@@ -59,24 +59,20 @@ namespace Yarl2
 
         void TryToMove(Player player, Map map, Command move) 
         {
-            ushort nextRow = 0, nextCol = 0;
+            ushort nextRow = player.Row, nextCol = player.Col;
 
             switch (move)
             {
                 case Command.MoveNorth:
                     nextRow = (ushort) (player.Row - 1);
-                    nextCol = player.Col;
                     break;
                 case Command.MoveSouth:
                     nextRow = (ushort)(player.Row + 1);
-                    nextCol = player.Col;
                     break;
                 case Command.MoveEast:
-                    nextRow = player.Row;
                     nextCol = (ushort) (player.Col + 1);
                     break;
                 case Command.MoveWest:
-                    nextRow = player.Row;
                     nextCol = (ushort)(player.Col - 1);
                     break;
                 case Command.MoveNorthWest:
