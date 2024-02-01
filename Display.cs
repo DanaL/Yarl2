@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using BearLibNET;
+using BearLibNET.DefaultImplementations;
 using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2
@@ -15,6 +16,7 @@ namespace Yarl2
     {
         string QueryUser(string prompt);        
         void TitleScreen();
+        void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible);
         char WaitForInput();
         void WriteLongMessage(List<string> message);
         void WriteMessage(string message);
@@ -22,17 +24,30 @@ namespace Yarl2
 
     internal class BLDisplay : IDisplay, IDisposable
     {
-        private int BACKSPACE = 8;
-        private int ScreenWidth = 60;
-        private int ScreenHeight = 30;
-        private int FontSize = 12;
+        private const int BACKSPACE = 8;
+        private const int ScreenWidth = 60;
+        private const int ScreenHeight = 30;
+        private const int FontSize = 12;
         private Dictionary<int, char>? KeyToChar;
+
+        private readonly short PlayerScreenRow;
+        private readonly short PlayerScreenCol;
+
+        private Color BLACK = new() { A = 255, R = 0, G = 0, B = 0 };
+        private Color WHITE = new() { A = 255, R = 255, G = 255, B = 255 };
+        private Color GREY = new() { A = 255, R = 136, G = 136, B = 136 };
+        private Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
+        private Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
+        private Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
 
         public BLDisplay(string windowTitle)
         {
             SetUpKeyToCharMap();
             Terminal.Open();
             Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}; font: DejaVuSansMono.ttf, size={FontSize}");
+            
+            PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
+            PlayerScreenCol = (ScreenHeight - 1) / 2;
         }
 
         private void SetUpKeyToCharMap()
@@ -52,6 +67,45 @@ namespace Yarl2
             KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
             KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
             KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
+        }
+
+        private (Color, char) TileToGlyph(Tile tile)
+        {
+            return tile switch
+            {
+                Tile.PermWall => (DARK_GREY, '#'),
+                Tile.Wall =>  (GREY, '#'),
+                Tile.Floor => (LIGHT_GREY, '.'),
+                _ => (BLACK, ' ')
+            };
+        }
+
+        public void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
+        {
+            short rowOffset = (short) (player.Row - PlayerScreenRow);
+            short colOffset = (short) (player.Col - PlayerScreenCol);
+            for (short row = 0; row < ScreenHeight - 1; row++)
+            {
+                for (short col = 0; col < ScreenHeight - 1; col++)
+                {
+                    short vr = (short)(row + rowOffset);
+                    short vc = (short)(col + colOffset);
+                    if (visible.ContainsKey((vr, vc)))
+                    {
+                        var (color, ch) = TileToGlyph(visible[(vr, vc)]);
+                        Terminal.Color(color);
+                        Terminal.Put(col, row, ch);
+                    }
+                    else
+                    {
+                        Terminal.Put(col, row, ' ');
+                    }
+                }
+            }
+
+            Terminal.Color(WHITE);
+            Terminal.Put(PlayerScreenCol, PlayerScreenRow, '@');
+            Terminal.Refresh();
         }
 
         public void WriteLongMessage(List<string> message)

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Yarl2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aca645b7e56a3bb8ce51c7008cba2611414387d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Yarl2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Yarl2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
