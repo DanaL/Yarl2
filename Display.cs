@@ -43,7 +43,7 @@ namespace Yarl2
         {
             SetUpKeyToCharMap();
             Terminal.Open();
-            Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}; font: DejaVuSansMono.ttf, size={FontSize}");
+            Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
             
             PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
             PlayerScreenCol = (ScreenHeight - 1) / 2;
@@ -81,7 +81,7 @@ namespace Yarl2
 
         public Command GetCommand()
         {
-            do
+            if (Terminal.HasInput())
             {
                 var ch = WaitForInput();
 
@@ -103,8 +103,11 @@ namespace Yarl2
                     return Command.MoveSouthEast;
                 else if (ch == 'Q')
                     return Command.Quit;
+                else
+                    return Command.Pass;
             }
-            while (true);            
+            else
+                return Command.None;            
         }
 
         public void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)

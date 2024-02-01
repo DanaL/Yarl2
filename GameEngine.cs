@@ -11,7 +11,7 @@ namespace Yarl2
     {
         MoveNorth, MoveSouth, MoveWest, MoveEast,
         MoveNorthEast, MoveSouthEast, MoveNorthWest, MoveSouthWest,
-        Pass, Quit
+        Pass, Quit, None
     }
 
     internal class GameQuitException : Exception { }
@@ -112,14 +112,19 @@ namespace Yarl2
         public void Play(Player player, Map map)
         {
             bool playing = true;
+            bool update = true;
 
             do 
             {
-                var visible = CalcVisible(player, map);
-                ui.UpdateDisplay(player, visible);
+                if (update)
+                {
+                    var visible = CalcVisible(player, map);
+                    ui.UpdateDisplay(player, visible);
+                }
 
+                update = true;
                 var cmd = ui.GetCommand();
-                switch (cmd) 
+                switch (cmd)
                 {
                     case Command.MoveNorth:
                     case Command.MoveSouth:
@@ -132,7 +137,10 @@ namespace Yarl2
                         TryToMove(player, map, cmd);
                         break;
                     case Command.Quit:
-                        playing = false;
+                        playing = false;                        
+                        break;
+                    case Command.None:
+                        update = false;
                         break;
                 }
             }
