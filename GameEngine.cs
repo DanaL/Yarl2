@@ -64,12 +64,12 @@ namespace Yarl2
             switch (move)
             {
                 case Command.MoveNorth:
-                    nextRow = (ushort) (player.Row - 1);                    
+                    nextRow = (ushort) (player.Row - 1);
                     break;
                 case Command.MoveSouth:
-                    nextRow = (ushort)(player.Row + 1);                    
+                    nextRow = (ushort)(player.Row + 1);
                     break;
-                case Command.MoveEast:                    
+                case Command.MoveEast:
                     nextCol = (ushort) (player.Col + 1);
                     break;
                 case Command.MoveWest:
