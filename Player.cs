@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Yarl2
 {
-    internal class Player
+    internal class Player : Actor
     {
-        public ushort Row { get; set; }
-        public ushort Col { get; set; }
         public string Name { get; set; }
         public int MaxHP { get; set; }
         public int CurrHP { get; set; }

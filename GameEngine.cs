@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace Yarl2
 {
+    abstract class Actor
+    {
+        public ushort Row { get; set; }
+        public ushort Col { get; set; }
+    }
+
     enum Command
     {
         MoveNorth, MoveSouth, MoveWest, MoveEast,
