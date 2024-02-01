@@ -15,6 +15,18 @@ namespace Yarl2
         Floor
     }
 
+    internal static class TileExtensions
+    {
+        public static bool Passable(this Tile tile)
+        {
+            return tile switch
+            {
+                Tile.Floor => true,
+                _ => false
+            };
+        }
+    }
+
     internal class Map
     {
         public readonly ushort Width;

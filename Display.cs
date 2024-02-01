@@ -9,11 +9,10 @@ using BearLibNET.DefaultImplementations;
 using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2
-{
-    internal class GameQuitException : Exception { }
-
+{    
     internal interface IDisplay
     {
+        Command GetCommand();
         string QueryUser(string prompt);        
         void TitleScreen();
         void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible);
@@ -80,6 +79,34 @@ namespace Yarl2
             };
         }
 
+        public Command GetCommand()
+        {
+            do
+            {
+                var ch = WaitForInput();
+
+                if (ch == 'h')
+                    return Command.MoveWest;
+                else if (ch == 'j')
+                    return Command.MoveSouth;
+                else if (ch == 'k')
+                    return Command.MoveNorth;
+                else if (ch == 'l')
+                    return Command.MoveEast;
+                else if (ch == 'y')
+                    return Command.MoveNorthWest;
+                else if (ch == 'u')
+                    return Command.MoveNorthEast;
+                else if (ch == 'b')
+                    return Command.MoveSouthWest;
+                else if (ch == 'n')
+                    return Command.MoveSouthEast;
+                else if (ch == 'Q')
+                    return Command.Quit;
+            }
+            while (true);            
+        }
+
         public void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
         {
             short rowOffset = (short) (player.Row - PlayerScreenRow);
@@ -94,17 +121,17 @@ namespace Yarl2
                     {
                         var (color, ch) = TileToGlyph(visible[(vr, vc)]);
                         Terminal.Color(color);
-                        Terminal.Put(col, row, ch);
+                        Terminal.Put(col, row + 1, ch);
                     }
                     else
                     {
-                        Terminal.Put(col, row, ' ');
+                        Terminal.Put(col, row + 1, ' ');
                     }
                 }
             }
 
             Terminal.Color(WHITE);
-            Terminal.Put(PlayerScreenCol, PlayerScreenRow, '@');
+            Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
             Terminal.Refresh();
         }
 

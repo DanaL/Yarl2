@@ -21,11 +21,10 @@ try
     ushort startCol = (ushort)rnd.Next(1, map.Width);
     var player = new Player(playerName, startRow, startCol);
 
-    var engine = new GameEngine(29, 29);
-    var visible = engine.CalcVisible(player, map);
-    display.UpdateDisplay(player, visible);
-    display.WaitForInput();
+    var engine = new GameEngine(29, 29, display);
+    engine.Play(player, map);
 }
+
 catch (GameQuitException)
 {
     var msg = new List<string>()
