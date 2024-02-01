@@ -237,9 +237,7 @@ namespace Yarl2
         }
 
         public void Dispose()
-        {
-            Console.WriteLine("Flag");
-            
+        {            
             Dispose(true);
         }
 
