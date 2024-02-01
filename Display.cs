@@ -26,6 +26,8 @@ namespace Yarl2
         private const int BACKSPACE = 8;
         private const int ScreenWidth = 60;
         private const int ScreenHeight = 30;
+        private const int SideBarWidth = 20;
+        private const int ViewWidth = ScreenWidth - SideBarWidth;
         private const int FontSize = 12;
         private Dictionary<int, char>? KeyToChar;
 
@@ -46,7 +48,7 @@ namespace Yarl2
             Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
             
             PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
-            PlayerScreenCol = (ScreenWidth - 21) / 2;
+            PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
         }
 
         private void SetUpKeyToCharMap()
@@ -110,6 +112,18 @@ namespace Yarl2
                 return Command.None;            
         }
 
+        void WriteSideBar(Player player)
+        {
+            Terminal.Print(ViewWidth, 1, $"| {player.Name}".PadRight(ViewWidth));
+            Terminal.Print(ViewWidth, 2, $"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(ViewWidth));
+
+            string blank = "|".PadRight(ViewWidth);
+            for (int row = 3; row < ScreenHeight; row++)
+            {
+                Terminal.Print(ViewWidth, row, blank);
+            }
+        }
+
         public void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
         {
             short rowOffset = (short) (player.Row - PlayerScreenRow);
@@ -135,6 +149,9 @@ namespace Yarl2
 
             Terminal.Color(WHITE);
             Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
+
+            WriteSideBar(player);
+
             Terminal.Refresh();
         }
 
