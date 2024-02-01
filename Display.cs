@@ -46,7 +46,7 @@ namespace Yarl2
             Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
             
             PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
-            PlayerScreenCol = (ScreenHeight - 1) / 2;
+            PlayerScreenCol = (ScreenWidth - 21) / 2;
         }
 
         private void SetUpKeyToCharMap()
@@ -116,7 +116,7 @@ namespace Yarl2
             short colOffset = (short) (player.Col - PlayerScreenCol);
             for (short row = 0; row < ScreenHeight - 1; row++)
             {
-                for (short col = 0; col < ScreenHeight - 1; col++)
+                for (short col = 0; col < ScreenWidth - 21; col++)
                 {
                     short vr = (short)(row + rowOffset);
                     short vc = (short)(col + colOffset);

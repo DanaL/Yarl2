@@ -35,7 +35,7 @@ namespace Yarl2
 
             for (int row = player.Row - 15; row < player.Row + 15; row++)
             {
-                for (int col = player.Col - 15; col < player.Col + 15; col++)
+                for (int col = player.Col - 20; col < player.Col + 20; col++)
                 {
                     if (row < 0 || col < 0)
                     {
@@ -141,6 +141,7 @@ namespace Yarl2
                         break;
                     case Command.None:
                         update = false;
+                        Thread.Sleep(25);
                         break;
                 }
             }
