@@ -16,6 +16,7 @@ namespace Yarl2
 {    
     internal abstract class Display
     {
+        protected const int BACKSPACE = 8;
         protected const int ScreenWidth = 60;
         protected const int ScreenHeight = 30;
         protected const int SideBarWidth = 20;
@@ -54,6 +55,30 @@ namespace Yarl2
             WriteLongMessage(msg);
             WaitForInput();
         }
+
+        protected Command KeyToCommand(char ch)
+        {
+            if (ch == 'h')
+                return Command.MoveWest;
+            else if (ch == 'j')
+                return Command.MoveSouth;
+            else if (ch == 'k')
+                return Command.MoveNorth;
+            else if (ch == 'l')
+                return Command.MoveEast;
+            else if (ch == 'y')
+                return Command.MoveNorthWest;
+            else if (ch == 'u')
+                return Command.MoveNorthEast;
+            else if (ch == 'b')
+                return Command.MoveSouthWest;
+            else if (ch == 'n')
+                return Command.MoveSouthEast;
+            else if (ch == 'Q')
+                return Command.Quit;
+            else
+                return Command.Pass;
+        }
     }
 
     internal class SDLDisplay : Display
@@ -69,7 +94,7 @@ namespace Yarl2
         {
             SDL_Init(SDL_INIT_VIDEO);
             SDL_ttf.TTF_Init();
-            _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", 24);
+            _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", 18);
             SDL_ttf.TTF_SizeUTF8(_font, " ", out _fontWidth, out _fontHeight);
             
             int width = ScreenWidth * _fontWidth;
@@ -82,12 +107,42 @@ namespace Yarl2
 
         public override Command GetCommand()
         {
-            throw new NotImplementedException();
+            while (SDL_PollEvent(out var e) != -1)
+            {
+                switch (e.type)
+                {
+                    case SDL_EventType.SDL_QUIT:
+                        return Command.Quit;
+                    case SDL_EventType.SDL_TEXTINPUT:
+                        char c;
+                        unsafe
+                        {
+                            c = (char)*e.text.text;
+                        }
+
+                        return KeyToCommand(c);
+                }
+            }
+
+            return Command.None;
         }
 
         public override string QueryUser(string prompt)
         {
-            throw new NotImplementedException();
+            string answer = "";
+
+            do 
+            {
+                WriteMessage($"{prompt} {answer}");
+                char ch = WaitForInput();            
+                if (ch == 13)
+                    return answer;
+                else if (ch == BACKSPACE)
+                    answer = answer.Length > 0 ? answer[..^1] : "";
+                else
+                    answer += ch;
+            } 
+            while (true);
         }
 
         public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
@@ -176,14 +231,13 @@ namespace Yarl2
 
         public override void WriteMessage(string message)
         {
-            throw new NotImplementedException();
+            SDL_RenderClear(_renderer);
+            WriteLine(message, 0, true);
         }
     }
 
     internal class BLDisplay : Display, IDisposable
-    {
-        private const int BACKSPACE = 8;
-
+    {        
         private Dictionary<int, char>? KeyToChar;
 
         public BLDisplay(string windowTitle)
@@ -231,30 +285,12 @@ namespace Yarl2
             if (Terminal.HasInput())
             {
                 var ch = WaitForInput();
-
-                if (ch == 'h')
-                    return Command.MoveWest;
-                else if (ch == 'j')
-                    return Command.MoveSouth;
-                else if (ch == 'k')
-                    return Command.MoveNorth;
-                else if (ch == 'l')
-                    return Command.MoveEast;
-                else if (ch == 'y')
-                    return Command.MoveNorthWest;
-                else if (ch == 'u')
-                    return Command.MoveNorthEast;
-                else if (ch == 'b')
-                    return Command.MoveSouthWest;
-                else if (ch == 'n')
-                    return Command.MoveSouthEast;
-                else if (ch == 'Q')
-                    return Command.Quit;
-                else
-                    return Command.Pass;
+                return KeyToCommand(ch);
             }
-            else
-                return Command.None;            
+            else 
+            {
+                return Command.None;
+            }
         }
 
         void WriteSideBar(Player player)

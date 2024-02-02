@@ -12,25 +12,24 @@ try
 {
     display.TitleScreen();
 
-    // string playerName = display.QueryUser("Who are you?");
-    // display.WriteMessage($"Hello, {playerName}.");
-    // display.WaitForInput();
-    // display.WriteMessage("");
+    string playerName = display.QueryUser("Who are you?");
+    display.WriteMessage($"Hello, {playerName}.");
+    display.WaitForInput();
 
-    // var rnd = new Random();
-    // ushort startRow = (ushort) rnd.Next(1, map.Height);
-    // ushort startCol = (ushort)rnd.Next(1, map.Width);
-    // var player = new Player(playerName, startRow, startCol);
+    var rnd = new Random();
+    ushort startRow = (ushort) rnd.Next(1, map.Height);
+    ushort startCol = (ushort)rnd.Next(1, map.Width);
+    var player = new Player(playerName, startRow, startCol);
 
-    // var engine = new GameEngine(29, 29, display);
+    var engine = new GameEngine(29, 29, display);
     // engine.Play(player, map);
 }
 catch (GameQuitException)
 {
-    // var msg = new List<string>()
-    // {
-    //     "",
-    //     " Being seeing you..."
-    // };
-    // display.WriteLongMessage(msg);
+    var msg = new List<string>()
+    {
+        "",
+        " Being seeing you..."
+    };
+    display.WriteLongMessage(msg);
 }
