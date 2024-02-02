@@ -1,95 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Yarl2;
 
-namespace Yarl2
+abstract class Actor
 {
-    abstract class Actor
+    public ushort Row { get; set; }
+    public ushort Col { get; set; }
+    public short MaxVisionRadius { get; set; }
+    public short CurrVisionRadius { get; set; }
+}
+
+internal class GameQuitException : Exception { }
+
+internal class GameEngine
+{
+    public readonly ushort VisibleWidth;
+    public readonly ushort VisibleHeight;
+    private readonly Display ui;
+
+    public GameEngine(ushort visWidth, ushort visHeight, Display display)
     {
-        public ushort Row { get; set; }
-        public ushort Col { get; set; }
+        VisibleWidth = visWidth;
+        VisibleHeight = visHeight;
+        ui = display;
     }
 
-    internal class GameQuitException : Exception { }
-
-    internal class GameEngine
+    Dictionary<(short, short), Tile> CalcVisible(Player player, Map map)
     {
-        public readonly ushort VisibleWidth;
-        public readonly ushort VisibleHeight;
-        private readonly Display ui;
-
-        public GameEngine(ushort visWidth, ushort visHeight, Display display)
+        var visible = new Dictionary<(short, short), Tile>();
+        var vs = FieldOfView.CalcVisible(player, map);
+        
+        foreach (var tile in vs)
         {
-            VisibleWidth = visWidth;
-            VisibleHeight = visHeight;
-            ui = display;
+            var r = tile.Item1;
+            var c = tile.Item2;
+            visible.Add(((short)r, (short)c), map.TileAt(r, c));
         }
+        
+        return visible;
+    }
 
-        Dictionary<(short, short), Tile> CalcVisible(Player player, Map map)
+    public void Play(Player player, Map map)
+    {
+        bool playing = true;
+        bool update = true;
+
+        do 
         {
-            var visible = new Dictionary<(short, short), Tile>();
-
-            for (int row = player.Row - 15; row < player.Row + 15; row++)
+            if (update)
             {
-                for (int col = player.Col - 20; col < player.Col + 20; col++)
-                {
-                    if (row < 0 || col < 0)
-                    {
-                        visible.Add(((short)row, (short)col), Tile.Unknown);
-                    }
-                    else if (!map.InBounds((ushort)row, (ushort)col)) 
-                    {
-                        visible.Add(((short)row, (short)col), Tile.Unknown);
-                    }
-                    else
-                    {
-                        var r = (ushort)row;
-                        var c = (ushort)col;
-                        visible.Add(((short)r, (short)c), map.TileAt(r, c));
-                    }
-                }
+                var visible = CalcVisible(player, map);
+                ui.UpdateDisplay(player, visible);
             }
 
-            return visible;
-        }
+            update = true;
+            var cmd = ui.GetCommand(player, map);
 
-        public void Play(Player player, Map map)
-        {
-            bool playing = true;
-            bool update = true;
-
-            do 
+            if (cmd is NullCommand)
             {
-                if (update)
-                {
-                    var visible = CalcVisible(player, map);
-                    ui.UpdateDisplay(player, visible);
-                }
-
-                update = true;
-                var cmd = ui.GetCommand(player, map);
-
-                if (cmd is NullCommand)
-                {
-                    update = false;
-                    Thread.Sleep(25);
-                }
-                else if (cmd is QuitCommand)
-                {
-                    playing = false;
-                }
-                else
-                {
-                    var result = cmd.Execute();
-
-                    if (result.Message is not null)
-                        ui.WriteMessage(result.Message);
-                }                
+                update = false;
+                Thread.Sleep(25);
             }
-            while (playing);
+            else if (cmd is QuitCommand)
+            {
+                playing = false;
+            }
+            else
+            {
+                var result = cmd.Execute();
+
+                if (result.Message is not null)
+                    ui.WriteMessage(result.Message);
+            }                
         }
+        while (playing);
     }
 }

@@ -4,9 +4,9 @@ using Yarl2;
 var display = new BLDisplay("Yarl2 0.0.1");
 //var display = new SDLDisplay("Yarl2 0.0.1");
 
+//var map = Map.TestMap();
 var map = new Map(75, 75);
 map.SetRandomTestMap();
-map.Dump();
 
 try
 {
@@ -20,6 +20,7 @@ try
     ushort startRow = (ushort) rnd.Next(1, map.Height);
     ushort startCol = (ushort)rnd.Next(1, map.Width);
     var player = new Player(playerName, startRow, startCol);
+    //var player = new Player(playerName, 7, 10);
 
     var engine = new GameEngine(29, 29, display);
     engine.Play(player, map);

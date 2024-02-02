@@ -1,85 +1,78 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+namespace Yarl2;
 
-namespace Yarl2
+internal class CommandResult
 {
-    internal class CommandResult
+    public bool Successful { get; set; }
+    public string? Message { get; set; }
+
+    public CommandResult() { }
+}
+
+internal abstract class Command
+{
+    public abstract CommandResult Execute();
+}
+
+internal class MoveCommand(Actor actor, short row, short col, Map map) : Command
+{
+    private Actor _actor = actor;
+    private short _row = row;
+    private short _col = col;
+    private Map _map = map;
+
+    public override CommandResult Execute()
     {
-        public bool Successful { get; set; }
-        public string? Message { get; set; }
+        CommandResult result = new CommandResult();
 
-        public CommandResult() { }
-    }
+        ushort nextRow = (ushort)_row;
+        ushort nextCol = (ushort)_col;
 
-    internal abstract class Command
-    {
-        public abstract CommandResult Execute();
-    }
-
-    internal class MoveCommand(Actor actor, short row, short col, Map map) : Command
-    {
-        private Actor _actor = actor;
-        private short _row = row;
-        private short _col = col;
-        private Map _map = map;
-
-        public override CommandResult Execute()
+        if (!_map.InBounds(nextRow, nextCol) || !_map.TileAt(nextRow, nextCol).Passable())
         {
-            CommandResult result = new CommandResult();
-
-            ushort nextRow = (ushort)_row;
-            ushort nextCol = (ushort)_col;
-
-            if (!_map.InBounds(nextRow, nextCol) || !_map.TileAt(nextRow, nextCol).Passable())
-            {
-                result.Successful = false;
-                if (_actor is Player)
-                    result.Message = "You cannot go that way!";
-            }
-            else
-            {
-                result.Successful = true;
-                _actor.Row = nextRow;
-                _actor.Col = nextCol;
-                result.Message = "";
-            }
-
-            return result;
+            result.Successful = false;
+            if (_actor is Player)
+                result.Message = "You cannot go that way!";
         }
-    }
-
-    internal class PassCommand(Actor actor) : Command
-    {
-        private Actor _actor = actor;
-
-        public override CommandResult Execute() 
+        else
         {
-            // do nothing for now but eventually there will be an energy cost to passing
-            // (ie., time will pass in game)
-            return new CommandResult() { Successful = true };
+            result.Successful = true;
+            _actor.Row = nextRow;
+            _actor.Col = nextCol;
+            result.Message = "";
         }
-    }
 
-    // I guess I can later add extra info about whether or not the player died, quit,
-    // or quit and saved?
-    internal class QuitCommand : Command
-    {
-        public override CommandResult Execute() 
-        {
-            throw new GameQuitException();
-        }
+        return result;
     }
+}
 
-    // This could be a Singleton?
-    internal class NullCommand : Command
+internal class PassCommand(Actor actor) : Command
+{
+    private Actor _actor = actor;
+
+    public override CommandResult Execute() 
     {
-        public override CommandResult Execute() 
-        {
-            throw new Exception("Hmm this shouldn't be called.");
-        }
+        // do nothing for now but eventually there will be an energy cost to passing
+        // (ie., time will pass in game)
+        return new CommandResult() { Successful = true };
+    }
+}
+
+// I guess I can later add extra info about whether or not the player died, quit,
+// or quit and saved?
+internal class QuitCommand : Command
+{
+    public override CommandResult Execute() 
+    {
+        throw new GameQuitException();
+    }
+}
+
+// This could be a Singleton?
+internal class NullCommand : Command
+{
+    public override CommandResult Execute() 
+    {
+        throw new Exception("Hmm this shouldn't be called.");
     }
 }
