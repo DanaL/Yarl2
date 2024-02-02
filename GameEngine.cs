@@ -13,13 +13,6 @@ namespace Yarl2
         public ushort Col { get; set; }
     }
 
-    enum Command
-    {
-        MoveNorth, MoveSouth, MoveWest, MoveEast,
-        MoveNorthEast, MoveSouthEast, MoveNorthWest, MoveSouthWest,
-        Pass, Quit, None
-    }
-
     internal class GameQuitException : Exception { }
 
     internal class GameEngine
@@ -63,54 +56,6 @@ namespace Yarl2
             return visible;
         }
 
-        void TryToMove(Player player, Map map, Command move) 
-        {
-            ushort nextRow = player.Row, nextCol = player.Col;
-
-            switch (move)
-            {
-                case Command.MoveNorth:
-                    nextRow = (ushort) (player.Row - 1);
-                    break;
-                case Command.MoveSouth:
-                    nextRow = (ushort)(player.Row + 1);
-                    break;
-                case Command.MoveEast:
-                    nextCol = (ushort) (player.Col + 1);
-                    break;
-                case Command.MoveWest:
-                    nextCol = (ushort)(player.Col - 1);
-                    break;
-                case Command.MoveNorthWest:
-                    nextRow = (ushort)(player.Row - 1);
-                    nextCol = (ushort)(player.Col - 1);
-                    break;
-                case Command.MoveNorthEast:
-                    nextRow = (ushort)(player.Row - 1);
-                    nextCol = (ushort)(player.Col + 1);
-                    break;
-                case Command.MoveSouthWest:
-                    nextRow = (ushort)(player.Row + 1);
-                    nextCol = (ushort)(player.Col - 1);
-                    break;
-                case Command.MoveSouthEast:
-                    nextRow = (ushort)(player.Row + 1);
-                    nextCol = (ushort)(player.Col + 1);
-                    break;
-            }
-
-            if (!map.InBounds(nextRow, nextCol) || !map.TileAt(nextRow, nextCol).Passable())
-            {
-                ui.WriteMessage("You cannot go that way!");                
-            }
-            else
-            {
-                player.Row = nextRow;
-                player.Col = nextCol;
-                ui.WriteMessage("");
-            }
-        }
-
         public void Play(Player player, Map map)
         {
             bool playing = true;
@@ -125,27 +70,24 @@ namespace Yarl2
                 }
 
                 update = true;
-                var cmd = ui.GetCommand();
-                switch (cmd)
+                var cmd = ui.GetCommand(player, map);
+
+                if (cmd is NullCommand)
                 {
-                    case Command.MoveNorth:
-                    case Command.MoveSouth:
-                    case Command.MoveWest:
-                    case Command.MoveEast:
-                    case Command.MoveNorthEast:
-                    case Command.MoveNorthWest:
-                    case Command.MoveSouthEast:
-                    case Command.MoveSouthWest:
-                        TryToMove(player, map, cmd);
-                        break;
-                    case Command.Quit:
-                        playing = false;                        
-                        break;
-                    case Command.None:
-                        update = false;
-                        Thread.Sleep(25);
-                        break;
+                    update = false;
+                    Thread.Sleep(25);
                 }
+                else if (cmd is QuitCommand)
+                {
+                    playing = false;
+                }
+                else
+                {
+                    var result = cmd.Execute();
+
+                    if (result.Message is not null)
+                        ui.WriteMessage(result.Message);
+                }                
             }
             while (playing);
         }

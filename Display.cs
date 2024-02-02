@@ -27,7 +27,8 @@ namespace Yarl2
         protected readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
         protected readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
 
-        public abstract Command GetCommand();
+        // map param will eventually be replaced by a GameState sort of object, I imagine
+        public abstract Command GetCommand(Player player, Map map);
         public abstract string QueryUser(string prompt);        
         
         public abstract void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible);
@@ -56,28 +57,28 @@ namespace Yarl2
             WriteLongMessage(msg);           
         }
 
-        protected Command KeyToCommand(char ch)
+        protected Command KeyToCommand(char ch, Player p, Map m)
         {
             if (ch == 'h')
-                return Command.MoveWest;
+                return new MoveCommand(p, (short)p.Row, (short)(p.Col - 1), m);
             else if (ch == 'j')
-                return Command.MoveSouth;
+                return new MoveCommand(p, (short)(p.Row + 1), (short)p.Col, m);
             else if (ch == 'k')
-                return Command.MoveNorth;
+                return new MoveCommand(p, (short)(p.Row - 1), (short)p.Col, m);
             else if (ch == 'l')
-                return Command.MoveEast;
+                return new MoveCommand(p, (short)p.Row, (short)(p.Col + 1), m);
             else if (ch == 'y')
-                return Command.MoveNorthWest;
+                return new MoveCommand(p, (short)(p.Row - 1), (short)(p.Col - 1), m);
             else if (ch == 'u')
-                return Command.MoveNorthEast;
+                return new MoveCommand(p, (short)(p.Row - 1), (short)(p.Col + 1), m);
             else if (ch == 'b')
-                return Command.MoveSouthWest;
+                return new MoveCommand(p, (short)(p.Row + 1), (short)(p.Col - 1), m);
             else if (ch == 'n')
-                return Command.MoveSouthEast;
+                return new MoveCommand(p, (short)(p.Row + 1), (short)(p.Col + 1), m);
             else if (ch == 'Q')
-                return Command.Quit;
+                return new QuitCommand();
             else
-                return Command.Pass;
+                return new PassCommand(p);
         }
 
         protected (Color, char) TileToGlyph(Tile tile)
@@ -116,14 +117,14 @@ namespace Yarl2
             _colours = [];
         }
 
-        public override Command GetCommand()
+        public override Command GetCommand(Player player, Map map)
         {
             while (SDL_PollEvent(out var e) != -1)
             {
                 switch (e.type)
                 {
                     case SDL_EventType.SDL_QUIT:
-                        return Command.Quit;
+                        return new QuitCommand();
                     case SDL_EventType.SDL_TEXTINPUT:
                         char c;
                         unsafe
@@ -131,11 +132,11 @@ namespace Yarl2
                             c = (char)*e.text.text;
                         }
 
-                        return KeyToCommand(c);
+                        return KeyToCommand(c, player, map);
                 }
             }
 
-            return Command.None;
+            return new NullCommand();
         }
 
         public override string QueryUser(string prompt)
@@ -320,16 +321,16 @@ namespace Yarl2
             KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
         }
 
-        public override Command GetCommand()
+        public override Command GetCommand(Player player, Map map)
         {
             if (Terminal.HasInput())
             {
                 var ch = WaitForInput();
-                return KeyToCommand(ch);
+                return KeyToCommand(ch, player, map);
             }
             else 
             {
-                return Command.None;
+                return new NullCommand();
             }
         }
 
