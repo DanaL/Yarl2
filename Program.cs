@@ -22,7 +22,7 @@ try
     var player = new Player(playerName, startRow, startCol);
 
     var engine = new GameEngine(29, 29, display);
-    // engine.Play(player, map);
+    engine.Play(player, map);
 }
 catch (GameQuitException)
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 
 using SDL2;
 using static SDL2.SDL;
@@ -39,6 +34,12 @@ namespace Yarl2
         public abstract char WaitForInput();
         public abstract void WriteLongMessage(List<string> message);
         public abstract void WriteMessage(string message);
+
+        public Display()
+        {
+            PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
+            PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
+        }
 
         public virtual void TitleScreen()
         {
@@ -79,6 +80,17 @@ namespace Yarl2
             else
                 return Command.Pass;
         }
+
+        protected (Color, char) TileToGlyph(Tile tile)
+        {
+            return tile switch
+            {
+                Tile.PermWall => (DARK_GREY, '#'),
+                Tile.Wall =>  (GREY, '#'),
+                Tile.Floor => (LIGHT_GREY, '.'),
+                _ => (BLACK, ' ')
+            };
+        }
     }
 
     internal class SDLDisplay : Display
@@ -90,7 +102,7 @@ namespace Yarl2
 
         private Dictionary<Color, SDL_Color> _colours;
 
-        public SDLDisplay(string windowTitle)
+        public SDLDisplay(string windowTitle) : base()
         {
             SDL_Init(SDL_INIT_VIDEO);
             SDL_ttf.TTF_Init();
@@ -145,14 +157,56 @@ namespace Yarl2
             while (true);
         }
 
+        private void SDLPut(short row, short col, char ch, Color color) 
+        {
+            var fontPtr = _font;
+            var fh = _fontHeight;
+            var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
+            var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
+            
+            var texture = SDL_CreateTextureFromSurface(_renderer, surface);
+            var loc = new SDL_Rect
+            {
+                x = col * _fontWidth + 2,
+                y = (row + 1) * fh,
+                h = fh,
+                w = s.w
+            };
+            
+            SDL_FreeSurface(surface);
+            SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
+        }
+        
         public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
         {
-            throw new NotImplementedException();
+            short rowOffset = (short) (player.Row - PlayerScreenRow);
+            short colOffset = (short) (player.Col - PlayerScreenCol);
+            for (short row = 0; row < ScreenHeight - 1; row++)
+            {
+                for (short col = 0; col < ScreenWidth - 21; col++)
+                {
+                    short vr = (short)(row + rowOffset);
+                    short vc = (short)(col + colOffset);
+                    if (visible.ContainsKey((vr, vc)))
+                    {
+                        var (color, ch) = TileToGlyph(visible[(vr, vc)]);
+                        SDLPut(row, col, ch, color);                        
+                    }
+                    else
+                    {
+                        SDLPut(row, col, ' ', BLACK);                        
+                    }
+                }
+            }
+
+            SDLPut(PlayerScreenRow, PlayerScreenCol, '@', WHITE);
+
+            SDL_RenderPresent(_renderer);
         }
 
         private static char KeysymToChar(SDL_Keysym keysym) 
         {
-        return keysym.mod == SDL_Keymod.KMOD_LSHIFT || keysym.mod == SDL_Keymod.KMOD_RSHIFT
+            return keysym.mod == SDL_Keymod.KMOD_LSHIFT || keysym.mod == SDL_Keymod.KMOD_RSHIFT
                 ? char.ToUpper((char)keysym.sym)
                 : (char)keysym.sym;
         }
@@ -240,14 +294,11 @@ namespace Yarl2
     {        
         private Dictionary<int, char>? KeyToChar;
 
-        public BLDisplay(string windowTitle)
+        public BLDisplay(string windowTitle) : base()
         {
             SetUpKeyToCharMap();
             Terminal.Open();
-            Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
-            
-            PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
-            PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
+            Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");            
         }
 
         private void SetUpKeyToCharMap()
@@ -267,17 +318,6 @@ namespace Yarl2
             KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
             KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
             KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
-        }
-
-        private (Color, char) TileToGlyph(Tile tile)
-        {
-            return tile switch
-            {
-                Tile.PermWall => (DARK_GREY, '#'),
-                Tile.Wall =>  (GREY, '#'),
-                Tile.Floor => (LIGHT_GREY, '.'),
-                _ => (BLACK, ' ')
-            };
         }
 
         public override Command GetCommand()
