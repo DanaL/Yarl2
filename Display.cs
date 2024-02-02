@@ -53,8 +53,7 @@ namespace Yarl2
                 "       (yet another attempt to make a roguelike,",
                 "           this time in C#...)"
             };
-            WriteLongMessage(msg);
-            WaitForInput();
+            WriteLongMessage(msg);           
         }
 
         protected Command KeyToCommand(char ch)

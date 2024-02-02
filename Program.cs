@@ -1,8 +1,8 @@
 ﻿
 using Yarl2;
 
-//var display = new BLDisplay("Yarl2 0.0.1");
-var display = new SDLDisplay("Yarl2 0.0.1");
+var display = new BLDisplay("Yarl2 0.0.1");
+//var display = new SDLDisplay("Yarl2 0.0.1");
 
 var map = new Map(75, 75);
 map.SetRandomTestMap();
