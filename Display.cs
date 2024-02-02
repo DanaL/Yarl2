@@ -179,6 +179,7 @@ namespace Yarl2
         
         public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
         {
+            SDL_RenderClear(_renderer);
             short rowOffset = (short) (player.Row - PlayerScreenRow);
             short colOffset = (short) (player.Col - PlayerScreenCol);
             for (short row = 0; row < ScreenHeight - 1; row++)
