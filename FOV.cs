@@ -141,8 +141,7 @@ internal class FieldOfView
                 .Union(CalcOctant(actor, map, 4))
                 .Union(CalcOctant(actor, map, 5))
                 .Union(CalcOctant(actor, map, 6))
-                .Union(CalcOctant(actor, map, 7))
-                .Union(CalcOctant(actor, map, 8))
+                .Union(CalcOctant(actor, map, 7))                
                 .ToHashSet();
     }
 
