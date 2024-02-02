@@ -26,9 +26,9 @@ namespace Yarl2
     {
         public readonly ushort VisibleWidth;
         public readonly ushort VisibleHeight;
-        private readonly IDisplay ui;
+        private readonly Display ui;
 
-        public GameEngine(ushort visWidth, ushort visHeight, IDisplay display)
+        public GameEngine(ushort visWidth, ushort visHeight, Display display)
         {
             VisibleWidth = visWidth;
             VisibleHeight = visHeight;
