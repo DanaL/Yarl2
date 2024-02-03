@@ -41,23 +41,14 @@ internal class GameEngine
     public void Play(Player player, Map map)
     {
         bool playing = true;
-        bool update = true;
-
+        
         do 
-        {
-            if (update)
-            {
-                var visible = CalcVisible(player, map);
-                ui.UpdateDisplay(visible);
-            }
-
-            update = true;
+        {            
             var cmd = ui.GetCommand(player, map);
 
             if (cmd is NullCommand)
             {
-                update = false;
-                Thread.Sleep(25);
+                Thread.Sleep(10);
             }
             else if (cmd is QuitCommand)
             {
@@ -69,6 +60,8 @@ internal class GameEngine
 
                 if (result.Message is not null)
                     ui.WriteMessage(result.Message);
+                var visible = CalcVisible(player, map);
+                ui.UpdateDisplay(visible);
             }                
         }
         while (playing);
