@@ -30,11 +30,11 @@ class ShadowLine
 
     public void Add(Shadow shadow)
     {
-        var index = 0;
+        int index = 0;
 
-        for (; index < _shadows.Count; index++)
+        while (index < _shadows.Count)
         {
-            if (_shadows[index].Start >= shadow.Start)
+            if (_shadows[index++].Start >= shadow.Start)
                 break;
         }
 
