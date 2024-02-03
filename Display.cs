@@ -102,6 +102,7 @@ internal class SDLDisplay : Display
     private string _lastMessage = "";
     private IntPtr _lastFrameTexture;
     private SDL_Rect _lastFrameLoc;
+    private Dictionary<(char, Color, Color), IntPtr> _cachedGlyphs;
 
     private Dictionary<Color, SDL_Color> _colours;
 
@@ -126,6 +127,8 @@ internal class SDLDisplay : Display
             h = (ScreenHeight - 1) * _fontHeight,
             w = ViewWidth * _fontWidth
         };
+
+        _cachedGlyphs = new();
     }
 
     public override Command GetCommand(Player player, Map map)
@@ -253,21 +256,19 @@ internal class SDLDisplay : Display
 
     private void SDLPut(short row, short col, char ch, Color color) 
     {
-        var fontPtr = _font;
-        var fh = _fontHeight;
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
-        var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
-        
-        var texture = SDL_CreateTextureFromSurface(_renderer, surface);
-        var loc = new SDL_Rect
+        var key = (ch, color, BLACK);
+
+        if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
         {
-            x = col * _fontWidth + 2,
-            y = row * fh,
-            h = fh,
-            w = s.w
-        };
-        
-        SDL_FreeSurface(surface);
+            var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
+            var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
+            SDL_FreeSurface(surface);
+            texture = toCache;
+            _cachedGlyphs.Add(key, texture);
+        }
+
+        var loc = new SDL_Rect { x = col * _fontWidth + 2, y = row * _fontHeight, h = _fontHeight, w = _fontWidth };
+
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
@@ -301,7 +302,7 @@ internal class SDLDisplay : Display
         
         SDLPut(PlayerScreenRow, PlayerScreenCol, '@', WHITE);
     
-        SDL_SetRenderTarget(_renderer, 0);
+        SDL_SetRenderTarget(_renderer, IntPtr.Zero);
         
         return targetTexture;
     }
@@ -310,8 +311,7 @@ internal class SDLDisplay : Display
     {
         SDL_RenderClear(_renderer);
         WriteLine(_lastMessage, 0);
-
-        SDL_RenderCopy(_renderer, _lastFrameTexture, 0, ref _lastFrameLoc);
+        SDL_RenderCopy(_renderer, _lastFrameTexture, IntPtr.Zero, ref _lastFrameLoc);
         SDL_RenderPresent(_renderer);
     }
 
