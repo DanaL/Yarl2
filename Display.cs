@@ -57,7 +57,7 @@ internal abstract class Display
         WriteLongMessage(msg);           
     }
 
-    protected Command KeyToCommand(char ch, Player p, Map m)
+    protected static Command KeyToCommand(char ch, Player p, Map m)
     {
         if (ch == 'h')
             return new MoveCommand(p, (short)p.Row, (short)(p.Col - 1), m);
@@ -95,10 +95,13 @@ internal abstract class Display
 
 internal class SDLDisplay : Display
 {
-    private IntPtr _window;
+    private readonly IntPtr _window;
     private readonly IntPtr _renderer, _font;
     private readonly int _fontWidth;
     private readonly int _fontHeight;
+    private string _lastMessage = "";
+    private IntPtr _lastFrameTexture;
+    private SDL_Rect _lastFrameLoc;
 
     private Dictionary<Color, SDL_Color> _colours;
 
@@ -115,6 +118,14 @@ internal class SDLDisplay : Display
         _renderer = SDL_CreateRenderer(_window, -1, SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 
         _colours = [];
+
+        _lastFrameLoc = new SDL_Rect
+        {
+            x = 0,
+            y = _fontHeight,
+            h = (ScreenHeight - 1) * _fontHeight,
+            w = ViewWidth * _fontWidth
+        };
     }
 
     public override Command GetCommand(Player player, Map map)
@@ -155,54 +166,6 @@ internal class SDLDisplay : Display
                 answer += ch;
         } 
         while (true);
-    }
-
-    private void SDLPut(short row, short col, char ch, Color color) 
-    {
-        var fontPtr = _font;
-        var fh = _fontHeight;
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
-        var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
-        
-        var texture = SDL_CreateTextureFromSurface(_renderer, surface);
-        var loc = new SDL_Rect
-        {
-            x = col * _fontWidth + 2,
-            y = (row + 1) * fh,
-            h = fh,
-            w = s.w
-        };
-        
-        SDL_FreeSurface(surface);
-        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
-    }
-    
-    public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
-    {
-        SDL_RenderClear(_renderer);
-        short rowOffset = (short) (player.Row - PlayerScreenRow);
-        short colOffset = (short) (player.Col - PlayerScreenCol);
-        for (short row = 0; row < ScreenHeight - 1; row++)
-        {
-            for (short col = 0; col < ScreenWidth - 21; col++)
-            {
-                short vr = (short)(row + rowOffset);
-                short vc = (short)(col + colOffset);
-                if (visible.ContainsKey((vr, vc)))
-                {
-                    var (color, ch) = TileToGlyph(visible[(vr, vc)]);
-                    SDLPut(row, col, ch, color);                        
-                }
-                else
-                {
-                    SDLPut(row, col, ' ', BLACK);                        
-                }
-            }
-        }
-
-        SDLPut(PlayerScreenRow, PlayerScreenCol, '@', WHITE);
-
-        SDL_RenderPresent(_renderer);
     }
 
     private static char KeysymToChar(SDL_Keysym keysym) 
@@ -249,7 +212,7 @@ internal class SDLDisplay : Display
         return value;
     }
 
-    private void WriteLine(string message, int lineNum, bool update)
+    private void WriteLine(string message, int lineNum)
     {
         message = message.PadRight(ScreenWidth);
         var fontPtr = _font;
@@ -268,10 +231,7 @@ internal class SDLDisplay : Display
         
         SDL_FreeSurface(surface);
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
-        
-        if (update)
-            SDL_RenderPresent(_renderer);
+        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);        
     }
 
     public override void WriteLongMessage(List<string> message)
@@ -279,15 +239,86 @@ internal class SDLDisplay : Display
         SDL_RenderClear(_renderer);
         for (int j = 0; j < message.Count; j++)
         {
-            WriteLine(message[j], j, false);
+            WriteLine(message[j], j);
         }
         SDL_RenderPresent(_renderer);
+        WaitForInput();
     }
 
     public override void WriteMessage(string message)
+    {        
+        _lastMessage = message;
+        DrawFame();
+    }
+
+    private void SDLPut(short row, short col, char ch, Color color) 
+    {
+        var fontPtr = _font;
+        var fh = _fontHeight;
+        var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
+        var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
+        
+        var texture = SDL_CreateTextureFromSurface(_renderer, surface);
+        var loc = new SDL_Rect
+        {
+            x = col * _fontWidth + 2,
+            y = row * fh,
+            h = fh,
+            w = s.w
+        };
+        
+        SDL_FreeSurface(surface);
+        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
+    }
+
+    private IntPtr CreateMainTexture(ushort playerRow, ushort playerCol, Dictionary<(short, short), Tile> visible)
+    {
+        var tw = ViewWidth * _fontWidth;
+        var th = (ScreenHeight - 1) * _fontHeight;
+        var targetTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBX8888, (int) SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET , tw, th);
+
+        SDL_SetRenderTarget(_renderer, targetTexture);
+
+        short rowOffset = (short) (playerRow - PlayerScreenRow);
+        short colOffset = (short) (playerCol - PlayerScreenCol);
+        for (short row = 0; row < ScreenHeight - 1; row++)
+        {
+            for (short col = 0; col < ScreenWidth - 21; col++)
+            {
+                short vr = (short)(row + rowOffset);
+                short vc = (short)(col + colOffset);
+                if (visible.ContainsKey((vr, vc)))
+                {
+                    var (color, ch) = TileToGlyph(visible[(vr, vc)]);
+                    SDLPut(row, col, ch, color);     
+                }
+                else
+                {
+                    SDLPut(row, col, ' ', BLACK);            
+                }
+            }
+        }
+        
+        SDLPut(PlayerScreenRow, PlayerScreenCol, '@', WHITE);
+    
+        SDL_SetRenderTarget(_renderer, 0);
+        
+        return targetTexture;
+    }
+
+    private void DrawFame()
     {
         SDL_RenderClear(_renderer);
-        WriteLine(message, 0, true);
+        WriteLine(_lastMessage, 0);
+
+        SDL_RenderCopy(_renderer, _lastFrameTexture, 0, ref _lastFrameLoc);
+        SDL_RenderPresent(_renderer);
+    }
+
+    public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
+    {
+        _lastFrameTexture = CreateMainTexture(player.Row, player.Col, visible);
+        DrawFame();
     }
 }
 
