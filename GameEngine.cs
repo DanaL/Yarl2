@@ -48,7 +48,7 @@ internal class GameEngine
             if (update)
             {
                 var visible = CalcVisible(player, map);
-                ui.UpdateDisplay(player, visible);
+                ui.UpdateDisplay(visible);
             }
 
             update = true;

@@ -31,10 +31,12 @@ internal abstract class Display
     public abstract Command GetCommand(Player player, Map map);
     public abstract string QueryUser(string prompt);        
     
-    public abstract void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible);
+    public abstract void UpdateDisplay(Dictionary<(short, short), Tile> visible);
     public abstract char WaitForInput();
     public abstract void WriteLongMessage(List<string> message);
     public abstract void WriteMessage(string message);
+
+    public Player? Player {get;set;} = null;
 
     public Display()
     {
@@ -215,9 +217,9 @@ internal class SDLDisplay : Display
         return value;
     }
 
-    private void WriteLine(string message, int lineNum)
+    private void WriteLine(string message, int lineNum, int col, int width)
     {
-        message = message.PadRight(ScreenWidth);
+        message = message.PadRight(width);
         var fontPtr = _font;
         var fh = _fontHeight;
         var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, message, ToSDLColour(WHITE), ToSDLColour(BLACK));        
@@ -226,7 +228,7 @@ internal class SDLDisplay : Display
         var texture = SDL_CreateTextureFromSurface(_renderer, surface);
         var loc = new SDL_Rect
         {
-            x = 2,
+            x = 2 + col * _fontWidth,
             y = lineNum * fh,
             h = fh,
             w = s.w
@@ -234,7 +236,7 @@ internal class SDLDisplay : Display
         
         SDL_FreeSurface(surface);
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);        
+        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
     public override void WriteLongMessage(List<string> message)
@@ -242,7 +244,7 @@ internal class SDLDisplay : Display
         SDL_RenderClear(_renderer);
         for (int j = 0; j < message.Count; j++)
         {
-            WriteLine(message[j], j);
+            WriteLine(message[j], j, 0, ScreenWidth);
         }
         SDL_RenderPresent(_renderer);
         WaitForInput();
@@ -251,7 +253,7 @@ internal class SDLDisplay : Display
     public override void WriteMessage(string message)
     {        
         _lastMessage = message;
-        DrawFame();
+        DrawFrame();
     }
 
     private void SDLPut(short row, short col, char ch, Color color) 
@@ -307,18 +309,38 @@ internal class SDLDisplay : Display
         return targetTexture;
     }
 
-    private void DrawFame()
+    void WriteSideBar(Player player)
+    {
+        var width = ScreenWidth - ViewWidth;
+        WriteLine($"| {player.Name}".PadRight(width), 1, ViewWidth, width);
+        WriteLine($"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(width), 2, ViewWidth, width);
+        
+        string blank = "|".PadRight(ViewWidth);
+        for (int row = 3; row < ScreenHeight; row++)
+        {
+            WriteLine(blank, row, ViewWidth, width);
+        }
+    }
+
+    private void DrawFrame()
     {
         SDL_RenderClear(_renderer);
-        WriteLine(_lastMessage, 0);
-        SDL_RenderCopy(_renderer, _lastFrameTexture, IntPtr.Zero, ref _lastFrameLoc);
+        WriteLine(_lastMessage, 0, 0, ScreenWidth);
+        if (Player is not null) 
+        {
+            WriteSideBar(Player);
+            SDL_RenderCopy(_renderer, _lastFrameTexture, IntPtr.Zero, ref _lastFrameLoc);
+        }
         SDL_RenderPresent(_renderer);
     }
 
-    public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
+    public override void UpdateDisplay(Dictionary<(short, short), Tile> visible)
     {
-        _lastFrameTexture = CreateMainTexture(player.Row, player.Col, visible);
-        DrawFame();
+        if (Player is null)
+            throw new Exception("Hmm this shouldn't happen");
+
+        _lastFrameTexture = CreateMainTexture(Player.Row, Player.Col, visible);
+        DrawFrame();        
     }
 }
 
@@ -365,10 +387,10 @@ internal class BLDisplay : Display, IDisposable
         }
     }
 
-    void WriteSideBar(Player player)
+    void WriteSideBar()
     {
-        Terminal.Print(ViewWidth, 1, $"| {player.Name}".PadRight(ViewWidth));
-        Terminal.Print(ViewWidth, 2, $"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(ViewWidth));
+        Terminal.Print(ViewWidth, 1, $"| {Player.Name}".PadRight(ViewWidth));
+        Terminal.Print(ViewWidth, 2, $"| HP: {Player.CurrHP} ({Player.MaxHP})".PadRight(ViewWidth));
 
         string blank = "|".PadRight(ViewWidth);
         for (int row = 3; row < ScreenHeight; row++)
@@ -377,10 +399,10 @@ internal class BLDisplay : Display, IDisposable
         }
     }
 
-    public override void UpdateDisplay(Player player, Dictionary<(short, short), Tile> visible)
+    public override void UpdateDisplay(Dictionary<(short, short), Tile> visible)
     {
-        short rowOffset = (short) (player.Row - PlayerScreenRow);
-        short colOffset = (short) (player.Col - PlayerScreenCol);
+        short rowOffset = (short) (Player.Row - PlayerScreenRow);
+        short colOffset = (short) (Player.Col - PlayerScreenCol);
         for (short row = 0; row < ScreenHeight - 1; row++)
         {
             for (short col = 0; col < ScreenWidth - 21; col++)
@@ -403,7 +425,7 @@ internal class BLDisplay : Display, IDisposable
         Terminal.Color(WHITE);
         Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
 
-        WriteSideBar(player);
+        WriteSideBar();
 
         Terminal.Refresh();
     }
