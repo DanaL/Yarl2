@@ -34,7 +34,7 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
 
             if (cmd is NullCommand)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(25);
             }
             else if (cmd is QuitCommand)
             {
@@ -47,7 +47,13 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
                 if (result.Message is not null)
                     ui.WriteMessage(result.Message);
     
-                var vs = FieldOfView.CalcVisible(player, map);
+                var stopWatch = new System.Diagnostics.Stopwatch();
+                stopWatch.Start();
+                var vs = FieldOfView.CalcVisible(player, map);                
+                stopWatch.Stop();                
+                TimeSpan ts = stopWatch.Elapsed;
+                Console.WriteLine($"fov: {ts.TotalMicroseconds}");
+
                 _rememberedSqs = _rememberedSqs.Union(vs).ToHashSet();
 
                 var gameState = new GameState()

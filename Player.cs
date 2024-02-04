@@ -14,7 +14,7 @@ internal class Player : Actor
         Col = col;
         MaxHP = 20;
         CurrHP = 15;
-        MaxVisionRadius = 10;
+        MaxVisionRadius = 15;
         CurrVisionRadius = MaxVisionRadius;
     }
 }

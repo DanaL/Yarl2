@@ -97,7 +97,7 @@ internal class FieldOfView
         bool fullShadow = false;
         var line = new ShadowLine();
         
-        for (short row = 1; row < actor.CurrVisionRadius; row++)
+        for (short row = 1; row <= actor.CurrVisionRadius; row++)
         {
             for (short col = 0; col <= row; col++)
             {
@@ -105,7 +105,9 @@ internal class FieldOfView
                 ushort r = (ushort)(actor.Row + dr);
                 ushort c = (ushort)(actor.Col + dc);
 
-                if (!map.InBounds(r, c))
+                // The distance check trims the view area to be more round
+                short d = (short) Math.Sqrt(dr * dr + dc * dc);
+                if (!map.InBounds(r, c) || d > actor.CurrVisionRadius)
                     break;
 
                 var projection = ProjectTile(row, col);
