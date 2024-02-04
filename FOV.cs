@@ -13,28 +13,18 @@ class Shadow(float start, float end)
 
 class ShadowLine
 {
-    private readonly List<Shadow> _shadows = new();
+    private readonly List<Shadow> _shadows = [];
 
     public bool IsFullShadow() => _shadows.Count == 1 && _shadows[0].Start == 0 && _shadows[0].End == 1;
-
-    public bool IsInShadow(Shadow projection)
-    {
-        foreach (var shadow in _shadows) 
-        { 
-            if (shadow.Contains(projection)) 
-                return true;
-        }
-
-        return false;
-    }
+    public bool IsInShadow(Shadow projection) => _shadows.Exists(s => s.Contains(projection));
 
     public void Add(Shadow shadow)
     {
         int index = 0;
 
-        while (index < _shadows.Count)
+        for (; index < _shadows.Count; index++)
         {
-            if (_shadows[index++].Start >= shadow.Start)
+            if (_shadows[index].Start >= shadow.Start)
                 break;
         }
 
@@ -54,14 +44,14 @@ class ShadowLine
         {
             if (overlappingPrevious is not null)
             {
-                overlappingPrevious.End = overlappingNext.Start;
+                overlappingPrevious.End = overlappingNext.End;
                 _shadows.RemoveAt(index);
             }
             else
             {
                 overlappingNext.Start = shadow.Start;
             }
-        }
+        }    
         else if (overlappingPrevious is not null)
         {
             overlappingPrevious.End = shadow.End;
@@ -85,7 +75,7 @@ internal class FieldOfView
             3 => (col, row),
             4 => ((short)-col, row),
             5 => ((short)-row, col),
-            6 => ((short) -row, (short)-col),
+            6 => ((short)-row, (short)-col),
             _ => ((short)-col, (short)-row),
         };
     }
@@ -109,18 +99,17 @@ internal class FieldOfView
                 short d = (short) Math.Sqrt(dr * dr + dc * dc);
                 if (!map.InBounds(r, c) || d > actor.CurrVisionRadius)
                     break;
-
+                
                 var projection = ProjectTile(row, col);
-                bool visible = !line.IsInShadow(projection);
-
-                if (visible)
+                if (!line.IsInShadow(projection)) 
+                {
                     visibleSqs.Add((r, c));
 
-                var tile = map.TileAt(r, c);
-                if (visible && tile.Opaque())
-                {
-                    line.Add(projection);
-                    fullShadow = line.IsFullShadow();
+                    if (map.TileAt(r, c).Opaque()) 
+                    {
+                        line.Add(projection);
+                        fullShadow = line.IsFullShadow();
+                    }
                 }
 
                 if (fullShadow)
@@ -133,25 +122,22 @@ internal class FieldOfView
 
     public static HashSet<(ushort, ushort)> CalcVisible(Actor actor, Map map)
     {
-        var visibleSqs = new HashSet<(ushort, ushort)>() { (actor.Row, actor.Col) };
+        var visible = new HashSet<(ushort, ushort)>() { (actor.Row, actor.Col) };
 
-        return visibleSqs
-                .Union(CalcOctant(actor, map, 0))
-                .Union(CalcOctant(actor, map, 1))
-                .Union(CalcOctant(actor, map, 2))
-                .Union(CalcOctant(actor, map, 3))
-                .Union(CalcOctant(actor, map, 4))
-                .Union(CalcOctant(actor, map, 5))
-                .Union(CalcOctant(actor, map, 6))
-                .Union(CalcOctant(actor, map, 7))                
-                .ToHashSet();
+        for (short j = 0; j < 8; j++)
+        {
+            foreach (var sq in CalcOctant(actor, map, j))
+                visible.Add(sq);
+        }
+
+        return visible;
     }
 
     private static Shadow ProjectTile(short row, short col)
     {            
         float topLeft = col / (row + 2.0f);
         float bottomRight = (col + 1.0f) / (row + 1.0f);
-
+        
         return new Shadow(topLeft, bottomRight);
     }
 }

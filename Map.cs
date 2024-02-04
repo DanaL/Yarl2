@@ -105,13 +105,13 @@ internal class Map
             }
         }
 
-        // Random rnd = new Random();
-        // for (int j = 0; j < 1000;  j++) 
-        // {
-        //     ushort row = (ushort) rnd.Next(1, Height);
-        //     ushort col = (ushort) rnd.Next(1, Width);
-        //     Tiles[row * Width + col] = Tile.Wall;
-        // }
+        Random rnd = new Random();
+        for (int j = 0; j < 1000;  j++) 
+        {
+            ushort row = (ushort) rnd.Next(1, Height);
+            ushort col = (ushort) rnd.Next(1, Width);
+            Tiles[row * Width + col] = Tile.Wall;
+        }
     }
 
     public Tile TileAt(ushort row,  ushort col) 
