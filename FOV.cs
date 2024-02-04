@@ -79,14 +79,14 @@ internal class FieldOfView
     {
         return octant switch
         {
-            0 => (col, (short)(-row)),
-            1 => (row, (short)(-col)),
+            0 => (col, (short)-row),
+            1 => (row, (short)-col),
             2 => (row, col),
             3 => (col, row),
-            4 => ((short)(-col), row),
-            5 => ((short)(-row), col),
-            6 => ((short) (-row), (short)(-col)),
-            _ => ((short)(-col), (short)(-row)),
+            4 => ((short)-col, row),
+            5 => ((short)-row, col),
+            6 => ((short) -row, (short)-col),
+            _ => ((short)-col, (short)-row),
         };
     }
 
