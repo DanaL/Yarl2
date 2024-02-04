@@ -10,33 +10,19 @@ abstract class Actor
 
 internal class GameQuitException : Exception { }
 
-internal class GameEngine
+internal class GameState
 {
-    public readonly ushort VisibleWidth;
-    public readonly ushort VisibleHeight;
-    private readonly Display ui;
+    public HashSet<(ushort, ushort)>? Remebered { get; set; }
+    public HashSet<(ushort, ushort)>? Visible { get; set; }
+    public Map? Map { get; set; }
+}
 
-    public GameEngine(ushort visWidth, ushort visHeight, Display display)
-    {
-        VisibleWidth = visWidth;
-        VisibleHeight = visHeight;
-        ui = display;
-    }
-
-    Dictionary<(short, short), Tile> CalcVisible(Player player, Map map)
-    {
-        var visible = new Dictionary<(short, short), Tile>();
-        var vs = FieldOfView.CalcVisible(player, map);
-        
-        foreach (var tile in vs)
-        {
-            var r = tile.Item1;
-            var c = tile.Item2;
-            visible.Add(((short)r, (short)c), map.TileAt(r, c));
-        }
-        
-        return visible;
-    }
+internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
+{
+    public readonly ushort VisibleWidth = visWidth;
+    public readonly ushort VisibleHeight = visHeight;
+    private readonly Display ui = display;
+    private HashSet<(ushort, ushort)> _rememberedSqs = [];
 
     public void Play(Player player, Map map)
     {
@@ -60,8 +46,17 @@ internal class GameEngine
 
                 if (result.Message is not null)
                     ui.WriteMessage(result.Message);
-                var visible = CalcVisible(player, map);
-                ui.UpdateDisplay(visible);
+    
+                var vs = FieldOfView.CalcVisible(player, map);
+                _rememberedSqs = _rememberedSqs.Union(vs).ToHashSet();
+
+                var gameState = new GameState()
+                {
+                    Visible = vs,
+                    Remebered = _rememberedSqs,
+                    Map = map
+                }; 
+                ui.UpdateDisplay(gameState);
             }                
         }
         while (playing);

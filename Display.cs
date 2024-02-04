@@ -31,12 +31,12 @@ internal abstract class Display
     public abstract Command GetCommand(Player player, Map map);
     public abstract string QueryUser(string prompt);        
     
-    public abstract void UpdateDisplay(Dictionary<(short, short), Tile> visible);
+    public abstract void UpdateDisplay(GameState gameState);
     public abstract char WaitForInput();
     public abstract void WriteLongMessage(List<string> message);
     public abstract void WriteMessage(string message);
 
-    public Player? Player {get;set;} = null;
+    public Player? Player { get; set; } = null;
 
     public Display()
     {
@@ -83,13 +83,13 @@ internal abstract class Display
             return new PassCommand(p);
     }
 
-    protected (Color, char) TileToGlyph(Tile tile)
+    protected (Color, char) TileToGlyph(Tile tile, bool lit)
     {
         return tile switch
         {
-            Tile.PermWall => (DARK_GREY, '#'),
-            Tile.Wall =>  (GREY, '#'),
-            Tile.Floor => (LIGHT_GREY, '.'),
+            Tile.PermWall => lit ? (GREY, '#') : (DARK_GREY, '#'),
+            Tile.Wall =>  lit ? (GREY, '#') : (DARK_GREY, '#'),
+            Tile.Floor => lit ? (YELLOW, '.') : (GREY, '.'),
             _ => (BLACK, ' ')
         };
     }
@@ -274,7 +274,7 @@ internal class SDLDisplay : Display
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
-    private IntPtr CreateMainTexture(ushort playerRow, ushort playerCol, Dictionary<(short, short), Tile> visible)
+    private IntPtr CreateMainTexture(ushort playerRow, ushort playerCol, GameState gameState)
     {
         var tw = ViewWidth * _fontWidth;
         var th = (ScreenHeight - 1) * _fontHeight;
@@ -286,19 +286,19 @@ internal class SDLDisplay : Display
         short colOffset = (short) (playerCol - PlayerScreenCol);
         for (short row = 0; row < ScreenHeight - 1; row++)
         {
-            for (short col = 0; col < ScreenWidth - 21; col++)
+            for (short col = 0; col < ViewWidth; col++)
             {
-                short vr = (short)(row + rowOffset);
-                short vc = (short)(col + colOffset);
-                if (visible.ContainsKey((vr, vc)))
-                {
-                    var (color, ch) = TileToGlyph(visible[(vr, vc)]);
-                    SDLPut(row, col, ch, color);     
-                }
+                ushort vr = (ushort)(row + rowOffset);
+                ushort vc = (ushort)(col + colOffset);
+                Color color;
+                char ch;
+                if (gameState.Visible!.Contains((vr, vc)))                
+                    (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);                
+                else if (gameState.Remebered!.Contains((vr, vc)))
+                    (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                 else
-                {
-                    SDLPut(row, col, ' ', BLACK);            
-                }
+                    (color, ch) = (BLACK, ' ');                
+                SDLPut(row, col, ch, color);
             }
         }
         
@@ -334,19 +334,19 @@ internal class SDLDisplay : Display
         SDL_RenderPresent(_renderer);
     }
 
-    public override void UpdateDisplay(Dictionary<(short, short), Tile> visible)
+    public override void UpdateDisplay(GameState gameState)
     {
         if (Player is null)
             throw new Exception("Hmm this shouldn't happen");
 
-        _lastFrameTexture = CreateMainTexture(Player.Row, Player.Col, visible);
+        _lastFrameTexture = CreateMainTexture(Player.Row, Player.Col, gameState);
         DrawFrame();        
     }
 }
 
 internal class BLDisplay : Display, IDisposable
 {        
-    private Dictionary<int, char>? KeyToChar;
+    private readonly Dictionary<int, char> KeyToChar = [];
 
     public BLDisplay(string windowTitle) : base()
     {
@@ -357,7 +357,6 @@ internal class BLDisplay : Display, IDisposable
 
     private void SetUpKeyToCharMap()
     {
-        KeyToChar = [];
         int curr = (int)TKCodes.InputEvents.TK_A;
         for (int ch = 'a'; ch <= 'z'; ch++)
         {
@@ -399,19 +398,26 @@ internal class BLDisplay : Display, IDisposable
         }
     }
 
-    public override void UpdateDisplay(Dictionary<(short, short), Tile> visible)
+    public override void UpdateDisplay(GameState gameState)
     {
-        short rowOffset = (short) (Player.Row - PlayerScreenRow);
-        short colOffset = (short) (Player.Col - PlayerScreenCol);
+        short rowOffset = (short) (Player!.Row - PlayerScreenRow);
+        short colOffset = (short) (Player!.Col - PlayerScreenCol);
         for (short row = 0; row < ScreenHeight - 1; row++)
         {
-            for (short col = 0; col < ScreenWidth - 21; col++)
+            for (short col = 0; col < ViewWidth; col++)
             {
-                short vr = (short)(row + rowOffset);
-                short vc = (short)(col + colOffset);
-                if (visible.ContainsKey((vr, vc)))
+                ushort vr = (ushort)(row + rowOffset);
+                ushort vc = (ushort)(col + colOffset);
+
+                if (gameState.Visible!.Contains((vr, vc)))
                 {
-                    var (color, ch) = TileToGlyph(visible[(vr, vc)]);
+                    var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);
+                    Terminal.Color(color);
+                    Terminal.Put(col, row + 1, ch);
+                }
+                else if (gameState.Remebered!.Contains((vr, vc)))
+                {
+                    var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                     Terminal.Color(color);
                     Terminal.Put(col, row + 1, ch);
                 }
