@@ -31,12 +31,7 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
         do 
         {            
             var cmd = ui.GetCommand(player, map);
-
-            if (cmd is NullCommand)
-            {
-                Thread.Sleep(25);
-            }
-            else if (cmd is QuitCommand)
+            if (cmd is QuitCommand)
             {
                 playing = false;
             }

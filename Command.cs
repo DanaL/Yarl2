@@ -67,12 +67,3 @@ internal class QuitCommand : Command
         throw new GameQuitException();
     }
 }
-
-// This could be a Singleton?
-internal class NullCommand : Command
-{
-    public override CommandResult Execute() 
-    {
-        throw new Exception("Hmm this shouldn't be called.");
-    }
-}
