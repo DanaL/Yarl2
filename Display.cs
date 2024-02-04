@@ -152,6 +152,8 @@ internal class SDLDisplay : Display
 
                     return KeyToCommand(c, player, map);
             }
+
+            SDL_Delay(16);
         }
 
         return new NullCommand();
@@ -197,9 +199,10 @@ internal class SDLDisplay : Display
                     //Console.WriteLine($"    {e.key.keysym.mod}");
                     //break;
             }
+            
             SDL_Delay(16);
         }
-
+        
         return '\0';
     }
 
