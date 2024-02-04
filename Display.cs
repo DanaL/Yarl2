@@ -29,7 +29,7 @@ internal abstract class Display
     protected readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
 
     // map param will eventually be replaced by a GameState sort of object, I imagine
-    public abstract Command GetCommand(Player player, Map map);
+    public abstract Command? GetCommand(Player player, Map map);
     public abstract string QueryUser(string prompt);        
     
     public abstract void UpdateDisplay(GameState gameState);
@@ -86,11 +86,11 @@ internal abstract class Display
 
     protected (Color, char) TileToGlyph(Tile tile, bool lit)
     {
-        return tile switch
+        return tile.Type switch
         {
-            Tile.PermWall => lit ? (GREY, '#') : (DARK_GREY, '#'),
-            Tile.Wall =>  lit ? (GREY, '#') : (DARK_GREY, '#'),
-            Tile.Floor => lit ? (YELLOW, '.') : (GREY, '.'),
+            TileType.PermWall => lit ? (GREY, '#') : (DARK_GREY, '#'),
+            TileType.Wall =>  lit ? (GREY, '#') : (DARK_GREY, '#'),
+            TileType.Floor => lit ? (YELLOW, '.') : (GREY, '.'),
             _ => (BLACK, ' ')
         };
     }
@@ -135,7 +135,7 @@ internal class SDLDisplay : Display
         _cachedGlyphs = new();
     }
 
-    public override Command GetCommand(Player player, Map map)
+    public override Command? GetCommand(Player player, Map map)
     {
         while (SDL_PollEvent(out var e) != -1)
         {
@@ -156,7 +156,7 @@ internal class SDLDisplay : Display
             SDL_Delay(16);
         }
 
-        return new NullCommand();
+        return null;
     }
 
     public override string QueryUser(string prompt)
@@ -379,7 +379,7 @@ internal class BLDisplay : Display, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
     }
 
-    public override Command GetCommand(Player player, Map map)
+    public override Command? GetCommand(Player player, Map map)
     {
         if (Terminal.HasInput())
         {
@@ -388,7 +388,7 @@ internal class BLDisplay : Display, IDisposable
         }
         else 
         {
-            return new NullCommand();
+            return null;
         }
     }
 
