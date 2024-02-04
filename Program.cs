@@ -1,8 +1,15 @@
 ﻿
+using System.Text.Json;
+
 using Yarl2;
 
-//var display = new BLDisplay("Yarl2 0.0.1");
-var display = new SDLDisplay("Yarl2 0.0.1");
+var options = Options.LoadOptions("options.json");
+
+Display display;
+if (options.Display == "Bearlib")
+    display = new BLDisplay("Yarl2 0.0.1", options.FontSize);
+else
+    display = new SDLDisplay("Yarl2 0.0.1", options.FontSize);
 
 //var map = Map.TestMap();
 var map = new Map(75, 75);
@@ -34,4 +41,37 @@ catch (GameQuitException)
         " Being seeing you..."
     };
     display.WriteLongMessage(msg);
+}
+
+namespace Yarl2
+{
+    public class Options
+    {
+        public string Display { get; set; }
+        public int FontSize { get; set; }
+    
+        public static Options LoadOptions(string path)
+        {
+            Options options = new Options()
+            {
+                Display = "Bearlib",
+                FontSize = 12,
+            };
+
+            if (File.Exists(path))
+            {
+                var json = File.ReadAllText(path);
+                var opts = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                if (opts is not null) 
+                {
+                    if (opts.TryGetValue("Display", out string displayValue))            
+                        options.Display = displayValue;
+                    if (opts.TryGetValue("FontSize", out string fsValue))
+                        options.FontSize = int.Parse(fsValue);
+                }
+            }
+            
+            return options;
+        }
+    }
 }

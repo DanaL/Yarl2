@@ -16,7 +16,8 @@ internal abstract class Display
     protected const int ScreenHeight = 30;
     protected const int SideBarWidth = 20;
     protected const int ViewWidth = ScreenWidth - SideBarWidth;
-    protected const int FontSize = 12;
+    
+    protected int FontSize;
     protected short PlayerScreenRow;
     protected short PlayerScreenCol;
 
@@ -108,11 +109,12 @@ internal class SDLDisplay : Display
 
     private Dictionary<Color, SDL_Color> _colours;
 
-    public SDLDisplay(string windowTitle) : base()
+    public SDLDisplay(string windowTitle, int fontSize) : base()
     {
+        FontSize = fontSize;
         SDL_Init(SDL_INIT_VIDEO);
         SDL_ttf.TTF_Init();
-        _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", 18);
+        _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", fontSize);
         SDL_ttf.TTF_SizeUTF8(_font, " ", out _fontWidth, out _fontHeight);
         
         int width = ScreenWidth * _fontWidth;
@@ -348,8 +350,9 @@ internal class BLDisplay : Display, IDisposable
 {        
     private readonly Dictionary<int, char> KeyToChar = [];
 
-    public BLDisplay(string windowTitle) : base()
+    public BLDisplay(string windowTitle, int fontSize) : base()
     {
+        FontSize = fontSize;
         SetUpKeyToCharMap();
         Terminal.Open();
         Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");            
