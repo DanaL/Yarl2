@@ -30,8 +30,7 @@ internal abstract class Display
     protected readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
     protected readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
 
-    // map param will eventually be replaced by a GameState sort of object, I imagine
-    public abstract Action? GetCommand(Player player, Map map);
+    public abstract Action? GetCommand(GameState gameState);
     public abstract string QueryUser(string prompt);        
     public abstract void UpdateDisplay(GameState gameState);
     public abstract char WaitForInput();
@@ -87,8 +86,11 @@ internal abstract class Display
         while (true);
     }
 
-    protected Action KeyToCommand(char ch, Player p, Map m)
+    protected Action KeyToCommand(char ch, GameState gameState)
     {
+        Player p = gameState.Player!;
+        Map m = gameState.Map!;
+
         if (ch == 'c') 
         {
             var (dr, dc) = AskForDirection();            
@@ -100,21 +102,21 @@ internal abstract class Display
             return new OpenDoorAction(p, (ushort)(p.Row + dr), (ushort)(p.Col + dc), m);
         }
         else if (ch == 'h')
-            return new MoveAction(p, p.Row, (ushort)(p.Col - 1), m);
+            return new MoveAction(p, p.Row, (ushort)(p.Col - 1), gameState);
         else if (ch == 'j')
-            return new MoveAction(p, (ushort)(p.Row + 1), p.Col, m);
+            return new MoveAction(p, (ushort)(p.Row + 1), p.Col, gameState);
         else if (ch == 'k')
-            return new MoveAction(p, (ushort)(p.Row - 1), p.Col, m);
+            return new MoveAction(p, (ushort)(p.Row - 1), p.Col, gameState);
         else if (ch == 'l')
-            return new MoveAction(p, p.Row, (ushort)(p.Col + 1), m);
+            return new MoveAction(p, p.Row, (ushort)(p.Col + 1), gameState);
         else if (ch == 'y')
-            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col - 1), m);
+            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col - 1), gameState);
         else if (ch == 'u')
-            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col + 1), m);
+            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col + 1), gameState);
         else if (ch == 'b')
-            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col - 1), m);
+            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col - 1), gameState);
         else if (ch == 'n')
-            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col + 1), m);
+            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col + 1), gameState);
         else if (ch == 'Q')
             return new QuitAction();
         else
@@ -178,7 +180,7 @@ internal class SDLDisplay : Display
         _cachedGlyphs = new();
     }
 
-    public override Action? GetCommand(Player player, Map map)
+    public override Action? GetCommand(GameState gameState)
     {
         SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
 
@@ -196,7 +198,7 @@ internal class SDLDisplay : Display
                         c = (char)*e.text.text;
                     }
 
-                    return KeyToCommand(c, player, map);
+                    return KeyToCommand(c, gameState);
             }
         }
         while (true);
@@ -417,12 +419,12 @@ internal class BLDisplay : Display, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
     }
 
-    public override Action? GetCommand(Player player, Map map)
+    public override Action? GetCommand(GameState gameState)
     {
         if (Terminal.HasInput())
         {
             var ch = WaitForInput();
-            return KeyToCommand(ch, player, map);
+            return KeyToCommand(ch, gameState);
         }
         else 
         {

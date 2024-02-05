@@ -5,6 +5,7 @@ internal class ActionResult
 {
     public bool Successful { get; set; }
     public string? Message { get; set; }
+    public Action? AltAction { get; set; }
 
     public ActionResult() { }
 }
@@ -84,22 +85,40 @@ internal class OpenDoorAction(Actor actor, ushort row, ushort col, Map map) : Ac
     }
 }
 
-internal class MoveAction(Actor actor, ushort row, ushort col, Map map) : Action
+internal class MoveAction(Actor actor, ushort row, ushort col, GameState gameState) : Action
 {
     private readonly Actor _actor = actor;
     private readonly ushort _row = row;
     private readonly ushort _col = col;
-    private readonly Map _map = map;
+    private readonly Map _map = gameState.Map!;
+    private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
 
     public override ActionResult Execute()
     {
         var result = new ActionResult();
 
-        if (!_map.InBounds(_row, _col) || !_map.TileAt(_row, _col).Passable())
+        if (!_map.InBounds(_row, _col))
         {
+            // in theory this shouldn't ever happen...
             result.Successful = false;
             if (_actor is Player)
                 result.Message = "You cannot go that way!";
+        }
+        else if (!_map.TileAt(_row, _col).Passable())
+        {
+            result.Successful = false;
+
+            if (_actor is Player)
+            {
+                if (_bumpToOpen && _map.TileAt(_row, _col).Type == TileType.Door)
+                {
+                    result.AltAction = new OpenDoorAction(_actor, _row, _col, _map);
+                }
+                else
+                {
+                    result.Message = "You cannot go that way!";
+                }
+            }
         }
         else
         {

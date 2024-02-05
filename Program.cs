@@ -29,7 +29,7 @@ try
     var player = new Player(playerName, startRow, startCol);
     display.Player = player;
    
-    var engine = new GameEngine(29, 29, display);
+    var engine = new GameEngine(29, 29, display, options);
     engine.Play(player, map);
 }
 catch (GameQuitException)
@@ -46,15 +46,17 @@ namespace Yarl2
 {
     public class Options
     {
-        public string Display { get; set; }
+        public string? Display { get; set; }
         public int FontSize { get; set; }
-    
+        public bool BumpToOpen { get; set; }
+
         public static Options LoadOptions(string path)
         {
             Options options = new Options()
             {
                 Display = "Bearlib",
                 FontSize = 12,
+                BumpToOpen = true
             };
 
             if (File.Exists(path))
@@ -67,6 +69,8 @@ namespace Yarl2
                         options.Display = displayValue;
                     if (opts.TryGetValue("FontSize", out string fsValue))
                         options.FontSize = int.Parse(fsValue);
+                    if (opts.TryGetValue("BumpToOpen", out string btoValue))
+                        options.BumpToOpen = bool.Parse(btoValue);
                 }
             }
             
