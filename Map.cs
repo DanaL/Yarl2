@@ -5,7 +5,8 @@ enum TileType
     Unknown,
     PermWall,
     Wall,
-    Floor
+    Floor,
+    Door
 }
 
 internal abstract class Tile 
@@ -25,6 +26,13 @@ internal class BasicTile(TileType type, bool passable, bool opaque) : Tile(type)
     public override bool Passable() => _passable;
     public override bool Opaque() => _opaque;
 }
+internal class Door(TileType type, bool open) : Tile(type)
+{
+    public bool Open { get; set;} = open;
+
+    public override bool Passable() => Open;
+    public override bool Opaque() => !Open;
+}
 
 internal class TileFactory
 {
@@ -40,6 +48,7 @@ internal class TileFactory
             TileType.PermWall => PermWall,
             TileType.Wall => Wall,
             TileType.Floor => Floor,
+            TileType.Door => new Door(type, false),
             _ => Unknown
         };
     }
@@ -93,7 +102,7 @@ internal class Map
 
         map.Tiles[5 * 20 + 14] = TileFactory.Get(TileType.Wall);
         map.Tiles[6 * 20 + 14] = TileFactory.Get(TileType.Wall);
-        map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.Wall);
+        map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.Door);
         map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.Wall);
         map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.Wall);
 

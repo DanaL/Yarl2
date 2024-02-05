@@ -11,9 +11,9 @@ if (options.Display == "Bearlib")
 else
     display = new SDLDisplay("Yarl2 0.0.1", options.FontSize);
 
-//var map = Map.TestMap();
-var map = new Map(75, 75);
-map.SetRandomTestMap();
+var map = Map.TestMap();
+//var map = new Map(75, 75);
+//map.SetRandomTestMap();
 
 try
 {

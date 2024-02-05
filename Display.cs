@@ -27,11 +27,12 @@ internal abstract class Display
     protected readonly Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
     protected readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
     protected readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
+    protected readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
+    protected readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
 
     // map param will eventually be replaced by a GameState sort of object, I imagine
-    public abstract Command? GetCommand(Player player, Map map);
+    public abstract Action? GetCommand(Player player, Map map);
     public abstract string QueryUser(string prompt);        
-    
     public abstract void UpdateDisplay(GameState gameState);
     public abstract char WaitForInput();
     public abstract void WriteLongMessage(List<string> message);
@@ -60,39 +61,81 @@ internal abstract class Display
         WriteLongMessage(msg);           
     }
 
-    protected static Command KeyToCommand(char ch, Player p, Map m)
+    private (short, short) AskForDirection()
     {
-        if (ch == 'h')
-            return new MoveCommand(p, (short)p.Row, (short)(p.Col - 1), m);
+        do 
+        {
+            WriteMessage("Which way?");
+            char ch = WaitForInput();
+            if (ch == 'y')
+                return (-1, -1);
+            else if (ch == 'u')
+                return (-1, 1);
+            else if (ch == 'h')
+                return (0, -1);
+            else if (ch == 'j')
+                return (1, 0);
+            else if (ch == 'k')
+                return (0, -1);
+            else if (ch == 'l')
+                return (0, 1);
+            else if (ch == 'b')
+                return (1, -1);
+            else if (ch == 'n')
+                return (1, 1);
+        }
+        while (true);
+    }
+
+    protected Action KeyToCommand(char ch, Player p, Map m)
+    {
+        if (ch == 'c') 
+        {
+            var (dr, dc) = AskForDirection();            
+            return new CloseDoorAction(p, (ushort)(p.Row + dr), (ushort)(p.Col + dc), m);
+        }
+        else if (ch == 'o') 
+        {
+            var (dr, dc) = AskForDirection();            
+            return new OpenDoorAction(p, (ushort)(p.Row + dr), (ushort)(p.Col + dc), m);
+        }
+        else if (ch == 'h')
+            return new MoveAction(p, p.Row, (ushort)(p.Col - 1), m);
         else if (ch == 'j')
-            return new MoveCommand(p, (short)(p.Row + 1), (short)p.Col, m);
+            return new MoveAction(p, (ushort)(p.Row + 1), p.Col, m);
         else if (ch == 'k')
-            return new MoveCommand(p, (short)(p.Row - 1), (short)p.Col, m);
+            return new MoveAction(p, (ushort)(p.Row - 1), p.Col, m);
         else if (ch == 'l')
-            return new MoveCommand(p, (short)p.Row, (short)(p.Col + 1), m);
+            return new MoveAction(p, p.Row, (ushort)(p.Col + 1), m);
         else if (ch == 'y')
-            return new MoveCommand(p, (short)(p.Row - 1), (short)(p.Col - 1), m);
+            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col - 1), m);
         else if (ch == 'u')
-            return new MoveCommand(p, (short)(p.Row - 1), (short)(p.Col + 1), m);
+            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col + 1), m);
         else if (ch == 'b')
-            return new MoveCommand(p, (short)(p.Row + 1), (short)(p.Col - 1), m);
+            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col - 1), m);
         else if (ch == 'n')
-            return new MoveCommand(p, (short)(p.Row + 1), (short)(p.Col + 1), m);
+            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col + 1), m);
         else if (ch == 'Q')
-            return new QuitCommand();
+            return new QuitAction();
         else
-            return new PassCommand(p);
+            return new PassAction(p);
     }
 
     protected (Color, char) TileToGlyph(Tile tile, bool lit)
     {
-        return tile.Type switch
+        switch (tile.Type)
         {
-            TileType.PermWall => lit ? (GREY, '#') : (DARK_GREY, '#'),
-            TileType.Wall =>  lit ? (GREY, '#') : (DARK_GREY, '#'),
-            TileType.Floor => lit ? (YELLOW, '.') : (GREY, '.'),
-            _ => (BLACK, ' ')
-        };
+            case TileType.Wall:
+            case TileType.PermWall:
+                return lit ? (GREY, '#') : (DARK_GREY, '#');
+            case TileType.Floor:
+                return lit ? (YELLOW, '.') : (GREY, '.');
+            case TileType.Door:
+                char ch = ((Door)tile).Open ? '\\' : '+';
+                return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
+            default:
+                return (BLACK, ' ');
+        }        
     }
 }
 
@@ -135,14 +178,17 @@ internal class SDLDisplay : Display
         _cachedGlyphs = new();
     }
 
-    public override Command? GetCommand(Player player, Map map)
+    public override Action? GetCommand(Player player, Map map)
     {
-        while (SDL_PollEvent(out var e) != -1)
+        SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
+
+        do
         {
+            SDL_WaitEvent(out var e);
             switch (e.type)
             {
                 case SDL_EventType.SDL_QUIT:
-                    return new QuitCommand();
+                    return new QuitAction();
                 case SDL_EventType.SDL_TEXTINPUT:
                     char c;
                     unsafe
@@ -152,11 +198,8 @@ internal class SDLDisplay : Display
 
                     return KeyToCommand(c, player, map);
             }
-
-            SDL_Delay(16);
         }
-
-        return null;
+        while (true);
     }
 
     public override string QueryUser(string prompt)
@@ -185,25 +228,20 @@ internal class SDLDisplay : Display
     }
 
     public override char WaitForInput()
-    {
-        while (SDL_PollEvent(out var e) != -1) 
+    {        
+        do 
         {
+            SDL_WaitEvent(out var e);
             switch (e.type) 
             {                
-                case SDL_EventType.SDL_KEYDOWN:
+                case SDL_EventType.SDL_KEYDOWN:                    
                     if (e.key.keysym.sym == SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL_Keycode.SDLK_RSHIFT)
                         continue;
-                    return KeysymToChar(e.key.keysym);
-                    //char ch = (char) e.key.keysym.sym;
-                    //Console.WriteLine($"foo {ch}");
-                    //Console.WriteLine($"    {e.key.keysym.mod}");
-                    //break;
+                    
+                    return KeysymToChar(e.key.keysym);                    
             }
-            
-            SDL_Delay(16);
-        }
-        
-        return '\0';
+        } 
+        while (true);        
     }
 
     private SDL_Color ToSDLColour(Color colour) 
@@ -379,7 +417,7 @@ internal class BLDisplay : Display, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
     }
 
-    public override Command? GetCommand(Player player, Map map)
+    public override Action? GetCommand(Player player, Map map)
     {
         if (Terminal.HasInput())
         {

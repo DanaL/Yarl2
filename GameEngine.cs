@@ -24,14 +24,28 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
     private readonly Display ui = display;
     private HashSet<(ushort, ushort)> _rememberedSqs = [];
 
+    private void UpdateView(Player player, Map map)
+    {
+        var vs = FieldOfView.CalcVisible(player, map);
+        _rememberedSqs = _rememberedSqs.Union(vs).ToHashSet();
+        var gameState = new GameState()
+        {
+            Visible = vs,
+            Remebered = _rememberedSqs,
+            Map = map
+        }; 
+        ui.UpdateDisplay(gameState);
+    }
+
     public void Play(Player player, Map map)
     {
         bool playing = true;
+        UpdateView(player, map);
         
         do 
         {            
             var cmd = ui.GetCommand(player, map);
-            if (cmd is QuitCommand)
+            if (cmd is QuitAction)
             {
                 playing = false;
             }
@@ -42,17 +56,7 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display)
                 if (result.Message is not null)
                     ui.WriteMessage(result.Message);
     
-                var vs = FieldOfView.CalcVisible(player, map);                
-                
-                _rememberedSqs = _rememberedSqs.Union(vs).ToHashSet();
-
-                var gameState = new GameState()
-                {
-                    Visible = vs,
-                    Remebered = _rememberedSqs,
-                    Map = map
-                }; 
-                ui.UpdateDisplay(gameState);
+                UpdateView(player, map);
             }                
         }
         while (playing);
