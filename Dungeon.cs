@@ -3,6 +3,7 @@ namespace Yarl2;
 internal class Dungeon
 {
     readonly Random _rng = new Random();
+    static (short, short)[] _adj = [(-2, 0), (2, 0), (0, 2), (0, -2)];
 
     // Pick a room template to overlay onto the map (currently either 
     // rectangular or circular)
@@ -122,6 +123,58 @@ internal class Dungeon
         rooms.Add(room);
     }
 
+    private static List<(ushort, ushort)> MazeNeighbours(Map map, ushort row, ushort col, TileType type)
+    {
+        return _adj.Select(n => ((ushort)(row + n.Item1), (ushort)(col + n.Item2)))
+                             .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
+                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();        
+    }
+
+    private void MazeConnect(Map map, ushort r, ushort c)
+    {
+        var neighbours = MazeNeighbours(map, r, c, TileType.Floor);
+        if (neighbours.Count > 0)
+        {
+            var (nr, nc) = neighbours[_rng.Next(neighbours.Count)];
+            ushort br = r, bc = c;
+            if (r < nr)
+                br = (ushort) (r + 1);
+            else if (r > nr)
+                br = (ushort)(r - 1);
+            else if (c < nc)
+                bc = (ushort)(c + 1);
+            else if (c > nc)
+                bc = (ushort)(c - 1);
+
+            map.SetTile(br, bc, TileFactory.Get(TileType.Floor));         
+        }
+    }
+
+    // Lay down the initial maze. Just using the randomized Prim's algorithm description from Wikipedia
+    // https://en.wikipedia.org/wiki/Maze_generation_algorithm#Iterative_randomized_Prim's_algorithm_(without_stack,_without_sets)
+    private void CarveMaze(Map map, ushort width, ushort height)
+    {
+        var startCellRow = (ushort)(_rng.Next(height));
+        var startCellCol = (ushort)(_rng.Next(width));
+        map.SetTile(startCellRow, startCellCol, TileFactory.Get(TileType.Floor));
+        var frontiers = MazeNeighbours(map, startCellRow, startCellCol, TileType.Wall);
+
+        while (frontiers.Count > 0) 
+        {
+            var i = _rng.Next(frontiers.Count);
+            var (nr, nc) = frontiers[i];
+
+            if (map.TileAt(nr, nc).Type == TileType.Wall) 
+            {
+                map.SetTile(nr, nc, TileFactory.Get(TileType.Floor));
+                MazeConnect(map, nr, nc);
+            }
+                        
+            frontiers.RemoveAt(i);
+            frontiers.AddRange(MazeNeighbours(map, nr, nc, TileType.Wall));
+        }        
+    }
+
     public Map DrawLevel(ushort width, ushort height)
     {
         var map = new Map(width, height);
@@ -129,7 +182,9 @@ internal class Dungeon
         for (short j = 0; j < width * height; j++)
             map.Tiles[j] = TileFactory.Get(TileType.Wall);
 
-        Carve(map, width, height);
+        CarveMaze(map, width, height);
+        map.Dump();
+        //Carve(map, width, height);
 
         return map;
     }

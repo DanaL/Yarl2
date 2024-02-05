@@ -97,7 +97,7 @@ internal class FieldOfView
 
                 // The distance check trims the view area to be more round
                 short d = (short) Math.Sqrt(dr * dr + dc * dc);
-                if (!map.InBounds(r, c) || d > actor.CurrVisionRadius)
+                if (!map.InBounds((short)r, (short)c) || d > actor.CurrVisionRadius)
                     break;
                 
                 var projection = ProjectTile(row, col);

@@ -97,7 +97,7 @@ internal class MoveAction(Actor actor, ushort row, ushort col, GameState gameSta
     {
         var result = new ActionResult();
 
-        if (!_map.InBounds(_row, _col))
+        if (!_map.InBounds((short)_row, (short)_col))
         {
             // in theory this shouldn't ever happen...
             result.Successful = false;

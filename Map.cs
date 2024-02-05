@@ -69,7 +69,7 @@ internal class Map
         Tiles = new Tile[Height * Width];
     }
 
-    public bool InBounds(ushort row,  ushort col) => row >= 0 && row < Height && col >= 0 && col < Width;
+    public bool InBounds(short row,  short col) => row >= 0 && row < Height && col >= 0 && col < Width;
 
     public static Map TestMap()
     {
@@ -135,6 +135,8 @@ internal class Map
             Tiles[row * Width + col] = TileFactory.Get(TileType.Wall);
         }
     }
+
+    public void SetTile(ushort row, ushort col, Tile tile) => Tiles[row * Width + col] = tile;
 
     public Tile TileAt(ushort row,  ushort col) 
     { 
