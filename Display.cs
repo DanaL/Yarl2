@@ -421,15 +421,15 @@ internal class BLDisplay : Display, IDisposable
 
     public override Action? GetCommand(GameState gameState)
     {
-        if (Terminal.HasInput())
+        do
         {
-            var ch = WaitForInput();
-            return KeyToCommand(ch, gameState);
+            if (Terminal.HasInput())
+            {
+                var ch = WaitForInput();
+                return KeyToCommand(ch, gameState);
+            }
         }
-        else 
-        {
-            return null;
-        }
+        while (true);
     }
 
     void WriteSideBar()
