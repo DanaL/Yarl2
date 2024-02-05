@@ -16,7 +16,7 @@ var map = Map.TestMap();
 //map.SetRandomTestMap();
 
 var dungeon = new Dungeon();
-var map2 = dungeon.DrawLevel(85, 50);
+var map2 = dungeon.DrawLevel(33, 33);
 //map2.Dump();
 
 return;
