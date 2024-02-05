@@ -15,6 +15,10 @@ var map = Map.TestMap();
 //var map = new Map(75, 75);
 //map.SetRandomTestMap();
 
+var dungeon = new Dungeon();
+var map2 = dungeon.DrawLevel(50, 50);
+map2.Dump();
+
 try
 {
     display.TitleScreen();
@@ -24,7 +28,7 @@ try
     display.WaitForInput();
 
     var rnd = new Random();
-    ushort startRow = (ushort) rnd.Next(1, map.Height);
+    ushort startRow = (ushort)rnd.Next(1, map.Height);
     ushort startCol = (ushort)rnd.Next(1, map.Width);
     var player = new Player(playerName, startRow, startCol);
     display.Player = player;

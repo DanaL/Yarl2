@@ -59,7 +59,7 @@ internal class Map
     public readonly ushort Width;
     public readonly ushort Height;
 
-    private Tile[] Tiles;
+    public Tile[] Tiles;
 
     public Map(ushort width, ushort height)
     {
@@ -143,21 +143,22 @@ internal class Map
         return Tiles[j];
     }
 
-    // public void Dump() 
-    // {
-    //     for (int row = 0; row < Height; row++)
-    //     {
-    //         for (int col = 0; col < Width; col++)
-    //         {
-    //             char ch = Tiles[row * Width + col] switch  {
-    //                 Tile.PermWall => '#',
-    //                 Tile.Wall => '#',
-    //                 Tile.Floor => '.',
-    //                 _ => ' '
-    //             };
-    //             Console.Write(ch);
-    //         }
-    //         Console.WriteLine();
-    //     }
-    // }
+    public void Dump() 
+    {
+        for (int row = 0; row < Height; row++)
+        {
+            for (int col = 0; col < Width; col++)
+            {
+                char ch = Tiles[row * Width + col].Type switch  {
+                    TileType.PermWall => '#',
+                    TileType.Wall => '#',
+                    TileType.Floor => '.',
+                    TileType.Door => '+',
+                    _ => ' '
+                };
+                Console.Write(ch);
+            }
+            Console.WriteLine();
+        }
+    }
 }
