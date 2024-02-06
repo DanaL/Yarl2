@@ -40,7 +40,6 @@ internal class Dungeon
             ushort sqry_inc = 1;
             short rc = (short) (radius + 1);
             short cc = (short) (radius + 1);
-       
 
             // Draw the outline of a cricle via Bresenham
             while (y <= x) 
@@ -57,7 +56,8 @@ internal class Dungeon
                 y += 1;
                 error += sqry_inc;
                 sqry_inc += 2;
-                if (error > x) {
+                if (error > x) 
+                {
                     x -= 1;
                     error -= sqrx_inc;
                     sqrx_inc -= 2;
@@ -93,6 +93,7 @@ internal class Dungeon
         short row, col;
         short dr, dc;
         ScanDirs dir;
+        short delta = 3; // how much to jump by when scanning
 
         // Pick a corner to start at and direction to move in
         int corner = _rng.Next(4);
@@ -105,12 +106,12 @@ internal class Dungeon
             if (_rng.Next(2) == 0) // move right along rows
             {
                 dr = 0;
-                dc = 1;
+                dc = delta;
                 dir = ScanDirs.RightDown;
             }
             else // move down along cols
             {
-                dr = 1;
+                dr = delta;
                 dc = 0;
                 dir = ScanDirs.DownRight;
             }
@@ -124,12 +125,12 @@ internal class Dungeon
             if (_rng.Next(2) == 0) // move left along rows
             {
                 dr = 0;
-                dc = -1;
+                dc = (short)-delta;
                 dir = ScanDirs.LeftDown;
             }
             else // move down along cols
             {
-                dr = 1;
+                dr = delta;
                 dc = 0;
                 dir = ScanDirs.DownLeft;
             }
@@ -143,12 +144,12 @@ internal class Dungeon
             if (_rng.Next(2) == 0) // move right along rows
             {
                 dr = 0;
-                dc = 1;
+                dc = delta;
                 dir = ScanDirs.RightUp;
             }
             else // move up along cols
             {
-                dr = -1;
+                dr = (short)-delta;
                 dc = 0;
                 dir = ScanDirs.UpRight;
             }
@@ -162,18 +163,17 @@ internal class Dungeon
             if (_rng.Next(2) == 0) // move left along rows
             {
                 dr = 0;
-                dc = -1;
+                dc = (short)-delta;
                 dir = ScanDirs.LeftUp;
             }
             else // move up along cols
             {
-                dr = -1;
+                dr = (short)-delta;
                 dc = 0;
                 dir = ScanDirs.UpLeft;
             }
         }
 
-        Console.WriteLine(dir);
         // Okay, scan across the map and try to place the new room
         do
         {
@@ -224,7 +224,6 @@ internal class Dungeon
                 brc = (short)(col + roomWidth);
                 if (!(map.InBounds(row, col) && map.InBounds(row, brc) && map.InBounds(brr, col) && map.InBounds(brr, brc)))
                 {
-                    Console.WriteLine(dir);
                     break;
                 }
 
@@ -246,7 +245,7 @@ internal class Dungeon
         return (-1, -1);
     }
 
-    private void AddRooms(Map map, ushort width, ushort height)
+    private List<Room> AddRooms(Map map, ushort width, ushort height)
     {
         var rooms = new List<Room>();
         var center_row = height / 2;
@@ -264,7 +263,6 @@ internal class Dungeon
 
         // Now keep adding rooms until we fail to add one. (Ie., we can't find a spot where
         // it won't overlap with another room
-        int count = 0;
         do
         {
             sqs = MakeRoomTemplate();
@@ -275,24 +273,28 @@ internal class Dungeon
             }
             DrawRoom(map, sqs, (ushort) r, (ushort) c);
             roomSqs = sqs.Select(s => ((ushort)(s.Item1 + r), (ushort)(s.Item2 + c)));
-            rooms.Add(new Room(roomSqs));
-            // room = new Room(sqs, (ushort) r, (ushort) c, (ushort)((ushort)r + sqs.GetLength(0)),
-            //                             (ushort)(c + sqs.GetLength(1)), "");
-            // rooms.Add(room);
-
-            // map.Dump();
-            // Console.WriteLine();
-            //if (count++ > 2) break;
+            rooms.Add(new Room(roomSqs));            
         }
         while (true);
+
+        return rooms;
     }
 
     private static List<(ushort, ushort)> MazeNeighbours(Map map, ushort row, ushort col, TileType type, short d)
     {
-        (short, short)[] _adj = [((short)-d, 0), (d, 0), (0, d), (0, (short)-d)];
-        return _adj.Select(n => ((ushort)(row + n.Item1), (ushort)(col + n.Item2)))
+        (short, short)[] adj = [((short)-d, 0), (d, 0), (0, d), (0, (short)-d)];
+        return adj.Select(n => ((ushort)(row + n.Item1), (ushort)(col + n.Item2)))
                              .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
-                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();        
+                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();
+    }
+
+    private static bool AdjFloors(Map map, ushort row, ushort col)
+    {
+        (short, short)[] adj = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1),
+                                    (1, -1), (1, 0), (1, 1)];
+        return adj.Select(n => ((ushort)(row + n.Item1), (ushort)(col + n.Item2)))
+                             .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
+                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Any();
     }
 
     private void MazeConnect(Map map, ushort r, ushort c)
@@ -315,15 +317,27 @@ internal class Dungeon
         }
     }
 
+    private (ushort, ushort) MazeStart(Map map, ushort width, ushort height)
+    {
+        do 
+        {
+            var r = (ushort)_rng.Next(height);
+            var c = (ushort)_rng.Next(width);
+
+            if (map.TileAt(r, c).Type == TileType.Wall && !AdjFloors(map, r, c))
+                return (r, c);
+        }
+        while (true);
+    }
+
     // Lay down the initial maze. Just using the randomized Prim's algorithm description from Wikipedia
     // https://en.wikipedia.org/wiki/Maze_generation_algorithm#Iterative_randomized_Prim's_algorithm_(without_stack,_without_sets)
     private void CarveMaze(Map map, ushort width, ushort height)
     {
-        var startCellRow = (ushort)(_rng.Next(height));
-        var startCellCol = (ushort)(_rng.Next(width));
-        map.SetTile(startCellRow, startCellCol, TileFactory.Get(TileType.Floor));
-        var frontiers = MazeNeighbours(map, startCellRow, startCellCol, TileType.Wall, 2);
-
+        var (startRow, startCol) = MazeStart(map, width, height);
+        map.SetTile(startRow, startCol, TileFactory.Get(TileType.Floor));
+        var frontiers = MazeNeighbours(map, startRow, startCol, TileType.Wall, 2);
+        
         while (frontiers.Count > 0) 
         {
             var i = _rng.Next(frontiers.Count);
@@ -335,8 +349,8 @@ internal class Dungeon
                 MazeConnect(map, nr, nc);
             }
                         
-            frontiers.RemoveAt(i);
-            frontiers.AddRange(MazeNeighbours(map, nr, nc, TileType.Wall, 2));
+            frontiers.RemoveAt(i);            
+            frontiers.AddRange(MazeNeighbours(map, nr, nc, TileType.Wall, 2));                                
         }        
     }
 
@@ -346,22 +360,32 @@ internal class Dungeon
 
         for (short j = 0; j < width * height; j++)
             map.Tiles[j] = TileFactory.Get(TileType.Wall);
+    
+        var rooms = AddRooms(map, width, height);
+        // Draw in the room perimeters
+        foreach (var room in rooms)
+        {
+            foreach (var sq in room.Permieter) 
+            {
+                if (map.InBounds((short)sq.Item1, (short)sq.Item2))
+                    map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.Wall));
+            }
+        }
 
-        //CarveMaze(map, width, height);        
-        AddRooms(map, width, height);
-
-        // Placing the rooms down leaves in a bunch of squares that are isolated by
-        // themselves so I'll just fill them in before I do more clean up. (Maybe in the
-        // future some of them can be used for closets/secret rooms?
-        //for (ushort r = 0; r < height; r++)
-        //{
-        //    for (ushort c= 0; c < width; c++)
-        //    {
-        //        if (MazeNeighbours(map, r, c, TileType.Floor, 1).Count() == 0)
-        //            map.SetTile(r, c, TileFactory.Get(TileType.Wall));
-        //    }
-        //}
+        // Fill in any dead ends
+        // for (ushort r = 0; r < height; r++)
+        // {
+        //     for (ushort c = 0; c < width; c++)
+        //     {
+        //         if (MazeNeighbours(map, r, c, TileType.Wall, 1).Count >= 3)
+        //             map.SetTile(r, c, TileFactory.Get(TileType.Wall));
+        //     }
+        // }
         map.Dump();
+        Console.WriteLine();
+
+        //CarveMaze(map, width, height);
+        //map.Dump();
 
         return map;
     }
@@ -372,7 +396,7 @@ enum ScanDirs { RightDown, DownRight, LeftDown, DownLeft, UpRight, RightUp, Left
 class Room
 {
     HashSet<(ushort, ushort)> Sqs {get; set; }
-    HashSet<(ushort, ushort)> Permieter { get; set; }
+    public HashSet<(ushort, ushort)> Permieter { get; set; }
 
     public Room(IEnumerable<(ushort, ushort)> sqs) 
     {
@@ -398,16 +422,13 @@ class Room
         maxCol += 1;
 
         Permieter = new();
-        for (ushort c = minCol; c <= maxCol; c++) 
-        {
-            Permieter.Add((minRow, c));
-            Permieter.Add((maxRow, c));
-        }
-
         for (ushort r = minRow; r <= maxRow; r++) 
         {
-            Permieter.Add((r, minCol));
-            Permieter.Add((r, maxCol));
+            for (ushort c = minCol; c <= maxCol; c++) 
+            {
+                if (!Sqs.Contains((r, c)))
+                    Permieter.Add((r, c));
+            }
         }
     }
 

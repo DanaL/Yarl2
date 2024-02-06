@@ -70,7 +70,7 @@ internal class Map
     }
 
     public bool InBounds(short row,  short col) => row >= 0 && row < Height && col >= 0 && col < Width;
-
+    
     public static Map TestMap()
     {
         var map = new Map(20, 20);
