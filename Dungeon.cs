@@ -11,6 +11,7 @@ internal class Dungeon
         ushort height, width;
         List<(ushort, ushort)> sqs = new();
         var rn = _rng.NextDouble();
+        
         if (rn < 0.8)
         {
             // make a rectangular room
@@ -138,70 +139,77 @@ internal class Dungeon
                              .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();
     }
 
-    private static bool AdjFloors(Map map, ushort row, ushort col)
+    private static int AdjFloors(Map map, ushort row, ushort col)
     {
         (short, short)[] adj = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1),
                                     (1, -1), (1, 0), (1, 1)];
         return adj.Select(n => ((ushort)(row + n.Item1), (ushort)(col + n.Item2)))
                              .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
-                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Any();
+                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Count();
     }
 
-    private void MazeConnect(Map map, ushort r, ushort c)
+    private void MazeConnect(Map map, ushort r1, ushort c1, ushort r2, ushort c2)
     {
-        var neighbours = MazeNeighbours(map, r, c, TileType.Floor, 2);
-        if (neighbours.Count > 0)
-        {
-            var (nr, nc) = neighbours[_rng.Next(neighbours.Count)];
-            ushort br = r, bc = c;
-            if (r < nr)
-                br = (ushort) (r + 1);
-            else if (r > nr)
-                br = (ushort)(r - 1);
-            else if (c < nc)
-                bc = (ushort)(c + 1);
-            else if (c > nc)
-                bc = (ushort)(c - 1);
-
-            map.SetTile(br, bc, TileFactory.Get(TileType.Floor));         
-        }
+        if (r1 < r2)
+            map.SetTile((ushort)(r1 + 1), c1, TileFactory.Get(TileType.Floor));
+        else if (r1 > r2)
+            map.SetTile((ushort)(r1 - 1), c1, TileFactory.Get(TileType.Floor));
+        else if (c1 < c2)
+            map.SetTile(r1, (ushort)(c1 + 1), TileFactory.Get(TileType.Floor));
+        else if (c1 > c2)
+            map.SetTile(r1, (ushort)(c1 - 1), TileFactory.Get(TileType.Floor));
     }
 
-    private (ushort, ushort) MazeStart(Map map, ushort width, ushort height)
+    private (bool, ushort, ushort) MazeStart(Map map, ushort width, ushort height)
     {
-        do 
+        for (ushort r = 1; r < height - 1; r++) 
         {
-            var r = (ushort)_rng.Next(height);
-            var c = (ushort)_rng.Next(width);
-
-            if (map.TileAt(r, c).Type == TileType.Wall && !AdjFloors(map, r, c))
-                return (r, c);
-        }
-        while (true);
-    }
-
-    // Lay down the initial maze. Just using the randomized Prim's algorithm description from Wikipedia
-    // https://en.wikipedia.org/wiki/Maze_generation_algorithm#Iterative_randomized_Prim's_algorithm_(without_stack,_without_sets)
-    private void CarveMaze(Map map, ushort width, ushort height)
-    {
-        var (startRow, startCol) = MazeStart(map, width, height);
-        map.SetTile(startRow, startCol, TileFactory.Get(TileType.Floor));
-        var frontiers = MazeNeighbours(map, startRow, startCol, TileType.Wall, 2);
-        
-        while (frontiers.Count > 0) 
-        {
-            var i = _rng.Next(frontiers.Count);
-            var (nr, nc) = frontiers[i];
-
-            if (map.TileAt(nr, nc).Type == TileType.Wall) 
+            for (ushort c = 1; c < width - 1; c++)
             {
-                map.SetTile(nr, nc, TileFactory.Get(TileType.Floor));
-                MazeConnect(map, nr, nc);
+                if (map.TileAt(r, c).Type == TileType.Wall && AdjFloors(map, r, c) == 0)
+                    return (true, r, c);
             }
-                        
-            frontiers.RemoveAt(i);            
-            frontiers.AddRange(MazeNeighbours(map, nr, nc, TileType.Wall, 2));                                
-        }        
+        }
+
+        return (false, 0, 0);
+    }   
+
+    private IEnumerable<(ushort, ushort)> NextNeighbours(Map map, ushort r, ushort c)
+    {
+        return MazeNeighbours(map, r, c, TileType.Wall, 2)
+                    .Where(s => AdjFloors(map, s.Item1, s.Item2) == 0);
+    }
+
+    // Random floodfill maze passages. (We have to do this a few times)
+    private bool CarveMaze(Map map, ushort width, ushort height)
+    {
+        var (success, startRow, startCol) = MazeStart(map, width, height);
+
+        if (success)
+        {            
+            map.SetTile(startRow, startCol, TileFactory.Get(TileType.Floor));
+
+            // find neighbours (2 sq away) that they are fully enclosed
+            var neighbours = NextNeighbours(map, startRow, startCol)
+                                .Select(n => (n, (startRow, startCol))).ToList();
+            while (neighbours.Count > 0)
+            {
+                var i = _rng.Next(neighbours.Count);
+                var (next, prev) = neighbours[i];
+                neighbours.RemoveAt(i);
+
+                if (map.TileAt(next.Item1, next.Item2).Type == TileType.Floor)
+                    continue;
+
+                map.SetTile(next.Item1, next.Item2, TileFactory.Get(TileType.Floor));
+                MazeConnect(map, prev.Item1, prev.Item2, next.Item1, next.Item2);
+                
+                neighbours.AddRange(NextNeighbours(map, next.Item1, next.Item2)
+                                        .Select(n => (n, (next.Item1, next.Item2))));
+            }
+        }
+
+        return success;
     }
 
     public Map DrawLevel(ushort width, ushort height)
@@ -222,12 +230,15 @@ internal class Dungeon
             }
         }
 
-       
+        bool mazing = true;
+        while (mazing)
+        {
+            mazing = CarveMaze(map, width, height);
+            
+        }
+        
         map.Dump();
         Console.WriteLine();
-
-        //CarveMaze(map, width, height);
-        //map.Dump();
 
         return map;
     }
@@ -263,7 +274,7 @@ class Room
         minCol = minCol == 0 ? minCol : (ushort)(minCol - 1);
         maxCol += 1;
 
-        Permieter = new();
+        Permieter = [];
         for (ushort r = minRow; r <= maxRow; r++) 
         {
             for (ushort c = minCol; c <= maxCol; c++) 
