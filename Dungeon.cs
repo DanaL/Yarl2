@@ -12,7 +12,7 @@ internal class Dungeon
         RoomShapes shape;
         List<(int, int)> sqs = new();
         var rn = _rng.NextDouble();
-        rn = 0.5;
+        //rn = 0.5;
         if (rn < 0.8)
         {
             // make a rectangular room
@@ -296,11 +296,11 @@ internal class Dungeon
         }
     }
 
-    (int, int) FindDisjointFloor(Map map, int width, int height, Dictionary<int, HashSet<(int, int)>> regions)
+    (int, int) FindDisjointFloor(Map map, Dictionary<int, HashSet<(int, int)>> regions)
     {
-        for (int r = 0; r < height; r++)
+        for (int r = 0; r < map.Height; r++)
         {
-            for (int c = 0; c < width; c++)
+            for (int c = 0; c < map.Width; c++)
             {
                 if (map.TileAt(r, c).Type == TileType.Floor)
                 {
@@ -322,14 +322,14 @@ internal class Dungeon
         return (-1, -1);
     }
 
-    Dictionary<int, HashSet<(int, int)>> FindRegions(Map map, int width, int height)
+    Dictionary<int, HashSet<(int, int)>> FindRegions(Map map)
     {
         int regionID = 0;
         var regions = new Dictionary<int, HashSet<(int, int)>>();
         
         do
         {
-            var (startRow, startCol) = FindDisjointFloor(map, width, height, regions);
+            var (startRow, startCol) = FindDisjointFloor(map, regions);
             if (startRow == -1 || startCol == -1)
                 break;
             regions[regionID++] = FloodFillRegion(map, startRow, startCol);            
@@ -372,25 +372,30 @@ internal class Dungeon
         return adjoining;
     }
 
-    void ConnectRegions(Map map, int width, int height, List<Room> rooms)
+    void ConnectRegions(Map map, List<Room> rooms)
     {
         // For rectangular rooms, each perimeter sqpare should be next to a hallway
         // (rounded rooms are more complicated)
         // So start by picking a random perimeter sq to turn into a door from each room
-        foreach (var room in rooms.Where(r => r.Shape == RoomShapes.Rect))
+        foreach (var room in rooms)
         {
-            while (true)
+            if (room.Shape == RoomShapes.Rect)
             {
-                var door = room.DoorCandidate(_rng);
-                if (ValidDoor(map, door.Item1, door.Item2)) 
+                while (true)
                 {
-                    map.SetTile(door.Item1, door.Item2, TileFactory.Get(TileType.Door));
-                    break;
+                    var door = room.DoorCandidate(_rng);
+                    if (ValidDoor(map, door.Item1, door.Item2))
+                    {
+                        map.SetTile(door.Item1, door.Item2, TileFactory.Get(TileType.Door));
+                        break;
+                    }
                 }
             }
         }
-        
-        var regions = FindRegions(map, width, height);
+
+        return;
+
+        var regions = FindRegions(map);
 
         if (regions.Count > 1) 
         {
@@ -516,7 +521,7 @@ internal class Dungeon
 
         map.Dump();
         Console.WriteLine();
-        ConnectRegions(map, width, height, rooms);
+        ConnectRegions(map, rooms);
         FillInDeadEnds(map);
         map.Dump();
         
