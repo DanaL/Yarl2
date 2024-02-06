@@ -1,5 +1,6 @@
 namespace Yarl2;
 
+// Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
 internal class Dungeon
 {
     readonly Random _rng = new Random();
@@ -12,7 +13,7 @@ internal class Dungeon
         RoomShapes shape;
         List<(int, int)> sqs = new();
         var rn = _rng.NextDouble();
-        //rn = 0.5;
+        
         if (rn < 0.8)
         {
             // make a rectangular room
@@ -163,11 +164,11 @@ internal class Dungeon
             map.SetTile(r1, c1 - 1, TileFactory.Get(TileType.Floor));
     }
 
-    static (bool, int, int) MazeStart(Map map, int width, int height)
+    static (bool, int, int) MazeStart(Map map)
     {
-        for (int r = 1; r < height - 1; r++) 
+        for (int r = 1; r < map.Height - 1; r++) 
         {
-            for (int c = 1; c < width - 1; c++)
+            for (int c = 1; c < map.Width - 1; c++)
             {
                 if (map.TileAt(r, c).Type == TileType.Wall && AdjFloors(map, r, c) == 0)
                     return (true, r, c);
@@ -184,9 +185,9 @@ internal class Dungeon
     }
 
     // Random floodfill maze passages. (We have to do this a few times)
-    bool CarveMaze(Map map, int width, int height)
+    bool CarveMaze(Map map)
     {
-        var (success, startRow, startCol) = MazeStart(map, width, height);
+        var (success, startRow, startCol) = MazeStart(map);
 
         if (success)
         {            
@@ -336,6 +337,16 @@ internal class Dungeon
         }
         while (true);
         
+        // Check for any regions that have very than three squares and just delete them
+        foreach (var k in regions.Keys)
+        {
+            if (regions[k].Count <= 3)
+            {
+                foreach (var sq in regions[k])
+                    map.SetTile(sq, TileFactory.Get(TileType.Wall));
+                regions.Remove(k);
+            }
+        }
         return regions;
     }
 
@@ -372,6 +383,160 @@ internal class Dungeon
         return adjoining;
     }
 
+    void AddDoorToRectRoom(Map map, Room room)
+    {
+        while (true)
+        {
+            var door = room.DoorCandidate(_rng);
+            if (ValidDoor(map, door.Item1, door.Item2))
+            {
+                map.SetTile(door, TileFactory.Get(TileType.Door));
+                return;
+            }
+        }
+    }
+
+    // Circular rooms end up with wall at least two squares away from
+    // any hallways, so they are slightly more complicated to join up
+    void ConnectCircularRoom(Map map, Room room)
+    {
+        int minRow = int.MaxValue, minCol = int.MaxValue, maxRow = 0, maxCol = 0;
+        foreach (var sq in room.Sqs)
+        {
+            if (sq.Item1 < minRow) minRow = sq.Item1;
+            if (sq.Item2 < minCol) minCol = sq.Item2;
+            if (sq.Item1 > maxRow) maxRow = sq.Item1;
+            if (sq.Item2 > maxCol) maxCol = sq.Item2;
+        }
+
+        bool done = false;
+        do
+        {
+            (int, int) delta;
+            int row;
+            int col;
+
+            // Pick direction to try drawing a line in
+            switch (_rng.Next(4)) 
+            {
+                case 0: // northward
+                    row = minRow;
+                    col = _rng.Next(minCol + 1, maxCol);
+                    delta = (-1, 0);
+                    break;
+                case 1: // southward
+                    row = maxRow;
+                    col = _rng.Next(minCol + 1, maxCol);
+                    delta = (1, 0);
+                    break;
+                case 2: // westward
+                    row = _rng.Next(minRow + 1, maxRow);
+                    col = minCol;
+                    delta = (0, -1);
+                    break;
+                default: // eastward
+                    row = _rng.Next(minRow + 1, maxRow);
+                    col = maxCol;
+                    delta = (0, 1);
+                    break;
+            }
+
+            // Because of the irregular shape, sometimes we try
+            // to start the tunnel on a wall square, which we don't want
+            if (map.TileAt(row, col).Type == TileType.Wall)
+                continue;
+            
+            bool success = false;
+            var tunnel = new List<(int, int)>();
+            int tunnelR = row + delta.Item1;
+            int tunnelC = col + delta.Item2;
+            while (map.InBounds(tunnelR, tunnelC) && map.TileAt(tunnelR, tunnelC).Type == TileType.Wall)
+            {
+                tunnel.Add((tunnelR, tunnelC));
+                tunnelR += delta.Item1;
+                tunnelC += delta.Item2;
+
+                if (map.InBounds(tunnelR, tunnelC) && map.TileAt(tunnelR, tunnelC).Type == TileType.Floor)
+                {
+                    success = true;
+                    break;
+                }
+                else if (tunnel.Count > 4)
+                {
+                    // We don't want an absurdly long tunnel; there should be a better candidate
+                    // (theoretical infinite loop risk? I've never seen a circular room generate that
+                    // is surrounded on all sides by walls 4 deep)
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success)
+            {
+                foreach (var sq in tunnel)
+                    map.SetTile(sq, TileFactory.Get(TileType.Floor));
+
+                // We can also make some of tunnel a door.
+                if (tunnel.Count == 2 && _rng.NextDouble() < 0.75)
+                {
+                    map.SetTile(tunnel[0], TileFactory.Get(TileType.Door));
+                }
+                else if (tunnel.Count > 2)
+                {
+                    map.SetTile(tunnel[0], TileFactory.Get(TileType.Door));
+                    map.SetTile(tunnel.Last(), TileFactory.Get(TileType.Door));
+                }
+
+                done = true;
+            }
+        }
+        while (!done);
+    }
+
+    void RepairIsolatedRegion(Map map, Dictionary<int, HashSet<(int, int)>> regions)
+    {
+        // first find the smallest region
+        int smallest = -1;
+        int count = int.MaxValue;
+
+        foreach (var k in regions.Keys)
+        {
+            if (regions[k].Count < count)
+            {
+                count = regions[k].Count;
+                smallest = k;
+            }
+        }
+
+        bool done = false;
+        do
+        {
+            bool success = false;
+            var sq = regions[smallest].ElementAt(_rng.Next(count));
+            var startRegion = RegionForSq(regions, sq.Item1, sq.Item2);
+            var dir = Util.Adj4[_rng.Next(4)];
+            var tunnel = new List<(int, int)>();
+            while (map.InBounds(sq))
+            {
+                tunnel.Add(sq);
+                if (map.TileAt(sq).Type == TileType.Floor && RegionForSq(regions, sq.Item1, sq.Item2) != startRegion)
+                {
+                    success = true;
+                    break;
+                }
+                sq = (sq.Item1 + dir.Item1, sq.Item2 + dir.Item2);
+            }
+
+            if (success)
+            {
+                foreach (var t in tunnel)
+                    map.SetTile(t, TileFactory.Get(TileType.Floor));
+                done = true;
+            }
+        }
+        while (!done);
+    }
+
     void ConnectRegions(Map map, List<Room> rooms)
     {
         // For rectangular rooms, each perimeter sqpare should be next to a hallway
@@ -380,43 +545,57 @@ internal class Dungeon
         foreach (var room in rooms)
         {
             if (room.Shape == RoomShapes.Rect)
-            {
-                while (true)
-                {
-                    var door = room.DoorCandidate(_rng);
-                    if (ValidDoor(map, door.Item1, door.Item2))
-                    {
-                        map.SetTile(door.Item1, door.Item2, TileFactory.Get(TileType.Door));
-                        break;
-                    }
-                }
-            }
+                AddDoorToRectRoom(map, room);
+            else
+                ConnectCircularRoom(map, room);            
         }
-
-        return;
 
         var regions = FindRegions(map);
 
         if (regions.Count > 1) 
         {
+            List<(int, int)> connectors;
             var perimeters = new HashSet<(int, int)>();
             foreach (var room in rooms)
                 perimeters = perimeters.Union(room.Permieter).ToHashSet();
 
-            var connectors = new List<(int, int)>();
-            // Find the walls that are adjacent to different regions
-            for (int r = 1; r < map.Height - 1; r++)
+            bool done = false;
+            do
             {
-                for (int c = 1; c < map.Width - 1; c++)
+                connectors = new List<(int, int)>();
+                // Find the walls that are adjacent to different regions
+                for (int r = 1; r < map.Height - 1; r++)
                 {
-                    if (map.TileAt(r, c).Type == TileType.Wall && AdjoiningRegions(regions, (r, c)).Count >= 2)
+                    for (int c = 1; c < map.Width - 1; c++)
                     {
-                        connectors.Add((r, c));
+                        if (map.TileAt(r, c).Type == TileType.Wall && AdjoiningRegions(regions, (r, c)).Count >= 2)
+                        {
+                            connectors.Add((r, c));
+                        }
                     }
                 }
-            }
 
-            bool done = false;
+                // Okay, sometimes a region is generated whose walls are all at least two
+                // thick. Almost always this is two adjacent round rooms (Round rooms! Why
+                // did I decide to implement round rooms??) who got connected which makes my 
+                // code to find connectors between regions fail. So, shotgun approach: I'm going
+                // to pick a square in the smaller region and erase walls until I reach a floor in
+                // another region. 
+                if (connectors.Count == 0)
+                {
+                    RepairIsolatedRegion(map, regions);
+                    regions = FindRegions(map);                    
+                    if (regions.Count == 1)
+                        return;
+                }
+                else
+                {
+                    done = true;
+                }                
+            }
+            while (!done);
+
+            done = false;
             do
             {
                 var con = connectors[_rng.Next(connectors.Count)];
@@ -456,8 +635,37 @@ internal class Dungeon
         }
     }
 
+    // Clean up artifacts that my generator sometimes to creates.
+    // So far the one I see is useless doors, like doors sitting in
+    // open space. (I blame the round rooms which have proven very finicky)
+    // We'll just turn them into open floors
+    static void TidyUp(Map map)
+    {
+        for (int r = 1; r < map.Height - 1; r++)
+        {
+            for (int c = 1; c < map.Width - 1; c++)
+            {
+                if (map.TileAt(r, c).Type == TileType.Door)
+                {
+                    var north = map.TileAt(r - 1, c).Type;
+                    var south = map.TileAt(r + 1, c).Type;
+                    var east = map.TileAt(r, c + 1).Type;
+                    var west = map.TileAt(r, c - 1).Type;
+
+                    // I'm too dumb/tired to figure out the much-cleaner inverse logic of this right now
+                    if ((north == TileType.Wall || north == TileType.PermWall || north == TileType.Door) && (south == TileType.Wall || south == TileType.PermWall || south == TileType.Door))
+                        continue;
+                    else if ((east == TileType.Wall || east == TileType.PermWall || east == TileType.Door) && (west == TileType.Wall || west == TileType.PermWall || west == TileType.Door))
+                        continue;
+                    else
+                        map.SetTile(r, c, TileFactory.Get(TileType.Floor));
+                }
+            }
+        }
+    }
+
     // Get rid of all (most) of the tunnels that go nowhere
-    private void FillInDeadEnds(Map map)
+    static void FillInDeadEnds(Map map)
     {
         bool done;
 
@@ -472,7 +680,6 @@ internal class Dungeon
                         continue;
 
                     // If there's only one exit, it's a dead end
-
                     int exits = 0;
                     foreach (var adj in Util.Adj4)
                     {
@@ -514,18 +721,25 @@ internal class Dungeon
         bool mazing = true;
         while (mazing)
         {
-            mazing = CarveMaze(map, width, height);            
+            mazing = CarveMaze(map);
         }
-        
-        Console.WriteLine("Rooms + maze done.");
 
-        map.Dump();
-        Console.WriteLine();
         ConnectRegions(map, rooms);
         FillInDeadEnds(map);
-        map.Dump();
-        
-        return map;
+
+        // We want to surround the level with permanent walls
+        var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
+        for (int r = 0; r < map.Height; r++)
+        {
+            for (int c= 0; c < map.Width; c++)
+            {
+                finalMap.SetTile(r + 1, c + 1, map.TileAt(r, c));
+            }
+        }
+
+        TidyUp(finalMap);
+                
+        return finalMap;
     }
 }
 
@@ -535,7 +749,7 @@ enum RoomShapes { Rect, Round }
 class Room
 {
     public RoomShapes Shape { get; set; }
-    HashSet<(int, int)> Sqs {get; set; }
+    public HashSet<(int, int)> Sqs {get; set; }
     public HashSet<(int, int)> Permieter { get; set; }
 
     public Room(IEnumerable<(int, int)> sqs, RoomShapes shape) 

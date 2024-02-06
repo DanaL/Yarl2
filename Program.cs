@@ -11,15 +11,10 @@ if (options.Display == "Bearlib")
 else
     display = new SDLDisplay("Yarl2 0.0.1", options.FontSize);
 
-var map = Map.TestMap();
-//var map = new Map(75, 75);
-//map.SetRandomTestMap();
 
 var dungeon = new Dungeon();
-var map2 = dungeon.DrawLevel(100, 40);
-//map2.Dump();
-
-return;
+var map = dungeon.DrawLevel(100, 40);
+map.Dump();
 
 try
 {

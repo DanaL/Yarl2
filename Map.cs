@@ -69,8 +69,16 @@ internal class Map
         Tiles = new Tile[Height * Width];
     }
 
+    public Map(int width, int height, TileType type)
+    {
+        Width = width;
+        Height = height;
+        Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
+    }
+
     public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;
-    
+    public bool InBounds((int, int) loc) => loc.Item1 >= 0 && loc.Item1 < Height && loc.Item2 >= 0 && loc.Item2 < Width;
+
     public static Map TestMap()
     {
         var map = new Map(20, 20);
@@ -139,12 +147,8 @@ internal class Map
     public void SetTile(int row, int col, Tile tile) => Tiles[row * Width + col] = tile;
     public void SetTile((int, int) loc, Tile tile) => Tiles[loc.Item1 * Width + loc.Item2] = tile;
 
-    public Tile TileAt(int row,  int col) 
-    { 
-        var j = row * Width + col;
-
-        return Tiles[j];
-    }
+    public Tile TileAt(int row,  int col) => Tiles[row * Width + col];
+    public Tile TileAt((int, int) loc) => Tiles[loc.Item1 * Width + loc.Item2];
 
     public void Dump() 
     {
