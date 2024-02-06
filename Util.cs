@@ -2,6 +2,8 @@ namespace Yarl2;
 
 class Util
 {
+    public static (int, int)[] Adj4 = [ (-1, 0), (1, 0), (0, 1), (0, -1)];
+    
     public static int Distance(int x1, int y1, int x2, int y2)
     {
         int dx = Math.Abs(x1 - x2);
