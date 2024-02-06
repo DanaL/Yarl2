@@ -45,7 +45,7 @@ internal class Dungeon
             int error = 0;
             int sqrx_inc = 2 * radius - 1;
             int sqry_inc = 1;
-            int rc = (short) (radius + 1);
+            int rc = radius + 1;
             int cc = radius + 1;
 
             // Draw the outline of a cricle via Bresenham
@@ -94,8 +94,8 @@ internal class Dungeon
         for (int x = 0; x < maxTries; x++)
         {
             var (sqs, shape) = MakeRoomTemplate();
-            short rh = (short)sqs.Select(s => s.Item1).Max();
-            short rw = (short)sqs.Select(s => s.Item2).Max();
+            int rh = sqs.Select(s => s.Item1).Max();
+            int rw = sqs.Select(s => s.Item2).Max();
 
             var row =  _rng.Next(1, map.Height - rh - 1);
             if (row % 2 == 0)
@@ -135,20 +135,20 @@ internal class Dungeon
         return rooms;
     }
 
-    static List<(int, int)> MazeNeighbours(Map map, int row, int col, TileType type, short d)
+    static List<(int, int)> MazeNeighbours(Map map, int row, int col, TileType type, int d)
     {
-        (short, short)[] adj = [((short)-d, 0), (d, 0), (0, d), (0, (short)-d)];
+        (int, int)[] adj = [(-d, 0), (d, 0), (0, d), (0,-d)];
         return adj.Select(n => (row + n.Item1, col + n.Item2))
-                             .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
+                             .Where(n => map.InBounds(n.Item1, n.Item2))
                              .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();
     }
 
     static int AdjFloors(Map map, int row, int col)
     {
-        (short, short)[] adj = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1),
+        (int, int)[] adj = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1),
                                     (1, -1), (1, 0), (1, 1)];
         return adj.Select(n => (row + n.Item1, col + n.Item2))
-                             .Where(n => map.InBounds((short)n.Item1, (short)n.Item2))
+                             .Where(n => map.InBounds(n.Item1, n.Item2))
                              .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Count();
     }
 
@@ -704,7 +704,7 @@ internal class Dungeon
     {
         var map = new Map(width, height);
 
-        for (short j = 0; j < width * height; j++)
+        for (int j = 0; j < width * height; j++)
             map.Tiles[j] = TileFactory.Get(TileType.Wall);
     
         var rooms = AddRooms(map);
@@ -713,7 +713,7 @@ internal class Dungeon
         {
             foreach (var sq in room.Permieter) 
             {
-                if (map.InBounds((short)sq.Item1, (short)sq.Item2))
+                if (map.InBounds(sq.Item1, sq.Item2))
                     map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.Wall));
             }
         }
@@ -797,12 +797,11 @@ class Room
     {
         do
         {
-            var (dr, dc) = Permieter.ElementAt(rng.Next(Permieter.Count));
-            (short, short)[] adj = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-            foreach (var n in adj)
+            var (dr, dc) = Permieter.ElementAt(rng.Next(Permieter.Count));            
+            foreach (var n in Util.Adj4)
             {
-                short nr = (short) (dr + n.Item1);
-                short nc = (short) (dc + n.Item2);
+                int nr = dr + n.Item1;
+                int nc = dc + n.Item2;
                 if (nr >= 0 && nc >= 0 && Sqs.Contains((nr, nc)))
                 {
                     return (dr, dc);

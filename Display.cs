@@ -18,8 +18,8 @@ internal abstract class Display
     protected const int ViewWidth = ScreenWidth - SideBarWidth;
     
     protected int FontSize;
-    protected short PlayerScreenRow;
-    protected short PlayerScreenCol;
+    protected int PlayerScreenRow;
+    protected int PlayerScreenCol;
 
     protected readonly Color BLACK = new() { A = 255, R = 0, G = 0, B = 0 };
     protected readonly Color WHITE = new() { A = 255, R = 255, G = 255, B = 255 };
@@ -60,7 +60,7 @@ internal abstract class Display
         WriteLongMessage(msg);           
     }
 
-    private (short, short) AskForDirection()
+    private (int, int) AskForDirection()
     {
         do 
         {
@@ -94,29 +94,29 @@ internal abstract class Display
         if (ch == 'c') 
         {
             var (dr, dc) = AskForDirection();            
-            return new CloseDoorAction(p, (ushort)(p.Row + dr), (ushort)(p.Col + dc), m);
+            return new CloseDoorAction(p, p.Row + dr, p.Col + dc, m);
         }
         else if (ch == 'o') 
         {
             var (dr, dc) = AskForDirection();            
-            return new OpenDoorAction(p, (ushort)(p.Row + dr), (ushort)(p.Col + dc), m);
+            return new OpenDoorAction(p, p.Row + dr, p.Col + dc, m);
         }
         else if (ch == 'h')
-            return new MoveAction(p, p.Row, (ushort)(p.Col - 1), gameState);
+            return new MoveAction(p, p.Row, p.Col - 1, gameState);
         else if (ch == 'j')
-            return new MoveAction(p, (ushort)(p.Row + 1), p.Col, gameState);
+            return new MoveAction(p, p.Row + 1, p.Col, gameState);
         else if (ch == 'k')
-            return new MoveAction(p, (ushort)(p.Row - 1), p.Col, gameState);
+            return new MoveAction(p, p.Row - 1, p.Col, gameState);
         else if (ch == 'l')
-            return new MoveAction(p, p.Row, (ushort)(p.Col + 1), gameState);
+            return new MoveAction(p, p.Row, p.Col + 1, gameState);
         else if (ch == 'y')
-            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col - 1), gameState);
+            return new MoveAction(p, p.Row - 1, p.Col - 1, gameState);
         else if (ch == 'u')
-            return new MoveAction(p, (ushort)(p.Row - 1), (ushort)(p.Col + 1), gameState);
+            return new MoveAction(p, p.Row - 1, p.Col + 1, gameState);
         else if (ch == 'b')
-            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col - 1), gameState);
+            return new MoveAction(p, p.Row + 1, p.Col - 1, gameState);
         else if (ch == 'n')
-            return new MoveAction(p, (ushort)(p.Row + 1), (ushort)(p.Col + 1), gameState);
+            return new MoveAction(p, p.Row + 1, p.Col + 1, gameState);
         else if (ch == 'Q')
             return new QuitAction();
         else
@@ -301,7 +301,7 @@ internal class SDLDisplay : Display
         DrawFrame();
     }
 
-    private void SDLPut(short row, short col, char ch, Color color) 
+    private void SDLPut(int row, int col, char ch, Color color) 
     {
         var key = (ch, color, BLACK);
 
@@ -329,9 +329,9 @@ internal class SDLDisplay : Display
 
         int rowOffset = playerRow - PlayerScreenRow;
         int colOffset = playerCol - PlayerScreenCol;
-        for (short row = 0; row < ScreenHeight - 1; row++)
+        for (int row = 0; row < ScreenHeight - 1; row++)
         {
-            for (short col = 0; col < ViewWidth; col++)
+            for (int col = 0; col < ViewWidth; col++)
             {
                 int vr = row + rowOffset;
                 int vc = col + colOffset;
@@ -446,14 +446,14 @@ internal class BLDisplay : Display, IDisposable
 
     public override void UpdateDisplay(GameState gameState)
     {
-        short rowOffset = (short) (Player!.Row - PlayerScreenRow);
-        short colOffset = (short) (Player!.Col - PlayerScreenCol);
-        for (short row = 0; row < ScreenHeight - 1; row++)
+        int rowOffset = Player!.Row - PlayerScreenRow;
+        int colOffset = Player!.Col - PlayerScreenCol;
+        for (int row = 0; row < ScreenHeight - 1; row++)
         {
-            for (short col = 0; col < ViewWidth; col++)
+            for (int col = 0; col < ViewWidth; col++)
             {
-                ushort vr = (ushort)(row + rowOffset);
-                ushort vc = (ushort)(col + colOffset);
+                int vr = row + rowOffset;
+                int vc = col + colOffset;
 
                 if (gameState.Visible!.Contains((vr, vc)))
                 {

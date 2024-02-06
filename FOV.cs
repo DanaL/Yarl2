@@ -87,9 +87,9 @@ internal class FieldOfView
         bool fullShadow = false;
         var line = new ShadowLine();
         
-        for (short row = 1; row <= actor.CurrVisionRadius; row++)
+        for (int row = 1; row <= actor.CurrVisionRadius; row++)
         {
-            for (short col = 0; col <= row; col++)
+            for (int col = 0; col <= row; col++)
             {
                 var (dr, dc) = RotateOctant(row, col, octant);
                 int r = actor.Row + dr;
@@ -124,7 +124,7 @@ internal class FieldOfView
     {
         var visible = new HashSet<(int, int)>() { (actor.Row, actor.Col) };
 
-        for (short j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
         {
             foreach (var sq in CalcOctant(actor, map, j))
                 visible.Add(sq);

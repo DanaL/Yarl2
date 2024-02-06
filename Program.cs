@@ -25,8 +25,8 @@ try
     display.WaitForInput();
 
     var rnd = new Random();
-    ushort startRow = (ushort)rnd.Next(1, map.Height);
-    ushort startCol = (ushort)rnd.Next(1, map.Width);
+    int startRow = rnd.Next(1, map.Height);
+    int startCol = rnd.Next(1, map.Width);
     var player = new Player(playerName, startRow, startCol);
     display.Player = player;
    
