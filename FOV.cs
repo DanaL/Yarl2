@@ -65,24 +65,24 @@ class ShadowLine
 
 internal class FieldOfView
 {
-    private static (short, short) RotateOctant(short row, short col, short octant)
+    private static (int, int) RotateOctant(int row, int col, int octant)
     {
         return octant switch
         {
-            0 => (col, (short)-row),
-            1 => (row, (short)-col),
+            0 => (col, -row),
+            1 => (row, -col),
             2 => (row, col),
             3 => (col, row),
-            4 => ((short)-col, row),
-            5 => ((short)-row, col),
-            6 => ((short)-row, (short)-col),
-            _ => ((short)-col, (short)-row),
+            4 => (-col, row),
+            5 => (-row, col),
+            6 => (-row, -col),
+            _ => (-col, -row),
         };
     }
 
-    private static HashSet<(ushort, ushort)> CalcOctant(Actor actor, Map map, short octant)
+    private static HashSet<(int, int)> CalcOctant(Actor actor, Map map, int octant)
     {
-        var visibleSqs = new HashSet<(ushort, ushort)>();
+        var visibleSqs = new HashSet<(int, int)>();
 
         bool fullShadow = false;
         var line = new ShadowLine();
@@ -92,12 +92,12 @@ internal class FieldOfView
             for (short col = 0; col <= row; col++)
             {
                 var (dr, dc) = RotateOctant(row, col, octant);
-                ushort r = (ushort)(actor.Row + dr);
-                ushort c = (ushort)(actor.Col + dc);
+                int r = actor.Row + dr;
+                int c = actor.Col + dc;
 
                 // The distance check trims the view area to be more round
-                short d = (short) Math.Sqrt(dr * dr + dc * dc);
-                if (!map.InBounds((short)r, (short)c) || d > actor.CurrVisionRadius)
+                int d = (int)Math.Sqrt(dr * dr + dc * dc);
+                if (!map.InBounds(r, c) || d > actor.CurrVisionRadius)
                     break;
                 
                 var projection = ProjectTile(row, col);
@@ -120,9 +120,9 @@ internal class FieldOfView
         return visibleSqs;
     }
 
-    public static HashSet<(ushort, ushort)> CalcVisible(Actor actor, Map map)
+    public static HashSet<(int, int)> CalcVisible(Actor actor, Map map)
     {
-        var visible = new HashSet<(ushort, ushort)>() { (actor.Row, actor.Col) };
+        var visible = new HashSet<(int, int)>() { (actor.Row, actor.Col) };
 
         for (short j = 0; j < 8; j++)
         {
@@ -133,7 +133,7 @@ internal class FieldOfView
         return visible;
     }
 
-    private static Shadow ProjectTile(short row, short col)
+    private static Shadow ProjectTile(int row, int col)
     {            
         float topLeft = col / (row + 2.0f);
         float bottomRight = (col + 1.0f) / (row + 1.0f);

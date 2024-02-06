@@ -2,10 +2,10 @@ namespace Yarl2;
 
 class Util
 {
-    public static ushort Distance(short x1, short y1, short x2, short y2)
+    public static int Distance(int x1, int y1, int x2, int y2)
     {
-        ushort dx = (ushort) Math.Abs(x1 - x2);
-        ushort dy = (ushort) Math.Abs(y1 - y2);
-        return (ushort) Math.Sqrt(dx * dx + dy * dy);
+        int dx = Math.Abs(x1 - x2);
+        int dy = Math.Abs(y1 - y2);
+        return (int)Math.Sqrt(dx * dx + dy * dy);
     }
 }

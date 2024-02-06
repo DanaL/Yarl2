@@ -56,12 +56,12 @@ internal class TileFactory
 
 internal class Map
 {
-    public readonly ushort Width;
-    public readonly ushort Height;
+    public readonly int Width;
+    public readonly int Height;
 
     public Tile[] Tiles;
 
-    public Map(ushort width, ushort height)
+    public Map(int width, int height)
     {
         Width = width;
         Height = height;
@@ -69,7 +69,7 @@ internal class Map
         Tiles = new Tile[Height * Width];
     }
 
-    public bool InBounds(short row,  short col) => row >= 0 && row < Height && col >= 0 && col < Width;
+    public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;
     
     public static Map TestMap()
     {
@@ -130,15 +130,15 @@ internal class Map
         Random rnd = new Random();
         for (int j = 0; j < 1000;  j++) 
         {
-            ushort row = (ushort) rnd.Next(1, Height);
-            ushort col = (ushort) rnd.Next(1, Width);
+            int row = rnd.Next(1, Height);
+            int col = rnd.Next(1, Width);
             Tiles[row * Width + col] = TileFactory.Get(TileType.Wall);
         }
     }
 
-    public void SetTile(ushort row, ushort col, Tile tile) => Tiles[row * Width + col] = tile;
+    public void SetTile(int row, int col, Tile tile) => Tiles[row * Width + col] = tile;
 
-    public Tile TileAt(ushort row,  ushort col) 
+    public Tile TileAt(int row,  int col) 
     { 
         var j = row * Width + col;
 

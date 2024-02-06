@@ -12,8 +12,8 @@ internal class GameQuitException : Exception { }
 
 internal class GameState
 {
-    public HashSet<(ushort, ushort)>? Remebered { get; set; }
-    public HashSet<(ushort, ushort)>? Visible { get; set; }
+    public HashSet<(int, int)>? Remebered { get; set; }
+    public HashSet<(int, int)>? Visible { get; set; }
     public Map? Map { get; set; }
     public Options? Options { get; set;}
     public Player? Player { get; set; }
@@ -25,7 +25,7 @@ internal class GameEngine(ushort visWidth, ushort visHeight, Display display, Op
     public readonly ushort VisibleHeight = visHeight;
     private readonly Display ui = display;
     private readonly Options _options = options;
-    private HashSet<(ushort, ushort)> _rememberedSqs = [];
+    private HashSet<(int, int)> _rememberedSqs = [];
 
     private void UpdateView(Player player, Map map)
     {
