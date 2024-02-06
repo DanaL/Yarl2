@@ -2,10 +2,10 @@
 
 abstract class Actor
 {
-    public ushort Row { get; set; }
-    public ushort Col { get; set; }
-    public short MaxVisionRadius { get; set; }
-    public short CurrVisionRadius { get; set; }
+    public int Row { get; set; }
+    public int Col { get; set; }
+    public int MaxVisionRadius { get; set; }
+    public int CurrVisionRadius { get; set; }
 }
 
 internal class GameQuitException : Exception { }
@@ -19,10 +19,10 @@ internal class GameState
     public Player? Player { get; set; }
 }
 
-internal class GameEngine(ushort visWidth, ushort visHeight, Display display, Options options)
+internal class GameEngine(int visWidth, int visHeight, Display display, Options options)
 {
-    public readonly ushort VisibleWidth = visWidth;
-    public readonly ushort VisibleHeight = visHeight;
+    public readonly int VisibleWidth = visWidth;
+    public readonly int VisibleHeight = visHeight;
     private readonly Display ui = display;
     private readonly Options _options = options;
     private HashSet<(int, int)> _rememberedSqs = [];

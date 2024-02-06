@@ -7,7 +7,7 @@ internal class Player : Actor
     public int MaxHP { get; set; }
     public int CurrHP { get; set; }
 
-    public Player(string name, ushort row, ushort col)
+    public Player(string name, int row, int col)
     {
         Name = name;
         Row = row;

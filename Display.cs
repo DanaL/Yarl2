@@ -319,7 +319,7 @@ internal class SDLDisplay : Display
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
-    private IntPtr CreateMainTexture(ushort playerRow, ushort playerCol, GameState gameState)
+    private IntPtr CreateMainTexture(int playerRow, int playerCol, GameState gameState)
     {
         var tw = ViewWidth * _fontWidth;
         var th = (ScreenHeight - 1) * _fontHeight;
@@ -327,14 +327,14 @@ internal class SDLDisplay : Display
 
         SDL_SetRenderTarget(_renderer, targetTexture);
 
-        short rowOffset = (short) (playerRow - PlayerScreenRow);
-        short colOffset = (short) (playerCol - PlayerScreenCol);
+        int rowOffset = playerRow - PlayerScreenRow;
+        int colOffset = playerCol - PlayerScreenCol;
         for (short row = 0; row < ScreenHeight - 1; row++)
         {
             for (short col = 0; col < ViewWidth; col++)
             {
-                ushort vr = (ushort)(row + rowOffset);
-                ushort vc = (ushort)(col + colOffset);
+                int vr = row + rowOffset;
+                int vc = col + colOffset;
                 Color color;
                 char ch;
                 if (gameState.Visible!.Contains((vr, vc)))                

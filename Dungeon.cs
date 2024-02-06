@@ -332,9 +332,7 @@ internal class Dungeon
             var (startRow, startCol) = FindDisjointFloor(map, width, height, regions);
             if (startRow == -1 || startCol == -1)
                 break;
-            regions[regionID++] = FloodFillRegion(map, startRow, startCol);
-            Console.WriteLine("foo");
-            Dump(map, width, height, regions);
+            regions[regionID++] = FloodFillRegion(map, startRow, startCol);            
         }
         while (true);
         
@@ -352,18 +350,26 @@ internal class Dungeon
         return -1;
     }
 
-    static bool IsConnector(Dictionary<int, HashSet<(int, int)>> regions, int row, int col)
+    static HashSet<int> AdjoiningRegions(Dictionary<int, HashSet<(int, int)>> regions, (int, int) con)
     {
-        int above = RegionForSq(regions, row - 1, col);
-        int below = RegionForSq(regions, row + 1, col);
-        int left = RegionForSq(regions, row, col - 1);
-        int right = RegionForSq(regions, row, col + 1);
+        var adjoining = new HashSet<int>();
+        int above = RegionForSq(regions, con.Item1 - 1, con.Item2);
+        int below = RegionForSq(regions, con.Item1 + 1, con.Item2);
+        int left = RegionForSq(regions, con.Item1, con.Item2 - 1);
+        int right = RegionForSq(regions, con.Item1, con.Item2 + 1);
 
-        if (above > -1 && below > -1 && above != below)
-            return true;
-        if (left > -1 && right > -1 && left != right)
-            return true;
-        return false;
+        if (above != -1 && below != -1) 
+        {
+            adjoining.Add(above);
+            adjoining.Add(below);
+        }
+        if (left != -1 && right != -1)
+        {
+            adjoining.Add(left);
+            adjoining.Add(right);
+        }
+
+        return adjoining;
     }
 
     void ConnectRegions(Map map, int width, int height, List<Room> rooms)
@@ -394,23 +400,85 @@ internal class Dungeon
             {
                 for (int c = 1; c < map.Width - 1; c++)
                 {
-                    if (map.TileAt(r, c).Type == TileType.Wall && IsConnector(regions, r, c))
+                    if (map.TileAt(r, c).Type == TileType.Wall && AdjoiningRegions(regions, (r, c)).Count >= 2)
                     {
                         connectors.Add((r, c));
                     }
                 }
             }
 
-            foreach (var con in connectors)
+            bool done = false;
+            do
             {
-                int above = RegionForSq(regions, con.Item1 - 1, con.Item2);
-                int below = RegionForSq(regions, con.Item1 + 1, con.Item2);
-                int left = RegionForSq(regions, con.Item1, con.Item2 - 1);
-                int right = RegionForSq(regions, con.Item1, con.Item2 + 1);
+                var con = connectors[_rng.Next(connectors.Count)];
+                
+                // I can check to see if the connector is on the perimeter of a room
+                // and make it a door instead
+                map.SetTile(con, TileFactory.Get(TileType.Floor));
 
-                Console.WriteLine($"{con}: {above}-{below} {left}-{right}");
+                var adjoiningRegions = AdjoiningRegions(regions, con);
+                var remaining = new List<(int, int)>();
+                // Remove the connectors we don't need
+                foreach (var other in connectors)
+                {
+                    var otherAdjoining = AdjoiningRegions(regions, other);
+                    if (adjoiningRegions.Intersect(otherAdjoining).Count() > 1)
+                    {
+                        // small chance of removing other connector to create the occasional loop
+                        // in the map
+                        if (_rng.NextDouble() < 0.20)
+                            map.SetTile(other, TileFactory.Get(TileType.Floor));
+                    }
+                    else
+                    {
+                        remaining.Add(other);
+                    }
+                }
+
+                if (remaining.Count == 0)
+                    done = true;
+                else
+                    connectors = remaining;
+            }
+            while (!done);
+        }
+    }
+
+    // Get rid of all (most) of the tunnels that go nowhere
+    private void FillInDeadEnds(Map map)
+    {
+        bool done;
+
+        do
+        {
+            done = true;
+            for (int r = 0; r < map.Height; r++)
+            {
+                for (int c = 0; c < map.Width; c++)
+                {
+                    if (map.TileAt(r, c).Type == TileType.Wall)
+                        continue;
+
+                    // If there's only one exit, it's a dead end
+
+                    int exits = 0;
+                    foreach (var adj in Util.Adj4)
+                    {
+                        int nr = r + adj.Item1;
+                        int nc = c + adj.Item2;
+                        if (map.InBounds(nr, nc) && map.TileAt(nr, nc).Type != TileType.Wall)
+                            ++exits;
+                    }
+
+                    if (exits == 1)
+                    {
+                        map.SetTile(r, c, TileFactory.Get(TileType.Wall));
+                        done = false;
+                    }
+                }
             }
         }
+        while (!done);
     }
 
     public Map DrawLevel(int width, int height)
@@ -439,11 +507,12 @@ internal class Dungeon
         
         Console.WriteLine("Rooms + maze done.");
 
+        map.Dump();
+        Console.WriteLine();
         ConnectRegions(map, width, height, rooms);
-
-        //map.Dump();
-        //Console.WriteLine();
-
+        FillInDeadEnds(map);
+        map.Dump();
+        
         return map;
     }
 }

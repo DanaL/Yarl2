@@ -137,6 +137,7 @@ internal class Map
     }
 
     public void SetTile(int row, int col, Tile tile) => Tiles[row * Width + col] = tile;
+    public void SetTile((int, int) loc, Tile tile) => Tiles[loc.Item1 * Width + loc.Item2] = tile;
 
     public Tile TileAt(int row,  int col) 
     { 

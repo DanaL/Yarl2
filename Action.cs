@@ -15,11 +15,11 @@ internal abstract class Action
     public abstract ActionResult Execute();
 }
 
-internal class CloseDoorAction(Actor actor, ushort row, ushort col, Map map) : Action
+internal class CloseDoorAction(Actor actor, int row, int col, Map map) : Action
 {
     private readonly Actor _actor = actor;
-    private readonly ushort _row = row;
-    private readonly ushort _col = col;
+    private readonly int _row = row;
+    private readonly int _col = col;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
@@ -50,11 +50,11 @@ internal class CloseDoorAction(Actor actor, ushort row, ushort col, Map map) : A
     }
 }
 
-internal class OpenDoorAction(Actor actor, ushort row, ushort col, Map map) : Action
+internal class OpenDoorAction(Actor actor, int row, int col, Map map) : Action
 {
     private readonly Actor _actor = actor;
-    private readonly ushort _row = row;
-    private readonly ushort _col = col;
+    private readonly int _row = row;
+    private readonly int _col = col;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
@@ -85,11 +85,11 @@ internal class OpenDoorAction(Actor actor, ushort row, ushort col, Map map) : Ac
     }
 }
 
-internal class MoveAction(Actor actor, ushort row, ushort col, GameState gameState) : Action
+internal class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
 {
     private readonly Actor _actor = actor;
-    private readonly ushort _row = row;
-    private readonly ushort _col = col;
+    private readonly int _row = row;
+    private readonly int _col = col;
     private readonly Map _map = gameState.Map!;
     private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
 
@@ -97,7 +97,7 @@ internal class MoveAction(Actor actor, ushort row, ushort col, GameState gameSta
     {
         var result = new ActionResult();
 
-        if (!_map.InBounds((short)_row, (short)_col))
+        if (!_map.InBounds(_row, _col))
         {
             // in theory this shouldn't ever happen...
             result.Successful = false;
