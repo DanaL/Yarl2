@@ -1,5 +1,3 @@
-using System.Security;
-
 namespace Yarl2;
 
 internal class Dungeon
@@ -16,8 +14,12 @@ internal class Dungeon
         if (rn < 0.8)
         {
             // make a rectangular room
-            height = (ushort)_rng.Next(6, 10);
-            width = (ushort)_rng.Next(6, 20);
+            height = (ushort)_rng.Next(5, 10);
+            if (height % 2 == 0)
+                ++height;
+            width = (ushort)_rng.Next(5, 20);
+            if (width % 2 == 0)
+                ++width;
             for (ushort r = 0; r < height; r++)
             {
                 for (ushort c = 0; c < width; c++)
@@ -78,204 +80,52 @@ internal class Dungeon
         return sqs;
     }
 
-    private static void DrawRoom(Map map, List<(ushort, ushort)> sqs, ushort row, ushort col)
-    {
-        foreach (var sq in sqs)
-        {
-            map.SetTile((ushort)(row + sq.Item1), (ushort)(col + sq.Item2), TileFactory.Get(TileType.Floor));
-        }
-    }
-
-    private (short, short) FindSpotForRoom(Map map, List<Room> rooms, List<(ushort, ushort)> sqs, ushort height, ushort width)
-    {
-        ushort roomHeight = sqs.Select(s => s.Item1).Max();
-        ushort roomWidth = sqs.Select(s => s.Item2).Max();
-        short row, col;
-        short dr, dc;
-        ScanDirs dir;
-        short delta = 3; // how much to jump by when scanning
-
-        // Pick a corner to start at and direction to move in
-        int corner = _rng.Next(4);
-        if (corner == 0) // top left
-        {
-            row = 0;
-            col = 0;
-
-            // pick which direction to scan
-            if (_rng.Next(2) == 0) // move right along rows
-            {
-                dr = 0;
-                dc = delta;
-                dir = ScanDirs.RightDown;
-            }
-            else // move down along cols
-            {
-                dr = delta;
-                dc = 0;
-                dir = ScanDirs.DownRight;
-            }
-        }
-        else if (corner == 1) // top right
-        {
-            row = 0;
-            col = (short) (width - roomWidth - 1);
-
-            // pick which direction to scan
-            if (_rng.Next(2) == 0) // move left along rows
-            {
-                dr = 0;
-                dc = (short)-delta;
-                dir = ScanDirs.LeftDown;
-            }
-            else // move down along cols
-            {
-                dr = delta;
-                dc = 0;
-                dir = ScanDirs.DownLeft;
-            }
-        }
-        else if (corner == 2) // bottom left
-        {
-            row = (short)(height - roomHeight);
-            col = 0;
-
-            // pick which direction to scan
-            if (_rng.Next(2) == 0) // move right along rows
-            {
-                dr = 0;
-                dc = delta;
-                dir = ScanDirs.RightUp;
-            }
-            else // move up along cols
-            {
-                dr = (short)-delta;
-                dc = 0;
-                dir = ScanDirs.UpRight;
-            }
-        }
-        else // bottom right
-        {
-            row = (short)(height - roomHeight - 1);
-            col = (short)(width - roomWidth - 1);
-
-            // pick which direction to scan
-            if (_rng.Next(2) == 0) // move left along rows
-            {
-                dr = 0;
-                dc = (short)-delta;
-                dir = ScanDirs.LeftUp;
-            }
-            else // move up along cols
-            {
-                dr = (short)-delta;
-                dc = 0;
-                dir = ScanDirs.UpLeft;
-            }
-        }
-
-        // Okay, scan across the map and try to place the new room
-        do
-        {
-            short brr = (short) (row + roomHeight);
-            short brc = (short) (col + roomWidth);
-
-            if (!(map.InBounds(row, col) && map.InBounds(row, brc) && map.InBounds(brr, col) && map.InBounds(brr, brc)))
-            {
-                // We've reached the end of a row or col, so try the next row/col                
-                switch (dir)
-                {
-                    case ScanDirs.RightDown:
-                        row += (short)(roomHeight + 1);
-                        col = 0;
-                        break;
-                    case ScanDirs.DownRight:
-                        row = 0;
-                        col += (short)(roomWidth + 1);
-                        break;
-                    case ScanDirs.LeftDown:
-                        row += (short)roomHeight;
-                        col = (short)(width - roomWidth - 1);
-                        break;
-                    case ScanDirs.DownLeft:
-                        row = (short)_rng.Next(3);
-                        col -= (short)roomWidth;
-                        break;
-                    case ScanDirs.RightUp:
-                        row -= (short)(roomHeight);
-                        col = (short)_rng.Next(3);
-                        break;
-                    case ScanDirs.UpRight:
-                        row = (short)(height - roomHeight - 1);
-                        col += (short)roomWidth;
-                        break;
-                    case ScanDirs.LeftUp:
-                        row -= (short)roomHeight;
-                        col = (short)(width - roomWidth - 1);
-                        break;
-                    case ScanDirs.UpLeft:
-                        row = (short)(height - roomHeight - 1);
-                        col -= (short)(roomWidth + 1);
-                        break;
-                }
-
-                // if we're still out of bounds, we've scanned the entire map
-                brr = (short)(row + roomHeight);
-                brc = (short)(col + roomWidth);
-                if (!(map.InBounds(row, col) && map.InBounds(row, brc) && map.InBounds(brr, col) && map.InBounds(brr, brc)))
-                {
-                    break;
-                }
-
-                continue;
-            }
-            
-            var newRoom = new Room(sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col))));
-            bool overlaps = rooms.Exists(r => r.Overlaps(newRoom));
-            if (!overlaps)
-            {
-                return (row, col);
-            }
-
-            row += dr;
-            col += dc;
-        }
-        while (true);
-
-        return (-1, -1);
-    }
-
     private List<Room> AddRooms(Map map, ushort width, ushort height)
     {
         var rooms = new List<Room>();
-        var center_row = height / 2;
-        var center_col = width / 2;
-        var row = (ushort) (center_row + _rng.Next(-6, 6));
-        var col = (ushort) (center_col + _rng.Next(-10, 10));
+        var perimeters = new HashSet<(ushort, ushort)>();
+        int maxTries = 75;
 
-        // Draw the starting room to the dungeon map. (This is just the first room we make on the
-        // level, not necessaily the entrance room)
-        var sqs = MakeRoomTemplate();
-        DrawRoom(map, sqs, row, col);
-        var roomSqs = sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col)));
-        var room = new Room(roomSqs);
-        rooms.Add(room);
-
-        // Now keep adding rooms until we fail to add one. (Ie., we can't find a spot where
-        // it won't overlap with another room
-        do
+        for (int x = 0; x < maxTries; x++)
         {
-            sqs = MakeRoomTemplate();
-            var (r, c) = FindSpotForRoom(map, rooms, sqs, height, width);
-            if (r < 0)
-            {                
-                break;
+            IEnumerable<(ushort, ushort)> sqs = MakeRoomTemplate();
+            short rh = (short)sqs.Select(s => s.Item1).Max();
+            short rw = (short)sqs.Select(s => s.Item2).Max();
+
+            var row = (ushort) _rng.Next(1, height - rh - 1);
+            if (row % 2 == 0)
+                row += 1;                
+            var col = (ushort) _rng.Next(1, width - rw - 1);
+            if (col % 2 == 0)
+                col += 1;
+            sqs = sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col)));
+            bool overlap = false;
+            foreach (var sq in sqs)
+            {
+                if (map.TileAt(sq.Item1, sq.Item2).Type == TileType.Floor) 
+                {
+                    overlap = true;
+                    break;
+                }
+                if (perimeters.Contains(sq))
+                {
+
+                    overlap = true;
+                    break;
+                }             
             }
-            DrawRoom(map, sqs, (ushort) r, (ushort) c);
-            roomSqs = sqs.Select(s => ((ushort)(s.Item1 + r), (ushort)(s.Item2 + c)));
-            rooms.Add(new Room(roomSqs));            
+            if (overlap)
+                continue;
+
+            var room = new Room(sqs);
+            rooms.Add(room);
+            perimeters = perimeters.Union(room.Permieter).ToHashSet();
+
+            foreach (var sq in sqs)
+            {
+                map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.Floor));
+            }
         }
-        while (true);
 
         return rooms;
     }
@@ -372,15 +222,7 @@ internal class Dungeon
             }
         }
 
-        // Fill in any dead ends
-        // for (ushort r = 0; r < height; r++)
-        // {
-        //     for (ushort c = 0; c < width; c++)
-        //     {
-        //         if (MazeNeighbours(map, r, c, TileType.Wall, 1).Count >= 3)
-        //             map.SetTile(r, c, TileFactory.Get(TileType.Wall));
-        //     }
-        // }
+       
         map.Dump();
         Console.WriteLine();
 
