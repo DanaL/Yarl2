@@ -6,15 +6,17 @@ internal class Dungeon
     
     // Pick a room template to overlay onto the map (currently either 
     // rectangular or circular)
-    private List<(ushort, ushort)> MakeRoomTemplate()
+    private (List<(ushort, ushort)>, RoomShapes) MakeRoomTemplate()
     {
         ushort height, width;
+        RoomShapes shape;
         List<(ushort, ushort)> sqs = new();
         var rn = _rng.NextDouble();
-        
+        rn = 0.5;
         if (rn < 0.8)
         {
             // make a rectangular room
+            shape = RoomShapes.Rect;
             height = (ushort)_rng.Next(5, 10);
             if (height % 2 == 0)
                 ++height;
@@ -31,7 +33,8 @@ internal class Dungeon
         } 
         else 
         {
-            // make a circular room        
+            // make a circular room       
+            shape = RoomShapes.Round; 
             var radius = (ushort) _rng.Next(3, 6);
             height = (ushort) (radius * 2 + 3);
             width = (ushort) (radius * 2 + 3);
@@ -78,7 +81,7 @@ internal class Dungeon
             }            
         }
 
-        return sqs;
+        return (sqs, shape);
     }
 
     private List<Room> AddRooms(Map map, ushort width, ushort height)
@@ -89,7 +92,7 @@ internal class Dungeon
 
         for (int x = 0; x < maxTries; x++)
         {
-            IEnumerable<(ushort, ushort)> sqs = MakeRoomTemplate();
+            var (sqs, shape) = MakeRoomTemplate();
             short rh = (short)sqs.Select(s => s.Item1).Max();
             short rw = (short)sqs.Select(s => s.Item2).Max();
 
@@ -99,7 +102,7 @@ internal class Dungeon
             var col = (ushort) _rng.Next(1, width - rw - 1);
             if (col % 2 == 0)
                 col += 1;
-            sqs = sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col)));
+            sqs = sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col))).ToList();
             bool overlap = false;
             foreach (var sq in sqs)
             {
@@ -118,7 +121,7 @@ internal class Dungeon
             if (overlap)
                 continue;
 
-            var room = new Room(sqs);
+            var room = new Room(sqs, shape);
             rooms.Add(room);
             perimeters = perimeters.Union(room.Permieter).ToHashSet();
 
@@ -148,7 +151,7 @@ internal class Dungeon
                              .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Count();
     }
 
-    private void MazeConnect(Map map, ushort r1, ushort c1, ushort r2, ushort c2)
+    private void ConnectNeighbours(Map map, ushort r1, ushort c1, ushort r2, ushort c2)
     {
         if (r1 < r2)
             map.SetTile((ushort)(r1 + 1), c1, TileFactory.Get(TileType.Floor));
@@ -202,7 +205,7 @@ internal class Dungeon
                     continue;
 
                 map.SetTile(next.Item1, next.Item2, TileFactory.Get(TileType.Floor));
-                MazeConnect(map, prev.Item1, prev.Item2, next.Item1, next.Item2);
+                ConnectNeighbours(map, prev.Item1, prev.Item2, next.Item1, next.Item2);
                 
                 neighbours.AddRange(NextNeighbours(map, next.Item1, next.Item2)
                                         .Select(n => (n, (next.Item1, next.Item2))));
@@ -210,6 +213,23 @@ internal class Dungeon
         }
 
         return success;
+    }
+
+    private bool ValidDoor(Map map, ushort r, ushort c)
+    {
+        return true;
+    }
+
+    private void ConnectRegions(Map map, ushort width, ushort height, List<Room> rooms)
+    {
+        // For rectangular rooms, each perimeter sqpare should be next to a hallway
+        // (rounded rooms are more complicated)
+        // So start by picking a random perimeter sq to turn into a door from each room
+        foreach (var room in rooms.Where(r => r.Shape == RoomShapes.Rect))
+        {
+            var door = room.DoorCandidate(_rng);
+            map.SetTile(door.Item1, door.Item2, TileFactory.Get(TileType.Door));
+        }
     }
 
     public Map DrawLevel(ushort width, ushort height)
@@ -233,10 +253,11 @@ internal class Dungeon
         bool mazing = true;
         while (mazing)
         {
-            mazing = CarveMaze(map, width, height);
-            
+            mazing = CarveMaze(map, width, height);            
         }
         
+        ConnectRegions(map, width, height, rooms);
+
         map.Dump();
         Console.WriteLine();
 
@@ -245,14 +266,17 @@ internal class Dungeon
 }
 
 enum ScanDirs { RightDown, DownRight, LeftDown, DownLeft, UpRight, RightUp, LeftUp, UpLeft };
+enum RoomShapes { Rect, Round }
 
 class Room
 {
+    public RoomShapes Shape { get; set; }
     HashSet<(ushort, ushort)> Sqs {get; set; }
     public HashSet<(ushort, ushort)> Permieter { get; set; }
 
-    public Room(IEnumerable<(ushort, ushort)> sqs) 
+    public Room(IEnumerable<(ushort, ushort)> sqs, RoomShapes shape) 
     {
+        Shape = shape;
         Sqs = new HashSet<(ushort, ushort)>(sqs);
 
         ushort minRow = ushort.MaxValue, maxRow = 0;
@@ -287,7 +311,26 @@ class Room
 
     public bool Overlaps(Room other)
     {
-        return Permieter.Intersect(other.Permieter).Count() > 0 || 
-            Permieter.Intersect(other.Sqs).Count() > 0;
+        return Permieter.Intersect(other.Permieter).Any() || 
+            Permieter.Intersect(other.Sqs).Any();
+    }
+
+    public (ushort, ushort) DoorCandidate(Random rng)
+    {
+        do
+        {
+            var (dr, dc) = Permieter.ElementAt(rng.Next(Permieter.Count));
+            (short, short)[] adj = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+            foreach (var n in adj)
+            {
+                short nr = (short) (dr + n.Item1);
+                short nc = (short) (dc + n.Item2);
+                if (nr >= 0 && nc >= 0 && Sqs.Contains(((ushort)nr, (ushort)nc)))
+                {
+                    return (dr, dc);
+                }                
+            }
+        } 
+        while (true);
     }
 }
