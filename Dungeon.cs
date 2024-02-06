@@ -84,7 +84,7 @@ internal class Dungeon
         return (sqs, shape);
     }
 
-    List<Room> AddRooms(Map map, int width, int height)
+    List<Room> AddRooms(Map map)
     {
         var rooms = new List<Room>();
         var perimeters = new HashSet<(int, int)>();
@@ -96,10 +96,10 @@ internal class Dungeon
             short rh = (short)sqs.Select(s => s.Item1).Max();
             short rw = (short)sqs.Select(s => s.Item2).Max();
 
-            var row =  _rng.Next(1, height - rh - 1);
+            var row =  _rng.Next(1, map.Height - rh - 1);
             if (row % 2 == 0)
                 row += 1;                
-            var col =  _rng.Next(1, width - rw - 1);
+            var col =  _rng.Next(1, map.Width - rw - 1);
             if (col % 2 == 0)
                 col += 1;
             sqs = sqs.Select(s => (s.Item1 + row, s.Item2 + col)).ToList();
@@ -175,9 +175,9 @@ internal class Dungeon
         }
 
         return (false, 0, 0);
-    }   
+    }
 
-    IEnumerable<(int, int)> NextNeighbours(Map map, int r, int c)
+    static IEnumerable<(int, int)> NextNeighbours(Map map, int r, int c)
     {
         return MazeNeighbours(map, r, c, TileType.Wall, 2)
                     .Where(s => AdjFloors(map, s.Item1, s.Item2) == 0);
@@ -394,6 +394,10 @@ internal class Dungeon
 
         if (regions.Count > 1) 
         {
+            var perimeters = new HashSet<(int, int)>();
+            foreach (var room in rooms)
+                perimeters = perimeters.Union(room.Permieter).ToHashSet();
+
             var connectors = new List<(int, int)>();
             // Find the walls that are adjacent to different regions
             for (int r = 1; r < map.Height - 1; r++)
@@ -411,10 +415,13 @@ internal class Dungeon
             do
             {
                 var con = connectors[_rng.Next(connectors.Count)];
-                
+
                 // I can check to see if the connector is on the perimeter of a room
                 // and make it a door instead
-                map.SetTile(con, TileFactory.Get(TileType.Floor));
+                if (perimeters.Contains(con) && _rng.NextDouble() < 0.8)
+                    map.SetTile(con, TileFactory.Get(TileType.Door));
+                else
+                    map.SetTile(con, TileFactory.Get(TileType.Floor));
 
                 var adjoiningRegions = AdjoiningRegions(regions, con);
                 var remaining = new List<(int, int)>();
@@ -488,7 +495,7 @@ internal class Dungeon
         for (short j = 0; j < width * height; j++)
             map.Tiles[j] = TileFactory.Get(TileType.Wall);
     
-        var rooms = AddRooms(map, width, height);
+        var rooms = AddRooms(map);
         // Draw in the room perimeters
         foreach (var room in rooms)
         {
