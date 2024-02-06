@@ -1,3 +1,5 @@
+using System.Security;
+
 namespace Yarl2;
 
 internal class Dungeon
@@ -6,48 +8,31 @@ internal class Dungeon
     
     // Pick a room template to overlay onto the map (currently either 
     // rectangular or circular)
-    private Tile[,] MakeRoomTemplate()
+    private List<(ushort, ushort)> MakeRoomTemplate()
     {
         ushort height, width;
-        Tile[,] sqs;
+        List<(ushort, ushort)> sqs = new();
         var rn = _rng.NextDouble();
-        rn = 0.81;
         if (rn < 0.8)
         {
             // make a rectangular room
-            height = (ushort)_rng.Next(7, 11);
-            width = (ushort)_rng.Next(7, 28);
-            sqs = new Tile[height, width];
-            for (ushort c = 0; c < width; c++) 
+            height = (ushort)_rng.Next(6, 10);
+            width = (ushort)_rng.Next(6, 20);
+            for (ushort r = 0; r < height; r++)
             {
-                sqs[0, c] = TileFactory.Get(TileType.Wall);
-                sqs[height - 1, c] = TileFactory.Get(TileType.Wall);
-            }
-            for (ushort r = 1; r < height - 1; r++)
-            {
-                sqs[r, 0] = TileFactory.Get(TileType.Wall);
-                sqs[r, width - 1]= TileFactory.Get(TileType.Wall);
-                for (ushort c = 1; c < width - 1; c++)
+                for (ushort c = 0; c < width; c++)
                 {
-                    sqs[r, c] = TileFactory.Get(TileType.Floor);
+                    sqs.Add((r, c));
                 }
-            }        
+            }
         } 
         else 
         {
             // make a circular room        
-            var radius = (ushort) _rng.Next(3, 7);
+            var radius = (ushort) _rng.Next(3, 6);
             height = (ushort) (radius * 2 + 3);
             width = (ushort) (radius * 2 + 3);
-            sqs = new Tile[height, width];
-            for (ushort r = 0; r < radius * 2 + 3; r++)
-            {
-                for (ushort c = 0; c < radius * 2 + 3; c++)
-                {
-                    sqs[r, c] = TileFactory.Get(TileType.Wall);
-                }
-            }
-
+            
             ushort x = radius;
             ushort y = 0;
             ushort error = 0;
@@ -60,15 +45,15 @@ internal class Dungeon
             // Draw the outline of a cricle via Bresenham
             while (y <= x) 
             {
-                sqs[rc + y, cc + x] = TileFactory.Get(TileType.Floor);
-                sqs[rc + y, cc - x] = TileFactory.Get(TileType.Floor);
-                sqs[rc - y, cc + x] = TileFactory.Get(TileType.Floor);
-                sqs[rc - y, cc - x] = TileFactory.Get(TileType.Floor);
-                sqs[rc + y, cc + x] = TileFactory.Get(TileType.Floor);
-                sqs[rc + y, cc - x] = TileFactory.Get(TileType.Floor);
-                sqs[rc - y, cc + x] = TileFactory.Get(TileType.Floor);
-                sqs[rc - y, cc - x] = TileFactory.Get(TileType.Floor);
-
+                sqs.Add(((ushort)(rc + y), (ushort)(cc + x)));
+                sqs.Add(((ushort)(rc + y), (ushort)(cc - x)));
+                sqs.Add(((ushort)(rc - y), (ushort)(cc + x)));
+                sqs.Add(((ushort)(rc - y), (ushort)(cc - x)));
+                sqs.Add(((ushort)(rc + y), (ushort)(cc + x)));
+                sqs.Add(((ushort)(rc + y), (ushort)(cc - x)));
+                sqs.Add(((ushort)(rc - y), (ushort)(cc + x)));
+                sqs.Add(((ushort)(rc - y), (ushort)(cc - x)));
+                
                 y += 1;
                 error += sqry_inc;
                 sqry_inc += 2;
@@ -80,12 +65,12 @@ internal class Dungeon
             }
 
             // Now turn all the squares inside the circle into floors
-            for (short r = 1; r < height - 1; r++)
+            for (ushort r = 1; r < height - 1; r++)
             {
-                for (short c = 1; c < width - 1; c++)
+                for (ushort c = 1; c < width - 1; c++)
                 {
-                    if (Util.Distance(r, c, rc, cc) <= radius)
-                        sqs[r, c] = TileFactory.Get(TileType.Floor);
+                    if (Util.Distance((short)r, (short)c, rc, cc) <= radius)
+                        sqs.Add((r, c));
                 }
             }            
         }
@@ -93,28 +78,24 @@ internal class Dungeon
         return sqs;
     }
 
-    private static void DrawRoom(Map map, Tile[,] tiles, ushort row, ushort col)
+    private static void DrawRoom(Map map, List<(ushort, ushort)> sqs, ushort row, ushort col)
     {
-        for (int r = 0; r < tiles.GetLength(0); r++)
+        foreach (var sq in sqs)
         {
-            for (int c = 0; c < tiles.GetLength(1); c++)
-            {
-                var i = (row + r) * map.Width + col + c;
-                map.Tiles[i] = tiles[r, c];
-            }
+            map.SetTile((ushort)(row + sq.Item1), (ushort)(col + sq.Item2), TileFactory.Get(TileType.Floor));
         }
     }
 
-    private (short, short) FindSpotForRoom(Map map, List<Room> rooms, Tile[,] sqs, ushort height, ushort width)
+    private (short, short) FindSpotForRoom(Map map, List<Room> rooms, List<(ushort, ushort)> sqs, ushort height, ushort width)
     {
-        int roomHeight = sqs.GetLength(0);
-        int roomWidth = sqs.GetLength(1);
+        ushort roomHeight = sqs.Select(s => s.Item1).Max();
+        ushort roomWidth = sqs.Select(s => s.Item2).Max();
         short row, col;
         short dr, dc;
         ScanDirs dir;
 
         // Pick a corner to start at and direction to move in
-        int corner = _rng.Next(4);        
+        int corner = _rng.Next(4);
         if (corner == 0) // top left
         {
             row = 0;
@@ -137,7 +118,7 @@ internal class Dungeon
         else if (corner == 1) // top right
         {
             row = 0;
-            col = (short) (width - roomWidth);
+            col = (short) (width - roomWidth - 1);
 
             // pick which direction to scan
             if (_rng.Next(2) == 0) // move left along rows
@@ -174,8 +155,8 @@ internal class Dungeon
         }
         else // bottom right
         {
-            row = (short)(height - roomHeight);
-            col = (short)(width - roomWidth);
+            row = (short)(height - roomHeight - 1);
+            col = (short)(width - roomWidth - 1);
 
             // pick which direction to scan
             if (_rng.Next(2) == 0) // move left along rows
@@ -192,53 +173,53 @@ internal class Dungeon
             }
         }
 
+        Console.WriteLine(dir);
         // Okay, scan across the map and try to place the new room
         do
         {
             short brr = (short) (row + roomHeight);
             short brc = (short) (col + roomWidth);
 
-            // bounds check needs to go here
             if (!(map.InBounds(row, col) && map.InBounds(row, brc) && map.InBounds(brr, col) && map.InBounds(brr, brc)))
             {
                 // We've reached the end of a row or col, so try the next row/col                
                 switch (dir)
                 {
                     case ScanDirs.RightDown:
-                        row += (short)(roomHeight);
-                        col = (short)_rng.Next(3);
+                        row += (short)(roomHeight + 1);
+                        col = 0;
                         break;
                     case ScanDirs.DownRight:
-                        row = (short)_rng.Next(3);
-                        col += (short)(roomWidth);
+                        row = 0;
+                        col += (short)(roomWidth + 1);
                         break;
                     case ScanDirs.LeftDown:
-                        row += (short)(roomHeight);
-                        col = (short)(width - roomWidth);
+                        row += (short)roomHeight;
+                        col = (short)(width - roomWidth - 1);
                         break;
                     case ScanDirs.DownLeft:
                         row = (short)_rng.Next(3);
-                        col -= (short)(roomWidth);
+                        col -= (short)roomWidth;
                         break;
                     case ScanDirs.RightUp:
                         row -= (short)(roomHeight);
                         col = (short)_rng.Next(3);
                         break;
                     case ScanDirs.UpRight:
-                        row = (short)(height - roomHeight);
-                        col += (short)(roomWidth);
+                        row = (short)(height - roomHeight - 1);
+                        col += (short)roomWidth;
                         break;
                     case ScanDirs.LeftUp:
-                        row -= (short)(roomHeight);
-                        col = (short)(width - roomWidth);
+                        row -= (short)roomHeight;
+                        col = (short)(width - roomWidth - 1);
                         break;
                     case ScanDirs.UpLeft:
-                        row = (short)(height - roomHeight);
+                        row = (short)(height - roomHeight - 1);
                         col -= (short)(roomWidth + 1);
                         break;
                 }
 
-                // if we're still out of bounds, we've scanned the entire map 
+                // if we're still out of bounds, we've scanned the entire map
                 brr = (short)(row + roomHeight);
                 brc = (short)(col + roomWidth);
                 if (!(map.InBounds(row, col) && map.InBounds(row, brc) && map.InBounds(brr, col) && map.InBounds(brr, brc)))
@@ -249,8 +230,9 @@ internal class Dungeon
 
                 continue;
             }
-                
-            bool overlaps = rooms.Exists(r => r.Overlaps((ushort) row, (ushort) col, (ushort) brr, (ushort) brc));
+            
+            var newRoom = new Room(sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col))));
+            bool overlaps = rooms.Exists(r => r.Overlaps(newRoom));
             if (!overlaps)
             {
                 return (row, col);
@@ -276,25 +258,31 @@ internal class Dungeon
         // level, not necessaily the entrance room)
         var sqs = MakeRoomTemplate();
         DrawRoom(map, sqs, row, col);
-        var room = new Room(sqs, row, col, (ushort)(row + sqs.GetLength(0)), 
-                                    (ushort)(col + sqs.GetLength(1)), "start");
+        var roomSqs = sqs.Select(s => ((ushort)(s.Item1 + row), (ushort)(s.Item2 + col)));
+        var room = new Room(roomSqs);
         rooms.Add(room);
 
         // Now keep adding rooms until we fail to add one. (Ie., we can't find a spot where
         // it won't overlap with another room
+        int count = 0;
         do
         {
             sqs = MakeRoomTemplate();
             var (r, c) = FindSpotForRoom(map, rooms, sqs, height, width);
             if (r < 0)
-            {
-                map.Dump();
+            {                
                 break;
             }
             DrawRoom(map, sqs, (ushort) r, (ushort) c);
-            room = new Room(sqs, (ushort) r, (ushort) c, (ushort)((ushort)r + sqs.GetLength(0)),
-                                        (ushort)(c + sqs.GetLength(1)), "");
-            rooms.Add(room);
+            roomSqs = sqs.Select(s => ((ushort)(s.Item1 + r), (ushort)(s.Item2 + c)));
+            rooms.Add(new Room(roomSqs));
+            // room = new Room(sqs, (ushort) r, (ushort) c, (ushort)((ushort)r + sqs.GetLength(0)),
+            //                             (ushort)(c + sqs.GetLength(1)), "");
+            // rooms.Add(room);
+
+            // map.Dump();
+            // Console.WriteLine();
+            //if (count++ > 2) break;
         }
         while (true);
     }
@@ -379,32 +367,53 @@ internal class Dungeon
     }
 }
 
-enum ScanDirs{ RightDown, DownRight, LeftDown, DownLeft, UpRight, RightUp, LeftUp, UpLeft };
+enum ScanDirs { RightDown, DownRight, LeftDown, DownLeft, UpRight, RightUp, LeftUp, UpLeft };
 
-class Room(Tile[,] Tiles, ushort ULRow, ushort ULCol, ushort LRRow, ushort LRCol, string Label)
+class Room
 {
-    public Tile[,] Tiles { get; set; } = Tiles;
-    public ushort ULRow { get; set; } = ULRow;
-    public ushort ULCol { get; set; } = ULCol;
-    public ushort LRRow { get; set; } = LRRow;
-    public ushort LRCol { get; set; } = LRCol;
-    public string Label { get; set; } = Label;
-    public int Height { get; } = Tiles.GetLength(0);
-    public int Width { get; } = Tiles.GetLength(1);
+    HashSet<(ushort, ushort)> Sqs {get; set; }
+    HashSet<(ushort, ushort)> Permieter { get; set; }
 
-    bool Contained(ushort r, ushort c) => r >= ULRow && r <= LRRow && c >= ULCol && c <= LRCol;
-
-    public bool Overlaps(ushort ulr, ushort ulc, ushort lrr, ushort lrc)
+    public Room(IEnumerable<(ushort, ushort)> sqs) 
     {
-        for (ushort r = ulr; r <= lrr; r++)
+        Sqs = new HashSet<(ushort, ushort)>(sqs);
+
+        ushort minRow = ushort.MaxValue, maxRow = 0;
+        ushort minCol = ushort.MaxValue, maxCol = 0;
+        foreach (var sq in sqs)
         {
-            for (ushort c = ulc; c <= lrc; c++)
-            {
-                if (Contained(r, c))
-                    return true;
-            }
+            if (sq.Item1 < minRow)
+                minRow = sq.Item1;
+            if (sq.Item1 > maxRow)
+                maxRow = sq.Item1;
+            if (sq.Item2 > maxCol)
+                maxCol = sq.Item2;
+            if (sq.Item2 < minCol)
+                minCol = sq.Item2;
         }
-        return false;
+
+        minRow = minRow == 0 ? minRow : (ushort)(minRow - 1);
+        maxRow += 1;
+        minCol = minCol == 0 ? minCol : (ushort)(minCol - 1);
+        maxCol += 1;
+
+        Permieter = new();
+        for (ushort c = minCol; c <= maxCol; c++) 
+        {
+            Permieter.Add((minRow, c));
+            Permieter.Add((maxRow, c));
+        }
+
+        for (ushort r = minRow; r <= maxRow; r++) 
+        {
+            Permieter.Add((r, minCol));
+            Permieter.Add((r, maxCol));
+        }
     }
-        
+
+    public bool Overlaps(Room other)
+    {
+        return Permieter.Intersect(other.Permieter).Count() > 0 || 
+            Permieter.Intersect(other.Sqs).Count() > 0;
+    }
 }
