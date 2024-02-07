@@ -93,6 +93,16 @@ internal class MoveAction(Actor actor, int row, int col, GameState gameState) : 
     private readonly Map _map = gameState.Map!;
     private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
 
+    static string BlockedMessage(Tile tile)
+    {
+        return tile.Type switch
+        {
+            TileType.DeepWater => "You don't want to get your boots wet.",
+            TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
+            _ => "You cannot go that way!"
+        }; ;
+    }
+
     public override ActionResult Execute()
     {
         var result = new ActionResult();
@@ -110,13 +120,14 @@ internal class MoveAction(Actor actor, int row, int col, GameState gameState) : 
 
             if (_actor is Player)
             {
-                if (_bumpToOpen && _map.TileAt(_row, _col).Type == TileType.Door)
+                var tile = _map.TileAt(_row, _col);
+                if (_bumpToOpen && tile.Type == TileType.Door)
                 {
                     result.AltAction = new OpenDoorAction(_actor, _row, _col, _map);
                 }
                 else
                 {
-                    result.Message = "You cannot go that way!";
+                    result.Message = BlockedMessage(tile);
                 }
             }
         }
