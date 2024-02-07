@@ -1,7 +1,7 @@
 namespace Yarl2;
 
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
-internal class Dungeon(Random rng)
+internal class DungeonMaker(Random rng)
 {
     readonly Random _rng = rng;
     

@@ -120,14 +120,14 @@ internal class FieldOfView
         return visibleSqs;
     }
 
-    public static HashSet<(int, int)> CalcVisible(Actor actor, Map map)
+    public static HashSet<(int, int, int)> CalcVisible(Actor actor, Map map, int currentLevel)
     {
-        var visible = new HashSet<(int, int)>() { (actor.Row, actor.Col) };
+        var visible = new HashSet<(int, int, int)>() { (currentLevel, actor.Row, actor.Col) };
 
         for (int j = 0; j < 8; j++)
         {
             foreach (var sq in CalcOctant(actor, map, j))
-                visible.Add(sq);
+                visible.Add((currentLevel, sq.Item1, sq.Item2));
         }
 
         return visible;

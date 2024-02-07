@@ -200,7 +200,7 @@ internal class SDLDisplay : Display
 
     public override Action? GetCommand(GameState gameState)
     {
-        SDL_WaitEvent(out var e);
+        SDL_PollEvent(out var e);
         switch (e.type)
         {
             case SDL_EventType.SDL_QUIT:
@@ -209,10 +209,8 @@ internal class SDLDisplay : Display
                 char c;
                 unsafe
                 {
-                    c = (char)*e.text.text;
+                    c = (char)*e.text.text;                    
                 }
-
-                SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
                 return KeyToCommand(c, gameState);
             default:
                 return new NullAction();
@@ -352,9 +350,9 @@ internal class SDLDisplay : Display
                 int vc = col + colOffset;
                 Color color;
                 char ch;
-                if (gameState.Visible!.Contains((vr, vc)))                
+                if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))                
                     (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);                
-                else if (gameState.Remebered!.Contains((vr, vc)))
+                else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
                     (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                 else
                     (color, ch) = (BLACK, ' ');                
@@ -468,13 +466,13 @@ internal class BLDisplay : Display, IDisposable
                 int vr = row + rowOffset;
                 int vc = col + colOffset;
 
-                if (gameState.Visible!.Contains((vr, vc)))
+                if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))
                 {
                     var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);
                     Terminal.Color(color);
                     Terminal.Put(col, row + 1, ch);
                 }
-                else if (gameState.Remebered!.Contains((vr, vc)))
+                else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
                 {
                     var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                     Terminal.Color(color);

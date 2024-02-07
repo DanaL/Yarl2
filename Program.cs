@@ -13,12 +13,16 @@ else
 
 var rng = new Random();
 
-var dungeon = new Dungeon(rng);
+//var dungeon = new DungeonMaker(rng);
 //var map = dungeon.DrawLevel(100, 40);
 //map.Dump();
 
-var wilderness = new Wilderness(rng);
-var map = wilderness.DrawLevel(257);
+var campaign = new Campaign();
+var wilderness = new Dungeon(0);
+var wildernessGenerator = new Wilderness(rng);
+var map = wildernessGenerator.DrawLevel(257);
+wilderness.AddMap(map);
+campaign.AddDungeon(wilderness);
 
 try
 {
@@ -34,7 +38,7 @@ try
     display.Player = player;
    
     var engine = new GameEngine(29, 29, display, options);
-    engine.Play(player, map);
+    engine.Play(player, campaign);
 }
 catch (GameQuitException)
 {
