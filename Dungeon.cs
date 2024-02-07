@@ -1,9 +1,9 @@
 namespace Yarl2;
 
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
-internal class Dungeon
+internal class Dungeon(Random rng)
 {
-    readonly Random _rng = new Random();
+    readonly Random _rng = rng;
     
     // Pick a room template to overlay onto the map (currently either 
     // rectangular or circular)

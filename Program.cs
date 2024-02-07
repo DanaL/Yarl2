@@ -1,5 +1,4 @@
-﻿
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Yarl2;
 
@@ -12,10 +11,15 @@ else
     display = new SDLDisplay("Yarl2 0.0.1", options.FontSize);
 
 
-var dungeon = new Dungeon();
-var map = dungeon.DrawLevel(100, 40);
-map.Dump();
+var rng = new Random();
 
+var dungeon = new Dungeon(rng);
+var map = dungeon.DrawLevel(100, 40);
+//map.Dump();
+
+var wilderness = new Wilderness(rng);
+wilderness.DrawLevel(65);
+return; 
 try
 {
     display.TitleScreen();

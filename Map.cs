@@ -6,7 +6,11 @@ enum TileType
     PermWall,
     Wall,
     Floor,
-    Door
+    Door,
+    DeepWater,
+    Grass,
+    Mountain,
+    SnowPeak
 }
 
 internal abstract class Tile 
@@ -40,6 +44,10 @@ internal class TileFactory
     private static readonly Tile Wall = new BasicTile(TileType.Wall, false, true);
     private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
     private static readonly Tile Floor = new BasicTile(TileType.Floor, true, false);
+    private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false);
+    private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false);
+    private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
+    private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
 
     public static Tile Get(TileType type)
     {
@@ -48,6 +56,10 @@ internal class TileFactory
             TileType.PermWall => PermWall,
             TileType.Wall => Wall,
             TileType.Floor => Floor,
+            TileType.DeepWater => DeepWater,
+            TileType.Grass => Grass,
+            TileType.Mountain => Mountain,
+            TileType.SnowPeak => SnowPeak,
             TileType.Door => new Door(type, false),
             _ => Unknown
         };
@@ -161,6 +173,9 @@ internal class Map
                     TileType.Wall => '#',
                     TileType.Floor => '.',
                     TileType.Door => '+',
+                    TileType.Mountain or TileType.SnowPeak => '^',
+                    TileType.Grass => ',',
+                    TileType.DeepWater => '~',
                     _ => ' '
                 };
                 Console.Write(ch);
