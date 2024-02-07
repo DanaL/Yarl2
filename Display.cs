@@ -200,26 +200,23 @@ internal class SDLDisplay : Display
 
     public override Action? GetCommand(GameState gameState)
     {
-        SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
-
-        do
+        SDL_WaitEvent(out var e);
+        switch (e.type)
         {
-            SDL_WaitEvent(out var e);
-            switch (e.type)
-            {
-                case SDL_EventType.SDL_QUIT:
-                    return new QuitAction();
-                case SDL_EventType.SDL_TEXTINPUT:
-                    char c;
-                    unsafe
-                    {
-                        c = (char)*e.text.text;
-                    }
+            case SDL_EventType.SDL_QUIT:
+                return new QuitAction();
+            case SDL_EventType.SDL_TEXTINPUT:
+                char c;
+                unsafe
+                {
+                    c = (char)*e.text.text;
+                }
 
-                    return KeyToCommand(c, gameState);
-            }
-        }
-        while (true);
+                SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
+                return KeyToCommand(c, gameState);
+            default:
+                return new NullAction();
+        }        
     }
 
     public override string QueryUser(string prompt)
@@ -439,15 +436,13 @@ internal class BLDisplay : Display, IDisposable
 
     public override Action? GetCommand(GameState gameState)
     {
-        do
+        if (Terminal.HasInput())
         {
-            if (Terminal.HasInput())
-            {
-                var ch = WaitForInput();
-                return KeyToCommand(ch, gameState);
-            }
+            var ch = WaitForInput();
+            return KeyToCommand(ch, gameState);
         }
-        while (true);
+        else
+            return new NullAction();
     }
 
     void WriteSideBar()

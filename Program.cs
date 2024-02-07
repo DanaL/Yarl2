@@ -6,19 +6,19 @@ var options = Options.LoadOptions("options.json");
 
 Display display;
 if (options.Display == "Bearlib")
-    display = new BLDisplay("Yarl2 0.0.1", options.FontSize);
+    display = new BLDisplay("Yarl2 0.0.1 + Bearlib", options.FontSize);
 else
-    display = new SDLDisplay("Yarl2 0.0.1", options.FontSize);
+    display = new SDLDisplay("Yarl2 0.0.1 + SDL", options.FontSize);
 
 
 var rng = new Random();
 
 var dungeon = new Dungeon(rng);
-var map = dungeon.DrawLevel(100, 40);
+//var map = dungeon.DrawLevel(100, 40);
 //map.Dump();
 
 var wilderness = new Wilderness(rng);
-map = wilderness.DrawLevel(257);
+var map = wilderness.DrawLevel(257);
 
 try
 {

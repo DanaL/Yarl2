@@ -60,6 +60,11 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
             {
                 playing = false;
             }
+            else if (cmd is NullAction)
+            {
+                // Just idling...                
+                Thread.Sleep(25);
+            }
             else
             {
                 ActionResult result;

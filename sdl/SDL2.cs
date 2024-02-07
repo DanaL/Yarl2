@@ -39,14 +39,17 @@ namespace SDL2
 	{
 		#region SDL2# Variables
 
+#if OSX
 		private const string nativeLibName = "SDL2.dylib";
+#else
+		private const string nativeLibName = "SDL2.dll";
+#endif
+        #endregion
 
-		#endregion
+        #region UTF8 Marshaling
 
-		#region UTF8 Marshaling
-
-		/* Used for stack allocated string marshaling. */
-		internal static int Utf8Size(string str)
+        /* Used for stack allocated string marshaling. */
+        internal static int Utf8Size(string str)
 		{
 			if (str == null)
 			{

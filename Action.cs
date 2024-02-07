@@ -164,3 +164,11 @@ internal class QuitAction : Action
         throw new GameQuitException();
     }
 }
+
+internal class NullAction : Action
+{
+    public override ActionResult Execute()
+    {
+        throw new Exception("Hmm this should never happen");
+    }
+}
