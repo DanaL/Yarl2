@@ -13,7 +13,8 @@ enum TileType
     Grass,
     Tree,
     Mountain,
-    SnowPeak
+    SnowPeak,
+    Portal
 }
 
 internal abstract class Tile 
@@ -39,6 +40,13 @@ internal class Door(TileType type, bool open) : Tile(type)
 
     public override bool Passable() => Open;
     public override bool Opaque() => !Open;
+}
+
+internal class Portal(TileType type) : Tile(type) 
+{
+    public (int, int, int, int) Destination { get; set; }
+    public override bool Passable() => true;
+    public override bool Opaque() => false;
 }
 
 internal class TileFactory
@@ -70,6 +78,7 @@ internal class TileFactory
             TileType.Mountain => Mountain,
             TileType.SnowPeak => SnowPeak,
             TileType.Door => new Door(type, false),
+            TileType.Portal => new Portal(type),
             _ => Unknown
         };
     }
@@ -99,6 +108,19 @@ internal class Map : ICloneable
 
     public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;
     public bool InBounds((int, int) loc) => loc.Item1 >= 0 && loc.Item1 < Height && loc.Item2 >= 0 && loc.Item2 < Width;
+
+    public (int, int) RandomTile(TileType type, Random rng)
+    {
+        do
+        {
+            int r = rng.Next(Height);
+            int c = rng.Next(Width);
+
+            if (TileAt(r, c).Type == type)
+                return (r, c);
+        }
+        while (true);
+    }
 
     public static Map TestMap()
     {

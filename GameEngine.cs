@@ -1,5 +1,4 @@
-﻿using System.Linq;
-
+﻿
 namespace Yarl2;
 
 abstract class Actor
@@ -12,6 +11,7 @@ abstract class Actor
 
 internal class GameQuitException : Exception { }
 
+// The queue of actors to act will likely need to go here.
 internal class GameState
 {
     public HashSet<(int, int, int)>? Remebered { get; set; }
@@ -20,6 +20,17 @@ internal class GameState
     public Options? Options { get; set;}
     public Player? Player { get; set; }
     public int CurrLevel { get; set; }
+    public int CurrDungeon { get; set; }
+    public Campaign? Campaign { get; set; }
+
+    public void EnterLevel(int dungeon, int level)
+    {
+        CurrLevel = level;
+        CurrDungeon = dungeon;
+
+        // Once the queue of actors is implemented, we will need to switch them
+        // out here.
+    }
 }
 
 internal class GameEngine(int visWidth, int visHeight, Display display, Options options)
@@ -29,41 +40,40 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
     private readonly Display ui = display;
     private readonly Options _options = options;
     
-    private void UpdateView(Player player, Dungeon dungeon, int currLevel)
+    // I'm really just replacing everything in GameState with Campaign...
+    private void UpdateView(Player player, GameState gameState)
     {
-        var map = dungeon.LevelMaps[currLevel];
+        var c = gameState.Campaign;
+        int currLevel = gameState.CurrLevel;
+        var dungeon = c.Dungeons[gameState.CurrDungeon];
+        var map = dungeon.LevelMaps[currLevel];            
         var vs = FieldOfView.CalcVisible(player, map, currLevel);
-        var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
+        var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();        
         dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
-        
-        var gameState = new GameState()
-        {
-            Visible = vs,
-            Remebered = dungeon.RememberedSqs,
-            Map = map,
-            Options = _options,
-            Player = player,
-            CurrLevel = currLevel
-        }; 
+        gameState.Visible = vs;
+        gameState.Remebered = dungeon.RememberedSqs;
+        gameState.Map = map;
         ui.UpdateDisplay(gameState);
     }
 
     public void Play(Player player, Campaign campaign)
     {
-        var currentDungeon = campaign.Dungeons[0];
         var currentLevel = 0;
-
+        var gameState = new GameState()
+        {
+            Map = campaign.Dungeons[0].LevelMaps[currentLevel],
+            Options = _options,
+            Player = player,
+            Campaign = campaign,
+            CurrLevel = 0,
+            CurrDungeon = 0
+        };
+        
         bool playing = true;
-        UpdateView(player, currentDungeon, currentLevel);
+        UpdateView(player, gameState);
 
         do 
-        {            
-            var gameState = new GameState()
-            {
-                Map = currentDungeon.LevelMaps[currentLevel],
-                Options = _options,
-                Player = player
-            };
+        {
             var cmd = ui.GetCommand(gameState);
             if (cmd is QuitAction)
             {
@@ -87,7 +97,7 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
                 }
                 while (result.AltAction is not null);                
 
-                UpdateView(player, currentDungeon, currentLevel);
+                UpdateView(player, gameState);
             }                
         }
         while (playing);

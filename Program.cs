@@ -13,7 +13,7 @@ else
 
 var rng = new Random();
 
-//var dungeon = new DungeonMaker(rng);
+var dm = new DungeonMaker(rng);
 //var map = dungeon.DrawLevel(100, 40);
 //map.Dump();
 
@@ -23,6 +23,16 @@ var wildernessGenerator = new Wilderness(rng);
 var map = wildernessGenerator.DrawLevel(257);
 wilderness.AddMap(map);
 campaign.AddDungeon(wilderness);
+
+var mainDungeon = new Dungeon(1);
+var firstLevel = dm.DrawLevel(100, 40);
+mainDungeon.AddMap(firstLevel);
+campaign.AddDungeon(mainDungeon);
+
+// Find an open floor in the first level of the dungeon
+// and create a Portal to it in the wilderness
+var stairs = firstLevel.RandomTile(TileType.Floor, rng);
+var entrance = map.RandomTile(TileType.Tree, rng);
 
 try
 {
@@ -34,7 +44,7 @@ try
 
     var rnd = new Random();
     var (startRow, startCol) = RandomStartPos(map, rnd);
-    var player = new Player(playerName, startRow, startCol);
+    var player = new Player(playerName, entrance.Item1, entrance.Item2);
     display.Player = player;
    
     var engine = new GameEngine(29, 29, display, options);

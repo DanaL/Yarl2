@@ -153,6 +153,8 @@ internal abstract class Display
                 return lit ? (GREY, '\u039B') : (DARK_GREY, '\u039B');
             case TileType.SnowPeak:
                 return lit ? (WHITE, '\u039B') : (GREY, '\u039B');
+            case TileType.Portal:
+                return lit ? (WHITE, 'Ո') : (GREY, 'Ո');
             default:
                 return (BLACK, ' ');
         }        
