@@ -3,114 +3,284 @@ namespace Yarl2;
 internal class Wilderness(Random rng)
 {
     private Random _rng = rng;
+    private int _length;
 
-    private double Fuzz() => _rng.NextDouble() - 0.5;
+    private int Fuzz() => _rng.Next(-50, 51);
 
-    void DiamondStep(double[] grid, int r, int c, int length, int width)
+    (int, int) CountNeighours(Map map, int r, int c)
     {
-        var avg = (grid[length * r + c] 
-                        + grid[length * r + c + width - 1]
-                        + grid[(r + width - 1) * length  + c] 
-                        + grid[(r + width - 1) * length + c + width - 1]) / 4.0;
+        int tree = 0;
+        int grass = 0;
+
+        foreach (var loc in Util.Adj8Sqs(r, c)) 
+        {
+            var tt = map.TileAt(loc).Type;
+            if (tt == TileType.Tree)
+                ++tree;
+            else if (tt == TileType.Grass)
+                ++grass;
+        }
+
+        return (tree, grass);
+    }
+
+    Map CAizeTerrain(Map map)
+    {
+        var next = (Map)map.Clone();
+        for (int r = 1; r < _length - 1; r++)
+        {
+            for (int c = 1; c < _length - 1; c++)
+            {
+                var (trees, _) = CountNeighours(map, r, c);
+                if (map.TileAt(r, c).Type == TileType.Grass && trees >= 5 && trees <= 8)
+                    next.SetTile(r, c, TileFactory.Get(TileType.Tree));
+                else if (map.TileAt(r, c).Type == TileType.Tree && trees < 4)
+                    next.SetTile(r, c, TileFactory.Get(TileType.Grass));
+            }
+        }
+
+        return next;
+    }
+
+    // Run a sort of cellular automata ule over the trees
+    // and grass to clump them together.
+    // Two generations seems to make a nice mix .
+    Map TweakTreesAndGrass(Map map)
+    {              
+        map = CAizeTerrain(map);
+        map = CAizeTerrain(map);
+
+        return map;
+    }
+
+    // Average each point with its neighbours to smooth things out
+    void SmoothGrid(int[,] grid)
+    {
+        for (int r = 0; r < _length; r++) 
+        {
+            for (int c = 0; c < _length; c++) 
+            {
+                int avg = grid[r , + c];
+                int count = 1;
+
+                if (r >= 1) 
+                {
+                    if (c >= 1) 
+                    {
+                        avg += grid[(r - 1), + c - 1];
+                        count += 1;
+                    }
+                    avg += grid[(r - 1), + c];
+                    count += 1;
+                    if (c + 1 < _length) 
+                    {
+                        avg += grid[(r - 1), + c + 1];
+                        count += 1;
+                    }
+                }
+
+                if (r > 1 && c >= 1) 
+                {
+                    avg += grid[(r - 1), c - 1];
+                    count += 1;
+                }
+
+                if (r > 1 && c + 1 < _length) 
+                {
+                    avg += grid[(r - 1), c + 1];
+                    count += 1;
+                }
+
+                if (r > 1 && r + 1 < _length) 
+                {
+                    if (c >= 1) 
+                    {
+                        avg += grid[(r - 1), c - 1];
+                        count += 1;
+                    }
+                    avg += grid[(r - 1), c];
+                    count += 1;
+                    if (c + 1 < _length) 
+                    {
+                        avg += grid[(r - 1) , c + 1];
+                        count += 1;
+                    }
+                }
+
+                grid[r, c] = avg / count;
+            }
+        }
+    }
+    void DiamondStep(int[,] grid, int r, int c, int width)
+    {
+        int avg = (grid[r, c] 
+                        + grid[r, c + width - 1]
+                        + grid[r + width - 1, c] 
+                        + grid[(r + width - 1), c + width - 1]) / 4;
 
 	
         var f = Fuzz();
-	    grid[(r + width / 2) * length + c + width / 2] = avg + f;
+	    grid[r + width / 2, + c + width / 2] = avg + f;
     }
 
-    void DiamondAverage(double[] grid, int r, int c, int width, int length)
+    void DiamondAverage(int[,] grid, int r, int c, int width)
     {
         int count = 0;
         double avg = 0.0;
 
         if (width <= c)
         {
-            avg += grid[r * length + c - width];
+            avg += grid[r, + c - width];
             count += 1;
         }
-        if (c + width < length)
+        if (c + width < _length)
         {
-            avg += grid[r * length + c + width];
+            avg += grid[r, c + width];
             count += 1;
         }
         if (width <= r)
         {
-            avg += grid[(r - width) * length + c];
+            avg += grid[(r - width), + c];
             count += 1;
         }
-        if (r + width < length)
+        if (r + width < _length)
         {
-            avg += grid[(r + width) * length + c];
+            avg += grid[r + width, c];
             count += 1;
         }
 
-        grid[r * length + c] = avg / count + Fuzz();
+        grid[r, c] = (int)(avg / count) + Fuzz();
     }
 
-    void SquareStep(double[] grid, int r, int c, int width, int length)
+    void SquareStep(int[,] grid, int r, int c, int width)
     {
         var halfWidth = width / 2;
 
-        DiamondAverage(grid, r - halfWidth, c, halfWidth, length);
-        DiamondAverage(grid, r + halfWidth, c, halfWidth, length);
-        DiamondAverage(grid, r, c - halfWidth, halfWidth, length);
-        DiamondAverage(grid, r, c + halfWidth, halfWidth, length);
+        DiamondAverage(grid, r - halfWidth, c, halfWidth);
+        DiamondAverage(grid, r + halfWidth, c, halfWidth);
+        DiamondAverage(grid, r, c - halfWidth, halfWidth);
+        DiamondAverage(grid, r, c + halfWidth, halfWidth);
     }
 
-    void MidpointDisplacement(double[] grid, int r, int c, int width, int length)
+    void MidpointDisplacement(int[,] grid, int r, int c, int width)
     {
-        DiamondStep(grid, r, c, width, length);
+        DiamondStep(grid, r, c, width);
         var halfWidth = width / 2;
-        SquareStep(grid, r + halfWidth, c + halfWidth, width, length);
+        SquareStep(grid, r + halfWidth, c + halfWidth, width);
 
         if (halfWidth == 1)
             return;
 
-        MidpointDisplacement(grid, r, c, halfWidth + 1, length);
-	    MidpointDisplacement(grid, r, c + halfWidth, halfWidth + 1, length);
-	    MidpointDisplacement(grid, r + halfWidth, c, halfWidth + 1, length);
-	    MidpointDisplacement(grid, r + halfWidth, c + halfWidth, halfWidth + 1, length);
+        MidpointDisplacement(grid, r, c, halfWidth + 1);
+	    MidpointDisplacement(grid, r, c + halfWidth, halfWidth + 1);
+	    MidpointDisplacement(grid, r + halfWidth, c, halfWidth + 1);
+	    MidpointDisplacement(grid, r + halfWidth, c + halfWidth, halfWidth + 1);
     }
 
-    Map ToMap(double[] grid, int length)
+    Map ToMap(int[,] grid)
     {
-        var map = new Map(length, length);
+        var map = new Map(_length, _length);
 
-        for (int r = 0; r < length; r++)
+        for (int r = 0; r < _length; r++)
         {
-            for (int c = 0; c < length; c++)
+            for (int c = 0; c < _length; c++)
             {
-                if (grid[r * length + c] < 1.5)
-                    map.SetTile(r, c, TileFactory.Get(TileType.DeepWater));
-                else if (grid[r * length + c] < 6.0)
-                    map.SetTile(r, c, TileFactory.Get(TileType.Grass));
-                else 
+                var v = grid[r, c];
+                TileType tt;
+                if (v < 25)
                 {
-                    var tt = _rng.NextDouble() < 0.9 ? TileType.Mountain : TileType.SnowPeak;
-                    map.SetTile(r, c, TileFactory.Get(tt));
+                    tt = TileType.DeepWater;
                 }
+                else if (v < 40)
+                {
+                    tt = TileType.Sand;
+                }
+                else if (v < 160)
+                {
+                    if (v % 2 == 0)
+                        tt = TileType.Grass;
+                    else
+                        tt = TileType.Tree;
+                }
+                else if (_rng.NextDouble() < 0.9)
+                {
+                    tt = TileType.Mountain;
+                }
+                else
+                {
+                    tt = TileType.Mountain;
+                }
+
+                map.SetTile(r, c, TileFactory.Get(tt));                
             }
         }
         return map;
     }
 
+    private void Dump(Map map, string filename)
+    {
+        using (TextWriter tw = new StreamWriter(filename)) 
+        {
+            for (int r = 0; r < _length; r++)
+            {
+                for (int c = 0; c < _length; c++)
+                {
+                    var t = map.TileAt(r, c);
+                    char ch = t.Type switch
+                    {
+                        TileType.PermWall => '#',
+                        TileType.Wall => '#',
+                        TileType.Floor or TileType.Sand => '.',
+                        TileType.Door => '+',
+                        TileType.Mountain or TileType.SnowPeak => '^',
+                        TileType.Grass => ',',
+                        TileType.Tree => 'T',
+                        TileType.DeepWater => '~',
+                        _ => ' '
+                    };
+
+                    tw.Write(ch);                    
+                }
+                tw.WriteLine();
+            }
+        }        
+    }
+
     public Map DrawLevel(int length)
     {
-        double[] grid = new double[length * length];
-        grid[0] = _rng.NextDouble() * 2.0 - 1.0;
-        grid[length - 1] = _rng.NextDouble() * 1.5 + 1.0;
-        grid[(length - 1) * length] = _rng.NextDouble() * 2.0 + 10.0;
-        grid[length * length - 1] = _rng.NextDouble() * 2.0 + 9.0;
+        _length = length;
+        int[,] grid = new int[length, length];
 
-        Console.WriteLine(grid[0]);
-        Console.WriteLine(grid[length - 1]);
-        Console.WriteLine(grid[(length - 1) * length]);
-        Console.WriteLine(grid[length * length - 1]);
+        if (_rng.NextDouble() < 0.5)
+        {
+            grid[0, 0] = _rng.Next(-10, 25);
+            grid[0, length - 1] = _rng.Next(0, 100);
+        }
+        else
+        {
+            grid[0, length - 1] = _rng.Next(-10, 25);
+            grid[0, 0] = _rng.Next(0, 100);
+        }        
+        grid[length - 1, 0] = _rng.Next(250, 300);
+        grid[length - 1, length - 1] = _rng.Next(200, 350);
 
-        MidpointDisplacement(grid, 0, 0, length, length);
+        MidpointDisplacement(grid, 0, 0, length);
+        SmoothGrid(grid);
+        
+        var map = ToMap(grid);
+        map = TweakTreesAndGrass(map);
 
-        var map = ToMap(grid, length);
-        map.Dump();
+        // set the border around the world
+        for (int c = 0; c < length; c++)
+        {
+            map.SetTile(0, c, TileFactory.Get(TileType.WorldBorder));
+            map.SetTile(length - 1, c, TileFactory.Get(TileType.WorldBorder));
+        }
+        for (int r = 1; r < length - 1; r++)
+        {
+            map.SetTile(r, 0, TileFactory.Get(TileType.WorldBorder));
+            map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
+        }
 
         return map;
     }

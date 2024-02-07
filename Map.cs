@@ -2,13 +2,16 @@
 
 enum TileType
 {
+    WorldBorder,
     Unknown,
     PermWall,
     Wall,
     Floor,
     Door,
     DeepWater,
+    Sand,
     Grass,
+    Tree,
     Mountain,
     SnowPeak
 }
@@ -40,12 +43,15 @@ internal class Door(TileType type, bool open) : Tile(type)
 
 internal class TileFactory
 {
+    private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true);
     private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true);
     private static readonly Tile Wall = new BasicTile(TileType.Wall, false, true);
     private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
     private static readonly Tile Floor = new BasicTile(TileType.Floor, true, false);
     private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false);
     private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false);
+    private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false);
+    private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false);
     private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
 
@@ -53,11 +59,14 @@ internal class TileFactory
     {
         return type switch 
         {
+            TileType.WorldBorder => WorldBorder,
             TileType.PermWall => PermWall,
             TileType.Wall => Wall,
             TileType.Floor => Floor,
             TileType.DeepWater => DeepWater,
+            TileType.Sand => Sand,
             TileType.Grass => Grass,
+            TileType.Tree => Tree,
             TileType.Mountain => Mountain,
             TileType.SnowPeak => SnowPeak,
             TileType.Door => new Door(type, false),
@@ -66,7 +75,7 @@ internal class TileFactory
     }
 }
 
-internal class Map
+internal class Map : ICloneable
 {
     public readonly int Width;
     public readonly int Height;
@@ -171,10 +180,11 @@ internal class Map
                 char ch = Tiles[row * Width + col].Type switch  {
                     TileType.PermWall => '#',
                     TileType.Wall => '#',
-                    TileType.Floor => '.',
+                    TileType.Floor or TileType.Sand => '.',
                     TileType.Door => '+',
                     TileType.Mountain or TileType.SnowPeak => '^',
                     TileType.Grass => ',',
+                    TileType.Tree => 'T',
                     TileType.DeepWater => '~',
                     _ => ' '
                 };
@@ -182,5 +192,14 @@ internal class Map
             }
             Console.WriteLine();
         }
+    }
+
+    public object Clone()
+    {
+        Map temp = new Map(Width, Height);
+        if (Tiles is not null)            
+            temp.Tiles = (Tile[])Tiles.Clone();
+
+        return temp;
     }
 }

@@ -18,8 +18,8 @@ var map = dungeon.DrawLevel(100, 40);
 //map.Dump();
 
 var wilderness = new Wilderness(rng);
-wilderness.DrawLevel(65);
-return; 
+map = wilderness.DrawLevel(257);
+
 try
 {
     display.TitleScreen();
@@ -29,8 +29,7 @@ try
     display.WaitForInput();
 
     var rnd = new Random();
-    int startRow = rnd.Next(1, map.Height);
-    int startCol = rnd.Next(1, map.Width);
+    var (startRow, startCol) = RandomStartPos(map, rnd);
     var player = new Player(playerName, startRow, startCol);
     display.Player = player;
    
@@ -45,6 +44,23 @@ catch (GameQuitException)
         " Being seeing you..."
     };
     display.WriteLongMessage(msg);
+}
+
+static (int, int) RandomStartPos(Map map, Random rnd)
+{
+    while (true)
+    {
+        int r = rnd.Next(1, map.Height - 1);
+        int c = rnd.Next(1, map.Width - 1);
+
+        switch (map.TileAt(r, c).Type)
+        {
+            case TileType.Floor:
+            case TileType.Grass:
+            case TileType.Tree:
+                return (r, c);
+        }
+    }
 }
 
 namespace Yarl2

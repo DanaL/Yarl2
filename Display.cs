@@ -27,8 +27,14 @@ internal abstract class Display
     protected readonly Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
     protected readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
     protected readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
+    protected readonly Color YELLOW_ORANGE = new() { A = 255, R = 255, G = 159, B = 0 };
     protected readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
     protected readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
+    protected readonly Color GREEN = new() { A = 255, R = 144, G = 238, B = 144 };
+    protected readonly Color DARK_GREEN = new() { A = 255, R = 0, G = 71, B = 49 };
+    protected readonly Color BLUE = new() { A = 255, R = 0, G = 0, B = 200 };
+    protected readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
+    protected readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
 
     public abstract Action? GetCommand(GameState gameState);
     public abstract string QueryUser(string prompt);        
@@ -135,6 +141,18 @@ internal abstract class Display
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
                 return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
+            case TileType.DeepWater:
+                return lit ? (BLUE, '~') : (DARK_BLUE, '~');
+            case TileType.Sand:
+                return lit ? (YELLOW, '.') : (YELLOW_ORANGE, '.');
+            case TileType.Grass:
+                return lit ? (GREEN, '.') : (DARK_GREEN, '.');
+            case TileType.Tree:
+                return lit ? (GREEN, '\u03D9') : (DARK_GREEN, '\u03D9');
+            case TileType.Mountain:
+                return lit ? (GREY, '\u039B') : (DARK_GREY, '\u039B');
+            case TileType.SnowPeak:
+                return lit ? (WHITE, '\u039B') : (GREY, '\u039B');
             default:
                 return (BLACK, ' ');
         }        
