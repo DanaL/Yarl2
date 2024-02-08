@@ -464,6 +464,8 @@ internal class BLDisplay : Display, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
     }
 
     public override Action? GetCommand(GameState gameState)
@@ -584,7 +586,21 @@ internal class BLDisplay : Display, IDisposable
 
             if (KeyToChar.TryGetValue(key, out char value))
             {
-                return Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT) ? char.ToUpper(value) : value;
+                // I feel like there has to be a better way to handle shifted characters
+                // in Bearlib but I haven't found it yet...
+                if (Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT))
+                {
+                    return value switch
+                    {
+                        ',' => '<',
+                        '.' => '>',
+                        _ => char.ToUpper(value)
+                    };
+                }
+                else
+                {
+                    return value;
+                }                    
             }
         }
         while (true);
