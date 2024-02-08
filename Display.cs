@@ -353,7 +353,7 @@ internal class SDLDisplay : Display
 
         if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
         {
-            var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
+            var surface =  SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
             var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
             SDL_FreeSurface(surface);
             texture = toCache;
@@ -389,15 +389,7 @@ internal class SDLDisplay : Display
                     (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                 else
                     (color, ch) = (BLACK, ' ');
-                
-                // Having trouble getting SDLtty to render unicode characters, although I've used them
-                // in my SDL-based rust roguelike. But for now...
-                if (ch == 'ϙ')
-                    ch = '#';
-                else if (ch == '\u039B')
-                    ch = '^';
-                else if (ch == 'Ո')
-                    ch = '>';
+                            
                 SDLPut(row, col, ch, color);
             }
         }
