@@ -71,7 +71,7 @@ internal abstract class Display
         do 
         {
             WriteMessage("Which way?");
-            char ch = WaitForInput();
+            char ch = WaitForInput();            
             if (ch == 'y')
                 return (-1, -1);
             else if (ch == 'u')
@@ -92,7 +92,7 @@ internal abstract class Display
         while (true);
     }
 
-    protected Action KeyToCommand(char ch, GameState gameState)
+    protected Action KeyToAction(char ch, GameState gameState)
     {
         Player p = gameState.Player!;
         Map m = gameState.Map!;
@@ -107,6 +107,12 @@ internal abstract class Display
             var (dr, dc) = AskForDirection();            
             return new OpenDoorAction(p, p.Row + dr, p.Col + dc, m);
         }
+        else if (ch == 'E')
+            return new PortalAction(gameState);
+        else if (ch == '>')
+            return new DownstairsAction(gameState);
+        else if (ch == '<')
+            return new UpstairsAction(gameState);
         else if (ch == 'h')
             return new MoveAction(p, p.Row, p.Col - 1, gameState);
         else if (ch == 'j')
@@ -155,6 +161,10 @@ internal abstract class Display
                 return lit ? (WHITE, '\u039B') : (GREY, '\u039B');
             case TileType.Portal:
                 return lit ? (WHITE, 'Ո') : (GREY, 'Ո');
+            case TileType.Downstairs:
+                return lit ? (GREY, '>') : (DARK_GREY, '>');
+            case TileType.Upstairs:
+                return lit ? (GREY, '<') : (DARK_GREY, '<');
             default:
                 return (BLACK, ' ');
         }        
@@ -202,21 +212,25 @@ internal class SDLDisplay : Display
 
     public override Action? GetCommand(GameState gameState)
     {
-        SDL_PollEvent(out var e);
-        switch (e.type)
-        {
-            case SDL_EventType.SDL_QUIT:
-                return new QuitAction();
-            case SDL_EventType.SDL_TEXTINPUT:
-                char c;
-                unsafe
-                {
-                    c = (char)*e.text.text;                    
-                }
-                return KeyToCommand(c, gameState);
-            default:
-                return new NullAction();
-        }        
+        while (SDL_PollEvent(out var e) != 0) {
+            switch (e.type)
+            {
+                case SDL_EventType.SDL_QUIT:
+                    return new QuitAction();
+                case SDL_EventType.SDL_TEXTINPUT:
+                    char c;
+                    unsafe
+                    {
+                        c = (char)*e.text.text;                    
+                    }
+                    
+                    return KeyToAction(c, gameState);
+                default:
+                    return new NullAction();
+            }        
+        }
+
+        return new NullAction();
     }
 
     public override string QueryUser(string prompt)
@@ -254,8 +268,9 @@ internal class SDLDisplay : Display
                 case SDL_EventType.SDL_KEYDOWN:                    
                     if (e.key.keysym.sym == SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL_Keycode.SDLK_RSHIFT)
                         continue;
-                    
-                    return KeysymToChar(e.key.keysym);                    
+                    var ch = e.key.keysym;                                        
+                    SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
+                    return KeysymToChar(ch);                    
             }
         } 
         while (true);        
@@ -448,7 +463,7 @@ internal class BLDisplay : Display, IDisposable
         if (Terminal.HasInput())
         {
             var ch = WaitForInput();
-            return KeyToCommand(ch, gameState);
+            return KeyToAction(ch, gameState);
         }
         else
             return new NullAction();

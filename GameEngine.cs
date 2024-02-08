@@ -31,6 +31,9 @@ internal class GameState
         // Once the queue of actors is implemented, we will need to switch them
         // out here.
     }
+
+    public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
+    public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
 }
 
 internal class GameEngine(int visWidth, int visHeight, Display display, Options options)

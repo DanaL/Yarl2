@@ -18,13 +18,13 @@ var dm = new DungeonMaker(rng);
 //map.Dump();
 
 var campaign = new Campaign();
-var wilderness = new Dungeon(0);
+var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
 var wildernessGenerator = new Wilderness(rng);
 var map = wildernessGenerator.DrawLevel(257);
 wilderness.AddMap(map);
 campaign.AddDungeon(wilderness);
 
-var mainDungeon = new Dungeon(1);
+var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
 var firstLevel = dm.DrawLevel(100, 40);
 mainDungeon.AddMap(firstLevel);
 campaign.AddDungeon(mainDungeon);
@@ -33,8 +33,17 @@ campaign.AddDungeon(mainDungeon);
 // and create a Portal to it in the wilderness
 var stairs = firstLevel.RandomTile(TileType.Floor, rng);
 var entrance = map.RandomTile(TileType.Tree, rng);
-var portal = new Portal(TileType.Portal);
+var portal = new Portal("You stand before a looming portal.")
+{
+    Destination = (1, 0, stairs.Item1, stairs.Item2)
+};
 map.SetTile(entrance, portal);
+
+var exitStairs = new Upstairs("")
+{
+    Destination = (0, 0, entrance.Item1, entrance.Item2)
+};
+firstLevel.SetTile(stairs, exitStairs);
 
 try
 {

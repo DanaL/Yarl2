@@ -1,11 +1,12 @@
 ﻿namespace Yarl2;
 
 // A structure to store info about a dungeon
-internal class Dungeon(int ID)
+internal class Dungeon(int ID, string arrivalMessage)
 {
     public int ID { get; init; } = ID;
     public HashSet<(int, int, int)> RememberedSqs = new();
     public Dictionary<int, Map> LevelMaps = new();
+    public string ArrivalMessage { get; } = arrivalMessage;
 
     public void AddMap(Map map)
     {

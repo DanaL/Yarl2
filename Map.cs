@@ -14,12 +14,15 @@ enum TileType
     Tree,
     Mountain,
     SnowPeak,
-    Portal
+    Portal,
+    Upstairs,
+    Downstairs
 }
 
 internal abstract class Tile 
 {
-    public TileType Type { get; }
+    public TileType Type { get; protected set; }
+    public virtual string StepMessage => "";
     public abstract bool Passable();
     public abstract bool Opaque();
 
@@ -42,11 +45,24 @@ internal class Door(TileType type, bool open) : Tile(type)
     public override bool Opaque() => !Open;
 }
 
-internal class Portal(TileType type) : Tile(type) 
+internal class Portal(string stepMessage) : Tile(TileType.Portal) 
 {
+    private readonly string _stepMessage = stepMessage;
     public (int, int, int, int) Destination { get; set; }
     public override bool Passable() => true;
     public override bool Opaque() => false;
+
+    public override string StepMessage => _stepMessage;
+}
+
+internal class Upstairs : Portal
+{
+    public Upstairs(string stepMessage) : base(stepMessage) => Type = TileType.Upstairs;
+}
+
+internal class Downstairs : Portal
+{
+    public Downstairs(string stepMessage) : base(stepMessage) => Type = TileType.Downstairs;
 }
 
 internal class TileFactory
@@ -62,7 +78,7 @@ internal class TileFactory
     private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false);
     private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
-
+    
     public static Tile Get(TileType type)
     {
         return type switch 
@@ -77,8 +93,7 @@ internal class TileFactory
             TileType.Tree => Tree,
             TileType.Mountain => Mountain,
             TileType.SnowPeak => SnowPeak,
-            TileType.Door => new Door(type, false),
-            TileType.Portal => new Portal(type),
+            TileType.Door => new Door(type, false),            
             _ => Unknown
         };
     }
