@@ -33,6 +33,8 @@ campaign.AddDungeon(mainDungeon);
 // and create a Portal to it in the wilderness
 var stairs = firstLevel.RandomTile(TileType.Floor, rng);
 var entrance = map.RandomTile(TileType.Tree, rng);
+var portal = new Portal(TileType.Portal);
+map.SetTile(entrance, portal);
 
 try
 {
@@ -42,8 +44,7 @@ try
     display.WriteMessage($"Hello, {playerName}.");
     display.WaitForInput();
 
-    var rnd = new Random();
-    var (startRow, startCol) = RandomStartPos(map, rnd);
+    var rnd = new Random();    
     var player = new Player(playerName, entrance.Item1, entrance.Item2);
     display.Player = player;
    

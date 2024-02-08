@@ -39,10 +39,10 @@ namespace SDL2
 
         /* Used by DllImport to load the native library. */
 
-#if OSX
-		private const string nativeLibName = "SDL2_ttf";
+#if WINDOWS
+	private const string nativeLibName = "SDL2_ttf.dll";		
 #else
-        private const string nativeLibName = "SDL2_ttf.dll";
+    private const string nativeLibName = "SDL2_ttf";
 #endif
         #endregion
 

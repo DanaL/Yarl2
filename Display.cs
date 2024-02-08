@@ -148,7 +148,7 @@ internal abstract class Display
             case TileType.Grass:
                 return lit ? (GREEN, '.') : (DARK_GREEN, '.');
             case TileType.Tree:
-                return lit ? (GREEN, '\u03D9') : (DARK_GREEN, '\u03D9');
+                return lit ? (GREEN, 'ϙ') : (DARK_GREEN, 'ϙ');
             case TileType.Mountain:
                 return lit ? (GREY, '\u039B') : (DARK_GREY, '\u039B');
             case TileType.SnowPeak:
@@ -357,7 +357,16 @@ internal class SDLDisplay : Display
                 else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
                     (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
                 else
-                    (color, ch) = (BLACK, ' ');                
+                    (color, ch) = (BLACK, ' ');
+                
+                // Having trouble getting SDLtty to render unicode characters, although I've used them
+                // in my SDL-based rust roguelike. But for now...
+                if (ch == 'ϙ')
+                    ch = '#';
+                else if (ch == '\u039B')
+                    ch = '^';
+                else if (ch == 'Ո')
+                    ch = '>';
                 SDLPut(row, col, ch, color);
             }
         }

@@ -39,10 +39,10 @@ namespace SDL2
 	{
 		#region SDL2# Variables
 
-#if OSX
-		private const string nativeLibName = "SDL2.dylib";
+#if WINDOWS
+	private const string nativeLibName = "SDL2.dll";		
 #else
-		private const string nativeLibName = "SDL2.dll";
+	private const string nativeLibName = "SDL2.dylib";
 #endif
         #endregion
 
