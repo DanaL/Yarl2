@@ -2,6 +2,10 @@
 
 using Yarl2;
 
+var wildernessGenerator = new Wilderness(new Random());
+var m2 = wildernessGenerator.DrawLevel(257);
+
+
 var options = Options.LoadOptions("options.json");
 
 Display display;

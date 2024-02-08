@@ -7,7 +7,140 @@ internal class Wilderness(Random rng)
 
     private int Fuzz() => _rng.Next(-50, 51);
 
-    (int, int) CountNeighours(Map map, int r, int c)
+    (int, int) NextPoint(int r, int c, int d, double angle)
+    {
+        int nextR = (int)(r + (d * Math.Sin(angle)));
+        int nextC = (int)(c + (d * Math.Cos(angle)));
+
+        return (nextR, nextC);
+    }
+
+    void DrawARiver(Map map, (int, int) start, double angle)
+    {
+        int row = start.Item1;
+        int col = start.Item2;
+        var pts = new List<(int, int)>();
+        double currentAngle = angle;
+
+        do
+        {
+            int d = _rng.Next(2, 5);
+            var n = NextPoint(row, col, d, currentAngle);
+
+            if (!map.InBounds(n))
+                break;
+
+            var nextSegment = Util.Bresenham(row, col, n.Item1, n.Item2);
+            bool riverCrossing = false;
+            foreach (var pt in nextSegment)
+            {
+                pts.Add((pt.Item1, pt.Item2));
+                if (map.TileAt(pt).Type == TileType.DeepWater)
+                {
+                    riverCrossing = true;
+                }
+            }
+
+            if (map.TileAt(n).Type == TileType.DeepWater && riverCrossing)
+                break;
+
+            row = n.Item1; 
+            col = n.Item2;
+            double angleTweak = _rng.NextDouble() / 2 - 0.25;
+            currentAngle += angleTweak;
+
+            // keep the river from turning back and looking like it's flowing uphill into the mountains
+            if (currentAngle > -0.1)
+                currentAngle = -0.28;
+            else if (currentAngle < -0.3)
+                currentAngle = -2.6;
+
+            // smooth river
+            // bresenham draws lines that can look like:
+            //     ~
+            //   ~~
+            //  ~@
+            // I don't want those points where the player could walk
+            // say NW and avoid stepping on the river
+            List<(int, int)> extraPts = [];
+            for (int j = 0; j < pts.Count - 1; j++)
+            {
+                var a = pts[j];
+                var b = pts[j + 1];
+                if (a.Item1 != b.Item1 && a.Item2 != b.Item2)
+                    extraPts.Add((a.Item1 - 1, a.Item2));
+
+                map.SetTile(pts[j], TileFactory.Get(TileType.DeepWater));
+            }
+
+            foreach (var pt in extraPts)
+                map.SetTile(pt, TileFactory.Get(TileType.DeepWater));
+        }
+        while (true);
+    }
+
+    (int, int) RiverStart(Map map, int colLo, int colHi)
+    {
+        int x = _length / 3;
+
+        do
+        {
+            int r = _rng.Next(_length - x, _length - 2);
+            int c = _rng.Next(colLo, colHi);
+
+            int mountains = CountAdjType(map, r, c, TileType.Mountain);
+            if (mountains > 3)
+                return (r, c);
+        }
+        while (true);
+    }
+    
+    // Try to draw up to three rivers on the map
+    void DrawRivers(Map map)
+    {
+        var opts = new List<int>() { 0, 1, 2 };
+        opts.Shuffle(_rng);
+
+        int passes = 0;
+        foreach (int o in opts) 
+        { 
+            if (o == 0 && _rng.NextDouble() < 0.5)
+            {
+                var startLoc = RiverStart(map, 2, _length / 3);
+                double angle = -0.28;
+                DrawARiver(map, startLoc, angle);
+            }
+            else if (o == 1)
+            {
+                var startLoc = RiverStart(map, _length / 3, (_length / 3) * 2);
+                double angle = -1.5;
+                DrawARiver(map, startLoc, angle);
+            }
+            else
+            {
+                var startLoc = RiverStart(map, _length - _length / 3, _length - 2);
+                double angle = -2.5;
+                DrawARiver(map, startLoc, angle);
+            }
+            ++passes;
+        }
+        
+    }
+
+    int CountAdjType(Map map, int r, int c, TileType type)
+    {
+        int count = 0;
+
+        foreach (var loc in Util.Adj8Sqs(r, c))
+        {
+            if (map.TileAt(loc).Type == type)
+                ++count;
+        }
+
+        return count;
+    }
+
+    (int, int) CountAdjTreesAndGrass(Map map, int r, int c)
     {
         int tree = 0;
         int grass = 0;
@@ -31,7 +164,7 @@ internal class Wilderness(Random rng)
         {
             for (int c = 1; c < _length - 1; c++)
             {
-                var (trees, _) = CountNeighours(map, r, c);
+                var (trees, _) = CountAdjTreesAndGrass(map, r, c);
                 if (map.TileAt(r, c).Type == TileType.Grass && trees >= 5 && trees <= 8)
                     next.SetTile(r, c, TileFactory.Get(TileType.Tree));
                 else if (map.TileAt(r, c).Type == TileType.Tree && trees < 4)
@@ -245,7 +378,7 @@ internal class Wilderness(Random rng)
             }
         }        
     }
-
+    
     public Map DrawLevel(int length)
     {
         _length = length;
@@ -270,6 +403,8 @@ internal class Wilderness(Random rng)
         var map = ToMap(grid);
         map = TweakTreesAndGrass(map);
 
+        DrawRivers(map);
+
         // set the border around the world
         for (int c = 0; c < length; c++)
         {
@@ -281,6 +416,8 @@ internal class Wilderness(Random rng)
             map.SetTile(r, 0, TileFactory.Get(TileType.WorldBorder));
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
+
+        Dump(map, "out.txt");
 
         return map;
     }
