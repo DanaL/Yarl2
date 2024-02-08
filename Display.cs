@@ -81,7 +81,7 @@ internal abstract class Display
             else if (ch == 'j')
                 return (1, 0);
             else if (ch == 'k')
-                return (0, -1);
+                return (-1, 0);
             else if (ch == 'l')
                 return (0, 1);
             else if (ch == 'b')
