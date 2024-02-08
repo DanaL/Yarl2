@@ -62,10 +62,12 @@ try
     {
         var bytes = File.ReadAllBytes(filename);
         var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
-        player = sgi.Player;
-        campaign = sgi.Campaign;
-        currentDungeon = sgi.CurrentDungeon;
-        currentLevel = sgi.CurrentLevel;
+
+        var (p, c, cl, cd) = Serialize.LoadSaveGame(playerName);
+        player = p;
+        campaign = c;
+        currentDungeon = cd;
+        currentLevel = cl;
     }
     else
     {

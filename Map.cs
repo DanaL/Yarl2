@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿
 
 namespace Yarl2;
 
@@ -28,8 +28,6 @@ internal abstract class Tile
     public abstract bool Passable();
     public abstract bool Opaque();
 
-    public Tile() {}
-
     protected Tile(TileType type) => Type = type;
 }
 
@@ -48,6 +46,11 @@ internal class Door(TileType type, bool open) : Tile(type)
 
     public override bool Passable() => Open;
     public override bool Opaque() => !Open;
+
+    public override string ToString()
+    {
+        return $"{(int)Type};{Open}";
+    }
 }
 
 internal class Portal(string stepMessage) : Tile(TileType.Portal) 
@@ -58,16 +61,25 @@ internal class Portal(string stepMessage) : Tile(TileType.Portal)
     public override bool Opaque() => false;
 
     public override string StepMessage => _stepMessage;
+
+    public override string ToString()
+    {
+        return $"{(int)Type};{Destination};{_stepMessage}";
+    }
 }
 
 internal class Upstairs : Portal
 {
     public Upstairs(string stepMessage) : base(stepMessage) => Type = TileType.Upstairs;
+
+    public override string ToString() => base.ToString();
 }
 
 internal class Downstairs : Portal
 {
     public Downstairs(string stepMessage) : base(stepMessage) => Type = TileType.Downstairs;
+
+    public override string ToString() => base.ToString();
 }
 
 internal class TileFactory
@@ -106,15 +118,10 @@ internal class TileFactory
 
 internal class Map : ICloneable
 {
-    [JsonInclude]
     public readonly int Width;
-    [JsonInclude]
     public readonly int Height;
 
-    [JsonInclude]
     public Tile[] Tiles;
-
-    public Map() {}
 
     public Map(int width, int height)
     {

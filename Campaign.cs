@@ -1,17 +1,12 @@
-﻿using System.Text.Json.Serialization;
-
+﻿
 namespace Yarl2;
 
 // A structure to store info about a dungeon
 internal class Dungeon(int ID, string arrivalMessage)
 {
-    [JsonInclude]
     public int ID { get; init; } = ID;
-    [JsonInclude]
-    public HashSet<(int, int, int)> RememberedSqs = new();
-    [JsonInclude]
+    public HashSet<(int, int, int)> RememberedSqs = [];
     public Dictionary<int, Map> LevelMaps = new();
-    [JsonInclude]
     public string ArrivalMessage { get; } = arrivalMessage;
 
     public void AddMap(Map map)
@@ -25,8 +20,7 @@ internal class Dungeon(int ID, string arrivalMessage)
 // the 'story' of the game. All the dungeon levels, etc
 internal class Campaign
 {
-    [JsonInclude]
-    public Dictionary<int, Dungeon> Dungeons = new();
+    public Dictionary<int, Dungeon> Dungeons = [];
 
     public void AddDungeon(Dungeon dungeon)
     {

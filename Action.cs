@@ -1,6 +1,4 @@
 ﻿
-using System.Runtime.CompilerServices;
-
 namespace Yarl2;
 
 internal class ActionResult

@@ -1,8 +1,4 @@
-﻿using System.IO;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.Json;
-
+﻿
 namespace Yarl2;
 
 abstract class Actor
@@ -63,19 +59,6 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
         ui.UpdateDisplay(gameState);
     }
 
-    static void SaveGame(Player player, Campaign campaign, GameState gameState)
-    {
-        var sgi = new SaveGameInfo(player, campaign, gameState.CurrLevel, gameState.CurrDungeon);
-        string filename = $"{player.Name}.dat";
-        
-        var resultBytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
-                    new JsonSerializerOptions { WriteIndented = false, IncludeFields=true });
-        File.WriteAllBytes(filename, resultBytes);
-
-        var s = JsonSerializer.Serialize(sgi, new JsonSerializerOptions { WriteIndented = true });
-        Console.WriteLine(s);
-    }
-
     public void Play(Player player, Campaign campaign, int currLevel, int currDungeon)
     {
         var currentLevel = 0;
@@ -103,7 +86,7 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
             {
                 if (ui.QueryYesNo("Really quit and save? (y/n)"))
                 {
-                    SaveGame(player, campaign, gameState);
+                    Serialize.WriteSaveGame(player.Name, player, campaign, gameState);
                     throw new GameQuitException();
                 }
                 else
@@ -136,4 +119,3 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
     }
 }
 
-internal record SaveGameInfo(Player? Player, Campaign? Campaign, int CurrentLevel, int CurrentDungeon);
