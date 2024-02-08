@@ -42,7 +42,7 @@ internal abstract class Display
     public abstract char WaitForInput();
     public abstract void WriteLongMessage(List<string> message);
     public abstract void WriteMessage(string message);
-
+    
     public Player? Player { get; set; } = null;
 
     public Display()
@@ -92,6 +92,20 @@ internal abstract class Display
         while (true);
     }
 
+    public bool QueryYesNo(string prompt)
+    {        
+        do 
+        {
+            WriteMessage(prompt);
+            char ch = WaitForInput();
+            if (ch == 'y')
+                return true;
+            else if (ch == 'n')
+                return false;
+        }
+        while (true);
+    }
+
     protected Action KeyToAction(char ch, GameState gameState)
     {
         Player p = gameState.Player!;
@@ -131,6 +145,8 @@ internal abstract class Display
             return new MoveAction(p, p.Row + 1, p.Col + 1, gameState);
         else if (ch == 'Q')
             return new QuitAction();
+        else if (ch == 'S')
+            return new SaveGameAction();
         else
             return new PassAction(p);
     }

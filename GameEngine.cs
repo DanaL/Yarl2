@@ -1,4 +1,8 @@
-﻿
+﻿using System.IO;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Text.Json;
+
 namespace Yarl2;
 
 abstract class Actor
@@ -59,7 +63,20 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
         ui.UpdateDisplay(gameState);
     }
 
-    public void Play(Player player, Campaign campaign)
+    static void SaveGame(Player player, Campaign campaign, GameState gameState)
+    {
+        var sgi = new SaveGameInfo(player, campaign, gameState.CurrLevel, gameState.CurrDungeon);
+        string filename = $"{player.Name}.dat";
+        
+        var resultBytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
+                    new JsonSerializerOptions { WriteIndented = false, IncludeFields=true });
+        File.WriteAllBytes(filename, resultBytes);
+
+        var s = JsonSerializer.Serialize(sgi, new JsonSerializerOptions { WriteIndented = true });
+        Console.WriteLine(s);
+    }
+
+    public void Play(Player player, Campaign campaign, int currLevel, int currDungeon)
     {
         var currentLevel = 0;
         var gameState = new GameState()
@@ -68,8 +85,8 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
             Options = _options,
             Player = player,
             Campaign = campaign,
-            CurrLevel = 0,
-            CurrDungeon = 0
+            CurrLevel = currLevel,
+            CurrDungeon = currDungeon
         };
         
         bool playing = true;
@@ -81,6 +98,18 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
             if (cmd is QuitAction)
             {
                 playing = false;
+            }
+            else if (cmd is SaveGameAction)
+            {
+                if (ui.QueryYesNo("Really quit and save? (y/n)"))
+                {
+                    SaveGame(player, campaign, gameState);
+                    throw new GameQuitException();
+                }
+                else
+                {
+                    ui.WriteMessage("Nevermind.");
+                }
             }
             else if (cmd is NullAction)
             {
@@ -106,3 +135,5 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
         while (playing);
     }
 }
+
+internal record SaveGameInfo(Player? Player, Campaign? Campaign, int CurrentLevel, int CurrentDungeon);

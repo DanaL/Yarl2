@@ -1,4 +1,6 @@
-﻿namespace Yarl2;
+﻿using System.Text.Json.Serialization;
+
+namespace Yarl2;
 
 enum TileType
 {
@@ -26,6 +28,8 @@ internal abstract class Tile
     public abstract bool Passable();
     public abstract bool Opaque();
 
+    public Tile() {}
+
     protected Tile(TileType type) => Type = type;
 }
 
@@ -37,6 +41,7 @@ internal class BasicTile(TileType type, bool passable, bool opaque) : Tile(type)
     public override bool Passable() => _passable;
     public override bool Opaque() => _opaque;
 }
+
 internal class Door(TileType type, bool open) : Tile(type)
 {
     public bool Open { get; set;} = open;
@@ -101,10 +106,15 @@ internal class TileFactory
 
 internal class Map : ICloneable
 {
+    [JsonInclude]
     public readonly int Width;
+    [JsonInclude]
     public readonly int Height;
 
+    [JsonInclude]
     public Tile[] Tiles;
+
+    public Map() {}
 
     public Map(int width, int height)
     {

@@ -239,16 +239,15 @@ internal class PassAction(Actor actor) : Action
 // or quit and saved?
 internal class QuitAction : Action
 {
-    public override ActionResult Execute() 
-    {
-        throw new GameQuitException();
-    }
+    public override ActionResult Execute() => throw new GameQuitException();
+}
+
+internal class SaveGameAction : Action
+{
+    public override ActionResult Execute() => throw new Exception("Shouldn't actually try to execute a Save Game action!");
 }
 
 internal class NullAction : Action
 {
-    public override ActionResult Execute()
-    {
-        throw new Exception("Hmm this should never happen");
-    }
+    public override ActionResult Execute() => throw new Exception("Hmm this should never happen");
 }
