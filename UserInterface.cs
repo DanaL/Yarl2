@@ -48,6 +48,7 @@ internal abstract class UserInterface
     protected string _messageBuffer = "";
     protected Options _options;
     private bool _playing;
+    public char DeepWaterChar { get; set; } = '~';
 
     private delegate void InputListener(UIEvent e);
     private InputListener? CurrentListener;
@@ -164,7 +165,7 @@ internal abstract class UserInterface
                 char ch = ((Door)tile).Open ? '\\' : '+';
                 return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
             case TileType.DeepWater:
-                return lit ? (BLUE, '~') : (DARK_BLUE, '~');
+                return lit ? (BLUE, DeepWaterChar) : (DARK_BLUE, DeepWaterChar);
             case TileType.Sand:
                 return lit ? (YELLOW, '.') : (YELLOW_ORANGE, '.');
             case TileType.Grass:
@@ -271,7 +272,8 @@ internal abstract class UserInterface
     public void GameLoop()
     {
         CurrentListener = StartupListener;
-
+        List<IAnimationListener> animationListeners = [];
+        animationListeners.Add(new WaterAnimationListener(this));
         TitleScreen();  
 
         DateTime lastPollTime = DateTime.Now;
@@ -325,6 +327,10 @@ internal abstract class UserInterface
                 GameState.Visible = vs;
                 GameState.Remebered = dungeon.RememberedSqs;
             }
+
+            foreach (var l in animationListeners)
+                l.Update();
+
             UpdateDisplay(GameState);
 
             var dd = DateTime.Now - lastPollTime;
@@ -332,6 +338,7 @@ internal abstract class UserInterface
             {
                 Console.WriteLine("hello, world?");
                 lastPollTime = DateTime.Now;
+                
             }
 
             Thread.Sleep(50);
@@ -480,5 +487,34 @@ internal class YesNoAccumulator : IInputAccumulator
             _done = true;
             _success = false;
         }
+    }
+}
+
+internal interface IAnimationListener
+{
+    void Update();
+}
+
+internal class WaterAnimationListener : IAnimationListener
+{
+    DateTime _lastSwitch;
+    UserInterface _ui;
+
+    public WaterAnimationListener(UserInterface ui)
+    {
+        _ui = ui;
+        _lastSwitch = DateTime.Now;
+    }
+
+    public void Update() 
+    {
+        var dd = DateTime.Now - _lastSwitch;
+
+        if (dd.TotalSeconds >= 0.75)
+        {
+            _ui.DeepWaterChar = _ui.DeepWaterChar == '~' ? '}' : '~';
+            _lastSwitch = DateTime.Now;
+        }
+        
     }
 }
