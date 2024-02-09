@@ -31,7 +31,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, int, int) LoadSaveGame(string playerName)
+    public static (Player?, Campaign) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -39,10 +39,12 @@ internal class Serialize
 
         var p = sgi.Player;
         var c = ShrunkenCampaign.Inflate(sgi.Campaign);
-        var cl = sgi.CurrentLevel;
-        var cd = sgi.CurrentDungeon;
-        return (p, c, cl, cd);
+        c.CurrentLevel = sgi.CurrentLevel;
+        c.CurrentDungeon = sgi.CurrentDungeon;
+        return (p, c);
     }
+
+    public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
 }
 
 internal class ShrunkenCampaign
@@ -53,7 +55,7 @@ internal class ShrunkenCampaign
     public static ShrunkenCampaign Shrink(Campaign c)
     {
         ShrunkenCampaign sc = new();
-
+        
         foreach (var k in c.Dungeons.Keys)
         {
             sc.Dungeons.Add(k, ShrunkenDungeon.Shrink(c.Dungeons[k]));

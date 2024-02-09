@@ -403,10 +403,19 @@ internal class PreGameHandler
 
     private void SetupGame(string playerName)
     {
-        var (c, startRow, startCol) = BeginCampaign(new Random());
-        Player player = new Player(playerName, startRow, startCol);          
-        _ui.Player = player;
-        _ui.BeginGame(c);
+        if (Serialize.SaveFileExists(playerName))
+        {
+            var (player, c) = Serialize.LoadSaveGame(playerName);
+            _ui.Player = player;
+            _ui.BeginGame(c);
+        }
+        else
+        {
+            var (c, startRow, startCol) = BeginCampaign(new Random());
+            Player player = new Player(playerName, startRow, startCol);
+            _ui.Player = player;
+            _ui.BeginGame(c);
+        }
     }
 
     // Eventually this is going to need state because
