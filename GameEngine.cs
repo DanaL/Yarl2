@@ -36,11 +36,11 @@ internal class GameState
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
 }
 
-internal class GameEngine(int visWidth, int visHeight, Display display, Options options)
+internal class GameEngine(int visWidth, int visHeight, UserInterface display, Options options)
 {
     public readonly int VisibleWidth = visWidth;
     public readonly int VisibleHeight = visHeight;
-    private readonly Display ui = display;
+    private readonly UserInterface ui = display;
     private readonly Options _options = options;
     
     // I'm really just replacing everything in GameState with Campaign...
@@ -56,7 +56,7 @@ internal class GameEngine(int visWidth, int visHeight, Display display, Options 
         gameState.Visible = vs;
         gameState.Remebered = dungeon.RememberedSqs;
         gameState.Map = map;
-        ui.UpdateDisplay(gameState);
+        //ui.UpdateDisplay(gameState);
     }
 
     public void Play(Player player, Campaign campaign, int currLevel, int currDungeon)

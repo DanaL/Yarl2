@@ -21,7 +21,9 @@ internal class Dungeon(int ID, string arrivalMessage)
 internal class Campaign
 {
     public Dictionary<int, Dungeon> Dungeons = [];
-
+    public int CurrentDungeon { get; set; }
+    public int CurrentLevel { get; set; }
+    
     public void AddDungeon(Dungeon dungeon)
     {
         int id = Dungeons.Count == 0 ? 0 : Dungeons.Keys.Max() + 1;
