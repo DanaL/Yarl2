@@ -279,19 +279,6 @@ internal abstract class UserInterface
     }
 }
 
-// I dunno? Should this be in Player object?
-//
-// Aesthetics-wise, I think it would be nice to have the
-// Player be another Actor so game loop is like "Hey Actors
-// do your shit
-internal class PlayerInputHandler
-{
-    public void HandleInput(UIEvent e)
-    {
-
-    }
-}
-
 internal class PreGameHandler
 {
     protected const int BACKSPACE = 8;
