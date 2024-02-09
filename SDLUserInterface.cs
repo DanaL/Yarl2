@@ -170,16 +170,6 @@ internal class SDLUserInterface : UserInterface
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
-    public override void WriteLongMessage(List<string> message)
-    {        
-        _longMessage = message;    
-    }
-
-    public override void WriteMessage(string message)
-    {        
-        _lastMessage = message;
-    }
-
     private void SDLPut(int row, int col, char ch, Color color) 
     {
         var key = (ch, color, BLACK);

@@ -12,7 +12,8 @@ internal class BLUserInferface : UserInterface, IDisposable
         FontSize = fontSize;
         SetUpKeyToCharMap();
         Terminal.Open();
-        Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");            
+        Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
+        Terminal.Refresh();                           
     }
 
     private void SetUpKeyToCharMap()
@@ -36,10 +37,10 @@ internal class BLUserInferface : UserInterface, IDisposable
     }
 
     protected override UIEvent PollForEvent()
-    {
+    {        
         if (Terminal.HasInput())
         {
-            int key = Terminal.Read();            
+            int key = Terminal.Read();
             if (key == (int)TKCodes.InputEvents.TK_CLOSE)
                 return new UIEvent(UIEventType.Quiting, '\0');
 
@@ -55,14 +56,17 @@ internal class BLUserInferface : UserInterface, IDisposable
                         '.' => '>',
                         _ => char.ToUpper(value)
                     };                   
-                }                        
+                }
             }
-            return new UIEvent(UIEventType.KeyInput, value);
+            
+            // When (SHIFT, CTRL, etc) is pressed HasInput() is still true but
+            // we only want to return a KeyInput event if there's an actual
+            // value entered
+            if (value != '\0')
+                return new UIEvent(UIEventType.KeyInput, value);
         }
-        else
-        {
-            return new UIEvent(UIEventType.NoEvent, '\0');
-        }
+
+        return new UIEvent(UIEventType.NoEvent, '\0');
     }
 
     public override Action? GetCommand(GameState gameState)
@@ -90,58 +94,56 @@ internal class BLUserInferface : UserInterface, IDisposable
 
     public override void UpdateDisplay(GameState gameState)
     {
-        int rowOffset = Player!.Row - PlayerScreenRow;
-        int colOffset = Player!.Col - PlayerScreenCol;
-        for (int row = 0; row < ScreenHeight - 1; row++)
-        {
-            for (int col = 0; col < ViewWidth; col++)
-            {
-                int vr = row + rowOffset;
-                int vc = col + colOffset;
-
-                if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))
-                {
-                    var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);
-                    Terminal.Color(color);
-                    Terminal.Put(col, row + 1, ch);
-                }
-                else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
-                {
-                    var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
-                    Terminal.Color(color);
-                    Terminal.Put(col, row + 1, ch);
-                }
-                else
-                {
-                    Terminal.Put(col, row + 1, ' ');
-                }
-            }
-        }
-
-        Terminal.Color(WHITE);
-        Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
-
-        WriteSideBar();
-
-        Terminal.Refresh();
-    }
-
-    public override void WriteLongMessage(List<string> message)
-    {
         Terminal.Clear();
 
-        for (int row = 0; row < message.Count; row++)
-        {
-            Terminal.Print(0, row, message[row]);
+        if (_longMessage != null)
+        {            
+            for (int row = 0; row < _longMessage.Count; row++)
+            {
+                Terminal.Print(0, row, _longMessage[row]);
+            }
         }
+        else
+        {
+            Terminal.Print(0, 0, _lastMessage.PadRight(ScreenWidth));
 
-        Terminal.Refresh();
-        WaitForInput();
-    }
+            if (Player is not null)
+            {
+                int rowOffset = Player!.Row - PlayerScreenRow;
+                int colOffset = Player!.Col - PlayerScreenCol;
+                for (int row = 0; row < ScreenHeight - 1; row++)
+                {
+                    for (int col = 0; col < ViewWidth; col++)
+                    {
+                        int vr = row + rowOffset;
+                        int vc = col + colOffset;
 
-    public override void WriteMessage(string message)
-    {
-        Terminal.Print(0, 0, message.PadRight(ScreenWidth));
+                        if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))
+                        {
+                            var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);
+                            Terminal.Color(color);
+                            Terminal.Put(col, row + 1, ch);
+                        }
+                        else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
+                        {
+                            var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
+                            Terminal.Color(color);
+                            Terminal.Put(col, row + 1, ch);
+                        }
+                        else
+                        {
+                            Terminal.Put(col, row + 1, ' ');
+                        }
+                    }
+                }
+
+                Terminal.Color(WHITE);
+                Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
+
+                WriteSideBar();
+            }
+        }
+        
         Terminal.Refresh();
     }
 
@@ -201,13 +203,6 @@ internal class BLUserInferface : UserInterface, IDisposable
             }
         }
         while (true);
-    }
-
-    public override void TitleScreen()
-    {
-        base.TitleScreen();
-        Terminal.Clear();
-        Terminal.Refresh();
     }
 
     public void Dispose()

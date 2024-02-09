@@ -2,14 +2,6 @@
 
 namespace Yarl2;
 
-enum LoopState
-{
-    Startup,
-    Pregame,
-    Playing,
-    Quitting    
-}
-
 enum UIEventType { Quiting, KeyInput, NoEvent }
 
 internal record struct UIEvent(UIEventType Type, char Value);
@@ -45,8 +37,6 @@ internal abstract class UserInterface
     public abstract string QueryUser(string prompt);        
     public abstract void UpdateDisplay(GameState gameState);
     public abstract char WaitForInput();
-    public abstract void WriteLongMessage(List<string> message);
-    public abstract void WriteMessage(string message);
     protected abstract UIEvent PollForEvent();
     
     protected List<string>? _longMessage;
@@ -116,6 +106,16 @@ internal abstract class UserInterface
                 return false;
         }
         while (true);
+    }
+
+    public void WriteMessage(string message)
+    {
+        _lastMessage = message;
+    }
+
+    public void WriteLongMessage(List<string> message)
+    {
+        _longMessage = message;
     }
 
     protected Action KeyToAction(char ch, GameState gameState)
@@ -230,7 +230,6 @@ internal abstract class UserInterface
 
     public void GameLoop()
     {
-        LoopState state = LoopState.Startup;
         CurrentListener = StartupListener;
 
         TitleScreen();  
