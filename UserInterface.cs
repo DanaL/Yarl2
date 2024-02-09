@@ -1,11 +1,16 @@
 ﻿using BearLibNET.DefaultImplementations;
+using System.Numerics;
 
 namespace Yarl2;
 
 enum UIEventType { Quiting, KeyInput, NoEvent }
-
 internal record struct UIEvent(UIEventType Type, char Value);
 
+// I think that the way development is proceeding, it's soon not going
+// to make sense for SDLUserInterface and BLUserInterface to be subclasses
+// of UserInterface. It's more like they are being relegated to primive 
+// display terminals and I'm pull more logic up into the base class, so
+// I'll probably move towards Composition instead of Inheritance
 internal abstract class UserInterface
 {
     protected const int BACKSPACE = 8;
@@ -40,16 +45,21 @@ internal abstract class UserInterface
     protected abstract UIEvent PollForEvent();
     
     protected List<string>? _longMessage;
-    protected string _lastMessage = "";
-    
+    protected string _messageBuffer = "";
+    protected Options _options;
+    private bool _playing;
+
     private delegate void InputListener(UIEvent e);
     private InputListener? CurrentListener;
 
     public Player? Player { get; set; } = null;
+    public Queue<char> InputBuffer = new Queue<char>();
+
     protected GameState? GameState { get; set; } = null;
 
-    public UserInterface()
+    public UserInterface(Options opts)
     {
+        _options = opts;
         PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;        
     }
@@ -110,7 +120,7 @@ internal abstract class UserInterface
 
     public void WriteMessage(string message)
     {
-        _lastMessage = message;
+        _messageBuffer = message;
     }
 
     public void WriteLongMessage(List<string> message)
@@ -133,34 +143,12 @@ internal abstract class UserInterface
             var (dr, dc) = AskForDirection();            
             return new OpenDoorAction(p, p.Row + dr, p.Col + dc, m);
         }
-        else if (ch == 'E')
-            return new PortalAction(gameState);
-        else if (ch == '>')
-            return new DownstairsAction(gameState);
-        else if (ch == '<')
-            return new UpstairsAction(gameState);
-        else if (ch == 'h')
-            return new MoveAction(p, p.Row, p.Col - 1, gameState);
-        else if (ch == 'j')
-            return new MoveAction(p, p.Row + 1, p.Col, gameState);
-        else if (ch == 'k')
-            return new MoveAction(p, p.Row - 1, p.Col, gameState);
-        else if (ch == 'l')
-            return new MoveAction(p, p.Row, p.Col + 1, gameState);
-        else if (ch == 'y')
-            return new MoveAction(p, p.Row - 1, p.Col - 1, gameState);
-        else if (ch == 'u')
-            return new MoveAction(p, p.Row - 1, p.Col + 1, gameState);
-        else if (ch == 'b')
-            return new MoveAction(p, p.Row + 1, p.Col - 1, gameState);
-        else if (ch == 'n')
-            return new MoveAction(p, p.Row + 1, p.Col + 1, gameState);
-        else if (ch == 'Q')
-            return new QuitAction();
+                
+        
         else if (ch == 'S')
             return new SaveGameAction();
-        else
-            return new PassAction(p);
+
+        return null;
     }
 
     protected (Color, char) TileToGlyph(Tile tile, bool lit)
@@ -203,11 +191,11 @@ internal abstract class UserInterface
         GameState = new GameState()
         {
             Map = campaign!.Dungeons[0].LevelMaps[campaign.CurrentLevel],
-            Options = null,
+            Options = _options,
             Player = Player,
             Campaign = campaign,
             CurrLevel = campaign.CurrentLevel,
-            CurrDungeon = campaign.CurrentDungeon
+            CurrDungeon = campaign.CurrentDungeon,
         };
 
         CurrentListener = new InputListener(MainListener);
@@ -218,14 +206,68 @@ internal abstract class UserInterface
         if (e.Type == UIEventType.KeyInput)
         {
             _longMessage = null;
-            var pregameHandler = new PregameHandler(this);
+            var pregameHandler = new PreGameHandler(this);
             CurrentListener = new InputListener(pregameHandler.HandleInput);
         }
     }
 
     private void MainListener(UIEvent e)
     {
+        if (e.Type == UIEventType.KeyInput)
+        {
+            InputBuffer.Enqueue(e.Value);
+        }
+    }
 
+    // Handles waiting will we display a goodbye message, and eventually
+    // High Scores screen, etc
+    private void OnQuitListener(UIEvent e)
+    {
+        if (e.Type == UIEventType.KeyInput)
+        {
+            _playing = false;
+        }
+    }
+
+    private void TakeTurn(Actor actor)
+    {
+        var action = actor.TakeTurn(this, GameState);
+
+        if (action is QuitAction)
+        {
+            // It feels maybe like overkill to use an exception here?
+            throw new GameQuitException();
+        }
+        else if (action is SaveGameAction)
+        {
+            //if (ui.QueryYesNo("Really quit and save? (y/n)"))
+            //{
+            //    Serialize.WriteSaveGame(player.Name, player, campaign, gameState);
+            //    throw new GameQuitException();
+            //}
+            //else
+            //{
+            //    ui.WriteMessage("Nevermind.");
+            //}
+        }
+        else if (action is NullAction)
+        {
+            // Just idling...                
+            return;
+        }
+        else
+        {
+            ActionResult result;
+            do
+            {
+                result = action!.Execute();
+                if (result.AltAction is not null)
+                    result = result.AltAction.Execute();
+                if (result.Message is not null)
+                    WriteMessage(result.Message);
+            }
+            while (result.AltAction is not null);
+        }
     }
 
     public void GameLoop()
@@ -236,7 +278,8 @@ internal abstract class UserInterface
 
         DateTime lastPollTime = DateTime.Now;
 
-        while (true) 
+        _playing = true;
+        while (_playing) 
         {
             var e = PollForEvent();
             if (e.Type == UIEventType.Quiting)
@@ -244,7 +287,26 @@ internal abstract class UserInterface
 
             if (e.Type == UIEventType.KeyInput)
                 CurrentListener(e);
-            
+
+            try
+            {
+                // Update step! This is where all the Actors get a chance
+                // to take their turn! (At the moment the only actor is 
+                // the player)
+                if (Player is not null)
+                    TakeTurn(Player);
+            }
+            catch (GameQuitException)
+            {
+                var msg = new List<string>()
+                {
+                    "",
+                    " Being seeing you..."
+                };
+                WriteLongMessage(msg);
+                CurrentListener = new InputListener(OnQuitListener);
+            }
+
             if (GameState is not null)
             {
                 // Maybe move this into gamestate?
@@ -252,7 +314,8 @@ internal abstract class UserInterface
                 var c = GameState.Campaign;
                 int currLevel = GameState.CurrLevel;
                 var dungeon = c.Dungeons[GameState.CurrDungeon];
-                var map = dungeon.LevelMaps[currLevel];            
+                var map = dungeon.LevelMaps[currLevel];
+                GameState.Map = map;
                 var vs = FieldOfView.CalcVisible(Player, map, currLevel);
                 var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();        
                 dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
@@ -293,14 +356,27 @@ internal abstract class UserInterface
     }
 }
 
-internal class PregameHandler
+// I dunno? Should this be in Player object?
+//
+// Aesthetics-wise, I think it would be nice to have the
+// Player be another Actor so game loop is like "Hey Actors
+// do your shit
+internal class PlayerInputHandler
+{
+    public void HandleInput(UIEvent e)
+    {
+
+    }
+}
+
+internal class PreGameHandler
 {
     protected const int BACKSPACE = 8;
     private const string _prompt = "Who are you?"; 
     private UserInterface _ui { get; set; }
     private string _playerName { get; set; } = "";
     
-    public PregameHandler(UserInterface ui)
+    public PreGameHandler(UserInterface ui)
     {
         _ui = ui;
         ui.WriteMessage(_prompt);

@@ -7,6 +7,8 @@ abstract class Actor
     public int Col { get; set; }
     public int MaxVisionRadius { get; set; }
     public int CurrVisionRadius { get; set; }
+
+    public abstract Action TakeTurn(UserInterface ui, GameState gameState);
 }
 
 internal class GameQuitException : Exception { }

@@ -18,12 +18,12 @@ internal class SDLUserInterface : UserInterface
 
     private Dictionary<Color, SDL_Color> _colours;
 
-    public SDLUserInterface(string windowTitle, int fontSize) : base()
+    public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
-        FontSize = fontSize;
+        FontSize = opt.FontSize;
         SDL_Init(SDL_INIT_VIDEO);
         SDL_ttf.TTF_Init();
-        _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", fontSize);
+        _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", opt.FontSize);
         SDL_ttf.TTF_SizeUTF8(_font, " ", out _fontWidth, out _fontHeight);
         
         int width = ScreenWidth * _fontWidth;
@@ -249,7 +249,7 @@ internal class SDLUserInterface : UserInterface
         }
         else
         {
-            WriteLine(_lastMessage, 0, 0, ScreenWidth);
+            WriteLine(_messageBuffer, 0, 0, ScreenWidth);
             if (Player is not null) {
                 _lastFrameTexture = CreateMainTexture(Player.Row, Player.Col, gameState);
                 WriteSideBar(Player);

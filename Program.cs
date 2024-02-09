@@ -5,14 +5,13 @@ using Yarl2;
 var wildernessGenerator = new Wilderness(new Random());
 var m2 = wildernessGenerator.DrawLevel(257);
 
-
 var options = Options.LoadOptions("options.json");
 
 UserInterface display;
 if (options.Display == "Bearlib")
-    display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options.FontSize);
+    display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options);
 else
-    display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options.FontSize);
+    display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
 
 try
 {

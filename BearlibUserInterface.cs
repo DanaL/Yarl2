@@ -7,9 +7,9 @@ internal class BLUserInferface : UserInterface, IDisposable
 {        
     private readonly Dictionary<int, char> KeyToChar = [];
 
-    public BLUserInferface(string windowTitle, int fontSize) : base()
+    public BLUserInferface(string windowTitle, Options opt) : base(opt)
     {
-        FontSize = fontSize;
+        FontSize = opt.FontSize;
         SetUpKeyToCharMap();
         Terminal.Open();
         Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
@@ -105,7 +105,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         }
         else
         {
-            Terminal.Print(0, 0, _lastMessage.PadRight(ScreenWidth));
+            Terminal.Print(0, 0, _messageBuffer.PadRight(ScreenWidth));
 
             if (Player is not null)
             {
