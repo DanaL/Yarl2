@@ -48,6 +48,10 @@ internal class Player : Actor
                 return new UpstairsAction(gameState);
             else if (ch == 'Q')
                 return new QuitAction();
+            else if (ch == 'S')
+            {
+                // Create or check an input accumulator
+            }
             else
                 return new PassAction(this);
         }

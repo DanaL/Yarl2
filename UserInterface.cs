@@ -270,6 +270,11 @@ internal abstract class UserInterface
         }
     }
 
+    private void DoActorTurns()
+    {
+        TakeTurn(Player);
+    }
+
     public void GameLoop()
     {
         CurrentListener = StartupListener;
@@ -294,7 +299,7 @@ internal abstract class UserInterface
                 // to take their turn! (At the moment the only actor is 
                 // the player)
                 if (Player is not null)
-                    TakeTurn(Player);
+                    DoActorTurns();
             }
             catch (GameQuitException)
             {
@@ -307,6 +312,10 @@ internal abstract class UserInterface
                 CurrentListener = new InputListener(OnQuitListener);
             }
 
+            // TODO: I really need to cleanup the GameState object and
+            // what uses what since it current has references to the Campaign,
+            // the Dungeons, the current Map, etc and too much of its guts
+            // are exposed and called directly
             if (GameState is not null)
             {
                 // Maybe move this into gamestate?
@@ -324,25 +333,6 @@ internal abstract class UserInterface
                 GameState.Remebered = dungeon.RememberedSqs;
             }
             UpdateDisplay(GameState);
-
-            // UpdateView will query for what the user can see
-            // UpdateView(player, gameState);
-            
-            // main loop state machine:
-
-            // oh I need a pre-game routine because I'll ask for 
-            // the player's name etc before the game begins :O
-            // GameState will have methods for loading the game
-            // or starting a new one?
-
-            // 1) waiting for input
-            //    on a key input event I'll want to pass the result 
-            //    to the appropriate handler
-
-            // 2) if idle, then the key input is a player's command
-            //    or are they the same thing and the delegate changes?
-
-            // event can be quit or quit-and-save
 
             var dd = DateTime.Now - lastPollTime;
             if (dd.TotalSeconds > 5) 
@@ -455,5 +445,27 @@ internal class PreGameHandler
         }
 
         _ui.WriteMessage($"{_prompt} {_playerName}");
+    }
+}
+
+internal interface IInputAccumulator 
+{
+    bool Done();
+    void Input(char ch);
+}
+
+internal class YesNoAccumulator : IInputAccumulator
+{
+    private bool _done;
+
+    public YesNoAccumulator() => _done = false;
+
+    public bool Done() => _done;
+
+    public void Input(char ch)
+    {
+        // Need to eventually handle ESC
+        if (ch == 'y')
+            _done = true;
     }
 }
