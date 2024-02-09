@@ -2,9 +2,6 @@
 
 using Yarl2;
 
-var wildernessGenerator = new Wilderness(new Random());
-var m2 = wildernessGenerator.DrawLevel(257);
-
 var options = Options.LoadOptions("options.json");
 
 UserInterface display;
@@ -17,39 +14,6 @@ try
 {
     var rng = new Random();
     display.GameLoop();
-
-    // string playerName = display.QueryUser("Who are you?").Trim();
-    // display.WriteMessage($"Hello, {playerName}.");
-    // display.WaitForInput();
-    
-    // Player player;
-    // Campaign campaign;
-    // int currentLevel, currentDungeon;
-
-    // string filename = $"{playerName}.dat";
-    // if (File.Exists(filename))
-    // {
-    //     var bytes = File.ReadAllBytes(filename);
-    //     var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
-
-    //     var (p, c, cl, cd) = Serialize.LoadSaveGame(playerName);
-    //     player = p;
-    //     campaign = c;
-    //     currentDungeon = cd;
-    //     currentLevel = cl;
-    // }
-    // else
-    // {
-    //     var (cm, row, col) = BeginCampaign(rng);
-    //     campaign = cm;
-    //     player = new Player(playerName, row, col);  
-    //     currentDungeon = 0;
-    //     currentLevel = 0;      
-    // }
-    
-    //display.Player = player;
-    //var engine = new GameEngine(29, 29, display, options);
-    //engine.Play(player, campaign, currentLevel, currentDungeon);
 }
 catch (GameQuitException)
 {

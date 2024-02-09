@@ -97,6 +97,7 @@ internal abstract class UserInterface
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
                 return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
+            case TileType.Water:
             case TileType.DeepWater:
                 return lit ? (BLUE, DeepWaterChar) : (DARK_BLUE, DeepWaterChar);
             case TileType.Sand:

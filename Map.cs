@@ -1,5 +1,4 @@
 ﻿
-
 namespace Yarl2;
 
 enum TileType
@@ -11,6 +10,7 @@ enum TileType
     Floor,
     Door,
     DeepWater,
+    Water,
     Sand,
     Grass,
     Tree,
@@ -31,13 +31,29 @@ internal abstract class Tile
     protected Tile(TileType type) => Type = type;
 }
 
-internal class BasicTile(TileType type, bool passable, bool opaque) : Tile(type)
+internal class BasicTile : Tile
 {
-    private readonly bool _passable = passable;
-    private readonly bool _opaque = opaque;
+    private readonly bool _passable;
+    private readonly bool _opaque;
+    private readonly string _stepMessage;
 
     public override bool Passable() => _passable;
     public override bool Opaque() => _opaque;
+    public override string StepMessage => _stepMessage;
+
+    public BasicTile(TileType type, bool passable, bool opaque) : base(type)
+    {
+        _passable = passable;
+        _opaque = opaque;
+        _stepMessage = "";
+    }
+
+    public BasicTile(TileType type, bool passable, bool opaque, string stepMessage) : base(type)
+    {
+        _passable = passable;
+        _opaque = opaque;
+        _stepMessage = stepMessage;
+    }
 }
 
 internal class Door(TileType type, bool open) : Tile(type)
@@ -95,7 +111,8 @@ internal class TileFactory
     private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false);
     private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
-    
+    private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
+
     public static Tile Get(TileType type)
     {
         return type switch 
@@ -110,7 +127,8 @@ internal class TileFactory
             TileType.Tree => Tree,
             TileType.Mountain => Mountain,
             TileType.SnowPeak => SnowPeak,
-            TileType.Door => new Door(type, false),            
+            TileType.Door => new Door(type, false), 
+            TileType.Water => Water,
             _ => Unknown
         };
     }

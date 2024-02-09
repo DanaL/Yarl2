@@ -177,7 +177,7 @@ internal class MoveAction(Actor actor, int row, int col, GameState gameState) : 
     {
         return tile.Type switch
         {
-            TileType.DeepWater => "You don't want to get your boots wet.",
+            TileType.DeepWater => "The ocean seems deep and cold.",
             TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
             _ => "You cannot go that way!"
         }; ;

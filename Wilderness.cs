@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Yarl2;
 
 internal class Wilderness(Random rng)
@@ -7,53 +9,39 @@ internal class Wilderness(Random rng)
 
     private int Fuzz() => _rng.Next(-50, 51);
 
-    (int, int) NextPoint(int r, int c, int d, double angle)
-    {
-        int nextR = (int)(r + (d * Math.Sin(angle)));
-        int nextC = (int)(c + (d * Math.Cos(angle)));
-
-        return (nextR, nextC);
-    }
-
-    void DrawARiver(Map map, (int, int) start, double angle)
+    void DrawARiver(Map map, (int, int) start)
     {
         int row = start.Item1;
         int col = start.Item2;
         var pts = new List<(int, int)>();
-        double currentAngle = angle;
-
+        
         do
         {
             int d = _rng.Next(2, 5);
-            var n = NextPoint(row, col, d, currentAngle);
+            int columnBoop = _rng.Next(-5, 5);
 
-            if (!map.InBounds(n))
+            int nextRow = row - d;
+            int nextCol = col + columnBoop;
+
+            if (!map.InBounds(nextRow, nextCol))
                 break;
 
-            var nextSegment = Util.Bresenham(row, col, n.Item1, n.Item2);
+            var nextSegment = Util.Bresenham(row, col, nextRow, nextCol);
             bool riverCrossing = false;
             foreach (var pt in nextSegment)
             {
                 pts.Add((pt.Item1, pt.Item2));
-                if (map.TileAt(pt).Type == TileType.DeepWater)
+                if (map.TileAt(pt).Type == TileType.DeepWater || map.TileAt(pt).Type == TileType.Water)
                 {
                     riverCrossing = true;
                 }
             }
 
-            if (map.TileAt(n).Type == TileType.DeepWater && riverCrossing)
+            if ((map.TileAt(nextRow, nextCol).Type == TileType.DeepWater || map.TileAt(nextRow, nextCol).Type == TileType.Water) && riverCrossing)
                 break;
 
-            row = n.Item1; 
-            col = n.Item2;
-            double angleTweak = _rng.NextDouble() / 2 - 0.25;
-            currentAngle += angleTweak;
-
-            // keep the river from turning back and looking like it's flowing uphill into the mountains
-            if (currentAngle > -0.1)
-                currentAngle = -0.28;
-            else if (currentAngle < -0.3)
-                currentAngle = -2.6;
+            row = nextRow;
+            col = nextCol;
 
             // smooth river
             // bresenham draws lines that can look like:
@@ -70,11 +58,11 @@ internal class Wilderness(Random rng)
                 if (a.Item1 != b.Item1 && a.Item2 != b.Item2)
                     extraPts.Add((a.Item1 - 1, a.Item2));
 
-                map.SetTile(pts[j], TileFactory.Get(TileType.DeepWater));
+                map.SetTile(pts[j], TileFactory.Get(TileType.Water));
             }
 
             foreach (var pt in extraPts)
-                map.SetTile(pt, TileFactory.Get(TileType.DeepWater));
+                map.SetTile(pt, TileFactory.Get(TileType.Water));
         }
         while (true);
     }
@@ -101,30 +89,28 @@ internal class Wilderness(Random rng)
         var opts = new List<int>() { 0, 1, 2 };
         opts.Shuffle(_rng);
 
+        int third = _length / 3;
+
         int passes = 0;
         foreach (int o in opts) 
         { 
-            if (o == 0 && _rng.NextDouble() < 0.5)
+            if (o == 0)
             {
-                var startLoc = RiverStart(map, 2, _length / 3);
-                double angle = -0.28;
-                DrawARiver(map, startLoc, angle);
+                var startLoc = RiverStart(map, 2, third);
+                DrawARiver(map, startLoc);
             }
             else if (o == 1)
             {
-                var startLoc = RiverStart(map, _length / 3, (_length / 3) * 2);
-                double angle = -1.5;
-                DrawARiver(map, startLoc, angle);
+                var startLoc = RiverStart(map, third, third * 2);
+                DrawARiver(map, startLoc);
             }
             else
             {
-                var startLoc = RiverStart(map, _length - _length / 3, _length - 2);
-                double angle = -2.5;
-                DrawARiver(map, startLoc, angle);
+                var startLoc = RiverStart(map, third * 2, _length - 2);
+                DrawARiver(map, startLoc);
             }
             ++passes;
-        }
-        
+        }        
     }
 
     int CountAdjType(Map map, int r, int c, TileType type)
@@ -368,7 +354,7 @@ internal class Wilderness(Random rng)
                         TileType.Mountain or TileType.SnowPeak => '^',
                         TileType.Grass => ',',
                         TileType.Tree => 'T',
-                        TileType.DeepWater => '~',
+                        TileType.DeepWater or TileType.Water => '~',
                         _ => ' '
                     };
 
@@ -417,7 +403,7 @@ internal class Wilderness(Random rng)
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
 
-        //Dump(map, "out.txt");
+        Dump(map, "out.txt");
 
         return map;
     }
