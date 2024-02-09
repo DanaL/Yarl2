@@ -52,7 +52,11 @@ internal abstract class UserInterface
     protected List<string>? _longMessage;
     protected string _lastMessage = "";
     
+    private delegate void InputListener(UIEvent e);
+    private InputListener? CurrentListener;
+
     public Player? Player { get; set; } = null;
+    protected GameState? GameState { get; set; } = null;
 
     public UserInterface()
     {
@@ -194,11 +198,40 @@ internal abstract class UserInterface
         }        
     }
 
+    public void BeginGame(Campaign campaign)
+    {
+        GameState = new GameState()
+        {
+            Map = campaign!.Dungeons[0].LevelMaps[campaign.CurrentLevel],
+            Options = null,
+            Player = Player,
+            Campaign = campaign,
+            CurrLevel = campaign.CurrentLevel,
+            CurrDungeon = campaign.CurrentDungeon
+        };
+
+        CurrentListener = new InputListener(MainListener);
+    }
+
+    private void StartupListener(UIEvent e)
+    {
+        if (e.Type == UIEventType.KeyInput)
+        {
+            _longMessage = null;
+            var pregameHandler = new PregameHandler(this);
+            CurrentListener = new InputListener(pregameHandler.HandleInput);
+        }
+    }
+
+    private void MainListener(UIEvent e)
+    {
+
+    }
+
     public void GameLoop()
     {
-        GameState? gameState = null;          
         LoopState state = LoopState.Startup;
-        PregameHandler? pregameHandler = null;
+        CurrentListener = StartupListener;
 
         TitleScreen();  
 
@@ -210,50 +243,25 @@ internal abstract class UserInterface
             if (e.Type == UIEventType.Quiting)
                 break;
 
-            switch (state)
-            {
-                case LoopState.Startup:
-                    if (e.Type == UIEventType.KeyInput)
-                    {
-                        state = LoopState.Pregame;
-                        pregameHandler = new PregameHandler(this);
-                        _longMessage = null;
-                    }
-                    break;
-                case LoopState.Pregame:
-                    if (e.Type == UIEventType.KeyInput && pregameHandler.HandleInput(e))
-                    {
-                        var campaign = pregameHandler.Campaign;
-                        gameState = new GameState()
-                        {
-                            Map = campaign!.Dungeons[0].LevelMaps[campaign.CurrentLevel],
-                            Options = null,
-                            Player = Player,
-                            Campaign = campaign,
-                            CurrLevel = campaign.CurrentLevel,
-                            CurrDungeon = campaign.CurrentDungeon
-                        };
-                        state = LoopState.Playing;
-                    }
-                    break;                
-            }
-
-            if (gameState is not null)
+            if (e.Type == UIEventType.KeyInput)
+                CurrentListener(e);
+            
+            if (GameState is not null)
             {
                 // Maybe move this into gamestate?
                 // or eventually the user input handler class?
-                var c = gameState.Campaign;
-                int currLevel = gameState.CurrLevel;
-                var dungeon = c.Dungeons[gameState.CurrDungeon];
+                var c = GameState.Campaign;
+                int currLevel = GameState.CurrLevel;
+                var dungeon = c.Dungeons[GameState.CurrDungeon];
                 var map = dungeon.LevelMaps[currLevel];            
                 var vs = FieldOfView.CalcVisible(Player, map, currLevel);
                 var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();        
                 dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
                 dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
-                gameState.Visible = vs;
-                gameState.Remebered = dungeon.RememberedSqs;
+                GameState.Visible = vs;
+                GameState.Remebered = dungeon.RememberedSqs;
             }
-            UpdateDisplay(gameState);
+            UpdateDisplay(GameState);
 
             // UpdateView will query for what the user can see
             // UpdateView(player, gameState);
@@ -292,8 +300,7 @@ internal class PregameHandler
     private const string _prompt = "Who are you?"; 
     private UserInterface _ui { get; set; }
     private string _playerName { get; set; } = "";
-    public Campaign? Campaign { get; set; }
-
+    
     public PregameHandler(UserInterface ui)
     {
         _ui = ui;
@@ -341,19 +348,25 @@ internal class PregameHandler
         var (c, startRow, startCol) = BeginCampaign(new Random());
         Player player = new Player(playerName, startRow, startCol);          
         _ui.Player = player;
-        Campaign = c;
+        _ui.BeginGame(c);
     }
 
     // Eventually this is going to need state because
     // we'll be handling picking a character class, etc
     // for a new game
-    public bool HandleInput(UIEvent e)
+
+    // This code is going to end up duplciated so I wonder
+    // if it'll be too complicated to make a generic 
+    // "typing in text handler"
+    public void HandleInput(UIEvent e)
     {
         if (e.Value == '\n' || e.Value == 13) 
         {
+            // done, 
             SetupGame(_playerName);
             _ui.WriteMessage($"Welcome, {_playerName}");
-            return true;
+            
+            return;
         }
         else if (e.Value == BACKSPACE)
         {
@@ -367,6 +380,5 @@ internal class PregameHandler
         }
 
         _ui.WriteMessage($"{_prompt} {_playerName}");
-        return false;
     }
 }
