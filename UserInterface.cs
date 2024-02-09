@@ -240,15 +240,8 @@ internal abstract class UserInterface
         }
         else if (action is SaveGameAction)
         {
-            //if (ui.QueryYesNo("Really quit and save? (y/n)"))
-            //{
-            //    Serialize.WriteSaveGame(player.Name, player, campaign, gameState);
-            //    throw new GameQuitException();
-            //}
-            //else
-            //{
-            //    ui.WriteMessage("Nevermind.");
-            //}
+            Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState);
+            throw new GameQuitException();
         }
         else if (action is NullAction)
         {
@@ -450,22 +443,33 @@ internal class PreGameHandler
 
 internal interface IInputAccumulator 
 {
-    bool Done();
+    bool Success { get; }
+    bool Done { get; }
     void Input(char ch);
 }
 
 internal class YesNoAccumulator : IInputAccumulator
 {
     private bool _done;
+    private bool _success;
 
     public YesNoAccumulator() => _done = false;
 
-    public bool Done() => _done;
+    public bool Success => _success;
+    public bool Done => _done;
 
     public void Input(char ch)
     {
         // Need to eventually handle ESC
         if (ch == 'y')
+        {
             _done = true;
+            _success = true;
+        }
+        else if (ch == 'n')
+        {
+            _done = true;
+            _success = false;
+        }
     }
 }

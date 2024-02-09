@@ -6,6 +6,8 @@ internal class Player : Actor
     public string Name { get; set; }
     public int MaxHP { get; set; }
     public int CurrHP { get; set; }
+    private IInputAccumulator? _accumulator;
+    private Action _deferred;
 
     public Player(string name, int row, int col)
     {
@@ -24,6 +26,25 @@ internal class Player : Actor
         {
             char ch = ui.InputBuffer.Dequeue();
             
+            if (_accumulator is not null)
+            {
+                _accumulator.Input(ch);
+                if (_accumulator.Done)
+                {                    
+                    if (_accumulator.Success)
+                    {
+                        _accumulator = null;
+                        return _deferred;
+                    }
+                    else
+                    {
+                        _accumulator = null;
+                        ui.WriteMessage("Nevermind.");
+                        return new NullAction();
+                    }
+                }
+            }
+
             if (ch == 'h')
                 return new MoveAction(this, Row, Col - 1, gameState);
             else if (ch == 'j')
@@ -50,7 +71,9 @@ internal class Player : Actor
                 return new QuitAction();
             else if (ch == 'S')
             {
-                // Create or check an input accumulator
+                _accumulator = new YesNoAccumulator();
+                _deferred = new SaveGameAction();
+                ui.WriteMessage("Really quit and save? (y/n)");
             }
             else
                 return new PassAction(this);
