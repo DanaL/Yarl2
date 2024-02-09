@@ -69,17 +69,6 @@ internal class BLUserInferface : UserInterface, IDisposable
         return new UIEvent(UIEventType.NoEvent, '\0');
     }
 
-    public override Action? GetCommand(GameState gameState)
-    {
-        if (Terminal.HasInput())
-        {
-            var ch = WaitForInput();
-            return KeyToAction(ch, gameState);
-        }
-        else
-            return new NullAction();
-    }
-
     void WriteSideBar()
     {
         Terminal.Print(ViewWidth, 1, $"| {Player.Name}".PadRight(ViewWidth));
@@ -145,64 +134,6 @@ internal class BLUserInferface : UserInterface, IDisposable
         }
         
         Terminal.Refresh();
-    }
-
-    public override string QueryUser(string prompt)
-    {            
-        string answer = "";
-        do
-        {
-            string message = $"{prompt} {answer}";
-            WriteMessage(message);
-
-            var ch = WaitForInput();
-            if (ch == '\n')
-            {
-                break;
-            }
-            else if (ch == BACKSPACE && answer.Length > 0)
-            {
-                answer = answer[..^1];
-            }
-            else if (ch != '\0')
-            {
-                answer += ch;
-            }
-        }
-        while (true);
-
-        return answer;
-    }
-
-    public override char WaitForInput()
-    {
-        do 
-        {
-            int key = Terminal.Read();
-            
-            if (key == (int)TKCodes.InputEvents.TK_CLOSE)
-                throw new GameQuitException();
-
-            if (KeyToChar.TryGetValue(key, out char value))
-            {
-                // I feel like there has to be a better way to handle shifted characters
-                // in Bearlib but I haven't found it yet...
-                if (Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT))
-                {
-                    return value switch
-                    {
-                        ',' => '<',
-                        '.' => '>',
-                        _ => char.ToUpper(value)
-                    };
-                }
-                else
-                {
-                    return value;
-                }                    
-            }
-        }
-        while (true);
     }
 
     public void Dispose()

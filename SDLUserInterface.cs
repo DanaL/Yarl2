@@ -65,71 +65,11 @@ internal class SDLUserInterface : UserInterface
         return new UIEvent(UIEventType.NoEvent, '\0');
     }
 
-    public override Action? GetCommand(GameState gameState)
-    {
-        while (SDL_PollEvent(out var e) != 0) {
-            switch (e.type)
-            {
-                case SDL_EventType.SDL_QUIT:
-                    return new QuitAction();
-                
-                case SDL_EventType.SDL_TEXTINPUT:
-                    char c;
-                    unsafe
-                    {
-                        c = (char)*e.text.text;                    
-                    }
-                    
-                    return KeyToAction(c, gameState);
-                default:
-                    return new NullAction();
-            }        
-        }
-
-        return new NullAction();
-    }
-
-    public override string QueryUser(string prompt)
-    {
-        string answer = "";
-
-        do 
-        {
-            WriteMessage($"{prompt} {answer}");
-            char ch = WaitForInput();            
-            if (ch == 13)
-                return answer;
-            else if (ch == BACKSPACE)
-                answer = answer.Length > 0 ? answer[..^1] : "";
-            else
-                answer += ch;
-        } 
-        while (true);
-    }
-
     private static char KeysymToChar(SDL_Keysym keysym) 
     {
         return keysym.mod == SDL_Keymod.KMOD_LSHIFT || keysym.mod == SDL_Keymod.KMOD_RSHIFT
             ? char.ToUpper((char)keysym.sym)
             : (char)keysym.sym;
-    }
-
-    public override char WaitForInput()
-    {        
-        do 
-        {
-            SDL_WaitEvent(out var e);
-            switch (e.type) 
-            {                
-                case SDL_EventType.SDL_KEYDOWN:                    
-                    if (e.key.keysym.sym == SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL_Keycode.SDLK_RSHIFT)
-                        continue;
-                    var ch = e.key.keysym;                                        
-                    SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
-                    return KeysymToChar(ch);                    
-            }
-        } 
-        while (true);        
     }
 
     private SDL_Color ToSDLColour(Color colour) 

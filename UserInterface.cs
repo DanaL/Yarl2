@@ -1,5 +1,4 @@
 ﻿using BearLibNET.DefaultImplementations;
-using System.Numerics;
 
 namespace Yarl2;
 
@@ -38,10 +37,7 @@ internal abstract class UserInterface
     protected readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
     protected readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
 
-    public abstract Action? GetCommand(GameState gameState);
-    public abstract string QueryUser(string prompt);        
     public abstract void UpdateDisplay(GameState gameState);
-    public abstract char WaitForInput();
     protected abstract UIEvent PollForEvent();
     
     protected List<string>? _longMessage;
@@ -79,46 +75,6 @@ internal abstract class UserInterface
         };        
     }
 
-    private (int, int) AskForDirection()
-    {
-        do 
-        {
-            WriteMessage("Which way?");
-            char ch = WaitForInput();            
-            if (ch == 'y')
-                return (-1, -1);
-            else if (ch == 'u')
-                return (-1, 1);
-            else if (ch == 'h')
-                return (0, -1);
-            else if (ch == 'j')
-                return (1, 0);
-            else if (ch == 'k')
-                return (-1, 0);
-            else if (ch == 'l')
-                return (0, 1);
-            else if (ch == 'b')
-                return (1, -1);
-            else if (ch == 'n')
-                return (1, 1);
-        }
-        while (true);
-    }
-
-    public bool QueryYesNo(string prompt)
-    {        
-        do 
-        {
-            WriteMessage(prompt);
-            char ch = WaitForInput();
-            if (ch == 'y')
-                return true;
-            else if (ch == 'n')
-                return false;
-        }
-        while (true);
-    }
-
     public void WriteMessage(string message)
     {
         _messageBuffer = message;
@@ -127,29 +83,6 @@ internal abstract class UserInterface
     public void WriteLongMessage(List<string> message)
     {
         _longMessage = message;
-    }
-
-    protected Action KeyToAction(char ch, GameState gameState)
-    {
-        Player p = gameState.Player!;
-        Map m = gameState.Map!;
-
-        if (ch == 'c') 
-        {
-            var (dr, dc) = AskForDirection();            
-            return new CloseDoorAction(p, p.Row + dr, p.Col + dc, m);
-        }
-        else if (ch == 'o') 
-        {
-            var (dr, dc) = AskForDirection();            
-            return new OpenDoorAction(p, p.Row + dr, p.Col + dc, m);
-        }
-                
-        
-        else if (ch == 'S')
-            return new SaveGameAction();
-
-        return null;
     }
 
     protected (Color, char) TileToGlyph(Tile tile, bool lit)
@@ -454,39 +387,6 @@ internal class PreGameHandler
         }
 
         _ui.WriteMessage($"{_prompt} {_playerName}");
-    }
-}
-
-internal interface IInputAccumulator 
-{
-    bool Success { get; }
-    bool Done { get; }
-    void Input(char ch);
-}
-
-internal class YesNoAccumulator : IInputAccumulator
-{
-    private bool _done;
-    private bool _success;
-
-    public YesNoAccumulator() => _done = false;
-
-    public bool Success => _success;
-    public bool Done => _done;
-
-    public void Input(char ch)
-    {
-        // Need to eventually handle ESC
-        if (ch == 'y')
-        {
-            _done = true;
-            _success = true;
-        }
-        else if (ch == 'n')
-        {
-            _done = true;
-            _success = false;
-        }
     }
 }
 

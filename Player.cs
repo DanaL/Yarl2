@@ -32,8 +32,15 @@ internal class Player : Actor
                 if (_accumulator.Done)
                 {                    
                     if (_accumulator.Success)
-                    {
+                    {                        
+                        if (_accumulator is DirectionAccumulator)
+                        {
+                            var acc = _accumulator as DirectionAccumulator;
+                            (_deferred as DirectionalAction).Row += acc.Result.Item1;
+                            (_deferred as DirectionalAction).Col += acc.Result.Item2;
+                        }
                         _accumulator = null;
+
                         return _deferred;
                     }
                     else
@@ -67,6 +74,26 @@ internal class Player : Actor
                 return new DownstairsAction(gameState);
             else if (ch == '<')
                 return new UpstairsAction(gameState);
+            else if (ch == 'c')
+            {
+                _accumulator = new DirectionAccumulator();
+                var action = new CloseDoorAction(ui.Player, gameState.Map);
+                action.Row = ui.Player.Row;
+                action.Col = ui.Player.Col;
+                _deferred = action;
+                
+                ui.WriteMessage("Which way?");
+            }
+            else if (ch == 'o')
+            {
+                _accumulator = new DirectionAccumulator();
+                var action = new OpenDoorAction(ui.Player, gameState.Map);
+                action.Row = ui.Player.Row;
+                action.Col = ui.Player.Col;
+                _deferred = action;
+
+                ui.WriteMessage("Which way?");
+            }
             else if (ch == 'Q')
                 return new QuitAction();
             else if (ch == 'S')

@@ -93,17 +93,21 @@ internal class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
-internal class CloseDoorAction(Actor actor, int row, int col, Map map) : Action
+internal abstract class DirectionalAction() : Action
+{
+    public int Row { get; set; }
+    public int Col { get; set; }
+}
+
+internal class CloseDoorAction(Actor actor, Map map) : DirectionalAction
 {
     private readonly Actor _actor = actor;
-    private readonly int _row = row;
-    private readonly int _col = col;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(_row, _col);
+        var door = _map.TileAt(Row, Col);
 
         if (door is Door d)
         {
@@ -128,17 +132,15 @@ internal class CloseDoorAction(Actor actor, int row, int col, Map map) : Action
     }
 }
 
-internal class OpenDoorAction(Actor actor, int row, int col, Map map) : Action
+internal class OpenDoorAction(Actor actor, Map map) : DirectionalAction
 {
     private readonly Actor _actor = actor;
-    private readonly int _row = row;
-    private readonly int _col = col;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(_row, _col);
+        var door = _map.TileAt(Row, Col);
 
         if (door is Door d)
         {
@@ -201,7 +203,10 @@ internal class MoveAction(Actor actor, int row, int col, GameState gameState) : 
                 var tile = _map.TileAt(_row, _col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    result.AltAction = new OpenDoorAction(_actor, _row, _col, _map);
+                    var openAction = new OpenDoorAction(_actor, _map);
+                    openAction.Row = _row;
+                    openAction.Col = _col;
+                    result.AltAction = openAction;
                 }
                 else
                 {

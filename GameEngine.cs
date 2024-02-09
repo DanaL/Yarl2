@@ -1,6 +1,9 @@
 ﻿
 namespace Yarl2;
 
+// These two classes don't really belong here anymore, now that the
+// GameEngine class is gone...
+
 abstract class Actor
 {
     public int Row { get; set; }
@@ -36,88 +39,5 @@ internal class GameState
 
     public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
-}
-
-internal class GameEngine(int visWidth, int visHeight, UserInterface display, Options options)
-{
-    public readonly int VisibleWidth = visWidth;
-    public readonly int VisibleHeight = visHeight;
-    private readonly UserInterface ui = display;
-    private readonly Options _options = options;
-    
-    // I'm really just replacing everything in GameState with Campaign...
-    private void UpdateView(Player player, GameState gameState)
-    {
-        var c = gameState.Campaign;
-        int currLevel = gameState.CurrLevel;
-        var dungeon = c.Dungeons[gameState.CurrDungeon];
-        var map = dungeon.LevelMaps[currLevel];            
-        var vs = FieldOfView.CalcVisible(player, map, currLevel);
-        var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();        
-        dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
-        gameState.Visible = vs;
-        gameState.Remebered = dungeon.RememberedSqs;
-        gameState.Map = map;
-        //ui.UpdateDisplay(gameState);
-    }
-
-    public void Play(Player player, Campaign campaign, int currLevel, int currDungeon)
-    {
-        var currentLevel = 0;
-        var gameState = new GameState()
-        {
-            Map = campaign.Dungeons[0].LevelMaps[currentLevel],
-            Options = _options,
-            Player = player,
-            Campaign = campaign,
-            CurrLevel = currLevel,
-            CurrDungeon = currDungeon
-        };
-        
-        bool playing = true;
-        UpdateView(player, gameState);
-
-        do 
-        {
-            var cmd = ui.GetCommand(gameState);
-            if (cmd is QuitAction)
-            {
-                playing = false;
-            }
-            else if (cmd is SaveGameAction)
-            {
-                if (ui.QueryYesNo("Really quit and save? (y/n)"))
-                {
-                    Serialize.WriteSaveGame(player.Name, player, campaign, gameState);
-                    throw new GameQuitException();
-                }
-                else
-                {
-                    ui.WriteMessage("Nevermind.");
-                }
-            }
-            else if (cmd is NullAction)
-            {
-                // Just idling...                
-                Thread.Sleep(25);
-            }
-            else
-            {
-                ActionResult result;
-                do 
-                {
-                    result = cmd!.Execute();
-                    if (result.AltAction is not null)
-                        result = result.AltAction.Execute();
-                    if (result.Message is not null)
-                        ui.WriteMessage(result.Message);                    
-                }
-                while (result.AltAction is not null);                
-
-                UpdateView(player, gameState);
-            }                
-        }
-        while (playing);
-    }
 }
 
