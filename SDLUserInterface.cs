@@ -128,7 +128,7 @@ internal class SDLUserInterface : UserInterface
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
-    private IntPtr CreateMainTexture(int playerRow, int playerCol, GameState gameState)
+    private IntPtr CreateMainTexture()
     {
         var tw = ViewWidth * _fontWidth;
         var th = (ScreenHeight - 1) * _fontHeight;
@@ -136,24 +136,12 @@ internal class SDLUserInterface : UserInterface
 
         SDL_SetRenderTarget(_renderer, targetTexture);
 
-        int rowOffset = playerRow - PlayerScreenRow;
-        int colOffset = playerCol - PlayerScreenCol;
         for (int row = 0; row < ScreenHeight - 1; row++)
         {
             for (int col = 0; col < ViewWidth; col++)
             {
-                int vr = row + rowOffset;
-                int vc = col + colOffset;
-                Color color;
-                char ch;
-                if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))                
-                    (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);                
-                else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
-                    (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
-                else
-                    (color, ch) = (BLACK, ' ');
-                            
-                SDLPut(row, col, ch, color);
+                var (colour, ch) = SqsOnScreen[row, col];                            
+                SDLPut(row, col, ch, colour);
             }
         }
         
@@ -177,7 +165,7 @@ internal class SDLUserInterface : UserInterface
         }
     }
 
-    public override void UpdateDisplay(GameState gameState)
+    public override void UpdateDisplay()
     {
         SDL_RenderClear(_renderer);
         if (_longMessage is not null) 
@@ -191,7 +179,7 @@ internal class SDLUserInterface : UserInterface
         {
             WriteLine(_messageBuffer, 0, 0, ScreenWidth);
             if (Player is not null) {
-                _lastFrameTexture = CreateMainTexture(Player.Row, Player.Col, gameState);
+                _lastFrameTexture = CreateMainTexture();
                 WriteSideBar(Player);
                 SDL_RenderCopy(_renderer, _lastFrameTexture, IntPtr.Zero, ref _lastFrameLoc);
             }

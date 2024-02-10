@@ -37,7 +37,7 @@ internal abstract class UserInterface
     protected readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
     protected readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
 
-    public abstract void UpdateDisplay(GameState gameState);
+    public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
     
     protected List<string>? _longMessage;
@@ -54,11 +54,14 @@ internal abstract class UserInterface
 
     protected GameState? GameState { get; set; } = null;
 
+    protected (Color, char)[,] SqsOnScreen;
+
     public UserInterface(Options opts)
     {
         _options = opts;
         PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
-        PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;        
+        PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
+        SqsOnScreen = new (Color, char)[ScreenHeight - 1, ViewWidth];
     }
 
     public virtual void TitleScreen()
@@ -246,37 +249,56 @@ internal abstract class UserInterface
             // the Dungeons, the current Map, etc and too much of its guts
             // are exposed and called directly
             if (GameState is not null)
-            {
-                // Maybe move this into gamestate?
-                // or eventually the user input handler class?
-                var c = GameState.Campaign;
-                int currLevel = GameState.CurrLevel;
-                var dungeon = c.Dungeons[GameState.CurrDungeon];
-                var map = dungeon.LevelMaps[currLevel];
-                GameState.Map = map;
-                var vs = FieldOfView.CalcVisible(Player, map, currLevel);
-                var toShow = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();        
-                dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
-                dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
-                GameState.Visible = vs;
-                GameState.Remebered = dungeon.RememberedSqs;
+            {                
+                SetSqsOnScreen();
             }
 
             foreach (var l in animationListeners)
                 l.Update();
 
-            UpdateDisplay(GameState);
+            UpdateDisplay();
 
             var dd = DateTime.Now - lastPollTime;
             if (dd.TotalSeconds > 5) 
             {
                 Console.WriteLine("hello, world?");
-                lastPollTime = DateTime.Now;
-                
+                lastPollTime = DateTime.Now;                
             }
 
-            Thread.Sleep(50);
+            Thread.Sleep(25);
         }        
+    }
+
+    void SetSqsOnScreen()
+    {
+        var cmpg = GameState.Campaign;
+        int currLevel = GameState.CurrLevel;
+        var dungeon = cmpg.Dungeons[GameState.CurrDungeon];
+        var map = dungeon.LevelMaps[currLevel];
+        GameState.Map = map;
+        var vs = FieldOfView.CalcVisible(Player, map, currLevel);
+        var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
+        dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
+        var rememberd = dungeon.RememberedSqs.Select(rm => (rm.Item2, rm.Item3)).ToHashSet();
+       
+        int rowOffset = Player.Row - PlayerScreenRow;
+        int colOffset = Player.Col - PlayerScreenCol;
+
+        for (int r = 0; r < ScreenHeight - 1; r++) 
+        {
+            for (int c = 0; c < ViewWidth; c++)
+            {
+                int mapRow = r + rowOffset;
+                int mapCol = c + colOffset;
+                if (visible.Contains((mapRow, mapCol)))                 
+                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);                
+                else if (rememberd.Contains((mapRow, mapCol)))
+                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);
+                else
+                    SqsOnScreen[r, c] = (BLACK, ' ');
+            }
+        }
+        SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (WHITE, '@');
     }
 }
 

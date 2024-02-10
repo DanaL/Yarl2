@@ -81,7 +81,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         }
     }
 
-    public override void UpdateDisplay(GameState gameState)
+    public override void UpdateDisplay()
     {
         Terminal.Clear();
 
@@ -98,31 +98,13 @@ internal class BLUserInferface : UserInterface, IDisposable
 
             if (Player is not null)
             {
-                int rowOffset = Player!.Row - PlayerScreenRow;
-                int colOffset = Player!.Col - PlayerScreenCol;
                 for (int row = 0; row < ScreenHeight - 1; row++)
                 {
                     for (int col = 0; col < ViewWidth; col++)
                     {
-                        int vr = row + rowOffset;
-                        int vc = col + colOffset;
-
-                        if (gameState.Visible!.Contains((gameState.CurrLevel, vr, vc)))
-                        {
-                            var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), true);
-                            Terminal.Color(color);
-                            Terminal.Put(col, row + 1, ch);
-                        }
-                        else if (gameState.Remebered!.Contains((gameState.CurrLevel, vr, vc)))
-                        {
-                            var (color, ch) = TileToGlyph(gameState.Map!.TileAt(vr, vc), false);
-                            Terminal.Color(color);
-                            Terminal.Put(col, row + 1, ch);
-                        }
-                        else
-                        {
-                            Terminal.Put(col, row + 1, ' ');
-                        }
+                        var (colour, ch) = SqsOnScreen[row, col];
+                        Terminal.Color(colour);
+                        Terminal.Put(col, row + 1, ch);
                     }
                 }
 

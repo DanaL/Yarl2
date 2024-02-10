@@ -19,8 +19,6 @@ internal class GameQuitException : Exception { }
 // The queue of actors to act will likely need to go here.
 internal class GameState
 {
-    public HashSet<(int, int, int)>? Remebered { get; set; }
-    public HashSet<(int, int, int)>? Visible { get; set; }
     public Map? Map { get; set; }
     public Options? Options { get; set;}
     public Player? Player { get; set; }
