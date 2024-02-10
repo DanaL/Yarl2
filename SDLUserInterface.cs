@@ -51,25 +51,36 @@ internal class SDLUserInterface : UserInterface
             {
                 case SDL_EventType.SDL_QUIT:
                     return new UIEvent(UIEventType.Quiting, '\0');
+                case SDL_EventType.SDL_TEXTINPUT:
+                    char c;
+                    unsafe
+                    {
+                        c = (char)*e.text.text;                    
+                    }
+                    SDL_FlushEvent(SDL_EventType.SDL_TEXTINPUT);
+                    return new UIEvent(UIEventType.KeyInput, c);
                 case SDL_EventType.SDL_KEYDOWN:
+                    // I feel like there has to be a better way to handle this stuff, but 
+                    // they keydown event was receiving , and . etc even when the shift 
+                    // key was held down but SDL_TEXTINPUT doesn't receive carriages returns,
+                    // etc. I need to look at someone else's SDL keyboard handling code...                    
                     if (e.key.keysym.sym == SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL_Keycode.SDLK_RSHIFT)
                         return new UIEvent(UIEventType.NoEvent, '\0');
-                    var ch = e.key.keysym;
-                    return new UIEvent(UIEventType.KeyInput, KeysymToChar(ch));
-
+                    var k = e.key.keysym.sym;
+                    var ch = (char)e.key.keysym.sym;
+                    return k switch 
+                    {
+                        SDL_Keycode.SDLK_ESCAPE => new UIEvent(UIEventType.KeyInput, ch),
+                        SDL_Keycode.SDLK_RETURN => new UIEvent(UIEventType.KeyInput, ch),
+                        SDL_Keycode.SDLK_BACKSPACE => new UIEvent(UIEventType.KeyInput, ch),
+                        _ => new UIEvent(UIEventType.NoEvent, '\0')
+                    };                        
                 default:
                     return new UIEvent(UIEventType.NoEvent, '\0');
             }        
         }
 
         return new UIEvent(UIEventType.NoEvent, '\0');
-    }
-
-    private static char KeysymToChar(SDL_Keysym keysym) 
-    {
-        return keysym.mod == SDL_Keymod.KMOD_LSHIFT || keysym.mod == SDL_Keymod.KMOD_RSHIFT
-            ? char.ToUpper((char)keysym.sym)
-            : (char)keysym.sym;
     }
 
     private SDL_Color ToSDLColour(Color colour) 

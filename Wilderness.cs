@@ -403,8 +403,6 @@ internal class Wilderness(Random rng)
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
 
-        Dump(map, "out.txt");
-
         return map;
     }
 }
