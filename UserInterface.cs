@@ -55,13 +55,20 @@ internal abstract class UserInterface
     protected GameState? GameState { get; set; } = null;
 
     public (Color, char)[,] SqsOnScreen;
+    public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
+    // It's convenient for other classes to ask what dungeon and level we're on
+    public int CurrentDungeon => GameState is not null ? GameState.CurrDungeon : -1;
+    public int CurrentLevel => GameState is not null ? GameState.CurrLevel : -1;
+    
     public UserInterface(Options opts)
     {
         _options = opts;
         PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
         SqsOnScreen = new (Color, char)[ScreenHeight - 1, ViewWidth];
+        ZLayer = new Tile[ScreenHeight - 1, ViewWidth];
+        ClearZLayer();
     }
 
     public virtual void TitleScreen()
@@ -119,6 +126,8 @@ internal abstract class UserInterface
                 return lit ? (GREY, '>') : (DARK_GREY, '>');
             case TileType.Upstairs:
                 return lit ? (GREY, '<') : (DARK_GREY, '<');
+            case TileType.Cloud:
+                return lit ? (WHITE, '#') : (WHITE, '#');
             default:
                 return (BLACK, ' ');
         }        
@@ -210,7 +219,7 @@ internal abstract class UserInterface
     {
         CurrentListener = StartupListener;
         List<IAnimationListener> animationListeners = [];
-        animationListeners.Add(new WaterAnimationListener(this));
+        animationListeners.Add(new CloudAnimationListener(this));
         TitleScreen();  
 
         DateTime lastPollTime = DateTime.Now;
@@ -230,6 +239,9 @@ internal abstract class UserInterface
                 // Update step! This is where all the Actors get a chance
                 // to take their turn! (At the moment the only actor is 
                 // the player)
+
+                // Return a value indicating if all the actors were idle?
+                // then I perhaps don't have to recalculate the view, etc
                 if (Player is not null)
                     DoActorTurns();
             }
@@ -252,7 +264,7 @@ internal abstract class UserInterface
             {                
                 SetSqsOnScreen();
             }
-
+            
             foreach (var l in animationListeners)
                 l.Update();
 
@@ -265,7 +277,7 @@ internal abstract class UserInterface
                 lastPollTime = DateTime.Now;                
             }
 
-            Thread.Sleep(25);
+            Thread.Sleep(30);
         }        
     }
 
@@ -290,15 +302,37 @@ internal abstract class UserInterface
             {
                 int mapRow = r + rowOffset;
                 int mapCol = c + colOffset;
-                if (visible.Contains((mapRow, mapCol)))                 
-                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);                
+                if (visible.Contains((mapRow, mapCol))) 
+                {
+                    if (ZLayer[r, c].Type != TileType.Unknown)                    
+                        SqsOnScreen[r, c] = TileToGlyph(ZLayer[r, c], true);
+                    else
+                        SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);
+                }
                 else if (rememberd.Contains((mapRow, mapCol)))
-                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);
+                {
+                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), false);
+                }
                 else
+                {
                     SqsOnScreen[r, c] = (BLACK, ' ');
+                }
             }
         }
-        SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (WHITE, '@');
+
+        if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
+            SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (WHITE, '@');
+    }
+
+    private void ClearZLayer()
+    {
+        for (int r = 0; r < ScreenHeight - 1; r++)
+        {
+            for (int c = 0; c < ViewWidth; c++)
+            {
+                ZLayer[r, c] = TileFactory.Get(TileType.Unknown);
+            }
+        }
     }
 }
 
@@ -397,60 +431,5 @@ internal class PreGameHandler
         }
 
         _ui.WriteMessage($"{_prompt} {_playerName}");
-    }
-}
-
-internal interface IAnimationListener
-{
-    void Update();
-}
-
-internal class WaterAnimationListener : IAnimationListener
-{
-    DateTime _lastFrame;
-    UserInterface _ui;
-    HashSet<(int, int)> _sparkles = [];
-
-    public WaterAnimationListener(UserInterface ui)
-    {
-        _ui = ui;
-        _lastFrame = DateTime.Now;
-        
-        SetSparkles();
-    }
-
-    void SetSparkles()
-    {
-        _sparkles = [];
-        var rng = new Random();        
-        for (int r = 0; r < UserInterface.ScreenHeight - 1; r++) 
-        {
-            for (int c = 0; c < UserInterface.ViewWidth; c++)
-            {
-                if (rng.NextDouble() < 0.05)
-                    _sparkles.Add((r, c));
-                if (_sparkles.Count >= 10)
-                    return;
-            }            
-        }
-    }
-    
-    public void Update() 
-    {
-        foreach (var sq in _sparkles)
-        {
-            var t = _ui.SqsOnScreen[sq.Item1, sq.Item2];
-            if (t.Item2 == '}')
-            {
-                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (_ui.LIGHT_BLUE, '~');
-            }
-        }
-
-        var dd = DateTime.Now - _lastFrame;
-        if (dd.TotalMilliseconds >= 150)
-        {
-            _lastFrame = DateTime.Now;
-            SetSparkles();
-        }    
     }
 }

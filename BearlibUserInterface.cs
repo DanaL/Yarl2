@@ -108,9 +108,6 @@ internal class BLUserInferface : UserInterface, IDisposable
                     }
                 }
 
-                Terminal.Color(WHITE);
-                Terminal.Put(PlayerScreenCol, PlayerScreenRow + 1, '@');
-
                 WriteSideBar();
             }
         }

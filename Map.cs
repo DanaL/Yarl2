@@ -18,7 +18,8 @@ enum TileType
     SnowPeak,
     Portal,
     Upstairs,
-    Downstairs
+    Downstairs,
+    Cloud
 }
 
 internal abstract class Tile 
@@ -111,6 +112,7 @@ internal class TileFactory
     private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false);
     private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
+    private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false);
     private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
 
     public static Tile Get(TileType type)
@@ -129,6 +131,7 @@ internal class TileFactory
             TileType.SnowPeak => SnowPeak,
             TileType.Door => new Door(type, false), 
             TileType.Water => Water,
+            TileType.Cloud => Cloud,
             _ => Unknown
         };
     }

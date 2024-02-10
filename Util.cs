@@ -7,6 +7,9 @@ class Util
     public static (int, int)[] Adj8= [ (-1, -1), (-1, 0), (-1, 1),
                                         (0, -1), (0, 1),
                                         (1, -1), (1, 0), (1, 1)];
+    public static List<(int, int)> NineSqs = [ (-1, -1), (-1, 0), (-1, 1),
+                                               (0, -1), (0, 0), (0, 1),
+                                               (1, -1), (1, 0), (1, 1) ];
 
     public static IEnumerable<(int, int)> Adj8Sqs(int r, int c)
     {
