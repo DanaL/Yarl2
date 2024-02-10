@@ -15,6 +15,11 @@ internal class SDLUserInterface : UserInterface
     private Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
     private Dictionary<Colour, SDL_Color> _colours;
 
+    // This may be a performance kludge for my last of understanding of SDL2 that
+    // doesn't pan out.
+    private (Colour, char)[,] _prevTiles = new (Colour, char)[ScreenHeight - 1, ViewWidth];
+    private string _prevMessage = "";
+
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
         FontSize = opt.FontSize;
@@ -39,6 +44,14 @@ internal class SDLUserInterface : UserInterface
         };
 
         _cachedGlyphs = new();
+
+        for (int r = 0; r < ScreenHeight - 1; r++)
+        {
+            for (int c = 0; c < ViewWidth; c++)
+            {
+                _prevTiles[r, c] = (Colours.BLACK, ' ');
+            }
+        }
     }
 
     protected override UIEvent PollForEvent()
@@ -171,8 +184,41 @@ internal class SDLUserInterface : UserInterface
         }
     }
 
+    private bool FrameChanged()
+    {
+        if (_prevMessage != _messageBuffer)
+            return true;
+
+        for (int row = 0; row < ScreenHeight - 1; row++)
+        {
+            for (int col = 0; col < ViewWidth; col++)
+            {
+                if (_prevTiles[row, col] != SqsOnScreen[row, col])
+                    return true;                
+            }
+        }
+
+        return false;
+    }
+
+    private void SaveLastFame()
+    {
+        for (int row = 0; row < ScreenHeight - 1; row++)
+        {
+            for (int col = 0; col < ViewWidth; col++)
+            {
+                _prevTiles[row, col] = SqsOnScreen[row, col];
+            }
+        }
+    }
+
     public override void UpdateDisplay()
     {
+        // TODO: when the sidebar actually does something,
+        //       I'll need to also check if it changed
+        if (_longMessage is null && !FrameChanged())
+            return;
+            
         SDL_RenderClear(_renderer);
         if (_longMessage is not null) 
         {
@@ -184,12 +230,14 @@ internal class SDLUserInterface : UserInterface
         else
         {
             WriteLine(_messageBuffer, 0, 0, ScreenWidth);
-            if (Player is not null) 
+            _prevMessage = _messageBuffer;
+            if (Player is not null)
             {
                 WriteSideBar(Player);
                 var texture = CreateMainTexture();
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);
+                SaveLastFame();
             }
         }
         SDL_RenderPresent(_renderer);
