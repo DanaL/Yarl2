@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Runtime.Intrinsics.X86;
 using BearLibNET.DefaultImplementations;
 
 namespace Yarl2;
@@ -23,21 +24,6 @@ internal abstract class UserInterface
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
 
-    public readonly Color BLACK = new() { A = 255, R = 0, G = 0, B = 0 };
-    public readonly Color WHITE = new() { A = 255, R = 255, G = 255, B = 255 };
-    public readonly Color GREY = new() { A = 255, R = 136, G = 136, B = 136 };
-    public readonly Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
-    public readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
-    public readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
-    public readonly Color YELLOW_ORANGE = new() { A = 255, R = 255, G = 159, B = 0 };
-    public readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
-    public readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
-    public readonly Color GREEN = new() { A = 255, R = 144, G = 238, B = 144 };
-    public readonly Color DARK_GREEN = new() { A = 255, R = 0, G = 71, B = 49 };
-    public readonly Color BLUE = new() { A = 255, R = 0, G = 0, B = 200 };
-    public readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
-    public readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
-
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
     
@@ -54,7 +40,7 @@ internal abstract class UserInterface
 
     protected GameState? GameState { get; set; } = null;
 
-    public (Color, char)[,] SqsOnScreen;
+    public (Colour, char)[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
     // It's convenient for other classes to ask what dungeon and level we're on
@@ -66,7 +52,7 @@ internal abstract class UserInterface
         _options = opts;
         PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
-        SqsOnScreen = new (Color, char)[ScreenHeight - 1, ViewWidth];
+        SqsOnScreen = new (Colour, char)[ScreenHeight - 1, ViewWidth];
         ZLayer = new Tile[ScreenHeight - 1, ViewWidth];
         ClearZLayer();
     }
@@ -95,41 +81,44 @@ internal abstract class UserInterface
         _longMessage = message;
     }
 
-    protected (Color, char) TileToGlyph(Tile tile, bool lit)
+    // I dunno about having this here. In previous games, I had each Tile object
+    // know what its colours were, but maybe the UI class *is* the correct spot
+    // to decide how to draw the glyph
+    protected (Colour, char) TileToGlyph(Tile tile, bool lit)
     {
         switch (tile.Type)
         {
             case TileType.Wall:
             case TileType.PermWall:
-                return lit ? (GREY, '#') : (DARK_GREY, '#');
+                return lit ? (Colours.GREY, '#') : (Colours.DARK_GREY, '#');
             case TileType.Floor:
-                return lit ? (YELLOW, '.') : (GREY, '.');
+                return lit ? (Colours.YELLOW, '.') : (Colours.GREY, '.');
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
-                return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
+                return lit ? (Colours.LIGHT_BROWN, ch) : (Colours.BROWN, ch);
             case TileType.Water:
             case TileType.DeepWater:
-                return lit ? (BLUE, '}') : (DARK_BLUE, '}');
+                return lit ? (Colours.BLUE, '}') : (Colours.DARK_BLUE, '}');
             case TileType.Sand:
-                return lit ? (YELLOW, '.') : (YELLOW_ORANGE, '.');
+                return lit ? (Colours.YELLOW, '.') : (Colours.YELLOW_ORANGE, '.');
             case TileType.Grass:
-                return lit ? (GREEN, '.') : (DARK_GREEN, '.');
+                return lit ? (Colours.GREEN, '.') : (Colours.DARK_GREEN, '.');
             case TileType.Tree:
-                return lit ? (GREEN, 'ϙ') : (DARK_GREEN, 'ϙ');
+                return lit ? (Colours.GREEN, 'ϙ') : (Colours.DARK_GREEN, 'ϙ');
             case TileType.Mountain:
-                return lit ? (GREY, '\u039B') : (DARK_GREY, '\u039B');
+                return lit ? (Colours.GREY, '\u039B') : (Colours.DARK_GREY, '\u039B');
             case TileType.SnowPeak:
-                return lit ? (WHITE, '\u039B') : (GREY, '\u039B');
+                return lit ? (Colours.WHITE, '\u039B') : (Colours.GREY, '\u039B');
             case TileType.Portal:
-                return lit ? (WHITE, 'Ո') : (GREY, 'Ո');
+                return lit ? (Colours.WHITE, 'Ո') : (Colours.GREY, 'Ո');
             case TileType.Downstairs:
-                return lit ? (GREY, '>') : (DARK_GREY, '>');
+                return lit ? (Colours.GREY, '>') : (Colours.DARK_GREY, '>');
             case TileType.Upstairs:
-                return lit ? (GREY, '<') : (DARK_GREY, '<');
+                return lit ? (Colours.GREY, '<') : (Colours.DARK_GREY, '<');
             case TileType.Cloud:
-                return lit ? (WHITE, '#') : (WHITE, '#');
+                return lit ? (Colours.WHITE, '#') : (Colours.WHITE, '#');
             default:
-                return (BLACK, ' ');
+                return (Colours.BLACK, ' ');
         }        
     }
 
@@ -315,13 +304,13 @@ internal abstract class UserInterface
                 }
                 else
                 {
-                    SqsOnScreen[r, c] = (BLACK, ' ');
+                    SqsOnScreen[r, c] = (Colours.BLACK, ' ');
                 }
             }
         }
 
         if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
-            SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (WHITE, '@');
+            SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (Colours.WHITE, '@');
     }
 
     private void ClearZLayer()

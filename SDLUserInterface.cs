@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 
 using SDL2;
 using static SDL2.SDL;
-using BearLibNET.DefaultImplementations;
 
 namespace Yarl2;
 
@@ -13,9 +12,8 @@ internal class SDLUserInterface : UserInterface
     private readonly int _fontWidth;
     private readonly int _fontHeight;    
     private SDL_Rect _mainFrameLoc;
-    private Dictionary<(char, Color, Color), IntPtr> _cachedGlyphs;
-
-    private Dictionary<Color, SDL_Color> _colours;
+    private Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
+    private Dictionary<Colour, SDL_Color> _colours;
 
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
@@ -83,12 +81,12 @@ internal class SDLUserInterface : UserInterface
         return new UIEvent(UIEventType.NoEvent, '\0');
     }
 
-    private SDL_Color ToSDLColour(Color colour) 
+    private SDL_Color ToSDLColour(Colour colour) 
     {
         if (!_colours.TryGetValue(colour, out SDL_Color value)) 
         {
             value = new SDL_Color() { 
-                    a = (byte) colour.A, 
+                    a = (byte) 255, 
                     r = (byte) colour.R,
                     g = (byte) colour.G,
                     b = (byte) colour.B
@@ -102,7 +100,7 @@ internal class SDLUserInterface : UserInterface
     private void WriteLine(string message, int lineNum, int col, int width)
     {
         message = message.PadRight(width);
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(WHITE), ToSDLColour(BLACK));        
+        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(Colours.WHITE), ToSDLColour(Colours.BLACK));        
         var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
         
         var texture = SDL_CreateTextureFromSurface(_renderer, surface);
@@ -120,13 +118,13 @@ internal class SDLUserInterface : UserInterface
         SDL_DestroyTexture(texture);
     }
 
-    private void SDLPut(int row, int col, char ch, Color color) 
+    private void SDLPut(int row, int col, char ch, Colour color) 
     {
-        var key = (ch, color, BLACK);
+        var key = (ch, color, Colours.BLACK);
 
         if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
         {
-            var surface =  SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(BLACK));        
+            var surface =  SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(Colours.BLACK));        
             var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
             SDL_FreeSurface(surface);
             texture = toCache;

@@ -1,4 +1,5 @@
 using BearLibNET;
+using BearLibNET.DefaultImplementations;
 using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2;
@@ -6,6 +7,7 @@ namespace Yarl2;
 internal class BLUserInferface : UserInterface, IDisposable
 {        
     private readonly Dictionary<int, char> KeyToChar = [];
+    private Dictionary<Colour, Color> _colours = [];
 
     public BLUserInferface(string windowTitle, Options opt) : base(opt)
     {
@@ -13,7 +15,23 @@ internal class BLUserInferface : UserInterface, IDisposable
         SetUpKeyToCharMap();
         Terminal.Open();
         Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
-        Terminal.Refresh();                           
+        Terminal.Refresh();
+    }
+
+    private Color ToBearLibColour(Colour colour) 
+    {
+        if (!_colours.TryGetValue(colour, out Color value)) 
+        {
+            value = new Color() { 
+                    A = 255, 
+                    R = colour.R,
+                    G = colour.G,
+                    B = colour.B
+            };
+            _colours.Add(colour, value);
+        }
+
+        return value;
     }
 
     private void SetUpKeyToCharMap()
@@ -103,7 +121,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                     for (int col = 0; col < ViewWidth; col++)
                     {
                         var (colour, ch) = SqsOnScreen[row, col];
-                        Terminal.Color(colour);
+                        Terminal.Color(ToBearLibColour(colour));
                         Terminal.Put(col, row + 1, ch);
                     }
                 }

@@ -172,7 +172,7 @@ internal class WaterAnimationListener : IAnimationListener
             var t = _ui.SqsOnScreen[sq.Item1, sq.Item2];
             if (t.Item2 == '}')
             {
-                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (_ui.LIGHT_BLUE, '~');
+                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (Colours.LIGHT_BLUE, '~');
             }
         }
 
