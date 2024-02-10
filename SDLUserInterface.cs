@@ -12,8 +12,7 @@ internal class SDLUserInterface : UserInterface
     private readonly IntPtr _renderer, _font;
     private readonly int _fontWidth;
     private readonly int _fontHeight;    
-    private IntPtr _lastFrameTexture;
-    private SDL_Rect _lastFrameLoc;
+    private SDL_Rect _mainFrameLoc;
     private Dictionary<(char, Color, Color), IntPtr> _cachedGlyphs;
 
     private Dictionary<Color, SDL_Color> _colours;
@@ -33,7 +32,7 @@ internal class SDLUserInterface : UserInterface
 
         _colours = [];
 
-        _lastFrameLoc = new SDL_Rect
+        _mainFrameLoc = new SDL_Rect
         {
             x = 0,
             y = _fontHeight,
@@ -46,7 +45,8 @@ internal class SDLUserInterface : UserInterface
 
     protected override UIEvent PollForEvent()
     {
-        while (SDL_PollEvent(out var e) != 0) {
+        while (SDL_PollEvent(out var e) != 0) 
+        {
             switch (e.type)
             {
                 case SDL_EventType.SDL_QUIT:
@@ -102,23 +102,22 @@ internal class SDLUserInterface : UserInterface
     private void WriteLine(string message, int lineNum, int col, int width)
     {
         message = message.PadRight(width);
-        var fontPtr = _font;
-        var fh = _fontHeight;
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(fontPtr, message, ToSDLColour(WHITE), ToSDLColour(BLACK));        
+        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(WHITE), ToSDLColour(BLACK));        
         var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
         
         var texture = SDL_CreateTextureFromSurface(_renderer, surface);
         var loc = new SDL_Rect
         {
             x = 2 + col * _fontWidth,
-            y = lineNum * fh,
-            h = fh,
+            y = lineNum * _fontHeight,
+            h = _fontHeight,
             w = s.w
         };
         
         SDL_FreeSurface(surface);
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
+        SDL_DestroyTexture(texture);
     }
 
     private void SDLPut(int row, int col, char ch, Color color) 
@@ -156,8 +155,6 @@ internal class SDLUserInterface : UserInterface
             }
         }
         
-        SDLPut(PlayerScreenRow, PlayerScreenCol, '@', WHITE);
-    
         SDL_SetRenderTarget(_renderer, IntPtr.Zero);
         
         return targetTexture;
@@ -189,10 +186,12 @@ internal class SDLUserInterface : UserInterface
         else
         {
             WriteLine(_messageBuffer, 0, 0, ScreenWidth);
-            if (Player is not null) {
-                _lastFrameTexture = CreateMainTexture();
+            if (Player is not null) 
+            {
                 WriteSideBar(Player);
-                SDL_RenderCopy(_renderer, _lastFrameTexture, IntPtr.Zero, ref _lastFrameLoc);
+                var texture = CreateMainTexture();
+                SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
+                SDL_DestroyTexture(texture);
             }
         }
         SDL_RenderPresent(_renderer);
