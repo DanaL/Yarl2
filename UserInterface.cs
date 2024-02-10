@@ -1,4 +1,5 @@
-﻿using BearLibNET.DefaultImplementations;
+﻿using System.Data;
+using BearLibNET.DefaultImplementations;
 
 namespace Yarl2;
 
@@ -13,29 +14,29 @@ internal record struct UIEvent(UIEventType Type, char Value);
 internal abstract class UserInterface
 {
     protected const int BACKSPACE = 8;
-    protected const int ScreenWidth = 60;
-    protected const int ScreenHeight = 30;
-    protected const int SideBarWidth = 20;
-    protected const int ViewWidth = ScreenWidth - SideBarWidth;
+    public const int ScreenWidth = 60;
+    public const int ScreenHeight = 30;
+    public const int SideBarWidth = 20;
+    public const int ViewWidth = ScreenWidth - SideBarWidth;
     
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
 
-    protected readonly Color BLACK = new() { A = 255, R = 0, G = 0, B = 0 };
-    protected readonly Color WHITE = new() { A = 255, R = 255, G = 255, B = 255 };
-    protected readonly Color GREY = new() { A = 255, R = 136, G = 136, B = 136 };
-    protected readonly Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
-    protected readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
-    protected readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
-    protected readonly Color YELLOW_ORANGE = new() { A = 255, R = 255, G = 159, B = 0 };
-    protected readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
-    protected readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
-    protected readonly Color GREEN = new() { A = 255, R = 144, G = 238, B = 144 };
-    protected readonly Color DARK_GREEN = new() { A = 255, R = 0, G = 71, B = 49 };
-    protected readonly Color BLUE = new() { A = 255, R = 0, G = 0, B = 200 };
-    protected readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
-    protected readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
+    public readonly Color BLACK = new() { A = 255, R = 0, G = 0, B = 0 };
+    public readonly Color WHITE = new() { A = 255, R = 255, G = 255, B = 255 };
+    public readonly Color GREY = new() { A = 255, R = 136, G = 136, B = 136 };
+    public readonly Color LIGHT_GREY = new() { A = 255, R = 220, G = 220, B = 220 };
+    public readonly Color DARK_GREY = new() { A = 255, R = 72, G = 73, B = 75 };
+    public readonly Color YELLOW = new() { A = 255, R = 255, G = 255, B = 53 };
+    public readonly Color YELLOW_ORANGE = new() { A = 255, R = 255, G = 159, B = 0 };
+    public readonly Color LIGHT_BROWN = new() { A = 255, R = 101, G = 75, B = 0 };
+    public readonly Color BROWN = new() { A = 255, R = 101, G = 67, B = 33 };
+    public readonly Color GREEN = new() { A = 255, R = 144, G = 238, B = 144 };
+    public readonly Color DARK_GREEN = new() { A = 255, R = 0, G = 71, B = 49 };
+    public readonly Color BLUE = new() { A = 255, R = 0, G = 0, B = 200 };
+    public readonly Color LIGHT_BLUE = new() { A = 255, R = 55, G = 198, B = 255 };
+    public readonly Color DARK_BLUE = new() { A = 255, R = 12, G = 35, B = 64 };
 
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
@@ -44,7 +45,6 @@ internal abstract class UserInterface
     protected string _messageBuffer = "";
     protected Options _options;
     private bool _playing;
-    public char DeepWaterChar { get; set; } = '~';
 
     private delegate void InputListener(UIEvent e);
     private InputListener? CurrentListener;
@@ -54,7 +54,7 @@ internal abstract class UserInterface
 
     protected GameState? GameState { get; set; } = null;
 
-    protected (Color, char)[,] SqsOnScreen;
+    public (Color, char)[,] SqsOnScreen;
 
     public UserInterface(Options opts)
     {
@@ -102,7 +102,7 @@ internal abstract class UserInterface
                 return lit ? (LIGHT_BROWN, ch) : (BROWN, ch);
             case TileType.Water:
             case TileType.DeepWater:
-                return lit ? (BLUE, DeepWaterChar) : (DARK_BLUE, DeepWaterChar);
+                return lit ? (BLUE, '}') : (DARK_BLUE, '}');
             case TileType.Sand:
                 return lit ? (YELLOW, '.') : (YELLOW_ORANGE, '.');
             case TileType.Grass:
@@ -407,24 +407,50 @@ internal interface IAnimationListener
 
 internal class WaterAnimationListener : IAnimationListener
 {
-    DateTime _lastSwitch;
+    DateTime _lastFrame;
     UserInterface _ui;
+    HashSet<(int, int)> _sparkles = [];
 
     public WaterAnimationListener(UserInterface ui)
     {
         _ui = ui;
-        _lastSwitch = DateTime.Now;
+        _lastFrame = DateTime.Now;
+        
+        SetSparkles();
     }
 
+    void SetSparkles()
+    {
+        _sparkles = [];
+        var rng = new Random();        
+        for (int r = 0; r < UserInterface.ScreenHeight - 1; r++) 
+        {
+            for (int c = 0; c < UserInterface.ViewWidth; c++)
+            {
+                if (rng.NextDouble() < 0.05)
+                    _sparkles.Add((r, c));
+                if (_sparkles.Count >= 10)
+                    return;
+            }            
+        }
+    }
+    
     public void Update() 
     {
-        var dd = DateTime.Now - _lastSwitch;
-
-        if (dd.TotalSeconds >= 0.75)
+        foreach (var sq in _sparkles)
         {
-            _ui.DeepWaterChar = _ui.DeepWaterChar == '~' ? '}' : '~';
-            _lastSwitch = DateTime.Now;
+            var t = _ui.SqsOnScreen[sq.Item1, sq.Item2];
+            if (t.Item2 == '}')
+            {
+                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (_ui.LIGHT_BLUE, '~');
+            }
         }
-        
+
+        var dd = DateTime.Now - _lastFrame;
+        if (dd.TotalMilliseconds >= 150)
+        {
+            _lastFrame = DateTime.Now;
+            SetSparkles();
+        }    
     }
 }
