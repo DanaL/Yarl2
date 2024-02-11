@@ -21,7 +21,8 @@ internal class Serialize
 {
     public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState)
     {
-        var sgi = new SaveGameInfo(player, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, gameState.CurrDungeon);
+        var p = ShrunkenPlayer.Shrink(player);
+        var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, gameState.CurrDungeon);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -37,7 +38,7 @@ internal class Serialize
         var bytes = File.ReadAllBytes(filename);
         var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
 
-        var p = sgi.Player;
+        var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = ShrunkenCampaign.Inflate(sgi.Campaign);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
@@ -47,7 +48,78 @@ internal class Serialize
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
 }
 
-internal class ShrunkenCampaign
+internal class ShrunkenPlayer
+{
+    public string Name { get; set; }
+    public int Row { get; set; }
+    public int Col { get; set; }
+    public int MaxHP { get; set; }
+    public int CurrHP { get; set; }
+    [JsonInclude]
+    public ShrunkenInventory Inventory { get; set; }
+
+    public static ShrunkenPlayer Shrink(Player p)
+    {
+        return new ShrunkenPlayer()
+        {
+            Name = p.Name,
+            MaxHP = p.MaxHP,
+            CurrHP = p.CurrHP,
+            Inventory = ShrunkenInventory.Shrink(p.Inventory),
+            Row = p.Row,
+            Col = p.Col
+        };
+    }
+
+    public static Player Inflate(ShrunkenPlayer sp)
+    {
+        return new Player(sp.Name, sp.Row, sp.Col)
+        {
+            MaxHP = sp.MaxHP,
+            CurrHP = sp.CurrHP,
+            Inventory = ShrunkenInventory.Inflate(sp.Inventory)
+        };
+    }
+}
+
+record InvItemKVP(char Slot, Item Item);
+
+class ShrunkenInventory
+{
+    public char NextSlot { get; set; }
+    public int Zorkmids { get; set; }
+    [JsonInclude]
+    public List<InvItemKVP> Items { get; set; }
+
+    public static ShrunkenInventory Shrink(Inventory inv)
+    {
+        var items = inv.ToKVP();
+
+        return new ShrunkenInventory()
+        {
+            Zorkmids = inv.Zorkmids,
+            NextSlot = inv.NextSlot,
+            Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, kvp.Item2)).ToList()
+        };
+    }
+
+    public static Inventory Inflate(ShrunkenInventory sp)
+    {
+        var inv = new Inventory();
+        
+        foreach (var kvp in sp.Items)
+        {
+            inv.Add(kvp.Item);
+        }
+        
+        inv.Zorkmids = sp.Zorkmids;
+        inv.NextSlot = sp.NextSlot;
+
+        return inv;
+    }
+}
+
+class ShrunkenCampaign
 {
     [JsonInclude]
     public Dictionary<int, ShrunkenDungeon> Dungeons = [];
@@ -156,9 +228,6 @@ internal class ShrunkenMap()
         for (int j = 0; j < map.Tiles.Length; j++)
         {
             var t = map.Tiles[j];
-
-            if (t.Type == TileType.Door)
-                Console.WriteLine();
             sm.Tiles[j] = (int) t.Type;
             if (t is not BasicTile)
             {
@@ -254,7 +323,7 @@ internal class ShrunkenMap()
     }
 }
 
-internal record SaveGameInfo(Player? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon);
+internal record SaveGameInfo(ShrunkenPlayer? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

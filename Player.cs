@@ -27,25 +27,24 @@ internal class Player : Actor
         if (slots.Length == 0)
         {
             ui.WriteMessage("You are empty handed!");
+            return;
         }
-        else
+
+        List<string> lines = [ "You are carrying: "];
+        foreach (var s in slots)
         {
-            List<string> lines = [ "You are carrying: "];
-            foreach (var s in slots)
+            var item = Inventory.ItemAt(s);
+            var desc = item.FullName.IndefArticle();
+            if (item.Equiped)
             {
-                var item = Inventory.ItemAt(s);
-                var desc = item.FullName.IndefArticle();
-                if (item.Equiped)
-                {
-                    if (item.Type == ItemType.Weapon)
-                        desc += " (in hand)";
-                    else if (item.Type == ItemType.Armour)
-                        desc += " (worn)";
-                }
-                lines.Add($"{s}) {desc}");
+                if (item.Type == ItemType.Weapon)
+                    desc += " (in hand)";
+                else if (item.Type == ItemType.Armour)
+                    desc += " (worn)";
             }
-            ui.ShowDropDown(lines);
+            lines.Add($"{s}) {desc}");
         }
+        ui.ShowDropDown(lines);
     }
 
     public override Action TakeTurn(UserInterface ui, GameState gameState)

@@ -52,30 +52,30 @@ class Inventory
 {
     public int Zorkmids { get; set; }
     Dictionary<char, Item> _items { get; set; } = [];
-    char _nextSlot;
+    public char NextSlot { get; set; }
 
-    public Inventory() => _nextSlot = 'a';
+    public Inventory() => NextSlot = 'a';
 
     void FindNextSlot() 
     {
-        char start = _nextSlot;
+        char start = NextSlot;
 
         while (true)
         {
-            ++_nextSlot;
-            if (_nextSlot == 123)
-                _nextSlot = 'a';
+            ++NextSlot;
+            if (NextSlot == 123)
+                NextSlot = 'a';
             //else if (_nextSlot == 91)
             //    _nextSlot = 'a';
 
-            if (!_items.ContainsKey(_nextSlot) || _items[_nextSlot] is null)
+            if (!_items.ContainsKey(NextSlot) || _items[NextSlot] is null)
             {
                 break;
             }
-            if (_nextSlot == start)
+            if (NextSlot == start)
             {
                 // there were no free slots
-                _nextSlot = '\0';
+                NextSlot = '\0';
                 break;
             }
         }
@@ -91,14 +91,15 @@ class Inventory
         
         // if the item has a slot and it's available, put it there
         // otherwise but it in the next available slot, if there is one
-        if (item.Slot != '\0' && _items[item.Slot] is null) 
+        bool slotAvailable = !_items.ContainsKey(item.Slot) || _items[item.Slot] is null;
+        if (item.Slot != '\0' && slotAvailable)
         {
             _items[item.Slot] = item;
         }
-        else if (_nextSlot != '\0')
+        else if (NextSlot != '\0')
         {
-            item.Slot = _nextSlot;
-            _items[_nextSlot] = item;
+            item.Slot = NextSlot;
+            _items[NextSlot] = item;
             FindNextSlot();
         }
         else
@@ -113,4 +114,6 @@ class Inventory
     {
         _items[slot] = null;
     }
+
+    public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value)).ToList();
 }
