@@ -20,13 +20,15 @@ internal abstract class UserInterface
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
     
+    public abstract void CloseMenu();
+    public abstract void ShowDropDown(List<string> lines);
+    public abstract void UpdateDisplay();
+    protected abstract UIEvent PollForEvent();
+    
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
 
-    public abstract void UpdateDisplay();
-    protected abstract UIEvent PollForEvent();
-    
     protected List<string>? _longMessage;
     protected string _messageBuffer = "";
     protected Options _options;
@@ -386,6 +388,13 @@ internal class PreGameHandler
         {
             var (c, startRow, startCol) = BeginCampaign(new Random());
             Player player = new Player(playerName, startRow, startCol);
+            var spear = ItemFactory.Get("spear");
+            spear.Adjectives.Add("old");
+            player.Inventory.Add(spear);
+            var armour = ItemFactory.Get("leather armour");
+            armour.Adjectives.Add("battered");
+            player.Inventory.Add(armour);
+            
             _ui.Player = player;
             _ui.BeginGame(c);
         }

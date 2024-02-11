@@ -8,6 +8,7 @@ internal class Player : Actor
     public int CurrHP { get; set; }
     private IInputAccumulator? _accumulator;
     private Action _deferred;
+    public Inventory Inventory { get; set; } = new();
 
     public Player(string name, int row, int col)
     {
@@ -18,6 +19,25 @@ internal class Player : Actor
         CurrHP = 15;
         MaxVisionRadius = 15;
         CurrVisionRadius = MaxVisionRadius;
+    }
+
+    private void ShowInventory(UserInterface ui)
+    {
+        var slots = Inventory.UsedSlots();
+        if (slots.Length == 0)
+        {
+            ui.WriteMessage("You are empty handed!");
+        }
+        else
+        {
+            List<string> lines = [ "You are carrying: "];
+            foreach (var s in slots)
+            {
+                var item = Inventory.ItemAt(s);
+                lines.Add($"{s}) {item.FullName.IndefArticle()}");
+            }
+            ui.ShowDropDown(lines);
+        }
     }
 
     public override Action TakeTurn(UserInterface ui, GameState gameState)
@@ -74,12 +94,20 @@ internal class Player : Actor
                 return new DownstairsAction(gameState);
             else if (ch == '<')
                 return new UpstairsAction(gameState);
+            else if (ch == 'i')
+            {
+                ShowInventory(ui);
+                _accumulator = new PauseForMoreAccumulator();
+                _deferred = new CloseMenuAction(ui);
+            }            
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new CloseDoorAction(ui.Player, gameState.Map);
-                action.Row = ui.Player.Row;
-                action.Col = ui.Player.Col;
+                var action = new CloseDoorAction(ui.Player, gameState.Map)
+                {
+                    Row = ui.Player.Row,
+                    Col = ui.Player.Col
+                };
                 _deferred = action;
                 
                 ui.WriteMessage("Which way?");

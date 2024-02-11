@@ -4,14 +4,25 @@
 // I'm sure someone smarter could come up with a cleaner 
 // solution...
 
-internal interface IInputAccumulator 
+interface IInputAccumulator 
 {
     bool Success { get; }
     bool Done { get; }
     void Input(char ch);
 }
 
-internal class YesNoAccumulator : IInputAccumulator
+class PauseForMoreAccumulator : IInputAccumulator
+{
+    private bool _keyPressed;
+
+    public bool Success => _keyPressed;
+    public bool Done => _keyPressed;
+
+    // We're done on any input 
+    public void Input(char ch) => _keyPressed = true;
+}
+
+class YesNoAccumulator : IInputAccumulator
 {
     private bool _done;
     private bool _success;
@@ -37,7 +48,7 @@ internal class YesNoAccumulator : IInputAccumulator
     }
 }
 
-internal class DirectionAccumulator : IInputAccumulator
+class DirectionAccumulator : IInputAccumulator
 {
     private bool _done;
     private bool _success;

@@ -99,6 +99,16 @@ internal class BLUserInferface : UserInterface, IDisposable
         }
     }
 
+    public override void ShowDropDown(List<string> lines)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void CloseMenu()
+    {
+        throw new NotImplementedException();
+    }
+
     public override void UpdateDisplay()
     {
         Terminal.Clear();

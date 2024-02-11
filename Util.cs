@@ -1,4 +1,5 @@
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks.Dataflow;
 
 namespace Yarl2;
@@ -115,7 +116,7 @@ class Util
     }
 }
 
-static class ListUtil
+static class ListUtils
 {
     public static void Shuffle<T>(this IList<T> list, Random rng)
     {
@@ -127,5 +128,17 @@ static class ListUtil
             (list[n], list[k]) = (list[k], list[n]);
         }
     }
+}
+
+static class StringUtils
+{
+    public static string DefArticle(this string s) => $"the {s}";
+
+    public static string IndefArticle(this string s) => s[0] switch
+    {
+        'a' or 'e' or 'i' or 'o' or 'u' or 'y' => $"an {s}",
+        >= '0' and <= '9' => s,
+        _ => $"a {s}"
+    };
 }
 

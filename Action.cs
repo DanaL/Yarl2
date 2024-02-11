@@ -1,7 +1,7 @@
 ﻿
 namespace Yarl2;
 
-internal class ActionResult
+class ActionResult
 {
     public bool Successful { get; set; }
     public string? Message { get; set; }
@@ -10,12 +10,12 @@ internal class ActionResult
     public ActionResult() { }
 }
 
-internal abstract class Action
+abstract class Action
 {
     public abstract ActionResult Execute();
 }
 
-internal class PortalAction(GameState gameState) : Action
+class PortalAction(GameState gameState) : Action
 {
     protected readonly GameState _gameState = gameState;
 
@@ -49,7 +49,7 @@ internal class PortalAction(GameState gameState) : Action
     }
 }
 
-internal class DownstairsAction(GameState gameState) : PortalAction(gameState)
+class DownstairsAction(GameState gameState) : PortalAction(gameState)
 {
     public override ActionResult Execute()
     {
@@ -71,7 +71,7 @@ internal class DownstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
-internal class UpstairsAction(GameState gameState) : PortalAction(gameState)
+class UpstairsAction(GameState gameState) : PortalAction(gameState)
 {
     public override ActionResult Execute()
     {
@@ -93,13 +93,13 @@ internal class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
-internal abstract class DirectionalAction() : Action
+abstract class DirectionalAction() : Action
 {
     public int Row { get; set; }
     public int Col { get; set; }
 }
 
-internal class CloseDoorAction(Actor actor, Map map) : DirectionalAction
+class CloseDoorAction(Actor actor, Map map) : DirectionalAction
 {
     private readonly Actor _actor = actor;
     private readonly Map _map = map;
@@ -132,7 +132,7 @@ internal class CloseDoorAction(Actor actor, Map map) : DirectionalAction
     }
 }
 
-internal class OpenDoorAction(Actor actor, Map map) : DirectionalAction
+class OpenDoorAction(Actor actor, Map map) : DirectionalAction
 {
     private readonly Actor _actor = actor;
     private readonly Map _map = map;
@@ -165,7 +165,7 @@ internal class OpenDoorAction(Actor actor, Map map) : DirectionalAction
     }
 }
 
-internal class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
+class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
 {
     private readonly Actor _actor = actor;
     private readonly int _row = row;
@@ -226,7 +226,7 @@ internal class MoveAction(Actor actor, int row, int col, GameState gameState) : 
     }
 }
 
-internal class PassAction(Actor actor) : Action
+class PassAction(Actor actor) : Action
 {
     private Actor _actor = actor;
 
@@ -238,19 +238,30 @@ internal class PassAction(Actor actor) : Action
     }
 }
 
+class CloseMenuAction(UserInterface ui) : Action 
+{
+    private UserInterface _ui = ui;
+
+    public override ActionResult Execute() 
+    { 
+        _ui.CloseMenu();
+        return new ActionResult() { Successful=true, Message="" };
+    }
+}
+
 // I guess I can later add extra info about whether or not the player died, quit,
 // or quit and saved?
-internal class QuitAction : Action
+class QuitAction : Action
 {
     public override ActionResult Execute() => throw new GameQuitException();
 }
 
-internal class SaveGameAction : Action
+class SaveGameAction : Action
 {
     public override ActionResult Execute() => throw new Exception("Shouldn't actually try to execute a Save Game action!");
 }
 
-internal class NullAction : Action
+class NullAction : Action
 {
     public override ActionResult Execute() => throw new Exception("Hmm this should never happen");
 }

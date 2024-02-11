@@ -22,14 +22,12 @@ enum TileType
     Cloud
 }
 
-internal abstract class Tile 
+internal abstract class Tile(TileType type)
 {
-    public TileType Type { get; protected set; }
+    public TileType Type { get; protected set; } = type;
     public virtual string StepMessage => "";
     public abstract bool Passable();
     public abstract bool Opaque();
-
-    protected Tile(TileType type) => Type = type;
 }
 
 internal class BasicTile : Tile
@@ -115,26 +113,23 @@ internal class TileFactory
     private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false);
     private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
 
-    public static Tile Get(TileType type)
+    public static Tile Get(TileType type) => type switch
     {
-        return type switch 
-        {
-            TileType.WorldBorder => WorldBorder,
-            TileType.PermWall => PermWall,
-            TileType.Wall => Wall,
-            TileType.Floor => Floor,
-            TileType.DeepWater => DeepWater,
-            TileType.Sand => Sand,
-            TileType.Grass => Grass,
-            TileType.Tree => Tree,
-            TileType.Mountain => Mountain,
-            TileType.SnowPeak => SnowPeak,
-            TileType.Door => new Door(type, false), 
-            TileType.Water => Water,
-            TileType.Cloud => Cloud,
-            _ => Unknown
-        };
-    }
+        TileType.WorldBorder => WorldBorder,
+        TileType.PermWall => PermWall,
+        TileType.Wall => Wall,
+        TileType.Floor => Floor,
+        TileType.DeepWater => DeepWater,
+        TileType.Sand => Sand,
+        TileType.Grass => Grass,
+        TileType.Tree => Tree,
+        TileType.Mountain => Mountain,
+        TileType.SnowPeak => SnowPeak,
+        TileType.Door => new Door(type, false),
+        TileType.Water => Water,
+        TileType.Cloud => Cloud,
+        _ => Unknown
+    };
 }
 
 internal class Map : ICloneable

@@ -18,7 +18,10 @@ internal class SDLUserInterface : UserInterface
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
     private (Colour, char)[,] _prevTiles = new (Colour, char)[ScreenHeight - 1, ViewWidth];
+    private List<string>? _menuRows;
     private string _prevMessage = "";
+    private bool _closingMenu;
+    private bool _openingMenu;
 
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
@@ -131,6 +134,19 @@ internal class SDLUserInterface : UserInterface
         SDL_DestroyTexture(texture);
     }
 
+    private void WriteDropDown()
+    {
+        int width = _menuRows!.Select(r => r.Length).Max() + 2;
+        int col = ViewWidth - width;
+        int row = 1;
+
+        foreach (var line in _menuRows!)
+        {
+            WriteLine(" " +line, row++, col, width);
+        }
+        WriteLine("", row, col, width);
+    }
+
     private void SDLPut(int row, int col, char ch, Colour color) 
     {
         var key = (ch, color, Colours.BLACK);
@@ -186,6 +202,19 @@ internal class SDLUserInterface : UserInterface
 
     private bool FrameChanged()
     {
+        if (_closingMenu)
+        {
+            _menuRows = null;
+            _closingMenu = false;
+            return true;
+        }
+
+        if (_openingMenu)
+        {
+            _openingMenu = false;
+            return true;
+        }
+
         if (_prevMessage != _messageBuffer)
             return true;
 
@@ -211,6 +240,14 @@ internal class SDLUserInterface : UserInterface
             }
         }
     }
+
+    public override void ShowDropDown(List<string> lines)
+    {
+        _openingMenu = true;
+        _menuRows = lines;
+    }
+
+    public override void CloseMenu() => _closingMenu = true;
 
     public override void UpdateDisplay()
     {
@@ -238,6 +275,11 @@ internal class SDLUserInterface : UserInterface
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);
                 SaveLastFame();
+            }
+
+            if (_menuRows is not null)
+            {
+                WriteDropDown();
             }
         }
         SDL_RenderPresent(_renderer);
