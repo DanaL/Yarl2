@@ -416,6 +416,7 @@ internal class PreGameHandler
             armour.Adjectives.Add("battered");
             armour.Equiped = true;
             player.Inventory.Add(armour);
+            player.Inventory.Add(ItemFactory.Get("dagger"));
             
             _ui.Player = player;
             _ui.BeginGame(c, new ItemDB());

@@ -36,19 +36,44 @@ class Item
     }  
 }
 
+enum ArmourParts
+{
+    Helmet,
+    Boots,
+    Cloak,
+    Shirt
+}
+
+class Armour : Item
+{
+    public ArmourParts Piece { get; set; }
+}
+
 class ItemFactory
 {
     public static Item Get(string name) => name switch
     {
         "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
                                     Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
-        "leather armour" => new Item()
+        "dagger" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
+                                    Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
+        "leather armour" => new Armour()
         {
             Name = name,
             Type = ItemType.Armour,
             Stackable = false,
             ArmourMod = 2,
+            Piece = ArmourParts.Shirt,
             Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
+        },
+        "helmet" => new Armour()
+        {
+            Name = name,
+            Type = ItemType.Armour,
+            Stackable = false,
+            ArmourMod = 1,
+            Piece = ArmourParts.Helmet,
+            Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
         },
         _ => throw new Exception($"{name} doesn't seem exist in yarl2 :()"),
     };
@@ -159,7 +184,64 @@ class Inventory
         _items[slot] = null;
     }
 
+    // This toggles the equip status of gear only and recalculation of stuff
+    // like armour class has to be done elsewhere because it felt icky to 
+    // have a reference back to the inventory's owner in the inventory object
+    public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
+    {
+        // I suppose at some point I'll have items that can't be equiped
+        // (or like it doesn't make sense for them to be) and I'll have
+        // to check for that
+        if (_items.TryGetValue(slot, out Item item))
+        {
+            if (item.Equiped) 
+            {
+                // No cursed items or such yet to check for...
+                item.Equiped = false;
+                return (EquipingResult.Unequiped, ArmourParts.Shirt);
+            }
+
+            // Okay we are equiping new gear, which is a little more complicated
+            if (item.Type == ItemType.Weapon)
+            {
+                // If there is a weapon already equiped, unequip it
+                foreach (char c in UsedSlots())
+                {
+                    if (_items[c].Type == ItemType.Weapon && _items[c].Equiped)
+                        _items[c].Equiped = false;
+                }
+
+                item.Equiped = true;
+                return (EquipingResult.Equiped, ArmourParts.Shirt);
+            }
+            else if (item.Type == ItemType.Armour)
+            {
+                var armour = item as Armour;
+                // check to see if there's another piece in that slot
+                var b = _items.Values.Where(i => i.Type == ItemType.Armour && i.Equiped)
+                                     .Any(a => ((Armour)a).Piece == armour.Piece);
+                if (b)
+                {
+                    // alert about already wearing a piece
+                    return (EquipingResult.Conflict, armour.Piece);
+                }
+
+                armour.Equiped = !armour.Equiped;
+                return (EquipingResult.Equiped, ArmourParts.Shirt);
+            }
+        }
+
+        return (EquipingResult.Conflict, ArmourParts.Shirt);
+    }
+
     public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value))
                                                .Where(p => p.Item2 is not null)
                                                .ToList();
+}
+
+enum EquipingResult 
+{
+    Equiped,
+    Unequiped,
+    Conflict
 }

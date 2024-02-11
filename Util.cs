@@ -24,6 +24,12 @@ class Colours
     public static readonly Colour DARK_BLUE = new(12, 35, 64);
 }
 
+// Miscellaneous constants used in a few places
+class Constants
+{
+    public const int ESC = 27;
+}
+
 class Util
 {
     public static (int, int)[] Adj4 = [ (-1, 0), (1, 0), (0, 1), (0, -1)];

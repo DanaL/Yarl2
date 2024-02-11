@@ -12,6 +12,7 @@ abstract class Actor
     public int CurrVisionRadius { get; set; }
 
     public abstract Action TakeTurn(UserInterface ui, GameState gameState);
+    public abstract void CalcEquipmentModifiers();
 }
 
 internal class GameQuitException : Exception { }

@@ -1,4 +1,6 @@
 ﻿
+using System.Reflection.Metadata.Ecma335;
+
 namespace Yarl2;
 
 class ActionResult
@@ -258,10 +260,59 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action,  IMe
     {
         var item = (_actor as Player).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
-        ((Player) actor).Inventory.Remove(Choice, 1);
-        _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+
+        if (item.Equiped)
+        {
+            return new ActionResult() { Successful=false, Message="You cannot drop something you have equiped." };
+        }
+        else 
+        {
+            ((Player) actor).Inventory.Remove(Choice, 1);
+            _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+            item.Equiped = false;
+            _actor.CalcEquipmentModifiers();
+            
+            return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
+        }
+    }
+}
+
+class ToggleEquipedAction(UserInterface ui, Actor actor) : Action, IMenuAction
+{
+    public char Choice { get; set; }
+    private UserInterface _ui = ui;
+    private Actor _actor = actor;
+
+    public override ActionResult Execute() 
+    {
+        ActionResult result;
+
+        var item = (_actor as Player).Inventory.ItemAt(Choice);        
+        _ui.CloseMenu();
+
+        var (equipResult, conflict) = ((Player) actor).Inventory.ToggleEquipStatus(Choice);
         
-        return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
+        switch (equipResult)
+        {
+            case EquipingResult.Equiped:
+                result = new ActionResult() { Successful=true, Message=$"You ready {item.FullName.DefArticle()}." };
+                break;
+            case EquipingResult.Unequiped:
+                result = new ActionResult() { Successful=true, Message=$"You unequip {item.FullName.DefArticle()}." };
+                break;
+            default:
+                string msg = "You are already wearing ";
+                if (conflict == ArmourParts.Helmet)
+                    msg += "a helmet.";
+                else if (conflict == ArmourParts.Shirt)
+                    msg += "some armour.";
+                result = new ActionResult() { Successful=true, Message=msg };
+                break;
+        }            
+        
+        _actor.CalcEquipmentModifiers();
+
+        return result;
     }
 }
 

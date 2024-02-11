@@ -1,4 +1,6 @@
 ﻿
+using System.Security.Cryptography;
+
 namespace Yarl2;
 
 internal class Player : Actor
@@ -6,7 +8,7 @@ internal class Player : Actor
     public string Name { get; set; }
     public int MaxHP { get; set; }
     public int CurrHP { get; set; }
-    private IInputAccumulator? _accumulator;
+    private InputAccumulator? _accumulator;
     private Action _deferred;
     public Inventory Inventory { get; set; } = new();
 
@@ -47,6 +49,12 @@ internal class Player : Actor
         ui.ShowDropDown(lines);
     }
 
+    public override void CalcEquipmentModifiers()
+    {
+        // I think this will get pulled up into a super class shared with monsters
+        // or to Actor itself if I decide all Actors can have inventories
+    }
+
     public override Action TakeTurn(UserInterface ui, GameState gameState)
     {
         if (ui.InputBuffer.Count > 0)
@@ -56,7 +64,13 @@ internal class Player : Actor
             if (_accumulator is not null)
             {
                 _accumulator.Input(ch);
-                if (_accumulator.Done)
+                if (!_accumulator.Done)
+                {
+                    if (_accumulator.Msg != "")
+                        ui.WriteMessage(_accumulator.Msg);
+                    return new NullAction();
+                }
+                else
                 {                    
                     if (_accumulator.Success)
                     {
@@ -78,6 +92,7 @@ internal class Player : Actor
                     else
                     {
                         _accumulator = null;
+                        ui.CloseMenu();
                         ui.WriteMessage("Nevermind.");
                         return new NullAction();
                     }
@@ -116,8 +131,16 @@ internal class Player : Actor
             {
                 ui.WriteMessage("Drop what?");
                 ShowInventory(ui);
-                _accumulator = new MenuPickAccumulator(Inventory.UsedSlots().ToHashSet());
+                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new DropItemAction(ui, this, gameState);
+            }
+            else if (ch == 'e')
+            {
+                ui.WriteMessage("Equip what?");
+                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _deferred = new ToggleEquipedAction(ui, this);
+
+                ShowInventory(ui);
             }
             else if (ch == 'c')
             {
