@@ -124,7 +124,7 @@ internal abstract class UserInterface
         }        
     }
 
-    public void BeginGame(Campaign campaign)
+    public void BeginGame(Campaign campaign, ItemDB itemDB)
     {
         GameState = new GameState()
         {
@@ -134,6 +134,7 @@ internal abstract class UserInterface
             Campaign = campaign,
             CurrLevel = campaign.CurrentLevel,
             CurrDungeon = campaign.CurrentDungeon,
+            ItemDB = itemDB
         };
 
         CurrentListener = new InputListener(MainListener);
@@ -399,9 +400,9 @@ internal class PreGameHandler
     {
         if (Serialize.SaveFileExists(playerName))
         {
-            var (player, c) = Serialize.LoadSaveGame(playerName);
+            var (player, c, itemDB) = Serialize.LoadSaveGame(playerName);
             _ui.Player = player;
-            _ui.BeginGame(c);
+            _ui.BeginGame(c, itemDB);
         }
         else
         {
@@ -417,7 +418,7 @@ internal class PreGameHandler
             player.Inventory.Add(armour);
             
             _ui.Player = player;
-            _ui.BeginGame(c);
+            _ui.BeginGame(c, new ItemDB());
         }
     }
 

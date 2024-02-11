@@ -172,6 +172,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     private readonly int _col = col;
     private readonly Map _map = gameState.Map!;
     private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
+    private readonly GameState _gameState = gameState;
 
     static string BlockedMessage(Tile tile)
     {
@@ -181,6 +182,19 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
             _ => "You cannot go that way!"
         }; ;
+    }
+
+    private string CalcDesc()
+    {
+        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
+        var items = _gameState.ItemDB.ItemsAt(loc);
+
+        if (items.Count == 0)
+            return _map.TileAt(_row, _col).StepMessage;
+        else if (items.Count > 1)
+            return "There are several items here.";
+        else
+            return $"There is {items[0].FullName.IndefArticle()} here.";
     }
 
     public override ActionResult Execute()
@@ -203,9 +217,11 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 var tile = _map.TileAt(_row, _col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map);
-                    openAction.Row = _row;
-                    openAction.Col = _col;
+                    var openAction = new OpenDoorAction(_actor, _map)
+                    {
+                        Row = _row,
+                        Col = _col
+                    };
                     result.AltAction = openAction;
                 }
                 else
@@ -219,7 +235,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             result.Successful = true;
             _actor.Row = _row;
             _actor.Col = _col;
-            result.Message = _map.TileAt(_row, _col).StepMessage;
+            result.Message = CalcDesc();
         }
 
         return result;

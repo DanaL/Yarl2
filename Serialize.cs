@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -22,7 +24,9 @@ internal class Serialize
     public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState)
     {
         var p = ShrunkenPlayer.Shrink(player);
-        var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, gameState.CurrDungeon);
+        var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, 
+                                    gameState.CurrDungeon, 
+                                    ShrunkenItemDB.Shrink(gameState.ItemDB));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -32,7 +36,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign) LoadSaveGame(string playerName)
+    public static (Player?, Campaign, ItemDB) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -40,9 +44,11 @@ internal class Serialize
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = ShrunkenCampaign.Inflate(sgi.Campaign);
+        var itemDB = ShrunkenItemDB.Inflate(sgi.ItemDB);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
-        return (p, c);
+
+        return (p, c, itemDB);
     }
 
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
@@ -323,7 +329,47 @@ internal class ShrunkenMap()
     }
 }
 
-internal record SaveGameInfo(ShrunkenPlayer? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon);
+// Sigh, JSONSerializer doesn't like my sweet Loc record struct as a dictionary
+// key so I have to pack and unpack the ItemDB. I wonder how much of a problem
+// this is going to be when the there's a dungeon full of items... (I'd probably
+// need to switch to a per-level itemDB)
+class ShrunkenItemDB
+{
+    public List<Loc> Keys { get; set; }
+    public List<List<Item>> Items { get; set; }
+
+    public static ShrunkenItemDB Shrink(ItemDB itemDB)
+    {
+        var sidb = new ShrunkenItemDB
+        {
+            Keys = new(),
+            Items = new()
+        };
+
+        foreach (var p in itemDB.Dump())
+        {
+            sidb.Keys.Add(p.Item1);
+            sidb.Items.Add(p.Item2);
+        }
+        
+        return sidb;
+    }
+
+    public static ItemDB Inflate(ShrunkenItemDB sidb)
+    {
+        var itemDB = new ItemDB();
+
+        for (int j = 0; j < sidb.Keys.Count; j++)
+        {
+            itemDB.AddStack(sidb.Keys[j], sidb.Items[j]);
+        }
+
+        return itemDB;
+    }
+}
+
+internal record SaveGameInfo(ShrunkenPlayer? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon,
+                                ShrunkenItemDB ItemDB);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

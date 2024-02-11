@@ -57,7 +57,7 @@ class ItemFactory
 // Structure to store where items are in the world
 class ItemDB
 {
-    private Dictionary<Loc, List<Item>> _items;
+    public Dictionary<Loc, List<Item>> _items;
 
     public ItemDB() => _items = [];
 
@@ -72,6 +72,12 @@ class ItemDB
         stack.Add(item);
     }
 
+    // This is really just used for restoring an itemdb from serialization
+    public void AddStack(Loc loc, List<Item> stack)
+    {
+        _items[loc] = stack;
+    }
+
     // It's probably dangerous/bad practice to return the list of items
     // so other parts of the game can manipulate it directly, but hey
     // it's easy and convenient
@@ -82,6 +88,8 @@ class ItemDB
         else
             return stack;
     }
+    
+    public List<(Loc, List<Item>)> Dump() => _items.Keys.Select(k => (k, _items[k])).ToList();
 }
 
 class Inventory
@@ -151,5 +159,7 @@ class Inventory
         _items[slot] = null;
     }
 
-    public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value)).ToList();
+    public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value))
+                                               .Where(p => p.Item2 is not null)
+                                               .ToList();
 }
