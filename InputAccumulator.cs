@@ -11,6 +11,32 @@ interface IInputAccumulator
     void Input(char ch);
 }
 
+class MenuPickAccumulator(HashSet<char> options) : IInputAccumulator
+{
+    private bool _done;
+    private bool _success;
+    private char _choice;
+    private HashSet<char> _options = options;
+
+    public bool Success => _success;
+    public bool Done => _done;
+
+    public char Choice => _choice;
+
+    public void Input(char ch) 
+    {
+        if (_options.Contains(ch))
+        {
+            _choice = ch;
+            _done = true;
+            _success = true;
+        }
+
+        // need to handle ESC key, which would be done = true but
+        // success = no
+    }
+}
+
 class PauseForMoreAccumulator : IInputAccumulator
 {
     private bool _keyPressed;

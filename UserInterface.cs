@@ -15,7 +15,7 @@ internal record struct UIEvent(UIEventType Type, char Value);
 internal abstract class UserInterface
 {
     protected const int BACKSPACE = 8;
-    public const int ScreenWidth = 60;
+    public const int ScreenWidth = 65;
     public const int ScreenHeight = 30;
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
@@ -390,9 +390,11 @@ internal class PreGameHandler
             Player player = new Player(playerName, startRow, startCol);
             var spear = ItemFactory.Get("spear");
             spear.Adjectives.Add("old");
+            spear.Equiped = true;
             player.Inventory.Add(spear);
             var armour = ItemFactory.Get("leather armour");
             armour.Adjectives.Add("battered");
+            armour.Equiped = true;
             player.Inventory.Add(armour);
             
             _ui.Player = player;

@@ -37,5 +37,10 @@ internal class GameState
 
     public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
+
+    public void ItemDropped(Item item, int row, int col)
+    {
+        
+    }
 }
 

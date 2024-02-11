@@ -1,3 +1,5 @@
+using System.Diagnostics.Tracing;
+
 enum ItemType
 {
     Weapon,
@@ -13,8 +15,8 @@ class Item
     public int Weight { get; set;}
     public bool Stackable { get; set; }
     public char Slot { get; set; }
-    public bool Equiped { get; set; }
-    public int Count { get; set; }
+    public bool Equiped { get; set; } = false;
+    public int Count { get; set; } = 1;
     public List<string> Adjectives { get; set; } = [];
 
     public string FullName {
@@ -34,14 +36,13 @@ class ItemFactory
 {
     public static Item Get(string name) => name switch
     {
-        "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Equiped = false },
+        "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false },
         "leather armour" => new Item()
         {
             Name = name,
             Type = ItemType.Armour,
             Stackable = false,
-            ArmourMod = 2,
-            Equiped = false
+            ArmourMod = 2,            
         },
         _ => throw new Exception($"{name} doesn't seem exist in yarl2 :()"),
     };
@@ -106,5 +107,10 @@ class Inventory
         }
 
         // TODO: handle stacks
+    }
+
+    public void Remove(char slot, int count)
+    {
+        _items[slot] = null;
     }
 }

@@ -226,6 +226,29 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     }
 }
 
+interface IMenuAction
+{
+    char Choice { get; set; }
+}
+
+class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action,  IMenuAction
+{
+    public char Choice { get; set; }
+    private UserInterface _ui = ui;
+    private Actor _actor = actor;
+    private GameState _gameState = gs;
+
+    public override ActionResult Execute() 
+    {
+        var item = (_actor as Player).Inventory.ItemAt(Choice);        
+        _ui.CloseMenu();
+        ((Player) actor).Inventory.Remove(Choice, 1);
+        _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+        
+        return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
+    }
+}
+
 class PassAction(Actor actor) : Action
 {
     private Actor _actor = actor;

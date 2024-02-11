@@ -34,7 +34,15 @@ internal class Player : Actor
             foreach (var s in slots)
             {
                 var item = Inventory.ItemAt(s);
-                lines.Add($"{s}) {item.FullName.IndefArticle()}");
+                var desc = item.FullName.IndefArticle();
+                if (item.Equiped)
+                {
+                    if (item.Type == ItemType.Weapon)
+                        desc += " (in hand)";
+                    else if (item.Type == ItemType.Armour)
+                        desc += " (worn)";
+                }
+                lines.Add($"{s}) {desc}");
             }
             ui.ShowDropDown(lines);
         }
@@ -52,12 +60,17 @@ internal class Player : Actor
                 if (_accumulator.Done)
                 {                    
                     if (_accumulator.Success)
-                    {                        
+                    {
                         if (_accumulator is DirectionAccumulator)
                         {
                             var acc = _accumulator as DirectionAccumulator;
                             (_deferred as DirectionalAction).Row += acc.Result.Item1;
                             (_deferred as DirectionalAction).Col += acc.Result.Item2;
+                        }
+                        else if (_accumulator is MenuPickAccumulator)
+                        {
+                            var acc = _accumulator as MenuPickAccumulator;
+                            (_deferred as IMenuAction).Choice = acc.Choice;
                         }
                         _accumulator = null;
 
@@ -99,7 +112,14 @@ internal class Player : Actor
                 ShowInventory(ui);
                 _accumulator = new PauseForMoreAccumulator();
                 _deferred = new CloseMenuAction(ui);
-            }            
+            }
+            else if (ch == 'd')
+            {
+                ui.WriteMessage("Drop what?");
+                ShowInventory(ui);
+                _accumulator = new MenuPickAccumulator(Inventory.UsedSlots().ToHashSet());
+                _deferred = new DropItemAction(ui, this, gameState);
+            }
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
