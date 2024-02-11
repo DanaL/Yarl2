@@ -1,7 +1,4 @@
 
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks.Dataflow;
-
 namespace Yarl2;
 
 // I didn't want to be beholden to someone else's colour class and anyhow
@@ -142,3 +139,10 @@ static class StringUtils
     };
 }
 
+// I'm only doing this because the JSONSerializer can't handle
+// tuples and I'd have to convert the DB keys to something else
+// anyhow
+// And it makes a nicer parameter to pass around to methods
+record struct Loc(int DungeonID, int Level, int Row, int Col);
+
+record struct Glyph(char Ch, Colour Lit, Colour Unlit);

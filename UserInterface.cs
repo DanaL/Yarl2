@@ -272,15 +272,48 @@ internal abstract class UserInterface
         }        
     }
 
+    (Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int)> remembered, Map map,
+                int mapRow, int mapCol, int scrRow, int scrCol)
+    {
+        var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
+        var items = GameState.ItemDB.ItemsAt(loc);
+        
+        // This is getting a bit gross...
+        if (visible.Contains((mapRow, mapCol))) 
+        {
+            if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)                    
+                return TileToGlyph(ZLayer[scrRow, scrCol], true);
+            else if (items.Count > 0)
+                return (items[0].Glyph.Lit, items[0].Glyph.Ch);
+            else
+                return TileToGlyph(map.TileAt(mapRow, mapCol), true);
+        }
+        else if (remembered.Contains((mapRow, mapCol)))
+        {
+            if (items.Count > 0)
+                return (items[0].Glyph.Unlit, items[0].Glyph.Ch);
+            else
+                return TileToGlyph(map.TileAt(mapRow, mapCol), false);
+        }
+        
+        return (Colours.BLACK, ' ');
+    }
+
     void SetSqsOnScreen()
     {
         var cmpg = GameState.Campaign;
-        int currLevel = GameState.CurrLevel;
         var dungeon = cmpg.Dungeons[GameState.CurrDungeon];
-        var map = dungeon.LevelMaps[currLevel];
+        var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player, map, currLevel);
+        var vs = FieldOfView.CalcVisible(Player, map, GameState.CurrLevel);
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
+
+        // There is a glitch here that I don't want to fix right now in that
+        // I am remembering only (row, col). So if a monster picks up an item
+        // out of the player's FOV, the remembered square will then show the map
+        // tile not the remembered item. I need to store a dictionary of loc + glyph
+        // Or perhaps it just needs to be a collection of items + non-basic tiles not
+        // every tile
         dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
         var rememberd = dungeon.RememberedSqs.Select(rm => (rm.Item2, rm.Item3)).ToHashSet();
        
@@ -293,21 +326,7 @@ internal abstract class UserInterface
             {
                 int mapRow = r + rowOffset;
                 int mapCol = c + colOffset;
-                if (visible.Contains((mapRow, mapCol))) 
-                {
-                    if (ZLayer[r, c].Type != TileType.Unknown)                    
-                        SqsOnScreen[r, c] = TileToGlyph(ZLayer[r, c], true);
-                    else
-                        SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), true);
-                }
-                else if (rememberd.Contains((mapRow, mapCol)))
-                {
-                    SqsOnScreen[r, c] = TileToGlyph(map.TileAt(mapRow, mapCol), false);
-                }
-                else
-                {
-                    SqsOnScreen[r, c] = (Colours.BLACK, ' ');
-                }
+                SqsOnScreen[r, c] = CalcGlyphAtLoc(visible, rememberd, map, mapRow, mapCol, r, c);                
             }
         }
 
