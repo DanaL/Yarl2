@@ -142,9 +142,21 @@ class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
     }
 }
 
-class OpenDoorAction(Actor actor, Map map) : DirectionalAction(actor)
+class OpenDoorAction : DirectionalAction
 {
-    private readonly Map _map = map;
+    private readonly Map _map;
+
+    public OpenDoorAction(Actor actor, Map map) : base(actor)
+    {
+        _map = map;
+    }
+
+    public OpenDoorAction(Actor actor, Map map, int row, int col) : base(actor)
+    {
+        _map = map;
+        _row = row;
+        _col = col;
+    }
 
     public override ActionResult Execute()
     {
@@ -226,7 +238,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 var tile = _map.TileAt(_row, _col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map);                    
+                    var openAction = new OpenDoorAction(_actor, _map, _row, _col);
                     result.AltAction = openAction;
                 }
                 else
