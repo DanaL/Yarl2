@@ -74,19 +74,8 @@ internal class Player : Actor
                 {                    
                     if (_accumulator.Success)
                     {
-                        if (_accumulator is DirectionAccumulator)
-                        {
-                            var acc = _accumulator as DirectionAccumulator;
-                            (_deferred as DirectionalAction).Row += acc.Result.Item1;
-                            (_deferred as DirectionalAction).Col += acc.Result.Item2;
-                        }
-                        else if (_accumulator is MenuPickAccumulator)
-                        {
-                            var acc = _accumulator as MenuPickAccumulator;
-                            (_deferred as IMenuAction).Choice = acc.Choice;
-                        }
+                        _deferred.ReceiveAccResult(_accumulator.GetResult());
                         _accumulator = null;
-
                         return _deferred;
                     }
                     else
@@ -145,11 +134,7 @@ internal class Player : Actor
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new CloseDoorAction(ui.Player, gameState.Map)
-                {
-                    Row = ui.Player.Row,
-                    Col = ui.Player.Col
-                };
+                var action = new CloseDoorAction(ui.Player, gameState.Map);                
                 _deferred = action;
                 
                 ui.WriteMessage("Which way?");
@@ -158,8 +143,6 @@ internal class Player : Actor
             {
                 _accumulator = new DirectionAccumulator();
                 var action = new OpenDoorAction(ui.Player, gameState.Map);
-                action.Row = ui.Player.Row;
-                action.Col = ui.Player.Col;
                 _deferred = action;
 
                 ui.WriteMessage("Which way?");

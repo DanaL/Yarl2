@@ -1,4 +1,6 @@
-﻿namespace Yarl2;
+﻿using System.Xml.Serialization;
+
+namespace Yarl2;
 
 // Handers to keep state while we are waiting for user input.
 // I'm sure someone smarter could come up with a cleaner 
@@ -10,15 +12,18 @@ abstract class InputAccumulator
     public virtual bool Done { get; set; }
     public string Msg { get; set; } = "";
 
-    public abstract void Input(char ch);    
+    public abstract void Input(char ch);
+
+    public virtual AccumulatorResult GetResult()
+    {
+        return new AccumulatorResult();
+    }
 }
 
 class MenuPickAccumulator(HashSet<char> options) : InputAccumulator
 {
     private char _choice;
     private HashSet<char> _options = options;
-
-    public char Choice => _choice;
 
     public override void Input(char ch) 
     {
@@ -40,6 +45,14 @@ class MenuPickAccumulator(HashSet<char> options) : InputAccumulator
             Done = false;
             Success = false;
         }
+    }
+
+    public override AccumulatorResult GetResult()
+    {
+        return new MenuAccumulatorResult()
+        {
+            Choice = _choice
+        };
     }
 }
 
@@ -77,10 +90,7 @@ class YesNoAccumulator : InputAccumulator
 class DirectionAccumulator : InputAccumulator
 {
     private (int, int) _result;
-
     public DirectionAccumulator() => Done = false;
-
-    public (int, int) Result => _result;
 
     public override void Input(char ch)
     {
@@ -134,4 +144,26 @@ class DirectionAccumulator : InputAccumulator
             Success = true;
         }
     }
+
+    public override AccumulatorResult GetResult()
+    {
+        return new DirectionAccumulatorResult()
+        {
+            Row = _result.Item1,
+            Col = _result.Item2
+        };
+    }
+}
+
+public class AccumulatorResult {}
+
+public class DirectionAccumulatorResult : AccumulatorResult
+{
+    public int Row { get; set; }
+    public int Col { get; set; }
+}
+
+public class MenuAccumulatorResult : AccumulatorResult
+{
+    public char Choice { get; set; }
 }

@@ -15,6 +15,7 @@ class ActionResult
 abstract class Action
 {
     public abstract ActionResult Execute();
+    public virtual void ReceiveAccResult(AccumulatorResult result) {}
 }
 
 class PortalAction(GameState gameState) : Action
@@ -95,21 +96,28 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
-abstract class DirectionalAction() : Action
+abstract class DirectionalAction(Actor actor) : Action
 {
-    public int Row { get; set; }
-    public int Col { get; set; }
+    protected readonly Actor _actor = actor;
+    protected int _row { get; set; }
+    protected int _col { get; set; }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var dirResult = (DirectionAccumulatorResult)result;
+        _row = _actor.Row + dirResult.Row;
+        _col = _actor.Col + dirResult.Col;
+    }
 }
 
-class CloseDoorAction(Actor actor, Map map) : DirectionalAction
-{
-    private readonly Actor _actor = actor;
+class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
+{    
     private readonly Map _map = map;
 
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(Row, Col);
+        var door = _map.TileAt(_row, _col);
 
         if (door is Door d)
         {
@@ -134,15 +142,14 @@ class CloseDoorAction(Actor actor, Map map) : DirectionalAction
     }
 }
 
-class OpenDoorAction(Actor actor, Map map) : DirectionalAction
+class OpenDoorAction(Actor actor, Map map) : DirectionalAction(actor)
 {
-    private readonly Actor _actor = actor;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(Row, Col);
+        var door = _map.TileAt(_row, _col);
 
         if (door is Door d)
         {
@@ -219,11 +226,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 var tile = _map.TileAt(_row, _col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map)
-                    {
-                        Row = _row,
-                        Col = _col
-                    };
+                    var openAction = new OpenDoorAction(_actor, _map);                    
                     result.AltAction = openAction;
                 }
                 else
@@ -244,12 +247,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     }
 }
 
-interface IMenuAction
-{
-    char Choice { get; set; }
-}
-
-class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action,  IMenuAction
+class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     private UserInterface _ui = ui;
@@ -271,13 +269,19 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action,  IMe
             _gameState.ItemDropped(item, _actor.Row, _actor.Col);
             item.Equiped = false;
             _actor.CalcEquipmentModifiers();
-            
+
             return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
         }
     }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
+    }
 }
 
-class ToggleEquipedAction(UserInterface ui, Actor actor) : Action, IMenuAction
+class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
 {
     public char Choice { get; set; }
     private UserInterface _ui = ui;
@@ -313,6 +317,12 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action, IMenuAction
         _actor.CalcEquipmentModifiers();
 
         return result;
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
     }
 }
 
