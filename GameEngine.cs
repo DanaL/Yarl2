@@ -12,20 +12,6 @@
 
 namespace Yarl2;
 
-// These two classes don't really belong here anymore, now that the
-// GameEngine class is gone...
-
-abstract class Actor
-{
-    public int Row { get; set; }
-    public int Col { get; set; }
-    public int MaxVisionRadius { get; set; }
-    public int CurrVisionRadius { get; set; }
-
-    public abstract Action TakeTurn(UserInterface ui, GameState gameState);
-    public abstract void CalcEquipmentModifiers();
-}
-
 internal class GameQuitException : Exception { }
 
 // The queue of actors to act will likely need to go here.
@@ -37,7 +23,7 @@ internal class GameState
     public int CurrLevel { get; set; }
     public int CurrDungeon { get; set; }
     public Campaign? Campaign { get; set; }
-    public ItemDB ItemDB { get; set; } = new ItemDB();
+    public GameObjectDB ItemDB { get; set; } = new GameObjectDB();
 
     public void EnterLevel(int dungeon, int level)
     {

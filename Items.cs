@@ -18,9 +18,8 @@ enum ItemType
     Zorkmid
 }
 
-class Item
+class Item : GameObj
 {
-    public string Name { get; set; } = "";
     public ItemType Type { get; set; }
     public int ArmourMod { get; set; }
     public int Weight { get; set;}
@@ -28,8 +27,7 @@ class Item
     public char Slot { get; set; }
     public bool Equiped { get; set; } = false;
     public int Count { get; set; } = 1;
-    public Glyph Glyph { get; set; }
-
+    
     public List<string> Adjectives { get; set; } = [];
 
     public string FullName {
@@ -86,47 +84,6 @@ class ItemFactory
         },
         _ => throw new Exception($"{name} doesn't seem exist in yarl2 :("),
     };
-}
-
-// Structure to store where items are in the world
-class ItemDB
-{
-    public Dictionary<Loc, List<Item>> _items;
-
-    public ItemDB() => _items = [];
-
-    public void Add(Loc loc, Item item)
-    {
-        if (!_items.TryGetValue(loc, out var stack))
-        {
-            stack = [];
-            _items.Add(loc, stack);
-        }
-
-        // I could have made _items Stack<Item> instead of a list, but there
-        // are times when I want to iterate over the items in a location,
-        // and sometimes the player will want to remove an item from the middle.
-        stack.Insert(0, item);
-    }
-
-    // This is really just used for restoring an itemdb from serialization
-    public void AddStack(Loc loc, List<Item> stack)
-    {
-       _items[loc] = stack;
-    }
-
-    // It's probably dangerous/bad practice to return the list of items
-    // so other parts of the game can manipulate it directly, but hey
-    // it's easy and convenient
-    public List<Item> ItemsAt(Loc loc)
-    {
-        if (!_items.TryGetValue(loc, out var stack))
-            return [];
-        else
-            return stack;
-    }
-    
-    public List<(Loc, List<Item>)> Dump() => _items.Keys.Select(k => (k, _items[k])).ToList();
 }
 
 class Inventory

@@ -142,7 +142,7 @@ internal abstract class UserInterface
         }        
     }
 
-    public void BeginGame(Campaign campaign, ItemDB itemDB)
+    public void BeginGame(Campaign campaign, GameObjectDB itemDB)
     {
         GameState = new GameState()
         {
@@ -186,9 +186,9 @@ internal abstract class UserInterface
         }
     }
 
-    private void TakeTurn(Actor actor)
+    private void TakeTurn(IPerformer performer)
     {
-        var action = actor.TakeTurn(this, GameState);
+        var action = performer.TakeTurn(this, GameState);
 
         if (action is QuitAction)
         {
@@ -295,22 +295,22 @@ internal abstract class UserInterface
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
-        var items = GameState.ItemDB.ItemsAt(loc);
+        var glyph = GameState.ItemDB.GlyphAt(loc);
         
         // This is getting a bit gross...
         if (visible.Contains((mapRow, mapCol))) 
         {
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)                    
                 return TileToGlyph(ZLayer[scrRow, scrCol], true);
-            else if (items.Count > 0)
-                return (items[0].Glyph.Lit, items[0].Glyph.Ch);
+            else if (glyph != GameObjectDB.EMPTY)
+                return (glyph.Lit, glyph.Ch);
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), true);
         }
         else if (remembered.Contains((mapRow, mapCol)))
         {
-            if (items.Count > 0)
-                return (items[0].Glyph.Unlit, items[0].Glyph.Ch);
+            if (glyph != GameObjectDB.EMPTY)
+                return (glyph.Unlit, glyph.Ch);
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }
@@ -437,7 +437,11 @@ internal class PreGameHandler
             player.Inventory.Add(ItemFactory.Get("dagger"));
             
             _ui.Player = player;
-            _ui.BeginGame(c, new ItemDB());
+
+            var objDb = new GameObjectDB();
+            var m = MonsterFactory.Get("skellie");
+            objDb.Add(new Loc(0, 0, startRow + 2, startCol - 2), m);
+            _ui.BeginGame(c, objDb);
         }
     }
 

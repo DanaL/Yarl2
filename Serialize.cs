@@ -44,7 +44,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, ItemDB) LoadSaveGame(string playerName)
+    public static (Player?, Campaign, GameObjectDB) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -346,7 +346,7 @@ class ShrunkenItemDB
     public List<Loc> Keys { get; set; }
     public List<List<Item>> Items { get; set; }
 
-    public static ShrunkenItemDB Shrink(ItemDB itemDB)
+    public static ShrunkenItemDB Shrink(GameObjectDB itemDB)
     {
         var sidb = new ShrunkenItemDB
         {
@@ -363,9 +363,9 @@ class ShrunkenItemDB
         return sidb;
     }
 
-    public static ItemDB Inflate(ShrunkenItemDB sidb)
+    public static GameObjectDB Inflate(ShrunkenItemDB sidb)
     {
-        var itemDB = new ItemDB();
+        var itemDB = new GameObjectDB();
 
         for (int j = 0; j < sidb.Keys.Count; j++)
         {

@@ -321,7 +321,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             ((Player) actor).Inventory.Remove(Choice, 1);
             _gameState.ItemDropped(item, _actor.Row, _actor.Col);
             item.Equiped = false;
-            _actor.CalcEquipmentModifiers();
+            (_actor as IItemHolder).CalcEquipmentModifiers();
 
             return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
         }
@@ -367,7 +367,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
                 break;
         }            
         
-        _actor.CalcEquipmentModifiers();
+        (_actor as IItemHolder).CalcEquipmentModifiers();
 
         return result;
     }

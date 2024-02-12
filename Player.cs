@@ -12,11 +12,8 @@
 
 namespace Yarl2;
 
-internal class Player : Actor
+internal class Player : Actor, IPerformer, IItemHolder
 {
-    public string Name { get; set; }
-    public int MaxHP { get; set; }
-    public int CurrHP { get; set; }
     private InputAccumulator? _accumulator;
     private Action _deferred;
     public Inventory Inventory { get; set; } = new();
@@ -74,13 +71,12 @@ internal class Player : Actor
         return options;
     }
     
-    public override void CalcEquipmentModifiers()
+    public void CalcEquipmentModifiers()
     {
-        // I think this will get pulled up into a super class shared with monsters
-        // or to Actor itself if I decide all Actors can have inventories
+        
     }
 
-    public override Action TakeTurn(UserInterface ui, GameState gameState)
+    public Action TakeTurn(UserInterface ui, GameState gameState)
     {
         if (ui.InputBuffer.Count > 0)
         {
