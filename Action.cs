@@ -282,7 +282,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var item = itemStack[i];
         itemStack.RemoveAt(i);
         inv.Add(item);
-        return new ActionResult() { Successful=false, Message=$"You pick up {item.FullName.DefArticle()}" };
+        return new ActionResult() { Successful=false, Message=$"You pick up {item.FullName.DefArticle()}." };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -304,9 +304,9 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var item = (_actor as Player).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
-        if (item.Equiped)
+        if (item.Equiped && item.Type == ItemType.Armour)
         {
-            return new ActionResult() { Successful=false, Message="You cannot drop something you have equiped." };
+            return new ActionResult() { Successful=false, Message="You cannot drop something you're wearing." };
         }
         else 
         {
