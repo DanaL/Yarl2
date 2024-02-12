@@ -10,19 +10,16 @@ internal class SDLUserInterface : UserInterface
     private readonly IntPtr _window;
     private readonly IntPtr _renderer, _font;
     private readonly int _fontWidth;
-    private readonly int _fontHeight;    
+    private readonly int _fontHeight;
     private SDL_Rect _mainFrameLoc;
     private Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
     private Dictionary<Colour, SDL_Color> _colours;
 
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
-    private (Colour, char)[,] _prevTiles = new (Colour, char)[ScreenHeight - 1, ViewWidth];
-    private List<string>? _menuRows;
+    private (Colour, char)[,] _prevTiles = new (Colour, char)[ScreenHeight - 1, ViewWidth];    
     private string _prevMessage = "";
-    private bool _closingMenu;
-    private bool _openingMenu;
-
+    
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
         FontSize = opt.FontSize;
@@ -56,6 +53,8 @@ internal class SDLUserInterface : UserInterface
             }
         }
     }
+
+    public override void CloseMenu() => ClosingMenu = true;
 
     protected override UIEvent PollForEvent()
     {
@@ -136,11 +135,11 @@ internal class SDLUserInterface : UserInterface
 
     private void WriteDropDown()
     {
-        int width = _menuRows!.Select(r => r.Length).Max() + 2;
+        int width = MenuRows!.Select(r => r.Length).Max() + 2;
         int col = ViewWidth - width;
         int row = 1;
 
-        foreach (var line in _menuRows!)
+        foreach (var line in MenuRows!)
         {
             WriteLine(" " +line, row++, col, width);
         }
@@ -202,16 +201,16 @@ internal class SDLUserInterface : UserInterface
 
     private bool FrameChanged()
     {
-        if (_closingMenu)
+        if (ClosingMenu)
         {
-            _menuRows = null;
-            _closingMenu = false;
+            MenuRows = null;
+            ClosingMenu = false;
             return true;
         }
 
-        if (_openingMenu)
+        if (OpeningMenu)
         {
-            _openingMenu = false;
+            OpeningMenu = false;
             return true;
         }
 
@@ -241,14 +240,6 @@ internal class SDLUserInterface : UserInterface
         }
     }
 
-    public override void ShowDropDown(List<string> lines)
-    {
-        _openingMenu = true;
-        _menuRows = lines;
-    }
-
-    public override void CloseMenu() => _closingMenu = true;
-
     public override void UpdateDisplay()
     {
         // TODO: when the sidebar actually does something,
@@ -277,7 +268,7 @@ internal class SDLUserInterface : UserInterface
                 SaveLastFame();
             }
 
-            if (_menuRows is not null)
+            if (MenuRows is not null)
             {
                 WriteDropDown();
             }

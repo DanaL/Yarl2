@@ -28,8 +28,6 @@ internal abstract class UserInterface
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
     
-    public abstract void CloseMenu();
-    public abstract void ShowDropDown(List<string> lines);
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
     
@@ -56,7 +54,11 @@ internal abstract class UserInterface
     // It's convenient for other classes to ask what dungeon and level we're on
     public int CurrentDungeon => GameState is not null ? GameState.CurrDungeon : -1;
     public int CurrentLevel => GameState is not null ? GameState.CurrLevel : -1;
-    
+
+    protected bool ClosingMenu { get; set; }
+    protected bool OpeningMenu { get; set; }
+    protected List<string>? MenuRows { get; set; }
+
     public UserInterface(Options opts)
     {
         _options = opts;
@@ -90,6 +92,14 @@ internal abstract class UserInterface
     {
         _longMessage = message;
     }
+
+    public void ShowDropDown(List<string> lines)
+    {
+        OpeningMenu = true;
+        MenuRows = lines;
+    }
+
+    public virtual void CloseMenu() => MenuRows = null;
 
     // I dunno about having this here. In previous games, I had each Tile object
     // know what its colours were, but maybe the UI class *is* the correct spot

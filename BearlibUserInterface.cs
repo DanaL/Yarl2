@@ -10,7 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using BearLibNET;
-using BearLibNET.DefaultImplementations;
+using Color = BearLibNET.DefaultImplementations.Color;
 using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2;
@@ -100,6 +100,7 @@ internal class BLUserInferface : UserInterface, IDisposable
 
     void WriteSideBar()
     {
+        Terminal.Color(ToBearLibColour(Colours.WHITE));
         Terminal.Print(ViewWidth, 1, $"| {Player.Name}".PadRight(ViewWidth));
         Terminal.Print(ViewWidth, 2, $"| HP: {Player.CurrHP} ({Player.MaxHP})".PadRight(ViewWidth));
 
@@ -110,14 +111,19 @@ internal class BLUserInferface : UserInterface, IDisposable
         }
     }
 
-    public override void ShowDropDown(List<string> lines)
+    private void WriteDropDown()
     {
-        throw new NotImplementedException();
-    }
+        Terminal.Color(ToBearLibColour(Colours.WHITE));
+        int width = MenuRows!.Select(r => r.Length).Max() + 2;
+        int col = ViewWidth - width;
+        int row = 1;
 
-    public override void CloseMenu()
-    {
-        throw new NotImplementedException();
+        foreach (var line in MenuRows!)
+        {
+            Terminal.Print(col, row++, line.PadRight(width));
+            
+        }
+        Terminal.Print(col, row, "".PadRight(width));        
     }
 
     public override void UpdateDisplay()
@@ -125,7 +131,8 @@ internal class BLUserInferface : UserInterface, IDisposable
         Terminal.Clear();
 
         if (_longMessage != null)
-        {            
+        {
+            Terminal.Color(ToBearLibColour(Colours.WHITE));
             for (int row = 0; row < _longMessage.Count; row++)
             {
                 Terminal.Print(0, row, _longMessage[row]);
@@ -148,6 +155,11 @@ internal class BLUserInferface : UserInterface, IDisposable
                 }
 
                 WriteSideBar();
+            }
+
+            if (MenuRows is not null)
+            {
+                WriteDropDown();
             }
         }
         
