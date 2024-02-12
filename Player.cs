@@ -32,7 +32,7 @@ internal class Player : Actor
             return;
         }
 
-        List<string> lines = [ "You are carrying: "];
+        List<string> lines = [ "You are carrying:" ];
         foreach (var s in slots)
         {
             var item = Inventory.ItemAt(s);
@@ -49,6 +49,22 @@ internal class Player : Actor
         ui.ShowDropDown(lines);
     }
 
+    private HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
+    {
+        HashSet<char> options = [];
+        List<string> lines = [ "You see:"] ;
+        char slot = 'a';
+        foreach (var item in items)
+        {
+            options.Add(slot);
+            var desc = item.FullName.IndefArticle();
+            lines.Add($"{slot++}) {desc}");
+        }
+        ui.ShowDropDown(lines);
+
+        return options;
+    }
+    
     public override void CalcEquipmentModifiers()
     {
         // I think this will get pulled up into a super class shared with monsters
@@ -115,6 +131,33 @@ internal class Player : Actor
                 ShowInventory(ui);
                 _accumulator = new PauseForMoreAccumulator();
                 _deferred = new CloseMenuAction(ui);
+            }
+            else if (ch == ',')
+            {
+                Loc loc = new Loc(gameState.CurrDungeon, gameState.CurrLevel, Row, Col);
+                var itemStack = gameState.ItemDB.ItemsAt(loc);
+
+                if (itemStack is null || itemStack.Count == 0)
+                {
+                    ui.WriteMessage("There's nothing there...");
+                    return new NullAction();
+                }
+                else if (itemStack.Count == 1) 
+                {
+                    var a = new PickupItemAction(ui, this, gameState);
+                    // A bit kludgy but this sets up the Action as though
+                    // the player had selected the first item in a list of one
+                    var mr = new MenuAccumulatorResult() { Choice = 'a' };                
+                    a.ReceiveAccResult(mr); 
+                    return a;
+                }
+                else 
+                {
+                    ui.WriteMessage("What do you pick up?");
+                    var opts = ShowPickupMenu(ui, itemStack);
+                    _accumulator = new MenuPickAccumulator(opts);
+                    _deferred = new PickupItemAction(ui, this, gameState);
+                }
             }
             else if (ch == 'd')
             {

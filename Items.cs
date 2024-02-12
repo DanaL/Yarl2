@@ -75,7 +75,7 @@ class ItemFactory
             Piece = ArmourParts.Helmet,
             Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
         },
-        _ => throw new Exception($"{name} doesn't seem exist in yarl2 :()"),
+        _ => throw new Exception($"{name} doesn't seem exist in yarl2 :("),
     };
 }
 
@@ -94,13 +94,16 @@ class ItemDB
             _items.Add(loc, stack);
         }
 
-        stack.Add(item);
+        // I could have made _items Stack<Item> instead of a list, but there
+        // are times when I want to iterate over the items in a location,
+        // and sometimes the player will want to remove an item from the middle.
+        stack.Insert(0, item);
     }
 
     // This is really just used for restoring an itemdb from serialization
     public void AddStack(Loc loc, List<Item> stack)
     {
-        _items[loc] = stack;
+       _items[loc] = stack;
     }
 
     // It's probably dangerous/bad practice to return the list of items

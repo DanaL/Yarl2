@@ -247,6 +247,39 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     }
 }
 
+class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+{
+    public char Choice { get; set; }
+    private UserInterface _ui = ui;
+    private Actor _actor = actor;
+    private GameState _gameState = gs;
+
+    public override ActionResult Execute()
+    {
+        _ui.CloseMenu();
+        Loc loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+        var itemStack = _gameState.ItemDB.ItemsAt(loc);
+
+        var inv = (_actor as Player).Inventory;
+        bool freeSlot = inv.UsedSlots().Length < 26;
+
+        if (!freeSlot)
+            return new ActionResult() { Successful=false, Message="There's no room in your inventory!" };
+
+        int i = Choice - 'a';
+        var item = itemStack[i];
+        itemStack.RemoveAt(i);
+        inv.Add(item);
+        return new ActionResult() { Successful=false, Message=$"You pick up {item.FullName.DefArticle()}" };
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
+    }
+}
+
 class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
