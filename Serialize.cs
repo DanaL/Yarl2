@@ -258,7 +258,7 @@ internal class ShrunkenMap()
 
         foreach (string s in shrunken)
         {
-            Tile tile = null;
+            Tile? tile = null;
             int[] digits;
             var pieces = s.Split(';');
             var j = int.Parse(pieces[0]);

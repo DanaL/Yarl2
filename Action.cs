@@ -296,7 +296,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
         var itemStack = _gameState.ObjDB.ItemsAt(loc);
 
-        var inv = (_actor as Player).Inventory;
+        var inv = ((Player)_actor).Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
 
         if (!freeSlot)
@@ -325,7 +325,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute() 
     {
-        var item = (_actor as Player).Inventory.ItemAt(Choice);        
+        var item = ((Player)_actor).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
         if (item.Equiped && item.Type == ItemType.Armour)
@@ -334,10 +334,10 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         }
         else 
         {
-            ((Player) actor).Inventory.Remove(Choice, 1);
+            ((Player) _actor).Inventory.Remove(Choice, 1);
             _gameState.ItemDropped(item, _actor.Row, _actor.Col);
             item.Equiped = false;
-            (_actor as IItemHolder).CalcEquipmentModifiers();
+            ((IItemHolder)_actor).CalcEquipmentModifiers();
 
             return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
         }
@@ -360,10 +360,10 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
     {
         ActionResult result;
 
-        var item = (_actor as Player).Inventory.ItemAt(Choice);        
+        var item = ((Player)_actor).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
-        var (equipResult, conflict) = ((Player) actor).Inventory.ToggleEquipStatus(Choice);
+        var (equipResult, conflict) = ((Player) _actor).Inventory.ToggleEquipStatus(Choice);
         
         switch (equipResult)
         {
@@ -383,7 +383,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
                 break;
         }            
         
-        (_actor as IItemHolder).CalcEquipmentModifiers();
+        ((IItemHolder)_actor).CalcEquipmentModifiers();
 
         return result;
     }
