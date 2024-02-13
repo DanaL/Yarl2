@@ -17,6 +17,8 @@ internal class Player : Actor, IPerformer, IItemHolder
     private InputAccumulator? _accumulator;
     private Action _deferred;
     public Inventory Inventory { get; set; } = new();
+    public double Energy { get; set; } = 0.0;
+    public double Recovery { get; set; }
 
     public Player(string name, int row, int col)
     {
@@ -27,6 +29,8 @@ internal class Player : Actor, IPerformer, IItemHolder
         CurrHP = 15;
         MaxVisionRadius = 15;
         CurrVisionRadius = MaxVisionRadius;
+        Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
+                        // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
 
     private void ShowInventory(UserInterface ui)

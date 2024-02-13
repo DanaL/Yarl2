@@ -17,6 +17,8 @@ namespace Yarl2;
 // item that zaps the player once in a while
 interface IPerformer
 {
+    double Energy { get; set; }
+    double Recovery { get; set; }
     Action TakeTurn(UserInterface ui, GameState gameState);
 }
 
@@ -51,19 +53,58 @@ class MonsterFactory
 { 
     public static Actor Get(string name, AIType aiType)
     {
-        var m = new Monster()
+        if (name == "skellie")
         {
-            Name = name,
-            MaxHP = 10,
-            CurrHP = 10,
-            AttackBonus = 3,
-            Dmg = new Dmg(1, 6, 1),
-            Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
-            AIType = aiType
-        };
-        m.SetBehaviour(aiType);
+            var m = new Monster()
+            {
+                Name = name,
+                MaxHP = 10,
+                CurrHP = 10,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
+                AIType = aiType,
+                Recovery = 1.0
+            };
+            m.SetBehaviour(aiType);
+            return m;
+        }
 
-        return m;
+        if (name == "goblin")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                MaxHP = 10,
+                CurrHP = 10,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('g', Colours.LIGHT_BROWN, Colours.BROWN),
+                AIType = aiType,
+                Recovery = 1.0
+            };
+            m.SetBehaviour(aiType);
+            return m;
+        }
+
+        if (name == "zombie")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                MaxHP = 10,
+                CurrHP = 10,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('z', Colours.LIME_GREEN, Colours.DARK_GREEN),
+                AIType = aiType,
+                Recovery = 0.75
+            };
+            m.SetBehaviour(aiType);
+            return m;
+        }
+
+        throw new Exception($"{name}s don't seem to exist in this world!");
     }
 }
 
@@ -76,13 +117,15 @@ class Monster : Actor, IPerformer
     public int AttackBonus { get; set; }
     public Dmg Dmg { get; set; }
     public AIType AIType { get; set;}
+    public double Energy { get; set; } = 0.0;
+    public double Recovery { get; set; }
+
     private IBehaviour _behaviour;
 
     public Monster() {}
     
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        Console.WriteLine($"{Name.IndefArticle()} takes its turn.");
         return _behaviour.CalcAction(this, gameState);
     }
 
@@ -108,7 +151,7 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        return new PassAction(actor);
+        return new MoveAction(actor, actor.Row - 1, actor.Col, gameState);
     }
 }
 

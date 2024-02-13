@@ -84,6 +84,15 @@ class GameObjectDB
             return stack;
     }
     
+    public void MonsterMoved(Monster m, Loc from, Loc to)
+    {
+        if (_monsters[from] == m)
+        {
+            _monsters.Remove(from);
+            _monsters[to] = m;
+        }
+    }
+
     public List<IPerformer> GetPerformers(int dungeonID, int level)
     {
         List<IPerformer> performers = [];

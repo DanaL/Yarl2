@@ -16,6 +16,7 @@ class ActionResult
     public bool Successful { get; set; }
     public string? Message { get; set; }
     public Action? AltAction { get; set; }
+    public double EnergyCost { get; set; } = 0.0;
 
     public ActionResult() { }
 }
@@ -38,6 +39,7 @@ class PortalAction(GameState gameState) : Action
         _gameState.Player!.Col = c;
         result.Successful = true;
         result.Message = _gameState.CurrentDungeon.ArrivalMessage;
+        result.EnergyCost = 1.0;
     }
 
     public override ActionResult Execute()
@@ -133,6 +135,7 @@ class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
             {
                 d.Open = false;
                 result.Successful = true;
+                result.EnergyCost = 1.0;
                 if (_actor is Player)
                     result.Message = "You close the door.";
             }
@@ -177,6 +180,7 @@ class OpenDoorAction : DirectionalAction
             {
                 d.Open = true;
                 result.Successful = true;
+                result.EnergyCost = 1.0;
                 if (_actor is Player)
                     result.Message = "You open the door.";
             }
@@ -258,6 +262,15 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
         else
         {            
             result.Successful = true;
+            result.EnergyCost = 1.0;
+
+            if (_actor is not Player)
+            {
+                var m = (Monster)_actor;
+                var from = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+                var to = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
+                _gameState.ObjDB.MonsterMoved(m, from, to);
+            }
             _actor.Row = _row;
             _actor.Col = _col;
             result.Message = CalcDesc();
@@ -277,7 +290,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     public override ActionResult Execute()
     {
         _ui.CloseMenu();
-        Loc loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
         var itemStack = _gameState.ObjDB.ItemsAt(loc);
 
         var inv = (_actor as Player).Inventory;
@@ -290,7 +303,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var item = itemStack[i];
         itemStack.RemoveAt(i);
         inv.Add(item);
-        return new ActionResult() { Successful=false, Message=$"You pick up {item.FullName.DefArticle()}." };
+        return new ActionResult() { Successful=true, Message=$"You pick up {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -323,7 +336,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             item.Equiped = false;
             (_actor as IItemHolder).CalcEquipmentModifiers();
 
-            return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}." };
+            return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
         }
     }
 
@@ -352,10 +365,10 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
         switch (equipResult)
         {
             case EquipingResult.Equiped:
-                result = new ActionResult() { Successful=true, Message=$"You ready {item.FullName.DefArticle()}." };
+                result = new ActionResult() { Successful=true, Message=$"You ready {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
-                result = new ActionResult() { Successful=true, Message=$"You unequip {item.FullName.DefArticle()}." };
+                result = new ActionResult() { Successful=true, Message=$"You unequip {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
                 break;
             default:
                 string msg = "You are already wearing ";
@@ -387,7 +400,7 @@ class PassAction(Actor actor) : Action
     {
         // do nothing for now but eventually there will be an energy cost to passing
         // (ie., time will pass in game)
-        return new ActionResult() { Successful = true };
+        return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }
 }
 

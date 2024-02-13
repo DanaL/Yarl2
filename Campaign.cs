@@ -84,10 +84,19 @@ internal class PreGameHandler(UserInterface ui)
         return (campaign, entrance.Item1, entrance.Item2);
     }
 
-    public void StartUp()
+    public bool StartUp()
     {
-        string playerName = _ui.BlockingGetResponse("Who are you?");
-        SetupGame(playerName);
+        try
+        {
+            string playerName = _ui.BlockingGetResponse("Who are you?");
+            SetupGame(playerName);
+
+            return true;
+        }
+        catch (GameQuitException)
+        {
+            return false;
+        }
     }
 
     private void SetupGame(string playerName)
@@ -115,8 +124,14 @@ internal class PreGameHandler(UserInterface ui)
             _ui.Player = player;
 
             var objDb = new GameObjectDB();
-            var m = MonsterFactory.Get("skellie", AIType.Basic);
-            objDb.Add(new Loc(0, 0, startRow + 2, startCol - 2), m);
+            var m = MonsterFactory.Get("goblin", AIType.Basic);
+            m.Row = startRow + 1;
+            m.Col = startCol - 1;
+            objDb.Add(new Loc(0, 0, startRow + 1, startCol - 1), m);
+            var z = MonsterFactory.Get("zombie", AIType.Basic);
+            z.Row = startRow + 1;
+            z.Col = startCol;
+            objDb.Add(new Loc(0, 0, startRow + 1, startCol), z);
 
             _ui.SetupGameState(c, objDb);
         }

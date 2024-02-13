@@ -167,9 +167,15 @@ internal abstract class UserInterface
         }
     }
 
-    private void TakeTurn(IPerformer performer)
+    private bool TakeTurn(IPerformer performer)
     {
         var action = performer.TakeTurn(this, GameState);
+
+        if (action is NullAction)
+        {
+            // Player is idling
+            return false;
+        }
 
         if (action is QuitAction)
         {
@@ -180,18 +186,14 @@ internal abstract class UserInterface
         {
             Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState);
             throw new GameQuitException();
-        }
-        else if (action is NullAction)
-        {
-            // Just idling...                
-            return;
-        }
+        }        
         else
         {
             ActionResult result;
             do
             {
-                result = action!.Execute();
+                result = action!.Execute();                
+                performer.Energy -= result.EnergyCost;
                 if (result.AltAction is not null)
                     result = result.AltAction.Execute();
                 if (result.Message is not null)
@@ -199,11 +201,8 @@ internal abstract class UserInterface
             }
             while (result.AltAction is not null);
         }
-    }
 
-    private void DoActorTurns()
-    {
-        TakeTurn(Player);
+        return true;
     }
 
     public void GameLoop()
@@ -214,13 +213,22 @@ internal abstract class UserInterface
         DateTime lastPollTime = DateTime.Now;
 
         List<IPerformer> performers = [];
+        // It's actually an error condition if at this point either Player or GameState is null
         if (Player is not null && GameState is not null)
         {
             performers.Add(Player);
             performers.AddRange(GameState.ObjDB.GetPerformers(GameState.CurrDungeon, GameState.CurrLevel));
+
+            // I guess this should happen elsewhere, or Actors should be created with topped-up energy
+            // for the case where we're entering GameLoop() from a saved game
+            foreach (var performer in performers) 
+            {
+                performer.Energy = performer.Recovery;
+            }
         }
-        
+
         _playing = true;
+        int p = 0;
         while (_playing) 
         {
             var e = PollForEvent();
@@ -232,14 +240,22 @@ internal abstract class UserInterface
             
             try
             {
-                // Update step! This is where all the Actors get a chance
-                // to take their turn! (At the moment the only actor is 
-                // the player)
+                // Update step! This is where all the current performer gets a chance
+                // to take their turn!                 
+                if (performers[p].Energy < 1.0 || TakeTurn(performers[p]))
+                {
+                    p = (p + 1) % performers.Count;
+                    performers[p].Energy += performers[p].Recovery;
 
-                // Return a value indicating if all the actors were idle?
-                // then I perhaps don't have to recalculate the view, etc
-                if (Player is not null)
-                    DoActorTurns();
+                    if (performers[p] != Player)
+                    {
+                        UpdateDisplay();
+                        Thread.Sleep(25);
+                    }
+                }
+
+                // I imagine later on there'll be bookkeeping and such once we've run
+                // through all the current performers?
             }
             catch (GameQuitException)
             {

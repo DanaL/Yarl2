@@ -15,9 +15,11 @@ else
 display.TitleScreen();
 
 var pgh = new PreGameHandler(display);
-pgh.StartUp();
-        
-display.GameLoop();
+
+if (pgh.StartUp())
+{
+    display.GameLoop();
+}
 
 namespace Yarl2
 {
