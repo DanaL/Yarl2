@@ -219,6 +219,9 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
 
     private string CalcDesc()
     {
+        if (_actor is not Player)
+            return "";
+
         var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
         var items = _gameState.ObjDB.ItemsAt(loc);
 
