@@ -34,7 +34,7 @@ internal class Serialize
         var p = ShrunkenPlayer.Shrink(player);
         var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
-                                    ShrunkenItemDB.Shrink(gameState.ItemDB));
+                                    ShrunkenGameObjDB.Shrink(gameState.ItemDB));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -52,7 +52,7 @@ internal class Serialize
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = ShrunkenCampaign.Inflate(sgi.Campaign);
-        var itemDB = ShrunkenItemDB.Inflate(sgi.ItemDB);
+        var itemDB = ShrunkenGameObjDB.Inflate(sgi.ItemDB);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
 
@@ -341,43 +341,54 @@ internal class ShrunkenMap()
 // key so I have to pack and unpack the ItemDB. I wonder how much of a problem
 // this is going to be when the there's a dungeon full of items... (I'd probably
 // need to switch to a per-level itemDB)
-class ShrunkenItemDB
+class ShrunkenGameObjDB
 {
-    public List<Loc> Keys { get; set; }
-    public List<List<Item>> Items { get; set; }
+    public List<Loc> ItemsKeys { get; set; } = new();
+    public List<List<Item>> Items { get; set; } = new();
+    public List<Loc> MonsterKeys { get; set; } = new();
+    public List<Monster> Monsters { get; set; } = new();
 
-    public static ShrunkenItemDB Shrink(GameObjectDB itemDB)
+    public static ShrunkenGameObjDB Shrink(GameObjectDB goDB)
     {
-        var sidb = new ShrunkenItemDB
-        {
-            Keys = new(),
-            Items = new()
-        };
+        var sidb = new ShrunkenGameObjDB();
 
-        foreach (var p in itemDB.Dump())
+        foreach (var p in goDB.ItemDump())
         {
-            sidb.Keys.Add(p.Item1);
+            sidb.ItemsKeys.Add(p.Item1);
             sidb.Items.Add(p.Item2);
         }
         
+        foreach (var a in goDB.MonsterDump())
+        {
+            sidb.MonsterKeys.Add(a.Item1);
+            sidb.Monsters.Add(a.Item2);
+        }
+
         return sidb;
     }
 
-    public static GameObjectDB Inflate(ShrunkenItemDB sidb)
+    public static GameObjectDB Inflate(ShrunkenGameObjDB sidb)
     {
-        var itemDB = new GameObjectDB();
+        var goDB = new GameObjectDB();
 
-        for (int j = 0; j < sidb.Keys.Count; j++)
+        for (int j = 0; j < sidb.ItemsKeys.Count; j++)
         {
-            itemDB.AddStack(sidb.Keys[j], sidb.Items[j]);
+            goDB.AddStack(sidb.ItemsKeys[j], sidb.Items[j]);
         }
 
-        return itemDB;
+        for (int j = 0; j < sidb.MonsterKeys.Count; j++)
+        {
+            var m = sidb.Monsters[j];
+            m.SetBehaviour(m.AIType);
+            goDB.Add(sidb.MonsterKeys[j], m);
+        }
+
+        return goDB;
     }
 }
 
 internal record SaveGameInfo(ShrunkenPlayer? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon,
-                                ShrunkenItemDB ItemDB);
+                                ShrunkenGameObjDB ItemDB);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

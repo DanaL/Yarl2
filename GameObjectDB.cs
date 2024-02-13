@@ -31,12 +31,12 @@ class GameObjectDB
     public static readonly Glyph EMPTY = new Glyph('@', Colours.BLACK, Colours.BLACK);
 
     public Dictionary<Loc, List<Item>> _items = [];
-    public Dictionary<Loc, Actor> _actors = [];
+    public Dictionary<Loc, Monster> _monsters = [];
 
     public Glyph GlyphAt(Loc loc)
     {
-        if (_actors.TryGetValue(loc, out Actor actor))
-            return actor.Glyph;
+        if (_monsters.TryGetValue(loc, out Monster monster))
+            return monster.Glyph;
         else if (_items.TryGetValue(loc, out List<Item> items))
         {
             if (items is not null && items.Count > 0)
@@ -48,9 +48,9 @@ class GameObjectDB
 
     public void Add(Loc loc, GameObj obj)
     {
-        if (obj is Actor)
+        if (obj is Monster)
         {
-            _actors.Add(loc, (Actor) obj);
+            _monsters.Add(loc, (Monster) obj);
         }
         else
         {
@@ -84,5 +84,6 @@ class GameObjectDB
             return stack;
     }
     
-    public List<(Loc, List<Item>)> Dump() => _items.Keys.Select(k => (k, _items[k])).ToList();
+    public List<(Loc, List<Item>)> ItemDump() => _items.Keys.Select(k => (k, _items[k])).ToList();
+    public List<(Loc, Monster)> MonsterDump() => _monsters.Keys.Select(k => (k, _monsters[k])).ToList();
 }

@@ -365,6 +365,8 @@ internal abstract class UserInterface
     }
 }
 
+// All the campaign making stuff here needs to be moved probably
+// to Campaign.cs
 internal class PreGameHandler
 {
     protected const int BACKSPACE = 8;
@@ -439,7 +441,7 @@ internal class PreGameHandler
             _ui.Player = player;
 
             var objDb = new GameObjectDB();
-            var m = MonsterFactory.Get("skellie");
+            var m = MonsterFactory.Get("skellie", AIType.Basic);
             objDb.Add(new Loc(0, 0, startRow + 2, startCol - 2), m);
             _ui.BeginGame(c, objDb);
         }

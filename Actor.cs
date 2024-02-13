@@ -29,7 +29,13 @@ interface IItemHolder
 
 record struct Dmg(int Num, int Dice, int Bonus);
 
-abstract class Actor : GameObj
+enum AIType 
+{
+    Basic,
+    Village
+}
+
+class Actor : GameObj
 {
     public int Row { get; set; }
     public int Col { get; set; }
@@ -37,31 +43,79 @@ abstract class Actor : GameObj
     public int CurrHP { get; set; }
     public int MaxVisionRadius { get; set; }
     public int CurrVisionRadius { get; set; }
-    public int AttackBonus { get; set; }
-    public Dmg Dmg { get; set; }
+    
+    public Actor() {}
 }
 
 class MonsterFactory 
 { 
-    public static Actor Get(string name)
+    public static Actor Get(string name, AIType aiType)
     {
-        return new BasicMonster()
+        var m = new Monster()
         {
             Name = name,
             MaxHP = 10,
             CurrHP = 10,
             AttackBonus = 3,
             Dmg = new Dmg(1, 6, 1),
-            Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY)
+            Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
+            AIType = aiType
         };
+        m.SetBehaviour(aiType);
+
+        return m;
     }
 }
 
-class BasicMonster : Actor, IPerformer
+// Covers pretty much any actor that isn't the player. Villagers
+// for instance are of type Monster even though it's a bit rude
+// to call them that. Dunno why I don't like the term NPC for
+// this class
+class Monster : Actor, IPerformer
 {
+    public int AttackBonus { get; set; }
+    public Dmg Dmg { get; set; }
+    public AIType AIType { get; set;}
+    private IBehaviour _behaviour;
+
+    public Monster() {}
+    
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        throw new NotImplementedException();
+        Console.WriteLine($"{Name.IndefArticle()} takes its turn.");
+        return _behaviour.CalcAction(this, gameState);
+    }
+
+    public void SetBehaviour(AIType aiType)
+    {
+        IBehaviour behaviour = aiType switch 
+        {
+            AIType.Basic => new BasicMonsterBehaviour(),
+            AIType.Village => new VillagerBehaviour()
+        };
+
+        _behaviour = behaviour;
+        AIType = aiType;
     }
 }
 
+interface IBehaviour 
+{ 
+    Action CalcAction(Actor actor, GameState gameState);
+}
+
+class BasicMonsterBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState)
+    {
+        return new PassAction(actor);
+    }
+}
+
+class VillagerBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState)
+    {
+        return new PassAction(actor);
+    }
+}
