@@ -84,6 +84,30 @@ class GameObjectDB
             return stack;
     }
     
+    public List<IPerformer> GetPerformers(int dungeonID, int level)
+    {
+        List<IPerformer> performers = [];
+        
+        // I wonder if it's worth building 'indexes' of the objects by level and maybe dungeon?
+        // To speed stuff like this up when there's lots of game objects
+        foreach (var loc in _items.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)) 
+        { 
+            foreach (var item in _items[loc]) 
+            {
+                if (item is IPerformer)
+                    performers.Add((IPerformer)item);
+            }
+        }
+
+        foreach (var loc in _monsters.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
+        {
+            if (_monsters[loc] is IPerformer)
+                performers.Add(_monsters[loc]);
+        }
+
+        return performers;
+    }
+
     public List<(Loc, List<Item>)> ItemDump() => _items.Keys.Select(k => (k, _items[k])).ToList();
     public List<(Loc, Monster)> MonsterDump() => _monsters.Keys.Select(k => (k, _monsters[k])).ToList();
 }

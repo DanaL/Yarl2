@@ -60,7 +60,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         KeyToChar.Add(curr, '0');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)BACKSPACE);
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)Constants.BACKSPACE);
         KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
     }

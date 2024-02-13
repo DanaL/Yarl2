@@ -216,7 +216,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     private string CalcDesc()
     {
         var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
-        var items = _gameState.ItemDB.ItemsAt(loc);
+        var items = _gameState.ObjDB.ItemsAt(loc);
 
         if (items.Count == 0)
             return _map.TileAt(_row, _col).StepMessage;
@@ -278,7 +278,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     {
         _ui.CloseMenu();
         Loc loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-        var itemStack = _gameState.ItemDB.ItemsAt(loc);
+        var itemStack = _gameState.ObjDB.ItemsAt(loc);
 
         var inv = (_actor as Player).Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;

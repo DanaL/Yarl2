@@ -10,20 +10,14 @@ if (options.Display == "Bearlib")
 else
     display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
 
-try
-{
-    var rng = new Random();
-    display.GameLoop();
-}
-catch (GameQuitException)
-{
-    var msg = new List<string>()
-    {
-        "",
-        " Being seeing you..."
-    };
-    display.WriteLongMessage(msg);
-}
+
+//var rng = new Random();
+display.TitleScreen();
+
+var pgh = new PreGameHandler(display);
+pgh.StartUp();
+        
+display.GameLoop();
 
 namespace Yarl2
 {

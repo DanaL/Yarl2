@@ -38,6 +38,7 @@ class Colours
 // Miscellaneous constants used in a few places
 class Constants
 {
+    public const int BACKSPACE = 8;
     public const int ESC = 27;
 }
 

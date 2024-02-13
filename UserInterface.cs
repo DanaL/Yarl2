@@ -10,6 +10,8 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //using System.Data;
 
+using System.Collections.Generic;
+
 namespace Yarl2;
 
 enum UIEventType { Quiting, KeyInput, NoEvent }
@@ -21,8 +23,7 @@ internal record struct UIEvent(UIEventType Type, char Value);
 // display terminals and I'm pull more logic up into the base class, so
 // I'll probably move towards Composition instead of Inheritance
 internal abstract class UserInterface
-{
-    protected const int BACKSPACE = 8;
+{    
     public const int ScreenWidth = 65;
     public const int ScreenHeight = 30;
     public const int SideBarWidth = 20;
@@ -39,9 +40,6 @@ internal abstract class UserInterface
     protected string _messageBuffer = "";
     protected Options _options;
     private bool _playing;
-
-    private delegate void InputListener(UIEvent e);
-    private InputListener? CurrentListener;
 
     public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
@@ -71,8 +69,8 @@ internal abstract class UserInterface
 
     public virtual void TitleScreen()
     {
-        _longMessage = new List<string>()
-        {
+        _longMessage =
+        [
             "",
             "",
             "",
@@ -80,7 +78,10 @@ internal abstract class UserInterface
             "     Welcome to Yarl2",
             "       (yet another attempt to make a roguelike,",
             "           this time in C#...)"
-        };        
+        ];
+        UpdateDisplay();
+        BlockForInput();
+        _longMessage = null;
     }
 
     public void WriteMessage(string message)
@@ -104,7 +105,7 @@ internal abstract class UserInterface
     // I dunno about having this here. In previous games, I had each Tile object
     // know what its colours were, but maybe the UI class *is* the correct spot
     // to decide how to draw the glyph
-    protected (Colour, char) TileToGlyph(Tile tile, bool lit)
+    protected static (Colour, char) TileToGlyph(Tile tile, bool lit)
     {
         switch (tile.Type)
         {
@@ -142,7 +143,7 @@ internal abstract class UserInterface
         }        
     }
 
-    public void BeginGame(Campaign campaign, GameObjectDB itemDB)
+    public void SetupGameState(Campaign campaign, GameObjectDB itemDB)
     {
         GameState = new GameState()
         {
@@ -152,28 +153,8 @@ internal abstract class UserInterface
             Campaign = campaign,
             CurrLevel = campaign.CurrentLevel,
             CurrDungeon = campaign.CurrentDungeon,
-            ItemDB = itemDB
+            ObjDB = itemDB
         };
-
-        CurrentListener = new InputListener(MainListener);
-    }
-
-    private void StartupListener(UIEvent e)
-    {
-        if (e.Type == UIEventType.KeyInput)
-        {
-            _longMessage = null;
-            var pregameHandler = new PreGameHandler(this);
-            CurrentListener = new InputListener(pregameHandler.HandleInput);
-        }
-    }
-
-    private void MainListener(UIEvent e)
-    {
-        if (e.Type == UIEventType.KeyInput)
-        {
-            InputBuffer.Enqueue(e.Value);
-        }
     }
 
     // Handles waiting will we display a goodbye message, and eventually
@@ -226,14 +207,19 @@ internal abstract class UserInterface
     }
 
     public void GameLoop()
-    {
-        CurrentListener = StartupListener;
+    {        
         List<IAnimationListener> animationListeners = [];
         animationListeners.Add(new CloudAnimationListener(this));
-        TitleScreen();  
-
+     
         DateTime lastPollTime = DateTime.Now;
 
+        List<IPerformer> performers = [];
+        if (Player is not null && GameState is not null)
+        {
+            performers.Add(Player);
+            performers.AddRange(GameState.ObjDB.GetPerformers(GameState.CurrDungeon, GameState.CurrLevel));
+        }
+        
         _playing = true;
         while (_playing) 
         {
@@ -242,8 +228,8 @@ internal abstract class UserInterface
                 break;
 
             if (e.Type == UIEventType.KeyInput)
-                CurrentListener(e);
-
+                InputBuffer.Enqueue(e.Value);
+            
             try
             {
                 // Update step! This is where all the Actors get a chance
@@ -257,13 +243,7 @@ internal abstract class UserInterface
             }
             catch (GameQuitException)
             {
-                var msg = new List<string>()
-                {
-                    "",
-                    " Being seeing you..."
-                };
-                WriteLongMessage(msg);
-                CurrentListener = new InputListener(OnQuitListener);
+                break;                
             }
 
             // TODO: I really need to cleanup the GameState object and
@@ -287,15 +267,70 @@ internal abstract class UserInterface
                 lastPollTime = DateTime.Now;                
             }
 
-            Thread.Sleep(30);
-        }        
+            Delay();
+        }
+
+        var msg = new List<string>()
+        {
+            "",
+            " Being seeing you..."
+        };
+        WriteLongMessage(msg);
+        UpdateDisplay();
+        BlockForInput();
+    }
+
+    static void Delay() => Thread.Sleep(30);
+
+    void BlockForInput()
+    {
+        UIEvent e;
+        do
+        {
+            e = PollForEvent();
+            Delay();
+        }
+        while (e.Type == UIEventType.NoEvent);
+    }
+
+    public string BlockingGetResponse(string prompt)
+    {
+        string result = "";
+        UIEvent e;
+
+        do
+        {
+            WriteMessage($"{prompt} {result}");
+            UpdateDisplay();
+            e = PollForEvent();
+
+            if (e.Type == UIEventType.NoEvent)
+            {
+                Delay();
+                continue;
+            }
+            else if (e.Value == Constants.ESC || e.Type == UIEventType.Quiting)
+            {
+                throw new GameQuitException();
+            }
+
+            if (e.Value == '\n' || e.Value == 13)
+                break;
+            else if (e.Value == Constants.BACKSPACE)
+                result = result.Length > 0 ? result[..^1] : "";            
+            else
+                result += e.Value;
+        }
+        while (true);
+        
+        return result.Trim();
     }
 
     (Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int)> remembered, Map map,
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
-        var glyph = GameState.ItemDB.GlyphAt(loc);
+        var glyph = GameState.ObjDB.GlyphAt(loc);
         
         // This is getting a bit gross...
         if (visible.Contains((mapRow, mapCol))) 
@@ -362,119 +397,5 @@ internal abstract class UserInterface
                 ZLayer[r, c] = TileFactory.Get(TileType.Unknown);
             }
         }
-    }
-}
-
-// All the campaign making stuff here needs to be moved probably
-// to Campaign.cs
-internal class PreGameHandler
-{
-    protected const int BACKSPACE = 8;
-    private const string _prompt = "Who are you?"; 
-    private UserInterface _ui { get; set; }
-    private string _playerName { get; set; } = "";
-    
-    public PreGameHandler(UserInterface ui)
-    {
-        _ui = ui;
-        ui.WriteMessage(_prompt);
-    }
-
-    (Campaign, int, int) BeginCampaign(Random rng)
-    {
-        var dm = new DungeonMaker(rng);
-        var campaign = new Campaign();
-        var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
-        var wildernessGenerator = new Wilderness(rng);
-        var map = wildernessGenerator.DrawLevel(257);
-        wilderness.AddMap(map);
-        campaign.AddDungeon(wilderness);
-
-        var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
-        var firstLevel = dm.DrawLevel(100, 40);
-        mainDungeon.AddMap(firstLevel);
-        campaign.AddDungeon(mainDungeon);
-
-        // Find an open floor in the first level of the dungeon
-        // and create a Portal to it in the wilderness
-        var stairs = firstLevel.RandomTile(TileType.Floor, rng);
-        var entrance = map.RandomTile(TileType.Tree, rng);
-        var portal = new Portal("You stand before a looming portal.")
-        {
-            Destination = (1, 0, stairs.Item1, stairs.Item2)
-        };
-        map.SetTile(entrance, portal);
-
-        var exitStairs = new Upstairs("")
-        {
-            Destination = (0, 0, entrance.Item1, entrance.Item2)
-        };
-        firstLevel.SetTile(stairs, exitStairs);
-
-        campaign.CurrentDungeon = 0;
-        campaign.CurrentLevel = 0;
-        return (campaign, entrance.Item1, entrance.Item2);
-    }
-
-    private void SetupGame(string playerName)
-    {
-        if (Serialize.SaveFileExists(playerName))
-        {
-            var (player, c, itemDB) = Serialize.LoadSaveGame(playerName);
-            _ui.Player = player;
-            _ui.BeginGame(c, itemDB);
-        }
-        else
-        {
-            var (c, startRow, startCol) = BeginCampaign(new Random());
-            Player player = new Player(playerName, startRow, startCol);
-            var spear = ItemFactory.Get("spear");
-            spear.Adjectives.Add("old");
-            spear.Equiped = true;
-            player.Inventory.Add(spear);
-            var armour = ItemFactory.Get("leather armour");
-            armour.Adjectives.Add("battered");
-            armour.Equiped = true;
-            player.Inventory.Add(armour);
-            player.Inventory.Add(ItemFactory.Get("dagger"));
-            
-            _ui.Player = player;
-
-            var objDb = new GameObjectDB();
-            var m = MonsterFactory.Get("skellie", AIType.Basic);
-            objDb.Add(new Loc(0, 0, startRow + 2, startCol - 2), m);
-            _ui.BeginGame(c, objDb);
-        }
-    }
-
-    // Eventually this is going to need state because
-    // we'll be handling picking a character class, etc
-    // for a new game
-
-    // This code is going to end up duplciated so I wonder
-    // if it'll be too complicated to make a generic 
-    // "typing in text handler"
-    public void HandleInput(UIEvent e)
-    {
-        if (e.Value == '\n' || e.Value == 13) 
-        {
-            // done, 
-            SetupGame(_playerName);
-            _ui.WriteMessage($"Welcome, {_playerName}");
-            
-            return;
-        }
-        else if (e.Value == BACKSPACE)
-        {
-            _playerName = _playerName.Length > 0 
-                            ? _playerName[..^1] 
-                            : "";
-        }
-        else 
-        {
-            _playerName += e.Value;            
-        }
-
-        _ui.WriteMessage($"{_prompt} {_playerName}");
     }
 }

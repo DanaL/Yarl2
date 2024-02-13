@@ -13,7 +13,7 @@
 namespace Yarl2;
 
 // A structure to store info about a dungeon
-internal class Dungeon(int ID, string arrivalMessage)
+class Dungeon(int ID, string arrivalMessage)
 {
     public int ID { get; init; } = ID;
     public HashSet<(int, int, int)> RememberedSqs = [];
@@ -29,7 +29,7 @@ internal class Dungeon(int ID, string arrivalMessage)
 
 // A data structure to store all the info about 
 // the 'story' of the game. All the dungeon levels, etc
-internal class Campaign
+class Campaign
 {
     public Dictionary<int, Dungeon> Dungeons = [];
     public int CurrentDungeon { get; set; }
@@ -41,3 +41,85 @@ internal class Campaign
         Dungeons.Add(id, dungeon);
     }
 }
+
+// All the campaign making stuff here needs to be moved probably
+// to Campaign.cs
+internal class PreGameHandler(UserInterface ui)
+{
+    private UserInterface _ui { get; set; } = ui;
+   
+    (Campaign, int, int) BeginCampaign(Random rng)
+    {
+        var dm = new DungeonMaker(rng);
+        var campaign = new Campaign();
+        var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
+        var wildernessGenerator = new Wilderness(rng);
+        var map = wildernessGenerator.DrawLevel(257);
+        wilderness.AddMap(map);
+        campaign.AddDungeon(wilderness);
+
+        var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
+        var firstLevel = dm.DrawLevel(100, 40);
+        mainDungeon.AddMap(firstLevel);
+        campaign.AddDungeon(mainDungeon);
+
+        // Find an open floor in the first level of the dungeon
+        // and create a Portal to it in the wilderness
+        var stairs = firstLevel.RandomTile(TileType.Floor, rng);
+        var entrance = map.RandomTile(TileType.Tree, rng);
+        var portal = new Portal("You stand before a looming portal.")
+        {
+            Destination = (1, 0, stairs.Item1, stairs.Item2)
+        };
+        map.SetTile(entrance, portal);
+
+        var exitStairs = new Upstairs("")
+        {
+            Destination = (0, 0, entrance.Item1, entrance.Item2)
+        };
+        firstLevel.SetTile(stairs, exitStairs);
+
+        campaign.CurrentDungeon = 0;
+        campaign.CurrentLevel = 0;
+        return (campaign, entrance.Item1, entrance.Item2);
+    }
+
+    public void StartUp()
+    {
+        string playerName = _ui.BlockingGetResponse("Who are you?");
+        SetupGame(playerName);
+    }
+
+    private void SetupGame(string playerName)
+    {
+        if (Serialize.SaveFileExists(playerName))
+        {
+            var (player, c, objDb) = Serialize.LoadSaveGame(playerName);
+            _ui.Player = player;
+            _ui.SetupGameState(c, objDb);
+        }
+        else
+        {
+            var (c, startRow, startCol) = BeginCampaign(new Random());
+            Player player = new Player(playerName, startRow, startCol);
+            var spear = ItemFactory.Get("spear");
+            spear.Adjectives.Add("old");
+            spear.Equiped = true;
+            player.Inventory.Add(spear);
+            var armour = ItemFactory.Get("leather armour");
+            armour.Adjectives.Add("battered");
+            armour.Equiped = true;
+            player.Inventory.Add(armour);
+            player.Inventory.Add(ItemFactory.Get("dagger"));
+
+            _ui.Player = player;
+
+            var objDb = new GameObjectDB();
+            var m = MonsterFactory.Get("skellie", AIType.Basic);
+            objDb.Add(new Loc(0, 0, startRow + 2, startCol - 2), m);
+
+            _ui.SetupGameState(c, objDb);
+        }
+    }    
+}
+

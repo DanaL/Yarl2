@@ -23,7 +23,7 @@ internal class GameState
     public int CurrLevel { get; set; }
     public int CurrDungeon { get; set; }
     public Campaign? Campaign { get; set; }
-    public GameObjectDB ItemDB { get; set; } = new GameObjectDB();
+    public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
 
     public void EnterLevel(int dungeon, int level)
     {
@@ -39,6 +39,6 @@ internal class GameState
 
     public void ItemDropped(Item item, int row, int col)
     {
-        ItemDB.Add(new Loc(CurrDungeon, CurrLevel, row, col), item);
+        ObjDB.Add(new Loc(CurrDungeon, CurrLevel, row, col), item);
     }
 }

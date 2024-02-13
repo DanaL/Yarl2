@@ -34,7 +34,7 @@ internal class Serialize
         var p = ShrunkenPlayer.Shrink(player);
         var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
-                                    ShrunkenGameObjDB.Shrink(gameState.ItemDB));
+                                    ShrunkenGameObjDB.Shrink(gameState.ObjDB));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 

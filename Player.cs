@@ -139,8 +139,8 @@ internal class Player : Actor, IPerformer, IItemHolder
             }
             else if (ch == ',')
             {
-                Loc loc = new Loc(gameState.CurrDungeon, gameState.CurrLevel, Row, Col);
-                var itemStack = gameState.ItemDB.ItemsAt(loc);
+                Loc loc = new(gameState.CurrDungeon, gameState.CurrLevel, Row, Col);
+                var itemStack = gameState.ObjDB.ItemsAt(loc);
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
@@ -196,7 +196,11 @@ internal class Player : Actor, IPerformer, IItemHolder
                 ui.WriteMessage("Which way?");
             }
             else if (ch == 'Q')
-                return new QuitAction();
+            {
+                _accumulator = new YesNoAccumulator();
+                _deferred = new QuitAction();
+                ui.WriteMessage("Really quit? Your game won't be saved! (y/n)");
+            }                
             else if (ch == 'S')
             {
                 _accumulator = new YesNoAccumulator();
