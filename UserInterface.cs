@@ -240,20 +240,26 @@ internal abstract class UserInterface
             
             try
             {
-                // Update step! This is where all the current performer gets a chance
-                // to take their turn!                 
-                if (performers[p].Energy < 1.0 || TakeTurn(performers[p]))
+                // Update step! This is where all the current performers gets a chance
+                // to take their turn!
+                //while (performers[p].Energy >= 0.9999 && TakeTurn(performers[p])
+                if (performers[p].Energy < 1.0)
                 {
-                    p = (p + 1) % performers.Count;
                     performers[p].Energy += performers[p].Recovery;
-
+                    p = (p + 1) % performers.Count;
+                }
+                else if (TakeTurn(performers[p]))
+                {                    
                     if (performers[p] != Player)
                     {
-                        UpdateDisplay();
-                        Thread.Sleep(25);
+                        //SetSqsOnScreen();
+                        //UpdateDisplay();
+                        //Thread.Sleep(25);
                     }
-                }
 
+                    if (performers[p].Energy < 1.0)
+                        p = (p + 1) % performers.Count;
+                }                    
                 // I imagine later on there'll be bookkeeping and such once we've run
                 // through all the current performers?
             }
@@ -261,15 +267,8 @@ internal abstract class UserInterface
             {
                 break;                
             }
-
-            // TODO: I really need to cleanup the GameState object and
-            // what uses what since it current has references to the Campaign,
-            // the Dungeons, the current Map, etc and too much of its guts
-            // are exposed and called directly
-            if (GameState is not null)
-            {                
-                SetSqsOnScreen();
-            }
+                                   
+            SetSqsOnScreen();
             
             foreach (var l in animationListeners)
                 l.Update();
