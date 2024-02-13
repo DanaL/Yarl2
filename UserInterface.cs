@@ -370,11 +370,11 @@ internal abstract class UserInterface
 
     void SetSqsOnScreen()
     {
-        var cmpg = GameState.Campaign;
-        var dungeon = cmpg.Dungeons[GameState.CurrDungeon];
+        var cmpg = GameState!.Campaign;
+        var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
         var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player, map, GameState.CurrLevel);
+        var vs = FieldOfView.CalcVisible(Player!, map, GameState.CurrLevel);
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         // There is a glitch here that I don't want to fix right now in that
