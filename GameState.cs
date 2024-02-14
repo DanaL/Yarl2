@@ -12,8 +12,6 @@
 
 namespace Yarl2;
 
-internal class GameQuitException : Exception { }
-
 // The queue of actors to act will likely need to go here.
 internal class GameState
 {
@@ -22,7 +20,7 @@ internal class GameState
     public Player? Player { get; set; }
     public int CurrLevel { get; set; }
     public int CurrDungeon { get; set; }
-    public Campaign? Campaign { get; set; }
+    public Campaign Campaign { get; set; }
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
 
     public void EnterLevel(int dungeon, int level)
@@ -36,9 +34,32 @@ internal class GameState
 
     public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
+    public bool InWilderness => CurrDungeon == 0;
 
     public void ItemDropped(Item item, int row, int col)
     {
         ObjDB.Add(new Loc(CurrDungeon, CurrLevel, row, col), item);
+    }
+
+    public void ActorMoved(Actor actor, Loc start, Loc dest)
+    {
+        if (actor is not Yarl2.Player)
+        {
+            var m = (Monster)actor;            
+            ObjDB.MonsterMoved(m, start, dest);
+        }
+    }
+
+    public void CheckForEffects(GameObj obj, Loc loc)
+    {
+        var (dungeon, level, row, col) = loc;
+        var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+
+        // I only have light effects in the game right now
+        var sqs = FieldOfView.CalcVisible(obj.LightRadius(this), row, col, map, level);
+        foreach (var (_, r, c) in sqs)
+        {
+            map.ApplyEffect(TerrainEffect.Lit, r, c);
+        }    
     }
 }

@@ -158,3 +158,4 @@ static class StringUtils
     };
 }
 
+internal class GameQuitException : Exception { }

@@ -12,6 +12,11 @@
 
 namespace Yarl2;
 
+enum TerrainEffect
+{
+    Lit
+}
+
 enum TileType
 {
     WorldBorder,
@@ -149,6 +154,7 @@ internal class Map : ICloneable
     public readonly int Height;
 
     public Tile[] Tiles;
+    public Dictionary<TerrainEffect, int[]> Auras;
 
     public Map(int width, int height)
     {
@@ -156,6 +162,8 @@ internal class Map : ICloneable
         Height = height;
 
         Tiles = new Tile[Height * Width];
+
+        InitEffectsTable();
     }
 
     public Map(int width, int height, TileType type)
@@ -163,6 +171,33 @@ internal class Map : ICloneable
         Width = width;
         Height = height;
         Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
+
+        InitEffectsTable();
+    }
+
+    public bool HasEffect(TerrainEffect effect, int row, int col)
+    {
+        if (InBounds(row, col) && Auras[effect][row * Width + col] >= 1)
+            return true;
+
+        return false;
+    }
+
+    public void ApplyEffect(TerrainEffect effect, int row, int col)
+    {
+        if (Auras.TryGetValue(effect, out var sqs))
+        {
+            ++sqs[row * Width + col];
+        }
+    }
+
+    private void InitEffectsTable()
+    {
+        // Eventually I'll have more effects
+        Auras = new Dictionary<TerrainEffect, int[]>
+        {
+            { TerrainEffect.Lit, new int[Height * Width] }
+        };
     }
 
     public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;

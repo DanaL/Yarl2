@@ -91,24 +91,24 @@ internal class FieldOfView
         };
     }
 
-    private static HashSet<(int, int)> CalcOctant(Actor actor, Map map, int octant)
+    private static HashSet<(int, int)> CalcOctant(int radius, int srcRow, int srcCol, Map map, int octant)
     {
         var visibleSqs = new HashSet<(int, int)>();
 
         bool fullShadow = false;
         var line = new ShadowLine();
         
-        for (int row = 1; row <= actor.CurrVisionRadius; row++)
+        for (int row = 1; row <= radius; row++)
         {
             for (int col = 0; col <= row; col++)
             {
                 var (dr, dc) = RotateOctant(row, col, octant);
-                int r = actor.Row + dr;
-                int c = actor.Col + dc;
+                int r = srcRow + dr;
+                int c = srcCol + dc;
 
                 // The distance check trims the view area to be more round
                 int d = (int)Math.Sqrt(dr * dr + dc * dc);
-                if (!map.InBounds(r, c) || d > actor.CurrVisionRadius)
+                if (!map.InBounds(r, c) || d > radius)
                     break;
                 
                 var projection = ProjectTile(row, col);
@@ -131,13 +131,13 @@ internal class FieldOfView
         return visibleSqs;
     }
 
-    public static HashSet<(int, int, int)> CalcVisible(Actor actor, Map map, int currentLevel)
+    public static HashSet<(int, int, int)> CalcVisible(int radius, int srcRow, int srcCol, Map map, int currentLevel)
     {
-        var visible = new HashSet<(int, int, int)>() { (currentLevel, actor.Row, actor.Col) };
+        var visible = new HashSet<(int, int, int)>() { (currentLevel, srcRow, srcCol) };
 
         for (int j = 0; j < 8; j++)
         {
-            foreach (var sq in CalcOctant(actor, map, j))
+            foreach (var sq in CalcOctant(radius, srcRow, srcCol, map, j))
                 visible.Add((currentLevel, sq.Item1, sq.Item2));
         }
 

@@ -33,6 +33,16 @@ internal class Player : Actor, IPerformer, IItemHolder
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
 
+    public override int LightRadius(GameState gs)
+    {
+        if (gs.InWilderness)
+            return 5;
+
+        // Calculate light radius from gear goes here
+
+        return 1;
+    }
+
     private void ShowInventory(UserInterface ui, string title = "You are carrying:")
     {
         var slots = Inventory.UsedSlots();

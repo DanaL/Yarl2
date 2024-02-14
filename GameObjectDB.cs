@@ -23,6 +23,8 @@ abstract class GameObj
 {
     public string Name { get; set; }
     public Glyph Glyph { get; set; }
+
+    public virtual int LightRadius(GameState gs) => 0;
 }
 
 // Structure to store where items are in the world

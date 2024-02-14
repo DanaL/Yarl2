@@ -267,13 +267,10 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             result.Successful = true;
             result.EnergyCost = 1.0;
 
-            if (_actor is not Player)
-            {
-                var m = (Monster)_actor;
-                var from = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-                var to = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
-                _gameState.ObjDB.MonsterMoved(m, from, to);
-            }
+            var from = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+            var to = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
+            _gameState.ActorMoved(actor, from, to);
+
             _actor.Row = _row;
             _actor.Col = _col;
             result.Message = CalcDesc();

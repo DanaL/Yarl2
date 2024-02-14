@@ -196,6 +196,8 @@ abstract class UserInterface
             CurrDungeon = campaign.CurrentDungeon,
             ObjDB = itemDB
         };
+
+        GameState.CheckForEffects(Player, new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col));
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -380,25 +382,36 @@ abstract class UserInterface
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
         var glyph = GameState.ObjDB.GlyphAt(loc);
-        
-        // This is getting a bit gross...
-        if (visible.Contains((mapRow, mapCol))) 
+
+        // Working toward having a difference between tiles that are lit and tiles within the player's vision radius
+        // So player could be at one location with VR 3 and see the aura of a torch 8 squares away but not the sqs
+        // in between because they are not lit
+        // So it's going to become a combo of (1) squares within vision radius and currently lit squares
+
+        // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
+        // For a square within visible that isn't lit, return remembered or Unknown
+        bool isVisible = visible.Contains((mapRow, mapCol));
+        if (isVisible && map.HasEffect(TerrainEffect.Lit, mapRow, mapCol))
         {
-            if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)                    
+            if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
                 return TileToGlyph(ZLayer[scrRow, scrCol], true);
             else if (glyph != GameObjectDB.EMPTY)
                 return (glyph.Lit, glyph.Ch);
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), true);
         }
-        else if (remembered.Contains((mapRow, mapCol)))
+        else if (isVisible && remembered.Contains((mapRow, mapCol)))
         {
-            if (glyph != GameObjectDB.EMPTY)
-                return (glyph.Unlit, glyph.Ch);
-            else
-                return TileToGlyph(map.TileAt(mapRow, mapCol), false);
+            TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }
-        
+        //else if (remembered.Contains((mapRow, mapCol)))
+        //{
+        //    if (glyph != GameObjectDB.EMPTY)
+        //        return (glyph.Unlit, glyph.Ch);
+        //    else
+        //        return TileToGlyph(map.TileAt(mapRow, mapCol), false);
+        //}
+                
         return (Colours.BLACK, ' ');
     }
 
@@ -408,7 +421,7 @@ abstract class UserInterface
         var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
         var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player!, map, GameState.CurrLevel);
+        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Row, Player!.Col, map, GameState.CurrLevel);
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         // There is a glitch here that I don't want to fix right now in that
@@ -422,7 +435,7 @@ abstract class UserInterface
        
         int rowOffset = Player.Row - PlayerScreenRow;
         int colOffset = Player.Col - PlayerScreenCol;
-
+                
         for (int r = 0; r < ViewHeight; r++) 
         {
             for (int c = 0; c < ViewWidth; c++)
