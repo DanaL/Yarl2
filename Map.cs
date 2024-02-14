@@ -87,7 +87,7 @@ internal class Door(TileType type, bool open) : Tile(type)
 internal class Portal(string stepMessage) : Tile(TileType.Portal) 
 {
     private readonly string _stepMessage = stepMessage;
-    public (int, int, int, int) Destination { get; set; }
+    public Loc Destination { get; set; }
     public override bool Passable() => true;
     public override bool Opaque() => false;
 
@@ -183,11 +183,11 @@ internal class Map : ICloneable
         return false;
     }
 
-    public void ApplyEffect(TerrainEffect effect, int row, int col)
+    public void ApplyEffect(TerrainEffect effect, int row, int col, int intensity)
     {
         if (Auras.TryGetValue(effect, out var sqs))
         {
-            ++sqs[row * Width + col];
+            sqs[row * Width + col] += intensity;
         }
     }
 

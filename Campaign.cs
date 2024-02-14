@@ -69,13 +69,13 @@ internal class PreGameHandler(UserInterface ui)
         var entrance = map.RandomTile(TileType.Tree, rng);
         var portal = new Portal("You stand before a looming portal.")
         {
-            Destination = (1, 0, stairs.Item1, stairs.Item2)
+            Destination = new Loc(1, 0, stairs.Item1, stairs.Item2)
         };
         map.SetTile(entrance, portal);
 
         var exitStairs = new Upstairs("")
         {
-            Destination = (0, 0, entrance.Item1, entrance.Item2)
+            Destination = new Loc(0, 0, entrance.Item1, entrance.Item2)
         };
         firstLevel.SetTile(stairs, exitStairs);
 

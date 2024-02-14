@@ -33,10 +33,12 @@ class PortalAction(GameState gameState) : Action
 
     protected void UsePortal(Portal portal, ActionResult result)
     {
+        var start = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _gameState.Player!.Row, _gameState.Player!.Col);
         var (dungeon, level, r, c) = portal.Destination;
         _gameState.EnterLevel(dungeon, level);
         _gameState.Player!.Row = r;
         _gameState.Player!.Col = c;
+        _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
         result.Successful = true;
         result.Message = _gameState.CurrentDungeon.ArrivalMessage;
         result.EnergyCost = 1.0;

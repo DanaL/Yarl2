@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
@@ -48,18 +50,31 @@ internal class GameState
             var m = (Monster)actor;            
             ObjDB.MonsterMoved(m, start, dest);
         }
+
+        // Update the effect auras the actor might have
+        if (actor.LightRadius(this) > 0)
+        {
+            SetLightingLevel(actor, start, -1);
+            SetLightingLevel(actor, dest, 1);
+        }
     }
 
-    public void CheckForEffects(GameObj obj, Loc loc)
+    // Eventually this should be expanded to cover all auras/effects
+    public void SetLightingLevel(GameObj obj, Loc loc, int intensity)
     {
         var (dungeon, level, row, col) = loc;
-        var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+        var currDungeon = Campaign.Dungeons[dungeon];
+        var map = currDungeon.LevelMaps[level];
+        var isPlayer = obj is Player;
 
         // I only have light effects in the game right now
         var sqs = FieldOfView.CalcVisible(obj.LightRadius(this), row, col, map, level);
-        foreach (var (_, r, c) in sqs)
+        foreach (var sq in sqs)
         {
-            map.ApplyEffect(TerrainEffect.Lit, r, c);
-        }    
-    }
+            map.ApplyEffect(TerrainEffect.Lit, sq.Item2, sq.Item3, intensity);
+
+            if (isPlayer)
+                currDungeon.RememberedSqs.Add(sq);
+        }
+    }    
 }

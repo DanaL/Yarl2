@@ -36,7 +36,7 @@ internal class Player : Actor, IPerformer, IItemHolder
     public override int LightRadius(GameState gs)
     {
         if (gs.InWilderness)
-            return 5;
+            return MaxVisionRadius;
 
         // Calculate light radius from gear goes here
 

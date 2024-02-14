@@ -272,7 +272,7 @@ internal class ShrunkenMap()
                                     .Skip(1)
                                     .Take(4)
                                     .Select(int.Parse).ToArray();
-                    ((Portal)tile).Destination = (digits[0], digits[1], digits[2], digits[3]);
+                    ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Upstairs:
                     tile = new Upstairs(pieces[3]);
@@ -280,7 +280,7 @@ internal class ShrunkenMap()
                                     .Skip(1)
                                     .Take(4)
                                     .Select(int.Parse).ToArray();
-                    ((Upstairs)tile).Destination = (digits[0], digits[1], digits[2], digits[3]);
+                    ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Downstairs:
                     tile = new Downstairs(pieces[3]);
@@ -288,7 +288,7 @@ internal class ShrunkenMap()
                                     .Skip(1)
                                     .Take(4)
                                     .Select(int.Parse).ToArray();
-                    ((Downstairs)tile).Destination = (digits[0], digits[1], digits[2], digits[3]);
+                    ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Door:
                     bool open = Convert.ToBoolean(pieces[2]);

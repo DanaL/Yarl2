@@ -197,7 +197,7 @@ abstract class UserInterface
             ObjDB = itemDB
         };
 
-        GameState.CheckForEffects(Player, new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col));
+        GameState.SetLightingLevel(Player, new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col), 1);
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -303,9 +303,9 @@ abstract class UserInterface
             }
                                    
             SetSqsOnScreen();
-            
-            //foreach (var l in animationListeners)
-            //    l.Update();
+
+            foreach (var l in animationListeners)
+                l.Update();
 
             UpdateDisplay();
 
@@ -402,16 +402,9 @@ abstract class UserInterface
         }
         else if (isVisible && remembered.Contains((mapRow, mapCol)))
         {
-            TileToGlyph(map.TileAt(mapRow, mapCol), false);
+            return TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }
-        //else if (remembered.Contains((mapRow, mapCol)))
-        //{
-        //    if (glyph != GameObjectDB.EMPTY)
-        //        return (glyph.Unlit, glyph.Ch);
-        //    else
-        //        return TileToGlyph(map.TileAt(mapRow, mapCol), false);
-        //}
-                
+                        
         return (Colours.BLACK, ' ');
     }
 
@@ -430,7 +423,6 @@ abstract class UserInterface
         // tile not the remembered item. I need to store a dictionary of loc + glyph
         // Or perhaps it just needs to be a collection of items + non-basic tiles not
         // every tile
-        dungeon.RememberedSqs = dungeon.RememberedSqs.Union(vs).ToHashSet();
         var rememberd = dungeon.RememberedSqs.Select(rm => (rm.Item2, rm.Item3)).ToHashSet();
        
         int rowOffset = Player.Row - PlayerScreenRow;
