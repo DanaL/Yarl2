@@ -76,6 +76,43 @@ class PauseForMoreAccumulator : InputAccumulator
     public override void Input(char ch) => _keyPressed = true;
 }
 
+class LongMessageAccumulator : InputAccumulator
+{
+    private UserInterface _ui;
+    private int _row;
+    private IEnumerable<string> _lines;
+    private bool _done;
+
+    public override bool Done => _done;
+    public override bool Success => true;
+
+    public LongMessageAccumulator(UserInterface ui, IEnumerable<string> lines)
+    {
+        _ui = ui;       
+        _lines = lines;
+
+        _done = false;
+        var page = _lines.Take(UserInterface.ScreenHeight).ToList();
+        ui.WriteLongMessage(page);
+        _row = page.Count;
+    }
+
+    public override void Input(char ch)
+    {
+        if (_row >= _lines.Count())
+        {
+            _done = true;
+            _ui.ClearLongMessage();
+        }
+        else
+        {
+            var page = _lines.Skip(_row).Take(UserInterface.ScreenHeight).ToList();
+            _ui.WriteLongMessage(page);
+            _row += page.Count;
+        }
+    }
+}
+
 class YesNoAccumulator : InputAccumulator
 {    
     public YesNoAccumulator() => Done = false;

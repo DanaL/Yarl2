@@ -224,8 +224,7 @@ internal class SDLUserInterface : UserInterface
     void WriteMessagesSection() 
     {
         var msgs = MessageHistory.Take(5)
-                                 .Select(msg => msg.Count > 1 ? $"{msg.Message} x{msg.Count}"
-                                                              : msg.Message);
+                                 .Select(msg => msg.Fmt);
         
         int row = ScreenHeight - 1;
         Colour colour = Colours.WHITE;

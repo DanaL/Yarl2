@@ -210,6 +210,12 @@ internal class Player : Actor, IPerformer, IItemHolder
                 _deferred = new SaveGameAction();
                 ui.Popup("Quit & Save? (y/n)");
             }
+            else if (ch == '*')
+            {
+                var lines = ui.MessageHistory.Select(m => m.Fmt);
+                _accumulator = new LongMessageAccumulator(ui, lines);
+                _deferred = new NullAction();
+            }
             else
                 return new PassAction(this);
         }

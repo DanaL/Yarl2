@@ -14,7 +14,10 @@ namespace Yarl2;
 enum UIEventType { Quiting, KeyInput, NoEvent }
 record struct UIEvent(UIEventType Type, char Value);
 
-record struct MsgHistory(string Message, int Count);
+record struct MsgHistory(string Message, int Count)
+{
+    public readonly string Fmt => Count > 1 ? $"{Message} x{Count}" : Message;
+}
 
 // I think that the way development is proceeding, it's soon not going
 // to make sense for SDLUserInterface and BLUserInterface to be subclasses
@@ -61,7 +64,7 @@ abstract class UserInterface
     protected string? _popupBuffer = "";
     protected int _popupWidth;
 
-    protected List<MsgHistory> MessageHistory = [];
+    public List<MsgHistory> MessageHistory = [];
     protected readonly int MaxHistory = 50;
     protected bool HistoryUpdated = false;
     
@@ -89,6 +92,11 @@ abstract class UserInterface
         ];
         UpdateDisplay();
         BlockForInput();
+        ClearLongMessage();
+    }
+
+    public void ClearLongMessage()
+    {
         _longMessage = null;
     }
 
@@ -119,11 +127,6 @@ abstract class UserInterface
         
         if (MessageHistory.Count > MaxHistory)
             MessageHistory.RemoveAt(MaxHistory);
-    }
-
-    public void wWriteMessage(string message)
-    {
-        _messageBuffer = message;
     }
 
     public void WriteLongMessage(List<string> message)
