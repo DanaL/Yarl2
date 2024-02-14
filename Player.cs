@@ -92,7 +92,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 if (!_accumulator.Done)
                 {
                     if (_accumulator.Msg != "")
-                        ui.WriteMessage(_accumulator.Msg);
+                        ui.Popup(_accumulator.Msg);
                     return new NullAction();
                 }
                 else
@@ -101,12 +101,14 @@ internal class Player : Actor, IPerformer, IItemHolder
                     {
                         _deferred.ReceiveAccResult(_accumulator.GetResult());
                         _accumulator = null;
+                        ui.ClosePopup();
                         return _deferred;
                     }
                     else
                     {
                         _accumulator = null;
                         ui.CloseMenu();
+                        ui.ClosePopup();
                         ui.WriteMessage("Nevermind.");
                         return new NullAction();
                     }
@@ -203,13 +205,13 @@ internal class Player : Actor, IPerformer, IItemHolder
             {
                 _accumulator = new YesNoAccumulator();
                 _deferred = new QuitAction();
-                ui.WriteMessage("Really quit? Your game won't be saved! (y/n)");
+                ui.Popup("Really quit?\n\nYour game won't be saved! (y/n)");
             }                
             else if (ch == 'S')
             {
                 _accumulator = new YesNoAccumulator();
                 _deferred = new SaveGameAction();
-                ui.WriteMessage("Really quit and save? (y/n)");
+                ui.Popup("Quit & Save? (y/n)");
             }
             else
                 return new PassAction(this);

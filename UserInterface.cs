@@ -22,7 +22,7 @@ internal record struct UIEvent(UIEventType Type, char Value);
 // I'll probably move towards Composition instead of Inheritance
 internal abstract class UserInterface
 {    
-    public const int ScreenWidth = 65;
+    public const int ScreenWidth = 70;
     public const int ScreenHeight = 32;
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
@@ -35,9 +35,7 @@ internal abstract class UserInterface
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
     protected List<string>? _longMessage;
-    protected string _messageBuffer = "";
-    protected string? _popupBuffer = "";
-    protected int _popupWidth;
+    protected string _messageBuffer = "";    
     protected Options _options;
     private bool _playing;
 
@@ -56,6 +54,10 @@ internal abstract class UserInterface
     protected bool ClosingMenu { get; set; }
     protected bool OpeningMenu { get; set; }
     protected List<string>? MenuRows { get; set; }
+
+    protected bool OpeningPopUp { get; set; }
+    protected string? _popupBuffer = "";
+    protected int _popupWidth;
 
     public UserInterface(Options opts)
     {
@@ -92,6 +94,14 @@ internal abstract class UserInterface
     public void Popup(string message, int width)
     {
         _popupBuffer = message;
+        _popupWidth = width;
+        OpeningPopUp = true;
+    }
+
+    public void Popup(string message)
+    {
+        _popupBuffer = message;
+        _popupWidth = 0;
     }
 
     public void WriteMessage(string message)

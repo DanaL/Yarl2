@@ -153,9 +153,9 @@ internal class SDLUserInterface : UserInterface
         int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
         width += 2;
         int col = (ViewWidth - width) / 2;
-        int row = 2;
+        int row = 5;
 
-        WriteLine("", 1, col, width);
+        WriteLine("", 4, col, width);
         foreach (var line in lines)
         {
             WriteLine($" {line} ", row++, col, width);
@@ -210,7 +210,7 @@ internal class SDLUserInterface : UserInterface
         WriteLine($"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(width), 1, ViewWidth, width);
         
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 2; row < ScreenHeight; row++)
+        for (int row = 2; row < ViewHeight; row++)
         {
             WriteLine(blank, row, ViewWidth, width);
         }
@@ -226,6 +226,12 @@ internal class SDLUserInterface : UserInterface
         }
 
         if (OpeningMenu)
+        {
+            OpeningMenu = false;
+            return true;
+        }
+
+        if (OpeningPopUp)
         {
             OpeningMenu = false;
             return true;
