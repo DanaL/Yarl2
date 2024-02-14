@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -137,16 +137,18 @@ internal class BLUserInferface : UserInterface, IDisposable
         var lines = _popupBuffer.Split('\n');
         int bufferWidth = lines.Select(l => l.Length).Max();
         int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
-        width += 2;
+        width += 4;
         int col = (ViewWidth - width) / 2;
         int row = 5;
 
-        Terminal.Print(col, 4, "".PadRight(width));        
+        string top = "+".PadRight(width - 1, '-') + "+";
+        Terminal.Print(col, 4, top);
+
         foreach (var line in lines)
         {
-            Terminal.Print(col, row++, line.PadRight(width));
+            Terminal.Print(col, row++, ("| " + line).PadRight(width - 2) + " |");
         }
-        Terminal.Print(col, row, "".PadRight(width));        
+        Terminal.Print(col, row, top);        
     }
 
     void WriteMessagesSection()
