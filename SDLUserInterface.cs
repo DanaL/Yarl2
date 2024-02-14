@@ -114,8 +114,13 @@ internal class SDLUserInterface : UserInterface
 
     private void WriteLine(string message, int lineNum, int col, int width)
     {
+        WriteLine(message, lineNum, col, width, Colours.WHITE);
+    }
+
+    private void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+    {
         message = message.PadRight(width);
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(Colours.WHITE), ToSDLColour(Colours.BLACK));        
+        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));        
         var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
         
         var texture = SDL_CreateTextureFromSurface(_renderer, surface);
@@ -216,6 +221,26 @@ internal class SDLUserInterface : UserInterface
         }
     }
 
+    void WriteMessagesSection() 
+    {
+        var msgs = MessageHistory.Take(5)
+                                 .Select(msg => msg.Count > 1 ? $"{msg.Message} x{msg.Count}"
+                                                              : msg.Message);
+        
+        int row = ScreenHeight - 1;
+        Colour colour = Colours.WHITE;
+        foreach (var msg in msgs)
+        {
+            var s = msg.PadRight(ScreenWidth);
+            WriteLine(s, row--, 0, ScreenWidth, colour);
+
+            if (colour == Colours.WHITE)
+                colour = Colours.GREY;
+            else if (colour == Colours.GREY)
+                colour = Colours.DARK_GREY;
+        }
+    }
+
     private bool FrameChanged()
     {
         if (ClosingMenu)
@@ -231,15 +256,25 @@ internal class SDLUserInterface : UserInterface
             return true;
         }
 
-        if (OpeningPopUp)
+        if (ClosingPopUp)
         {
-            OpeningMenu = false;
+            _popupBuffer = null;
+            ClosingPopUp = false;
             return true;
         }
 
-        if (_prevMessage != _messageBuffer)
+        if (OpeningPopUp)
+        {
+            OpeningPopUp = false;
             return true;
+        }
 
+        if (HistoryUpdated)
+        {
+            HistoryUpdated = false;
+            return true;
+        }
+        
         for (int row = 0; row < ViewHeight; row++)
         {
             for (int col = 0; col < ViewWidth; col++)
@@ -267,9 +302,11 @@ internal class SDLUserInterface : UserInterface
     {
         // TODO: when the sidebar actually does something,
         //       I'll need to also check if it changed
-        if (_longMessage is null && !FrameChanged())
+        if (_longMessage is null && !FrameChanged()) 
+        {
             return;
-            
+        }
+
         SDL_RenderClear(_renderer);
         if (_longMessage is not null) 
         {
@@ -290,6 +327,9 @@ internal class SDLUserInterface : UserInterface
                 SDL_DestroyTexture(texture);
                 SaveLastFame();
             }
+
+            if (MessageHistory.Count > 0)
+                WriteMessagesSection();
 
             if (_popupBuffer is not null)
             {

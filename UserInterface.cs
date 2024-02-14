@@ -8,25 +8,26 @@
 // You should have received a copy of the CC0 Public Domain Dedication along 
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
-//using System.Data;
 
 namespace Yarl2;
 
 enum UIEventType { Quiting, KeyInput, NoEvent }
-internal record struct UIEvent(UIEventType Type, char Value);
+record struct UIEvent(UIEventType Type, char Value);
+
+record struct MsgHistory(string Message, int Count);
 
 // I think that the way development is proceeding, it's soon not going
 // to make sense for SDLUserInterface and BLUserInterface to be subclasses
 // of UserInterface. It's more like they are being relegated to primive 
 // display terminals and I'm pull more logic up into the base class, so
 // I'll probably move towards Composition instead of Inheritance
-internal abstract class UserInterface
+abstract class UserInterface
 {    
     public const int ScreenWidth = 70;
     public const int ScreenHeight = 32;
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
-    public const int ViewHeight = ScreenHeight - 4;
+    public const int ViewHeight = ScreenHeight - 5;
 
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
@@ -55,14 +56,19 @@ internal abstract class UserInterface
     protected bool OpeningMenu { get; set; }
     protected List<string>? MenuRows { get; set; }
 
+    protected bool ClosingPopUp { get; set; }
     protected bool OpeningPopUp { get; set; }
     protected string? _popupBuffer = "";
     protected int _popupWidth;
 
+    protected List<MsgHistory> MessageHistory = [];
+    protected readonly int MaxHistory = 50;
+    protected bool HistoryUpdated = false;
+    
     public UserInterface(Options opts)
     {
         _options = opts;
-        PlayerScreenRow = ViewHeight / 2 + 1;
+        PlayerScreenRow = ViewHeight / 2;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
         SqsOnScreen = new (Colour, char)[ViewHeight, ViewWidth];
         ZLayer = new Tile[ViewHeight, ViewWidth];
@@ -88,23 +94,34 @@ internal abstract class UserInterface
 
     public void ClosePopup()
     {
-        _popupBuffer = null;
+        ClosingPopUp = true;
     }
 
-    public void Popup(string message, int width)
+    public void Popup(string message, int width = 0)
     {
         _popupBuffer = message;
         _popupWidth = width;
         OpeningPopUp = true;
     }
 
-    public void Popup(string message)
+    public void AlertPlayer(string message) 
     {
-        _popupBuffer = message;
-        _popupWidth = 0;
+        message = message.Trim();
+        if (string.IsNullOrEmpty(message))
+            return;
+
+        HistoryUpdated = true;
+        
+        if (MessageHistory.Count > 0 && MessageHistory[0].Message == message)
+            MessageHistory[0] = new MsgHistory(message, MessageHistory[0].Count + 1);
+        else
+            MessageHistory.Insert(0, new MsgHistory(message, 1));
+        
+        if (MessageHistory.Count > MaxHistory)
+            MessageHistory.RemoveAt(MaxHistory);
     }
 
-    public void WriteMessage(string message)
+    public void wWriteMessage(string message)
     {
         _messageBuffer = message;
     }
@@ -207,7 +224,7 @@ internal abstract class UserInterface
                 if (result.AltAction is not null)
                     result = result.AltAction.Execute();
                 if (result.Message is not null)
-                    WriteMessage(result.Message);
+                    AlertPlayer(result.Message);
             }
             while (result.AltAction is not null);
         }
@@ -281,8 +298,8 @@ internal abstract class UserInterface
                                    
             SetSqsOnScreen();
             
-            foreach (var l in animationListeners)
-                l.Update();
+            //foreach (var l in animationListeners)
+            //    l.Update();
 
             UpdateDisplay();
 

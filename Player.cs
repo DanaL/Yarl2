@@ -33,16 +33,16 @@ internal class Player : Actor, IPerformer, IItemHolder
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
 
-    private void ShowInventory(UserInterface ui)
+    private void ShowInventory(UserInterface ui, string title = "You are carrying:")
     {
         var slots = Inventory.UsedSlots();
         if (slots.Length == 0)
         {
-            ui.WriteMessage("You are empty handed!");
+            ui.AlertPlayer("You are empty handed!");
             return;
         }
 
-        List<string> lines = [ "You are carrying:" ];
+        List<string> lines = [ title ];
         foreach (var s in slots)
         {
             var item = Inventory.ItemAt(s);
@@ -60,9 +60,9 @@ internal class Player : Actor, IPerformer, IItemHolder
     }
 
     private HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
-    {
+    {                    
         HashSet<char> options = [];
-        List<string> lines = [ "You see:"] ;
+        List<string> lines = [ "What do you pick up?"] ;
         char slot = 'a';
         foreach (var item in items)
         {
@@ -109,7 +109,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                         _accumulator = null;
                         ui.CloseMenu();
                         ui.ClosePopup();
-                        ui.WriteMessage("Nevermind.");
+                        ui.AlertPlayer("Nevermind.");
                         return new NullAction();
                     }
                 }
@@ -150,7 +150,7 @@ internal class Player : Actor, IPerformer, IItemHolder
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
-                    ui.WriteMessage("There's nothing there...");
+                    ui.AlertPlayer("There's nothing there...");
                     return new NullAction();
                 }
                 else if (itemStack.Count == 1) 
@@ -164,7 +164,6 @@ internal class Player : Actor, IPerformer, IItemHolder
                 }
                 else 
                 {
-                    ui.WriteMessage("What do you pick up?");
                     var opts = ShowPickupMenu(ui, itemStack);
                     _accumulator = new MenuPickAccumulator(opts);
                     _deferred = new PickupItemAction(ui, this, gameState);
@@ -172,18 +171,16 @@ internal class Player : Actor, IPerformer, IItemHolder
             }
             else if (ch == 'd')
             {
-                ui.WriteMessage("Drop what?");
-                ShowInventory(ui);
+                ShowInventory(ui, "Drop what?");
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new DropItemAction(ui, this, gameState);
             }
             else if (ch == 'e')
             {
-                ui.WriteMessage("Equip what?");
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ToggleEquipedAction(ui, this);
 
-                ShowInventory(ui);
+                ShowInventory(ui, "Equip what?");
             }
             else if (ch == 'c')
             {
@@ -191,7 +188,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new CloseDoorAction(ui.Player, gameState.Map);                
                 _deferred = action;
                 
-                ui.WriteMessage("Which way?");
+                ui.AlertPlayer("Which way?");
             }
             else if (ch == 'o')
             {
@@ -199,7 +196,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new OpenDoorAction(ui.Player, gameState.Map);
                 _deferred = action;
 
-                ui.WriteMessage("Which way?");
+                ui.AlertPlayer("Which way?");
             }
             else if (ch == 'Q')
             {
