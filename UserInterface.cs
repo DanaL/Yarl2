@@ -245,20 +245,7 @@ abstract class UserInterface
      
         DateTime lastPollTime = DateTime.Now;
 
-        List<IPerformer> performers = [];
-        // It's actually an error condition if at this point either Player or GameState is null
-        if (Player is not null && GameState is not null)
-        {
-            performers.Add(Player);
-            performers.AddRange(GameState.ObjDB.GetPerformers(GameState.CurrDungeon, GameState.CurrLevel));
-
-            // I guess this should happen elsewhere, or Actors should be created with topped-up energy
-            // for the case where we're entering GameLoop() from a saved game
-            foreach (var performer in performers) 
-            {
-                performer.Energy = performer.Recovery;
-            }
-        }
+        GameState.RefreshPerformers();
 
         _playing = true;
         int p = 0;
@@ -276,14 +263,14 @@ abstract class UserInterface
                 // Update step! This is where all the current performers gets a chance
                 // to take their turn!
                 //while (performers[p].Energy >= 0.9999 && TakeTurn(performers[p])
-                if (performers[p].Energy < 1.0)
+                if (GameState.CurrPerformers[p].Energy < 1.0)
                 {
-                    performers[p].Energy += performers[p].Recovery;
-                    p = (p + 1) % performers.Count;
+                    GameState.CurrPerformers[p].Energy += GameState.CurrPerformers[p].Recovery;
+                    p = (p + 1) % GameState.CurrPerformers.Count;
                 }
-                else if (TakeTurn(performers[p]))
+                else if (TakeTurn(GameState.CurrPerformers[p]))
                 {                    
-                    if (performers[p] != Player)
+                    if (GameState.CurrPerformers[p] != Player)
                     {
                         // I dunno if this is necessary
                         //SetSqsOnScreen();
@@ -291,8 +278,8 @@ abstract class UserInterface
                         //Thread.Sleep(25);
                     }
 
-                    if (performers[p].Energy < 1.0)
-                        p = (p + 1) % performers.Count;
+                    if (GameState.CurrPerformers[p].Energy < 1.0)
+                        p = (p + 1) % GameState.CurrPerformers.Count;
                 }                    
                 // I imagine later on there'll be bookkeeping and such once we've run
                 // through all the current performers?
@@ -400,7 +387,7 @@ abstract class UserInterface
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), true);
         }
-        else if (isVisible && remembered.Contains((mapRow, mapCol)))
+        else if (remembered.Contains((mapRow, mapCol)))
         {
             return TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }

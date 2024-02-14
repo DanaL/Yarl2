@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
@@ -24,6 +22,7 @@ internal class GameState
     public int CurrDungeon { get; set; }
     public Campaign Campaign { get; set; }
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
+    public List<IPerformer> CurrPerformers { get; set; } = [];
 
     public void EnterLevel(int dungeon, int level)
     {
@@ -41,6 +40,18 @@ internal class GameState
     public void ItemDropped(Item item, int row, int col)
     {
         ObjDB.Add(new Loc(CurrDungeon, CurrLevel, row, col), item);
+    }
+
+    public void RefreshPerformers()
+    {
+        CurrPerformers.Clear();
+        CurrPerformers.Add(Player);
+        CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
+
+        foreach (var performer in CurrPerformers)
+        {
+            performer.Energy = performer.Recovery;
+        }
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)

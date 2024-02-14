@@ -38,9 +38,10 @@ internal class Player : Actor, IPerformer, IItemHolder
         if (gs.InWilderness)
             return MaxVisionRadius;
 
-        // Calculate light radius from gear goes here
+        int strongestLight = Inventory.UsedSlots().Select(s => (Inventory.ItemAt(s)).LightRadius(gs))
+                                                  .Max();
 
-        return 1;
+        return strongestLight > 1 ? strongestLight : 1;
     }
 
     private void ShowInventory(UserInterface ui, string title = "You are carrying:")
@@ -178,6 +179,12 @@ internal class Player : Actor, IPerformer, IItemHolder
                     _accumulator = new MenuPickAccumulator(opts);
                     _deferred = new PickupItemAction(ui, this, gameState);
                 }
+            }
+            else if (ch == 'a')
+            {
+                ShowInventory(ui, "Use which item?");
+                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _deferred = new UseItemAction(ui, this, gameState);
             }
             else if (ch == 'd')
             {

@@ -15,7 +15,13 @@ enum ItemType
 {
     Weapon,
     Armour,
-    Zorkmid
+    Zorkmid,
+    Tool
+}
+
+interface IUseableItem
+{
+    string Use(GameState gs, int row, int col);
 }
 
 class Item : GameObj
@@ -30,7 +36,7 @@ class Item : GameObj
     
     public List<string> Adjectives { get; set; } = [];
 
-    public string FullName {
+    public virtual string FullName {
         get 
         {
             if (Adjectives.Count == 0)
@@ -54,6 +60,72 @@ enum ArmourParts
 class Armour : Item
 {
     public ArmourParts Piece { get; set; }
+}
+
+class Torch : Item, IPerformer, IUseableItem
+{
+    public bool Lit { get; set; }
+    public int Fuel { get; set; }
+    public double Energy { get; set; }
+    public double Recovery
+    {
+        get => 1.0;
+        set { } // I don't think the recovery value for torches will change
+    }
+
+    public override string FullName => Lit ? base.FullName + " (lit)" : base.FullName;
+    public override int LightRadius(GameState gs) => Lit ? 5 : 0;
+
+    public override Glyph Glyph
+    {
+        get => Lit ? new Glyph('(', Colours.DULL_RED, Colours.YELLOW_ORANGE)
+                   : new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN);
+    }
+
+    public string Use(GameState gs, int row, int col)
+    {
+        var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
+        if (Lit)
+        {            
+            gs.CurrPerformers.Remove(this);
+
+            // Gotta set the lighting level before we extinguish the torch
+            // so it's radius is still 5 when calculating which squares to 
+            // affect
+            gs.SetLightingLevel(this, loc, -1);
+            Lit = false;
+
+            return $"You extinguish {Name.DefArticle()}.";
+        }
+        else
+        {
+            Lit = true;
+            Stackable = false;
+            Energy = Recovery;
+            gs.CurrPerformers.Add(this);
+            gs.SetLightingLevel(this, loc, 1);
+
+            return $"The {Name} sparks to life!";
+        }
+    }
+
+    public Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        Console.WriteLine($"I'm a torch taking my turn! {Fuel}");
+        if (!Lit)
+            return new PassAction(this);
+
+        if (--Fuel > 0)
+        {
+            // I could also alert the player here that the torch is flickering, about to go out, etc
+            
+            return new PassAction(this);
+        }
+        else
+        {
+            return new ExtinguishAction(this, gameState, ui);
+        }
+    }
 }
 
 class ItemFactory
@@ -81,6 +153,10 @@ class ItemFactory
             ArmourMod = 1,
             Piece = ArmourParts.Helmet,
             Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
+        },
+        "torch" => new Torch()
+        {
+            Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 150, Lit = false
         },
         _ => throw new Exception($"{name} doesn't seem exist in yarl2 :("),
     };

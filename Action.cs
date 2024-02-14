@@ -213,7 +213,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     {
         return tile.Type switch
         {
-            TileType.DeepWater => "The ocean seems deep and cold.",
+            TileType.DeepWater => "The water seems deep and cold.",
             TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
             _ => "You cannot go that way!"
         }; ;
@@ -315,6 +315,36 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+{
+    public char Choice { get; set; }
+    private UserInterface _ui = ui;
+    private Actor _actor = actor;
+    private GameState _gameState = gs;
+
+    public override ActionResult Execute()
+    {
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
+        _ui.CloseMenu();
+
+        if (item is IUseableItem tool)
+        {
+            var msg = tool.Use(_gameState, _actor.Row, _actor.Col);
+            return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
+        }
+        else
+        {
+            return new ActionResult() { Successful = false, Message = "You don't know how to use that!" };
+        }
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
+    }
+}
+
 class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
@@ -324,7 +354,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute() 
     {
-        var item = ((Player)_actor).Inventory.ItemAt(Choice);        
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
         if (item.Equiped && item.Type == ItemType.Armour)
@@ -359,8 +389,13 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
     {
         ActionResult result;
 
-        var item = ((Player)_actor).Inventory.ItemAt(Choice);        
+        var item = ((Player)_actor).Inventory.ItemAt(Choice);
         _ui.CloseMenu();
+
+        if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
+        {
+            return new ActionResult() { Successful = false, Message = "You cannot equip that!" };
+        }
 
         var (equipResult, conflict) = ((Player) _actor).Inventory.ToggleEquipStatus(Choice);
         
@@ -394,9 +429,9 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
     }
 }
 
-class PassAction(Actor actor) : Action
+class PassAction(IPerformer performer) : Action
 {
-    private Actor _actor = actor;
+    private IPerformer _perfmer = performer;
 
     public override ActionResult Execute() 
     {
@@ -414,6 +449,21 @@ class CloseMenuAction(UserInterface ui) : Action
     { 
         _ui.CloseMenu();
         return new ActionResult() { Successful=true, Message="" };
+    }
+}
+
+class ExtinguishAction(IPerformer performer, GameState gs, UserInterface ui) : Action
+{
+    private IPerformer _perfmer = performer;
+    private UserInterface _ui = ui;
+    private GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        // needs to remove itself from the current performers
+        // alert the player
+
+        return new ActionResult() { Successful = true, Message = "" };
     }
 }
 

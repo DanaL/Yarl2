@@ -34,6 +34,8 @@ class Colours
     public static readonly Colour BLUE = new(0, 0, 200);
     public static readonly Colour LIGHT_BLUE = new(55, 198, 255);
     public static readonly Colour DARK_BLUE = new(12, 35, 64);
+    public static readonly Colour BRIGHT_RED = new(208, 28, 31);
+    public static readonly Colour DULL_RED = new(129, 12, 12);
 }
 
 // Miscellaneous constants used in a few places

@@ -120,6 +120,8 @@ internal class PreGameHandler(UserInterface ui)
             armour.Equiped = true;
             player.Inventory.Add(armour);
             player.Inventory.Add(ItemFactory.Get("dagger"));
+            player.Inventory.Add(ItemFactory.Get(("torch")));
+            //player.Inventory.Add(ItemFactory.Get(("torch")));
 
             _ui.Player = player;
 

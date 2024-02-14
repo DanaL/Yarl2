@@ -26,6 +26,8 @@ interface IPerformer
 // an interface to hold the functions the ones who do will need
 interface IItemHolder
 {
+    public Inventory Inventory { get; set; } 
+
     void CalcEquipmentModifiers();
 }
 
@@ -159,6 +161,6 @@ class VillagerBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        return new PassAction(actor);
+        return new PassAction((IPerformer)actor);
     }
 }

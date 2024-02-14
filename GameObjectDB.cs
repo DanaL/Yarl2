@@ -22,7 +22,7 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit);
 abstract class GameObj
 {
     public string Name { get; set; }
-    public Glyph Glyph { get; set; }
+    public virtual Glyph Glyph { get; set; }
 
     public virtual int LightRadius(GameState gs) => 0;
 }
