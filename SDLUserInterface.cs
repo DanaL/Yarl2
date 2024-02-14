@@ -17,7 +17,7 @@ internal class SDLUserInterface : UserInterface
 
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
-    private (Colour, char)[,] _prevTiles = new (Colour, char)[ScreenHeight - 1, ViewWidth];    
+    private (Colour, char)[,] _prevTiles = new (Colour, char)[ViewHeight, ViewWidth];    
     private string _prevMessage = "";
     
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
@@ -38,14 +38,14 @@ internal class SDLUserInterface : UserInterface
         _mainFrameLoc = new SDL_Rect
         {
             x = 0,
-            y = _fontHeight,
-            h = (ScreenHeight - 1) * _fontHeight,
+            y = 0,
+            h = ViewHeight * _fontHeight,
             w = ViewWidth * _fontWidth
         };
 
         _cachedGlyphs = new();
 
-        for (int r = 0; r < ScreenHeight - 1; r++)
+        for (int r = 0; r < ViewHeight; r++)
         {
             for (int c = 0; c < ViewWidth; c++)
             {
@@ -146,6 +146,23 @@ internal class SDLUserInterface : UserInterface
         WriteLine("", row, col, width);
     }
 
+    private void WritePopUp()
+    {
+        var lines = _popupBuffer.Split('\n');
+        int bufferWidth = lines.Select(l => l.Length).Max();
+        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
+        width += 2;
+        int col = (ViewWidth - width) / 2;
+        int row = 2;
+
+        WriteLine("", 1, col, width);
+        foreach (var line in lines)
+        {
+            WriteLine($" {line} ", row++, col, width);
+        }
+        WriteLine("", row, col, width);        
+    }
+
     private void SDLPut(int row, int col, char ch, Colour color) 
     {
         var key = (ch, color, Colours.BLACK);
@@ -167,12 +184,12 @@ internal class SDLUserInterface : UserInterface
     private IntPtr CreateMainTexture()
     {
         var tw = ViewWidth * _fontWidth;
-        var th = (ScreenHeight - 1) * _fontHeight;
+        var th = ViewHeight * _fontHeight;
         var targetTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBX8888, (int) SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET , tw, th);
 
         SDL_SetRenderTarget(_renderer, targetTexture);
 
-        for (int row = 0; row < ScreenHeight - 1; row++)
+        for (int row = 0; row < ViewHeight; row++)
         {
             for (int col = 0; col < ViewWidth; col++)
             {
@@ -189,11 +206,11 @@ internal class SDLUserInterface : UserInterface
     void WriteSideBar(Player player)
     {
         var width = ScreenWidth - ViewWidth;
-        WriteLine($"| {player.Name}".PadRight(width), 1, ViewWidth, width);
-        WriteLine($"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(width), 2, ViewWidth, width);
+        WriteLine($"| {player.Name}".PadRight(width), 0, ViewWidth, width);
+        WriteLine($"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(width), 1, ViewWidth, width);
         
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 3; row < ScreenHeight; row++)
+        for (int row = 2; row < ScreenHeight; row++)
         {
             WriteLine(blank, row, ViewWidth, width);
         }
@@ -217,7 +234,7 @@ internal class SDLUserInterface : UserInterface
         if (_prevMessage != _messageBuffer)
             return true;
 
-        for (int row = 0; row < ScreenHeight - 1; row++)
+        for (int row = 0; row < ViewHeight; row++)
         {
             for (int col = 0; col < ViewWidth; col++)
             {
@@ -231,7 +248,7 @@ internal class SDLUserInterface : UserInterface
 
     private void SaveLastFame()
     {
-        for (int row = 0; row < ScreenHeight - 1; row++)
+        for (int row = 0; row < ViewHeight; row++)
         {
             for (int col = 0; col < ViewWidth; col++)
             {
@@ -266,6 +283,11 @@ internal class SDLUserInterface : UserInterface
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);
                 SaveLastFame();
+            }
+
+            if (_popupBuffer is not null)
+            {
+                WritePopUp();
             }
 
             if (MenuRows is not null)

@@ -60,7 +60,7 @@ internal class CloudAnimationListener : IAnimationListener
 
         if (rng.NextDouble() < 0.5)
         {
-            _row = rng.Next(-3, (int) (0.33 * UserInterface.ScreenHeight));
+            _row = rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
             _col = -3;
         }
         else
@@ -74,7 +74,7 @@ internal class CloudAnimationListener : IAnimationListener
 
     private void EraseCloud()
     {
-        int h = UserInterface.ScreenHeight - 1;
+        int h = UserInterface.ViewHeight;
         int w = UserInterface.ViewWidth;
 
         for (int r = 0; r < 3; r++) 
@@ -91,7 +91,7 @@ internal class CloudAnimationListener : IAnimationListener
 
     private void AnimationStep()
     {
-        int h = UserInterface.ScreenHeight - 1;
+        int h = UserInterface.ViewHeight;
         int w = UserInterface.ViewWidth;
 
         EraseCloud();
@@ -136,7 +136,7 @@ internal class CloudAnimationListener : IAnimationListener
 
             // The cloud has drifted offscreen. We'll wait a little while before 
             // creating the next one.
-            if (_row >= UserInterface.ScreenHeight - 1 || _col >= UserInterface.ViewWidth) 
+            if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth) 
             {
                 var rng = new Random();
                 _paused = true;
@@ -164,7 +164,7 @@ internal class WaterAnimationListener : IAnimationListener
     {
         _sparkles = [];
         var rng = new Random();        
-        for (int r = 0; r < UserInterface.ScreenHeight - 1; r++) 
+        for (int r = 0; r < UserInterface.ViewHeight; r++) 
         {
             for (int c = 0; c < UserInterface.ViewWidth; c++)
             {

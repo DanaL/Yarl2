@@ -10,8 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 //using System.Data;
 
-using System.Collections.Generic;
-
 namespace Yarl2;
 
 enum UIEventType { Quiting, KeyInput, NoEvent }
@@ -25,19 +23,21 @@ internal record struct UIEvent(UIEventType Type, char Value);
 internal abstract class UserInterface
 {    
     public const int ScreenWidth = 65;
-    public const int ScreenHeight = 30;
+    public const int ScreenHeight = 32;
     public const int SideBarWidth = 20;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
-    
+    public const int ViewHeight = ScreenHeight - 4;
+
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
     
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
-
     protected List<string>? _longMessage;
     protected string _messageBuffer = "";
+    protected string? _popupBuffer = "";
+    protected int _popupWidth;
     protected Options _options;
     private bool _playing;
 
@@ -60,10 +60,10 @@ internal abstract class UserInterface
     public UserInterface(Options opts)
     {
         _options = opts;
-        PlayerScreenRow = (ScreenHeight - 1) / 2 + 1;
+        PlayerScreenRow = ViewHeight / 2 + 1;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
-        SqsOnScreen = new (Colour, char)[ScreenHeight - 1, ViewWidth];
-        ZLayer = new Tile[ScreenHeight - 1, ViewWidth];
+        SqsOnScreen = new (Colour, char)[ViewHeight, ViewWidth];
+        ZLayer = new Tile[ViewHeight, ViewWidth];
         ClearZLayer();
     }
 
@@ -82,6 +82,16 @@ internal abstract class UserInterface
         UpdateDisplay();
         BlockForInput();
         _longMessage = null;
+    }
+
+    public void ClosePopup()
+    {
+        _popupBuffer = null;
+    }
+
+    public void Popup(string message, int width)
+    {
+        _popupBuffer = message;
     }
 
     public void WriteMessage(string message)
@@ -155,16 +165,6 @@ internal abstract class UserInterface
             CurrDungeon = campaign.CurrentDungeon,
             ObjDB = itemDB
         };
-    }
-
-    // Handles waiting will we display a goodbye message, and eventually
-    // High Scores screen, etc
-    private void OnQuitListener(UIEvent e)
-    {
-        if (e.Type == UIEventType.KeyInput)
-        {
-            _playing = false;
-        }
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -252,6 +252,7 @@ internal abstract class UserInterface
                 {                    
                     if (performers[p] != Player)
                     {
+                        // I dunno if this is necessary
                         //SetSqsOnScreen();
                         //UpdateDisplay();
                         //Thread.Sleep(25);
@@ -315,7 +316,7 @@ internal abstract class UserInterface
 
         do
         {
-            WriteMessage($"{prompt} {result}");
+            Popup($"{prompt}\n{result}", 20);
             UpdateDisplay();
             e = PollForEvent();
 
@@ -338,6 +339,8 @@ internal abstract class UserInterface
         }
         while (true);
         
+        ClosePopup();
+
         return result.Trim();
     }
 
@@ -389,7 +392,7 @@ internal abstract class UserInterface
         int rowOffset = Player.Row - PlayerScreenRow;
         int colOffset = Player.Col - PlayerScreenCol;
 
-        for (int r = 0; r < ScreenHeight - 1; r++) 
+        for (int r = 0; r < ViewHeight; r++) 
         {
             for (int c = 0; c < ViewWidth; c++)
             {
@@ -405,7 +408,7 @@ internal abstract class UserInterface
 
     private void ClearZLayer()
     {
-        for (int r = 0; r < ScreenHeight - 1; r++)
+        for (int r = 0; r < ViewHeight; r++)
         {
             for (int c = 0; c < ViewWidth; c++)
             {
