@@ -63,7 +63,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)Constants.BACKSPACE);
         KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);        
     }
 
     protected override UIEvent PollForEvent()
@@ -84,6 +84,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                     {
                         ',' => '<',
                         '.' => '>',
+                        '8' => '*',
                         _ => char.ToUpper(value)
                     };                   
                 }
@@ -106,7 +107,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         Terminal.Print(ViewWidth, 2, $"| HP: {Player.CurrHP} ({Player.MaxHP})".PadRight(ViewWidth));
 
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 3; row < ScreenHeight; row++)
+        for (int row = 3; row < ViewHeight; row++)
         {
             Terminal.Print(ViewWidth, row, blank);
         }
@@ -124,7 +125,48 @@ internal class BLUserInferface : UserInterface, IDisposable
             Terminal.Print(col, row++, line.PadRight(width));
             
         }
+        Terminal.Print(col, row, "".PadRight(width));
+    }
+
+    // The WritePopUp() and WriteMessageSection() methods between Bearlib and SDL
+    // are soooo close to being able to be merged and pulled up into the superclass.
+    // All I really need to do is make a wrapper around Termnial.Print()
+    private void WritePopUp()
+    {
+        Terminal.Color(ToBearLibColour(Colours.WHITE));
+        var lines = _popupBuffer.Split('\n');
+        int bufferWidth = lines.Select(l => l.Length).Max();
+        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
+        width += 2;
+        int col = (ViewWidth - width) / 2;
+        int row = 5;
+
+        Terminal.Print(col, 4, "".PadRight(width));        
+        foreach (var line in lines)
+        {
+            Terminal.Print(col, row++, line.PadRight(width));
+        }
         Terminal.Print(col, row, "".PadRight(width));        
+    }
+
+    void WriteMessagesSection()
+    {
+        var msgs = MessageHistory.Take(5)
+                                 .Select(msg => msg.Fmt);
+
+        int row = ScreenHeight - 1;
+        Colour colour = Colours.WHITE;
+        foreach (var msg in msgs)
+        {
+            Terminal.Color(ToBearLibColour(colour));
+            var s = msg.PadRight(ScreenWidth);
+            Terminal.Print(0, row--, s.PadRight(ScreenWidth));
+            
+            if (colour == Colours.WHITE)
+                colour = Colours.GREY;
+            else if (colour == Colours.GREY)
+                colour = Colours.DARK_GREY;
+        }
     }
 
     public override void UpdateDisplay()
@@ -145,7 +187,7 @@ internal class BLUserInferface : UserInterface, IDisposable
 
             if (Player is not null)
             {
-                for (int row = 0; row < ScreenHeight - 1; row++)
+                for (int row = 0; row < ViewHeight; row++)
                 {
                     for (int col = 0; col < ViewWidth; col++)
                     {
@@ -158,9 +200,17 @@ internal class BLUserInferface : UserInterface, IDisposable
                 WriteSideBar();
             }
 
+            if (MessageHistory.Count > 0)
+                WriteMessagesSection();
+
             if (MenuRows is not null)
             {
                 WriteDropDown();
+            }
+
+            if (_popupBuffer is not null)
+            {
+                WritePopUp();
             }
         }
         
