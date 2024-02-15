@@ -44,20 +44,10 @@ internal class Player : Actor, IPerformer, IItemHolder
             if (itemSources.Count > 0)
                 sources.AddRange(itemSources);
         }
-        
+
         return sources;
     }
-    // public override int LightRadius(GameState gs)
-    // {
-    //     if (gs.InWilderness)
-    //         return MaxVisionRadius;
-
-    //     int strongestLight = Inventory.UsedSlots().Select(s => (Inventory.ItemAt(s)).LightRadius(gs))
-    //                                               .Max();
-
-    //     return strongestLight > 1 ? strongestLight : 1;
-    // }
-
+    
     private void ShowInventory(UserInterface ui, string title = "You are carrying:")
     {
         var slots = Inventory.UsedSlots();
@@ -216,7 +206,7 @@ internal class Player : Actor, IPerformer, IItemHolder
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new CloseDoorAction(ui.Player, gameState.Map);                
+                var action = new CloseDoorAction(ui.Player, gameState.Map, gameState);                
                 _deferred = action;
                 
                 ui.AlertPlayer("Which way?");
@@ -224,7 +214,7 @@ internal class Player : Actor, IPerformer, IItemHolder
             else if (ch == 'o')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new OpenDoorAction(ui.Player, gameState.Map);
+                var action = new OpenDoorAction(ui.Player, gameState.Map, gameState);
                 _deferred = action;
 
                 ui.AlertPlayer("Which way?");

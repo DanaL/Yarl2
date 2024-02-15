@@ -122,8 +122,9 @@ abstract class DirectionalAction(Actor actor) : Action
     }
 }
 
-class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
-{    
+class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(actor)
+{
+    private GameState _gs = gs;
     private readonly Map _map = map;
 
     public override ActionResult Execute()
@@ -135,11 +136,16 @@ class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
         {
             if (d.Open)
             {
+                // Okay this is a bit goofy but I need to extinguish squares lit by the 
+                // actor before the door is closed, then recalculate what is still lit
+                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
+                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, false);
                 d.Open = false;
                 result.Successful = true;
                 result.EnergyCost = 1.0;
                 if (_actor is Player)
                     result.Message = "You close the door.";
+                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, true);
             }
             else if (_actor is Player)
             {
@@ -157,18 +163,21 @@ class CloseDoorAction(Actor actor, Map map) : DirectionalAction(actor)
 
 class OpenDoorAction : DirectionalAction
 {
+    private GameState _gs;
     private readonly Map _map;
 
-    public OpenDoorAction(Actor actor, Map map) : base(actor)
+    public OpenDoorAction(Actor actor, Map map, GameState gs) : base(actor)
     {
         _map = map;
+        _gs = gs;
     }
 
-    public OpenDoorAction(Actor actor, Map map, int row, int col) : base(actor)
+    public OpenDoorAction(Actor actor, Map map, int row, int col, GameState gs) : base(actor)
     {
         _map = map;
         _row = row;
         _col = col;
+        _gs = gs;
     }
 
     public override ActionResult Execute()
@@ -185,6 +194,11 @@ class OpenDoorAction : DirectionalAction
                 result.EnergyCost = 1.0;
                 if (_actor is Player)
                     result.Message = "You open the door.";
+
+                // This lights up the new squares exposed by the door. I guess eventually
+                // I'll need a "calc all auras projected by actor" method
+                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
+                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, true);
             }
             else if (_actor is Player)
             {
@@ -255,7 +269,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 var tile = _map.TileAt(_row, _col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map, _row, _col);
+                    var openAction = new OpenDoorAction(_actor, _map, _row, _col, _gameState);
                     result.AltAction = openAction;
                 }
                 else
