@@ -15,7 +15,7 @@ namespace Yarl2;
 internal class Player : Actor, IPerformer, IItemHolder
 {
     private InputAccumulator? _accumulator;
-    private Action _deferred;
+    private Action? _deferred;
     public Inventory Inventory { get; set; } = new();
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
@@ -33,16 +33,30 @@ internal class Player : Actor, IPerformer, IItemHolder
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
 
-    public override int LightRadius(GameState gs)
+    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) 
     {
-        if (gs.InWilderness)
-            return MaxVisionRadius;
+        int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
+        List<(ulong, int)> sources = [ (ID, playerVisionRadius) ];
 
-        int strongestLight = Inventory.UsedSlots().Select(s => (Inventory.ItemAt(s)).LightRadius(gs))
-                                                  .Max();
-
-        return strongestLight > 1 ? strongestLight : 1;
+        foreach (var item in Inventory.UsedSlots().Select(s => Inventory.ItemAt(s)))
+        {
+            var itemSources = item.EffectSources(flags, gs);
+            if (itemSources.Count > 0)
+                sources.AddRange(itemSources);
+        }
+        
+        return sources;
     }
+    // public override int LightRadius(GameState gs)
+    // {
+    //     if (gs.InWilderness)
+    //         return MaxVisionRadius;
+
+    //     int strongestLight = Inventory.UsedSlots().Select(s => (Inventory.ItemAt(s)).LightRadius(gs))
+    //                                               .Max();
+
+    //     return strongestLight > 1 ? strongestLight : 1;
+    // }
 
     private void ShowInventory(UserInterface ui, string title = "You are carrying:")
     {

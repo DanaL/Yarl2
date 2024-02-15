@@ -28,8 +28,8 @@ abstract class GameObj
     private ulong _id;
     public ulong ID => _id;
 
-    public virtual int LightRadius(GameState gs) => 0;
-
+    public virtual List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => [];
+    
     public GameObj() => _id = IDSeed++;
 }
 

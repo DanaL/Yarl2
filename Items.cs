@@ -74,13 +74,14 @@ class Torch : Item, IPerformer, IUseableItem
     }
 
     public override string FullName => Lit ? base.FullName + " (lit)" : base.FullName;
-    public override int LightRadius(GameState gs) => Lit ? 5 : 0;
-
+    
     public override Glyph Glyph
     {
         get => Lit ? new Glyph('(', Colours.DULL_RED, Colours.YELLOW_ORANGE)
                    : new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN);
     }
+
+    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => Lit ? [(ID, 5)] : [];
 
     public string Use(GameState gs, int row, int col)
     {

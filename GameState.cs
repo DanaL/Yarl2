@@ -62,14 +62,14 @@ internal class GameState
             ObjDB.MonsterMoved(m, start, dest);
         }
 
-        // Update the effect auras the actor might have
-        if (actor.LightRadius(this) > 0)
-        {
-            ToggleEffect(actor, start, TerrainFlags.Lit, false);
-            ToggleEffect(actor, dest, TerrainFlags.Lit, true);
-        }
+        // It might be more efficient to actually calculate the squares covered
+        // by the old and new locations and toggle their set difference? But
+        // maybe not enough for the more complicated code?
+        ToggleEffect(actor, start, TerrainFlags.Lit, false);
+        ToggleEffect(actor, dest, TerrainFlags.Lit, true);        
     }
 
+    // I only have light effects in the game right now, but I also have ambitions        
     public void ToggleEffect(GameObj obj, Loc loc, TerrainFlags effect, bool on)
     {
         var (dungeon, level, row, col) = loc;
@@ -77,18 +77,20 @@ internal class GameState
         var map = currDungeon.LevelMaps[level];
         var isPlayer = obj is Player;
 
-        // I only have light effects in the game right now
-        var sqs = FieldOfView.CalcVisible(obj.LightRadius(this), row, col, map, level);
-        foreach (var sq in sqs)
+        foreach (var (sourceID, radius) in obj.EffectSources(effect, this)) 
         {
-            if (on)
-                map.ApplyEffect(effect, sq.Item2, sq.Item3, obj.ID);
-            else
-                map.RemoveEffect(effect, sq.Item2, sq.Item3, obj.ID);
-                
-            // I guess maybe move this back to UI, or the Move action?
-            if (isPlayer)
-                currDungeon.RememberedSqs.Add(sq);
+            var sqs = FieldOfView.CalcVisible(radius, row, col, map, level);
+            foreach (var sq in sqs)
+            {
+                if (on)
+                    map.ApplyEffect(effect, sq.Item2, sq.Item3, sourceID);
+                else
+                    map.RemoveEffect(effect, sq.Item2, sq.Item3, sourceID);
+
+                // I guess maybe move this back to UI, or the Move action?
+                if (isPlayer)
+                    currDungeon.RememberedSqs.Add(sq);
+            }
         }
     }
 }
