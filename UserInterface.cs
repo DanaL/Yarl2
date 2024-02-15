@@ -319,12 +319,12 @@ abstract class UserInterface
         List<IAnimationListener> animationListeners = [];
         animationListeners.Add(new CloudAnimationListener(this));
      
-        DateTime lastPollTime = DateTime.Now;
-
         GameState.RefreshPerformers();
+        GameState.CurrPerformers = [Player];
 
         _playing = true;
         int p = 0;
+        DateTime refresh = DateTime.Now;
         while (_playing) 
         {
             var e = PollForEvent();
@@ -333,27 +333,18 @@ abstract class UserInterface
 
             if (e.Type == UIEventType.KeyInput)
                 InputBuffer.Enqueue(e.Value);
-            
+
             try
             {
                 // Update step! This is where all the current performers gets a chance
                 // to take their turn!
-                
                 if (GameState.CurrPerformers[p].Energy < 1.0)
                 {
                     GameState.CurrPerformers[p].Energy += GameState.CurrPerformers[p].Recovery;
                     p = (p + 1) % GameState.CurrPerformers.Count;
                 }
                 else if (TakeTurn(GameState.CurrPerformers[p]))
-                {                    
-                    if (GameState.CurrPerformers[p] != Player)
-                    {
-                        // I dunno if this is necessary
-                        //SetSqsOnScreen();
-                        //UpdateDisplay();
-                        //Thread.Sleep(25);
-                    }
-
+                {
                     // this is slightly different than a monster being killed because this just
                     // removes them from the queue. A burnt out torch still exists as an item in
                     // the game but a dead monster needs to be removed from the GameObjDb as well
@@ -377,22 +368,21 @@ abstract class UserInterface
             {
                 break;                
             }
-                                   
-            SetSqsOnScreen();
 
             foreach (var l in animationListeners)
                 l.Update();
-
-            UpdateDisplay();
-
-            var dd = DateTime.Now - lastPollTime;
-            if (dd.TotalSeconds > 5) 
+            
+            var elapsed = DateTime.Now - refresh;
+            if (elapsed.TotalMilliseconds > 60)
             {
-                Console.WriteLine("hello, world?");
-                lastPollTime = DateTime.Now;                
+                SetSqsOnScreen();
+                UpdateDisplay();
+                refresh = DateTime.Now;
             }
 
-            Delay();
+            //Delay();
+            
+            //Console.WriteLine($"{elapsed.TotalMilliseconds} ms");            
         }
 
         var msg = new List<string>()

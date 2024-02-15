@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
@@ -66,9 +68,8 @@ internal class GameState
 
         // It might be more efficient to actually calculate the squares covered
         // by the old and new locations and toggle their set difference? But
-        // maybe not enough for the more complicated code?
-        ToggleEffect(actor, start, TerrainFlags.Lit, false);
-        ToggleEffect(actor, dest, TerrainFlags.Lit, true);        
+        // maybe not enough for the more complicated code?        
+        CheckMovedEffects(actor, start, dest, TerrainFlags.Lit);
     }
 
     // Find all the game objects affecting a square with a particular
@@ -97,14 +98,49 @@ internal class GameState
         return objs;
     }
 
-    // I only have light effects in the game right now, but I also have ambitions        
+    // This is still an extremely inefficient way to handle updating a moving source
+    // such as a light :/
+    public void CheckMovedEffects(GameObj obj, Loc start, Loc dest, TerrainFlags effect)
+    {        
+        var newSqs = new HashSet<(ulong, int, int, int, int)>();
+        var oldSqs = new HashSet<(ulong, int, int, int, int)>();
+
+        foreach (var (sourceID, radius) in obj.EffectSources(effect, this))
+        {
+            var (dungeon, level, row, col) = start;
+            var currDungeon = Campaign.Dungeons[dungeon];
+            var map = currDungeon.LevelMaps[level];
+            foreach (var sq in FieldOfView.CalcVisible(radius, row, col, map, level))
+                oldSqs.Add((sourceID, dungeon, level, sq.Item2, sq.Item3));
+            (dungeon, level, row, col) = dest;
+             currDungeon = Campaign.Dungeons[dungeon];
+            map = currDungeon.LevelMaps[level];
+            foreach (var sq in FieldOfView.CalcVisible(radius, row, col, map, level))
+                newSqs.Add((sourceID, dungeon, level, sq.Item2, sq.Item3));
+        }
+
+        oldSqs.ExceptWith(newSqs);
+        foreach (var (objID, dungeon, level, _, _) in oldSqs)
+        {
+            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+            map.RemoveEffect(effect, objID);
+        }
+
+        foreach (var (objID, dungeon, level, r, c) in newSqs)
+        {
+            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+            map.ApplyEffect(effect, r, c, objID);
+        }
+    }
+
+    // I only have light effects in the game right now, but I also have ambitions
     public void ToggleEffect(GameObj obj, Loc loc, TerrainFlags effect, bool on)
     {
         var (dungeon, level, row, col) = loc;
         var currDungeon = Campaign.Dungeons[dungeon];
         var map = currDungeon.LevelMaps[level];
-        
-        foreach (var (sourceID, radius) in obj.EffectSources(effect, this)) 
+
+        foreach (var (sourceID, radius) in obj.EffectSources(effect, this))
         {
             var sqs = FieldOfView.CalcVisible(radius, row, col, map, level);
             foreach (var sq in sqs)

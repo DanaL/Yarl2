@@ -174,6 +174,9 @@ internal class Map : ICloneable
         Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
     }
 
+    // I could speed this up maybe by calculating the intersections
+    // whenever the effects are updated. But otoh maybe with things
+    // moving around the map it'll just be constantly updating anyhow
     public bool HasEffect(TerrainFlags effect, int row, int col)
     {
         if (!InBounds(row, col) || !Effects.ContainsKey((row, col)))
@@ -196,11 +199,7 @@ internal class Map : ICloneable
             Effects.Add((row, col), flagsDict);
         }
 
-        if (!flagsDict.TryGetValue(objID, out TerrainFlags flags))
-        {
-            flagsDict.Add(objID, effect);
-        }
-        else
+        if (!flagsDict.TryAdd(objID, effect))
         {
             flagsDict[objID] |= effect;
         }
