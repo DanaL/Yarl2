@@ -34,7 +34,8 @@ abstract class UserInterface
 
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
-    
+    protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
+
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
@@ -111,6 +112,69 @@ abstract class UserInterface
         _popupBuffer = message;
         _popupWidth = width;
         OpeningPopUp = true;
+    }
+
+    protected void WriteMessagesSection()
+    {
+        var msgs = MessageHistory.Take(5)
+                                 .Select(msg => msg.Fmt);
+
+        int row = ScreenHeight - 1;
+        Colour colour = Colours.WHITE;
+        foreach (var msg in msgs)
+        {
+            var s = msg.PadRight(ScreenWidth);
+            WriteLine(s, row--, 0, ScreenWidth, colour);
+
+            if (colour == Colours.WHITE)
+                colour = Colours.GREY;
+            else if (colour == Colours.GREY)
+                colour = Colours.DARK_GREY;
+        }
+    }
+
+    protected void WritePopUp()
+    {
+        var lines = _popupBuffer.Split('\n');
+        int bufferWidth = lines.Select(l => l.Length).Max();
+        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
+        width += 4;
+        int col = (ViewWidth - width) / 2;
+        int row = 5;
+
+        string border = "+".PadRight(width - 1, '-') + "+";
+        WriteLine(border, 4, col, width, Colours.WHITE);
+
+        foreach (var line in lines)
+        {
+            WriteLine(("| " + line).PadRight(width - 2) + " |", row++, col, width, Colours.WHITE);
+        }
+        WriteLine(border, row, col, width, Colours.WHITE);
+    }
+
+    protected void WriteSideBar()
+    {
+        WriteLine($"| {Player.Name}", 0, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| HP: {Player.CurrHP} ({Player.MaxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
+
+        string blank = "|".PadRight(ViewWidth);
+        for (int row = 2; row < ViewHeight; row++)
+        {
+            WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
+        }
+    }
+
+    protected void WriteDropDown()
+    {
+        int width = MenuRows!.Select(r => r.Length).Max() + 2;
+        int col = ViewWidth - width;
+        int row = 0;
+
+        foreach (var line in MenuRows!)
+        {
+            WriteLine(" " + line, row++, col, width, Colours.WHITE);
+        }
+        WriteLine("", row, col, width, Colours.WHITE);
     }
 
     public void AlertPlayer(string message) 

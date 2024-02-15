@@ -112,12 +112,7 @@ internal class SDLUserInterface : UserInterface
         return value;
     }
 
-    private void WriteLine(string message, int lineNum, int col, int width)
-    {
-        WriteLine(message, lineNum, col, width, Colours.WHITE);
-    }
-
-    private void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+    protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
     {
         message = message.PadRight(width);
         var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));        
@@ -136,36 +131,6 @@ internal class SDLUserInterface : UserInterface
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
         SDL_DestroyTexture(texture);
-    }
-
-    private void WriteDropDown()
-    {
-        int width = MenuRows!.Select(r => r.Length).Max() + 2;
-        int col = ViewWidth - width;
-        int row = 1;
-
-        foreach (var line in MenuRows!)
-        {
-            WriteLine(" " +line, row++, col, width);
-        }
-        WriteLine("", row, col, width);
-    }
-
-    private void WritePopUp()
-    {
-        var lines = _popupBuffer.Split('\n');
-        int bufferWidth = lines.Select(l => l.Length).Max();
-        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
-        width += 2;
-        int col = (ViewWidth - width) / 2;
-        int row = 5;
-
-        WriteLine("", 4, col, width);
-        foreach (var line in lines)
-        {
-            WriteLine($" {line} ", row++, col, width);
-        }
-        WriteLine("", row, col, width);        
     }
 
     private SDL_Color RndTorchColour()
@@ -222,38 +187,6 @@ internal class SDLUserInterface : UserInterface
         SDL_SetRenderTarget(_renderer, IntPtr.Zero);
         
         return targetTexture;
-    }
-
-    void WriteSideBar(Player player)
-    {
-        var width = ScreenWidth - ViewWidth;
-        WriteLine($"| {player.Name}".PadRight(width), 0, ViewWidth, width);
-        WriteLine($"| HP: {player.CurrHP} ({player.MaxHP})".PadRight(width), 1, ViewWidth, width);
-        
-        string blank = "|".PadRight(ViewWidth);
-        for (int row = 2; row < ViewHeight; row++)
-        {
-            WriteLine(blank, row, ViewWidth, width);
-        }
-    }
-
-    void WriteMessagesSection() 
-    {
-        var msgs = MessageHistory.Take(5)
-                                 .Select(msg => msg.Fmt);
-        
-        int row = ScreenHeight - 1;
-        Colour colour = Colours.WHITE;
-        foreach (var msg in msgs)
-        {
-            var s = msg.PadRight(ScreenWidth);
-            WriteLine(s, row--, 0, ScreenWidth, colour);
-
-            if (colour == Colours.WHITE)
-                colour = Colours.GREY;
-            else if (colour == Colours.GREY)
-                colour = Colours.DARK_GREY;
-        }
     }
 
     private bool FrameChanged()
@@ -327,16 +260,16 @@ internal class SDLUserInterface : UserInterface
         {
             for (int j = 0; j < _longMessage.Count; j++)
             {
-                WriteLine(_longMessage[j], j, 0, ScreenWidth);
+                WriteLine(_longMessage[j], j, 0, ScreenWidth, Colours.WHITE);
             }
         }
         else
         {
-            WriteLine(_messageBuffer, 0, 0, ScreenWidth);
+            WriteLine(_messageBuffer, 0, 0, ScreenWidth, Colours.WHITE);
             _prevMessage = _messageBuffer;
             if (Player is not null)
             {
-                WriteSideBar(Player);
+                WriteSideBar();
                 var texture = CreateMainTexture();
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);

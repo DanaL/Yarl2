@@ -99,76 +99,11 @@ internal class BLUserInferface : UserInterface, IDisposable
 
         return new UIEvent(UIEventType.NoEvent, '\0');
     }
-
-    void WriteSideBar()
+     
+    protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
     {
-        Terminal.Color(ToBearLibColour(Colours.WHITE));
-        Terminal.Print(ViewWidth, 1, $"| {Player.Name}".PadRight(ViewWidth));
-        Terminal.Print(ViewWidth, 2, $"| HP: {Player.CurrHP} ({Player.MaxHP})".PadRight(ViewWidth));
-
-        string blank = "|".PadRight(ViewWidth);
-        for (int row = 3; row < ViewHeight; row++)
-        {
-            Terminal.Print(ViewWidth, row, blank);
-        }
-    }
-
-    private void WriteDropDown()
-    {
-        Terminal.Color(ToBearLibColour(Colours.WHITE));
-        int width = MenuRows!.Select(r => r.Length).Max() + 2;
-        int col = ViewWidth - width;
-        int row = 1;
-
-        foreach (var line in MenuRows!)
-        {
-            Terminal.Print(col, row++, line.PadRight(width));
-            
-        }
-        Terminal.Print(col, row, "".PadRight(width));
-    }
-
-    // The WritePopUp() and WriteMessageSection() methods between Bearlib and SDL
-    // are soooo close to being able to be merged and pulled up into the superclass.
-    // All I really need to do is make a wrapper around Termnial.Print()
-    private void WritePopUp()
-    {
-        Terminal.Color(ToBearLibColour(Colours.WHITE));
-        var lines = _popupBuffer.Split('\n');
-        int bufferWidth = lines.Select(l => l.Length).Max();
-        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
-        width += 4;
-        int col = (ViewWidth - width) / 2;
-        int row = 5;
-
-        string top = "+".PadRight(width - 1, '-') + "+";
-        Terminal.Print(col, 4, top);
-
-        foreach (var line in lines)
-        {
-            Terminal.Print(col, row++, ("| " + line).PadRight(width - 2) + " |");
-        }
-        Terminal.Print(col, row, top);        
-    }
-
-    void WriteMessagesSection()
-    {
-        var msgs = MessageHistory.Take(5)
-                                 .Select(msg => msg.Fmt);
-
-        int row = ScreenHeight - 1;
-        Colour colour = Colours.WHITE;
-        foreach (var msg in msgs)
-        {
-            Terminal.Color(ToBearLibColour(colour));
-            var s = msg.PadRight(ScreenWidth);
-            Terminal.Print(0, row--, s.PadRight(ScreenWidth));
-            
-            if (colour == Colours.WHITE)
-                colour = Colours.GREY;
-            else if (colour == Colours.GREY)
-                colour = Colours.DARK_GREY;
-        }
+        Terminal.Color(ToBearLibColour(textColour));
+        Terminal.Print(col, lineNum, message.PadRight(width));
     }
 
     public override void UpdateDisplay()
@@ -184,9 +119,7 @@ internal class BLUserInferface : UserInterface, IDisposable
             }
         }
         else
-        {
-            Terminal.Print(0, 0, _messageBuffer.PadRight(ScreenWidth));
-
+        {            
             if (Player is not null)
             {
                 for (int row = 0; row < ViewHeight; row++)
@@ -195,7 +128,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                     {
                         var (colour, ch) = SqsOnScreen[row, col];
                         Terminal.Color(ToBearLibColour(colour));
-                        Terminal.Put(col, row + 1, ch);
+                        Terminal.Put(col, row, ch);
                     }
                 }
 
