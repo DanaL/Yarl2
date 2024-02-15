@@ -103,8 +103,7 @@ internal class GameState
         var (dungeon, level, row, col) = loc;
         var currDungeon = Campaign.Dungeons[dungeon];
         var map = currDungeon.LevelMaps[level];
-        var isPlayer = obj is Player;
-
+        
         foreach (var (sourceID, radius) in obj.EffectSources(effect, this)) 
         {
             var sqs = FieldOfView.CalcVisible(radius, row, col, map, level);
@@ -114,10 +113,6 @@ internal class GameState
                     map.ApplyEffect(effect, sq.Item2, sq.Item3, sourceID);
                 else
                     map.RemoveEffect(effect, sourceID);
-
-                // I guess maybe move this back to UI, or the Move action?
-                if (isPlayer)
-                    currDungeon.RememberedSqs.Add(sq);
             }
         }
     }

@@ -378,22 +378,20 @@ abstract class UserInterface
         return result.Trim();
     }
 
-    (Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int)> remembered, Map map,
+    (Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int, int)> remembered, Map map,
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
         var glyph = GameState.ObjDB.GlyphAt(loc);
-
-        // Working toward having a difference between tiles that are lit and tiles within the player's vision radius
-        // So player could be at one location with VR 3 and see the aura of a torch 8 squares away but not the sqs
-        // in between because they are not lit
-        // So it's going to become a combo of (1) squares within vision radius and currently lit squares
-
+                
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
         bool isVisible = visible.Contains((mapRow, mapCol));
         if (isVisible && map.HasEffect(TerrainFlags.Lit, mapRow, mapCol))
         {
+            // This is a bit of a side effect maybe, but this is also /the/ place
+            // where I'm calculating which squares the player sees
+            remembered.Add((GameState.CurrLevel, mapRow, mapCol));
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
                 return TileToGlyph(ZLayer[scrRow, scrCol], true);
             else if (glyph != GameObjectDB.EMPTY)
@@ -401,7 +399,7 @@ abstract class UserInterface
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), true);
         }
-        else if (remembered.Contains((mapRow, mapCol)))
+        else if (remembered.Contains((GameState.CurrLevel, mapRow, mapCol)))
         {
             return TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }
@@ -424,7 +422,7 @@ abstract class UserInterface
         // tile not the remembered item. I need to store a dictionary of loc + glyph
         // Or perhaps it just needs to be a collection of items + non-basic tiles not
         // every tile
-        var rememberd = dungeon.RememberedSqs.Select(rm => (rm.Item2, rm.Item3)).ToHashSet();
+        var rememberd = dungeon.RememberedSqs;
        
         int rowOffset = Player.Row - PlayerScreenRow;
         int colOffset = Player.Col - PlayerScreenCol;
