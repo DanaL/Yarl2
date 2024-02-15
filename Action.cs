@@ -206,6 +206,7 @@ class OpenDoorAction : DirectionalAction
                 {
                     _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
                 }
+                _gs.ToggleEffect(_actor, new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col), TerrainFlags.Lit, true);
             }
             else if (_actor is Player)
             {
