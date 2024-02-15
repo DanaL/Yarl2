@@ -168,18 +168,34 @@ internal class SDLUserInterface : UserInterface
         WriteLine("", row, col, width);        
     }
 
+    private SDL_Color RndTorchColour()
+    {
+        var rng = new Random();
+        var alpha = rng.Next(25, 125);
+        return new SDL_Color() { 
+                    a = (byte) 30, 
+                    r = (byte) 255,
+                    g = (byte) 159,
+                    b = (byte) 0
+            };
+    }
+
     private void SDLPut(int row, int col, char ch, Colour color) 
     {
         var key = (ch, color, Colours.BLACK);
 
-        if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
-        {
-            var surface =  SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(Colours.BLACK));        
+        //if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
+        //{
+            nint surface;
+            if (ch == '.' && color == Colours.YELLOW)
+                surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), RndTorchColour());
+            else
+                surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(Colours.BLACK));        
             var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
             SDL_FreeSurface(surface);
-            texture = toCache;
-            _cachedGlyphs.Add(key, texture);
-        }
+            var texture = toCache;
+            //_cachedGlyphs.Add(key, texture);
+        //}
 
         var loc = new SDL_Rect { x = col * _fontWidth + 2, y = row * _fontHeight, h = _fontHeight, w = _fontWidth };
 
