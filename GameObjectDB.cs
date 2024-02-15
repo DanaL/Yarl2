@@ -21,10 +21,16 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit);
 
 abstract class GameObj
 {
+    private static ulong IDSeed = 0;
     public string Name { get; set; }
     public virtual Glyph Glyph { get; set; }
 
+    private ulong _id;
+    public ulong ID => _id;
+
     public virtual int LightRadius(GameState gs) => 0;
+
+    public GameObj() => _id = IDSeed++;
 }
 
 // Structure to store where items are in the world

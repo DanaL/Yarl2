@@ -92,7 +92,7 @@ class Torch : Item, IPerformer, IUseableItem
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
             // affect
-            gs.SetLightingLevel(this, loc, -1);
+            gs.ToggleEffect(this, loc, TerrainFlags.Lit, false);
             Lit = false;
 
             return $"You extinguish {Name.DefArticle()}.";
@@ -103,7 +103,7 @@ class Torch : Item, IPerformer, IUseableItem
             Stackable = false;
             Energy = Recovery;
             gs.CurrPerformers.Add(this);
-            gs.SetLightingLevel(this, loc, 1);
+            gs.ToggleEffect(this, loc, TerrainFlags.Lit, true);
 
             return $"The {Name} sparks to life!";
         }

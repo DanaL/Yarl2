@@ -11,6 +11,10 @@ else
     display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
 
 
+// var a = TerrainFlags.None;
+// a |= TerrainFlags.Lit;
+// Console.WriteLine(a & TerrainFlags.Wet);
+
 //var rng = new Random();
 display.TitleScreen();
 

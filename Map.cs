@@ -12,9 +12,12 @@
 
 namespace Yarl2;
 
-enum TerrainEffect
+[Flags]
+enum TerrainFlags
 {
-    Lit
+    None = 0,
+    Lit = 1,
+    Wet = 2 // Dunno if I'm going to use this for anything
 }
 
 enum TileType
@@ -154,7 +157,7 @@ internal class Map : ICloneable
     public readonly int Height;
 
     public Tile[] Tiles;
-    public Dictionary<TerrainEffect, int[]> Auras;
+    public Dictionary<(int, int), Dictionary<ulong, TerrainFlags>> Effects = [];
 
     public Map(int width, int height)
     {
@@ -162,8 +165,6 @@ internal class Map : ICloneable
         Height = height;
 
         Tiles = new Tile[Height * Width];
-
-        InitEffectsTable();
     }
 
     public Map(int width, int height, TileType type)
@@ -171,33 +172,47 @@ internal class Map : ICloneable
         Width = width;
         Height = height;
         Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
-
-        InitEffectsTable();
     }
 
-    public bool HasEffect(TerrainEffect effect, int row, int col)
+    public bool HasEffect(TerrainFlags effect, int row, int col)
     {
-        if (InBounds(row, col) && Auras[effect][row * Width + col] >= 1)
-            return true;
+        if (!InBounds(row, col) || !Effects.ContainsKey((row, col)))
+            return false;
+
+        foreach (var flags in Effects[(row, col)].Values)
+        {
+            if ((effect & flags) != TerrainFlags.None)
+                return true;
+        }
 
         return false;
     }
 
-    public void ApplyEffect(TerrainEffect effect, int row, int col, int intensity)
+    public void ApplyEffect(TerrainFlags effect, int row, int col, ulong objID)
     {
-        if (Auras.TryGetValue(effect, out var sqs))
+        if (!Effects.TryGetValue((row, col), out var flagsDict))
         {
-            sqs[row * Width + col] += intensity;
+            flagsDict = new() { { objID, effect } };
+            Effects.Add((row, col), flagsDict);
+        }
+
+        if (!flagsDict.TryGetValue(objID, out TerrainFlags flags))
+        {
+            flagsDict.Add(objID, effect);
+        }
+        else
+        {
+            flagsDict[objID] |= effect;
         }
     }
 
-    private void InitEffectsTable()
+    public void RemoveEffect(TerrainFlags effect, int row, int col, ulong objID)
     {
-        // Eventually I'll have more effects
-        Auras = new Dictionary<TerrainEffect, int[]>
+        if (Effects.TryGetValue((row, col), out var flagsDict))
         {
-            { TerrainEffect.Lit, new int[Height * Width] }
-        };
+            if (flagsDict.ContainsKey(objID)) 
+                flagsDict[objID] &= ~effect;
+        }
     }
 
     public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;

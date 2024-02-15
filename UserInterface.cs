@@ -197,7 +197,8 @@ abstract class UserInterface
             ObjDB = itemDB
         };
 
-        GameState.SetLightingLevel(Player, new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col), 1);
+        var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col);
+        GameState.ToggleEffect(Player, playerLoc, TerrainFlags.Lit, true);
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -378,7 +379,7 @@ abstract class UserInterface
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
         bool isVisible = visible.Contains((mapRow, mapCol));
-        if (isVisible && map.HasEffect(TerrainEffect.Lit, mapRow, mapCol))
+        if (isVisible && map.HasEffect(TerrainFlags.Lit, mapRow, mapCol))
         {
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
                 return TileToGlyph(ZLayer[scrRow, scrCol], true);

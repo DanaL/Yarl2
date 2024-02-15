@@ -23,7 +23,7 @@ internal class GameState
     public Campaign Campaign { get; set; }
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
-
+    
     public void EnterLevel(int dungeon, int level)
     {
         CurrLevel = level;
@@ -65,13 +65,12 @@ internal class GameState
         // Update the effect auras the actor might have
         if (actor.LightRadius(this) > 0)
         {
-            SetLightingLevel(actor, start, -1);
-            SetLightingLevel(actor, dest, 1);
+            ToggleEffect(actor, start, TerrainFlags.Lit, false);
+            ToggleEffect(actor, dest, TerrainFlags.Lit, true);
         }
     }
 
-    // Eventually this should be expanded to cover all auras/effects
-    public void SetLightingLevel(GameObj obj, Loc loc, int intensity)
+    public void ToggleEffect(GameObj obj, Loc loc, TerrainFlags effect, bool on)
     {
         var (dungeon, level, row, col) = loc;
         var currDungeon = Campaign.Dungeons[dungeon];
@@ -82,10 +81,14 @@ internal class GameState
         var sqs = FieldOfView.CalcVisible(obj.LightRadius(this), row, col, map, level);
         foreach (var sq in sqs)
         {
-            map.ApplyEffect(TerrainEffect.Lit, sq.Item2, sq.Item3, intensity);
-
+            if (on)
+                map.ApplyEffect(effect, sq.Item2, sq.Item3, obj.ID);
+            else
+                map.RemoveEffect(effect, sq.Item2, sq.Item3, obj.ID);
+                
+            // I guess maybe move this back to UI, or the Move action?
             if (isPlayer)
                 currDungeon.RememberedSqs.Add(sq);
         }
-    }    
+    }
 }
