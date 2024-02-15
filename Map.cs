@@ -158,7 +158,7 @@ internal class Map : ICloneable
 
     public Tile[] Tiles;
     public Dictionary<(int, int), Dictionary<ulong, TerrainFlags>> Effects = [];
-
+    
     public Map(int width, int height)
     {
         Width = width;
@@ -206,11 +206,12 @@ internal class Map : ICloneable
         }
     }
 
-    public void RemoveEffect(TerrainFlags effect, int row, int col, ulong objID)
+    // I dunno if this is going to be too slow...
+    public void RemoveEffect(TerrainFlags effect, ulong objID)
     {
-        if (Effects.TryGetValue((row, col), out var flagsDict))
+        foreach (var flagsDict in Effects.Values)
         {
-            if (flagsDict.ContainsKey(objID)) 
+            if (flagsDict.ContainsKey(objID))
                 flagsDict[objID] &= ~effect;
         }
     }

@@ -19,6 +19,7 @@ interface IPerformer
 {
     double Energy { get; set; }
     double Recovery { get; set; }
+    bool RemoveFromQueue { get; set; }
     Action TakeTurn(UserInterface ui, GameState gameState);
 }
 
@@ -121,6 +122,8 @@ class Monster : Actor, IPerformer
     public AIType AIType { get; set;}
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
+
+    public bool RemoveFromQueue { get; set; }
 
     private IBehaviour _behaviour;
 

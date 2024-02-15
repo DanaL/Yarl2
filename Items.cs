@@ -21,7 +21,7 @@ enum ItemType
 
 interface IUseableItem
 {
-    string Use(GameState gs, int row, int col);
+    (bool, string) Use(GameState gs, int row, int col);
 }
 
 class Item : GameObj
@@ -66,6 +66,7 @@ class Torch : Item, IPerformer, IUseableItem
 {
     public bool Lit { get; set; }
     public int Fuel { get; set; }
+    public bool RemoveFromQueue { get; set; }
     public double Energy { get; set; }
     public double Recovery
     {
@@ -83,7 +84,7 @@ class Torch : Item, IPerformer, IUseableItem
 
     public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => Lit ? [(ID, 5)] : [];
 
-    public string Use(GameState gs, int row, int col)
+    public (bool, string) Use(GameState gs, int row, int col)
     {
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
@@ -96,9 +97,9 @@ class Torch : Item, IPerformer, IUseableItem
             gs.ToggleEffect(this, loc, TerrainFlags.Lit, false);
             Lit = false;
 
-            return $"You extinguish {Name.DefArticle()}.";
+            return (true, $"You extinguish {Name.DefArticle()}.");
         }
-        else
+        else if (Fuel > 0)
         {
             Lit = true;
             Stackable = false;
@@ -106,25 +107,28 @@ class Torch : Item, IPerformer, IUseableItem
             gs.CurrPerformers.Add(this);
             gs.ToggleEffect(this, loc, TerrainFlags.Lit, true);
 
-            return $"The {Name} sparks to life!";
+            return (true, $"The {Name} sparks to life!");
+        }
+        else
+        {
+            return (false, $"That {Name} is burnt out!");
         }
     }
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        Console.WriteLine($"I'm a torch taking my turn! {Fuel}");
         if (!Lit)
             return new PassAction(this);
 
         if (--Fuel > 0)
         {
-            // I could also alert the player here that the torch is flickering, about to go out, etc
-            
+            // I could also alert the player here that the torch is flickering, about to go out, etc            
             return new PassAction(this);
         }
         else
         {
-            return new ExtinguishAction(this, gameState, ui);
+            Lit = false;
+            return new ExtinguishAction(this, gameState);
         }
     }
 }

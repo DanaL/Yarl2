@@ -24,7 +24,8 @@ abstract class GameObj
     private static ulong IDSeed = 0;
     public string Name { get; set; }
     public virtual Glyph Glyph { get; set; }
-
+    public Loc Loc { get; set; }
+    
     private ulong _id;
     public ulong ID => _id;
 
@@ -40,6 +41,7 @@ class GameObjectDB
 
     public Dictionary<Loc, List<Item>> _items = [];
     public Dictionary<Loc, Monster> _monsters = [];
+    public Dictionary<ulong, GameObj> _objs = [];
 
     public Glyph GlyphAt(Loc loc)
     {
@@ -54,8 +56,18 @@ class GameObjectDB
         return EMPTY;
     }
 
+    public GameObj? GetObj(ulong id) 
+    {
+        if (!_objs.TryGetValue(id, out GameObj? val))
+            return null;
+        return val;
+    }
+
+    // I think I want to eventually register all create objects in the
+    // _objs dictionary
     public void Add(Loc loc, GameObj obj)
     {
+        _objs[obj.ID] = obj;
         if (obj is Monster)
         {
             _monsters.Add(loc, (Monster) obj);

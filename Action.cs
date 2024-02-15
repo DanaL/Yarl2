@@ -135,17 +135,21 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
         if (door is Door d)
         {
             if (d.Open)
-            {
-                // Okay this is a bit goofy but I need to extinguish squares lit by the 
-                // actor before the door is closed, then recalculate what is still lit
-                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
-                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, false);
+            {                
                 d.Open = false;
                 result.Successful = true;
                 result.EnergyCost = 1.0;
                 if (_actor is Player)
                     result.Message = "You close the door.";
-                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, true);
+                
+                // Find any light sources tht were affecting the door and update them, since
+                // it's now open. (Eventually gotta extend it to any aura type effects)
+                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);                
+                foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
+                {
+                    _gs.CurrentMap.RemoveEffect(TerrainFlags.Lit, src.ID);
+                    _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
+                }
             }
             else if (_actor is Player)
             {
@@ -195,10 +199,13 @@ class OpenDoorAction : DirectionalAction
                 if (_actor is Player)
                     result.Message = "You open the door.";
 
-                // This lights up the new squares exposed by the door. I guess eventually
-                // I'll need a "calc all auras projected by actor" method
-                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
-                _gs.ToggleEffect(_actor, loc, TerrainFlags.Lit, true);
+                // Find any light sources tht were affecting the door and update them, since
+                // it's now open. (Eventually gotta extend it to any aura type effects)
+                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
+                foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
+                {
+                    _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
+                }
             }
             else if (_actor is Player)
             {
@@ -343,8 +350,8 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item is IUseableItem tool)
         {
-            var msg = tool.Use(_gameState, _actor.Row, _actor.Col);
-            return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
+            var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
+            return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
         }
         else
         {
@@ -466,18 +473,17 @@ class CloseMenuAction(UserInterface ui) : Action
     }
 }
 
-class ExtinguishAction(IPerformer performer, GameState gs, UserInterface ui) : Action
+class ExtinguishAction(IPerformer performer, GameState gs) : Action
 {
-    private IPerformer _perfmer = performer;
-    private UserInterface _ui = ui;
+    private IPerformer _performer = performer;
     private GameState _gs = gs;
 
     public override ActionResult Execute()
-    {
-        // needs to remove itself from the current performers
-        // alert the player
+    {        
+        _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
+        _gs.CurrentMap.RemoveEffect(TerrainFlags.Lit, ((GameObj)_performer).ID);
 
-        return new ActionResult() { Successful = true, Message = "" };
+        return new ActionResult() { Successful = true, Message = "The torch burns out.", EnergyCost = 1.0 };
     }
 }
 

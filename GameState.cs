@@ -39,7 +39,9 @@ internal class GameState
 
     public void ItemDropped(Item item, int row, int col)
     {
-        ObjDB.Add(new Loc(CurrDungeon, CurrLevel, row, col), item);
+        var loc = new Loc(CurrDungeon, CurrLevel, row, col);
+        item.Loc = loc;
+        ObjDB.Add(loc, item);
     }
 
     public void RefreshPerformers()
@@ -69,6 +71,32 @@ internal class GameState
         ToggleEffect(actor, dest, TerrainFlags.Lit, true);        
     }
 
+    // Find all the game objects affecting a square with a particular
+    // effect
+    public List<GameObj> ObjsAffectingLoc(Loc loc, TerrainFlags effect)
+    {
+        var objs = new List<GameObj>();
+
+        var (dungeon, level, row, col) = loc;
+        var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+        if (map.Effects.ContainsKey((row, col)) && map.Effects[(row, col)].Count > 0)
+        {
+            var effects = map.Effects[(row, col)];
+            foreach (var k in effects.Keys)
+            {
+                if ((effects[k] & effect) != TerrainFlags.None) 
+                {
+                    var o = ObjDB.GetObj(k);
+                    if (o is not null)
+                        objs.Add(o);
+                }
+                    
+            }
+        }
+
+        return objs;
+    }
+
     // I only have light effects in the game right now, but I also have ambitions        
     public void ToggleEffect(GameObj obj, Loc loc, TerrainFlags effect, bool on)
     {
@@ -85,7 +113,7 @@ internal class GameState
                 if (on)
                     map.ApplyEffect(effect, sq.Item2, sq.Item3, sourceID);
                 else
-                    map.RemoveEffect(effect, sq.Item2, sq.Item3, sourceID);
+                    map.RemoveEffect(effect, sourceID);
 
                 // I guess maybe move this back to UI, or the Move action?
                 if (isPlayer)

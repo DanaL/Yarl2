@@ -33,6 +33,10 @@ internal class Player : Actor, IPerformer, IItemHolder
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
 
+    // This doesn't really mean anything for the Player. An Exception will be tossed when
+    // they are killed.
+    public bool RemoveFromQueue { get; set; }
+
     public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) 
     {
         int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
