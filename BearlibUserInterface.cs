@@ -34,7 +34,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         if (!_colours.TryGetValue(colour, out Color value)) 
         {
             value = new Color() { 
-                    A = 255, 
+                    A = colour.Alpha, 
                     R = colour.R,
                     G = colour.G,
                     B = colour.B
@@ -119,15 +119,17 @@ internal class BLUserInferface : UserInterface, IDisposable
             }
         }
         else
-        {            
+        {
+            //var faintRed = new Color() { A = 100, R = 255, G = 0, B = 0 };
             if (Player is not null)
             {
                 for (int row = 0; row < ViewHeight; row++)
                 {
                     for (int col = 0; col < ViewWidth; col++)
-                    {
-                        var (colour, ch) = SqsOnScreen[row, col];
-                        Terminal.Color(ToBearLibColour(colour));
+                    {                        
+                        var (fg, bg, ch) = SqsOnScreen[row, col];
+                        Terminal.BkColor(ToBearLibColour(bg));
+                        Terminal.Color(ToBearLibColour(fg));
                         Terminal.Put(col, row, ch);
                     }
                 }

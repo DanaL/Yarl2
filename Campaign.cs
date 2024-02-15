@@ -65,7 +65,7 @@ internal class PreGameHandler(UserInterface ui)
 
         // Find an open floor in the first level of the dungeon
         // and create a Portal to it in the wilderness
-        var stairs = firstLevel.RandomTile(TileType.Floor, rng);
+        var stairs = firstLevel.RandomTile(TileType.DungeonFloor, rng);
         var entrance = map.RandomTile(TileType.Tree, rng);
         var portal = new Portal("You stand before a looming portal.")
         {

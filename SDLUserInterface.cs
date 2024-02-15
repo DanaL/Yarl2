@@ -17,7 +17,7 @@ internal class SDLUserInterface : UserInterface
 
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
-    private (Colour, char)[,] _prevTiles = new (Colour, char)[ViewHeight, ViewWidth];    
+    private (Colour, Colour, char)[,] _prevTiles = new (Colour, Colour, char)[ViewHeight, ViewWidth];    
     private string _prevMessage = "";
     
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
@@ -49,7 +49,7 @@ internal class SDLUserInterface : UserInterface
         {
             for (int c = 0; c < ViewWidth; c++)
             {
-                _prevTiles[r, c] = (Colours.BLACK, ' ');
+                _prevTiles[r, c] = (Colours.BLACK, Colours.BLACK, ' ');
             }
         }
     }
@@ -101,7 +101,7 @@ internal class SDLUserInterface : UserInterface
         if (!_colours.TryGetValue(colour, out SDL_Color value)) 
         {
             value = new SDL_Color() { 
-                    a = (byte) 255, 
+                    a = (byte) colour.Alpha, 
                     r = (byte) colour.R,
                     g = (byte) colour.G,
                     b = (byte) colour.B
@@ -145,22 +145,22 @@ internal class SDLUserInterface : UserInterface
             };
     }
 
-    private void SDLPut(int row, int col, char ch, Colour color) 
+    private void SDLPut(int row, int col, char ch, Colour fg, Colour bg) 
     {
-        var key = (ch, color, Colours.BLACK);
+        var key = (ch, fg, bg);
 
-        //if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
-        //{
+        if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
+        {
             nint surface;
-            if (ch == '.' && color == Colours.YELLOW)
-                surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), RndTorchColour());
-            else
-                surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(color), ToSDLColour(Colours.BLACK));        
+            //if (ch == '.' && fg == Colours.YELLOW)
+            //    surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(fg), RndTorchColour());
+            //else
+            surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(fg), ToSDLColour(bg));        
             var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
             SDL_FreeSurface(surface);
-            var texture = toCache;
-            //_cachedGlyphs.Add(key, texture);
-        //}
+            texture = toCache;
+            _cachedGlyphs.Add(key, texture);
+        }
 
         var loc = new SDL_Rect { x = col * _fontWidth + 2, y = row * _fontHeight, h = _fontHeight, w = _fontWidth };
 
@@ -179,8 +179,8 @@ internal class SDLUserInterface : UserInterface
         {
             for (int col = 0; col < ViewWidth; col++)
             {
-                var (colour, ch) = SqsOnScreen[row, col];                            
-                SDLPut(row, col, ch, colour);
+                var (fg, bg, ch) = SqsOnScreen[row, col];                            
+                SDLPut(row, col, ch, fg, bg);
             }
         }
         

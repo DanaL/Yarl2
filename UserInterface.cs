@@ -49,7 +49,7 @@ abstract class UserInterface
 
     protected GameState? GameState { get; set; } = null;
 
-    public (Colour, char)[,] SqsOnScreen;
+    public (Colour FG, Colour BG, char CH)[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
     // It's convenient for other classes to ask what dungeon and level we're on
@@ -74,7 +74,7 @@ abstract class UserInterface
         _options = opts;
         PlayerScreenRow = ViewHeight / 2;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
-        SqsOnScreen = new (Colour, char)[ViewHeight, ViewWidth];
+        SqsOnScreen = new (Colour, Colour, char)[ViewHeight, ViewWidth];
         ZLayer = new Tile[ViewHeight, ViewWidth];
         ClearZLayer();
     }
@@ -207,44 +207,55 @@ abstract class UserInterface
 
     public virtual void CloseMenu() => MenuRows = null;
 
+    static Colour RndTorchColour()
+    {
+        var rnd = new Random();
+        return rnd.Next(3) switch
+        {
+            0 => Colours.TORCH_ORANGE,
+            1 => Colours.TORCH_RED,
+            _ => Colours.TORCH_YELLOW
+        };
+    }
+
     // I dunno about having this here. In previous games, I had each Tile object
     // know what its colours were, but maybe the UI class *is* the correct spot
     // to decide how to draw the glyph
-    protected static (Colour, char) TileToGlyph(Tile tile, bool lit)
+    protected static (Colour, Colour, char) TileToGlyph(Tile tile, bool lit)
     {
         switch (tile.Type)
         {
             case TileType.Wall:
             case TileType.PermWall:
-                return lit ? (Colours.GREY, '#') : (Colours.DARK_GREY, '#');
-            case TileType.Floor:
-                return lit ? (Colours.YELLOW, '.') : (Colours.GREY, '.');
+                return lit ? (Colours.GREY, Colours.TORCH_ORANGE, '#') : (Colours.DARK_GREY, Colours.BLACK, '#');
+            case TileType.DungeonFloor:
+                return lit ? (Colours.YELLOW, Colours.TORCH_ORANGE, '.') : (Colours.GREY, Colours.BLACK, '.');
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
-                return lit ? (Colours.LIGHT_BROWN, ch) : (Colours.BROWN, ch);
+                return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, ch) : (Colours.BROWN, Colours.BLACK, ch);
             case TileType.Water:
             case TileType.DeepWater:
-                return lit ? (Colours.BLUE, '}') : (Colours.DARK_BLUE, '}');
+                return lit ? (Colours.BLUE, Colours.BLACK, '}') : (Colours.DARK_BLUE, Colours.BLACK, '}');
             case TileType.Sand:
-                return lit ? (Colours.YELLOW, '.') : (Colours.YELLOW_ORANGE, '.');
+                return lit ? (Colours.YELLOW, Colours.BLACK, '.') : (Colours.YELLOW_ORANGE, Colours.BLACK, '.');
             case TileType.Grass:
-                return lit ? (Colours.GREEN, '.') : (Colours.DARK_GREEN, '.');
+                return lit ? (Colours.GREEN, Colours.BLACK, '.') : (Colours.DARK_GREEN, Colours.BLACK, '.');
             case TileType.Tree:
-                return lit ? (Colours.GREEN, 'ϙ') : (Colours.DARK_GREEN, 'ϙ');
+                return lit ? (Colours.GREEN, Colours.BLACK, 'ϙ') : (Colours.DARK_GREEN, Colours.BLACK, 'ϙ');
             case TileType.Mountain:
-                return lit ? (Colours.GREY, '\u039B') : (Colours.DARK_GREY, '\u039B');
+                return lit ? (Colours.GREY, Colours.BLACK, '\u039B') : (Colours.DARK_GREY, Colours.BLACK, '\u039B');
             case TileType.SnowPeak:
-                return lit ? (Colours.WHITE, '\u039B') : (Colours.GREY, '\u039B');
+                return lit ? (Colours.WHITE, Colours.BLACK, '\u039B') : (Colours.GREY, Colours.BLACK, '\u039B');
             case TileType.Portal:
-                return lit ? (Colours.WHITE, 'Ո') : (Colours.GREY, 'Ո');
+                return lit ? (Colours.WHITE, Colours.BLACK, 'Ո') : (Colours.GREY, Colours.BLACK, 'Ո');
             case TileType.Downstairs:
-                return lit ? (Colours.GREY, '>') : (Colours.DARK_GREY, '>');
+                return lit ? (Colours.GREY, Colours.BLACK, '>') : (Colours.DARK_GREY, Colours.BLACK, '>');
             case TileType.Upstairs:
-                return lit ? (Colours.GREY, '<') : (Colours.DARK_GREY, '<');
+                return lit ? (Colours.GREY, Colours.BLACK, '<') : (Colours.DARK_GREY, Colours.BLACK, '<');
             case TileType.Cloud:
-                return lit ? (Colours.WHITE, '#') : (Colours.WHITE, '#');
+                return lit ? (Colours.WHITE, Colours.BLACK, '#') : (Colours.WHITE, Colours.BLACK, '#');
             default:
-                return (Colours.BLACK, ' ');
+                return (Colours.BLACK, Colours.BLACK, ' ');
         }        
     }
 
@@ -442,7 +453,7 @@ abstract class UserInterface
         return result.Trim();
     }
 
-    (Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int, int)> remembered, Map map,
+    (Colour, Colour, char) CalcGlyphAtLoc(HashSet<(int, int)> visible, HashSet<(int, int, int)> remembered, Map map,
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
@@ -459,7 +470,7 @@ abstract class UserInterface
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
                 return TileToGlyph(ZLayer[scrRow, scrCol], true);
             else if (glyph != GameObjectDB.EMPTY)
-                return (glyph.Lit, glyph.Ch);
+                return (glyph.Lit, Colours.BLACK, glyph.Ch);
             else
                 return TileToGlyph(map.TileAt(mapRow, mapCol), true);
         }
@@ -468,7 +479,7 @@ abstract class UserInterface
             return TileToGlyph(map.TileAt(mapRow, mapCol), false);
         }
                         
-        return (Colours.BLACK, ' ');
+        return (Colours.BLACK, Colours.BLACK, ' ');
     }
 
     void SetSqsOnScreen()
@@ -502,7 +513,7 @@ abstract class UserInterface
         }
 
         if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
-            SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (Colours.WHITE, '@');
+            SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = (Colours.WHITE, Colours.BLACK, '@');
     }
 
     private void ClearZLayer()

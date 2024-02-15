@@ -181,9 +181,9 @@ internal class WaterAnimationListener : IAnimationListener
         foreach (var sq in _sparkles)
         {
             var t = _ui.SqsOnScreen[sq.Item1, sq.Item2];
-            if (t.Item2 == '}')
+            if (t.CH == '}')
             {
-                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (Colours.LIGHT_BLUE, '~');
+                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (Colours.LIGHT_BLUE, Colours.BLACK, '~');
             }
         }
 

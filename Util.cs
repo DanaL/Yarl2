@@ -15,27 +15,30 @@ namespace Yarl2;
 // I didn't want to be beholden to someone else's colour class and anyhow
 // Bearlib's didn't have a comparison operator implemented, which was 
 // inconvenient for me
-record struct Colour(int R, int G, int B);
+record struct Colour(int R, int G, int B, int Alpha);
 
 class Colours
 {
-    public static readonly Colour BLACK = new(0, 0 , 0);
-    public static readonly Colour WHITE = new(255, 255, 255);
-    public static readonly Colour GREY = new(136, 136, 136);
-    public static readonly Colour LIGHT_GREY = new(220, 220, 220);
-    public static readonly Colour DARK_GREY = new(72, 73, 75);
-    public static readonly Colour YELLOW = new(255, 255, 53);
-    public static readonly Colour YELLOW_ORANGE = new(255, 159, 0);
-    public static readonly Colour LIGHT_BROWN = new(101, 75, 0);
-    public static readonly Colour BROWN = new(101, 67, 33);
-    public static readonly Colour GREEN = new(144, 238, 144);
-    public static readonly Colour DARK_GREEN = new(0, 71, 49);
-    public static readonly Colour LIME_GREEN = new(191, 255, 0);
-    public static readonly Colour BLUE = new(0, 0, 200);
-    public static readonly Colour LIGHT_BLUE = new(55, 198, 255);
-    public static readonly Colour DARK_BLUE = new(12, 35, 64);
-    public static readonly Colour BRIGHT_RED = new(208, 28, 31);
-    public static readonly Colour DULL_RED = new(129, 12, 12);
+    public static readonly Colour BLACK = new(0, 0 , 0, 255);
+    public static readonly Colour WHITE = new(255, 255, 255, 255);
+    public static readonly Colour GREY = new(136, 136, 136, 255);
+    public static readonly Colour LIGHT_GREY = new(220, 220, 220, 255);
+    public static readonly Colour DARK_GREY = new(72, 73, 75, 255);
+    public static readonly Colour YELLOW = new(255, 255, 53, 255);
+    public static readonly Colour YELLOW_ORANGE = new(255, 159, 0, 255);
+    public static readonly Colour LIGHT_BROWN = new(101, 75, 0, 255);
+    public static readonly Colour BROWN = new(101, 67, 33, 255);
+    public static readonly Colour GREEN = new(144, 238, 144, 255);
+    public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
+    public static readonly Colour LIME_GREEN = new(191, 255, 0, 255);
+    public static readonly Colour BLUE = new(0, 0, 200, 255);
+    public static readonly Colour LIGHT_BLUE = new(55, 198, 255, 255);
+    public static readonly Colour DARK_BLUE = new(12, 35, 64, 255);
+    public static readonly Colour BRIGHT_RED = new(208, 28, 31, 255);
+    public static readonly Colour DULL_RED = new(129, 12, 12, 255);
+    public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 15);
+    public static readonly Colour TORCH_RED = new(208, 28, 31, 15);
+    public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 15);
 }
 
 // Miscellaneous constants used in a few places

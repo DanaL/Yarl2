@@ -26,7 +26,7 @@ enum TileType
     Unknown,
     PermWall,
     Wall,
-    Floor,
+    DungeonFloor,
     Door,
     DeepWater,
     Water,
@@ -122,7 +122,7 @@ internal class TileFactory
     private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true);
     private static readonly Tile Wall = new BasicTile(TileType.Wall, false, true);
     private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
-    private static readonly Tile Floor = new BasicTile(TileType.Floor, true, false);
+    private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false);
     private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false);
     private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false);
     private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false);
@@ -137,7 +137,7 @@ internal class TileFactory
         TileType.WorldBorder => WorldBorder,
         TileType.PermWall => PermWall,
         TileType.Wall => Wall,
-        TileType.Floor => Floor,
+        TileType.DungeonFloor => Floor,
         TileType.DeepWater => DeepWater,
         TileType.Sand => Sand,
         TileType.Grass => Grass,
@@ -249,7 +249,7 @@ internal class Map : ICloneable
 
             for (var col = 1; col < 19; col++)
             {
-                map.Tiles[row * 20 + col] = TileFactory.Get(TileType.Floor);
+                map.Tiles[row * 20 + col] = TileFactory.Get(TileType.DungeonFloor);
             }
         }
 
@@ -284,7 +284,7 @@ internal class Map : ICloneable
             Tiles[row * Width + Width - 1] = TileFactory.Get(TileType.PermWall);
             for (int col = 1; col < Width - 1; col++) 
             {
-                Tiles[row * Width + col] = TileFactory.Get(TileType.Floor);
+                Tiles[row * Width + col] = TileFactory.Get(TileType.DungeonFloor);
             }
         }
 
@@ -312,7 +312,7 @@ internal class Map : ICloneable
                 char ch = Tiles[row * Width + col].Type switch  {
                     TileType.PermWall => '#',
                     TileType.Wall => '#',
-                    TileType.Floor or TileType.Sand => '.',
+                    TileType.DungeonFloor or TileType.Sand => '.',
                     TileType.Door => '+',
                     TileType.Mountain or TileType.SnowPeak => '^',
                     TileType.Grass => ',',

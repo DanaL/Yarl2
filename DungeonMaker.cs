@@ -118,7 +118,7 @@ internal class DungeonMaker(Random rng)
             bool overlap = false;
             foreach (var sq in sqs)
             {
-                if (map.TileAt(sq.Item1, sq.Item2).Type == TileType.Floor) 
+                if (map.TileAt(sq.Item1, sq.Item2).Type == TileType.DungeonFloor) 
                 {
                     overlap = true;
                     break;
@@ -139,7 +139,7 @@ internal class DungeonMaker(Random rng)
 
             foreach (var sq in sqs)
             {
-                map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.Floor));
+                map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.DungeonFloor));
             }
         }
 
@@ -160,19 +160,19 @@ internal class DungeonMaker(Random rng)
                                     (1, -1), (1, 0), (1, 1)];
         return adj.Select(n => (row + n.Item1, col + n.Item2))
                              .Where(n => map.InBounds(n.Item1, n.Item2))
-                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.Floor).Count();
+                             .Where(n => map.TileAt(n.Item1, n.Item2).Type == TileType.DungeonFloor).Count();
     }
 
     static void ConnectNeighbours(Map map, int r1, int c1, int r2, int c2)
     {
         if (r1 < r2)
-            map.SetTile(r1 + 1, c1, TileFactory.Get(TileType.Floor));
+            map.SetTile(r1 + 1, c1, TileFactory.Get(TileType.DungeonFloor));
         else if (r1 > r2)
-            map.SetTile(r1 - 1, c1, TileFactory.Get(TileType.Floor));
+            map.SetTile(r1 - 1, c1, TileFactory.Get(TileType.DungeonFloor));
         else if (c1 < c2)
-            map.SetTile(r1, c1 + 1, TileFactory.Get(TileType.Floor));
+            map.SetTile(r1, c1 + 1, TileFactory.Get(TileType.DungeonFloor));
         else if (c1 > c2)
-            map.SetTile(r1, c1 - 1, TileFactory.Get(TileType.Floor));
+            map.SetTile(r1, c1 - 1, TileFactory.Get(TileType.DungeonFloor));
     }
 
     static (bool, int, int) MazeStart(Map map)
@@ -202,7 +202,7 @@ internal class DungeonMaker(Random rng)
 
         if (success)
         {            
-            map.SetTile(startRow, startCol, TileFactory.Get(TileType.Floor));
+            map.SetTile(startRow, startCol, TileFactory.Get(TileType.DungeonFloor));
 
             // find neighbours (2 sq away) that they are fully enclosed
             var neighbours = NextNeighbours(map, startRow, startCol)
@@ -213,10 +213,10 @@ internal class DungeonMaker(Random rng)
                 var (next, prev) = neighbours[i];
                 neighbours.RemoveAt(i);
 
-                if (map.TileAt(next.Item1, next.Item2).Type == TileType.Floor)
+                if (map.TileAt(next.Item1, next.Item2).Type == TileType.DungeonFloor)
                     continue;
 
-                map.SetTile(next.Item1, next.Item2, TileFactory.Get(TileType.Floor));
+                map.SetTile(next.Item1, next.Item2, TileFactory.Get(TileType.DungeonFloor));
                 ConnectNeighbours(map, prev.Item1, prev.Item2, next.Item1, next.Item2);
                 
                 neighbours.AddRange(NextNeighbours(map, next.Item1, next.Item2)
@@ -233,13 +233,13 @@ internal class DungeonMaker(Random rng)
             return false;
         
         if (map.InBounds(r-1, c) && map.InBounds(r+1, c)
-                && map.TileAt(r-1, c).Type == TileType.Floor
-                && map.TileAt(r+1, c).Type == TileType.Floor)
+                && map.TileAt(r-1, c).Type == TileType.DungeonFloor
+                && map.TileAt(r+1, c).Type == TileType.DungeonFloor)
             return true;
 
         if (map.InBounds(r, c-1) && map.InBounds(r, c+1)
-                && map.TileAt(r, c-1).Type == TileType.Floor
-                && map.TileAt(r, c+1).Type == TileType.Floor)
+                && map.TileAt(r, c-1).Type == TileType.DungeonFloor
+                && map.TileAt(r, c+1).Type == TileType.DungeonFloor)
             return true;
         
         return false;
@@ -284,7 +284,7 @@ internal class DungeonMaker(Random rng)
                 bool inRegion = false;
                 foreach (var k in regions.Keys)
                 {
-                    if (regions[k].Contains((row, col)) && map.TileAt(row, col).Type == TileType.Floor)
+                    if (regions[k].Contains((row, col)) && map.TileAt(row, col).Type == TileType.DungeonFloor)
                     {
                         Console.Write(k+1);
                         inRegion = true;
@@ -296,7 +296,7 @@ internal class DungeonMaker(Random rng)
                     char ch = map.TileAt(row, col).Type switch  {
                         TileType.PermWall => '#',
                         TileType.Wall => ' ',
-                        TileType.Floor => '.',
+                        TileType.DungeonFloor => '.',
                         TileType.Door => '+',
                         _ => ' '
                     };
@@ -314,7 +314,7 @@ internal class DungeonMaker(Random rng)
         {
             for (int c = 0; c < map.Width; c++)
             {
-                if (map.TileAt(r, c).Type == TileType.Floor)
+                if (map.TileAt(r, c).Type == TileType.DungeonFloor)
                 {
                     bool found = false;
                     foreach (var region in regions.Values) 
@@ -467,7 +467,7 @@ internal class DungeonMaker(Random rng)
                 tunnelR += delta.Item1;
                 tunnelC += delta.Item2;
 
-                if (map.InBounds(tunnelR, tunnelC) && map.TileAt(tunnelR, tunnelC).Type == TileType.Floor)
+                if (map.InBounds(tunnelR, tunnelC) && map.TileAt(tunnelR, tunnelC).Type == TileType.DungeonFloor)
                 {
                     success = true;
                     break;
@@ -485,7 +485,7 @@ internal class DungeonMaker(Random rng)
             if (success)
             {
                 foreach (var sq in tunnel)
-                    map.SetTile(sq, TileFactory.Get(TileType.Floor));
+                    map.SetTile(sq, TileFactory.Get(TileType.DungeonFloor));
 
                 // We can also make some of tunnel a door.
                 if (tunnel.Count == 2 && _rng.NextDouble() < 0.75)
@@ -530,7 +530,7 @@ internal class DungeonMaker(Random rng)
             while (map.InBounds(sq))
             {
                 tunnel.Add(sq);
-                if (map.TileAt(sq).Type == TileType.Floor && RegionForSq(regions, sq.Item1, sq.Item2) != startRegion)
+                if (map.TileAt(sq).Type == TileType.DungeonFloor && RegionForSq(regions, sq.Item1, sq.Item2) != startRegion)
                 {
                     success = true;
                     break;
@@ -541,7 +541,7 @@ internal class DungeonMaker(Random rng)
             if (success)
             {
                 foreach (var t in tunnel)
-                    map.SetTile(t, TileFactory.Get(TileType.Floor));
+                    map.SetTile(t, TileFactory.Get(TileType.DungeonFloor));
                 done = true;
             }
         }
@@ -616,7 +616,7 @@ internal class DungeonMaker(Random rng)
                 if (perimeters.Contains(con) && _rng.NextDouble() < 0.8)
                     map.SetTile(con, TileFactory.Get(TileType.Door));
                 else
-                    map.SetTile(con, TileFactory.Get(TileType.Floor));
+                    map.SetTile(con, TileFactory.Get(TileType.DungeonFloor));
 
                 var adjoiningRegions = AdjoiningRegions(regions, con);
                 var remaining = new List<(int, int)>();
@@ -629,7 +629,7 @@ internal class DungeonMaker(Random rng)
                         // small chance of removing other connector to create the occasional loop
                         // in the map
                         if (_rng.NextDouble() < 0.20)
-                            map.SetTile(other, TileFactory.Get(TileType.Floor));
+                            map.SetTile(other, TileFactory.Get(TileType.DungeonFloor));
                     }
                     else
                     {
@@ -669,7 +669,7 @@ internal class DungeonMaker(Random rng)
                     else if ((east == TileType.Wall || east == TileType.PermWall || east == TileType.Door) && (west == TileType.Wall || west == TileType.PermWall || west == TileType.Door))
                         continue;
                     else
-                        map.SetTile(r, c, TileFactory.Get(TileType.Floor));
+                        map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
                 }
             }
         }
