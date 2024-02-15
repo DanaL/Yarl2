@@ -364,7 +364,7 @@ internal class Wilderness(Random rng)
                         TileType.Grass => ',',
                         TileType.Tree => 'T',
                         TileType.DeepWater or TileType.Water => '~',
-                        _ => ' '
+                        _ => '!'
                     };
 
                     tw.Write(ch);                    

@@ -42,9 +42,7 @@ class Campaign
     }
 }
 
-// All the campaign making stuff here needs to be moved probably
-// to Campaign.cs
-internal class PreGameHandler(UserInterface ui)
+class PreGameHandler(UserInterface ui)
 {
     private UserInterface _ui { get; set; } = ui;
    
@@ -54,8 +52,12 @@ internal class PreGameHandler(UserInterface ui)
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
         var wildernessGenerator = new Wilderness(rng);
-        var map = wildernessGenerator.DrawLevel(257);
-        wilderness.AddMap(map);
+        var wildernessMap = wildernessGenerator.DrawLevel(257);
+
+        var tb = new TownBuilder();
+        wildernessMap = tb.DrawnTown(wildernessMap, rng);
+
+        wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
         var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
@@ -66,12 +68,12 @@ internal class PreGameHandler(UserInterface ui)
         // Find an open floor in the first level of the dungeon
         // and create a Portal to it in the wilderness
         var stairs = firstLevel.RandomTile(TileType.DungeonFloor, rng);
-        var entrance = map.RandomTile(TileType.Tree, rng);
+        var entrance = wildernessMap.RandomTile(TileType.Tree, rng);
         var portal = new Portal("You stand before a looming portal.")
         {
             Destination = new Loc(1, 0, stairs.Item1, stairs.Item2)
         };
-        map.SetTile(entrance, portal);
+        wildernessMap.SetTile(entrance, portal);
 
         var exitStairs = new Upstairs("")
         {

@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Data.SqlTypes;
+
 namespace Yarl2;
 
 [Flags]
@@ -28,6 +30,7 @@ enum TileType
     Wall,
     DungeonFloor,
     Door,
+    Window,
     DeepWater,
     Water,
     Sand,
@@ -38,7 +41,9 @@ enum TileType
     Portal,
     Upstairs,
     Downstairs,
-    Cloud
+    Cloud,
+    WoodWall,   
+    WoodFloor
 }
 
 internal abstract class Tile(TileType type)
@@ -131,6 +136,9 @@ internal class TileFactory
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false);
     private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
+    private static readonly Tile Window = new BasicTile(TileType.Window, true, false);
+    private static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true);
+    private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false);
 
     public static Tile Get(TileType type) => type switch
     {
@@ -147,6 +155,9 @@ internal class TileFactory
         TileType.Door => new Door(type, false),
         TileType.Water => Water,
         TileType.Cloud => Cloud,
+        TileType.Window => Window,
+        TileType.WoodFloor => WoodFloor,
+        TileType.WoodWall => WoodWall,
         _ => Unknown
     };
 }
