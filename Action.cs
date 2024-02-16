@@ -147,7 +147,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
                 var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);                
                 foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
                 {
-                    _gs.CurrentMap.RemoveEffect(TerrainFlags.Lit, src.ID);
+                    _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, src.ID);
                     _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
                 }
             }
@@ -482,7 +482,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
     public override ActionResult Execute()
     {        
         _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
-        _gs.CurrentMap.RemoveEffect(TerrainFlags.Lit, ((GameObj)_performer).ID);
+        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, ((GameObj)_performer).ID);
 
         return new ActionResult() { Successful = true, Message = "The torch burns out.", EnergyCost = 1.0 };
     }

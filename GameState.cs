@@ -104,7 +104,7 @@ internal class GameState
     {        
         var newSqs = new HashSet<(ulong, int, int, int, int)>();
         var oldSqs = new HashSet<(ulong, int, int, int, int)>();
-
+        
         foreach (var (sourceID, radius) in obj.EffectSources(effect, this))
         {
             var (dungeon, level, row, col) = start;
@@ -119,18 +119,41 @@ internal class GameState
                 newSqs.Add((sourceID, dungeon, level, sq.Item2, sq.Item3));
         }
 
-        oldSqs.ExceptWith(newSqs);
-        foreach (var (objID, dungeon, level, _, _) in oldSqs)
+        List<(ulong, int, int, int, int)> toAdd = [];
+        List<(ulong, int, int, int, int)> toClear = [];
+        foreach (var sq in newSqs) 
         {
-            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-            map.RemoveEffect(effect, objID);
+            if (!oldSqs.Contains(sq))
+                toAdd.Add(sq);
+        }
+        foreach (var sq in oldSqs)
+        {
+            if (!newSqs.Contains(sq))
+                toClear.Add(sq);
         }
 
-        foreach (var (objID, dungeon, level, r, c) in newSqs)
+        foreach (var (objID, dungeon, level, r, c) in toAdd)
         {
             var map = Campaign.Dungeons[dungeon].LevelMaps[level];
             map.ApplyEffect(effect, r, c, objID);
         }
+        foreach (var (objID, dungeon, level, r, c) in toClear)
+        {
+            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+            map.RemoveAtLoc(effect, r, c, objID);
+        }
+        // oldSqs.ExceptWith(newSqs);
+        // foreach (var (objID, dungeon, level, _, _) in oldSqs)
+        // {
+        //     var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+        //     map.RemoveEffect(effect, objID);
+        // }
+
+        // foreach (var (objID, dungeon, level, r, c) in newSqs)
+        // {
+        //     var map = Campaign.Dungeons[dungeon].LevelMaps[level];
+        //     map.ApplyEffect(effect, r, c, objID);
+        // }
     }
 
     // I only have light effects in the game right now, but I also have ambitions
@@ -148,7 +171,7 @@ internal class GameState
                 if (on)
                     map.ApplyEffect(effect, sq.Item2, sq.Item3, sourceID);
                 else
-                    map.RemoveEffect(effect, sourceID);
+                    map.RemoveEffectFromMap(effect, sourceID);
             }
         }
     }

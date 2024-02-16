@@ -216,8 +216,19 @@ internal class Map : ICloneable
         }
     }
 
+    public void RemoveAtLoc(TerrainFlags effect, int row, int col, ulong objID)
+    {
+        if (Effects.TryGetValue((row, col), out var flagsDict))
+        {
+            if (flagsDict.ContainsKey(objID))
+            {
+                flagsDict[objID] &= ~effect;
+            }
+        }
+    }
+
     // I dunno if this is going to be too slow...
-    public void RemoveEffect(TerrainFlags effect, ulong objID)
+    public void RemoveEffectFromMap(TerrainFlags effect, ulong objID)
     {
         foreach (var flagsDict in Effects.Values)
         {
