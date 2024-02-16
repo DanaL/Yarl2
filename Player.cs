@@ -27,7 +27,7 @@ internal class Player : Actor, IPerformer, IItemHolder
         Col = col;
         MaxHP = 20;
         CurrHP = 15;
-        MaxVisionRadius = 15;
+        MaxVisionRadius = 25;
         CurrVisionRadius = MaxVisionRadius;
         Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?

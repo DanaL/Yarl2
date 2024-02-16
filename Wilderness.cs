@@ -400,6 +400,14 @@ internal class Wilderness(Random rng)
 
         DrawRivers(map);
 
+        // temporarily make the world trees 
+        for (int r = 1; r< length-1;r++)
+        {
+            for (int c = 1; c < length-1;c++)
+            {
+                map.SetTile(r, c, TileFactory.Get(TileType.Tree));
+            }
+        }
         // set the border around the world
         for (int c = 0; c < length; c++)
         {

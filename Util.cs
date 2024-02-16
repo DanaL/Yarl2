@@ -26,8 +26,8 @@ class Colours
     public static readonly Colour DARK_GREY = new(72, 73, 75, 255);
     public static readonly Colour YELLOW = new(255, 255, 53, 255);
     public static readonly Colour YELLOW_ORANGE = new(255, 159, 0, 255);
-    public static readonly Colour LIGHT_BROWN = new(101, 75, 0, 255);
-    public static readonly Colour BROWN = new(101, 67, 33, 255);
+    public static readonly Colour LIGHT_BROWN = new(160, 82, 45, 255);
+    public static readonly Colour BROWN = new(43, 23, 0, 255);
     public static readonly Colour GREEN = new(144, 238, 144, 255);
     public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
     public static readonly Colour LIME_GREEN = new(191, 255, 0, 255);
@@ -57,6 +57,12 @@ class Util
     public static List<(int, int)> NineSqs = [ (-1, -1), (-1, 0), (-1, 1),
                                                (0, -1), (0, 0), (0, 1),
                                                (1, -1), (1, 0), (1, 1) ];
+
+    public static IEnumerable<(int, int)> Adj4Sqs(int r, int c)
+    {
+        foreach (var d in Adj4)
+            yield return (r + d.Item1, c + d.Item2);
+    }
 
     public static IEnumerable<(int, int)> Adj8Sqs(int r, int c)
     {
@@ -134,7 +140,7 @@ class Util
         }
 
         return pts;
-    }
+    }    
 }
 
 static class ListUtils
@@ -148,6 +154,14 @@ static class ListUtils
             n--;
             (list[n], list[k]) = (list[k], list[n]);
         }
+    }
+
+    public static List<T> Filled<T>(T val, int count)
+    {
+        List<T> res = new List<T>();
+        for (int j = 0; j < count; j ++)
+            res.Add(val);
+        return res;
     }
 }
 

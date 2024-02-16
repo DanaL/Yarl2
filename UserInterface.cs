@@ -230,6 +230,8 @@ abstract class UserInterface
                 return lit ? (Colours.GREY, Colours.TORCH_ORANGE, '#') : (Colours.DARK_GREY, Colours.BLACK, '#');
             case TileType.DungeonFloor:
                 return lit ? (Colours.YELLOW, Colours.TORCH_ORANGE, '.') : (Colours.GREY, Colours.BLACK, '.');
+            case TileType.StoneFloor:
+                return lit ? (Colours.LIGHT_GREY, Colours.BLACK, '.') : (Colours.DARK_GREY, Colours.BLACK, '.');
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
                 return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, ch) : (Colours.BROWN, Colours.BLACK, ch);
@@ -258,8 +260,16 @@ abstract class UserInterface
                 return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, '.') : (Colours.BROWN, Colours.BLACK, '.');
             case TileType.WoodWall:
                 return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, '#') : (Colours.BROWN, Colours.BLACK, '#');
-            case TileType.Window:
+            case TileType.HWindow:
                 return lit ? (Colours.LIGHT_GREY, Colours.BLACK, '-') : (Colours.GREY, Colours.BLACK, '-');
+            case TileType.VWindow:
+                return lit ? (Colours.LIGHT_GREY, Colours.BLACK, '|') : (Colours.GREY, Colours.BLACK, '|');
+            case TileType.Forge:
+                return lit ? (Colours.BRIGHT_RED, Colours.TORCH_ORANGE, '^') : (Colours.DULL_RED, Colours.BLACK, '^');
+            case TileType.Dirt:
+                return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, '.') : (Colours.BROWN, Colours.BLACK, '.');
+            case TileType.Well:
+                return lit ? (Colours.LIGHT_GREY, Colours.BLACK, 'o') : (Colours.GREY, Colours.BLACK, 'o');
             default:
                 return (Colours.BLACK, Colours.BLACK, ' ');
         }        

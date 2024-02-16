@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Data.SqlTypes;
+using System.Security.Principal;
 
 namespace Yarl2;
 
@@ -29,8 +30,10 @@ enum TileType
     PermWall,
     Wall,
     DungeonFloor,
+    StoneFloor,
     Door,
-    Window,
+    HWindow,
+    VWindow,
     DeepWater,
     Water,
     Sand,
@@ -43,7 +46,11 @@ enum TileType
     Downstairs,
     Cloud,
     WoodWall,   
-    WoodFloor
+    WoodFloor,
+    Forge,
+    Dirt,
+    Well,
+    Bridge
 }
 
 internal abstract class Tile(TileType type)
@@ -128,6 +135,7 @@ internal class TileFactory
     private static readonly Tile Wall = new BasicTile(TileType.Wall, false, true);
     private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
     private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false);
+    private static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false);
     private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false);
     private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false);
     private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false);
@@ -136,9 +144,14 @@ internal class TileFactory
     private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
     private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false);
     private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
-    private static readonly Tile Window = new BasicTile(TileType.Window, true, false);
+    private static readonly Tile HWindow = new BasicTile(TileType.HWindow, false, false);
+    private static readonly Tile VWindow = new BasicTile(TileType.VWindow, false, false);
     private static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true);
     private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false);
+    private static readonly Tile Forge = new BasicTile(TileType.Forge, true, false);
+    private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false);
+    private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
+    private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
 
     public static Tile Get(TileType type) => type switch
     {
@@ -146,6 +159,7 @@ internal class TileFactory
         TileType.PermWall => PermWall,
         TileType.Wall => Wall,
         TileType.DungeonFloor => Floor,
+        TileType.StoneFloor => StoneFloor,
         TileType.DeepWater => DeepWater,
         TileType.Sand => Sand,
         TileType.Grass => Grass,
@@ -155,9 +169,14 @@ internal class TileFactory
         TileType.Door => new Door(type, false),
         TileType.Water => Water,
         TileType.Cloud => Cloud,
-        TileType.Window => Window,
+        TileType.HWindow => HWindow,
+        TileType.VWindow => VWindow,
         TileType.WoodFloor => WoodFloor,
         TileType.WoodWall => WoodWall,
+        TileType.Forge => Forge,
+        TileType.Dirt => Dirt,
+        TileType.Well => Well,
+        TileType.Bridge => Bridge,
         _ => Unknown
     };
 }
@@ -287,6 +306,33 @@ internal class Map : ICloneable
         map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.Door);
         map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.Wall);
         map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.Wall);
+
+        map.Tiles[12 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[12 * 20 + 5] = TileFactory.Get(TileType.Wall);
+        map.Tiles[12 * 20 + 6] = TileFactory.Get(TileType.Wall);
+        map.Tiles[12 * 20 + 7] = TileFactory.Get(TileType.Wall);
+        map.Tiles[12 * 20 + 8] = TileFactory.Get(TileType.Wall);
+
+        map.Tiles[13 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[13 * 20 + 8] = TileFactory.Get(TileType.Wall);
+        map.Tiles[14 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[14 * 20 + 8] = TileFactory.Get(TileType.Door);
+        map.Tiles[15 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[15 * 20 + 8] = TileFactory.Get(TileType.Wall);
+        map.Tiles[16 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[16 * 20 + 8] = TileFactory.Get(TileType.Wall);
+
+        map.Tiles[17 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 5] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 6] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 7] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 8] = TileFactory.Get(TileType.Wall);
+
+        map.Tiles[14 * 20 + 15] = TileFactory.Get(TileType.Wall);
+        map.Tiles[15 * 20 + 15] = TileFactory.Get(TileType.Wall);
+        map.Tiles[16 * 20 + 15] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 15] = TileFactory.Get(TileType.Wall);
+        map.Tiles[18 * 20 + 15] = TileFactory.Get(TileType.Wall);
 
         return map;
     }

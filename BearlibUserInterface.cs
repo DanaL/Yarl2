@@ -30,7 +30,7 @@ internal class BLUserInferface : UserInterface, IDisposable
     }
 
     private Color ToBearLibColour(Colour colour) 
-    {
+    {        
         if (!_colours.TryGetValue(colour, out Color value)) 
         {
             value = new Color() { 
