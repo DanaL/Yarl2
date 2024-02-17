@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.InteropServices;
+
 namespace Yarl2;
 
 // Eventually this will addd NPCs, special features, etc. For now let's
@@ -89,7 +91,7 @@ class TownBuilder
             int centreCol = col + t.Width / 2;
             int quarter = TOWN_HEIGHT / 4;
             int northQuarter = townRow + quarter;
-            int southQuarter = townCol + quarter + quarter;
+            int southQuarter = townRow + quarter + quarter;
             int mid = townCol + TOWN_WIDTH / 2;
 
             if (centreRow >= southQuarter)
@@ -576,6 +578,23 @@ class TownBuilder
                 var tile = map.TileAt(sq);
                 if (tile.Type == TileType.Grass || tile.Type == TileType.Tree)
                     map.SetTile(sq, TileFactory.Get(TileType.Dirt));
+                else if (tile.Type == TileType.Water)
+                {
+                    map.SetTile(sq, TileFactory.Get(TileType.Bridge));
+                    var col = sq.Item2 + 1;
+                    while (map.TileAt(sq.Item1, col).Type == TileType.Water)
+                    {
+                        map.SetTile(sq.Item1, col, TileFactory.Get(TileType.Bridge));
+                        ++col;
+                    }
+
+                    col = sq.Item2 - 1;
+                    while (map.TileAt(sq.Item1, col).Type == TileType.Water)
+                    {
+                        map.SetTile(sq.Item1, col, TileFactory.Get(TileType.Bridge));
+                        --col;
+                    }
+                }
             }
         }
     }

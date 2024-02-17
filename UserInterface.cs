@@ -231,7 +231,7 @@ abstract class UserInterface
             case TileType.DungeonFloor:
                 return lit ? (Colours.YELLOW, Colours.TORCH_ORANGE, '.') : (Colours.GREY, Colours.BLACK, '.');
             case TileType.StoneFloor:
-                return lit ? (Colours.LIGHT_GREY, Colours.BLACK, '.') : (Colours.DARK_GREY, Colours.BLACK, '.');
+                return lit ? (Colours.GREY, Colours.BLACK, '.') : (Colours.DARK_GREY, Colours.BLACK, '.');
             case TileType.Door:
                 char ch = ((Door)tile).Open ? '\\' : '+';
                 return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, ch) : (Colours.BROWN, Colours.BLACK, ch);
