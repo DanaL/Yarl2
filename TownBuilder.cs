@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Runtime.InteropServices;
-
 namespace Yarl2;
 
 // Eventually this will addd NPCs, special features, etc. For now let's

@@ -47,8 +47,7 @@ class PreGameHandler(UserInterface ui)
     private UserInterface _ui { get; set; } = ui;
    
     (Campaign, int, int) BeginCampaign(Random rng)
-    {
-        var dm = new DungeonMaker(rng);
+    {        
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
         var wildernessGenerator = new Wilderness(rng);
@@ -60,30 +59,22 @@ class PreGameHandler(UserInterface ui)
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
-        var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
-        var firstLevel = dm.DrawLevel(100, 40);
-        mainDungeon.AddMap(firstLevel);
+        var entrance = wildernessMap.RandomTile(TileType.Tree, rng);
+        
+        //var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
+        var dBuilder = new DungeonBuilder();
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, rng);        
         campaign.AddDungeon(mainDungeon);
 
-        // Find an open floor in the first level of the dungeon
-        // and create a Portal to it in the wilderness
-        var stairs = firstLevel.RandomTile(TileType.DungeonFloor, rng);
-        var entrance = wildernessMap.RandomTile(TileType.Tree, rng);
         var portal = new Portal("You stand before a looming portal.")
         {
-            Destination = new Loc(1, 0, stairs.Item1, stairs.Item2)
+            Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
         };
         wildernessMap.SetTile(entrance, portal);
 
-        var exitStairs = new Upstairs("")
-        {
-            Destination = new Loc(0, 0, entrance.Item1, entrance.Item2)
-        };
-        firstLevel.SetTile(stairs, exitStairs);
-
         campaign.CurrentDungeon = 0;
         campaign.CurrentLevel = 0;
-        return (campaign, tb.TownCentre.Item1, tb.TownCentre.Item2);        
+        return (campaign, entrance.Item1, entrance.Item2);        
     }
 
     public bool StartUp()

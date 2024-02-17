@@ -12,7 +12,7 @@
 namespace Yarl2;
 
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
-internal class DungeonMaker(Random rng)
+class DungeonMap(Random rng)
 {
     readonly Random _rng = rng;
     
@@ -275,34 +275,20 @@ internal class DungeonMaker(Random rng)
         return sqs;
     }
 
-    public void Dump(Map map, int width, int height, Dictionary<int, HashSet<(int, int)>> regions) 
+    public void Dump(Map map, int width, int height) 
     {
         for (int row = 0; row < height; row++)
         {
             for (int col = 0; col < width; col++)
             {
-                bool inRegion = false;
-                foreach (var k in regions.Keys)
-                {
-                    if (regions[k].Contains((row, col)) && map.TileAt(row, col).Type == TileType.DungeonFloor)
-                    {
-                        Console.Write(k+1);
-                        inRegion = true;
-                    }
-                }
-
-                if (!inRegion)
-                {
-                    char ch = map.TileAt(row, col).Type switch  {
-                        TileType.PermWall => '#',
-                        TileType.Wall => ' ',
-                        TileType.DungeonFloor => '.',
-                        TileType.Door => '+',
-                        _ => ' '
-                    };
-                    Console.Write(ch);
-                }
-                
+                char ch = map.TileAt(row, col).Type switch  {
+                    TileType.PermWall => '#',
+                    TileType.Wall => ' ',
+                    TileType.DungeonFloor => '.',
+                    TileType.Door => '+',
+                    _ => ' '
+                };
+                Console.Write(ch);
             }
             Console.WriteLine();
         }
@@ -749,7 +735,7 @@ internal class DungeonMaker(Random rng)
         }
 
         TidyUp(finalMap);
-                
+        
         return finalMap;
     }
 }
