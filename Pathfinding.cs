@@ -82,16 +82,47 @@ class DjikstraMap
             visited.Add(sq);
         }
 
-        for (int r = 0; r < height; r++)
+        // for (int r = 0; r < height; r++)
+        // {
+        //     for (int c = 0; c < width; c++)
+        //     {
+        //         if (_djikstraMap[r, c] < int.MaxValue)
+        //             Console.Write(_djikstraMap[r, c].ToString().PadRight(4));                
+        //         else
+        //             Console.Write("    ");
+        //     }
+        //     Console.WriteLine();
+        // }        
+    }
+
+    public List<(int, int)> ShortestPath(int row, int col, int offsetRow, int offsetCol)
+    {
+        int height = _djikstraMap!.GetLength(0);
+        int width = _djikstraMap.GetLength(1);
+        List<(int, int)> path = [ (row, col) ];
+        int currRow = row - offsetRow;
+        int currCol = col - offsetCol;
+        int score = _djikstraMap[currRow, currCol];
+
+        while (score != 0)
         {
-            for (int c = 0; c < width; c++)
+            int cost = int.MaxValue;
+            (int, int) next = (-1, -1);
+            foreach (var adj in Util.Adj4Sqs(currRow, currCol))
             {
-                if (_djikstraMap[r, c] < int.MaxValue)
-                    Console.Write(_djikstraMap[r, c].ToString().PadRight(4));                
-                else
-                    Console.Write("    ");
+                if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= height || adj.Item2 >= width)
+                    continue;
+                if (_djikstraMap[adj.Item1, adj.Item2] < cost)
+                {
+                    next = (adj.Item1, adj.Item2);
+                    cost = _djikstraMap[adj.Item1, adj.Item2];
+                }
             }
-            Console.WriteLine();
-        }        
+            path.Add((next.Item1 + offsetRow, next.Item2 + offsetCol));
+            score = cost;
+            (currRow, currCol) = next;
+        }
+
+        return path;
     }
 }

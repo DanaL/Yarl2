@@ -36,8 +36,8 @@ class Town
 
 class TownBuilder
 {
-    const int TOWN_HEIGHT = 36;
-    const int TOWN_WIDTH = 60;
+    const int TOWN_HEIGHT = 37;
+    const int TOWN_WIDTH = 63;
 
     public (int, int) TownCentre { get; set; }
     public Town Town { get; set; }
@@ -479,6 +479,8 @@ class TownBuilder
             {
                 if (map.TileAt(r, c).Type == TileType.Tree && rng.NextDouble() < 0.85)
                     map.SetTile(r, c, TileFactory.Get(TileType.Grass));
+                else if (map.TileAt(r, c).Type == TileType.Mountain)
+                    map.SetTile(r, c, TileFactory.Get(TileType.Grass));
             }
         }
 
@@ -538,13 +540,15 @@ class TownBuilder
             {                 
                 if (map.TileAt(r, c).Type == TileType.Door)
                 {
-                    foreach (var adj in Util.Adj8Sqs(r, c))
+                    foreach (var adj in Util.Adj4Sqs(r, c))
                     {
                         var tile = map.TileAt(adj.Item1, adj.Item2);
-                        if (tile.Type == TileType.Grass || tile.Type == TileType.Tree)
+                        if (tile.Type == TileType.Grass || tile.Type == TileType.Tree) 
+                        {
                             map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.Dirt));
-                    }
-                    doors.Add((r, c));
+                            doors.Add((adj.Item1, adj.Item2));
+                        }
+                    }                    
                 }
             }
         }
@@ -553,7 +557,6 @@ class TownBuilder
         int j = rng.Next(Town.TownSquare.Count);
         var centre = Town.TownSquare.ToList()[j];
 
-        
         Dictionary<TileType, int> passable = [];
         passable.Add(TileType.Grass, 1);
         passable.Add(TileType.Dirt, 1);
@@ -565,6 +568,16 @@ class TownBuilder
         var dmap = new DjikstraMap(map, townRow, townRow + TOWN_HEIGHT, townCol, townCol + TOWN_WIDTH);
         dmap.Generate(passable, (centre.Row, centre.Col));
         
+        foreach (var doorstep in doors)
+        {
+            var path = dmap.ShortestPath(doorstep.Item1, doorstep.Item2, townRow, townCol);
+            foreach (var sq in path)
+            {
+                var tile = map.TileAt(sq);
+                if (tile.Type == TileType.Grass || tile.Type == TileType.Tree)
+                    map.SetTile(sq, TileFactory.Get(TileType.Dirt));
+            }
+        }
     }
 
     public void AddWell(Map map, Random rng)
@@ -593,7 +606,7 @@ class TownBuilder
             map.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.Well));
 
             foreach (var adj in Util.Adj8Sqs(sq.Row, sq.Col))
-                map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.Dirt));
+                map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.StoneFloor));
             break;
         }
     }

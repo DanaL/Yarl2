@@ -83,7 +83,7 @@ class PreGameHandler(UserInterface ui)
 
         campaign.CurrentDungeon = 0;
         campaign.CurrentLevel = 0;
-        return (campaign, tb.TownCentre.Item1, tb.TownCentre.Item2);
+        return (campaign, tb.TownCentre.Item1, tb.TownCentre.Item2);        
     }
 
     public bool StartUp()

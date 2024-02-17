@@ -270,6 +270,8 @@ abstract class UserInterface
                 return lit ? (Colours.LIGHT_BROWN, Colours.BLACK, '.') : (Colours.BROWN, Colours.BLACK, '.');
             case TileType.Well:
                 return lit ? (Colours.LIGHT_GREY, Colours.BLACK, 'o') : (Colours.GREY, Colours.BLACK, 'o');
+            case TileType.Bridge:
+                return lit ? (Colours.GREY, Colours.BLACK, '=') : (Colours.DARK_GREY, Colours.BLACK, '=');
             default:
                 return (Colours.BLACK, Colours.BLACK, ' ');
         }        

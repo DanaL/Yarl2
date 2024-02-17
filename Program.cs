@@ -4,21 +4,21 @@ using Yarl2;
 
 var options = Options.LoadOptions("options.json");
 
-var dm = Map.TestMap();
-dm.Dump();
+// var dm = Map.TestMap();
+// dm.Dump();
 
-var dj = new DjikstraMap(dm, 0, 20, 0, 20);
-Dictionary<TileType, int> passable = new() { { TileType.DungeonFloor, 1 }, { TileType.Door, 2 } };
-dj.Generate(passable, (18, 1));
+// var dj = new DjikstraMap(dm, 0, 20, 0, 20);
+// Dictionary<TileType, int> passable = new() { { TileType.DungeonFloor, 1 }, { TileType.Door, 2 } };
+// dj.Generate(passable, (18, 1));
 
-return;
+// var path = dj.ShortestPath(16, 5, 0, 0);
+// return;
 
 UserInterface display;
 if (options.Display == "Bearlib")
     display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options);
 else
     display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
-
 
 // var a = TerrainFlags.None;
 // a |= TerrainFlags.Lit;
