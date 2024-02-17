@@ -65,7 +65,13 @@ internal class Player : Actor, IPerformer, IItemHolder
         foreach (var s in slots)
         {
             var item = Inventory.ItemAt(s);
-            var desc = item.FullName.IndefArticle();
+
+            string desc;
+            if (item.Count == 1)
+                desc = item.FullName.IndefArticle();
+            else
+                desc = $"{item.Count} {item.FullName.Pluralize()}";
+                
             if (item.Equiped)
             {
                 if (item.Type == ItemType.Weapon)

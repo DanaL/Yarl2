@@ -113,6 +113,8 @@ class PreGameHandler(UserInterface ui)
             armour.Equiped = true;
             player.Inventory.Add(armour);
             player.Inventory.Add(ItemFactory.Get("dagger"));
+            player.Inventory.Add(ItemFactory.Get("dagger"));
+            player.Inventory.Add(ItemFactory.Get("dagger"));
 
             for (int i = 0; i < 10; i++)
             {

@@ -208,6 +208,19 @@ class Inventory
         if (item.Type == ItemType.Zorkmid)
             Zorkmids += item.Count;
         
+        // if the item is stackable, see if there's anything to stack it with
+        if (item.Stackable)
+        {
+            foreach (var v in _items.Values)
+            {
+                if (v.Type == item.Type && v.Name == item.Name) 
+                {
+                    v.Count += item.Count;
+                    return;
+                }
+            }
+        }
+
         // if the item has a slot and it's available, put it there
         // otherwise but it in the next available slot, if there is one
         bool slotAvailable = !_items.ContainsKey(item.Slot) || _items[item.Slot] is null;
@@ -225,8 +238,6 @@ class Inventory
         {
             // no space could be found for it :(
         }
-
-        // TODO: handle stacks
     }
 
     public void Remove(char slot, int count)

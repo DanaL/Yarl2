@@ -175,6 +175,15 @@ static class StringUtils
         >= '0' and <= '9' => s,
         _ => $"a {s}"
     };
+
+    public static string Pluralize(this string s)
+    {
+        // TODO: handle things like "Potion of Healing" etc
+        if (s.EndsWith("s") || s.EndsWith("x") || s.EndsWith("ch"))
+            return s + "es";
+        else
+            return s + "s";
+    }
 }
 
 internal class GameQuitException : Exception { }
