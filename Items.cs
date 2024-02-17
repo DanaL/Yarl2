@@ -161,7 +161,7 @@ class ItemFactory
         },
         "torch" => new Torch()
         {
-            Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 1000, Lit = false
+            Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 500, Lit = false
         },
         _ => throw new Exception($"{name} doesn't seem exist in yarl2 :("),
     };

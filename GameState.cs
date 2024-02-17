@@ -25,7 +25,8 @@ internal class GameState
     public Campaign Campaign { get; set; }
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
-    
+    public int Turn { get; set; } = 1;
+
     public void EnterLevel(int dungeon, int level)
     {
         CurrLevel = level;

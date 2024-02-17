@@ -158,15 +158,16 @@ abstract class UserInterface
         WriteLine($"| HP: {Player.CurrHP} ({Player.MaxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
 
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 2; row < ViewHeight - 1; row++)
+        for (int row = 2; row < ViewHeight - 2; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
 
         if (GameState.CurrDungeon == 0)
-            WriteLine("| Outside", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine("| Outside", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
         else
-            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     protected void WriteDropDown()
@@ -372,16 +373,23 @@ abstract class UserInterface
                     // removes them from the queue. A burnt out torch still exists as an item in
                     // the game but a dead monster needs to be removed from the GameObjDb as well
                     if (GameState.CurrPerformers[p].RemoveFromQueue)
-                    {
-                        GameState.CurrPerformers.RemoveAt(p);
+                    {                        
                         // Don't need to increment p here, because removing the 'dead'
-                        // performer will set up the next one, but we may be past the end of the list
-                        if (p >= GameState.CurrPerformers.Count)
-                            p = 0;
+                        // performer will set up the next one
+                        GameState.CurrPerformers.RemoveAt(p);
                     }
                     else if (GameState.CurrPerformers[p].Energy < 1.0) 
                     {
-                        p = (p + 1) % GameState.CurrPerformers.Count;
+                        ++p;
+                    }
+
+                    if (p >= GameState.CurrPerformers.Count)
+                    {
+                        ++GameState.Turn;
+                        p = 0;
+
+                        // probably there will eventually be end-of-turn stuff
+                        // here eventually
                     }
                 }                    
                 // I imagine later on there'll be bookkeeping and such once we've run
