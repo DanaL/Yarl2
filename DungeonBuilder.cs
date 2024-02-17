@@ -95,8 +95,6 @@ class DungeonBuilder
 
         SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
-        Console.WriteLine($"wtf {ExitLoc}");
-
         return dungeon;
     }
 }

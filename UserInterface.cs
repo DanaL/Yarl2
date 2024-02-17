@@ -158,10 +158,15 @@ abstract class UserInterface
         WriteLine($"| HP: {Player.CurrHP} ({Player.MaxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
 
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 2; row < ViewHeight; row++)
+        for (int row = 2; row < ViewHeight - 1; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
+
+        if (GameState.CurrDungeon == 0)
+            WriteLine("| Outside", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+        else
+            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     protected void WriteDropDown()
