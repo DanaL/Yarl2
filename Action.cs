@@ -40,7 +40,10 @@ class PortalAction(GameState gameState) : Action
         _gameState.Player!.Col = c;
         _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
         result.Successful = true;
-        result.Message = _gameState.CurrentDungeon.ArrivalMessage;
+
+        if (start.DungeonID != portal.Destination.DungeonID)
+            result.Message = _gameState.CurrentDungeon.ArrivalMessage;
+    
         result.EnergyCost = 1.0;
     }
 
