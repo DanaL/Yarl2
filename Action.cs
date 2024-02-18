@@ -346,7 +346,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             msg = $"You pick up {item.FullName.DefArticle()}.";
         else
             msg = $"You pick up {item.Count} {item.FullName.Pluralize()}.";
-            
+
         return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };
     }
 
@@ -371,8 +371,21 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item is IUseableItem tool)
         {
-            var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
-            return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
+            if (item.Count > 1)
+            {
+                --item.Count;
+                var used = (Item) item.Clone();
+                used.Count = 1;
+                var (success, msg) = ((IUseableItem)used).Use(_gameState, _actor.Row, _actor.Col);
+                // need to handle the situation where there are no free inventory slots
+                ((IItemHolder)_actor).Inventory.Add(used);
+                return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
+            }
+            else
+            {
+                var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
+                return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
+            }
         }
         else
         {
