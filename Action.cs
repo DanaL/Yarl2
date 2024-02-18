@@ -252,12 +252,22 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
         var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
         var items = _gameState.ObjDB.ItemsAt(loc);
 
-        if (items.Count == 0)
+        if (items.Count == 0) 
+        {
             return _map.TileAt(_row, _col).StepMessage;
+        }
         else if (items.Count > 1)
+        {
             return "There are several items here.";
+        }
+        else if (items[0].Count > 1)
+        {
+            return $"There are {items[0].Count} {items[0].FullName.Pluralize()} here.";
+        }
         else
+        {
             return $"There is {items[0].FullName.IndefArticle()} here.";
+        }
     }
 
     public override ActionResult Execute()
@@ -330,7 +340,14 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var item = itemStack[i];
         itemStack.RemoveAt(i);
         inv.Add(item);
-        return new ActionResult() { Successful=true, Message=$"You pick up {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
+
+        string msg;
+        if (item.Count == 1)
+            msg = $"You pick up {item.FullName.DefArticle()}.";
+        else
+            msg = $"You pick up {item.Count} {item.FullName.Pluralize()}.";
+            
+        return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -370,12 +387,57 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+{
+    private readonly UserInterface _ui = ui;
+    private readonly Actor _actor = actor;
+    private readonly GameState _gameState = gs;
+    private readonly char _slot = slot;
+    private int _amount;
+
+    public override ActionResult Execute()
+    {
+        string msg = "";
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(_slot);        
+        _ui.ClosePopup();
+
+        if (_amount == 0 || _amount > item.Count)
+        {
+            // drop entire stack
+            ((IItemHolder) _actor).Inventory.Remove(_slot, 1);
+            _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+            item.Equiped = false;
+            ((IItemHolder)_actor).CalcEquipmentModifiers();
+            msg = $"You drop all {item.Count} {item.FullName.Pluralize()}.";
+        }
+        else
+        {
+            item.Count -= _amount;
+            var dropped = (Item)item.Clone();
+            dropped.Count = _amount;
+            ((IItemHolder)_actor).CalcEquipmentModifiers();
+            _gameState.ItemDropped(dropped, _actor.Row, _actor.Col);
+            string name = dropped.Count > 1 ? $"{_amount } {dropped.FullName.Pluralize()}"
+                                            : dropped.FullName.DefArticle();
+            msg = $"You drop {name}.";
+        }
+
+        return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };        
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var count = ((NumericAccumulatorResult)result).Amount;
+        _amount = count;
+    }
+}
+
 class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
-    private UserInterface _ui = ui;
-    private Actor _actor = actor;
-    private GameState _gameState = gs;
+    private readonly UserInterface _ui = ui;
+    private readonly Actor _actor = actor;
+    private readonly GameState _gameState = gs;
 
     public override ActionResult Execute() 
     {
@@ -386,9 +448,24 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         {
             return new ActionResult() { Successful=false, Message="You cannot drop something you're wearing." };
         }
+        else if (item.Count > 1)
+        {
+            var dropStackAction = new DropStackAction(_ui, _actor, _gameState, Choice);
+            var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
+            _ui.Popup(prompt);
+            var acc = new NumericAccumulator(_ui, prompt);
+            if (_actor is Player player)
+            {
+                player.ReplacePendingAction(dropStackAction, acc);
+                return new ActionResult() { Successful = false, Message = "", EnergyCost = 0.0 };
+            }
+            else
+                // When monsters can pick up stuff I guess I'll have to handle that here??
+                return new ActionResult() { Successful = true };
+        }
         else 
         {
-            ((Player) _actor).Inventory.Remove(Choice, 1);
+            ((IItemHolder) _actor).Inventory.Remove(Choice, 1);
             _gameState.ItemDropped(item, _actor.Row, _actor.Col);
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();

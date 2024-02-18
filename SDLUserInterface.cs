@@ -279,14 +279,14 @@ internal class SDLUserInterface : UserInterface
             if (MessageHistory.Count > 0)
                 WriteMessagesSection();
 
-            if (_popupBuffer is not null)
-            {
-                WritePopUp();
-            }
-
             if (MenuRows is not null)
             {
                 WriteDropDown();
+            }
+
+            if (_popupBuffer is not null)
+            {
+                WritePopUp();
             }
         }
         SDL_RenderPresent(_renderer);

@@ -112,6 +112,7 @@ abstract class UserInterface
         _popupBuffer = message;
         _popupWidth = width;
         OpeningPopUp = true;
+        ClosingPopUp = false;
     }
 
     protected void WriteMessagesSection()
@@ -143,7 +144,7 @@ abstract class UserInterface
         int row = 5;
 
         string border = "+".PadRight(width - 1, '-') + "+";
-        WriteLine(border, 4, col, width, Colours.WHITE);
+        WriteLine(border, row++, col, width, Colours.WHITE);
 
         foreach (var line in lines)
         {

@@ -29,6 +29,45 @@ abstract class InputAccumulator
     }
 }
 
+class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
+{
+    private UserInterface _ui = ui;
+    private string _prompt = prompt;
+    private string _value = "";
+
+    public override void Input(char ch)
+    {
+        if (ch == Constants.ESC)
+        {
+            Done = true;
+            Success = false;
+        }
+        else if (ch == '\n' || ch == '\r')
+        {
+            Done = true;
+            Success = true;
+        }
+        else if (ch == Constants.BACKSPACE && _value.Length > 0)
+        {
+            _value = _value[..^1];
+        }
+        else if (char.IsDigit(ch))
+        {
+            _value += ch;
+        }
+
+        _ui.Popup($"{_prompt}\n{_value}");
+    }
+
+    public override AccumulatorResult GetResult()
+    {
+        if (int.TryParse(_value, out int result))
+            return new NumericAccumulatorResult() { Amount = result };
+        else
+            return new NumericAccumulatorResult() { Amount = 0 };        
+    }
+}
+
 class MenuPickAccumulator(HashSet<char> options) : InputAccumulator
 {
     private char _choice;
@@ -212,4 +251,9 @@ public class DirectionAccumulatorResult : AccumulatorResult
 public class MenuAccumulatorResult : AccumulatorResult
 {
     public char Choice { get; set; }
+}
+
+public class NumericAccumulatorResult : AccumulatorResult
+{
+    public int Amount { get; set; }
 }

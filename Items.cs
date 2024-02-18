@@ -24,7 +24,7 @@ interface IUseableItem
     (bool, string) Use(GameState gs, int row, int col);
 }
 
-class Item : GameObj
+class Item : GameObj, ICloneable
 {
     public ItemType Type { get; set; }
     public int ArmourMod { get; set; }
@@ -33,7 +33,8 @@ class Item : GameObj
     public char Slot { get; set; }
     public bool Equiped { get; set; } = false;
     public int Count { get; set; } = 1;
-    
+    public int Bonus { get; set; } = 0;
+
     public List<string> Adjectives { get; set; } = [];
 
     public virtual string FullName {
@@ -46,7 +47,14 @@ class Item : GameObj
             else
                 return $"{string.Join(", ", Adjectives)} {Name}"; 
         }
-    }  
+    }
+
+    public object Clone()
+    {
+        var item = (Item)MemberwiseClone();
+
+        return item;
+    }
 }
 
 enum ArmourParts
@@ -211,9 +219,9 @@ class Inventory
         // if the item is stackable, see if there's anything to stack it with
         if (item.Stackable)
         {
-            foreach (var v in _items.Values)
+            foreach (var v in _items.Values.Where(v => v is not null))
             {
-                if (v.Type == item.Type && v.Name == item.Name) 
+                if (v.Type == item.Type && v.Name == item.Name && v.Bonus == item.Bonus) 
                 {
                     v.Count += item.Count;
                     return;

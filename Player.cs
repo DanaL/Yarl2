@@ -71,7 +71,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 desc = item.FullName.IndefArticle();
             else
                 desc = $"{item.Count} {item.FullName.Pluralize()}";
-                
+
             if (item.Equiped)
             {
                 if (item.Type == ItemType.Weapon)
@@ -103,6 +103,12 @@ internal class Player : Actor, IPerformer, IItemHolder
     public void CalcEquipmentModifiers()
     {
         
+    }
+
+    public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
+    {
+        _deferred = newAction;
+        _accumulator = newAccumulator;
     }
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
