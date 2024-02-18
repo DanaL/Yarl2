@@ -11,12 +11,72 @@
 
 namespace Yarl2;
 
-internal interface IAnimationListener
+interface IAnimationListener
 {
     void Update();
 }
 
-internal class CloudAnimationListener : IAnimationListener
+class TorchLightAnimationListener : IAnimationListener
+{
+    readonly UserInterface _ui;
+    DateTime _lastFrame;
+    List<(int, int)> _flickered = [];
+
+    public TorchLightAnimationListener(UserInterface ui)
+    {
+        _ui = ui;
+        _lastFrame = DateTime.Now;
+    }
+
+    public void Update()
+    {
+        if (_ui.CurrentDungeon == 0)
+            return; // we're in the wilderness
+        
+        var dd = DateTime.Now - _lastFrame;
+
+        if (dd.TotalMilliseconds > 500)
+        {
+            PickFlickeringSqs();
+            _lastFrame = DateTime.Now;
+        }
+        
+        SetFlickeringSqsToScreen();        
+    }
+
+    private void PickFlickeringSqs()
+    {
+        var rnd = new Random();
+        
+        int count = 0;
+        _flickered = [];
+        for (int r = 0; r < UserInterface.ViewHeight; r++)
+        {
+            for (int c = 0; c < UserInterface.ViewWidth; c++)
+            {
+                if (_ui.SqsOnScreen[r, c].BG == Colours.TORCH_ORANGE && rnd.Next(20) == 0)
+                {
+                    _flickered.Add((r, c));
+                    if (++count > 3)
+                        return;
+                }
+            }
+        }
+    }
+
+    private void SetFlickeringSqsToScreen()
+    {
+        foreach (var (r, c) in _flickered) 
+        {
+            if (_ui.SqsOnScreen[r, c].CH == '.')
+                _ui.SqsOnScreen[r, c] = (Colours.YELLOW_ORANGE, Colours.TORCH_RED, '.');
+            else if (_ui.SqsOnScreen[r, c].CH == '#')
+                _ui.SqsOnScreen[r, c] = (Colours.TORCH_ORANGE, Colours.TORCH_RED, '#');
+        }
+    }
+}
+
+class CloudAnimationListener : IAnimationListener
 {
     readonly UserInterface _ui;
     bool[] _cloud = new bool[9];

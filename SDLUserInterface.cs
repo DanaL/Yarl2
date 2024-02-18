@@ -265,8 +265,6 @@ internal class SDLUserInterface : UserInterface
         }
         else
         {
-            WriteLine(_messageBuffer, 0, 0, ScreenWidth, Colours.WHITE);
-            _prevMessage = _messageBuffer;
             if (Player is not null)
             {
                 WriteSideBar();

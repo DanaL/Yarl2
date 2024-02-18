@@ -39,8 +39,7 @@ abstract class UserInterface
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
-    protected List<string>? _longMessage;
-    protected string _messageBuffer = "";    
+    protected List<string>? _longMessage;   
     protected Options _options;
     private bool _playing;
 
@@ -214,17 +213,6 @@ abstract class UserInterface
 
     public virtual void CloseMenu() => MenuRows = null;
 
-    static Colour RndTorchColour()
-    {
-        var rnd = new Random();
-        return rnd.Next(3) switch
-        {
-            0 => Colours.TORCH_ORANGE,
-            1 => Colours.TORCH_RED,
-            _ => Colours.TORCH_YELLOW
-        };
-    }
-
     // I dunno about having this here. In previous games, I had each Tile object
     // know what its colours were, but maybe the UI class *is* the correct spot
     // to decide how to draw the glyph
@@ -343,7 +331,8 @@ abstract class UserInterface
     {        
         List<IAnimationListener> animationListeners = [];
         animationListeners.Add(new CloudAnimationListener(this));
-     
+        animationListeners.Add(new TorchLightAnimationListener(this));
+
         GameState.RefreshPerformers();
         GameState.CurrPerformers = [Player];
 
@@ -401,18 +390,21 @@ abstract class UserInterface
                 break;                
             }
 
-            foreach (var l in animationListeners)
-                l.Update();
             
             var elapsed = DateTime.Now - refresh;
             if (elapsed.TotalMilliseconds > 60)
             {
                 SetSqsOnScreen();
+
+                foreach (var l in animationListeners)
+                   l.Update();
+
                 UpdateDisplay();
                 refresh = DateTime.Now;
             }
 
-            //Delay();
+            
+            Delay();
             
             //Console.WriteLine($"{elapsed.TotalMilliseconds} ms");            
         }
@@ -427,7 +419,7 @@ abstract class UserInterface
         BlockForInput();
     }
 
-    static void Delay() => Thread.Sleep(30);
+    static void Delay() => Thread.Sleep(15);
 
     void BlockForInput()
     {
