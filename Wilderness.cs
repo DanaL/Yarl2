@@ -41,7 +41,7 @@ internal class Wilderness(Random rng)
             {
                 pts.Add((pt.Item1, pt.Item2));
                 if (map.TileAt(pt).Type == TileType.DeepWater || map.TileAt(pt).Type == TileType.Water)
-                {
+                {                    
                     riverCrossing = true;
                 }
             }
@@ -76,20 +76,21 @@ internal class Wilderness(Random rng)
         while (true);
     }
 
-    (int, int) RiverStart(Map map, int colLo, int colHi)
-    {
+    List<(int, int)> FindRiverStarts(Map map, int colLo, int colHi)
+    {        
+        List<(int, int)> candidates = [];
         int x = _length / 3;
-
-        do
+        for (int r = _length - x; r < _length - 2; r++)
         {
-            int r = _rng.Next(_length - x, _length - 2);
-            int c = _rng.Next(colLo, colHi);
-
-            int mountains = CountAdjType(map, r, c, TileType.Mountain);
-            if (mountains > 3)
-                return (r, c);
+            for (int c = colLo; c < colHi; c++)
+            {
+                int mountains = CountAdjType(map, r, c, TileType.Mountain);
+                if (mountains > 3) 
+                   candidates.Add((r, c));
+            }
         }
-        while (true);
+        
+        return candidates;
     }
     
     // Try to draw up to three rivers on the map
@@ -100,29 +101,39 @@ internal class Wilderness(Random rng)
 
         int third = _length / 3;
 
-        int passes = 0;
         foreach (int o in opts) 
         { 
             if (o == 0)
             {
-                var startLoc = RiverStart(map, 2, third);
-                DrawARiver(map, startLoc);
+                var startCandidates = FindRiverStarts(map, 2, third);
+                if (startCandidates.Count > 0)
+                {
+                    var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+                    DrawARiver(map, startLoc);
+                }
             }
             else if (o == 1)
             {
-                var startLoc = RiverStart(map, third, third * 2);
-                DrawARiver(map, startLoc);
+                var startCandidates = FindRiverStarts(map, third, third * 2);
+                if (startCandidates.Count > 0)
+                {
+                    var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+                    DrawARiver(map, startLoc);
+                }
             }
             else
             {
-                var startLoc = RiverStart(map, third * 2, _length - 2);
-                DrawARiver(map, startLoc);
+                var startCandidates = FindRiverStarts(map, third * 2, _length - 2);
+                if (startCandidates.Count > 0)
+                {
+                    var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+                    DrawARiver(map, startLoc);
+                }
             }
-            ++passes;
         }        
     }
 
-    int CountAdjType(Map map, int r, int c, TileType type)
+    static int CountAdjType(Map map, int r, int c, TileType type)
     {
         int count = 0;
 
