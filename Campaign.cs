@@ -51,7 +51,6 @@ class PreGameHandler(UserInterface ui)
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
         var wildernessGenerator = new Wilderness(rng);
-
         var wildernessMap = wildernessGenerator.DrawLevel(257);
         var tb = new TownBuilder();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);

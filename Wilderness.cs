@@ -39,7 +39,7 @@ internal class Wilderness(Random rng)
             bool riverCrossing = false;
             foreach (var pt in nextSegment)
             {
-                pts.Add((pt.Item1, pt.Item2));
+                pts.Add(pt);
                 if (map.TileAt(pt).Type == TileType.DeepWater || map.TileAt(pt).Type == TileType.Water)
                 {                    
                     riverCrossing = true;
@@ -67,8 +67,9 @@ internal class Wilderness(Random rng)
                 if (a.Item1 != b.Item1 && a.Item2 != b.Item2)
                     extraPts.Add((a.Item1 - 1, a.Item2));
 
-                map.SetTile(pts[j], TileFactory.Get(TileType.Water));
+                map.SetTile(pts[j], TileFactory.Get(TileType.Water));                
             }
+            map.SetTile(pts.Last(), TileFactory.Get(TileType.Water));
 
             foreach (var pt in extraPts)
                 map.SetTile(pt, TileFactory.Get(TileType.Water));
