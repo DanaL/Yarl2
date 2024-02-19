@@ -102,6 +102,12 @@ class DjikstraMap
         List<(int, int)> path = [ (row, col) ];
         int currRow = row - offsetRow;
         int currCol = col - offsetCol;
+
+        if (currRow < 0 || currCol < 0) 
+        {
+            return [];
+        }
+
         int score = _djikstraMap[currRow, currCol];
 
         while (score != 0)

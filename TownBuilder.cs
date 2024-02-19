@@ -120,7 +120,7 @@ class TownBuilder
                 int currCol = col + c;
                 var tileType = buildingSqs[r * t.Width + c] switch
                 {
-                    '#' => isWood ? TileType.WoodWall : TileType.Wall,
+                    '#' => isWood ? TileType.WoodWall : TileType.StoneWall,
                     '`' => TileType.Grass,
                     '+' => TileType.Door,
                     '|' => TileType.VWindow,
@@ -165,7 +165,7 @@ class TownBuilder
                 {
                     case TileType.DeepWater:
                     case TileType.Water:
-                    case TileType.Wall:
+                    case TileType.StoneWall:
                     case TileType.WoodWall:
                     case TileType.DungeonFloor:
                     case TileType.WoodFloor:
@@ -182,20 +182,20 @@ class TownBuilder
         for (int c = 0; c < t.Width; c++)
         {
             var tile = map.TileAt(nwRow - 1, nwCol + c);
-            if (tile.Type == TileType.Wall || tile.Type == TileType.WoodWall)
+            if (tile.Type == TileType.StoneWall || tile.Type == TileType.WoodWall)
                 return false;
             tile = map.TileAt(nwRow + t.Height, nwCol + c);
-            if (tile.Type == TileType.Wall || tile.Type == TileType.WoodWall)
+            if (tile.Type == TileType.StoneWall || tile.Type == TileType.WoodWall)
                 return false;
         }
 
         for (int r = 0; r < t.Height; r++)
         {
             var tile = map.TileAt(nwRow + r, nwCol - 1);
-            if (tile.Type == TileType.Wall || tile.Type == TileType.WoodWall)
+            if (tile.Type == TileType.StoneWall || tile.Type == TileType.WoodWall)
                 return false;
             tile = map.TileAt(nwRow + r, nwCol + t.Width);
-            if (tile.Type == TileType.Wall || tile.Type == TileType.WoodWall)
+            if (tile.Type == TileType.StoneWall || tile.Type == TileType.WoodWall)
                 return false;
         }
 

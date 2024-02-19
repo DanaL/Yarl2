@@ -28,9 +28,10 @@ enum TileType
     WorldBorder,
     Unknown,
     PermWall,
-    Wall,
+    DungeonWall,
     DungeonFloor,
     StoneFloor,
+    StoneWall,
     Door,
     HWindow,
     VWindow,
@@ -132,7 +133,8 @@ internal class TileFactory
 {
     private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true);
     private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true);
-    private static readonly Tile Wall = new BasicTile(TileType.Wall, false, true);
+    private static readonly Tile DungeonWall = new BasicTile(TileType.DungeonWall, false, true);
+    private static readonly Tile StoneWall = new BasicTile(TileType.StoneWall, false, true);
     private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
     private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false);
     private static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false);
@@ -157,7 +159,8 @@ internal class TileFactory
     {
         TileType.WorldBorder => WorldBorder,
         TileType.PermWall => PermWall,
-        TileType.Wall => Wall,
+        TileType.DungeonWall => DungeonWall,
+        TileType.StoneWall => StoneWall,
         TileType.DungeonFloor => Floor,
         TileType.StoneFloor => StoneFloor,
         TileType.DeepWater => DeepWater,
@@ -293,46 +296,46 @@ internal class Map : ICloneable
             }
         }
 
-        map.Tiles[3 * 20 + 8] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 9] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 10] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 11] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 12] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 13] = TileFactory.Get(TileType.Wall);
-        map.Tiles[3 * 20 + 14] = TileFactory.Get(TileType.Wall);
+        map.Tiles[3 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 9] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 10] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 11] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 12] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 13] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[3 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
 
-        map.Tiles[5 * 20 + 14] = TileFactory.Get(TileType.Wall);
-        map.Tiles[6 * 20 + 14] = TileFactory.Get(TileType.Wall);
+        map.Tiles[5 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[6 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.Door);
-        map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.Wall);
-        map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.Wall);
+        map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
 
-        map.Tiles[12 * 20 + 4] = TileFactory.Get(TileType.Wall);
-        map.Tiles[12 * 20 + 5] = TileFactory.Get(TileType.Wall);
-        map.Tiles[12 * 20 + 6] = TileFactory.Get(TileType.Wall);
-        map.Tiles[12 * 20 + 7] = TileFactory.Get(TileType.Wall);
-        map.Tiles[12 * 20 + 8] = TileFactory.Get(TileType.Wall);
+        map.Tiles[12 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[12 * 20 + 5] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[12 * 20 + 6] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[12 * 20 + 7] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[12 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
 
-        map.Tiles[13 * 20 + 4] = TileFactory.Get(TileType.Wall);
-        map.Tiles[13 * 20 + 8] = TileFactory.Get(TileType.Wall);
-        map.Tiles[14 * 20 + 4] = TileFactory.Get(TileType.Wall);
+        map.Tiles[13 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[13 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[14 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[14 * 20 + 8] = TileFactory.Get(TileType.Door);
-        map.Tiles[15 * 20 + 4] = TileFactory.Get(TileType.Wall);
-        map.Tiles[15 * 20 + 8] = TileFactory.Get(TileType.Wall);
-        map.Tiles[16 * 20 + 4] = TileFactory.Get(TileType.Wall);
-        map.Tiles[16 * 20 + 8] = TileFactory.Get(TileType.Wall);
+        map.Tiles[15 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[15 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[16 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[16 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
 
-        map.Tiles[17 * 20 + 4] = TileFactory.Get(TileType.Wall);
-        map.Tiles[17 * 20 + 5] = TileFactory.Get(TileType.Wall);
-        map.Tiles[17 * 20 + 6] = TileFactory.Get(TileType.Wall);
-        map.Tiles[17 * 20 + 7] = TileFactory.Get(TileType.Wall);
-        map.Tiles[17 * 20 + 8] = TileFactory.Get(TileType.Wall);
+        map.Tiles[17 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[17 * 20 + 5] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[17 * 20 + 6] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[17 * 20 + 7] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[17 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
 
-        map.Tiles[14 * 20 + 15] = TileFactory.Get(TileType.Wall);
-        map.Tiles[15 * 20 + 15] = TileFactory.Get(TileType.Wall);
-        map.Tiles[16 * 20 + 15] = TileFactory.Get(TileType.Wall);
-        map.Tiles[17 * 20 + 15] = TileFactory.Get(TileType.Wall);
-        map.Tiles[18 * 20 + 15] = TileFactory.Get(TileType.Wall);
+        map.Tiles[14 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[15 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[16 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[17 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
+        map.Tiles[18 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
 
         return map;
     }
@@ -360,7 +363,7 @@ internal class Map : ICloneable
         {
             int row = rnd.Next(1, Height);
             int col = rnd.Next(1, Width);
-            Tiles[row * Width + col] = TileFactory.Get(TileType.Wall);
+            Tiles[row * Width + col] = TileFactory.Get(TileType.DungeonWall);
         }
     }
 
@@ -378,7 +381,7 @@ internal class Map : ICloneable
             {
                 char ch = Tiles[row * Width + col].Type switch  {
                     TileType.PermWall => '#',
-                    TileType.Wall => '#',
+                    TileType.DungeonWall => '#',
                     TileType.DungeonFloor or TileType.Sand => '.',
                     TileType.Door => '+',
                     TileType.Mountain or TileType.SnowPeak => '^',

@@ -222,9 +222,11 @@ abstract class UserInterface
     {
         switch (tile.Type)
         {
-            case TileType.Wall:
+            case TileType.DungeonWall:
             case TileType.PermWall:
                 return lit ? new Sqr(Colours.GREY, Colours.TORCH_ORANGE, '#') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '#');
+            case TileType.StoneWall:
+                return lit ? new Sqr(Colours.GREY, Colours.BLACK, '#') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '#');
             case TileType.DungeonFloor:
                 return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '.') : new Sqr(Colours.GREY, Colours.BLACK, '.');
             case TileType.StoneFloor:

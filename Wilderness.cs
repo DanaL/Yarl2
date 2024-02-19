@@ -357,7 +357,7 @@ internal class Wilderness(Random rng)
                     char ch = t.Type switch
                     {
                         TileType.PermWall => '#',
-                        TileType.Wall => '#',
+                        TileType.DungeonWall => '#',
                         TileType.DungeonFloor or TileType.Sand => '.',
                         TileType.Door => '+',
                         TileType.Mountain or TileType.SnowPeak => '^',
