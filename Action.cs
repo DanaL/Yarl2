@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Linq.Expressions;
+
 namespace Yarl2;
 
 class ActionResult
@@ -42,7 +44,7 @@ class PortalAction(GameState gameState) : Action
         result.Successful = true;
 
         if (start.DungeonID != portal.Destination.DungeonID)
-            result.Message = new SimpleMessage(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination);
+            result.Message = MessageFactory.Phrase(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination);
     
         result.EnergyCost = 1.0;
     }
@@ -60,7 +62,7 @@ class PortalAction(GameState gameState) : Action
         }
         else
         {
-            result.Message = new SimpleMessage("There is nowhere to go here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("There is nowhere to go here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -82,7 +84,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = new SimpleMessage("You cannot go down here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("You cannot go down here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -104,7 +106,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = new SimpleMessage("You cannot go up here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("You cannot go up here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -144,7 +146,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
                 result.Successful = true;
                 result.EnergyCost = 1.0;
 
-                var msg = new SVSMessage(_actor.ID, Verb.Close, "the door", false, loc);
+                var msg = MessageFactory.Phrase(_actor.ID, Verb.Close, "the door", false, loc, _gs);
                 result.Message = msg;
 
                 // Find any light sources tht were affecting the door and update them, since
@@ -158,12 +160,12 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
             }
             else if (_actor is Player)
             {
-                result.Message = new SimpleMessage("The door is already closed!", loc);
+                result.Message = MessageFactory.Phrase("The door is already closed.", _gs.PlayerLoc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = new SimpleMessage("There's no door there!", loc);
+            result.Message = MessageFactory.Phrase("There's no door there!", _gs.PlayerLoc);            
         }
 
         return result;
@@ -203,7 +205,7 @@ class OpenDoorAction : DirectionalAction
                 result.Successful = true;
                 result.EnergyCost = 1.0;
 
-                var msg = new SVSMessage(_actor.ID, Verb.Open, "the door", false, loc);
+                var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "the door", false, loc, _gs);
                 result.Message = msg;
                 
                 // Find any light sources tht were affecting the door and update them, since
@@ -217,12 +219,12 @@ class OpenDoorAction : DirectionalAction
             }
             else if (_actor is Player)
             {
-                result.Message = new SimpleMessage("The door is already open!", loc);
+                result.Message = MessageFactory.Phrase("The door is already open.", _gs.PlayerLoc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = result.Message = new SimpleMessage("There's no door there!", loc);
+            result.Message = MessageFactory.Phrase("There's no door there!", _gs.PlayerLoc);
         }
 
         return result;
@@ -283,7 +285,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             // in theory this shouldn't ever happen...
             result.Successful = false;            
             if (_actor is Player)
-                result.Message = new SimpleMessage("You cannot go that way!", _gameState.PlayerLoc);
+                result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.PlayerLoc);
         }
         else if (!_map.TileAt(_row, _col).Passable())
         {
@@ -299,7 +301,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 }
                 else
                 {
-                    result.Message = new SimpleMessage(BlockedMessage(tile), _gameState.PlayerLoc);
+                    result.Message = MessageFactory.Phrase(BlockedMessage(tile), _gameState.PlayerLoc);
                 }
             }
         }
@@ -316,7 +318,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             _actor.Col = _col;
 
             if (_actor is Player)
-                result.Message = new SimpleMessage(CalcDesc(), to);
+                result.Message = MessageFactory.Phrase(CalcDesc(), to);                
         }
 
         return result;
@@ -338,11 +340,12 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         var inv = ((IItemHolder)_actor).Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
+        Message msg;
 
         if (!freeSlot) 
         {
-            return new ActionResult() { Successful=false, 
-                Message = new SimpleMessage("There's no room in your inventory!", _gameState.PlayerLoc) };
+            msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.PlayerLoc);
+            return new ActionResult() { Successful=false, Message = msg };                
         }
 
         int i = Choice - 'a';
@@ -350,8 +353,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         itemStack.RemoveAt(i);
         inv.Add(item, _actor.ID);
 
-        var msg = new SVOMessage(_actor.ID, Verb.Pickup, item.ID, item.Count, false, loc);
-        
+        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, item.Count, false, loc, _gameState);
         return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };
     }
 
@@ -380,24 +382,24 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (item.Count > 1)
             {
                 --item.Count;
-                var used = (Item) item.Clone();
+                var used = item.Duplicate(_gameState);
                 used.Count = 1;
                 var (success, msg) = ((IUseableItem)used).Use(_gameState, _actor.Row, _actor.Col);
                 // need to handle the situation where there are no free inventory slots
                 ((IItemHolder)_actor).Inventory.Add(used, _actor.ID);                
-                var alert = new SimpleMessage(msg, loc);
+                var alert = MessageFactory.Phrase(msg, loc);
                 return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
             }
             else
             {
                 var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
-                var alert = new SimpleMessage(msg, loc);
+                var alert = MessageFactory.Phrase(msg, loc);
                 return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
             }
         }
         else
         {
-            var msg = new SimpleMessage("You don't know how to use that!", _gameState.PlayerLoc);
+            var msg = MessageFactory.Phrase("You don't know a way to use that!", _gameState.PlayerLoc);
             return new ActionResult() { Successful = false, Message = msg };
         }
     }
@@ -431,21 +433,17 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
             var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            alert = new SVOMessage(_actor.ID, Verb.Drop, item.ID, item.Count, false, loc);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, item.Count, false, loc, _gameState);
         }
         else
         {
             item.Count -= _amount;
-            var dropped = (Item)item.Clone();
+            var dropped = item.Duplicate(_gameState);
             dropped.Count = _amount;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
             _gameState.ItemDropped(dropped, _actor.Row, _actor.Col);
-            string name = dropped.Count > 1 ? $"{_amount } {dropped.FullName.Pluralize()}"
-                                            : dropped.FullName.DefArticle();
-
             var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            alert = new SVOMessage(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, loc);
-            _gameState.Alert(alert);            
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, loc, _gameState);                      
         }
 
         return new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };        
@@ -472,7 +470,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item.Equiped && item.Type == ItemType.Armour)
         {
-            var msg = new SimpleMessage("You cannot drop something you're wearing.", _gameState.PlayerLoc);
+            var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.PlayerLoc);
             return new ActionResult() { Successful=false, Message=msg };
         }
         else if (item.Count > 1)
@@ -498,7 +496,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             ((IItemHolder)_actor).CalcEquipmentModifiers();
 
             var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            var alert = new SVOMessage(_actor.ID, Verb.Drop, item.ID, 1, false, loc);            
+            var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, loc, _gameState);
             _ui.AlertPlayer(alert);
             return new ActionResult() { Successful=true, Message=null, EnergyCost = 1.0 };
         }
@@ -527,7 +525,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
         {
-            var msg = new SimpleMessage("You cannot equip that!", loc);
+            var msg = MessageFactory.Phrase("You cannot equip that!", _gameState.PlayerLoc);
             return new ActionResult() { Successful = false, Message = msg };
         }
         
@@ -536,11 +534,11 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
         switch (equipResult)
         {
             case EquipingResult.Equiped:
-                alert = new SVOMessage(_actor.ID, Verb.Ready, item.ID, 1, false, loc);
+                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, loc, _gameState);
                 result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
-                alert = new SVOMessage(_actor.ID, Verb.Ready, item.ID, 1, false, loc);
+                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, loc, _gameState);
                 result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             default:
@@ -549,7 +547,8 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
                     msg += "a helmet.";
                 else if (conflict == ArmourParts.Shirt)
                     msg += "some armour.";
-                result = new ActionResult() { Successful=true, Message=new SimpleMessage(msg, loc) };
+                alert = MessageFactory.Phrase(msg, _gameState.PlayerLoc);
+                result = new ActionResult() { Successful=true, Message=alert };
                 break;
         }            
         
@@ -599,7 +598,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
         _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, ((GameObj)_performer).ID);
 
         var obj = _performer as GameObj;
-        var msg = new SVOMessage(obj.ID, Verb.BurnsOut, 0, 1, false, obj.Loc);
+        var msg = MessageFactory.Phrase(obj.ID, Verb.BurnsOut, 0, 1, false, obj.Loc, _gs);
         return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
     }
 }

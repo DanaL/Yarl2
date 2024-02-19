@@ -36,13 +36,11 @@ enum Verb
     BurnsOut
 }
 
-abstract class Message(Loc loc) 
+record Message(string Text, Loc loc);
+
+class MessageFactory
 {
-    public Loc Loc { get; set; } = loc;
-
-    public abstract string AsPhrase(GameState gs);
-
-    protected string CalcVerb(GameObj subject, Verb verb)
+    static string CalcVerb(GameObj subject, Verb verb)
     {
         bool fp = subject is Player;
         return verb switch 
@@ -62,7 +60,7 @@ abstract class Message(Loc loc)
         };
     }
 
-    protected string CalcName(GameObj gobj, int amount = 0)
+    static string CalcName(GameObj gobj, int amount = 0)
     {
         StringBuilder sb = new StringBuilder();
         if (gobj is Item item)
@@ -83,67 +81,52 @@ abstract class Message(Loc loc)
 
         return sb.ToString();
     }
-}
 
-class SimpleMessage(string msg, Loc loc) : Message(loc)
-{
-    public string _msg = msg;
+    public static Message Phrase(string text, Loc loc)
+    {
+        return new Message(text, loc);
+    }
 
-    public override string AsPhrase(GameState gs) => _msg;    
-}
-
-// Subject-verb-object message, where object is another gameobj
-class SVOMessage(ulong Subject, Verb Verb, ulong Obj, int Amt, bool Exciting, Loc Loc) : Message(Loc)
-{
-    public override string AsPhrase(GameState gs)
+    public static Message Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? subject = gs.ObjDB.GetObj(Subject);
-        GameObj? victim = gs.ObjDB.GetObj(Obj);
+        GameObj? sub = gs.ObjDB.GetObj(subject);
+        GameObj? victim = gs.ObjDB.GetObj(obj);
 
-        if (subject is not null)
+        if (sub is not null)
         {
-            sb.Append(CalcName(subject));
+            sb.Append(CalcName(sub));
             sb.Append(' ');
-            sb.Append(CalcVerb(subject, Verb));
+            sb.Append(CalcVerb(sub, verb));
 
-            if (Obj != 0 && victim is not null)
+            if (obj != 0 && victim is not null)
             {                
                 sb.Append(' ');
-                sb.Append(CalcName(victim, Amt));
+                sb.Append(CalcName(victim, amt));
             }
 
-            sb.Append(Exciting ? '!' : '.');
+            sb.Append(exciting ? '!' : '.');
         }
 
-        return sb.ToString();
+        return new Message(sb.ToString(), loc);
     }
-}
 
-// Sometimes the object will just be a string, when the object isn't a game object.
-// Ie., "You open the door." etc
-class SVSMessage(ulong subject, Verb verb, string obj, bool exciting, Loc loc) : Message(loc)
-{
-    ulong _subject = subject;
-    Verb _verb = verb;
-    string _object = obj;
-    bool _exciting = exciting;
-
-    public override string AsPhrase(GameState gs)
+    public static Message Phrase(ulong subject, Verb verb, string obj, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? subject = gs.ObjDB.GetObj(_subject);
+        GameObj? sub = gs.ObjDB.GetObj(subject);
         
-        if (subject is not null)
+        if (sub is not null)
         {
-            sb.Append(CalcName(subject));
+            sb.Append(CalcName(sub));
             sb.Append(' ');
-            sb.Append(CalcVerb(subject, _verb));               
+            sb.Append(CalcVerb(sub, verb));               
             sb.Append(' ');
-            sb.Append(_object);
-            sb.Append(_exciting ? '!' : '.');
+            sb.Append(obj);
+            sb.Append(exciting ? '!' : '.');
         }
 
-        return sb.ToString();
+        return new Message(sb.ToString(), loc);
     }
 }
+

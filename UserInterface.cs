@@ -187,18 +187,15 @@ abstract class UserInterface
     {
         // TODO: only display messages that are within the player's
         // current FOV
-        GameState.Alert(alert);
-
-        var message = alert.AsPhrase(GameState).Trim();
-        if (string.IsNullOrEmpty(message))
+        if (string.IsNullOrEmpty(alert.Text))
             return;
 
         HistoryUpdated = true;
         
-        if (MessageHistory.Count > 0 && MessageHistory[0].Message == message)
-            MessageHistory[0] = new MsgHistory(message, MessageHistory[0].Count + 1);
+        if (MessageHistory.Count > 0 && MessageHistory[0].Message == alert.Text)
+            MessageHistory[0] = new MsgHistory(alert.Text, MessageHistory[0].Count + 1);
         else
-            MessageHistory.Insert(0, new MsgHistory(message, 1));
+            MessageHistory.Insert(0, new MsgHistory(alert.Text, 1));
         
         if (MessageHistory.Count > MaxHistory)
             MessageHistory.RemoveAt(MaxHistory);

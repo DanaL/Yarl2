@@ -26,9 +26,7 @@ internal class GameState
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
     public int Turn { get; set; } = 1;
-    public List<Message> MessageBuffer { get; private set; } = [];
-    private const int _maxMessageBuffer = 50;
-
+    
     public Loc PlayerLoc => new Loc(CurrDungeon, CurrLevel, Player.Row, Player.Col);
 
     public void EnterLevel(int dungeon, int level)
@@ -43,13 +41,6 @@ internal class GameState
     public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
     public bool InWilderness => CurrDungeon == 0;
-
-    public void Alert(Message msg)
-    {
-        MessageBuffer.Insert(0, msg);
-        if (MessageBuffer.Count > _maxMessageBuffer)
-            MessageBuffer.RemoveAt(_maxMessageBuffer);
-    }
 
     public void ItemDropped(Item item, int row, int col)
     {

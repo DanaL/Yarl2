@@ -30,12 +30,11 @@ abstract class GameObj
     public virtual Glyph Glyph { get; set; }
     public Loc Loc { get; set; }
     
-    private ulong _id;
-    public ulong ID => _id;
+    public ulong ID { get; set; }
 
     public virtual List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => [];
-    
-    public GameObj() => _id = IDSeed++;
+    public GameObj() => ID = IDSeed++;
+    public static ulong NextID => IDSeed++;
 }
 
 // Structure to store where items are in the world

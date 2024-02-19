@@ -24,7 +24,7 @@ interface IUseableItem
     (bool, string) Use(GameState gs, int row, int col);
 }
 
-class Item : GameObj, ICloneable
+class Item : GameObj
 {
     public ItemType Type { get; set; }
     public int ArmourMod { get; set; }
@@ -50,10 +50,11 @@ class Item : GameObj, ICloneable
         }
     }
 
-    public object Clone()
+    public Item Duplicate(GameState gs)
     {
         var item = (Item)MemberwiseClone();
-
+        item.ID = NextID;
+        gs.ObjDB.Add(item);
         return item;
     }
 }
