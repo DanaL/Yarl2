@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel;
+
 namespace Yarl2;
 
 // I'm only doing this because the JSONSerializer can't handle
@@ -21,8 +23,10 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit);
 
 abstract class GameObj
 {
-    private static ulong IDSeed = 0;
+    public const ulong PLAYER_ID = 1;
+    private static ulong IDSeed = 1;
     public string Name { get; set; }
+    public virtual string FullName { get; } 
     public virtual Glyph Glyph { get; set; }
     public Loc Loc { get; set; }
     
@@ -39,15 +43,15 @@ class GameObjectDB
 {
     public static readonly Glyph EMPTY = new Glyph('@', Colours.BLACK, Colours.BLACK);
 
-    public Dictionary<Loc, List<Item>> _items = [];
-    public Dictionary<Loc, Monster> _monsters = [];
+    public Dictionary<Loc, List<Item>> _itemLocs = [];
+    public Dictionary<Loc, Actor> _actorLocs = [];
     public Dictionary<ulong, GameObj> _objs = [];
 
     public Glyph GlyphAt(Loc loc)
     {
-        if (_monsters.TryGetValue(loc, out Monster monster))
-            return monster.Glyph;
-        else if (_items.TryGetValue(loc, out List<Item> items))
+        if (_actorLocs.TryGetValue(loc, out Actor actor))
+            return actor.Glyph;
+        else if (_itemLocs.TryGetValue(loc, out List<Item> items))
         {
             if (items is not null && items.Count > 0)
                 return items[0].Glyph;
@@ -63,34 +67,34 @@ class GameObjectDB
         return val;
     }
 
-    // I think I want to eventually register all create objects in the
-    // _objs dictionary
-    public void Add(Loc loc, GameObj obj)
+    public void Add(GameObj obj)
     {
         _objs[obj.ID] = obj;
-        if (obj is Monster)
-        {
-            _monsters.Add(loc, (Monster) obj);
-        }
-        else
-        {
-            if (!_items.TryGetValue(loc, out var stack))
-            {
-                stack = [];
-                _items.Add(loc, stack);
-            }
-
-            // I could have made _items Stack<Item> instead of a list, but there
-            // are times when I want to iterate over the items in a location,
-            // and sometimes the player will want to remove an item from the middle.
-            stack.Insert(0, (Item) obj);
-        }
     }
 
+    public void SetToLoc(Loc loc, Actor actor)
+    {
+        _actorLocs[loc] = actor;
+    }
+
+    public void SetToLoc(Loc loc, Item item)
+    {
+        if (!_itemLocs.TryGetValue(loc, out var stack))
+        {
+            stack = [];
+            _itemLocs.Add(loc, stack);
+        }
+
+        // I could have made _items Stack<Item> instead of a list, but there
+        // are times when I want to iterate over the items in a location,
+        // and sometimes the player will want to remove an item from the middle.
+        stack.Insert(0, item);
+    }
+    
     // This is really just used for restoring an itemdb from serialization
     public void AddStack(Loc loc, List<Item> stack)
     {
-       _items[loc] = stack;
+       _itemLocs[loc] = stack;
     }
 
     // It's probably dangerous/bad practice to return the list of items
@@ -98,18 +102,18 @@ class GameObjectDB
     // it's easy and convenient
     public List<Item> ItemsAt(Loc loc)
     {
-        if (!_items.TryGetValue(loc, out var stack))
+        if (!_itemLocs.TryGetValue(loc, out var stack))
             return [];
         else
             return stack;
     }
     
-    public void MonsterMoved(Monster m, Loc from, Loc to)
+    public void ActorMoved(Actor a, Loc from, Loc to)
     {
-        if (_monsters[from] == m)
+        if (_actorLocs[from] == a)
         {
-            _monsters.Remove(from);
-            _monsters[to] = m;
+            _actorLocs.Remove(from);
+            _actorLocs[to] = a;
         }
     }
 
@@ -119,24 +123,24 @@ class GameObjectDB
         
         // I wonder if it's worth building 'indexes' of the objects by level and maybe dungeon?
         // To speed stuff like this up when there's lots of game objects
-        foreach (var loc in _items.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)) 
+        foreach (var loc in _itemLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)) 
         { 
-            foreach (var item in _items[loc]) 
+            foreach (var item in _itemLocs[loc]) 
             {
                 if (item is IPerformer)
                     performers.Add((IPerformer)item);
             }
         }
 
-        foreach (var loc in _monsters.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
+        foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
         {
-            if (_monsters[loc] is IPerformer)
-                performers.Add(_monsters[loc]);
+            if (_actorLocs[loc] is IPerformer performer)
+                performers.Add(performer);
         }
 
         return performers;
     }
 
-    public List<(Loc, List<Item>)> ItemDump() => _items.Keys.Select(k => (k, _items[k])).ToList();
-    public List<(Loc, Monster)> MonsterDump() => _monsters.Keys.Select(k => (k, _monsters[k])).ToList();
+    public List<(Loc, List<Item>)> ItemDump() => _itemLocs.Keys.Select(k => (k, _itemLocs[k])).ToList();
+    public List<(Loc, Actor)> ActorDump() => _actorLocs.Keys.Select(k => (k, _actorLocs[k])).ToList();
 }

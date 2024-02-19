@@ -14,7 +14,7 @@ namespace Yarl2;
 class ActionResult
 {
     public bool Successful { get; set; }
-    public string? Message { get; set; }
+    public Message? Message { get; set; }
     public Action? AltAction { get; set; }
     public double EnergyCost { get; set; } = 0.0;
 
@@ -42,7 +42,7 @@ class PortalAction(GameState gameState) : Action
         result.Successful = true;
 
         if (start.DungeonID != portal.Destination.DungeonID)
-            result.Message = _gameState.CurrentDungeon.ArrivalMessage;
+            result.Message = new SimpleMessage(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination);
     
         result.EnergyCost = 1.0;
     }
@@ -60,7 +60,7 @@ class PortalAction(GameState gameState) : Action
         }
         else
         {
-            result.Message = "There is nowhere to go here.";
+            result.Message = new SimpleMessage("There is nowhere to go here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -82,7 +82,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = "You cannot go down here.";
+            result.Message = new SimpleMessage("You cannot go down here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -104,7 +104,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = "You cannot go up here.";
+            result.Message = new SimpleMessage("You cannot go up here.", _gameState.PlayerLoc);
         }
 
         return result;
@@ -134,6 +134,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
     {
         var result = new ActionResult() { Successful = false };
         var door = _map.TileAt(_row, _col);
+        var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
 
         if (door is Door d)
         {
@@ -142,26 +143,27 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
                 d.Open = false;
                 result.Successful = true;
                 result.EnergyCost = 1.0;
-                if (_actor is Player)
-                    result.Message = "You close the door.";
-                
+
+                var msg = new SVSMessage(_actor.ID, Verb.Close, "the door", false, loc);
+                result.Message = msg;
+
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
-                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);                
                 foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
                 {
+                    var actorLoc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
                     _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, src.ID);
-                    _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
+                    _gs.ToggleEffect(src, actorLoc, TerrainFlags.Lit, true);
                 }
             }
             else if (_actor is Player)
             {
-                result.Message = "The door is already closed!";
+                result.Message = new SimpleMessage("The door is already closed!", loc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = "There's no door there!";
+            result.Message = new SimpleMessage("There's no door there!", loc);
         }
 
         return result;
@@ -191,6 +193,7 @@ class OpenDoorAction : DirectionalAction
     {
         var result = new ActionResult() { Successful = false };
         var door = _map.TileAt(_row, _col);
+        var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
 
         if (door is Door d)
         {
@@ -199,12 +202,13 @@ class OpenDoorAction : DirectionalAction
                 d.Open = true;
                 result.Successful = true;
                 result.EnergyCost = 1.0;
-                if (_actor is Player)
-                    result.Message = "You open the door.";
 
+                var msg = new SVSMessage(_actor.ID, Verb.Open, "the door", false, loc);
+                result.Message = msg;
+                
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
-                var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
+                
                 foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
                 {
                     _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
@@ -213,12 +217,12 @@ class OpenDoorAction : DirectionalAction
             }
             else if (_actor is Player)
             {
-                result.Message = "The door is already open!";
+                result.Message = new SimpleMessage("The door is already open!", loc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = "There's no door there!";
+            result.Message = result.Message = new SimpleMessage("There's no door there!", loc);
         }
 
         return result;
@@ -277,9 +281,9 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
         if (!_map.InBounds(_row, _col))
         {
             // in theory this shouldn't ever happen...
-            result.Successful = false;
+            result.Successful = false;            
             if (_actor is Player)
-                result.Message = "You cannot go that way!";
+                result.Message = new SimpleMessage("You cannot go that way!", _gameState.PlayerLoc);
         }
         else if (!_map.TileAt(_row, _col).Passable())
         {
@@ -295,7 +299,7 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
                 }
                 else
                 {
-                    result.Message = BlockedMessage(tile);
+                    result.Message = new SimpleMessage(BlockedMessage(tile), _gameState.PlayerLoc);
                 }
             }
         }
@@ -310,7 +314,9 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
 
             _actor.Row = _row;
             _actor.Col = _col;
-            result.Message = CalcDesc();
+
+            if (_actor is Player)
+                result.Message = new SimpleMessage(CalcDesc(), to);
         }
 
         return result;
@@ -330,23 +336,22 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
         var itemStack = _gameState.ObjDB.ItemsAt(loc);
 
-        var inv = ((Player)_actor).Inventory;
+        var inv = ((IItemHolder)_actor).Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
 
-        if (!freeSlot)
-            return new ActionResult() { Successful=false, Message="There's no room in your inventory!" };
+        if (!freeSlot) 
+        {
+            return new ActionResult() { Successful=false, 
+                Message = new SimpleMessage("There's no room in your inventory!", _gameState.PlayerLoc) };
+        }
 
         int i = Choice - 'a';
         var item = itemStack[i];
         itemStack.RemoveAt(i);
-        inv.Add(item);
+        inv.Add(item, _actor.ID);
 
-        string msg;
-        if (item.Count == 1)
-            msg = $"You pick up {item.FullName.DefArticle()}.";
-        else
-            msg = $"You pick up {item.Count} {item.FullName.Pluralize()}.";
-
+        var msg = new SVOMessage(_actor.ID, Verb.Pickup, item.ID, item.Count, false, loc);
+        
         return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };
     }
 
@@ -371,6 +376,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item is IUseableItem tool)
         {
+            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
             if (item.Count > 1)
             {
                 --item.Count;
@@ -378,18 +384,21 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 used.Count = 1;
                 var (success, msg) = ((IUseableItem)used).Use(_gameState, _actor.Row, _actor.Col);
                 // need to handle the situation where there are no free inventory slots
-                ((IItemHolder)_actor).Inventory.Add(used);
-                return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
+                ((IItemHolder)_actor).Inventory.Add(used, _actor.ID);                
+                var alert = new SimpleMessage(msg, loc);
+                return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
             }
             else
             {
                 var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
-                return new ActionResult() { Successful = success, Message = msg, EnergyCost = 1.0 };
+                var alert = new SimpleMessage(msg, loc);
+                return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
             }
         }
         else
         {
-            return new ActionResult() { Successful = false, Message = "You don't know how to use that!" };
+            var msg = new SimpleMessage("You don't know how to use that!", _gameState.PlayerLoc);
+            return new ActionResult() { Successful = false, Message = msg };
         }
     }
 
@@ -410,7 +419,7 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
 
     public override ActionResult Execute()
     {
-        string msg = "";
+        Message alert;
         var item = ((IItemHolder)_actor).Inventory.ItemAt(_slot);        
         _ui.ClosePopup();
 
@@ -421,7 +430,8 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
             _gameState.ItemDropped(item, _actor.Row, _actor.Col);
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
-            msg = $"You drop all {item.Count} {item.FullName.Pluralize()}.";
+            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+            alert = new SVOMessage(_actor.ID, Verb.Drop, item.ID, item.Count, false, loc);
         }
         else
         {
@@ -432,10 +442,13 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
             _gameState.ItemDropped(dropped, _actor.Row, _actor.Col);
             string name = dropped.Count > 1 ? $"{_amount } {dropped.FullName.Pluralize()}"
                                             : dropped.FullName.DefArticle();
-            msg = $"You drop {name}.";
+
+            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+            alert = new SVOMessage(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, loc);
+            _gameState.Alert(alert);            
         }
 
-        return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };        
+        return new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };        
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -459,7 +472,8 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item.Equiped && item.Type == ItemType.Armour)
         {
-            return new ActionResult() { Successful=false, Message="You cannot drop something you're wearing." };
+            var msg = new SimpleMessage("You cannot drop something you're wearing.", _gameState.PlayerLoc);
+            return new ActionResult() { Successful=false, Message=msg };
         }
         else if (item.Count > 1)
         {
@@ -470,7 +484,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (_actor is Player player)
             {
                 player.ReplacePendingAction(dropStackAction, acc);
-                return new ActionResult() { Successful = false, Message = "", EnergyCost = 0.0 };
+                return new ActionResult() { Successful = false, Message = null, EnergyCost = 0.0 };
             }
             else
                 // When monsters can pick up stuff I guess I'll have to handle that here??
@@ -483,7 +497,10 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
 
-            return new ActionResult() { Successful=true, Message=$"You drop {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
+            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+            var alert = new SVOMessage(_actor.ID, Verb.Drop, item.ID, 1, false, loc);            
+            _ui.AlertPlayer(alert);
+            return new ActionResult() { Successful=true, Message=null, EnergyCost = 1.0 };
         }
     }
 
@@ -494,33 +511,37 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
+class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     private UserInterface _ui = ui;
     private Actor _actor = actor;
+    private GameState _gameState = gs;
 
     public override ActionResult Execute() 
     {
         ActionResult result;
-
-        var item = ((Player)_actor).Inventory.ItemAt(Choice);
+        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
         if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
         {
-            return new ActionResult() { Successful = false, Message = "You cannot equip that!" };
+            var msg = new SimpleMessage("You cannot equip that!", loc);
+            return new ActionResult() { Successful = false, Message = msg };
         }
-
-        var (equipResult, conflict) = ((Player) _actor).Inventory.ToggleEquipStatus(Choice);
         
+        var (equipResult, conflict) = ((Player) _actor).Inventory.ToggleEquipStatus(Choice);
+        Message alert;
         switch (equipResult)
         {
             case EquipingResult.Equiped:
-                result = new ActionResult() { Successful=true, Message=$"You ready {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
+                alert = new SVOMessage(_actor.ID, Verb.Ready, item.ID, 1, false, loc);
+                result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
-                result = new ActionResult() { Successful=true, Message=$"You unequip {item.FullName.DefArticle()}.", EnergyCost = 1.0 };
+                alert = new SVOMessage(_actor.ID, Verb.Ready, item.ID, 1, false, loc);
+                result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             default:
                 string msg = "You are already wearing ";
@@ -528,7 +549,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor) : Action
                     msg += "a helmet.";
                 else if (conflict == ArmourParts.Shirt)
                     msg += "some armour.";
-                result = new ActionResult() { Successful=true, Message=msg };
+                result = new ActionResult() { Successful=true, Message=new SimpleMessage(msg, loc) };
                 break;
         }            
         
@@ -563,7 +584,7 @@ class CloseMenuAction(UserInterface ui) : Action
     public override ActionResult Execute() 
     { 
         _ui.CloseMenu();
-        return new ActionResult() { Successful=true, Message="" };
+        return new ActionResult() { Successful=true, Message=null };
     }
 }
 
@@ -577,7 +598,9 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
         _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
         _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, ((GameObj)_performer).ID);
 
-        return new ActionResult() { Successful = true, Message = "The torch burns out.", EnergyCost = 1.0 };
+        var obj = _performer as GameObj;
+        var msg = new SVOMessage(obj.ID, Verb.BurnsOut, 0, 1, false, obj.Loc);
+        return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
     }
 }
 

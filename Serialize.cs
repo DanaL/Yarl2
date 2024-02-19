@@ -119,12 +119,12 @@ class ShrunkenInventory
 
     public static Inventory Inflate(ShrunkenInventory sp)
     {
-        var inv = new Inventory();
+        var inv = new Inventory(0);
         
-        foreach (var kvp in sp.Items)
-        {
-            inv.Add(kvp.Item);
-        }
+        // foreach (var kvp in sp.Items)
+        // {
+        //     inv.Add(kvp.Item);
+        // }
         
         inv.Zorkmids = sp.Zorkmids;
         inv.NextSlot = sp.NextSlot;
@@ -358,11 +358,11 @@ class ShrunkenGameObjDB
             sidb.Items.Add(p.Item2);
         }
         
-        foreach (var a in goDB.MonsterDump())
-        {
-            sidb.MonsterKeys.Add(a.Item1);
-            sidb.Monsters.Add(a.Item2);
-        }
+        // foreach (var a in goDB.ActorDump())
+        // {
+        //     sidb.MonsterKeys.Add(a.Item1);
+        //     sidb.Monsters.Add(a.Item2);
+        // }
 
         return sidb;
     }
@@ -376,12 +376,12 @@ class ShrunkenGameObjDB
             goDB.AddStack(sidb.ItemsKeys[j], sidb.Items[j]);
         }
 
-        for (int j = 0; j < sidb.MonsterKeys.Count; j++)
-        {
-            var m = sidb.Monsters[j];
-            m.SetBehaviour(m.AIType);
-            goDB.Add(sidb.MonsterKeys[j], m);
-        }
+        // for (int j = 0; j < sidb.MonsterKeys.Count; j++)
+        // {
+        //     var m = sidb.Monsters[j];
+        //     m.SetBehaviour(m.AIType);
+        //     goDB.Add(sidb.MonsterKeys[j], m);
+        // }
 
         return goDB;
     }

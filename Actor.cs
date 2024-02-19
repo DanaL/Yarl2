@@ -50,6 +50,8 @@ class Actor : GameObj
     public int CurrVisionRadius { get; set; }
     
     public Actor() {}
+
+    public override string FullName => Name.DefArticle();
 }
 
 class MonsterFactory 

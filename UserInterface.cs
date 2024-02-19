@@ -183,9 +183,13 @@ abstract class UserInterface
         WriteLine("", row, col, width, Colours.WHITE);
     }
 
-    public void AlertPlayer(string message) 
+    public void AlertPlayer(Message alert) 
     {
-        message = message.Trim();
+        // TODO: only display messages that are within the player's
+        // current FOV
+        GameState.Alert(alert);
+
+        var message = alert.AsPhrase(GameState).Trim();
         if (string.IsNullOrEmpty(message))
             return;
 
@@ -286,6 +290,7 @@ abstract class UserInterface
         };
 
         var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col);
+        itemDB.SetToLoc(playerLoc, Player);
         GameState.ToggleEffect(Player, playerLoc, TerrainFlags.Lit, true);
     }
 
@@ -389,7 +394,6 @@ abstract class UserInterface
             {
                 break;                
             }
-
             
             var elapsed = DateTime.Now - refresh;
             if (elapsed.TotalMilliseconds > 60)
@@ -502,7 +506,7 @@ abstract class UserInterface
         var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
         var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Row, Player!.Col, map, GameState.CurrLevel);
+        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Row, Player!.Col, map, GameState.CurrLevel);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         // There is a glitch here that I don't want to fix right now in that

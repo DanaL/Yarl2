@@ -102,29 +102,31 @@ class PreGameHandler(UserInterface ui)
         }
         else
         {
+            var objDb = new GameObjectDB();
             var (c, startRow, startCol) = BeginCampaign(new Random());
-            Player player = new Player(playerName, startRow, startCol);
-            var spear = ItemFactory.Get("spear");
+            Player player = new(playerName, startRow, startCol);
+            objDb.Add(player);
+            var spear = ItemFactory.Get("spear", objDb);
             spear.Adjectives.Add("old");
             spear.Equiped = true;
-            player.Inventory.Add(spear);
-            var armour = ItemFactory.Get("leather armour");
+            player.Inventory.Add(spear, player.ID);
+            var armour = ItemFactory.Get("leather armour", objDb);
             armour.Adjectives.Add("battered");
             armour.Equiped = true;
-            player.Inventory.Add(armour);
-            player.Inventory.Add(ItemFactory.Get("dagger"));
-            player.Inventory.Add(ItemFactory.Get("dagger"));
-            player.Inventory.Add(ItemFactory.Get("dagger"));
+            player.Inventory.Add(armour, player.ID);
+            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
+            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
+            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 
             for (int i = 0; i < 10; i++)
             {
-                player.Inventory.Add(ItemFactory.Get(("torch")));
+                player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
             }
             //player.Inventory.Add(ItemFactory.Get(("torch")));
 
             _ui.Player = player;
 
-            var objDb = new GameObjectDB();
+            
             // var m = MonsterFactory.Get("goblin", AIType.Basic);
             // m.Row = startRow + 1;
             // m.Col = startCol - 1;

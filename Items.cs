@@ -34,6 +34,7 @@ class Item : GameObj, ICloneable
     public bool Equiped { get; set; } = false;
     public int Count { get; set; } = 1;
     public int Bonus { get; set; } = 0;
+    public ulong ContainedBy { get; set; } = 0;
 
     public List<string> Adjectives { get; set; } = [];
 
@@ -143,45 +144,51 @@ class Torch : Item, IPerformer, IUseableItem
 
 class ItemFactory
 {
-    public static Item Get(string name) => name switch
+    public static Item Get(string name, GameObjectDB objDB) 
     {
-        "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
-                                    Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
-        "dagger" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
-                                    Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
-        "leather armour" => new Armour()
-        {
-            Name = name,
-            Type = ItemType.Armour,
-            Stackable = false,
-            ArmourMod = 2,
-            Piece = ArmourParts.Shirt,
-            Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
-        },
-        "helmet" => new Armour()
-        {
-            Name = name,
-            Type = ItemType.Armour,
-            Stackable = false,
-            ArmourMod = 1,
-            Piece = ArmourParts.Helmet,
-            Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
-        },
-        "torch" => new Torch()
-        {
-            Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 500, Lit = false
-        },
-        _ => throw new Exception($"{name} doesn't seem exist in yarl2 :("),
-    };
+        var item = name switch 
+        { 
+            "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
+                Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
+            "dagger" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
+                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
+            "leather armour" => new Armour()
+            {
+                Name = name,
+                Type = ItemType.Armour,
+                Stackable = false,
+                ArmourMod = 2,
+                Piece = ArmourParts.Shirt,
+                Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
+            },
+            "helmet" => new Armour()
+            {
+                Name = name,
+                Type = ItemType.Armour,
+                Stackable = false,
+                ArmourMod = 1,
+                Piece = ArmourParts.Helmet,
+                Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
+            },
+            "torch" => new Torch()
+            {
+                Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 500, Lit = false
+            },
+            _ => throw new Exception($"{name} doesn't seem exist in yarl2 :(")
+        };
+
+        objDB.Add(item);
+
+        return item;
+    }
 }
 
-class Inventory
+class Inventory(ulong ownerID)
 {
+    public ulong OwnerID { get; init; } = ownerID;
     public int Zorkmids { get; set; }
     Dictionary<char, Item> _items { get; set; } = [];
-    public char NextSlot { get; set; }
-
-    public Inventory() => NextSlot = 'a';
+    public char NextSlot { get; set; } = 'a';
 
     void FindNextSlot() 
     {
@@ -192,10 +199,8 @@ class Inventory
             ++NextSlot;
             if (NextSlot == 123)
                 NextSlot = 'a';
-            //else if (_nextSlot == 91)
-            //    _nextSlot = 'a';
-
-            if (!_items.ContainsKey(NextSlot) || _items[NextSlot] is null)
+            
+            if (!_items.TryGetValue(NextSlot, out Item? value) || value is null)
             {
                 break;
             }
@@ -211,7 +216,7 @@ class Inventory
     public char[] UsedSlots() => [.._items.Keys.Where(k => _items[k] != null).Order()];
     public Item ItemAt(char slot) => _items[slot];
 
-    public void Add(Item item)
+    public void Add(Item item, ulong ownerID)
     {
         if (item.Type == ItemType.Zorkmid)
             Zorkmids += item.Count;
@@ -234,11 +239,13 @@ class Inventory
         bool slotAvailable = !_items.ContainsKey(item.Slot) || _items[item.Slot] is null;
         if (item.Slot != '\0' && slotAvailable)
         {
+            item.ContainedBy = ownerID;
             _items[item.Slot] = item;
         }
         else if (NextSlot != '\0')
         {
             item.Slot = NextSlot;
+            item.ContainedBy = ownerID;
             _items[NextSlot] = item;
             FindNextSlot();
         }

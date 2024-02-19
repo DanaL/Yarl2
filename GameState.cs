@@ -26,6 +26,10 @@ internal class GameState
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
     public int Turn { get; set; } = 1;
+    public List<Message> MessageBuffer { get; private set; } = [];
+    private const int _maxMessageBuffer = 50;
+
+    public Loc PlayerLoc => new Loc(CurrDungeon, CurrLevel, Player.Row, Player.Col);
 
     public void EnterLevel(int dungeon, int level)
     {
@@ -40,11 +44,19 @@ internal class GameState
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
     public bool InWilderness => CurrDungeon == 0;
 
+    public void Alert(Message msg)
+    {
+        MessageBuffer.Insert(0, msg);
+        if (MessageBuffer.Count > _maxMessageBuffer)
+            MessageBuffer.RemoveAt(_maxMessageBuffer);
+    }
+
     public void ItemDropped(Item item, int row, int col)
     {
         var loc = new Loc(CurrDungeon, CurrLevel, row, col);
         item.Loc = loc;
-        ObjDB.Add(loc, item);
+        item.ContainedBy = 0;
+        ObjDB.SetToLoc(loc, item);
     }
 
     public void RefreshPerformers()
@@ -60,13 +72,9 @@ internal class GameState
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)
-    {
-        if (actor is not Yarl2.Player)
-        {
-            var m = (Monster)actor;            
-            ObjDB.MonsterMoved(m, start, dest);
-        }
-
+    {        
+        ObjDB.ActorMoved(actor, start, dest);
+        
         // It might be more efficient to actually calculate the squares covered
         // by the old and new locations and toggle their set difference? But
         // maybe not enough for the more complicated code?        

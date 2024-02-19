@@ -16,7 +16,7 @@ internal class Player : Actor, IPerformer, IItemHolder
 {
     private InputAccumulator? _accumulator;
     private Action? _deferred;
-    public Inventory Inventory { get; set; } = new();
+    public Inventory Inventory { get; set; } = new(PLAYER_ID);
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
 
@@ -32,6 +32,8 @@ internal class Player : Actor, IPerformer, IItemHolder
         Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
     }
+
+    public override string FullName => "You";
 
     // This doesn't really mean anything for the Player. An Exception will be tossed when
     // they are killed.
@@ -57,7 +59,7 @@ internal class Player : Actor, IPerformer, IItemHolder
         var slots = Inventory.UsedSlots();
         if (slots.Length == 0)
         {
-            ui.AlertPlayer("You are empty handed!");
+            //ui.AlertPlayer("You are empty handed!");
             return;
         }
 
@@ -84,7 +86,7 @@ internal class Player : Actor, IPerformer, IItemHolder
         ui.ShowDropDown(lines);
     }
 
-    private HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
+    static HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
     {                    
         HashSet<char> options = [];
         List<string> lines = [ "What do you pick up?"] ;
@@ -140,7 +142,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                         _accumulator = null;
                         ui.CloseMenu();
                         ui.ClosePopup();
-                        ui.AlertPlayer("Nevermind.");
+                        ui.AlertPlayer(new SimpleMessage("Nevermind.", gameState.PlayerLoc));
                         return new NullAction();
                     }
                 }
@@ -181,7 +183,7 @@ internal class Player : Actor, IPerformer, IItemHolder
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
-                    ui.AlertPlayer("There's nothing there...");
+                    ui.AlertPlayer(new SimpleMessage("There's nothing there...", gameState.PlayerLoc));
                     return new NullAction();
                 }
                 else if (itemStack.Count == 1) 
@@ -215,7 +217,7 @@ internal class Player : Actor, IPerformer, IItemHolder
             else if (ch == 'e')
             {
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ToggleEquipedAction(ui, this);
+                _deferred = new ToggleEquipedAction(ui, this, gameState);
 
                 ShowInventory(ui, "Equip what?");
             }
@@ -225,7 +227,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new CloseDoorAction(ui.Player, gameState.Map, gameState);                
                 _deferred = action;
                 
-                ui.AlertPlayer("Which way?");
+                ui.AlertPlayer(new SimpleMessage("Which way?", gameState.PlayerLoc));
             }
             else if (ch == 'o')
             {
@@ -233,7 +235,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new OpenDoorAction(ui.Player, gameState.Map, gameState);
                 _deferred = action;
 
-                ui.AlertPlayer("Which way?");
+                ui.AlertPlayer(new SimpleMessage("Which way?", gameState.PlayerLoc));
             }
             else if (ch == 'Q')
             {
