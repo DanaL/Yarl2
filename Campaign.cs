@@ -16,8 +16,8 @@ namespace Yarl2;
 class Dungeon(int ID, string arrivalMessage)
 {
     public int ID { get; init; } = ID;
-    public HashSet<(int, int, int)> RememberedSqs = [];
-    public Dictionary<int, Map> LevelMaps = new();
+    public Dictionary<(int, int, int), Sqr> RememberedSqs = [];
+    public Dictionary<int, Map> LevelMaps = [];
     public string ArrivalMessage { get; } = arrivalMessage;
 
     public void AddMap(Map map)

@@ -193,10 +193,10 @@ internal class ShrunkenDungeon
             sd.LevelMaps.Add(k, ShrunkenMap.Shrink(dungeon.LevelMaps[k]));
         }
 
-        foreach (var sq in dungeon.RememberedSqs)
-        {
-            sd.RememberedSqs.Add(RememberedSq.FromTuple(sq));
-        }
+        // foreach (var sq in dungeon.RememberedSqs)
+        // {
+        //     sd.RememberedSqs.Add(RememberedSq.FromTuple(sq));
+        // }
 
         return sd;
     }
@@ -206,10 +206,10 @@ internal class ShrunkenDungeon
         Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage);
         d.RememberedSqs = [];
 
-        foreach (var sq in sd.RememberedSqs)
-        {
-            d.RememberedSqs.Add(sq.ToTuple());
-        }
+        // foreach (var sq in sd.RememberedSqs)
+        // {
+        //     d.RememberedSqs.Add(sq.ToTuple());
+        // }
 
         foreach (var k in sd.LevelMaps.Keys)
         {

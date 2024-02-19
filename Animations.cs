@@ -54,7 +54,7 @@ class TorchLightAnimationListener : IAnimationListener
         {
             for (int c = 0; c < UserInterface.ViewWidth; c++)
             {
-                if (_ui.SqsOnScreen[r, c].BG == Colours.TORCH_ORANGE && rnd.Next(20) == 0)
+                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && rnd.Next(20) == 0)
                 {
                     _flickered.Add((r, c));
                     if (++count > 3)
@@ -68,10 +68,10 @@ class TorchLightAnimationListener : IAnimationListener
     {
         foreach (var (r, c) in _flickered) 
         {
-            if (_ui.SqsOnScreen[r, c].CH == '.')
-                _ui.SqsOnScreen[r, c] = (Colours.YELLOW_ORANGE, Colours.TORCH_RED, '.');
-            else if (_ui.SqsOnScreen[r, c].CH == '#')
-                _ui.SqsOnScreen[r, c] = (Colours.TORCH_ORANGE, Colours.TORCH_RED, '#');
+            if (_ui.SqsOnScreen[r, c].Ch == '.')
+                _ui.SqsOnScreen[r, c] = new Sqr(Colours.YELLOW_ORANGE, Colours.TORCH_RED, '.');
+            else if (_ui.SqsOnScreen[r, c].Ch == '#')
+                _ui.SqsOnScreen[r, c] = new Sqr(Colours.TORCH_ORANGE, Colours.TORCH_RED, '#');
         }
     }
 }
@@ -203,55 +203,5 @@ class CloudAnimationListener : IAnimationListener
                 _nextCloud = DateTime.Now.AddSeconds(rng.Next(5, 16));                
             }
         }
-    }
-}
-
-internal class WaterAnimationListener : IAnimationListener
-{
-    DateTime _lastFrame;
-    UserInterface _ui;
-    HashSet<(int, int)> _sparkles = [];
-
-    public WaterAnimationListener(UserInterface ui)
-    {
-        _ui = ui;
-        _lastFrame = DateTime.Now;
-        
-        SetSparkles();
-    }
-
-    void SetSparkles()
-    {
-        _sparkles = [];
-        var rng = new Random();        
-        for (int r = 0; r < UserInterface.ViewHeight; r++) 
-        {
-            for (int c = 0; c < UserInterface.ViewWidth; c++)
-            {
-                if (rng.NextDouble() < 0.05)
-                    _sparkles.Add((r, c));
-                if (_sparkles.Count >= 10)
-                    return;
-            }            
-        }
-    }
-    
-    public void Update() 
-    {
-        foreach (var sq in _sparkles)
-        {
-            var t = _ui.SqsOnScreen[sq.Item1, sq.Item2];
-            if (t.CH == '}')
-            {
-                _ui.SqsOnScreen[sq.Item1, sq.Item2] = (Colours.LIGHT_BLUE, Colours.BLACK, '~');
-            }
-        }
-
-        var dd = DateTime.Now - _lastFrame;
-        if (dd.TotalMilliseconds >= 150)
-        {
-            _lastFrame = DateTime.Now;
-            SetSparkles();
-        }    
     }
 }

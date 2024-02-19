@@ -17,7 +17,7 @@ internal class SDLUserInterface : UserInterface
 
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
-    private (Colour, Colour, char)[,] _prevTiles = new (Colour, Colour, char)[ViewHeight, ViewWidth];    
+    private Sqr[,] _prevTiles = new Sqr[ViewHeight, ViewWidth];    
     private string _prevMessage = "";
     
     public SDLUserInterface(string windowTitle, Options opt) : base(opt)
@@ -49,7 +49,7 @@ internal class SDLUserInterface : UserInterface
         {
             for (int c = 0; c < ViewWidth; c++)
             {
-                _prevTiles[r, c] = (Colours.BLACK, Colours.BLACK, ' ');
+                _prevTiles[r, c] = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
             }
         }
     }
