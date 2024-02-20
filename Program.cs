@@ -13,6 +13,9 @@ var options = Options.LoadOptions("options.json");
 
 // var path = dj.ShortestPath(16, 5, 0, 0);
 // return;
+var i1 = ItemSaver.TextToItem("2|0,0,0,0|spear|0|False|a|True|1|0|1|old|);white;grey|Weapon");
+var i2 = ItemSaver.TextToItem("3|0,0,0,0|leather armour|2|False|b|True|1|0|1|battered|[;brown;lightbrown|Shirt|Armour");
+var i3 = ItemSaver.TextToItem("7|0,0,0,0|torch|0|True||False|1|0|0||False|500|0|Torch");
 
 UserInterface display;
 if (options.Display == "Bearlib")

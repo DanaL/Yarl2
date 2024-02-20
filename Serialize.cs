@@ -99,26 +99,140 @@ internal class ShrunkenPlayer
 
 record InvItemKVP(char Slot, Item Item);
 
+class ColourSave
+{
+    public static string ColourToText(Colour colour)
+    {
+        if (colour == Colours.WHITE) return "white";
+        else if (colour == Colours.BLACK) return "black";
+        else if (colour == Colours.GREY) return "grey";
+        else if (colour == Colours.LIGHT_GREY) return "lightgrey";
+        else if (colour == Colours.DARK_GREY) return "darkgrey";
+        else if (colour == Colours.YELLOW) return "yellow";
+        else if (colour == Colours.YELLOW_ORANGE) return "yelloworange";
+        else if (colour == Colours.LIGHT_BROWN) return "lightbrown";
+        else if (colour == Colours.BROWN) return "brown";
+        else if (colour == Colours.GREEN) return "green";
+        else if (colour == Colours.DARK_GREEN) return "darkgreen";
+        else if (colour == Colours.LIME_GREEN) return "limegreen";
+        else if (colour == Colours.BLUE) return "blue";
+        else if (colour == Colours.LIGHT_BLUE) return "lightblue";
+        else if (colour == Colours.DARK_BLUE) return "darkblue";
+        else if (colour == Colours.BRIGHT_RED) return "brightred";
+        else if (colour == Colours.DULL_RED) return "dullred";
+        else if (colour == Colours.TORCH_ORANGE) return "torchorange";
+        else if (colour == Colours.TORCH_RED) return "torchred";
+        else if (colour == Colours.TORCH_YELLOW) return "torchyellow";
+        else throw new Exception("Hmm I don't know that colour");
+    }
+  
+    public static Colour TextToColour(string colour)
+    {
+        if (colour == "white") return Colours.WHITE;
+        else if (colour == "black") return Colours.BLACK;
+        else if (colour == "grey") return Colours.GREY;
+        else if (colour == "lightgrey") return Colours.LIGHT_GREY;
+        else if (colour == "darkgrey") return Colours.DARK_GREY;
+        else if (colour == "yellow") return Colours.YELLOW;
+        else if (colour == "yelloworange") return Colours.YELLOW_ORANGE;
+        else if (colour == "lightbrown") return Colours.LIGHT_BROWN;
+        else if (colour == "brown") return Colours.BROWN;
+        else if (colour == "darkgreen") return Colours.DARK_GREEN;
+        else if (colour == "limegreen") return Colours.LIME_GREEN;
+        else if (colour == "blue") return Colours.BLUE;
+        else if (colour == "lightblue") return Colours.LIGHT_BLUE;
+        else if (colour == "darkblue") return Colours.DARK_BLUE;
+        else if (colour == "brightred") return Colours.BRIGHT_RED;
+        else if (colour == "dullred") return Colours.DULL_RED;
+        else if (colour == "torchorange") return Colours.TORCH_ORANGE;
+        else if (colour == "torchred") return Colours.TORCH_RED;
+        else if (colour == "torchyellow") return Colours.TORCH_YELLOW;
+        else throw new Exception("Hmm I don't know that colour");
+    }
+}
+
 // The Item class and its subclasses has proven annoying to serialize so I'm
 // going to do a bespoke text format for them. Not too happy about this because
 // I'll probably create a bunch of bugs in the meantime :'(
 class ItemSaver
 {
+    static string GlyphToText(Glyph glyph) => $"{glyph.Ch};{ColourSave.ColourToText(glyph.Lit)};{ColourSave.ColourToText(glyph.Unlit)}";
+    static Glyph TextToGlyph(string text)
+    {
+        var p = text.Split(';');
+        return new Glyph(p[0][0], ColourSave.TextToColour(p[1]), ColourSave.TextToColour(p[2]));
+    }
+
+    static Loc TextToLoc(string text)
+    {
+        var digits = text.Split(',').Select(int.Parse).ToArray();
+        return new Loc(digits[0], digits[1], digits[2], digits[3]);
+    }
+
     public static string ItemToText(Item item)
     {
         string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.ArmourMod}|{item.Stackable}|{item.Slot}|";
         txt += $"{item.Equiped}|{item.Count}|{item.Bonus}|{item.ContainedBy}|";
         txt += string.Join(',', item.Adjectives);
         if (item.Type == ItemType.Weapon)
-            txt += "|Weapon";
+            txt += $"|{GlyphToText(item.Glyph)}|Weapon";
         else if (item is Armour armour)
-            txt += $"{armour.Piece}|Armour";
+            txt += $"|{GlyphToText(item.Glyph)}|{armour.Piece}|Armour";
         else if (item is Torch torch)
-            txt += $"{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
-        
-        // need to add in the Glyph
+            txt += $"|{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
         
         return txt;
+    }
+
+    public static Item TextToItem(string text)
+    {
+        var pieces = text.Split('|');
+        var type = pieces.Last();
+
+        var item = new Item()
+        {
+            ID = ulong.Parse(pieces[0]),
+            Loc = TextToLoc(pieces[1]),
+            Name = pieces[2],
+            ArmourMod = int.Parse(pieces[3]),
+            Stackable = bool.Parse(pieces[4]),
+            Slot = pieces[5][0],
+            Equiped = bool.Parse(pieces[6]),
+            Count = int.Parse(pieces[7]),
+            Bonus = int.Parse(pieces[8]),
+            ContainedBy = ulong.Parse(pieces[9]),
+            Adjectives = [.. pieces[10].Split(',')]
+        };
+        if (type == "Weapon")
+        {
+            item.Type = ItemType.Weapon;
+            item.Glyph = TextToGlyph(pieces[11]);
+        }
+        else if (type == "Armour")
+        {
+            var armour = (Armour)item;
+            armour.Type = ItemType.Armour;
+            armour.Glyph = TextToGlyph(pieces[11]);
+            armour.Piece = pieces[12] switch
+            {
+                "Shirt" => ArmourParts.Shirt,
+                "Boots" => ArmourParts.Boots,
+                "Cloak" => ArmourParts.Cloak,
+                "Helmet" => ArmourParts.Helmet,
+                _ => throw new Exception($"Unknown armour part {pieces[12]} while deserializing item")
+            };
+        }
+        else if (type == "Torch")
+        {
+            var torch = item as Torch;
+            torch.Lit = bool.Parse(pieces[11]);
+            torch.Fuel = int.Parse(pieces[12]);
+            torch.Energy = int.Parse(pieces[13]);
+        }
+        else
+            throw new Exception("Hmm I don't know how to deserialize that item!");
+
+        return item;
     }
 }
 
