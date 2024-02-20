@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -97,6 +98,29 @@ internal class ShrunkenPlayer
 }
 
 record InvItemKVP(char Slot, Item Item);
+
+// The Item class and its subclasses has proven annoying to serialize so I'm
+// going to do a bespoke text format for them. Not too happy about this because
+// I'll probably create a bunch of bugs in the meantime :'(
+class ItemSaver
+{
+    public static string ItemToText(Item item)
+    {
+        string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.ArmourMod}|{item.Stackable}|{item.Slot}|";
+        txt += $"{item.Equiped}|{item.Count}|{item.Bonus}|{item.ContainedBy}|";
+        txt += string.Join(',', item.Adjectives);
+        if (item.Type == ItemType.Weapon)
+            txt += "|Weapon";
+        else if (item is Armour armour)
+            txt += $"{armour.Piece}|Armour";
+        else if (item is Torch torch)
+            txt += $"{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
+        
+        // need to add in the Glyph
+        
+        return txt;
+    }
+}
 
 class ShrunkenInventory
 {

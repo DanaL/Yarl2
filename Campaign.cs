@@ -117,6 +117,9 @@ class PreGameHandler(UserInterface ui)
             player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
             player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 
+            Console.WriteLine(ItemSaver.ItemToText(spear));
+            Console.WriteLine(ItemSaver.ItemToText(ItemFactory.Get("torch", objDb)));
+            
             for (int i = 0; i < 10; i++)
             {
                 player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);

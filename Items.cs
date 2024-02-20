@@ -28,7 +28,6 @@ class Item : GameObj
 {
     public ItemType Type { get; set; }
     public int ArmourMod { get; set; }
-    public int Weight { get; set;}
     public bool Stackable { get; set; }
     public char Slot { get; set; }
     public bool Equiped { get; set; } = false;

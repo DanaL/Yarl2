@@ -17,7 +17,10 @@ namespace Yarl2;
 // tuples and I'd have to convert the DB keys to something else
 // anyhow.
 // Although it does make a nicer parameter to pass around to methods
-record struct Loc(int DungeonID, int Level, int Row, int Col);
+record struct Loc(int DungeonID, int Level, int Row, int Col)
+{
+    public override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+}
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit);
 
