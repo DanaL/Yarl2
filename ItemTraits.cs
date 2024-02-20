@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System;
-
 namespace Yarl2;
 
 enum ArmourParts
@@ -35,6 +33,7 @@ abstract class ItemTrait
 {
     public abstract string Desc();
     public abstract ItemTrait Duplicate(Item container);
+    public abstract string AsText();
 }
 
 class MeleeAttackTrait : ItemTrait
@@ -47,7 +46,10 @@ class MeleeAttackTrait : ItemTrait
 
     public override ItemTrait Duplicate(Item _) => 
         new MeleeAttackTrait() { Bonus = Bonus, DamageDie = DamageDie, NumOfDie = NumOfDie };
+
+    public override string AsText() => $"MeleeAttackTrait,{DamageDie},{NumOfDie},{Bonus}";
 }
+
 class ArmourTrait : ItemTrait
 {
     public ArmourParts Part { get; set; }
@@ -58,11 +60,13 @@ class ArmourTrait : ItemTrait
 
     public override ItemTrait Duplicate(Item _) => 
         new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
+
+    public override string AsText() => $"ArmourTrait,{Part},{ArmourMod},{Bonus}";
 }
 
-class LightSourceTrait(Item item) : ItemTrait, IPerformer, IUSeable
+class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
 {
-    public Item Item { get; set; } = item;
+    public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
     public int Radius { get; set; }
     public int Fuel { get; set; }
@@ -72,10 +76,16 @@ class LightSourceTrait(Item item) : ItemTrait, IPerformer, IUSeable
 
     public override string Desc() => Lit ? "(Lit)" : "";
 
+    public override string AsText()
+    {
+        return $"LightSourceTrait,{ContainerID},{Lit},{Radius},{Fuel},{Energy},{Recovery}";
+    }
+
     public override ItemTrait Duplicate(Item container)
     {
-        return new LightSourceTrait(container)
+        return new LightSourceTrait()
         {
+            ContainerID = container.ID,
             Fuel = Fuel,
             Radius = Radius,
             Lit = Lit,
@@ -86,6 +96,7 @@ class LightSourceTrait(Item item) : ItemTrait, IPerformer, IUSeable
 
     public (bool, string) Use(GameState gs, int row, int col)
     {
+        Item item = (Item)gs.ObjDB.GetObj(ContainerID);
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
         {
@@ -93,25 +104,25 @@ class LightSourceTrait(Item item) : ItemTrait, IPerformer, IUSeable
 
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
-            // affect
-            gs.ToggleEffect(Item, loc, TerrainFlags.Lit, false);
+            // affect            
+            gs.ToggleEffect(item, loc, TerrainFlags.Lit, false);
             Lit = false;
 
-            return (true, $"You extinguish {Item.FullName.DefArticle()}.");
+            return (true, $"You extinguish {item.FullName.DefArticle()}.");
         }
         else if (Fuel > 0)
         {
             Lit = true;
-            Item.Stackable = false;
+            item.Stackable = false;
             Energy = Recovery;
             gs.CurrPerformers.Add(this);
-            gs.ToggleEffect(Item, loc, TerrainFlags.Lit, true);
+            gs.ToggleEffect(item, loc, TerrainFlags.Lit, true);
 
-            return (true, $"The {Item.Name} sparks to life!");
+            return (true, $"The {item.Name} sparks to life!");
         }
         else
         {
-            return (false, $"That {Item.Name} is burnt out!");
+            return (false, $"That {item.Name} is burnt out!");
         }
     }
 
@@ -130,5 +141,59 @@ class LightSourceTrait(Item item) : ItemTrait, IPerformer, IUSeable
             Lit = false;
             return new ExtinguishAction(this, gameState);
         }
+    }
+}
+
+class TraitFactory
+{
+    public static ItemTrait FromText(string text)
+    {
+        var pieces = text.Split(',');
+        var type = pieces[0];
+
+        ItemTrait trait;
+
+        switch (type)
+        {
+            case "MeleeAttackTrait":
+                trait = new MeleeAttackTrait()
+                {
+                    DamageDie = int.Parse(pieces[1]),
+                    NumOfDie = int.Parse(pieces[2]),
+                    Bonus = int.Parse(pieces[3])
+                };
+                break;
+            case "ArmourTrait":
+                var part = pieces[1] switch
+                {
+                    "Helmet" => ArmourParts.Helmet,
+                    "Boots" => ArmourParts.Boots,
+                    "Cloak" => ArmourParts.Cloak,
+                    "Shirt" => ArmourParts.Shirt,
+                    _ => throw new Exception("I don't know about that Armour Part")
+                };
+                trait = new ArmourTrait()
+                {
+                    Part = part,
+                    ArmourMod = int.Parse(pieces[2]),
+                    Bonus = int.Parse(pieces[3])
+                };
+                break;
+            case "LightSourceTrait":
+                trait = new LightSourceTrait()
+                {
+                    ContainerID = ulong.Parse(pieces[1]),
+                    Lit = bool.Parse(pieces[2]),
+                    Radius = int.Parse(pieces[3]),
+                    Fuel = int.Parse(pieces[4]),
+                    Energy = int.Parse(pieces[5]),
+                    Recovery = int.Parse(pieces[6])
+                };
+                break;
+            default:
+                throw new Exception("I don't know how to make that kind of Trait");
+        }
+
+        return trait;
     }
 }

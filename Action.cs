@@ -599,11 +599,12 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
 
         // ExtinguishActions are performed on LightSourceTraits
         var src = (LightSourceTrait)_performer;
-        src.Item.Adjectives.Add("burnt out");
+        Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
+        item.Adjectives.Add("burnt out");
 
-        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, (src.Item).ID);
+        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, (item).ID);
 
-        var msg = MessageFactory.Phrase(src.Item.ID, Verb.BurnsOut, 0, 1, false, src.Item.Loc, _gs);
+        var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, item.Loc, _gs);
         return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
     }
 }

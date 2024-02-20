@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
@@ -141,19 +139,7 @@ internal class GameState
         {
             var map = Campaign.Dungeons[dungeon].LevelMaps[level];
             map.RemoveAtLoc(effect, r, c, objID);
-        }
-        // oldSqs.ExceptWith(newSqs);
-        // foreach (var (objID, dungeon, level, _, _) in oldSqs)
-        // {
-        //     var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-        //     map.RemoveEffect(effect, objID);
-        // }
-
-        // foreach (var (objID, dungeon, level, r, c) in newSqs)
-        // {
-        //     var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-        //     map.ApplyEffect(effect, r, c, objID);
-        // }
+        }        
     }
 
     // I only have light effects in the game right now, but I also have ambitions

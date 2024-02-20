@@ -116,7 +116,7 @@ class ItemFactory
             case "torch":
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
-                item.Traits.Add(new LightSourceTrait(item) { Fuel=15, Radius=5, Lit=false, 
+                item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=500, Radius=5, Lit=false, 
                                          Energy=0.0, Recovery=1.0});
                 break;
             default:

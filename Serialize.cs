@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks.Dataflow;
 
 namespace Yarl2;
 
@@ -174,13 +175,14 @@ class ItemSaver
         string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.Stackable}|{item.Slot}|";
         txt += $"{item.Equiped}|{item.Count}|{item.ContainedBy}|";
         txt += string.Join(',', item.Adjectives);
-        if (item.Type == ItemType.Weapon)
-            txt += $"|{GlyphToText(item.Glyph)}|Weapon";
-        else if (item is Armour armour)
-            txt += $"|{GlyphToText(item.Glyph)}|{armour.Piece}|Armour";
-        //else if (item is Torch torch)
-        //    txt += $"|{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
-        
+        txt += $"|" + GlyphToText(item.Glyph);
+
+        var traits = string.Join(';', item.Traits.Select(t => t.AsText()));
+        if (traits.Length > 0)
+            txt += "|" + traits;
+
+        txt += $"|{item.Type}";
+
         return txt;
     }
 
@@ -194,42 +196,18 @@ class ItemSaver
             ID = ulong.Parse(pieces[0]),
             Loc = TextToLoc(pieces[1]),
             Name = pieces[2],
-            Stackable = bool.Parse(pieces[4]),
-            Slot = pieces[5][0],
-            Equiped = bool.Parse(pieces[6]),
-            Count = int.Parse(pieces[7]),
-            ContainedBy = ulong.Parse(pieces[9]),
-            Adjectives = [.. pieces[10].Split(',')]
+            Stackable = bool.Parse(pieces[3]),
+            Slot = pieces[4] == "" ? '\0' : pieces[4][0],
+            Equiped = bool.Parse(pieces[5]),
+            Count = int.Parse(pieces[6]),
+            ContainedBy = ulong.Parse(pieces[7]),
+            Adjectives = [.. pieces[8].Split(',')],
+            Glyph = TextToGlyph(pieces[9]),
         };
-        if (type == "Weapon")
-        {
-            item.Type = ItemType.Weapon;
-            item.Glyph = TextToGlyph(pieces[11]);
-        }
-        else if (type == "Armour")
-        {
-            var armour = (Armour)item;
-            armour.Type = ItemType.Armour;
-            armour.Glyph = TextToGlyph(pieces[11]);
-            armour.Piece = pieces[12] switch
-            {
-                "Shirt" => ArmourParts.Shirt,
-                "Boots" => ArmourParts.Boots,
-                "Cloak" => ArmourParts.Cloak,
-                "Helmet" => ArmourParts.Helmet,
-                _ => throw new Exception($"Unknown armour part {pieces[12]} while deserializing item")
-            };
-        }
-        //else if (type == "Torch")
-        //{
-        //    var torch = item as Torch;
-        //    torch.Lit = bool.Parse(pieces[11]);
-        //    torch.Fuel = int.Parse(pieces[12]);
-        //    torch.Energy = int.Parse(pieces[13]);
-        //}
-        else
-            throw new Exception("Hmm I don't know how to deserialize that item!");
 
+        foreach (var traitStr in pieces[10].Split(';'))
+            item.Traits.Add(TraitFactory.FromText(traitStr));
+        
         return item;
     }
 }
