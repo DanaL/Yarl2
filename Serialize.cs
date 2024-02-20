@@ -171,15 +171,15 @@ class ItemSaver
 
     public static string ItemToText(Item item)
     {
-        string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.ArmourMod}|{item.Stackable}|{item.Slot}|";
-        txt += $"{item.Equiped}|{item.Count}|{item.Bonus}|{item.ContainedBy}|";
+        string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.Stackable}|{item.Slot}|";
+        txt += $"{item.Equiped}|{item.Count}|{item.ContainedBy}|";
         txt += string.Join(',', item.Adjectives);
         if (item.Type == ItemType.Weapon)
             txt += $"|{GlyphToText(item.Glyph)}|Weapon";
         else if (item is Armour armour)
             txt += $"|{GlyphToText(item.Glyph)}|{armour.Piece}|Armour";
-        else if (item is Torch torch)
-            txt += $"|{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
+        //else if (item is Torch torch)
+        //    txt += $"|{torch.Lit}|{torch.Fuel}|{torch.Energy}|Torch";
         
         return txt;
     }
@@ -194,12 +194,10 @@ class ItemSaver
             ID = ulong.Parse(pieces[0]),
             Loc = TextToLoc(pieces[1]),
             Name = pieces[2],
-            ArmourMod = int.Parse(pieces[3]),
             Stackable = bool.Parse(pieces[4]),
             Slot = pieces[5][0],
             Equiped = bool.Parse(pieces[6]),
             Count = int.Parse(pieces[7]),
-            Bonus = int.Parse(pieces[8]),
             ContainedBy = ulong.Parse(pieces[9]),
             Adjectives = [.. pieces[10].Split(',')]
         };
@@ -222,13 +220,13 @@ class ItemSaver
                 _ => throw new Exception($"Unknown armour part {pieces[12]} while deserializing item")
             };
         }
-        else if (type == "Torch")
-        {
-            var torch = item as Torch;
-            torch.Lit = bool.Parse(pieces[11]);
-            torch.Fuel = int.Parse(pieces[12]);
-            torch.Energy = int.Parse(pieces[13]);
-        }
+        //else if (type == "Torch")
+        //{
+        //    var torch = item as Torch;
+        //    torch.Lit = bool.Parse(pieces[11]);
+        //    torch.Fuel = int.Parse(pieces[12]);
+        //    torch.Energy = int.Parse(pieces[13]);
+        //}
         else
             throw new Exception("Hmm I don't know how to deserialize that item!");
 

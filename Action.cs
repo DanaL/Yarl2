@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Linq.Expressions;
-
 namespace Yarl2;
 
 class ActionResult
@@ -373,29 +371,32 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
+         var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
-        if (item is IUseableItem tool)
+        var useableTraits = item.Traits.Where(t => t is IUSeable);
+        if (useableTraits.Any()) 
         {
+            Item toUse = item;
             var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
             if (item.Count > 1)
             {
                 --item.Count;
-                var used = item.Duplicate(_gameState);
-                used.Count = 1;
-                var (success, msg) = ((IUseableItem)used).Use(_gameState, _actor.Row, _actor.Col);
-                // need to handle the situation where there are no free inventory slots
-                ((IItemHolder)_actor).Inventory.Add(used, _actor.ID);                
-                var alert = MessageFactory.Phrase(msg, loc);
-                return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
+                toUse = item.Duplicate(_gameState);
+                toUse.Count = 1;
+                toUse.Stackable = false;
+                ((IItemHolder)_actor).Inventory.Add(toUse, _actor.ID);                
+                useableTraits = toUse.Traits.Where(t => t is IUSeable);
             }
-            else
+
+            bool success = false;
+            string msg = "";
+            foreach (IUSeable trait in useableTraits)
             {
-                var (success, msg) = tool.Use(_gameState, _actor.Row, _actor.Col);
-                var alert = MessageFactory.Phrase(msg, loc);
-                return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
+                (success, msg) = trait.Use(_gameState, _actor.Row, _actor.Col);
             }
+            var alert = MessageFactory.Phrase(msg, loc);
+            return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
         }
         else
         {
@@ -595,10 +596,14 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
     public override ActionResult Execute()
     {        
         _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
-        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, ((GameObj)_performer).ID);
 
-        var obj = _performer as GameObj;
-        var msg = MessageFactory.Phrase(obj.ID, Verb.BurnsOut, 0, 1, false, obj.Loc, _gs);
+        // ExtinguishActions are performed on LightSourceTraits
+        var src = (LightSourceTrait)_performer;
+        src.Item.Adjectives.Add("burnt out");
+
+        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, (src.Item).ID);
+
+        var msg = MessageFactory.Phrase(src.Item.ID, Verb.BurnsOut, 0, 1, false, src.Item.Loc, _gs);
         return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
     }
 }

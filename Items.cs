@@ -19,126 +19,69 @@ enum ItemType
     Tool
 }
 
-interface IUseableItem
-{
-    (bool, string) Use(GameState gs, int row, int col);
-}
-
 class Item : GameObj
 {
     public ItemType Type { get; set; }
-    public int ArmourMod { get; set; }
     public bool Stackable { get; set; }
     public char Slot { get; set; }
     public bool Equiped { get; set; } = false;
     public int Count { get; set; } = 1;
-    public int Bonus { get; set; } = 0;
     public ulong ContainedBy { get; set; } = 0;
 
     public List<string> Adjectives { get; set; } = [];
+    public List<ItemTrait> Traits { get; set; } = [];
 
-    public virtual string FullName {
-        get 
+    private string CalcFullName()
+    {
+        string name = Name;
+
+        if (Adjectives.Count == 1)
+            name = $"{Adjectives[0]} {Name}";
+        else if (Adjectives.Count > 1)
+            name = $"{string.Join(", ", Adjectives)} {Name}";
+
+        string traitDescs = string.Join(' ', Traits.Select(t => t.Desc()));
+        if (traitDescs.Length > 0)
+            name = name + " " + traitDescs;
+
+        return name;
+    }
+
+    public override string FullName => CalcFullName();
+
+    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs)
+    {
+        List<(ulong, int)> sources = [];
+
+        if (flags == TerrainFlags.Lit)
         {
-            if (Adjectives.Count == 0)
-                return Name;
-            else if (Adjectives.Count == 1)
-                return $"{Adjectives[0]} {Name}";
-            else
-                return $"{string.Join(", ", Adjectives)} {Name}"; 
+            foreach (var t in Traits)
+            {
+                if (t is LightSourceTrait light && light.Lit)
+                    sources.Add((ID, light.Radius));                
+            }
         }
+        
+        return sources;
     }
 
     public Item Duplicate(GameState gs)
     {
         var item = (Item)MemberwiseClone();
         item.ID = NextID;
+        item.Traits = [];
+        item.Adjectives = Adjectives.Select(s => s).ToList();
+
+        // In the case of LightSourceTraits, we need to create a duplicate of
+        // the trait and set it to point to the containing object. I'll need to
+        // come up with something cleaner when I have more traits that have
+        // changing fields (a la a Torch's fuel)
+        foreach (var trait in Traits)
+            item.Traits.Add(trait.Duplicate(item));
+        
         gs.ObjDB.Add(item);
+
         return item;
-    }
-}
-
-enum ArmourParts
-{
-    Helmet,
-    Boots,
-    Cloak,
-    Shirt
-}
-
-class Armour : Item
-{
-    public ArmourParts Piece { get; set; }
-}
-
-class Torch : Item, IPerformer, IUseableItem
-{
-    public bool Lit { get; set; }
-    public int Fuel { get; set; }
-    public bool RemoveFromQueue { get; set; }
-    public double Energy { get; set; }
-    public double Recovery
-    {
-        get => 1.0;
-        set { } // I don't think the recovery value for torches will change
-    }
-
-    public override string FullName => Lit ? base.FullName + " (lit)" : base.FullName;
-    
-    public override Glyph Glyph
-    {
-        get => Lit ? new Glyph('(', Colours.DULL_RED, Colours.YELLOW_ORANGE)
-                   : new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN);
-    }
-
-    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => Lit ? [(ID, 5)] : [];
-
-    public (bool, string) Use(GameState gs, int row, int col)
-    {
-        var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
-        if (Lit)
-        {            
-            gs.CurrPerformers.Remove(this);
-
-            // Gotta set the lighting level before we extinguish the torch
-            // so it's radius is still 5 when calculating which squares to 
-            // affect
-            gs.ToggleEffect(this, loc, TerrainFlags.Lit, false);
-            Lit = false;
-
-            return (true, $"You extinguish {Name.DefArticle()}.");
-        }
-        else if (Fuel > 0)
-        {
-            Lit = true;
-            Stackable = false;
-            Energy = Recovery;
-            gs.CurrPerformers.Add(this);
-            gs.ToggleEffect(this, loc, TerrainFlags.Lit, true);
-
-            return (true, $"The {Name} sparks to life!");
-        }
-        else
-        {
-            return (false, $"That {Name} is burnt out!");
-        }
-    }
-
-    public Action TakeTurn(UserInterface ui, GameState gameState)
-    {
-        if (!Lit)
-            return new PassAction(this);
-
-        if (--Fuel > 0)
-        {
-            // I could also alert the player here that the torch is flickering, about to go out, etc            
-            return new PassAction(this);
-        }
-        else
-        {
-            Lit = false;
-            return new ExtinguishAction(this, gameState);
-        }
     }
 }
 
@@ -146,36 +89,39 @@ class ItemFactory
 {
     public static Item Get(string name, GameObjectDB objDB) 
     {
-        var item = name switch 
-        { 
-            "spear" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
-                Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
-            "dagger" => new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
-                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) },
-            "leather armour" => new Armour()
-            {
-                Name = name,
-                Type = ItemType.Armour,
-                Stackable = false,
-                ArmourMod = 2,
-                Piece = ArmourParts.Shirt,
-                Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
-            },
-            "helmet" => new Armour()
-            {
-                Name = name,
-                Type = ItemType.Armour,
-                Stackable = false,
-                ArmourMod = 1,
-                Piece = ArmourParts.Helmet,
-                Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
-            },
-            "torch" => new Torch()
-            {
-                Name = name, Type = ItemType.Tool, Stackable = true, Fuel = 500, Lit = false
-            },
-            _ => throw new Exception($"{name} doesn't seem exist in yarl2 :(")
-        };
+        Item item;
+
+        switch (name)
+        {
+            case "spear":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, 
+                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
+                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 6, NumOfDie = 1, Bonus = 0 });
+                break;
+            case "dagger":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
+                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
+                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 4, NumOfDie = 1, Bonus = 0 });
+                break;
+            case "leather armour":
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                                    Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
+                break;
+            case "helmet":
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                                    Glyph = new Glyph('[', Colours.WHITE, Colours.GREY) };
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
+                break;
+            case "torch":
+                item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true,
+                                    Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
+                item.Traits.Add(new LightSourceTrait(item) { Fuel=15, Radius=5, Lit=false, 
+                                         Energy=0.0, Recovery=1.0});
+                break;
+            default:
+                throw new Exception($"{name} doesn't seem exist in yarl2 :(");
+        }
 
         objDB.Add(item);
 
@@ -226,7 +172,9 @@ class Inventory(ulong ownerID)
         {
             foreach (var v in _items.Values.Where(v => v is not null))
             {
-                if (v.Type == item.Type && v.Name == item.Name && v.Bonus == item.Bonus) 
+                // I probably need to make a CanStack item method to handle cases where
+                // we're trying to stack a dagger +1 and a dagger +2
+                if (v.Type == item.Type && v.Name == item.Name) // && v.Bonus == item.Bonus) 
                 {
                     v.Count += item.Count;
                     return;

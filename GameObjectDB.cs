@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.ComponentModel;
-
 namespace Yarl2;
 
 // I'm only doing this because the JSONSerializer can't handle
