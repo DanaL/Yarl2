@@ -14,6 +14,8 @@ namespace Yarl2;
 
 internal class Player : Actor, IPerformer, IItemHolder
 {
+    public int MaxVisionRadius { get; set; }
+    public int CurrVisionRadius { get; set; }
     private InputAccumulator? _accumulator;
     private Action? _deferred;
     public Inventory Inventory { get; set; } = new(PLAYER_ID);

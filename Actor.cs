@@ -44,9 +44,7 @@ class Actor : GameObj
 {
     public int MaxHP { get; set; }
     public int CurrHP { get; set; }
-    public int MaxVisionRadius { get; set; }
-    public int CurrVisionRadius { get; set; }
-    
+        
     public Actor() {}
 
     public override string FullName => Name.DefArticle();
@@ -54,7 +52,7 @@ class Actor : GameObj
 
 class MonsterFactory 
 { 
-    public static Actor Get(string name, AIType aiType)
+    public static Actor Get(string name)
     {
         if (name == "skellie")
         {
@@ -66,10 +64,10 @@ class MonsterFactory
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
-                AIType = aiType,
+                AIType = AIType.Basic,
                 Recovery = 1.0
             };
-            m.SetBehaviour(aiType);
+            m.SetBehaviour(AIType.Basic);
             return m;
         }
 
@@ -83,10 +81,10 @@ class MonsterFactory
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('g', Colours.LIGHT_BROWN, Colours.BROWN),
-                AIType = aiType,
+                AIType = AIType.Basic,
                 Recovery = 1.0
             };
-            m.SetBehaviour(aiType);
+            m.SetBehaviour(AIType.Basic);
             return m;
         }
 
@@ -100,10 +98,10 @@ class MonsterFactory
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.LIME_GREEN, Colours.DARK_GREEN),
-                AIType = aiType,
+                AIType = AIType.Basic,
                 Recovery = 0.75
             };
-            m.SetBehaviour(aiType);
+            m.SetBehaviour(AIType.Basic);
             return m;
         }
 

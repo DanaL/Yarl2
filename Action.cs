@@ -50,7 +50,7 @@ class PortalAction(GameState gameState) : Action
     {
         var result = new ActionResult() { Successful = false };
         
-        var p = _gameState.Player;        
+        var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Portal) 
@@ -72,7 +72,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     {
         var result = new ActionResult() { Successful = false };
 
-        var p = _gameState.Player;        
+        var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Downstairs) 
@@ -94,7 +94,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     {
         var result = new ActionResult() { Successful = false };
 
-        var p = _gameState.Player;        
+        var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Upstairs) 
