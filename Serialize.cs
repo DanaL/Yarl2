@@ -52,11 +52,12 @@ internal class Serialize
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = CampaignSave.Inflate(sgi.Campaign);
-        var itemDB = GameObjDBSaver.Inflate(sgi.ItemDB);
+        var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
+        objDB._objs.Add(p.ID, p);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
 
-        return (p, c, itemDB);
+        return (p, c, objDB);
     }
 
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
@@ -200,6 +201,8 @@ class ItemSaver
     {
         var pieces = text.Split('|');
         
+        List<string> adjectives = pieces[8].Split(',').Where(s => s != "")
+                                                      .ToList();
         var item = new Item()
         {
             ID = ulong.Parse(pieces[0]),
@@ -210,7 +213,7 @@ class ItemSaver
             Equiped = bool.Parse(pieces[5]),
             Count = int.Parse(pieces[6]),
             ContainedBy = ulong.Parse(pieces[7]),
-            Adjectives = [.. pieces[8].Split(',')],
+            Adjectives = adjectives,
             Glyph = TextToGlyph(pieces[9]),
             Type = TextToItemType(pieces.Last())
         };
@@ -507,6 +510,10 @@ class GameObjDBSaver
         {
             var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();
             goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
+            foreach (var item in items)
+            {
+                goDB._objs.Add(item.ID, item);
+            }
         }
 
         return goDB;
