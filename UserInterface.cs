@@ -339,7 +339,6 @@ abstract class UserInterface
         animationListeners.Add(new TorchLightAnimationListener(this));
 
         GameState.RefreshPerformers();
-        GameState.CurrPerformers = [Player];
 
         _playing = true;
         int p = 0;

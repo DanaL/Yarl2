@@ -51,7 +51,6 @@ internal class GameState
     public void RefreshPerformers()
     {
         CurrPerformers.Clear();
-        CurrPerformers.Add(Player);
         CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
 
         foreach (var performer in CurrPerformers)
