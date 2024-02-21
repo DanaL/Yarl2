@@ -280,7 +280,7 @@ abstract class UserInterface
     {
         GameState = new GameState()
         {
-            Map = campaign!.Dungeons[0].LevelMaps[campaign.CurrentLevel],
+            Map = campaign!.Dungeons[campaign.CurrentDungeon].LevelMaps[campaign.CurrentLevel],
             Options = _options,
             Player = Player,
             Campaign = campaign,
@@ -289,7 +289,7 @@ abstract class UserInterface
             ObjDB = itemDB
         };
 
-        var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentDungeon, Player.Row, Player.Col);
+        var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentLevel, Player.Row, Player.Col);
         itemDB.SetToLoc(playerLoc, Player);
         GameState.ToggleEffect(Player, playerLoc, TerrainFlags.Lit, true);
     }

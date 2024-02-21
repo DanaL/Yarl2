@@ -52,6 +52,8 @@ internal class Serialize
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = CampaignSave.Inflate(sgi.Campaign);
+        c.CurrentDungeon = sgi.CurrentDungeon;
+        c.CurrentLevel = sgi.CurrentLevel;
         var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
         objDB._objs.Add(p.ID, p);
         objDB.SetToLoc(p.Loc, p);
@@ -259,19 +261,13 @@ class ShrunkenInventory
 
 class CampaignSave
 {
-    public int CurrentDungeon { get; set; }
-    public int CurrentLevel { get; set; }
     [JsonInclude]
     public Dictionary<int, DungeonSaver> Dungeons = [];
 
     public static CampaignSave Shrink(Campaign c)
     {
-        CampaignSave sc = new()
-        {
-            CurrentDungeon = c.CurrentDungeon,
-            CurrentLevel = c.CurrentLevel
-        };
-        
+        CampaignSave sc = new();
+       
         foreach (var k in c.Dungeons.Keys)
         {
             sc.Dungeons.Add(k, DungeonSaver.Shrink(c.Dungeons[k]));
@@ -358,15 +354,24 @@ internal class MapSaver()
     int[]? Tiles{ get; set; }
     [JsonInclude]
     List<string>? SpecialTiles { get; set; }
+    [JsonInclude]
+    Dictionary<string, Dictionary<ulong, TerrainFlags>> Effects { get; set; }
 
     public static MapSaver Shrink(Map map)
     {
+        Dictionary<string, Dictionary<ulong, TerrainFlags>> effectsInfo = [];
+        foreach (var kvp in map.Effects)
+        {            
+            effectsInfo.Add(kvp.Key.ToString(), kvp.Value);
+        }
+
         MapSaver sm = new MapSaver
         {
             Height = map.Height,
             Width = map.Width,
             Tiles = new int[map.Tiles.Length],
-            SpecialTiles = []
+            SpecialTiles = [],
+            Effects = effectsInfo
         };
 
         for (int j = 0; j < map.Tiles.Length; j++)
@@ -435,6 +440,13 @@ internal class MapSaver()
 
         if (sm.Tiles is null || sm.SpecialTiles is null)
             throw new Exception("Invalid save game data!");
+
+        foreach (var kvp in sm.Effects)
+        {
+            var d = Regex.Split(kvp.Key, @"\D+");                                  
+            var key = (int.Parse(d[1]), int.Parse(d[2]));
+            map.Effects.Add(key, kvp.Value);
+        }
 
         try
         {

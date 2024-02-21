@@ -16,8 +16,7 @@ namespace Yarl2;
 enum TerrainFlags
 {
     None = 0,
-    Lit = 1,
-    Wet = 2 // Dunno if I'm going to use this for anything
+    Lit = 1
 }
 
 enum TileType
