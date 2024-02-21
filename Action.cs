@@ -34,10 +34,12 @@ class PortalAction(GameState gameState) : Action
     protected void UsePortal(Portal portal, ActionResult result)
     {
         var start = _gameState.Player!.Loc;
-        var (dungeon, level, r, c) = portal.Destination;
+        var (dungeon, level, _, _) = portal.Destination;
         _gameState.EnterLevel(dungeon, level);
         _gameState.Player!.Loc = portal.Destination;
         _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
+        _gameState.RefreshPerformers();
+
         result.Successful = true;
 
         if (start.DungeonID != portal.Destination.DungeonID)

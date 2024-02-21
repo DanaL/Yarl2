@@ -46,21 +46,26 @@ internal class GameState(Player p, Campaign c, Options opts)
         ObjDB.SetToLoc(loc, item);
     }
 
-    public void RefreshPerformers()
+    public void BuildPerformersList()
     {
-        CurrPerformers.Clear();
-        CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
-
-        // Let the Player go first when starting a new game session
-        var i = CurrPerformers.FindIndex(p => p is Player);
-        var player = CurrPerformers[i];
-        CurrPerformers.RemoveAt(i);
-        CurrPerformers.Insert(0, player);
+        RefreshPerformers();
 
         foreach (var performer in CurrPerformers)
         {
             performer.Energy = performer.Recovery;
         }
+    }
+
+    public void RefreshPerformers()
+    {
+        CurrPerformers.Clear();
+        CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
+
+        // It's convenient to know the player is always at position 0 in the list
+        var i = CurrPerformers.FindIndex(p => p is Player);
+        var player = CurrPerformers[i];
+        CurrPerformers.RemoveAt(i);
+        CurrPerformers.Insert(0, player);
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)

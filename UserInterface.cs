@@ -335,7 +335,7 @@ abstract class UserInterface
         animationListeners.Add(new CloudAnimationListener(this));
         animationListeners.Add(new TorchLightAnimationListener(this));
 
-        GameState.RefreshPerformers();
+        GameState.BuildPerformersList();
 
         _playing = true;
         int p = 0;
