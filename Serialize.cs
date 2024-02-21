@@ -54,9 +54,8 @@ internal class Serialize
         var c = CampaignSave.Inflate(sgi.Campaign);
         var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
         objDB._objs.Add(p.ID, p);
-        c.CurrentLevel = sgi.CurrentLevel;
-        c.CurrentDungeon = sgi.CurrentDungeon;
-
+        objDB.SetToLoc(p.Loc, p);
+        
         return (p, c, objDB);
     }
 

@@ -55,13 +55,13 @@ class GameObjectDB
     public static readonly Glyph EMPTY = new Glyph('@', Colours.BLACK, Colours.BLACK);
 
     public Dictionary<Loc, List<Item>> _itemLocs = [];
-    public Dictionary<Loc, Actor> _actorLocs = [];
+    public Dictionary<Loc, ulong> _actorLocs = [];
     public Dictionary<ulong, GameObj> _objs = [];
 
     public Glyph GlyphAt(Loc loc)
     {
-        if (_actorLocs.TryGetValue(loc, out Actor actor))
-            return actor.Glyph;
+        if (_actorLocs.TryGetValue(loc, out ulong id))
+            return _objs[id].Glyph;
         else if (_itemLocs.TryGetValue(loc, out List<Item> items))
         {
             if (items is not null && items.Count > 0)
@@ -85,7 +85,7 @@ class GameObjectDB
 
     public void SetToLoc(Loc loc, Actor actor)
     {
-        _actorLocs[loc] = actor;
+        _actorLocs[loc] = actor.ID;
     }
 
     public void SetToLoc(Loc loc, Item item)
@@ -121,10 +121,10 @@ class GameObjectDB
     
     public void ActorMoved(Actor a, Loc from, Loc to)
     {
-        if (_actorLocs[from] == a)
+        if (_actorLocs[from] == a.ID)
         {
             _actorLocs.Remove(from);
-            _actorLocs[to] = a;
+            _actorLocs[to] = a.ID;
         }
     }
 
@@ -145,13 +145,11 @@ class GameObjectDB
 
         foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
         {
-            if (_actorLocs[loc] is IPerformer performer)
+            var actor = _objs[_actorLocs[loc]];
+            if (actor is IPerformer performer)
                 performers.Add(performer);
         }
 
         return performers;
     }
-
-    public List<(Loc, List<Item>)> ItemDump() => _itemLocs.Keys.Select(k => (k, _itemLocs[k])).ToList();
-    public List<(Loc, Actor)> ActorDump() => _actorLocs.Keys.Select(k => (k, _actorLocs[k])).ToList();
 }
