@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text.RegularExpressions;
+
 namespace Yarl2;
 
 // I'm only doing this because the JSONSerializer can't handle
@@ -18,6 +20,12 @@ namespace Yarl2;
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
     public override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+    public static Loc FromText(string text)
+    {
+        var digits = Regex.Split(text, @"\D+")
+                                    .Select(int.Parse).ToArray();
+        return new Loc(digits[0], digits[1], digits[2], digits[3]);
+    }
 }
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit);
@@ -35,6 +43,9 @@ abstract class GameObj
 
     public virtual List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => [];
     public GameObj() => ID = IDSeed++;
+    public static ulong Seed => IDSeed;
+    public static void SetSeed(ulong seed) => IDSeed = seed;
+
     public static ulong NextID => IDSeed++;
 }
 

@@ -34,7 +34,7 @@ internal class Serialize
         var p = ShrunkenPlayer.Shrink(player);
         var sgi = new SaveGameInfo(p, CampaignSave.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
-                                    ShrunkenGameObjDB.Shrink(gameState.ObjDB));
+                                    GameObjDBSaver.Shrink(gameState.ObjDB));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -52,7 +52,7 @@ internal class Serialize
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
         var c = CampaignSave.Inflate(sgi.Campaign);
-        var itemDB = ShrunkenGameObjDB.Inflate(sgi.ItemDB);
+        var itemDB = GameObjDBSaver.Inflate(sgi.ItemDB);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
 
@@ -463,22 +463,31 @@ internal class MapSaver()
 // key so I have to pack and unpack the ItemDB. I wonder how much of a problem
 // this is going to be when the there's a dungeon full of items... (I'd probably
 // need to switch to a per-level itemDB)
-class ShrunkenGameObjDB
+class GameObjDBSaver
 {
-    public List<Loc> ItemsKeys { get; set; } = new();
-    public List<List<Item>> Items { get; set; } = new();
-    public List<Loc> MonsterKeys { get; set; } = new();
-    public List<Monster> Monsters { get; set; } = new();
+    // Come to think of it, maybe the ID seed belongs in the GameObjDB class
+    // instead of being a static field in GameObj hmmm
+    public ulong GameObjSeed { get; set; }
+    
+    [JsonInclude]
+    public Dictionary<string, List<string>> ItemsAtLoc = [];
+    //public Dictionary<Loc, Actor> _actorLocs = [];
+    //public Dictionary<ulong, GameObj> _objs = [];
 
-    public static ShrunkenGameObjDB Shrink(GameObjectDB goDB)
+    public static GameObjDBSaver Shrink(GameObjectDB goDB)
     {
-        var sidb = new ShrunkenGameObjDB();
+        var sidb = new GameObjDBSaver{ GameObjSeed = GameObj.Seed };
 
-        foreach (var p in goDB.ItemDump())
+        foreach (var kvp in goDB._itemLocs)
         {
-            sidb.ItemsKeys.Add(p.Item1);
-            sidb.Items.Add(p.Item2);
+            var itemStrs = kvp.Value.Select(ItemSaver.ItemToText).ToList();
+            sidb.ItemsAtLoc.Add(kvp.Key.ToString(), itemStrs);
         }
+        // foreach (var p in goDB.ItemDump())
+        // {
+        //     sidb.ItemsKeys.Add(p.Item1);
+        //     sidb.Items.Add(p.Item2);
+        // }
         
         // foreach (var a in goDB.ActorDump())
         // {
@@ -489,28 +498,23 @@ class ShrunkenGameObjDB
         return sidb;
     }
 
-    public static GameObjectDB Inflate(ShrunkenGameObjDB sidb)
+    public static GameObjectDB Inflate(GameObjDBSaver sidb)
     {
+        GameObj.SetSeed(sidb.GameObjSeed);
         var goDB = new GameObjectDB();
-
-        for (int j = 0; j < sidb.ItemsKeys.Count; j++)
+        
+        foreach (var kvp in sidb.ItemsAtLoc)
         {
-            goDB.AddStack(sidb.ItemsKeys[j], sidb.Items[j]);
+            var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();
+            goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
         }
-
-        // for (int j = 0; j < sidb.MonsterKeys.Count; j++)
-        // {
-        //     var m = sidb.Monsters[j];
-        //     m.SetBehaviour(m.AIType);
-        //     goDB.Add(sidb.MonsterKeys[j], m);
-        // }
 
         return goDB;
     }
 }
 
 internal record SaveGameInfo(ShrunkenPlayer? Player, CampaignSave? Campaign, int CurrentLevel, int CurrentDungeon,
-                                ShrunkenGameObjDB ItemDB);
+                                GameObjDBSaver ItemDB);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized
