@@ -83,6 +83,14 @@ class Item : GameObj
 
         return item;
     }
+
+    // Active in the sense of being an IPerformer who needs to be in the 
+    // turn order.
+    public List<IPerformer> ActiveTraits()
+    {
+        return Traits.Where(i => i is IPerformer p && i.Acitve)
+                     .Select(t => (IPerformer) t).ToList();
+    }
 }
 
 class ItemFactory
@@ -256,6 +264,19 @@ class Inventory(ulong ownerID)
         }
 
         return (EquipingResult.Conflict, ArmourParts.Shirt);
+    }
+
+    // Active as in has a trait that needs to be in the turn order
+    public List<IPerformer> ActiveItemTraits()
+    {
+        List<IPerformer> activeTraits = [];
+
+        foreach (var item in _items.Values)
+        {
+            activeTraits.AddRange(item.ActiveTraits());
+        }
+        
+        return activeTraits;
     }
 
     public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value))

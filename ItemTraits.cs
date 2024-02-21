@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel.Design;
+
 namespace Yarl2;
 
 enum ArmourParts
@@ -34,6 +36,7 @@ abstract class ItemTrait
     public abstract string Desc();
     public abstract ItemTrait Duplicate(Item container);
     public abstract string AsText();
+    public abstract bool Acitve { get; }
 }
 
 class MeleeAttackTrait : ItemTrait
@@ -48,6 +51,8 @@ class MeleeAttackTrait : ItemTrait
         new MeleeAttackTrait() { Bonus = Bonus, DamageDie = DamageDie, NumOfDie = NumOfDie };
 
     public override string AsText() => $"MeleeAttackTrait,{DamageDie},{NumOfDie},{Bonus}";
+
+    public override bool Acitve => true;
 }
 
 class ArmourTrait : ItemTrait
@@ -62,6 +67,8 @@ class ArmourTrait : ItemTrait
         new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
 
     public override string AsText() => $"ArmourTrait,{Part},{ArmourMod},{Bonus}";
+
+    public override bool Acitve => true;
 }
 
 class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
@@ -75,6 +82,8 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
     public double Recovery { get; set; }
 
     public override string Desc() => Lit ? "(lit)" : "";
+
+    public override bool Acitve => Lit;
 
     public override string AsText()
     {

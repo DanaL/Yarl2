@@ -138,8 +138,7 @@ class GameObjectDB
         { 
             foreach (var item in _itemLocs[loc]) 
             {
-                if (item is IPerformer)
-                    performers.Add((IPerformer)item);
+                performers.AddRange(item.ActiveTraits());                
             }
         }
 
@@ -148,6 +147,11 @@ class GameObjectDB
             var actor = _objs[_actorLocs[loc]];
             if (actor is IPerformer performer)
                 performers.Add(performer);
+
+            if (actor is IItemHolder holder)
+            {
+                performers.AddRange(holder.Inventory.ActiveItemTraits());
+            }
         }
 
         return performers;

@@ -53,6 +53,12 @@ internal class GameState
         CurrPerformers.Clear();
         CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
 
+        // Let the Player go first when starting a new game session
+        var i = CurrPerformers.FindIndex(p => p is Player);
+        var player = CurrPerformers[i];
+        CurrPerformers.RemoveAt(i);
+        CurrPerformers.Insert(0, player);
+
         foreach (var performer in CurrPerformers)
         {
             performer.Energy = performer.Recovery;
