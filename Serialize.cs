@@ -9,13 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks.Dataflow;
-using SDL2;
 
 namespace Yarl2;
 
@@ -36,7 +32,7 @@ internal class Serialize
     public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState)
     {
         var p = ShrunkenPlayer.Shrink(player);
-        var sgi = new SaveGameInfo(p, ShrunkenCampaign.Shrink(campaign), gameState.CurrLevel, 
+        var sgi = new SaveGameInfo(p, CampaignSave.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
                                     ShrunkenGameObjDB.Shrink(gameState.ObjDB));
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
@@ -55,7 +51,7 @@ internal class Serialize
         var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
 
         var p = ShrunkenPlayer.Inflate(sgi.Player);
-        var c = ShrunkenCampaign.Inflate(sgi.Campaign);
+        var c = CampaignSave.Inflate(sgi.Campaign);
         var itemDB = ShrunkenGameObjDB.Inflate(sgi.ItemDB);
         c.CurrentLevel = sgi.CurrentLevel;
         c.CurrentDungeon = sgi.CurrentDungeon;
@@ -259,37 +255,43 @@ class ShrunkenInventory
     }
 }
 
-class ShrunkenCampaign
+class CampaignSave
 {
+    public int CurrentDungeon { get; set; }
+    public int CurrentLevel { get; set; }
     [JsonInclude]
-    public Dictionary<int, ShrunkenDungeon> Dungeons = [];
+    public Dictionary<int, DungeonSaver> Dungeons = [];
 
-    public static ShrunkenCampaign Shrink(Campaign c)
+    public static CampaignSave Shrink(Campaign c)
     {
-        ShrunkenCampaign sc = new();
+        CampaignSave sc = new()
+        {
+            CurrentDungeon = c.CurrentDungeon,
+            CurrentLevel = c.CurrentLevel
+        };
         
         foreach (var k in c.Dungeons.Keys)
         {
-            sc.Dungeons.Add(k, ShrunkenDungeon.Shrink(c.Dungeons[k]));
+            sc.Dungeons.Add(k, DungeonSaver.Shrink(c.Dungeons[k]));
         }
 
         return sc;
     }
 
-    public static Campaign Inflate(ShrunkenCampaign sc)
+    public static Campaign Inflate(CampaignSave sc)
     {
         Campaign campaign = new();
 
         foreach (var k in  sc.Dungeons.Keys)
         {
-            campaign.Dungeons.Add(k, ShrunkenDungeon.Inflate(sc.Dungeons[k]));
+            campaign.Dungeons.Add(k, DungeonSaver.Inflate(sc.Dungeons[k]));
         }
 
         return campaign;
     }
 }
 
-internal class ShrunkenDungeon
+internal class DungeonSaver
 {
     public int ID { get; set; }
     public string? ArrivalMessage { get; set;  }
@@ -297,17 +299,17 @@ internal class ShrunkenDungeon
     [JsonInclude]
     public List<RememberedSq> RememberedSqs;
     [JsonInclude]
-    public Dictionary<int, ShrunkenMap> LevelMaps;
+    public Dictionary<int, MapSaver> LevelMaps;
 
-    public ShrunkenDungeon()
+    public DungeonSaver()
     {
         RememberedSqs = [];
         LevelMaps = [];
     }
 
-    public static ShrunkenDungeon Shrink(Dungeon dungeon)
+    public static DungeonSaver Shrink(Dungeon dungeon)
     {
-        var sd = new ShrunkenDungeon()
+        var sd = new DungeonSaver()
         {
             ID = dungeon.ID,
             ArrivalMessage = dungeon.ArrivalMessage,
@@ -316,37 +318,37 @@ internal class ShrunkenDungeon
 
         foreach (var k in dungeon.LevelMaps.Keys)
         {
-            sd.LevelMaps.Add(k, ShrunkenMap.Shrink(dungeon.LevelMaps[k]));
+            sd.LevelMaps.Add(k, MapSaver.Shrink(dungeon.LevelMaps[k]));
         }
 
-        // foreach (var sq in dungeon.RememberedSqs)
-        // {
-        //     sd.RememberedSqs.Add(RememberedSq.FromTuple(sq));
-        // }
+        foreach (var sq in dungeon.RememberedSqs)
+        {
+            sd.RememberedSqs.Add(RememberedSq.FromTuple(sq.Key, sq.Value));
+        }
 
         return sd;
     }
 
-    public static Dungeon Inflate(ShrunkenDungeon sd)
+    public static Dungeon Inflate(DungeonSaver sd)
     {
         Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage);
         d.RememberedSqs = [];
 
-        // foreach (var sq in sd.RememberedSqs)
-        // {
-        //     d.RememberedSqs.Add(sq.ToTuple());
-        // }
+        foreach (var sq in sd.RememberedSqs)
+        {
+            d.RememberedSqs.Add(sq.ToTuple(), sq.Sqr);
+        }
 
         foreach (var k in sd.LevelMaps.Keys)
         {
-            d.LevelMaps.Add(k, ShrunkenMap.Inflate(sd.LevelMaps[k]));
+            d.LevelMaps.Add(k, MapSaver.Inflate(sd.LevelMaps[k]));
         }
 
         return d;
     }
 }
 
-internal class ShrunkenMap()
+internal class MapSaver()
 {    
     public int Height { get; set; }
     public int Width { get; set; }
@@ -355,9 +357,9 @@ internal class ShrunkenMap()
     [JsonInclude]
     List<string>? SpecialTiles { get; set; }
 
-    public static ShrunkenMap Shrink(Map map)
+    public static MapSaver Shrink(Map map)
     {
-        ShrunkenMap sm = new ShrunkenMap
+        MapSaver sm = new MapSaver
         {
             Height = map.Height,
             Width = map.Width,
@@ -395,24 +397,18 @@ internal class ShrunkenMap()
                 case TileType.Portal:
                     tile = new Portal(pieces[3]);
                     digits = Regex.Split(pieces[2], @"\D+")
-                                    .Skip(1)
-                                    .Take(4)
                                     .Select(int.Parse).ToArray();
                     ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Upstairs:
                     tile = new Upstairs(pieces[3]);
                     digits = Regex.Split(pieces[2], @"\D+")
-                                    .Skip(1)
-                                    .Take(4)
                                     .Select(int.Parse).ToArray();
                     ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Downstairs:
                     tile = new Downstairs(pieces[3]);
                     digits = Regex.Split(pieces[2], @"\D+")
-                                    .Skip(1)
-                                    .Take(4)
                                     .Select(int.Parse).ToArray();
                     ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
@@ -431,7 +427,7 @@ internal class ShrunkenMap()
         return tiles;
     }
 
-    public static Map Inflate(ShrunkenMap sm)
+    public static Map Inflate(MapSaver sm)
     {
         Map map = new Map(sm.Width, sm.Height);
 
@@ -513,13 +509,13 @@ class ShrunkenGameObjDB
     }
 }
 
-internal record SaveGameInfo(ShrunkenPlayer? Player, ShrunkenCampaign? Campaign, int CurrentLevel, int CurrentDungeon,
+internal record SaveGameInfo(ShrunkenPlayer? Player, CampaignSave? Campaign, int CurrentLevel, int CurrentDungeon,
                                 ShrunkenGameObjDB ItemDB);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized
-internal record struct RememberedSq(int A, int B, int C)
+internal record struct RememberedSq(int A, int B, int C, Sqr Sqr)
 {
-    public static RememberedSq FromTuple((int, int, int) t) => new RememberedSq(t.Item1, t.Item2, t.Item3);
+    public static RememberedSq FromTuple((int, int, int) t, Sqr sqr) => new RememberedSq(t.Item1, t.Item2, t.Item3, sqr);
     public (int, int, int) ToTuple() => (A, B, C);
 }
