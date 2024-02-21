@@ -23,7 +23,7 @@ internal class GameState
     public Campaign Campaign { get; set; }
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
-    public int Turn { get; set; } = 1;
+    public int Turn { get; set; }
     
     public Loc PlayerLoc => new Loc(CurrDungeon, CurrLevel, Player.Row, Player.Col);
 

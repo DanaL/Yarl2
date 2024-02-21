@@ -276,7 +276,7 @@ abstract class UserInterface
         }        
     }
 
-    public void SetupGameState(Campaign campaign, GameObjectDB itemDB)
+    public void SetupGameState(Campaign campaign, GameObjectDB itemDB, int currentTurn)
     {
         GameState = new GameState()
         {
@@ -286,7 +286,8 @@ abstract class UserInterface
             Campaign = campaign,
             CurrLevel = campaign.CurrentLevel,
             CurrDungeon = campaign.CurrentDungeon,
-            ObjDB = itemDB
+            ObjDB = itemDB,
+            Turn = currentTurn
         };
 
         var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentLevel, Player.Row, Player.Col);

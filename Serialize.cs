@@ -34,7 +34,7 @@ internal class Serialize
         var p = ShrunkenPlayer.Shrink(player);
         var sgi = new SaveGameInfo(p, CampaignSave.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
-                                    GameObjDBSaver.Shrink(gameState.ObjDB));
+                                    GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -44,7 +44,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, GameObjectDB) LoadSaveGame(string playerName)
+    public static (Player?, Campaign, GameObjectDB, int) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -58,7 +58,7 @@ internal class Serialize
         objDB._objs.Add(p.ID, p);
         objDB.SetToLoc(p.Loc, p);
         
-        return (p, c, objDB);
+        return (p, c, objDB, sgi.Turn);
     }
 
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
@@ -532,7 +532,7 @@ class GameObjDBSaver
 }
 
 internal record SaveGameInfo(ShrunkenPlayer? Player, CampaignSave? Campaign, int CurrentLevel, int CurrentDungeon,
-                                GameObjDBSaver ItemDB);
+                                GameObjDBSaver ItemDB, int Turn);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

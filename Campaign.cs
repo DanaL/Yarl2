@@ -95,9 +95,9 @@ class PreGameHandler(UserInterface ui)
     {
         if (Serialize.SaveFileExists(playerName))
         {
-            var (player, c, objDb) = Serialize.LoadSaveGame(playerName);
+            var (player, c, objDb, currentTurn) = Serialize.LoadSaveGame(playerName);
             _ui.Player = player;
-            _ui.SetupGameState(c, objDb);
+            _ui.SetupGameState(c, objDb, currentTurn);
         }
         else
         {
@@ -139,7 +139,7 @@ class PreGameHandler(UserInterface ui)
             // z.Col = startCol;
             // objDb.Add(new Loc(0, 0, startRow + 1, startCol), z);
 
-            _ui.SetupGameState(c, objDb);
+            _ui.SetupGameState(c, objDb, 1);
         }
     }    
 }
