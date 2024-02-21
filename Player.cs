@@ -20,11 +20,9 @@ internal class Player : Actor, IPerformer, IItemHolder
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
 
-    public Player(string name, int row, int col)
+    public Player(string name)
     {
         Name = name;
-        Row = row;
-        Col = col;
         MaxHP = 20;
         CurrHP = 15;
         MaxVisionRadius = 25;
@@ -149,21 +147,21 @@ internal class Player : Actor, IPerformer, IItemHolder
             }
 
             if (ch == 'h')
-                return new MoveAction(this, Row, Col - 1, gameState);
+                return new MoveAction(this, Loc.Move(0, -1), gameState);
             else if (ch == 'j')
-                return new MoveAction(this, Row + 1, Col, gameState);
+                return new MoveAction(this, Loc.Move(1, 0), gameState);
             else if (ch == 'k')
-                return new MoveAction(this, Row - 1, Col, gameState);
+                return new MoveAction(this, Loc.Move(-1, 0), gameState);
             else if (ch == 'l')
-                return new MoveAction(this, Row, Col + 1, gameState);
+                return new MoveAction(this, Loc.Move(0, 1), gameState);
             else if (ch == 'y')
-                return new MoveAction(this, Row - 1, Col - 1, gameState);
+                return new MoveAction(this,Loc.Move(-1, -1), gameState);
             else if (ch == 'u')
-                return new MoveAction(this, Row - 1, Col + 1, gameState);
+                return new MoveAction(this, Loc.Move(-1, 1), gameState);
             else if (ch == 'b')
-                return new MoveAction(this, Row + 1, Col - 1, gameState);
+                return new MoveAction(this, Loc.Move(1, -1), gameState);
             else if (ch == 'n')
-                return new MoveAction(this, Row + 1, Col + 1, gameState);
+                return new MoveAction(this, Loc.Move(1, 1), gameState);
             else if (ch == 'E')
                 return new PortalAction(gameState);
             else if (ch == '>')
@@ -178,8 +176,7 @@ internal class Player : Actor, IPerformer, IItemHolder
             }
             else if (ch == ',')
             {
-                Loc loc = new(gameState.CurrDungeon, gameState.CurrLevel, Row, Col);
-                var itemStack = gameState.ObjDB.ItemsAt(loc);
+                var itemStack = gameState.ObjDB.ItemsAt(Loc);
 
                 if (itemStack is null || itemStack.Count == 0)
                 {

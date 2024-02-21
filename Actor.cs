@@ -42,8 +42,6 @@ enum AIType
 
 class Actor : GameObj
 {
-    public int Row { get; set; }
-    public int Col { get; set; }
     public int MaxHP { get; set; }
     public int CurrHP { get; set; }
     public int MaxVisionRadius { get; set; }
@@ -158,7 +156,7 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        return new MoveAction(actor, actor.Row - 1, actor.Col, gameState);
+        return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
     }
 }
 

@@ -24,8 +24,8 @@ internal class GameState
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
     public int Turn { get; set; }
-    
-    public Loc PlayerLoc => new Loc(CurrDungeon, CurrLevel, Player.Row, Player.Col);
+
+    public Loc PlayerLoc => Player.Loc;
 
     public void EnterLevel(int dungeon, int level)
     {

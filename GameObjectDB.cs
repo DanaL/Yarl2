@@ -19,7 +19,14 @@ namespace Yarl2;
 // Although it does make a nicer parameter to pass around to methods
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
+    // A convenient method because this comes up a lot.
+    public Loc Move(int RowDelta, int ColDelta)
+    {
+        return this with { Row = Row + RowDelta, Col = Col + ColDelta };
+    }
+
     public override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+
     public static Loc FromText(string text)
     {
         var digits = Regex.Split(text, @"\D+")

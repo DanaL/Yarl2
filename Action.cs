@@ -33,11 +33,10 @@ class PortalAction(GameState gameState) : Action
 
     protected void UsePortal(Portal portal, ActionResult result)
     {
-        var start = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _gameState.Player!.Row, _gameState.Player!.Col);
+        var start = _gameState.Player!.Loc;
         var (dungeon, level, r, c) = portal.Destination;
         _gameState.EnterLevel(dungeon, level);
-        _gameState.Player!.Row = r;
-        _gameState.Player!.Col = c;
+        _gameState.Player!.Loc = portal.Destination;
         _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
         result.Successful = true;
 
@@ -52,7 +51,7 @@ class PortalAction(GameState gameState) : Action
         var result = new ActionResult() { Successful = false };
         
         var p = _gameState.Player;        
-        var t = _gameState.CurrentMap.TileAt(p.Row, p.Col);
+        var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Portal) 
         {
@@ -74,7 +73,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
         var result = new ActionResult() { Successful = false };
 
         var p = _gameState.Player;        
-        var t = _gameState.CurrentMap.TileAt(p.Row, p.Col);
+        var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Downstairs) 
         {
@@ -96,7 +95,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
         var result = new ActionResult() { Successful = false };
 
         var p = _gameState.Player;        
-        var t = _gameState.CurrentMap.TileAt(p.Row, p.Col);
+        var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
         if (t.Type == TileType.Upstairs) 
         {
@@ -114,14 +113,12 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
 abstract class DirectionalAction(Actor actor) : Action
 {
     protected readonly Actor _actor = actor;
-    protected int _row { get; set; }
-    protected int _col { get; set; }
-
+    protected Loc _loc { get; set; }
+    
     public override void ReceiveAccResult(AccumulatorResult result)
     {
         var dirResult = (DirectionAccumulatorResult)result;
-        _row = _actor.Row + dirResult.Row;
-        _col = _actor.Col + dirResult.Col;
+        _loc = _actor.Loc with { Row = _actor.Loc.Row + dirResult.Row, Col = _actor.Loc.Col + dirResult.Col };        
     }
 }
 
@@ -133,8 +130,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(_row, _col);
-        var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
+        var door = _map.TileAt(_loc.Row, _loc.Col);
 
         if (door is Door d)
         {
@@ -144,16 +140,15 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
                 result.Successful = true;
                 result.EnergyCost = 1.0;
 
-                var msg = MessageFactory.Phrase(_actor.ID, Verb.Close, "the door", false, loc, _gs);
+                var msg = MessageFactory.Phrase(_actor.ID, Verb.Close, "the door", false, _loc, _gs);
                 result.Message = msg;
 
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
-                foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
+                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlags.Lit))
                 {
-                    var actorLoc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col);
                     _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, src.ID);
-                    _gs.ToggleEffect(src, actorLoc, TerrainFlags.Lit, true);
+                    _gs.ToggleEffect(src, _actor.Loc, TerrainFlags.Lit, true);
                 }
             }
             else if (_actor is Player)
@@ -181,20 +176,18 @@ class OpenDoorAction : DirectionalAction
         _gs = gs;
     }
 
-    public OpenDoorAction(Actor actor, Map map, int row, int col, GameState gs) : base(actor)
+    public OpenDoorAction(Actor actor, Map map, Loc loc, GameState gs) : base(actor)
     {
         _map = map;
-        _row = row;
-        _col = col;
+        _loc = loc;
         _gs = gs;
     }
 
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = false };
-        var door = _map.TileAt(_row, _col);
-        var loc = new Loc(_gs.CurrDungeon, _gs.CurrLevel, _row, _col);
-
+        var door = _map.TileAt(_loc.Row, _loc.Col);
+        
         if (door is Door d)
         {
             if (!d.Open)
@@ -203,17 +196,17 @@ class OpenDoorAction : DirectionalAction
                 result.Successful = true;
                 result.EnergyCost = 1.0;
 
-                var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "the door", false, loc, _gs);
+                var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "the door", false, _loc, _gs);
                 result.Message = msg;
                 
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
                 
-                foreach (var src in _gs.ObjsAffectingLoc(loc, TerrainFlags.Lit))
+                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlags.Lit))
                 {
                     _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
                 }
-                _gs.ToggleEffect(_actor, new Loc(_gs.CurrDungeon, _gs.CurrLevel, _actor.Row, _actor.Col), TerrainFlags.Lit, true);
+                _gs.ToggleEffect(_actor, _loc, TerrainFlags.Lit, true);
             }
             else if (_actor is Player)
             {
@@ -229,11 +222,10 @@ class OpenDoorAction : DirectionalAction
     }
 }
 
-class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
+class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
 {
     private readonly Actor _actor = actor;
-    private readonly int _row = row;
-    private readonly int _col = col;
+    private readonly Loc _loc = loc;
     private readonly Map _map = gameState.Map!;
     private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
     private readonly GameState _gameState = gameState;
@@ -253,12 +245,11 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
         if (_actor is not Player)
             return "";
 
-        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
-        var items = _gameState.ObjDB.ItemsAt(loc);
+        var items = _gameState.ObjDB.ItemsAt(_loc);
 
         if (items.Count == 0) 
         {
-            return _map.TileAt(_row, _col).StepMessage;
+            return _map.TileAt(_loc.Row, _loc.Col).StepMessage;
         }
         else if (items.Count > 1)
         {
@@ -278,23 +269,23 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
     {
         var result = new ActionResult();
 
-        if (!_map.InBounds(_row, _col))
+        if (!_map.InBounds(_loc.Row, _loc.Col))
         {
             // in theory this shouldn't ever happen...
             result.Successful = false;            
             if (_actor is Player)
                 result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.PlayerLoc);
         }
-        else if (!_map.TileAt(_row, _col).Passable())
+        else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
         {
             result.Successful = false;
 
             if (_actor is Player)
             {
-                var tile = _map.TileAt(_row, _col);
+                var tile = _map.TileAt(_loc.Row, _loc.Col);
                 if (_bumpToOpen && tile.Type == TileType.Door)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map, _row, _col, _gameState);
+                    var openAction = new OpenDoorAction(_actor, _map, _loc, _gameState);
                     result.AltAction = openAction;
                 }
                 else
@@ -308,15 +299,11 @@ class MoveAction(Actor actor, int row, int col, GameState gameState) : Action
             result.Successful = true;
             result.EnergyCost = 1.0;
 
-            var from = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            var to = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _row, _col);
-            _gameState.ActorMoved(actor, from, to);
-
-            _actor.Row = _row;
-            _actor.Col = _col;
+            _gameState.ActorMoved(_actor, _actor.Loc, _loc);
+            _actor.Loc = _loc;
 
             if (_actor is Player)
-                result.Message = MessageFactory.Phrase(CalcDesc(), to);                
+                result.Message = MessageFactory.Phrase(CalcDesc(), _loc);                
         }
 
         return result;
@@ -333,8 +320,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     public override ActionResult Execute()
     {
         _ui.CloseMenu();
-        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-        var itemStack = _gameState.ObjDB.ItemsAt(loc);
+        var itemStack = _gameState.ObjDB.ItemsAt(_actor.Loc);
 
         var inv = ((IItemHolder)_actor).Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
@@ -351,7 +337,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         itemStack.RemoveAt(i);
         inv.Add(item, _actor.ID);
 
-        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, item.Count, false, loc, _gameState);
+        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, item.Count, false, _actor.Loc, _gameState);
         return new ActionResult() { Successful=true, Message=msg, EnergyCost = 1.0 };
     }
 
@@ -378,7 +364,6 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         if (useableTraits.Any()) 
         {
             Item toUse = item;
-            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
             if (item.Count > 1)
             {
                 --item.Count;
@@ -393,9 +378,9 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             string msg = "";
             foreach (IUSeable trait in useableTraits)
             {
-                (success, msg) = trait.Use(_gameState, _actor.Row, _actor.Col);
+                (success, msg) = trait.Use(_gameState, _actor.Loc.Row, _actor.Loc.Col);
             }
-            var alert = MessageFactory.Phrase(msg, loc);
+            var alert = MessageFactory.Phrase(msg, _actor.Loc);
             return new ActionResult() { Successful = success, Message = alert, EnergyCost = 1.0 };
         }
         else
@@ -430,11 +415,10 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
         {
             // drop entire stack
             ((IItemHolder) _actor).Inventory.Remove(_slot, 1);
-            _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
-            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, item.Count, false, loc, _gameState);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, item.Count, false, _actor.Loc, _gameState);
         }
         else
         {
@@ -442,9 +426,8 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
             var dropped = item.Duplicate(_gameState);
             dropped.Count = _amount;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
-            _gameState.ItemDropped(dropped, _actor.Row, _actor.Col);
-            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, loc, _gameState);                      
+            _gameState.ItemDropped(dropped, _actor.Loc.Row, _actor.Loc.Col);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, _actor.Loc, _gameState);                      
         }
 
         return new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };        
@@ -492,12 +475,11 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         else 
         {
             ((IItemHolder) _actor).Inventory.Remove(Choice, 1);
-            _gameState.ItemDropped(item, _actor.Row, _actor.Col);
+            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
             item.Equiped = false;
             ((IItemHolder)_actor).CalcEquipmentModifiers();
 
-            var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
-            var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, loc, _gameState);
+            var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gameState);
             _ui.AlertPlayer(alert);
             return new ActionResult() { Successful=true, Message=null, EnergyCost = 1.0 };
         }
@@ -520,7 +502,6 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
     public override ActionResult Execute() 
     {
         ActionResult result;
-        var loc = new Loc(_gameState.CurrDungeon, _gameState.CurrLevel, _actor.Row, _actor.Col);
         var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
@@ -535,11 +516,11 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
         switch (equipResult)
         {
             case EquipingResult.Equiped:
-                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, loc, _gameState);
+                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, _actor.Loc, _gameState);
                 result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
-                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, loc, _gameState);
+                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, _actor.Loc, _gameState);
                 result = new ActionResult() { Successful=true, Message=alert, EnergyCost = 1.0 };
                 break;
             default:

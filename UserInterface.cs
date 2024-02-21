@@ -290,9 +290,8 @@ abstract class UserInterface
             Turn = currentTurn
         };
 
-        var playerLoc = new Loc(campaign.CurrentDungeon, campaign.CurrentLevel, Player.Row, Player.Col);
-        itemDB.SetToLoc(playerLoc, Player);
-        GameState.ToggleEffect(Player, playerLoc, TerrainFlags.Lit, true);
+        itemDB.SetToLoc(Player.Loc, Player);
+        GameState.ToggleEffect(Player, Player.Loc, TerrainFlags.Lit, true);
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -517,7 +516,7 @@ abstract class UserInterface
         var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
         var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Row, Player!.Col, map, GameState.CurrLevel);        
+        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Loc.Row, Player!.Loc.Col, map, GameState.CurrLevel);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         // There is a glitch here that I don't want to fix right now in that
@@ -528,8 +527,8 @@ abstract class UserInterface
         // every tile
         var rememberd = dungeon.RememberedSqs;
        
-        int rowOffset = Player.Row - PlayerScreenRow;
-        int colOffset = Player.Col - PlayerScreenCol;
+        int rowOffset = Player.Loc.Row - PlayerScreenRow;
+        int colOffset = Player.Loc.Col - PlayerScreenCol;
                 
         for (int r = 0; r < ViewHeight; r++) 
         {
