@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.ComponentModel.Design;
-
 namespace Yarl2;
 
 enum ArmourParts
@@ -105,7 +103,7 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
 
     public (bool, string) Use(GameState gs, int row, int col)
     {
-        Item item = (Item)gs.ObjDB.GetObj(ContainerID);
+        Item item = gs.ObjDB.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
         {

@@ -423,19 +423,19 @@ internal class MapSaver
             {
                 case TileType.Portal:
                     tile = new Portal(pieces[3]);
-                    digits = Regex.Split(pieces[2], @"\D+")
-                                    .Select(int.Parse).ToArray();
+                    digits = Util.DigitsRegex().Split(pieces[2])
+                                               .Select(int.Parse).ToArray();
                     ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Upstairs:
                     tile = new Upstairs(pieces[3]);
-                    digits = Regex.Split(pieces[2], @"\D+")
+                    digits = Util.DigitsRegex().Split(pieces[2])
                                     .Select(int.Parse).ToArray();
                     ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Downstairs:
                     tile = new Downstairs(pieces[3]);
-                    digits = Regex.Split(pieces[2], @"\D+")
+                    digits = Util.DigitsRegex().Split(pieces[2])
                                     .Select(int.Parse).ToArray();
                     ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
@@ -463,7 +463,7 @@ internal class MapSaver
 
         foreach (var kvp in sm.Effects)
         {
-            var d = Regex.Split(kvp.Key, @"\D+");                                  
+            var d = Util.DigitsRegex().Split(kvp.Key);                                  
             var key = (int.Parse(d[1]), int.Parse(d[2]));
             map.Effects.Add(key, kvp.Value);
         }

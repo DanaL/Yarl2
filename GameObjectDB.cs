@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text.RegularExpressions;
-
 namespace Yarl2;
 
 // I'm only doing this because the JSONSerializer can't handle
@@ -25,14 +23,14 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
         return this with { Row = Row + RowDelta, Col = Col + ColDelta };
     }
 
-    public override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+    public readonly override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
 
     public static Loc FromText(string text)
     {
-        var digits = Regex.Split(text, @"\D+")
-                                    .Select(int.Parse).ToArray();
+        var digits = Util.DigitsRegex().Split(text)
+                                       .Select(int.Parse).ToArray();
         return new Loc(digits[0], digits[1], digits[2], digits[3]);
-    }
+    }    
 }
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit);

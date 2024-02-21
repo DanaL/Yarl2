@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text.RegularExpressions;
+
 namespace Yarl2;
 
 // I didn't want to be beholden to someone else's colour class and anyhow
@@ -48,8 +50,11 @@ class Constants
     public const int ESC = 27;
 }
 
-class Util
+partial class Util
 {
+    [GeneratedRegex(@"\D+")]
+    public static partial Regex DigitsRegex();
+
     public static (int, int)[] Adj4 = [ (-1, 0), (1, 0), (0, 1), (0, -1)];
     public static (int, int)[] Adj8= [ (-1, -1), (-1, 0), (-1, 1),
                                         (0, -1), (0, 1),
