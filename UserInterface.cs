@@ -278,12 +278,9 @@ abstract class UserInterface
 
     public void SetupGameState(Campaign campaign, GameObjectDB itemDB, int currentTurn)
     {
-        GameState = new GameState()
+        GameState = new GameState(Player, campaign, _options)
         {
             Map = campaign!.Dungeons[campaign.CurrentDungeon].LevelMaps[campaign.CurrentLevel],
-            Options = _options,
-            Player = Player,
-            Campaign = campaign,
             CurrLevel = campaign.CurrentLevel,
             CurrDungeon = campaign.CurrentDungeon,
             ObjDB = itemDB,

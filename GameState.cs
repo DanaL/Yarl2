@@ -13,19 +13,17 @@
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-internal class GameState
+internal class GameState(Player p, Campaign c, Options opts)
 {
     public Map? Map { get; set; }
-    public Options? Options { get; set;}
-    public Player? Player { get; set; }
+    public Options? Options { get; set; } = opts;
+    public Player Player { get; set; } = p;
     public int CurrLevel { get; set; }
     public int CurrDungeon { get; set; }
-    public Campaign Campaign { get; set; }
+    public Campaign Campaign { get; set; } = c;
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> CurrPerformers { get; set; } = [];
     public int Turn { get; set; }
-
-    public Loc PlayerLoc => Player.Loc;
 
     public void EnterLevel(int dungeon, int level)
     {

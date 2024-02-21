@@ -59,7 +59,7 @@ class PortalAction(GameState gameState) : Action
         }
         else
         {
-            result.Message = MessageFactory.Phrase("There is nowhere to go here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("There is nowhere to go here.", _gameState.Player.Loc);
         }
 
         return result;
@@ -81,7 +81,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = MessageFactory.Phrase("You cannot go down here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("You cannot go down here.", _gameState.Player.Loc);
         }
 
         return result;
@@ -103,7 +103,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
         }
         else
         {
-            result.Message = MessageFactory.Phrase("You cannot go up here.", _gameState.PlayerLoc);
+            result.Message = MessageFactory.Phrase("You cannot go up here.", _gameState.Player.Loc);
         }
 
         return result;
@@ -153,12 +153,12 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
             }
             else if (_actor is Player)
             {
-                result.Message = MessageFactory.Phrase("The door is already closed.", _gs.PlayerLoc);
+                result.Message = MessageFactory.Phrase("The door is already closed.", _gs.Player.Loc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = MessageFactory.Phrase("There's no door there!", _gs.PlayerLoc);            
+            result.Message = MessageFactory.Phrase("There's no door there!", _gs.Player.Loc);            
         }
 
         return result;
@@ -210,12 +210,12 @@ class OpenDoorAction : DirectionalAction
             }
             else if (_actor is Player)
             {
-                result.Message = MessageFactory.Phrase("The door is already open.", _gs.PlayerLoc);
+                result.Message = MessageFactory.Phrase("The door is already open.", _gs.Player.Loc);
             }
         }
         else if (_actor is Player)
         {
-            result.Message = MessageFactory.Phrase("There's no door there!", _gs.PlayerLoc);
+            result.Message = MessageFactory.Phrase("There's no door there!", _gs.Player.Loc);
         }
 
         return result;
@@ -274,7 +274,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             // in theory this shouldn't ever happen...
             result.Successful = false;            
             if (_actor is Player)
-                result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.PlayerLoc);
+                result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.Player.Loc);
         }
         else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
         {
@@ -290,7 +290,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
                 }
                 else
                 {
-                    result.Message = MessageFactory.Phrase(BlockedMessage(tile), _gameState.PlayerLoc);
+                    result.Message = MessageFactory.Phrase(BlockedMessage(tile), _gameState.Player.Loc);
                 }
             }
         }
@@ -328,7 +328,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (!freeSlot) 
         {
-            msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.PlayerLoc);
+            msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.Player.Loc);
             return new ActionResult() { Successful=false, Message = msg };                
         }
 
@@ -385,7 +385,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         }
         else
         {
-            var msg = MessageFactory.Phrase("You don't know a way to use that!", _gameState.PlayerLoc);
+            var msg = MessageFactory.Phrase("You don't know a way to use that!", _gameState.Player.Loc);
             return new ActionResult() { Successful = false, Message = msg };
         }
     }
@@ -454,7 +454,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item.Equiped && item.Type == ItemType.Armour)
         {
-            var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.PlayerLoc);
+            var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
             return new ActionResult() { Successful=false, Message=msg };
         }
         else if (item.Count > 1)
@@ -507,7 +507,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
         {
-            var msg = MessageFactory.Phrase("You cannot equip that!", _gameState.PlayerLoc);
+            var msg = MessageFactory.Phrase("You cannot equip that!", _gameState.Player.Loc);
             return new ActionResult() { Successful = false, Message = msg };
         }
         
@@ -529,7 +529,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
                     msg += "a helmet.";
                 else if (conflict == ArmourParts.Shirt)
                     msg += "some armour.";
-                alert = MessageFactory.Phrase(msg, _gameState.PlayerLoc);
+                alert = MessageFactory.Phrase(msg, _gameState.Player.Loc);
                 result = new ActionResult() { Successful=true, Message=alert };
                 break;
         }            

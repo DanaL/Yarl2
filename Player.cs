@@ -142,7 +142,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                         _accumulator = null;
                         ui.CloseMenu();
                         ui.ClosePopup();
-                        ui.AlertPlayer(MessageFactory.Phrase("Nevermind.", gameState.PlayerLoc));
+                        ui.AlertPlayer(MessageFactory.Phrase("Nevermind.", gameState.Player.Loc));
                         return new NullAction();
                     }
                 }
@@ -182,7 +182,7 @@ internal class Player : Actor, IPerformer, IItemHolder
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
-                    ui.AlertPlayer(MessageFactory.Phrase("There's nothing there...", gameState.PlayerLoc));
+                    ui.AlertPlayer(MessageFactory.Phrase("There's nothing there...", gameState.Player.Loc));
                     return new NullAction();
                 }
                 else if (itemStack.Count == 1) 
@@ -226,7 +226,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new CloseDoorAction(ui.Player, gameState.Map, gameState);                
                 _deferred = action;
                 
-                ui.AlertPlayer(MessageFactory.Phrase("Which way?", gameState.PlayerLoc));
+                ui.AlertPlayer(MessageFactory.Phrase("Which way?", gameState.Player.Loc));
             }
             else if (ch == 'o')
             {
@@ -234,7 +234,7 @@ internal class Player : Actor, IPerformer, IItemHolder
                 var action = new OpenDoorAction(ui.Player, gameState.Map, gameState);
                 _deferred = action;
 
-                ui.AlertPlayer(MessageFactory.Phrase("Which way?", gameState.PlayerLoc));
+                ui.AlertPlayer(MessageFactory.Phrase("Which way?", gameState.Player.Loc));
             }
             else if (ch == 'Q')
             {
