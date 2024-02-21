@@ -9,11 +9,13 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks.Dataflow;
+using SDL2;
 
 namespace Yarl2;
 
@@ -66,6 +68,7 @@ internal class Serialize
 
 internal class ShrunkenPlayer
 {
+    public ulong ID { get; set; }
     public string Name { get; set; }
     public int Row { get; set; }
     public int Col { get; set; }
@@ -78,6 +81,7 @@ internal class ShrunkenPlayer
     {
         return new ShrunkenPlayer()
         {
+            ID = p.ID,
             Name = p.Name,
             MaxHP = p.MaxHP,
             CurrHP = p.CurrHP,
@@ -91,14 +95,15 @@ internal class ShrunkenPlayer
     {
         return new Player(sp.Name, sp.Row, sp.Col)
         {
+            ID = sp.ID,
             MaxHP = sp.MaxHP,
             CurrHP = sp.CurrHP,
-            Inventory = ShrunkenInventory.Inflate(sp.Inventory)
+            Inventory = ShrunkenInventory.Inflate(sp.Inventory, sp.ID)
         };
     }
 }
 
-record InvItemKVP(char Slot, Item Item);
+record InvItemKVP(char Slot, string ItemText);
 
 class ColourSave
 {
@@ -157,6 +162,15 @@ class ColourSave
 // I'll probably create a bunch of bugs in the meantime :'(
 class ItemSaver
 {
+    static ItemType TextToItemType(string text) => text switch
+    {
+        "Armour" => ItemType.Armour,
+        "Weapon" => ItemType.Weapon,
+        "Zorkmid" => ItemType.Zorkmid,
+        "Tool" => ItemType.Tool,
+        _ => throw new Exception($"Hmm I don't know about Item Type {text}")
+    };
+
     static string GlyphToText(Glyph glyph) => $"{glyph.Ch};{ColourSave.ColourToText(glyph.Lit)};{ColourSave.ColourToText(glyph.Unlit)}";
     static Glyph TextToGlyph(string text)
     {
@@ -189,8 +203,7 @@ class ItemSaver
     public static Item TextToItem(string text)
     {
         var pieces = text.Split('|');
-        var type = pieces.Last();
-
+        
         var item = new Item()
         {
             ID = ulong.Parse(pieces[0]),
@@ -203,6 +216,7 @@ class ItemSaver
             ContainedBy = ulong.Parse(pieces[7]),
             Adjectives = [.. pieces[8].Split(',')],
             Glyph = TextToGlyph(pieces[9]),
+            Type = TextToItemType(pieces.Last())
         };
 
         foreach (var traitStr in pieces[10].Split(';'))
@@ -220,25 +234,23 @@ class ShrunkenInventory
     public List<InvItemKVP> Items { get; set; }
 
     public static ShrunkenInventory Shrink(Inventory inv)
-    {
-        var items = inv.ToKVP();
-
+    {        
         return new ShrunkenInventory()
         {
             Zorkmids = inv.Zorkmids,
             NextSlot = inv.NextSlot,
-            Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, kvp.Item2)).ToList()
+            Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, ItemSaver.ItemToText(kvp.Item2))).ToList()
         };
     }
 
-    public static Inventory Inflate(ShrunkenInventory sp)
+    public static Inventory Inflate(ShrunkenInventory sp, ulong ownerID)
     {
-        var inv = new Inventory(0);
+        var inv = new Inventory(ownerID);
         
-        // foreach (var kvp in sp.Items)
-        // {
-        //     inv.Add(kvp.Item);
-        // }
+        foreach (var kvp in sp.Items)
+        {
+            inv.Add(ItemSaver.TextToItem(kvp.ItemText), ownerID);
+        }
         
         inv.Zorkmids = sp.Zorkmids;
         inv.NextSlot = sp.NextSlot;

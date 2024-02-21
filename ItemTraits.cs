@@ -74,7 +74,7 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
     public double Energy { get; set; }
     public double Recovery { get; set; }
 
-    public override string Desc() => Lit ? "(Lit)" : "";
+    public override string Desc() => Lit ? "(lit)" : "";
 
     public override string AsText()
     {
