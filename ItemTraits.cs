@@ -107,7 +107,7 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
         {
-            gs.CurrPerformers.Remove(this);
+            gs.Performers.Remove(this);
 
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
@@ -122,7 +122,7 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
             Lit = true;
             item.Stackable = false;
             Energy = Recovery;
-            gs.CurrPerformers.Add(this);
+            gs.Performers.Add(this);
             gs.ToggleEffect(item, loc, TerrainFlags.Lit, true);
 
             return (true, $"The {item.Name} sparks to life!");

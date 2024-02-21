@@ -22,8 +22,9 @@ internal class GameState(Player p, Campaign c, Options opts)
     public int CurrDungeon { get; set; }
     public Campaign Campaign { get; set; } = c;
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
-    public List<IPerformer> CurrPerformers { get; set; } = [];
+    public List<IPerformer> Performers { get; set; } = [];
     public int Turn { get; set; }
+    private int _currPerformer = 0;
 
     public void EnterLevel(int dungeon, int level)
     {
@@ -50,22 +51,66 @@ internal class GameState(Player p, Campaign c, Options opts)
     {
         RefreshPerformers();
 
-        foreach (var performer in CurrPerformers)
+        foreach (var performer in Performers)
         {
             performer.Energy = performer.Recovery;
         }
-    }
 
+        // Let the player go first when starting a session
+        var i = Performers.FindIndex(p => p is Player);
+        var player = Performers[i];
+        Performers.RemoveAt(i);
+        Performers.Insert(0, player);
+    }
+    
     public void RefreshPerformers()
     {
-        CurrPerformers.Clear();
-        CurrPerformers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
+        IPerformer? curr = null;
+        if (Performers.Count > 0)
+        {
+             curr = Performers[_currPerformer];
+        }
 
-        // It's convenient to know the player is always at position 0 in the list
-        var i = CurrPerformers.FindIndex(p => p is Player);
-        var player = CurrPerformers[i];
-        CurrPerformers.RemoveAt(i);
-        CurrPerformers.Insert(0, player);
+        Performers.Clear();
+        Performers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
+
+        if (curr is not null)
+        {
+            _currPerformer = Performers.IndexOf(curr);
+        }
+    }
+
+    public IPerformer NextPerformer()
+    {
+        do
+        {
+            // This is slightly different than a monster being killed because this just
+            // removes them from the queue. A burnt out torch still exists as an item in
+            // the game but a dead monster needs to be removed from the GameObjDb as well
+            if (Performers[_currPerformer].RemoveFromQueue)
+            {
+                // Don't need to increment p here, because removing the 'dead'
+                // performer will set up the next one
+                Performers.RemoveAt(_currPerformer);                
+            }
+            
+            if (Performers[_currPerformer].Energy < 1.0)
+            {
+                Performers[_currPerformer].Energy += Performers[_currPerformer].Recovery;
+                ++_currPerformer;
+            }
+
+            if (_currPerformer >= Performers.Count)
+            {
+                ++Turn;
+                _currPerformer = 0;
+                // probably there will eventually be end-of-turn stuff
+                // here eventually
+            }
+
+            return Performers[_currPerformer];
+        }
+        while (Performers.Count > 0);
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)

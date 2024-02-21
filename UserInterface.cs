@@ -353,38 +353,8 @@ abstract class UserInterface
             {
                 // Update step! This is where all the current performers gets a chance
                 // to take their turn!
-                if (GameState.CurrPerformers[p].Energy < 1.0)
-                {
-                    GameState.CurrPerformers[p].Energy += GameState.CurrPerformers[p].Recovery;
-                    p = (p + 1) % GameState.CurrPerformers.Count;
-                }
-                else if (TakeTurn(GameState.CurrPerformers[p]))
-                {
-                    // this is slightly different than a monster being killed because this just
-                    // removes them from the queue. A burnt out torch still exists as an item in
-                    // the game but a dead monster needs to be removed from the GameObjDb as well
-                    if (GameState.CurrPerformers[p].RemoveFromQueue)
-                    {                        
-                        // Don't need to increment p here, because removing the 'dead'
-                        // performer will set up the next one
-                        GameState.CurrPerformers.RemoveAt(p);
-                    }
-                    else if (GameState.CurrPerformers[p].Energy < 1.0) 
-                    {
-                        ++p;
-                    }
-
-                    if (p >= GameState.CurrPerformers.Count)
-                    {
-                        ++GameState.Turn;
-                        p = 0;
-
-                        // probably there will eventually be end-of-turn stuff
-                        // here eventually
-                    }
-                }                    
-                // I imagine later on there'll be bookkeeping and such once we've run
-                // through all the current performers?
+                IPerformer performer = GameState.NextPerformer();
+                TakeTurn(performer);
             }
             catch (GameQuitException)
             {
