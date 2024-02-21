@@ -308,7 +308,7 @@ abstract class UserInterface
         }
         else if (action is SaveGameAction)
         {
-            Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState);
+            Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
             throw new GameQuitException();
         }        
         else

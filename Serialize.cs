@@ -29,12 +29,12 @@ namespace Yarl2;
 // actually a concern for my game's save files)
 internal class Serialize
 {
-    public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState)
+    public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState, List<MsgHistory> MessageHistory)
     {
         var p = PlayerSaver.Shrink(player);
         var sgi = new SaveGameInfo(p, CampaignSaver.Shrink(campaign), gameState.CurrLevel, 
                                     gameState.CurrDungeon, 
-                                    GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn);
+                                    GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn, MessageHistory);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
 
@@ -44,7 +44,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, GameObjectDB, int) LoadSaveGame(string playerName)
+    public static (Player?, Campaign, GameObjectDB, int, List<MsgHistory>) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -58,7 +58,7 @@ internal class Serialize
         objDB._objs.Add(p.ID, p);
         objDB.SetToLoc(p.Loc, p);
         
-        return (p, c, objDB, sgi.Turn);
+        return (p, c, objDB, sgi.Turn, sgi.MessageHistory);
     }
 
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
@@ -555,12 +555,12 @@ class GameObjDBSaver
     }
 }
 
-internal record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
-                                GameObjDBSaver ItemDB, int Turn);
+record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
+                                GameObjDBSaver ItemDB, int Turn, List<MsgHistory> MessageHistory);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized
-internal record struct RememberedSq(int A, int B, int C, Sqr Sqr)
+record struct RememberedSq(int A, int B, int C, Sqr Sqr)
 {
     public static RememberedSq FromTuple((int, int, int) t, Sqr sqr) => new RememberedSq(t.Item1, t.Item2, t.Item3, sqr);
     public (int, int, int) ToTuple() => (A, B, C);
