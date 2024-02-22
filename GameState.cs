@@ -91,7 +91,12 @@ internal class GameState(Player p, Campaign c, Options opts)
             {
                 // Don't need to increment p here, because removing the 'dead'
                 // performer will set up the next one
-                Performers.RemoveAt(_currPerformer);                
+                Performers.RemoveAt(_currPerformer);
+                if (_currPerformer >= Performers.Count) 
+                {
+                    ++Turn;
+                    _currPerformer = 0;
+                }
             }
             
             if (Performers[_currPerformer].Energy < 1.0)
@@ -108,9 +113,12 @@ internal class GameState(Player p, Campaign c, Options opts)
                 // here eventually
             }
 
-            return Performers[_currPerformer];
+            if (Performers[_currPerformer].Energy >= 1.0)
+                return Performers[_currPerformer];
         }
         while (Performers.Count > 0);
+
+        throw new Exception("Hmm we should never run out of performers");
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)

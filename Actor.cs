@@ -154,7 +154,6 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        Console.WriteLine($"{actor.Name} takes a turn. {((IPerformer)actor).Energy}");
         return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
     }
 }
