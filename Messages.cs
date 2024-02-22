@@ -87,6 +87,14 @@ class MessageFactory
         return new Message(text, loc);
     }
 
+    static string Capitalize(string s)
+    {
+       if (s != "" && char.IsLetter(s[0]))
+            return $"{char.ToUpper(s[0])}{s[1..]}";
+        else
+            return s;
+    }
+
     public static Message Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
@@ -108,7 +116,7 @@ class MessageFactory
             sb.Append(exciting ? '!' : '.');
         }
 
-        return new Message(sb.ToString(), loc);
+        return new Message(Capitalize(sb.ToString()), loc);
     }
 
     public static Message Phrase(ulong subject, Verb verb, string obj, bool exciting, Loc loc, GameState gs)
@@ -126,7 +134,7 @@ class MessageFactory
             sb.Append(exciting ? '!' : '.');
         }
 
-        return new Message(sb.ToString(), loc);
+        return new Message(Capitalize(sb.ToString()), loc);
     }
 }
 

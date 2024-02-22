@@ -130,15 +130,15 @@ class PreGameHandler(UserInterface ui)
             
             _ui.Player = player;
 
-            var m = MonsterFactory.Get("goblin");
-            m.Loc = player.Loc with { Row = player.Loc.Row + 1, Col = player.Loc.Col - 1 };
-            objDb.Add(m);
-            objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol - 1), m);
+            // var m = MonsterFactory.Get("goblin");
+            // m.Loc = player.Loc with { Row = player.Loc.Row + 1, Col = player.Loc.Col - 1 };
+            // objDb.Add(m);
+            // objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol - 1), m);
 
-            var z = MonsterFactory.Get("zombie");
-            z.Loc = player.Loc with { Row = player.Loc.Row + 1 };
-            objDb.Add(z);
-            objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol), z);
+            // var z = MonsterFactory.Get("zombie");
+            // z.Loc = player.Loc with { Row = player.Loc.Row + 1 };
+            // objDb.Add(z);
+            // objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol), z);
 
             _ui.SetupGameState(c, objDb, 1);            
         }
