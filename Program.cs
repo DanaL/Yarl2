@@ -4,6 +4,15 @@ using Yarl2;
 
 var options = Options.LoadOptions("options.json");
 
+var rng = new Random();
+var nameGenerator = new NameGenerator(rng);
+
+for (int i = 0; i < 10; i++)
+{
+    int length = rng.Next(5, 11);
+    Console.WriteLine(nameGenerator.GenerateName(length));
+}
+
 // var dm = Map.TestMap();
 // dm.Dump();
 
