@@ -76,12 +76,12 @@ class PreGameHandler(UserInterface ui)
         return (campaign, entrance.Item1, entrance.Item2);        
     }
 
-    public bool StartUp()
+    public bool StartUp(Random rng)
     {
         try
         {
             string playerName = _ui.BlockingGetResponse("Who are you?");
-            SetupGame(playerName);
+            SetupGame(playerName, rng);
 
             return true;
         }
@@ -91,7 +91,7 @@ class PreGameHandler(UserInterface ui)
         }
     }
 
-    private void SetupGame(string playerName)
+    private void SetupGame(string playerName, Random rng)
     {
         if (Serialize.SaveFileExists(playerName))
         {
@@ -103,7 +103,7 @@ class PreGameHandler(UserInterface ui)
         else
         {
             var objDb = new GameObjectDB();
-            var (c, startRow, startCol) = BeginCampaign(new Random());
+            var (c, startRow, startCol) = BeginCampaign(rng);
             Player player = new(playerName);
             player.Loc = new Loc(0, 0, startRow, startCol);
             objDb.Add(player);

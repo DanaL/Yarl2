@@ -336,7 +336,7 @@ internal class Map : ICloneable
         return map;
     }
 
-    public void SetRandomTestMap()
+    public void SetRandomTestMap(Random rng)
     {
         for (int col = 0; col < Width; col++) 
         {
@@ -354,11 +354,10 @@ internal class Map : ICloneable
             }
         }
 
-        Random rnd = new Random();
         for (int j = 0; j < 1000;  j++) 
         {
-            int row = rnd.Next(1, Height);
-            int col = rnd.Next(1, Width);
+            int row = rng.Next(1, Height);
+            int col = rng.Next(1, Width);
             Tiles[row * Width + col] = TileFactory.Get(TileType.DungeonWall);
         }
     }

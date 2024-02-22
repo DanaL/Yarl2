@@ -18,14 +18,16 @@ interface IAnimationListener
 
 class TorchLightAnimationListener : IAnimationListener
 {
+    Random _rng;
     readonly UserInterface _ui;
     DateTime _lastFrame;
     List<(int, int)> _flickered = [];
 
-    public TorchLightAnimationListener(UserInterface ui)
+    public TorchLightAnimationListener(UserInterface ui, Random rng)
     {
         _ui = ui;
         _lastFrame = DateTime.Now;
+        _rng = rng;
     }
 
     public void Update()
@@ -45,16 +47,14 @@ class TorchLightAnimationListener : IAnimationListener
     }
 
     private void PickFlickeringSqs()
-    {
-        var rnd = new Random();
-        
+    {        
         int count = 0;
         _flickered = [];
         for (int r = 0; r < UserInterface.ViewHeight; r++)
         {
             for (int c = 0; c < UserInterface.ViewWidth; c++)
             {
-                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && rnd.Next(20) == 0)
+                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _rng.Next(20) == 0)
                 {
                     _flickered.Add((r, c));
                     if (++count > 3)
@@ -85,13 +85,15 @@ class CloudAnimationListener : IAnimationListener
     DateTime _lastFrame;
     DateTime _nextCloud;
     bool _paused;
+    Random _rng;
 
     bool InWilderness => _ui.CurrentDungeon == 0 && _ui.CurrentLevel == 0;
 
-    public CloudAnimationListener(UserInterface ui)
+    public CloudAnimationListener(UserInterface ui, Random rng)
     {
         _ui = ui;
         _lastFrame = DateTime.Now;
+        _rng = rng;
 
         // Only make a cloud if we're in the wilderness
         if (InWilderness)
@@ -100,14 +102,13 @@ class CloudAnimationListener : IAnimationListener
 
     void MakeCloud()
     {                
-        var rng = new Random();
         int count = 0;
         List<int> locs = [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ];
-        locs.Shuffle(rng);
+        locs.Shuffle(_rng);
 
         foreach (var k in locs) 
         {
-            if (count < 7 && rng.NextDouble() < 0.7)
+            if (count < 7 && _rng.NextDouble() < 0.7)
             {
                 _cloud[k] = true;
                 ++ count;
@@ -118,15 +119,15 @@ class CloudAnimationListener : IAnimationListener
             }
         }
 
-        if (rng.NextDouble() < 0.5)
+        if (_rng.NextDouble() < 0.5)
         {
-            _row = rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
+            _row = _rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
             _col = -3;
         }
         else
         {
             _row = -3;
-            _col = rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
+            _col = _rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
         }
 
         _paused = false;
@@ -198,9 +199,8 @@ class CloudAnimationListener : IAnimationListener
             // creating the next one.
             if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth) 
             {
-                var rng = new Random();
                 _paused = true;
-                _nextCloud = DateTime.Now.AddSeconds(rng.Next(5, 16));                
+                _nextCloud = DateTime.Now.AddSeconds(_rng.Next(5, 16));                
             }
         }
     }

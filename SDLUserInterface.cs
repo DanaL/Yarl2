@@ -20,7 +20,7 @@ internal class SDLUserInterface : UserInterface
     private Sqr[,] _prevTiles = new Sqr[ViewHeight, ViewWidth];    
     private string _prevMessage = "";
     
-    public SDLUserInterface(string windowTitle, Options opt) : base(opt)
+    public SDLUserInterface(string windowTitle, Options opt, Random rng) : base(opt, rng)
     {
         FontSize = opt.FontSize;
         SDL_Init(SDL_INIT_VIDEO);
@@ -131,18 +131,6 @@ internal class SDLUserInterface : UserInterface
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
         SDL_DestroyTexture(texture);
-    }
-
-    private SDL_Color RndTorchColour()
-    {
-        var rng = new Random();
-        var alpha = rng.Next(25, 125);
-        return new SDL_Color() { 
-                    a = (byte) 30, 
-                    r = (byte) 255,
-                    g = (byte) 159,
-                    b = (byte) 0
-            };
     }
 
     private void SDLPut(int row, int col, char ch, Colour fg, Colour bg) 

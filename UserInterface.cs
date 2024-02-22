@@ -48,6 +48,7 @@ abstract class UserInterface
     public Queue<char> InputBuffer = new Queue<char>();
 
     protected GameState? GameState { get; set; } = null;
+    protected Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
@@ -69,13 +70,14 @@ abstract class UserInterface
     protected readonly int MaxHistory = 50;
     protected bool HistoryUpdated = false;
     
-    public UserInterface(Options opts)
+    public UserInterface(Options opts, Random rng)
     {
         _options = opts;
         PlayerScreenRow = ViewHeight / 2;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
         SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
         ZLayer = new Tile[ViewHeight, ViewWidth];
+        Rng = rng;
         ClearZLayer();
     }
 
@@ -332,8 +334,8 @@ abstract class UserInterface
     public void GameLoop()
     {        
         List<IAnimationListener> animationListeners = [];
-        animationListeners.Add(new CloudAnimationListener(this));
-        animationListeners.Add(new TorchLightAnimationListener(this));
+        animationListeners.Add(new CloudAnimationListener(this, Rng));
+        animationListeners.Add(new TorchLightAnimationListener(this, Rng));
 
         GameState.BuildPerformersList();
 
