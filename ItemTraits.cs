@@ -135,8 +135,6 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        Console.WriteLine("I'm just a torch, taking my turn!");
-
         if (!Lit)
             return new PassAction(this);
 

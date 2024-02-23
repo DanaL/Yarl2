@@ -254,7 +254,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
         {
             new Decoration(DecorationType.Statue, StatueDesc()),
             new Decoration(DecorationType.Fresco, FrescoDesc()),
-            new Decoration(DecorationType.Fresco, MosaicDesc()),
+            new Decoration(DecorationType.Mosaic, MosaicDesc()),
             new Decoration(DecorationType.ScholarJournal, ScholarJournal1()),
             new Decoration(DecorationType.ScholarJournal, ScholarJounral2()),
             new Decoration(DecorationType.ScholarJournal, ScholarJounral3())
@@ -277,6 +277,8 @@ class RulerInfo
 
 class History 
 {
+    WorldFacts _facts;
+    RulerInfo _ruler;
     private Random _rng;
 
     public History(Random rng)
@@ -284,9 +286,17 @@ class History
         _rng = rng;
     }
 
+    public List<Decoration> GetDecorations()
+    {
+        var historicalEvent = new InvasionHistoricalEvent(_ruler, _facts, _rng);
+        var decs = historicalEvent.GenerateDecorations();
+
+        return decs;
+    }
+
     public void CalcDungeonHistory()
     {
-        var facts = new WorldFacts(_rng);
+        _facts = new WorldFacts(_rng);
 
         // Okay, we need to know:
         //  1) Who the ruler was/who founded the dungeon
@@ -301,9 +311,9 @@ class History
         };
 
         var nameGen = new NameGenerator(_rng, "names.txt");
-        var name = facts.RulerName();
+        var name = _facts.RulerName();
 
-        var ruler = new RulerInfo()
+        _ruler = new RulerInfo()
         {
             Type = type,
             Name = name,
@@ -311,9 +321,5 @@ class History
             Epithet = nameGen.PickEpithet(),
             Beloved = _rng.NextDouble() < 0.5
         };
-
-        var fact = new InvasionHistoricalEvent(ruler, facts, _rng);
-        var decs = fact.GenerateDecorations();
-        Console.WriteLine(fact.Title);
     }
 }

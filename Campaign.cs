@@ -60,9 +60,12 @@ class PreGameHandler(UserInterface ui)
 
         var entrance = wildernessMap.RandomTile(TileType.Tree, rng);
         
+        var history = new History(rng);
+        history.CalcDungeonHistory();
+
         //var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
         var dBuilder = new DungeonBuilder();
-        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, rng);        
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, rng);        
         campaign.AddDungeon(mainDungeon);
 
         var portal = new Portal("You stand before a looming portal.")

@@ -47,10 +47,12 @@ enum TileType
     Forge,
     Dirt,
     Well,
-    Bridge
+    Bridge,
+    Statue,
+    DungeonFloorText
 }
 
-internal abstract class Tile(TileType type)
+abstract class Tile(TileType type)
 {
     public TileType Type { get; protected set; } = type;
     public virtual string StepMessage => "";
@@ -58,7 +60,7 @@ internal abstract class Tile(TileType type)
     public abstract bool Opaque();
 }
 
-internal class BasicTile : Tile
+class BasicTile : Tile
 {
     private readonly bool _passable;
     private readonly bool _opaque;
@@ -83,7 +85,7 @@ internal class BasicTile : Tile
     }
 }
 
-internal class Door(TileType type, bool open) : Tile(type)
+class Door(TileType type, bool open) : Tile(type)
 {
     public bool Open { get; set;} = open;
 
@@ -96,7 +98,7 @@ internal class Door(TileType type, bool open) : Tile(type)
     }
 }
 
-internal class Portal(string stepMessage) : Tile(TileType.Portal) 
+class Portal(string stepMessage) : Tile(TileType.Portal) 
 {
     private readonly string _stepMessage = stepMessage;
     public Loc Destination { get; set; }
@@ -111,21 +113,35 @@ internal class Portal(string stepMessage) : Tile(TileType.Portal)
     }
 }
 
-internal class Upstairs : Portal
+class Upstairs : Portal
 {
     public Upstairs(string stepMessage) : base(stepMessage) => Type = TileType.Upstairs;
 
     public override string ToString() => base.ToString();
 }
 
-internal class Downstairs : Portal
+class Downstairs : Portal
 {
     public Downstairs(string stepMessage) : base(stepMessage) => Type = TileType.Downstairs;
 
     public override string ToString() => base.ToString();
 }
 
-internal class TileFactory
+class DungeonFloorText(string stepMessage) : Tile(TileType.DungeonFloorText)
+{
+    private readonly string _stepMessage = stepMessage;
+    public override bool Passable() => true;
+    public override bool Opaque() => false;
+
+    public override string StepMessage => _stepMessage;
+
+    public override string ToString()
+    {
+        return $"{(int)Type};{_stepMessage}";
+    }
+}
+
+class TileFactory
 {
     private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true);
     private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true);
@@ -150,6 +166,7 @@ internal class TileFactory
     private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false);
     private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
     private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
+    private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true);
 
     public static Tile Get(TileType type) => type switch
     {
@@ -176,6 +193,7 @@ internal class TileFactory
         TileType.Dirt => Dirt,
         TileType.Well => Well,
         TileType.Bridge => Bridge,
+        TileType.Statue => Statue,
         _ => Unknown
     };
 }

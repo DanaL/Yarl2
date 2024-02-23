@@ -443,6 +443,10 @@ internal class MapSaver
                     bool open = Convert.ToBoolean(pieces[2]);
                     tile = new Door(TileType.Door, open);
                     break;
+                case TileType.DungeonFloorText:
+                    string msg = pieces[2];
+                    tile = new DungeonFloorText(msg);
+                    break;
             }
 
             if (tile is not null)

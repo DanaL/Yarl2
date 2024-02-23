@@ -230,6 +230,7 @@ abstract class UserInterface
             case TileType.StoneWall:
                 return lit ? new Sqr(Colours.GREY, Colours.BLACK, '#') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '#');
             case TileType.DungeonFloor:
+            case TileType.DungeonFloorText:
                 return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '.') : new Sqr(Colours.GREY, Colours.BLACK, '.');
             case TileType.StoneFloor:
                 return lit ? new Sqr(Colours.GREY, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '.');
@@ -273,6 +274,8 @@ abstract class UserInterface
                 return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, 'o') : new Sqr(Colours.GREY, Colours.BLACK, 'o');
             case TileType.Bridge:
                 return lit ? new Sqr(Colours.GREY, Colours.BLACK, '=') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '=');
+            case TileType.Statue:
+                return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, '&') : new Sqr(Colours.GREY, Colours.BLACK, '&');
             default:
                 return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
         }        

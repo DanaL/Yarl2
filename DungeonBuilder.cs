@@ -80,7 +80,62 @@ class DungeonBuilder
         }
     }
 
-    public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, Random rng)
+    private void PlaceStatue(Map map, int height, int width, string statueDesc, Random rng)
+    {
+        List<(int, int)> candidateSqs = [];
+        // Find all the candidate squares where the statue(s) might go
+        for (int r = 1; r < height - 1; r++)
+        {
+            for (int c = 1; c < width - 1; c++)
+            {
+                if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+                {
+                    bool viable = true;
+                    foreach (var t in Util.Adj4Sqs(r, c))
+                    {
+                        if (map.TileAt(t).Type != TileType.DungeonFloor)
+                        {
+                            viable = false;
+                            break;
+                        }
+                    }
+
+                    if (viable)
+                        candidateSqs.Add((r, c));
+                }
+            }
+        }
+
+        if (candidateSqs.Count > 0) 
+        {
+            var sq = candidateSqs[rng.Next(candidateSqs.Count)];
+            foreach (var n in Util.Adj4Sqs(sq.Item1, sq.Item2))
+            {
+                map.SetTile(n, TileFactory.Get(TileType.Statue));
+            }
+
+            var tile = new DungeonFloorText(statueDesc.Capitalize());
+            map.SetTile(sq, tile);
+            Console.WriteLine(sq);
+        }
+    }
+
+    // While I'm testing I'll just stick all the decorations on level 1
+    public void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, Random rng)
+    {
+        var decorations = history.GetDecorations();
+
+        // I eventually probably won't include every decoration from every fact
+        foreach (var decoration in decorations) 
+        { 
+            if (decoration.Type == DecorationType.Statue)
+            {
+                PlaceStatue(levels[0], height, width, decoration.Desc, rng);
+            }
+        }
+    }
+
+    public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, Random rng)
     {
         _dungeonID = id;
         var dungeon = new Dungeon(id, arrivalMessage);
@@ -94,6 +149,8 @@ class DungeonBuilder
         }   
 
         SetStairs(levels, h, w, numOfLevels, entrance, rng);
+
+        DecorateDungeon(levels, h, w, numOfLevels, history, rng);
 
         return dungeon;
     }
