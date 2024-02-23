@@ -21,9 +21,12 @@ int seed = DateTime.Now.GetHashCode();
 Console.WriteLine($"Seed: {seed}");
 var rng = new Random(seed);
 
-var h = new History(rng);
-for (int j = 0; j < 10; j++)
-    h.CalcDungeonHistory();
+for (int i = 0; i < 10; i++)
+{
+    var h = new History(rng);
+    h.CalcDungeonHistory();    
+}
+    
 return;
 
 UserInterface display;

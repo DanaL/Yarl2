@@ -31,12 +31,12 @@ namespace Yarl2
             "the provinces", "the faithful", "autmun rains", "the fearful" ];
         private string[] _titles = [ "strong", "mighty", "unbowed", "forgotten", "cursed", "twice cursed", 
             "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen", 
-            "faithful", "beaufiful", "radiant", "awful", "terrible", "wise", "just" ];
+            "faithful", "beaufiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
 
-        public NameGenerator(Random rng)
+        public NameGenerator(Random rng, string sourceFile)
         {
             _rng = rng;
-            var names = File.ReadAllLines("names.txt")
+            var names = File.ReadAllLines(sourceFile)
                             .Select(n => n.ToLower()).ToList();
 
             Dictionary<char, int> starts = [];
@@ -129,18 +129,18 @@ namespace Yarl2
 
         public string PickTitle() => _ranks[_rng.Next(_ranks.Length)].Capitalize();
 
-        public string Suffix()
+        public string PickEpithet()
         {
             if (_rng.NextDouble() < 0.333)
             {
                 var adj = _adjectives[_rng.Next(_adjectives.Length)].Capitalize();
                 var domain = _domains[_rng.Next(_domains.Length)];
-                return $"{adj} of {domain}";
+                return $"{adj.Capitalize()} of {domain.Capitalize()}";
             }
             else
             {
                 var title = _titles[_rng.Next(_titles.Length)];
-                return $"the {title.Capitalize()}";
+                return $"the {title}";
             }
         }
     }
