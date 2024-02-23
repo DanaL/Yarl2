@@ -114,14 +114,47 @@ class DungeonBuilder
                 map.SetTile(n, TileFactory.Get(TileType.Statue));
             }
 
-            var tile = new DungeonFloorText(statueDesc.Capitalize());
+            var tile = new Landmark(statueDesc.Capitalize());
             map.SetTile(sq, tile);
-            Console.WriteLine(sq);
+        }
+    }
+
+    private void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
+    {
+        List<(int, int)> candidateSqs = [];
+        // We're looking for any floor square that's adjacent to wall
+        for (int r = 1; r < height - 1; r++)
+        {
+            for (int c = 1; c < width - 1; c++)
+            {
+                if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+                {
+                    bool viable = false;
+                    foreach (var t in Util.Adj4Sqs(r, c))
+                    {
+                        if (map.TileAt(t).Type == TileType.DungeonWall)
+                        {
+                            viable = true;
+                            break;
+                        }
+                    }
+
+                    if (viable)
+                        candidateSqs.Add((r, c));
+                }
+            }
+        }
+
+        if (candidateSqs.Count > 0)
+        {
+            var sq = candidateSqs[rng.Next(candidateSqs.Count)];            
+            var tile = new Landmark(frescoText.Capitalize());
+            map.SetTile(sq, tile);
         }
     }
 
     // While I'm testing I'll just stick all the decorations on level 1
-    public void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, Random rng)
+    private void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, Random rng)
     {
         var decorations = history.GetDecorations();
 
@@ -131,6 +164,16 @@ class DungeonBuilder
             if (decoration.Type == DecorationType.Statue)
             {
                 PlaceStatue(levels[0], height, width, decoration.Desc, rng);
+            }
+            else if (decoration.Type == DecorationType.Mosaic)
+            {
+                var sq = levels[0].RandomTile(TileType.DungeonFloor, rng);
+                var mosaic = new Landmark(decoration.Desc.Capitalize());
+                levels[0].SetTile(sq, mosaic);
+            }
+            else if (decoration.Type == DecorationType.Fresco)
+            {
+                PlaceFresco(levels[0], height, width, decoration.Desc, rng);
             }
         }
     }

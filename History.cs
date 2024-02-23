@@ -177,7 +177,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
         {
             return _invader.Item1 switch
             {
-                InvaderType.Nation => $"{defenders} driving back an invading army'",
+                InvaderType.Nation => $"{defenders} driving back an invading army.",
                 InvaderType.Dragon => $"{defenders} facing a mighty dragon.",
                 InvaderType.Barbarians => $"{defenders} clashing with a barbarian horde.",
                 InvaderType.Demon => $"{defenders} facing a terrible demon.",
@@ -189,7 +189,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
         {
             return _invader.Item1 switch
             {
-                InvaderType.Nation => $"{defenders} fleeing an invading army'",
+                InvaderType.Nation => $"{defenders} fleeing an invading army.",
                 InvaderType.Dragon => $"a terrible dragon devouring {defenders}.",
                 InvaderType.Barbarians => $"{defenders} fleeing a barbarian horde.",
                 InvaderType.Demon => $"a horrific demon destroying {defenders}.",

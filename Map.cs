@@ -49,7 +49,7 @@ enum TileType
     Well,
     Bridge,
     Statue,
-    DungeonFloorText
+    Landmark
 }
 
 abstract class Tile(TileType type)
@@ -127,7 +127,7 @@ class Downstairs : Portal
     public override string ToString() => base.ToString();
 }
 
-class DungeonFloorText(string stepMessage) : Tile(TileType.DungeonFloorText)
+class Landmark(string stepMessage) : Tile(TileType.Landmark)
 {
     private readonly string _stepMessage = stepMessage;
     public override bool Passable() => true;
@@ -276,6 +276,9 @@ internal class Map : ICloneable
     public bool InBounds(int row,  int col) => row >= 0 && row < Height && col >= 0 && col < Width;
     public bool InBounds((int, int) loc) => loc.Item1 >= 0 && loc.Item1 < Height && loc.Item2 >= 0 && loc.Item2 < Width;
 
+    // I'll need to search out a bunch of dungeon floors (the main use for this function) so I 
+    // should build up a list of random floors and pick from among them instead of randomly
+    // trying squares. (And remove from list when I SetTile()...
     public (int, int) RandomTile(TileType type, Random rng)
     {
         do
