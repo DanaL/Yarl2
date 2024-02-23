@@ -158,11 +158,11 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     private string KnownStatue()
     {
         if (_succesful)
-            return $"a statute depicting {_rulerInfo.FullName}, victorious in battle";
+            return $"a statute depicting {_rulerInfo.FullName}, victorious in battle.";
         else if (_rulerInfo.Beloved)
-            return $"a statute depicting {_rulerInfo.FullName}, grim in face";
+            return $"a statute depicting {_rulerInfo.FullName}, grim in face.";
         else
-            return $"a statute depicting {_rulerInfo.FullName}, kneeling, their gaze to the ground";
+            return $"a statute depicting {_rulerInfo.FullName}, kneeling, their gaze to the ground.";
     }
 
     private string VisualDesc()

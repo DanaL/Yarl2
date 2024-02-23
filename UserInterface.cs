@@ -122,12 +122,36 @@ abstract class UserInterface
         var msgs = MessageHistory.Take(5)
                                  .Select(msg => msg.Fmt);
 
+        int count = 0;
         int row = ScreenHeight - 1;
         Colour colour = Colours.WHITE;
         foreach (var msg in msgs)
         {
-            var s = msg.PadRight(ScreenWidth);
-            WriteLine(s, row--, 0, ScreenWidth, colour);
+            if (msg.Length >= ScreenWidth)
+            {
+                int c;
+                // Find the point to split the line. I'm never going to send a
+                // message that's a string with no spaces wider than the 
+                // screen am I...
+                for (c = ScreenWidth - 1; c >= 0; c--)
+                {
+                    if (msg[c] == ' ')
+                        break;
+                }
+                string s1 = msg[(c + 1)..].TrimStart().PadRight(ScreenWidth);
+                string s2 = msg[..c].TrimStart().PadRight(ScreenWidth);
+                WriteLine(s1, row--, 0, ScreenWidth, colour);
+                if (ScreenHeight - row < 5)
+                    WriteLine(s2, row--, 0, ScreenWidth, colour);
+            }
+            else
+            {
+                string s = msg.PadRight(ScreenWidth);
+                WriteLine(s, row--, 0, ScreenWidth, colour);
+            }
+
+            if (++count == 5)
+                break;
 
             if (colour == Colours.WHITE)
                 colour = Colours.GREY;
