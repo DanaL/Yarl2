@@ -189,6 +189,14 @@ static class StringUtils
         else
             return s + "s";
     }
+
+    public static string Capitalize(this string s)
+    {
+       if (s != "" && char.IsLetter(s[0]))
+            return $"{char.ToUpper(s[0])}{s[1..]}";
+        else
+            return s;
+    }
 }
 
 internal class GameQuitException : Exception { }

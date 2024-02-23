@@ -20,7 +20,18 @@ namespace Yarl2
         private Random _rng;
         private List<(char, int)> _starts;
         private List<(string, int)> _pairs;
-        private int _totalPairs;
+    
+        private string[] _ranks = [ "king", "queen", "viscount", "marquess", "baron", "lord", "lady",
+            "sovereign", "vizier", "duke", "grand duke", "archduke", "prince", "princess", "earl",
+            "despot", "count", "countess", "baroness", "elder", "justice", "judge", "tyrant" ];
+        private string[] _adjectives = [ "seeker", "ruler", "conqueror", "reaver", "saviour", "friend",
+            "patron", "protector", "beloved"];
+        private string[] _domains = [ "mists", "the heavens", "spring", "summer", "fall", "winter", "wisdom",
+            "faith", "faith", "peace", "the west", "the north", "the south", "the skies", "the stars",
+            "the provinces", "the faithful", "autmun rains", "the fearful" ];
+        private string[] _titles = [ "strong", "mighty", "unbowed", "forgotten", "cursed", "twice cursed", 
+            "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen", 
+            "faithful", "beaufiful", "radiant", "awful", "terrible", "wise", "just" ];
 
         public NameGenerator(Random rng)
         {
@@ -114,6 +125,23 @@ namespace Yarl2
             while (sb.Length < length);
 
             return sb.ToString();
+        }
+
+        public string PickTitle() => _ranks[_rng.Next(_ranks.Length)].Capitalize();
+
+        public string Suffix()
+        {
+            if (_rng.NextDouble() < 0.333)
+            {
+                var adj = _adjectives[_rng.Next(_adjectives.Length)].Capitalize();
+                var domain = _domains[_rng.Next(_domains.Length)];
+                return $"{adj} of {domain}";
+            }
+            else
+            {
+                var title = _titles[_rng.Next(_titles.Length)];
+                return $"the {title.Capitalize()}";
+            }
         }
     }
 }

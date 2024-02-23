@@ -21,6 +21,11 @@ int seed = DateTime.Now.GetHashCode();
 Console.WriteLine($"Seed: {seed}");
 var rng = new Random(seed);
 
+var h = new History(rng);
+for (int j = 0; j < 10; j++)
+    h.CalcDungeonHistory();
+return;
+
 UserInterface display;
 if (options.Display == "Bearlib")
     display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options, rng);
