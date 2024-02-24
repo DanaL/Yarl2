@@ -125,7 +125,7 @@ class ItemFactory
             case "torch":
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
-                item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=500, Radius=5, Lit=false, 
+                item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=33, Radius=5, Lit=false, 
                                          Energy=0.0, Recovery=1.0});
                 break;
             default:
@@ -214,7 +214,7 @@ class Inventory(ulong ownerID)
 
     public void Remove(char slot, int count)
     {
-        _items[slot] = null;
+        _items.Remove(slot);
     }
 
     // This toggles the equip status of gear only and recalculation of stuff
