@@ -460,7 +460,7 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         if (readables.Any())
         {
             IReadable document = (IReadable)readables.First();
-            document.Read(_actor, _ui);
+            document.Read(_actor, _ui, item);
             
             if (_actor is Player player)
             {

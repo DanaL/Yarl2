@@ -28,7 +28,7 @@ class Armour : Item
 
 interface IReadable
 {
-    void Read(Actor actor, UserInterface ui);
+    void Read(Actor actor, UserInterface ui, Item document);
 }
 
 interface IUSeable
@@ -94,10 +94,10 @@ class DocumentTrait : ItemTrait, IReadable
         throw new NotImplementedException();
     }
 
-    public void Read(Actor actor, UserInterface ui)
+    public void Read(Actor actor, UserInterface ui, Item document)
     {
         string msg = $"{actor.FullName} read:\n{_text}";
-        ui.Popup(msg);   
+        ui.Popup(msg, document.FullName.IndefArticle());   
     }
 }
 

@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Yarl2;
@@ -66,8 +67,8 @@ abstract class UserInterface
     protected bool ClosingPopUp { get; set; }
     protected bool OpeningPopUp { get; set; }
     protected string? _popupBuffer = "";
-    protected int _popupWidth;
-
+    protected string _popupTitle = "";
+    
     public List<MsgHistory> MessageHistory = [];
     protected readonly int MaxHistory = 50;
     protected bool HistoryUpdated = false;
@@ -108,13 +109,14 @@ abstract class UserInterface
     public void ClosePopup()
     {
         _popupBuffer = null;
+        _popupTitle = "";
         ClosingPopUp = true;
     }
 
-    public void Popup(string message, int width = 0)
+    public void Popup(string message, string title = "")
     {
         _popupBuffer = message;
-        _popupWidth = width;
+        _popupTitle = title;
         OpeningPopUp = true;
         ClosingPopUp = false;
     }
@@ -203,7 +205,7 @@ abstract class UserInterface
         int maxPopUpWidth = ViewWidth - 4;
         var lines = _popupBuffer.Split('\n');
         int bufferWidth = lines.Select(l => l.Length).Max();
-        int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
+        int width = bufferWidth > 20 ? bufferWidth : 20;
         width += 4;
 
         if (width >= maxPopUpWidth)
@@ -217,8 +219,20 @@ abstract class UserInterface
         int row = 5;
 
         string border = "+".PadRight(width - 1, '-') + "+";
-        WriteLine(border, row++, col, width, Colours.WHITE);
 
+        if (_popupTitle.Length > 0)
+        {
+            int left = (width - _popupTitle.Length) / 2 - 2;
+            string title = "+".PadRight(left, '-') + ' ';
+            title += _popupTitle + ' ';
+            title = title.PadRight(width - 1, '-') + "+";
+            WriteLine(title, row++, col, width, Colours.WHITE);
+        }
+        else
+        {
+            WriteLine(border, row++, col, width, Colours.WHITE);
+        }
+        
         foreach (var line in lines)
         {
             WriteLine(("| " + line).PadRight(width - 2) + " |", row++, col, width, Colours.WHITE);
@@ -486,7 +500,7 @@ abstract class UserInterface
 
         do
         {
-            Popup($"{prompt}\n{result}", 20);
+            Popup($"{prompt}\n{result}");
             UpdateDisplay();
             e = PollForEvent();
 
