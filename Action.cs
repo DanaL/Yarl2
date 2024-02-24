@@ -465,7 +465,7 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (_actor is Player player)
             {
                 var acc = new PauseForMoreAccumulator();
-                var action = new CloseMenuAction(ui);
+                var action = new CloseMenuAction(ui, 1.0);
                 player.ReplacePendingAction(action, acc);
             }
             return new ActionResult() { Successful = true, Message = null };
@@ -602,14 +602,15 @@ class PassAction(IPerformer performer) : Action
     }
 }
 
-class CloseMenuAction(UserInterface ui) : Action 
+class CloseMenuAction(UserInterface ui, double energyCost = 0.0) : Action 
 {
     private UserInterface _ui = ui;
+    private double _energyCost = energyCost;
 
     public override ActionResult Execute() 
     { 
         _ui.CloseMenu();
-        return new ActionResult() { Successful=true, Message=null };
+        return new ActionResult() { Successful=true, Message=null, EnergyCost = _energyCost };
     }
 }
 
