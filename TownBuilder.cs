@@ -559,6 +559,7 @@ class TownBuilder
 
         Dictionary<TileType, int> passable = [];
         passable.Add(TileType.Grass, 1);
+        passable.Add(TileType.Sand, 1);
         passable.Add(TileType.Dirt, 1);
         passable.Add(TileType.Bridge, 1);
         passable.Add(TileType.Tree, 2);
@@ -669,7 +670,7 @@ class TownBuilder
         int startCol = rng.Next(wildernessSize / 4, wildernessSize / 2);
 
         PlaceBuildings(map, startRow, startCol, rng);
-
+        
         int centreRow = startRow + TOWN_HEIGHT / 2;
         int centreCol = startCol + TOWN_WIDTH / 2;
         TownCentre = (centreRow, centreCol);
@@ -686,7 +687,7 @@ class TownBuilder
         }
 
         DrawPathsInTown(map, rng, startRow, startCol);
-
+        
         AddWell(map, rng);
 
         return map;

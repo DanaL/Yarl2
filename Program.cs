@@ -18,6 +18,7 @@ var options = Options.LoadOptions("options.json");
 //var i2 = ItemSaver.TextToItem("3|0,0,0,0|leather armour|False|b|True|1|1|battered|[;brown;lightbrown|ArmourTrait,Shirt,1,0|Armour");
 //var i3 = ItemSaver.TextToItem("7|0,0,0,0|torch|True||False|1|0||(;lightbrown;brown|LightSourceTrait,7,True,5,15,0,1|Tool");
 int seed = DateTime.Now.GetHashCode();
+//seed = 544993503;
 Console.WriteLine($"Seed: {seed}");
 var rng = new Random(seed);
 
