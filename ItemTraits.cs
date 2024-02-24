@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel;
+
 namespace Yarl2;
 
 enum ArmourParts
@@ -22,6 +24,11 @@ enum ArmourParts
 class Armour : Item
 {
     public ArmourParts Piece { get; set; }
+}
+
+interface IReadable
+{
+    void Read(Actor actor, UserInterface ui);
 }
 
 interface IUSeable
@@ -48,7 +55,7 @@ class MeleeAttackTrait : ItemTrait
     public override ItemTrait Duplicate(Item _) => 
         new MeleeAttackTrait() { Bonus = Bonus, DamageDie = DamageDie, NumOfDie = NumOfDie };
 
-    public override string AsText() => $"MeleeAttackTrait,{DamageDie},{NumOfDie},{Bonus}";
+    public override string AsText() => $"MeleeAttackTrait#{DamageDie}#{NumOfDie}#{Bonus}";
 
     public override bool Acitve => true;
 }
@@ -64,12 +71,37 @@ class ArmourTrait : ItemTrait
     public override ItemTrait Duplicate(Item _) => 
         new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
 
-    public override string AsText() => $"ArmourTrait,{Part},{ArmourMod},{Bonus}";
+    public override string AsText() => $"ArmourTrait#{Part}#{ArmourMod}#{Bonus}";
 
     public override bool Acitve => true;
 }
 
-class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
+class DocumentTrait : ItemTrait, IReadable
+{
+    string _text;
+
+    public DocumentTrait(string text)
+    {
+        _text = text;
+    }
+
+    public override bool Acitve => true;
+    public override string Desc() => "";
+    public override string AsText() => $"DocumentTrait#{_text}";
+
+    public override ItemTrait Duplicate(Item container)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Read(Actor actor, UserInterface ui)
+    {
+        string msg = $"{actor.FullName} read:\n{_text}";
+        ui.Popup(msg);   
+    }
+}
+
+class LightSourceTrait : ItemTrait, IPerformer, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
@@ -85,7 +117,7 @@ class LightSourceTrait() : ItemTrait, IPerformer, IUSeable
 
     public override string AsText()
     {
-        return $"LightSourceTrait,{ContainerID},{Lit},{Radius},{Fuel},{Energy},{Recovery}";
+        return $"LightSourceTrait#{ContainerID}#{Lit}#{Radius}#{Fuel}#{Energy}#{Recovery}";
     }
 
     public override ItemTrait Duplicate(Item container)
@@ -155,7 +187,7 @@ class TraitFactory
 {
     public static ItemTrait FromText(string text)
     {
-        var pieces = text.Split(',');
+        var pieces = text.Split('#');
         var type = pieces[0];
 
         ItemTrait trait;
@@ -196,6 +228,9 @@ class TraitFactory
                     Energy = int.Parse(pieces[5]),
                     Recovery = int.Parse(pieces[6])
                 };
+                break;
+            case "DocumentTrait":
+                trait = new DocumentTrait(pieces[1].Replace("<br/>", "\n"));
                 break;
             default:
                 throw new Exception("I don't know how to make that kind of Trait");

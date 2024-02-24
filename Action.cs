@@ -442,6 +442,48 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
     }
 }
 
+// Reading a magic scroll will need to work a little different than just
+// reading a text document
+class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+{
+    public char Choice { get; set; }
+    readonly UserInterface _ui = ui;
+    readonly Actor _actor = actor;
+    readonly GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
+        _ui.CloseMenu();
+
+        var readables = item.Traits.Where(t => t is IReadable);
+        if (readables.Any())
+        {
+            IReadable document = (IReadable)readables.First();
+            document.Read(_actor, _ui);
+            
+            if (_actor is Player player)
+            {
+                var acc = new PauseForMoreAccumulator();
+                var action = new CloseMenuAction(ui);
+                player.ReplacePendingAction(action, acc);
+            }
+            return new ActionResult() { Successful = true, Message = null };
+        }
+        else
+        {
+            var msg = MessageFactory.Phrase("There's nothing to read on that!", _gs.Player.Loc);
+            return new ActionResult() { Successful = false, Message = msg };
+        }
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
+    }
+}
+
 class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }

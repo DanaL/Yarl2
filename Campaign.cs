@@ -46,7 +46,7 @@ class PreGameHandler(UserInterface ui)
 {
     private UserInterface _ui { get; set; } = ui;
    
-    (Campaign, int, int) BeginCampaign(Random rng)
+    (Campaign, int, int) BeginCampaign(Random rng, GameObjectDB objDb)
     {        
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
@@ -65,7 +65,7 @@ class PreGameHandler(UserInterface ui)
 
         //var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
         var dBuilder = new DungeonBuilder();
-        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, rng);        
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);        
         campaign.AddDungeon(mainDungeon);
 
         var portal = new Portal("You stand before a looming portal.")
@@ -106,7 +106,7 @@ class PreGameHandler(UserInterface ui)
         else
         {
             var objDb = new GameObjectDB();
-            var (c, startRow, startCol) = BeginCampaign(rng);
+            var (c, startRow, startCol) = BeginCampaign(rng, objDb);
             Player player = new(playerName);
             player.Loc = new Loc(0, 0, startRow, startCol);
             objDb.Add(player);

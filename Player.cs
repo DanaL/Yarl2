@@ -213,6 +213,12 @@ internal class Player : Actor, IPerformer, IItemHolder
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new DropItemAction(ui, this, gameState);
             }
+            else if (ch == 'r')
+            {
+                ShowInventory(ui, "Read what?");
+                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _deferred = new ReadItemAction(ui, this, gameState);
+            }
             else if (ch == 'e')
             {
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);

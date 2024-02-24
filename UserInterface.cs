@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 enum UIEventType { Quiting, KeyInput, NoEvent }
@@ -160,12 +162,57 @@ abstract class UserInterface
         }
     }
 
+    // This is going to look ugly if a message contains a long line
+    // followed by a line break then short line but I don't know
+    // if I'm ever going to need to worry about that in my game.
+    private string[] ResizePopupLines(string[] lines, int maxWidth)
+    {
+        List<string> resized = [];
+
+        foreach (var line in lines)
+        {
+            if (line.Length < maxWidth)
+                resized.Add(line);
+            else
+            {
+                var sb = new StringBuilder();
+                foreach (var word in line.Split(' '))
+                {
+                    if (sb.Length + word.Length < maxWidth) 
+                    {
+                        sb.Append(word);
+                        sb.Append(' ');
+                    }
+                    else
+                    {
+                        resized.Add(sb.ToString().TrimEnd());
+                        sb = new StringBuilder(word);
+                        sb.Append(' ');
+                    }
+                }
+                if (sb.Length > 0)
+                    resized.Add(sb.ToString().TrimEnd());
+            }
+        }
+
+        return resized.ToArray();
+    }
+
     protected void WritePopUp()
     {
+        int maxPopUpWidth = ViewWidth - 4;
         var lines = _popupBuffer.Split('\n');
         int bufferWidth = lines.Select(l => l.Length).Max();
         int width = bufferWidth > _popupWidth ? bufferWidth : _popupWidth;
         width += 4;
+
+        if (width >= maxPopUpWidth)
+        {
+            lines = ResizePopupLines(lines, maxPopUpWidth - 4);
+            _popupBuffer = string.Join('\n', lines);
+            width = lines.Select(l => l.Length).Max() + 4;
+        }
+
         int col = (ViewWidth - width) / 2;
         int row = 5;
 

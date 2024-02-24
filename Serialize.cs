@@ -49,12 +49,12 @@ internal class Serialize
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
         var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
+        var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
 
-        var p = PlayerSaver.Inflate(sgi.Player);
+        var p = PlayerSaver.Inflate(sgi.Player, objDB);
         var c = CampaignSaver.Inflate(sgi.Campaign);
         c.CurrentDungeon = sgi.CurrentDungeon;
-        c.CurrentLevel = sgi.CurrentLevel;
-        var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
+        c.CurrentLevel = sgi.CurrentLevel;        
         objDB._objs.Add(p.ID, p);
         objDB.SetToLoc(p.Loc, p);
         
@@ -85,12 +85,12 @@ class PlayerSaver
         Loc = p.Loc.ToString()
     };
 
-    public static Player Inflate(PlayerSaver sp) => new Player(sp.Name)
+    public static Player Inflate(PlayerSaver sp, GameObjectDB objDb) => new Player(sp.Name)
     {
         ID = sp.ID,
         MaxHP = sp.MaxHP,
         CurrHP = sp.CurrHP,
-        Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID),
+        Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
         Loc = Yarl2.Loc.FromText(sp.Loc)
     };
 }
@@ -186,6 +186,7 @@ class ItemSaver
         "Weapon" => ItemType.Weapon,
         "Zorkmid" => ItemType.Zorkmid,
         "Tool" => ItemType.Tool,
+        "Document" => ItemType.Document,
         _ => throw new Exception($"Hmm I don't know about Item Type {text}")
     };
 
@@ -263,13 +264,15 @@ class InventorySaver
         };
     }
 
-    public static Inventory Inflate(InventorySaver sp, ulong ownerID)
+    public static Inventory Inflate(InventorySaver sp, ulong ownerID, GameObjectDB objDb)
     {
         var inv = new Inventory(ownerID);
         
         foreach (var kvp in sp.Items)
         {
-            inv.Add(ItemSaver.TextToItem(kvp.ItemText), ownerID);
+            var item = ItemSaver.TextToItem(kvp.ItemText);
+            objDb.Add(item);
+            inv.Add(item, ownerID);
         }
         
         inv.Zorkmids = sp.Zorkmids;

@@ -16,7 +16,8 @@ enum ItemType
     Weapon,
     Armour,
     Zorkmid,
-    Tool
+    Tool,
+    Document
 }
 
 class Item : GameObj

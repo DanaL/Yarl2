@@ -158,11 +158,11 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     private string KnownStatue()
     {
         if (_succesful)
-            return $"a statute depicting {_rulerInfo.FullName}, victorious in battle.";
+            return $"a statue depicting {_rulerInfo.FullName}, victorious in battle.";
         else if (_rulerInfo.Beloved)
-            return $"a statute depicting {_rulerInfo.FullName}, grim in face.";
+            return $"a statue depicting {_rulerInfo.FullName}, grim in face.";
         else
-            return $"a statute depicting {_rulerInfo.FullName}, kneeling, their gaze to the ground.";
+            return $"a statue depicting {_rulerInfo.FullName}, kneeling, their gaze to the ground.";
     }
 
     private string VisualDesc()
@@ -223,9 +223,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
 
     private string ScholarJournal1()
     {
-        return $@"My dear {_facts.RulerName()}, I am here in this dank place researching the {Title}, having
-                    been lead here after discovering an old codex in a library in {_facts.GetNation()} I will...";
-        
+        return $@"My dear {_facts.RulerName()}, I am here in this dank place researching the {Title}, having been lead here after discovering an old codex in a library in the {_facts.GetNation()} I will...";        
     }
 
     private string ScholarJounral2()
@@ -239,11 +237,11 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     private string ScholarJounral3()
     {
         if (_succesful && _rulerInfo.Beloved)
-            return $"...the inscription read '{_rulerInfo.Name} victorious over {_invader.Item2} was greeted with laurels upon their return...";
+            return $"...the inscription read: {_rulerInfo.Name}, victorious over {_invader.Item2} was greeted with laurels upon their return...";
         else if (_succesful && !_rulerInfo.Beloved)
             return $"...their victory seems to have cemenented their power over the people, who dwelt in fear of {_rulerInfo.Name}...";
         else
-            return $"...I wish to learn what became of {_rulerInfo.FullName} after the devastating defeat in the battle of...";
+            return $"...I wish to learn what became of {_rulerInfo.FullName} after their devastating defeat in the battle of...";
     }
 
     // Generate a list of decorations that might be strewn throughout

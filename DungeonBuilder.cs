@@ -153,8 +153,44 @@ class DungeonBuilder
         }
     }
 
+    private void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Random rng)
+    {
+        // Any floor will do...
+        List<(int, int)> candidateSqs = [];
+        for (int r = 1; r < height - 1; r++)
+        {
+            for (int c = 1; c < width - 1; c++)
+            {
+                if (map.TileAt(r, c).Type == TileType.DungeonFloor)                
+                        candidateSqs.Add((r, c));                
+            }
+        }
+
+        string adjective;
+        string desc;
+        var roll = rng.NextDouble();
+        if (roll < 0.5) 
+        {
+            desc = "scroll";
+            adjective = "tattered";
+        }
+        else
+        {
+            desc = "page";
+            adjective = "torn";
+        }
+
+        var doc = new Item() { Name = desc, Type = ItemType.Document, Stackable = false,
+                                    Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY), Adjectives = [ adjective] };
+        doc.Traits.Add(new DocumentTrait(documentText));
+        var (row, col) = candidateSqs[rng.Next(candidateSqs.Count)];
+        var loc = new Loc(_dungeonID, level, row, col);
+        objDb.Add(doc);
+        objDb.SetToLoc(loc, doc);
+    }
+
     // While I'm testing I'll just stick all the decorations on level 1
-    private void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, Random rng)
+    private void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, GameObjectDB objDb, Random rng)
     {
         var decorations = history.GetDecorations();
 
@@ -175,10 +211,14 @@ class DungeonBuilder
             {
                 PlaceFresco(levels[0], height, width, decoration.Desc, rng);
             }
+            else if (decoration.Type == DecorationType.ScholarJournal)
+            {
+                PlaceDocument(levels[0], 0, height, width, decoration.Desc, objDb, rng);
+            }
         }
     }
 
-    public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, Random rng)
+    public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng)
     {
         _dungeonID = id;
         var dungeon = new Dungeon(id, arrivalMessage);
@@ -193,7 +233,7 @@ class DungeonBuilder
 
         SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
-        DecorateDungeon(levels, h, w, numOfLevels, history, rng);
+        DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
         return dungeon;
     }
