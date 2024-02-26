@@ -494,6 +494,33 @@ abstract class UserInterface
         while (e.Type == UIEventType.NoEvent);
     }
 
+    public char FullScreenMenu(List<string> menu, HashSet<char> options)
+    {
+        UIEvent e;
+
+        do
+        {
+            WriteLongMessage(menu);
+            UpdateDisplay();
+            e = PollForEvent();
+
+            if (e.Type == UIEventType.NoEvent)
+            {
+                Delay();
+                continue;
+            }
+            else if (e.Value == Constants.ESC || e.Type == UIEventType.Quiting)
+            {
+                throw new GameQuitException();
+            }
+            else if (options.Contains(e.Value))
+            {
+                return e.Value;
+            }
+        }
+        while (true);     
+    }
+
     public string BlockingGetResponse(string prompt)
     {
         string result = "";
