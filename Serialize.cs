@@ -74,12 +74,14 @@ class PlayerSaver
     [JsonInclude]
     public InventorySaver Inventory { get; set; }
 
+    [JsonInclude]
+    public Dictionary<Attribute, Stat> Stats;
+
     public static PlayerSaver Shrink(Player p) => new PlayerSaver()
     {
         ID = p.ID,
         Name = p.Name,
-        MaxHP = p.MaxHP,
-        CurrHP = p.CurrHP,
+        Stats = p.Stats,
         Inventory = InventorySaver.Shrink(p.Inventory),
         Loc = p.Loc.ToString()
     };
@@ -87,8 +89,7 @@ class PlayerSaver
     public static Player Inflate(PlayerSaver sp, GameObjectDB objDb) => new Player(sp.Name)
     {
         ID = sp.ID,
-        MaxHP = sp.MaxHP,
-        CurrHP = sp.CurrHP,
+        Stats = sp.Stats,
         Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
         Loc = Yarl2.Loc.FromText(sp.Loc)
     };
@@ -98,14 +99,16 @@ class MonsterSaver
 {
     public ulong ID { get; set; }
     public string Name { get; set; }
-    public int CurrHP { get; set; } 
     public string Loc { get; set; }
+
+    [JsonInclude]
+    public Dictionary<Attribute, Stat> Stats;
 
     public static MonsterSaver Shrink(Monster m) => new MonsterSaver()
     {
         ID = m.ID,
         Name = m.Name,
-        CurrHP = m.CurrHP,
+        Stats = m.Stats,
         Loc = m.Loc.ToString()
     };
 
@@ -113,7 +116,7 @@ class MonsterSaver
     {
         var m = (Monster) MonsterFactory.Get(ms.Name);
         m.ID = ms.ID;
-        m.CurrHP = ms.CurrHP;
+        m.Stats = ms.Stats;
         m.Loc = Yarl2.Loc.FromText(ms.Loc);
 
         return m;

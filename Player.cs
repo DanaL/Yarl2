@@ -10,27 +10,30 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Data;
+
 namespace Yarl2;
 
 internal class Player : Actor, IPerformer, IItemHolder
 {
     public int MaxVisionRadius { get; set; }
-    public int CurrVisionRadius { get; set; }
-    private InputAccumulator? _accumulator;
-    private Action? _deferred;
+    public int CurrVisionRadius { get; set; }    
     public Inventory Inventory { get; set; } = new(PLAYER_ID);
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
 
+    private InputAccumulator? _accumulator;
+    private Action? _deferred;
+
     public Player(string name)
     {
         Name = name;
-        MaxHP = 20;
-        CurrHP = 15;
         MaxVisionRadius = 25;
         CurrVisionRadius = MaxVisionRadius;
         Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?
+        Stats.Add(Attribute.HP, new Stat(20));
+        Stats[Attribute.HP].Change(-3);
     }
 
     public override string FullName => "You";

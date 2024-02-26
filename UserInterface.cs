@@ -242,7 +242,9 @@ abstract class UserInterface
     protected void WriteSideBar()
     {
         WriteLine($"| {Player.Name}", 0, ViewWidth, SideBarWidth, Colours.WHITE);
-        WriteLine($"| HP: {Player.CurrHP} ({Player.MaxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
+        int currHP = Player.Stats[Attribute.HP].Curr;
+        int maxHP = Player.Stats[Attribute.HP].Max;
+        WriteLine($"| HP: {currHP} ({maxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
 
         string blank = "|".PadRight(ViewWidth);
         for (int row = 2; row < ViewHeight - 2; row++)

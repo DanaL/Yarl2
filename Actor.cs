@@ -42,9 +42,8 @@ enum AIType
 
 class Actor : GameObj
 {
-    public int MaxHP { get; set; }
-    public int CurrHP { get; set; }
-        
+    public Dictionary<Attribute, Stat> Stats { get; set; } = [];
+
     public Actor() {}
 
     public override string FullName => Name.DefArticle();
@@ -58,15 +57,14 @@ class MonsterFactory
         {
             var m = new Monster()
             {
-                Name = name,
-                MaxHP = 10,
-                CurrHP = 10,
+                Name = name,                
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
                 AIType = AIType.Basic,
                 Recovery = 1.0
             };
+            m.Stats.Add(Attribute.HP, new Stat(10));
             m.SetBehaviour(AIType.Basic);
             return m;
         }
@@ -76,14 +74,13 @@ class MonsterFactory
             var m = new Monster()
             {
                 Name = name,
-                MaxHP = 10,
-                CurrHP = 10,
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('g', Colours.LIGHT_BROWN, Colours.BROWN),
                 AIType = AIType.Basic,
                 Recovery = 1.0
             };
+            m.Stats.Add(Attribute.HP, new Stat(10));
             m.SetBehaviour(AIType.Basic);
             return m;
         }
@@ -93,14 +90,13 @@ class MonsterFactory
             var m = new Monster()
             {
                 Name = name,
-                MaxHP = 10,
-                CurrHP = 10,
                 AttackBonus = 3,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.LIME_GREEN, Colours.DARK_GREEN),
                 AIType = AIType.Basic,
                 Recovery = 0.75
             };
+            m.Stats.Add(Attribute.HP, new Stat(10));
             m.SetBehaviour(AIType.Basic);
             return m;
         }

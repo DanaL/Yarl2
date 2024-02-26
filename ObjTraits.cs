@@ -11,19 +11,6 @@
 
 namespace Yarl2;
 
-enum ArmourParts
-{
-    Helmet,
-    Boots,
-    Cloak,
-    Shirt
-}
-
-class Armour : Item
-{
-    public ArmourParts Piece { get; set; }
-}
-
 interface IReadable
 {
     void Read(Actor actor, UserInterface ui, Item document);
@@ -34,15 +21,15 @@ interface IUSeable
     (bool, string) Use(GameState gs, int row, int col);
 }
 
-abstract class ItemTrait 
+abstract class ObjTrait 
 {
     public abstract string Desc();
-    public abstract ItemTrait Duplicate(Item container);
+    public abstract ObjTrait Duplicate(Item container);
     public abstract string AsText();
     public abstract bool Acitve { get; }
 }
 
-class MeleeAttackTrait : ItemTrait
+class MeleeAttackTrait : ObjTrait
 {
     public int DamageDie { get; set; }
     public int NumOfDie { get; set; }
@@ -50,7 +37,7 @@ class MeleeAttackTrait : ItemTrait
 
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
 
-    public override ItemTrait Duplicate(Item _) => 
+    public override ObjTrait Duplicate(Item _) => 
         new MeleeAttackTrait() { Bonus = Bonus, DamageDie = DamageDie, NumOfDie = NumOfDie };
 
     public override string AsText() => $"MeleeAttackTrait#{DamageDie}#{NumOfDie}#{Bonus}";
@@ -58,7 +45,7 @@ class MeleeAttackTrait : ItemTrait
     public override bool Acitve => true;
 }
 
-class ArmourTrait : ItemTrait
+class ArmourTrait : ObjTrait
 {
     public ArmourParts Part { get; set; }
     public int ArmourMod {  get; set; }
@@ -66,7 +53,7 @@ class ArmourTrait : ItemTrait
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
 
-    public override ItemTrait Duplicate(Item _) => 
+    public override ObjTrait Duplicate(Item _) => 
         new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
 
     public override string AsText() => $"ArmourTrait#{Part}#{ArmourMod}#{Bonus}";
@@ -74,7 +61,7 @@ class ArmourTrait : ItemTrait
     public override bool Acitve => true;
 }
 
-class DocumentTrait : ItemTrait, IReadable
+class DocumentTrait : ObjTrait, IReadable
 {
     string _text;
 
@@ -87,7 +74,7 @@ class DocumentTrait : ItemTrait, IReadable
     public override string Desc() => "";
     public override string AsText() => $"DocumentTrait#{_text}";
 
-    public override ItemTrait Duplicate(Item container)
+    public override ObjTrait Duplicate(Item container)
     {
         throw new NotImplementedException();
     }
@@ -99,7 +86,7 @@ class DocumentTrait : ItemTrait, IReadable
     }
 }
 
-class LightSourceTrait : ItemTrait, IPerformer, IUSeable
+class LightSourceTrait : ObjTrait, IPerformer, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
@@ -118,7 +105,7 @@ class LightSourceTrait : ItemTrait, IPerformer, IUSeable
         return $"LightSourceTrait#{ContainerID}#{Lit}#{Radius}#{Fuel}#{Energy}#{Recovery}";
     }
 
-    public override ItemTrait Duplicate(Item container)
+    public override ObjTrait Duplicate(Item container)
     {
         return new LightSourceTrait()
         {
@@ -183,12 +170,12 @@ class LightSourceTrait : ItemTrait, IPerformer, IUSeable
 
 class TraitFactory
 {
-    public static ItemTrait FromText(string text)
+    public static ObjTrait FromText(string text)
     {
         var pieces = text.Split('#');
         var type = pieces[0];
 
-        ItemTrait trait;
+        ObjTrait trait;
 
         switch (type)
         {

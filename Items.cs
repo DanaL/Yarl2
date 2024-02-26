@@ -30,7 +30,7 @@ class Item : GameObj
     public ulong ContainedBy { get; set; } = 0;
 
     public List<string> Adjectives { get; set; } = [];
-    public List<ItemTrait> Traits { get; set; } = [];
+    public List<ObjTrait> Traits { get; set; } = [];
 
     private string CalcFullName()
     {
@@ -136,6 +136,19 @@ class ItemFactory
 
         return item;
     }
+}
+
+enum ArmourParts
+{
+    Helmet,
+    Boots,
+    Cloak,
+    Shirt
+}
+
+class Armour : Item
+{
+    public ArmourParts Piece { get; set; }
 }
 
 class Inventory(ulong ownerID)
