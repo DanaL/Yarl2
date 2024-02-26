@@ -107,32 +107,9 @@ class PreGameHandler(UserInterface ui)
         {
             var objDb = new GameObjectDB();
             var (c, startRow, startCol) = BeginCampaign(rng, objDb);
-            Player player = new(playerName);
-            player.Loc = new Loc(0, 0, startRow, startCol);
-            objDb.Add(player);
-            var spear = ItemFactory.Get("spear", objDb);
-            spear.Adjectives.Add("old");
-            spear.Equiped = true;
-            player.Inventory.Add(spear, player.ID);
-            var armour = ItemFactory.Get("leather armour", objDb);
-            armour.Adjectives.Add("battered");
-            armour.Equiped = true;
-            player.Inventory.Add(armour, player.ID);
-            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
-            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
-            player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 
-            //Console.WriteLine(ItemSaver.ItemToText(spear));
-            //Console.WriteLine(ItemSaver.ItemToText(armour));
-            //Console.WriteLine(ItemSaver.ItemToText(ItemFactory.Get("torch", objDb)));
-
-            for (int i = 0; i < 10; i++)
-            {
-                player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
-            }
+            var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
             
-            _ui.Player = player;
-
             // var m = MonsterFactory.Get("goblin");
             // m.Loc = player.Loc with { Row = player.Loc.Row + 1, Col = player.Loc.Col - 1 };
             // objDb.Add(m);
@@ -143,6 +120,7 @@ class PreGameHandler(UserInterface ui)
             // objDb.Add(z);
             // objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol), z);
 
+            _ui.Player = player;
             _ui.SetupGameState(c, objDb, 1);            
         }
     }    

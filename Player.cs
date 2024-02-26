@@ -14,14 +14,21 @@ using System.Data;
 
 namespace Yarl2;
 
-internal class Player : Actor, IPerformer, IItemHolder
+enum PlayerClass
+{
+    OrcReaver,
+    DwarfStalwart
+}
+
+class Player : Actor, IPerformer, IItemHolder
 {
     public int MaxVisionRadius { get; set; }
     public int CurrVisionRadius { get; set; }    
     public Inventory Inventory { get; set; } = new(PLAYER_ID);
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
-
+    public PlayerClass CharClass { get; set; }
+    
     private InputAccumulator? _accumulator;
     private Action? _deferred;
 

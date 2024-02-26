@@ -13,12 +13,16 @@
 // My plan is to have almost anything numeric be a stat: armour mods
 // the classic str, dex, etc, fuel a torch has
 
+namespace Yarl2;
+
 enum Attribute 
 {
     HP,
     Strength,
     Dexterity,
-    Constituion
+    Constituion,
+    Piety, // What I renamed D&D's Wisdom
+    MeleeAttackBonus
 }
 
 class Stat(int maxValue)
@@ -26,7 +30,13 @@ class Stat(int maxValue)
     public int Max { get; private set; } = maxValue;
     public int Curr { get; private set; } = maxValue;
 
-    public int ChangeMaxValue(int delta)
+    public void SetMax(int newMax) 
+    {
+        Max = newMax;
+        Curr = newMax;
+    } 
+
+    public int ChangeMax(int delta)
     {
         Max += delta;
         return Max;
