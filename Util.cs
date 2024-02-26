@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text.RegularExpressions;
+using SDL2;
 
 namespace Yarl2;
 
@@ -145,7 +146,13 @@ partial class Util
         }
 
         return pts;
-    }    
+    }
+
+    public static string PlayerClassToStr(PlayerClass charClass) => charClass switch
+    {
+        PlayerClass.OrcReaver => "Orc Reaver",
+        _ => "Dwarf Stalwart"
+    };
 }
 
 static class ListUtils

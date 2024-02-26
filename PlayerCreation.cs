@@ -70,10 +70,13 @@ class PlayerCreator
         // First, roll the basic stats
         var stats = new Dictionary<Attribute, Stat>()
         {
+
             { Attribute.Strength, new Stat(StatRoll(rng)) },
-            { Attribute.Constituion, new Stat(StatRoll(rng)) },
+            { Attribute.Constitution, new Stat(StatRoll(rng)) },
             { Attribute.Dexterity, new Stat(StatRoll(rng)) },
-            { Attribute.Piety, new Stat(StatRoll(rng)) }
+            { Attribute.Piety, new Stat(StatRoll(rng)) },
+            { Attribute.Level, new Stat(1) },
+            { Attribute.XP, new Stat(0) }
         };
         
         // Now the class-specific stuff
@@ -84,7 +87,7 @@ class PlayerCreator
                 roll = StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
-                hp = 15 + stats[Attribute.Constituion].Curr;
+                hp = 15 + stats[Attribute.Constitution].Curr;
                 stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
                 break;
             case PlayerClass.DwarfStalwart:
@@ -95,8 +98,8 @@ class PlayerCreator
 
                 if (stats[Attribute.Piety].Curr < 0)
                     stats[Attribute.Piety].SetMax(0);
-                    
-                hp = 12 + stats[Attribute.Constituion].Curr;
+
+                hp = 12 + stats[Attribute.Constitution].Curr;
                 stats.Add(Attribute.MeleeAttackBonus, new Stat(2));                
                 break;
         }

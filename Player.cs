@@ -117,6 +117,24 @@ class Player : Actor, IPerformer, IItemHolder
         
     }
 
+    string PrintStat(Attribute attr)
+    {
+        int val = Stats[attr].Curr;
+        return val > 0 ? $"+{val}" : $"{val}";
+    }
+
+    List<string> CharacterSheet()
+    {
+        List<string> lines = [];
+
+        lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(CharClass)}");
+        lines.Add("");
+        lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
+        lines.Add("");
+        lines.Add($"You have earned {Stats[Attribute.XP].Curr} XP.");
+        return lines;
+    }
+
     public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
     {
         _deferred = newAction;
@@ -267,6 +285,12 @@ class Player : Actor, IPerformer, IItemHolder
             else if (ch == '*')
             {
                 var lines = ui.MessageHistory.Select(m => m.Fmt);
+                _accumulator = new LongMessageAccumulator(ui, lines);
+                _deferred = new NullAction();
+            }
+            else if (ch == '@')
+            {
+                List<string> lines = CharacterSheet();
                 _accumulator = new LongMessageAccumulator(ui, lines);
                 _deferred = new NullAction();
             }

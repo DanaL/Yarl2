@@ -20,9 +20,11 @@ enum Attribute
     HP,
     Strength,
     Dexterity,
-    Constituion,
+    Constitution,
     Piety, // What I renamed D&D's Wisdom
-    MeleeAttackBonus
+    MeleeAttackBonus,
+    Level,
+    XP
 }
 
 class Stat(int maxValue)

@@ -109,6 +109,7 @@ class PreGameHandler(UserInterface ui)
             var (c, startRow, startCol) = BeginCampaign(rng, objDb);
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
+            _ui.ClearLongMessage();
             
             // var m = MonsterFactory.Get("goblin");
             // m.Loc = player.Loc with { Row = player.Loc.Row + 1, Col = player.Loc.Col - 1 };
