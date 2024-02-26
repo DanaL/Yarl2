@@ -99,7 +99,7 @@ class PlayerCreator
                 if (stats[Attribute.Piety].Curr < 0)
                     stats[Attribute.Piety].SetMax(0);
 
-                hp = 12 + stats[Attribute.Constitution].Curr;
+                hp = 10 + stats[Attribute.Constitution].Curr;
                 stats.Add(Attribute.MeleeAttackBonus, new Stat(2));                
                 break;
         }
@@ -109,6 +109,43 @@ class PlayerCreator
         stats.Add(Attribute.HP, new Stat(hp));
 
         return stats;
+    }
+
+    public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
+    {
+        switch (player.CharClass)
+        {
+            case PlayerClass.OrcReaver:
+                var spear = ItemFactory.Get("spear", objDb);
+                spear.Adjectives.Add("old");
+                spear.Equiped = true;
+                player.Inventory.Add(spear, player.ID);
+                var slarmour = ItemFactory.Get("studded leather armour", objDb);
+                slarmour.Adjectives.Add("battered");
+                slarmour.Equiped = true;
+                player.Inventory.Add(slarmour, player.ID);
+                break;
+            case PlayerClass.DwarfStalwart:
+                var axe = ItemFactory.Get("hand axe", objDb);
+                axe.Equiped = true;
+                player.Inventory.Add(axe, player.ID);
+                var chain = ItemFactory.Get("chainmail", objDb);
+                chain.Equiped = true;
+                player.Inventory.Add(chain, player.ID);
+                var helmet = ItemFactory.Get("helmet", objDb);
+                helmet.Equiped = true;
+                player.Inventory.Add(helmet, player.ID);
+                break;
+        }
+
+        // Everyone gets 3 to 5 torches to start with
+        player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
+        player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
+        player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
+        for (int i = 0; i < rng.Next(3); i++)
+        {
+            player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
+        }
     }
 
     public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Random rng)
@@ -121,22 +158,8 @@ class PlayerCreator
         player.Stats = RollStats(player.CharClass, rng);
 
         objDb.Add(player);
-        var spear = ItemFactory.Get("spear", objDb);
-        spear.Adjectives.Add("old");
-        spear.Equiped = true;
-        player.Inventory.Add(spear, player.ID);
-        var armour = ItemFactory.Get("leather armour", objDb);
-        armour.Adjectives.Add("battered");
-        armour.Equiped = true;
-        player.Inventory.Add(armour, player.ID);
-        player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
-        player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
-        player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 
-        for (int i = 0; i < 10; i++)
-        {
-            player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
-        }
+        SetStartingGear(player, objDb, rng);
 
         return player;
     }

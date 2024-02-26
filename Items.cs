@@ -112,10 +112,25 @@ class ItemFactory
                                         Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
                 item.Traits.Add(new MeleeAttackTrait() { DamageDie = 4, NumOfDie = 1, Bonus = 0 });
                 break;
+            case "hand axe":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
+                                        Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN) };
+                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 6, NumOfDie = 1, Bonus = 0 });
+                break;
             case "leather armour":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
+                break;
+            case "studded leather armour":
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                                    Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
+                break;
+            case "chainmail":
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                                    Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY) };
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
                 break;
             case "helmet":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,

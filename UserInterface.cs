@@ -245,9 +245,9 @@ abstract class UserInterface
         int currHP = Player.Stats[Attribute.HP].Curr;
         int maxHP = Player.Stats[Attribute.HP].Max;
         WriteLine($"| HP: {currHP} ({maxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
-
+        WriteLine($"| AC: {Player.AC}", 2, ViewWidth, SideBarWidth, Colours.WHITE);
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 2; row < ViewHeight - 2; row++)
+        for (int row = 3; row < ViewHeight - 2; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }

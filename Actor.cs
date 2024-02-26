@@ -47,6 +47,8 @@ class Actor : GameObj
     public Actor() {}
 
     public override string FullName => Name.DefArticle();
+
+    public virtual int AC => 10;
 }
 
 class MonsterFactory 

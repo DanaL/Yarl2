@@ -45,6 +45,27 @@ class Player : Actor, IPerformer, IItemHolder
 
     public override string FullName => "You";
 
+    public override int AC 
+    {
+        get 
+        {
+            int ac = 10 + Stats[Attribute.Dexterity].Curr;
+
+            int armour = 0;
+            foreach (var slot in Inventory.UsedSlots())
+            {
+                var item = Inventory.ItemAt(slot);
+                if (item.Equiped)
+                {
+                    armour += item.Traits.Where(t => t is ArmourTrait)
+                                         .Select(t => (t as ArmourTrait).ArmourMod + (t as ArmourTrait).Bonus)
+                                         .Sum();
+                }
+            }
+            return ac + armour;
+        }
+    }
+
     // This doesn't really mean anything for the Player. An Exception will be tossed when
     // they are killed.
     public bool RemoveFromQueue { get; set; }
@@ -132,6 +153,7 @@ class Player : Actor, IPerformer, IItemHolder
         lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
         lines.Add("");
         lines.Add($"You have earned {Stats[Attribute.XP].Curr} XP.");
+
         return lines;
     }
 
