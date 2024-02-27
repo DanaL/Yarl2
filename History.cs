@@ -143,7 +143,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
                     return "a statue of a cowering elf.";
             case OGRulerType.DwarfLord:
                 if (_succesful && _rulerInfo.Beloved)
-                    return "a statue of a fearsome dwarf, who leans on thier axe.";
+                    return "a statue of a fearsome dwarf, who leans on their axe.";
                 else if (_succesful && !_rulerInfo.Beloved)
                     return "a statue of a dwarf, their cloak covering their face.";
                 else if (!_succesful && _rulerInfo.Beloved)

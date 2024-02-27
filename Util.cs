@@ -148,6 +148,44 @@ partial class Util
         return pts;
     }
 
+    public static List<(int, int)> BresenhamCircle(int row, int col, int radius)
+    {
+        List<(int, int)> sqs = [];
+
+        int x = col + radius;
+        int y = row;
+        int error = 0;
+        int sqrx_inc = 2 * radius - 1;
+        int sqry_inc = 1;
+        int rc = radius + 1;
+        int cc = radius + 1;
+
+        // Draw the outline of a cricle via Bresenham
+        while (y <= x)
+        {
+            sqs.Add((rc + y, cc + x));
+            sqs.Add((rc + y, cc - x));
+            sqs.Add((rc - y, cc + x));
+            sqs.Add((rc - y, cc - x));
+            sqs.Add((rc + y, cc + x));
+            sqs.Add((rc + y, cc - x));
+            sqs.Add((rc - y, cc + x));
+            sqs.Add((rc - y, cc - x));
+
+            y += 1;
+            error += sqry_inc;
+            sqry_inc += 2;
+            if (error > x)
+            {
+                x -= 1;
+                error -= sqrx_inc;
+                sqrx_inc -= 2;
+            }
+        }
+
+        return sqs;
+    }
+
     public static string PlayerClassToStr(PlayerClass charClass) => charClass switch
     {
         PlayerClass.OrcReaver => "Orc Reaver",

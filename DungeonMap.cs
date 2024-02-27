@@ -50,44 +50,18 @@ class DungeonMap(Random rng)
             var radius = _rng.Next(3, 6);
             height = radius * 2 + 3;
             width = radius * 2 + 3;
-            
-            int x = radius;
-            int y = 0;
-            int error = 0;
-            int sqrx_inc = 2 * radius - 1;
-            int sqry_inc = 1;
-            int rc = radius + 1;
-            int cc = radius + 1;
 
-            // Draw the outline of a cricle via Bresenham
-            while (y <= x) 
-            {
-                sqs.Add((rc + y, cc + x));
-                sqs.Add((rc + y, cc - x));
-                sqs.Add((rc - y, cc + x));
-                sqs.Add((rc - y, cc - x));
-                sqs.Add((rc + y, cc + x));
-                sqs.Add((rc + y, cc - x));
-                sqs.Add((rc - y, cc + x));
-                sqs.Add((rc - y, cc - x));
-                
-                y += 1;
-                error += sqry_inc;
-                sqry_inc += 2;
-                if (error > x) 
-                {
-                    x -= 1;
-                    error -= sqrx_inc;
-                    sqrx_inc -= 2;
-                }
-            }
+            sqs = Util.BresenhamCircle(0, 0, radius);
+
+            int maxr = sqs.Select(p => p.Item1).Max();
+            int maxc = sqs.Select(p => p.Item2).Max();
 
             // Now turn all the squares inside the circle into floors
             for (int r = 1; r < height - 1; r++)
             {
                 for (int c = 1; c < width - 1; c++)
                 {
-                    if (Util.Distance(r, c, rc, cc) <= radius)
+                    if (Util.Distance(r, c, height / 2, width / 2) <= radius)
                         sqs.Add((r, c));
                 }
             }            
@@ -735,7 +709,9 @@ class DungeonMap(Random rng)
         }
 
         TidyUp(finalMap);
-        
+
+        //Dump(finalMap, width, height);
+
         return finalMap;
     }
 }
