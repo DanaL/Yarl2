@@ -152,36 +152,61 @@ partial class Util
     {
         List<(int, int)> sqs = [];
 
-        int x = col + radius;
-        int y = row;
-        int error = 0;
-        int sqrx_inc = 2 * radius - 1;
-        int sqry_inc = 1;
-        int rc = radius + 1;
-        int cc = radius + 1;
+        int x = 0;
+        int y = radius;
+        int d = 3 * 2 * radius;
 
-        // Draw the outline of a cricle via Bresenham
-        while (y <= x)
+        while (x <= y)
         {
-            sqs.Add((rc + y, cc + x));
-            sqs.Add((rc + y, cc - x));
-            sqs.Add((rc - y, cc + x));
-            sqs.Add((rc - y, cc - x));
-            sqs.Add((rc + y, cc + x));
-            sqs.Add((rc + y, cc - x));
-            sqs.Add((rc - y, cc + x));
-            sqs.Add((rc - y, cc - x));
+            sqs.Add((row + y, col + x));
+            sqs.Add((row - y, col + x));
+            sqs.Add((row + y, col - x));
+            sqs.Add((row - y, col - x));
 
-            y += 1;
-            error += sqry_inc;
-            sqry_inc += 2;
-            if (error > x)
+            sqs.Add((row + x, col + y));
+            sqs.Add((row - x, col + y));
+            sqs.Add((row + x, col - y));
+            sqs.Add((row - x, col - y));
+
+            if (d < 0)
+                d += 4 * x + 6;
+            else
             {
-                x -= 1;
-                error -= sqrx_inc;
-                sqrx_inc -= 2;
+                d += 4 * (x - y) + 10;
+                y--;
             }
+            x++;
         }
+        //int x = col + radius;
+        //int y = row;
+        //int error = 0;
+        //int sqrx_inc = 2 * radius - 1;
+        //int sqry_inc = 1;
+        //int rc = row;
+        //int cc = col;
+
+        //// Draw the outline of a cricle via Bresenham
+        //while (y <= x)
+        //{
+        //    sqs.Add((rc + y, cc + x));
+        //    sqs.Add((rc + y, cc - x));
+        //    sqs.Add((rc - y, cc + x));
+        //    sqs.Add((rc - y, cc - x));
+        //    sqs.Add((rc + y, cc + x));
+        //    sqs.Add((rc + y, cc - x));
+        //    sqs.Add((rc - y, cc + x));
+        //    sqs.Add((rc - y, cc - x));
+
+        //    y += 1;
+        //    error += sqry_inc;
+        //    sqry_inc += 2;
+        //    if (error > x)
+        //    {
+        //        x -= 1;
+        //        error -= sqrx_inc;
+        //        sqrx_inc -= 2;
+        //    }
+        //}
 
         return sqs;
     }

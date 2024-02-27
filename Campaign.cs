@@ -63,7 +63,6 @@ class PreGameHandler(UserInterface ui)
         var history = new History(rng);
         history.CalcDungeonHistory();
 
-        //var mainDungeon = new Dungeon(1, "Musty smells. A distant clang. Danger.");
         var dBuilder = new DungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);        
         campaign.AddDungeon(mainDungeon);

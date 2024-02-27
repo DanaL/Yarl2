@@ -335,7 +335,7 @@ internal class Wilderness(Random rng)
                 {
                     tt = TileType.Sand;
                 }
-                else if (v < 160)
+                else if (v < 165)
                 {
                     if (v % 2 == 0)
                         tt = TileType.Grass;
@@ -357,13 +357,13 @@ internal class Wilderness(Random rng)
         return map;
     }
 
-    private void Dump(Map map, string filename)
+    static void Dump(Map map, int length, string filename)
     {
         using (TextWriter tw = new StreamWriter(filename)) 
         {
-            for (int r = 0; r < _length; r++)
+            for (int r = 0; r < length; r++)
             {
-                for (int c = 0; c < _length; c++)
+                for (int c = 0; c < length; c++)
                 {
                     var t = map.TileAt(r, c);
                     char ch = t.Type switch
@@ -386,6 +386,21 @@ internal class Wilderness(Random rng)
         }        
     }
     
+    static void SetBorderingWater(Map map, int length)
+    {
+        int center = length / 2;
+        int radius = center - 1;
+
+        for (int r = 0; r < length; r++)
+        {
+            for (int c = 0; c < length; c++)
+            {
+                if (Util.Distance(r, c, center, center) > radius)
+                    map.SetTile(r, c, TileFactory.Get(TileType.DeepWater));
+            }
+        }
+    }
+
     public Map DrawLevel(int length)
     {
         _length = length;
@@ -412,6 +427,10 @@ internal class Wilderness(Random rng)
 
         DrawRivers(map);
 
+        // I want the outer perimeter to be deep water/ocean
+        SetBorderingWater(map, length);
+        Dump(map, length, "w2.txt");
+
         // set the border around the world
         for (int c = 0; c < length; c++)
         {
@@ -423,7 +442,7 @@ internal class Wilderness(Random rng)
             map.SetTile(r, 0, TileFactory.Get(TileType.WorldBorder));
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
-
+        
         return map;
     }
 }

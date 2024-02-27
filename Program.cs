@@ -7,6 +7,7 @@ var options = Options.LoadOptions("options.json");
 // var dm = Map.TestMap();
 // dm.Dump();
 
+
 string x = Yarl2.Attribute.Dexterity.ToString();
 Enum.TryParse(x, out Yarl2.Attribute e);
 // var dj = new DjikstraMap(dm, 0, 20, 0, 20);

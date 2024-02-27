@@ -24,7 +24,7 @@ class DungeonMap(Random rng)
         RoomShapes shape;
         List<(int, int)> sqs = new();
         var rn = _rng.NextDouble();
-        
+
         if (rn < 0.8)
         {
             // make a rectangular room
@@ -51,10 +51,7 @@ class DungeonMap(Random rng)
             height = radius * 2 + 3;
             width = radius * 2 + 3;
 
-            sqs = Util.BresenhamCircle(0, 0, radius);
-
-            int maxr = sqs.Select(p => p.Item1).Max();
-            int maxc = sqs.Select(p => p.Item2).Max();
+            sqs = Util.BresenhamCircle(height / 2, width / 2, radius).ToList();
 
             // Now turn all the squares inside the circle into floors
             for (int r = 1; r < height - 1; r++)
