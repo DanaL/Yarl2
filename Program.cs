@@ -7,9 +7,6 @@ var options = Options.LoadOptions("options.json");
 // var dm = Map.TestMap();
 // dm.Dump();
 
-
-string x = Yarl2.Attribute.Dexterity.ToString();
-Enum.TryParse(x, out Yarl2.Attribute e);
 // var dj = new DjikstraMap(dm, 0, 20, 0, 20);
 // Dictionary<TileType, int> passable = new() { { TileType.DungeonFloor, 1 }, { TileType.Door, 2 } };
 // dj.Generate(passable, (18, 1));
@@ -17,9 +14,6 @@ Enum.TryParse(x, out Yarl2.Attribute e);
 // var path = dj.ShortestPath(16, 5, 0, 0);
 // return;
 
-//var i1 = ItemSaver.TextToItem("2|0,0,0,0|spear|False|a|True|1|1|old|);white;grey|MeleeAttackTrait,6,1,0|Weapon");
-//var i2 = ItemSaver.TextToItem("3|0,0,0,0|leather armour|False|b|True|1|1|battered|[;brown;lightbrown|ArmourTrait,Shirt,1,0|Armour");
-//var i3 = ItemSaver.TextToItem("7|0,0,0,0|torch|True||False|1|0||(;lightbrown;brown|LightSourceTrait,7,True,5,15,0,1|Tool");
 int seed = DateTime.Now.GetHashCode();
 //seed = 544993503;
 Console.WriteLine($"Seed: {seed}");
@@ -30,10 +24,6 @@ if (options.Display == "Bearlib")
     display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options, rng);
 else
     display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options, rng);
-
-// var a = TerrainFlags.None;
-// a |= TerrainFlags.Lit;
-// Console.WriteLine(a & TerrainFlags.Wet);
 
 display.TitleScreen();
 

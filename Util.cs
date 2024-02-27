@@ -11,7 +11,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text.RegularExpressions;
-using SDL2;
 
 namespace Yarl2;
 
@@ -177,37 +176,7 @@ partial class Util
             }
             x++;
         }
-        //int x = col + radius;
-        //int y = row;
-        //int error = 0;
-        //int sqrx_inc = 2 * radius - 1;
-        //int sqry_inc = 1;
-        //int rc = row;
-        //int cc = col;
-
-        //// Draw the outline of a cricle via Bresenham
-        //while (y <= x)
-        //{
-        //    sqs.Add((rc + y, cc + x));
-        //    sqs.Add((rc + y, cc - x));
-        //    sqs.Add((rc - y, cc + x));
-        //    sqs.Add((rc - y, cc - x));
-        //    sqs.Add((rc + y, cc + x));
-        //    sqs.Add((rc + y, cc - x));
-        //    sqs.Add((rc - y, cc + x));
-        //    sqs.Add((rc - y, cc - x));
-
-        //    y += 1;
-        //    error += sqry_inc;
-        //    sqry_inc += 2;
-        //    if (error > x)
-        //    {
-        //        x -= 1;
-        //        error -= sqrx_inc;
-        //        sqrx_inc -= 2;
-        //    }
-        //}
-
+        
         return sqs;
     }
 
