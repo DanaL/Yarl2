@@ -45,6 +45,13 @@ class PortalAction(GameState gameState) : Action
         if (start.DungeonID != portal.Destination.DungeonID)
             result.Message = MessageFactory.Phrase(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination);
     
+        if (portal.Destination.DungeonID > 0)
+        {
+            int maxDepth = _gameState.Player!.Stats[Attribute.Depth].Max;
+            if (portal.Destination.Level + 1 > maxDepth)
+                _gameState.Player!.Stats[Attribute.Depth].SetMax(portal.Destination.Level + 1);
+        }
+
         result.EnergyCost = 1.0;
     }
 

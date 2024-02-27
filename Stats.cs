@@ -24,7 +24,8 @@ enum Attribute
     Piety, // What I renamed D&D's Wisdom
     MeleeAttackBonus,
     Level,
-    XP
+    XP,
+    Depth
 }
 
 class Stat(int maxValue)

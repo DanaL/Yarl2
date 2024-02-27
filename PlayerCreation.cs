@@ -67,7 +67,7 @@ class PlayerCreator
     
     static Dictionary<Attribute, Stat> RollStats(PlayerClass charClass, Random rng)
     {
-        // First, roll the basic stats
+        // First, set the basic stats
         var stats = new Dictionary<Attribute, Stat>()
         {
 
@@ -76,7 +76,8 @@ class PlayerCreator
             { Attribute.Dexterity, new Stat(StatRoll(rng)) },
             { Attribute.Piety, new Stat(StatRoll(rng)) },
             { Attribute.Level, new Stat(1) },
-            { Attribute.XP, new Stat(0) }
+            { Attribute.XP, new Stat(0) },
+            { Attribute.Depth, new Stat(0) }
         };
         
         // Now the class-specific stuff

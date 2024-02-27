@@ -165,6 +165,12 @@ class Player : Actor, IPerformer, IItemHolder
         lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
         lines.Add("");
         lines.Add($"You have earned {Stats[Attribute.XP].Curr} XP.");
+        lines.Add("");
+
+        if (Stats[Attribute.Depth].Max == 0)
+            lines.Add("You have yet to venture into the Dungeon.");
+        else
+            lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
 
         return lines;
     }
