@@ -77,7 +77,7 @@ internal class BLUserInferface : UserInterface, IDisposable
             if (KeyToChar.TryGetValue(key, out char value))
             {
                 // I feel like there has to be a better way to handle shifted characters
-                // in Bearlib but I haven't found it yet...                
+                // in Bearlib but I haven't found it yet...
                 if (Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT))
                 {
                     value = value switch
@@ -85,6 +85,8 @@ internal class BLUserInferface : UserInterface, IDisposable
                         ',' => '<',
                         '.' => '>',
                         '8' => '*',
+                        '4' => '$',
+                        '2' => '@',
                         _ => char.ToUpper(value)
                     };                   
                 }
