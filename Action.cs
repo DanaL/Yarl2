@@ -399,6 +399,60 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
+{
+    readonly UserInterface _ui = ui;
+    readonly Actor _actor = actor;
+    readonly GameState _gameState = gs;
+    int _amount;
+
+    public override ActionResult Execute()
+    {
+        double cost = 1.0;
+        bool successful = true;
+        Message alert;
+
+        var inventory = ((IItemHolder)_actor).Inventory;
+        if (_amount > inventory.Zorkmids)
+        {
+            _amount = inventory.Zorkmids;
+        }
+        
+        if (_amount == 0)
+        {
+            cost = 0.0; // we won't make the player spend an action if they drop nothing
+            successful = false;
+            alert = MessageFactory.Phrase("You hold onto your zorkminds.", _actor.Loc);
+        }
+        else
+        {
+            
+            var coins = ItemFactory.Get("zorkmids", _gameState.ObjDB);
+            _gameState.ItemDropped(coins, _actor.Loc.Row, _actor.Loc.Col);
+            coins.Count = _amount;
+            string msg;
+            if (_amount == 1)
+                msg = "a single zorkmid";
+            else if (_amount == inventory.Zorkmids)
+                msg = "all your money";
+            else
+                msg = $"{_amount} zorkmids";
+            
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, msg, false, _actor.Loc, _gameState);
+
+            inventory.Zorkmids -= _amount;
+        }
+
+        return new ActionResult() { Successful=successful, Message=alert, EnergyCost = cost };  
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var count = ((NumericAccumulatorResult)result).Amount;
+        _amount = count;
+    }
+}
+
 class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
 {
     private readonly UserInterface _ui = ui;
@@ -493,9 +547,30 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute() 
     {
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
+         if (Choice == '$')
+        {
+            var inventory = ((IItemHolder)_actor).Inventory;
+            if (inventory.Zorkmids == 0)
+            {
+                var msg = MessageFactory.Phrase("You have no money!", _gameState.Player.Loc);
+                return new ActionResult() { Successful=false, Message=msg };
+            }
+            var dropMoney = new DropZorkmidsAction(_ui, _actor, _gameState);
+            _ui.Popup("How much?");
+            var acc = new NumericAccumulator(_ui, "How much?");
+            if (_actor is Player player)
+            {
+                player.ReplacePendingAction(dropMoney, acc);
+                return new ActionResult() { Successful = false, Message = null, EnergyCost = 0.0 };
+            }
+            else
+                // Will monsters ever just decide to drop money?
+                return new ActionResult() { Successful = true };
+        }
+        
+        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
         if (item.Equiped && item.Type == ItemType.Armour)
         {
             var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
@@ -513,7 +588,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 return new ActionResult() { Successful = false, Message = null, EnergyCost = 0.0 };
             }
             else
-                // When monsters can pick up stuff I guess I'll have to handle that here??
+                // When monsters can drop stuff I guess I'll have to handle that here??
                 return new ActionResult() { Successful = true };
         }
         else 

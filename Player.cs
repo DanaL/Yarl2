@@ -85,7 +85,7 @@ class Player : Actor, IPerformer, IItemHolder
         return sources;
     }
     
-    private void ShowInventory(UserInterface ui, string title = "You are carrying:")
+    private void ShowInventory(UserInterface ui, string title, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots();
         if (slots.Length == 0)
@@ -114,6 +114,18 @@ class Player : Actor, IPerformer, IItemHolder
             }
             lines.Add($"{s}) {desc}");
         }
+
+        if (mentionMoney)
+        {
+            lines.Add("");
+            if (Inventory.Zorkmids == 0)
+                lines.Add("You seem to be broke.");
+            else if (Inventory.Zorkmids == 1)
+                lines.Add("You have a single zorkmid.");
+            else
+                lines.Add($"You wallet contains {Inventory.Zorkmids} zorkmids.");                
+        }
+
         ui.ShowDropDown(lines);
     }
 
@@ -222,7 +234,7 @@ class Player : Actor, IPerformer, IItemHolder
                 return new UpstairsAction(gameState);
             else if (ch == 'i')
             {
-                ShowInventory(ui);
+                ShowInventory(ui, "You are carrying:", true);
                 _accumulator = new PauseForMoreAccumulator();
                 _deferred = new CloseMenuAction(ui);
             }
@@ -259,8 +271,10 @@ class Player : Actor, IPerformer, IItemHolder
             }
             else if (ch == 'd')
             {
-                ShowInventory(ui, "Drop what?");
-                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                ShowInventory(ui, "Drop what?", true);
+                HashSet<char> slots = [.. Inventory.UsedSlots()];
+                slots.Add('$');
+                _accumulator = new MenuPickAccumulator(slots);
                 _deferred = new DropItemAction(ui, this, gameState);
             }
             else if (ch == 'r')

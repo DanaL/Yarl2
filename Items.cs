@@ -143,6 +143,10 @@ class ItemFactory
                 item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=500, Radius=5, Lit=false, 
                                          Energy=0.0, Recovery=1.0});
                 break;
+            case "zorkmids":
+                item = new Item() { Name = "zorkmid", Type = ItemType.Zorkmid, Stackable = true,
+                                    Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE) };
+                break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");
         }
@@ -201,8 +205,11 @@ class Inventory(ulong ownerID)
 
     public void Add(Item item, ulong ownerID)
     {
-        if (item.Type == ItemType.Zorkmid)
+        if (item.Type == ItemType.Zorkmid) 
+        {
             Zorkmids += item.Count;
+            return;
+        }
         
         // if the item is stackable, see if there's anything to stack it with
         if (item.Stackable)

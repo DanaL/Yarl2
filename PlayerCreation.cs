@@ -146,6 +146,10 @@ class PlayerCreator
         {
             player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
         }
+
+        var money = ItemFactory.Get("zorkmids", objDb);
+        money.Count = rng.Next(25, 51);
+        player.Inventory.Add(money, player.ID);
     }
 
     public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Random rng)
