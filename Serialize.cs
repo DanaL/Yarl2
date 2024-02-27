@@ -75,13 +75,13 @@ class PlayerSaver
     public InventorySaver Inventory { get; set; }
 
     [JsonInclude]
-    public Dictionary<Attribute, Stat> Stats;
+    public List<AttrStatKVP> Stats { get; set; }
 
-    public static PlayerSaver Shrink(Player p) => new PlayerSaver()
+    public static PlayerSaver Shrink(Player p) => new()
     {
         ID = p.ID,
         Name = p.Name,
-        Stats = p.Stats,
+        Stats = AttrStatKVP.Save(p.Stats),
         Inventory = InventorySaver.Shrink(p.Inventory),
         Loc = p.Loc.ToString()
     };
@@ -89,7 +89,7 @@ class PlayerSaver
     public static Player Inflate(PlayerSaver sp, GameObjectDB objDb) => new Player(sp.Name)
     {
         ID = sp.ID,
-        Stats = sp.Stats,
+        Stats = AttrStatKVP.Load(sp.Stats),
         Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
         Loc = Yarl2.Loc.FromText(sp.Loc)
     };
@@ -102,13 +102,13 @@ class MonsterSaver
     public string Loc { get; set; }
 
     [JsonInclude]
-    public Dictionary<Attribute, Stat> Stats;
+    public List<AttrStatKVP> Stats;
 
-    public static MonsterSaver Shrink(Monster m) => new MonsterSaver()
+    public static MonsterSaver Shrink(Monster m) => new()
     {
         ID = m.ID,
         Name = m.Name,
-        Stats = m.Stats,
+        Stats = AttrStatKVP.Save(m.Stats),
         Loc = m.Loc.ToString()
     };
 
@@ -116,10 +116,32 @@ class MonsterSaver
     {
         var m = (Monster) MonsterFactory.Get(ms.Name);
         m.ID = ms.ID;
-        m.Stats = ms.Stats;
+        m.Stats = AttrStatKVP.Load(ms.Stats);
         m.Loc = Yarl2.Loc.FromText(ms.Loc);
 
         return m;
+    }
+}
+
+record AttrStatKVP(string Attr, Stat Stat)
+{
+    public static Dictionary<Attribute, Stat> Load(List<AttrStatKVP> kvps)
+    {
+        Dictionary<Attribute, Stat> stats = [];
+
+        foreach (var kvp in kvps) 
+        {
+            Enum.TryParse(kvp.Attr, out Attribute a);
+            stats.Add(a, kvp.Stat);
+        }
+
+        return stats;
+    }
+
+    public static List<AttrStatKVP> Save(Dictionary<Attribute, Stat> stats)
+    {
+        return stats.Select(kvp => new AttrStatKVP(kvp.Key.ToString(), kvp.Value))
+                    .ToList();
     }
 }
 

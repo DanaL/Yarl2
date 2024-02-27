@@ -28,11 +28,21 @@ enum Attribute
     Depth
 }
 
-class Stat(int maxValue)
+class Stat
 {
-    public int Max { get; private set; } = maxValue;
-    public int Curr { get; private set; } = maxValue;
+    // Empty constructor and public setter methods was just simpler
+    // for serialization
+    public int Max { get; set; }
+    public int Curr { get; set; }
 
+    public Stat() {}
+
+    public Stat(int maxValue)
+    {
+        Max = maxValue;
+        Curr = maxValue;
+    }
+    
     public void SetMax(int newMax) 
     {
         Max = newMax;
