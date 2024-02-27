@@ -38,7 +38,7 @@ abstract class UserInterface
     public abstract void UpdateDisplay();
     protected abstract UIEvent PollForEvent();
     protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
-
+    
     protected int FontSize;
     protected int PlayerScreenRow;
     protected int PlayerScreenCol;
@@ -239,6 +239,15 @@ abstract class UserInterface
         WriteLine(border, row, col, width, Colours.WHITE);
     }
 
+    protected void WriteLine(List<(Colour, string)> pieces, int lineNum, int col, int width)
+    {
+        foreach (var piece in pieces)
+        {
+            WriteLine(piece.Item2, lineNum, col, width, piece.Item1);
+            col += piece.Item2.Length;
+        }
+    }
+
     protected void WriteSideBar()
     {
         WriteLine($"| {Player.Name}", 0, ViewWidth, SideBarWidth, Colours.WHITE);
@@ -246,8 +255,12 @@ abstract class UserInterface
         int maxHP = Player.Stats[Attribute.HP].Max;
         WriteLine($"| HP: {currHP} ({maxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
         WriteLine($"| AC: {Player.AC}", 2, ViewWidth, SideBarWidth, Colours.WHITE);
+
+        List<(Colour, string)> zorkmidLine = [ (Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {Player.Inventory.Zorkmids}")];
+        WriteLine(zorkmidLine, 3, ViewWidth, SideBarWidth);
+
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 3; row < ViewHeight - 2; row++)
+        for (int row = 4; row < ViewHeight - 2; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
