@@ -429,8 +429,7 @@ internal class Wilderness(Random rng)
 
         // I want the outer perimeter to be deep water/ocean
         SetBorderingWater(map, length);
-        Dump(map, length, "w2.txt");
-
+        
         // set the border around the world
         for (int c = 0; c < length; c++)
         {

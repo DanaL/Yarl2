@@ -22,6 +22,12 @@ enum OGRulerType
     //MadWizard
 }
 
+enum VillainType
+{
+    FieryDemon,
+    Necromancer
+}
+
 // class to accumulate a list of facts about the world as historical
 // events are generated so that they can be reused.
 class WorldFacts
@@ -277,6 +283,8 @@ class History
 {
     WorldFacts _facts;
     RulerInfo _ruler;
+    public VillainType Villain { get; set; }
+
     private Random _rng;
 
     public History(Random rng)
@@ -319,5 +327,11 @@ class History
             Epithet = nameGen.PickEpithet(),
             Beloved = _rng.NextDouble() < 0.5
         };
+    }
+
+    // This will have to be vastly expanded of course.
+    public void GenerateVillain()
+    {
+        Villain = _rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
     }
 }

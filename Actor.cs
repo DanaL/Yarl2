@@ -53,14 +53,15 @@ class Actor : GameObj
 
 class MonsterFactory 
 { 
+    // TODO: gotta read this shit in from a file of some sort, yuck
     public static Actor Get(string name)
     {
-        if (name == "skellie")
+        if (name == "skeleton")
         {
             var m = new Monster()
             {
                 Name = name,                
-                AttackBonus = 3,
+                AttackBonus = 2,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
                 AIType = AIType.Basic,
@@ -76,13 +77,109 @@ class MonsterFactory
             var m = new Monster()
             {
                 Name = name,
-                AttackBonus = 3,
+                AttackBonus = 2,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('g', Colours.LIGHT_BROWN, Colours.BROWN),
                 AIType = AIType.Basic,
                 Recovery = 1.0
             };
-            m.Stats.Add(Attribute.HP, new Stat(10));
+            m.Stats.Add(Attribute.HP, new Stat(8));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "goblin boss")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 6, 2),
+                Glyph = new Glyph('g', Colours.GREEN, Colours.DARK_GREEN),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(12));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "hobgoblin")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 8, 1),
+                Glyph = new Glyph('g', Colours.GREY, Colours.DARK_GREY),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(16));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "goblin archer")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 3,
+                Dmg = new Dmg(1, 6, 2),
+                Glyph = new Glyph('g', Colours.BRIGHT_RED, Colours.LIGHT_BROWN),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(12));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "wolf")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 2),
+                Glyph = new Glyph('d', Colours.LIGHT_GREY, Colours.GREY),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(8));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "giant rat")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 2),
+                Glyph = new Glyph('r', Colours.LIGHT_GREY, Colours.GREY),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(5));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "dire bat")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 2),
+                Glyph = new Glyph('v', Colours.LIGHT_BROWN, Colours.BROWN),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(6));
             m.SetBehaviour(AIType.Basic);
             return m;
         }
@@ -92,13 +189,61 @@ class MonsterFactory
             var m = new Monster()
             {
                 Name = name,
-                AttackBonus = 3,
+                AttackBonus = 2,
                 Dmg = new Dmg(1, 6, 1),
                 Glyph = new Glyph('z', Colours.LIME_GREEN, Colours.DARK_GREEN),
                 AIType = AIType.Basic,
                 Recovery = 0.75
             };
             m.Stats.Add(Attribute.HP, new Stat(10));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "kobold")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('k', Colours.BRIGHT_RED, Colours.DULL_RED),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(8));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "kobold trickster")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('k', Colours.LIGHT_BLUE, Colours.BLUE),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(8));
+            m.SetBehaviour(AIType.Basic);
+            return m;
+        }
+
+        if (name == "kobold foreman")
+        {
+            var m = new Monster()
+            {
+                Name = name,
+                AttackBonus = 2,
+                Dmg = new Dmg(1, 6, 1),
+                Glyph = new Glyph('k', Colours.YELLOW_ORANGE, Colours.DULL_RED),
+                AIType = AIType.Basic,
+                Recovery = 1.0
+            };
+            m.Stats.Add(Attribute.HP, new Stat(8));
             m.SetBehaviour(AIType.Basic);
             return m;
         }
@@ -152,7 +297,8 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
+        return new PassAction((IPerformer)actor);
+        //return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
     }
 }
 

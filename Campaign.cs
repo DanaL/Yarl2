@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Globalization;
+
 namespace Yarl2;
 
 // A structure to store info about a dungeon
@@ -62,6 +64,7 @@ class PreGameHandler(UserInterface ui)
         
         var history = new History(rng);
         history.CalcDungeonHistory();
+        history.GenerateVillain();
 
         var dBuilder = new DungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);        
@@ -73,6 +76,29 @@ class PreGameHandler(UserInterface ui)
         };
         wildernessMap.SetTile(entrance, portal);
 
+        // Temp: generate monster decks and populate the first two levels of the dungeon.
+        // I'll actually want to save the decks for reuse as random monsters are added
+        // in, but I'm not sure where they should live. I guess maybe in the Map structure,
+        // which has really come to represent a dungeon level
+        var decks = DeckBulder.MakeDecks(1, 2, history.Villain, rng);
+
+        for (int lvl = 0; lvl < 2; lvl++)
+        {
+            for (int j = 0; j < rng.Next(8, 13); j++)
+            {
+                var deck = decks[lvl];
+                var sq = mainDungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+                var loc = new Loc(mainDungeon.ID, lvl, sq.Item1, sq.Item2);
+                if (deck.Indexes.Count == 0)
+                    deck.Reshuffle(rng);
+                string m = deck.Monsters[deck.Indexes.Dequeue()];
+                Actor monster = MonsterFactory.Get(m);
+                monster.Loc = loc;
+                objDb.Add(monster);
+                objDb.SetToLoc(loc, monster);
+            }
+        }
+        
         campaign.CurrentDungeon = 0;
         campaign.CurrentLevel = 0;
         return (campaign, entrance.Item1, entrance.Item2);        
@@ -109,16 +135,6 @@ class PreGameHandler(UserInterface ui)
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
             _ui.ClearLongMessage();
-            
-            // var m = MonsterFactory.Get("goblin");
-            // m.Loc = player.Loc with { Row = player.Loc.Row + 1, Col = player.Loc.Col - 1 };
-            // objDb.Add(m);
-            // objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol - 1), m);
-
-            // var z = MonsterFactory.Get("zombie");
-            // z.Loc = player.Loc with { Row = player.Loc.Row + 1 };
-            // objDb.Add(z);
-            // objDb.SetToLoc(new Loc(0, 0, startRow + 1, startCol), z);
 
             _ui.Player = player;
             _ui.SetupGameState(c, objDb, 1);            
