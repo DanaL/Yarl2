@@ -82,6 +82,8 @@ partial class Util
         return (int)Math.Sqrt(dx * dx + dy * dy);
     }
 
+    public static int Distance(Loc a, Loc b) => Distance(a.Row, a.Col, b.Row, b.Col);
+
     // Bresenham straight out of my old Scientific Computing textbook
     public static List<(int, int)> Bresenham(int r0, int c0, int r1, int c1)
     {

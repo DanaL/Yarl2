@@ -77,8 +77,7 @@ class DjikstraMap
                 if (!visited.Contains(n))
                     q.Enqueue(n);
             }
-            int totalCost = cheapestNeighbour + cost;
-            _djikstraMap[sq.Item1, sq.Item2] = totalCost;
+            _djikstraMap[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
             visited.Add(sq);
         }
 
@@ -132,20 +131,16 @@ class DjikstraMap
         return path;
     }
 
-    // Will return the monster's loc if for some reason no moves are found
-    public (int, int) Cheapest(int row, int col)
+    public List<(int, int, int)> Neighbours(int row, int col)
     {
-        (int, int) move = (row, col);
-        int cheapest = int.MaxValue;
+        List<(int, int, int)> adj = [];
+
         foreach (var (nr, nc) in Util.Adj8Sqs(row, col))
         {
-            if (_djikstraMap[nr, nc] < cheapest)
-            {
-                cheapest = _djikstraMap[nr, nc];
-                move = (nr, nc);
-            }
+            if (_djikstraMap[nr, nc] < int.MaxValue)
+                adj.Add((nr, nc, _djikstraMap[nr, nc]));
         }
 
-        return move;
+        return [.. adj.OrderBy(v => v.Item3)];
     }
 }

@@ -185,6 +185,7 @@ class ColourSave
         else if (colour == "yelloworange") return Colours.YELLOW_ORANGE;
         else if (colour == "lightbrown") return Colours.LIGHT_BROWN;
         else if (colour == "brown") return Colours.BROWN;
+        else if (colour == "green") return Colours.GREEN;
         else if (colour == "darkgreen") return Colours.DARK_GREEN;
         else if (colour == "limegreen") return Colours.LIME_GREEN;
         else if (colour == "blue") return Colours.BLUE;

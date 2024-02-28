@@ -34,7 +34,7 @@ internal class GameState(Player p, Campaign c, Options opts)
         { TileType.Landmark, 1 },
         { TileType.Upstairs, 1 },
         { TileType.Downstairs, 1 },
-        { TileType.Door, 2 }
+        //{ TileType.Door, 2 }
     };
 
     public void EnterLevel(int dungeon, int level)

@@ -146,12 +146,33 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
-        Console.WriteLine($"{actor.Name} loc: {actor.Loc}");
-        var dest = gameState.DMap.Cheapest(actor.Loc.Row, actor.Loc.Col);
-        Console.WriteLine($"    best move: {dest}");
+        // Basic monster behaviour:
+        //   1) if adj to player, attack
+        //   2) otherwise move toward them
+        //   3) Pass I guess
 
+        Loc playerLoc = gameState.Player.Loc;
+        // Fight!
+        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        {
+            Console.WriteLine($"{actor.FullName} would attack right now!");
+            return new PassAction((IPerformer)actor);
+        }
+       
+        // Move!
+        var adj = gameState.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+            if (!gameState.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gameState);
+            }
+        }
+        
+        // Otherwise do nothing!
         return new PassAction((IPerformer)actor);
-        //return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
     }
 }
 
