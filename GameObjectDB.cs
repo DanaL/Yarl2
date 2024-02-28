@@ -77,6 +77,8 @@ class GameObjectDB
         return EMPTY;
     }
 
+    public bool Occupied(Loc loc) => _actorLocs.ContainsKey(loc);
+
     public GameObj? GetObj(ulong id) 
     {
         if (!_objs.TryGetValue(id, out GameObj? val))

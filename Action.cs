@@ -281,9 +281,16 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
         if (!_map.InBounds(_loc.Row, _loc.Col))
         {
             // in theory this shouldn't ever happen...
-            result.Successful = false;            
+            result.Successful = false;
             if (_actor is Player)
                 result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.Player.Loc);
+        }
+        else if (_gameState.ObjDB.Occupied(_loc))
+        {
+            // Eventually this will result in a fight or an NPC interaction (or at least a warning)
+            result.Successful = false;
+            if (_actor is Player)
+                result.Message = MessageFactory.Phrase("There's someone in your way!", _gameState.Player.Loc);
         }
         else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
         {
