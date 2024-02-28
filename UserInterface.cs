@@ -332,9 +332,10 @@ abstract class UserInterface
                 return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '.') : new Sqr(Colours.GREY, Colours.BLACK, '.');
             case TileType.StoneFloor:
                 return lit ? new Sqr(Colours.GREY, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '.');
-            case TileType.Door:
-                char ch = ((Door)tile).Open ? '\\' : '+';
-                return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, ch) : new Sqr(Colours.BROWN, Colours.BLACK, ch);
+            case TileType.ClosedDoor:
+                return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '+') : new Sqr(Colours.BROWN, Colours.BLACK, '+');
+            case TileType.OpenDoor:
+                return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '\\') : new Sqr(Colours.BROWN, Colours.BLACK, '\\');
             case TileType.Water:
             case TileType.DeepWater:
                 return lit ? new Sqr(Colours.BLUE, Colours.BLACK, '}') : new Sqr(Colours.DARK_BLUE, Colours.BLACK, '}');

@@ -467,10 +467,13 @@ internal class MapSaver
                                     .Select(int.Parse).ToArray();
                     ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
-                case TileType.Door:
+                case TileType.OpenDoor:
+                case TileType.ClosedDoor:
                     bool open = Convert.ToBoolean(pieces[2]);
-                    tile = new Door(TileType.Door, open);
-                    break;
+                    // technically wrong for open doors but the internal state
+                    // of the door will work itself out
+                    tile = new Door(TileType.ClosedDoor, open);
+                    break;                
                 case TileType.Landmark:
                     string msg = pieces[2];
                     tile = new Landmark(msg);

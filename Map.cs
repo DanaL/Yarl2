@@ -28,7 +28,10 @@ enum TileType
     DungeonFloor,
     StoneFloor,
     StoneWall,
-    Door,
+    ClosedDoor,
+    OpenDoor,
+    LockedDoor,
+    BrokenDoor,
     HWindow,
     VWindow,
     DeepWater,
@@ -54,7 +57,7 @@ enum TileType
 
 abstract class Tile(TileType type)
 {
-    public TileType Type { get; protected set; } = type;
+    public virtual TileType Type { get; protected set; } = type;
     public virtual string StepMessage => "";
     public abstract bool Passable();
     public abstract bool Opaque();
@@ -89,6 +92,12 @@ class Door(TileType type, bool open) : Tile(type)
 {
     public bool Open { get; set;} = open;
 
+    // Not sure if this is a good way to handle this for places like 
+    // the pathfinding code or if it's a gross hack
+    public override TileType Type 
+    {
+        get => Open ? TileType.OpenDoor : TileType.ClosedDoor;       
+    }
     public override bool Passable() => Open;
     public override bool Opaque() => !Open;
 
@@ -182,7 +191,7 @@ class TileFactory
         TileType.Tree => Tree,
         TileType.Mountain => Mountain,
         TileType.SnowPeak => SnowPeak,
-        TileType.Door => new Door(type, false),
+        TileType.ClosedDoor => new Door(type, false),
         TileType.Water => Water,
         TileType.Cloud => Cloud,
         TileType.HWindow => HWindow,
@@ -323,7 +332,7 @@ internal class Map : ICloneable
 
         map.Tiles[5 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[6 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-        map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.Door);
+        map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.ClosedDoor);
         map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
 
@@ -336,7 +345,7 @@ internal class Map : ICloneable
         map.Tiles[13 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[13 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[14 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-        map.Tiles[14 * 20 + 8] = TileFactory.Get(TileType.Door);
+        map.Tiles[14 * 20 + 8] = TileFactory.Get(TileType.ClosedDoor);
         map.Tiles[15 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[15 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
         map.Tiles[16 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
@@ -399,7 +408,7 @@ internal class Map : ICloneable
                     TileType.PermWall => '#',
                     TileType.DungeonWall => '#',
                     TileType.DungeonFloor or TileType.Sand => '.',
-                    TileType.Door => '+',
+                    TileType.ClosedDoor => '+',
                     TileType.Mountain or TileType.SnowPeak => '^',
                     TileType.Grass => ',',
                     TileType.Tree => 'T',

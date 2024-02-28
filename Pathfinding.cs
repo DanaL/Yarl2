@@ -64,6 +64,7 @@ class DjikstraMap
             if (visited.Contains(sq))
                 continue;
             var tile = _map.TileAt(sq.Item1 + _loRow, sq.Item2 + _loCol);
+
             if (!passable.TryGetValue(tile.Type, out int cost))
                 continue;
 

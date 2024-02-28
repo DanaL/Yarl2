@@ -122,7 +122,7 @@ class TownBuilder
                 {
                     '#' => isWood ? TileType.WoodWall : TileType.StoneWall,
                     '`' => TileType.Grass,
-                    '+' => TileType.Door,
+                    '+' => TileType.ClosedDoor,
                     '|' => TileType.VWindow,
                     '-' => TileType.HWindow,
                     'T' => TileType.Tree,
@@ -169,7 +169,7 @@ class TownBuilder
                     case TileType.WoodWall:
                     case TileType.DungeonFloor:
                     case TileType.WoodFloor:
-                    case TileType.Door:
+                    case TileType.ClosedDoor:
                     case TileType.HWindow:
                         return false;
                     default:
@@ -463,7 +463,7 @@ class TownBuilder
 
         foreach (var (adjR, adjC) in Util.Adj8Sqs(row, col))
         {
-            if (map.TileAt(adjR, adjC).Type == TileType.Door)
+            if (map.TileAt(adjR, adjC).Type == TileType.ClosedDoor)
                 return false;
         }
 
@@ -538,7 +538,7 @@ class TownBuilder
         { 
             for (int c = townCol; c < townCol + TOWN_WIDTH; c++) 
             {                 
-                if (map.TileAt(r, c).Type == TileType.Door)
+                if (map.TileAt(r, c).Type == TileType.ClosedDoor)
                 {
                     foreach (var adj in Util.Adj4Sqs(r, c))
                     {

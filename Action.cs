@@ -299,7 +299,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             if (_actor is Player)
             {
                 var tile = _map.TileAt(_loc.Row, _loc.Col);
-                if (_bumpToOpen && tile.Type == TileType.Door)
+                if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
                 {
                     var openAction = new OpenDoorAction(_actor, _map, _loc, _gameState);
                     result.AltAction = openAction;

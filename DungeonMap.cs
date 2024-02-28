@@ -256,7 +256,7 @@ class DungeonMap(Random rng)
                     TileType.PermWall => '#',
                     TileType.DungeonWall => ' ',
                     TileType.DungeonFloor => '.',
-                    TileType.Door => '+',
+                    TileType.ClosedDoor => '+',
                     _ => ' '
                 };
                 Console.Write(ch);
@@ -358,7 +358,7 @@ class DungeonMap(Random rng)
             var door = room.DoorCandidate(_rng);
             if (ValidDoor(map, door.Item1, door.Item2))
             {
-                map.SetTile(door, TileFactory.Get(TileType.Door));
+                map.SetTile(door, TileFactory.Get(TileType.ClosedDoor));
                 return;
             }
         }
@@ -447,12 +447,12 @@ class DungeonMap(Random rng)
                 // We can also make some of tunnel a door.
                 if (tunnel.Count == 2 && _rng.NextDouble() < 0.75)
                 {
-                    map.SetTile(tunnel[0], TileFactory.Get(TileType.Door));
+                    map.SetTile(tunnel[0], TileFactory.Get(TileType.ClosedDoor));
                 }
                 else if (tunnel.Count > 2)
                 {
-                    map.SetTile(tunnel[0], TileFactory.Get(TileType.Door));
-                    map.SetTile(tunnel.Last(), TileFactory.Get(TileType.Door));
+                    map.SetTile(tunnel[0], TileFactory.Get(TileType.ClosedDoor));
+                    map.SetTile(tunnel.Last(), TileFactory.Get(TileType.ClosedDoor));
                 }
 
                 done = true;
@@ -571,7 +571,7 @@ class DungeonMap(Random rng)
                 // I can check to see if the connector is on the perimeter of a room
                 // and make it a door instead
                 if (perimeters.Contains(con) && _rng.NextDouble() < 0.8)
-                    map.SetTile(con, TileFactory.Get(TileType.Door));
+                    map.SetTile(con, TileFactory.Get(TileType.ClosedDoor));
                 else
                     map.SetTile(con, TileFactory.Get(TileType.DungeonFloor));
 
@@ -613,7 +613,7 @@ class DungeonMap(Random rng)
         {
             for (int c = 1; c < map.Width - 1; c++)
             {
-                if (map.TileAt(r, c).Type == TileType.Door)
+                if (map.TileAt(r, c).Type == TileType.ClosedDoor)
                 {
                     var north = map.TileAt(r - 1, c).Type;
                     var south = map.TileAt(r + 1, c).Type;
@@ -621,9 +621,9 @@ class DungeonMap(Random rng)
                     var west = map.TileAt(r, c - 1).Type;
 
                     // I'm too dumb/tired to figure out the much-cleaner inverse logic of this right now
-                    if ((north == TileType.DungeonWall || north == TileType.PermWall || north == TileType.Door) && (south == TileType.DungeonWall || south == TileType.PermWall || south == TileType.Door))
+                    if ((north == TileType.DungeonWall || north == TileType.PermWall || north == TileType.ClosedDoor) && (south == TileType.DungeonWall || south == TileType.PermWall || south == TileType.ClosedDoor))
                         continue;
-                    else if ((east == TileType.DungeonWall || east == TileType.PermWall || east == TileType.Door) && (west == TileType.DungeonWall || west == TileType.PermWall || west == TileType.Door))
+                    else if ((east == TileType.DungeonWall || east == TileType.PermWall || east == TileType.ClosedDoor) && (west == TileType.DungeonWall || west == TileType.PermWall || west == TileType.ClosedDoor))
                         continue;
                     else
                         map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));

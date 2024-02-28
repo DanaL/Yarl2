@@ -371,7 +371,7 @@ internal class Wilderness(Random rng)
                         TileType.PermWall => '#',
                         TileType.DungeonWall => '#',
                         TileType.DungeonFloor or TileType.Sand => '.',
-                        TileType.Door => '+',
+                        TileType.ClosedDoor => '+',
                         TileType.Mountain or TileType.SnowPeak => '^',
                         TileType.Grass => ',',
                         TileType.Tree => 'T',
