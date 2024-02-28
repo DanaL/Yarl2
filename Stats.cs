@@ -25,7 +25,10 @@ enum Attribute
     MeleeAttackBonus,
     Level,
     XP,
-    Depth
+    Depth,
+    AC, // used for monsters who have a simple AC
+    DmgDie,
+    DmgRolls
 }
 
 class Stat

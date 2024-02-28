@@ -53,202 +53,55 @@ class Actor : GameObj
 
 class MonsterFactory 
 { 
-    // TODO: gotta read this shit in from a file of some sort, yuck
-    public static Actor Get(string name)
+    static Dictionary<string, string> _catalog = [];
+
+    static void LoadCatalog()
     {
-        if (name == "skeleton")
+        foreach (var line in File.ReadAllLines("monsters.txt"))
         {
-            var m = new Monster()
-            {
-                Name = name,                
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('z', Colours.GREY, Colours.DARK_GREY),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(10));
-            m.SetBehaviour(AIType.Basic);
-            return m;
+            int i = line.IndexOf('|');
+            string name = line[..i].Trim();
+            string val = line[(i + 1)..];
+            _catalog.Add(name, val);
         }
+    }
 
-        if (name == "goblin")
+    public static Actor? Get(string name)
+    {
+        if (_catalog.Count == 0)
+            LoadCatalog();
+
+        if (!_catalog.TryGetValue(name, out string? template))
+            throw new Exception($"{name}s don't seem to exist in this world!");
+
+        var fields = template.Split('|').Select(f => f.Trim()).ToArray();
+
+        var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
+                                            ColourSave.TextToColour(fields[2]));
+        Enum.TryParse(fields[10], out AIType ai);                                            
+        var m = new Monster()
         {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('g', Colours.LIGHT_BROWN, Colours.BROWN),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(8));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
+            Name = name,
+            Glyph = glyph,
+            AIType = ai,
+            Recovery = double.Parse(fields[6])
+        };
+        m.SetBehaviour(ai);
 
-        if (name == "goblin boss")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 3,
-                Dmg = new Dmg(1, 6, 2),
-                Glyph = new Glyph('g', Colours.GREEN, Colours.DARK_GREEN),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(12));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
+        int hp = int.Parse(fields[4]);
+        m.Stats.Add(Attribute.HP, new Stat(hp));
+        int attBonus = int.Parse(fields[5]);
+        m.Stats.Add(Attribute.MeleeAttackBonus, new Stat(attBonus));
+        int ac = int.Parse(fields[3]);
+        m.Stats.Add(Attribute.AC, new Stat(ac));
+        int str = int.Parse(fields[9]);
+        m.Stats.Add(Attribute.Strength, new Stat(str));
+        int dmgDie = int.Parse(fields[7]);
+        m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
+        int dmgRolls = int.Parse(fields[8]);
+        m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
 
-        if (name == "hobgoblin")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 3,
-                Dmg = new Dmg(1, 8, 1),
-                Glyph = new Glyph('g', Colours.GREY, Colours.DARK_GREY),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(16));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "goblin archer")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 3,
-                Dmg = new Dmg(1, 6, 2),
-                Glyph = new Glyph('g', Colours.BRIGHT_RED, Colours.LIGHT_BROWN),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(12));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "wolf")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 2),
-                Glyph = new Glyph('d', Colours.LIGHT_GREY, Colours.GREY),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(8));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "giant rat")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 2),
-                Glyph = new Glyph('r', Colours.LIGHT_GREY, Colours.GREY),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(5));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "dire bat")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 2),
-                Glyph = new Glyph('v', Colours.LIGHT_BROWN, Colours.BROWN),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(6));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "zombie")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('z', Colours.LIME_GREEN, Colours.DARK_GREEN),
-                AIType = AIType.Basic,
-                Recovery = 0.75
-            };
-            m.Stats.Add(Attribute.HP, new Stat(10));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "kobold")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('k', Colours.BRIGHT_RED, Colours.DULL_RED),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(8));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "kobold trickster")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('k', Colours.LIGHT_BLUE, Colours.BLUE),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(8));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        if (name == "kobold foreman")
-        {
-            var m = new Monster()
-            {
-                Name = name,
-                AttackBonus = 2,
-                Dmg = new Dmg(1, 6, 1),
-                Glyph = new Glyph('k', Colours.YELLOW_ORANGE, Colours.DULL_RED),
-                AIType = AIType.Basic,
-                Recovery = 1.0
-            };
-            m.Stats.Add(Attribute.HP, new Stat(8));
-            m.SetBehaviour(AIType.Basic);
-            return m;
-        }
-
-        throw new Exception($"{name}s don't seem to exist in this world!");
+        return m;
     }
 }
 
@@ -258,8 +111,6 @@ class MonsterFactory
 // this class
 class Monster : Actor, IPerformer
 {
-    public int AttackBonus { get; set; }
-    public Dmg Dmg { get; set; }
     public AIType AIType { get; set;}
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
