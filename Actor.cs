@@ -146,6 +146,10 @@ class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
     {
+        Console.WriteLine($"{actor.Name} loc: {actor.Loc}");
+        var dest = gameState.DMap.Cheapest(actor.Loc.Row, actor.Loc.Col);
+        Console.WriteLine($"    best move: {dest}");
+
         return new PassAction((IPerformer)actor);
         //return new MoveAction(actor, actor.Loc.Move(-1, 0), gameState);
     }

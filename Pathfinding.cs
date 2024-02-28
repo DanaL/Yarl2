@@ -131,4 +131,21 @@ class DjikstraMap
 
         return path;
     }
+
+    // Will return the monster's loc if for some reason no moves are found
+    public (int, int) Cheapest(int row, int col)
+    {
+        (int, int) move = (row, col);
+        int cheapest = int.MaxValue;
+        foreach (var (nr, nc) in Util.Adj8Sqs(row, col))
+        {
+            if (_djikstraMap[nr, nc] < cheapest)
+            {
+                cheapest = _djikstraMap[nr, nc];
+                move = (nr, nc);
+            }
+        }
+
+        return move;
+    }
 }

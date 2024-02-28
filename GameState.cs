@@ -16,7 +16,7 @@ namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
 internal class GameState(Player p, Campaign c, Options opts)
-{
+{    
     public Map? Map { get; set; }
     public Options? Options { get; set; } = opts;
     public Player Player { get; set; } = p;
@@ -27,6 +27,15 @@ internal class GameState(Player p, Campaign c, Options opts)
     public List<IPerformer> Performers { get; set; } = [];
     public int Turn { get; set; }
     private int _currPerformer = 0;
+    public DjikstraMap? DMap { get; private set; }
+
+    static readonly Dictionary<TileType, int> _passableBasic = new() { 
+        { TileType.DungeonFloor, 1 },
+        { TileType.Landmark, 1 },
+        { TileType.Upstairs, 1 },
+        { TileType.Downstairs, 1 },
+        { TileType.Door, 2 }
+    };
 
     public void EnterLevel(int dungeon, int level)
     {
@@ -139,15 +148,8 @@ internal class GameState(Player p, Campaign c, Options opts)
         {
             long startTime = Stopwatch.GetTimestamp();
 
-            var dmap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-            Dictionary<TileType, int> passable = [];
-            passable.Add(TileType.DungeonFloor, 1);
-            passable.Add(TileType.Landmark, 1);
-            passable.Add(TileType.Upstairs, 1);
-            passable.Add(TileType.Downstairs, 1);
-            passable.Add(TileType.Door, 2);
-
-            dmap.Generate(passable, (dest.Row, dest.Col));
+            DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+            DMap.Generate(_passableBasic, (dest.Row, dest.Col));
 
             var elapsed = Stopwatch.GetElapsedTime(startTime);
             Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
