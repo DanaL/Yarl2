@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
+
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
@@ -129,6 +131,27 @@ internal class GameState(Player p, Campaign c, Options opts)
         // by the old and new locations and toggle their set difference? But
         // maybe not enough for the more complicated code?        
         CheckMovedEffects(actor, start, dest, TerrainFlags.Lit);
+
+        // Not making djikstra maps for the otherworld just yet.
+        // Eventually I need to take into account whether or not
+        // monsters can open doors, fly, etc. Multiple maps??
+        if (actor is Player && dest.DungeonID > 0)
+        {
+            long startTime = Stopwatch.GetTimestamp();
+
+            var dmap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+            Dictionary<TileType, int> passable = [];
+            passable.Add(TileType.DungeonFloor, 1);
+            passable.Add(TileType.Landmark, 1);
+            passable.Add(TileType.Upstairs, 1);
+            passable.Add(TileType.Downstairs, 1);
+            passable.Add(TileType.Door, 2);
+
+            dmap.Generate(passable, (dest.Row, dest.Col));
+
+            var elapsed = Stopwatch.GetElapsedTime(startTime);
+            Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
+        }
     }
 
     // Find all the game objects affecting a square with a particular

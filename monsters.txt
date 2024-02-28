@@ -1,5 +1,5 @@
-skeleton        |z|grey         |darkgrey  |12| 8|2| 1.0|6|1|12|Basic
-zombie          |v|limegreen    |darkgreen | 8|10|2|0.75|6|1|12|Basic
+skeleton        |z|white        |darkgrey  |12| 8|2| 1.0|6|1|12|Basic
+zombie          |z|limegreen    |darkgreen | 8|10|2|0.75|6|1|12|Basic
 goblin          |g|lightbrown   |brown     |12| 8|2| 1.0|6|1|12|Basic
 goblin  boss    |g|green        |darkgreen |13|10|3| 1.0|6|1|13|Basic
 hobgoblin       |g|grey         |darkgrey  |14|15|3| 1.0|8|1|14|Basic
