@@ -32,8 +32,6 @@ interface IItemHolder
     void CalcEquipmentModifiers();
 }
 
-record struct Dmg(int Num, int Dice, int Bonus);
-
 enum AIType 
 {
     Basic,
