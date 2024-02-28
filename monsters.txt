@@ -1,12 +1,12 @@
 skeleton        |z|white        |darkgrey  |12| 8|2| 1.0|6|1|12|Basic
 zombie          |z|limegreen    |darkgreen | 8|10|2|0.75|6|1|12|Basic
-goblin          |g|lightbrown   |brown     |12| 8|2| 1.0|6|1|12|Basic
-goblin boss     |g|green        |darkgreen |13|10|3| 1.0|6|1|13|Basic
-hobgoblin       |g|grey         |darkgrey  |14|15|3| 1.0|8|1|14|Basic
-goblin archer   |g|brightred    |lightbrown|12|10|2| 1.0|6|1|12|Basic
+goblin          |g|lightbrown   |brown     |12| 8|2| 1.0|6|1|12|BasicHumanoid
+goblin boss     |g|green        |darkgreen |13|10|3| 1.0|6|1|13|BasicHumanoid
+hobgoblin       |g|grey         |darkgrey  |14|15|3| 1.0|8|1|14|BasicHumanoid
+goblin archer   |g|brightred    |lightbrown|12|10|2| 1.0|6|1|12|BasicHumanoid
 wolf            |d|lightgrey    |grey      |12| 8|2| 1.0|6|1|12|Basic
 giant rat       |r|lightgrey    |grey      |11| 5|2| 1.0|6|1|10|Basic
 dire bat        |v|lightbrown   |brown     |12| 5|2| 1.0|6|1|10|Basic
-kobold          |k|brightred    |dullred   |12| 8|2| 1.0|6|1|10|Basic
-kobold trickster|k|lightblue    |blue      |14| 9|3| 1.0|6|1|10|Basic
-kobold foreman  |k|yelloworange |blue      |13|12|3| 1.0|8|1|12|Basic
+kobold          |k|brightred    |dullred   |12| 8|2| 1.0|6|1|10|BasicHumanoid
+kobold trickster|k|lightblue    |blue      |14| 9|3| 1.0|6|1|10|BasicHumanoid
+kobold foreman  |k|yelloworange |blue      |13|12|3| 1.0|8|1|12|BasicHumanoid

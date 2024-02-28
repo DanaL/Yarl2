@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -285,7 +286,7 @@ abstract class UserInterface
         WriteLine("", row, col, width, Colours.WHITE);
     }
 
-    public void AlertPlayer(Message alert) 
+    public void AlertPlayer(Message alert, string ifNotSeen) 
     {
         // TODO: only display messages that are within the player's
         // current FOV
@@ -293,11 +294,17 @@ abstract class UserInterface
             return;
 
         HistoryUpdated = true;
-        
-        if (MessageHistory.Count > 0 && MessageHistory[0].Message == alert.Text)
+
+        string msgText;
+        if (GameState.RecentlySeen.Contains(alert.Loc))
+            msgText = alert.Text;
+        else
+            msgText = ifNotSeen;
+
+        if (MessageHistory.Count > 0 && MessageHistory[0].Message == msgText)
             MessageHistory[0] = new MsgHistory(alert.Text, MessageHistory[0].Count + 1);
         else
-            MessageHistory.Insert(0, new MsgHistory(alert.Text, 1));
+            MessageHistory.Insert(0, new MsgHistory(msgText, 1));
         
         if (MessageHistory.Count > MaxHistory)
             MessageHistory.RemoveAt(MaxHistory);
@@ -426,8 +433,9 @@ abstract class UserInterface
                 performer.Energy -= result.EnergyCost;
                 if (result.AltAction is not null)
                     result = result.AltAction.Execute();
+
                 if (result.Message is not null)
-                    AlertPlayer(result.Message);
+                    AlertPlayer(result.Message, result.MessageIfUnseen);
             }
             while (result.AltAction is not null);
         }
@@ -584,6 +592,8 @@ abstract class UserInterface
             Tile tile = map.TileAt(mapRow, mapCol);
             Sqr memory = TileToSqr(tile, false);
 
+            GameState.RecentlySeen.Add(loc);
+
             // Remember the unlit version of the sqr since it's displayed in the
             // unlit portion of the view.
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown) 
@@ -623,6 +633,8 @@ abstract class UserInterface
         GameState.Map = map;
         var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Loc.Row, Player!.Loc.Col, map, GameState.CurrLevel);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
+
+        GameState.RecentlySeen = [];
 
         // There is a glitch here that I don't want to fix right now in that
         // I am remembering only (row, col). So if a monster picks up an item

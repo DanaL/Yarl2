@@ -35,6 +35,7 @@ interface IItemHolder
 enum AIType 
 {
     Basic,
+    BasicHumanoid,
     Village
 }
 
@@ -129,6 +130,7 @@ class Monster : Actor, IPerformer
         IBehaviour behaviour = aiType switch 
         {
             AIType.Basic => new BasicMonsterBehaviour(),
+            AIType.BasicHumanoid => new BasicHumanoidBehaviour(),
             AIType.Village => new VillagerBehaviour()
         };
 
@@ -142,6 +144,8 @@ interface IBehaviour
     Action CalcAction(Actor actor, GameState gameState);
 }
 
+// Very basic idea for a wolf or such, which can move and attack the player
+// but doesn't have hands/can't open doors etc
 class BasicMonsterBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState)
@@ -151,7 +155,6 @@ class BasicMonsterBehaviour : IBehaviour
         //   2) otherwise move toward them
         //   3) Pass I guess
 
-        Loc playerLoc = gameState.Player.Loc;
         // Fight!
         if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
         {
@@ -171,6 +174,40 @@ class BasicMonsterBehaviour : IBehaviour
             }
         }
         
+        // Otherwise do nothing!
+        return new PassAction((IPerformer)actor);
+    }
+}
+
+// Basic goblins and such. These guys know how to open doors
+class BasicHumanoidBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState)
+    {
+        // Fight!
+        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        {
+            Console.WriteLine($"{actor.FullName} would attack right now!");
+            return new PassAction((IPerformer)actor);
+        }
+
+        // Move!
+        var adj = gameState.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+
+            if (gameState.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
+            {
+                return new OpenDoorAction(actor, gameState.CurrentMap, loc, gameState);
+            }
+            else if (!gameState.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gameState);
+            }
+        }
+
         // Otherwise do nothing!
         return new PassAction((IPerformer)actor);
     }

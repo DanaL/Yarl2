@@ -36,7 +36,7 @@ enum Verb
     BurnsOut
 }
 
-record Message(string Text, Loc loc);
+record Message(string Text, Loc Loc);
 
 class MessageFactory
 {
@@ -120,9 +120,9 @@ class MessageFactory
         {
             sb.Append(CalcName(sub));
             sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb));               
+            sb.Append(CalcVerb(sub, verb));
             sb.Append(' ');
-            sb.Append(obj);
+            sb.Append(obj.DefArticle());
             sb.Append(exciting ? '!' : '.');
         }
 

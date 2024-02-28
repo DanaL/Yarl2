@@ -15,6 +15,7 @@ class ActionResult
 {
     public bool Successful { get; set; }
     public Message? Message { get; set; }
+    public string MessageIfUnseen { get; set; } = "";
     public Action? AltAction { get; set; }
     public double EnergyCost { get; set; } = 0.0;
 
@@ -151,6 +152,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
 
                 var msg = MessageFactory.Phrase(_actor.ID, Verb.Close, "the door", false, _loc, _gs);
                 result.Message = msg;
+                result.MessageIfUnseen = "You hear a door close.";
 
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
@@ -205,12 +207,13 @@ class OpenDoorAction : DirectionalAction
                 result.Successful = true;
                 result.EnergyCost = 1.0;
 
-                var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "the door", false, _loc, _gs);
+                var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "door", false, _loc, _gs);
                 result.Message = msg;
-                
+                result.MessageIfUnseen = "You hear a door open.";
+
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
-                
+
                 foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlags.Lit))
                 {
                     _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
@@ -613,7 +616,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             ((IItemHolder)_actor).CalcEquipmentModifiers();
 
             var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gameState);
-            _ui.AlertPlayer(alert);
+            _ui.AlertPlayer(alert, "");
             return new ActionResult() { Successful=true, Message=null, EnergyCost = 1.0 };
         }
     }

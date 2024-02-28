@@ -28,13 +28,26 @@ internal class GameState(Player p, Campaign c, Options opts)
     public int Turn { get; set; }
     private int _currPerformer = 0;
     public DjikstraMap? DMap { get; private set; }
+    public DjikstraMap? DMapDoors { get; private set; }
+    public HashSet<Loc> RecentlySeen { get; set; } = [];
 
     static readonly Dictionary<TileType, int> _passableBasic = new() { 
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },
         { TileType.Upstairs, 1 },
         { TileType.Downstairs, 1 },
-        { TileType.OpenDoor, 1 }
+        { TileType.OpenDoor, 1 },
+        { TileType.BrokenDoor, 1 }
+    };
+
+    static readonly Dictionary<TileType, int> _passableWithDoors = new() {
+        { TileType.DungeonFloor, 1 },
+        { TileType.Landmark, 1 },
+        { TileType.Upstairs, 1 },
+        { TileType.Downstairs, 1 },
+        { TileType.OpenDoor, 1 },
+        { TileType.BrokenDoor, 1 },
+        { TileType.ClosedDoor, 1 }
     };
 
     public void EnterLevel(int dungeon, int level)
@@ -150,6 +163,10 @@ internal class GameState(Player p, Campaign c, Options opts)
 
             DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
             DMap.Generate(_passableBasic, (dest.Row, dest.Col));
+
+            // I wonder how complicated it would be to generate the maps in parallel
+            DMapDoors = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+            DMapDoors.Generate(_passableWithDoors, (dest.Row, dest.Col));
 
             var elapsed = Stopwatch.GetElapsedTime(startTime);
             Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
