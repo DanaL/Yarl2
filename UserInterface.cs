@@ -494,7 +494,7 @@ abstract class UserInterface
         BlockForInput();
     }
 
-    static void Delay() => Thread.Sleep(15);
+    static void Delay() => Thread.Sleep(10);
 
     void BlockForInput()
     {
@@ -580,10 +580,11 @@ abstract class UserInterface
         bool isVisible = visible.Contains((mapRow, mapCol));
         if (isVisible && map.HasEffect(TerrainFlags.Lit, mapRow, mapCol))
         {
-            var tile = map.TileAt(mapRow, mapCol);
+            Tile tile = map.TileAt(mapRow, mapCol);
+            Sqr memory = TileToSqr(tile, false);
 
             // Remember the unlit version of the sqr since it's displayed in the
-            // unlit portion of the view            
+            // unlit portion of the view.
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown) 
             {
                 return TileToSqr(ZLayer[scrRow, scrCol], true);
@@ -591,8 +592,12 @@ abstract class UserInterface
             else if (glyph != GameObjectDB.EMPTY) 
             {
                 var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
-                var memory = sqr with { Fg = glyph.Unlit };
+
+                var item = GameState.ObjDB.ItemGlyphAt(loc);
+                if (item != GameObjectDB.EMPTY)
+                    memory = sqr with { Fg = item.Unlit };
                 remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
+
                 return sqr;
             }
             else 
@@ -601,9 +606,9 @@ abstract class UserInterface
                 return TileToSqr(tile, true);
             }
         }
-        else if (remembered.TryGetValue((GameState.CurrLevel, mapRow, mapCol), out Sqr memory))
+        else if (remembered.TryGetValue((GameState.CurrLevel, mapRow, mapCol), out var remSq))
         {
-            return memory;
+            return remSq;
         }
                         
         return new Sqr(Colours.BLACK, Colours.BLACK, ' ');

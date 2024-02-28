@@ -58,7 +58,7 @@ abstract class GameObj
 // Structure to store where items are in the world
 class GameObjectDB
 {
-    public static readonly Glyph EMPTY = new Glyph('@', Colours.BLACK, Colours.BLACK);
+    public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK);
 
     public Dictionary<Loc, List<Item>> _itemLocs = [];
     public Dictionary<Loc, ulong> _actorLocs = [];
@@ -68,7 +68,15 @@ class GameObjectDB
     {
         if (_actorLocs.TryGetValue(loc, out ulong id))
             return _objs[id].Glyph;
-        else if (_itemLocs.TryGetValue(loc, out List<Item> items))
+        else
+            return ItemGlyphAt(loc);
+    }
+
+    // Basically, the sqr ignoring the occupant since we only want to remember
+    // either the item stack or the tile
+    public Glyph ItemGlyphAt(Loc loc)
+    {
+        if (_itemLocs.TryGetValue(loc, out var items))
         {
             if (items is not null && items.Count > 0)
                 return items[0].Glyph;
