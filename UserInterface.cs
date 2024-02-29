@@ -312,7 +312,7 @@ abstract class UserInterface
             msgText = ifNotSeen;
 
         if (MessageHistory.Count > 0 && MessageHistory[0].Message == msgText)
-            MessageHistory[0] = new MsgHistory(alert.Text, MessageHistory[0].Count + 1);
+            MessageHistory[0] = new MsgHistory(msgText, MessageHistory[0].Count + 1);
         else
             MessageHistory.Insert(0, new MsgHistory(msgText, 1));
         
