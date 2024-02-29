@@ -54,9 +54,22 @@ class Battle
             if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
                 bonusDamage += str.Curr;
 
-            int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
-            Console.WriteLine($"{target.Name} has {hpLeft} HP left...");
             Message msg = MessageFactory.Phrase(attacker.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
+
+            int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+
+            if (hpLeft < 1)
+            {
+                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
+                msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
+
+                Console.WriteLine($"{target.Name} {target.ID} is killed!");
+
+                gs.ActorKilled(target);
+            }
+
+            Console.WriteLine($"{target.Name} has {hpLeft} HP left...");
+            
             result.Message = msg;
         }
         else

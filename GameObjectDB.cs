@@ -72,6 +72,12 @@ class GameObjectDB
             return ItemGlyphAt(loc);
     }
 
+    public void RemoveActor(Actor actor)
+    {
+        _objs.Remove(actor.ID);
+        _actorLocs.Remove(actor.Loc);
+    }
+
     // Basically, the sqr ignoring the occupant since we only want to remember
     // either the item stack or the tile
     public Glyph ItemGlyphAt(Loc loc)

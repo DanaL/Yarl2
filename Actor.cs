@@ -177,7 +177,7 @@ class BasicHumanoidBehaviour : IBehaviour
         // Fight!
         if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
         {
-            Console.WriteLine($"{actor.FullName} would attack right now!");
+            Console.WriteLine($"{actor.Name} {actor.ID} would attack right now!");
             return new PassAction((IPerformer)actor);
         }
 

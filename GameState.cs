@@ -71,6 +71,12 @@ internal class GameState(Player p, Campaign c, Options opts)
         ObjDB.SetToLoc(loc, item);
     }
 
+    public void ActorKilled(Actor victim)
+    {
+        ((IPerformer)victim).RemoveFromQueue = true;
+        ObjDB.RemoveActor(victim);
+    }
+
     public void BuildPerformersList()
     {
         RefreshPerformers();
@@ -137,7 +143,7 @@ internal class GameState(Player p, Campaign c, Options opts)
                 // here eventually
             }
 
-            if (Performers[_currPerformer].Energy >= 1.0)
+            if (Performers[_currPerformer].Energy >= 1.0 && !Performers[_currPerformer].RemoveFromQueue)
                 return Performers[_currPerformer];
         }
         while (Performers.Count > 0);
