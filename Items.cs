@@ -45,7 +45,7 @@ class Item : GameObj
         if (traitDescs.Length > 0)
             name = name + " " + traitDescs;
 
-        return name;
+        return name.Trim();
     }
 
     public override string FullName => CalcFullName();
