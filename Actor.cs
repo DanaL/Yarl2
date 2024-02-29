@@ -120,6 +120,17 @@ class Monster : Actor, IPerformer
 
     public Monster() {}
     
+    public override int AC 
+    {
+        get 
+        {
+            if (Stats.TryGetValue(Attribute.AC, out Stat ac))
+                return ac.Curr;
+            else
+                return base.AC;
+        }
+    }
+    
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
         return _behaviour.CalcAction(this, gameState);

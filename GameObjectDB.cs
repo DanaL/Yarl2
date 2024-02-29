@@ -85,6 +85,19 @@ class GameObjectDB
         return EMPTY;
     }
 
+    public Actor? Occupant(Loc loc)
+    {
+        if (_actorLocs.TryGetValue(loc, out ulong objId))
+        {
+            if (_objs.TryGetValue(objId, out var actor))
+            {
+                return (Actor)actor;
+            }
+        }
+
+        return null;        
+    }
+
     public bool Occupied(Loc loc) => _actorLocs.ContainsKey(loc);
 
     public GameObj? GetObj(ulong id) 

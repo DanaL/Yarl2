@@ -28,6 +28,27 @@ abstract class Action
     public virtual void ReceiveAccResult(AccumulatorResult result) {}
 }
 
+// _actor, _map, _loc, _gameState
+class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
+{
+    GameState _gs = gs;
+    Loc _loc = loc;
+    Actor _actor = actor;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = true };
+
+        var target = _gs.ObjDB.Occupant(_loc);
+        if (target is not null) 
+        {
+            Console.WriteLine($"{_actor.FullName} attacks {target.Name}");
+        }
+
+        return result;
+    }
+}
+
 class PortalAction(GameState gameState) : Action
 {
     protected readonly GameState _gameState = gameState;
@@ -292,8 +313,8 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
         {
             // Eventually this will result in a fight or an NPC interaction (or at least a warning)
             result.Successful = false;
-            if (_actor is Player)
-                result.Message = MessageFactory.Phrase("There's someone in your way!", _gameState.Player.Loc);
+            var attackAction = new MeleeAttackAction(_actor, _loc, _gameState);
+            result.AltAction = attackAction;
         }
         else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
         {
