@@ -39,19 +39,180 @@ enum AIType
     Village
 }
 
+// Actor should really be an abstract class but abstract classes seemed
+// to be problematic when I was trying to use the JSON serialization
+// libraries
 class Actor : GameObj
 {
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
 
-    public Actor() {}
+    public Actor() { }
 
-    public override string FullName => Name.DefArticle();
-
+    public override string FullName => Name.DefArticle();    
+    public virtual int TotalMeleeAttackModifier() => 0;
     public virtual int AC => 10;
+    public virtual List<Damage> MeleeDamage() => [];
+
+    public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
+    {
+        // Really, in the future, we'll need to check each damage type to see
+        // if the Monster is resistant or immune to a particular type.
+        int total = damage.Select(d => d.Item1).Sum() + bonusDamage;
+        if (total < 0)
+            total = 0;
+        Stats[Attribute.HP].Curr -= total;
+
+        return Stats[Attribute.HP].Curr;
+    }
 }
 
-class MonsterFactory 
+// Covers pretty much any actor that isn't the player. Villagers
+// for instance are of type Monster even though it's a bit rude
+// to call them that. Dunno why I don't like the term NPC for
+// this class
+class Monster : Actor, IPerformer
+{
+    public AIType AIType { get; set;}
+    public double Energy { get; set; } = 0.0;
+    public double Recovery { get; set; }
+
+    public bool RemoveFromQueue { get; set; }
+
+    private IBehaviour _behaviour;
+
+    public Monster() 
+    {
+        _behaviour = new BasicMonsterBehaviour();
+    }
+
+    public override List<Damage> MeleeDamage()
+    {
+        int die = 4;
+        if (Stats.TryGetValue(Attribute.DmgDie, out var dmgDie))
+            die = dmgDie.Curr;
+        int numOfDie = 1;
+        if (Stats.TryGetValue(Attribute.DmgRolls, out var rolls))
+            numOfDie = rolls.Curr;
+
+        // Blunt for now. I need to add damage type to monster definition file
+        // AND handle cases of multiple damage types. Ie., hellhounds and such
+        return [ new Damage(die, numOfDie, DamageType.Blunt) ];
+    }
+
+    public override int AC 
+    {
+        get 
+        {
+            if (Stats.TryGetValue(Attribute.AC, out Stat ac))
+                return ac.Curr;
+            else
+                return base.AC;
+        }
+    }
+    
+    public Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        return _behaviour.CalcAction(this, gameState, ui.Rng);
+    }
+
+    public void SetBehaviour(AIType aiType)
+    {
+        IBehaviour behaviour = aiType switch 
+        {
+            AIType.Village => new VillagerBehaviour(),
+            AIType.BasicHumanoid => new BasicHumanoidBehaviour(),            
+            _ => new BasicMonsterBehaviour(),
+        };
+
+        _behaviour = behaviour;
+        AIType = aiType;
+    }
+}
+
+interface IBehaviour 
 { 
+    Action CalcAction(Actor actor, GameState gameState, Random rng);
+}
+
+// Very basic idea for a wolf or such, which can move and attack the player
+// but doesn't have hands/can't open doors etc
+class BasicMonsterBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    {
+        // Basic monster behaviour:
+        //   1) if adj to player, attack
+        //   2) otherwise move toward them
+        //   3) Pass I guess
+
+        // Fight!
+        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        {
+            Console.WriteLine($"{actor.FullName} would attack right now!");
+            return new PassAction((IPerformer)actor);
+        }
+       
+        // Move!
+        var adj = gameState.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+            if (!gameState.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gameState, rng);
+            }
+        }
+        
+        // Otherwise do nothing!
+        return new PassAction((IPerformer)actor);
+    }
+}
+
+// Basic goblins and such. These guys know how to open doors
+class BasicHumanoidBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    {
+        // Fight!
+        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        {
+            Console.WriteLine($"{actor.FullName} would attack right now!");
+            return new PassAction((IPerformer)actor);
+        }
+
+        // Move!
+        var adj = gameState.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+
+            if (gameState.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
+            {
+                return new OpenDoorAction(actor, gameState.CurrentMap, loc, gameState);
+            }
+            else if (!gameState.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gameState, rng);
+            }
+        }
+
+        // Otherwise do nothing!
+        return new PassAction((IPerformer)actor);
+    }
+}
+
+class VillagerBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    {
+        return new PassAction((IPerformer)actor);
+    }
+}
+
+class MonsterFactory
+{
     static Dictionary<string, string> _catalog = [];
 
     static void LoadCatalog()
@@ -77,7 +238,7 @@ class MonsterFactory
 
         var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
                                             ColourSave.TextToColour(fields[2]));
-        Enum.TryParse(fields[10], out AIType ai);                                            
+        Enum.TryParse(fields[10], out AIType ai);
         var m = new Monster()
         {
             Name = name,
@@ -101,133 +262,5 @@ class MonsterFactory
         m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
 
         return m;
-    }
-}
-
-// Covers pretty much any actor that isn't the player. Villagers
-// for instance are of type Monster even though it's a bit rude
-// to call them that. Dunno why I don't like the term NPC for
-// this class
-class Monster : Actor, IPerformer
-{
-    public AIType AIType { get; set;}
-    public double Energy { get; set; } = 0.0;
-    public double Recovery { get; set; }
-
-    public bool RemoveFromQueue { get; set; }
-
-    private IBehaviour _behaviour;
-
-    public Monster() {}
-    
-    public override int AC 
-    {
-        get 
-        {
-            if (Stats.TryGetValue(Attribute.AC, out Stat ac))
-                return ac.Curr;
-            else
-                return base.AC;
-        }
-    }
-    
-    public Action TakeTurn(UserInterface ui, GameState gameState)
-    {
-        return _behaviour.CalcAction(this, gameState);
-    }
-
-    public void SetBehaviour(AIType aiType)
-    {
-        IBehaviour behaviour = aiType switch 
-        {
-            AIType.Basic => new BasicMonsterBehaviour(),
-            AIType.BasicHumanoid => new BasicHumanoidBehaviour(),
-            AIType.Village => new VillagerBehaviour()
-        };
-
-        _behaviour = behaviour;
-        AIType = aiType;
-    }
-}
-
-interface IBehaviour 
-{ 
-    Action CalcAction(Actor actor, GameState gameState);
-}
-
-// Very basic idea for a wolf or such, which can move and attack the player
-// but doesn't have hands/can't open doors etc
-class BasicMonsterBehaviour : IBehaviour
-{
-    public Action CalcAction(Actor actor, GameState gameState)
-    {
-        // Basic monster behaviour:
-        //   1) if adj to player, attack
-        //   2) otherwise move toward them
-        //   3) Pass I guess
-
-        // Fight!
-        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
-        {
-            Console.WriteLine($"{actor.FullName} would attack right now!");
-            return new PassAction((IPerformer)actor);
-        }
-       
-        // Move!
-        var adj = gameState.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
-        foreach (var sq in adj)
-        {
-            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-            if (!gameState.ObjDB.Occupied(loc))
-            {
-                // the square is free so move there!
-                return new MoveAction(actor, loc, gameState);
-            }
-        }
-        
-        // Otherwise do nothing!
-        return new PassAction((IPerformer)actor);
-    }
-}
-
-// Basic goblins and such. These guys know how to open doors
-class BasicHumanoidBehaviour : IBehaviour
-{
-    public Action CalcAction(Actor actor, GameState gameState)
-    {
-        // Fight!
-        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
-        {
-            Console.WriteLine($"{actor.FullName} would attack right now!");
-            return new PassAction((IPerformer)actor);
-        }
-
-        // Move!
-        var adj = gameState.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
-        foreach (var sq in adj)
-        {
-            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-
-            if (gameState.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
-            {
-                return new OpenDoorAction(actor, gameState.CurrentMap, loc, gameState);
-            }
-            else if (!gameState.ObjDB.Occupied(loc))
-            {
-                // the square is free so move there!
-                return new MoveAction(actor, loc, gameState);
-            }
-        }
-
-        // Otherwise do nothing!
-        return new PassAction((IPerformer)actor);
-    }
-}
-
-class VillagerBehaviour : IBehaviour
-{
-    public Action CalcAction(Actor actor, GameState gameState)
-    {
-        return new PassAction((IPerformer)actor);
     }
 }

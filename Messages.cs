@@ -45,7 +45,7 @@ class MessageFactory
         bool fp = subject is Player;
         return verb switch 
         {
-            Verb.Hit => fp ? "attack" : "attacks",
+            Verb.Hit => fp ? "hit" : "hits",
             Verb.Miss => fp ? "miss" : "misses",
             Verb.Pickup => fp ? "pick up" : "picks up",
             Verb.Drop => fp ? "drop" : "drops",

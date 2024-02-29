@@ -29,20 +29,36 @@ abstract class ObjTrait
     public abstract bool Acitve { get; }
 }
 
-class MeleeAttackTrait : ObjTrait
-{
-    public int DamageDie { get; set; }
-    public int NumOfDie { get; set; }
-    public int Bonus { get; set; }
+// Should split the traits into Attack traits and Damage traits? Maybe?
+abstract class AttackTrait : ObjTrait { }
 
+class MeleeAttackTrait : AttackTrait
+{
+    public int Bonus { get; set; }
+    
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
 
     public override ObjTrait Duplicate(Item _) => 
-        new MeleeAttackTrait() { Bonus = Bonus, DamageDie = DamageDie, NumOfDie = NumOfDie };
+        new MeleeAttackTrait() { Bonus = Bonus };
 
-    public override string AsText() => $"MeleeAttackTrait#{DamageDie}#{NumOfDie}#{Bonus}";
+    public override string AsText() => $"MeleeAttackTrait#{Bonus}";
 
     public override bool Acitve => true;
+}
+
+class DamageTrait : ObjTrait
+{
+    public int DamageDie { get; set; }
+    public int NumOfDie { get; set; }
+    public DamageType DamageType { get; set; }
+
+    public override string AsText() => $"DamageTrait#{DamageDie}#{NumOfDie}#{DamageType}";
+    
+    public override ObjTrait Duplicate(Item _) =>
+        new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType };
+
+    public override string Desc() => "";
+    public override bool Acitve => true;    
 }
 
 class ArmourTrait : ObjTrait
@@ -182,9 +198,16 @@ class TraitFactory
             case "MeleeAttackTrait":
                 trait = new MeleeAttackTrait()
                 {
+                    Bonus = int.Parse(pieces[3])
+                };
+                break;
+            case "DamageTrait":
+                Enum.TryParse(pieces[3], out DamageType damageType);
+                trait = new DamageTrait()
+                {
                     DamageDie = int.Parse(pieces[1]),
                     NumOfDie = int.Parse(pieces[2]),
-                    Bonus = int.Parse(pieces[3])
+                    DamageType = damageType
                 };
                 break;
             case "ArmourTrait":

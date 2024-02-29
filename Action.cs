@@ -28,12 +28,12 @@ abstract class Action
     public virtual void ReceiveAccResult(AccumulatorResult result) {}
 }
 
-// _actor, _map, _loc, _gameState
-class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
+class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
 {
     GameState _gs = gs;
     Loc _loc = loc;
     Actor _actor = actor;
+    Random _rng = rng;
 
     public override ActionResult Execute()
     {
@@ -42,7 +42,7 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null) 
         {
-            Console.WriteLine($"{_actor.FullName} attacks {target.Name}");
+            result = Battle.MeleeAttack(_actor, target, _gs, _rng);
         }
 
         return result;
@@ -255,13 +255,14 @@ class OpenDoorAction : DirectionalAction
     }
 }
 
-class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
+class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Action
 {
-    private readonly Actor _actor = actor;
-    private readonly Loc _loc = loc;
-    private readonly Map _map = gameState.Map!;
-    private readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
-    private readonly GameState _gameState = gameState;
+    readonly Actor _actor = actor;
+    readonly Loc _loc = loc;
+    readonly Map _map = gameState.Map!;
+    readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
+    readonly GameState _gs = gameState;
+    readonly Random _rng = rng;
 
     static string BlockedMessage(Tile tile)
     {
@@ -273,12 +274,12 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
         }; ;
     }
 
-    private string CalcDesc()
+    string CalcDesc()
     {
         if (_actor is not Player)
             return "";
 
-        var items = _gameState.ObjDB.ItemsAt(_loc);
+        var items = _gs.ObjDB.ItemsAt(_loc);
 
         if (items.Count == 0) 
         {
@@ -307,13 +308,13 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             // in theory this shouldn't ever happen...
             result.Successful = false;
             if (_actor is Player)
-                result.Message = MessageFactory.Phrase("You cannot go that way!", _gameState.Player.Loc);
+                result.Message = MessageFactory.Phrase("You cannot go that way!", _gs.Player.Loc);
         }
-        else if (_gameState.ObjDB.Occupied(_loc))
+        else if (_gs.ObjDB.Occupied(_loc))
         {
             // Eventually this will result in a fight or an NPC interaction (or at least a warning)
             result.Successful = false;
-            var attackAction = new MeleeAttackAction(_actor, _loc, _gameState);
+            var attackAction = new MeleeAttackAction(_actor, _loc, _gs, _rng);
             result.AltAction = attackAction;
         }
         else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
@@ -325,12 +326,12 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
                 var tile = _map.TileAt(_loc.Row, _loc.Col);
                 if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
                 {
-                    var openAction = new OpenDoorAction(_actor, _map, _loc, _gameState);
+                    var openAction = new OpenDoorAction(_actor, _map, _loc, _gs);
                     result.AltAction = openAction;
                 }
                 else
                 {
-                    result.Message = MessageFactory.Phrase(BlockedMessage(tile), _gameState.Player.Loc);
+                    result.Message = MessageFactory.Phrase(BlockedMessage(tile), _gs.Player.Loc);
                 }
             }
         }
@@ -339,7 +340,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             result.Successful = true;
             result.EnergyCost = 1.0;
 
-            _gameState.ActorMoved(_actor, _actor.Loc, _loc);
+            _gs.ActorMoved(_actor, _actor.Loc, _loc);
             _actor.Loc = _loc;
 
             if (_actor is Player)

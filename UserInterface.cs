@@ -50,7 +50,7 @@ abstract class UserInterface
     public Queue<char> InputBuffer = new Queue<char>();
 
     protected GameState? GameState { get; set; } = null;
-    protected Random Rng { get; set; }
+    public Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
@@ -442,7 +442,10 @@ abstract class UserInterface
                 result = action!.Execute();                
                 performer.Energy -= result.EnergyCost;
                 if (result.AltAction is not null)
+                {
                     result = result.AltAction.Execute();
+                    performer.Energy -= result.EnergyCost;
+                }
 
                 if (result.Message is not null)
                     AlertPlayer(result.Message, result.MessageIfUnseen);

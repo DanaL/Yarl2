@@ -105,17 +105,20 @@ class ItemFactory
             case "spear":
                 item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, 
                                         Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
-                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 6, NumOfDie = 1, Bonus = 0 });
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
                 break;
             case "dagger":
                 item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
                                         Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
-                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 4, NumOfDie = 1, Bonus = 0 });
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
                 break;
             case "hand axe":
                 item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
                                         Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN) };
-                item.Traits.Add(new MeleeAttackTrait() { DamageDie = 6, NumOfDie = 1, Bonus = 0 });
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });                
                 break;
             case "leather armour":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
@@ -203,7 +206,7 @@ class Inventory(ulong ownerID)
     public char[] UsedSlots() => [.._items.Keys.Where(k => _items[k] != null).Order()];
     public Item ItemAt(char slot) => _items[slot];
 
-    public Item ReadiedWeapon()
+    public Item? ReadiedWeapon()
     {
         foreach (char slot in UsedSlots()) 
         {

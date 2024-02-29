@@ -29,8 +29,8 @@ class Player : Actor, IPerformer, IItemHolder
     public double Recovery { get; set; }
     public PlayerClass CharClass { get; set; }
     
-    private InputAccumulator? _accumulator;
-    private Action? _deferred;
+    InputAccumulator? _accumulator;
+    Action? _deferred;
 
     public Player(string name)
     {
@@ -66,7 +66,7 @@ class Player : Actor, IPerformer, IItemHolder
         }
     }
 
-    public int TotalMeleeAttackModifier()
+    public override int TotalMeleeAttackModifier()
     {
         int mod = Stats[Attribute.Strength].Curr;
                
@@ -80,6 +80,31 @@ class Player : Actor, IPerformer, IItemHolder
             mod += meleeAttackBonus.Curr;
 
         return mod;
+    }
+
+    public override List<Damage> MeleeDamage()
+    {
+        List<Damage> dmgs = [];
+
+        Item? weapon = Inventory.ReadiedWeapon();
+        if (weapon is not null)
+        {
+            foreach (var trait in weapon.Traits)
+            {
+                if (trait is DamageTrait dmg)
+                {
+                    dmgs.Add(new Damage(dmg.DamageDie, dmg.NumOfDie, dmg.DamageType));
+                }
+            }            
+        }
+        else
+        {
+            // Perhaps eventually there will be a Monk Role, or one 
+            // with claws or such
+            dmgs.Add(new Damage(1, 1, DamageType.Blunt));
+        }
+
+        return dmgs;
     }
 
     // This doesn't really mean anything for the Player. An Exception will be tossed when
@@ -101,7 +126,7 @@ class Player : Actor, IPerformer, IItemHolder
         return sources;
     }
     
-    private void ShowInventory(UserInterface ui, string title, bool mentionMoney = false)
+    void ShowInventory(UserInterface ui, string title, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots();
         if (slots.Length == 0)
@@ -233,21 +258,21 @@ class Player : Actor, IPerformer, IItemHolder
             }
 
             if (ch == 'h')
-                return new MoveAction(this, Loc.Move(0, -1), gameState);
+                return new MoveAction(this, Loc.Move(0, -1), gameState, ui.Rng);
             else if (ch == 'j')
-                return new MoveAction(this, Loc.Move(1, 0), gameState);
+                return new MoveAction(this, Loc.Move(1, 0), gameState, ui.Rng);
             else if (ch == 'k')
-                return new MoveAction(this, Loc.Move(-1, 0), gameState);
+                return new MoveAction(this, Loc.Move(-1, 0), gameState, ui.Rng);
             else if (ch == 'l')
-                return new MoveAction(this, Loc.Move(0, 1), gameState);
+                return new MoveAction(this, Loc.Move(0, 1), gameState, ui.Rng);
             else if (ch == 'y')
-                return new MoveAction(this,Loc.Move(-1, -1), gameState);
+                return new MoveAction(this,Loc.Move(-1, -1), gameState, ui.Rng);
             else if (ch == 'u')
-                return new MoveAction(this, Loc.Move(-1, 1), gameState);
+                return new MoveAction(this, Loc.Move(-1, 1), gameState, ui.Rng);
             else if (ch == 'b')
-                return new MoveAction(this, Loc.Move(1, -1), gameState);
+                return new MoveAction(this, Loc.Move(1, -1), gameState, ui.Rng);
             else if (ch == 'n')
-                return new MoveAction(this, Loc.Move(1, 1), gameState);
+                return new MoveAction(this, Loc.Move(1, 1), gameState, ui.Rng);
             else if (ch == 'E')
                 return new PortalAction(gameState);
             else if (ch == '>')

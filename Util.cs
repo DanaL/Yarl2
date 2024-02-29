@@ -240,4 +240,5 @@ static class StringUtils
     }
 }
 
-internal class GameQuitException : Exception { }
+class GameQuitException : Exception { }
+class PlayerKilledException(string message) : Exception(message) { }
