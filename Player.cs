@@ -66,6 +66,22 @@ class Player : Actor, IPerformer, IItemHolder
         }
     }
 
+    public int TotalMeleeAttackModifier()
+    {
+        int mod = Stats[Attribute.Strength].Curr;
+               
+        var weapon = Inventory.ReadiedWeapon();
+        MeleeAttackTrait? attackTrait = (MeleeAttackTrait?) weapon.Traits.Where(t => t is MeleeAttackTrait).FirstOrDefault();
+        if (attackTrait is null)
+            throw new Exception("Why would we have a weapon without an attack trait??");
+        mod += attackTrait.Bonus;
+
+        if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var meleeAttackBonus))
+            mod += meleeAttackBonus.Curr;
+
+        return mod;
+    }
+
     // This doesn't really mean anything for the Player. An Exception will be tossed when
     // they are killed.
     public bool RemoveFromQueue { get; set; }

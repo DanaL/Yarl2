@@ -203,6 +203,17 @@ class Inventory(ulong ownerID)
     public char[] UsedSlots() => [.._items.Keys.Where(k => _items[k] != null).Order()];
     public Item ItemAt(char slot) => _items[slot];
 
+    public Item ReadiedWeapon()
+    {
+        foreach (char slot in UsedSlots()) 
+        {
+            if (_items[slot] != null && _items[slot].Type == ItemType.Weapon && _items[slot].Equiped)
+                return _items[slot];
+        }
+
+        return null;
+    }
+
     public void Add(Item item, ulong ownerID)
     {
         if (item.Type == ItemType.Zorkmid) 

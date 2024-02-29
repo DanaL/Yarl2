@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -30,9 +29,9 @@ record struct MsgHistory(string Message, int Count)
 // I'll probably move towards Composition instead of Inheritance
 abstract class UserInterface
 {    
-    public const int ScreenWidth = 70;
+    public const int ScreenWidth = 80;
     public const int ScreenHeight = 32;
-    public const int SideBarWidth = 20;
+    public const int SideBarWidth = 30;
     public const int ViewWidth = ScreenWidth - SideBarWidth;
     public const int ViewHeight = ScreenHeight - 5;
 
@@ -251,17 +250,28 @@ abstract class UserInterface
 
     protected void WriteSideBar()
     {
-        WriteLine($"| {Player.Name}", 0, ViewWidth, SideBarWidth, Colours.WHITE);
+        int row = 0;
+        WriteLine($"| {Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
         int currHP = Player.Stats[Attribute.HP].Curr;
         int maxHP = Player.Stats[Attribute.HP].Max;
-        WriteLine($"| HP: {currHP} ({maxHP})", 1, ViewWidth, SideBarWidth, Colours.WHITE);
-        WriteLine($"| AC: {Player.AC}", 2, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| AC: {Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
         List<(Colour, string)> zorkmidLine = [ (Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {Player.Inventory.Zorkmids}")];
-        WriteLine(zorkmidLine, 3, ViewWidth, SideBarWidth);
+        WriteLine(zorkmidLine, row++, ViewWidth, SideBarWidth);
 
         string blank = "|".PadRight(ViewWidth);
-        for (int row = 4; row < ViewHeight - 2; row++)
+        WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
+
+        var weapon = Player.Inventory.ReadiedWeapon();
+        if (weapon != null) 
+        {
+            List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
+            weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));                
+            WriteLine(weaponLine, row++, ViewWidth, SideBarWidth);
+        }
+
+        for (; row < ViewHeight - 2; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
