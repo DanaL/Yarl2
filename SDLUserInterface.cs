@@ -18,7 +18,6 @@ internal class SDLUserInterface : UserInterface
     // This may be a performance kludge for my last of understanding of SDL2 that
     // doesn't pan out.
     private Sqr[,] _prevTiles = new Sqr[ViewHeight, ViewWidth];    
-    private string _prevMessage = "";
     
     public SDLUserInterface(string windowTitle, Options opt, Random rng) : base(opt, rng)
     {

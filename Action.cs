@@ -558,7 +558,7 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (_actor is Player player)
             {
                 var acc = new PauseForMoreAccumulator();
-                var action = new CloseMenuAction(ui, 1.0);
+                var action = new CloseMenuAction(_ui, 1.0);
                 player.ReplacePendingAction(action, acc);
             }
             return new ActionResult() { Successful = true, Message = null };
