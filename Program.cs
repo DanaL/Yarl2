@@ -4,7 +4,6 @@ using Yarl2;
 
 var options = Options.LoadOptions("options.json");
 
-var m1 = MonsterFactory.Get("skeleton");
 // var dm = Map.TestMap();
 // dm.Dump();
 

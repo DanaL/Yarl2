@@ -92,7 +92,7 @@ class PreGameHandler(UserInterface ui)
                 if (deck.Indexes.Count == 0)
                     deck.Reshuffle(rng);
                 string m = deck.Monsters[deck.Indexes.Dequeue()];
-                Actor monster = MonsterFactory.Get(m);
+                Actor monster = MonsterFactory.Get(m, rng);
                 monster.Loc = loc;
                 objDb.Add(monster);
                 objDb.SetToLoc(loc, monster);

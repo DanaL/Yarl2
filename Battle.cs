@@ -74,8 +74,6 @@ class Battle
                 gs.ActorKilled(target);
             }
 
-            Console.WriteLine($"{target.Name} has {hpLeft} HP left...");
-            
             result.Message = msg;
         }
         else

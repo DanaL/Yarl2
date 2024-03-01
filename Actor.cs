@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using Yarl2;
+
 namespace Yarl2;
 
 // Interface for anything that will get a turn in the game. The Player,
@@ -32,6 +34,9 @@ interface IItemHolder
     void CalcEquipmentModifiers();
 }
 
+// I wonder if a simple status will be enough
+enum ActorStatus { Idle, Active }
+
 enum AIType 
 {
     Basic,
@@ -45,6 +50,7 @@ enum AIType
 class Actor : GameObj
 {
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
+    public ActorStatus Status { get; set; }
 
     public Actor() { }
 
@@ -55,6 +61,9 @@ class Actor : GameObj
 
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
     {
+        if (Status == ActorStatus.Idle)
+            Status = ActorStatus.Active;
+
         // Really, in the future, we'll need to check each damage type to see
         // if the Monster is resistant or immune to a particular type.
         int total = damage.Select(d => d.Item1).Sum() + bonusDamage;
@@ -75,7 +84,6 @@ class Monster : Actor, IPerformer
     public AIType AIType { get; set;}
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
-
     public bool RemoveFromQueue { get; set; }
 
     private IBehaviour _behaviour;
@@ -138,28 +146,33 @@ interface IBehaviour
 // but doesn't have hands/can't open doors etc
 class BasicMonsterBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    public Action CalcAction(Actor actor, GameState gs, Random rng)
     {
+        if (actor.Status == ActorStatus.Idle) 
+        {
+            return new PassAction((IPerformer)actor);
+        }
+
         // Basic monster behaviour:
         //   1) if adj to player, attack
         //   2) otherwise move toward them
         //   3) Pass I guess
 
         // Fight!
-        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
         {
-            return new MeleeAttackAction(actor, gameState.Player.Loc, gameState, rng);
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
         }
        
         // Move!
-        var adj = gameState.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        var adj = gs.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
         {
             var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-            if (!gameState.ObjDB.Occupied(loc))
+            if (!gs.ObjDB.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gameState, rng);
+                return new MoveAction(actor, loc, gs, rng);
             }
         }
         
@@ -171,28 +184,33 @@ class BasicMonsterBehaviour : IBehaviour
 // Basic goblins and such. These guys know how to open doors
 class BasicHumanoidBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    public Action CalcAction(Actor actor, GameState gs, Random rng)
     {
+        if (actor.Status == ActorStatus.Idle) 
+        {            
+            return new PassAction((IPerformer)actor);
+        }
+        
         // Fight!
-        if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
         {
-            return new MeleeAttackAction(actor, gameState.Player.Loc, gameState, rng);
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
         }
 
         // Move!
-        var adj = gameState.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        var adj = gs.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
         {
             var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
 
-            if (gameState.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
+            if (gs.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
             {
-                return new OpenDoorAction(actor, gameState.CurrentMap, loc, gameState);
+                return new OpenDoorAction(actor, gs.CurrentMap, loc, gs);
             }
-            else if (!gameState.ObjDB.Occupied(loc))
+            else if (!gs.ObjDB.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gameState, rng);
+                return new MoveAction(actor, loc, gs, rng);
             }
         }
 
@@ -224,7 +242,7 @@ class MonsterFactory
         }
     }
 
-    public static Actor? Get(string name)
+    public static Actor Get(string name, Random rng)
     {
         if (_catalog.Count == 0)
             LoadCatalog();
@@ -259,6 +277,8 @@ class MonsterFactory
         int dmgRolls = int.Parse(fields[8]);
         m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
 
+        m.Status = rng.NextDouble() < 0.1 ? ActorStatus.Active : ActorStatus.Idle;
+        
         return m;
     }
 }

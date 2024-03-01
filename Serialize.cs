@@ -114,12 +114,13 @@ class MonsterSaver
 
     public static Monster Inflate(MonsterSaver ms)
     {
-        var m = (Monster) MonsterFactory.Get(ms.Name);
-        m.ID = ms.ID;
-        m.Stats = AttrStatKVP.Load(ms.Stats);
-        m.Loc = Yarl2.Loc.FromText(ms.Loc);
+        //var m = (Monster) MonsterFactory.Get(ms.Name);
+        //m.ID = ms.ID;
+        //m.Stats = AttrStatKVP.Load(ms.Stats);
+        //m.Loc = Yarl2.Loc.FromText(ms.Loc);
 
-        return m;
+        //return m;
+        return null;
     }
 }
 
