@@ -377,7 +377,7 @@ class Player : Actor, IPerformer, IItemHolder
             }
             else if (ch == '@')
             {
-                List<string> lines = CharacterSheet();
+                var lines = CharacterSheet();
                 _accumulator = new LongMessageAccumulator(ui, lines);
                 _deferred = new NullAction();
             }

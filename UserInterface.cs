@@ -325,6 +325,9 @@ abstract class UserInterface
         else
             return;
 
+        if (string.IsNullOrEmpty(msgText))
+            return;
+
         HistoryUpdated = true;
 
         if (MessageHistory.Count > 0 && MessageHistory[0].Message == msgText)

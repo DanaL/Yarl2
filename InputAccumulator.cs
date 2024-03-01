@@ -121,6 +121,7 @@ class LongMessageAccumulator : InputAccumulator
     private int _row;
     private IEnumerable<string> _lines;
     private bool _done;
+    private int _pageCount = 1;
 
     public override bool Done => _done;
     public override bool Success => true;
@@ -145,7 +146,11 @@ class LongMessageAccumulator : InputAccumulator
         }
         else
         {
-            var page = _lines.Skip(_row).Take(UserInterface.ScreenHeight).ToList();
+            var page = _lines.Skip(_row).Take(UserInterface.ScreenHeight - 1).ToList();
+            var txt = $"~ page {++_pageCount} ~";
+            txt = txt.PadLeft(UserInterface.ScreenWidth/2 - txt.Length + txt.Length/2, ' ');
+            page.Insert(0, txt);
+
             _ui.WriteLongMessage(page);
             _row += page.Count;
         }
