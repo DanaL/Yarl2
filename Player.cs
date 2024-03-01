@@ -43,7 +43,7 @@ class Player : Actor, IPerformer, IItemHolder
         Stats[Attribute.HP].Change(-3);
     }
 
-    public override string FullName => "You";
+    public override string FullName => "you";
 
     public override int AC 
     {
@@ -71,10 +71,14 @@ class Player : Actor, IPerformer, IItemHolder
         int mod = Stats[Attribute.Strength].Curr;
                
         var weapon = Inventory.ReadiedWeapon();
-        MeleeAttackTrait? attackTrait = (MeleeAttackTrait?) weapon.Traits.Where(t => t is MeleeAttackTrait).FirstOrDefault();
-        if (attackTrait is null)
-            throw new Exception("Why would we have a weapon without an attack trait??");
-        mod += attackTrait.Bonus;
+        if (weapon is not null)
+        {
+            MeleeAttackTrait? attackTrait = (MeleeAttackTrait?) weapon.Traits
+                                                                      .Where(t => t is MeleeAttackTrait)
+                                                                      .FirstOrDefault() 
+                                            ?? throw new Exception("Why would we have a weapon without an attack trait??");
+            mod += attackTrait.Bonus;
+        }
 
         if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var meleeAttackBonus))
             mod += meleeAttackBonus.Curr;

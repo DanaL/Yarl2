@@ -37,33 +37,9 @@ class PlayerCreator
 
     }
 
-    // I am very bravely breaking from D&D traidtion and I'm just going to 
-    // store the stat's modifier instead of the score from 3-18 :O
-    static int StatRollToMod(int roll)
-    {
-        if (roll < 4)
-            return -4;
-        else if (roll == 4 || roll == 5)
-            return -3;
-        else if (roll == 6 || roll == 7)
-            return -2;
-        else if (roll == 8 || roll == 9)
-            return -1;
-        else if (roll == 10 || roll == 11)
-            return 0;
-        else if (roll == 12 || roll == 13)
-            return 1;
-        else if (roll == 14 || roll == 15)
-            return 2;
-        else if (roll == 16 || roll == 17)
-            return 3;
-        else
-            return 4;
-    }
-
     // If I use this enough, move it to Utils?
     static int Roll3d6(Random rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
-    static int StatRoll(Random rng) => StatRollToMod(Roll3d6(rng));
+    static int StatRoll(Random rng) => Util.StatRollToMod(Roll3d6(rng));
     
     static Dictionary<Attribute, Stat> RollStats(PlayerClass charClass, Random rng)
     {
@@ -85,7 +61,7 @@ class PlayerCreator
         switch (charClass)
         {            
             case PlayerClass.OrcReaver:
-                roll = StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
+                roll = Util.StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
                 hp = 15 + stats[Attribute.Constitution].Curr;
@@ -93,7 +69,7 @@ class PlayerCreator
                 break;
             case PlayerClass.DwarfStalwart:
                 // Should Stalwarts also be strength based?
-                roll = StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
+                roll = Util.StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
 

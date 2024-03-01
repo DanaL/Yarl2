@@ -29,7 +29,6 @@ else
 display.TitleScreen();
 
 var pgh = new PreGameHandler(display);
-
 if (pgh.StartUp(rng))
 {
     display.GameLoop();

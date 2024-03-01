@@ -95,6 +95,7 @@ abstract class UserInterface
             "       (yet another attempt to make a roguelike,",
             "           this time in C#...)"
         ];
+        
         UpdateDisplay();
         BlockForInput();
         ClearLongMessage();
@@ -103,6 +104,15 @@ abstract class UserInterface
     public void ClearLongMessage()
     {
         _longMessage = null;
+    }
+
+    public void KillScreen(string message)
+    {
+        Popup(message);
+        SetSqsOnScreen();
+        UpdateDisplay();
+        BlockForInput();
+        ClearLongMessage();
     }
 
     public void ClosePopup()
@@ -449,6 +459,13 @@ abstract class UserInterface
 
                 if (result.Message is not null)
                     AlertPlayer(result.Message, result.MessageIfUnseen);
+
+                if (result.PlayerKilled)
+                {
+                     KillScreen("You died :(");
+                     throw new GameQuitException();
+                }
+                    
             }
             while (result.AltAction is not null);
         }

@@ -18,6 +18,7 @@ class ActionResult
     public string MessageIfUnseen { get; set; } = "";
     public Action? AltAction { get; set; }
     public double EnergyCost { get; set; } = 0.0;
+    public bool PlayerKilled { get; set; } = false;
 
     public ActionResult() { }
 }

@@ -187,6 +187,30 @@ partial class Util
         PlayerClass.OrcReaver => "Orc Reaver",
         _ => "Dwarf Stalwart"
     };
+
+    // I am very bravely breaking from D&D traidtion and I'm just going to 
+    // store the stat's modifier instead of the score from 3-18 :O
+    public static int StatRollToMod(int roll)
+    {
+        if (roll < 4)
+            return -4;
+        else if (roll == 4 || roll == 5)
+            return -3;
+        else if (roll == 6 || roll == 7)
+            return -2;
+        else if (roll == 8 || roll == 9)
+            return -1;
+        else if (roll == 10 || roll == 11)
+            return 0;
+        else if (roll == 12 || roll == 13)
+            return 1;
+        else if (roll == 14 || roll == 15)
+            return 2;
+        else if (roll == 16 || roll == 17)
+            return 3;
+        else
+            return 4;
+    }
 }
 
 static class ListUtils

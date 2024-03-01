@@ -60,10 +60,16 @@ class Battle
 
             if (hpLeft < 1)
             {
-                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
-                msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
-
-                Console.WriteLine($"{target.Name} {target.ID} is killed!");
+                if (target is Player)
+                {
+                    result.PlayerKilled = true;
+                    msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);                    
+                }
+                else 
+                {
+                    Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
+                    msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
+                }
 
                 gs.ActorKilled(target);
             }

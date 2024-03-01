@@ -148,8 +148,7 @@ class BasicMonsterBehaviour : IBehaviour
         // Fight!
         if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
         {
-            Console.WriteLine($"{actor.FullName} would attack right now!");
-            return new PassAction((IPerformer)actor);
+            return new MeleeAttackAction(actor, gameState.Player.Loc, gameState, rng);
         }
        
         // Move!
@@ -177,8 +176,7 @@ class BasicHumanoidBehaviour : IBehaviour
         // Fight!
         if (Util.Distance(actor.Loc, gameState.Player.Loc) <= 1)
         {
-            Console.WriteLine($"{actor.Name} {actor.ID} would attack right now!");
-            return new PassAction((IPerformer)actor);
+            return new MeleeAttackAction(actor, gameState.Player.Loc, gameState, rng);
         }
 
         // Move!
@@ -254,7 +252,7 @@ class MonsterFactory
         m.Stats.Add(Attribute.MeleeAttackBonus, new Stat(attBonus));
         int ac = int.Parse(fields[3]);
         m.Stats.Add(Attribute.AC, new Stat(ac));
-        int str = int.Parse(fields[9]);
+        int str = Util.StatRollToMod(int.Parse(fields[9]));
         m.Stats.Add(Attribute.Strength, new Stat(str));
         int dmgDie = int.Parse(fields[7]);
         m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
