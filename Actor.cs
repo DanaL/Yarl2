@@ -112,7 +112,6 @@ class Monster : Actor, IPerformer
     {
         if (sourceID == gs.Player.ID && Status == ActorStatus.Idle)
         {
-            Console.WriteLine($"{Name} {ID} hears the player and wakes up.");
             Status = ActorStatus.Active;
         }
     }

@@ -62,7 +62,7 @@ abstract class Tile(TileType type)
     public abstract bool Passable();
     public abstract bool Opaque();
 
-    public bool BlocksSound() => Type switch
+    public bool SoundProof() => Type switch
     {
         TileType.WorldBorder => true,
         TileType.DungeonWall => true,

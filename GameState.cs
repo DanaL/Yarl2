@@ -182,7 +182,7 @@ class GameState(Player p, Campaign c, Options opts)
     // Find all the game objects affecting a square with a particular
     // effect
     public List<GameObj> ObjsAffectingLoc(Loc loc, TerrainFlags effect)
-    {
+    {        
         var objs = new List<GameObj>();
 
         var (dungeon, level, row, col) = loc;
@@ -213,24 +213,27 @@ class GameState(Player p, Campaign c, Options opts)
         var map = CurrentMap;
         var q = new Queue<(int, int, int)>();
         q.Enqueue((startRow, startCol, volume + 1));
-        var visited = new HashSet<(int, int)>();
+        var visited = new HashSet<(int, int)>() { (startRow, startCol) };
 
         while (q.Count > 0) 
         { 
             var curr = q.Dequeue();
-            visited.Add((curr.Item1, curr.Item2));
-
+            
             foreach (var n in Util.Adj8Sqs(curr.Item1, curr.Item2))
-            {
-                if (!map.InBounds(n.Item1, n.Item2) || visited.Contains((n.Item1, n.Item2)))
+            {               
+                if (visited.Contains((n.Item1, n.Item2)))
+                    continue;
+
+                visited.Add((n.Item1, n.Item2));
+
+                if (!map.InBounds(n.Item1, n.Item2))
                     continue;
 
                 // Stop at walls, closed doors, and other tiles that block sound
                 // (I could instead cut volume for wood things, etc, but I'm not
                 // going THAT far down the simulationist rabbit hole!)
-                if (map.TileAt(n.Item1, n.Item2).BlocksSound())
+                if (map.TileAt(n.Item1, n.Item2).SoundProof())
                 {
-                    visited.Add((n.Item1, n.Item2));
                     continue;
                 }
 

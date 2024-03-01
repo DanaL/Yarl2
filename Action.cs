@@ -347,7 +347,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             if (_actor is Player)
             {
                 result.Message = MessageFactory.Phrase(CalcDesc(), _loc);
-                _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 15);
+                _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 12);
             }
         }
 
