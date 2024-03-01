@@ -58,7 +58,8 @@ class Actor : GameObj
     public virtual int TotalMeleeAttackModifier() => 0;
     public virtual int AC => 10;
     public virtual List<Damage> MeleeDamage() => [];
-
+    public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
+    
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
     {
         if (Status == ActorStatus.Idle)
@@ -72,7 +73,7 @@ class Actor : GameObj
         Stats[Attribute.HP].Curr -= total;
 
         return Stats[Attribute.HP].Curr;
-    }
+    }    
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
@@ -105,6 +106,15 @@ class Monster : Actor, IPerformer
         // Blunt for now. I need to add damage type to monster definition file
         // AND handle cases of multiple damage types. Ie., hellhounds and such
         return [ new Damage(die, numOfDie, DamageType.Blunt) ];
+    }
+
+    public override void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) 
+    {
+        if (sourceID == gs.Player.ID && Status == ActorStatus.Idle)
+        {
+            Console.WriteLine($"{Name} {ID} hears the player and wakes up.");
+            Status = ActorStatus.Active;
+        }
     }
 
     public override int AC 

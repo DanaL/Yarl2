@@ -15,7 +15,7 @@ using System.Diagnostics;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-internal class GameState(Player p, Campaign c, Options opts)
+class GameState(Player p, Campaign c, Options opts)
 {    
     public Map? Map { get; set; }
     public Options? Options { get; set; } = opts;
@@ -203,6 +203,48 @@ internal class GameState(Player p, Campaign c, Options opts)
         }
 
         return objs;
+    }
+
+    // Make a noise in the dungeon, start at the source and flood-fill out 
+    // decrementing the volume until we hit 0. We'll alert any Actors found
+    // the noise
+    public void Noise(ulong sourceID, int startRow, int startCol, int volume)
+    {
+        var map = CurrentMap;
+        var q = new Queue<(int, int, int)>();
+        q.Enqueue((startRow, startCol, volume + 1));
+        var visited = new HashSet<(int, int)>();
+
+        while (q.Count > 0) 
+        { 
+            var curr = q.Dequeue();
+            visited.Add((curr.Item1, curr.Item2));
+
+            foreach (var n in Util.Adj8Sqs(curr.Item1, curr.Item2))
+            {
+                if (!map.InBounds(n.Item1, n.Item2) || visited.Contains((n.Item1, n.Item2)))
+                    continue;
+
+                // Stop at walls, closed doors, and other tiles that block sound
+                // (I could instead cut volume for wood things, etc, but I'm not
+                // going THAT far down the simulationist rabbit hole!)
+                if (map.TileAt(n.Item1, n.Item2).BlocksSound())
+                {
+                    visited.Add((n.Item1, n.Item2));
+                    continue;
+                }
+
+                // alert actors
+                var occ = ObjDB.Occupant(new Loc(CurrDungeon, CurrLevel, n.Item1, n.Item2));
+                if (occ is not null)
+                {
+                    occ.HearNoise(sourceID, startRow, startCol, this);
+                }
+
+                if (curr.Item3 > 1)
+                    q.Enqueue((n.Item1, n.Item2, curr.Item3 - 1));
+            }
+        }
     }
 
     // This is still an extremely inefficient way to handle updating a moving source

@@ -61,6 +61,19 @@ abstract class Tile(TileType type)
     public virtual string StepMessage => "";
     public abstract bool Passable();
     public abstract bool Opaque();
+
+    public bool BlocksSound() => Type switch
+    {
+        TileType.WorldBorder => true,
+        TileType.DungeonWall => true,
+        TileType.PermWall => true,
+        TileType.WoodWall => true,
+        TileType.ClosedDoor => true,
+        TileType.LockedDoor => true,        
+        TileType.Mountain => true,
+        TileType.SnowPeak => true,
+        _ => false
+    };
 }
 
 class BasicTile : Tile
