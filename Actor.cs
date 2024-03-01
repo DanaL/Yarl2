@@ -286,7 +286,7 @@ class MonsterFactory
         int dmgRolls = int.Parse(fields[8]);
         m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
 
-        m.Status = rng.NextDouble() < 0.1 ? ActorStatus.Active : ActorStatus.Idle;
+        m.Status = rng.NextDouble() < 0.9 ? ActorStatus.Active : ActorStatus.Idle;
         
         return m;
     }

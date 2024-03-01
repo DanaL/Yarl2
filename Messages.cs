@@ -33,10 +33,11 @@ enum Verb
     Unready,
     BurnsOut,
     Kill,
-    Etre
+    Etre,
+    Hear
 }
 
-record Message(string Text, Loc Loc);
+record Message(string Text, Loc Loc, bool Sound=false);
 
 class MessageFactory
 {
@@ -56,7 +57,8 @@ class MessageFactory
             Verb.Unready => fp ? "unequip" : "unequips",
             Verb.BurnsOut => fp ? "burnt out" : "burns out",
             Verb.Kill => fp ? "kill" : "kills",
-            Verb.Etre => fp ? "are" : "is"
+            Verb.Etre => fp ? "are" : "is",
+            Verb.Hear => fp ? "hear" : "hears"
         };
     }
 
@@ -73,7 +75,8 @@ class MessageFactory
         Verb.Unready => "unequiped",
         Verb.BurnsOut => "burnt out",
         Verb.Kill => "killed",
-        Verb.Etre => "been"
+        Verb.Etre => "been",
+        Verb.Hear => "heard"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

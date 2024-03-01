@@ -349,6 +349,14 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
                 result.Message = MessageFactory.Phrase(CalcDesc(), _loc);
                 _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 12);
             }
+            else
+            {                
+                var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 10);
+                if (alerted.Contains(_gs.Player.ID))
+                {
+                    result.Message = new Message("You hear padding footsteps...", _loc, true);
+                }
+            }
         }
 
         return result;

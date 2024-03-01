@@ -310,16 +310,22 @@ abstract class UserInterface
     {
         // TODO: only display messages that are within the player's
         // current FOV
-        if (string.IsNullOrEmpty(alert.Text))
+        if (string.IsNullOrEmpty(alert.Text) && string.IsNullOrEmpty(ifNotSeen))
+            return;
+
+        // Eventually I need to handle sight vs sound messages better...
+        // In the meantime, we have a few cases.
+        string msgText;
+        if (!GameState.RecentlySeen.Contains(alert.Loc) && alert.Sound)
+            msgText = alert.Text;
+        else if (GameState.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
+            msgText = alert.Text;
+        else if (!GameState.RecentlySeen.Contains(alert.Loc))
+            msgText = ifNotSeen;
+        else
             return;
 
         HistoryUpdated = true;
-
-        string msgText;
-        if (GameState.RecentlySeen.Contains(alert.Loc))
-            msgText = alert.Text;
-        else
-            msgText = ifNotSeen;
 
         if (MessageHistory.Count > 0 && MessageHistory[0].Message == msgText)
             MessageHistory[0] = new MsgHistory(msgText, MessageHistory[0].Count + 1);

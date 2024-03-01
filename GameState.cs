@@ -208,8 +208,10 @@ class GameState(Player p, Campaign c, Options opts)
     // Make a noise in the dungeon, start at the source and flood-fill out 
     // decrementing the volume until we hit 0. We'll alert any Actors found
     // the noise
-    public void Noise(ulong sourceID, int startRow, int startCol, int volume)
+    public HashSet<ulong> Noise(ulong sourceID, int startRow, int startCol, int volume)
     {
+        long startTime = Stopwatch.GetTimestamp();
+        var alerted = new HashSet<ulong>();
         var map = CurrentMap;
         var q = new Queue<(int, int, int)>();
         q.Enqueue((startRow, startCol, volume + 1));
@@ -242,12 +244,18 @@ class GameState(Player p, Campaign c, Options opts)
                 if (occ is not null)
                 {
                     occ.HearNoise(sourceID, startRow, startCol, this);
+                    alerted.Add(occ.ID);
                 }
 
                 if (curr.Item3 > 1)
                     q.Enqueue((n.Item1, n.Item2, curr.Item3 - 1));
             }
         }
+
+        var elapsed = Stopwatch.GetElapsedTime(startTime);
+        //Console.WriteLine($"noise time ({sourceID}): {elapsed.TotalMicroseconds}");
+
+        return alerted;
     }
 
     // This is still an extremely inefficient way to handle updating a moving source
