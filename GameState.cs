@@ -126,6 +126,7 @@ class GameState(Player p, Campaign c, Options opts)
                 {
                     ++Turn;
                     _currPerformer = 0;
+                    EndOfTurn();
                 }
             }
             
@@ -136,11 +137,10 @@ class GameState(Player p, Campaign c, Options opts)
             }
 
             if (_currPerformer >= Performers.Count)
-            {
+            {                
                 ++Turn;
                 _currPerformer = 0;
-                // probably there will eventually be end-of-turn stuff
-                // here eventually
+                EndOfTurn();
             }
 
             if (Performers[_currPerformer].Energy >= 1.0 && !Performers[_currPerformer].RemoveFromQueue)
@@ -149,6 +149,20 @@ class GameState(Player p, Campaign c, Options opts)
         while (Performers.Count > 0);
 
         throw new Exception("Hmm we should never run out of performers");
+    }
+
+    // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait
+    // that's countdown timer for healing. Then its period can be tweaked by effects and items.
+    // I don't what to have every single effect have its own turn like light sources do, but 
+    // maybe Actors can have a list of effects I check for each turn?
+    //
+    // Also not sure how often monsters should regenerate.
+    void EndOfTurn()
+    {
+        if (Turn % 23 == 0)
+        {
+            Player.Stats[Attribute.HP].Change(1);
+        }
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)
