@@ -41,6 +41,7 @@ class Colours
     public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
     public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
     public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 15);
+    public static readonly Colour FX_RED = new(128, 00, 00, 175);
 }
 
 // Miscellaneous constants used in a few places

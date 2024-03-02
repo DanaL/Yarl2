@@ -15,7 +15,7 @@ using System.Diagnostics;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-class GameState(Player p, Campaign c, Options opts)
+class GameState(Player p, Campaign c, Options opts, UserInterface ui)
 {    
     public Map? Map { get; set; }
     public Options? Options { get; set; } = opts;
@@ -30,7 +30,8 @@ class GameState(Player p, Campaign c, Options opts)
     public DjikstraMap? DMap { get; private set; }
     public DjikstraMap? DMapDoors { get; private set; }
     public HashSet<Loc> RecentlySeen { get; set; } = [];
-
+    public UserInterface UI { get; set; } = ui;
+    
     static readonly Dictionary<TileType, int> _passableBasic = new() { 
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },

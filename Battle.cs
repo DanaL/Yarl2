@@ -82,6 +82,8 @@ class Battle
                 gs.ActorKilled(target);
             }
 
+            gs.UI.RegisterHitAnimation(target.Loc, Colours.FX_RED);
+
             result.Message = msg;
         }
         else

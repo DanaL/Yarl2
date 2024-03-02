@@ -35,7 +35,7 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
     Loc _loc = loc;
     Actor _actor = actor;
     Random _rng = rng;
-
+    
     public override ActionResult Execute()
     {
         var result = new ActionResult() { Successful = true };

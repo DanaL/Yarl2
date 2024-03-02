@@ -49,7 +49,7 @@ abstract class UserInterface
     public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
 
-    protected GameState? GameState { get; set; } = null;
+    public GameState? GameState { get; private set; } = null;
     public Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
@@ -72,6 +72,8 @@ abstract class UserInterface
     protected readonly int MaxHistory = 50;
     protected bool HistoryUpdated = false;
     
+    List<IAnimationListener> _animationListeners = [];
+
     public UserInterface(Options opts, Random rng)
     {
         _options = opts;
@@ -81,6 +83,10 @@ abstract class UserInterface
         ZLayer = new Tile[ViewHeight, ViewWidth];
         Rng = rng;
         ClearZLayer();
+
+        _animationListeners.Add(new CloudAnimationListener(this, Rng));
+        _animationListeners.Add(new TorchLightAnimationListener(this, Rng));
+        _animationListeners.Add(new HitAnimation(this));
     }
 
     public virtual void TitleScreen()
@@ -128,6 +134,13 @@ abstract class UserInterface
         _popupTitle = title;
         OpeningPopUp = true;
         ClosingPopUp = false;
+    }
+
+    public void RegisterHitAnimation(Loc loc, Colour colour)
+    {
+        var hitAnim = (HitAnimation) _animationListeners.Where(a => a is HitAnimation)
+                                                        .First();
+        hitAnim.Add(loc, colour);                                                        
     }
 
     protected void WriteMessagesSection()
@@ -420,7 +433,7 @@ abstract class UserInterface
 
     public void SetupGameState(Campaign campaign, GameObjectDB itemDB, int currentTurn)
     {
-        GameState = new GameState(Player, campaign, _options)
+        GameState = new GameState(Player, campaign, _options, this)
         {
             Map = campaign!.Dungeons[campaign.CurrentDungeon].LevelMaps[campaign.CurrentLevel],
             CurrLevel = campaign.CurrentLevel,
@@ -483,11 +496,7 @@ abstract class UserInterface
     }
 
     public void GameLoop()
-    {        
-        List<IAnimationListener> animationListeners = [];
-        animationListeners.Add(new CloudAnimationListener(this, Rng));
-        animationListeners.Add(new TorchLightAnimationListener(this, Rng));
-
+    {                
         GameState.BuildPerformersList();
 
         _playing = true;
@@ -519,7 +528,7 @@ abstract class UserInterface
             {
                 SetSqsOnScreen();
 
-                foreach (var l in animationListeners)
+                foreach (var l in _animationListeners)
                    l.Update();
 
                 UpdateDisplay();
@@ -664,6 +673,14 @@ abstract class UserInterface
         return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
     }
 
+    public (int, int) LocToScrLoc(int row, int col)
+    {
+        int rowOffset = Player.Loc.Row - PlayerScreenRow;
+        int colOffset = Player.Loc.Col - PlayerScreenCol;
+
+        return (row - rowOffset, col - colOffset);
+    }
+    
     void SetSqsOnScreen()
     {
         var cmpg = GameState!.Campaign;
@@ -690,6 +707,7 @@ abstract class UserInterface
         {
             for (int c = 0; c < ViewWidth; c++)
             {
+                // replace w/ LocToScrLoc?
                 int mapRow = r + rowOffset;
                 int mapCol = c + colOffset;
                 SqsOnScreen[r, c] = CalcSqrAtLoc(visible, rememberd, map, mapRow, mapCol, r, c);                

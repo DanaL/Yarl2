@@ -16,6 +16,42 @@ interface IAnimationListener
     void Update();
 }
 
+class HitAnimation(UserInterface ui) : IAnimationListener
+{
+    readonly UserInterface _ui = ui;
+    Dictionary<Loc, (DateTime TS, Colour C)> _hits = [];
+
+    public void Add(Loc loc, Colour colour)
+    {
+        // We have only one colour animation on a square at a time
+        _hits[loc] = (DateTime.Now, colour);
+    }
+
+    public void Update()
+    {
+        foreach (var loc in _hits.Keys)
+        {
+            var occ = _ui.GameState.ObjDB.Occupant(loc);
+            var dateDiff = (DateTime.Now - _hits[loc].TS).TotalMilliseconds;
+            if (dateDiff > 400)
+            {
+                _hits.Remove(loc);
+            }
+            else if (occ is not null)
+            {
+                var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+
+                if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
+                {
+                    Sqr sq = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _hits[loc].C};
+                    _ui.SqsOnScreen[scrR, scrC] = sq;
+                
+                }                
+            }
+        }
+    }
+}
+
 class TorchLightAnimationListener : IAnimationListener
 {
     Random _rng;

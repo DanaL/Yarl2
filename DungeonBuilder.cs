@@ -218,6 +218,8 @@ class DungeonBuilder
         }
     }
 
+    // I think this seed generated isolated rooms :O
+    //    -5586292
     public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng)
     {
         _dungeonID = id;

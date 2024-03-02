@@ -129,7 +129,7 @@ class Monster : Actor, IPerformer
     
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        return _behaviour.CalcAction(this, gameState, ui.Rng);
+        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
     }
 
     public void SetBehaviour(AIType aiType)
@@ -148,14 +148,14 @@ class Monster : Actor, IPerformer
 
 interface IBehaviour 
 { 
-    Action CalcAction(Actor actor, GameState gameState, Random rng);
+    Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
 }
 
 // Very basic idea for a wolf or such, which can move and attack the player
 // but doesn't have hands/can't open doors etc
 class BasicMonsterBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gs, Random rng)
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
     {
         if (actor.Status == ActorStatus.Idle) 
         {
@@ -193,7 +193,7 @@ class BasicMonsterBehaviour : IBehaviour
 // Basic goblins and such. These guys know how to open doors
 class BasicHumanoidBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gs, Random rng)
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
     {
         if (actor.Status == ActorStatus.Idle) 
         {            
@@ -230,7 +230,7 @@ class BasicHumanoidBehaviour : IBehaviour
 
 class VillagerBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gameState, Random rng)
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
         return new PassAction((IPerformer)actor);
     }
