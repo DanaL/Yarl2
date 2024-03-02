@@ -263,7 +263,7 @@ class MonsterFactory
 
         var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
                                             ColourSave.TextToColour(fields[2]));
-        Enum.TryParse(fields[10], out AIType ai);
+        Enum.TryParse(fields[11], out AIType ai);
         var m = new Monster()
         {
             Name = name,
@@ -285,7 +285,8 @@ class MonsterFactory
         m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
         int dmgRolls = int.Parse(fields[8]);
         m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
-
+        int xpValue = int.Parse(fields[10]);
+        m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
         m.Status = rng.NextDouble() < 0.9 ? ActorStatus.Active : ActorStatus.Idle;
         
         return m;

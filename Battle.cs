@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.PortableExecutable;
+
 namespace Yarl2;
 
 enum DamageType
@@ -69,6 +71,12 @@ class Battle
                 {
                     Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
                     msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
+
+                    if (attacker.ID == gs.Player.ID && target is Monster m)
+                    {
+                        int xpv = m.Stats[Attribute.XPValue].Curr;
+                        attacker.Stats[Attribute.XP].ChangeMax(xpv);
+                    }
                 }
 
                 gs.ActorKilled(target);

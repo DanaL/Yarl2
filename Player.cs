@@ -209,7 +209,7 @@ class Player : Actor, IPerformer, IItemHolder
         lines.Add("");
         lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
         lines.Add("");
-        lines.Add($"You have earned {Stats[Attribute.XP].Curr} XP.");
+        lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
         lines.Add("");
 
         if (Stats[Attribute.Depth].Max == 0)

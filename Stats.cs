@@ -28,7 +28,8 @@ enum Attribute
     Depth,
     AC, // used for monsters who have a simple AC
     DmgDie,
-    DmgRolls
+    DmgRolls,
+    XPValue
 }
 
 class Stat
