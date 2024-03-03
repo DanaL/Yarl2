@@ -25,7 +25,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public Campaign Campaign { get; set; } = c;
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> Performers { get; set; } = [];
-    public int Turn { get; set; }
+    public ulong Turn { get; set; }
     private int _currPerformer = 0;
     public DjikstraMap? DMap { get; private set; }
     public DjikstraMap? DMapDoors { get; private set; }

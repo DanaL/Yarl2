@@ -32,7 +32,9 @@ enum Attribute
     DmgRolls,
     XPValue,
     MeleeDmgBonus,
-    ACMod
+    ACMod,
+    Cleave,
+    Impale
 }
 
 class Stat

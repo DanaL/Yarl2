@@ -34,7 +34,9 @@ enum Verb
     BurnsOut,
     Kill,
     Etre,
-    Hear
+    Hear,
+    Cleave,
+    Impale
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -58,7 +60,9 @@ class MessageFactory
             Verb.BurnsOut => fp ? "burnt out" : "burns out",
             Verb.Kill => fp ? "kill" : "kills",
             Verb.Etre => fp ? "are" : "is",
-            Verb.Hear => fp ? "hear" : "hears"
+            Verb.Hear => fp ? "hear" : "hears",
+            Verb.Cleave => fp ? "cleave" : "cleaves",
+            Verb.Impale => fp ? "impale" : "impales"
         };
     }
 
@@ -76,7 +80,9 @@ class MessageFactory
         Verb.BurnsOut => "burnt out",
         Verb.Kill => "killed",
         Verb.Etre => "been",
-        Verb.Hear => "heard"
+        Verb.Hear => "heard",
+        Verb.Cleave => "cleaved",
+        Verb.Impale => "impaled"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

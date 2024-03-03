@@ -10,9 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Net.NetworkInformation;
-using System.Threading.Channels;
-
 namespace Yarl2;
 
 enum Boon
@@ -23,7 +20,9 @@ enum Boon
     PietyInc,
     BonusHP,
     MeleeDmgBonus,
-    ShieldOfFaith
+    ShieldOfFaith,
+    Cleave,
+    Impale
 }
 
 class PlayerCreator
@@ -217,8 +216,16 @@ class PlayerCreator
                 msg = "\n  a bonus to melee damage";
                 break;
             case Boon.ShieldOfFaith:
-                player.Features.Add(new Feature("shield of the faithful", Attribute.ACMod, 2));
+                player.Features.Add(new Feature("shield of the faithful", Attribute.ACMod, 2, ulong.MaxValue));
                 msg = "\n  Shield of the Faithful";
+                break;
+            case Boon.Cleave:
+                player.Features.Add(new Feature("cleave", Attribute.Cleave, 1, ulong.MaxValue));
+                msg = "\n  the ability to Cleave";
+                break;
+            case Boon.Impale:
+                player.Features.Add(new Feature("impale", Attribute.Impale, 1, ulong.MaxValue));
+                msg = "\n  the ability to Impale";
                 break;
         }
 
@@ -243,9 +250,13 @@ class PlayerCreator
                 boons.Add(Boon.StrInc);
             if (player.Stats[Attribute.Constitution].Max < 4)
                 boons.Add(Boon.ConInc);
-                        
+            if (!player.Features.Any(f => f.Attribute == Attribute.Cleave))
+                boons.Add(Boon.Cleave);
+            if (!player.Features.Any(f => f.Attribute == Attribute.Impale))
+                boons.Add(Boon.Impale);
+
             Boon boon = boons[rng.Next(boons.Count)];
-            msg +=  ApplyBoon(player, boon);
+            msg +=  ApplyBoon(player, boon);            
         }
 
         return msg;
@@ -274,9 +285,11 @@ class PlayerCreator
                 boons.Add(Boon.PietyInc);            
             if (!player.Features.Any(f => f.Name == "shield of the faithful"))
                 boons.Add(Boon.ShieldOfFaith);
+            if (!player.Features.Any(f => f.Attribute == Attribute.Impale))
+                boons.Add(Boon.Impale);
 
             Boon boon = boons[rng.Next(boons.Count)];
-            msg +=  ApplyBoon(player, boon);
+            msg +=  ApplyBoon(player, boon);            
         }
 
         return msg;

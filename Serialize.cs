@@ -43,7 +43,7 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, GameObjectDB, int, List<MsgHistory>) LoadSaveGame(string playerName)
+    public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -592,7 +592,7 @@ class GameObjDBSaver
 }
 
 record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
-                                GameObjDBSaver ItemDB, int Turn, List<MsgHistory> MessageHistory);
+                                GameObjDBSaver ItemDB, ulong Turn, List<MsgHistory> MessageHistory);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

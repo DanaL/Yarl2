@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.PortableExecutable;
-
 namespace Yarl2;
 
 enum DamageType
@@ -38,6 +36,92 @@ class Battle
         return (total, dmg.Type);
     }
 
+    static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, Random rng)
+    {
+        bool success = false;
+
+        // is there an opponent behind the primary target to impale?
+        int diffRow = (attacker.Loc.Row - target.Loc.Row) * 2;
+        int diffCol = (attacker.Loc.Col - target.Loc.Col) * 2;
+        Loc checkLoc = attacker.Loc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
+        Actor? occ = gs.ObjDB.Occupant(checkLoc);
+        if (occ is not null && attackRoll >= occ.AC)
+        {
+            ResolveHit(attacker, occ, gs, result, Verb.Impale, rng);
+            success = true;
+        }
+
+        return success;
+    }
+
+    static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, Random rng)
+    {
+        bool success = false;
+        // Check for any cleave targets Adj4 to main target and Adj to attacker
+        var adjToAtt = new HashSet<(int, int)>(Util.Adj8Sqs(attacker.Loc.Row, attacker.Loc.Col));
+        foreach (var sq in Util.Adj4Sqs(target.Loc.Row, target.Loc.Col))
+        {
+            var loc = target.Loc with { Row = sq.Item1, Col = sq.Item2 };
+            var occ = gs.ObjDB.Occupant(loc);
+            if (occ is not null && occ.ID != attacker.ID && adjToAtt.Contains((occ.Loc.Row, occ.Loc.Col)))
+            {
+                if (attackRoll >= occ.AC)
+                {
+                    ResolveHit(attacker, occ, gs, result, Verb.Cleave, rng);
+                    success = true;
+                }
+            }
+        }
+
+        return success;
+    }
+
+    static void ResolveHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
+    {
+        // Need to handle the case where the player isn't currently wielding a weapon...
+        var dmg = attacker.MeleeDamage()
+                            .Select(d => DamageRoll(d, rng));
+
+        int bonusDamage = 0; // this is separate from the damage types because, say,
+                                // a flaming sword that does 1d8 slashing, 1d6 fire has
+                                // two damage types but we only want to add the player's
+                                // strength modifier once
+        if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
+            bonusDamage += str.Curr;
+        if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
+            bonusDamage += mdb.Curr;
+        Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
+
+        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+
+        if (hpLeft < 1)
+        {
+            if (target is Player)
+            {
+                result.PlayerKilled = true;
+                msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);                    
+            }
+            else 
+            {
+                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
+                msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
+
+                if (attacker.ID == gs.Player.ID && target is Monster m)
+                {
+                    int xpv = m.Stats[Attribute.XPValue].Curr;
+                    //attacker.Stats[Attribute.XP].ChangeMax(xpv);
+                    attacker.Stats[Attribute.XP].ChangeMax(20);
+                }
+            }
+
+            gs.ActorKilled(target);
+        }
+
+        gs.UI.RegisterHitAnimation(target.Loc, Colours.FX_RED);
+
+        result.Messages.Add(msg);
+    }
+
     public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs, Random rng)
     {
         var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
@@ -45,53 +129,23 @@ class Battle
         int roll = AttackRoll(rng) + attacker.TotalMeleeAttackModifier();
         if (roll >= target.AC)
         {
-            // Need to handle the case where the player isn't currently wielding a weapon...
-            var dmg = attacker.MeleeDamage()
-                              .Select(d => DamageRoll(d, rng));
-
-            int bonusDamage = 0; // this is separate from the damage types because, say,
-                                 // a flaming sword that does 1d8 slashing, 1d6 fire has
-                                 // two damage types but we only want to add the player's
-                                 // strength modifier once
-            if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
-                bonusDamage += str.Curr;
-            if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
-                bonusDamage += mdb.Curr;
-            Message msg = MessageFactory.Phrase(attacker.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
-
-            int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
-
-            if (hpLeft < 1)
+            ResolveHit(attacker, target, gs, result, Verb.Hit, rng);
+            
+            // in the future I'll need to make sure the other targets aren't friendly/allies
+            bool specialAttack = false;
+            if (attacker.Features.Any(f => f.Attribute == Attribute.Cleave) && rng.NextDouble() < 0.3333)
             {
-                if (target is Player)
-                {
-                    result.PlayerKilled = true;
-                    msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);                    
-                }
-                else 
-                {
-                    Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
-                    msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
-
-                    if (attacker.ID == gs.Player.ID && target is Monster m)
-                    {
-                        int xpv = m.Stats[Attribute.XPValue].Curr;
-                        //attacker.Stats[Attribute.XP].ChangeMax(xpv);
-                        attacker.Stats[Attribute.XP].ChangeMax(20);
-                    }
-                }
-
-                gs.ActorKilled(target);
+                specialAttack = ResolveCleave(attacker, target, roll, gs, result, rng);
             }
-
-            gs.UI.RegisterHitAnimation(target.Loc, Colours.FX_RED);
-
-            result.Message = msg;
+            if (!specialAttack && attacker.Features.Any(f => f.Attribute == Attribute.Impale))
+            {
+                specialAttack = ResolveImpale(attacker, target, roll, gs, result, rng);
+            }
         }
         else
         {
             Message msg = MessageFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
-            result.Message = msg;
+            result.Messages.Add(msg);
         }
 
         return result;

@@ -319,25 +319,26 @@ abstract class UserInterface
         WriteLine("", row, col, width, Colours.WHITE);
     }
 
-    public void AlertPlayer(Message alert, string ifNotSeen) 
+    public void AlertPlayer(List<Message> alerts, string ifNotSeen) 
     {
         // TODO: only display messages that are within the player's
         // current FOV
-        if (string.IsNullOrEmpty(alert.Text) && string.IsNullOrEmpty(ifNotSeen))
+        if (alerts.Count == 0 && string.IsNullOrEmpty(ifNotSeen))
             return;
 
         // Eventually I need to handle sight vs sound messages better...
         // In the meantime, we have a few cases.
-        string msgText;
-        if (!GameState.RecentlySeen.Contains(alert.Loc) && alert.Sound)
-            msgText = alert.Text;
-        else if (GameState.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
-            msgText = alert.Text;
-        else if (!GameState.RecentlySeen.Contains(alert.Loc))
-            msgText = ifNotSeen;
-        else
-            return;
+        List<string> msgs = [];
+        foreach (var alert in alerts) {
+            if (!GameState.RecentlySeen.Contains(alert.Loc) && alert.Sound)
+                msgs.Add(alert.Text);
+            else if (GameState.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
+                msgs.Add(alert.Text);
+            else if (!GameState.RecentlySeen.Contains(alert.Loc))
+                msgs.Add(ifNotSeen);
+        }
 
+        string msgText = string.Join(' ', msgs).Trim();
         if (string.IsNullOrEmpty(msgText))
             return;
 
@@ -431,7 +432,7 @@ abstract class UserInterface
         }        
     }
 
-    public void SetupGameState(Campaign campaign, GameObjectDB itemDB, int currentTurn)
+    public void SetupGameState(Campaign campaign, GameObjectDB itemDB, ulong currentTurn)
     {
         GameState = new GameState(Player, campaign, _options, this)
         {
@@ -479,8 +480,8 @@ abstract class UserInterface
                     performer.Energy -= result.EnergyCost;
                 }
 
-                if (result.Message is not null)
-                    AlertPlayer(result.Message, result.MessageIfUnseen);
+                if (result.Messages.Count > 0)
+                    AlertPlayer(result.Messages, result.MessageIfUnseen);
 
                 if (result.PlayerKilled)
                 {
