@@ -752,17 +752,24 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
         // ExtinguishActions are performed on LightSourceTraits
         var src = (LightSourceTrait)_performer;
         Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
-        
+        Loc loc = item.Loc;
+
         if (item.ContainedBy > 0)
         {
-            IItemHolder owner = (IItemHolder) _gs.ObjDB.GetObj(item.ContainedBy);
-            if (owner.Inventory.ItemAt(item.Slot).ID == item.ID)
-                owner.Inventory.Remove(item.Slot, 1);
+            var owner = _gs.ObjDB.GetObj(item.ContainedBy);
+            if (owner is not null)
+            {
+                // I don't think owner should ever be null, barring a bug
+                // but this placates the warning in VS/VS Code
+                loc = owner.Loc;
+                ((IItemHolder)owner).Inventory.Remove(item.Slot, 1);
+            }
         }
         
         _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, (item).ID);
 
-        var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, item.Loc, _gs);
+        var cb = item.ContainedBy;
+        var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);
         return new ActionResult() { Successful = true, Message = msg, EnergyCost = 1.0 };
     }
 }

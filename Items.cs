@@ -224,7 +224,7 @@ class Inventory(ulong ownerID)
             Zorkmids += item.Count;
             return;
         }
-        
+
         // if the item is stackable, see if there's anything to stack it with
         if (item.Stackable)
         {
