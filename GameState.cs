@@ -164,6 +164,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         {
             Player.Stats[Attribute.HP].Change(1);
         }
+
+        PlayerCreator.CheckLevelUp(Player, UI, UI.Rng);
     }
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)

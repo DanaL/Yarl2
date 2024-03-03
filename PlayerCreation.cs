@@ -10,7 +10,20 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.NetworkInformation;
+using System.Threading.Channels;
+
 namespace Yarl2;
+
+enum Boon
+{    
+    StrInc,
+    ConInc,    
+    DexInc,
+    PietyInc,
+    BonusHP,
+    MeleeDmgBonus
+}
 
 class PlayerCreator
 {
@@ -46,7 +59,6 @@ class PlayerCreator
         // First, set the basic stats
         var stats = new Dictionary<Attribute, Stat>()
         {
-
             { Attribute.Strength, new Stat(StatRoll(rng)) },
             { Attribute.Constitution, new Stat(StatRoll(rng)) },
             { Attribute.Dexterity, new Stat(StatRoll(rng)) },
@@ -61,15 +73,16 @@ class PlayerCreator
         switch (charClass)
         {            
             case PlayerClass.OrcReaver:
-                roll = Util.StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
+                roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
                 hp = 15 + stats[Attribute.Constitution].Curr;
                 stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
+                stats.Add(Attribute.HitDie, new Stat(12));
                 break;
             case PlayerClass.DwarfStalwart:
                 // Should Stalwarts also be strength based?
-                roll = Util.StatRollToMod(6 + rng.Next(1, 7) + rng.Next(1, 7));
+                roll = Util.StatRollToMod(8 + rng.Next(1, 6) + rng.Next(1, 6));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
 
@@ -77,7 +90,8 @@ class PlayerCreator
                     stats[Attribute.Piety].SetMax(0);
 
                 hp = 10 + stats[Attribute.Constitution].Curr;
-                stats.Add(Attribute.MeleeAttackBonus, new Stat(2));                
+                stats.Add(Attribute.MeleeAttackBonus, new Stat(2));
+                stats.Add(Attribute.HitDie, new Stat(10));              
                 break;
         }
         
@@ -143,5 +157,158 @@ class PlayerCreator
         SetStartingGear(player, objDb, rng);
 
         return player;
+    }
+
+    static int LevelForXP(int xp)
+    {
+        if (xp < 20)
+            return 1;
+        else if (xp < 40)
+            return 2;
+        else if (xp < 80)
+            return 3;
+        else if (xp < 160)
+            return 4;
+        else
+            return 5;
+    }
+
+    static string ApplyBoon(Player player, Boon boon)
+    {
+        string msg = "";
+
+        switch (boon)
+        {
+            case Boon.StrInc:
+                player.Stats[Attribute.Strength].ChangeMax(1);
+                player.Stats[Attribute.Strength].Change(1);
+                msg = "\n  a Str increase";
+                break;
+            case Boon.ConInc:
+                player.Stats[Attribute.Constitution].ChangeMax(1);
+                player.Stats[Attribute.Constitution].Change(1);
+
+                // Con went up, so we increase max HP for levels earned so far
+                player.Stats[Attribute.HP].ChangeMax(player.Stats[Attribute.Level].Max);
+                
+                msg = "\n  a Con increase";
+                break;
+            case Boon.DexInc:
+                player.Stats[Attribute.Dexterity].ChangeMax(1);
+                player.Stats[Attribute.Dexterity].Change(1);
+                msg = "\n  a Dex increase";
+                break;
+            case Boon.PietyInc:
+                player.Stats[Attribute.Piety].ChangeMax(1);
+                player.Stats[Attribute.Piety].Change(1);
+                msg = "\n  a Piety increase";
+                break;
+            case Boon.BonusHP:
+                player.Stats[Attribute.HP].ChangeMax(5);
+                player.Stats[Attribute.HP].Change(5);
+                msg = "\n  +5 extra HP";
+                break;
+            case Boon.MeleeDmgBonus:
+                if (player.Stats.TryGetValue(Attribute.MeleeDmgBonus, out Stat? stat))
+                    stat.ChangeMax(2);
+                else
+                    player.Stats[Attribute.MeleeDmgBonus] = new Stat(2);
+                msg = "\n  a bonus to melee damage";
+                break;
+        }
+
+        return msg;
+    }
+
+    static string LevelUpReaver(Player player, int newLevel, Random rng)
+    {
+        string msg = "";
+
+        if (newLevel % 2 == 0)
+        {
+            int ab = player.Stats[Attribute.MeleeAttackBonus].Max;
+            player.Stats[Attribute.MeleeAttackBonus].SetMax(ab + 1);
+            msg += $"\n  Attack Bonus increases to {ab + 1}";
+        }
+        else
+        {
+            // eventually add 'feats' like Cleave, etc
+            List<Boon> boons = [ Boon.BonusHP, Boon.MeleeDmgBonus ];
+            if (player.Stats[Attribute.Strength].Max < 4)
+                boons.Add(Boon.StrInc);
+            if (player.Stats[Attribute.Constitution].Max < 4)
+                boons.Add(Boon.ConInc);
+                        
+            Boon boon = boons[rng.Next(boons.Count)];
+            msg +=  ApplyBoon(player, boon);
+        }
+
+        return msg;
+    }
+
+    static string LevelUpStalwart(Player player, int newLevel, Random rng)
+    {
+       string msg = "";
+
+        if (newLevel % 2 == 0)
+        {
+            int ab = player.Stats[Attribute.MeleeAttackBonus].Max;
+            player.Stats[Attribute.MeleeAttackBonus].SetMax(ab + 1);
+            msg += $"\n  Attack Bonus increases to {ab + 1}";
+        }
+        else
+        {
+            // Need more boons for Stalwarts. Probably Prayers once I have
+            // some implemented
+            List<Boon> boons = [];
+            if (player.Stats[Attribute.Strength].Max < 4)
+                boons.Add(Boon.StrInc);
+            if (player.Stats[Attribute.Constitution].Max < 4)
+                boons.Add(Boon.ConInc);
+            if (player.Stats[Attribute.Piety].Max < 4)
+                boons.Add(Boon.PietyInc);
+            
+            Boon boon = boons[rng.Next(boons.Count)];
+            msg +=  ApplyBoon(player, boon);
+        }
+
+        return msg;
+    }
+
+    // Am I going to have effects that reduce a player's XP/level? I dunno.
+    // Classic D&D stuff but those effects have most been dropped from the 
+    // modern rulesets
+    public static void CheckLevelUp(Player player, UserInterface ui, Random rng)
+    {
+        int level = LevelForXP(player.Stats[Attribute.XP].Max);
+        
+        if (level > player.Stats[Attribute.Level].Curr)
+        {
+            player.Stats[Attribute.Level].SetMax(level);
+
+            int hitDie = player.Stats[Attribute.HitDie].Max;
+            int newHP = rng.Next(hitDie) + 1 + player.Stats[Attribute.Constitution].Max;
+            if (newHP < 1)
+                newHP = 1;
+            player.Stats[Attribute.HP].ChangeMax(newHP);
+            player.Stats[Attribute.HP].Change(newHP);
+            
+            string msg = $"\nWelcome to level {level}!";
+            msg += $"\n  +{newHP} HP";
+
+            switch (player.CharClass)
+            {
+                case PlayerClass.OrcReaver:
+                    msg += LevelUpReaver(player, level, rng);                    
+                    break;
+                case PlayerClass.DwarfStalwart:
+                    msg += LevelUpStalwart(player, level, rng);
+                    break;
+            }
+
+            msg += "\n";
+
+            ui.Popup(msg, "Level up!");
+        }
     }
 }

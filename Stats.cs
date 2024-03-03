@@ -18,6 +18,7 @@ namespace Yarl2;
 enum Attribute 
 {
     HP,
+    HitDie,
     Strength,
     Dexterity,
     Constitution,
@@ -29,7 +30,8 @@ enum Attribute
     AC, // used for monsters who have a simple AC
     DmgDie,
     DmgRolls,
-    XPValue
+    XPValue,
+    MeleeDmgBonus
 }
 
 class Stat

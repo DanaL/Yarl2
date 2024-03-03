@@ -261,6 +261,8 @@ class Player : Actor, IPerformer, IItemHolder
                 }
             }
 
+            ui.ClosePopup();
+
             if (ch == 'h')
                 return new MoveAction(this, Loc.Move(0, -1), gameState, ui.Rng);
             else if (ch == 'j')

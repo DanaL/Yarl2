@@ -55,7 +55,8 @@ class Battle
                                  // strength modifier once
             if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
                 bonusDamage += str.Curr;
-
+            if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
+                bonusDamage += mdb.Curr;
             Message msg = MessageFactory.Phrase(attacker.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
 
             int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
@@ -75,7 +76,8 @@ class Battle
                     if (attacker.ID == gs.Player.ID && target is Monster m)
                     {
                         int xpv = m.Stats[Attribute.XPValue].Curr;
-                        attacker.Stats[Attribute.XP].ChangeMax(xpv);
+                        //attacker.Stats[Attribute.XP].ChangeMax(xpv);
+                        attacker.Stats[Attribute.XP].ChangeMax(20);
                     }
                 }
 
