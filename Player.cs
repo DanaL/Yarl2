@@ -62,6 +62,11 @@ class Player : Actor, IPerformer, IItemHolder
                                          .Sum();
                 }
             }
+            
+            ac += Features.Where(f => f.Attribute == Attribute.ACMod)
+                          .Select(f => f.Mod)
+                          .Sum();
+                          
             return ac + armour;
         }
     }

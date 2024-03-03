@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.CompilerServices;
 using Yarl2;
 
 namespace Yarl2;
@@ -44,12 +45,15 @@ enum AIType
     Village
 }
 
+record Feature(string Name, Attribute Attribute, int Mod);
+
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
 class Actor : GameObj
 {
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
+    public List<Feature> Features { get; set; } = [];
     public ActorStatus Status { get; set; }
 
     public Actor() { }

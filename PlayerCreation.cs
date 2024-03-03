@@ -22,7 +22,8 @@ enum Boon
     DexInc,
     PietyInc,
     BonusHP,
-    MeleeDmgBonus
+    MeleeDmgBonus,
+    ShieldOfFaith
 }
 
 class PlayerCreator
@@ -215,6 +216,10 @@ class PlayerCreator
                     player.Stats[Attribute.MeleeDmgBonus] = new Stat(2);
                 msg = "\n  a bonus to melee damage";
                 break;
+            case Boon.ShieldOfFaith:
+                player.Features.Add(new Feature("shield of the faithful", Attribute.ACMod, 2));
+                msg = "\n  Shield of the Faithful";
+                break;
         }
 
         return msg;
@@ -266,8 +271,10 @@ class PlayerCreator
             if (player.Stats[Attribute.Constitution].Max < 4)
                 boons.Add(Boon.ConInc);
             if (player.Stats[Attribute.Piety].Max < 4)
-                boons.Add(Boon.PietyInc);
-            
+                boons.Add(Boon.PietyInc);            
+            if (!player.Features.Any(f => f.Name == "shield of the faithful"))
+                boons.Add(Boon.ShieldOfFaith);
+
             Boon boon = boons[rng.Next(boons.Count)];
             msg +=  ApplyBoon(player, boon);
         }

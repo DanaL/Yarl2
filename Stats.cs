@@ -31,7 +31,8 @@ enum Attribute
     DmgDie,
     DmgRolls,
     XPValue,
-    MeleeDmgBonus
+    MeleeDmgBonus,
+    ACMod
 }
 
 class Stat
