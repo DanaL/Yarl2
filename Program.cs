@@ -15,7 +15,7 @@ var options = Options.LoadOptions("options.json");
 // return;
 
 int seed = DateTime.Now.GetHashCode();
-//seed = 544993503;
+seed = 601907053;
 Console.WriteLine($"Seed: {seed}");
 var rng = new Random(seed);
 

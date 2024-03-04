@@ -555,6 +555,9 @@ class TownBuilder
 
         // pick a random spot in the town square for the paths to converge on
         int j = rng.Next(Town.TownSquare.Count);
+        if (Town.TownSquare.Count == 0)
+            return;
+
         var centre = Town.TownSquare.ToList()[j];
 
         Dictionary<TileType, int> passable = [];
@@ -629,6 +632,29 @@ class TownBuilder
         }
     }
 
+    static int CountBlockedSqs(Map map, int startRow, int startCol)
+    {
+        int blocked = 0;
+        for (int r = startRow; r < startRow + TOWN_HEIGHT; r++)
+        {
+            for (int c = startCol; c < startCol + TOWN_WIDTH; c++)
+            {
+                switch (map.TileAt(r, c).Type) 
+                {
+                    case TileType.WorldBorder:
+                    case TileType.Mountain:
+                    case TileType.SnowPeak:
+                    case TileType.DeepWater:
+                    case TileType.Water:
+                        ++blocked;
+                        break;
+                }
+            }
+        }
+
+        return blocked;
+    }
+
     public Map DrawnTown(Map map, Random rng)
     {        
         int rows = 0, width = 0;
@@ -665,9 +691,22 @@ class TownBuilder
 
         int wildernessSize = map.Height;
 
-        // Pick starting co-ordinates that are in the centre-ish area of the map
-        int startRow = rng.Next(wildernessSize / 4, wildernessSize / 2);
-        int startCol = rng.Next(wildernessSize / 4, wildernessSize / 2);
+        // We want to find a spot without too many water or mountain squares.
+        // I probably need to be concerned about infinite loops, so probably if
+        // have several tries I can't find an acceptable spot, I probably want to
+        // bail out and generate a new wilderness map.
+        int startRow, startCol;
+        int acceptableBlocked = (int) ((TOWN_WIDTH * TOWN_HEIGHT) * 0.15);
+        while (true)
+        {
+            // Pick starting co-ordinates that are in the centre-ish area of the map
+            startRow = rng.Next(wildernessSize / 4, wildernessSize / 2);
+            startCol = rng.Next(wildernessSize / 4, wildernessSize / 2);
+
+            int blockedSqs = CountBlockedSqs(map, startRow, startCol);
+            if (blockedSqs <= acceptableBlocked)
+                break;
+        }
 
         PlaceBuildings(map, startRow, startCol, rng);
         

@@ -46,7 +46,7 @@ class PreGameHandler(UserInterface ui)
 {
     private UserInterface _ui { get; set; } = ui;
    
-    (Campaign, int, int) BeginCampaign(Random rng, GameObjectDB objDb)
+    (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
     {        
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");        
@@ -129,7 +129,7 @@ class PreGameHandler(UserInterface ui)
         else
         {
             var objDb = new GameObjectDB();
-            var (c, startRow, startCol) = BeginCampaign(rng, objDb);
+            var (c, startRow, startCol) = BeginNewCampaign(rng, objDb);
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
             _ui.ClearLongMessage();
