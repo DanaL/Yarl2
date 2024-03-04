@@ -132,8 +132,10 @@ class Battle
             ResolveHit(attacker, target, gs, result, Verb.Hit, rng);
             
             // in the future I'll need to make sure the other targets aren't friendly/allies
+            // should I limit Impale and Cleave to weapon types? Maybe Slashing and Bludgeoning
+            // can Cleave and Piercing can Impale? 
             bool specialAttack = false;
-            if (attacker.Features.Any(f => f.Attribute == Attribute.Cleave) && rng.NextDouble() < 0.3333)
+            if (attacker.Features.Any(f => f.Attribute == Attribute.Cleave)) // && rng.NextDouble() < 0.3333)
             {
                 specialAttack = ResolveCleave(attacker, target, roll, gs, result, rng);
             }

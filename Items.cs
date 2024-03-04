@@ -17,7 +17,8 @@ enum ItemType
     Armour,
     Zorkmid,
     Tool,
-    Document
+    Document,
+    Potion
 }
 
 class Item : GameObj
@@ -28,7 +29,7 @@ class Item : GameObj
     public bool Equiped { get; set; } = false;
     public int Count { get; set; } = 1;
     public ulong ContainedBy { get; set; } = 0;
-
+    public bool Consumable { get; set; } = false;
     public List<string> Adjectives { get; set; } = [];
     public List<ObjTrait> Traits { get; set; } = [];
 
@@ -149,6 +150,12 @@ class ItemFactory
             case "zorkmids":
                 item = new Item() { Name = "zorkmid", Type = ItemType.Zorkmid, Stackable = true,
                                     Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE) };
+                break;
+            case "potion of healing":
+                item = new Item() { Name = "potion of healing", Type = ItemType.Potion, Stackable = true,
+                                    Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE),
+                                    Consumable = true };
+                item.Traits.Add(new MinorHealTrait());
                 break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");

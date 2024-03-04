@@ -36,7 +36,9 @@ enum Verb
     Etre,
     Hear,
     Cleave,
-    Impale
+    Impale,
+    Drink,
+    Heal
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -62,7 +64,9 @@ class MessageFactory
             Verb.Etre => fp ? "are" : "is",
             Verb.Hear => fp ? "hear" : "hears",
             Verb.Cleave => fp ? "cleave" : "cleaves",
-            Verb.Impale => fp ? "impale" : "impales"
+            Verb.Impale => fp ? "impale" : "impales",
+            Verb.Drink => fp ? "drink" : "drinks",
+            Verb.Heal => fp ? "heal" : "heals"
         };
     }
 
@@ -82,7 +86,9 @@ class MessageFactory
         Verb.Etre => "been",
         Verb.Hear => "heard",
         Verb.Cleave => "cleaved",
-        Verb.Impale => "impaled"
+        Verb.Impale => "impaled",
+        Verb.Drink => "drunk",
+        Verb.Heal => "healed"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

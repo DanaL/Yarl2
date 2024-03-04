@@ -18,7 +18,7 @@ interface IReadable
 
 interface IUSeable
 {
-    (bool, string) Use(GameState gs, int row, int col);
+    (bool, string) Use(Actor user, GameState gs, int row, int col);
 }
 
 abstract class ObjTrait 
@@ -27,6 +27,27 @@ abstract class ObjTrait
     public abstract ObjTrait Duplicate(Item container);
     public abstract string AsText();
     public abstract bool Acitve { get; }
+}
+
+class MinorHealTrait : ObjTrait, IUSeable
+{
+    public override bool Acitve => throw new NotImplementedException();
+
+    public override string AsText() => "MinorHealTrait";
+    public override string Desc() => "";
+    public override ObjTrait Duplicate(Item container)  => new MinorHealTrait();
+
+    public (bool, string) Use(Actor user, GameState gs, int row, int col)
+    {        
+        var hp = 0;
+        for (int j = 0; j < 4; j++)
+            hp += gs.UI.Rng.Next(4) + 1;
+        user.Stats[Attribute.HP].Change(hp);
+        var msg = MessageFactory.Phrase(user.ID, Verb.Etre, Verb.Heal, false, user.Loc, gs);
+        var txt = msg.Text[..^1] + $" for {hp} HP.";
+        
+        return (true, txt);
+    }
 }
 
 // Should split the traits into Attack traits and Damage traits? Maybe?
@@ -134,7 +155,7 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
         };
     }
 
-    public (bool, string) Use(GameState gs, int row, int col)
+    public (bool, string) Use(Actor _, GameState gs, int row, int col)
     {
         Item item = gs.ObjDB.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);

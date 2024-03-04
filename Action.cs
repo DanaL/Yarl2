@@ -423,15 +423,20 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 toUse = item.Duplicate(_gameState);
                 toUse.Count = 1;
                 toUse.Stackable = false;
-                ((IItemHolder)_actor).Inventory.Add(toUse, _actor.ID);                
+                if (!toUse.Consumable)
+                    ((IItemHolder)_actor).Inventory.Add(toUse, _actor.ID);                
                 useableTraits = toUse.Traits.Where(t => t is IUSeable);
+            }
+            else if (item.Consumable)
+            {
+                ((IItemHolder)_actor).Inventory.Remove(Choice, 0);
             }
 
             bool success = false;
             string msg = "";
             foreach (IUSeable trait in useableTraits)
             {
-                (success, msg) = trait.Use(_gameState, _actor.Loc.Row, _actor.Loc.Col);
+                (success, msg) = trait.Use(_actor, _gameState, _actor.Loc.Row, _actor.Loc.Col);
             }
             var alert = MessageFactory.Phrase(msg, _actor.Loc);
             return new ActionResult() { Successful = success, Messages = [alert], EnergyCost = 1.0 };

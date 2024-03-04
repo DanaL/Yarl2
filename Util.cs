@@ -249,11 +249,21 @@ static class StringUtils
 
     public static string Pluralize(this string s)
     {
-        // TODO: handle things like "Potion of Healing" etc
-        if (s.EndsWith("s") || s.EndsWith("x") || s.EndsWith("ch"))
+        if (s.Contains(" of "))
+        {
+            int space = s.IndexOf(' ');
+            s = s[..space] + 's' + s[space..];
+
+            return s;
+        }
+        else if (s.EndsWith("s") || s.EndsWith("x") || s.EndsWith("ch"))
+        {
             return s + "es";
+        }
         else
+        {
             return s + "s";
+        }
     }
 
     public static string Capitalize(this string s)
