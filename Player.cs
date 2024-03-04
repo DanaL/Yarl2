@@ -133,6 +133,13 @@ class Player : Actor, IPerformer, IItemHolder
         return sources;
     }
     
+    static string ItemMenuDesc(Item item)
+    {
+        return item.Count == 1
+            ? item.FullName.IndefArticle()
+            : $"{item.Count} {item.FullName.Pluralize()}";        
+    }
+
     void ShowInventory(UserInterface ui, string title, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots();
@@ -146,13 +153,8 @@ class Player : Actor, IPerformer, IItemHolder
         foreach (var s in slots)
         {
             var item = Inventory.ItemAt(s);
-
-            string desc;
-            if (item.Count == 1)
-                desc = item.FullName.IndefArticle();
-            else
-                desc = $"{item.Count} {item.FullName.Pluralize()}";
-
+            string desc = ItemMenuDesc(item);
+            
             if (item.Equiped)
             {
                 if (item.Type == ItemType.Weapon)
@@ -185,7 +187,7 @@ class Player : Actor, IPerformer, IItemHolder
         foreach (var item in items)
         {
             options.Add(slot);
-            var desc = item.FullName.IndefArticle();
+            string desc = ItemMenuDesc(item);
             lines.Add($"{slot++}) {desc}");
         }
         ui.ShowDropDown(lines);
