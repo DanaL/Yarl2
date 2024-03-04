@@ -22,7 +22,8 @@ enum Boon
     MeleeDmgBonus,
     ShieldOfFaith,
     Cleave,
-    Impale
+    Impale,
+    Rage
 }
 
 class PlayerCreator
@@ -231,6 +232,10 @@ class PlayerCreator
                 player.Features.Add(new Feature("impale", Attribute.Impale, 1, ulong.MaxValue));
                 msg = "\n  the ability to Impale";
                 break;
+            case Boon.Rage:
+                player.Features.Add(new Feature("rage", Attribute.Rage, 1, ulong.MaxValue));
+                msg = "\n  you may now Rage";
+                break;
         }
 
         return msg;
@@ -260,7 +265,8 @@ class PlayerCreator
                 boons.Add(Boon.Impale);
 
             Boon boon = boons[rng.Next(boons.Count)];
-            msg +=  ApplyBoon(player, boon);            
+            //msg +=  ApplyBoon(player, boon);
+            msg += ApplyBoon(player, Boon.Rage);
         }
 
         return msg;

@@ -34,7 +34,8 @@ enum Attribute
     MeleeDmgBonus,
     ACMod,
     Cleave,
-    Impale
+    Impale,
+    Rage
 }
 
 class Stat

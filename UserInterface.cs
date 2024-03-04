@@ -290,7 +290,7 @@ abstract class UserInterface
         if (weapon != null) 
         {
             List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
-            weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));                
+            weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));
             WriteLine(weaponLine, row++, ViewWidth, SideBarWidth);
         }
 
@@ -299,6 +299,13 @@ abstract class UserInterface
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
 
+        // Write statuses
+        if (Player.Features.Any(f => f.Attribute == Attribute.Rage) && currHP < maxHP / 2)
+        {
+            List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
+            WriteLine(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
+        }
+            
         if (GameState.CurrDungeon == 0)
             WriteLine("| Outside", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
         else

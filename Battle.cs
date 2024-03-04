@@ -80,7 +80,7 @@ class Battle
     {
         // Need to handle the case where the player isn't currently wielding a weapon...
         var dmg = attacker.MeleeDamage()
-                            .Select(d => DamageRoll(d, rng));
+                          .Select(d => DamageRoll(d, rng));
 
         int bonusDamage = 0; // this is separate from the damage types because, say,
                                 // a flaming sword that does 1d8 slashing, 1d6 fire has
@@ -90,6 +90,14 @@ class Battle
             bonusDamage += str.Curr;
         if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
+        if (attacker.Features.Any(f => f.Attribute == Attribute.Rage))
+        {
+            // if an attacker can rage and their HP is less than half max, they do extra dmg
+            int currHP = attacker.Stats[Attribute.HP].Curr;
+            int maxHP = attacker.Stats[Attribute.HP].Max;
+            if (currHP < maxHP / 2)
+                bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
+        }
         Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
 
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
@@ -133,7 +141,7 @@ class Battle
             
             // in the future I'll need to make sure the other targets aren't friendly/allies
             // should I limit Impale and Cleave to weapon types? Maybe Slashing and Bludgeoning
-            // can Cleave and Piercing can Impale? 
+            // can Cleave and Piercing can Impale?            
             bool specialAttack = false;
             if (attacker.Features.Any(f => f.Attribute == Attribute.Cleave)) // && rng.NextDouble() < 0.3333)
             {
