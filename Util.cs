@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Yarl2;
@@ -85,68 +86,34 @@ partial class Util
 
     public static int Distance(Loc a, Loc b) => Distance(a.Row, a.Col, b.Row, b.Col);
 
-    // Bresenham straight out of my old Scientific Computing textbook
     public static List<(int, int)> Bresenham(int r0, int c0, int r1, int c1)
     {
         List<(int, int)> pts = [];
-        int error = 0;
-        int stepR, stepC;
-        int deltaC = c1 - c0;
-        int r = r0;
-        int c = c0;
+        int dr = Math.Abs(r0 - r1);
+        int dc = Math.Abs(c0 - c1);
+        int sr = r0 < r1 ? 1 : -1;
+        int sc = c0 < c1 ? 1 : -1;
+        int err = (dc > dr ? dc : -dr) / 2;
+        int e2;
 
-        if (deltaC < 0)
+        for ( ; ; )
         {
-            deltaC = -deltaC;
-            stepC = -1;
-        }
-        else
-        {
-            stepC = 1;
-        }
-
-        int deltaR = r1 - r0;
-        if (deltaR < 0)
-        {
-            deltaR = -deltaR;
-            stepR = -1;
-        }
-        else
-        {
-            stepR = 1;
-        }
-
-        if (deltaR < deltaC)
-        {
-            int criterion = deltaC / 2;
-            while (c != c1 + stepC)
+            pts.Add((r0, c0));
+            if (r0 == r1 && c0 == c1)
+                break;
+            e2 = err;
+            if (e2 > -dc)
             {
-                pts.Add((r, c));
-                c += stepC;
-                error += deltaR;
-                if (error > criterion)
-                {
-                    error -= deltaC;
-                    r += stepR;
-                }
+                err -= dr;
+                c0 += sc;
+            }
+            if (e2 < dr)
+            {
+                err += dc;
+                r0 += sr;
             }
         }
-        else
-        {
-            int criterion = deltaR / 2;
-            while (r != r1 + stepR)
-            {
-                pts.Add((r, c));
-                r += stepR;
-                error += deltaC;
-                if (error > criterion)
-                {
-                    error -= deltaR;
-                    c += stepC;
-                }
-            }
-        }
-
+                
         return pts;
     }
 
