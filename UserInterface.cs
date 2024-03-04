@@ -434,6 +434,8 @@ abstract class UserInterface
                 return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, '&') : new Sqr(Colours.GREY, Colours.BLACK, '&');
             case TileType.Landmark:
                 return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '_') : new Sqr(Colours.GREY, Colours.BLACK, '_');
+            case TileType.Chasm:
+                return lit ? new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237');
             default:
                 return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
         }        
@@ -646,6 +648,24 @@ abstract class UserInterface
         if (isVisible && map.HasEffect(TerrainFlags.Lit, mapRow, mapCol))
         {
             Tile tile = map.TileAt(mapRow, mapCol);
+            Sqr? sqBelow = null;
+            if (tile.Type == TileType.Chasm) 
+            {
+                Loc below = loc with { Level = GameState.CurrLevel + 1 };
+                Glyph glyphBelow = GameState.ObjDB.GlyphAt(below);
+                char ch;
+                if (glyphBelow != GameObjectDB.EMPTY)
+                {
+                    ch = glyphBelow.Ch;
+                }
+                else
+                {
+                    var belowTile = TileToSqr(GameState.CurrentDungeon.LevelMaps[GameState.CurrLevel + 1].TileAt(mapRow, mapCol), false);
+                    ch = belowTile.Ch;
+                }
+                sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);                
+            }
+
             Sqr memory = TileToSqr(tile, false);
 
             GameState.RecentlySeen.Add(loc);
@@ -655,6 +675,10 @@ abstract class UserInterface
             if (ZLayer[scrRow, scrCol].Type != TileType.Unknown) 
             {
                 return TileToSqr(ZLayer[scrRow, scrCol], true);
+            }
+            else if (sqBelow != null)
+            {
+                return sqBelow;
             }
             else if (glyph != GameObjectDB.EMPTY) 
             {

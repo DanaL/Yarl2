@@ -235,6 +235,29 @@ class DungeonBuilder
 
         SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
+        var chasmTemplate = CACave.GetCave(15, 15, rng);
+        // temp draw a chasm around the down stairs on level 1
+        for (int r = 0; r < h; r++)
+        {
+            for (int c = 0; c < w; c++)
+            {
+                if (levels[0].TileAt(r, c).Type == TileType.Downstairs)
+                {
+                    for (int cr = 0; cr < 15; cr++)
+                    {
+                        for (int cc = 0; cc < 15; cc++)
+                        {
+                            bool chasm = chasmTemplate[cr, cc];
+                            if ((cr == 5 && cc == 5) || !chasm) continue;                            
+                            var sq = (r + cr - 7, c + cc - 7);
+                            if (levels[0].InBounds(sq))
+                                levels[0].SetTile(sq, TileFactory.Get(TileType.Chasm));
+                        }
+                    }
+                }
+            }
+        }
+
         DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
         return dungeon;

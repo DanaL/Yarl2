@@ -52,7 +52,8 @@ enum TileType
     Well,
     Bridge,
     Statue,
-    Landmark
+    Landmark,
+    Chasm
 }
 
 abstract class Tile(TileType type)
@@ -189,6 +190,7 @@ class TileFactory
     private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
     private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
     private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true);
+    private static readonly Tile Chasm = new BasicTile(TileType.Chasm, true, false);
 
     public static Tile Get(TileType type) => type switch
     {
@@ -216,11 +218,12 @@ class TileFactory
         TileType.Well => Well,
         TileType.Bridge => Bridge,
         TileType.Statue => Statue,
+        TileType.Chasm => Chasm,
         _ => Unknown
     };
 }
 
-internal class Map : ICloneable
+class Map : ICloneable
 {
     public readonly int Width;
     public readonly int Height;
@@ -441,5 +444,71 @@ internal class Map : ICloneable
             temp.Tiles = (Tile[])Tiles.Clone();
 
         return temp;
+    }
+}
+
+class CACave
+{
+    static bool[,] Iteration(bool[,] map, int height, int width)
+    {
+        var next = new bool[height, width];
+
+        for (int r = 0; r < height; r++)
+        {
+            for (int c = 0; c < width; c++)
+            {
+                if (r == 0 || r == height - 1 || c == 0 || c == width - 1)
+                {
+                    next[r, c] = false;
+                }
+                else
+                {
+                    int adj = !map[r, c] ? 1 : 0;
+                    foreach (var sq in Util.Adj8Sqs(r, c))
+                    {
+                        if (!map[sq.Item1, sq.Item2])
+                            ++adj;
+                    }
+
+                    next[r, c] = adj < 5;
+                }
+            }
+        }
+
+        return next;
+    }
+
+    static void Dump(bool[,] map, int height, int width)
+    {
+        for (int r = 0; r < height; r++)
+        {
+            for (int c = 0; c < width; c++)
+            {
+                Console.Write(map[r, c] ? '.' : '#');
+            }
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+    }
+
+    public static bool[,] GetCave(int height,  int width, Random rng)
+    {
+        var template = new bool[height, width];
+        
+        for (int r = 0; r < height; r++)
+        {
+            for (int c = 0; c < width; c++)
+            {
+                template[r, c] = rng.NextDouble() > 0.45;
+            }
+        }
+        
+        for (int j = 0; j < 4; j++)
+        {
+            template = Iteration(template, height, width);
+            
+        }
+
+        return template;
     }
 }
