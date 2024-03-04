@@ -190,7 +190,7 @@ class TileFactory
     private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
     private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
     private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true);
-    private static readonly Tile Chasm = new BasicTile(TileType.Chasm, true, false);
+    private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false);
 
     public static Tile Get(TileType type) => type switch
     {

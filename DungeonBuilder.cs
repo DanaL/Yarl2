@@ -248,9 +248,9 @@ class DungeonBuilder
                         for (int cc = 0; cc < 15; cc++)
                         {
                             bool chasm = chasmTemplate[cr, cc];
-                            if ((cr == 5 && cc == 5) || !chasm) continue;                            
+                            if ((cr == 7 && cc == 7) || !chasm) continue;                            
                             var sq = (r + cr - 7, c + cc - 7);
-                            if (levels[0].InBounds(sq))
+                            if (levels[0].InBounds(sq) && levels[1].TileAt(sq).Type != TileType.DungeonWall)
                                 levels[0].SetTile(sq, TileFactory.Get(TileType.Chasm));
                         }
                     }

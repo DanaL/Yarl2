@@ -271,6 +271,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         {
             TileType.DeepWater => "The water seems deep and cold.",
             TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
+            TileType.Chasm => "Do you really want to jump into the chasm?",
             _ => "You cannot go that way!"
         }; ;
     }
