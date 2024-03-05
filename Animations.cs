@@ -16,6 +16,76 @@ interface IAnimationListener
     void Update();
 }
 
+class BarkAnimation(UserInterface ui) : IAnimationListener
+{
+    private const int DISPLAY_TIME_MS = 2500;
+    readonly UserInterface _ui = ui;
+    List<(Actor, string, DateTime)> _voiceLines = [];
+
+    public void Add(Actor speaker, string message)
+    {
+        _voiceLines.Add((speaker, message, DateTime.Now));
+    }
+
+    // Need to actually calculate where to place the bark if the
+    // speaker is near an edge of the screen/
+    // screenRow and screenCol are the speaker's row/col
+    private void RenderLine(int screenRow, int screenCol, string message)
+    {
+        int pointerCol = screenCol + 1;
+        int row = screenRow + (screenRow < 2 ? 1 : -1);
+        int row2 = screenRow + (screenRow < 2 ? 2 : -2);
+
+        int col = screenCol - screenCol / 3;
+        char pointer = '/';
+        if (col == screenCol) 
+        {
+            pointer = '|';
+            pointerCol = screenCol;
+        }
+        if (screenCol - message.Length / 3 < 0)
+        {
+            col = 0;
+        }
+        else if (screenCol + (message.Length / 3) * 2 > _ui.SqsOnScreen.GetLength(1))
+        {
+            col = _ui.SqsOnScreen.GetLength(1) - message.Length - 1;
+            pointer = '\\';
+            pointerCol = screenCol - 1;
+        }
+                
+        // This is a dorky way to do this, but doesn't require me writing new UI functions :P
+        _ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);        
+        foreach (char ch in message) 
+        {
+            _ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
+        }
+        
+    }
+
+    public void Update()
+    {
+        _voiceLines = _voiceLines.Where(vl => (DateTime.Now - vl.Item3).TotalMilliseconds < DISPLAY_TIME_MS)
+                                 .ToList();          
+        foreach (var (speaker, msg, ts) in _voiceLines) 
+        { 
+            if ((DateTime.Now - ts).TotalMilliseconds < DISPLAY_TIME_MS)
+            {
+                var gs = ui.GameState;
+                var loc = speaker.Loc;
+                if (loc.DungeonID == gs.CurrDungeon && loc.Level == gs.CurrLevel)
+                {
+                    var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+                    if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
+                    {
+                        RenderLine(scrR, scrC, msg);
+                    }
+                }
+            }
+        }
+    }
+}
+
 class HitAnimation(UserInterface ui) : IAnimationListener
 {
     readonly UserInterface _ui = ui;

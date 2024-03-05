@@ -87,6 +87,7 @@ abstract class UserInterface
         _animationListeners.Add(new CloudAnimationListener(this, Rng));
         _animationListeners.Add(new TorchLightAnimationListener(this, Rng));
         _animationListeners.Add(new HitAnimation(this));
+        _animationListeners.Add(new BarkAnimation(this));
     }
 
     public virtual void TitleScreen()
@@ -134,6 +135,13 @@ abstract class UserInterface
         _popupTitle = title;
         OpeningPopUp = true;
         ClosingPopUp = false;
+    }
+
+    public void RegisterBark(Actor speaker, string voiceLine)
+    {
+        var barkAnim = (BarkAnimation)_animationListeners.Where(v => v is BarkAnimation)
+                                                                 .First();
+        barkAnim.Add(speaker, voiceLine);
     }
 
     public void RegisterHitAnimation(Loc loc, Colour colour)
@@ -262,7 +270,7 @@ abstract class UserInterface
         WriteLine(border, row, col, width, Colours.WHITE);
     }
 
-    protected void WriteLine(List<(Colour, string)> pieces, int lineNum, int col, int width)
+    public void WriteText(List<(Colour, string)> pieces, int lineNum, int col, int width)
     {
         foreach (var piece in pieces)
         {
@@ -281,7 +289,7 @@ abstract class UserInterface
         WriteLine($"| AC: {Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
         List<(Colour, string)> zorkmidLine = [ (Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {Player.Inventory.Zorkmids}")];
-        WriteLine(zorkmidLine, row++, ViewWidth, SideBarWidth);
+        WriteText(zorkmidLine, row++, ViewWidth, SideBarWidth);
 
         string blank = "|".PadRight(ViewWidth);
         WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
@@ -291,7 +299,7 @@ abstract class UserInterface
         {
             List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
             weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));
-            WriteLine(weaponLine, row++, ViewWidth, SideBarWidth);
+            WriteText(weaponLine, row++, ViewWidth, SideBarWidth);
         }
 
         for (; row < ViewHeight - 2; row++)
@@ -303,7 +311,7 @@ abstract class UserInterface
         if (Player.Features.Any(f => f.Attribute == Attribute.Rage) && currHP < maxHP / 2)
         {
             List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
-            WriteLine(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
+            WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
         }
             
         if (GameState.CurrDungeon == 0)

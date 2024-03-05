@@ -29,6 +29,9 @@ class Village
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
         var sq = sqs[rng.Next(sqs.Count)];
         cleric.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        cleric.VillagerType = VillagerType.Priest;
+        cleric.SetBehaviour(new PriestBehaviour());
+
         objDb.Add(cleric);
         objDb.SetToLoc(cleric.Loc, cleric);
     }

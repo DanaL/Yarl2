@@ -58,6 +58,8 @@ class Actor : GameObj
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public List<Feature> Features { get; set; } = [];
     public ActorStatus Status { get; set; }
+    
+    protected IBehaviour _behaviour;
 
     public Actor() { }
 
@@ -81,7 +83,9 @@ class Actor : GameObj
         Stats[Attribute.HP].Curr -= total;
 
         return Stats[Attribute.HP].Curr;
-    }    
+    }
+
+    public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
@@ -94,8 +98,6 @@ class Monster : Actor, IPerformer
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; }
     public bool RemoveFromQueue { get; set; }
-
-    private IBehaviour _behaviour;
 
     public Monster() 
     {
@@ -154,25 +156,49 @@ class Monster : Actor, IPerformer
     }
 }
 
+// I don't know if I'll actually need this? Maybe the 'type' of villager
+// can just be determined by what behaviour is assigned to them?
+enum VillagerType { Peasant, Priest }
 class Villager : Actor, IPerformer
 {
     public double Energy { get; set; } = 0.0;
     public double Recovery { get; set; } = 1.0;
     public bool RemoveFromQueue { get; set; }
-    
+    public VillagerType VillagerType { get; set; }
+
     public override string FullName => Name.Capitalize();  
 
-    public Villager() => Glyph = new Glyph('@', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE);
+    public Villager() => Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE);
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        return new PassAction(this);
+        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);        
     }
 }
 
 interface IBehaviour 
 { 
     Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
+}
+
+class PriestBehaviour : IBehaviour
+{
+    DateTime _lastIntonation = new DateTime(1900, 1, 1);
+
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    {
+        if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
+        {
+            ui.RegisterBark(actor, "Praise be to Huntokar!");
+            _lastIntonation = DateTime.Now;
+
+            return new PassAction((IPerformer)actor);
+        }
+        else
+        {
+            return new PassAction((IPerformer)actor);
+        }
+    }
 }
 
 // Very basic idea for a wolf or such, which can move and attack the player
