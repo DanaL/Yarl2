@@ -64,6 +64,21 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
     public bool InWilderness => CurrDungeon == 0;
 
+    public bool LOSBetween(Loc a, Loc b)
+    {
+        if (a.DungeonID != b.DungeonID || a.Level != b.Level)
+            return false;
+
+        var map = Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
+        foreach (var sq in Util.Bresenham(a.Row, a.Col, b.Row, b.Col))
+        {
+            if (!map.InBounds(sq) || map.TileAt(sq).Opaque())
+                return false;
+        }
+
+        return true;
+    }
+
     public void ItemDropped(Item item, int row, int col)
     {
         var loc = new Loc(CurrDungeon, CurrLevel, row, col);
