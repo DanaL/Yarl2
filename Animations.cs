@@ -11,20 +11,26 @@
 
 namespace Yarl2;
 
-interface IAnimationListener
+abstract class Animation
 {
-    void Update();
+    public DateTime Expiry { get; protected set; }
+    public abstract void Update();
 }
 
-class BarkAnimation(UserInterface ui) : IAnimationListener
-{
-    private const int DISPLAY_TIME_MS = 2500;
-    readonly UserInterface _ui = ui;
-    List<(Actor, string, DateTime)> _voiceLines = [];
 
-    public void Add(Actor speaker, string message)
+class BarkAnimation : Animation
+{    
+    readonly UserInterface _ui;
+    Actor _actor;
+    string _bark;
+
+    // Duration in milliseconds
+    public BarkAnimation(UserInterface ui, int duration, Actor actor, string bark)
     {
-        _voiceLines.Add((speaker, message, DateTime.Now));
+        _ui = ui;
+        Expiry = DateTime.Now.AddMilliseconds(duration);
+        _actor = actor;
+        _bark = bark;
     }
 
     // Need to actually calculate where to place the bark if the
@@ -59,70 +65,57 @@ class BarkAnimation(UserInterface ui) : IAnimationListener
         foreach (char ch in message) 
         {
             _ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
-        }
-        
+        }        
     }
 
-    public void Update()
-    {
-        _voiceLines = _voiceLines.Where(vl => (DateTime.Now - vl.Item3).TotalMilliseconds < DISPLAY_TIME_MS)
-                                 .ToList();          
-        foreach (var (speaker, msg, ts) in _voiceLines) 
-        { 
-            if ((DateTime.Now - ts).TotalMilliseconds < DISPLAY_TIME_MS)
-            {
-                var gs = ui.GameState;
-                var loc = speaker.Loc;
-                if (loc.DungeonID == gs.CurrDungeon && loc.Level == gs.CurrLevel)
-                {
-                    var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
-                    if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
-                    {
-                        RenderLine(scrR, scrC, msg);
-                    }
-                }
-            }
-        }
-    }
-}
-
-class HitAnimation(UserInterface ui) : IAnimationListener
-{
-    readonly UserInterface _ui = ui;
-    Dictionary<Loc, (DateTime TS, Colour C)> _hits = [];
-
-    public void Add(Loc loc, Colour colour)
-    {
-        // We have only one colour animation on a square at a time
-        _hits[loc] = (DateTime.Now, colour);
-    }
-
-    public void Update()
-    {
-        foreach (var loc in _hits.Keys)
+    public override void Update()
+    {        
+        var gs = _ui.GameState;
+        var loc = _actor.Loc;
+        if (loc.DungeonID == gs.CurrDungeon && loc.Level == gs.CurrLevel)
         {
-            var occ = _ui.GameState.ObjDB.Occupant(loc);
-            var dateDiff = (DateTime.Now - _hits[loc].TS).TotalMilliseconds;
-            if (dateDiff > 400)
+            var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+            if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
             {
-                _hits.Remove(loc);
+                RenderLine(scrR, scrC, _bark);
             }
-            else if (occ is not null)
-            {
-                var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+        }        
+    }
+}
 
-                if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
-                {
-                    Sqr sq = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _hits[loc].C};
-                    _ui.SqsOnScreen[scrR, scrC] = sq;
-                
-                }                
-            }
+class HitAnimation : Animation
+{
+    readonly GameState _gs;
+    Loc _loc;
+    Colour _colour;
+    ulong _victimID;
+
+    public HitAnimation(ulong victimID, GameState gs, Loc loc, Colour colour)
+    {
+        _gs = gs;
+        _loc = loc;
+        _colour = colour;
+        _victimID = victimID;
+        Expiry = DateTime.Now.AddMilliseconds(400);
+    }
+
+    public override void Update()
+    {
+        var occ = _gs.ObjDB.Occupant(_loc);
+        if (occ is null || occ.ID != _victimID)
+            return;
+
+        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col);
+
+        if (scrR > 0 && scrR < _gs.UI.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _gs.UI.SqsOnScreen.GetLength(1))
+        {
+            Sqr sq = _gs.UI.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
+            _gs.UI.SqsOnScreen[scrR, scrC] = sq;
         }
     }
 }
 
-class TorchLightAnimationListener : IAnimationListener
+class TorchLightAnimationListener : Animation
 {
     Random _rng;
     readonly UserInterface _ui;
@@ -131,12 +124,13 @@ class TorchLightAnimationListener : IAnimationListener
 
     public TorchLightAnimationListener(UserInterface ui, Random rng)
     {
+        Expiry = DateTime.MaxValue;
         _ui = ui;
         _lastFrame = DateTime.Now;
         _rng = rng;
     }
 
-    public void Update()
+    public override void Update()
     {
         if (_ui.CurrentDungeon == 0)
             return; // we're in the wilderness
@@ -182,7 +176,7 @@ class TorchLightAnimationListener : IAnimationListener
     }
 }
 
-class CloudAnimationListener : IAnimationListener
+class CloudAnimationListener : Animation
 {
     readonly UserInterface _ui;
     bool[] _cloud = new bool[9];
@@ -197,6 +191,7 @@ class CloudAnimationListener : IAnimationListener
 
     public CloudAnimationListener(UserInterface ui, Random rng)
     {
+        Expiry = DateTime.MaxValue;
         _ui = ui;
         _lastFrame = DateTime.Now;
         _rng = rng;
@@ -281,7 +276,7 @@ class CloudAnimationListener : IAnimationListener
         }
     }
 
-    public void Update()
+    public override void Update()
     {
         var dd = DateTime.Now - _lastFrame;
 

@@ -125,7 +125,8 @@ class Battle
             gs.ActorKilled(target);
         }
 
-        gs.UI.RegisterHitAnimation(target.Loc, Colours.FX_RED);
+        var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
+        gs.UI.RegisterAnimation(hitAnim);
 
         result.Messages.Add(msg);
     }

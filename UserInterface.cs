@@ -72,7 +72,7 @@ abstract class UserInterface
     protected readonly int MaxHistory = 50;
     protected bool HistoryUpdated = false;
     
-    List<IAnimationListener> _animationListeners = [];
+    List<Animation> _animations = [];
 
     public UserInterface(Options opts, Random rng)
     {
@@ -84,10 +84,8 @@ abstract class UserInterface
         Rng = rng;
         ClearZLayer();
 
-        _animationListeners.Add(new CloudAnimationListener(this, Rng));
-        _animationListeners.Add(new TorchLightAnimationListener(this, Rng));
-        _animationListeners.Add(new HitAnimation(this));
-        _animationListeners.Add(new BarkAnimation(this));
+        _animations.Add(new CloudAnimationListener(this, Rng));
+        _animations.Add(new TorchLightAnimationListener(this, Rng));
     }
 
     public virtual void TitleScreen()
@@ -137,18 +135,9 @@ abstract class UserInterface
         ClosingPopUp = false;
     }
 
-    public void RegisterBark(Actor speaker, string voiceLine)
+    public void RegisterAnimation(Animation animation)
     {
-        var barkAnim = (BarkAnimation)_animationListeners.Where(v => v is BarkAnimation)
-                                                                 .First();
-        barkAnim.Add(speaker, voiceLine);
-    }
-
-    public void RegisterHitAnimation(Loc loc, Colour colour)
-    {
-        var hitAnim = (HitAnimation) _animationListeners.Where(a => a is HitAnimation)
-                                                        .First();
-        hitAnim.Add(loc, colour);                                                        
+        _animations.Add(animation);
     }
 
     protected void WriteMessagesSection()
@@ -546,17 +535,15 @@ abstract class UserInterface
             {
                 SetSqsOnScreen();
 
-                foreach (var l in _animationListeners)
+                foreach (var l in _animations)
                    l.Update();
-
+                _animations = _animations.Where(a => a.Expiry > DateTime.Now)
+                                         .ToList();
                 UpdateDisplay();
                 refresh = DateTime.Now;
             }
 
-            
             Delay();
-            
-            //Console.WriteLine($"{elapsed.TotalMilliseconds} ms");            
         }
 
         var msg = new List<string>()

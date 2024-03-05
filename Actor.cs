@@ -189,7 +189,8 @@ class PriestBehaviour : IBehaviour
     {
         if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
         {
-            ui.RegisterBark(actor, "Praise be to Huntokar!");
+            var bark = new BarkAnimation(ui, 2500, actor, "Praise be to Huntokar!");
+            ui.RegisterAnimation(bark); 
             _lastIntonation = DateTime.Now;
 
             return new PassAction((IPerformer)actor);
