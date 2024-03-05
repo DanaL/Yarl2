@@ -147,6 +147,20 @@ class Monster : Actor, IPerformer
     }
 }
 
+class Villager : Actor, IPerformer
+{
+    public double Energy { get; set; } = 0.0;
+    public double Recovery { get; set; } = 1.0;
+    public bool RemoveFromQueue { get; set; }
+    
+    public Villager() => Glyph = new Glyph('@', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE);
+    
+    public Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        return new PassAction(this);
+    }
+}
+
 interface IBehaviour 
 { 
     Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);

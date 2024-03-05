@@ -33,6 +33,23 @@ namespace Yarl2
             "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen", 
             "faithful", "beaufiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
 
+        // TODO: replace with something less lame...
+        public static string TownName(Random rng)
+        {
+            string[] prefixes = [ "Upper ", "Lower ", "North ", "South ", "East ", "West ", "New ", "Old "];
+            string[] main = [ "Stone", "Black", "Green", "Red", "Deer", "Bar", "Burr", "Cor", "Ar", "Gold", "Silver", "Iron"];
+            string[] suffixes = [ "ton", "town", " By-the-Sea", " Shore", " Downs", " Woods"];
+
+            string name = "";
+            if (rng.NextDouble() < 0.5)
+                name = prefixes[rng.Next(prefixes.Length)];
+            name += main[rng.Next(main.Length)];
+            if (rng.NextDouble() < 0.75)
+                name += suffixes[rng.Next(suffixes.Length)];
+
+            return name;
+        }
+
         public NameGenerator(Random rng, string sourceFile)
         {
             _rng = rng;

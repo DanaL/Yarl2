@@ -25,6 +25,7 @@ enum BuildingType
 
 class Town
 {
+    public string Name { get; set; } = "";
     public HashSet<(int, int)> Shrine { get; set; } = [];
     public HashSet<(int, int)> Tavern { get; set; } = [];
     public HashSet<(int, int)> Market { get; set; } = [];
@@ -73,7 +74,7 @@ class TownBuilder
             rotated[indices[i]] = c;
         }
 
-        return rotated.ToArray();
+        return [.. rotated];
     }
 
     void DrawBuilding(Map map, int row, int col, int townRow, int townCol, Template t, BuildingType building, Random rng)

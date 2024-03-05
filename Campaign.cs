@@ -46,7 +46,7 @@ class PreGameHandler(UserInterface ui)
 {
     private UserInterface _ui { get; set; } = ui;
    
-    (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
+    static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
     {        
         var campaign = new Campaign();
         var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");        
@@ -55,6 +55,12 @@ class PreGameHandler(UserInterface ui)
         
         var tb = new TownBuilder();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
+
+        Town town = tb.Town;
+        town.Name = NameGenerator.TownName(rng);
+        Console.WriteLine(town.Name);
+        Village.Populate(wildernessMap, town, objDb, rng);
+
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
