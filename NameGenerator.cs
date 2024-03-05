@@ -38,7 +38,7 @@ namespace Yarl2
         {
             string[] prefixes = [ "Upper ", "Lower ", "North ", "South ", "East ", "West ", "New ", "Old "];
             string[] main = [ "Stone", "Black", "Green", "Red", "Deer", "Bar", "Burr", "Cor", "Ar", "Gold", "Silver", "Iron"];
-            string[] suffixes = [ "ton", "town", " By-the-Sea", " Shore", " Downs", " Woods"];
+            string[] suffixes = [ "ton", "town", " By-the-Sea", " Shore", " Downs", "wood", "moor", " Woods"];
 
             string name = "";
             if (rng.NextDouble() < 0.5)

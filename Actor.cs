@@ -33,7 +33,13 @@ interface IItemHolder
 }
 
 // I wonder if a simple status will be enough
-enum ActorStatus { Idle, Active }
+enum ActorStatus 
+{ 
+    Idle, 
+    Active,
+    Indifferent,
+    Friendly
+}
 
 enum AIType 
 {
@@ -60,7 +66,8 @@ class Actor : GameObj
     public virtual int AC => 10;
     public virtual List<Damage> MeleeDamage() => [];
     public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
-    
+    public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
+
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
     {
         if (Status == ActorStatus.Idle)
@@ -153,8 +160,10 @@ class Villager : Actor, IPerformer
     public double Recovery { get; set; } = 1.0;
     public bool RemoveFromQueue { get; set; }
     
+    public override string FullName => Name.Capitalize();  
+
     public Villager() => Glyph = new Glyph('@', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE);
-    
+
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
         return new PassAction(this);

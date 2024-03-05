@@ -314,10 +314,18 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         }
         else if (_gs.ObjDB.Occupied(_loc))
         {
-            // Eventually this will result in a fight or an NPC interaction (or at least a warning)
             result.Successful = false;
-            var attackAction = new MeleeAttackAction(_actor, _loc, _gs, _rng);
-            result.AltAction = attackAction;
+            var occ = _gs.ObjDB.Occupant(_loc);
+            if (occ is not null && !occ.Hostile)
+            {
+                string msg = $"You don't want to attack {occ.FullName}!";
+                result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
+            }
+            else
+            {
+                var attackAction = new MeleeAttackAction(_actor, _loc, _gs, _rng);
+                result.AltAction = attackAction;
+            }
         }
         else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
         {

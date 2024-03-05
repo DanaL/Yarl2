@@ -22,7 +22,8 @@ class Village
 
         var cleric = new Villager()
         {
-            Name = ng.GenerateName(rng.Next(5, 9))
+            Name = ng.GenerateName(rng.Next(5, 9)),
+            Status = ActorStatus.Indifferent
         };
         var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor || 
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
