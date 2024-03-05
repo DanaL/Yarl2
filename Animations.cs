@@ -39,24 +39,25 @@ class BarkAnimation : Animation
     private void RenderLine(int screenRow, int screenCol, string message)
     {
         int pointerCol = screenCol + 1;
-        int row = screenRow + (screenRow < 2 ? 1 : -1);
-        int row2 = screenRow + (screenRow < 2 ? 2 : -2);
+        int row = screenRow + (screenRow < 3 ? 1 : -1);
+        int row2 = screenRow + (screenRow < 3 ? 2 : -2);
 
         int col = screenCol - screenCol / 3;
-        char pointer = '/';
+        char pointer = row > 3 ? '/' : '\\';
         if (col == screenCol) 
         {
             pointer = '|';
             pointerCol = screenCol;
         }
+
         if (screenCol - message.Length / 3 < 0)
         {
             col = 0;
         }
-        else if (screenCol + (message.Length / 3) * 2 > _ui.SqsOnScreen.GetLength(1))
+        else if (screenCol + (message.Length / 3) * 2 > UserInterface.ViewWidth)
         {
-            col = _ui.SqsOnScreen.GetLength(1) - message.Length - 1;
-            pointer = '\\';
+            col = UserInterface.ViewWidth - message.Length - 1;
+            pointer = row > 3 ? '\\' : '/';
             pointerCol = screenCol - 1;
         }
                 
@@ -83,7 +84,7 @@ class BarkAnimation : Animation
         if (loc.DungeonID == gs.CurrDungeon && loc.Level == gs.CurrLevel)
         {
             var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
-            if (scrR > 0 && scrR < _ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _ui.SqsOnScreen.GetLength(1))
+            if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
             {
                 RenderLine(scrR, scrC, _bark);
             }
