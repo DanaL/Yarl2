@@ -165,6 +165,7 @@ class Villager : Actor, IPerformer
     public double Recovery { get; set; } = 1.0;
     public bool RemoveFromQueue { get; set; }
     public VillagerType VillagerType { get; set; }
+    public string Appearance { get; set; } = "";
 
     public override string FullName => Name.Capitalize();  
 
