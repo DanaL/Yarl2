@@ -76,7 +76,8 @@ class Village
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
-            Town = town
+            Town = town,
+            Markup = 1.5 + rng.NextDouble() / 2
         };
         var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();

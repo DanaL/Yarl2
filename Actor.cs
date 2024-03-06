@@ -89,8 +89,10 @@ class Actor : GameObj, IPerformer
 
     public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
-    public virtual Action TakeTurn(UserInterface ui, GameState gameState) 
-        => throw new NotImplementedException("Shouldn't be instantiating an Actor directly");
+    public virtual Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
+    }
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
@@ -139,11 +141,6 @@ class Monster : Actor
         }
     }
     
-    public override Action TakeTurn(UserInterface ui, GameState gameState)
-    {
-        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
-    }
-
     public void SetBehaviour(AIType aiType)
     {
         IBehaviour behaviour = aiType switch 
@@ -158,18 +155,18 @@ class Monster : Actor
     }
 }
 
-class Villager : Actor, IPerformer
+class Villager : Actor
 {
     public string Appearance { get; set; } = "";
     public Town Town { get; set; }
+    public double Markup { get; set; } // for villagers who sell stuff...
 
     public override string FullName => Name.Capitalize();  
 
-    public Villager() => Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE);
-
-    public override Action TakeTurn(UserInterface ui, GameState gameState)
+    public Villager()
     {
-        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);        
+        Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE);
+        Recovery = 1.0;
     }
 
     // I guess I'll include chat dialogues and such as part of the Behaviour sublcasses?
@@ -203,11 +200,11 @@ class PriestBehaviour : IBehaviour, IChatter
             ui.RegisterAnimation(bark); 
             _lastIntonation = DateTime.Now;
 
-            return new PassAction((IPerformer)actor);
+            return new PassAction(actor);
         }
         else
         {
-            return new PassAction((IPerformer)actor);
+            return new PassAction(actor);
         }
     }
 
@@ -225,7 +222,7 @@ class PriestBehaviour : IBehaviour, IChatter
 class SmithBehaviour : IBehaviour, IChatter
 {
     DateTime _lastBark = new DateTime(1900, 1, 1);
-
+    
     static string PickBark(Random rng)
     {
         int roll = rng.Next(2);
@@ -255,8 +252,14 @@ class SmithBehaviour : IBehaviour, IChatter
     public string Chat(Villager smith)
     {
         var sb = new StringBuilder();
-        sb.Append("\"You'll want some weapons or better armour before venturing futher!");
-        
+
+        sb.Append('"');
+        if (smith.Markup > 1.75)
+            sb.Append("If you're looking for arms or armour, I'm the only game in town!");
+        else
+            sb.Append("You'll want some weapons or better armour before venturing futher!");
+        sb.Append('"');
+
         return sb.ToString();
     }
 }
@@ -296,7 +299,7 @@ class BasicMonsterBehaviour : IBehaviour
         }
         
         // Otherwise do nothing!
-        return new PassAction((IPerformer)actor);
+        return new PassAction(actor);
     }
 }
 
@@ -307,7 +310,7 @@ class BasicHumanoidBehaviour : IBehaviour
     {
         if (actor.Status == ActorStatus.Idle) 
         {            
-            return new PassAction((IPerformer)actor);
+            return new PassAction(actor);
         }
         
         // Fight!
@@ -334,7 +337,7 @@ class BasicHumanoidBehaviour : IBehaviour
         }
 
         // Otherwise do nothing!
-        return new PassAction((IPerformer)actor);
+        return new PassAction(actor);
     }
 }
 
@@ -342,7 +345,7 @@ class VillagerBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
-        return new PassAction((IPerformer)actor);
+        return new PassAction(actor);
     }
 }
 
