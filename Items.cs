@@ -32,6 +32,7 @@ class Item : GameObj
     public bool Consumable { get; set; } = false;
     public List<string> Adjectives { get; set; } = [];
     public List<ObjTrait> Traits { get; set; } = [];
+    public int Value { get; set; }
 
     private string CalcFullName()
     {
@@ -104,45 +105,45 @@ class ItemFactory
         switch (name)
         {
             case "spear":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, 
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 10,
                                         Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
                 item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
                 item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
                 break;
             case "dagger":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true,
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true, Value = 10,
                                         Glyph = new Glyph(')', Colours.WHITE, Colours.GREY) };
                 item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
                 item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
                 break;
             case "hand axe":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false,
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 15,
                                         Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN) };
                 item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
                 item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });                
                 break;
             case "leather armour":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
                 break;
             case "studded leather armour":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 25,
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
                 break;
             case "chainmail":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 45,
                                     Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
                 break;
             case "helmet":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false,
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
                                     Glyph = new Glyph('[', Colours.WHITE, Colours.GREY) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
                 break;
             case "torch":
-                item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true,
+                item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
                 item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=500, Radius=5, Lit=false, 
                                          Energy=0.0, Recovery=1.0});
@@ -152,7 +153,7 @@ class ItemFactory
                                     Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE) };
                 break;
             case "potion of healing":
-                item = new Item() { Name = "potion of healing", Type = ItemType.Potion, Stackable = true,
+                item = new Item() { Name = "potion of healing", Type = ItemType.Potion, Stackable = true, Value = 75,
                                     Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE),
                                     Consumable = true };
                 item.Traits.Add(new MinorHealTrait());
