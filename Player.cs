@@ -18,13 +18,10 @@ enum PlayerClass
     DwarfStalwart
 }
 
-class Player : Actor, IPerformer, IItemHolder
+class Player : Actor, IPerformer
 {
     public int MaxVisionRadius { get; set; }
     public int CurrVisionRadius { get; set; }    
-    public Inventory Inventory { get; set; } = new(PLAYER_ID);
-    public double Energy { get; set; } = 0.0;
-    public double Recovery { get; set; }
     public PlayerClass CharClass { get; set; }
     
     InputAccumulator? _accumulator;
@@ -114,10 +111,6 @@ class Player : Actor, IPerformer, IItemHolder
         return dmgs;
     }
 
-    // This doesn't really mean anything for the Player. An Exception will be tossed when
-    // they are killed.
-    public bool RemoveFromQueue { get; set; }
-
     public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) 
     {
         int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
@@ -195,11 +188,6 @@ class Player : Actor, IPerformer, IItemHolder
         return options;
     }
     
-    public void CalcEquipmentModifiers()
-    {
-        
-    }
-
     string PrintStat(Attribute attr)
     {
         int val = Stats[attr].Curr;
@@ -231,7 +219,7 @@ class Player : Actor, IPerformer, IItemHolder
         _accumulator = newAccumulator;
     }
 
-    public Action TakeTurn(UserInterface ui, GameState gameState)
+    public override Action TakeTurn(UserInterface ui, GameState gameState)
     {
         if (ui.InputBuffer.Count > 0)
         {

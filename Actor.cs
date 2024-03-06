@@ -25,15 +25,6 @@ interface IPerformer
     Action TakeTurn(UserInterface ui, GameState gameState);
 }
 
-// I think not ever monster will have an inventory, I've split out
-// an interface to hold the functions the ones who do will need
-interface IItemHolder
-{
-    public Inventory Inventory { get; set; } 
-
-    void CalcEquipmentModifiers();
-}
-
 // I wonder if a simple status will be enough
 enum ActorStatus 
 { 
@@ -55,21 +46,30 @@ record Feature(string Name, Attribute Attribute, int Mod, ulong expiry);
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
-class Actor : GameObj
+class Actor : GameObj, IPerformer
 {
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public List<Feature> Features { get; set; } = [];
     public ActorStatus Status { get; set; }
-    
+    public Inventory Inventory { get; set; }
+
+    public double Energy { get; set; } = 0.0;
+    public double Recovery { get; set; }
+    public bool RemoveFromQueue { get; set; }
+
     protected IBehaviour _behaviour;
 
-    public Actor() { }
+    public Actor() 
+    {
+        Inventory = new Inventory(ID);
+    }
 
     public override string FullName => Name.DefArticle();    
     public virtual int TotalMeleeAttackModifier() => 0;
     public virtual int AC => 10;
     public virtual List<Damage> MeleeDamage() => [];
     public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
+    public virtual void CalcEquipmentModifiers() { }
     public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
 
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
@@ -88,19 +88,19 @@ class Actor : GameObj
     }
 
     public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
+
+    public virtual Action TakeTurn(UserInterface ui, GameState gameState) 
+        => throw new NotImplementedException("Shouldn't be instantiating an Actor directly");
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
 // for instance are of type Monster even though it's a bit rude
 // to call them that. Dunno why I don't like the term NPC for
 // this class
-class Monster : Actor, IPerformer
+class Monster : Actor
 {
     public AIType AIType { get; set;}
-    public double Energy { get; set; } = 0.0;
-    public double Recovery { get; set; }
-    public bool RemoveFromQueue { get; set; }
-
+    
     public Monster() 
     {
         _behaviour = new BasicMonsterBehaviour();
@@ -139,7 +139,7 @@ class Monster : Actor, IPerformer
         }
     }
     
-    public Action TakeTurn(UserInterface ui, GameState gameState)
+    public override Action TakeTurn(UserInterface ui, GameState gameState)
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
     }
@@ -158,15 +158,8 @@ class Monster : Actor, IPerformer
     }
 }
 
-// I don't know if I'll actually need this? Maybe the 'type' of villager
-// can just be determined by what behaviour is assigned to them?
-enum VillagerType { Peasant, Priest }
 class Villager : Actor, IPerformer
 {
-    public double Energy { get; set; } = 0.0;
-    public double Recovery { get; set; } = 1.0;
-    public bool RemoveFromQueue { get; set; }
-    public VillagerType VillagerType { get; set; }
     public string Appearance { get; set; } = "";
     public Town Town { get; set; }
 
@@ -174,7 +167,7 @@ class Villager : Actor, IPerformer
 
     public Villager() => Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE);
 
-    public Action TakeTurn(UserInterface ui, GameState gameState)
+    public override Action TakeTurn(UserInterface ui, GameState gameState)
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);        
     }
@@ -225,6 +218,45 @@ class PriestBehaviour : IBehaviour, IChatter
         sb.Append(priest.Town.Name);
         sb.Append(".\"");
 
+        return sb.ToString();
+    }
+}
+
+class SmithBehaviour : IBehaviour, IChatter
+{
+    DateTime _lastBark = new DateTime(1900, 1, 1);
+
+    static string PickBark(Random rng)
+    {
+        int roll = rng.Next(2);
+
+        if (roll == 0)
+            return "A stout axe will serve you well!";
+        else
+            return "More work...";
+    }
+
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    {
+        if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+        {
+            var bark = new BarkAnimation(ui, 2500, actor, PickBark(rng));
+            ui.RegisterAnimation(bark);
+            _lastBark = DateTime.Now;
+
+            return new PassAction((IPerformer)actor);
+        }
+        else
+        {
+            return new PassAction((IPerformer)actor);
+        }
+    }
+
+    public string Chat(Villager smith)
+    {
+        var sb = new StringBuilder();
+        sb.Append("\"You'll want some weapons or better armour before venturing futher!");
+        
         return sb.ToString();
     }
 }

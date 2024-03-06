@@ -424,7 +424,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         _ui.CloseMenu();
         var itemStack = _gameState.ObjDB.ItemsAt(_actor.Loc);
 
-        var inv = ((IItemHolder)_actor).Inventory;
+        var inv = _actor.Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
         Message msg;
 
@@ -459,7 +459,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-         var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
+         var item = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
         var useableTraits = item.Traits.Where(t => t is IUSeable);
@@ -473,12 +473,12 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 toUse.Count = 1;
                 toUse.Stackable = false;
                 if (!toUse.Consumable)
-                    ((IItemHolder)_actor).Inventory.Add(toUse, _actor.ID);                
+                    _actor.Inventory.Add(toUse, _actor.ID);                
                 useableTraits = toUse.Traits.Where(t => t is IUSeable);
             }
             else if (item.Consumable)
             {
-                ((IItemHolder)_actor).Inventory.Remove(Choice, 0);
+                _actor.Inventory.Remove(Choice, 0);
             }
 
             bool success = false;
@@ -517,7 +517,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
         bool successful = true;
         Message alert;
 
-        var inventory = ((IItemHolder)_actor).Inventory;
+        var inventory = _actor.Inventory;
         if (_amount > inventory.Zorkmids)
         {
             _amount = inventory.Zorkmids;
@@ -569,16 +569,16 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
     public override ActionResult Execute()
     {
         Message alert;
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(_slot);        
+        var item = _actor.Inventory.ItemAt(_slot);        
         _ui.ClosePopup();
 
         if (_amount == 0 || _amount > item.Count)
         {
             // drop entire stack
-            ((IItemHolder) _actor).Inventory.Remove(_slot, 1);
+            _actor.Inventory.Remove(_slot, 1);
             _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
             item.Equiped = false;
-            ((IItemHolder)_actor).CalcEquipmentModifiers();
+            _actor.CalcEquipmentModifiers();
             alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, item.Count, false, _actor.Loc, _gameState);
         }
         else
@@ -586,7 +586,7 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
             item.Count -= _amount;
             var dropped = item.Duplicate(_gameState);
             dropped.Count = _amount;
-            ((IItemHolder)_actor).CalcEquipmentModifiers();
+            _actor.CalcEquipmentModifiers();
             _gameState.ItemDropped(dropped, _actor.Loc.Row, _actor.Loc.Col);
             alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, _actor.Loc, _gameState);                      
         }
@@ -612,7 +612,7 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
+        var item = _actor.Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
         var readables = item.Traits.Where(t => t is IReadable);
@@ -656,7 +656,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
          if (Choice == '$')
         {
-            var inventory = ((IItemHolder)_actor).Inventory;
+            var inventory = _actor.Inventory;
             if (inventory.Zorkmids == 0)
             {
                 var msg = MessageFactory.Phrase("You have no money!", _gameState.Player.Loc);
@@ -675,7 +675,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 return new ActionResult() { Successful = true };
         }
         
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);        
+        var item = _actor.Inventory.ItemAt(Choice);        
         if (item.Equiped && item.Type == ItemType.Armour)
         {
             var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
@@ -698,10 +698,10 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         }
         else 
         {
-            ((IItemHolder) _actor).Inventory.Remove(Choice, 1);
+            _actor.Inventory.Remove(Choice, 1);
             _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
             item.Equiped = false;
-            ((IItemHolder)_actor).CalcEquipmentModifiers();
+            _actor.CalcEquipmentModifiers();
 
             var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gameState);
             _ui.AlertPlayer([alert], "");
@@ -726,7 +726,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
     public override ActionResult Execute() 
     {
         ActionResult result;
-        var item = ((IItemHolder)_actor).Inventory.ItemAt(Choice);
+        var item = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
         if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
@@ -758,7 +758,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
                 break;
         }            
         
-        ((IItemHolder)_actor).CalcEquipmentModifiers();
+        _actor.CalcEquipmentModifiers();
 
         return result;
     }
@@ -816,7 +816,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
                 // I don't think owner should ever be null, barring a bug
                 // but this placates the warning in VS/VS Code
                 loc = owner.Loc;
-                ((IItemHolder)owner).Inventory.Remove(item.Slot, 1);
+                ((Actor)owner).Inventory.Remove(item.Slot, 1);
             }
         }
         

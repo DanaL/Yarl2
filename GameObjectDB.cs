@@ -179,14 +179,11 @@ class GameObjectDB
 
         foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
         {
-            var actor = _objs[_actorLocs[loc]];
+            var actor = _objs[_actorLocs[loc]] as Actor;
             if (actor is IPerformer performer)
                 performers.Add(performer);
 
-            if (actor is IItemHolder holder)
-            {
-                performers.AddRange(holder.Inventory.ActiveItemTraits());
-            }
+            performers.AddRange(actor.Inventory.ActiveItemTraits());
         }
 
         return performers;

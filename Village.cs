@@ -51,10 +51,8 @@ class Village
         return appearance.ToString();
     }
 
-    public static void Populate(Map map, Town town, GameObjectDB objDb, Random rng)
-    {
-        var ng = new NameGenerator(rng, "names.txt");
-
+    static Villager GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
+    {        
         var cleric = new Villager()
         {
             Name = ng.GenerateName(rng.Next(5, 9)),
@@ -62,16 +60,43 @@ class Village
             Appearance = VillagerAppearance(rng),
             Town = town
         };
-        var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor || 
+        var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
         var sq = sqs[rng.Next(sqs.Count)];
         cleric.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
-        cleric.VillagerType = VillagerType.Priest;
         cleric.SetBehaviour(new PriestBehaviour());
 
-        Console.WriteLine(cleric.FullName);
-        Console.WriteLine(cleric.Appearance.IndefArticle().Capitalize());
+        return cleric;
+    }
+
+    static Villager GenerateSmith(Map map, Town town, NameGenerator ng, Random rng)
+    {
+        var smith = new Villager()
+        {
+            Name = ng.GenerateName(rng.Next(5, 9)),
+            Status = ActorStatus.Indifferent,
+            Appearance = VillagerAppearance(rng),
+            Town = town
+        };
+        var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
+                                          map.TileAt(sq).Type == TileType.WoodFloor).ToList();
+        var sq = sqs[rng.Next(sqs.Count)];
+        smith.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        smith.SetBehaviour(new SmithBehaviour());
+
+        return smith;
+    }
+
+    public static void Populate(Map map, Town town, GameObjectDB objDb, Random rng)
+    {
+        var ng = new NameGenerator(rng, "names.txt");
+
+        var cleric = GeneratePriest(map, town, ng, rng);
         objDb.Add(cleric);
         objDb.SetToLoc(cleric.Loc, cleric);
+
+        var smith = GenerateSmith(map, town, ng, rng);
+        objDb.Add(smith);
+        objDb.SetToLoc(smith.Loc, smith);
     }
 }
