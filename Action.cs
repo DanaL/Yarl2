@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 class ActionResult
@@ -170,7 +172,12 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         }
         else if (other is Villager villager)
         {
-            _gs.UI.Popup($"{villager.Appearance.IndefArticle().Capitalize()}.", villager.FullName);
+            var dialogueText = new StringBuilder();
+            dialogueText.Append(villager.Appearance.IndefArticle().Capitalize());
+            dialogueText.Append(".\n\n");
+            dialogueText.Append(villager.Chat());
+
+            _gs.UI.Popup(dialogueText.ToString(), villager.FullName);
 
             result.Successful = true;
             result.EnergyCost = 1.0;

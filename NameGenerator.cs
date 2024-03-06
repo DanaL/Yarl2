@@ -44,7 +44,7 @@ namespace Yarl2
             if (rng.NextDouble() < 0.5)
                 name = prefixes[rng.Next(prefixes.Length)];
             name += main[rng.Next(main.Length)];
-            if (rng.NextDouble() < 0.75)
+            if (rng.NextDouble() < 0.75 || name.IndexOf(' ') == -1)
                 name += suffixes[rng.Next(suffixes.Length)];
 
             return name;

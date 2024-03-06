@@ -59,7 +59,8 @@ class Village
         {
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
-            Appearance = VillagerAppearance(rng)
+            Appearance = VillagerAppearance(rng),
+            Town = town
         };
         var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor || 
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();

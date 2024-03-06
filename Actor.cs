@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 // Interface for anything that will get a turn in the game. The Player,
@@ -166,6 +168,7 @@ class Villager : Actor, IPerformer
     public bool RemoveFromQueue { get; set; }
     public VillagerType VillagerType { get; set; }
     public string Appearance { get; set; } = "";
+    public Town Town { get; set; }
 
     public override string FullName => Name.Capitalize();  
 
@@ -175,6 +178,19 @@ class Villager : Actor, IPerformer
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);        
     }
+
+    // I guess I'll include chat dialogues and such as part of the Behaviour sublcasses?
+    // I'll need to include menu/inventory interaction stuff for villagers who sell
+    // goods and services.
+    public string Chat()
+    {
+        return ((IChatter)_behaviour).Chat(this);
+    }
+}
+
+interface IChatter
+{
+    string Chat(Villager villager);
 }
 
 interface IBehaviour 
@@ -182,7 +198,7 @@ interface IBehaviour
     Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
 }
 
-class PriestBehaviour : IBehaviour
+class PriestBehaviour : IBehaviour, IChatter
 {
     DateTime _lastIntonation = new DateTime(1900, 1, 1);
 
@@ -200,6 +216,16 @@ class PriestBehaviour : IBehaviour
         {
             return new PassAction((IPerformer)actor);
         }
+    }
+
+    public string Chat(Villager priest)
+    {
+        var sb = new StringBuilder();
+        sb.Append("\"It is my duty to look after the spiritual well-being of the village of ");
+        sb.Append(priest.Town.Name);
+        sb.Append(".\"");
+
+        return sb.ToString();
     }
 }
 
