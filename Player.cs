@@ -345,23 +345,24 @@ class Player : Actor, IPerformer, IItemHolder
             {
                 _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ToggleEquipedAction(ui, this, gameState);
-
                 ShowInventory(ui, "Equip what?");
             }
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new CloseDoorAction(ui.Player, gameState.Map, gameState);                
-                _deferred = action;
-                
+                _deferred = new CloseDoorAction(this, gameState.Map, gameState);                
+                ui.AlertPlayer([MessageFactory.Phrase("Which way?", gameState.Player.Loc)], "");
+            }
+            else if (ch == 'C')
+            {
+                _accumulator = new DirectionAccumulator();
+                _deferred = new ChatAction(this, gameState);
                 ui.AlertPlayer([MessageFactory.Phrase("Which way?", gameState.Player.Loc)], "");
             }
             else if (ch == 'o')
             {
                 _accumulator = new DirectionAccumulator();
-                var action = new OpenDoorAction(ui.Player, gameState.Map, gameState);
-                _deferred = action;
-
+                _deferred = new OpenDoorAction(this, gameState.Map, gameState);
                 ui.AlertPlayer([MessageFactory.Phrase("Which way?", gameState.Player.Loc)], "");
             }
             else if (ch == 'Q')

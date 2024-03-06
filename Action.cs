@@ -154,6 +154,39 @@ abstract class DirectionalAction(Actor actor) : Action
     }
 }
 
+class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
+{
+    private GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = false };
+
+        var other = _gs.ObjDB.Occupant(_loc);
+
+        if (other is null)
+        {
+            result.Messages.Add(MessageFactory.Phrase("There's no one there!", _actor.Loc));
+        }
+        else if (other is Villager villager)
+        {
+            _gs.UI.Popup($"{villager.Appearance.IndefArticle().Capitalize()}.", villager.FullName);
+
+            result.Successful = true;
+            result.EnergyCost = 1.0;
+        }
+        else
+        {
+            result.Messages.Add(MessageFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
+
+            result.Successful = true;
+            result.EnergyCost = 1.0;
+        }
+
+        return result;
+    }
+}
+
 class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(actor)
 {
     private GameState _gs = gs;
