@@ -42,7 +42,7 @@ class BarkAnimation : Animation
         int row = screenRow + (screenRow < 3 ? 1 : -1);
         int row2 = screenRow + (screenRow < 3 ? 2 : -2);
 
-        int col = screenCol - screenCol / 3;
+        int col = screenCol - message.Length / 3;
         char pointer = row > 3 ? '/' : '\\';
         if (col == screenCol) 
         {
@@ -54,7 +54,7 @@ class BarkAnimation : Animation
         {
             col = 0;
         }
-        else if (screenCol + (message.Length / 3) * 2 > UserInterface.ViewWidth)
+        else if (col + message.Length >= UserInterface.ViewWidth)
         {
             col = UserInterface.ViewWidth - message.Length - 1;
             pointer = row > 3 ? '\\' : '/';

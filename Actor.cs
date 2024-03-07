@@ -223,30 +223,85 @@ class SmithBehaviour : IBehaviour, IChatter
 {
     DateTime _lastBark = new DateTime(1900, 1, 1);
     
-    static string PickBark(Random rng)
-    {
-        int roll = rng.Next(2);
-
-        if (roll == 0)
-            return "A stout axe will serve you well!";
+    static string PickBark(Actor smith, Random rng)
+    {        
+        var items = smith.Inventory.UsedSlots()
+                         .Select(s => smith.Inventory.ItemAt(s)).ToList();
+        Item? item;
+        if (items.Count > 0)
+            item = items[rng.Next(items.Count)];
         else
+            item = null;
+
+        int roll = rng.Next(2);
+        if (roll == 0 && item is not null) 
+        {
+            if (item.Type == ItemType.Weapon)
+            {
+                if (item.Traits.Any(t => t is DamageTrait trait && trait.DamageType == DamageType.Blunt))
+                    return $"A stout {item.Name} will serve you well!";
+                else
+                    return $"A sharp {item.Name} will serve you well!";
+            }                
+            else if (item.Name == "helmet" || item.Name == "shield")
+                return $"A sturdy {item.Name} will serve you well!";
+            else
+                return $"Some sturdy {item.Name} will serve you well!";            
+        }
+        else 
+        {
             return "More work...";
+        }
     }
 
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor smith, GameState gameState, UserInterface ui, Random rng)
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, 2500, actor, PickBark(rng));
+            var bark = new BarkAnimation(ui, 2500, smith, PickBark(smith, rng));
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
-            return new PassAction((IPerformer)actor);
+            return new PassAction(smith);
         }
         else
         {
-            return new PassAction((IPerformer)actor);
+            return new PassAction(smith);
         }
+    }
+
+    string BuildMenu(Villager smith)
+    {
+        var sb = new StringBuilder();
+
+        var items = smith.Inventory.UsedSlots()
+                         .Select(s => smith.Inventory.ItemAt(s));
+        char ch = 'a';
+        foreach (var item in items)
+        {
+            sb.Append(ch++);
+            sb.Append(") ");
+            sb.Append(item.FullName);
+
+            if (item.Count > 1)
+            {
+                sb.Append(" (");
+                sb.Append(item.Count);
+                sb.Append(')');
+            }
+
+            int price = (int) (item.Value * smith.Markup);
+            sb.Append(" - ");
+            sb.Append(price);
+            sb.Append("gp");
+
+            if (item.Count > 1)
+                sb.Append(" apiece\n");
+            else
+                sb.Append('\n');
+        }
+
+        return sb.ToString();
     }
 
     public string Chat(Villager smith)
@@ -259,6 +314,8 @@ class SmithBehaviour : IBehaviour, IChatter
         else
             sb.Append("You'll want some weapons or better armour before venturing futher!");
         sb.Append('"');
+        sb.Append("\n\n");
+        sb.Append(BuildMenu(smith));
 
         return sb.ToString();
     }
@@ -272,7 +329,7 @@ class BasicMonsterBehaviour : IBehaviour
     {
         if (actor.Status == ActorStatus.Idle) 
         {
-            return new PassAction((IPerformer)actor);
+            return new PassAction(actor);
         }
 
         // Basic monster behaviour:

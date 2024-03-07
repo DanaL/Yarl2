@@ -121,7 +121,7 @@ class PlayerCreator
                 var axe = ItemFactory.Get("hand axe", objDb);
                 axe.Equiped = true;
                 player.Inventory.Add(axe, player.ID);
-                var chain = ItemFactory.Get("chainmail", objDb);
+                var chain = ItemFactory.Get("ringmail", objDb);
                 chain.Equiped = true;
                 player.Inventory.Add(chain, player.ID);
                 var helmet = ItemFactory.Get("helmet", objDb);

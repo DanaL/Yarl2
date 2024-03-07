@@ -122,6 +122,30 @@ class ItemFactory
                 item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
                 item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });                
                 break;
+            case "battle axe":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
+                                        Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN) };
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });                
+                break;
+            case "mace":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
+                                        Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY) };
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });                
+                break;
+            case "longsword":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
+                                        Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY) };
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });                
+                break;
+            case "rapier":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 20,
+                                        Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY) };
+                item.Traits.Add(new MeleeAttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });                
+                break;
             case "leather armour":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
@@ -132,10 +156,15 @@ class ItemFactory
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
                 break;
-            case "chainmail":
+            case "ringmail":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 45,
                                     Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY) };
                 item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
+                break;
+            case "chainmail":
+                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 75,
+                                    Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY) };
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
                 break;
             case "helmet":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,

@@ -69,7 +69,7 @@ class Village
         return cleric;
     }
 
-    static Villager GenerateSmith(Map map, Town town, NameGenerator ng, Random rng)
+    static Villager GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
     {
         var smith = new Villager()
         {
@@ -85,6 +85,21 @@ class Village
         smith.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
         smith.SetBehaviour(new SmithBehaviour());
 
+        smith.Inventory.Add(ItemFactory.Get("ringmail", objDb), smith.ID);
+        smith.Inventory.Add(ItemFactory.Get("helmet", objDb), smith.ID);
+        if (rng.NextDouble() < 0.25)
+            smith.Inventory.Add(ItemFactory.Get("chainmail", objDb), smith.ID);
+        smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
+        smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
+        if (rng.NextDouble() < 0.33)
+            smith.Inventory.Add(ItemFactory.Get("battle axe", objDb), smith.ID);
+        if (rng.NextDouble() < 0.33)
+            smith.Inventory.Add(ItemFactory.Get("mace", objDb), smith.ID);
+        if (rng.NextDouble() < 0.33)
+            smith.Inventory.Add(ItemFactory.Get("longsword", objDb), smith.ID);
+        if (rng.NextDouble() < 0.33)
+            smith.Inventory.Add(ItemFactory.Get("rapier", objDb), smith.ID);
+
         return smith;
     }
 
@@ -96,7 +111,7 @@ class Village
         objDb.Add(cleric);
         objDb.SetToLoc(cleric.Loc, cleric);
 
-        var smith = GenerateSmith(map, town, ng, rng);
+        var smith = GenerateSmith(map, town, ng, objDb, rng);
         objDb.Add(smith);
         objDb.SetToLoc(smith.Loc, smith);
     }
