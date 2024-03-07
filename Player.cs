@@ -305,14 +305,14 @@ class Player : Actor, IPerformer
                 else 
                 {
                     var opts = ShowPickupMenu(ui, itemStack);
-                    _accumulator = new MenuPickAccumulator(opts);
+                    _accumulator = new InventoryAccumulator(opts);
                     _deferred = new PickupItemAction(ui, this, gameState);
                 }
             }
             else if (ch == 'a')
             {
                 ShowInventory(ui, "Use which item?");
-                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new UseItemAction(ui, this, gameState);
             }
             else if (ch == 'd')
@@ -320,18 +320,18 @@ class Player : Actor, IPerformer
                 ShowInventory(ui, "Drop what?", true);
                 HashSet<char> slots = [.. Inventory.UsedSlots()];
                 slots.Add('$');
-                _accumulator = new MenuPickAccumulator(slots);
+                _accumulator = new InventoryAccumulator(slots);
                 _deferred = new DropItemAction(ui, this, gameState);
             }
             else if (ch == 'r')
             {
                 ShowInventory(ui, "Read what?");
-                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ReadItemAction(ui, this, gameState);
             }
             else if (ch == 'e')
             {
-                _accumulator = new MenuPickAccumulator([.. Inventory.UsedSlots()]);
+                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ToggleEquipedAction(ui, this, gameState);
                 ShowInventory(ui, "Equip what?");
             }

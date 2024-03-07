@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 // Handers to keep state while we are waiting for user input.
@@ -68,7 +70,156 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
     }
 }
 
-class MenuPickAccumulator(HashSet<char> options) : InputAccumulator
+class ShopMenuItem(char slot, Item item)
+{
+    public char Slot { get; set; } = slot;
+    public Item Item { get; set; } = item;
+    public int Count { get; set; } = 0;    
+}
+
+class ShopMenuAccumulator : InputAccumulator
+{
+    readonly Villager _shopkeeper;
+    readonly UserInterface _ui;
+    Dictionary<char, ShopMenuItem> _menuItems = [];
+    
+    public ShopMenuAccumulator(Villager shopkeeper, UserInterface ui)
+    {
+        _ui = ui;
+        _shopkeeper = shopkeeper;
+        var items = _shopkeeper.Inventory.UsedSlots()
+                             .Select(_shopkeeper.Inventory.ItemAt);
+        
+        char ch = 'a';
+        foreach (var item in items)
+            _menuItems.Add(ch++, new ShopMenuItem(item.Slot, item));
+            
+        WritePopup();
+    }
+    
+    public override void Input(char ch)
+    {
+        if (ch == Constants.ESC)
+        {
+            Done = true;
+            Success = false;
+        }
+        else if (ch == '\n' || ch == '\r')
+        {
+            Done = true;
+            Success = true;
+        }
+        else if (_menuItems.ContainsKey(ch))
+        {
+            var item = _menuItems[ch].Item;
+            if (item.Count == 1 && _menuItems[ch].Count == 0)
+                _menuItems[ch].Count = 1;
+            else if (item.Count == 1)
+                _menuItems[ch].Count = 0;
+            else
+            {
+                ++_menuItems[ch].Count;
+                if (_menuItems[ch].Count > _menuItems[ch].Item.Count)
+                    _menuItems[ch].Count = 0;
+            }
+            WritePopup();
+        }
+    }
+
+    public override AccumulatorResult GetResult()
+    {
+        var result = new ShoppingAccumulatorResult();
+
+        //foreach (var (ch, num) in _selections)
+        //{
+        //    if (num > 0)
+        //        result.Selections.Add((ch, num));
+        //}
+
+        return result;
+    }
+
+    int TotalInvoice()
+    {
+        return _menuItems.Values.Select(mi => mi.Count * (int) (mi.Item.Value * _shopkeeper.Markup)).Sum();
+    }
+
+    private void WritePopup()
+    {
+        var sb = new StringBuilder(_shopkeeper.Appearance.IndefArticle().Capitalize());
+        sb.Append(".\n\n");
+        sb.Append(_shopkeeper.ChatText());
+        sb.Append("\n\n");
+
+        var keys = _menuItems.Keys.ToList();
+        keys.Sort();
+
+        List<string> lines = [];
+        foreach (var key in keys)
+        {
+            var line = new StringBuilder();
+            line.Append(key);
+            line.Append(") ");
+            line.Append(_menuItems[key].Item.FullName);
+
+            if (_menuItems[key].Item.Count > 1)
+            {
+                line.Append(" (");
+                line.Append(_menuItems[key].Item.Count);
+                line.Append(')');
+            }
+
+            int price = (int)(_menuItems[key].Item.Value * _shopkeeper.Markup);
+            line.Append(" - [YELLOW $]");
+            line.Append(price);
+            
+            if (_menuItems[key].Item.Count > 1)
+                line.Append(" apiece");
+            lines.Add(line.ToString());
+        }
+
+        int widest = lines.Select(l => l.Length).Max() + 2;
+        int l = 0;
+        foreach (var key in keys)
+        {
+            if (_menuItems[key].Count > 0)
+            {
+                sb.Append(lines[l].PadRight(widest + 2));
+                if (_menuItems[key].Item.Count == 1)
+                    sb.Append('✔');
+                else
+                {
+                    sb.Append('x');
+                    sb.Append(_menuItems[key].Count);
+                }
+            }
+            else 
+            {
+                sb.Append(lines[l]);
+            }
+            sb.Append('\n');
+            ++l;
+        }
+
+        int invoice = TotalInvoice();
+        if (invoice > 0)
+        {
+            sb.Append("\nTotal bill: ");
+            sb.Append("[YELLOW $]");
+            sb.Append(invoice);
+            sb.Append('\n');
+        }
+
+        if (invoice > _ui.Player.Inventory.Zorkmids)
+        {
+            sb.Append("[brightred You don't have enough money for all that!]");
+        }
+
+        _ui.Popup(sb.ToString(), _shopkeeper.FullName);
+    }
+}
+
+class InventoryAccumulator(HashSet<char> options) : InputAccumulator
 {
     private char _choice;
     private HashSet<char> _options = options;
@@ -261,4 +412,10 @@ public class MenuAccumulatorResult : AccumulatorResult
 public class NumericAccumulatorResult : AccumulatorResult
 {
     public int Amount { get; set; }
+}
+
+public class ShoppingAccumulatorResult : AccumulatorResult
+{
+    public List<(char, int)> Selections { get; set; } = [];
+    public int Zorkminds { get; set; } = 0;
 }

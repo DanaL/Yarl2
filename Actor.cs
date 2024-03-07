@@ -169,18 +169,12 @@ class Villager : Actor
         Recovery = 1.0;
     }
 
-    // I guess I'll include chat dialogues and such as part of the Behaviour sublcasses?
-    // I'll need to include menu/inventory interaction stuff for villagers who sell
-    // goods and services.
-    public string Chat()
-    {
-        return ((IChatter)_behaviour).Chat(this);
-    }
+    public string ChatText() => ((IChatter)_behaviour).ChatText(this);
 }
 
 interface IChatter
 {
-    string Chat(Villager villager);
+    string ChatText(Villager villager);
 }
 
 interface IBehaviour 
@@ -208,7 +202,7 @@ class PriestBehaviour : IBehaviour, IChatter
         }
     }
 
-    public string Chat(Villager priest)
+    public string ChatText(Villager priest)
     {
         var sb = new StringBuilder();
         sb.Append("\"It is my duty to look after the spiritual well-being of the village of ");
@@ -221,7 +215,7 @@ class PriestBehaviour : IBehaviour, IChatter
 
 class SmithBehaviour : IBehaviour, IChatter
 {
-    DateTime _lastBark = new DateTime(1900, 1, 1);
+    DateTime _lastBark = new(1900, 1, 1);
     
     static string PickBark(Actor smith, Random rng)
     {        
@@ -270,52 +264,15 @@ class SmithBehaviour : IBehaviour, IChatter
         }
     }
 
-    string BuildMenu(Villager smith)
+    public string ChatText(Villager smith)
     {
         var sb = new StringBuilder();
-
-        var items = smith.Inventory.UsedSlots()
-                         .Select(s => smith.Inventory.ItemAt(s));
-        char ch = 'a';
-        foreach (var item in items)
-        {
-            sb.Append(ch++);
-            sb.Append(") ");
-            sb.Append(item.FullName);
-
-            if (item.Count > 1)
-            {
-                sb.Append(" (");
-                sb.Append(item.Count);
-                sb.Append(')');
-            }
-
-            int price = (int) (item.Value * smith.Markup);
-            sb.Append(" - ");
-            sb.Append(price);
-            sb.Append("gp");
-
-            if (item.Count > 1)
-                sb.Append(" apiece\n");
-            else
-                sb.Append('\n');
-        }
-
-        return sb.ToString();
-    }
-
-    public string Chat(Villager smith)
-    {
-        var sb = new StringBuilder();
-
         sb.Append('"');
         if (smith.Markup > 1.75)
             sb.Append("If you're looking for arms or armour, I'm the only game in town!");
         else
             sb.Append("You'll want some weapons or better armour before venturing futher!");
         sb.Append('"');
-        sb.Append("\n\n");
-        sb.Append(BuildMenu(smith));
 
         return sb.ToString();
     }

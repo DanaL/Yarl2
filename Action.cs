@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
 using System.Text;
 
 namespace Yarl2;
@@ -144,6 +145,27 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
+class ShopAction(GameState gs) : Action
+{
+    GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = false };
+
+        result.EnergyCost = 1.0;
+
+        return result;
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var shopResult = result as ShoppingAccumulatorResult;
+        foreach (var (ch, num) in shopResult.Selections)
+            Console.WriteLine($"{ch} {num}");
+    }
+}
+
 abstract class DirectionalAction(Actor actor) : Action
 {
     protected readonly Actor _actor = actor;
@@ -172,15 +194,11 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         }
         else if (other is Villager villager)
         {
-            var dialogueText = new StringBuilder();
-            dialogueText.Append(villager.Appearance.IndefArticle().Capitalize());
-            dialogueText.Append(".\n\n");
-            dialogueText.Append(villager.Chat());
+            
+            var acc = new ShopMenuAccumulator(villager, _gs.UI);
+            _gs.Player.ReplacePendingAction(new ShopAction(_gs), acc);
 
-            _gs.UI.Popup(dialogueText.ToString(), villager.FullName);
-
-            result.Successful = true;
-            result.EnergyCost = 1.0;
+            return new ActionResult() { Successful = false, EnergyCost = 0.0 };
         }
         else
         {
