@@ -194,9 +194,9 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         }
         else if (other is Villager villager)
         {
-            
-            var acc = new ShopMenuAccumulator(villager, _gs.UI);
-            _gs.Player.ReplacePendingAction(new ShopAction(_gs), acc);
+
+            var (action, acc) = villager.Chat(_gs);
+            _gs.Player.ReplacePendingAction(action, acc);
 
             return new ActionResult() { Successful = false, EnergyCost = 0.0 };
         }

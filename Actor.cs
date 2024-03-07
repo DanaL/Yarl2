@@ -155,6 +155,12 @@ class Monster : Actor
     }
 }
 
+interface IChatter
+{
+    string ChatText(Villager villager);
+    (Action, InputAccumulator) Chat(Villager villager, GameState gs);
+}
+
 class Villager : Actor
 {
     public string Appearance { get; set; } = "";
@@ -170,12 +176,11 @@ class Villager : Actor
     }
 
     public string ChatText() => ((IChatter)_behaviour).ChatText(this);
+
+    public (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
 }
 
-interface IChatter
-{
-    string ChatText(Villager villager);
-}
+
 
 interface IBehaviour 
 { 
@@ -202,6 +207,11 @@ class PriestBehaviour : IBehaviour, IChatter
         }
     }
 
+    public (Action, InputAccumulator) Chat(Villager villager, GameState gs)
+    {
+        throw new NotImplementedException();
+    }
+
     public string ChatText(Villager priest)
     {
         var sb = new StringBuilder();
@@ -216,7 +226,7 @@ class PriestBehaviour : IBehaviour, IChatter
 class SmithBehaviour : IBehaviour, IChatter
 {
     DateTime _lastBark = new(1900, 1, 1);
-    
+        
     static string PickBark(Actor smith, Random rng)
     {        
         var items = smith.Inventory.UsedSlots()
@@ -275,6 +285,14 @@ class SmithBehaviour : IBehaviour, IChatter
         sb.Append('"');
 
         return sb.ToString();
+    }
+
+    public (Action, InputAccumulator) Chat(Villager smith, GameState gs)
+    {
+        var acc = new ShopMenuAccumulator(smith, gs.UI);
+        var action = new ShopAction(gs);
+
+        return (action, acc);
     }
 }
 
