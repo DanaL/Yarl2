@@ -69,6 +69,34 @@ class Village
         return cleric;
     }
 
+    static Villager GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+    {
+        var grocer = new Villager()
+        {
+            Name = ng.GenerateName(rng.Next(5, 9)),
+            Status = ActorStatus.Indifferent,
+            Appearance = VillagerAppearance(rng),
+            Town = town,
+            Markup = 1.25 + rng.NextDouble() / 2
+        };
+        var sqs = town.Market.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
+                                          map.TileAt(sq).Type == TileType.WoodFloor).ToList();
+        var sq = sqs[rng.Next(sqs.Count)];
+        grocer.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        grocer.SetBehaviour(new GrocerBehaviour());
+        
+        grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+        grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+        grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+        grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+        for (int j = 0; j < rng.Next(4); j++)
+            grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+        for (int j = 0; j < rng.Next(1, 4); j ++)
+            grocer.Inventory.Add(ItemFactory.Get("potion of healing", objDb), grocer.ID);
+
+        return grocer;
+    }
+
     static Villager GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
     {
         var smith = new Villager()
@@ -115,5 +143,9 @@ class Village
         var smith = GenerateSmith(map, town, ng, objDb, rng);
         objDb.Add(smith);
         objDb.SetToLoc(smith.Loc, smith);
+
+        var grocer = GenerateGrocer(map, town, ng, objDb, rng);
+        objDb.Add(grocer);
+        objDb.SetToLoc(grocer.Loc, grocer);
     }
 }

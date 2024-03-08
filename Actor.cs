@@ -302,6 +302,58 @@ class SmithBehaviour : IBehaviour, IChatter
     }
 }
 
+class GrocerBehaviour : IBehaviour, IChatter
+{
+    DateTime _lastBark = new(1900, 1, 1);
+        
+    static string PickBark(Actor grocer, Random rng)
+    {        
+        int roll = rng.Next(3);
+        if (roll == 0)
+            return "Supplies for the prudent adventurer!";
+        else if (roll == 1)
+            return "Check out our specials!";
+        else
+            return "Store credit only.";
+    }
+
+    public Action CalcAction(Actor grocer, GameState gameState, UserInterface ui, Random rng)
+    {
+        if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+        {
+            var bark = new BarkAnimation(ui, 2500, grocer, PickBark(grocer, rng));
+            ui.RegisterAnimation(bark);
+            _lastBark = DateTime.Now;
+
+            return new PassAction();
+        }
+        else
+        {
+            return new PassAction();
+        }
+    }
+
+    public string ChatText(Villager grocer)
+    {
+        var sb = new StringBuilder();
+        sb.Append('"');
+        sb.Append("Welcome to ");
+        sb.Append(grocer.Town.Name.Capitalize());
+        sb.Append("market!");
+        sb.Append('"');
+
+        return sb.ToString();
+    }
+
+    public (Action, InputAccumulator) Chat(Villager smith, GameState gs)
+    {
+        var acc = new ShopMenuAccumulator(smith, gs.UI);
+        var action = new ShopAction(smith, gs);
+
+        return (action, acc);
+    }
+}
+
 // Very basic idea for a wolf or such, which can move and attack the player
 // but doesn't have hands/can't open doors etc
 class BasicMonsterBehaviour : IBehaviour
