@@ -347,7 +347,6 @@ abstract class UserInterface
             lt.Add(padding);
             lt.Add((Colours.WHITE, " |"));
             WriteText(lt, row++, col, width - 4);
-            //WriteLine(("| " + line).PadRight(width - 2) + " |", row++, col, width, Colours.WHITE);
         }
         WriteLine(border, row, col, width, Colours.WHITE);
     }
@@ -356,6 +355,8 @@ abstract class UserInterface
     {
         foreach (var piece in pieces)
         {
+            if (piece.Item2.Length == 0)
+                continue;
             WriteLine(piece.Item2, lineNum, col, piece.Item2.Length, piece.Item1);
             col += piece.Item2.Length;
         }

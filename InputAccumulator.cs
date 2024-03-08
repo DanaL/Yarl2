@@ -185,12 +185,15 @@ class ShopMenuAccumulator : InputAccumulator
             if (_menuItems[key].Count > 0)
             {
                 sb.Append(lines[l].PadRight(widest + 2));
-                if (_menuItems[key].Item.Count == 1)
-                    sb.Append('✔');
+                if (_menuItems[key].Item.Count == 1) 
+                {
+                    sb.Append("[GREEN *]");
+                }
                 else
                 {
-                    sb.Append('x');
+                    sb.Append("[GREEN ");
                     sb.Append(_menuItems[key].Count);
+                    sb.Append(']');
                 }
             }
             else 

@@ -378,7 +378,7 @@ class Player : Actor, IPerformer
                 _deferred = new NullAction();
             }
             else
-                return new PassAction(this);
+                return new PassAction();
         }
 
         return new NullAction();

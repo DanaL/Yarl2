@@ -199,17 +199,23 @@ class PriestBehaviour : IBehaviour, IChatter
             ui.RegisterAnimation(bark); 
             _lastIntonation = DateTime.Now;
 
-            return new PassAction(actor);
+            return new PassAction();
         }
         else
         {
-            return new PassAction(actor);
+            return new PassAction();
         }
     }
 
-    public (Action, InputAccumulator) Chat(Villager villager, GameState gs)
+    public (Action, InputAccumulator) Chat(Villager priest, GameState gs)
     {
-        throw new NotImplementedException();
+        var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
+        sb.Append(".\n\n");
+        sb.Append(priest.ChatText());
+        sb.Append("\n\n");
+
+        gs.UI.Popup(sb.ToString(), priest.Name);
+        return (new PassAction(), new PauseForMoreAccumulator());
     }
 
     public string ChatText(Villager priest)
@@ -266,11 +272,11 @@ class SmithBehaviour : IBehaviour, IChatter
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
-            return new PassAction(smith);
+            return new PassAction();
         }
         else
         {
-            return new PassAction(smith);
+            return new PassAction();
         }
     }
 
@@ -304,7 +310,7 @@ class BasicMonsterBehaviour : IBehaviour
     {
         if (actor.Status == ActorStatus.Idle) 
         {
-            return new PassAction(actor);
+            return new PassAction();
         }
 
         // Basic monster behaviour:
@@ -331,7 +337,7 @@ class BasicMonsterBehaviour : IBehaviour
         }
         
         // Otherwise do nothing!
-        return new PassAction(actor);
+        return new PassAction();
     }
 }
 
@@ -342,7 +348,7 @@ class BasicHumanoidBehaviour : IBehaviour
     {
         if (actor.Status == ActorStatus.Idle) 
         {            
-            return new PassAction(actor);
+            return new PassAction();
         }
         
         // Fight!
@@ -369,7 +375,7 @@ class BasicHumanoidBehaviour : IBehaviour
         }
 
         // Otherwise do nothing!
-        return new PassAction(actor);
+        return new PassAction();
     }
 }
 
@@ -377,7 +383,7 @@ class VillagerBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
-        return new PassAction(actor);
+        return new PassAction();
     }
 }
 

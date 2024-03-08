@@ -788,14 +788,10 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class PassAction(IPerformer performer) : Action
-{
-    private IPerformer _perfmer = performer;
-
+class PassAction : Action
+{    
     public override ActionResult Execute() 
     {
-        // do nothing for now but eventually there will be an energy cost to passing
-        // (ie., time will pass in game)
         return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }
 }

@@ -45,7 +45,7 @@ class MinorHealTrait : ObjTrait, IUSeable
         user.Stats[Attribute.HP].Change(hp);
         var msg = MessageFactory.Phrase(user.ID, Verb.Etre, Verb.Heal, false, user.Loc, gs);
         var txt = msg.Text[..^1] + $" for {hp} HP.";
-        
+
         return (true, txt);
     }
 }
@@ -190,12 +190,12 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
         if (!Lit)
-            return new PassAction(this);
+            return new PassAction();
 
         if (--Fuel > 0)
         {
             // I could also alert the player here that the torch is flickering, about to go out, etc            
-            return new PassAction(this);
+            return new PassAction();
         }
         else
         {
