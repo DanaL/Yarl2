@@ -20,6 +20,8 @@ namespace Yarl2;
 // inconvenient for me
 record struct Colour(int R, int G, int B, int Alpha);
 
+enum Dir { North, South, East, West }
+
 class Colours
 {
     public static readonly Colour BLACK = new(0, 0 , 0, 255);
