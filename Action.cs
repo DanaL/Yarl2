@@ -9,9 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-using System.Text;
-
 namespace Yarl2;
 
 class ActionResult
@@ -145,24 +142,48 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
 }
 
-class ShopAction(GameState gs) : Action
-{
+class ShopAction(Villager shopkeeper, GameState gs) : Action
+{    
     GameState _gs = gs;
+    Villager _shopkeeper = shopkeeper;
+    int _invoice;
+    List<(char, int)> _selections = [];
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() 
+        { 
+            Successful = _invoice > 0,
+            EnergyCost = 1.0
+        };
 
-        result.EnergyCost = 1.0;
+        _gs.Player.Inventory.Zorkmids -= _invoice;
 
+        foreach (var (slot, count) in _selections)
+        {
+            Item bought;
+            Item item = _shopkeeper.Inventory.ItemAt(slot);
+            if (count == item.Count)
+            {
+                bought = item;
+            }
+            else
+            {
+                bought = item.Duplicate(_gs);
+                bought.Count = count;
+            }            
+            _shopkeeper.Inventory.Remove(slot, count);
+            _gs.Player.Inventory.Add(bought, _gs.Player.ID);
+        }
+        
         return result;
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
     {
         var shopResult = result as ShoppingAccumulatorResult;
-        foreach (var (ch, num) in shopResult.Selections)
-            Console.WriteLine($"{ch} {num}");
+        _invoice = shopResult.Zorkminds;
+        _selections = shopResult.Selections;
     }
 }
 
@@ -693,7 +714,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 return new ActionResult() { Successful = true };
         }
         
-        var item = _actor.Inventory.ItemAt(Choice);        
+        var item = _actor.Inventory.ItemAt(Choice);
         if (item.Equiped && item.Type == ItemType.Armour)
         {
             var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);

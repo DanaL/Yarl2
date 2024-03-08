@@ -214,7 +214,7 @@ class PriestBehaviour : IBehaviour, IChatter
         sb.Append(priest.ChatText());
         sb.Append("\n\n");
 
-        gs.UI.Popup(sb.ToString(), priest.Name);
+        gs.UI.Popup(sb.ToString(), priest.FullName);
         return (new PassAction(), new PauseForMoreAccumulator());
     }
 
@@ -296,7 +296,7 @@ class SmithBehaviour : IBehaviour, IChatter
     public (Action, InputAccumulator) Chat(Villager smith, GameState gs)
     {
         var acc = new ShopMenuAccumulator(smith, gs.UI);
-        var action = new ShopAction(gs);
+        var action = new ShopAction(smith, gs);
 
         return (action, acc);
     }

@@ -104,7 +104,7 @@ class ShopMenuAccumulator : InputAccumulator
             Done = true;
             Success = false;
         }
-        else if (ch == '\n' || ch == '\r')
+        else if ((ch == '\n' || ch == '\r') && _ui.Player.Inventory.Zorkmids >= TotalInvoice())
         {
             Done = true;
             Success = true;
@@ -126,18 +126,13 @@ class ShopMenuAccumulator : InputAccumulator
         }
     }
 
-    public override AccumulatorResult GetResult()
+    public override AccumulatorResult GetResult() => new ShoppingAccumulatorResult()
     {
-        var result = new ShoppingAccumulatorResult();
-
-        //foreach (var (ch, num) in _selections)
-        //{
-        //    if (num > 0)
-        //        result.Selections.Add((ch, num));
-        //}
-
-        return result;
-    }
+        Zorkminds = TotalInvoice(),
+        Selections = _menuItems.Values.Where(i => i.Count > 0)
+                                      .Select(i => (i.Slot, i.Count))
+                                      .ToList()
+    };
 
     int TotalInvoice()
     {

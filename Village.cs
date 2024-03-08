@@ -91,6 +91,7 @@ class Village
             smith.Inventory.Add(ItemFactory.Get("chainmail", objDb), smith.ID);
         smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
         smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
+        smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
         if (rng.NextDouble() < 0.33)
             smith.Inventory.Add(ItemFactory.Get("battle axe", objDb), smith.ID);
         if (rng.NextDouble() < 0.33)

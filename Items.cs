@@ -300,7 +300,10 @@ class Inventory(ulong ownerID)
 
     public void Remove(char slot, int count)
     {
-        _items.Remove(slot);
+        if (count == ItemAt(slot).Count)
+            _items.Remove(slot);
+        else
+            ItemAt(slot).Count -= count;
     }
 
     // This toggles the equip status of gear only and recalculation of stuff
