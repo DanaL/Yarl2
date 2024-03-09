@@ -645,7 +645,7 @@ abstract class UserInterface
         var msg = new List<string>()
         {
             "",
-            " Being seeing you..."
+            " Be seeing you..."
         };
         WriteLongMessage(msg);
         UpdateDisplay();

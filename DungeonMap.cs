@@ -920,7 +920,7 @@ class DungeonMap(Random rng)
         ConnectRegions(map, rooms);
         FillInDeadEnds(map);
 
-        AddRiver(map, width, height, TileType.Chasm);
+        AddRiver(map, width, height, TileType.DeepWater);
 
         // We want to surround the level with permanent walls
         var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
