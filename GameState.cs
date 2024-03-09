@@ -38,7 +38,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         { TileType.Upstairs, 1 },
         { TileType.Downstairs, 1 },
         { TileType.OpenDoor, 1 },
-        { TileType.BrokenDoor, 1 }
+        { TileType.BrokenDoor, 1 },
+        { TileType.WoodBridge, 1 }
     };
 
     static readonly Dictionary<TileType, int> _passableWithDoors = new() {
@@ -48,7 +49,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         { TileType.Downstairs, 1 },
         { TileType.OpenDoor, 1 },
         { TileType.BrokenDoor, 1 },
-        { TileType.ClosedDoor, 1 }
+        { TileType.ClosedDoor, 1 },
+        { TileType.WoodBridge, 1 }
     };
 
     public void EnterLevel(int dungeon, int level)
