@@ -680,7 +680,9 @@ class DungeonMap(Random rng)
         return dirs[_rng. Next(dirs.Count)];
     }
 
-    void AddRiver(Map map, int width, int height)
+    // It's called AddRiver(), but we'll draw a few types of 'rivers'
+    // including water, chasms, and even tually lava
+    void AddRiver(Map map, int width, int height, TileType riverTile)
     {
         // pick starting wall
         int roll = _rng.Next(4);
@@ -731,8 +733,8 @@ class DungeonMap(Random rng)
         while (!done)
         {
             var nd = DeltaFromDir(dir);
-            row = row + nd.Item1;
-            col = col + nd.Item2;
+            row += nd.Item1;
+            col += nd.Item2;
             if (row < 0) 
             {
                 row = 0;
@@ -757,12 +759,12 @@ class DungeonMap(Random rng)
             dir = ChangeRiverDir(dir, origDir);
         }
 
-        DrawRiver(map, pts);
+        DrawRiver(map, pts, riverTile);
 
-        AddBridges(map, height, width);
+        AddBridges(map, height, width, riverTile);
     }
 
-    void AddBridges(Map map, int height, int width)
+    void AddBridges(Map map, int height, int width, TileType riverTile)
     {
         var regions = FindRegions(map);
         int largest = 0;
@@ -779,11 +781,11 @@ class DungeonMap(Random rng)
         var djmap = new DjikstraMap(map, 0, height, 0, width);
         var passable = new Dictionary<TileType, int>
         {
-            { TileType.DungeonFloor, 1 },
-            { TileType.DeepWater, 1 },
+            { TileType.DungeonFloor, 1 },            
             { TileType.ClosedDoor, 1 },
             { TileType.OpenDoor, 1 },
-            { TileType.WoodBridge, 1 }
+            { TileType.WoodBridge, 1 },
+            { riverTile, 1 }
         };
         
         foreach (var k in regions.Keys)
@@ -799,7 +801,7 @@ class DungeonMap(Random rng)
                 var path = djmap.ShortestPath(start.Item1, start.Item2, 0, 0);
                 foreach (var pt in path)
                 {
-                    if (map.IsTile(pt, TileType.DeepWater))
+                    if (map.IsTile(pt, riverTile))
                         map.SetTile(pt, TileFactory.Get(TileType.WoodBridge));
                 }
             }
@@ -835,58 +837,58 @@ class DungeonMap(Random rng)
         return distances.Select(d => (d.Item1, d.Item2)).ToList();
     }
 
-    void WidenRiver(Map map, int row, int col)
+    void WidenRiver(Map map, int row, int col, TileType riverTile)
     {
         var above = (row - 1, col);
         var below = (row + 1, col);
         var left = (row, col - 1);
         var right = (row, col + 1);
 
-        if (!map.IsTile(above, TileType.DeepWater) && !map.IsTile(below, TileType.DeepWater))
+        if (!map.IsTile(above,riverTile) && !map.IsTile(below, riverTile))
         {
             if (map.InBounds(above)) 
             {
-                map.SetTile(above, TileFactory.Get(TileType.DeepWater));
+                map.SetTile(above, TileFactory.Get(riverTile));
                 above = (above.Item1 - 1, above.Item2);
                 if (map.InBounds(above) && _rng.NextDouble() < 0.33)
-                    map.SetTile(above, TileFactory.Get(TileType.DeepWater));
+                    map.SetTile(above, TileFactory.Get(riverTile));
             }
             if (map.InBounds(below)) 
             {
-                map.SetTile(below, TileFactory.Get(TileType.DeepWater));
+                map.SetTile(below, TileFactory.Get(riverTile));
                 below = (below.Item1 + 1, below.Item2);
                 if (map.InBounds(below) && _rng.NextDouble() < 0.33)
-                    map.SetTile(below, TileFactory.Get(TileType.DeepWater));
+                    map.SetTile(below, TileFactory.Get(riverTile));
             }
         }
-        if (!map.IsTile(left, TileType.DeepWater) && !map.IsTile(right, TileType.DeepWater))
+        if (!map.IsTile(left, riverTile) && !map.IsTile(right, riverTile))
         {
             if (map.InBounds(left)) 
             {
-                map.SetTile(left, TileFactory.Get(TileType.DeepWater));
+                map.SetTile(left, TileFactory.Get(riverTile));
                 left = (left.Item1, left.Item2 - 1);
                 if (map.InBounds(left) && _rng.NextDouble() < 0.33)
-                    map.SetTile(left, TileFactory.Get(TileType.DeepWater));
+                    map.SetTile(left, TileFactory.Get(riverTile));
             }
             if (map.InBounds(right))
             {
-                map.SetTile(right, TileFactory.Get(TileType.DeepWater));
+                map.SetTile(right, TileFactory.Get(riverTile));
                 right = (right.Item1, right.Item2 + 1);
                 if (map.InBounds(right) && _rng.NextDouble() < 0.33)
-                    map.SetTile(right, TileFactory.Get(TileType.DeepWater));
+                    map.SetTile(right, TileFactory.Get(riverTile));
             }
         }
     }
 
-    void DrawRiver(Map map, List<(int, int, Dir)> pts)
+    void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile)
     {
         for (int j = 0; j < pts.Count - 1; j++)
         {
-            var water = Util.Bresenham(pts[j].Item1, pts[j].Item2, pts[j+1].Item1, pts[j+1].Item2);
-            foreach (var w in water)
+            var river = Util.Bresenham(pts[j].Item1, pts[j].Item2, pts[j+1].Item1, pts[j+1].Item2);
+            foreach (var w in river)
             {
-                map.SetTile(w, TileFactory.Get(TileType.DeepWater));
-                WidenRiver(map, w.Item1, w.Item2);
+                map.SetTile(w, TileFactory.Get(riverTile));
+                WidenRiver(map, w.Item1, w.Item2, riverTile);
             }
         }
     }
@@ -918,7 +920,7 @@ class DungeonMap(Random rng)
         ConnectRegions(map, rooms);
         FillInDeadEnds(map);
 
-        AddRiver(map, width, height);
+        AddRiver(map, width, height, TileType.Chasm);
 
         // We want to surround the level with permanent walls
         var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
