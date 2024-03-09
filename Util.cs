@@ -245,5 +245,101 @@ static class StringUtils
     }
 }
 
+// Class that will divide a map into disjoint regions. Useful for making sure
+// a dungeon level is fully connected, or for finding 'hidden valleys' in 
+// the wilderness map
+class RegionFinder(HashSet<TileType> passable)
+{
+    HashSet<TileType> _passable = passable;
+
+    bool Passable(TileType type) => _passable.Contains(type);
+
+    (int, int) FindDisjointFloor(Map map, Dictionary<int, HashSet<(int, int)>> regions)
+    {
+        for (int r = 0; r < map.Height; r++)
+        {
+            for (int c = 0; c < map.Width; c++)
+            {
+                if (Passable(map.TileAt(r, c).Type))
+                {
+                    bool found = false;
+                    foreach (var region in regions.Values) 
+                    {
+                        if (region.Contains((r, c))) 
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        return (r, c);
+                }
+            }
+        }
+
+        return (-1, -1);
+    }
+
+    HashSet<(int, int)> FloodFillRegion(Map map, int row, int col)
+    {
+        var sqs = new HashSet<(int ,int)>();
+        var q = new Queue<(int, int)>();
+        q.Enqueue((row, col));
+
+        while (q.Count > 0)
+        {
+            var sq = q.Dequeue();
+
+            if (sqs.Contains(sq))
+                continue;
+
+            sqs.Add(sq);
+        
+            foreach (var d in Util.Adj4)
+            {
+                var nr = sq.Item1 + d.Item1;
+                var nc = sq.Item2 + d.Item2;
+                var n = (nr, nc);
+                if (!sqs.Contains(n) && map.InBounds(nr, nc) && Passable(map.TileAt(nr, nc).Type))
+                {
+                    q.Enqueue(n);
+                }
+            }
+        }
+
+        return sqs;
+    }
+
+    public Dictionary<int, HashSet<(int, int)>> Find(Map map, bool fillSmallRegions, TileType fillTile)
+    {
+        int regionID = 0;
+        var regions = new Dictionary<int, HashSet<(int, int)>>();
+        
+        do
+        {
+            var (startRow, startCol) = FindDisjointFloor(map, regions);
+            if (startRow == -1 || startCol == -1)
+                break;
+            regions[regionID++] = FloodFillRegion(map, startRow, startCol);            
+        }
+        while (true);
+        
+        // Check for any regions that have very than three squares and just delete them
+        if (fillSmallRegions)
+        {
+            foreach (var k in regions.Keys)
+            {
+                if (regions[k].Count <= 3)
+                {
+                    foreach (var sq in regions[k])
+                        map.SetTile(sq, TileFactory.Get(fillTile));
+                    regions.Remove(k);
+                }
+            }
+        }
+        return regions;
+    }
+}
+
 class GameQuitException : Exception { }
 class PlayerKilledException(string message) : Exception(message) { }

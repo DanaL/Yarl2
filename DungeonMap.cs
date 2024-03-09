@@ -216,97 +216,6 @@ class DungeonMap(Random rng)
         return false;
     }
     
-    static bool Passable(TileType type) => type switch
-    {
-        TileType.DungeonFloor => true,
-        TileType.OpenDoor => true,
-        TileType.ClosedDoor => true,
-        _ => false
-    };
-
-    static HashSet<(int, int)> FloodFillRegion(Map map, int row, int col)
-    {
-        var sqs = new HashSet<(int ,int)>();
-        var q = new Queue<(int, int)>();
-        q.Enqueue((row, col));
-
-        while (q.Count > 0)
-        {
-            var sq = q.Dequeue();
-
-            if (sqs.Contains(sq))
-                continue;
-
-            sqs.Add(sq);
-        
-            foreach (var d in Util.Adj4)
-            {
-                var nr = sq.Item1 + d.Item1;
-                var nc = sq.Item2 + d.Item2;
-                var n = (nr, nc);
-                if (!sqs.Contains(n) && map.InBounds(nr, nc) && Passable(map.TileAt(nr, nc).Type))
-                {
-                    q.Enqueue(n);
-                }
-            }
-        }
-
-        return sqs;
-    }
-
-    static (int, int) FindDisjointFloor(Map map, Dictionary<int, HashSet<(int, int)>> regions)
-    {
-        for (int r = 0; r < map.Height; r++)
-        {
-            for (int c = 0; c < map.Width; c++)
-            {
-                if (Passable(map.TileAt(r, c).Type))
-                {
-                    bool found = false;
-                    foreach (var region in regions.Values) 
-                    {
-                        if (region.Contains((r, c))) 
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        return (r, c);
-                }
-            }
-        }
-
-        return (-1, -1);
-    }
-
-    static Dictionary<int, HashSet<(int, int)>> FindRegions(Map map)
-    {
-        int regionID = 0;
-        var regions = new Dictionary<int, HashSet<(int, int)>>();
-        
-        do
-        {
-            var (startRow, startCol) = FindDisjointFloor(map, regions);
-            if (startRow == -1 || startCol == -1)
-                break;
-            regions[regionID++] = FloodFillRegion(map, startRow, startCol);            
-        }
-        while (true);
-        
-        // Check for any regions that have very than three squares and just delete them
-        foreach (var k in regions.Keys)
-        {
-            if (regions[k].Count <= 3)
-            {
-                foreach (var sq in regions[k])
-                    map.SetTile(sq, TileFactory.Get(TileType.DungeonWall));
-                regions.Remove(k);
-            }
-        }
-        return regions;
-    }
-
     static int RegionForSq(Dictionary<int, HashSet<(int, int)>> regions, int row, int col)
     {
         foreach (var k in regions.Keys)
@@ -507,7 +416,10 @@ class DungeonMap(Random rng)
                 ConnectCircularRoom(map, room);            
         }
 
-        var regions = FindRegions(map);
+        HashSet<TileType> passable = [ TileType.DungeonFloor, TileType.BrokenDoor, TileType.OpenDoor,
+            TileType.ClosedDoor, TileType.LockedDoor, TileType.WoodBridge ]; 
+        var regionFinder = new RegionFinder(passable);
+        var regions = regionFinder.Find(map, true, TileType.DungeonWall);
 
         if (regions.Count > 1) 
         {
@@ -541,7 +453,7 @@ class DungeonMap(Random rng)
                 if (connectors.Count == 0)
                 {
                     RepairIsolatedRegion(map, regions);
-                    regions = FindRegions(map);                    
+                    regions = regionFinder.Find(map, true, TileType.DungeonWall);                    
                     if (regions.Count == 1)
                         return;
                 }
@@ -766,7 +678,10 @@ class DungeonMap(Random rng)
 
     void AddBridges(Map map, int height, int width, TileType riverTile)
     {
-        var regions = FindRegions(map);
+        HashSet<TileType> openSqs = [ TileType.DungeonFloor, TileType.BrokenDoor, TileType.OpenDoor,
+            TileType.ClosedDoor, TileType.LockedDoor, TileType.WoodBridge ]; 
+        var regionFinder = new RegionFinder(openSqs);
+        var regions = regionFinder.Find(map, false, TileType.Unknown);
         int largest = 0;
         int count = 0;
         foreach (var k in regions.Keys)
@@ -920,7 +835,7 @@ class DungeonMap(Random rng)
         ConnectRegions(map, rooms);
         FillInDeadEnds(map);
 
-        AddRiver(map, width, height, TileType.DeepWater);
+        AddRiver(map, width, height, TileType.Chasm);
 
         // We want to surround the level with permanent walls
         var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
