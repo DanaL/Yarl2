@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using SDL2;
-
 namespace Yarl2;
 
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
@@ -767,24 +765,74 @@ class DungeonMap(Random rng)
     void AddBridges(Map map, int height, int width)
     {
         var regions = FindRegions(map);
-        for (int r = 0; r < height; r++)
+        int largest = 0;
+        int count = 0;
+        foreach (var k in regions.Keys)
         {
-            for (int c= 0; c< width; c++)
+            if (regions[k].Count > count)
             {
-                var tile = map.TileAt(r, c).Type;
-                char ch = tile switch
-                {
-                    TileType.DungeonWall => '#',
-                    TileType.DungeonFloor => '.',
-                    TileType.DeepWater => '}',
-                    TileType.OpenDoor => '+',
-                    TileType.ClosedDoor => '+'
-                    _ => ' '
-                };
-                Console.Write(ch);
+                largest = k;
+                count = regions[k].Count;
             }
-            Console.WriteLine();
         }
+    
+        var djmap = new DjikstraMap(map, 0, height, 0, width);
+        var passable = new Dictionary<TileType, int>
+        {
+            { TileType.DungeonFloor, 1 },
+            { TileType.DeepWater, 1 },
+            { TileType.ClosedDoor, 1 },
+            { TileType.OpenDoor, 1 },
+            { TileType.WoodBridge, 1 }
+        };
+        
+        foreach (var k in regions.Keys)
+        {
+            if (k != largest && regions[k].Count >= 5)
+            {
+                // find the closest points between this region and the main/largest region
+                var nearby = ClosestPts(regions[largest], regions[k]);
+                var pair = nearby[_rng.Next(nearby.Count)];
+                djmap.Generate(passable, pair.Item2);
+
+                var start = pair.Item1;
+                var path = djmap.ShortestPath(start.Item1, start.Item2, 0, 0);
+                foreach (var pt in path)
+                {
+                    if (map.IsTile(pt, TileType.DeepWater))
+                        map.SetTile(pt, TileFactory.Get(TileType.WoodBridge));
+                }
+            }
+        }            
+    }
+
+    List<((int, int), (int, int))> ClosestPts(HashSet<(int, int)> lg, HashSet<(int, int)> sm)
+    {
+        List<((int, int), (int, int), int)> distances = [];
+        foreach (var pt in sm)
+        {
+            var lsm = new Loc(0, 0, pt.Item1, pt.Item2);
+            foreach (var pt2 in lg)
+            {
+                var llg = new Loc(0, 0, pt2.Item1, pt2.Item2);
+                int d = Util.Distance(lsm, llg);
+                if (distances.Count < 5)
+                    distances.Add((pt, pt2, d));
+                else
+                {
+                    for (int j = 0; j < 5; j++)
+                    {
+                        if (d < distances[j].Item3)
+                        {
+                            distances[j] = (pt, pt2, d);
+                            break;
+                        }
+                    }
+                }
+            }            
+        }
+
+        return distances.Select(d => (d.Item1, d.Item2)).ToList();
     }
 
     void WidenRiver(Map map, int row, int col)

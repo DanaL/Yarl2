@@ -51,6 +51,7 @@ enum TileType
     Dirt,
     Well,
     Bridge,
+    WoodBridge,
     Statue,
     Landmark,
     Chasm
@@ -189,6 +190,7 @@ class TileFactory
     private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false);
     private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
     private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
+    private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false);
     private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true);
     private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false);
 
@@ -217,6 +219,7 @@ class TileFactory
         TileType.Dirt => Dirt,
         TileType.Well => Well,
         TileType.Bridge => Bridge,
+        TileType.WoodBridge => WoodBridge,
         TileType.Statue => Statue,
         TileType.Chasm => Chasm,
         _ => Unknown
@@ -431,6 +434,7 @@ class Map : ICloneable
                     TileType.Grass => ',',
                     TileType.Tree => 'T',
                     TileType.DeepWater => '~',
+                    TileType.WoodBridge => '=',
                     _ => ' '
                 };
                 Console.Write(ch);

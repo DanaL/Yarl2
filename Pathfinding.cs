@@ -55,7 +55,12 @@ class DjikstraMap
         int goalCol = goal.Item2 - _loCol;
         _djikstraMap[goalRow, goalCol] = 0;
 
-        var q = new Queue<(int, int)>(Util.Adj4Sqs(goalRow, goalCol));
+        var q = new Queue<(int, int)>();
+        foreach (var sq in Util.Adj4Sqs(goalRow, goalCol))
+        {
+            if (sq.Item1 >= 0 && sq.Item2 >= 0 && sq.Item1 < height && sq.Item2 < width)
+                q.Enqueue(sq);
+        }
         HashSet<(int, int)> visited = [(goalRow, goalCol)];
 
         while (q.Count > 0)
