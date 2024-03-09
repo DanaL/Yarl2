@@ -415,10 +415,8 @@ class DungeonMap(Random rng)
             else
                 ConnectCircularRoom(map, room);            
         }
-
-        HashSet<TileType> passable = [ TileType.DungeonFloor, TileType.BrokenDoor, TileType.OpenDoor,
-            TileType.ClosedDoor, TileType.LockedDoor, TileType.WoodBridge ]; 
-        var regionFinder = new RegionFinder(passable);
+        
+        var regionFinder = new RegionFinder(new DungeonPassable());
         var regions = regionFinder.Find(map, true, TileType.DungeonWall);
 
         if (regions.Count > 1) 
@@ -677,10 +675,8 @@ class DungeonMap(Random rng)
     }
 
     void AddBridges(Map map, int height, int width, TileType riverTile)
-    {
-        HashSet<TileType> openSqs = [ TileType.DungeonFloor, TileType.BrokenDoor, TileType.OpenDoor,
-            TileType.ClosedDoor, TileType.LockedDoor, TileType.WoodBridge ]; 
-        var regionFinder = new RegionFinder(openSqs);
+    {        
+        var regionFinder = new RegionFinder(new DungeonPassable());
         var regions = regionFinder.Find(map, false, TileType.Unknown);
         int largest = 0;
         int count = 0;

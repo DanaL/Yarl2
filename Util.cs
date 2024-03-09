@@ -245,14 +245,43 @@ static class StringUtils
     }
 }
 
+interface IPassable
+{
+    bool Passable(TileType type);
+}
+
+class DungeonPassable : IPassable
+{
+    public bool Passable(TileType type) => type switch
+    {
+        TileType.DungeonFloor => true,
+        TileType.BrokenDoor => true,
+        TileType.OpenDoor => true,
+        TileType.ClosedDoor => true,
+        TileType.LockedDoor => true,
+        TileType.WoodBridge => true,
+        _ => false
+    };
+}
+
+class WildernessPassable : IPassable 
+{
+    public bool Passable(TileType type) => type switch
+    {
+        TileType.Mountain => false,
+        TileType.SnowPeak => false,
+        TileType.Water => false,
+        TileType.DeepWater => false,
+        _ => true
+    };
+}
+
 // Class that will divide a map into disjoint regions. Useful for making sure
 // a dungeon level is fully connected, or for finding 'hidden valleys' in 
 // the wilderness map
-class RegionFinder(HashSet<TileType> passable)
+class RegionFinder(IPassable pc)
 {
-    HashSet<TileType> _passable = passable;
-
-    bool Passable(TileType type) => _passable.Contains(type);
+    IPassable _passableChecker = pc;
 
     (int, int) FindDisjointFloor(Map map, Dictionary<int, HashSet<(int, int)>> regions)
     {
@@ -260,7 +289,7 @@ class RegionFinder(HashSet<TileType> passable)
         {
             for (int c = 0; c < map.Width; c++)
             {
-                if (Passable(map.TileAt(r, c).Type))
+                if (_passableChecker.Passable(map.TileAt(r, c).Type))
                 {
                     bool found = false;
                     foreach (var region in regions.Values) 
@@ -300,7 +329,7 @@ class RegionFinder(HashSet<TileType> passable)
                 var nr = sq.Item1 + d.Item1;
                 var nc = sq.Item2 + d.Item2;
                 var n = (nr, nc);
-                if (!sqs.Contains(n) && map.InBounds(nr, nc) && Passable(map.TileAt(nr, nc).Type))
+                if (!sqs.Contains(n) && map.InBounds(nr, nc) && _passableChecker.Passable(map.TileAt(nr, nc).Type))
                 {
                     q.Enqueue(n);
                 }

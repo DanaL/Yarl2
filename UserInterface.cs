@@ -398,7 +398,7 @@ abstract class UserInterface
         }
             
         if (GameState.CurrDungeon == 0)
-            WriteLine("| Outside", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine($"| Outside ({Player.Loc.Row}, {Player.Loc.Col})", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
         else
             WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
         WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);

@@ -442,6 +442,10 @@ internal class Wilderness(Random rng)
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
         
+        // find the 'hidden valleys' that may be among the mountains
+        var regionFinder = new RegionFinder(new WildernessPassable());
+        var regions = regionFinder.Find(map, false, TileType.Unknown);
+        
         return map;
     }
 }
