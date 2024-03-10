@@ -233,6 +233,20 @@ class DungeonBuilder
             dungeon.AddMap(levels[l]);
         }   
 
+        DungeonMap.AddRiver(levels[0], w + 1, h + 1, TileType.Chasm, rng);
+        // We want to make any square that's a wall below the chasm into dungeon floor
+        for (int r = 1; r < h; r++)
+        {
+            for (int c = 1; c < w; c++) 
+            {
+                var pt = (r, c);
+                if (levels[0].IsTile(pt, TileType.Chasm) && levels[1].IsTile(pt, TileType.DungeonWall))
+                {
+                    levels[1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
+                }
+            }
+        }
+
         SetStairs(levels, h, w, numOfLevels, entrance, rng);
         
         DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
