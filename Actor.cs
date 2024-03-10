@@ -66,6 +66,7 @@ class Actor : GameObj, IPerformer
 
     public override string FullName => Name.DefArticle();    
     public virtual int TotalMeleeAttackModifier() => 0;
+    public virtual int TotalMissileAttackModifier(Item weapon) => 0;
     public virtual int AC => 10;
     public virtual List<Damage> MeleeDamage() => [];
     public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }

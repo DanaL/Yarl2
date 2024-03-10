@@ -66,6 +66,22 @@ class Player : Actor, IPerformer
         }
     }
 
+    public override int TotalMissileAttackModifier(Item weapon)
+    {
+       int mod = Stats[Attribute.Dexterity].Curr;
+
+       if (Stats.TryGetValue(Attribute.MissileAttackBonus, out var missibleAttackBonus))
+            mod += missibleAttackBonus.Curr;
+
+        AttackTrait? attackTrait = (AttackTrait?) weapon.Traits
+                                                    .Where(t => t is AttackTrait)
+                                                    .FirstOrDefault() 
+                                            ?? throw new Exception("Why would we have a weapon without an attack trait??");
+        mod += attackTrait.Bonus;
+
+        return mod;
+    }
+
     public override int TotalMeleeAttackModifier()
     {
         int mod = Stats[Attribute.Strength].Curr;
@@ -73,9 +89,9 @@ class Player : Actor, IPerformer
         var weapon = Inventory.ReadiedWeapon();
         if (weapon is not null)
         {
-            MeleeAttackTrait? attackTrait = (MeleeAttackTrait?) weapon.Traits
-                                                                      .Where(t => t is MeleeAttackTrait)
-                                                                      .FirstOrDefault() 
+            AttackTrait? attackTrait = (AttackTrait?) weapon.Traits
+                                                            .Where(t => t is AttackTrait)
+                                                            .FirstOrDefault() 
                                             ?? throw new Exception("Why would we have a weapon without an attack trait??");
             mod += attackTrait.Bonus;
         }
@@ -99,7 +115,7 @@ class Player : Actor, IPerformer
                 {
                     dmgs.Add(new Damage(dmg.DamageDie, dmg.NumOfDie, dmg.DamageType));
                 }
-            }            
+            }
         }
         else
         {

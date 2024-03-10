@@ -50,19 +50,16 @@ class MinorHealTrait : ObjTrait, IUSeable
     }
 }
 
-// Should split the traits into Attack traits and Damage traits? Maybe?
-abstract class AttackTrait : ObjTrait { }
-
-class MeleeAttackTrait : AttackTrait
+class AttackTrait : ObjTrait
 {
     public int Bonus { get; set; }
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
 
     public override ObjTrait Duplicate(Item _) => 
-        new MeleeAttackTrait() { Bonus = Bonus };
+        new AttackTrait() { Bonus = Bonus };
 
-    public override string AsText() => $"MeleeAttackTrait#{Bonus}";
+    public override string AsText() => $"AttackTrait#{Bonus}";
 
     public override bool Acitve => true;
 }
@@ -216,8 +213,8 @@ class TraitFactory
 
         switch (type)
         {
-            case "MeleeAttackTrait":
-                trait = new MeleeAttackTrait()
+            case "AttackTrait":
+                trait = new AttackTrait()
                 {
                     Bonus = int.Parse(pieces[3])
                 };

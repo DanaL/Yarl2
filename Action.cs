@@ -682,23 +682,30 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class ThrowAction(UserInterface ui, Player player, GameState gs, char slot) : Action
-{
-    public Loc Target { get; set; }
+class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+{    
     readonly UserInterface _ui = ui;
-    readonly Player _player = player;
+    readonly Actor _actor = actor;
     readonly GameState _gs = gs;
     readonly char _slot = slot;
+    Loc _target { get; set; }
 
     public override ActionResult Execute()
     {
-        return new ActionResult() { Successful = false, EnergyCost = 1.0 };
+        var ammo = _actor.Inventory.ItemAt(_slot).Duplicate(_gs);
+        ammo.Count = 1;
+        _actor.Inventory.Remove(_slot, 1);
+        _gs.ItemDropped(ammo, _target.Row, _target.Col);
+        ammo.Equiped = false;
+        _actor.CalcEquipmentModifiers();
+
+        return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
     {
         var locResult = result as LocAccumulatorResult;
-        Console.WriteLine($"Throw thing at {locResult.Loc}");
+        _target = locResult.Loc;
     }
 }
 
@@ -730,12 +737,12 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
             return result;
         }
 
-        var aimAction = new ThrowAction(_ui, _player, _gs, Choice);
+        var action = new ThrowAction(_ui, _player, _gs, Choice);
         var range = 5 + _player.Stats[Attribute.Strength].Curr;
         if (range < 2)
             range = 2;
         var acc = new AimAccumulator(_ui, _player.Loc, range);
-        _player.ReplacePendingAction(aimAction, acc);
+        _player.ReplacePendingAction(action, acc);
                 
         return new ActionResult() { Successful = false, EnergyCost = 0.0 };
     }

@@ -24,6 +24,7 @@ enum Attribute
     Constitution,
     Piety, // What I renamed D&D's Wisdom
     MeleeAttackBonus,
+    MissileAttackBonus,
     Level,
     XP,
     Depth,
@@ -32,6 +33,7 @@ enum Attribute
     DmgRolls,
     XPValue,
     MeleeDmgBonus,
+    MissileDmgBonus,
     ACMod,
     Cleave,
     Impale,

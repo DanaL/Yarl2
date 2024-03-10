@@ -47,7 +47,7 @@ class Battle
         Actor? occ = gs.ObjDB.Occupant(checkLoc);
         if (occ is not null && attackRoll >= occ.AC)
         {
-            ResolveHit(attacker, occ, gs, result, Verb.Impale, rng);
+            ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale, rng);
             success = true;
         }
 
@@ -67,7 +67,7 @@ class Battle
             {
                 if (attackRoll >= occ.AC)
                 {
-                    ResolveHit(attacker, occ, gs, result, Verb.Cleave, rng);
+                    ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave, rng);
                     success = true;
                 }
             }
@@ -76,7 +76,30 @@ class Battle
         return success;
     }
 
-    static void ResolveHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
+    static void ResolveMissileHit(Actor attacker, Actor target, Item ammo, GameState gs, ActionResult result, Random rng)
+    {
+        List<(int, DamageType)> dmg = [];
+        foreach (var trait in ammo.Traits)
+        {
+            if (trait is DamageTrait dt)
+            {
+                var d = new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType);
+                dmg.Add(DamageRoll(d, rng));
+            }
+        }
+
+        int bonusDamage = 0;
+        if (attacker.Stats.TryGetValue(Attribute.Dexterity, out var dex))
+            bonusDamage += dex.Curr;
+        if (attacker.Stats.TryGetValue(Attribute.MissileAttackBonus, out var mdb))
+            bonusDamage += mdb.Curr;
+
+        Message msg = MessageFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
+        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+        ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    }
+
+    static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
     {
         // Need to handle the case where the player isn't currently wielding a weapon...
         var dmg = attacker.MeleeDamage()
@@ -99,9 +122,12 @@ class Battle
                 bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
         }
         Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
-
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+        ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    }
 
+    static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, Message msg, GameState gs)
+    {        
         if (hpLeft < 1)
         {
             if (target is Player)
@@ -138,7 +164,7 @@ class Battle
         int roll = AttackRoll(rng) + attacker.TotalMeleeAttackModifier();
         if (roll >= target.AC)
         {
-            ResolveHit(attacker, target, gs, result, Verb.Hit, rng);
+            ResolveMeleeHit(attacker, target, gs, result, Verb.Hit, rng);
             
             // in the future I'll need to make sure the other targets aren't friendly/allies
             // should I limit Impale and Cleave to weapon types? Maybe Slashing and Bludgeoning
@@ -152,6 +178,24 @@ class Battle
             {
                 specialAttack = ResolveImpale(attacker, target, roll, gs, result, rng);
             }
+        }
+        else
+        {
+            Message msg = MessageFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
+            result.Messages.Add(msg);
+        }
+
+        return result;
+    }
+
+    public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, Random rng)
+    {
+        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+
+        int roll = AttackRoll(rng) + attacker.TotalMissileAttackModifier(ammo);
+        if (roll >= target.AC)
+        {
+            ResolveMissileHit(attacker, target, ammo, gs, result, rng);            
         }
         else
         {
