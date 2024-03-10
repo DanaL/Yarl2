@@ -66,6 +66,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
     public bool InWilderness => CurrDungeon == 0;
 
+    public Tile TileAt(Loc loc)
+    {
+        var d = Campaign!.Dungeons[loc.DungeonID];
+        var map = d.LevelMaps[loc.Level];
+        return map.TileAt(loc.Row, loc.Col);
+    }
+
     public bool LOSBetween(Loc a, Loc b)
     {
         if (a.DungeonID != b.DungeonID || a.Level != b.Level)

@@ -13,10 +13,41 @@ namespace Yarl2;
 
 abstract class Animation
 {
-    public DateTime Expiry { get; protected set; }
+    public DateTime Expiry { get; set; }
     public abstract void Update();
 }
 
+class AimAnimation : Animation
+{
+    public Loc Target { get; set; }
+    Loc _start;    
+    readonly int _scrW;
+    readonly int _scrH;
+    readonly UserInterface _ui;
+
+    public AimAnimation(UserInterface ui, Loc start)
+    {
+        _start = start;
+        Target = start;
+        Expiry = DateTime.MaxValue;
+        _ui = ui;
+        _scrW = ui.SqsOnScreen.GetLength(1);
+        _scrH = ui.SqsOnScreen.GetLength(0);
+    }
+    
+    public override void Update()
+    {    
+        foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
+        {
+            var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2);
+             if (scrR > 0 && scrR < _scrH && scrC > 0 && scrC < _scrW)
+             {
+                Sqr sq = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = Colours.HILITE };
+                _ui.SqsOnScreen[scrR, scrC] = sq;
+            }
+        }
+    }
+}
 
 class BarkAnimation : Animation
 {    

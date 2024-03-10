@@ -31,11 +31,87 @@ abstract class InputAccumulator
     }
 }
 
+class AimAccumulator : InputAccumulator
+{
+    readonly UserInterface _ui;
+    Loc _start;
+    Loc _target;
+    AimAnimation _anim;
+    readonly int _maxRange;
+
+    public AimAccumulator(UserInterface ui, Loc start, int maxRange)
+    {
+        _ui = ui;
+        _start = start;
+        _target = start;
+        _anim = new AimAnimation(_ui, _target);
+        _ui.RegisterAnimation(_anim);
+        _maxRange = maxRange;
+    }
+
+    bool Passable(Loc loc)
+    {
+        var tile = _ui.GameState.TileAt(loc);
+        
+        switch (tile.Type)
+        {
+            case TileType.DeepWater:
+            case TileType.Water:
+            case TileType.Chasm:
+                return true;
+            default:
+                return tile.Passable();
+        }
+    }
+
+    public override void Input(char ch)
+    {
+        if (ch == Constants.ESC)
+        {
+            Done = true;
+            Success = false;
+
+            ExpireAnimation();
+            return;
+        }
+        else if (ch == '\n' || ch == '\r')
+        {
+            Done = true;
+            Success = true;
+
+            ExpireAnimation();
+            return;
+        }
+
+        var dir = Util.KeyToDir(ch);
+        if (dir != (0, 0))
+        {
+            Loc mv = _target with { Row = _target.Row + dir.Item1, 
+                                    Col = _target.Col + dir.Item2 };
+            if (Util.Distance(_start, mv) <= _maxRange && Passable(mv))
+            {
+                _target = mv;
+                _anim.Target = mv;
+            }
+        }
+    }
+
+    void ExpireAnimation()
+    {
+        _anim.Expiry = DateTime.MinValue;
+    }
+
+    public override AccumulatorResult GetResult() => new LocAccumulatorResult()
+    {
+        Loc = _target
+    };
+}
+
 class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
 {
-    private UserInterface _ui = ui;
-    private string _prompt = prompt;
-    private string _value = "";
+    UserInterface _ui = ui;
+    string _prompt = prompt;
+    string _value = "";
 
     public override void Input(char ch)
     {
@@ -334,51 +410,10 @@ class DirectionAccumulator : InputAccumulator
     public override void Input(char ch)
     {
         // Need to eventually handle ESC
-        if (ch == 'y')
+        var dir = Util.KeyToDir(ch);
+        if (dir != (0, 0))
         {
-            _result = (-1, -1);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'u')
-        {
-            _result = (-1, 1);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'h')
-        {
-            _result = (0, -1);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'j')
-        {
-            _result = (1, 0);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'k')
-        {
-            _result = (-1, 0);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'l')
-        {
-            _result = (0, 1);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'b')
-        {
-            _result = (1, -1);
-            Done = true;
-            Success = true;
-        }
-        else if (ch == 'n')
-        {
-            _result = (1, 1); 
+            _result = dir;
             Done = true;
             Success = true;
         }
@@ -394,25 +429,30 @@ class DirectionAccumulator : InputAccumulator
     }
 }
 
-public class AccumulatorResult {}
+class AccumulatorResult {}
 
-public class DirectionAccumulatorResult : AccumulatorResult
+class LocAccumulatorResult : AccumulatorResult
+{
+    public Loc Loc { get; set; }
+}
+
+class DirectionAccumulatorResult : AccumulatorResult
 {
     public int Row { get; set; }
     public int Col { get; set; }
 }
 
-public class MenuAccumulatorResult : AccumulatorResult
+class MenuAccumulatorResult : AccumulatorResult
 {
     public char Choice { get; set; }
 }
 
-public class NumericAccumulatorResult : AccumulatorResult
+class NumericAccumulatorResult : AccumulatorResult
 {
     public int Amount { get; set; }
 }
 
-public class ShoppingAccumulatorResult : AccumulatorResult
+class ShoppingAccumulatorResult : AccumulatorResult
 {
     public List<(char, int)> Selections { get; set; } = [];
     public int Zorkminds { get; set; } = 0;

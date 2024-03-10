@@ -329,6 +329,15 @@ class Player : Actor, IPerformer
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ReadItemAction(ui, this, gameState);
             }
+            else if (ch == 't')
+            {
+                // Eventually I'll want to remember the last item thrown
+                // so the player doesn't need to always select an item if
+                // they're throwing draggers several turns in a row
+                ShowInventory(ui, "Throw what?");                
+                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+                _deferred = new ThrowSelectionAction(ui, this, gameState);
+            }
             else if (ch == 'e')
             {
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);

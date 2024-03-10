@@ -12,6 +12,7 @@
 
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using SDL2;
 
 namespace Yarl2;
 
@@ -46,6 +47,7 @@ class Colours
     public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 15);
     public static readonly Colour FX_RED = new(128, 00, 00, 175);
     public static readonly Colour FAR_BELOW = new(55, 198, 255, 75);
+    public static readonly Colour HILITE = new(255, 255, 53, 128);
 }
 
 // Miscellaneous constants used in a few places
@@ -182,6 +184,19 @@ partial class Util
         else
             return 4;
     }
+
+    public static (int, int) KeyToDir(char key) => key switch
+    {
+        'y' => (-1, -1),
+        'u' => (-1, 1),
+        'h' => (0, -1),
+        'j' => (1, 0),
+        'k' => (-1, 0),
+        'l' => (0, 1),
+        'b' => (1, -1),
+        'n' => (1, 1),
+        _ => (0, 0)
+    };
 }
 
 static class ListUtils

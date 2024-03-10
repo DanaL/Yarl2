@@ -682,12 +682,77 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class ThrowAction(UserInterface ui, Player player, GameState gs, char slot) : Action
+{
+    public Loc Target { get; set; }
+    readonly UserInterface _ui = ui;
+    readonly Player _player = player;
+    readonly GameState _gs = gs;
+    readonly char _slot = slot;
+
+    public override ActionResult Execute()
+    {
+        return new ActionResult() { Successful = false, EnergyCost = 1.0 };
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var locResult = result as LocAccumulatorResult;
+        Console.WriteLine($"Throw thing at {locResult.Loc}");
+    }
+}
+
+class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Action
+{
+    public char Choice { get; set; }
+    readonly UserInterface _ui = ui;
+    readonly Player _player = player;
+    readonly GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+       _ui.CloseMenu();
+
+        Console.WriteLine($"gonna throw item {Choice}");
+        var item = _player.Inventory.ItemAt(Choice);
+        if (item is null)
+        {
+            var msg = new Message("That doesn't make sense", _player.Loc);
+            var result = new ActionResult() { Successful = false, EnergyCost = 0.0 };
+            result.Messages.Add(msg);
+            return result;
+        }
+        else if (item.Type == ItemType.Armour && item.Equiped)
+        {
+            var msg = new Message("You're wearing that!", _player.Loc);
+            var result = new ActionResult() { Successful = false, EnergyCost = 0.0 };
+            result.Messages.Add(msg);
+            return result;
+        }
+
+        var aimAction = new ThrowAction(_ui, _player, _gs, Choice);
+        var range = 5 + _player.Stats[Attribute.Strength].Curr;
+        if (range < 2)
+            range = 2;
+        var acc = new AimAccumulator(_ui, _player.Loc, range);
+        _player.ReplacePendingAction(aimAction, acc);
+                
+        return new ActionResult() { Successful = false, EnergyCost = 0.0 };
+    }
+
+    public override void ReceiveAccResult(AccumulatorResult result)
+    {
+        var menuResult = (MenuAccumulatorResult)result;
+        Choice = menuResult.Choice;
+    }
+}
+
 class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
-    private readonly UserInterface _ui = ui;
-    private readonly Actor _actor = actor;
-    private readonly GameState _gameState = gs;
+    readonly UserInterface _ui = ui;
+    readonly Actor _actor = actor;
+    readonly GameState _gameState = gs;
 
     public override ActionResult Execute() 
     {

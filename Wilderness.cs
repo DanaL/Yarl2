@@ -337,10 +337,7 @@ internal class Wilderness(Random rng)
                 }
                 else if (v < 165)
                 {
-                    if (v % 2 == 0)
-                        tt = TileType.Grass;
-                    else
-                        tt = TileType.Tree;
+                    tt = v % 2 == 0 ? tt = TileType.Grass : TileType.Tree;
                 }
                 else if (_rng.NextDouble() < 0.9)
                 {
