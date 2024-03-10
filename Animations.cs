@@ -49,6 +49,47 @@ class AimAnimation : Animation
     }
 }
 
+class MissileAnimation : Animation 
+{
+    readonly UserInterface _ui;
+    Glyph _glyph;
+    List<Loc> _pts;
+    int _frame;
+    DateTime _lastFrame;
+    Item _ammo;
+
+    public MissileAnimation(UserInterface ui, Glyph glyph, List<Loc> pts, Item ammo)
+    {
+        _ui = ui;
+        _glyph = glyph;
+        _pts = pts;
+        Expiry = DateTime.MaxValue;
+        _frame = 0;
+        _lastFrame = DateTime.Now;
+        _ammo = ammo;
+    }
+
+    public override void Update()
+    {
+        var pt = _pts[_frame];
+        var sq = new Sqr(_glyph.Lit, Colours.BLACK, _glyph.Ch);
+        var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col);
+        _ui.SqsOnScreen[scrR, scrC] = sq;
+        
+        if ((DateTime.Now - _lastFrame).TotalMilliseconds > 5)
+        {
+            _lastFrame = DateTime.Now;
+            ++_frame;
+        }
+
+        if (_frame >= _pts.Count) 
+        {
+            Expiry = DateTime.MinValue;
+            _ammo.Hidden = false;
+        }
+    }
+}
+
 class BarkAnimation : Animation
 {    
     readonly UserInterface _ui;

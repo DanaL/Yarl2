@@ -33,7 +33,8 @@ class Item : GameObj
     public List<string> Adjectives { get; set; } = [];
     public List<ObjTrait> Traits { get; set; } = [];
     public int Value { get; set; }
-
+    public bool Hidden { get; set; } = false;
+    
     private string CalcFullName()
     {
         string name = Name;
