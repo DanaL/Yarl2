@@ -190,7 +190,7 @@ interface IBehaviour
 
 class PriestBehaviour : IBehaviour, IChatter
 {
-    DateTime _lastIntonation = new DateTime(1900, 1, 1);
+    DateTime _lastIntonation = new(1900, 1, 1);
 
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
@@ -235,9 +235,10 @@ class SmithBehaviour : IBehaviour, IChatter
     DateTime _lastBark = new(1900, 1, 1);
         
     static string PickBark(Actor smith, Random rng)
-    {        
+    {
         var items = smith.Inventory.UsedSlots()
-                         .Select(s => smith.Inventory.ItemAt(s)).ToList();
+                                   .Select(smith.Inventory.ItemAt)
+                                   .Select(si => si.Item1).ToList();
         Item? item;
         if (items.Count > 0)
             item = items[rng.Next(items.Count)];

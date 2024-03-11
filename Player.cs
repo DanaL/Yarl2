@@ -49,7 +49,7 @@ class Player : Actor, IPerformer
             int armour = 0;
             foreach (var slot in Inventory.UsedSlots())
             {
-                var item = Inventory.ItemAt(slot);
+                var (item, _) = Inventory.ItemAt(slot);
                 if (item.Equiped)
                 {
                     armour += item.Traits.Where(t => t is ArmourTrait)
@@ -132,7 +132,7 @@ class Player : Actor, IPerformer
         int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
         List<(ulong, int)> sources = [ (ID, playerVisionRadius) ];
 
-        foreach (var item in Inventory.UsedSlots().Select(s => Inventory.ItemAt(s)))
+        foreach (var (item, _) in Inventory.UsedSlots().Select(s => Inventory.ItemAt(s)))
         {
             var itemSources = item.EffectSources(flags, gs);
             if (itemSources.Count > 0)
@@ -142,13 +142,6 @@ class Player : Actor, IPerformer
         return sources;
     }
     
-    static string ItemMenuDesc(Item item)
-    {
-        return item.Count == 1
-            ? item.FullName.IndefArticle()
-            : $"{item.Count} {item.FullName.Pluralize()}";        
-    }
-
     void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots();
@@ -158,12 +151,14 @@ class Player : Actor, IPerformer
             return;
         }
 
+
         List<string> lines = [ title ];
         foreach (var s in slots)
         {
-            var item = Inventory.ItemAt(s);
-            string desc = ItemMenuDesc(item);
-            
+            var (item, count) = Inventory.ItemAt(s);
+            string desc = count == 1 ? item.FullName.IndefArticle()
+                                     : $"{count} {item.FullName.Pluralize()}";
+
             if (item.Equiped)
             {
                 if (item.Type == ItemType.Weapon)
@@ -202,7 +197,7 @@ class Player : Actor, IPerformer
         foreach (var item in items)
         {
             options.Add(slot);
-            string desc = ItemMenuDesc(item);
+            string desc = item.Name; // ItemMenuDesc(item);
             lines.Add($"{slot++}) {desc}");
         }
         ui.ShowDropDown(lines);

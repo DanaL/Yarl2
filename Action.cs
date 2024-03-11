@@ -161,19 +161,9 @@ class ShopAction(Villager shopkeeper, GameState gs) : Action
 
         foreach (var (slot, count) in _selections)
         {
-            Item bought;
-            Item item = _shopkeeper.Inventory.ItemAt(slot);
-            if (count == item.Count)
-            {
-                bought = item;
-            }
-            else
-            {
-                bought = item.Duplicate(_gs);
-                bought.Count = count;
-            }            
-            _shopkeeper.Inventory.Remove(slot, count);
-            _gs.Player.Inventory.Add(bought, _gs.Player.ID);
+            List<Item> bought = _shopkeeper.Inventory.Remove(slot, count);
+            foreach (var item in bought) 
+                _gs.Player.Inventory.Add(item, _gs.Player.ID);
         }
         
         return result;
@@ -370,10 +360,10 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         {
             return "There are several items here.";
         }
-        else if (items[0].Count > 1)
-        {
-            return $"There are {items[0].Count} {items[0].FullName.Pluralize()} here.";
-        }
+        //else if (items[0].Count > 1)
+        //{
+        //    return $"There are {items[0].Count} {items[0].FullName.Pluralize()} here.";
+        //}
         else
         {
             return $"There is {items[0].FullName.IndefArticle()} here.";
@@ -478,7 +468,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         itemStack.RemoveAt(i);
         inv.Add(item, _actor.ID);
 
-        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, item.Count, false, _actor.Loc, _gameState);
+        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gameState);
         return new ActionResult() { Successful=true, Messages = [msg], EnergyCost = 1.0 };
     }
 
@@ -498,27 +488,17 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-         var item = _actor.Inventory.ItemAt(Choice);
+         var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
         var useableTraits = item.Traits.Where(t => t is IUSeable);
         if (useableTraits.Any()) 
         {
-            Item toUse = item;
-            if (item.Count > 1)
-            {
-                --item.Count;
-                toUse = item.Duplicate(_gameState);
-                toUse.Count = 1;
-                toUse.Stackable = false;
-                if (!toUse.Consumable)
-                    _actor.Inventory.Add(toUse, _actor.ID);                
-                useableTraits = toUse.Traits.Where(t => t is IUSeable);
-            }
-            else if (item.Consumable)
-            {
-                _actor.Inventory.Remove(Choice, 0);
-            }
+            Item? toUse = _actor.Inventory.RemoveByID(item.ID) 
+                            ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
+            toUse.Stackable = false;
+            if (!toUse.Consumable)
+                _actor.Inventory.Add(toUse, _actor.ID);
 
             bool success = false;
             string msg = "";
@@ -573,7 +553,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
             
             var coins = ItemFactory.Get("zorkmids", _gameState.ObjDB);
             _gameState.ItemDropped(coins, _actor.Loc.Row, _actor.Loc.Col);
-            coins.Count = _amount;
+            coins.Value = _amount;
             string msg;
             if (_amount == 1)
                 msg = "a single zorkmid";
@@ -608,26 +588,23 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
     public override ActionResult Execute()
     {
         Message alert;
-        var item = _actor.Inventory.ItemAt(_slot);        
+        var (item, itemCount) = _actor.Inventory.ItemAt(_slot);        
         _ui.ClosePopup();
 
-        if (_amount == 0 || _amount > item.Count)
+        if (_amount == 0 || _amount > itemCount)
         {
             // drop entire stack
             _actor.Inventory.Remove(_slot, 1);
             _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
             item.Equiped = false;
             _actor.CalcEquipmentModifiers();
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, item.Count, false, _actor.Loc, _gameState);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, itemCount, false, _actor.Loc, _gameState);
         }
         else
         {
-            item.Count -= _amount;
-            var dropped = item.Duplicate(_gameState);
-            dropped.Count = _amount;
             _actor.CalcEquipmentModifiers();
-            _gameState.ItemDropped(dropped, _actor.Loc.Row, _actor.Loc.Col);
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, dropped.ID, dropped.Count, false, _actor.Loc, _gameState);                      
+            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, itemCount, false, _actor.Loc, _gameState);                      
         }
 
         return new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };        
@@ -651,7 +628,7 @@ class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-        var item = _actor.Inventory.ItemAt(Choice);        
+        var (item, _) = _actor.Inventory.ItemAt(Choice);        
         _ui.CloseMenu();
 
         var readables = item.Traits.Where(t => t is IReadable);
@@ -692,19 +669,24 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
     public override ActionResult Execute()
     {
-        var ammo = _actor.Inventory.ItemAt(_slot).Duplicate(_gs);
-        ammo.Count = 1;
-        _actor.Inventory.Remove(_slot, 1);
-        _gs.ItemDropped(ammo, _target.Row, _target.Col);
-        ammo.Equiped = false;
-        ammo.Hidden = true;
-        _actor.CalcEquipmentModifiers();
+        
+        //ulong origID = _actor.Inventory.ItemAt(_slot).ID;
+        //var ammo = _actor.Inventory.ItemAt(_slot).Duplicate(_gs);
+        //ammo.Count = 1;
+        //_actor.Inventory.Remove(_slot, 1);
 
-        var pts = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
-                      .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
-                      .ToList();
-        var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
-        _ui.RegisterAnimation(anim);
+        //_gs.CheckMovedEffects(ammo, _actor.Loc, _target, TerrainFlags.Lit);
+        //_gs.ItemDropped(ammo, _target.Row, _target.Col);
+        
+        //ammo.Equiped = false;
+        //ammo.Hidden = true;
+        //_actor.CalcEquipmentModifiers();
+
+        //var pts = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
+        //              .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
+        //              .ToList();
+        //var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
+        //_ui.RegisterAnimation(anim);
 
         return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }
@@ -727,7 +709,7 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
     {
        _ui.CloseMenu();
 
-        var item = _player.Inventory.ItemAt(Choice);
+        var (item, _) = _player.Inventory.ItemAt(Choice);
         if (item is null)
         {
             var msg = new Message("That doesn't make sense", _player.Loc);
@@ -744,7 +726,7 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
         }
 
         var action = new ThrowAction(_ui, _player, _gs, Choice);
-        var range = 5 + _player.Stats[Attribute.Strength].Curr;
+        var range = 7 + _player.Stats[Attribute.Strength].Curr;
         if (range < 2)
             range = 2;
         var acc = new AimAccumulator(_ui, _player.Loc, range);
@@ -792,13 +774,13 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 return new ActionResult() { Successful = true };
         }
         
-        var item = _actor.Inventory.ItemAt(Choice);
+        var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
         if (item.Equiped && item.Type == ItemType.Armour)
         {
             var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
             return new ActionResult() { Successful=false, Messages = [msg] };
         }
-        else if (item.Count > 1)
+        else if (itemCount > 1)
         {
             var dropStackAction = new DropStackAction(_ui, _actor, _gameState, Choice);
             var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
@@ -843,7 +825,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
     public override ActionResult Execute() 
     {
         ActionResult result;
-        var item = _actor.Inventory.ItemAt(Choice);
+        var (item, _) = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
         if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
@@ -861,12 +843,12 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
                 result = new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
-                alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, _actor.Loc, _gameState);
+                alert = MessageFactory.Phrase(_actor.ID, Verb.Unready, item.ID, 1, false, _actor.Loc, _gameState);
                 result = new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };
                 break;
             default:
                 string msg = "You are already wearing ";
-                if (conflict == ArmourParts.Helmet)
+                if (conflict == ArmourParts.Hat)
                     msg += "a helmet.";
                 else if (conflict == ArmourParts.Shirt)
                     msg += "some armour.";

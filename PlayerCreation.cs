@@ -147,7 +147,7 @@ class PlayerCreator
             player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 
         var money = ItemFactory.Get("zorkmids", objDb);
-        money.Count = rng.Next(25, 51);
+        money.Value = rng.Next(25, 51);
         player.Inventory.Add(money, player.ID);
     }
 

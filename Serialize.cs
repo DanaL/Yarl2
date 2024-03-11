@@ -232,7 +232,7 @@ class ItemSaver
     public static string ItemToText(Item item)
     {
         string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.Stackable}|{item.Slot}|";
-        txt += $"{item.Equiped}|{item.Count}|{item.ContainedBy}|";
+        txt += $"{item.Equiped}|{item.Value}|{item.ContainedBy}|";
         txt += string.Join(',', item.Adjectives);
         txt += $"|" + GlyphToText(item.Glyph);
 
@@ -259,7 +259,7 @@ class ItemSaver
             Stackable = bool.Parse(pieces[3]),
             Slot = pieces[4] == "" ? '\0' : pieces[4][0],
             Equiped = bool.Parse(pieces[5]),
-            Count = int.Parse(pieces[6]),
+            Value = int.Parse(pieces[6]),
             ContainedBy = ulong.Parse(pieces[7]),
             Adjectives = adjectives,
             Glyph = TextToGlyph(pieces[9]),
@@ -286,7 +286,7 @@ class InventorySaver
         {
             Zorkmids = inv.Zorkmids,
             NextSlot = inv.NextSlot,
-            Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, ItemSaver.ItemToText(kvp.Item2))).ToList()
+            //Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, ItemSaver.ItemToText(kvp.Item2))).ToList()
         };
     }
 

@@ -96,14 +96,16 @@ class MessageFactory
         StringBuilder sb = new StringBuilder();
         if (gobj is Item item)
         {
-            if (item.Count == 1)
-                sb.Append(item.FullName.DefArticle());
-            else 
+            if (amount > 1)
             {
                 sb.Append(amount);
                 sb.Append(' ');
                 sb.Append(item.FullName.Pluralize());
             }
+            else
+            {
+                sb.Append(item.FullName.DefArticle());
+            }            
         }
         else
         {

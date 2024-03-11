@@ -266,7 +266,7 @@ class Map : ICloneable
         return false;
     }
 
-    public void ApplyEffect(TerrainFlags effect, int row, int col, ulong objID)
+    public void ApplyEffectAt(TerrainFlags effect, int row, int col, ulong objID)
     {
         if (!Effects.TryGetValue((row, col), out var flagsDict))
         {
@@ -280,7 +280,7 @@ class Map : ICloneable
         }
     }
 
-    public void RemoveAtLoc(TerrainFlags effect, int row, int col, ulong objID)
+    public void RemoveEffectAt(TerrainFlags effect, int row, int col, ulong objID)
     {
         if (Effects.TryGetValue((row, col), out var flagsDict))
         {

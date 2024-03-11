@@ -27,7 +27,6 @@ class Item : GameObj
     public bool Stackable { get; set; }
     public char Slot { get; set; }
     public bool Equiped { get; set; } = false;
-    public int Count { get; set; } = 1;
     public ulong ContainedBy { get; set; } = 0;
     public bool Consumable { get; set; } = false;
     public List<string> Adjectives { get; set; } = [];
@@ -69,24 +68,24 @@ class Item : GameObj
         return sources;
     }
 
-    public Item Duplicate(GameState gs)
-    {
-        var item = (Item)MemberwiseClone();
-        item.ID = NextID;
-        item.Traits = [];
-        item.Adjectives = Adjectives.Select(s => s).ToList();
+    //public Item Duplicate(GameState gs)
+    //{
+    //    var item = (Item)MemberwiseClone();
+    //    item.ID = NextID;
+    //    item.Traits = [];
+    //    item.Adjectives = Adjectives.Select(s => s).ToList();
 
-        // In the case of LightSourceTraits, we need to create a duplicate of
-        // the trait and set it to point to the containing object. I'll need to
-        // come up with something cleaner when I have more traits that have
-        // changing fields (a la a Torch's fuel)
-        foreach (var trait in Traits)
-            item.Traits.Add(trait.Duplicate(item));
+    //    // In the case of LightSourceTraits, we need to create a duplicate of
+    //    // the trait and set it to point to the containing object. I'll need to
+    //    // come up with something cleaner when I have more traits that have
+    //    // changing fields (a la a Torch's fuel)
+    //    foreach (var trait in Traits)
+    //        item.Traits.Add(trait.Duplicate(item));
         
-        gs.ObjDB.Add(item);
+    //    gs.ObjDB.Add(item);
 
-        return item;
-    }
+    //    return item;
+    //}
 
     // Active in the sense of being an IPerformer who needs to be in the 
     // turn order.
@@ -170,7 +169,7 @@ class ItemFactory
             case "helmet":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
                                     Glyph = new Glyph('[', Colours.WHITE, Colours.GREY) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
+                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
                 break;
             case "torch":
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
@@ -200,7 +199,8 @@ class ItemFactory
 
 enum ArmourParts
 {
-    Helmet,
+    None,
+    Hat,
     Boots,
     Cloak,
     Shirt
@@ -215,20 +215,21 @@ class Inventory(ulong ownerID)
 {
     public ulong OwnerID { get; init; } = ownerID;
     public int Zorkmids { get; set; }
-    Dictionary<char, Item> _items { get; set; } = [];
+    List<Item> _items = [];
     public char NextSlot { get; set; } = 'a';
 
     void FindNextSlot() 
     {
         char start = NextSlot;
+        var slots = UsedSlots().ToHashSet();
 
         while (true)
         {
             ++NextSlot;
             if (NextSlot == 123)
                 NextSlot = 'a';
-            
-            if (!_items.TryGetValue(NextSlot, out Item? value) || value is null)
+
+            if (!slots.Contains(NextSlot))
             {
                 break;
             }
@@ -241,15 +242,21 @@ class Inventory(ulong ownerID)
         }
     }
 
-    public char[] UsedSlots() => [.._items.Keys.Where(k => _items[k] != null).Order()];
-    public Item ItemAt(char slot) => _items[slot];
+    public char[] UsedSlots() => _items.Select(i => i.Slot).Distinct().ToArray();
+
+    public (Item, int) ItemAt(char slot)
+    {
+        var inSlot = _items.Where(i => i.Slot == slot);
+
+        return (inSlot.First(), inSlot.Count());
+    }
 
     public Item? ReadiedWeapon()
-    {
-        foreach (char slot in UsedSlots()) 
+    {        
+        foreach (var item in _items)
         {
-            if (_items[slot] != null && _items[slot].Type == ItemType.Weapon && _items[slot].Equiped)
-                return _items[slot];
+            if (item.Type == ItemType.Weapon && item.Equiped)
+                return item;
         }
 
         return null;
@@ -259,52 +266,90 @@ class Inventory(ulong ownerID)
     {
         if (item.Type == ItemType.Zorkmid) 
         {
-            Zorkmids += item.Count;
+            Zorkmids += item.Value;
             return;
         }
 
-        // if the item is stackable, see if there's anything to stack it with
+        // Find the slot for the item
+        var usedSlots = UsedSlots().ToHashSet();
+        char slotToUse = '\0';
+
+        // If the item is stackable and there are others of the same item, use
+        // that slot. Otherwise, if the item has a previously assigned slot and
+        // it's still available, use that slot. Finally, look for the next
+        // available slot
         if (item.Stackable)
         {
-            foreach (var v in _items.Values.Where(v => v is not null))
+            foreach (var other in _items)
             {
-                // I probably need to make a CanStack item method to handle cases where
-                // we're trying to stack a dagger +1 and a dagger +2
-                if (v.Type == item.Type && v.Name == item.Name) // && v.Bonus == item.Bonus) 
+                // Not yet worrying about +1 dagger vs +2 dagger which probably shouldn't stack together
+                // Maybe a CanStack() method on Item
+                if (other.Type == item.Type && other.Name == item.Name)
                 {
-                    v.Count += item.Count;
-                    return;
+                    slotToUse = other.Slot;
+                    break;
                 }
             }
         }
-
-        // if the item has a slot and it's available, put it there
-        // otherwise but it in the next available slot, if there is one
-        bool slotAvailable = !_items.ContainsKey(item.Slot) || _items[item.Slot] is null;
-        if (item.Slot != '\0' && slotAvailable)
+        else if (item.Slot != '\0' && !usedSlots.Contains(item.Slot))
         {
-            item.ContainedBy = ownerID;
-            _items[item.Slot] = item;
+            slotToUse = item.Slot;
         }
-        else if (NextSlot != '\0')
+        
+        
+        if (slotToUse == '\0')
         {
-            item.Slot = NextSlot;
-            item.ContainedBy = ownerID;
-            _items[NextSlot] = item;
+            slotToUse = NextSlot;
             FindNextSlot();
         }
+
+        if (slotToUse != '\0')
+        {
+            item.Slot = slotToUse;
+            item.ContainedBy = ownerID;
+            _items.Add(item);
+        }
         else
         {
-            // no space could be found for it :(
-        }
+            // There was no free slot, which I am not currently handling...
+        }        
     }
 
-    public void Remove(char slot, int count)
+    public Item? RemoveByID(ulong id) 
     {
-        if (count == ItemAt(slot).Count)
-            _items.Remove(slot);
-        else
-            ItemAt(slot).Count -= count;
+        Item? item = null;
+
+        for (int j = 0; j < _items.Count; j++)
+        {
+            if (_items[j].ID == id)
+            {
+                item = _items[j];
+                _items.RemoveAt(j);
+                break;
+            }
+        }
+
+        return item;
+    }
+
+    public List<Item> Remove(char slot, int count)
+    {
+        List<int> indexes = [];
+        for (int j = _items.Count - 1; j >= 0; j--)
+        {
+            if (_items[j].Slot == slot)
+                indexes.Add(j);
+        }
+
+        List<Item> removed = [];
+        int totalToRemove = int.Min(count, indexes.Count);
+        for (int j = 0; j < totalToRemove; j++)
+        {
+            removed.Add(_items[j]);
+            _items.RemoveAt(indexes[j]);
+        }
+
+        return removed;
     }
 
     // This toggles the equip status of gear only and recalculation of stuff
@@ -315,7 +360,17 @@ class Inventory(ulong ownerID)
         // I suppose at some point I'll have items that can't be equiped
         // (or like it doesn't make sense for them to be) and I'll have
         // to check for that
-        if (_items.TryGetValue(slot, out Item item))
+        Item? item = null;
+        foreach (var i in  _items)
+        {
+            if (i.Slot == slot)
+            {
+                item = i;
+                break;
+            }
+        }
+
+        if (item is not null)
         {
             if (item.Equiped) 
             {
@@ -328,28 +383,38 @@ class Inventory(ulong ownerID)
             if (item.Type == ItemType.Weapon)
             {
                 // If there is a weapon already equiped, unequip it
-                foreach (char c in UsedSlots())
+                foreach (Item other in _items)
                 {
-                    if (_items[c].Type == ItemType.Weapon && _items[c].Equiped)
-                        _items[c].Equiped = false;
+                    if (other.Type == ItemType.Weapon && other.Equiped)
+                        other.Equiped = false;
                 }
-
+ 
                 item.Equiped = true;
                 return (EquipingResult.Equiped, ArmourParts.Shirt);
             }
             else if (item.Type == ItemType.Armour)
             {
-                var armour = item as Armour;
-                // check to see if there's another piece in that slot
-                var b = _items.Values.Where(i => i.Type == ItemType.Armour && i.Equiped)
-                                     .Any(a => ((Armour)a).Piece == armour.Piece);
-                if (b)
+                ArmourParts part = ArmourParts.None;
+                foreach (var t in item.Traits)
                 {
-                    // alert about already wearing a piece
-                    return (EquipingResult.Conflict, armour.Piece);
+                    if (t is ArmourTrait at)
+                    {
+                        part = at.Part;
+                    }
                 }
 
-                armour.Equiped = !armour.Equiped;
+                // check to see if there's another piece in that slot
+                foreach (var other  in _items.Where(a => a.Type == ItemType.Armour && a.Equiped))
+                {
+                    foreach (var t in other.Traits)
+                    {
+                        if (t is ArmourTrait at && at.Part == part)
+                            return (EquipingResult.Conflict, part);
+                    }                    
+                }
+                
+                item.Equiped = !item.Equiped;
+
                 return (EquipingResult.Equiped, ArmourParts.Shirt);
             }
         }
@@ -362,7 +427,7 @@ class Inventory(ulong ownerID)
     {
         List<IPerformer> activeTraits = [];
 
-        foreach (var item in _items.Values)
+        foreach (var item in _items)
         {
             activeTraits.AddRange(item.ActiveTraits());
         }
@@ -370,9 +435,9 @@ class Inventory(ulong ownerID)
         return activeTraits;
     }
 
-    public List<(char, Item)> ToKVP() => _items.Select(kvp => (kvp.Key, kvp.Value))
-                                               .Where(p => p.Item2 is not null)
-                                               .ToList();
+    //public List<(char, Item)> ToKVP() => _items.Select(i => (i.Slot, i.Value))
+    //                                           .Where(p => p.Item2 is not null)
+    //                                           .ToList();
 }
 
 enum EquipingResult 

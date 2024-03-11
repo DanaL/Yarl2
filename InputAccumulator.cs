@@ -146,11 +146,12 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
     }
 }
 
-class ShopMenuItem(char slot, Item item)
+class ShopMenuItem(char slot, Item item, int stockCount)
 {
     public char Slot { get; set; } = slot;
     public Item Item { get; set; } = item;
-    public int Count { get; set; } = 0;    
+    public int StockCount { get; set; } = stockCount;
+    public int SelectedCount {  get; set; } = 0;
 }
 
 class ShopMenuAccumulator : InputAccumulator
@@ -167,8 +168,8 @@ class ShopMenuAccumulator : InputAccumulator
                              .Select(_shopkeeper.Inventory.ItemAt);
         
         char ch = 'a';
-        foreach (var item in items)
-            _menuItems.Add(ch++, new ShopMenuItem(item.Slot, item));
+        foreach (var (item, count) in items)
+            _menuItems.Add(ch++, new ShopMenuItem(item.Slot, item, count));
             
         WritePopup();
     }
@@ -187,16 +188,15 @@ class ShopMenuAccumulator : InputAccumulator
         }
         else if (_menuItems.ContainsKey(ch))
         {
-            var item = _menuItems[ch].Item;
-            if (item.Count == 1 && _menuItems[ch].Count == 0)
-                _menuItems[ch].Count = 1;
-            else if (item.Count == 1)
-                _menuItems[ch].Count = 0;
+            if (_menuItems[ch].StockCount == 1 && _menuItems[ch].SelectedCount == 0)
+                _menuItems[ch].SelectedCount = 1;
+            else if (_menuItems[ch].StockCount == 1)
+                _menuItems[ch].SelectedCount = 0;
             else
             {
-                ++_menuItems[ch].Count;
-                if (_menuItems[ch].Count > _menuItems[ch].Item.Count)
-                    _menuItems[ch].Count = 0;
+                ++_menuItems[ch].SelectedCount;
+                if (_menuItems[ch].SelectedCount > _menuItems[ch].StockCount)
+                    _menuItems[ch].SelectedCount = 0;
             }
             WritePopup();
         }
@@ -205,14 +205,14 @@ class ShopMenuAccumulator : InputAccumulator
     public override AccumulatorResult GetResult() => new ShoppingAccumulatorResult()
     {
         Zorkminds = TotalInvoice(),
-        Selections = _menuItems.Values.Where(i => i.Count > 0)
-                                      .Select(i => (i.Slot, i.Count))
+        Selections = _menuItems.Values.Where(i => i.SelectedCount > 0)
+                                      .Select(i => (i.Slot, i.SelectedCount))
                                       .ToList()
     };
 
     int TotalInvoice()
     {
-        return _menuItems.Values.Select(mi => mi.Count * (int) (mi.Item.Value * _shopkeeper.Markup)).Sum();
+        return _menuItems.Values.Select(mi => mi.SelectedCount * (int) (mi.Item.Value * _shopkeeper.Markup)).Sum();
     }
 
     private void WritePopup()
@@ -233,10 +233,10 @@ class ShopMenuAccumulator : InputAccumulator
             line.Append(") ");
             line.Append(_menuItems[key].Item.FullName);
 
-            if (_menuItems[key].Item.Count > 1)
+            if (_menuItems[key].StockCount > 1)
             {
                 line.Append(" (");
-                line.Append(_menuItems[key].Item.Count);
+                line.Append(_menuItems[key].StockCount);
                 line.Append(')');
             }
 
@@ -244,7 +244,7 @@ class ShopMenuAccumulator : InputAccumulator
             line.Append(" - [YELLOW $]");
             line.Append(price);
             
-            if (_menuItems[key].Item.Count > 1)
+            if (_menuItems[key].StockCount > 1)
                 line.Append(" apiece");
             lines.Add(line.ToString());
         }
@@ -253,17 +253,17 @@ class ShopMenuAccumulator : InputAccumulator
         int l = 0;
         foreach (var key in keys)
         {
-            if (_menuItems[key].Count > 0)
+            if (_menuItems[key].SelectedCount > 0)
             {
                 sb.Append(lines[l].PadRight(widest + 2));
-                if (_menuItems[key].Item.Count == 1) 
+                if (_menuItems[key].StockCount == 1) 
                 {
                     sb.Append("[GREEN *]");
                 }
                 else
                 {
                     sb.Append("[GREEN ");
-                    sb.Append(_menuItems[key].Count);
+                    sb.Append(_menuItems[key].SelectedCount);
                     sb.Append(']');
                 }
             }

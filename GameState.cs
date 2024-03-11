@@ -336,12 +336,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         foreach (var (objID, dungeon, level, r, c) in toAdd)
         {
             var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-            map.ApplyEffect(effect, r, c, objID);
+            map.ApplyEffectAt(effect, r, c, objID);
         }
         foreach (var (objID, dungeon, level, r, c) in toClear)
         {
             var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-            map.RemoveAtLoc(effect, r, c, objID);
+            map.RemoveEffectAt(effect, r, c, objID);
         }        
     }
 
@@ -358,7 +358,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             foreach (var sq in sqs)
             {
                 if (on)
-                    map.ApplyEffect(effect, sq.Item2, sq.Item3, sourceID);
+                    map.ApplyEffectAt(effect, sq.Item2, sq.Item3, sourceID);
                 else
                     map.RemoveEffectFromMap(effect, sourceID);
             }

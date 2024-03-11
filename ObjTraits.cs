@@ -24,7 +24,7 @@ interface IUSeable
 abstract class ObjTrait 
 {
     public abstract string Desc();
-    public abstract ObjTrait Duplicate(Item container);
+    //public abstract ObjTrait Duplicate(Item container);
     public abstract string AsText();
     public abstract bool Acitve { get; }
 }
@@ -35,7 +35,7 @@ class MinorHealTrait : ObjTrait, IUSeable
 
     public override string AsText() => "MinorHealTrait";
     public override string Desc() => "";
-    public override ObjTrait Duplicate(Item container)  => new MinorHealTrait();
+    //public override ObjTrait Duplicate(Item container)  => new MinorHealTrait();
 
     public (bool, string) Use(Actor user, GameState gs, int row, int col)
     {        
@@ -56,8 +56,8 @@ class AttackTrait : ObjTrait
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
 
-    public override ObjTrait Duplicate(Item _) => 
-        new AttackTrait() { Bonus = Bonus };
+    //public override ObjTrait Duplicate(Item _) => 
+    //    new AttackTrait() { Bonus = Bonus };
 
     public override string AsText() => $"AttackTrait#{Bonus}";
 
@@ -72,8 +72,8 @@ class DamageTrait : ObjTrait
 
     public override string AsText() => $"DamageTrait#{DamageDie}#{NumOfDie}#{DamageType}";
     
-    public override ObjTrait Duplicate(Item _) =>
-        new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType };
+    //public override ObjTrait Duplicate(Item _) =>
+    //    new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType };
 
     public override string Desc() => "";
     public override bool Acitve => true;    
@@ -87,8 +87,8 @@ class ArmourTrait : ObjTrait
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
 
-    public override ObjTrait Duplicate(Item _) => 
-        new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
+    //public override ObjTrait Duplicate(Item _) => 
+    //    new ArmourTrait() { Bonus = Bonus, ArmourMod = ArmourMod, Part = Part };
 
     public override string AsText() => $"ArmourTrait#{Part}#{ArmourMod}#{Bonus}";
 
@@ -108,10 +108,10 @@ class DocumentTrait : ObjTrait, IReadable
     public override string Desc() => "";
     public override string AsText() => $"DocumentTrait#{_text}";
 
-    public override ObjTrait Duplicate(Item container)
-    {
-        throw new NotImplementedException();
-    }
+    //public override ObjTrait Duplicate(Item container)
+    //{
+    //    throw new NotImplementedException();
+    //}
 
     public void Read(Actor actor, UserInterface ui, Item document)
     {
@@ -139,18 +139,18 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
         return $"LightSourceTrait#{ContainerID}#{Lit}#{Radius}#{Fuel}#{Energy}#{Recovery}";
     }
 
-    public override ObjTrait Duplicate(Item container)
-    {
-        return new LightSourceTrait()
-        {
-            ContainerID = container.ID,
-            Fuel = Fuel,
-            Radius = Radius,
-            Lit = Lit,
-            Energy = 0.0,
-            Recovery = Recovery
-        };
-    }
+    //public override ObjTrait Duplicate(Item container)
+    //{
+    //    return new LightSourceTrait()
+    //    {
+    //        ContainerID = container.ID,
+    //        Fuel = Fuel,
+    //        Radius = Radius,
+    //        Lit = Lit,
+    //        Energy = 0.0,
+    //        Recovery = Recovery
+    //    };
+    //}
 
     public (bool, string) Use(Actor _, GameState gs, int row, int col)
     {
@@ -231,7 +231,7 @@ class TraitFactory
             case "ArmourTrait":
                 var part = pieces[1] switch
                 {
-                    "Helmet" => ArmourParts.Helmet,
+                    "Helmet" => ArmourParts.Hat,
                     "Boots" => ArmourParts.Boots,
                     "Cloak" => ArmourParts.Cloak,
                     "Shirt" => ArmourParts.Shirt,
