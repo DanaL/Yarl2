@@ -771,8 +771,9 @@ abstract class UserInterface
             {
                 return sqBelow;
             }
-            else if (glyph != GameObjectDB.EMPTY) 
+            else if (tile.Type != TileType.DeepWater && glyph != GameObjectDB.EMPTY) 
             {
+                // Items on a deep water square are underwater
                 var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
 
                 var item = GameState.ObjDB.ItemGlyphAt(loc);

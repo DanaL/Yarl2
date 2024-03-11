@@ -356,7 +356,7 @@ class Player : Actor, IPerformer
                 // Eventually I'll want to remember the last item thrown
                 // so the player doesn't need to always select an item if
                 // they're throwing draggers several turns in a row
-                string instructions = "Use move keys to move to target square,\nEnter to select or ESC to abort";
+                string instructions = "* Use move keys to move to target;\n  Enter to select or ESC to abort *";
                 ShowInventory(ui, "Throw what?", instructions);
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ThrowSelectionAction(ui, this, gameState);

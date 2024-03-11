@@ -86,6 +86,16 @@ class MissileAnimation : Animation
         {
             Expiry = DateTime.MinValue;
             _ammo.Hidden = false;
+
+            // This happens inside the animation class because I don't want the
+            // message to be displayed until the animation has finished.
+            var tile = _ui.GameState.TileAt(_pts.Last());
+            if (tile.Type == TileType.DeepWater)
+            {
+                var item = _ammo.FullName.DefArticle().Capitalize();
+                var msg = new Message($"{item} disappears with a splash.", _pts.Last());
+                _ui.AlertPlayer([msg], "You hear a splash.");
+            }
         }
     }
 }
