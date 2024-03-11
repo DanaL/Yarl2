@@ -149,7 +149,7 @@ class Player : Actor, IPerformer
             : $"{item.Count} {item.FullName.Pluralize()}";        
     }
 
-    void ShowInventory(UserInterface ui, string title, bool mentionMoney = false)
+    void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots();
         if (slots.Length == 0)
@@ -183,6 +183,12 @@ class Player : Actor, IPerformer
                 lines.Add("You have a single zorkmid.");
             else
                 lines.Add($"You wallet contains {Inventory.Zorkmids} zorkmids.");                
+        }
+
+        if (!string.IsNullOrEmpty(instructions))
+        {
+            lines.Add("");
+            lines.AddRange(instructions.Split('\n'));
         }
 
         ui.ShowDropDown(lines);
@@ -296,7 +302,7 @@ class Player : Actor, IPerformer
                 return new UpstairsAction(gameState);
             else if (ch == 'i')
             {
-                ShowInventory(ui, "You are carrying:", true);
+                ShowInventory(ui, "You are carrying:", "", true);
                 _accumulator = new PauseForMoreAccumulator();
                 _deferred = new CloseMenuAction(ui);
             }
@@ -327,13 +333,13 @@ class Player : Actor, IPerformer
             }
             else if (ch == 'a')
             {
-                ShowInventory(ui, "Use which item?");
+                ShowInventory(ui, "Use which item?", "");
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new UseItemAction(ui, this, gameState);
             }
             else if (ch == 'd')
             {
-                ShowInventory(ui, "Drop what?", true);
+                ShowInventory(ui, "Drop what?", "", true);
                 HashSet<char> slots = [.. Inventory.UsedSlots()];
                 slots.Add('$');
                 _accumulator = new InventoryAccumulator(slots);
@@ -341,7 +347,7 @@ class Player : Actor, IPerformer
             }
             else if (ch == 'r')
             {
-                ShowInventory(ui, "Read what?");
+                ShowInventory(ui, "Read what?", "");
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ReadItemAction(ui, this, gameState);
             }
@@ -350,7 +356,8 @@ class Player : Actor, IPerformer
                 // Eventually I'll want to remember the last item thrown
                 // so the player doesn't need to always select an item if
                 // they're throwing draggers several turns in a row
-                ShowInventory(ui, "Throw what?");                
+                string instructions = "Use move keys to move to target square,\nEnter to select or ESC to abort";
+                ShowInventory(ui, "Throw what?", instructions);
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ThrowSelectionAction(ui, this, gameState);
             }
@@ -358,7 +365,7 @@ class Player : Actor, IPerformer
             {
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ToggleEquipedAction(ui, this, gameState);
-                ShowInventory(ui, "Equip what?");
+                ShowInventory(ui, "Equip what?", "");
             }
             else if (ch == 'c')
             {
