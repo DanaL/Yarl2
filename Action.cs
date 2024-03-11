@@ -664,25 +664,22 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
     Loc _target { get; set; }
 
     public override ActionResult Execute()
-    {
-        
-        //ulong origID = _actor.Inventory.ItemAt(_slot).ID;
-        //var ammo = _actor.Inventory.ItemAt(_slot).Duplicate(_gs);
-        //ammo.Count = 1;
-        //_actor.Inventory.Remove(_slot, 1);
+    {        
+        var ammo = _actor.Inventory.Remove(_slot, 1).First();
+        if (ammo != null)
+        {
+            _gs.CheckMovedEffects(ammo, _actor.Loc, _target, TerrainFlags.Lit);
+            _gs.ItemDropped(ammo, _target.Row, _target.Col);
+            ammo.Equiped = false;
+            ammo.Hidden = true;
+            _actor.CalcEquipmentModifiers();
+        }
 
-        //_gs.CheckMovedEffects(ammo, _actor.Loc, _target, TerrainFlags.Lit);
-        //_gs.ItemDropped(ammo, _target.Row, _target.Col);
-        
-        //ammo.Equiped = false;
-        //ammo.Hidden = true;
-        //_actor.CalcEquipmentModifiers();
-
-        //var pts = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
-        //              .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
-        //              .ToList();
-        //var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
-        //_ui.RegisterAnimation(anim);
+        var pts = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
+                      .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
+                      .ToList();
+        var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
+        _ui.RegisterAnimation(anim);
 
         return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }
