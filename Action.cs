@@ -165,7 +165,15 @@ class ShopAction(Villager shopkeeper, GameState gs) : Action
             foreach (var item in bought) 
                 _gs.Player.Inventory.Add(item, _gs.Player.ID);
         }
-        
+
+        string txt = $"You pay {_shopkeeper.FullName} {_invoice} zorkmid";
+        if (_invoice > 1)
+            txt += "s";
+        txt += " and collect your goods.";
+
+        var msg = new Message(txt, _gs.Player.Loc);
+        result.Messages.Add(msg);
+
         return result;
     }
 
