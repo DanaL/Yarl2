@@ -144,13 +144,13 @@ class Player : Actor, IPerformer
     
     void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
     {
-        var slots = Inventory.UsedSlots();
+        var slots = Inventory.UsedSlots().Order().ToArray();
+
         if (slots.Length == 0)
         {
             //ui.AlertPlayer("You are empty handed!");
             return;
         }
-
 
         List<string> lines = [ title ];
         foreach (var s in slots)

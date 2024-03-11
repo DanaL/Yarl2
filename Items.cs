@@ -345,8 +345,9 @@ class Inventory(ulong ownerID)
         int totalToRemove = int.Min(count, indexes.Count);
         for (int j = 0; j < totalToRemove; j++)
         {
-            removed.Add(_items[j]);
-            _items.RemoveAt(indexes[j]);
+            int index = indexes[j];
+            removed.Add(_items[index]);
+            _items.RemoveAt(index);
         }
 
         return removed;

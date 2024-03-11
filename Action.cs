@@ -587,25 +587,21 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
 
     public override ActionResult Execute()
     {
-        Message alert;
         var (item, itemCount) = _actor.Inventory.ItemAt(_slot);        
         _ui.ClosePopup();
 
         if (_amount == 0 || _amount > itemCount)
+            _amount = itemCount;
+
+        var droppedItems = _actor.Inventory.Remove(_slot, _amount);
+        foreach (var droppedItem in droppedItems)
         {
-            // drop entire stack
-            _actor.Inventory.Remove(_slot, 1);
-            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
-            item.Equiped = false;
-            _actor.CalcEquipmentModifiers();
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, itemCount, false, _actor.Loc, _gameState);
+            _gameState.ItemDropped(droppedItem, _actor.Loc.Row, _actor.Loc.Col);
+            droppedItem.Equiped = false;
         }
-        else
-        {
-            _actor.CalcEquipmentModifiers();
-            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, itemCount, false, _actor.Loc, _gameState);                      
-        }
+
+        _actor.CalcEquipmentModifiers();
+        Message alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, _amount, false, _actor.Loc, _gameState);
 
         return new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };        
     }
