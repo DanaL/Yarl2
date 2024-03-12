@@ -682,7 +682,8 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
             List<Loc> pts = [];
             foreach (var pt in trajectory)
             {
-                if (_gs.TileAt(pt).Passable())
+                var tile = _gs.TileAt(pt);
+                if (tile.Passable() || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
                     pts.Add(pt);
                 else
                     break;
