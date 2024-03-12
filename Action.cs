@@ -676,18 +676,28 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
         var ammo = _actor.Inventory.Remove(_slot, 1).First();
         if (ammo != null)
         {
-            _gs.CheckMovedEffects(ammo, _actor.Loc, _target, TerrainFlags.Lit);
-            _gs.ItemDropped(ammo, _target.Row, _target.Col);
+            // Calculate where the projectile will actually stop
+            var trajectory = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
+                                 .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2));
+            List<Loc> pts = [];
+            foreach (var pt in trajectory)
+            {
+                if (_gs.TileAt(pt).Passable())
+                    pts.Add(pt);
+                else
+                    break;
+            }
+
+            var landingPt = pts.Last();
+            _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt, TerrainFlags.Lit);
+            _gs.ItemDropped(ammo, landingPt.Row, landingPt.Col);
             ammo.Equiped = false;
             ammo.Hidden = true;
             _actor.CalcEquipmentModifiers();
-        }
 
-        var pts = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
-                      .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
-                      .ToList();
-        var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
-        _ui.RegisterAnimation(anim);
+            var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
+            _ui.RegisterAnimation(anim);
+        }
 
         return new ActionResult() { Successful = true, EnergyCost = 1.0 };
     }

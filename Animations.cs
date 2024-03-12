@@ -31,8 +31,8 @@ class AimAnimation : Animation
         Target = start;
         Expiry = DateTime.MaxValue;
         _ui = ui;
-        _scrW = ui.SqsOnScreen.GetLength(1);
-        _scrH = ui.SqsOnScreen.GetLength(0);
+        _scrW = UserInterface.ViewWidth;
+        _scrH = UserInterface.ViewHeight;
     }
     
     public override void Update()

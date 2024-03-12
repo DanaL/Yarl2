@@ -70,11 +70,11 @@ namespace Yarl2
                 var opts = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
                 if (opts is not null) 
                 {
-                    if (opts.TryGetValue("Display", out string displayValue))            
+                    if (opts.TryGetValue("Display", out var displayValue))            
                         options.Display = displayValue;
-                    if (opts.TryGetValue("FontSize", out string fsValue))
+                    if (opts.TryGetValue("FontSize", out var fsValue))
                         options.FontSize = int.Parse(fsValue);
-                    if (opts.TryGetValue("BumpToOpen", out string btoValue))
+                    if (opts.TryGetValue("BumpToOpen", out var btoValue))
                         options.BumpToOpen = bool.Parse(btoValue);
                 }
             }

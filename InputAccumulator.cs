@@ -34,6 +34,7 @@ abstract class InputAccumulator
 class AimAccumulator : InputAccumulator
 {
     readonly UserInterface _ui;
+    readonly GameState _gs;
     Loc _start;
     Loc _target;
     AimAnimation _anim;
@@ -46,22 +47,8 @@ class AimAccumulator : InputAccumulator
         _target = start;
         _anim = new AimAnimation(_ui, _target);
         _ui.RegisterAnimation(_anim);
-        _maxRange = maxRange;
-    }
-
-    bool Passable(Loc loc)
-    {
-        var tile = _ui.GameState.TileAt(loc);
-        
-        switch (tile.Type)
-        {
-            case TileType.DeepWater:
-            case TileType.Water:
-            case TileType.Chasm:
-                return true;
-            default:
-                return tile.Passable();
-        }
+        _maxRange = maxRange;        
+        _gs = _ui.GameState!;
     }
 
     public override void Input(char ch)
@@ -88,7 +75,7 @@ class AimAccumulator : InputAccumulator
         {
             Loc mv = _target with { Row = _target.Row + dir.Item1, 
                                     Col = _target.Col + dir.Item2 };
-            if (Util.Distance(_start, mv) <= _maxRange && Passable(mv))
+            if (Util.Distance(_start, mv) <= _maxRange && _gs.CurrentMap.InBounds(mv.Row, mv.Col))
             {
                 _target = mv;
                 _anim.Target = mv;
