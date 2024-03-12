@@ -52,22 +52,13 @@ class Item : GameObj
 
     public override string FullName => CalcFullName();
 
-    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs)
-    {
-        List<(ulong, int)> sources = [];
-
-        if (flags == TerrainFlags.Lit)
-        {
-            foreach (var t in Traits)
-            {
-                if (t is LightSourceTrait light && light.Lit)
-                    sources.Add((ID, light.Radius));                
-            }
-        }
-        
-        return sources;
+    public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
+    {        
+        return Traits.Where(t => t.Aura)
+                     .Select(t => (ID, t.Radius, t.Effect))
+                     .ToList();
     }
-
+    
     // Active in the sense of being an IPerformer who needs to be in the 
     // turn order.
     public List<IPerformer> ActiveTraits()
@@ -155,8 +146,10 @@ class ItemFactory
             case "torch":
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
-                item.Traits.Add(new LightSourceTrait() { ContainerID = item.ID, Fuel=500, Radius=5, Lit=false, 
-                                         Energy=0.0, Recovery=1.0});
+                var ls = new LightSourceTrait() {
+                    ContainerID = item.ID, Fuel = 500, Lit = false, Energy = 0.0, Recovery = 1.0 };
+                ls.Stats[Attribute.Radius] = new Stat(5);
+                item.Traits.Add(ls);
                 break;
             case "zorkmids":
                 item = new Item() { Name = "zorkmid", Type = ItemType.Zorkmid, Stackable = true,

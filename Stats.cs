@@ -37,7 +37,8 @@ enum Attribute
     ACMod,
     Cleave,
     Impale,
-    Rage
+    Rage,
+    Radius
 }
 
 class Stat

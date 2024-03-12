@@ -47,7 +47,7 @@ abstract class GameObj
     
     public ulong ID { get; set; }
 
-    public virtual List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) => [];
+    public virtual List<(ulong, int, TerrainFlag)> Auras(GameState gs) => [];
     public GameObj() => ID = IDSeed++;
     public static ulong Seed => IDSeed;
     public static void SetSeed(ulong seed) => IDSeed = seed;

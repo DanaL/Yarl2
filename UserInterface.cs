@@ -546,7 +546,7 @@ abstract class UserInterface
         };
 
         itemDB.SetToLoc(Player.Loc, Player);
-        GameState.ToggleEffect(Player, Player.Loc, TerrainFlags.Lit, true);
+        GameState.ToggleEffect(Player, Player.Loc, TerrainFlag.Lit, true);
     }
 
     private bool TakeTurn(IPerformer performer)
@@ -736,7 +736,7 @@ abstract class UserInterface
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
         bool isVisible = visible.Contains((mapRow, mapCol));
-        if (isVisible && map.HasEffect(TerrainFlags.Lit, mapRow, mapCol))
+        if (isVisible && map.HasEffect(TerrainFlag.Lit, mapRow, mapCol))
         {
             Tile tile = map.TileAt(mapRow, mapCol);
             Sqr? sqBelow = null;

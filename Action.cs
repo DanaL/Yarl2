@@ -255,10 +255,10 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
 
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
-                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlags.Lit))
+                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
                 {
-                    _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, src.ID);
-                    _gs.ToggleEffect(src, _actor.Loc, TerrainFlags.Lit, true);
+                    _gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, src.ID);
+                    _gs.ToggleEffect(src, _actor.Loc, TerrainFlag.Lit, true);
                 }
             }
             else if (_actor is Player)
@@ -313,11 +313,11 @@ class OpenDoorAction : DirectionalAction
                 // Find any light sources tht were affecting the door and update them, since
                 // it's now open. (Eventually gotta extend it to any aura type effects)
 
-                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlags.Lit))
+                foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
                 {
-                    _gs.ToggleEffect(src, src.Loc, TerrainFlags.Lit, true);
+                    _gs.ToggleEffect(src, src.Loc, TerrainFlag.Lit, true);
                 }
-                _gs.ToggleEffect(_actor, _loc, TerrainFlags.Lit, true);
+                _gs.ToggleEffect(_actor, _loc, TerrainFlag.Lit, true);
             }
             else if (_actor is Player)
             {
@@ -674,7 +674,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
     void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
         var landingPt = pts.Last();
-        _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt, TerrainFlags.Lit);
+        _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
         _gs.ItemDropped(ammo, landingPt.Row, landingPt.Col);
         ammo.Equiped = false;
         ammo.Hidden = true;
@@ -962,7 +962,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
             }
         }
         
-        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlags.Lit, (item).ID);
+        _gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
 
         var cb = item.ContainedBy;
         var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);

@@ -11,6 +11,8 @@
 
 namespace Yarl2;
 
+enum AuraEffect { Light }
+
 interface IReadable
 {
     void Read(Actor actor, UserInterface ui, Item document);
@@ -26,6 +28,10 @@ abstract class ObjTrait
     public abstract string Desc();
     public abstract string AsText();
     public abstract bool Acitve { get; }
+    public abstract bool Aura { get; }    
+    public virtual TerrainFlag Effect => TerrainFlag.None;
+    public Dictionary<Attribute, Stat> Stats { get; set; } = [];
+    public virtual int Radius => 0;
 }
 
 class MinorHealTrait : ObjTrait, IUSeable
@@ -34,7 +40,8 @@ class MinorHealTrait : ObjTrait, IUSeable
 
     public override string AsText() => "MinorHealTrait";
     public override string Desc() => "";
-    
+    public override bool Aura => false;
+
     public (bool, string) Use(Actor user, GameState gs, int row, int col)
     {        
         var hp = 0;
@@ -54,7 +61,7 @@ class AttackTrait : ObjTrait
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
     public override string AsText() => $"AttackTrait#{Bonus}";
-
+    public override bool Aura => false;
     public override bool Acitve => true;
 }
 
@@ -66,7 +73,8 @@ class DamageTrait : ObjTrait
 
     public override string AsText() => $"DamageTrait#{DamageDie}#{NumOfDie}#{DamageType}";    
     public override string Desc() => "";
-    public override bool Acitve => true;    
+    public override bool Acitve => true;
+    public override bool Aura => false;
 }
 
 class ArmourTrait : ObjTrait
@@ -77,7 +85,7 @@ class ArmourTrait : ObjTrait
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
     public override string AsText() => $"ArmourTrait#{Part}#{ArmourMod}#{Bonus}";
-
+    public override bool Aura => false;
     public override bool Acitve => true;
 }
 
@@ -88,6 +96,7 @@ class DocumentTrait(string text) : ObjTrait, IReadable
     public override bool Acitve => true;
     public override string Desc() => "";
     public override string AsText() => $"DocumentTrait#{_text}";
+    public override bool Aura => false;
 
     public void Read(Actor actor, UserInterface ui, Item document)
     {
@@ -100,19 +109,20 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
-    public int Radius { get; set; }
     public int Fuel { get; set; }
     public bool RemoveFromQueue { get; set; }
     public double Energy { get; set; }
     public double Recovery { get; set; }
-
-    public override string Desc() => Lit ? "(lit)" : "";
+    public override bool Aura => true;
+    public override TerrainFlag Effect => TerrainFlag.Lit;
+    public override string Desc() => Lit ? "(lit)" : "";    
 
     public override bool Acitve => Lit;
-
+    public override int Radius => Lit ? Stats[Attribute.Radius].Max : 0;
+    
     public override string AsText()
     {
-        return $"LightSourceTrait#{ContainerID}#{Lit}#{Radius}#{Fuel}#{Energy}#{Recovery}";
+        return $"LightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Energy}#{Recovery}";
     }
 
     public (bool, string) Use(Actor _, GameState gs, int row, int col)
@@ -126,7 +136,7 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
             // affect            
-            gs.ToggleEffect(item, loc, TerrainFlags.Lit, false);
+            gs.ToggleEffect(item, loc, TerrainFlag.Lit, false);
             Lit = false;
 
             return (true, $"You extinguish {item.FullName.DefArticle()}.");
@@ -137,7 +147,7 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
             item.Stackable = false;
             Energy = Recovery;
             gs.Performers.Add(this);
-            gs.ToggleEffect(item, loc, TerrainFlags.Lit, true);
+            gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
             return (true, $"The {item.Name} sparks to life!");
         }
@@ -211,12 +221,12 @@ class TraitFactory
                 trait = new LightSourceTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
-                    Lit = bool.Parse(pieces[2]),
-                    Radius = int.Parse(pieces[3]),
+                    Lit = bool.Parse(pieces[2]),                    
                     Fuel = int.Parse(pieces[4]),
                     Energy = int.Parse(pieces[5]),
                     Recovery = int.Parse(pieces[6])
                 };
+                trait.Stats[Attribute.Radius].SetMax(5);
                 break;
             case "DocumentTrait":
                 trait = new DocumentTrait(pieces[1].Replace("<br/>", "\n"));

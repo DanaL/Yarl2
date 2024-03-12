@@ -13,7 +13,7 @@
 namespace Yarl2;
 
 [Flags]
-enum TerrainFlags
+enum TerrainFlag
 {
     None = 0,
     Lit = 1
@@ -232,7 +232,7 @@ class Map : ICloneable
     public readonly int Height;
 
     public Tile[] Tiles;
-    public Dictionary<(int, int), Dictionary<ulong, TerrainFlags>> Effects = [];
+    public Dictionary<(int, int), Dictionary<ulong, TerrainFlag>> Effects = [];
     
     public Map(int width, int height)
     {
@@ -252,21 +252,21 @@ class Map : ICloneable
     // I could speed this up maybe by calculating the intersections
     // whenever the effects are updated. But otoh maybe with things
     // moving around the map it'll just be constantly updating anyhow
-    public bool HasEffect(TerrainFlags effect, int row, int col)
+    public bool HasEffect(TerrainFlag effect, int row, int col)
     {
         if (!InBounds(row, col) || !Effects.ContainsKey((row, col)))
             return false;
 
         foreach (var flags in Effects[(row, col)].Values)
         {
-            if ((effect & flags) != TerrainFlags.None)
+            if ((effect & flags) != TerrainFlag.None)
                 return true;
         }
 
         return false;
     }
 
-    public void ApplyEffectAt(TerrainFlags effect, int row, int col, ulong objID)
+    public void ApplyEffectAt(TerrainFlag effect, int row, int col, ulong objID)
     {
         if (!Effects.TryGetValue((row, col), out var flagsDict))
         {
@@ -280,7 +280,7 @@ class Map : ICloneable
         }
     }
 
-    public void RemoveEffectAt(TerrainFlags effect, int row, int col, ulong objID)
+    public void RemoveEffectAt(TerrainFlag effect, int row, int col, ulong objID)
     {
         if (Effects.TryGetValue((row, col), out var flagsDict))
         {
@@ -292,7 +292,7 @@ class Map : ICloneable
     }
 
     // I dunno if this is going to be too slow...
-    public void RemoveEffectFromMap(TerrainFlags effect, ulong objID)
+    public void RemoveEffectFromMap(TerrainFlag effect, ulong objID)
     {
         foreach (var flagsDict in Effects.Values)
         {

@@ -404,11 +404,11 @@ internal class MapSaver
     [JsonInclude]
     List<string>? SpecialTiles { get; set; }
     [JsonInclude]
-    Dictionary<string, Dictionary<ulong, TerrainFlags>> Effects { get; set; }
+    Dictionary<string, Dictionary<ulong, TerrainFlag>> Effects { get; set; }
 
     public static MapSaver Shrink(Map map)
     {
-        Dictionary<string, Dictionary<ulong, TerrainFlags>> effectsInfo = [];
+        Dictionary<string, Dictionary<ulong, TerrainFlag>> effectsInfo = [];
         foreach (var kvp in map.Effects)
         {            
             effectsInfo.Add(kvp.Key.ToString(), kvp.Value);

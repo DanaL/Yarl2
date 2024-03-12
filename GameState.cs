@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Diagnostics;
+using System.Reflection.Emit;
 
 namespace Yarl2;
 
@@ -199,7 +200,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         // It might be more efficient to actually calculate the squares covered
         // by the old and new locations and toggle their set difference? But
         // maybe not enough for the more complicated code?        
-        CheckMovedEffects(actor, start, dest, TerrainFlags.Lit);
+        CheckMovedEffects(actor, start, dest);
 
         // Not making djikstra maps for the otherworld just yet.
         // Eventually I need to take into account whether or not
@@ -222,7 +223,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
 
     // Find all the game objects affecting a square with a particular
     // effect
-    public List<GameObj> ObjsAffectingLoc(Loc loc, TerrainFlags effect)
+    public List<GameObj> ObjsAffectingLoc(Loc loc, TerrainFlag effect)
     {        
         var objs = new List<GameObj>();
 
@@ -233,7 +234,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             var effects = map.Effects[(row, col)];
             foreach (var k in effects.Keys)
             {
-                if ((effects[k] & effect) != TerrainFlags.None) 
+                if ((effects[k] & effect) != TerrainFlag.None) 
                 {
                     var o = ObjDB.GetObj(k);
                     if (o is not null)
@@ -299,30 +300,27 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         return alerted;
     }
 
-    // This is still an extremely inefficient way to handle updating a moving source
-    // such as a light :/
-    public void CheckMovedEffects(GameObj obj, Loc start, Loc dest, TerrainFlags effect)
-    {        
+    // When an effect source moves, we need to clear out the table tracking its
+    // starting position and insert entries for the destination
+    void UpdateEffect(ulong sourceID, Loc start, Loc dest, int radius, TerrainFlag effect)
+    {
         var newSqs = new HashSet<(ulong, int, int, int, int)>();
         var oldSqs = new HashSet<(ulong, int, int, int, int)>();
-        
-        foreach (var (sourceID, radius) in obj.EffectSources(effect, this))
+
+        var startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
+        foreach (var sq in FieldOfView.CalcVisible(radius, start.Row, start.Col, startMap, start.Level))
         {
-            var (dungeon, level, row, col) = start;
-            var currDungeon = Campaign.Dungeons[dungeon];
-            var map = currDungeon.LevelMaps[level];
-            foreach (var sq in FieldOfView.CalcVisible(radius, row, col, map, level))
-                oldSqs.Add((sourceID, dungeon, level, sq.Item2, sq.Item3));
-            (dungeon, level, row, col) = dest;
-             currDungeon = Campaign.Dungeons[dungeon];
-            map = currDungeon.LevelMaps[level];
-            foreach (var sq in FieldOfView.CalcVisible(radius, row, col, map, level))
-                newSqs.Add((sourceID, dungeon, level, sq.Item2, sq.Item3));
+            oldSqs.Add((sourceID, start.DungeonID, start.Level, sq.Item2, sq.Item3));
+        }
+        var destMap = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
+        foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.Level))
+        {
+            newSqs.Add((sourceID, dest.DungeonID, dest.Level, sq.Item2, sq.Item3));
         }
 
         List<(ulong, int, int, int, int)> toAdd = [];
         List<(ulong, int, int, int, int)> toClear = [];
-        foreach (var sq in newSqs) 
+        foreach (var sq in newSqs)
         {
             if (!oldSqs.Contains(sq))
                 toAdd.Add(sq);
@@ -342,25 +340,39 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         {
             var map = Campaign.Dungeons[dungeon].LevelMaps[level];
             map.RemoveEffectAt(effect, r, c, objID);
-        }        
+        }
+    }
+
+    // This is still an extremely inefficient way to handle updating a moving source
+    // such as a light :/
+    public void CheckMovedEffects(GameObj obj, Loc start, Loc dest)
+    {
+        var auras = obj.Auras(this);
+        foreach (var aura in auras)
+        {
+            UpdateEffect(aura.Item1, start, dest, aura.Item2, aura.Item3);
+        }
     }
 
     // I only have light effects in the game right now, but I also have ambitions
-    public void ToggleEffect(GameObj obj, Loc loc, TerrainFlags effect, bool on)
+    public void ToggleEffect(GameObj obj, Loc loc, TerrainFlag effect, bool on)
     {
         var (dungeon, level, row, col) = loc;
         var currDungeon = Campaign.Dungeons[dungeon];
         var map = currDungeon.LevelMaps[level];
 
-        foreach (var (sourceID, radius) in obj.EffectSources(effect, this))
+        foreach (var aura in obj.Auras(this))
         {
-            var sqs = FieldOfView.CalcVisible(radius, row, col, map, level);
-            foreach (var sq in sqs)
+            if (aura.Item3 == effect)
             {
-                if (on)
-                    map.ApplyEffectAt(effect, sq.Item2, sq.Item3, sourceID);
-                else
-                    map.RemoveEffectFromMap(effect, sourceID);
+                var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, level);
+                foreach (var sq in sqs)
+                {
+                    if (on)
+                        map.ApplyEffectAt(effect, sq.Item2, sq.Item3, aura.Item1);
+                    else
+                        map.RemoveEffectFromMap(effect, aura.Item1);
+                }
             }
         }
     }

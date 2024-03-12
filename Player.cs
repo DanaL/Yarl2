@@ -127,21 +127,21 @@ class Player : Actor, IPerformer
         return dmgs;
     }
 
-    public override List<(ulong, int)> EffectSources(TerrainFlags flags, GameState gs) 
+    public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
     {
         int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
-        List<(ulong, int)> sources = [ (ID, playerVisionRadius) ];
+        List<(ulong, int, TerrainFlag)> auras = [ (ID, playerVisionRadius, TerrainFlag.Lit)] ;
 
-        foreach (var (item, _) in Inventory.UsedSlots().Select(s => Inventory.ItemAt(s)))
+        foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
         {
-            var itemSources = item.EffectSources(flags, gs);
-            if (itemSources.Count > 0)
-                sources.AddRange(itemSources);
+            //var itemAuras = item.Auras(gs);
+            //if (itemAuras.Count > 0)
+            auras.AddRange(item.Auras(gs));
         }
 
-        return sources;
+        return auras;
     }
-    
+        
     void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
     {
         var slots = Inventory.UsedSlots().Order().ToArray();
