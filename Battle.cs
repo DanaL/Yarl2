@@ -161,7 +161,6 @@ class Battle
     {
         var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
 
-        int attackMod = attacker.TotalMeleeAttackModifier();
         int roll = AttackRoll(rng) + attacker.TotalMeleeAttackModifier();
         if (roll >= target.AC)
         {

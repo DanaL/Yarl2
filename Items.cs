@@ -34,7 +34,7 @@ class Item : GameObj
     public int Value { get; set; }
     public bool Hidden { get; set; } = false;
     
-    private string CalcFullName()
+    string CalcFullName()
     {
         string name = Name;
 
@@ -67,25 +67,6 @@ class Item : GameObj
         
         return sources;
     }
-
-    //public Item Duplicate(GameState gs)
-    //{
-    //    var item = (Item)MemberwiseClone();
-    //    item.ID = NextID;
-    //    item.Traits = [];
-    //    item.Adjectives = Adjectives.Select(s => s).ToList();
-
-    //    // In the case of LightSourceTraits, we need to create a duplicate of
-    //    // the trait and set it to point to the containing object. I'll need to
-    //    // come up with something cleaner when I have more traits that have
-    //    // changing fields (a la a Torch's fuel)
-    //    foreach (var trait in Traits)
-    //        item.Traits.Add(trait.Duplicate(item));
-        
-    //    gs.ObjDB.Add(item);
-
-    //    return item;
-    //}
 
     // Active in the sense of being an IPerformer who needs to be in the 
     // turn order.
