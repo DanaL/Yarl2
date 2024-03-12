@@ -671,7 +671,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
     readonly char _slot = slot;
     Loc _target { get; set; }
 
-    void ProjectileLands(List<Loc> pts, Item ammo)
+    void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
         var landingPt = pts.Last();
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt, TerrainFlags.Lit);
@@ -679,6 +679,14 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
         ammo.Equiped = false;
         ammo.Hidden = true;
         _actor.CalcEquipmentModifiers();
+
+        var tile = _gs.TileAt(landingPt);
+        if (tile.Type == TileType.Chasm)
+        {
+            string txt = $"{ammo.FullName.DefArticle().Capitalize()} tumbles into the darkness.";
+            var msg = new Message(txt, landingPt);
+            result.Messages.Add(msg);
+        }
 
         var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
         _ui.RegisterAnimation(anim);
@@ -724,7 +732,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
                 }
             }
             
-            ProjectileLands(pts, ammo);
+            ProjectileLands(pts, ammo, result);
         }
 
         return result;
