@@ -89,9 +89,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         return true;
     }
 
-    public void ItemDropped(Item item, int row, int col)
+    public void ItemDropped(Item item, Loc loc)
     {
-        var loc = new Loc(CurrDungeon, CurrLevel, row, col);
         item.Loc = loc;
         item.ContainedBy = 0;
         ObjDB.SetToLoc(loc, item);

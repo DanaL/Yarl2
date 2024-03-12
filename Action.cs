@@ -560,7 +560,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
         {
             
             var coins = ItemFactory.Get("zorkmids", _gameState.ObjDB);
-            _gameState.ItemDropped(coins, _actor.Loc.Row, _actor.Loc.Col);
+            _gameState.ItemDropped(coins, _actor.Loc);
             coins.Value = _amount;
             string msg;
             if (_amount == 1)
@@ -604,7 +604,7 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
         var droppedItems = _actor.Inventory.Remove(_slot, _amount);
         foreach (var droppedItem in droppedItems)
         {
-            _gameState.ItemDropped(droppedItem, _actor.Loc.Row, _actor.Loc.Col);
+            _gameState.ItemDropped(droppedItem, _actor.Loc);
             droppedItem.Equiped = false;
         }
 
@@ -671,11 +671,24 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
     readonly char _slot = slot;
     Loc _target { get; set; }
 
+    Loc FinalLandingSpot (Loc loc)
+    {
+        var tile = _gs.TileAt(loc);
+
+        while (tile.Type == TileType.Chasm)
+        {
+            loc = loc with { Level = loc.Level + 1 };
+            tile = _gs.TileAt(loc);
+        }
+
+        return loc;
+    }
+
     void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
-        var landingPt = pts.Last();
+        var landingPt = FinalLandingSpot(pts.Last());
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
-        _gs.ItemDropped(ammo, landingPt.Row, landingPt.Col);
+        _gs.ItemDropped(ammo, landingPt);
         ammo.Equiped = false;
         ammo.Hidden = true;
         _actor.CalcEquipmentModifiers();
@@ -845,7 +858,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         else 
         {
             _actor.Inventory.Remove(Choice, 1);
-            _gameState.ItemDropped(item, _actor.Loc.Row, _actor.Loc.Col);
+            _gameState.ItemDropped(item, _actor.Loc);
             item.Equiped = false;
             _actor.CalcEquipmentModifiers();
 
