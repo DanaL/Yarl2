@@ -131,11 +131,19 @@ class Monster : Actor
         }
     }
 
+    public override int TotalMeleeAttackModifier() 
+    {
+        if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var ab))
+            return ab.Curr;
+        else
+            return 0;
+    }
+
     public override int AC 
     {
         get 
         {
-            if (Stats.TryGetValue(Attribute.AC, out Stat ac))
+            if (Stats.TryGetValue(Attribute.AC, out var ac))
                 return ac.Curr;
             else
                 return base.AC;
