@@ -190,16 +190,17 @@ class Battle
 
     public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, Random rng)
     {
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var result = new ActionResult() { Successful = false, EnergyCost = 1.0 };
 
         int roll = AttackRoll(rng) + attacker.TotalMissileAttackModifier(ammo);
         if (roll >= target.AC)
         {
-            ResolveMissileHit(attacker, target, ammo, gs, result, rng);            
+            ResolveMissileHit(attacker, target, ammo, gs, result, rng);
+            result.Successful = true;
         }
         else
         {
-            Message msg = MessageFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
+            Message msg = MessageFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
             result.Messages.Add(msg);
         }
 

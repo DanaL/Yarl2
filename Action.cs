@@ -671,36 +671,63 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
     readonly char _slot = slot;
     Loc _target { get; set; }
 
+    void ProjectileLands(List<Loc> pts, Item ammo)
+    {
+        var landingPt = pts.Last();
+        _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt, TerrainFlags.Lit);
+        _gs.ItemDropped(ammo, landingPt.Row, landingPt.Col);
+        ammo.Equiped = false;
+        ammo.Hidden = true;
+        _actor.CalcEquipmentModifiers();
+
+        var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
+        _ui.RegisterAnimation(anim);
+    }
+
     public override ActionResult Execute()
-    {        
+    {
+        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
         var ammo = _actor.Inventory.Remove(_slot, 1).First();
         if (ammo != null)
         {
             // Calculate where the projectile will actually stop
             var trajectory = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
-                                 .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2));
+                                 .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
+                                 .ToList();
             List<Loc> pts = [];
-            foreach (var pt in trajectory)
+            for (int j = 0; j < trajectory.Count;  j++) 
             {
+                var pt = trajectory[j];
                 var tile = _gs.TileAt(pt);
-                if (tile.Passable() || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
+                var occ = _gs.ObjDB.Occupant(pt);
+                if (j > 0 && occ != null)
+                {
                     pts.Add(pt);
+                    
+                    // I'm not handling what happens if a projectile hits a friendly or 
+                    // neutral NPCs
+                    var attackResult = Battle.MissileAttack(_actor, occ, _gs, ammo, _ui.Rng);
+                    result.Messages.AddRange(attackResult.Messages);
+                    result.EnergyCost = attackResult.EnergyCost;
+                    if (attackResult.Successful)
+                    {
+                        break;
+                    }
+                }
+                else if (tile.Passable() || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
+                {
+                    pts.Add(pt);
+                }
                 else
+                {
                     break;
+                }
             }
-
-            var landingPt = pts.Last();
-            _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt, TerrainFlags.Lit);
-            _gs.ItemDropped(ammo, landingPt.Row, landingPt.Col);
-            ammo.Equiped = false;
-            ammo.Hidden = true;
-            _actor.CalcEquipmentModifiers();
-
-            var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
-            _ui.RegisterAnimation(anim);
+            
+            ProjectileLands(pts, ammo);
         }
 
-        return new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        return result;
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
