@@ -25,10 +25,10 @@ class AimAnimation : Animation
     readonly int _scrH;
     readonly UserInterface _ui;
 
-    public AimAnimation(UserInterface ui, Loc start)
+    public AimAnimation(UserInterface ui, Loc origin, Loc initialTarget)
     {
-        _start = start;
-        Target = start;
+        _start = origin;
+        Target = initialTarget;
         Expiry = DateTime.MaxValue;
         _ui = ui;
         _scrW = UserInterface.ViewWidth;

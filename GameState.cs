@@ -32,7 +32,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public DjikstraMap? DMapDoors { get; private set; }
     public HashSet<Loc> RecentlySeen { get; set; } = [];
     public UserInterface UI { get; set; } = ui;
-    
+    public ulong LastTarget { get; set; } = 0;
+
     static readonly Dictionary<TileType, int> _passableBasic = new() { 
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },

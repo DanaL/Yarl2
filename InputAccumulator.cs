@@ -45,10 +45,32 @@ class AimAccumulator : InputAccumulator
         _ui = ui;
         _start = start;
         _target = start;
-        _anim = new AimAnimation(_ui, _target);
-        _ui.RegisterAnimation(_anim);
-        _maxRange = maxRange;        
+        _maxRange = maxRange;
         _gs = _ui.GameState!;
+        CheckForPreviousTarget();
+
+        _anim = new AimAnimation(_ui, start, _target);
+        _ui.RegisterAnimation(_anim);        
+    }
+
+    void CheckForPreviousTarget()
+    {
+        if (_gs.LastTarget > 0)
+        {
+            for (int r = _start.Row - _maxRange; r < _start.Col + _maxRange; r++) 
+            {
+                for (int c = _start.Col - _maxRange; c < _start.Col + _maxRange; c++)
+                {
+                    var loc = _start with { Row = r, Col = c };
+                    var occ = _gs.ObjDB.Occupant(loc);
+                    if (occ is not null && occ.ID == _gs.LastTarget) 
+                    {
+                        _target = loc;
+                        return;
+                    }                    
+                }
+            }
+        }
     }
 
     public override void Input(char ch)
@@ -88,10 +110,21 @@ class AimAccumulator : InputAccumulator
         _anim.Expiry = DateTime.MinValue;
     }
 
-    public override AccumulatorResult GetResult() => new LocAccumulatorResult()
+    public override AccumulatorResult GetResult()
     {
-        Loc = _target
-    };
+        var result = new LocAccumulatorResult() 
+        { 
+            Loc = _target 
+        };
+
+        var occ = _gs.ObjDB.Occupant(_target);
+        if (occ is not null)
+        {
+            _gs.LastTarget = occ.ID;
+        }
+
+        return result;
+    }
 }
 
 class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
@@ -202,7 +235,7 @@ class ShopMenuAccumulator : InputAccumulator
         return _menuItems.Values.Select(mi => mi.SelectedCount * (int) (mi.Item.Value * _shopkeeper.Markup)).Sum();
     }
 
-    private void WritePopup()
+    void WritePopup()
     {
         var sb = new StringBuilder(_shopkeeper.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
@@ -282,8 +315,8 @@ class ShopMenuAccumulator : InputAccumulator
 
 class InventoryAccumulator(HashSet<char> options) : InputAccumulator
 {
-    private char _choice;
-    private HashSet<char> _options = options;
+    char _choice;
+    HashSet<char> _options = options;
 
     public override void Input(char ch) 
     {
@@ -318,7 +351,7 @@ class InventoryAccumulator(HashSet<char> options) : InputAccumulator
 
 class PauseForMoreAccumulator : InputAccumulator
 {
-    private bool _keyPressed;
+    bool _keyPressed;
 
     public override bool Success => _keyPressed;
     public override bool Done => _keyPressed;
@@ -329,11 +362,11 @@ class PauseForMoreAccumulator : InputAccumulator
 
 class LongMessageAccumulator : InputAccumulator
 {
-    private UserInterface _ui;
-    private int _row;
-    private IEnumerable<string> _lines;
-    private bool _done;
-    private int _pageCount = 1;
+    UserInterface _ui;
+    int _row;
+    IEnumerable<string> _lines;
+    bool _done;
+    int _pageCount = 1;
 
     public override bool Done => _done;
     public override bool Success => true;
@@ -391,7 +424,7 @@ class YesNoAccumulator : InputAccumulator
 
 class DirectionAccumulator : InputAccumulator
 {
-    private (int, int) _result;
+    (int, int) _result;
     public DirectionAccumulator() => Done = false;
 
     public override void Input(char ch)
