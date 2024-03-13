@@ -76,7 +76,7 @@ class MissileAnimation : Animation
         var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
         
-        if ((DateTime.Now - _lastFrame).TotalMilliseconds > 5)
+        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
         {
             _lastFrame = DateTime.Now;
             ++_frame;
