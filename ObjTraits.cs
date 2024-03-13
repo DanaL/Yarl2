@@ -105,7 +105,7 @@ class DocumentTrait(string text) : ObjTrait, IReadable
     }
 }
 
-class LightSourceTrait : ObjTrait, IPerformer, IUSeable
+class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
@@ -122,12 +122,12 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
     
     public override string AsText()
     {
-        return $"LightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Energy}#{Recovery}";
+        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Energy}#{Recovery}";
     }
 
     public (bool, string) Use(Actor _, GameState gs, int row, int col)
     {
-        Item item = gs.ObjDB.GetObj(ContainerID) as Item;
+        Item? item = gs.ObjDB.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
         {
@@ -136,24 +136,34 @@ class LightSourceTrait : ObjTrait, IPerformer, IUSeable
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
             // affect            
-            gs.ToggleEffect(item, loc, TerrainFlag.Lit, false);
+            gs.ToggleEffect(item!, loc, TerrainFlag.Lit, false);
             Lit = false;
 
-            return (true, $"You extinguish {item.FullName.DefArticle()}.");
+            for (int j = 0; j < item!.Traits.Count; j++)
+            {
+                if (item!.Traits[j] is DamageTrait dt && dt.DamageType == DamageType.Fire)
+                {
+                    item!.Traits.RemoveAt(j);
+                    break;
+                }
+            }
+
+            return (true, $"You extinguish {item!.FullName.DefArticle()}.");
         }
         else if (Fuel > 0)
         {
             Lit = true;
-            item.Stackable = false;
+            item!.Stackable = false;
             Energy = Recovery;
             gs.Performers.Add(this);
             gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
+            item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
             return (true, $"The {item.Name} sparks to life!");
         }
         else
         {
-            return (false, $"That {item.Name} is burnt out!");
+            return (false, $"That {item!.Name} is burnt out!");
         }
     }
 
@@ -218,7 +228,7 @@ class TraitFactory
                 };
                 break;
             case "LightSourceTrait":
-                trait = new LightSourceTrait()
+                trait = new FlameLightSourceTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
                     Lit = bool.Parse(pieces[2]),                    

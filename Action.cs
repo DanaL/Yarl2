@@ -499,8 +499,8 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
          var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
-        var useableTraits = item.Traits.Where(t => t is IUSeable);
-        if (useableTraits.Any()) 
+        var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
+        if (useableTraits.Count != 0) 
         {
             Item? toUse = _actor.Inventory.RemoveByID(item.ID) 
                             ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
@@ -959,7 +959,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
         _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
 
         // ExtinguishActions are performed on LightSourceTraits
-        var src = (LightSourceTrait)_performer;
+        var src = (FlameLightSourceTrait)_performer;
         Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
         Loc loc = item.Loc;
 

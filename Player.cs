@@ -73,10 +73,10 @@ class Player : Actor, IPerformer
        if (Stats.TryGetValue(Attribute.MissileAttackBonus, out var missibleAttackBonus))
             mod += missibleAttackBonus.Curr;
 
-        AttackTrait? attackTrait = (AttackTrait?) weapon.Traits
+        AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
                                                     .Where(t => t is AttackTrait)
-                                                    .FirstOrDefault() 
-                                            ?? throw new Exception("Why would we have a weapon without an attack trait??");
+                                                    .FirstOrDefault()
+                                            ?? new AttackTrait() { Bonus = 0 };
         mod += attackTrait.Bonus;
 
         return mod;
@@ -91,8 +91,8 @@ class Player : Actor, IPerformer
         {
             AttackTrait? attackTrait = (AttackTrait?) weapon.Traits
                                                             .Where(t => t is AttackTrait)
-                                                            .FirstOrDefault() 
-                                            ?? throw new Exception("Why would we have a weapon without an attack trait??");
+                                                            .FirstOrDefault()
+                                            ?? new AttackTrait() { Bonus = 0 };
             mod += attackTrait.Bonus;
         }
 
