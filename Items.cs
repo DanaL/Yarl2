@@ -18,7 +18,8 @@ enum ItemType
     Zorkmid,
     Tool,
     Document,
-    Potion
+    Potion,
+    Scroll
 }
 
 class Item : GameObj
@@ -147,7 +148,7 @@ class ItemFactory
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
                 var ls = new FlameLightSourceTrait() {
-                    ContainerID = item.ID, Fuel = 20, Lit = false, Energy = 0.0, Recovery = 1.0 };
+                    ContainerID = item.ID, Fuel = 500, Lit = false, Energy = 0.0, Recovery = 1.0 };
                 ls.Stats[Attribute.Radius] = new Stat(5);
                 item.Traits.Add(ls);
                 break;
@@ -160,6 +161,13 @@ class ItemFactory
                                     Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE),
                                     Consumable = true };
                 item.Traits.Add(new MinorHealTrait());
+                break;
+            case "scroll of blink":
+                item = new Item()
+                {
+                    Name = "scroll of blink", Type = ItemType.Scroll, Stackable = true, Value = 125,
+                                    Glyph = new Glyph('?', Colours.WHITE, Colours.GREY), Consumable = true };
+                item.Traits.Add(new BlinkTrait());
                 break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");

@@ -502,6 +502,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
         if (useableTraits.Count != 0) 
         {
+            var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
             Item? toUse = _actor.Inventory.RemoveByID(item.ID) 
                             ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
             toUse.Stackable = false;
@@ -509,18 +510,28 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 _actor.Inventory.Add(toUse, _actor.ID);
 
             bool success = false;
-            string msg = "";
             foreach (IUSeable trait in useableTraits)
             {
-                (success, msg) = trait.Use(_actor, _gameState, _actor.Loc.Row, _actor.Loc.Col);
+                var useResult = trait.Use(_actor, _gameState, _actor.Loc.Row, _actor.Loc.Col);
+                result.Successful = useResult.Successful;
+                var alert = MessageFactory.Phrase(useResult.Message, _actor.Loc);
+                result.Messages.Add(alert);
+                success = useResult.Successful;
+                
+                if (useResult.ReplacementAction is not null)
+                {
+                    result.Successful = false;
+                    result.AltAction = useResult.ReplacementAction;
+                    result.EnergyCost = 0.0;
+                }
             }
-            var alert = MessageFactory.Phrase(msg, _actor.Loc);
-            return new ActionResult() { Successful = success, Messages = [alert], EnergyCost = 1.0 };
+
+            return result;
         }
         else
         {
             var msg = MessageFactory.Phrase("You don't know a way to use that!", _gameState.Player.Loc);
-            return new ActionResult() { Successful = false, Messages = [msg] };
+            return new ActionResult() { Successful = true, Messages = [msg], EnergyCost = 0.0 };
         }
     }
 

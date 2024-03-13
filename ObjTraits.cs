@@ -11,6 +11,8 @@
 
 namespace Yarl2;
 
+record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
+
 enum AuraEffect { Light }
 
 interface IReadable
@@ -20,29 +22,62 @@ interface IReadable
 
 interface IUSeable
 {
-    (bool, string) Use(Actor user, GameState gs, int row, int col);
+    UseResult Use(Actor user, GameState gs, int row, int col);
 }
 
 abstract class ObjTrait 
 {
-    public abstract string Desc();
+    public virtual string Desc() => "";
     public abstract string AsText();
     public abstract bool Acitve { get; }
-    public abstract bool Aura { get; }    
+    public virtual bool Aura => false;
     public virtual TerrainFlag Effect => TerrainFlag.None;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public virtual int Radius => 0;
 }
 
+class BlinkTrait : ObjTrait, IUSeable
+{
+    public override bool Acitve => throw new NotImplementedException();
+    public override string AsText() => "BlinkTrait";
+
+    public UseResult Use(Actor user, GameState gs, int row, int col)
+    {
+        List<Loc> sqs = [];
+        var start = user.Loc;
+
+        for (var r = start.Row - 12; r < start.Row + 12; r++)
+        {
+            for (var c = start.Col - 12; c < start.Col + 12; c++)
+            {
+                var loc = start with { Row = r, Col = c };
+                int d = Util.Distance(start, loc);
+                if (d >= 8 && d <= 12 && gs.TileAt(loc).Passable() && !gs.ObjDB.Occupied(loc))
+                {
+                    sqs.Add(loc);
+                }
+            }
+        }
+
+        if (sqs.Count == 0)
+        {
+            return new UseResult(false, "Bloop?", null, null);
+        }
+        else
+        {
+            var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];            
+            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);            
+            return new UseResult(true, "Bamf!", mv, null);
+        }        
+    }    
+}
+
 class MinorHealTrait : ObjTrait, IUSeable
 {
     public override bool Acitve => throw new NotImplementedException();
-
     public override string AsText() => "MinorHealTrait";
-    public override string Desc() => "";
-    public override bool Aura => false;
-
-    public (bool, string) Use(Actor user, GameState gs, int row, int col)
+    
+    public UseResult Use(Actor user, GameState gs, int row, int col)
     {        
         var hp = 0;
         for (int j = 0; j < 4; j++)
@@ -51,7 +86,7 @@ class MinorHealTrait : ObjTrait, IUSeable
         var msg = MessageFactory.Phrase(user.ID, Verb.Etre, Verb.Heal, false, user.Loc, gs);
         var txt = msg.Text[..^1] + $" for {hp} HP.";
 
-        return (true, txt);
+        return new UseResult(true, txt, null, null);
     }
 }
 
@@ -60,8 +95,7 @@ class AttackTrait : ObjTrait
     public int Bonus { get; set; }
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
-    public override string AsText() => $"AttackTrait#{Bonus}";
-    public override bool Aura => false;
+    public override string AsText() => $"AttackTrait#{Bonus}";    
     public override bool Acitve => true;
 }
 
@@ -125,7 +159,7 @@ class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
         return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Energy}#{Recovery}";
     }
 
-    public (bool, string) Use(Actor _, GameState gs, int row, int col)
+    public UseResult Use(Actor _, GameState gs, int row, int col)
     {
         Item? item = gs.ObjDB.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
@@ -148,7 +182,7 @@ class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
                 }
             }
 
-            return (true, $"You extinguish {item!.FullName.DefArticle()}.");
+            return new UseResult(true, $"You extinguish {item!.FullName.DefArticle()}.", null, null);
         }
         else if (Fuel > 0)
         {
@@ -159,11 +193,11 @@ class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
             gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
             item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
-            return (true, $"The {item.Name} sparks to life!");
+            return new UseResult(true, $"The {item.Name} sparks to life!", null, null);
         }
         else
         {
-            return (false, $"That {item!.Name} is burnt out!");
+            return new UseResult(false, $"That {item!.Name} is burnt out!", null, null);
         }
     }
 

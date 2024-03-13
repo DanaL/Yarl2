@@ -142,7 +142,11 @@ class PlayerCreator
         player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
         player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
         player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-        
+
+        player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
+        player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
+        player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
+
         for (int j = 0; j < 5; j++)
             player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
 

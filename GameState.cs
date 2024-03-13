@@ -72,7 +72,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     {
         var d = Campaign!.Dungeons[loc.DungeonID];
         var map = d.LevelMaps[loc.Level];
-        return map.TileAt(loc.Row, loc.Col);
+
+        return map.InBounds(loc.Row, loc.Col)
+                    ? map.TileAt(loc.Row, loc.Col)
+                    : TileFactory.Get(TileType.Unknown);        
     }
 
     public bool LOSBetween(Loc a, Loc b)

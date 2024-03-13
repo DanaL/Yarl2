@@ -574,10 +574,12 @@ abstract class UserInterface
             ActionResult result;
             do
             {
-                result = action!.Execute();                
+                result = action!.Execute();
                 performer.Energy -= result.EnergyCost;
                 if (result.AltAction is not null)
                 {
+                    if (result.Messages.Count > 0)
+                        AlertPlayer(result.Messages, result.MessageIfUnseen);
                     result = result.AltAction.Execute();
                     performer.Energy -= result.EnergyCost;
                 }
