@@ -888,7 +888,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
         var (item, _) = _actor.Inventory.ItemAt(Choice);
         _ui.CloseMenu();
 
-        if (item.Type != ItemType.Armour && item.Type != ItemType.Weapon)
+        if (!(item.Type == ItemType.Armour || item.Type == ItemType.Weapon || item.Type == ItemType.Tool))
         {
             var msg = MessageFactory.Phrase("You cannot equip that!", _gameState.Player.Loc);
             return new ActionResult() { Successful = false, Messages = [msg] };

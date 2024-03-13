@@ -102,9 +102,13 @@ class Battle
     static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
     {
         // Need to handle the case where the player isn't currently wielding a weapon...
-        var dmg = attacker.MeleeDamage()
-                          .Select(d => DamageRoll(d, rng));
-
+        List<(int, DamageType)> dmg = [];
+        foreach (var d in attacker.MeleeDamage())
+        {
+            var dr = DamageRoll(d, rng);
+            dmg.Add(dr);
+        }
+ 
         int bonusDamage = 0; // this is separate from the damage types because, say,
                                 // a flaming sword that does 1d8 slashing, 1d6 fire has
                                 // two damage types but we only want to add the player's

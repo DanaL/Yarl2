@@ -147,7 +147,7 @@ class ItemFactory
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
                 var ls = new FlameLightSourceTrait() {
-                    ContainerID = item.ID, Fuel = 500, Lit = false, Energy = 0.0, Recovery = 1.0 };
+                    ContainerID = item.ID, Fuel = 20, Lit = false, Energy = 0.0, Recovery = 1.0 };
                 ls.Stats[Attribute.Radius] = new Stat(5);
                 item.Traits.Add(ls);
                 break;
@@ -229,7 +229,7 @@ class Inventory(ulong ownerID)
     {        
         foreach (var item in _items)
         {
-            if (item.Type == ItemType.Weapon && item.Equiped)
+            if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equiped)
                 return item;
         }
 
@@ -355,7 +355,7 @@ class Inventory(ulong ownerID)
             }
 
             // Okay we are equiping new gear, which is a little more complicated
-            if (item.Type == ItemType.Weapon)
+            if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
             {
                 // If there is a weapon already equiped, unequip it
                 foreach (Item other in _items)
