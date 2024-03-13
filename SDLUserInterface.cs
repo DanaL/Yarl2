@@ -85,6 +85,7 @@ internal class SDLUserInterface : UserInterface
                         SDL_Keycode.SDLK_ESCAPE => new UIEvent(UIEventType.KeyInput, ch),
                         SDL_Keycode.SDLK_RETURN => new UIEvent(UIEventType.KeyInput, ch),
                         SDL_Keycode.SDLK_BACKSPACE => new UIEvent(UIEventType.KeyInput, ch),
+                        SDL_Keycode.SDLK_TAB => new UIEvent(UIEventType.KeyInput, ch),
                         _ => new UIEvent(UIEventType.NoEvent, '\0')
                     };                        
                 default:

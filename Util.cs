@@ -54,6 +54,7 @@ class Colours
 class Constants
 {
     public const int BACKSPACE = 8;
+    public const int TAB = 9;
     public const int ESC = 27;
 }
 

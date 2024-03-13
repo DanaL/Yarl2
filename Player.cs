@@ -339,19 +339,13 @@ class Player : Actor, IPerformer
                 slots.Add('$');
                 _accumulator = new InventoryAccumulator(slots);
                 _deferred = new DropItemAction(ui, this, gameState);
-            }
-            else if (ch == 'r')
-            {
-                ShowInventory(ui, "Read what?", "");
-                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ReadItemAction(ui, this, gameState);
-            }
+            }            
             else if (ch == 't')
             {
                 // Eventually I'll want to remember the last item thrown
                 // so the player doesn't need to always select an item if
                 // they're throwing draggers several turns in a row
-                string instructions = "* Use move keys to move to target;\n  Enter to select or ESC to abort *";
+                string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
                 ShowInventory(ui, "Throw what?", instructions);
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
                 _deferred = new ThrowSelectionAction(ui, this, gameState);

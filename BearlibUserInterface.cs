@@ -63,7 +63,8 @@ internal class BLUserInferface : UserInterface, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)Constants.BACKSPACE);
         KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);        
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_TAB, (char)Constants.TAB);
     }
 
     protected override UIEvent PollForEvent()

@@ -39,6 +39,8 @@ class AimAccumulator : InputAccumulator
     Loc _target;
     AimAnimation _anim;
     readonly int _maxRange;
+    List<Loc> _monsters = [];
+    int _targeted = -1;
 
     public AimAccumulator(UserInterface ui, Loc start, int maxRange)
     {
@@ -47,30 +49,31 @@ class AimAccumulator : InputAccumulator
         _target = start;
         _maxRange = maxRange;
         _gs = _ui.GameState!;
-        CheckForPreviousTarget();
+        FindTargets();
 
         _anim = new AimAnimation(_ui, start, _target);
         _ui.RegisterAnimation(_anim);        
     }
 
-    void CheckForPreviousTarget()
+    void FindTargets()
     {
-        if (_gs.LastTarget > 0)
+        foreach (var loc in _gs.RecentlySeen)
         {
-            for (int r = _start.Row - _maxRange; r < _start.Col + _maxRange; r++) 
+            if (Util.Distance(loc, _start) <= _maxRange)
             {
-                for (int c = _start.Col - _maxRange; c < _start.Col + _maxRange; c++)
+                var occ = _gs.ObjDB.Occupant(loc);
+                if (occ is null || occ.ID == _gs.Player.ID)
+                    continue;
+
+                _monsters.Add(loc);
+
+                if (occ.ID == _gs.LastTarget)
                 {
-                    var loc = _start with { Row = r, Col = c };
-                    var occ = _gs.ObjDB.Occupant(loc);
-                    if (occ is not null && occ.ID == _gs.LastTarget) 
-                    {
-                        _target = loc;
-                        return;
-                    }                    
+                    _targeted = _monsters.Count - 1;
+                    _target = loc;
                 }
             }
-        }
+        }        
     }
 
     public override void Input(char ch)
@@ -83,6 +86,14 @@ class AimAccumulator : InputAccumulator
             ExpireAnimation();
             return;
         }
+        else if (ch == Constants.TAB && _monsters.Count > 0)
+        {
+            int next = (++_targeted) % _monsters.Count;
+            _target = _monsters[next];
+            _anim.Target = _monsters[next];
+            _targeted = next;
+        }
+
         else if (ch == '\n' || ch == '\r')
         {
             Done = true;

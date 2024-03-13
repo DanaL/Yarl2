@@ -66,7 +66,7 @@ class BlinkTrait : ObjTrait, IUSeable
         else
         {
             var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];            
-            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);            
+            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);
             return new UseResult(true, "Bamf!", mv, null);
         }        
     }    
@@ -123,19 +123,24 @@ class ArmourTrait : ObjTrait
     public override bool Acitve => true;
 }
 
-class DocumentTrait(string text) : ObjTrait, IReadable
+class ReadableTrait(string text) : ObjTrait, IUSeable
 {
-    string _text = text;
-
+    readonly string _text = text;
+    public ulong ContainerID { get; set; }
     public override bool Acitve => true;
-    public override string Desc() => "";
     public override string AsText() => $"DocumentTrait#{_text}";
     public override bool Aura => false;
 
-    public void Read(Actor actor, UserInterface ui, Item document)
+    public UseResult Use(Actor user, GameState gs, int row, int col)
     {
-        string msg = $"{actor.FullName} read:\n{_text}";
-        ui.Popup(msg, document.FullName.IndefArticle());   
+        Item? doc = gs.ObjDB.GetObj(ContainerID) as Item;
+        string msg = $"{user.FullName.Capitalize()} read:\n{_text}";        
+        gs.UI.Popup(msg, doc!.FullName.IndefArticle().Capitalize());
+
+        var action = new CloseMenuAction(gs.UI, 1.0);
+        var acc = new PauseForMoreAccumulator();
+        
+        return new UseResult(false, "", action, acc);
     }
 }
 
@@ -272,8 +277,8 @@ class TraitFactory
                 };
                 trait.Stats[Attribute.Radius].SetMax(5);
                 break;
-            case "DocumentTrait":
-                trait = new DocumentTrait(pieces[1].Replace("<br/>", "\n"));
+            case "ReadableTrait":
+                trait = new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
                 break;
             default:
                 throw new Exception("I don't know how to make that kind of Trait");

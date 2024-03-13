@@ -492,7 +492,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     public char Choice { get; set; }
     private UserInterface _ui = ui;
     private Actor _actor = actor;
-    private GameState _gameState = gs;
+    private GameState _gs = gs;
 
     public override ActionResult Execute()
     {
@@ -512,13 +512,18 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             bool success = false;
             foreach (IUSeable trait in useableTraits)
             {
-                var useResult = trait.Use(_actor, _gameState, _actor.Loc.Row, _actor.Loc.Col);
+                var useResult = trait.Use(_actor, _gs, _actor.Loc.Row, _actor.Loc.Col);
                 result.Successful = useResult.Successful;
                 var alert = MessageFactory.Phrase(useResult.Message, _actor.Loc);
                 result.Messages.Add(alert);
                 success = useResult.Successful;
-                
-                if (useResult.ReplacementAction is not null)
+                                
+                if (useResult.Accumulator is not null)
+                {
+                    _gs.Player.ReplacePendingAction(useResult.ReplacementAction!, useResult.Accumulator);
+                    result.EnergyCost = 0.0;
+                }
+                else if (useResult.ReplacementAction is not null)
                 {
                     result.Successful = false;
                     result.AltAction = useResult.ReplacementAction;
@@ -530,7 +535,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         }
         else
         {
-            var msg = MessageFactory.Phrase("You don't know a way to use that!", _gameState.Player.Loc);
+            var msg = MessageFactory.Phrase("You don't know a way to use that!", _gs.Player.Loc);
             return new ActionResult() { Successful = true, Messages = [msg], EnergyCost = 0.0 };
         }
     }
@@ -629,48 +634,6 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
     {
         var count = ((NumericAccumulatorResult)result).Amount;
         _amount = count;
-    }
-}
-
-// Reading a magic scroll will need to work a little different than just
-// reading a text document
-class ReadItemAction(UserInterface ui, Actor actor, GameState gs) : Action
-{
-    public char Choice { get; set; }
-    readonly UserInterface _ui = ui;
-    readonly Actor _actor = actor;
-    readonly GameState _gs = gs;
-
-    public override ActionResult Execute()
-    {
-        var (item, _) = _actor.Inventory.ItemAt(Choice);        
-        _ui.CloseMenu();
-
-        var readables = item.Traits.Where(t => t is IReadable);
-        if (readables.Any())
-        {
-            IReadable document = (IReadable)readables.First();
-            document.Read(_actor, _ui, item);
-            
-            if (_actor is Player player)
-            {
-                var acc = new PauseForMoreAccumulator();
-                var action = new CloseMenuAction(_ui, 1.0);
-                player.ReplacePendingAction(action, acc);
-            }
-            return new ActionResult() { Successful = true };
-        }
-        else
-        {
-            var msg = MessageFactory.Phrase("There's nothing to read on that!", _gs.Player.Loc);
-            return new ActionResult() { Successful = false, Messages = [msg] };
-        }
-    }
-
-    public override void ReceiveAccResult(AccumulatorResult result)
-    {
-        var menuResult = (MenuAccumulatorResult)result;
-        Choice = menuResult.Choice;
     }
 }
 
