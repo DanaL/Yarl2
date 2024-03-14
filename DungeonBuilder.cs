@@ -237,7 +237,7 @@ class DungeonBuilder
             dungeon.AddMap(levels[l]);
         }   
 
-        DungeonMap.AddRiver(levels[0], w + 1, h + 1, TileType.Chasm, rng);
+        DungeonMap.AddRiver(levels[0], w + 1, h + 1, TileType.DeepWater, rng);
         // We want to make any square that's a wall below the chasm into dungeon floor
         for (int r = 1; r < h; r++)
         {

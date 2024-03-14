@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Collections.Concurrent;
+
 namespace Yarl2;
 
 
@@ -70,6 +72,18 @@ class GameObjectDB
             return _objs[id].Glyph;
         else
             return ItemGlyphAt(loc);
+    }
+
+    public (Glyph Occ, Glyph Item) Glyphs(Loc loc)
+    {
+        Glyph occ;
+        if (_actorLocs.TryGetValue(loc, out ulong id))
+            occ = _objs[id].Glyph;
+        else
+            occ = EMPTY;
+
+        
+        return (occ, ItemGlyphAt(loc));
     }
 
     public void RemoveActor(Actor actor)

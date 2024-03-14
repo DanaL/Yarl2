@@ -705,7 +705,7 @@ class DungeonMap(Random rng)
                 // find the closest points between this region and the main/largest region
                 var nearby = ClosestPts(regions[largest], regions[k]);
                 var pair = nearby[rng.Next(nearby.Count)];
-                djmap.Generate(passable, pair.Item2);
+                djmap.Generate(passable, pair.Item2, 70);
 
                 var start = pair.Item1;
                 var path = djmap.ShortestPath(start.Item1, start.Item2, 0, 0);

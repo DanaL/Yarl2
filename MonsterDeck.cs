@@ -109,7 +109,7 @@ class DeckBulder
             {
                 var deck = EarlyLevelDeck(lvl, rng);
                 deck.Reshuffle(rng);
-                decks.Add(deck);
+                decks.Add(deck);                
             }
             ++lvl;
         }

@@ -38,7 +38,8 @@ enum Attribute
     Cleave,
     Impale,
     Rage,
-    Radius
+    Radius,
+    Flying
 }
 
 class Stat

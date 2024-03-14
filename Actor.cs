@@ -38,7 +38,8 @@ enum AIType
 {
     Basic,
     BasicHumanoid,
-    Village
+    BasicFlyer,
+    Villager
 }
 
 record Feature(string Name, Attribute Attribute, int Mod, ulong expiry);
@@ -94,6 +95,8 @@ class Actor : GameObj, IPerformer
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
     }
+
+    public bool HasFeature(Attribute attr) => Features.Any(f => f.Attribute == attr);
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
@@ -154,8 +157,9 @@ class Monster : Actor
     {
         IBehaviour behaviour = aiType switch 
         {
-            AIType.Village => new VillagerBehaviour(),
-            AIType.BasicHumanoid => new BasicHumanoidBehaviour(),            
+            AIType.Villager => new VillagerBehaviour(),
+            AIType.BasicHumanoid => new BasicHumanoidBehaviour(),
+            AIType.BasicFlyer => new BasicFlyingBehaviour(),
             _ => new BasicMonsterBehaviour(),
         };
 
@@ -364,6 +368,36 @@ class GrocerBehaviour : IBehaviour, IChatter
     }
 }
 
+class BasicFlyingBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    {
+        if (actor.Status == ActorStatus.Idle)
+        {
+            return new PassAction();
+        }
+
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        {
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        }
+
+        var adj = gs.DMapFlight.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+            if (!gs.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gs, rng);
+            }
+        }
+
+        // Otherwise do nothing!
+        return new PassAction();
+    }
+}
+
 // Very basic idea for a wolf or such, which can move and attack the player
 // but doesn't have hands/can't open doors etc
 class BasicMonsterBehaviour : IBehaviour
@@ -485,6 +519,15 @@ class MonsterFactory
             Recovery = double.Parse(fields[6])
         };
         m.SetBehaviour(ai);
+
+        if (!string.IsNullOrEmpty(fields[12]))
+        {
+            foreach (var feature in fields[12].Split(','))
+            {
+                if (Enum.TryParse(feature, out Attribute attr))
+                    m.Features.Add(new Feature(feature, attr, 0, ulong.MaxValue));
+            }
+        }
 
         int hp = int.Parse(fields[4]);
         m.Stats.Add(Attribute.HP, new Stat(hp));

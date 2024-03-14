@@ -733,8 +733,8 @@ abstract class UserInterface
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
-        var glyph = GameState.ObjDB.GlyphAt(loc);
-                
+        var (occ, items) = GameState.ObjDB.Glyphs(loc);
+
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
         bool isVisible = visible.Contains((mapRow, mapCol));
@@ -769,18 +769,34 @@ abstract class UserInterface
             {
                 return TileToSqr(ZLayer[scrRow, scrCol], true);
             }
-            else if (sqBelow != null)
+            else if (sqBelow != null && occ == GameObjectDB.EMPTY)
             {
                 return sqBelow;
             }
-            else if (tile.Type != TileType.DeepWater && glyph != GameObjectDB.EMPTY) 
+            else if (tile.Type == TileType.DeepWater && occ == GameObjectDB.EMPTY)
             {
-                // Items on a deep water square are underwater
-                var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
+                // This will get further complicated when I have water creatures 
+                // who nethack-style are invisible normally. (Or invisible in 
+                // general come to think of it)
 
-                var item = GameState.ObjDB.ItemGlyphAt(loc);
-                if (item != GameObjectDB.EMPTY)
-                    memory = sqr with { Fg = item.Unlit };
+                // But items at water tiles will be 'under water' so we don't show them
+                remembered[(GameState.CurrLevel, mapRow, mapCol)] = TileToSqr(tile, false);
+                return TileToSqr(tile, true);
+            }
+            else if (occ != GameObjectDB.EMPTY) 
+            {
+                var sqr = new Sqr(occ.Lit, Colours.BLACK, occ.Ch);                
+                if (items != GameObjectDB.EMPTY)
+                    memory = sqr with { Fg = items.Unlit };
+                remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
+
+                return sqr;
+            }
+            else if (items != GameObjectDB.EMPTY)
+            {
+                var sqr = new Sqr(items.Lit, Colours.BLACK, items.Ch);
+                if (items != GameObjectDB.EMPTY)
+                    memory = sqr with { Fg = items.Unlit };
                 remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
 
                 return sqr;

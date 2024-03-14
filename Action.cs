@@ -378,6 +378,18 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         }
     }
 
+    bool CanMoveTo()
+    {
+        var tile = _map.TileAt(_loc.Row, _loc.Col);
+
+        if (tile.Passable())
+            return true;
+        else if (_actor.HasFeature(Attribute.Flying) && tile.PassableByFlight())
+            return true;
+
+        return false;
+    }
+
     public override ActionResult Execute()
     {
         var result = new ActionResult();
@@ -404,7 +416,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
                 result.AltAction = attackAction;
             }
         }
-        else if (!_map.TileAt(_loc.Row, _loc.Col).Passable())
+        else if (!CanMoveTo())
         {
             result.Successful = false;
 

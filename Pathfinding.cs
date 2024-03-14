@@ -36,7 +36,7 @@ class DjikstraMap
     // slightly more expensive)
     // I'm going to make life easy on myself for now and just work with a 
     // single goal.
-    public void Generate(Dictionary<TileType, int> passable, (int, int) goal)
+    public void Generate(Dictionary<TileType, int> passable, (int, int) goal, int maxRange)
     {
         int height = _hiRow - _loRow;
         int width = _hiCol - _loCol;
@@ -66,6 +66,12 @@ class DjikstraMap
         while (q.Count > 0)
         {
             var sq = q.Dequeue();
+            if (Util.Distance(sq.Item1, sq.Item2, goalRow, goalCol) >= maxRange)
+            {
+                visited.Add(sq);
+                continue;
+            }
+
             if (visited.Contains(sq))
                 continue;
             var tile = _map.TileAt(sq.Item1 + _loRow, sq.Item2 + _loCol);

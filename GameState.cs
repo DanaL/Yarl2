@@ -11,7 +11,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 
 namespace Yarl2;
 
@@ -30,6 +29,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     private int _currPerformer = 0;
     public DjikstraMap? DMap { get; private set; }
     public DjikstraMap? DMapDoors { get; private set; }
+    public DjikstraMap? DMapFlight { get; private set; }
     public HashSet<Loc> RecentlySeen { get; set; } = [];
     public UserInterface UI { get; set; } = ui;
     public ulong LastTarget { get; set; } = 0;
@@ -53,6 +53,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         { TileType.BrokenDoor, 1 },
         { TileType.ClosedDoor, 1 },
         { TileType.WoodBridge, 1 }
+    };
+
+    static readonly Dictionary<TileType, int> _passableFlying = new() {
+        { TileType.DungeonFloor, 1 },
+        { TileType.Landmark, 1 },
+        { TileType.Upstairs, 1 },
+        { TileType.Downstairs, 1 },
+        { TileType.OpenDoor, 1 },
+        { TileType.BrokenDoor, 1 },
+        { TileType.WoodBridge, 1 },
+        { TileType.DeepWater, 1 },
+        { TileType.Water, 1 },
+        { TileType.Chasm, 1 }
     };
 
     public void EnterLevel(int dungeon, int level)
@@ -213,11 +226,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             long startTime = Stopwatch.GetTimestamp();
 
             DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-            DMap.Generate(_passableBasic, (dest.Row, dest.Col));
+            DMap.Generate(_passableBasic, (dest.Row, dest.Col), 25);
 
             // I wonder how complicated it would be to generate the maps in parallel
             DMapDoors = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-            DMapDoors.Generate(_passableWithDoors, (dest.Row, dest.Col));
+            DMapDoors.Generate(_passableWithDoors, (dest.Row, dest.Col), 25);
+
+            DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+            DMapFlight.Generate(_passableFlying, (dest.Row, dest.Col), 25);
 
             var elapsed = Stopwatch.GetElapsedTime(startTime);
             Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");

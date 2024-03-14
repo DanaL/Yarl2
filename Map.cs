@@ -62,6 +62,7 @@ abstract class Tile(TileType type)
     public virtual TileType Type { get; protected set; } = type;
     public virtual string StepMessage => "";
     public abstract bool Passable();
+    public abstract bool PassableByFlight();
     public abstract bool Opaque();
 
     public bool SoundProof() => Type switch
@@ -80,26 +81,30 @@ abstract class Tile(TileType type)
 
 class BasicTile : Tile
 {
-    private readonly bool _passable;
-    private readonly bool _opaque;
-    private readonly string _stepMessage;
+    readonly bool _passable;
+    readonly bool _passableByFlight;
+    readonly bool _opaque;
+    readonly string _stepMessage;
 
     public override bool Passable() => _passable;
+    public override bool PassableByFlight() => _passableByFlight;
     public override bool Opaque() => _opaque;
     public override string StepMessage => _stepMessage;
 
-    public BasicTile(TileType type, bool passable, bool opaque) : base(type)
+    public BasicTile(TileType type, bool passable, bool opaque, bool passableByFlight) : base(type)
     {
         _passable = passable;
         _opaque = opaque;
         _stepMessage = "";
+        _passableByFlight = passableByFlight;
     }
 
-    public BasicTile(TileType type, bool passable, bool opaque, string stepMessage) : base(type)
+    public BasicTile(TileType type, bool passable, bool opaque, bool passableByFlight, string stepMessage) : base(type)
     {
         _passable = passable;
         _opaque = opaque;
         _stepMessage = stepMessage;
+        _passableByFlight = passableByFlight;
     }
 }
 
@@ -114,6 +119,7 @@ class Door(TileType type, bool open) : Tile(type)
         get => Open ? TileType.OpenDoor : TileType.ClosedDoor;       
     }
     public override bool Passable() => Open;
+    public override bool PassableByFlight() => Open;
     public override bool Opaque() => !Open;
 
     public override string ToString()
@@ -127,6 +133,7 @@ class Portal(string stepMessage) : Tile(TileType.Portal)
     private readonly string _stepMessage = stepMessage;
     public Loc Destination { get; set; }
     public override bool Passable() => true;
+    public override bool PassableByFlight() => true;
     public override bool Opaque() => false;
 
     public override string StepMessage => _stepMessage;
@@ -155,6 +162,7 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
 {
     private readonly string _stepMessage = stepMessage;
     public override bool Passable() => true;
+    public override bool PassableByFlight() => true;
     public override bool Opaque() => false;
 
     public override string StepMessage => _stepMessage;
@@ -167,32 +175,32 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
 
 class TileFactory
 {
-    private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true);
-    private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true);
-    private static readonly Tile DungeonWall = new BasicTile(TileType.DungeonWall, false, true);
-    private static readonly Tile StoneWall = new BasicTile(TileType.StoneWall, false, true);
-    private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true);
-    private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false);
-    private static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false);
-    private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false);
-    private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false);
-    private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false);
-    private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false);
-    private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true);
-    private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true);
-    private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false);
-    private static readonly Tile Water = new BasicTile(TileType.Water, true, false, "You splash into the water.");
-    private static readonly Tile HWindow = new BasicTile(TileType.HWindow, false, false);
-    private static readonly Tile VWindow = new BasicTile(TileType.VWindow, false, false);
-    private static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true);
-    private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false);
-    private static readonly Tile Forge = new BasicTile(TileType.Forge, true, false);
-    private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false);
-    private static readonly Tile Well = new BasicTile(TileType.Well, true, false);
-    private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false);
-    private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false);
-    private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true);
-    private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false);
+    private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true, false);
+    private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true, false);
+    private static readonly Tile DungeonWall = new BasicTile(TileType.DungeonWall, false, true, false);
+    private static readonly Tile StoneWall = new BasicTile(TileType.StoneWall, false, true, false);
+    private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true, false);
+    private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false, true);
+    private static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false, true);
+    private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false, true);
+    private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false, true);
+    private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false, true);
+    private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false, true);
+    private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true, false);
+    private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true, false);
+    private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false, true);
+    private static readonly Tile Water = new BasicTile(TileType.Water, true, false, true, "You splash into the water.");
+    private static readonly Tile HWindow = new BasicTile(TileType.HWindow, false, false, false);
+    private static readonly Tile VWindow = new BasicTile(TileType.VWindow, false, false, false);
+    private static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true, false);
+    private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false, true);
+    private static readonly Tile Forge = new BasicTile(TileType.Forge, true, false, true);
+    private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false, true);
+    private static readonly Tile Well = new BasicTile(TileType.Well, true, false, true);
+    private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
+    private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
+    private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true, false);
+    private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
 
     public static Tile Get(TileType type) => type switch
     {
