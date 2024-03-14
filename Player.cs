@@ -398,6 +398,14 @@ class Player : Actor, IPerformer
                 _accumulator = new LongMessageAccumulator(ui, lines);
                 _deferred = new NullAction();
             }
+            else if (ch == '?')
+            {
+                var time = gameState.CurrTime();
+                var hour = time.Item1.ToString().PadLeft(2, '0');
+                var minute = time.Item2.ToString().PadLeft(2, '0');
+                var msg = new Message($"The current time is {hour}:{minute}", Loc);
+                ui.AlertPlayer([msg], "");
+            }
             else
                 return new PassAction();
         }

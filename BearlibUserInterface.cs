@@ -65,6 +65,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
         KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
         KeyToChar.Add((int)TKCodes.InputEvents.TK_TAB, (char)Constants.TAB);
+        KeyToChar.Add((int)TKCodes.InputEvents.TK_SLASH, '/');
     }
 
     protected override UIEvent PollForEvent()
@@ -88,6 +89,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                         '8' => '*',
                         '4' => '$',
                         '2' => '@',
+                        '/' => '?',
                         _ => char.ToUpper(value)
                     };                   
                 }
