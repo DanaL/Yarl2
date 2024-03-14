@@ -129,7 +129,27 @@ class Player : Actor, IPerformer
 
     public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
     {
-        int playerVisionRadius = gs.InWilderness ? MaxVisionRadius : 1;
+        int playerVisionRadius = 1;
+        
+        // What latitude does the game take place out? Will I eventually
+        // have seasonal variation in the length of days? :O
+        if (gs.InWilderness)
+        {
+            var (hour, _) = gs.CurrTime();
+            if (hour >= 6 && hour <= 19)
+                playerVisionRadius = MaxVisionRadius;
+            else if (hour >= 20 && hour <= 21)
+                playerVisionRadius = 7;
+            else if (hour >= 21 && hour <= 23)
+                playerVisionRadius = 5;
+            else if (hour < 4)
+                playerVisionRadius = 3;
+            else if (hour == 4)
+                playerVisionRadius = 5;
+            else
+                playerVisionRadius = 7;
+        }
+        
         List<(ulong, int, TerrainFlag)> auras = [ (ID, playerVisionRadius, TerrainFlag.Lit)] ;
 
         foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
@@ -404,6 +424,7 @@ class Player : Actor, IPerformer
                 var hour = time.Item1.ToString().PadLeft(2, '0');
                 var minute = time.Item2.ToString().PadLeft(2, '0');
                 var msg = new Message($"The current time is {hour}:{minute}", Loc);
+                gameState.Turn += 1000;
                 ui.AlertPlayer([msg], "");
             }
             else
