@@ -452,7 +452,9 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
                 var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 10);
                 if (alerted.Contains(_gs.Player.ID))
                 {
-                    result.Messages.Add(new Message("You hear padding footsteps...", _loc, true));
+                    var txt = _actor.HasFeature(Attribute.Flying) ? "You hear softly beating wings..."
+                                                                  : "You hear padding footsteps...";
+                    result.Messages.Add(new Message(txt, _loc, true));
                 }
             }
         }
