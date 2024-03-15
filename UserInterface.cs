@@ -49,7 +49,7 @@ abstract class UserInterface
     public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
 
-    public GameState? GameState { get; private set; } = null;
+    public GameState? GameState { get; private set; }
     public Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
@@ -383,7 +383,7 @@ abstract class UserInterface
             WriteText(weaponLine, row++, ViewWidth, SideBarWidth);
         }
 
-        for (; row < ViewHeight - 2; row++)
+        for (; row < ViewHeight - 1; row++)
         {
             WriteLine(blank, row, ViewWidth, SideBarWidth, Colours.WHITE);
         }
@@ -392,21 +392,21 @@ abstract class UserInterface
         if (Player.Features.Any(f => f.Attribute == Attribute.Rage) && currHP < maxHP / 2)
         {
             List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
-            WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
+            WriteText(rageLine, ViewHeight - 2, ViewWidth, SideBarWidth);
         }
             
         if (GameState.CurrDungeon == 0) 
         {
             var time = GameState.CurrTime();
             var mins = time.Item2.ToString().PadLeft(2, '0');
-            WriteLine($"| Outside {time.Item1}:{mins}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine($"| Outside {time.Item1}:{mins}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
         }
         else 
         {
-            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
         }
 
-        WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+        //WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     protected void WriteDropDown()
@@ -456,11 +456,7 @@ abstract class UserInterface
             MessageHistory.RemoveAt(MaxHistory);
     }
 
-    public void WriteLongMessage(List<string> message)
-    {
-        _longMessage = message;
-    }
-
+    public void WriteLongMessage(List<string> message) => _longMessage = message;
     public void ShowDropDown(List<string> lines) => MenuRows = lines;
     public void CloseMenu() => MenuRows = [];
 

@@ -154,8 +154,6 @@ class Player : Actor, IPerformer
 
         foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
         {
-            //var itemAuras = item.Auras(gs);
-            //if (itemAuras.Count > 0)
             auras.AddRange(item.Auras(gs));
         }
 
