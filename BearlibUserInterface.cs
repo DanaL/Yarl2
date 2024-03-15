@@ -17,8 +17,8 @@ namespace Yarl2;
 
 internal class BLUserInferface : UserInterface, IDisposable
 {        
-    private readonly Dictionary<int, char> KeyToChar = [];
-    private Dictionary<Colour, Color> _colours = [];
+    readonly Dictionary<int, char> KeyToChar = [];
+    Dictionary<Colour, Color> _colours = [];
 
     public BLUserInferface(string windowTitle, Options opt, Random rng) : base(opt, rng)
     {
@@ -29,7 +29,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         Terminal.Refresh();
     }
 
-    private Color ToBearLibColour(Colour colour) 
+    Color ToBearLibColour(Colour colour) 
     {        
         if (!_colours.TryGetValue(colour, out Color value)) 
         {
@@ -45,7 +45,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         return value;
     }
 
-    private void SetUpKeyToCharMap()
+    void SetUpKeyToCharMap()
     {
         int curr = (int)TKCodes.InputEvents.TK_A;
         for (int ch = 'a'; ch <= 'z'; ch++)
@@ -145,7 +145,7 @@ internal class BLUserInferface : UserInterface, IDisposable
             if (MessageHistory.Count > 0)
                 WriteMessagesSection();
 
-            if (MenuRows is not null)
+            if (MenuRows.Count > 0)
             {
                 WriteDropDown();
             }

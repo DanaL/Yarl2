@@ -5,20 +5,16 @@ using static SDL2.SDL;
 
 namespace Yarl2;
 
-internal class SDLUserInterface : UserInterface
+class SDLUserInterface : UserInterface
 {
-    private readonly IntPtr _window;
-    private readonly IntPtr _renderer, _font;
-    private readonly int _fontWidth;
-    private readonly int _fontHeight;
-    private SDL_Rect _mainFrameLoc;
-    private Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
-    private Dictionary<Colour, SDL_Color> _colours;
+    readonly IntPtr _window;
+    readonly IntPtr _renderer, _font;
+    readonly int _fontWidth;
+    readonly int _fontHeight;
+    SDL_Rect _mainFrameLoc;
+    Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
+    Dictionary<Colour, SDL_Color> _colours;
 
-    // This may be a performance kludge for my last of understanding of SDL2 that
-    // doesn't pan out.
-    private Sqr[,] _prevTiles = new Sqr[ViewHeight, ViewWidth];    
-    
     public SDLUserInterface(string windowTitle, Options opt, Random rng) : base(opt, rng)
     {
         FontSize = opt.FontSize;
@@ -42,18 +38,8 @@ internal class SDLUserInterface : UserInterface
             w = ViewWidth * _fontWidth
         };
 
-        _cachedGlyphs = new();
-
-        for (int r = 0; r < ViewHeight; r++)
-        {
-            for (int c = 0; c < ViewWidth; c++)
-            {
-                _prevTiles[r, c] = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
-            }
-        }
+        _cachedGlyphs = [];
     }
-
-    public override void CloseMenu() => ClosingMenu = true;
 
     protected override UIEvent PollForEvent()
     {
@@ -96,7 +82,7 @@ internal class SDLUserInterface : UserInterface
         return new UIEvent(UIEventType.NoEvent, '\0');
     }
 
-    private SDL_Color ToSDLColour(Colour colour) 
+    SDL_Color ToSDLColour(Colour colour) 
     {
         if (!_colours.TryGetValue(colour, out SDL_Color value)) 
         {
@@ -133,16 +119,13 @@ internal class SDLUserInterface : UserInterface
         SDL_DestroyTexture(texture);
     }
 
-    private void SDLPut(int row, int col, char ch, Colour fg, Colour bg) 
+    void SDLPut(int row, int col, char ch, Colour fg, Colour bg) 
     {
         var key = (ch, fg, bg);
 
         if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
         {
             nint surface;
-            //if (ch == '.' && fg == Colours.YELLOW)
-            //    surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(fg), RndTorchColour());
-            //else
             surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(fg), ToSDLColour(bg));        
             var toCache = SDL_CreateTextureFromSurface(_renderer, surface);            
             SDL_FreeSurface(surface);
@@ -155,7 +138,7 @@ internal class SDLUserInterface : UserInterface
         SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
     }
 
-    private IntPtr CreateMainTexture()
+    IntPtr CreateMainTexture()
     {
         var tw = ViewWidth * _fontWidth;
         var th = ViewHeight * _fontHeight;
@@ -177,72 +160,8 @@ internal class SDLUserInterface : UserInterface
         return targetTexture;
     }
 
-    private bool FrameChanged()
-    {
-        if (ClosingMenu)
-        {
-            MenuRows = null;
-            ClosingMenu = false;
-            return true;
-        }
-
-        if (OpeningMenu)
-        {
-            OpeningMenu = false;
-            return true;
-        }
-
-        if (ClosingPopUp)
-        {
-            _popupBuffer = null;
-            ClosingPopUp = false;
-            return true;
-        }
-
-        if (OpeningPopUp)
-        {
-            OpeningPopUp = false;
-            return true;
-        }
-
-        if (HistoryUpdated)
-        {
-            HistoryUpdated = false;
-            return true;
-        }
-        
-        for (int row = 0; row < ViewHeight; row++)
-        {
-            for (int col = 0; col < ViewWidth; col++)
-            {
-                if (_prevTiles[row, col] != SqsOnScreen[row, col])
-                    return true;                
-            }
-        }
-
-        return false;
-    }
-
-    private void SaveLastFame()
-    {
-        for (int row = 0; row < ViewHeight; row++)
-        {
-            for (int col = 0; col < ViewWidth; col++)
-            {
-                _prevTiles[row, col] = SqsOnScreen[row, col];
-            }
-        }
-    }
-
     public override void UpdateDisplay()
-    {
-        // TODO: when the sidebar actually does something,
-        //       I'll need to also check if it changed
-        if (_longMessage is null && !FrameChanged()) 
-        {
-            return;
-        }
-
+    {        
         SDL_RenderClear(_renderer);
         if (_longMessage is not null) 
         {
@@ -259,13 +178,12 @@ internal class SDLUserInterface : UserInterface
                 var texture = CreateMainTexture();
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);
-                SaveLastFame();
             }
 
             if (MessageHistory.Count > 0)
                 WriteMessagesSection();
 
-            if (MenuRows is not null)
+            if (MenuRows.Count > 0)
             {
                 WriteDropDown();
             }

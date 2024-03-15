@@ -44,7 +44,7 @@ abstract class UserInterface
     protected int PlayerScreenCol;
     protected List<string>? _longMessage;   
     protected Options _options;
-    private bool _playing;
+    bool _playing;
 
     public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
@@ -59,9 +59,7 @@ abstract class UserInterface
     public int CurrentDungeon => GameState is not null ? GameState.CurrDungeon : -1;
     public int CurrentLevel => GameState is not null ? GameState.CurrLevel : -1;
 
-    protected bool ClosingMenu { get; set; }
-    protected bool OpeningMenu { get; set; }
-    protected List<string>? MenuRows { get; set; }
+    protected List<string> MenuRows { get; set; } = [];
 
     protected bool ClosingPopUp { get; set; }
     protected bool OpeningPopUp { get; set; }
@@ -183,7 +181,7 @@ abstract class UserInterface
         }
     }
 
-    private List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
+    List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
     {
         List<(Colour, string)> split = [];
 
@@ -211,7 +209,7 @@ abstract class UserInterface
     // This is going to look ugly if a message contains a long line
     // followed by a line break then short line but I don't know
     // if I'm ever going to need to worry about that in my game.
-    private List<List<(Colour, string)>> ResizePopupLines(List<List<(Colour, string)>> lines, int maxWidth)
+    List<List<(Colour, string)>> ResizePopupLines(List<List<(Colour, string)>> lines, int maxWidth)
     {
         List<List<(Colour, string)>> resized = [];
         foreach (var line in lines)
@@ -463,13 +461,8 @@ abstract class UserInterface
         _longMessage = message;
     }
 
-    public void ShowDropDown(List<string> lines)
-    {
-        OpeningMenu = true;
-        MenuRows = lines;
-    }
-
-    public virtual void CloseMenu() => MenuRows = null;
+    public void ShowDropDown(List<string> lines) => MenuRows = lines;
+    public void CloseMenu() => MenuRows = [];
 
     // I dunno about having this here. In previous games, I had each Tile object
     // know what its colours were, but maybe the UI class *is* the correct spot
@@ -556,7 +549,7 @@ abstract class UserInterface
         GameState.ToggleEffect(Player, Player.Loc, TerrainFlag.Lit, true);
     }
 
-    private bool TakeTurn(IPerformer performer)
+    bool TakeTurn(IPerformer performer)
     {
         var action = performer.TakeTurn(this, GameState);
 
@@ -867,7 +860,7 @@ abstract class UserInterface
             SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
     }
 
-    private void ClearZLayer()
+    void ClearZLayer()
     {
         for (int r = 0; r < ViewHeight; r++)
         {
