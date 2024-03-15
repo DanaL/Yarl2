@@ -288,24 +288,21 @@ class Map : ICloneable
         }
     }
 
-    public void RemoveEffectAt(TerrainFlag effect, int row, int col, ulong objID)
-    {
-        if (Effects.TryGetValue((row, col), out var flagsDict))
-        {
-            if (flagsDict.ContainsKey(objID))
-            {
-                flagsDict[objID] &= ~effect;
-            }
-        }
-    }
-
-    // I dunno if this is going to be too slow...
+    // Don't think I need both this method and RemoveEffectsFor()
     public void RemoveEffectFromMap(TerrainFlag effect, ulong objID)
     {
         foreach (var flagsDict in Effects.Values)
         {
             if (flagsDict.ContainsKey(objID))
                 flagsDict[objID] &= ~effect;
+        }
+    }
+
+    public void RemoveEffectsFor(ulong objID)
+    {
+        foreach (var k in Effects.Keys)
+        {
+            Effects[k].Remove(objID);
         }
     }
 

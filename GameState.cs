@@ -334,57 +334,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         return alerted;
     }
 
-    // When an effect source moves, we need to clear out the table tracking its
-    // starting position and insert entries for the destination
-    void UpdateEffect(ulong sourceID, Loc start, Loc dest, int radius, TerrainFlag effect)
-    {
-        var newSqs = new HashSet<(ulong, int, int, int, int)>();
-        var oldSqs = new HashSet<(ulong, int, int, int, int)>();
-
-        var startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
-        foreach (var sq in FieldOfView.CalcVisible(radius, start.Row, start.Col, startMap, start.Level))
-        {
-            oldSqs.Add((sourceID, start.DungeonID, start.Level, sq.Item2, sq.Item3));
-        }
-        var destMap = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
-        foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.Level))
-        {
-            newSqs.Add((sourceID, dest.DungeonID, dest.Level, sq.Item2, sq.Item3));
-        }
-
-        List<(ulong, int, int, int, int)> toAdd = [];
-        List<(ulong, int, int, int, int)> toClear = [];
-        foreach (var sq in newSqs)
-        {
-            if (!oldSqs.Contains(sq))
-                toAdd.Add(sq);
-        }
-        foreach (var sq in oldSqs)
-        {
-            if (!newSqs.Contains(sq))
-                toClear.Add(sq);
-        }
-
-        foreach (var (objID, dungeon, level, r, c) in toAdd)
-        {
-            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-            map.ApplyEffectAt(effect, r, c, objID);
-        }
-        foreach (var (objID, dungeon, level, r, c) in toClear)
-        {
-            var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-            map.RemoveEffectAt(effect, r, c, objID);
-        }
-    }
-
-    // This is still an extremely inefficient way to handle updating a moving source
-    // such as a light :/
     public void CheckMovedEffects(GameObj obj, Loc start, Loc dest)
     {
-        var auras = obj.Auras(this);
+        // first we want to clear out the old effects
+        var startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
+        startMap.RemoveEffectsFor(obj.ID);
+
+        var destMap = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
+        var auras = obj.Auras(this).Where(a => a.Item2 > 0);
         foreach (var aura in auras)
         {
-            UpdateEffect(aura.Item1, start, dest, aura.Item2, aura.Item3);
+            ulong id = aura.Item1;
+            int radius = aura.Item2;
+            TerrainFlag effect = aura.Item3;
+            
+            foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.Level))
+            {
+                destMap.ApplyEffectAt(effect, sq.Item2, sq.Item3, id);
+            }
         }
     }
 
