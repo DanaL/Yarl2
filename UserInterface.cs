@@ -397,10 +397,17 @@ abstract class UserInterface
             WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
         }
             
-        if (GameState.CurrDungeon == 0)
-            WriteLine($"| Outside ({Player.Loc.Row}, {Player.Loc.Col})", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
-        else
+        if (GameState.CurrDungeon == 0) 
+        {
+            var time = GameState.CurrTime();
+            var mins = time.Item2.ToString().PadLeft(2, '0');
+            WriteLine($"| Outside {time.Item1}:{mins}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+        }
+        else 
+        {
             WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 2, ViewWidth, SideBarWidth, Colours.WHITE);
+        }
+
         WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 

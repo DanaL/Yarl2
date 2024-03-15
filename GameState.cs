@@ -87,11 +87,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     // way correspond to one action in the game...) so an hour is  360 turns
     public (int, int) CurrTime()
     {
-        // There are 8640 turns/day
-        int normalized = (int) (Turn + 2880) % 8640;
-        int hour = normalized / 360;
-        int leftover = normalized - (hour * 360);
-        int minute = leftover / 6;
+        // There are 1440 turns/day
+        int normalized = (int) (Turn + 480) % 1440;
+        int hour = normalized / 60;
+        int minute = normalized - (hour * 60);
+        //int minute = leftover / 6;
 
         return (hour, minute);
     }
