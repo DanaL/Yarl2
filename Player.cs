@@ -141,11 +141,11 @@ class Player : Actor, IPerformer
             else if (hour >= 20 && hour <= 21)
                 playerVisionRadius = 7;
             else if (hour >= 21 && hour <= 23)
-                playerVisionRadius = 5;
-            else if (hour < 4)
                 playerVisionRadius = 3;
+            else if (hour < 4)
+                playerVisionRadius = 2;
             else if (hour == 4)
-                playerVisionRadius = 5;
+                playerVisionRadius = 3;
             else
                 playerVisionRadius = 7;
         }
