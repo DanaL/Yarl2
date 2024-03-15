@@ -516,11 +516,14 @@ class ArcherBehaviour : IBehaviour
         if (distanceFromPlayer <= range)
         {
             var trajectory = Util.Bresenham(actor.Loc.Row, actor.Loc.Col, p.Loc.Row, p.Loc.Col)
-                                 .Select(sq => actor.Loc with { Row = sq.Item1, Col = sq.Item2 });
+                                 .Select(sq => actor.Loc with { Row = sq.Item1, Col = sq.Item2 })
+                                 .ToList();
 
             if (ClearShot(gs, trajectory))
             {
                 var arrow = ItemFactory.Get("arrow", gs.ObjDB);
+                var arrowAnim = new ArrowAnimation(ui, trajectory, Colours.LIGHT_BROWN);
+                ui.RegisterAnimation(arrowAnim);
                 return new MissileAttackAction(actor, p.Loc, gs, arrow, rng);
             }
         }

@@ -707,7 +707,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
             result.Messages.Add(msg);
         }
 
-        var anim = new MissileAnimation(_ui, ammo.Glyph, pts, ammo);
+        var anim = new ThrownMissileAnimation(_ui, ammo.Glyph, pts, ammo);
         _ui.RegisterAnimation(anim);
     }
 

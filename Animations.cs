@@ -49,7 +49,62 @@ class AimAnimation : Animation
     }
 }
 
-class MissileAnimation : Animation 
+class ArrowAnimation : Animation
+{
+    readonly UserInterface _ui;
+    List<(Loc, char)> _frames = [];
+    int _frame = 0;    
+    Colour _ammoColour;
+    DateTime _lastFrame;
+    
+    public ArrowAnimation(UserInterface ui, List<Loc> pts, Colour ammoColour)
+    {
+        Expiry = DateTime.MaxValue;
+        _ui = ui;
+        _ammoColour = ammoColour;
+
+        for (int j = 0; j < pts.Count - 1; j++)
+        {
+            _frames.Add((pts[j+1], CalcChar(pts[j], pts[j+1])));
+        }
+    }
+
+    static char CalcChar(Loc a,  Loc b)
+    {
+        if (a.Row == b.Row)
+            return '-';
+        else if (a.Col == b.Col)
+            return '|';
+        else if (a.Col < b.Col && a.Row < b.Row)
+            return '\\';
+        else if (a.Col > b.Col && a.Row > b.Row)
+            return '\\';
+        else
+            return '/';
+    }
+
+    public override void Update()
+    {
+        var (loc, ch) = _frames[_frame];
+        var sq = new Sqr(_ammoColour, Colours.BLACK, ch);        
+        var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+        _ui.SqsOnScreen[scrR, scrC] = sq;
+
+        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
+        {
+            _lastFrame = DateTime.Now;
+            ++_frame;
+        }
+
+        if (_frame >= _frames.Count)
+        {
+            Expiry = DateTime.MinValue;            
+        }
+    }
+
+}
+
+class ThrownMissileAnimation : Animation 
 {
     readonly UserInterface _ui;
     Glyph _glyph;
@@ -58,7 +113,7 @@ class MissileAnimation : Animation
     DateTime _lastFrame;
     Item _ammo;
 
-    public MissileAnimation(UserInterface ui, Glyph glyph, List<Loc> pts, Item ammo)
+    public ThrownMissileAnimation(UserInterface ui, Glyph glyph, List<Loc> pts, Item ammo)
     {
         _ui = ui;
         _glyph = glyph;
