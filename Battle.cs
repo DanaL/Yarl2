@@ -91,7 +91,7 @@ class Battle
         int bonusDamage = 0;
         if (attacker.Stats.TryGetValue(Attribute.Dexterity, out var dex))
             bonusDamage += dex.Curr;
-        if (attacker.Stats.TryGetValue(Attribute.MissileAttackBonus, out var mdb))
+        if (attacker.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
 
         Message msg = MessageFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);

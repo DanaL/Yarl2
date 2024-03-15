@@ -119,6 +119,12 @@ class ItemFactory
                 item.Traits.Add(new AttackTrait() { Bonus = 0 });
                 item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });                
                 break;
+            case "arrow":
+                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true, Value = 2,
+                    Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN) };
+                item.Traits.Add(new AttackTrait() { Bonus = 0 });
+                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+                break;
             case "leather armour":
                 item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
                                     Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };

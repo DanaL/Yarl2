@@ -120,7 +120,7 @@ abstract class UserInterface
 
     public void ClosePopup()
     {
-        _popupBuffer = null;
+        _popupBuffer = "";
         _popupTitle = "";
         ClosingPopUp = true;
     }

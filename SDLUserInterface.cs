@@ -188,7 +188,7 @@ class SDLUserInterface : UserInterface
                 WriteDropDown();
             }
 
-            if (_popupBuffer is not null)
+            if (!string.IsNullOrEmpty(_popupBuffer))
             {
                 WritePopUp();
             }

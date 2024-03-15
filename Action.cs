@@ -42,10 +42,28 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
 
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null) 
-        {
             result = Battle.MeleeAttack(_actor, target, _gs, _rng);
-        }
+        
+        return result;
+    }
+}
 
+class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo, Random rng) : Action
+{
+    GameState _gs = gs;
+    Loc _loc = loc;
+    Actor _actor = actor;
+    Random _rng = rng;
+    Item _ammo = ammo;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = true };
+
+        var target = _gs.ObjDB.Occupant(_loc);
+        if (target is not null)
+            result = Battle.MissileAttack(_actor, target, _gs, _ammo, _rng);
+        
         return result;
     }
 }
@@ -723,7 +741,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
                         break;
                     }
                 }
-                else if (tile.Passable() || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
+                else if (tile.Passable() || tile.PassableByFlight())
                 {
                     pts.Add(pt);
                 }

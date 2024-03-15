@@ -150,7 +150,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                 WriteDropDown();
             }
 
-            if (_popupBuffer is not null)
+            if (!string.IsNullOrEmpty(_popupBuffer))
             {
                 WritePopUp();
             }

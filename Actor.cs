@@ -39,6 +39,7 @@ enum AIType
     Basic,
     BasicHumanoid,
     BasicFlyer,
+    Archer,
     Villager
 }
 
@@ -63,6 +64,7 @@ class Actor : GameObj, IPerformer
     public Actor() 
     {
         Inventory = new Inventory(ID);
+        _behaviour = new BasicMonsterBehaviour();
     }
 
     public override string FullName => Name.DefArticle();    
@@ -106,11 +108,8 @@ class Actor : GameObj, IPerformer
 class Monster : Actor
 {
     public AIType AIType { get; set;}
-    
-    public Monster() 
-    {
-        _behaviour = new BasicMonsterBehaviour();
-    }
+
+    public Monster() { }
 
     public override List<Damage> MeleeDamage()
     {
@@ -136,7 +135,15 @@ class Monster : Actor
 
     public override int TotalMeleeAttackModifier() 
     {
-        if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var ab))
+        if (Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab))
+            return ab.Curr;
+        else
+            return 0;
+    }
+
+    public override int TotalMissileAttackModifier(Item weapon)
+    {
+        if (Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab))
             return ab.Curr;
         else
             return 0;
@@ -160,6 +167,7 @@ class Monster : Actor
             AIType.Villager => new VillagerBehaviour(),
             AIType.BasicHumanoid => new BasicHumanoidBehaviour(),
             AIType.BasicFlyer => new BasicFlyingBehaviour(),
+            AIType.Archer => new ArcherBehaviour(),
             _ => new BasicMonsterBehaviour(),
         };
 
@@ -192,8 +200,6 @@ class Villager : Actor
 
     public (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
 }
-
-
 
 interface IBehaviour 
 { 
@@ -475,6 +481,72 @@ class BasicHumanoidBehaviour : IBehaviour
     }
 }
 
+class ArcherBehaviour : IBehaviour
+{
+    bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
+    {
+        foreach (var loc in trajectory)
+        {
+            var tile = gs.TileAt(loc);
+            if (!(tile.Passable() || tile.PassableByFlight()))
+                return false;
+        }
+
+        return true;
+    }
+
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    {
+        int range = 8;
+        // I'm going use Radius for Range for archers for now. Will
+        // there ever be a reason for a Monster to have both a 
+        // Radius and Range stat? That's a worry for future Dana!
+        if (actor.Stats.TryGetValue(Attribute.Radius, out Stat? r))
+        {
+            range = r.Curr;
+        }
+
+        if (actor.Status == ActorStatus.Idle)
+        {
+            return new PassAction();
+        }
+
+        var p = gs.Player;
+        int distanceFromPlayer = Util.Distance(actor.Loc, p.Loc);
+        if (distanceFromPlayer <= range)
+        {
+            var trajectory = Util.Bresenham(actor.Loc.Row, actor.Loc.Col, p.Loc.Row, p.Loc.Col)
+                                 .Select(sq => actor.Loc with { Row = sq.Item1, Col = sq.Item2 });
+
+            if (ClearShot(gs, trajectory))
+            {
+                var arrow = ItemFactory.Get("arrow", gs.ObjDB);
+                return new MissileAttackAction(actor, p.Loc, gs, arrow, rng);
+            }
+        }
+
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        {
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        }
+
+        // Move!
+        var adj = gs.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
+        foreach (var sq in adj)
+        {
+            var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
+            if (!gs.ObjDB.Occupied(loc))
+            {
+                // the square is free so move there!
+                return new MoveAction(actor, loc, gs, rng);
+            }
+        }
+
+        // Otherwise do nothing!
+        return new PassAction();
+    }
+}
+
 class VillagerBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
@@ -510,7 +582,7 @@ class MonsterFactory
 
         var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
                                             ColourSave.TextToColour(fields[2]));
-        Enum.TryParse(fields[11], out AIType ai);
+        Enum.TryParse(fields[12], out AIType ai);
         var m = new Monster()
         {
             Name = name,
@@ -520,9 +592,9 @@ class MonsterFactory
         };
         m.SetBehaviour(ai);
 
-        if (!string.IsNullOrEmpty(fields[12]))
+        if (!string.IsNullOrEmpty(fields[13]))
         {
-            foreach (var feature in fields[12].Split(','))
+            foreach (var feature in fields[13].Split(','))
             {
                 if (Enum.TryParse(feature, out Attribute attr))
                     m.Features.Add(new Feature(feature, attr, 0, ulong.MaxValue));
@@ -532,16 +604,18 @@ class MonsterFactory
         int hp = int.Parse(fields[4]);
         m.Stats.Add(Attribute.HP, new Stat(hp));
         int attBonus = int.Parse(fields[5]);
-        m.Stats.Add(Attribute.MeleeAttackBonus, new Stat(attBonus));
+        m.Stats.Add(Attribute.MonsterAttackBonus, new Stat(attBonus));
         int ac = int.Parse(fields[3]);
-        m.Stats.Add(Attribute.AC, new Stat(ac));
-        int str = Util.StatRollToMod(int.Parse(fields[9]));
-        m.Stats.Add(Attribute.Strength, new Stat(str));
+        m.Stats.Add(Attribute.AC, new Stat(ac));        
         int dmgDie = int.Parse(fields[7]);
         m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
         int dmgRolls = int.Parse(fields[8]);
         m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
-        int xpValue = int.Parse(fields[10]);
+        int str = Util.StatRollToMod(int.Parse(fields[9]));
+        m.Stats.Add(Attribute.Strength, new Stat(str));
+        int dex = Util.StatRollToMod(int.Parse(fields[10]));
+        m.Stats.Add(Attribute.Dexterity, new Stat(dex));
+        int xpValue = int.Parse(fields[11]);
         m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
         m.Status = rng.NextDouble() < 0.9 ? ActorStatus.Active : ActorStatus.Idle;
         

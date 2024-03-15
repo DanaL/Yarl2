@@ -25,6 +25,7 @@ enum Attribute
     Piety, // What I renamed D&D's Wisdom
     MeleeAttackBonus,
     MissileAttackBonus,
+    MonsterAttackBonus, // not going to bother having separate melee/missile atk bonuses for monsters
     Level,
     XP,
     Depth,
