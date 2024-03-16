@@ -46,6 +46,36 @@ class PreGameHandler(UserInterface ui)
 {
     private UserInterface _ui { get; set; } = ui;
    
+    static bool StartSq(Map map, int row, int col)
+    {
+        switch (map.TileAt(row, col).Type)
+        {
+            case TileType.Grass:
+            case TileType.Sand:
+            case TileType.Tree:
+            case TileType.Dirt:
+                return true;
+            default:
+                return false;
+        }    
+    }
+
+    static (int, int) PickStartLoc(Map map, Town town, Random rng)
+    {
+        List<(int, int)> opts = [];
+
+        for (int r = town.Row - 5; r < town.Row; r++) 
+        {
+            for (int c = town.Col; c < town.Col + town.Width; c++)
+            {
+                if (map.InBounds(r, c) && StartSq(map, r, c))
+                    opts.Add((r, c));
+            }
+        }
+
+        return opts[rng.Next(opts.Count)];
+    }
+
     static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
     {        
         var campaign = new Campaign();
@@ -103,9 +133,12 @@ class PreGameHandler(UserInterface ui)
             }
         }
         
+        var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
+
         campaign.CurrentDungeon = 0;
         campaign.CurrentLevel = 0;
-        return (campaign, entrance.Item1, entrance.Item2);        
+        return (campaign, startR, startC);
+        //return (campaign, entrance.Item1, entrance.Item2);
     }
 
     public bool StartUp(Random rng)
