@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using SDL2;
 
 namespace Yarl2;
 
@@ -18,6 +19,30 @@ namespace Yarl2;
 
 class Village
 {
+    static Loc RandomOutdoorLoc(Map map, Town town, Random rng)
+    {
+        List<(int, int)> sqs = [];
+        for (int r = town.Row; r < town.Row + town.Height; r++)
+        {
+            for (int c = town.Col; c < town.Col + town.Width; c++)
+            {
+                switch (map.TileAt(r, c).Type)
+                {
+                    case TileType.Grass:
+                    case TileType.Tree:
+                    case TileType.Sand:
+                    case TileType.Dirt:
+                        sqs.Add((r, c));
+                        break;
+                }
+            }
+        }
+
+        var sq = sqs[rng.Next(sqs.Count)];
+
+        return new Loc(0, 0, sq.Item1, sq.Item2);
+    }
+
     static string VillagerAppearance(Random rng)
     {
         string[] species = [ "human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
@@ -58,7 +83,8 @@ class Village
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
-            Town = town
+            Town = town,
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -77,7 +103,8 @@ class Village
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
             Town = town,
-            Markup = 1.25 + rng.NextDouble() / 2
+            Markup = 1.25 + rng.NextDouble() / 2,
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         var sqs = town.Market.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -105,7 +132,8 @@ class Village
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
             Town = town,
-            Markup = 1.5 + rng.NextDouble() / 2
+            Markup = 1.5 + rng.NextDouble() / 2,
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -132,6 +160,49 @@ class Village
         return smith;
     }
 
+    static VillageAnimal GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
+    {                
+        int roll = rng.Next(4);
+        var (colourDesc, colour) = roll switch
+        {
+            0 => ("grey", Colours.GREY),
+            1 => ("brown", Colours.LIGHT_BROWN),
+            2 => ("black", Colours.DARK_GREY),
+            _ => ("rusty", Colours.DULL_RED)
+        };
+
+        roll = rng.Next(5);
+        string adj = roll switch
+        {
+            0 => "scruffy",
+            1 => "furry",
+            2 => "fluffy",
+            3 => "playful",
+            _ => "friendly"
+        };
+
+        roll = rng.Next(4);
+        string dogType = roll switch
+        {
+            0 => "pup",
+            1 => "dog",
+            2 => "puppy",
+            _ => "hound"
+        };
+
+        var pup = new VillageAnimal()
+        {
+            Name = $"{adj} {dogType}",
+            Town = town,
+            Status = ActorStatus.Indifferent,
+            Appearance = $"{adj} {dogType} with {colourDesc} fur",
+            Glyph = new Glyph('d', colour, colour),
+            Loc = RandomOutdoorLoc(map, town, rng)
+        };
+
+        return pup;
+    }
+
     public static void Populate(Map map, Town town, GameObjectDB objDb, Random rng)
     {
         var ng = new NameGenerator(rng, "names.txt");
@@ -147,5 +218,9 @@ class Village
         var grocer = GenerateGrocer(map, town, ng, objDb, rng);
         objDb.Add(grocer);
         objDb.SetToLoc(grocer.Loc, grocer);
+
+        var pup = GeneratePuppy(map, town, objDb, rng);
+        objDb.Add(pup);
+        objDb.SetToLoc(pup.Loc, pup);
     }
 }

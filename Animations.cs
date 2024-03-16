@@ -90,7 +90,7 @@ class ArrowAnimation : Animation
         var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
 
-        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
+        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
         {
             _lastFrame = DateTime.Now;
             ++_frame;

@@ -229,22 +229,24 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         {
             result.Messages.Add(MessageFactory.Phrase("There's no one there!", _actor.Loc));
         }
-        else if (other is Villager villager)
+        else
         {
-
-            var (action, acc) = villager.Chat(_gs);
-            _gs.Player.ReplacePendingAction(action, acc);
+            var txt = other.ChatText();
+            if (string.IsNullOrEmpty(txt))
+            {
+                result.Messages.Add(MessageFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
+                result.Successful = true;
+                result.EnergyCost = 1.0;
+            }
+            else
+            {
+                var (action, acc) = other.Chat(_gs);
+                _gs.Player.ReplacePendingAction(action, acc);
+            }
 
             return new ActionResult() { Successful = false, EnergyCost = 0.0 };
         }
-        else
-        {
-            result.Messages.Add(MessageFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
-
-            result.Successful = true;
-            result.EnergyCost = 1.0;
-        }
-
+        
         return result;
     }
 }
@@ -423,7 +425,19 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         {
             result.Successful = false;
             var occ = _gs.ObjDB.Occupant(_loc);
-            if (occ is not null && !occ.Hostile)
+            if (occ is VillageAnimal)
+            {
+                string msg;
+                if (_rng.NextDouble() < 0.5)
+                    msg = $"You pat {occ.FullName}.";
+                else
+                    msg = $"You give {occ.FullName} some scritches.";
+                _gs.UI.Popup(msg);
+                result.EnergyCost = 1.0;
+                result.Successful = true;
+                //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
+            }
+            else if (occ is not null && !occ.Hostile)
             {
                 string msg = $"You don't want to attack {occ.FullName}!";
                 result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));

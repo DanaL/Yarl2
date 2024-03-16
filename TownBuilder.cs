@@ -33,6 +33,10 @@ class Town
     public List<HashSet<(int, int)>> Homes { get; set; } = [];
     public List<int> TakenHomes { get; set; } = [];
     public HashSet<Loc> TownSquare { get; set; } = [];
+    public int Row { get; set; }
+    public int Col { get; set; }
+    public int Height { get; set; }
+    public int Width { get; set; }
 }
 
 class TownBuilder
@@ -709,6 +713,11 @@ class TownBuilder
                 break;
         }
 
+        Town.Row = startRow;
+        Town.Col = startCol;
+        Town.Height = TOWN_HEIGHT;
+        Town.Width = TOWN_WIDTH;
+        
         PlaceBuildings(map, startRow, startCol, rng);
         
         int centreRow = startRow + TOWN_HEIGHT / 2;

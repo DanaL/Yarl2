@@ -56,11 +56,12 @@ class Actor : GameObj, IPerformer
     public Inventory Inventory { get; set; }
 
     public double Energy { get; set; } = 0.0;
-    public double Recovery { get; set; }
+    public double Recovery { get; set; } = 1.0;
     public bool RemoveFromQueue { get; set; }
+    public string Appearance { get; set; } = "";
 
     protected IBehaviour _behaviour;
-
+    
     public Actor() 
     {
         Inventory = new Inventory(ID);
@@ -75,6 +76,9 @@ class Actor : GameObj, IPerformer
     public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
     public virtual void CalcEquipmentModifiers() { }
     public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
+
+    public virtual string ChatText() => "";
+    public virtual (Action, InputAccumulator) Chat(GameState gs) => (null, null);
 
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
     {
@@ -176,34 +180,123 @@ class Monster : Actor
     }
 }
 
-interface IChatter
-{
-    string ChatText(Villager villager);
-    (Action, InputAccumulator) Chat(Villager villager, GameState gs);
-}
-
 class Villager : Actor
-{
-    public string Appearance { get; set; } = "";
+{    
     public Town Town { get; set; }
     public double Markup { get; set; } // for villagers who sell stuff...
 
     public override string FullName => Name.Capitalize();  
+    public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
+    public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
+}
 
-    public Villager()
+class VillageAnimal : Actor
+{
+    public Town Town { get; set; }
+    
+    public VillageAnimal()
     {
-        Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE);
-        Recovery = 1.0;
+        _behaviour = new VillagePupBehaviour();
     }
+    
+    public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
+    public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
+}
 
-    public string ChatText() => ((IChatter)_behaviour).ChatText(this);
-
-    public (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
+interface IChatter
+{
+    string ChatText(Actor actor);
+    (Action, InputAccumulator) Chat(Actor actro, GameState gs);
 }
 
 interface IBehaviour 
 { 
     Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
+}
+
+class VillagePupBehaviour : IBehaviour, IChatter
+{
+    // Eventually different messages depending on if the dog is friendly or not?
+    public string ChatText(Actor animal)
+    {
+        return "Arf! Arf!";
+    }
+
+    static bool LocInTown(int row, int col, Town t)
+    {
+        if (row < t.Row || row >= t.Row + t.Height)
+            return false;
+        if (col < t.Col || col >= t.Col + t.Width)
+            return false;
+        return true;
+    }
+
+    static bool Passable(TileType type) => type switch
+    {
+        TileType.Grass => true,
+        TileType.Tree => true,
+        TileType.Dirt => true,
+        TileType.Sand => true,
+        TileType.Bridge => true,
+        _ => false
+    };
+
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    {
+        var animal = (VillageAnimal)actor;
+        var town = animal.Town;
+        
+        double roll = rng.NextDouble();
+        if (roll < 0.25)
+            return new PassAction();
+
+        // in the future, when they become friendly with the player they'll move toward them
+        List<Loc> mvOpts = [];
+        foreach (var sq in Util.Adj8Sqs(animal.Loc.Row, animal.Loc.Col))
+        {
+            if (LocInTown(sq.Item1, sq.Item2, town))
+            {
+                var loc = animal.Loc with { Row = sq.Item1, Col = sq.Item2};
+                if (Passable(gameState.TileAt(loc).Type))
+                    mvOpts.Add(loc);
+            }
+        }
+
+        // Keep the animal tending somewhat to move toward the center of town
+        var centerRow = town.Row + town.Height/2;
+        var centerCol = town.Col + town.Width/2;
+        var adj = animal.Loc;
+        if (animal.Loc.Row < centerRow && animal.Loc.Col < centerCol)
+            adj = animal.Loc with { Row = animal.Loc.Row + 1, Col = animal.Loc.Col + 1 };
+        else if (animal.Loc.Row > centerRow && animal.Loc.Col > centerCol)
+            adj = animal.Loc with { Row = animal.Loc.Row - 1, Col = animal.Loc.Col - 1 };
+        else if (animal.Loc.Row < centerRow && animal.Loc.Col > centerCol)
+            adj = animal.Loc with { Row = animal.Loc.Row + 1, Col = animal.Loc.Col - 1 };
+        else if (animal.Loc.Row > centerRow && animal.Loc.Col < centerCol)
+            adj = animal.Loc with { Row = animal.Loc.Row - 1, Col = animal.Loc.Col + 1 };
+
+        if (adj != animal.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDB.Occupied(adj))
+        {
+            mvOpts.Add(adj);
+            mvOpts.Add(adj);
+            mvOpts.Add(adj);
+        }
+
+        if (mvOpts.Count == 0)
+            return new PassAction();
+        else
+            return new MoveAction(actor, mvOpts[rng.Next(mvOpts.Count)], gameState, rng);
+    }
+
+    public (Action, InputAccumulator) Chat(Actor animal, GameState gs)
+    {
+        var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
+        sb.Append(".\n\n");
+        sb.Append(animal.ChatText());
+        
+        gs.UI.Popup(sb.ToString());
+        return (new PassAction(), new PauseForMoreAccumulator());
+    }
 }
 
 class PriestBehaviour : IBehaviour, IChatter
@@ -226,7 +319,7 @@ class PriestBehaviour : IBehaviour, IChatter
         }
     }
 
-    public (Action, InputAccumulator) Chat(Villager priest, GameState gs)
+    public (Action, InputAccumulator) Chat(Actor priest, GameState gs)
     {
         var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
@@ -237,11 +330,11 @@ class PriestBehaviour : IBehaviour, IChatter
         return (new PassAction(), new PauseForMoreAccumulator());
     }
 
-    public string ChatText(Villager priest)
+    public string ChatText(Actor priest)
     {
         var sb = new StringBuilder();
         sb.Append("\"It is my duty to look after the spiritual well-being of the village of ");
-        sb.Append(priest.Town.Name);
+        sb.Append(((Villager) priest).Town.Name);
         sb.Append(".\"");
 
         return sb.ToString();
@@ -300,11 +393,12 @@ class SmithBehaviour : IBehaviour, IChatter
         }
     }
 
-    public string ChatText(Villager smith)
+    public string ChatText(Actor smith)
     {
         var sb = new StringBuilder();
         sb.Append('"');
-        if (smith.Markup > 1.75)
+        double markup = ((Villager)smith).Markup;
+        if (markup > 1.75)
             sb.Append("If you're looking for arms or armour, I'm the only game in town!");
         else
             sb.Append("You'll want some weapons or better armour before venturing futher!");
@@ -313,8 +407,9 @@ class SmithBehaviour : IBehaviour, IChatter
         return sb.ToString();
     }
 
-    public (Action, InputAccumulator) Chat(Villager smith, GameState gs)
+    public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
     {
+        Villager smith = (Villager) actor;
         var acc = new ShopMenuAccumulator(smith, gs.UI);
         var action = new ShopAction(smith, gs);
 
@@ -353,20 +448,22 @@ class GrocerBehaviour : IBehaviour, IChatter
         }
     }
 
-    public string ChatText(Villager grocer)
+    public string ChatText(Actor actor)
     {
+        var grocer = (Villager)actor;
         var sb = new StringBuilder();
         sb.Append('"');
         sb.Append("Welcome to ");
         sb.Append(grocer.Town.Name.Capitalize());
-        sb.Append("market!");
+        sb.Append(" market!");
         sb.Append('"');
 
         return sb.ToString();
     }
 
-    public (Action, InputAccumulator) Chat(Villager smith, GameState gs)
+    public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
     {
+        var smith = (Villager)actor;
         var acc = new ShopMenuAccumulator(smith, gs.UI);
         var action = new ShopAction(smith, gs);
 
