@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace Yarl2;
 
 // A structure to store info about a dungeon
@@ -76,6 +78,88 @@ class PreGameHandler(UserInterface ui)
         return opts[rng.Next(opts.Count)];
     }
 
+    // I want to pick a square that nestled into the mountains, so we'll pick
+    // a square surrounded by at least 3 mountains
+    static (int, int) PickDungeonEntrance(Map map, HashSet<(int, int)> region, Town town, Random rng)
+    {
+        int tcRow = town.Row + town.Height/2;
+        int tcCol = town.Col + town.Width/2;
+
+        List<(int, int, int)> options = [];
+        foreach (var sq in region)
+        {
+            bool candidate = false;
+            switch (map.TileAt(sq).Type)
+            {
+                case TileType.Grass:
+                case TileType.Dirt:
+                case TileType.Tree:
+                case TileType.Sand:
+                    candidate = true;
+                    break;
+            }
+            if (!candidate)
+                continue;
+            
+            if (Util.CountAdjTileType(map, sq.Item1, sq.Item2, TileType.Mountain) >= 4) 
+            {
+                int d = Util.Distance(sq.Item1, sq.Item2, tcRow, tcCol);
+                options.Add((sq.Item1, sq.Item2, d));
+            }
+        }
+        options = [.. options.OrderBy(sq => sq.Item3)];
+        
+        var entrance = options[rng.Next(options.Count / 4)];
+
+        return (entrance.Item1, entrance.Item2);
+    }
+
+    static bool InTown(int row, int col, Town town) =>
+        row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width;
+    
+    static void DrawOldRoad(Map map, HashSet<(int, int)> region, (int, int) entrance, Town town, Random rng)
+    {        
+        int loRow = 257, loCol= 257, hiRow = 0, hiCol = 0;
+        foreach (var sq in region)
+        {
+            if (sq.Item1 < loRow)
+                loRow = sq.Item1;
+            if (sq.Item1 > hiRow)
+                hiRow = sq.Item1;
+            if (sq.Item2 < loCol)
+                loCol = sq.Item2;
+            if (sq.Item2 > hiCol)
+                hiCol = sq.Item2;
+        }
+
+        Dictionary<TileType, int> passable = [];
+        passable.Add(TileType.Grass, 1);
+        passable.Add(TileType.Sand, 1);
+        passable.Add(TileType.Tree, 2);
+        passable.Add(TileType.Dirt, 1);
+        passable.Add(TileType.Bridge, 1);
+        passable.Add(TileType.Water, 1);
+
+        int tcRow = town.Row + town.Height/2;
+        int tcCol = town.Col + town.Width/2;
+        var dmap = new DjikstraMap(map, loRow, hiRow, loCol, hiCol);
+        dmap.Generate(passable, (tcRow, tcCol), 257);
+        var road = dmap.ShortestPath(entrance.Item1, entrance.Item2, 0, 0);
+
+        double draw = 1.0;
+        foreach (var sq in road.Skip(1))
+        {
+            if (InTown(sq.Item1, sq.Item2, town))
+                break;
+
+            if (map.TileAt(sq).Type == TileType.Water)
+                map.SetTile(sq, TileFactory.Get(TileType.Bridge));
+            else if (rng.NextDouble() < draw)
+                map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
+            draw -= 0.02;
+        }
+    }
+
     static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
     {        
         var campaign = new Campaign();
@@ -94,8 +178,24 @@ class PreGameHandler(UserInterface ui)
         wilderness.AddMap(wildernessMap);
         campaign.AddDungeon(wilderness);
 
-        var entrance = wildernessMap.RandomTile(TileType.Tree, rng);
-        
+        // find the 'hidden valleys' that may be among the mountains
+        var regionFinder = new RegionFinder(new WildernessPassable());
+        var regions = regionFinder.Find(wildernessMap, false, TileType.Unknown);
+
+        // I'm assuming the largest area is the one we want to place the dungeon entrance in
+        int largest = 0;
+        HashSet<(int, int)> mainRegion = [];
+        foreach (var k in regions.Keys)
+        {
+            if (regions[k].Count > largest)
+            {
+                mainRegion = regions[k];
+                largest = regions[k].Count;
+            }
+        }
+        var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
+        DrawOldRoad(wildernessMap, mainRegion, entrance, town, rng);
+
         var history = new History(rng);
         history.CalcDungeonHistory();
         history.GenerateVillain();

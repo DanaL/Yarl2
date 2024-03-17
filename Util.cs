@@ -10,9 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using SDL2;
 
 namespace Yarl2;
 
@@ -81,6 +79,19 @@ partial class Util
     {
         foreach (var d in Adj8)
             yield return (r + d.Item1, c + d.Item2);
+    }
+
+    public static int CountAdjTileType(Map map, int r, int c, TileType type)
+    {
+        int count = 0;
+
+        foreach (var loc in Util.Adj8Sqs(r, c))
+        {
+            if (map.TileAt(loc).Type == type)
+                ++count;
+        }
+
+        return count;
     }
 
     public static int Distance(int x1, int y1, int x2, int y2)

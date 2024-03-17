@@ -49,6 +49,7 @@ enum TileType
     WoodFloor,
     Forge,
     Dirt,
+    StoneRoad,
     Well,
     Bridge,
     WoodBridge,
@@ -196,6 +197,7 @@ class TileFactory
     private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false, true);
     private static readonly Tile Forge = new BasicTile(TileType.Forge, true, false, true);
     private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false, true);
+    private static readonly Tile StoneRoad = new BasicTile(TileType.StoneRoad, true, false, true);
     private static readonly Tile Well = new BasicTile(TileType.Well, true, false, true);
     private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
     private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
@@ -230,6 +232,7 @@ class TileFactory
         TileType.WoodBridge => WoodBridge,
         TileType.Statue => Statue,
         TileType.Chasm => Chasm,
+        TileType.StoneRoad => StoneRoad,
         _ => Unknown
     };
 }

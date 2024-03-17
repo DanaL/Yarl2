@@ -85,7 +85,7 @@ internal class Wilderness(Random rng)
         {
             for (int c = colLo; c < colHi; c++)
             {
-                int mountains = CountAdjType(map, r, c, TileType.Mountain);
+                int mountains = Util.CountAdjTileType(map, r, c, TileType.Mountain);
                 if (mountains > 3) 
                    candidates.Add((r, c));
             }
@@ -134,20 +134,7 @@ internal class Wilderness(Random rng)
         }        
     }
 
-    static int CountAdjType(Map map, int r, int c, TileType type)
-    {
-        int count = 0;
-
-        foreach (var loc in Util.Adj8Sqs(r, c))
-        {
-            if (map.TileAt(loc).Type == type)
-                ++count;
-        }
-
-        return count;
-    }
-
-    (int, int) CountAdjTreesAndGrass(Map map, int r, int c)
+    static (int, int) CountAdjTreesAndGrass(Map map, int r, int c)
     {
         int tree = 0;
         int grass = 0;
@@ -438,10 +425,6 @@ internal class Wilderness(Random rng)
             map.SetTile(r, 0, TileFactory.Get(TileType.WorldBorder));
             map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
         }
-        
-        // find the 'hidden valleys' that may be among the mountains
-        var regionFinder = new RegionFinder(new WildernessPassable());
-        var regions = regionFinder.Find(map, false, TileType.Unknown);
         
         return map;
     }
