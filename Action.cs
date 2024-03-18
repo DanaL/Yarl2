@@ -1016,9 +1016,8 @@ class ObjTraitExpiredAction(IPerformer performer, GameState gs) : Action
         var src = (ExpiresTrait)_performer;
 
         // item being null should always be a bug, actually, I think
-        Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
-        if (item != null) 
-        { 
+        if (_gs.ObjDB.GetObj(src.ContainerID) is Item item)
+        {
             Loc loc = item.Loc;
 
             // Alert! Alert! This is cut-and-pasted from ExtinguishAction()

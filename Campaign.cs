@@ -118,7 +118,7 @@ class PreGameHandler(UserInterface ui)
         row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width;
     
     static void DrawOldRoad(Map map, HashSet<(int, int)> region, (int, int) entrance, Town town, Random rng)
-    {        
+    {
         int loRow = 257, loCol= 257, hiRow = 0, hiCol = 0;
         foreach (var sq in region)
         {
@@ -139,9 +139,22 @@ class PreGameHandler(UserInterface ui)
         passable.Add(TileType.Dirt, 1);
         passable.Add(TileType.Bridge, 1);
         passable.Add(TileType.Water, 1);
+        passable.Add(TileType.WoodFloor, 1);
+
+        // These aren't passable in a game sense, but we're only drawing the 
+        // ancient road to the outskits of town (but I still need to calculate
+        // the path all the way to the centre square, which may end up inside
+        // a building)        
+        passable.Add(TileType.HWindow, 1);
+        passable.Add(TileType.VWindow, 1);
+        passable.Add(TileType.ClosedDoor, 1);
+        passable.Add(TileType.StoneFloor, 1);
+        passable.Add(TileType.StoneWall, 1);
+        passable.Add(TileType.WoodWall, 1);
 
         int tcRow = town.Row + town.Height/2;
         int tcCol = town.Col + town.Width/2;
+
         var dmap = new DjikstraMap(map, loRow, hiRow, loCol, hiCol);
         dmap.Generate(passable, (tcRow, tcCol), 257);
         var road = dmap.ShortestPath(entrance.Item1, entrance.Item2, 0, 0);
@@ -237,8 +250,8 @@ class PreGameHandler(UserInterface ui)
 
         campaign.CurrentDungeon = 0;
         campaign.CurrentLevel = 0;
-        return (campaign, startR, startC);
-        //return (campaign, entrance.Item1, entrance.Item2);
+        //return (campaign, startR, startC);
+        return (campaign, entrance.Item1, entrance.Item2);
     }
 
     public bool StartUp(Random rng)

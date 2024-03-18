@@ -135,6 +135,10 @@ class DjikstraMap
                     cost = _djikstraMap[adj.Item1, adj.Item2];
                 }
             }
+
+            if (cost == int.MaxValue)
+                break;
+
             path.Add((next.Item1 + offsetRow, next.Item2 + offsetCol));
             score = cost;
             (currRow, currCol) = next;
