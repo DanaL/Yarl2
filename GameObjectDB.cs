@@ -9,10 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Collections.Concurrent;
-
 namespace Yarl2;
-
 
 // I'm only doing this because the JSONSerializer can't handle
 // tuples and I'd have to convert the DB keys to something else
@@ -38,7 +35,27 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit);
 
-abstract class GameObj
+// This feels like a bit of a hack, but quite a bit into
+// development I decided to have a Z-level for both game objects
+// and tiles, to simplify the code for what glyph to display for a 
+// given square. Tiles are normally the lowest Z, but water tiles
+// are higher so that most items are 'underwater' Flying monsters
+// are in the air above but swimmers probably (they don't exist
+// as I type this) below. Then, I wanted to add fog, which 
+// should entirely obscure the tile and which I want to implement
+// as an Item type
+//
+// So anyhow, I'm reluctant to add a superclass of both GameObj and 
+// Tile and I am reluctant to make all Items/Actors a subclass of 
+// Tile so I've decided to go with an interface. If more shared
+// stuff ends up inside this interface I guess I'll think about
+// making a proper superclass.
+interface IZLevel
+{
+    int Z();
+}
+
+abstract class GameObj: IZLevel
 {
     public const ulong PLAYER_ID = 1;
     private static ulong IDSeed = 2;
@@ -55,6 +72,11 @@ abstract class GameObj
     public static void SetSeed(ulong seed) => IDSeed = seed;
 
     public static ulong NextID => IDSeed++;
+
+    public virtual int Z()
+    {
+        return 0;
+    }
 }
 
 // Structure to store where items are in the world
@@ -66,6 +88,41 @@ class GameObjectDB
     public Dictionary<Loc, ulong> _actorLocs = [];
     public Dictionary<ulong, GameObj> _objs = [];
 
+    // I'm returning isItem because when remembering what glyphs were seen
+    // (for displaying visited but out of site tiles) I want to remember items
+    // but not actors
+    public (Glyph, int, bool) TopGlyph(Loc loc)
+    {
+        var glyph = EMPTY;
+        int z = 0;
+        bool isItem = false;
+
+        if (_actorLocs.TryGetValue(loc, out ulong id))
+        {
+            glyph = _objs[id].Glyph;
+            z = _objs[id].Z();
+        }
+        
+        if (_itemLocs.TryGetValue(loc, out var items))
+        {
+            foreach (var item in items)
+            {
+                if (item.Z() > z)
+                {
+                    glyph = item.Glyph;
+                    z = item.Z();
+                    isItem = true;
+                }
+            }
+        }
+
+        return (glyph, z, isItem);
+    }
+
+    // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
+    //   They're only used to querying what's below on chasm sqs
+    // Basically, the sqr ignoring the occupant since we only want to remember
+    // either the item stack or the tile
     public Glyph GlyphAt(Loc loc)
     {
         if (_actorLocs.TryGetValue(loc, out ulong id))
@@ -74,26 +131,6 @@ class GameObjectDB
             return ItemGlyphAt(loc);
     }
 
-    public (Glyph Occ, Glyph Item) Glyphs(Loc loc)
-    {
-        Glyph occ;
-        if (_actorLocs.TryGetValue(loc, out ulong id))
-            occ = _objs[id].Glyph;
-        else
-            occ = EMPTY;
-
-        
-        return (occ, ItemGlyphAt(loc));
-    }
-
-    public void RemoveActor(Actor actor)
-    {
-        _objs.Remove(actor.ID);
-        _actorLocs.Remove(actor.Loc);
-    }
-
-    // Basically, the sqr ignoring the occupant since we only want to remember
-    // either the item stack or the tile
     public Glyph ItemGlyphAt(Loc loc)
     {
         if (_itemLocs.TryGetValue(loc, out var items))
@@ -103,6 +140,12 @@ class GameObjectDB
         }
 
         return EMPTY;
+    }
+
+    public void RemoveActor(Actor actor)
+    {
+        _objs.Remove(actor.ID);
+        _actorLocs.Remove(actor.Loc);
     }
 
     public Actor? Occupant(Loc loc)

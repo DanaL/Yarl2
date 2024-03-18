@@ -48,8 +48,9 @@ record Feature(string Name, Attribute Attribute, int Mod, ulong expiry);
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
-class Actor : GameObj, IPerformer
+class Actor : GameObj, IPerformer, IZLevel
 {
+    static readonly int DEFAULT_Z = 4;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public List<Feature> Features { get; set; } = [];
     public ActorStatus Status { get; set; }
@@ -66,6 +67,14 @@ class Actor : GameObj, IPerformer
     {
         Inventory = new Inventory(ID);
         _behaviour = new BasicMonsterBehaviour();
+    }
+
+    public override int Z()
+    {
+        if (Stats.TryGetValue(Attribute.Flying, out Stat? value))
+            return value.Curr;
+        else
+            return DEFAULT_Z;
     }
 
     public override string FullName => Name.DefArticle();    

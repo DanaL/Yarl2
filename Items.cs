@@ -24,6 +24,7 @@ enum ItemType
 
 class Item : GameObj
 {
+    static readonly int DEFAULT_Z = 2;
     public ItemType Type { get; set; }
     public bool Stackable { get; set; }
     public char Slot { get; set; }
@@ -34,7 +35,12 @@ class Item : GameObj
     public List<ObjTrait> Traits { get; set; } = [];
     public int Value { get; set; }
     public bool Hidden { get; set; } = false;
-    
+
+    public override int Z()
+    {
+        return DEFAULT_Z;
+    }
+
     string CalcFullName()
     {
         string name = Name;

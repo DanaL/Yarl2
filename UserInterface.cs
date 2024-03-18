@@ -731,86 +731,71 @@ abstract class UserInterface
                 int mapRow, int mapCol, int scrRow, int scrCol)
     {
         var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
-        var (occ, items) = GameState.ObjDB.Glyphs(loc);
-
+       
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
         bool isVisible = visible.Contains((mapRow, mapCol));
-        if (isVisible && map.HasEffect(TerrainFlag.Lit, mapRow, mapCol))
+
+        if (!isVisible || !map.HasEffect(TerrainFlag.Lit, mapRow, mapCol))
         {
-            Tile tile = map.TileAt(mapRow, mapCol);
-            Sqr? sqBelow = null;
-            if (tile.Type == TileType.Chasm) 
-            {
-                Loc below = loc with { Level = GameState.CurrLevel + 1 };
-                Glyph glyphBelow = GameState.ObjDB.GlyphAt(below);
-                char ch;
-                if (glyphBelow != GameObjectDB.EMPTY)
-                {
-                    ch = glyphBelow.Ch;
-                }
-                else
-                {
-                    var belowTile = TileToSqr(GameState.CurrentDungeon.LevelMaps[GameState.CurrLevel + 1].TileAt(mapRow, mapCol), false);
-                    ch = belowTile.Ch;
-                }
-                sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);                
-            }
-
-            Sqr memory = TileToSqr(tile, false);
-
-            GameState.RecentlySeen.Add(loc);
-
-            // Remember the unlit version of the sqr since it's displayed in the
-            // unlit portion of the view.
-            if (ZLayer[scrRow, scrCol].Type != TileType.Unknown) 
-            {
-                return TileToSqr(ZLayer[scrRow, scrCol], true);
-            }
-            else if (sqBelow != null && occ == GameObjectDB.EMPTY)
-            {
-                return sqBelow;
-            }
-            else if (tile.Type == TileType.DeepWater && occ == GameObjectDB.EMPTY)
-            {
-                // This will get further complicated when I have water creatures 
-                // who nethack-style are invisible normally. (Or invisible in 
-                // general come to think of it)
-
-                // But items at water tiles will be 'under water' so we don't show them
-                remembered[(GameState.CurrLevel, mapRow, mapCol)] = TileToSqr(tile, false);
-                return TileToSqr(tile, true);
-            }
-            else if (occ != GameObjectDB.EMPTY) 
-            {
-                var sqr = new Sqr(occ.Lit, Colours.BLACK, occ.Ch);                
-                if (items != GameObjectDB.EMPTY)
-                    memory = sqr with { Fg = items.Unlit };
-                remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
-
-                return sqr;
-            }
-            else if (items != GameObjectDB.EMPTY)
-            {
-                var sqr = new Sqr(items.Lit, Colours.BLACK, items.Ch);
-                if (items != GameObjectDB.EMPTY)
-                    memory = sqr with { Fg = items.Unlit };
-                remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
-
-                return sqr;
-            }
-            else 
-            {
-                remembered[(GameState.CurrLevel, mapRow, mapCol)] = TileToSqr(tile, false);
-                return TileToSqr(tile, true);
-            }
+            if (remembered.TryGetValue((GameState.CurrLevel, mapRow, mapCol), out var remSq))
+                return remSq;
+            else
+                return new Sqr(Colours.BLACK, Colours.BLACK, ' ');;
         }
-        else if (remembered.TryGetValue((GameState.CurrLevel, mapRow, mapCol), out var remSq))
+
+        Tile tile = map.TileAt(mapRow, mapCol);
+        // First, check if we have a chasm square, in which case we'll look up info
+        // from the level below
+        Sqr? sqBelow = null;
+        if (tile.Type == TileType.Chasm)
         {
-            return remSq;
+            Loc below = loc with { Level = GameState.CurrLevel + 1 };
+            Glyph glyphBelow = GameState.ObjDB.GlyphAt(below);
+            char ch;
+            if (glyphBelow != GameObjectDB.EMPTY)
+            {
+                ch = glyphBelow.Ch;
+            }
+            else
+            {
+                var belowTile = TileToSqr(GameState.CurrentDungeon.LevelMaps[GameState.CurrLevel + 1].TileAt(mapRow, mapCol), false);
+                ch = belowTile.Ch;
+            }
+            sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);
         }
-                        
-        return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
+
+        //Sqr memory = TileToSqr(tile, false);
+        GameState.RecentlySeen.Add(loc);
+
+        // The ZLayer trumps. Although maybe now that I've added a Z-coord
+        // to items and actors I can get rid of the ZLayer?
+        if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)        
+            return TileToSqr(ZLayer[scrRow, scrCol], true);
+        
+         var (glyph, z, item) = GameState.ObjDB.TopGlyph(loc);
+        // For a chasm sq, return the tile from the level below,
+        // unless there's an Actor on this level (such as a flying
+        // creature)
+        if (sqBelow != null && glyph == GameObjectDB.EMPTY)
+            return sqBelow;
+        
+        Sqr memory = TileToSqr(tile, false);
+        Sqr sqr; 
+        if (z > tile.Z())
+        {            
+            sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
+            if (item)
+                memory = sqr with { Fg = glyph.Unlit};
+        }
+        else
+        {
+            sqr = TileToSqr(tile, true);
+        }
+
+        remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
+
+        return sqr;
     }
 
     public (int, int) LocToScrLoc(int row, int col)

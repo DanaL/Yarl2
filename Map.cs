@@ -58,10 +58,18 @@ enum TileType
     Chasm
 }
 
-abstract class Tile(TileType type)
+abstract class Tile(TileType type) : IZLevel
 {
     public virtual TileType Type { get; protected set; } = type;
     public virtual string StepMessage => "";
+
+    public int Z() => Type switch
+    {
+        TileType.Water => 6,
+        TileType.DeepWater => 6,
+        _ => 0
+    };
+
     public abstract bool Passable();
     public abstract bool PassableByFlight();
     public abstract bool Opaque();
