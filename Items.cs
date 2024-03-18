@@ -188,20 +188,16 @@ class ItemFactory
                 item = new Item()
                 {
                     Name = name, Type = ItemType.Environment, Stackable = false, Value = 0,
-                    Glyph = new Glyph('*', Colours.GREY, Colours.LIGHT_GREY)
+                    Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY)
                 };
                 item.SetZ(10);
                 item.Traits.Add(new OpaqueTrait());
-                //var ls = new FlameLightSourceTrait()
-                //{
-                //    ContainerID = item.ID,
-                //    Fuel = 500,
-                //    Lit = false,
-                //    Energy = 0.0,
-                //    Recovery = 1.0
-                //};
-                //ls.Stats[Attribute.Radius] = new Stat(5);
-                //item.Traits.Add(ls);
+                item.Traits.Add(new ExpiresTrait()
+                {
+                    ContainerID = item.ID,
+                    Energy = 0.0,
+                    Recovery = 1.0                    
+                });               
                 break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");

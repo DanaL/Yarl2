@@ -36,6 +36,26 @@ abstract class ObjTrait
     public virtual int Radius => 0;
 }
 
+class ExpiresTrait : ObjTrait, IPerformer
+{
+    public ulong ExpiresOn { get; set; }
+    public ulong ContainerID { get; set; }
+    public bool RemoveFromQueue { get; set; }
+    public double Energy { get; set; }
+    public double Recovery { get; set; }
+
+    public override bool Acitve => true;
+    public override string AsText() => $"ExpiresTrait#{ExpiresOn}";
+
+    public Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        if (gameState.Turn >= ExpiresOn)
+            return new ObjTraitExpiredAction(this, gameState);
+        else
+            return new PassAction();
+    }
+}
+
 class OpaqueTrait : ObjTrait
 {
     public override bool Acitve => false;

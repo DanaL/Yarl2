@@ -225,7 +225,9 @@ class GameObjectDB
             return stack.Where(i => i.Type != ItemType.Environment)
                         .ToList();
     }
-    
+
+    public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
+
     public void ActorMoved(Actor a, Loc from, Loc to)
     {
         if (_actorLocs[from] == a.ID)

@@ -38,7 +38,8 @@ enum Verb
     Cleave,
     Impale,
     Drink,
-    Heal
+    Heal,
+    Dissipate
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -66,7 +67,8 @@ class MessageFactory
             Verb.Cleave => fp ? "cleave" : "cleaves",
             Verb.Impale => fp ? "impale" : "impales",
             Verb.Drink => fp ? "drink" : "drinks",
-            Verb.Heal => fp ? "heal" : "heals"
+            Verb.Heal => fp ? "heal" : "heals",
+            Verb.Dissipate => fp ? "dissipate" : "dissipates"
         };
     }
 
@@ -88,7 +90,8 @@ class MessageFactory
         Verb.Cleave => "cleaved",
         Verb.Impale => "impaled",
         Verb.Drink => "drunk",
-        Verb.Heal => "healed"
+        Verb.Heal => "healed",
+        Verb.Dissipate => "dissipated"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

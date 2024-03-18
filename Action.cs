@@ -971,8 +971,8 @@ class CloseMenuAction(UserInterface ui, double energyCost = 0.0) : Action
 
 class ExtinguishAction(IPerformer performer, GameState gs) : Action
 {
-    private IPerformer _performer = performer;
-    private GameState _gs = gs;
+    IPerformer _performer = performer;
+    GameState _gs = gs;
 
     public override ActionResult Execute()
     {        
@@ -1000,6 +1000,47 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
         var cb = item.ContainedBy;
         var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);
         return new ActionResult() { Successful = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+}
+
+class ObjTraitExpiredAction(IPerformer performer, GameState gs) : Action
+{
+    IPerformer _performer = performer;
+    GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+
+        _performer.RemoveFromQueue = true;
+        var src = (ExpiresTrait)_performer;
+
+        // item being null should always be a bug, actually, I think
+        Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
+        if (item != null) 
+        { 
+            Loc loc = item.Loc;
+
+            // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
+            if (item.ContainedBy > 0)
+            {
+                var owner = _gs.ObjDB.GetObj(item.ContainedBy);
+                if (owner is not null)
+                {
+                    // I don't think owner should ever be null, barring a bug
+                    // but this placates the warning in VS/VS Code
+                    loc = owner.Loc;
+                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
+                }
+            }
+
+            _gs.ObjDB.RemoveItem(loc, item);
+
+            var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, _gs);
+            result.Messages.Add(msg);
+        }
+
+        return result;
     }
 }
 

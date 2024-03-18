@@ -431,12 +431,18 @@ class Player : Actor, IPerformer
             }
             else if (ch == 'F')
             {
-                foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
+                for (int r = Loc.Row - 2; r < Loc.Row + 3; r++)
                 {
-                    var mist = ItemFactory.Get("mist", gameState.ObjDB);
-                    var mistLoc = Loc with { Row = sq.Item1, Col = sq.Item2 };
-                    gameState.ItemDropped(mist, mistLoc);
-                }                
+                    for (int c = Loc.Col - 2; c < Loc.Col + 3; c++)
+                    {
+                        var mist = ItemFactory.Get("mist", gameState.ObjDB);
+                        var mistLoc = Loc with { Row = r, Col = c };
+                        gameState.ItemDropped(mist, mistLoc);
+                        var t = (ExpiresTrait)mist.Traits.First(t => t is ExpiresTrait);
+                        t.ExpiresOn = gameState.Turn + 10;
+                        gameState.Performers.Add(t);
+                    }
+                }                     
             }
             else
                 return new PassAction();
