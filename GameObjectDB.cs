@@ -226,6 +226,15 @@ class GameObjectDB
                         .ToList();
     }
 
+    public List<Item> EnvironmentsAt(Loc loc)
+    {
+        if (!_itemLocs.TryGetValue(loc, out var stack))
+            return [];
+        else
+            return stack.Where(i => i.Type == ItemType.Environment)
+                        .ToList();
+    }
+
     public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
 
     public void ActorMoved(Actor a, Loc from, Loc to)

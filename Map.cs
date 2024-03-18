@@ -87,6 +87,43 @@ abstract class Tile(TileType type) : IZLevel
         TileType.SnowPeak => true,
         _ => false
     };
+
+    public static string TileDesc(TileType type) => type switch
+    { 
+        TileType.Water => "water",
+        TileType.DeepWater => "deep water",
+        TileType.PermWall => "a wall",
+        TileType.DungeonWall => "a wall",
+        TileType.StoneWall => "a wall",
+        TileType.WoodWall => "a wall",
+        TileType.DungeonFloor => "stone floor",
+        TileType.StoneFloor => "stone floor",
+        TileType.WoodFloor => "wood floor",
+        TileType.Mountain => "a mountain",
+        TileType.SnowPeak => "a mountain",
+        TileType.Tree => "trees",
+        TileType.Grass => "grass",
+        TileType.OpenDoor => "a open door",
+        TileType.BrokenDoor => "a broken door",
+        TileType.ClosedDoor => "a closed door",
+        TileType.LockedDoor => "a locked door",
+        TileType.HWindow => "a window",
+        TileType.VWindow => "a window",
+        TileType.Sand => "sand",
+        TileType.Dirt => "dirt path",
+        TileType.StoneRoad => "ancient flagstones",
+        TileType.Well => "a well",
+        TileType.Bridge => "a bridge",
+        TileType.WoodBridge => "a wood bridge",
+        TileType.Chasm => "a chasm",
+        TileType.Landmark => "a landmark",
+        TileType.Forge => "a forge",
+        TileType.Statue => "a statue",
+        TileType.Upstairs => "some stairs up",
+        TileType.Downstairs => "some stairs down",
+        TileType.Portal => "a dungeon entrance",
+        _ => "unknown"
+    };
 }
 
 class BasicTile : Tile

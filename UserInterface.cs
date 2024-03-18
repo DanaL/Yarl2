@@ -363,7 +363,7 @@ abstract class UserInterface
     protected void WriteSideBar()
     {
         int row = 0;
-        WriteLine($"| {Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| {Player!.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
         int currHP = Player.Stats[Attribute.HP].Curr;
         int maxHP = Player.Stats[Attribute.HP].Max;
         WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
@@ -392,9 +392,26 @@ abstract class UserInterface
         if (Player.Features.Any(f => f.Attribute == Attribute.Rage) && currHP < maxHP / 2)
         {
             List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
-            WriteText(rageLine, ViewHeight - 2, ViewWidth, SideBarWidth);
+            WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
         }
-            
+
+        var tile = GameState!.TileAt(Player.Loc);
+        var tileSq = TileToSqr(tile, true);
+        var tileText = Tile.TileDesc(tile.Type).Capitalize();
+        foreach (var item in GameState.ObjDB.EnvironmentsAt(Player.Loc))
+        {
+            if (item.Type == ItemType.Environment)
+            {
+                var g = item.Glyph;
+                tileSq = new Sqr(g.Lit, Colours.BLACK, g.Ch);
+                tileText = $"Some {item.Name}";
+                break;
+            }
+        }
+        
+        List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, $"{tileSq.Ch} "), (Colours.WHITE, tileText)];
+        WriteText(tileLine, ViewHeight - 2, ViewWidth, SideBarWidth);
+
         if (GameState.CurrDungeon == 0) 
         {
             var time = GameState.CurrTime();
