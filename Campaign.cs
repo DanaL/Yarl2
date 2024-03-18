@@ -160,6 +160,8 @@ class PreGameHandler(UserInterface ui)
         var road = dmap.ShortestPath(entrance.Item1, entrance.Item2, 0, 0);
 
         double draw = 1.0;
+        double delta = 2.0 / road.Count;
+
         foreach (var sq in road.Skip(1))
         {
             if (InTown(sq.Item1, sq.Item2, town))
@@ -169,7 +171,9 @@ class PreGameHandler(UserInterface ui)
                 map.SetTile(sq, TileFactory.Get(TileType.Bridge));
             else if (rng.NextDouble() < draw)
                 map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
-            draw -= 0.02;
+            draw -= delta;
+            if (draw < 0.03)
+                draw = 0.03;
         }
     }
 
