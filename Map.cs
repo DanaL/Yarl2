@@ -16,7 +16,8 @@ namespace Yarl2;
 enum TerrainFlag
 {
     None = 0,
-    Lit = 1
+    Lit = 1,
+    Obscures = 2,
 }
 
 enum TileType

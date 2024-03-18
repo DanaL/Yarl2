@@ -812,7 +812,7 @@ abstract class UserInterface
         var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
         var map = dungeon.LevelMaps[GameState.CurrLevel];
         GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Loc.Row, Player!.Loc.Col, map, GameState.CurrLevel);        
+        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Loc.Row, Player!.Loc.Col, map, GameState.CurrDungeon, GameState.CurrLevel, GameState.ObjDB);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         GameState.RecentlySeen = [];

@@ -597,7 +597,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     readonly UserInterface _ui = ui;
     readonly Actor _actor = actor;
-    readonly GameState _gameState = gs;
+    readonly GameState _gs = gs;
     int _amount;
 
     public override ActionResult Execute()
@@ -621,8 +621,8 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
         else
         {
             
-            var coins = ItemFactory.Get("zorkmids", _gameState.ObjDB);
-            _gameState.ItemDropped(coins, _actor.Loc);
+            var coins = ItemFactory.Get("zorkmids", _gs.ObjDB);
+            _gs.ItemDropped(coins, _actor.Loc);
             coins.Value = _amount;
             string msg;
             if (_amount == 1)
@@ -632,7 +632,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
             else
                 msg = $"{_amount} zorkmids";
             
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, msg, false, _actor.Loc, _gameState);
+            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, msg, false, _actor.Loc, _gs);
 
             inventory.Zorkmids -= _amount;
         }
@@ -651,7 +651,7 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
 {
     private readonly UserInterface _ui = ui;
     private readonly Actor _actor = actor;
-    private readonly GameState _gameState = gs;
+    private readonly GameState _gs = gs;
     private readonly char _slot = slot;
     private int _amount;
 
@@ -666,12 +666,12 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
         var droppedItems = _actor.Inventory.Remove(_slot, _amount);
         foreach (var droppedItem in droppedItems)
         {
-            _gameState.ItemDropped(droppedItem, _actor.Loc);
+            _gs.ItemDropped(droppedItem, _actor.Loc);
             droppedItem.Equiped = false;
         }
 
         _actor.CalcEquipmentModifiers();
-        Message alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, _amount, false, _actor.Loc, _gameState);
+        Message alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, _amount, false, _actor.Loc, _gs);
 
         return new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };        
     }

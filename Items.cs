@@ -19,7 +19,8 @@ enum ItemType
     Tool,
     Document,
     Potion,
-    Scroll
+    Scroll,
+    Environment // I'm implementing things like mist as 'items'
 }
 
 class Item : GameObj
@@ -35,10 +36,12 @@ class Item : GameObj
     public List<ObjTrait> Traits { get; set; } = [];
     public int Value { get; set; }
     public bool Hidden { get; set; } = false;
+    int _z = DEFAULT_Z;
 
+    public void SetZ(int z) => _z = z;
     public override int Z()
     {
-        return DEFAULT_Z;
+        return _z;
     }
 
     string CalcFullName()
@@ -180,6 +183,25 @@ class ItemFactory
                     Name = "scroll of blink", Type = ItemType.Scroll, Stackable = true, Value = 125,
                                     Glyph = new Glyph('?', Colours.WHITE, Colours.GREY), Consumable = true };
                 item.Traits.Add(new BlinkTrait());
+                break;
+            case "mist":
+                item = new Item()
+                {
+                    Name = name, Type = ItemType.Environment, Stackable = false, Value = 0,
+                    Glyph = new Glyph('*', Colours.GREY, Colours.LIGHT_GREY)
+                };
+                item.SetZ(10);
+                item.Traits.Add(new OpaqueTrait());
+                //var ls = new FlameLightSourceTrait()
+                //{
+                //    ContainerID = item.ID,
+                //    Fuel = 500,
+                //    Lit = false,
+                //    Energy = 0.0,
+                //    Recovery = 1.0
+                //};
+                //ls.Stats[Attribute.Radius] = new Stat(5);
+                //item.Traits.Add(ls);
                 break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");

@@ -348,7 +348,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             int radius = aura.Item2;
             TerrainFlag effect = aura.Item3;
             
-            foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.Level))
+            foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.DungeonID, dest.Level, ObjDB))
             {
                 destMap.ApplyEffectAt(effect, sq.Item2, sq.Item3, id);
             }
@@ -366,7 +366,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         {
             if (aura.Item3 == effect)
             {
-                var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, level);
+                var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, dungeon, level, ObjDB);
                 foreach (var sq in sqs)
                 {
                     if (on)

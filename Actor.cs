@@ -50,6 +50,7 @@ record Feature(string Name, Attribute Attribute, int Mod, ulong expiry);
 // libraries
 class Actor : GameObj, IPerformer, IZLevel
 {
+    static readonly int FLYING_Z = 10;
     static readonly int DEFAULT_Z = 4;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public List<Feature> Features { get; set; } = [];
@@ -69,14 +70,8 @@ class Actor : GameObj, IPerformer, IZLevel
         _behaviour = new BasicMonsterBehaviour();
     }
 
-    public override int Z()
-    {
-        if (Stats.TryGetValue(Attribute.Flying, out Stat? value))
-            return value.Curr;
-        else
-            return DEFAULT_Z;
-    }
-
+    public override int Z() => Stats.ContainsKey(Attribute.Flying) ? FLYING_Z : DEFAULT_Z;
+    
     public override string FullName => Name.DefArticle();    
     public virtual int TotalMeleeAttackModifier() => 0;
     public virtual int TotalMissileAttackModifier(Item weapon) => 0;

@@ -36,6 +36,13 @@ abstract class ObjTrait
     public virtual int Radius => 0;
 }
 
+class OpaqueTrait : ObjTrait
+{
+    public override bool Acitve => false;
+    public override string AsText() => "OpaqueTrait";
+    public override TerrainFlag Effect => TerrainFlag.Obscures;
+}
+
 class BlinkTrait : ObjTrait, IUSeable
 {
     public override bool Acitve => throw new NotImplementedException();

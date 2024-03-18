@@ -88,6 +88,20 @@ class GameObjectDB
     public Dictionary<Loc, ulong> _actorLocs = [];
     public Dictionary<ulong, GameObj> _objs = [];
 
+    public bool ItemsWithEffect(Loc loc, TerrainFlag flag)
+    {
+        if (_itemLocs.TryGetValue(loc, out var items))
+        {
+            foreach (var item in items)
+            {
+                if (item.Traits.Any(t => t.Effect == flag))
+                    return true;
+            }    
+        }
+
+        return false;
+    }
+
     // I'm returning isItem because when remembering what glyphs were seen
     // (for displaying visited but out of site tiles) I want to remember items
     // but not actors
@@ -208,7 +222,8 @@ class GameObjectDB
         if (!_itemLocs.TryGetValue(loc, out var stack))
             return [];
         else
-            return stack;
+            return stack.Where(i => i.Type != ItemType.Environment)
+                        .ToList();
     }
     
     public void ActorMoved(Actor a, Loc from, Loc to)

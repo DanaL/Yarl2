@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 enum PlayerClass
@@ -37,6 +39,8 @@ class Player : Actor, IPerformer
         Stats.Add(Attribute.HP, new Stat(20));
         Stats[Attribute.HP].Change(-3);
     }
+
+    public override int Z() => 12;
 
     public override string FullName => "you";
 
@@ -424,6 +428,15 @@ class Player : Actor, IPerformer
                 var msg = new Message($"The current time is {hour}:{minute}", Loc);
                 gameState.Turn += 1000;
                 ui.AlertPlayer([msg], "");
+            }
+            else if (ch == 'F')
+            {
+                foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
+                {
+                    var mist = ItemFactory.Get("mist", gameState.ObjDB);
+                    var mistLoc = Loc with { Row = sq.Item1, Col = sq.Item2 };
+                    gameState.ItemDropped(mist, mistLoc);
+                }                
             }
             else
                 return new PassAction();

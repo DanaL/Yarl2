@@ -24,7 +24,7 @@ class Shadow(float start, float end)
 
 class ShadowLine
 {
-    private readonly List<Shadow> _shadows = [];
+    readonly List<Shadow> _shadows = [];
 
     public bool IsFullShadow() => _shadows.Count == 1 && _shadows[0].Start == 0 && _shadows[0].End == 1;
     public bool IsInShadow(Shadow projection) => _shadows.Exists(s => s.Contains(projection));
@@ -74,9 +74,9 @@ class ShadowLine
     }
 }
 
-internal class FieldOfView
+class FieldOfView
 {
-    private static (int, int) RotateOctant(int row, int col, int octant)
+    static (int, int) RotateOctant(int row, int col, int octant)
     {
         return octant switch
         {
@@ -91,7 +91,7 @@ internal class FieldOfView
         };
     }
 
-    private static HashSet<(int, int)> CalcOctant(int radius, int srcRow, int srcCol, Map map, int octant)
+    static HashSet<(int, int)> CalcOctant(int radius, int srcRow, int srcCol, Map map, int octant, int dungeonID, int level, GameObjectDB objDb)
     {
         var visibleSqs = new HashSet<(int, int)>();
 
@@ -116,7 +116,8 @@ internal class FieldOfView
                 {
                     visibleSqs.Add((r, c));
 
-                    if (map.TileAt(r, c).Opaque()) 
+                    var loc = new Loc(dungeonID, level, r, c);
+                    if (map.TileAt(r, c).Opaque() || objDb.ItemsWithEffect(loc, TerrainFlag.Obscures)) 
                     {
                         line.Add(projection);
                         fullShadow = line.IsFullShadow();
@@ -131,20 +132,20 @@ internal class FieldOfView
         return visibleSqs;
     }
 
-    public static HashSet<(int, int, int)> CalcVisible(int radius, int srcRow, int srcCol, Map map, int currentLevel)
+    public static HashSet<(int, int, int)> CalcVisible(int radius, int srcRow, int srcCol, Map map, int dungeonID, int currLevel, GameObjectDB objDb)
     {
-        var visible = new HashSet<(int, int, int)>() { (currentLevel, srcRow, srcCol) };
+        var visible = new HashSet<(int, int, int)>() { (currLevel, srcRow, srcCol) };
 
         for (int j = 0; j < 8; j++)
         {
-            foreach (var sq in CalcOctant(radius, srcRow, srcCol, map, j))
-                visible.Add((currentLevel, sq.Item1, sq.Item2));
+            foreach (var sq in CalcOctant(radius, srcRow, srcCol, map, j, dungeonID, currLevel, objDb))
+                visible.Add((currLevel, sq.Item1, sq.Item2));
         }
 
         return visible;
     }
 
-    private static Shadow ProjectTile(int row, int col)
+    static Shadow ProjectTile(int row, int col)
     {            
         float topLeft = col / (row + 2.0f);
         float bottomRight = (col + 1.0f) / (row + 1.0f);
