@@ -149,7 +149,7 @@ class GameObjectDB
     {
         if (_itemLocs.TryGetValue(loc, out var items))
         {
-            if (items is not null && items.Count > 0 && !items[0].Hidden)
+            if (items is not null && items.Count > 0 && items[0].Z() >= 0)
                 return items[0].Glyph;
         }
 

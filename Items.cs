@@ -25,7 +25,7 @@ enum ItemType
 
 class Item : GameObj
 {
-    static readonly int DEFAULT_Z = 2;
+    public static readonly int DEFAULT_Z = 2;
     public ItemType Type { get; set; }
     public bool Stackable { get; set; }
     public char Slot { get; set; }
@@ -35,7 +35,6 @@ class Item : GameObj
     public List<string> Adjectives { get; set; } = [];
     public List<ObjTrait> Traits { get; set; } = [];
     public int Value { get; set; }
-    public bool Hidden { get; set; } = false;
     int _z = DEFAULT_Z;
 
     public void SetZ(int z) => _z = z;

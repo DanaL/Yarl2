@@ -140,7 +140,7 @@ class ThrownMissileAnimation : Animation
         if (_frame >= _pts.Count) 
         {
             Expiry = DateTime.MinValue;
-            _ammo.Hidden = false;
+            _ammo.SetZ(Item.DEFAULT_Z);
 
             // This happens inside the animation class because I don't want the
             // message to be displayed until the animation has finished.

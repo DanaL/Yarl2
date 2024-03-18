@@ -516,10 +516,10 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.Player.Loc);
             return new ActionResult() { Successful=false, Messages = [msg] };                
         }
-
+        
         int i = Choice - 'a';
         var item = itemStack[i];
-        itemStack.RemoveAt(i);
+        gs.ObjDB.RemoveItem(_actor.Loc, item);
         inv.Add(item, _actor.ID);
 
         msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gameState);
@@ -710,7 +710,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
         _gs.ItemDropped(ammo, landingPt);
         ammo.Equiped = false;
-        ammo.Hidden = true;
+        ammo.SetZ(-1);
         _actor.CalcEquipmentModifiers();
 
         var tile = _gs.TileAt(landingPt);
