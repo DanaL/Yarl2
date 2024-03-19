@@ -560,7 +560,7 @@ abstract class UserInterface
             Turn = currentTurn
         };
 
-        itemDB.SetToLoc(Player.Loc, Player);
+        itemDB.AddToLoc(Player.Loc, Player);
         GameState.ToggleEffect(Player, Player.Loc, TerrainFlag.Lit, true);
     }
 

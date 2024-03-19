@@ -178,12 +178,12 @@ class PreGameHandler(UserInterface ui)
     }
 
     static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
-    {        
+    {
         var campaign = new Campaign();
-        var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");        
+        var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
         var wildernessGenerator = new Wilderness(rng);
         var wildernessMap = wildernessGenerator.DrawLevel(257);
-        
+
         var tb = new TownBuilder();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
 
@@ -217,8 +217,11 @@ class PreGameHandler(UserInterface ui)
         history.CalcDungeonHistory();
         history.GenerateVillain();
 
-        var dBuilder = new DungeonBuilder();
-        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);        
+        //var dBuilder = new MainDungeonBuilder();
+        //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+        var dBuilder = new ArenaBuilder();
+        var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+
         campaign.AddDungeon(mainDungeon);
 
         var portal = new Portal("You stand before a looming portal.")
@@ -227,35 +230,58 @@ class PreGameHandler(UserInterface ui)
         };
         wildernessMap.SetTile(entrance, portal);
 
+       
+        //PopulateDungeon(rng, objDb, history, mainDungeon);
+        PopulateArena(rng, objDb, mainDungeon);
+
+        var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
+
+        campaign.CurrentDungeon = 0;
+        campaign.CurrentLevel = 0;
+
+        //return (campaign, startR, startC);
+        return (campaign, entrance.Item1, entrance.Item2);
+    }
+
+    private static void PopulateArena(Random rng, GameObjectDB objDb, Dungeon dungeon)
+    {
+        int lvl = 0;
+        var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+        var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+
+        Actor monster = MonsterFactory.Get("kobold trickster", rng);
+        monster.Loc = loc;
+        objDb.Add(monster);
+        objDb.AddToLoc(loc, monster);
+    }
+
+    // This is very temporary/early code since eventually dungeons will need to
+    // know how to populate themselves (or receive a populator class of some 
+    // sort) because monsters will spawn as the player explores
+    private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon)
+    {
+        var decks = DeckBulder.MakeDecks(1, 2, history.Villain, rng);
+
         // Temp: generate monster decks and populate the first two levels of the dungeon.
         // I'll actually want to save the decks for reuse as random monsters are added
         // in, but I'm not sure where they should live. I guess maybe in the Map structure,
         // which has really come to represent a dungeon level
-        var decks = DeckBulder.MakeDecks(1, 2, history.Villain, rng);
-
         for (int lvl = 0; lvl < 2; lvl++)
         {
             for (int j = 0; j < rng.Next(8, 13); j++)
             {
                 var deck = decks[lvl];
-                var sq = mainDungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-                var loc = new Loc(mainDungeon.ID, lvl, sq.Item1, sq.Item2);
+                var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+                var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
                 if (deck.Indexes.Count == 0)
                     deck.Reshuffle(rng);
                 string m = deck.Monsters[deck.Indexes.Dequeue()];
                 Actor monster = MonsterFactory.Get(m, rng);
                 monster.Loc = loc;
                 objDb.Add(monster);
-                objDb.SetToLoc(loc, monster);
+                objDb.AddToLoc(loc, monster);
             }
         }
-        
-        var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
-
-        campaign.CurrentDungeon = 0;
-        campaign.CurrentLevel = 0;
-        //return (campaign, startR, startC);
-        return (campaign, entrance.Item1, entrance.Item2);
     }
 
     public bool StartUp(Random rng)

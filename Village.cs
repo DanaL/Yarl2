@@ -209,18 +209,18 @@ class Village
 
         var cleric = GeneratePriest(map, town, ng, rng);
         objDb.Add(cleric);
-        objDb.SetToLoc(cleric.Loc, cleric);
+        objDb.AddToLoc(cleric.Loc, cleric);
 
         var smith = GenerateSmith(map, town, ng, objDb, rng);
         objDb.Add(smith);
-        objDb.SetToLoc(smith.Loc, smith);
+        objDb.AddToLoc(smith.Loc, smith);
 
         var grocer = GenerateGrocer(map, town, ng, objDb, rng);
         objDb.Add(grocer);
-        objDb.SetToLoc(grocer.Loc, grocer);
+        objDb.AddToLoc(grocer.Loc, grocer);
 
         var pup = GeneratePuppy(map, town, objDb, rng);
         objDb.Add(pup);
-        objDb.SetToLoc(pup.Loc, pup);
+        objDb.AddToLoc(pup.Loc, pup);
     }
 }

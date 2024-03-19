@@ -55,7 +55,7 @@ internal class Serialize
         c.CurrentDungeon = sgi.CurrentDungeon;
         c.CurrentLevel = sgi.CurrentLevel;        
         objDB._objs.Add(p.ID, p);
-        objDB.SetToLoc(p.Loc, p);
+        objDB.AddToLoc(p.Loc, p);
         
         return (p, c, objDB, sgi.Turn, sgi.MessageHistory);
     }
@@ -584,7 +584,7 @@ class GameObjDBSaver
         {
             var m = MonsterSaver.Inflate(ms);
             goDB.Add(m);
-            goDB.SetToLoc(m.Loc, m);
+            goDB.AddToLoc(m.Loc, m);
         }
 
         return goDB;

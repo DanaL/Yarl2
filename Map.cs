@@ -507,6 +507,7 @@ class Map : ICloneable
     }
 }
 
+// False == wall, true == floor
 class CACave
 {
     static bool[,] Iteration(bool[,] map, int height, int width)

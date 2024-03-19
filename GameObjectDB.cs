@@ -189,7 +189,7 @@ class GameObjectDB
         _objs[obj.ID] = obj;
     }
 
-    public void SetToLoc(Loc loc, Actor actor)
+    public void AddToLoc(Loc loc, Actor actor)
     {
         _actorLocs[loc] = actor.ID;
     }
