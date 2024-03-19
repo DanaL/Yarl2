@@ -29,12 +29,22 @@ abstract class Trait
 {
     public virtual string Desc() => "";
     public abstract string AsText();
-    public abstract bool Active { get; }
+    public virtual bool Active => true;
     public virtual bool Aura => false;
     public virtual TerrainFlag Effect => TerrainFlag.None;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public virtual int Radius => 0;
     public ulong ExpiresOn { get; set; } = ulong.MaxValue;
+}
+
+class ImpaleTrait : Trait
+{
+    public override string AsText() => "Impale";
+}
+
+class CleaveTrait : Trait
+{
+    public override string AsText() => "Cleave";
 }
 
 class RageTrait(Actor actor) : Trait
@@ -59,7 +69,6 @@ class FlyingTrait : Trait
     public FlyingTrait() { }
     public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
-    public override bool Active => true;
     public override string AsText() => "Flying";
 }
 
@@ -71,7 +80,6 @@ class ExpiresTrait : Trait, IPerformer
     public double Energy { get; set; }
     public double Recovery { get; set; }
 
-    public override bool Active => true;
     public override string AsText() => $"Expires#{ExpiresOn}";
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
@@ -85,7 +93,6 @@ class ExpiresTrait : Trait, IPerformer
 
 class OpaqueTrait : Trait
 {
-    public override bool Active => true;
     public override string AsText() => "Opaque";
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
@@ -97,7 +104,6 @@ abstract class SpellTrait : Trait, IUSeable
 
 class FogCloudTrait : SpellTrait
 {
-    public override bool Active => true;
     public override string AsText() => "FogCloud";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
@@ -108,7 +114,6 @@ class FogCloudTrait : SpellTrait
 
 class BlinkTrait : SpellTrait
 {
-    public override bool Active => true;
     public override string AsText() => "Blink";
 
     public override UseResult Use(Actor user, GameState gs, int row, int col)
@@ -144,7 +149,6 @@ class BlinkTrait : SpellTrait
 
 class MinorHealTrait : SpellTrait
 {
-    public override bool Active => true;
     public override string AsText() => "MinorHeal";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
@@ -165,8 +169,7 @@ class AttackTrait : Trait
     public int Bonus { get; set; }
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
-    public override string AsText() => $"Attack#{Bonus}";    
-    public override bool Active => true;
+    public override string AsText() => $"Attack#{Bonus}";        
 }
 
 class DamageTrait : Trait
@@ -176,8 +179,7 @@ class DamageTrait : Trait
     public DamageType DamageType { get; set; }
 
     public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}";    
-    public override string Desc() => "";
-    public override bool Active => true;
+    public override string Desc() => "";    
     public override bool Aura => false;
 }
 
@@ -189,15 +191,13 @@ class ArmourTrait : Trait
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
     public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";
-    public override bool Aura => false;
-    public override bool Active => true;
+    public override bool Aura => false;    
 }
 
 class ReadableTrait(string text) : Trait, IUSeable
 {
     readonly string _text = text;
     public ulong ContainerID { get; set; }
-    public override bool Active => true;
     public override string AsText() => $"Document#{_text}";
     public override bool Aura => false;
 

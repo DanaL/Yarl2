@@ -232,11 +232,11 @@ class PlayerCreator
                 msg = "\n  Shield of the Faithful";
                 break;
             case Boon.Cleave:
-                player.Features.Add(new Feature("cleave", Attribute.Cleave, 1, ulong.MaxValue));
+                player.Traits.Add(new CleaveTrait());
                 msg = "\n  the ability to Cleave";
                 break;
             case Boon.Impale:
-                player.Features.Add(new Feature("impale", Attribute.Impale, 1, ulong.MaxValue));
+                player.Traits.Add(new ImpaleTrait());
                 msg = "\n  the ability to Impale";
                 break;
             case Boon.Rage:
@@ -266,10 +266,12 @@ class PlayerCreator
                 boons.Add(Boon.StrInc);
             if (player.Stats[Attribute.Constitution].Max < 4)
                 boons.Add(Boon.ConInc);
-            if (!player.Features.Any(f => f.Attribute == Attribute.Cleave))
+            if (!player.HasTrait<CleaveTrait>())
                 boons.Add(Boon.Cleave);
-            if (!player.Features.Any(f => f.Attribute == Attribute.Impale))
+            if (!player.HasTrait<ImpaleTrait>())
                 boons.Add(Boon.Impale);
+            if (!player.HasTrait<RageTrait>())
+                boons.Add(Boon.Rage);
 
             Boon boon = boons[rng.Next(boons.Count)];
             //msg +=  ApplyBoon(player, boon);
@@ -302,7 +304,7 @@ class PlayerCreator
                 boons.Add(Boon.PietyInc);            
             if (!player.Features.Any(f => f.Name == "shield of the faithful"))
                 boons.Add(Boon.ShieldOfFaith);
-            if (!player.Features.Any(f => f.Attribute == Attribute.Impale))
+            if (!player.HasTrait<ImpaleTrait>())
                 boons.Add(Boon.Impale);
 
             Boon boon = boons[rng.Next(boons.Count)];
