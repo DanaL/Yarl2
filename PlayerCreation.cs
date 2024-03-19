@@ -228,7 +228,7 @@ class PlayerCreator
                 msg = "\n  a bonus to melee damage";
                 break;
             case Boon.ShieldOfFaith:
-                player.Features.Add(new Feature("shield of the faithful", Attribute.ACMod, 2, ulong.MaxValue));
+                player.Traits.Add(new ShieldOfTheFaithfulTrait() { ArmourMod = 2 });
                 msg = "\n  Shield of the Faithful";
                 break;
             case Boon.Cleave:
@@ -301,8 +301,8 @@ class PlayerCreator
             if (player.Stats[Attribute.Constitution].Max < 4)
                 boons.Add(Boon.ConInc);
             if (player.Stats[Attribute.Piety].Max < 4)
-                boons.Add(Boon.PietyInc);            
-            if (!player.Features.Any(f => f.Name == "shield of the faithful"))
+                boons.Add(Boon.PietyInc);
+            if (!player.HasTrait<ShieldOfTheFaithfulTrait>())
                 boons.Add(Boon.ShieldOfFaith);
             if (!player.HasTrait<ImpaleTrait>())
                 boons.Add(Boon.Impale);

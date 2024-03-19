@@ -183,15 +183,25 @@ class DamageTrait : Trait
     public override bool Aura => false;
 }
 
-class ArmourTrait : Trait
+class ACModTrait : Trait
+{
+    public int ArmourMod { get; set; }
+    public override string AsText() => $"ACMode#{ArmourMod}";
+}
+
+class ArmourTrait : ACModTrait
 {
     public ArmourParts Part { get; set; }
-    public int ArmourMod {  get; set; }
     public int Bonus { set; get; }
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
     public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";
     public override bool Aura => false;    
+}
+
+class ShieldOfTheFaithfulTrait : ACModTrait
+{
+    public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
 class ReadableTrait(string text) : Trait, IUSeable

@@ -35,7 +35,6 @@ enum Attribute
     XPValue,
     MeleeDmgBonus,
     MissileDmgBonus,
-    ACMod,
     Radius,    
 }
 

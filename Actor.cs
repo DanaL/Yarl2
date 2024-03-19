@@ -44,8 +44,6 @@ enum AIType
     Villager
 }
 
-record Feature(string Name, Attribute Attribute, int Mod, ulong expiry);
-
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
@@ -55,7 +53,6 @@ class Actor : GameObj, IPerformer, IZLevel
     static readonly int DEFAULT_Z = 4;
     
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
-    public List<Feature> Features { get; set; } = [];
     public List<Trait> Traits { get; set; } = [];
 
     public ActorStatus Status { get; set; }
@@ -112,8 +109,6 @@ class Actor : GameObj, IPerformer, IZLevel
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
     }
-
-    public bool HasFeature(Attribute attr) => Features.Any(f => f.Attribute == attr);
 }
 
 // Covers pretty much any actor that isn't the player. Villagers

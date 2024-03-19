@@ -56,15 +56,15 @@ class Player : Actor, IPerformer
                 var (item, _) = Inventory.ItemAt(slot);
                 if (item.Equiped)
                 {
-                    armour += item.Traits.Where(t => t is ArmourTrait)
-                                         .Select(t => (t as ArmourTrait).ArmourMod + (t as ArmourTrait).Bonus)
+                    armour += item.Traits.OfType<ArmourTrait>()
+                                         .Select(t => t.ArmourMod + t.Bonus)
                                          .Sum();
                 }
             }
-            
-            ac += Features.Where(f => f.Attribute == Attribute.ACMod)
-                          .Select(f => f.Mod)
-                          .Sum();
+
+            ac += Traits.OfType<ACModTrait>()
+                        .Select(t => t.ArmourMod)
+                        .Sum();
 
             return ac + armour;
         }
