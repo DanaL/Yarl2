@@ -389,7 +389,7 @@ abstract class UserInterface
         }
 
         // Write statuses
-        if (Player.Features.Any(f => f.Attribute == Attribute.Rage) && currHP < maxHP / 2)
+        if (Player.HasActiveTrait<RageTrait>())
         {
             List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
             WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);

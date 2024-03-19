@@ -40,6 +40,7 @@ enum AIType
     BasicHumanoid,
     BasicFlyer,
     Archer,
+    Spellcaster,
     Villager
 }
 
@@ -52,8 +53,11 @@ class Actor : GameObj, IPerformer, IZLevel
 {
     static readonly int FLYING_Z = 10;
     static readonly int DEFAULT_Z = 4;
+    
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public List<Feature> Features { get; set; } = [];
+    public List<Trait> Traits { get; set; } = [];
+
     public ActorStatus Status { get; set; }
     public Inventory Inventory { get; set; }
 
@@ -70,7 +74,9 @@ class Actor : GameObj, IPerformer, IZLevel
         _behaviour = new BasicMonsterBehaviour();
     }
 
-    public override int Z() => Stats.ContainsKey(Attribute.Flying) ? FLYING_Z : DEFAULT_Z;
+    public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
+                                       .OfType<T>().Any();
+    public override int Z() =>  HasActiveTrait<FlyingTrait>() ? FLYING_Z : DEFAULT_Z;
     
     public override string FullName => Name.DefArticle();    
     public virtual int TotalMeleeAttackModifier() => 0;
@@ -651,6 +657,16 @@ class ArcherBehaviour : IBehaviour
     }
 }
 
+class SpellcasterBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    {
+        Console.WriteLine("Imma cast a spell!");
+
+        return new PassAction();
+    }
+}
+
 class VillagerBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
@@ -698,10 +714,12 @@ class MonsterFactory
 
         if (!string.IsNullOrEmpty(fields[13]))
         {
-            foreach (var feature in fields[13].Split(','))
+            foreach (var traitTxt in fields[13].Split(','))
             {
-                if (Enum.TryParse(feature, out Attribute attr))
-                    m.Features.Add(new Feature(feature, attr, 0, ulong.MaxValue));
+                var trait = TraitFactory.FromText(traitTxt);
+                m.Traits.Add(trait);
+                //if (Enum.TryParse(feature, out Attribute attr))
+                //    m.Features.Add(new Feature(feature, attr, 0, ulong.MaxValue));
             }
         }
 

@@ -33,7 +33,7 @@ class Item : GameObj
     public ulong ContainedBy { get; set; } = 0;
     public bool Consumable { get; set; } = false;
     public List<string> Adjectives { get; set; } = [];
-    public List<ObjTrait> Traits { get; set; } = [];
+    public List<Trait> Traits { get; set; } = [];
     public int Value { get; set; }
     int _z = DEFAULT_Z;
 
@@ -72,7 +72,7 @@ class Item : GameObj
     // turn order.
     public List<IPerformer> ActiveTraits()
     {
-        return Traits.Where(i => i is IPerformer p && i.Acitve)
+        return Traits.Where(i => i is IPerformer p && i.Active)
                      .Select(t => (IPerformer) t).ToList();
     }
 }

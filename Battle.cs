@@ -117,14 +117,8 @@ class Battle
             bonusDamage += str.Curr;
         if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
-        if (attacker.Features.Any(f => f.Attribute == Attribute.Rage))
-        {
-            // if an attacker can rage and their HP is less than half max, they do extra dmg
-            int currHP = attacker.Stats[Attribute.HP].Curr;
-            int maxHP = attacker.Stats[Attribute.HP].Max;
-            if (currHP < maxHP / 2)
-                bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
-        }
+        if (attacker.HasActiveTrait<RageTrait>())
+            bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);        
         Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);

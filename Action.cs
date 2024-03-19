@@ -404,7 +404,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
 
         if (tile.Passable())
             return true;
-        else if (_actor.HasFeature(Attribute.Flying) && tile.PassableByFlight())
+        else if (_actor.HasActiveTrait<FlyingTrait>() && tile.PassableByFlight())
             return true;
 
         return false;
@@ -483,9 +483,9 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             {                
                 var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 10);
                 if (alerted.Contains(_gs.Player.ID))
-                {
-                    var txt = _actor.HasFeature(Attribute.Flying) ? "You hear softly beating wings..."
-                                                                  : "You hear padding footsteps...";
+                {                    
+                    var txt = _actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
+                                                             : "You hear padding footsteps...";
                     result.Messages.Add(new Message(txt, _loc, true));
                 }
             }

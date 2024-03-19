@@ -240,7 +240,7 @@ class PlayerCreator
                 msg = "\n  the ability to Impale";
                 break;
             case Boon.Rage:
-                player.Features.Add(new Feature("rage", Attribute.Rage, 1, ulong.MaxValue));
+                player.Traits.Add(new RageTrait(player));
                 msg = "\n  you may now Rage";
                 break;
         }

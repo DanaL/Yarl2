@@ -26,7 +26,8 @@ int seed = DateTime.Now.GetHashCode();
 //seed = 1067714652;
 //seed = 562054470;
 //seed = -1750061855;
-//seed = 475720358; 
+//seed = 475720358;
+seed = -910280873;
 Console.WriteLine($"Seed: {seed}");
 var rng = new Random(seed);
 

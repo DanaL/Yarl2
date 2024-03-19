@@ -25,27 +25,54 @@ interface IUSeable
     UseResult Use(Actor user, GameState gs, int row, int col);
 }
 
-abstract class ObjTrait 
+abstract class Trait 
 {
     public virtual string Desc() => "";
     public abstract string AsText();
-    public abstract bool Acitve { get; }
+    public abstract bool Active { get; }
     public virtual bool Aura => false;
     public virtual TerrainFlag Effect => TerrainFlag.None;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public virtual int Radius => 0;
+    public ulong ExpiresOn { get; set; } = ulong.MaxValue;
 }
 
-class ExpiresTrait : ObjTrait, IPerformer
+class RageTrait(Actor actor) : Trait
 {
-    public ulong ExpiresOn { get; set; }
+    Actor _actor = actor;
+
+    public override bool Active
+    {
+        get
+        {
+            int currHP = _actor.Stats[Attribute.HP].Curr;
+            int maxHP = _actor.Stats[Attribute.HP].Max;
+            return currHP < maxHP / 2;
+        }
+    }
+
+    public override string AsText() => "Rage";
+}
+
+class FlyingTrait : Trait
+{
+    public FlyingTrait() { }
+    public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
+
+    public override bool Active => true;
+    public override string AsText() => "Flying";
+}
+
+// This is for items that expire, need to come up with a better name
+class ExpiresTrait : Trait, IPerformer
+{
     public ulong ContainerID { get; set; }
     public bool RemoveFromQueue { get; set; }
     public double Energy { get; set; }
     public double Recovery { get; set; }
 
-    public override bool Acitve => true;
-    public override string AsText() => $"ExpiresTrait#{ExpiresOn}";
+    public override bool Active => true;
+    public override string AsText() => $"Expires#{ExpiresOn}";
 
     public Action TakeTurn(UserInterface ui, GameState gameState)
     {
@@ -56,22 +83,33 @@ class ExpiresTrait : ObjTrait, IPerformer
     }
 }
 
-class OpaqueTrait : ObjTrait
+class OpaqueTrait : Trait
 {
-    public override bool Acitve => false;
-    public override string AsText() => "OpaqueTrait";
+    public override bool Active => true;
+    public override string AsText() => "Opaque";
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
-abstract class SpellTrait : ObjTrait, IUSeable
+abstract class SpellTrait : Trait, IUSeable
 {
     public abstract UseResult Use(Actor user, GameState gs, int row, int col);    
 }
 
+class FogCloudTrait : SpellTrait
+{
+    public override bool Active => true;
+    public override string AsText() => "FogCloud";
+    
+    public override UseResult Use(Actor user, GameState gs, int row, int col)
+    {
+        return new UseResult(true, "FOG CLOUD!", null, null);
+    }
+}
+
 class BlinkTrait : SpellTrait
 {
-    public override bool Acitve => throw new NotImplementedException();
-    public override string AsText() => "BlinkTrait";
+    public override bool Active => true;
+    public override string AsText() => "Blink";
 
     public override UseResult Use(Actor user, GameState gs, int row, int col)
     {
@@ -106,8 +144,8 @@ class BlinkTrait : SpellTrait
 
 class MinorHealTrait : SpellTrait
 {
-    public override bool Acitve => throw new NotImplementedException();
-    public override string AsText() => "MinorHealTrait";
+    public override bool Active => true;
+    public override string AsText() => "MinorHeal";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
     {        
@@ -122,45 +160,45 @@ class MinorHealTrait : SpellTrait
     }
 }
 
-class AttackTrait : ObjTrait
+class AttackTrait : Trait
 {
     public int Bonus { get; set; }
     
     public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
-    public override string AsText() => $"AttackTrait#{Bonus}";    
-    public override bool Acitve => true;
+    public override string AsText() => $"Attack#{Bonus}";    
+    public override bool Active => true;
 }
 
-class DamageTrait : ObjTrait
+class DamageTrait : Trait
 {
     public int DamageDie { get; set; }
     public int NumOfDie { get; set; }
     public DamageType DamageType { get; set; }
 
-    public override string AsText() => $"DamageTrait#{DamageDie}#{NumOfDie}#{DamageType}";    
+    public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}";    
     public override string Desc() => "";
-    public override bool Acitve => true;
+    public override bool Active => true;
     public override bool Aura => false;
 }
 
-class ArmourTrait : ObjTrait
+class ArmourTrait : Trait
 {
     public ArmourParts Part { get; set; }
     public int ArmourMod {  get; set; }
     public int Bonus { set; get; }
 
     public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
-    public override string AsText() => $"ArmourTrait#{Part}#{ArmourMod}#{Bonus}";
+    public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";
     public override bool Aura => false;
-    public override bool Acitve => true;
+    public override bool Active => true;
 }
 
-class ReadableTrait(string text) : ObjTrait, IUSeable
+class ReadableTrait(string text) : Trait, IUSeable
 {
     readonly string _text = text;
     public ulong ContainerID { get; set; }
-    public override bool Acitve => true;
-    public override string AsText() => $"DocumentTrait#{_text}";
+    public override bool Active => true;
+    public override string AsText() => $"Document#{_text}";
     public override bool Aura => false;
 
     public UseResult Use(Actor user, GameState gs, int row, int col)
@@ -176,7 +214,7 @@ class ReadableTrait(string text) : ObjTrait, IUSeable
     }
 }
 
-class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
+class FlameLightSourceTrait : Trait, IPerformer, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
@@ -188,7 +226,7 @@ class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
     public override TerrainFlag Effect => TerrainFlag.Lit;
     public override string Desc() => Lit ? "(lit)" : "";    
 
-    public override bool Acitve => Lit;
+    public override bool Active => Lit;
     public override int Radius => Lit ? Stats[Attribute.Radius].Max : 0;
     
     public override string AsText()
@@ -258,22 +296,22 @@ class FlameLightSourceTrait : ObjTrait, IPerformer, IUSeable
 
 class TraitFactory
 {
-    public static ObjTrait FromText(string text)
+    public static Trait FromText(string text)
     {
         var pieces = text.Split('#');
         var type = pieces[0];
 
-        ObjTrait trait;
+        Trait trait;
 
         switch (type)
         {
-            case "AttackTrait":
+            case "Attack":
                 trait = new AttackTrait()
                 {
                     Bonus = int.Parse(pieces[3])
                 };
                 break;
-            case "DamageTrait":
+            case "Damage":
                 Enum.TryParse(pieces[3], out DamageType damageType);
                 trait = new DamageTrait()
                 {
@@ -282,7 +320,7 @@ class TraitFactory
                     DamageType = damageType
                 };
                 break;
-            case "ArmourTrait":
+            case "Armour":
                 var part = pieces[1] switch
                 {
                     "Helmet" => ArmourParts.Hat,
@@ -298,7 +336,7 @@ class TraitFactory
                     Bonus = int.Parse(pieces[3])
                 };
                 break;
-            case "LightSourceTrait":
+            case "LightSource":
                 trait = new FlameLightSourceTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
@@ -309,8 +347,17 @@ class TraitFactory
                 };
                 trait.Stats[Attribute.Radius].SetMax(5);
                 break;
-            case "ReadableTrait":
+            case "Readable":
                 trait = new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
+                break;
+            case "Flying":
+                trait = new FlyingTrait();
+                break;
+            case "Blink":
+                trait = new BlinkTrait();
+                break;
+            case "FogCloud":
+                trait = new FogCloudTrait();
                 break;
             default:
                 throw new Exception("I don't know how to make that kind of Trait");
