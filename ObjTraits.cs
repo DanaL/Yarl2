@@ -63,12 +63,17 @@ class OpaqueTrait : ObjTrait
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
-class BlinkTrait : ObjTrait, IUSeable
+abstract class SpellTrait : ObjTrait, IUSeable
+{
+    public abstract UseResult Use(Actor user, GameState gs, int row, int col);    
+}
+
+class BlinkTrait : SpellTrait
 {
     public override bool Acitve => throw new NotImplementedException();
     public override string AsText() => "BlinkTrait";
 
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public override UseResult Use(Actor user, GameState gs, int row, int col)
     {
         List<Loc> sqs = [];
         var start = user.Loc;
@@ -99,12 +104,12 @@ class BlinkTrait : ObjTrait, IUSeable
     }    
 }
 
-class MinorHealTrait : ObjTrait, IUSeable
+class MinorHealTrait : SpellTrait
 {
     public override bool Acitve => throw new NotImplementedException();
     public override string AsText() => "MinorHealTrait";
     
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public override UseResult Use(Actor user, GameState gs, int row, int col)
     {        
         var hp = 0;
         for (int j = 0; j < 4; j++)
