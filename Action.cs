@@ -564,12 +564,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
                 result.Messages.Add(alert);
                 success = useResult.Successful;
                                 
-                if (useResult.Accumulator is not null)
-                {
-                    _gs.Player.ReplacePendingAction(useResult.ReplacementAction!, useResult.Accumulator);
-                    result.EnergyCost = 0.0;
-                }
-                else if (useResult.ReplacementAction is not null)
+                if (useResult.ReplacementAction is not null)
                 {
                     result.Successful = false;
                     result.AltAction = useResult.ReplacementAction;
@@ -590,6 +585,28 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     {
         var menuResult = (MenuAccumulatorResult)result;
         Choice = menuResult.Choice;
+    }
+}
+
+class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
+{
+    readonly Actor _target = target;
+    readonly GameState _gs = gs;
+    readonly int _healDie = healDie;
+    readonly int _healDice = healDice;
+
+    public override ActionResult Execute()
+    {
+        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var hp = 0;
+        for (int j = 0; j < _healDice; j++)
+            hp += _gs.UI.Rng.Next(_healDie) + 1;
+        _target.Stats[Attribute.HP].Change(hp);
+        var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, false, _target.Loc, _gs);        
+        var txt = msg.Text[..^1] + $" for {hp} HP.";
+        result.Messages.Add(new Message(txt, _target.Loc, false));
+
+        return result;
     }
 }
 

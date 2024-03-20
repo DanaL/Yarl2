@@ -174,7 +174,7 @@ class ItemFactory
                 item = new Item() { Name = "potion of healing", Type = ItemType.Potion, Stackable = true, Value = 75,
                                     Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE),
                                     Consumable = true };
-                item.Traits.Add(new MinorHealTrait());
+                item.Traits.Add(new CastMinorHealTrait());
                 break;
             case "scroll of blink":
                 item = new Item()

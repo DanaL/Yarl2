@@ -40,7 +40,8 @@ enum Verb
     Drink,
     Heal,
     Dissipate,
-    Blink
+    Blink,
+    Cast
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -70,7 +71,8 @@ class MessageFactory
             Verb.Drink => fp ? "drink" : "drinks",
             Verb.Heal => fp ? "heal" : "heals",
             Verb.Dissipate => fp ? "dissipate" : "dissipates",
-            Verb.Blink => fp ? "blink" : "blinks"
+            Verb.Blink => fp ? "blink" : "blinks",
+            Verb.Cast => fp ? "cast" : "casts"
         };
     }
 
@@ -94,7 +96,8 @@ class MessageFactory
         Verb.Drink => "drunk",
         Verb.Heal => "healed",
         Verb.Dissipate => "dissipated",
-        Verb.Blink => "blinked"
+        Verb.Blink => "blinked",
+        Verb.Cast => "cast"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

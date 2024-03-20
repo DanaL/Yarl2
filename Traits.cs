@@ -107,11 +107,11 @@ abstract class SpellTrait : Trait, IUSeable
 
 class FogCloudTrait : SpellTrait
 {
-    public override ulong Cooldown => 5;
+    public override ulong Cooldown => 7;
     public override string AsText() => "FogCloud";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
-    {
+    {        
         return new UseResult(true, "FOG CLOUD!", null, null);
     }
 }
@@ -146,29 +146,22 @@ class BlinkTrait : SpellTrait
         else
         {
             var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];
-            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);
-            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);
+            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);            
             gs.UI.RegisterAnimation(new SqAnimation(gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
             gs.UI.RegisterAnimation(new SqAnimation(gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);
             return new UseResult(true, $"Bamf! {msg.Text} away!", mv, null);
         }        
     }    
 }
 
-class MinorHealTrait : SpellTrait
+class CastMinorHealTrait : SpellTrait
 {
     public override string AsText() => "MinorHeal";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
     {        
-        var hp = 0;
-        for (int j = 0; j < 4; j++)
-            hp += gs.UI.Rng.Next(4) + 1;
-        user.Stats[Attribute.HP].Change(hp);
-        var msg = MessageFactory.Phrase(user.ID, Verb.Etre, Verb.Heal, false, user.Loc, gs);
-        var txt = msg.Text[..^1] + $" for {hp} HP.";
-
-        return new UseResult(true, txt, null, null);
+        return new UseResult(true, "", new HealAction(user, gs, 4, 4), null);
     }
 }
 

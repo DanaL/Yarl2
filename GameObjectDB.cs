@@ -17,6 +17,7 @@ namespace Yarl2;
 // Although it does make a nicer parameter to pass around to methods
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
+    public static Loc Nowhere = new Loc(-1, -1, -1, -1);
     // A convenient method because this comes up a lot.
     public Loc Move(int RowDelta, int ColDelta)
     {
