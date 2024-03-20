@@ -246,9 +246,7 @@ class MonsterFactory
             foreach (var traitTxt in fields[13].Split(','))
             {
                 var trait = TraitFactory.FromText(traitTxt);
-                m.Traits.Add(trait);
-                //if (Enum.TryParse(feature, out Attribute attr))
-                //    m.Features.Add(new Feature(feature, attr, 0, ulong.MaxValue));
+                m.Traits.Add(trait);                
             }
         }
 

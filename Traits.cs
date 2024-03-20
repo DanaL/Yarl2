@@ -315,10 +315,7 @@ class TraitFactory
                 break;
             case "Flying":
                 trait = new FlyingTrait();
-                break;
-            case "Blink":
-                trait = new CastBlinkTrait();
-                break;            
+                break;             
             default:
                 throw new Exception("I don't know how to make that kind of Trait");
         }
