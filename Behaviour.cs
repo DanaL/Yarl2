@@ -446,48 +446,34 @@ class KoboldTricksterBehaviour : IBehaviour
 {
     IMoveStrategy _moveStrategy = new DoorOpeningMoveStrategy();
     Dictionary<string, ulong> _lastCast = [];
+    const int BLINK_COOLDOWN = 5;
 
-    bool CanBlink(ulong cooldown, ulong currTurn)
+    bool CanBlink(ulong currTurn)
     {
         if (!_lastCast.TryGetValue("Blink", out var last))
             return true;
-        else if (last + cooldown < currTurn)
+        else if (last + BLINK_COOLDOWN < currTurn)
             return true;
         return false;
     }
 
     public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
     {
-        //// if the trickster is injured and can blink away, it will
-        //if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
-        //{
-        //    var blink = actor.Traits.OfType<BlinkTrait>().First();
-        //    if (CanBlink(blink.Cooldown, gs.Turn))
-        //    {
-        //        _lastCast["Blink"] = gs.Turn;
-        //        var spellAction = new SpellAction(actor, gs)
-        //        {
-        //            Spell = blink
-        //        };
-        //        return spellAction;
-        //    }
+        // if the trickster is injured and can blink away, it will
+        if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
+        {
+            if (CanBlink(gs.Turn))
+            {
+                _lastCast["Blink"] = gs.Turn;
+                return new BlinkAction(actor, gs);
+            }
+        }
 
-        //}
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        {
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        }
 
-        //List<SpellTrait> options = [];
-        //foreach (var spell in actor.Traits.OfType<SpellTrait>())
-        //{
-        //    if (!_lastCast.TryGetValue(spell.AsText(), out var last))
-        //        options.Add(spell);
-        //    else if (last + spell.Cooldown < gs.Turn)
-        //        options.Add(spell);
-        //}
-
-        //if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
-        //{
-        //    return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
-        //}
-        
         return _moveStrategy.MoveAction(actor, gs, rng);
     }
 }
