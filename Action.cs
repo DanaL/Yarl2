@@ -536,9 +536,9 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
-    private UserInterface _ui = ui;
-    private Actor _actor = actor;
-    private GameState _gs = gs;
+    UserInterface _ui = ui;
+    Actor _actor = actor;
+    GameState _gs = gs;
 
     public override ActionResult Execute()
     {
@@ -590,6 +590,36 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     {
         var menuResult = (MenuAccumulatorResult)result;
         Choice = menuResult.Choice;
+    }
+}
+
+class SpellAction(Actor actor, GameState gs) : Action
+{
+    public SpellTrait? Spell { get; set; }
+    Actor _actor = actor;
+    GameState _gs = gs;
+    
+    public override ActionResult Execute()
+    {
+        if (Spell is null)
+        {
+            throw new Exception("Calling SpellAction with a null Spell value");
+        }
+        
+        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var spellResult = Spell.Use(_actor, _gs, _actor.Loc.Row, _actor.Loc.Col);
+        result.Successful = spellResult.Successful;
+        var alert = MessageFactory.Phrase(spellResult.Message, _actor.Loc);
+        result.Messages.Add(alert);        
+                        
+        if (spellResult.ReplacementAction is not null)
+        {
+            result.Successful = false;
+            result.AltAction = spellResult.ReplacementAction;
+            result.EnergyCost = 0.0;
+        }
+
+        return result;
     }
 }
 

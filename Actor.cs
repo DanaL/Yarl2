@@ -656,9 +656,31 @@ class ArcherBehaviour : IBehaviour
 
 class SpellcasterBehaviour : IBehaviour
 {
+    Dictionary<string, ulong> _lastCast = [];
+
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
-        Console.WriteLine("Imma cast a spell!");
+        List<SpellTrait> options = [];
+        foreach (var spell in actor.Traits.OfType<SpellTrait>())
+        {
+            if (!_lastCast.TryGetValue(spell.AsText(), out var last))
+                options.Add(spell);
+            else if (last + spell.Cooldown < gameState.Turn)
+                options.Add(spell);            
+        }
+        
+        if (options.Count > 0)
+        {
+            var spell = options[gameState.UI.Rng.Next(options.Count)];
+            _lastCast[spell.AsText()] = gameState.Turn;
+
+            var spellAction = new SpellAction(actor, gameState)
+            {
+                Spell = spell
+            };
+
+            return spellAction;
+        }
 
         return new PassAction();
     }

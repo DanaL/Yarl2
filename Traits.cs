@@ -99,11 +99,15 @@ class OpaqueTrait : Trait
 
 abstract class SpellTrait : Trait, IUSeable
 {
+    // Cooldown is mainly used for monster casters since there are some
+    // spells I don't want them casting
+    public virtual ulong Cooldown => 0;
     public abstract UseResult Use(Actor user, GameState gs, int row, int col);    
 }
 
 class FogCloudTrait : SpellTrait
 {
+    public override ulong Cooldown => 5;
     public override string AsText() => "FogCloud";
     
     public override UseResult Use(Actor user, GameState gs, int row, int col)
@@ -114,6 +118,7 @@ class FogCloudTrait : SpellTrait
 
 class BlinkTrait : SpellTrait
 {
+    public override ulong Cooldown => 4;
     public override string AsText() => "Blink";
 
     public override UseResult Use(Actor user, GameState gs, int row, int col)
