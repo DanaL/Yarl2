@@ -178,6 +178,7 @@ class Monster : Actor
             AIType.BasicHumanoid => new BasicHumanoidBehaviour(),
             AIType.BasicFlyer => new BasicFlyingBehaviour(),
             AIType.Archer => new ArcherBehaviour(),
+            AIType.Spellcaster => new SpellcasterBehaviour(),
             _ => new BasicMonsterBehaviour(),
         };
 
@@ -586,7 +587,7 @@ class BasicHumanoidBehaviour : IBehaviour
 
 class ArcherBehaviour : IBehaviour
 {
-    bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
+    static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
     {
         foreach (var loc in trajectory)
         {
