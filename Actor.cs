@@ -41,6 +41,7 @@ enum AIType
     BasicFlyer,
     Archer,
     Spellcaster,
+    KoboldTrickster,
     Villager
 }
 
@@ -179,6 +180,7 @@ class Monster : Actor
             AIType.BasicFlyer => new BasicFlyingBehaviour(),
             AIType.Archer => new ArcherBehaviour(),
             AIType.Spellcaster => new SpellcasterBehaviour(),
+            AIType.KoboldTrickster => new KoboldTricksterBehaviour(),
             _ => new BasicMonsterBehaviour(),
         };
 
@@ -632,7 +634,7 @@ class ArcherBehaviour : IBehaviour
             }
         }
 
-        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        if (distanceFromPlayer <= 1)
         {
             return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
         }
@@ -650,6 +652,77 @@ class ArcherBehaviour : IBehaviour
         }
 
         // Otherwise do nothing!
+        return new PassAction();
+    }
+}
+
+// I hope to not have too many specific to a monster behaviours but atm I'm not
+// sure how to hand different strategies monsters might use. The trickster I
+// want to Blink around annoyingly, but a different caster might use its spells
+// in a different pattern.
+//
+// OTOH, this makes it kind of pointless to include the list of spells for a 
+// monster in monsters.txt and means I can't just create a new caster-type
+// by adding a line to the file :/
+//
+// Maybe I can classify spells by a type? HEAL/ATTACK/ESCAPE/etc?
+class KoboldTricksterBehaviour : IBehaviour
+{
+    Dictionary<string, ulong> _lastCast = [];
+
+    bool CanBlink(ulong cooldown, ulong currTurn)
+    {
+        if (!_lastCast.TryGetValue("Blink", out var last))
+            return true;
+        else if (last + cooldown < currTurn)
+            return true;
+        return false;
+    }
+
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    {
+        // if the trickster is injured and can blink away, it will
+        if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
+        {
+            var blink = actor.Traits.OfType<BlinkTrait>().First();
+            if (CanBlink(blink.Cooldown, gs.Turn))
+            {
+                _lastCast["Blink"] = gs.Turn;
+                var spellAction = new SpellAction(actor, gs)
+                {
+                    Spell = blink
+                };
+                return spellAction;
+            }
+                
+        }
+
+        List<SpellTrait> options = [];
+        foreach (var spell in actor.Traits.OfType<SpellTrait>())
+        {
+            if (!_lastCast.TryGetValue(spell.AsText(), out var last))
+                options.Add(spell);
+            else if (last + spell.Cooldown < gs.Turn)
+                options.Add(spell);            
+        }
+        
+        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        {
+            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        }
+        // if (options.Count > 0)
+        // {
+        //     var spell = options[gameState.UI.Rng.Next(options.Count)];
+        //     _lastCast[spell.AsText()] = gameState.Turn;
+
+        //     var spellAction = new SpellAction(actor, gameState)
+        //     {
+        //         Spell = spell
+        //     };
+
+        //     return spellAction;
+        // }
+
         return new PassAction();
     }
 }
