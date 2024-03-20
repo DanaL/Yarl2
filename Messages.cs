@@ -39,14 +39,15 @@ enum Verb
     Impale,
     Drink,
     Heal,
-    Dissipate
+    Dissipate,
+    Blink
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
 
 class MessageFactory
 {
-    static string CalcVerb(GameObj subject, Verb verb)
+    public static string CalcVerb(GameObj subject, Verb verb)
     {
         bool fp = subject is Player;
         return verb switch 
@@ -68,7 +69,8 @@ class MessageFactory
             Verb.Impale => fp ? "impale" : "impales",
             Verb.Drink => fp ? "drink" : "drinks",
             Verb.Heal => fp ? "heal" : "heals",
-            Verb.Dissipate => fp ? "dissipate" : "dissipates"
+            Verb.Dissipate => fp ? "dissipate" : "dissipates",
+            Verb.Blink => fp ? "blink" : "blinks"
         };
     }
 
@@ -91,7 +93,8 @@ class MessageFactory
         Verb.Impale => "impaled",
         Verb.Drink => "drunk",
         Verb.Heal => "healed",
-        Verb.Dissipate => "dissipated"
+        Verb.Dissipate => "dissipated",
+        Verb.Blink => "blinked"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)
@@ -142,6 +145,21 @@ class MessageFactory
             }
 
             sb.Append(exciting ? '!' : '.');
+        }
+
+        return new Message(sb.ToString().Capitalize(), loc);
+    }
+
+    public static Message Phrase(ulong subject, Verb verb, Loc loc, GameState gs)
+    {
+        var sb = new StringBuilder();
+        GameObj? sub = gs.ObjDB.GetObj(subject);
+
+        if (sub is not null)
+        {
+            sb.Append(CalcName(sub));
+            sb.Append(' ');
+            sb.Append(CalcVerb(sub, verb));            
         }
 
         return new Message(sb.ToString().Capitalize(), loc);

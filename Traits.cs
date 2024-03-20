@@ -147,7 +147,8 @@ class BlinkTrait : SpellTrait
         {
             var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];            
             var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);
-            return new UseResult(true, "Bamf!", mv, null);
+            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);            
+            return new UseResult(true, $"Bamf! {msg.Text} away!", mv, null);
         }        
     }    
 }
