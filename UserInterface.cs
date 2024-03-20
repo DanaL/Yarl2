@@ -597,6 +597,7 @@ abstract class UserInterface
                         AlertPlayer(result.Messages, result.MessageIfUnseen);
                     result = result.AltAction.Execute();
                     performer.Energy -= result.EnergyCost;
+                    action = result.AltAction;
                 }
 
                 if (result.Messages.Count > 0)

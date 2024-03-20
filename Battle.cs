@@ -157,7 +157,7 @@ class Battle
 
     public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs, Random rng)
     {
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
         int roll = AttackRoll(rng) + attacker.TotalMeleeAttackModifier();
         if (roll >= target.AC)
@@ -188,13 +188,13 @@ class Battle
 
     public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, Random rng)
     {
-        var result = new ActionResult() { Successful = false, EnergyCost = 1.0 };
+        var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
         int roll = AttackRoll(rng) + attacker.TotalMissileAttackModifier(ammo);
         if (roll >= target.AC)
         {
             ResolveMissileHit(attacker, target, ammo, gs, result, rng);
-            result.Successful = true;
+            result.Complete = true;
         }
         else
         {

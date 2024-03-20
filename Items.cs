@@ -181,7 +181,7 @@ class ItemFactory
                 {
                     Name = "scroll of blink", Type = ItemType.Scroll, Stackable = true, Value = 125,
                                     Glyph = new Glyph('?', Colours.WHITE, Colours.GREY), Consumable = true };
-                item.Traits.Add(new BlinkTrait());
+                item.Traits.Add(new CastBlinkTrait());
                 break;
             case "mist":
                 item = new Item()

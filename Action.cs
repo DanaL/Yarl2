@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class ActionResult
 {
-    public bool Successful { get; set; }
+    public bool Complete { get; set; }
     public List<Message> Messages { get; set; } = [];
     public string MessageIfUnseen { get; set; } = "";
     public Action? AltAction { get; set; }
@@ -38,7 +38,7 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
     
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = true };
+        var result = new ActionResult() { Complete = true };
 
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null) 
@@ -58,7 +58,7 @@ class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo, Random 
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = true };
+        var result = new ActionResult() { Complete = true };
 
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null)
@@ -81,7 +81,7 @@ class PortalAction(GameState gameState) : Action
         _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
         _gameState.RefreshPerformers();
 
-        result.Successful = true;
+        result.Complete = true;
 
         if (start.DungeonID != portal.Destination.DungeonID)
             result.Messages.Add(MessageFactory.Phrase(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination));
@@ -98,7 +98,7 @@ class PortalAction(GameState gameState) : Action
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
         
         var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
@@ -120,7 +120,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
 {
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
 
         var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
@@ -142,7 +142,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
 {
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
 
         var p = _gameState.Player!;        
         var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
@@ -171,7 +171,7 @@ class ShopAction(Villager shopkeeper, GameState gs) : Action
     {
         var result = new ActionResult() 
         { 
-            Successful = _invoice > 0,
+            Complete = _invoice > 0,
             EnergyCost = 1.0
         };
 
@@ -221,7 +221,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
 
         var other = _gs.ObjDB.Occupant(_loc);
 
@@ -235,7 +235,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
             if (string.IsNullOrEmpty(txt))
             {
                 result.Messages.Add(MessageFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
-                result.Successful = true;
+                result.Complete = true;
                 result.EnergyCost = 1.0;
             }
             else
@@ -244,7 +244,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
                 _gs.Player.ReplacePendingAction(action, acc);
             }
 
-            return new ActionResult() { Successful = false, EnergyCost = 0.0 };
+            return new ActionResult() { Complete = false, EnergyCost = 0.0 };
         }
         
         return result;
@@ -258,7 +258,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
         var door = _map.TileAt(_loc.Row, _loc.Col);
 
         if (door is Door d)
@@ -266,7 +266,7 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
             if (d.Open)
             {                
                 d.Open = false;
-                result.Successful = true;
+                result.Complete = true;
                 result.EnergyCost = 1.0;
 
                 var msg = MessageFactory.Phrase(_actor.ID, Verb.Close, "the door", false, _loc, _gs);
@@ -315,7 +315,7 @@ class OpenDoorAction : DirectionalAction
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = false };
+        var result = new ActionResult() { Complete = false };
         var door = _map.TileAt(_loc.Row, _loc.Col);
         
         if (door is Door d)
@@ -323,7 +323,7 @@ class OpenDoorAction : DirectionalAction
             if (!d.Open)
             {
                 d.Open = true;
-                result.Successful = true;
+                result.Complete = true;
                 result.EnergyCost = 1.0;
 
                 var msg = MessageFactory.Phrase(_actor.ID, Verb.Open, "door", false, _loc, _gs);
@@ -417,13 +417,13 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         if (!_map.InBounds(_loc.Row, _loc.Col))
         {
             // in theory this shouldn't ever happen...
-            result.Successful = false;
+            result.Complete = false;
             if (_actor is Player)
                 result.Messages.Add(MessageFactory.Phrase("You cannot go that way!", _gs.Player.Loc));
         }
         else if (_gs.ObjDB.Occupied(_loc))
         {
-            result.Successful = false;
+            result.Complete = false;
             var occ = _gs.ObjDB.Occupant(_loc);
             if (occ is VillageAnimal)
             {
@@ -434,7 +434,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
                     msg = $"You give {occ.FullName} some scritches.";
                 _gs.UI.Popup(msg);
                 result.EnergyCost = 1.0;
-                result.Successful = true;
+                result.Complete = true;
                 //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
             }
             else if (occ is not null && !occ.Hostile)
@@ -450,7 +450,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         }
         else if (!CanMoveTo())
         {
-            result.Successful = false;
+            result.Complete = false;
 
             if (_actor is Player)
             {
@@ -468,7 +468,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         }
         else
         {            
-            result.Successful = true;
+            result.Complete = true;
             result.EnergyCost = 1.0;
 
             _gs.ActorMoved(_actor, _actor.Loc, _loc);
@@ -514,7 +514,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         if (!freeSlot) 
         {
             msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.Player.Loc);
-            return new ActionResult() { Successful=false, Messages = [msg] };                
+            return new ActionResult() { Complete=false, Messages = [msg] };                
         }
         
         int i = Choice - 'a';
@@ -523,7 +523,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         inv.Add(item, _actor.ID);
 
         msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gameState);
-        return new ActionResult() { Successful=true, Messages = [msg], EnergyCost = 1.0 };
+        return new ActionResult() { Complete=true, Messages = [msg], EnergyCost = 1.0 };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -548,7 +548,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
         if (useableTraits.Count != 0) 
         {
-            var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+            var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
             Item? toUse = _actor.Inventory.RemoveByID(item.ID) 
                             ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
             toUse.Stackable = false;
@@ -559,14 +559,14 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             foreach (IUSeable trait in useableTraits)
             {
                 var useResult = trait.Use(_actor, _gs, _actor.Loc.Row, _actor.Loc.Col);
-                result.Successful = useResult.Successful;
+                result.Complete = useResult.Successful;
                 var alert = MessageFactory.Phrase(useResult.Message, _actor.Loc);
                 result.Messages.Add(alert);
                 success = useResult.Successful;
                                 
                 if (useResult.ReplacementAction is not null)
                 {
-                    result.Successful = false;
+                    result.Complete = false;
                     result.AltAction = useResult.ReplacementAction;
                     result.EnergyCost = 0.0;
                 }
@@ -577,7 +577,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         else
         {
             var msg = MessageFactory.Phrase("You don't know a way to use that!", _gs.Player.Loc);
-            return new ActionResult() { Successful = true, Messages = [msg], EnergyCost = 0.0 };
+            return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 0.0 };
         }
     }
 
@@ -585,6 +585,49 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     {
         var menuResult = (MenuAccumulatorResult)result;
         Choice = menuResult.Choice;
+    }
+}
+
+class BlinkAction(Actor caster, GameState gs) : Action
+{
+    readonly Actor _caster = caster;
+    readonly GameState _gs = gs;
+
+    public override ActionResult Execute()
+    {
+        List<Loc> sqs = [];
+        var start = _caster.Loc;
+
+        for (var r = start.Row - 12; r < start.Row + 12; r++)
+        {
+            for (var c = start.Col - 12; c < start.Col + 12; c++)
+            {
+                var loc = start with { Row = r, Col = c };
+                int d = Util.Distance(start, loc);
+                if (d >= 8 && d <= 12 && _gs.TileAt(loc).Passable() && !_gs.ObjDB.Occupied(loc))
+                {
+                    sqs.Add(loc);
+                }
+            }
+        }
+
+        if (sqs.Count == 0)
+        {
+            var msg = new Message("A spell fizzles...", _caster.Loc);
+            return new ActionResult() { Complete=true, Messages=[msg], EnergyCost=1.0 };            
+        }        
+        else
+        {
+            var landingSpot = sqs[_gs.UI.Rng.Next(sqs.Count)];
+            var mv = new MoveAction(_caster, landingSpot, _gs, _gs.UI.Rng);
+            _gs.UI.RegisterAnimation(new SqAnimation(_gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            _gs.UI.RegisterAnimation(new SqAnimation(_gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            var msg = MessageFactory.Phrase(_caster.ID, Verb.Blink, _caster.Loc, _gs);
+            var txt = $"Bamf! {msg.Text} away!";
+            msg = new Message(txt, _caster.Loc);
+
+            return new ActionResult() { Complete=false, Messages=[msg], EnergyCost=0.0, AltAction = mv };            
+        }
     }
 }
 
@@ -597,7 +640,7 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
         var hp = 0;
         for (int j = 0; j < _healDice; j++)
             hp += _gs.UI.Rng.Next(_healDie) + 1;
@@ -605,36 +648,6 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
         var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, false, _target.Loc, _gs);        
         var txt = msg.Text[..^1] + $" for {hp} HP.";
         result.Messages.Add(new Message(txt, _target.Loc, false));
-
-        return result;
-    }
-}
-
-class SpellAction(Actor actor, GameState gs) : Action
-{
-    public SpellTrait? Spell { get; set; }
-    Actor _actor = actor;
-    GameState _gs = gs;
-    
-    public override ActionResult Execute()
-    {
-        if (Spell is null)
-        {
-            throw new Exception("Calling SpellAction with a null Spell value");
-        }
-        
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
-        var spellResult = Spell.Use(_actor, _gs, _actor.Loc.Row, _actor.Loc.Col);
-        result.Successful = spellResult.Successful;
-        var alert = MessageFactory.Phrase(spellResult.Message, _actor.Loc);
-        result.Messages.Add(alert);        
-                        
-        if (spellResult.ReplacementAction is not null)
-        {
-            result.Successful = false;
-            result.AltAction = spellResult.ReplacementAction;
-            result.EnergyCost = 0.0;
-        }
 
         return result;
     }
@@ -684,7 +697,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
             inventory.Zorkmids -= _amount;
         }
 
-        return new ActionResult() { Successful=successful, Messages = [alert], EnergyCost = cost };  
+        return new ActionResult() { Complete=successful, Messages = [alert], EnergyCost = cost };  
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -720,7 +733,7 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
         _actor.CalcEquipmentModifiers();
         Message alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, _amount, false, _actor.Loc, _gs);
 
-        return new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };        
+        return new ActionResult() { Complete=true, Messages = [alert], EnergyCost = 1.0 };        
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -774,7 +787,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
         var ammo = _actor.Inventory.Remove(_slot, 1).First();
         if (ammo != null)
         {
@@ -797,7 +810,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
                     var attackResult = Battle.MissileAttack(_actor, occ, _gs, ammo, _ui.Rng);
                     result.Messages.AddRange(attackResult.Messages);
                     result.EnergyCost = attackResult.EnergyCost;
-                    if (attackResult.Successful)
+                    if (attackResult.Complete)
                     {
                         break;
                     }
@@ -840,14 +853,14 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
         if (item is null)
         {
             var msg = new Message("That doesn't make sense", _player.Loc);
-            var result = new ActionResult() { Successful = false, EnergyCost = 0.0 };
+            var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
             result.Messages.Add(msg);
             return result;
         }
         else if (item.Type == ItemType.Armour && item.Equiped)
         {
             var msg = new Message("You're wearing that!", _player.Loc);
-            var result = new ActionResult() { Successful = false, EnergyCost = 0.0 };
+            var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
             result.Messages.Add(msg);
             return result;
         }
@@ -859,7 +872,7 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
         var acc = new AimAccumulator(_ui, _player.Loc, range);
         _player.ReplacePendingAction(action, acc);
                 
-        return new ActionResult() { Successful = false, EnergyCost = 0.0 };
+        return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -886,7 +899,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (inventory.Zorkmids == 0)
             {
                 var msg = MessageFactory.Phrase("You have no money!", _gameState.Player.Loc);
-                return new ActionResult() { Successful=false, Messages = [msg] };
+                return new ActionResult() { Complete=false, Messages = [msg] };
             }
             var dropMoney = new DropZorkmidsAction(_ui, _actor, _gameState);
             _ui.Popup("How much?");
@@ -894,18 +907,18 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (_actor is Player player)
             {
                 player.ReplacePendingAction(dropMoney, acc);
-                return new ActionResult() { Successful = false, EnergyCost = 0.0 };
+                return new ActionResult() { Complete = false, EnergyCost = 0.0 };
             }
             else
                 // Will monsters ever just decide to drop money?
-                return new ActionResult() { Successful = true };
+                return new ActionResult() { Complete = true };
         }
         
         var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
         if (item.Equiped && item.Type == ItemType.Armour)
         {
             var msg = MessageFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
-            return new ActionResult() { Successful=false, Messages = [msg] };
+            return new ActionResult() { Complete=false, Messages = [msg] };
         }
         else if (itemCount > 1)
         {
@@ -916,11 +929,11 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             if (_actor is Player player)
             {
                 player.ReplacePendingAction(dropStackAction, acc);
-                return new ActionResult() { Successful = false, EnergyCost = 0.0 };
+                return new ActionResult() { Complete = false, EnergyCost = 0.0 };
             }
             else
                 // When monsters can drop stuff I guess I'll have to handle that here??
-                return new ActionResult() { Successful = true };
+                return new ActionResult() { Complete = true };
         }
         else 
         {
@@ -931,7 +944,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
             var alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gameState);
             _ui.AlertPlayer([alert], "");
-            return new ActionResult() { Successful=true, EnergyCost = 1.0 };
+            return new ActionResult() { Complete=true, EnergyCost = 1.0 };
         }
     }
 
@@ -958,7 +971,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
         if (!(item.Type == ItemType.Armour || item.Type == ItemType.Weapon || item.Type == ItemType.Tool))
         {
             var msg = MessageFactory.Phrase("You cannot equip that!", _gameState.Player.Loc);
-            return new ActionResult() { Successful = false, Messages = [msg] };
+            return new ActionResult() { Complete = false, Messages = [msg] };
         }
         
         var (equipResult, conflict) = ((Player) _actor).Inventory.ToggleEquipStatus(Choice);
@@ -967,11 +980,11 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
         {
             case EquipingResult.Equiped:
                 alert = MessageFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, _actor.Loc, _gameState);
-                result = new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };
+                result = new ActionResult() { Complete=true, Messages = [alert], EnergyCost = 1.0 };
                 break;
             case EquipingResult.Unequiped:
                 alert = MessageFactory.Phrase(_actor.ID, Verb.Unready, item.ID, 1, false, _actor.Loc, _gameState);
-                result = new ActionResult() { Successful=true, Messages = [alert], EnergyCost = 1.0 };
+                result = new ActionResult() { Complete=true, Messages = [alert], EnergyCost = 1.0 };
                 break;
             default:
                 string msg = "You are already wearing ";
@@ -980,7 +993,7 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
                 else if (conflict == ArmourParts.Shirt)
                     msg += "some armour.";
                 alert = MessageFactory.Phrase(msg, _gameState.Player.Loc);
-                result = new ActionResult() { Successful=true, Messages = [alert] };
+                result = new ActionResult() { Complete=true, Messages = [alert] };
                 break;
         }            
         
@@ -1000,7 +1013,7 @@ class PassAction : Action
 {    
     public override ActionResult Execute() 
     {
-        return new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }
 }
 
@@ -1012,7 +1025,7 @@ class CloseMenuAction(UserInterface ui, double energyCost = 0.0) : Action
     public override ActionResult Execute() 
     { 
         _ui.CloseMenu();
-        return new ActionResult() { Successful=true, EnergyCost = _energyCost };
+        return new ActionResult() { Complete=true, EnergyCost = _energyCost };
     }
 }
 
@@ -1046,7 +1059,7 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
 
         var cb = item.ContainedBy;
         var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);
-        return new ActionResult() { Successful = true, Messages = [msg], EnergyCost = 1.0 };
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
     }
 }
 
@@ -1057,7 +1070,7 @@ class ObjTraitExpiredAction(IPerformer performer, GameState gs) : Action
 
     public override ActionResult Execute()
     {
-        var result = new ActionResult() { Successful = true, EnergyCost = 1.0 };
+        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
         _performer.RemoveFromQueue = true;
         var src = (ExpiresTrait)_performer;

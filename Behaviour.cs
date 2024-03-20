@@ -458,69 +458,37 @@ class KoboldTricksterBehaviour : IBehaviour
 
     public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
     {
-        // if the trickster is injured and can blink away, it will
-        if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
-        {
-            var blink = actor.Traits.OfType<BlinkTrait>().First();
-            if (CanBlink(blink.Cooldown, gs.Turn))
-            {
-                _lastCast["Blink"] = gs.Turn;
-                var spellAction = new SpellAction(actor, gs)
-                {
-                    Spell = blink
-                };
-                return spellAction;
-            }
+        //// if the trickster is injured and can blink away, it will
+        //if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
+        //{
+        //    var blink = actor.Traits.OfType<BlinkTrait>().First();
+        //    if (CanBlink(blink.Cooldown, gs.Turn))
+        //    {
+        //        _lastCast["Blink"] = gs.Turn;
+        //        var spellAction = new SpellAction(actor, gs)
+        //        {
+        //            Spell = blink
+        //        };
+        //        return spellAction;
+        //    }
 
-        }
+        //}
 
-        List<SpellTrait> options = [];
-        foreach (var spell in actor.Traits.OfType<SpellTrait>())
-        {
-            if (!_lastCast.TryGetValue(spell.AsText(), out var last))
-                options.Add(spell);
-            else if (last + spell.Cooldown < gs.Turn)
-                options.Add(spell);
-        }
+        //List<SpellTrait> options = [];
+        //foreach (var spell in actor.Traits.OfType<SpellTrait>())
+        //{
+        //    if (!_lastCast.TryGetValue(spell.AsText(), out var last))
+        //        options.Add(spell);
+        //    else if (last + spell.Cooldown < gs.Turn)
+        //        options.Add(spell);
+        //}
 
-        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
-        {
-            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
-        }
+        //if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        //{
+        //    return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        //}
         
         return _moveStrategy.MoveAction(actor, gs, rng);
-    }
-}
-
-class SpellcasterBehaviour : IBehaviour
-{
-    Dictionary<string, ulong> _lastCast = [];
-
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
-    {
-        List<SpellTrait> options = [];
-        foreach (var spell in actor.Traits.OfType<SpellTrait>())
-        {
-            if (!_lastCast.TryGetValue(spell.AsText(), out var last))
-                options.Add(spell);
-            else if (last + spell.Cooldown < gameState.Turn)
-                options.Add(spell);
-        }
-
-        if (options.Count > 0)
-        {
-            var spell = options[gameState.UI.Rng.Next(options.Count)];
-            _lastCast[spell.AsText()] = gameState.Turn;
-
-            var spellAction = new SpellAction(actor, gameState)
-            {
-                Spell = spell
-            };
-
-            return spellAction;
-        }
-
-        return new PassAction();
     }
 }
 

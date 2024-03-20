@@ -97,69 +97,21 @@ class OpaqueTrait : Trait
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
-abstract class SpellTrait : Trait, IUSeable
+class CastBlinkTrait : Trait, IUSeable
 {
-    // Cooldown is mainly used for monster casters since there are some
-    // spells I don't want them casting
-    public virtual ulong Cooldown => 0;
-    public abstract UseResult Use(Actor user, GameState gs, int row, int col);    
-}
-
-class FogCloudTrait : SpellTrait
-{
-    public override ulong Cooldown => 7;
-    public override string AsText() => "FogCloud";
-    
-    public override UseResult Use(Actor user, GameState gs, int row, int col)
-    {        
-        return new UseResult(true, "FOG CLOUD!", null, null);
-    }
-}
-
-class BlinkTrait : SpellTrait
-{
-    public override ulong Cooldown => 4;
     public override string AsText() => "Blink";
 
-    public override UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Actor user, GameState gs, int row, int col)
     {
-        List<Loc> sqs = [];
-        var start = user.Loc;
-
-        for (var r = start.Row - 12; r < start.Row + 12; r++)
-        {
-            for (var c = start.Col - 12; c < start.Col + 12; c++)
-            {
-                var loc = start with { Row = r, Col = c };
-                int d = Util.Distance(start, loc);
-                if (d >= 8 && d <= 12 && gs.TileAt(loc).Passable() && !gs.ObjDB.Occupied(loc))
-                {
-                    sqs.Add(loc);
-                }
-            }
-        }
-
-        if (sqs.Count == 0)
-        {
-            return new UseResult(false, "Bloop?", null, null);
-        }
-        else
-        {
-            var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];
-            var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);            
-            gs.UI.RegisterAnimation(new SqAnimation(gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-            gs.UI.RegisterAnimation(new SqAnimation(gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);
-            return new UseResult(true, $"Bamf! {msg.Text} away!", mv, null);
-        }        
+        return new UseResult(true, "", new BlinkAction(user, gs), null);
     }    
 }
 
-class CastMinorHealTrait : SpellTrait
+class CastMinorHealTrait : Trait, IUSeable
 {
     public override string AsText() => "MinorHeal";
     
-    public override UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Actor user, GameState gs, int row, int col)
     {        
         return new UseResult(true, "", new HealAction(user, gs, 4, 4), null);
     }
@@ -365,11 +317,8 @@ class TraitFactory
                 trait = new FlyingTrait();
                 break;
             case "Blink":
-                trait = new BlinkTrait();
-                break;
-            case "FogCloud":
-                trait = new FogCloudTrait();
-                break;
+                trait = new CastBlinkTrait();
+                break;            
             default:
                 throw new Exception("I don't know how to make that kind of Trait");
         }
