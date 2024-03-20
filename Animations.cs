@@ -229,6 +229,42 @@ class BarkAnimation : Animation
     }
 }
 
+// Simple animation to draw one character at a location. WIth a bit of work, I
+// can probably merge HitAnimation into this, but HitAnimation actually 
+// preceded this
+class SqAnimation : Animation
+{
+    readonly GameState _gs;
+    Loc _loc;
+    Colour _fgColour;
+    Colour _bgColour;
+    char _ch;
+
+    public SqAnimation(GameState gs, Loc loc, Colour fg, Colour bg, char ch)
+    {
+        _gs = gs;
+        _loc = loc;
+        _fgColour = fg;
+        _bgColour = bg;
+        _ch = ch;
+        Expiry = DateTime.Now.AddMilliseconds(250);
+    }
+
+    public override void Update()
+    {
+        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col);
+
+        if (!_gs.RecentlySeen.Contains(_loc))
+            return;
+
+        if (scrR > 0 && scrR < _gs.UI.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _gs.UI.SqsOnScreen.GetLength(1))
+        {
+            Sqr sq = new Sqr(_fgColour, _bgColour, _ch);
+            _gs.UI.SqsOnScreen[scrR, scrC] = sq;
+        }
+    }
+}
+
 class HitAnimation : Animation
 {
     readonly GameState _gs;

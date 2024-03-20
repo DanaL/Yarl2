@@ -145,9 +145,11 @@ class BlinkTrait : SpellTrait
         }
         else
         {
-            var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];            
+            var landingSpot = sqs[gs.UI.Rng.Next(sqs.Count)];
             var mv = new MoveAction(user, landingSpot, gs, gs.UI.Rng);
-            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);            
+            var msg = MessageFactory.Phrase(user.ID, Verb.Blink, user.Loc, gs);
+            gs.UI.RegisterAnimation(new SqAnimation(gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            gs.UI.RegisterAnimation(new SqAnimation(gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
             return new UseResult(true, $"Bamf! {msg.Text} away!", mv, null);
         }        
     }    
