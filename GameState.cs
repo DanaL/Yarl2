@@ -233,7 +233,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         PlayerCreator.CheckLevelUp(Player, UI, UI.Rng);
     }
 
-    public void ActorMoved(Actor actor, Loc start, Loc dest)
+    public void  ActorMoved(Actor actor, Loc start, Loc dest)
     {        
         ObjDB.ActorMoved(actor, start, dest);
         
@@ -354,6 +354,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         foreach (var aura in auras)
         {
             ulong id = aura.Item1;
+            startMap.RemoveEffectsFor(id);
             int radius = aura.Item2;
             TerrainFlag effect = aura.Item3;
             
