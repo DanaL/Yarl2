@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Xml.Linq;
+
 namespace Yarl2;
 
 enum ItemType
@@ -78,7 +80,7 @@ class Item : GameObj
 }
 
 class ItemFactory
-{
+{    
     public static Item Get(string name, GameObjectDB objDB) 
     {
         Item item;
@@ -183,21 +185,6 @@ class ItemFactory
                                     Glyph = new Glyph('?', Colours.WHITE, Colours.GREY), Consumable = true };
                 item.Traits.Add(new CastBlinkTrait());
                 break;
-            case "mist":
-                item = new Item()
-                {
-                    Name = name, Type = ItemType.Environment, Stackable = false, Value = 0,
-                    Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY)
-                };
-                item.SetZ(10);
-                item.Traits.Add(new OpaqueTrait());
-                item.Traits.Add(new ExpiresTrait()
-                {
-                    ContainerID = item.ID,
-                    Energy = 0.0,
-                    Recovery = 1.0                    
-                });               
-                break;
             default:
                 throw new Exception($"{name} doesn't seem exist in yarl2 :(");
         }
@@ -205,6 +192,27 @@ class ItemFactory
         objDB.Add(item);
 
         return item;
+    }
+
+    public static Item Mist(GameState gs)
+    {
+        var mist = new Item()
+        {
+            Name = "mist",
+            Type = ItemType.Environment,
+            Stackable = false,
+            Value = 0,
+            Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY)
+        };
+        mist.SetZ(10);
+        mist.Traits.Add(new OpaqueTrait());
+        mist.Traits.Add(new CountdownTrait()
+        {
+            ContainerID = mist.ID,
+            ExpiresOn = gs.Turn + 7
+        });
+
+        return mist;
     }
 }
 

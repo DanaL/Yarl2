@@ -56,6 +56,12 @@ interface IZLevel
     int Z();
 }
 
+interface IGameEventListener
+{
+    public bool Expired { get; set; }
+    void Alert(UIEventType eventType, GameState gs);
+}
+
 abstract class GameObj: IZLevel
 {
     public const ulong PLAYER_ID = 1;

@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Yarl2;
 
-enum UIEventType { Quiting, KeyInput, NoEvent }
+enum UIEventType { Quiting, KeyInput, EndOfRound, NoEvent }
 record struct UIEvent(UIEventType Type, char Value);
 record Sqr(Colour Fg, Colour Bg, char Ch);
 

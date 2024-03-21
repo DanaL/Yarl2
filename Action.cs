@@ -641,12 +641,12 @@ class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
                 {
                     if (!_gs.CurrentMap.InBounds(r, c))
                         continue;
-                    var mist = ItemFactory.Get("mist", _gs.ObjDB);
+                    var mist = ItemFactory.Mist(gs);
                     var mistLoc = _target with { Row = r, Col = c };
+                    var timer = mist.Traits.OfType<CountdownTrait>().First();
+                    _gs.RegisterForEvent(UIEventType.EndOfRound, timer);
+                    _gs.ObjDB.Add(mist);
                     _gs.ItemDropped(mist, mistLoc);
-                    var t = (ExpiresTrait)mist.Traits.First(t => t is ExpiresTrait);
-                    t.ExpiresOn = _gs.Turn + 10;
-                    _gs.Performers.Add(t);
                 }
             }
 
@@ -1185,49 +1185,6 @@ class ExtinguishAction(IPerformer performer, GameState gs) : Action
             var cb = item.ContainedBy;
             var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);
             return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
-        }
-    }
-}
-
-class ObjTraitExpiredAction(IPerformer performer, GameState gs) : Action
-{
-    IPerformer _performer = performer;
-    GameState _gs = gs;
-
-    public sealed override ActionResult Execute
-    {
-        get
-        {
-            var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
-
-            _performer.RemoveFromQueue = true;
-            var src = (ExpiresTrait)_performer;
-
-            // item being null should always be a bug, actually, I think
-            if (_gs.ObjDB.GetObj(src.ContainerID) is Item item)
-            {
-                Loc loc = item.Loc;
-
-                // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
-                if (item.ContainedBy > 0)
-                {
-                    var owner = _gs.ObjDB.GetObj(item.ContainedBy);
-                    if (owner is not null)
-                    {
-                        // I don't think owner should ever be null, barring a bug
-                        // but this placates the warning in VS/VS Code
-                        loc = owner.Loc;
-                        ((Actor)owner).Inventory.Remove(item.Slot, 1);
-                    }
-                }
-
-                _gs.ObjDB.RemoveItem(loc, item);
-
-                var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, _gs);
-                result.Messages.Add(msg);
-            }
-
-            return result;
         }
     }
 }

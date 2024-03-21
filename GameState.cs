@@ -26,7 +26,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
     public List<IPerformer> Performers { get; set; } = [];
     public ulong Turn { get; set; }
-    private int _currPerformer = 0;
     public DjikstraMap? DMap { get; private set; }
     public DjikstraMap? DMapDoors { get; private set; }
     public DjikstraMap? DMapFlight { get; private set; }
@@ -34,6 +33,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     public UserInterface UI { get; set; } = ui;
     public ulong LastTarget { get; set; } = 0;
 
+    // This might (probably will) expand into a hashtable of 
+    // UIEventType mapped to a list of listeners
+    List<IGameEventListener> _endOfRoundListeners { get; set; } = [];
+
+    private int _currPerformer = 0;
+        
     static readonly Dictionary<TileType, int> _passableBasic = new() { 
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },
@@ -91,8 +96,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         int normalized = (int) (Turn + 480) % 1440;
         int hour = normalized / 60;
         int minute = normalized - (hour * 60);
-        //int minute = leftover / 6;
-
+        
         return (hour, minute);
     }
 
@@ -231,6 +235,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         }
 
         PlayerCreator.CheckLevelUp(Player, UI, UI.Rng);
+
+        foreach (var listener in _endOfRoundListeners)
+        {
+            listener.Alert(UIEventType.EndOfRound, this);
+        }
+        _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     }
 
     public void  ActorMoved(Actor actor, Loc start, Loc dest)
@@ -386,5 +396,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
                 }
             }
         }
+    }
+
+    public void RegisterForEvent(UIEventType eventType, IGameEventListener listener)
+    {
+        if (eventType == UIEventType.EndOfRound)
+            _endOfRoundListeners.Add(listener);
+        else
+            throw new NotImplementedException("I haven't created any other event listeners yet :o");
     }
 }

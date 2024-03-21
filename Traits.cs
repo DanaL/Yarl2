@@ -82,22 +82,44 @@ class FlyingTrait : Trait
     public override string AsText() => "Flying";
 }
 
-// This is for items that expire, need to come up with a better name
-class ExpiresTrait : Trait, IPerformer
+// Technically I suppose this is a Count Up not a Count Down...
+class CountdownTrait : Trait, IGameEventListener
 {
+    public bool Expired { get; set; } = false;
+    public override string AsText() => "EventListenerTrait";
     public ulong ContainerID { get; set; }
-    public bool RemoveFromQueue { get; set; }
-    public double Energy { get; set; }
-    public double Recovery { get; set; }
 
-    public override string AsText() => $"Expires#{ExpiresOn}";
-
-    public Action TakeTurn(UserInterface ui, GameState gameState)
+    public void Alert(UIEventType eventType, GameState gs)
     {
-        if (gameState.Turn >= ExpiresOn)
-            return new ObjTraitExpiredAction(this, gameState);
-        else
-            return new PassAction();
+        if (gs.Turn < ExpiresOn)
+            return;
+
+        Expired = true;
+
+        if (gs.ObjDB.GetObj(ContainerID) is Item item)
+        {
+            Loc loc = item.Loc;
+
+            // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
+            if (item.ContainedBy > 0)
+            {
+                var owner = gs.ObjDB.GetObj(item.ContainedBy);
+                if (owner is not null)
+                {
+                    // I don't think owner should ever be null, barring a bug
+                    // but this placates the warning in VS/VS Code
+                    loc = owner.Loc;
+                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
+                }
+            }
+
+            gs.ObjDB.RemoveItem(loc, item);
+
+            // This is rather tied to Fog Cloud atm -- I should perhaps provide an
+            // expiry message that can be set for each trait
+            var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
+            gs.UI.AlertPlayer([msg], "");                
+        }              
     }
 }
 
