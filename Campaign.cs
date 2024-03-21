@@ -250,20 +250,21 @@ class PreGameHandler(UserInterface ui)
         var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
 
-        //Actor trickster = MonsterFactory.Get("kobold trickster", rng);
-        //trickster.Loc = loc;
-        //objDb.Add(trickster);
-        //objDb.AddToLoc(loc, trickster);
+        Actor trickster = MonsterFactory.Get("kobold trickster", rng);
+        trickster.Loc = loc;
+        objDb.Add(trickster);
+        objDb.AddToLoc(loc, trickster);
 
-        //for (int k = 0; k < 20; k++)
-        //{
-        //    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-        //    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-        //    Actor k1 = MonsterFactory.Get("kobold", rng);
-        //    k1.Loc = loc;
-        //    objDb.Add(k1);
-        //    objDb.AddToLoc(loc, k1);
-        //}
+        for (int k = 0; k < 3; k++)
+        {
+            sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+            loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+            Actor k1 = MonsterFactory.Get("kobold", rng);
+            k1.Loc = loc;
+            k1.Status = ActorStatus.Active;
+            objDb.Add(k1);
+            objDb.AddToLoc(loc, k1);
+        }
 
         sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);

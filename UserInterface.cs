@@ -621,7 +621,6 @@ abstract class UserInterface
         GameState.BuildPerformersList();
 
         _playing = true;
-        int p = 0;
         DateTime refresh = DateTime.Now;
         while (_playing) 
         {
@@ -641,10 +640,10 @@ abstract class UserInterface
             }
             catch (GameQuitException)
             {
-                break;                
+                break;
             }
             
-            var elapsed = DateTime.Now - refresh;
+            TimeSpan elapsed = DateTime.Now - refresh;
             if (elapsed.TotalMilliseconds > 60)
             {
                 SetSqsOnScreen();
@@ -657,7 +656,10 @@ abstract class UserInterface
                 refresh = DateTime.Now;
             }
 
-            Delay();
+            if (elapsed.TotalMilliseconds < 10)
+            {
+                Delay((int)(10 - elapsed.TotalMilliseconds));
+            }
         }
 
         var msg = new List<string>()
@@ -670,7 +672,7 @@ abstract class UserInterface
         BlockForInput();
     }
 
-    static void Delay() => Thread.Sleep(10);
+    static void Delay(int ms = 10) => Thread.Sleep(ms);
 
     void BlockForInput()
     {

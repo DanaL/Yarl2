@@ -1,5 +1,4 @@
-﻿
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -9,8 +8,6 @@
 // You should have received a copy of the CC0 Public Domain Dedication along 
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
-
-using System.Text;
 
 namespace Yarl2;
 

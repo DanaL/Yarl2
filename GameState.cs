@@ -257,7 +257,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         // monsters can open doors, fly, etc. Multiple maps??
         if (actor is Player && dest.DungeonID > 0)
         {
-            long startTime = Stopwatch.GetTimestamp();
+            //long startTime = Stopwatch.GetTimestamp();
 
             DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
             DMap.Generate(_passableBasic, (dest.Row, dest.Col), 25);
@@ -269,8 +269,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
             DMapFlight.Generate(_passableFlying, (dest.Row, dest.Col), 25);
 
-            var elapsed = Stopwatch.GetElapsedTime(startTime);
-            Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
+            //var elapsed = Stopwatch.GetElapsedTime(startTime);
+            //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
         }
     }
 
