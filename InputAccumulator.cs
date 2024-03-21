@@ -440,13 +440,20 @@ class DirectionAccumulator : InputAccumulator
 
     public override void Input(char ch)
     {
-        // Need to eventually handle ESC
-        var dir = Util.KeyToDir(ch);
-        if (dir != (0, 0))
+        if (ch == Constants.ESC)
         {
-            _result = dir;
             Done = true;
-            Success = true;
+            Success = false;
+        }
+        else
+        {
+            var dir = Util.KeyToDir(ch);
+            if (dir != (0, 0))
+            {
+                _result = dir;
+                Done = true;
+                Success = true;
+            }
         }
     }
 
