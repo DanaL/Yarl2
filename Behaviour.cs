@@ -448,6 +448,7 @@ class KoboldTricksterBehaviour : IBehaviour
     readonly Dictionary<string, ulong> _lastCast = [];
     const int BLINK_COOLDOWN = 5;
     const int FOG_CLOUD_COOLDOWN = 8;
+    const int ENTANGLE_COOLDOWN = 13;
 
     bool CanBlink(ulong currTurn)
     {
@@ -463,6 +464,15 @@ class KoboldTricksterBehaviour : IBehaviour
         if (!_lastCast.TryGetValue("FogCloud", out var last))
             return true;
         else if (last + FOG_CLOUD_COOLDOWN < currTurn)
+            return true;
+        return false;
+    }
+
+    bool CanEntangle(ulong currTurn)
+    {
+        if (!_lastCast.TryGetValue("Entangle", out var last))
+            return true;
+        else if (last + ENTANGLE_COOLDOWN < currTurn)
             return true;
         return false;
     }
@@ -486,10 +496,25 @@ class KoboldTricksterBehaviour : IBehaviour
             return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
         }
 
+        List<(Action, string)> spells = [];
         if (distanceFromPlayer <= 7 && CanFogCloud(gs.Turn) && gs.CanSeeLoc(actor, gs.Player.Loc, 7))
         {
-            _lastCast["FogCloud"] = gs.Turn;
-            return new FogCloudAction(actor, gs, gs.Player.Loc);
+            spells.Add((new FogCloudAction(actor, gs, gs.Player.Loc), "FogCloud"));
+        }
+        if (distanceFromPlayer <= 7 && CanEntangle(gs.Turn) && gs.CanSeeLoc(actor, gs.Player.Loc, 7))
+        {
+            spells.Add((new EntangleAction(actor, gs, gs.Player.Loc), "Entangle"));
+        }
+        if (CanBlink(gs.Turn))
+        {
+            spells.Add((new BlinkAction(actor, gs), "Blink"));
+        }
+
+        if (spells.Count > 0)
+        {
+            var (act, name) = spells[rng.Next(spells.Count)];
+            _lastCast[name] = gs.Turn;
+            return act;
         }
 
         return _moveStrategy.MoveAction(actor, gs, rng);
@@ -497,6 +522,15 @@ class KoboldTricksterBehaviour : IBehaviour
 }
 
 class VillagerBehaviour : IBehaviour
+{
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    {
+        return new PassAction();
+    }
+}
+
+// Some barriers and such are implemented as monsters
+class InertBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {

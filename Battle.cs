@@ -135,14 +135,15 @@ class Battle
             }
             else 
             {
-                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, Verb.Kill, true, target.Loc, gs);
+                var verb = target.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
+                var plural = target.HasTrait<PluralTrait>();
+                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, verb, plural, true, target.Loc, gs);
                 msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
 
                 if (attacker.ID == gs.Player.ID && target is Monster m)
                 {
                     int xpv = m.Stats[Attribute.XPValue].Curr;
-                    //attacker.Stats[Attribute.XP].ChangeMax(xpv);
-                    attacker.Stats[Attribute.XP].ChangeMax(20);
+                    attacker.Stats[Attribute.XP].ChangeMax(xpv);                    
                 }
             }
 

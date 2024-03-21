@@ -41,14 +41,15 @@ enum Verb
     Heal,
     Dissipate,
     Blink,
-    Cast
+    Cast,
+    Destroy
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
 
 class MessageFactory
 {
-    public static string CalcVerb(GameObj subject, Verb verb)
+    public static string CalcVerb(GameObj subject, Verb verb, bool thirdP = false)
     {
         bool fp = subject is Player;
         return verb switch 
@@ -63,8 +64,8 @@ class MessageFactory
             Verb.Ready => fp ? "ready" : "readies",
             Verb.Unready => fp ? "unequip" : "unequips",
             Verb.BurnsOut => fp ? "burnt out" : "burns out",
-            Verb.Kill => fp ? "kill" : "kills",
-            Verb.Etre => fp ? "are" : "is",
+            Verb.Kill => fp ? "kill" : thirdP ? "killed" : "kills",
+            Verb.Etre => fp ? "are" : thirdP ? "are" : "is",
             Verb.Hear => fp ? "hear" : "hears",
             Verb.Cleave => fp ? "cleave" : "cleaves",
             Verb.Impale => fp ? "impale" : "impales",
@@ -72,7 +73,8 @@ class MessageFactory
             Verb.Heal => fp ? "heal" : "heals",
             Verb.Dissipate => fp ? "dissipate" : "dissipates",
             Verb.Blink => fp ? "blink" : "blinks",
-            Verb.Cast => fp ? "cast" : "casts"
+            Verb.Cast => fp ? "cast" : "casts",
+            Verb.Destroy => fp ? "destroy" : "destroys"
         };
     }
 
@@ -97,7 +99,8 @@ class MessageFactory
         Verb.Heal => "healed",
         Verb.Dissipate => "dissipated",
         Verb.Blink => "blinked",
-        Verb.Cast => "cast"
+        Verb.Cast => "cast",
+        Verb.Destroy => "destroyed"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)
@@ -186,7 +189,7 @@ class MessageFactory
         return new Message(sb.ToString().Capitalize(), loc);
     }
 
-    public static Message Phrase(ulong subject, Verb verb, Verb pastParticiple, bool exciting, Loc loc, GameState gs)
+    public static Message Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
         GameObj? sub = gs.ObjDB.GetObj(subject);
@@ -195,7 +198,7 @@ class MessageFactory
         {
             sb.Append(CalcName(sub));
             sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb));
+            sb.Append(CalcVerb(sub, verb, thirdP));
             sb.Append(' ');
             sb.Append(PastParticiple(pastParticiple));
             sb.Append(exciting ? '!' : '.');

@@ -37,6 +37,16 @@ abstract class Trait
     public ulong ExpiresOn { get; set; } = ulong.MaxValue;
 }
 
+class PlantTrait : Trait
+{
+    public override string AsText() => "Plant";
+}
+
+class PluralTrait : Trait
+{
+    public override string AsText() => "Plural";
+}
+
 class ImpaleTrait : Trait
 {
     public override string AsText() => "Impale";
@@ -315,7 +325,13 @@ class TraitFactory
                 break;
             case "Flying":
                 trait = new FlyingTrait();
-                break;             
+                break;
+            case "Plant":
+                trait = new PlantTrait();
+                break;
+            case "Plural":
+                trait = new PluralTrait();
+                break;
             default:
                 throw new Exception("I don't know how to make that kind of Trait");
         }

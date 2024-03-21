@@ -611,7 +611,35 @@ class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
             }
         }
 
-        var msg = MessageFactory.Phrase(_casterID, Verb.Cast, " fog cloud", true, _target, _gs);
+        var txt = MessageFactory.Phrase(_casterID, Verb.Cast, _target, _gs).Text;
+        var msg = new Message(txt + " Fog Cloud!", _target, false);
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+}
+
+class EntangleAction(Actor caster, GameState gs, Loc target) : Action
+{
+    readonly ulong _casterID = caster.ID;
+    readonly GameState _gs = gs;
+    readonly Loc _target = target;
+
+    public override ActionResult Execute()
+    {
+        foreach (var (r, c) in Util.Adj8Sqs(_target.Row, _target.Col))
+        {
+            var loc = _target with { Row = r, Col = c};
+            var tile = _gs.TileAt(loc);
+            if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDB.Occupied(loc))
+            {
+                Actor vines = MonsterFactory.Get("vines", _gs.UI.Rng);
+                vines.Loc = loc;
+                _gs.ObjDB.Add(vines);
+                _gs.ObjDB.AddToLoc(loc, vines);
+            }
+        }
+
+        var txt = MessageFactory.Phrase(_casterID, Verb.Cast, _target, _gs).Text;
+        var msg = new Message(txt + " Entangle!", _target, false);
         return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
     }
 }
@@ -672,7 +700,8 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
         for (int j = 0; j < _healDice; j++)
             hp += _gs.UI.Rng.Next(_healDie) + 1;
         _target.Stats[Attribute.HP].Change(hp);
-        var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, false, _target.Loc, _gs);
+        var plural = _target.HasTrait<PluralTrait>();
+        var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, plural, false, _target.Loc, _gs);
         var txt = msg.Text[..^1] + $" for {hp} HP.";
 
         return new ActionResult() { Complete = true, Messages = [new Message(txt, _target.Loc, false)], EnergyCost = 1.0 };
