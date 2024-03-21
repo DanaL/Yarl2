@@ -1152,43 +1152,6 @@ class CloseMenuAction(UserInterface ui, double energyCost = 0.0) : Action
     }
 }
 
-class ExtinguishAction(IPerformer performer, GameState gs) : Action
-{
-    IPerformer _performer = performer;
-    GameState _gs = gs;
-
-    public override ActionResult Execute
-    {
-        get
-        {
-            _performer.RemoveFromQueue = true; // signal to remove it from the performer queue
-
-            // ExtinguishActions are performed on LightSourceTraits
-            var src = (FlameLightSourceTrait)_performer;
-            Item item = _gs.ObjDB.GetObj(src.ContainerID) as Item;
-            Loc loc = item.Loc;
-
-            if (item.ContainedBy > 0)
-            {
-                var owner = _gs.ObjDB.GetObj(item.ContainedBy);
-                if (owner is not null)
-                {
-                    // I don't think owner should ever be null, barring a bug
-                    // but this placates the warning in VS/VS Code
-                    loc = owner.Loc;
-                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
-                }
-            }
-
-            _gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
-
-            var cb = item.ContainedBy;
-            var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, _gs);
-            return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
-        }
-    }
-}
-
 // I guess I can later add extra info about whether or not the player died, quit,
 // or quit and saved?
 class QuitAction : Action

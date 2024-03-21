@@ -405,4 +405,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         else
             throw new NotImplementedException("I haven't created any other event listeners yet :o");
     }
+
+    public void StopListening(UIEventType eventType, IGameEventListener listener)
+    {
+        if (eventType == UIEventType.EndOfRound)
+            _endOfRoundListeners.Remove(listener);
+        else
+            throw new NotImplementedException("I haven't created any other event listeners yet :o");
+    }
 }

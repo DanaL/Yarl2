@@ -59,7 +59,7 @@ class CleaveTrait : Trait
 
 class RageTrait(Actor actor) : Trait
 {
-    Actor _actor = actor;
+    readonly Actor _actor = actor;
 
     public override bool Active
     {
@@ -80,47 +80,6 @@ class FlyingTrait : Trait
     public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
     public override string AsText() => "Flying";
-}
-
-// Technically I suppose this is a Count Up not a Count Down...
-class CountdownTrait : Trait, IGameEventListener
-{
-    public bool Expired { get; set; } = false;
-    public override string AsText() => "EventListenerTrait";
-    public ulong ContainerID { get; set; }
-
-    public void Alert(UIEventType eventType, GameState gs)
-    {
-        if (gs.Turn < ExpiresOn)
-            return;
-
-        Expired = true;
-
-        if (gs.ObjDB.GetObj(ContainerID) is Item item)
-        {
-            Loc loc = item.Loc;
-
-            // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
-            if (item.ContainedBy > 0)
-            {
-                var owner = gs.ObjDB.GetObj(item.ContainedBy);
-                if (owner is not null)
-                {
-                    // I don't think owner should ever be null, barring a bug
-                    // but this placates the warning in VS/VS Code
-                    loc = owner.Loc;
-                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
-                }
-            }
-
-            gs.ObjDB.RemoveItem(loc, item);
-
-            // This is rather tied to Fog Cloud atm -- I should perhaps provide an
-            // expiry message that can be set for each trait
-            var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
-            gs.UI.AlertPlayer([msg], "");                
-        }              
-    }
 }
 
 class OpaqueTrait : Trait
@@ -209,24 +168,64 @@ class ReadableTrait(string text) : Trait, IUSeable
     }
 }
 
-class FlameLightSourceTrait : Trait, IPerformer, IUSeable
+// Technically I suppose this is a Count Up not a Count Down...
+class CountdownTrait : Trait, IGameEventListener
+{
+    public bool Expired { get; set; } = false;
+    public override string AsText() => "CountdownTrait";
+    public ulong ContainerID { get; set; }
+
+    public void Alert(UIEventType eventType, GameState gs)
+    {
+        if (gs.Turn < ExpiresOn)
+            return;
+
+        Expired = true;
+
+        if (gs.ObjDB.GetObj(ContainerID) is Item item)
+        {
+            Loc loc = item.Loc;
+
+            // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
+            if (item.ContainedBy > 0)
+            {
+                var owner = gs.ObjDB.GetObj(item.ContainedBy);
+                if (owner is not null)
+                {
+                    // I don't think owner should ever be null, barring a bug
+                    // but this placates the warning in VS/VS Code
+                    loc = owner.Loc;
+                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
+                }
+            }
+
+            gs.ObjDB.RemoveItem(loc, item);
+
+            // This is rather tied to Fog Cloud atm -- I should perhaps provide an
+            // expiry message that can be set for each trait
+            var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
+            gs.UI.AlertPlayer([msg], "");
+        }
+    }
+}
+
+class FlameLightSourceTrait : Trait, IGameEventListener, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
     public int Fuel { get; set; }
-    public bool RemoveFromQueue { get; set; }
-    public double Energy { get; set; }
-    public double Recovery { get; set; }
     public override bool Aura => true;
     public override TerrainFlag Effect => TerrainFlag.Lit;
     public override string Desc() => Lit ? "(lit)" : "";    
 
     public override bool Active => Lit;
     public override int Radius => Lit ? Stats[Attribute.Radius].Max : 0;
-    
+
+    public bool Expired { get; set; } = false;
+
     public override string AsText()
     {
-        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Energy}#{Recovery}";
+        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}";
     }
 
     public UseResult Use(Actor _, GameState gs, int row, int col)
@@ -235,7 +234,7 @@ class FlameLightSourceTrait : Trait, IPerformer, IUSeable
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
         {
-            gs.Performers.Remove(this);
+            gs.StopListening(UIEventType.EndOfRound, this);
 
             // Gotta set the lighting level before we extinguish the torch
             // so it's radius is still 5 when calculating which squares to 
@@ -258,8 +257,7 @@ class FlameLightSourceTrait : Trait, IPerformer, IUSeable
         {
             Lit = true;
             item!.Stackable = false;
-            Energy = Recovery;
-            gs.Performers.Add(this);
+            gs.RegisterForEvent(UIEventType.EndOfRound, this);
             gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
             item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
@@ -271,20 +269,34 @@ class FlameLightSourceTrait : Trait, IPerformer, IUSeable
         }
     }
 
-    public Action TakeTurn(UserInterface ui, GameState gameState)
+    public void Alert(UIEventType eventType, GameState gs)
     {
+        // Although if it's not Lit, it shouldn't be listening for events
         if (!Lit)
-            return new PassAction();
+            return;
 
-        if (--Fuel > 0)
-        {
-            // I could also alert the player here that the torch is flickering, about to go out, etc            
-            return new PassAction();
-        }
-        else
+        if (--Fuel < 1)
         {
             Lit = false;
-            return new ExtinguishAction(this, gameState);
+            Expired = true;
+
+            if (gs.ObjDB.GetObj(ContainerID) is Item item)
+            {
+                Loc loc = item.Loc;
+                if (item.ContainedBy > 0 && gs.ObjDB.GetObj(item.ContainedBy) is Actor owner)
+                {                    
+                    // I don't think owner should ever be null, barring a bug
+                    // but this placates the warning in VS/VS Code
+                    loc = owner.Loc;
+                    owner.Inventory.Remove(item.Slot, 1);
+                }
+
+                gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
+
+                var cb = item.ContainedBy;
+                var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
+                gs.UI.AlertPlayer([msg], "");
+            }
         }
     }
 }
@@ -336,9 +348,7 @@ class TraitFactory
                 {
                     ContainerID = ulong.Parse(pieces[1]),
                     Lit = bool.Parse(pieces[2]),                    
-                    Fuel = int.Parse(pieces[4]),
-                    Energy = int.Parse(pieces[5]),
-                    Recovery = int.Parse(pieces[6])
+                    Fuel = int.Parse(pieces[4])                    
                 };
                 trait.Stats[Attribute.Radius].SetMax(5);
                 break;

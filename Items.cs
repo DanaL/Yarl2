@@ -164,7 +164,7 @@ class ItemFactory
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN) };
                 var ls = new FlameLightSourceTrait() {
-                    ContainerID = item.ID, Fuel = 500, Lit = false, Energy = 0.0, Recovery = 1.0 };
+                    ContainerID = item.ID, Fuel = 15, Lit = false };
                 ls.Stats[Attribute.Radius] = new Stat(5);
                 item.Traits.Add(ls);
                 break;
