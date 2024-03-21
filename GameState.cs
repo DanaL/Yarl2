@@ -106,6 +106,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
                     : TileFactory.Get(TileType.Unknown);        
     }
 
+    public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
+    {
+        var (d, level, row, col) = viewer.Loc;
+        var map = Campaign.Dungeons[d].LevelMaps[level];
+        var fov = FieldOfView.CalcVisible(radius, row, col, map, d, level, ObjDB);
+
+        return fov.Contains((level, loc.Row, loc.Col));
+    }
+
     public bool LOSBetween(Loc a, Loc b)
     {
         if (a.DungeonID != b.DungeonID || a.Level != b.Level)

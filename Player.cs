@@ -428,22 +428,7 @@ class Player : Actor, IPerformer
                 var msg = new Message($"The current time is {hour}:{minute}", Loc);
                 gameState.Turn += 1000;
                 ui.AlertPlayer([msg], "");
-            }
-            else if (ch == 'F')
-            {
-                for (int r = Loc.Row - 2; r < Loc.Row + 3; r++)
-                {
-                    for (int c = Loc.Col - 2; c < Loc.Col + 3; c++)
-                    {
-                        var mist = ItemFactory.Get("mist", gameState.ObjDB);
-                        var mistLoc = Loc with { Row = r, Col = c };
-                        gameState.ItemDropped(mist, mistLoc);
-                        var t = (ExpiresTrait)mist.Traits.First(t => t is ExpiresTrait);
-                        t.ExpiresOn = gameState.Turn + 10;
-                        gameState.Performers.Add(t);
-                    }
-                }                     
-            }
+            }            
             else
                 return new PassAction();
         }

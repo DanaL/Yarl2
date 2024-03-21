@@ -588,6 +588,34 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
+{
+    readonly ulong _casterID = caster.ID;
+    readonly GameState _gs = gs;
+    readonly Loc _target = target;
+
+    public override ActionResult Execute()
+    {
+        for (int r = _target.Row - 2; r < _target.Row + 3; r++)
+        {
+            for (int c = _target.Col - 2; c < _target.Col + 3; c++)
+            {
+                if (!_gs.CurrentMap.InBounds(r, c))
+                    continue;
+                var mist = ItemFactory.Get("mist", _gs.ObjDB);
+                var mistLoc = _target with { Row = r, Col = c };
+                _gs.ItemDropped(mist, mistLoc);
+                var t = (ExpiresTrait)mist.Traits.First(t => t is ExpiresTrait);
+                t.ExpiresOn = _gs.Turn + 10;
+                _gs.Performers.Add(t);
+            }
+        }
+
+        var msg = MessageFactory.Phrase(_casterID, Verb.Cast, " fog cloud", true, _target, _gs);
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+}
+
 class BlinkAction(Actor caster, GameState gs) : Action
 {
     readonly Actor _caster = caster;
@@ -639,17 +667,15 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
     readonly int _healDice = healDice;
 
     public override ActionResult Execute()
-    {
-        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    {        
         var hp = 0;
         for (int j = 0; j < _healDice; j++)
             hp += _gs.UI.Rng.Next(_healDie) + 1;
         _target.Stats[Attribute.HP].Change(hp);
-        var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, false, _target.Loc, _gs);        
+        var msg = MessageFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, false, _target.Loc, _gs);
         var txt = msg.Text[..^1] + $" for {hp} HP.";
-        result.Messages.Add(new Message(txt, _target.Loc, false));
 
-        return result;
+        return new ActionResult() { Complete = true, Messages = [new Message(txt, _target.Loc, false)], EnergyCost = 1.0 };
     }
 }
 

@@ -444,15 +444,25 @@ class ArcherBehaviour : IBehaviour
 // Maybe I can classify spells by a type? HEAL/ATTACK/ESCAPE/etc?
 class KoboldTricksterBehaviour : IBehaviour
 {
-    IMoveStrategy _moveStrategy = new DoorOpeningMoveStrategy();
-    Dictionary<string, ulong> _lastCast = [];
+    readonly DoorOpeningMoveStrategy _moveStrategy = new DoorOpeningMoveStrategy();
+    readonly Dictionary<string, ulong> _lastCast = [];
     const int BLINK_COOLDOWN = 5;
+    const int FOG_CLOUD_COOLDOWN = 8;
 
     bool CanBlink(ulong currTurn)
     {
         if (!_lastCast.TryGetValue("Blink", out var last))
             return true;
         else if (last + BLINK_COOLDOWN < currTurn)
+            return true;
+        return false;
+    }
+
+    bool CanFogCloud(ulong currTurn)
+    {
+        if (!_lastCast.TryGetValue("FogCloud", out var last))
+            return true;
+        else if (last + FOG_CLOUD_COOLDOWN < currTurn)
             return true;
         return false;
     }
@@ -469,9 +479,17 @@ class KoboldTricksterBehaviour : IBehaviour
             }
         }
 
-        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
+        int distanceFromPlayer = Util.Distance(actor.Loc, gs.Player.Loc);
+
+        if (distanceFromPlayer <= 1)
         {
             return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
+        }
+
+        if (distanceFromPlayer <= 7 && CanFogCloud(gs.Turn) && gs.CanSeeLoc(actor, gs.Player.Loc, 7))
+        {
+            _lastCast["FogCloud"] = gs.Turn;
+            return new FogCloudAction(actor, gs, gs.Player.Loc);
         }
 
         return _moveStrategy.MoveAction(actor, gs, rng);
