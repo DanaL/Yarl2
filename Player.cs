@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 enum PlayerClass
@@ -258,10 +256,12 @@ class Player : Actor, IPerformer
         _accumulator = newAccumulator;
     }
 
+    private DateTime lastTurnTime = DateTime.Now;
+
     public override Action TakeTurn(UserInterface ui, GameState gameState)
-    {
+    {        
         if (ui.InputBuffer.Count > 0)
-        {
+        {            
             char ch = ui.InputBuffer.Dequeue();
             
             if (_accumulator is not null)
@@ -428,8 +428,8 @@ class Player : Actor, IPerformer
                 var msg = new Message($"The current time is {hour}:{minute}", Loc);
                 gameState.Turn += 1000;
                 ui.AlertPlayer([msg], "");
-            }            
-            else
+            }
+            else if (ch == ' ' || ch == '.')
                 return new PassAction();
         }
 
