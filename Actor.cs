@@ -107,6 +107,12 @@ class Actor : GameObj, IPerformer, IZLevel
     {
         return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
     }
+
+    public bool AbilityCheck(Attribute attr, int dc, Random rng)
+    {
+        int roll = rng.Next(20) + 1 + Stats[attr].Curr;
+        return roll >= dc;
+    }
 }
 
 // Covers pretty much any actor that isn't the player. Villagers

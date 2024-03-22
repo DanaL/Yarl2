@@ -243,6 +243,11 @@ class GameObjectDB
     }
 
     public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
+    public void RemoveItemFromGame(Loc loc, Item item)
+    {
+        _itemLocs[loc].Remove(item);
+        _objs.Remove(item.ID);
+    }
 
     public void ActorMoved(Actor a, Loc from, Loc to)
     {

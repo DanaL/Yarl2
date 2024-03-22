@@ -42,7 +42,8 @@ enum Verb
     Dissipate,
     Blink,
     Cast,
-    Destroy
+    Destroy,
+    Tear
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -74,7 +75,8 @@ class MessageFactory
             Verb.Dissipate => fp ? "dissipate" : "dissipates",
             Verb.Blink => fp ? "blink" : "blinks",
             Verb.Cast => fp ? "cast" : "casts",
-            Verb.Destroy => fp ? "destroy" : "destroys"
+            Verb.Destroy => fp ? "destroy" : "destroys",
+            Verb.Tear => fp ? "tear" : "tears"
         };
     }
 
@@ -100,7 +102,8 @@ class MessageFactory
         Verb.Dissipate => "dissipated",
         Verb.Blink => "blinked",
         Verb.Cast => "cast",
-        Verb.Destroy => "destroyed"
+        Verb.Destroy => "destroyed",
+        Verb.Tear => "teared"
     };
 
     static string CalcName(GameObj gobj, int amount = 0)

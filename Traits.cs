@@ -37,6 +37,13 @@ abstract class Trait
     public ulong ExpiresOn { get; set; } = ulong.MaxValue;
 }
 
+class StickyTrait : Trait
+{
+    public int DC => 13;
+
+    public override string AsText() => "Sticky";
+}
+
 class PlantTrait : Trait
 {
     public override string AsText() => "Plant";
@@ -199,7 +206,7 @@ class CountdownTrait : Trait, IGameEventListener
                 }
             }
 
-            gs.ObjDB.RemoveItem(loc, item);
+            gs.ObjDB.RemoveItemFromGame(loc, item);
 
             // This is rather tied to Fog Cloud atm -- I should perhaps provide an
             // expiry message that can be set for each trait

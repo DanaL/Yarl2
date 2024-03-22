@@ -250,10 +250,10 @@ class PreGameHandler(UserInterface ui)
         var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
 
-        Actor trickster = MonsterFactory.Get("kobold trickster", rng);
-        trickster.Loc = loc;
-        objDb.Add(trickster);
-        objDb.AddToLoc(loc, trickster);
+        //Actor trickster = MonsterFactory.Get("kobold trickster", rng);
+        //trickster.Loc = loc;
+        //objDb.Add(trickster);
+        //objDb.AddToLoc(loc, trickster);
 
         for (int k = 0; k < 3; k++)
         {

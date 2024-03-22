@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 class ActionResult
@@ -406,24 +408,31 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         if (_actor is not Player)
             return "";
 
-        var items = _gs.ObjDB.ItemsAt(_loc);
+        var sb = new StringBuilder();
+        sb.Append(_map.TileAt(_loc.Row, _loc.Col).StepMessage);
 
-        if (items.Count == 0) 
+        var items = _gs.ObjDB.ItemsAt(_loc);
+        if (items.Count > 1)
         {
-            return _map.TileAt(_loc.Row, _loc.Col).StepMessage;
+            sb.Append(' ');
+            sb.Append("There are several items here.");
         }
-        else if (items.Count > 1)
+        else if (items.Count == 1)
         {
-            return "There are several items here.";
+            sb.Append(' ');
+            sb.Append($"There is {items[0].FullName.IndefArticle()} here.");
         }
-        //else if (items[0].Count > 1)
-        //{
-        //    return $"There are {items[0].Count} {items[0].FullName.Pluralize()} here.";
-        //}
-        else
-        {
-            return $"There is {items[0].FullName.IndefArticle()} here.";
+
+        foreach (var env in _gs.ObjDB.EnvironmentsAt(_loc)) 
+        { 
+            if (env.Traits.OfType<StickyTrait>().Any())
+            {
+                sb.Append("There are some sticky ");
+                sb.Append(env.Name);
+                sb.Append(" here.");
+            }
         }
+        return sb.ToString().Trim();
     }
 
     bool CanMoveTo()
@@ -443,6 +452,33 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         get
         {
             var result = new ActionResult();
+
+            // First, is there anything preventing the actor from moving off
+            // of the square?
+            foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
+            {
+                var web = env.Traits.OfType<StickyTrait>().First();
+                if (web is not null)
+                {
+                    bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);
+                    if (!strCheck)
+                    {
+                        result.EnergyCost = 1.0;
+                        result.Complete = false;
+                        var txt = $"{_actor.FullName.Capitalize()} {MessageFactory.CalcVerb(_actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
+                        var msg = new Message(txt, _actor.Loc);
+                        result.Messages.Add(msg);
+                        return result;
+                    }
+                    else
+                    {
+                        var txt = $"{_actor.FullName.Capitalize()} {MessageFactory.CalcVerb(_actor, Verb.Tear)} through {env.Name.DefArticle()}.";
+                        var msg = MessageFactory.Phrase(txt, _actor.Loc);
+                        _gs.ObjDB.RemoveItemFromGame(env.Loc, env);
+                        result.Messages.Add(msg);
+                    }
+                }
+            }
 
             if (!_map.InBounds(_loc.Row, _loc.Col))
             {

@@ -429,6 +429,15 @@ class Player : Actor, IPerformer
                 gameState.Turn += 1000;
                 ui.AlertPlayer([msg], "");
             }
+            else if (ch == 'w')
+            {
+                foreach (var sq in Util.Adj4Sqs(Loc.Row, Loc.Col))
+                {
+                    var w = ItemFactory.Web();
+                    gameState.ObjDB.Add(w);
+                    gameState.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2 });                    
+                }
+            }
             else if (ch == ' ' || ch == '.')
                 return new PassAction();
         }

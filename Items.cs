@@ -214,6 +214,21 @@ class ItemFactory
 
         return mist;
     }
+
+    public static Item Web()
+    {
+        var web = new Item()
+        {
+            Name = "webs",
+            Type = ItemType.Environment,
+            Stackable = false,
+            Value = 0,
+            Glyph = new Glyph(':', Colours.WHITE, Colours.GREY)
+        };
+        web.Traits.Add(new StickyTrait());
+
+        return web;
+    }
 }
 
 enum ArmourParts
