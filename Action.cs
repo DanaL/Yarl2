@@ -400,6 +400,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         { 
             if (env.Traits.OfType<StickyTrait>().Any())
             {
+                sb.Append(' ');
                 sb.Append("There are some sticky ");
                 sb.Append(env.Name);
                 sb.Append(" here.");
@@ -535,32 +536,55 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
 class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
-    UserInterface _ui = ui;
-    Actor _actor = actor;
-    GameState _gameState = gs;
+    readonly UserInterface _ui = ui;
+    readonly Actor _actor = actor;
+    readonly GameState _gs = gs;
 
     public override ActionResult Execute()
     {
-        _ui.CloseMenu();
-        var itemStack = _gameState.ObjDB.ItemsAt(_actor.Loc);
+        var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
+        _ui.CloseMenu();
+        var itemStack = _gs.ObjDB.ItemsAt(_actor.Loc);
         var inv = _actor.Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
-        Message msg;
-
+        int i = Choice - 'a';
+        var item = itemStack[i];
+        
         if (!freeSlot)
         {
-            msg = MessageFactory.Phrase("There's no room in your inventory!", _gameState.Player.Loc);
+            var msg = MessageFactory.Phrase("There's no room in your inventory!", _gs.Player.Loc);
             return new ActionResult() { Complete = false, Messages = [msg] };
         }
 
-        int i = Choice - 'a';
-        var item = itemStack[i];
-        gs.ObjDB.RemoveItem(_actor.Loc, item);
+        // First, is there anything preventing the actor from moving off
+        // of the square?
+        foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
+        {
+            var web = env.Traits.OfType<StickyTrait>().First();
+            if (web is not null)
+            {
+                bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);
+                if (!strCheck)
+                {
+                    var txt = $"{item.FullName.DefArticle().Capitalize()} {MessageFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
+                    var stickyMsg = new Message(txt, _actor.Loc);                    
+                    return new ActionResult() {  EnergyCost = 1.0, Complete = false, Messages = [stickyMsg] };
+                }
+                else
+                {
+                    var txt = $"{_actor.FullName.Capitalize()} {MessageFactory.CalcVerb(_actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
+                    var stickyMsg = MessageFactory.Phrase(txt, _actor.Loc);                    
+                    result.Messages.Add(stickyMsg);
+                }
+            }
+        }
+
+        _gs.ObjDB.RemoveItem(_actor.Loc, item);
         inv.Add(item, _actor.ID);
 
-        msg = MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gameState);
-        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };        
+        result.Messages.Add(MessageFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gs));
+        return result;       
     }
 
     public override void ReceiveAccResult(AccumulatorResult result)
