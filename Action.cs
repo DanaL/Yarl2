@@ -373,7 +373,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
             TileType.Chasm => "Do you really want to jump into the chasm?",
             _ => "You cannot go that way!"
-        }; ;
+        };
     }
 
     string CalcDesc()
@@ -387,21 +387,25 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         var items = _gs.ObjDB.ItemsAt(_loc);
         if (items.Count > 1)
         {
-            sb.Append(' ');
-            sb.Append("There are several items here.");
+            sb.Append(" There are several items here.");
+        }
+        else if (items.Count == 1 && items[0].Type == ItemType.Zorkmid)
+        {
+            if (items[0].Value == 1)
+                sb.Append($" There is a lone zorkmid here.");
+            else
+                sb.Append($" There are {items[0].Value} zorkmids here!");
         }
         else if (items.Count == 1)
         {
-            sb.Append(' ');
-            sb.Append($"There is {items[0].FullName.IndefArticle()} here.");
+            sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
         }
 
         foreach (var env in _gs.ObjDB.EnvironmentsAt(_loc)) 
         { 
             if (env.Traits.OfType<StickyTrait>().Any())
             {
-                sb.Append(' ');
-                sb.Append("There are some sticky ");
+                sb.Append(" There are some sticky ");
                 sb.Append(env.Name);
                 sb.Append(" here.");
             }
@@ -792,7 +796,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
         {
             cost = 0.0; // we won't make the player spend an action if they drop nothing
             successful = false;
-            alert = MessageFactory.Phrase("You hold onto your zorkminds.", _actor.Loc);
+            alert = new Message("You hold onto your zorkmids.", _actor.Loc);
         }
         else
         {
@@ -800,15 +804,15 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
             var coins = ItemFactory.Get("zorkmids", _gs.ObjDB);
             _gs.ItemDropped(coins, _actor.Loc);
             coins.Value = _amount;
-            string msg;
+            string msg = $"{MessageFactory.CalcName(_actor).Capitalize()} {MessageFactory.CalcVerb(_actor, Verb.Drop)} ";
             if (_amount == 1)
-                msg = "a single zorkmid";
+                msg += "a single zorkmid.";
             else if (_amount == inventory.Zorkmids)
-                msg = "all your money";
+                msg += "all your money!";
             else
-                msg = $"{_amount} zorkmids";
+                msg += $"{_amount} zorkmids.";
 
-            alert = MessageFactory.Phrase(_actor.ID, Verb.Drop, msg, false, _actor.Loc, _gs);
+            alert = new Message(msg, _actor.Loc);
 
             inventory.Zorkmids -= _amount;
         }

@@ -106,7 +106,7 @@ class MessageFactory
         Verb.Tear => "teared"
     };
 
-    static string CalcName(GameObj gobj, int amount = 0)
+    public static string CalcName(GameObj gobj, int amount = 0)
     {
         StringBuilder sb = new StringBuilder();
         if (gobj is Item item)
