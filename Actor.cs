@@ -210,16 +210,6 @@ class MonsterFactory
         }
     }
 
-    // static IBehaviour AITypeToBehaviour(AIType ai) => ai switch
-    // {
-    //     AIType.BasicHumanoid => new BasicMonsterBehaviour(new DoorOpeningMoveStrategy()),
-    //     AIType.BasicFlyer => new BasicMonsterBehaviour(new SimpleFlightMoveStrategy()),
-    //     AIType.Archer => new ArcherBehaviour(),
-    //     AIType.KoboldTrickster => new KoboldTricksterBehaviour(),
-    //     AIType.Spider => new SpiderBehaviour(),
-    //     _ => new BasicMonsterBehaviour(new DumbMoveStrategy()),
-    // };
-
     static void ParseActions(Monster mob, string txt)
     {
         foreach (var act in txt.Split(','))
@@ -277,9 +267,6 @@ class MonsterFactory
             MoveStrategy = mv
         };
 
-        //Enum.TryParse(fields[12], out AIType ai);
-        //m.SetBehaviour(AITypeToBehaviour(ai));
-
         int hp = int.Parse(fields[4]);
         m.Stats.Add(Attribute.HP, new Stat(hp));
         int attBonus = int.Parse(fields[5]);
@@ -292,16 +279,12 @@ class MonsterFactory
         m.Stats.Add(Attribute.Dexterity, new Stat(dex));
         int xpValue = int.Parse(fields[9]);
         m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
-        //int dmgDie = int.Parse(fields[7]);
-        //m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
-        //int dmgRolls = int.Parse(fields[8]);
-        //m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
-
+        
         ParseActions(m, fields[11]);
 
         if (!string.IsNullOrEmpty(fields[12]))
         {
-            foreach (var traitTxt in fields[11].Split(','))
+            foreach (var traitTxt in fields[12].Split(','))
             {
                 var trait = TraitFactory.FromText(traitTxt);
                 m.Traits.Add(trait);                

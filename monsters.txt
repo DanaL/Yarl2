@@ -1,1 +1,5 @@
 skeleton        |z|white        |darkgrey  |12| 8|2| 1.0|12|10|2|Dumb|Melee#6#1#Slashing|
+zombie          |z|limegreen    |darkgreen | 8|10|2|0.75|12| 8|3|Dumb|Melee#6#1#Blunt|
+wolf            |d|lightgrey    |grey      |12| 8|2| 1.0|12|10|3|Dumb|Melee#6#1#Piercing|
+giant rat       |r|lightgrey    |grey      |11| 5|2| 1.0|10|10|2|Dumb|Melee#4#1#Piercing|
+dire bat        |v|lightbrown   |brown     |12| 5|2| 1.0|10|12|2|Flying|Melee#5#1#Piercing|Flying
