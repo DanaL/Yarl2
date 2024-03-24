@@ -255,23 +255,30 @@ class PreGameHandler(UserInterface ui)
         //objDb.Add(trickster);
         //objDb.AddToLoc(loc, trickster);
 
-        for (int k = 0; k < 3; k++)
-        {
-            sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-            loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-            Actor k1 = MonsterFactory.Get("kobold", rng);
-            k1.Loc = loc;
-            k1.Status = ActorStatus.Active;
-            objDb.Add(k1);
-            objDb.AddToLoc(loc, k1);
-        }
+        // for (int k = 0; k < 3; k++)
+        // {
+        //     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+        //     loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+        //     Actor k1 = MonsterFactory.Get("kobold", rng);
+        //     k1.Loc = loc;
+        //     k1.Status = ActorStatus.Active;
+        //     objDb.Add(k1);
+        //     objDb.AddToLoc(loc, k1);
+        // }
 
         sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-        Actor bat = MonsterFactory.Get("dire bat", rng);
-        bat.Loc = loc;
-        objDb.Add(bat);
-        objDb.AddToLoc(loc, bat);
+        Actor skellie = MonsterFactory.Get("skeleton", rng);
+        skellie.Loc = loc;
+        objDb.Add(skellie);
+        objDb.AddToLoc(loc, skellie);
+
+        // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+        // loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+        // Actor bat = MonsterFactory.Get("dire bat", rng);
+        // bat.Loc = loc;
+        // objDb.Add(bat);
+        // objDb.AddToLoc(loc, bat);
     }
 
     // This is very temporary/early code since eventually dungeons will need to

@@ -39,7 +39,8 @@ enum AIType
     Archer,
     Spellcaster,
     KoboldTrickster,
-    Villager
+    Villager,
+    Spider
 }
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -116,27 +117,23 @@ class Actor : GameObj, IPerformer, IZLevel
 }
 
 // Covers pretty much any actor that isn't the player. Villagers
-// for instance are of type Monster even though it's a bit rude
+// for instan           ce are of type Monster even though it's a bit rude
 // to call them that. Dunno why I don't like the term NPC for
 // this class
 class Monster : Actor
 {
     public AIType AIType { get; set;}
+    public IMoveStrategy MoveStrategy { get; set; }
+    public List<ActionTrait> Actions { get; set; } = [];
 
-    public Monster() { }
-
+    public Monster() => _behaviour = new MonsterBehaviour();
+    
+    public Damage? Dmg { get; set; }
     public override List<Damage> MeleeDamage()
     {
-        int die = 4;
-        if (Stats.TryGetValue(Attribute.DmgDie, out var dmgDie))
-            die = dmgDie.Curr;
-        int numOfDie = 1;
-        if (Stats.TryGetValue(Attribute.DmgRolls, out var rolls))
-            numOfDie = rolls.Curr;
+        List<Damage> dmgs = [ Dmg ?? new Damage(4, 1, DamageType.Blunt)];
 
-        // Blunt for now. I need to add damage type to monster definition file
-        // AND handle cases of multiple damage types. Ie., hellhounds and such
-        return [ new Damage(die, numOfDie, DamageType.Blunt) ];
+        return dmgs;
     }
 
     public override void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) 
@@ -213,15 +210,51 @@ class MonsterFactory
         }
     }
 
-    static IBehaviour AITypeToBehaviour(AIType ai) => ai switch
+    // static IBehaviour AITypeToBehaviour(AIType ai) => ai switch
+    // {
+    //     AIType.BasicHumanoid => new BasicMonsterBehaviour(new DoorOpeningMoveStrategy()),
+    //     AIType.BasicFlyer => new BasicMonsterBehaviour(new SimpleFlightMoveStrategy()),
+    //     AIType.Archer => new ArcherBehaviour(),
+    //     AIType.KoboldTrickster => new KoboldTricksterBehaviour(),
+    //     AIType.Spider => new SpiderBehaviour(),
+    //     _ => new BasicMonsterBehaviour(new DumbMoveStrategy()),
+    // };
+
+    static void ParseActions(Monster mob, string txt)
     {
-        AIType.BasicHumanoid => new BasicMonsterBehaviour(new DoorOpeningMoveStrategy()),
-        AIType.BasicFlyer => new BasicMonsterBehaviour(new SimpleFlightMoveStrategy()),
-        AIType.Archer => new ArcherBehaviour(),
-        AIType.KoboldTrickster => new KoboldTricksterBehaviour(),
-        _ => new BasicMonsterBehaviour(new DumbMoveStrategy()),
+        foreach (var act in txt.Split(','))
+        {
+            string name = act[..act.IndexOf('#')];
+            if (name == "Melee")
+            {
+                Enum.TryParse(act[(act.LastIndexOf('#') + 1)..], out DamageType damageType);
+                var digits = Util.DigitsRegex().Split(txt);
+                var at = new MobMeleeTrait()
+                {
+                    Name = "Melee",
+                    DamageDie = int.Parse(digits[1]),
+                    DamageDice = int.Parse(digits[2]),
+                    MinRange = 1,
+                    MaxRange = 1,
+                    DamageType = damageType
+
+                };
+                mob.Actions.Add(at);
+            }
+        }
+    }
+
+    static IMoveStrategy TextToMove(string txt) => txt.ToLower() switch
+    {
+        "door" => new DoorOpeningMoveStrategy(),
+        "flying" => new SimpleFlightMoveStrategy(),
+        "inert" => new InertMoveStrategy(),
+        _ => new DumbMoveStrategy()
     };
 
+    //       0       1    2      3   4   5           6         7    8    9       10        11
+    // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions 
+    // skeleton        |z|white        |darkgrey  |12| 8|2| 1.0| 6|1|12|10|2|Basic|
     public static Actor Get(string name, Random rng)
     {
         if (_catalog.Count == 0)
@@ -235,25 +268,17 @@ class MonsterFactory
         var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
                                             ColourSave.TextToColour(fields[2]));
         
-        Enum.TryParse(fields[12], out AIType ai);
+        var mv = TextToMove(fields[10]);
         var m = new Monster()
         {
             Name = name,
             Glyph = glyph,
-            AIType = ai,
-            Recovery = double.Parse(fields[6])
+            Recovery = double.Parse(fields[6]),
+            MoveStrategy = mv
         };
 
-        if (!string.IsNullOrEmpty(fields[13]))
-        {
-            foreach (var traitTxt in fields[13].Split(','))
-            {
-                var trait = TraitFactory.FromText(traitTxt);
-                m.Traits.Add(trait);                
-            }
-        }
-
-        m.SetBehaviour(AITypeToBehaviour(ai));
+        //Enum.TryParse(fields[12], out AIType ai);
+        //m.SetBehaviour(AITypeToBehaviour(ai));
 
         int hp = int.Parse(fields[4]);
         m.Stats.Add(Attribute.HP, new Stat(hp));
@@ -261,16 +286,28 @@ class MonsterFactory
         m.Stats.Add(Attribute.MonsterAttackBonus, new Stat(attBonus));
         int ac = int.Parse(fields[3]);
         m.Stats.Add(Attribute.AC, new Stat(ac));        
-        int dmgDie = int.Parse(fields[7]);
-        m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
-        int dmgRolls = int.Parse(fields[8]);
-        m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
-        int str = Util.StatRollToMod(int.Parse(fields[9]));
+        int str = Util.StatRollToMod(int.Parse(fields[7]));
         m.Stats.Add(Attribute.Strength, new Stat(str));
-        int dex = Util.StatRollToMod(int.Parse(fields[10]));
+        int dex = Util.StatRollToMod(int.Parse(fields[8]));
         m.Stats.Add(Attribute.Dexterity, new Stat(dex));
-        int xpValue = int.Parse(fields[11]);
+        int xpValue = int.Parse(fields[9]);
         m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
+        //int dmgDie = int.Parse(fields[7]);
+        //m.Stats.Add(Attribute.DmgDie, new Stat(dmgDie));
+        //int dmgRolls = int.Parse(fields[8]);
+        //m.Stats.Add(Attribute.DmgRolls, new Stat(dmgRolls));
+
+        ParseActions(m, fields[11]);
+
+        if (!string.IsNullOrEmpty(fields[12]))
+        {
+            foreach (var traitTxt in fields[11].Split(','))
+            {
+                var trait = TraitFactory.FromText(traitTxt);
+                m.Traits.Add(trait);                
+            }
+        }
+        
         m.Status = rng.NextDouble() < 0.9 ? ActorStatus.Active : ActorStatus.Idle;
         
         return m;

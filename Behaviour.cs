@@ -18,6 +18,12 @@ interface IMoveStrategy
     Action MoveAction(Actor actor, GameState gs, Random rng);
 }
 
+class InertMoveStrategy : IMoveStrategy
+{
+    public Action MoveAction(Actor actor, GameState gs, Random rng) =>
+        new PassAction();
+}
+
 // For creatures that don't know how to open doors
 class DumbMoveStrategy : IMoveStrategy
 {
@@ -96,6 +102,57 @@ interface IChatter
 interface IBehaviour
 {
     Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
+}
+
+class MonsterBehaviour : IBehaviour
+{
+    Dictionary<string, ulong> _lastUse = [];
+
+    bool Available(ActionTrait act, int distance, ulong turn)
+    {
+        if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > turn)
+        {
+            return false;
+        }
+
+        if (act.MinRange <= distance && act.MaxRange >= distance)
+            return true;
+
+        return false;
+    }
+
+    Action FromTrait(Monster mob, ActionTrait act, GameState gs, Random rng)
+    {
+        if (act is MobMeleeTrait attack)
+        {
+            var p = gs.Player;
+            mob.Dmg = new Damage(attack.DamageDie, attack.DamageDice, attack.DamageType);
+            _lastUse[act.Name] = gs.Turn;
+            return new MeleeAttackAction(mob, p.Loc, gs, rng);
+        }
+
+        return new NullAction();
+    }
+
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    {
+        Monster mob = (Monster)actor;
+        
+        var p = gs.Player;
+        int distanceFromPlayer = Util.Distance(actor.Loc, p.Loc);
+
+        // Should prioritize an escape action if the monster is hurt?
+        // Maybe mobs can eventually have a bravery stat?
+
+        // Actions should be in the list in order of prerfence
+        foreach (var action in mob.Actions)
+        {
+            if (Available(action, distanceFromPlayer, gs.Turn))
+                return FromTrait(mob, action, gs, rng);
+        }
+
+        return mob.MoveStrategy.MoveAction(mob, gs, rng);
+    }
 }
 
 class VillagePupBehaviour : IBehaviour, IChatter
@@ -427,6 +484,19 @@ class ArcherBehaviour : IBehaviour
         {
             return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
         }
+
+        return _moveStrategy.MoveAction(actor, gs, rng);
+    }
+}
+
+class SpiderBehaviour : IBehaviour
+{
+    readonly IMoveStrategy _moveStrategy = new DumbMoveStrategy();
+    const int WEB_COOLDOWN = 6;
+
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    {
+        int distanceFromPlayer = Util.Distance(actor.Loc, gs.Player.Loc);
 
         return _moveStrategy.MoveAction(actor, gs, rng);
     }

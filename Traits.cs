@@ -37,6 +37,27 @@ abstract class Trait
     public ulong ExpiresOn { get; set; } = ulong.MaxValue;
 }
 
+// To let me classify traits that mobs can take on their turns
+// Not sure if this is the best way to go...
+abstract class ActionTrait : Trait
+{
+    // I was thinking I could use MinRange to set abilities a monster might use
+    // from further away. Ie., gobin archer has one attack from distance 2 to 7
+    // and another they use when they are in melee range.
+    public int MinRange { get; set; } = 0;
+    public int MaxRange { get; set; } = 0;
+    public ulong Cooldown { get; set; } = 0;
+    public string Name { get; set; } = "";
+}
+
+class MobMeleeTrait : ActionTrait
+{
+    public override string AsText() => $"MobAttackTrait#{MinRange}#{MaxRange}#{Cooldown}";
+    public int DamageDie { get; set; }
+    public int DamageDice { get; set; }
+    public DamageType DamageType { get; set; }
+}
+
 class StickyTrait : Trait
 {
     public int DC => 13;
