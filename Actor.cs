@@ -246,18 +246,18 @@ class MonsterFactory
                 };
                 mob.Actions.Add(at);
             }
-            else if (name == "Entangle")
+            else if (name == "Entangle" || name == "Web")
             {
                 var digits = Util.DigitsRegex().Split(act);
-                var entangle = new SpellActionTrait()
+                var spell = new SpellActionTrait()
                 {
                     Name = name,
                     Cooldown = ulong.Parse(digits[1]),
                     MinRange = int.Parse(digits[2]),
                     MaxRange = int.Parse(digits[3])
                 };
-                mob.Actions.Add(entangle);
-            }
+                mob.Actions.Add(spell);
+            }            
             // Default to assume it's a simple spell trait consisting of name + cool down
             else 
             {

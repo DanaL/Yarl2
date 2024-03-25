@@ -150,6 +150,8 @@ class MonsterBehaviour : IBehaviour
                 return new FogCloudAction(mob, gs, gs.Player.Loc);
             else if (spell.Name == "Entangle")
                 return new EntangleAction(mob, gs, gs.Player.Loc);
+            else if (spell.Name == "Web")
+                return new WebAction(mob, gs, gs.Player.Loc);
         }
         
         return new NullAction();

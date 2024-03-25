@@ -705,7 +705,40 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
 
         var txt = MessageFactory.Phrase(_casterID, Verb.Cast, _target, _gs).Text;
         var msg = new Message(txt + " Entangle!", _target, false);
-        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };        
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+}
+
+class WebAction(Actor caster, GameState gs, Loc target) : Action
+{
+    readonly ulong _casterID = caster.ID;
+    readonly GameState _gs = gs;
+    readonly Loc _target = target;
+
+    public override ActionResult Execute()
+    {
+        var w = ItemFactory.Web();
+        _gs.ObjDB.Add(w);
+        _gs.ItemDropped(w, _target);
+
+        //_gs.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2 });
+
+        foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
+        {
+            if (_gs.UI.Rng.NextDouble() < 0.666)
+            {
+                w = ItemFactory.Web();
+                _gs.ObjDB.Add(w);
+                _gs.ItemDropped(w, _target with { Row = sq.Item1, Col = sq.Item2});
+            }
+        }
+
+        var txt = "";
+        var victim = _gs.ObjDB.Occupant(_target);
+        if (victim is not null)
+            txt = $"{victim.FullName.Capitalize()} {MessageFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";        
+        var msg = new Message(txt, _target, false);
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
     }
 }
 
