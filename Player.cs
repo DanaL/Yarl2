@@ -33,9 +33,7 @@ class Player : Actor, IPerformer
         MaxVisionRadius = 25;
         CurrVisionRadius = MaxVisionRadius;
         Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
-                        // when a Player's recover is bolstered by, like, a Potion of Speed or such?
-        Stats.Add(Attribute.HP, new Stat(20));
-        Stats[Attribute.HP].Change(-3);
+                        // when a Player's recover is bolstered by, like, a Potion of Speed or such?        
     }
 
     public override int Z() => 12;

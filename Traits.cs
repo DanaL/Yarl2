@@ -48,14 +48,65 @@ abstract class ActionTrait : Trait
     public int MaxRange { get; set; } = 0;
     public ulong Cooldown { get; set; } = 0;
     public string Name { get; set; } = "";
+
+    public abstract bool Available(Monster mob, GameState gs);
+    protected bool InRange(Monster mob, GameState gs)
+    {
+        int dist = Util.Distance(mob.Loc, gs.Player.Loc);
+        return MinRange <= dist && MaxRange >= dist;
+    }
+}
+
+class SpellActionTrait : ActionTrait
+{
+    public override string AsText() => $"SpellActionTraint#{Name}#{Cooldown}";
+    public override bool Available(Monster mob, GameState gs) => true;
 }
 
 class MobMeleeTrait : ActionTrait
 {
-    public override string AsText() => $"MobAttackTrait#{MinRange}#{MaxRange}#{Cooldown}";
+    public override string AsText() => $"MobMeleeTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}";
     public int DamageDie { get; set; }
     public int DamageDice { get; set; }
     public DamageType DamageType { get; set; }
+
+    public override bool Available(Monster mob, GameState gs) => InRange(mob, gs);
+}
+
+class MobMissileTrait : ActionTrait
+{
+    public override string AsText() => $"MobMissileTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}";
+    public int DamageDie { get; set; }
+    public int DamageDice { get; set; }
+    public DamageType DamageType { get; set; }
+
+    public static List<Loc> Trajectory(Monster mob, Loc target)
+    {
+        return Util.Bresenham(mob.Loc.Row, mob.Loc.Col, target.Row, target.Col)
+                   .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
+                   .ToList();
+    }
+
+    static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
+    {
+        foreach (var loc in trajectory)
+        {
+            var tile = gs.TileAt(loc);
+            if (!(tile.Passable() || tile.PassableByFlight()))
+                return false;
+        }
+
+        return true;
+    }
+
+    public override bool Available(Monster mob, GameState gs)
+    {
+        if (!InRange(mob, gs))
+            return false;
+
+        var p = gs.Player;                
+        return ClearShot(gs, Trajectory(mob, p.Loc));
+    }
 }
 
 class StickyTrait : Trait
@@ -116,6 +167,7 @@ class OpaqueTrait : Trait
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
+// For items that can cast blink
 class CastBlinkTrait : Trait, IUSeable
 {
     public override string AsText() => "Blink";

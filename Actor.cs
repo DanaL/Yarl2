@@ -66,8 +66,7 @@ class Actor : GameObj, IPerformer, IZLevel
     
     public Actor() 
     {
-        Inventory = new Inventory(ID);
-        _behaviour = new BasicMonsterBehaviour(new DumbMoveStrategy());
+        Inventory = new Inventory(ID);        
     }
 
     public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
@@ -218,7 +217,7 @@ class MonsterFactory
             if (name == "Melee")
             {
                 Enum.TryParse(act[(act.LastIndexOf('#') + 1)..], out DamageType damageType);
-                var digits = Util.DigitsRegex().Split(txt);
+                var digits = Util.DigitsRegex().Split(act);
                 var at = new MobMeleeTrait()
                 {
                     Name = "Melee",
@@ -231,6 +230,45 @@ class MonsterFactory
                 };
                 mob.Actions.Add(at);
             }
+            else if (name == "Missile")
+            {
+                Enum.TryParse(act[(act.LastIndexOf('#') + 1)..], out DamageType damageType);
+                var digits = Util.DigitsRegex().Split(act);
+                var at = new MobMissileTrait()
+                {
+                    Name = "Missile",
+                    DamageDie = int.Parse(digits[1]),
+                    DamageDice = int.Parse(digits[2]),
+                    MinRange = int.Parse(digits[3]),
+                    MaxRange = int.Parse(digits[4]),
+                    DamageType = damageType
+
+                };
+                mob.Actions.Add(at);
+            }
+            else if (name == "Entangle")
+            {
+                var digits = Util.DigitsRegex().Split(act);
+                var entangle = new SpellActionTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(digits[1]),
+                    MinRange = int.Parse(digits[2]),
+                    MaxRange = int.Parse(digits[3])
+                };
+                mob.Actions.Add(entangle);
+            }
+            // Default to assume it's a simple spell trait consisting of name + cool down
+            else 
+            {
+                ulong cooldown = ulong.Parse(act[(act.IndexOf('#') + 1)..]);
+                var spell = new SpellActionTrait()
+                {
+                    Name = name,
+                    Cooldown = cooldown
+                };
+                mob.Actions.Add(spell);
+            }            
         }
     }
 
@@ -238,7 +276,7 @@ class MonsterFactory
     {
         "door" => new DoorOpeningMoveStrategy(),
         "flying" => new SimpleFlightMoveStrategy(),
-        "inert" => new InertMoveStrategy(),
+        "wall" => new WallMoveStrategy(),
         _ => new DumbMoveStrategy()
     };
 
@@ -280,7 +318,8 @@ class MonsterFactory
         int xpValue = int.Parse(fields[9]);
         m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
         
-        ParseActions(m, fields[11]);
+        if (fields[11] != "")
+            ParseActions(m, fields[11]);
 
         if (!string.IsNullOrEmpty(fields[12]))
         {

@@ -430,10 +430,10 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         var result = new ActionResult();
 
         // First, is there anything preventing the actor from moving off
-        // of the square?
+        // of the square?y
         foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
         {
-            var web = env.Traits.OfType<StickyTrait>().First();
+            var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
             if (web is not null)
             {
                 bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);

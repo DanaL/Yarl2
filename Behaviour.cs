@@ -18,7 +18,7 @@ interface IMoveStrategy
     Action MoveAction(Actor actor, GameState gs, Random rng);
 }
 
-class InertMoveStrategy : IMoveStrategy
+class WallMoveStrategy : IMoveStrategy
 {
     public Action MoveAction(Actor actor, GameState gs, Random rng) =>
         new PassAction();
@@ -123,14 +123,35 @@ class MonsterBehaviour : IBehaviour
 
     Action FromTrait(Monster mob, ActionTrait act, GameState gs, Random rng)
     {
-        if (act is MobMeleeTrait attack)
+        if (act is MobMeleeTrait meleeAttack)
         {
             var p = gs.Player;
-            mob.Dmg = new Damage(attack.DamageDie, attack.DamageDice, attack.DamageType);
+            mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
             _lastUse[act.Name] = gs.Turn;
             return new MeleeAttackAction(mob, p.Loc, gs, rng);
         }
+        else if (act is MobMissileTrait missileAttack)
+        {
+            mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
+            _lastUse[act.Name] = gs.Turn;
 
+            var arrowAnim = new ArrowAnimation(gs.UI, MobMissileTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
+            gs.UI.RegisterAnimation(arrowAnim);
+
+            var arrow = ItemFactory.Get("arrow", gs.ObjDB);
+            return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow, rng);
+        }
+        else if (act is SpellActionTrait spell)
+        {
+            _lastUse[spell.Name] = gs.Turn;
+            if (spell.Name == "Blink")                
+                return new BlinkAction(mob, gs);
+            else if (spell.Name == "FogCloud")
+                return new FogCloudAction(mob, gs, gs.Player.Loc);
+            else if (spell.Name == "Entangle")
+                return new EntangleAction(mob, gs, gs.Player.Loc);
+        }
+        
         return new NullAction();
     }
 
@@ -138,17 +159,22 @@ class MonsterBehaviour : IBehaviour
     {
         Monster mob = (Monster)actor;
         
-        var p = gs.Player;
-        int distanceFromPlayer = Util.Distance(actor.Loc, p.Loc);
+        if (actor.Status == ActorStatus.Idle)
+        {
+            return new PassAction();
+        }
 
         // Should prioritize an escape action if the monster is hurt?
         // Maybe mobs can eventually have a bravery stat?
 
         // Actions should be in the list in order of prerfence
-        foreach (var action in mob.Actions)
+        foreach (var act in mob.Actions)
         {
-            if (Available(action, distanceFromPlayer, gs.Turn))
-                return FromTrait(mob, action, gs, rng);
+            if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown >= gs.Turn)
+                continue;
+
+            if (act.Available(mob, gs)) 
+                return FromTrait(mob, act, gs, rng);
         }
 
         return mob.MoveStrategy.MoveAction(mob, gs, rng);
@@ -412,195 +438,7 @@ class GrocerBehaviour : IBehaviour, IChatter
     }
 }
 
-// Simple monsters that if not idle will move toward the player and melee and
-// attack them
-class BasicMonsterBehaviour(IMoveStrategy ms) : IBehaviour
-{
-    readonly IMoveStrategy _moveStrategy = ms;
-    
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
-    {
-        if (actor.Status == ActorStatus.Idle)
-            return new PassAction();
-        
-        // Fight!
-        if (Util.Distance(actor.Loc, gs.Player.Loc) <= 1)
-            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
-        
-        return _moveStrategy.MoveAction(actor, gs, rng);
-    }
-}
-
-class ArcherBehaviour : IBehaviour
-{
-    IMoveStrategy _moveStrategy = new DoorOpeningMoveStrategy();
-
-    static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
-    {
-        foreach (var loc in trajectory)
-        {
-            var tile = gs.TileAt(loc);
-            if (!(tile.Passable() || tile.PassableByFlight()))
-                return false;
-        }
-
-        return true;
-    }
-
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
-    {
-        int range = 8;
-        // I'm going use Radius for Range for archers for now. Will
-        // there ever be a reason for a Monster to have both a 
-        // Radius and Range stat? That's a worry for future Dana!
-        if (actor.Stats.TryGetValue(Attribute.Radius, out Stat? r))
-        {
-            range = r.Curr;
-        }
-
-        if (actor.Status == ActorStatus.Idle)
-        {
-            return new PassAction();
-        }
-
-        var p = gs.Player;
-        int distanceFromPlayer = Util.Distance(actor.Loc, p.Loc);
-        if (distanceFromPlayer <= range)
-        {
-            var trajectory = Util.Bresenham(actor.Loc.Row, actor.Loc.Col, p.Loc.Row, p.Loc.Col)
-                                 .Select(sq => actor.Loc with { Row = sq.Item1, Col = sq.Item2 })
-                                 .ToList();
-
-            if (ClearShot(gs, trajectory))
-            {
-                var arrow = ItemFactory.Get("arrow", gs.ObjDB);
-                var arrowAnim = new ArrowAnimation(ui, trajectory, Colours.LIGHT_BROWN);
-                ui.RegisterAnimation(arrowAnim);
-                return new MissileAttackAction(actor, p.Loc, gs, arrow, rng);
-            }
-        }
-
-        if (distanceFromPlayer <= 1)
-        {
-            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
-        }
-
-        return _moveStrategy.MoveAction(actor, gs, rng);
-    }
-}
-
-class SpiderBehaviour : IBehaviour
-{
-    readonly IMoveStrategy _moveStrategy = new DumbMoveStrategy();
-    const int WEB_COOLDOWN = 6;
-
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
-    {
-        int distanceFromPlayer = Util.Distance(actor.Loc, gs.Player.Loc);
-
-        return _moveStrategy.MoveAction(actor, gs, rng);
-    }
-}
-
-// I hope to not have too many specific to a monster behaviours but atm I'm not
-// sure how to hand different strategies monsters might use. The trickster I
-// want to Blink around annoyingly, but a different caster might use its spells
-// in a different pattern.
-//
-// OTOH, this makes it kind of pointless to include the list of spells for a 
-// monster in monsters.txt and means I can't just create a new caster-type
-// by adding a line to the file :/
-//
-// Maybe I can classify spells by a type? HEAL/ATTACK/ESCAPE/etc?
-class KoboldTricksterBehaviour : IBehaviour
-{
-    readonly DoorOpeningMoveStrategy _moveStrategy = new DoorOpeningMoveStrategy();
-    readonly Dictionary<string, ulong> _lastCast = [];
-    const int BLINK_COOLDOWN = 5;
-    const int FOG_CLOUD_COOLDOWN = 8;
-    const int ENTANGLE_COOLDOWN = 13;
-
-    bool CanBlink(ulong currTurn)
-    {
-        if (!_lastCast.TryGetValue("Blink", out var last))
-            return true;
-        else if (last + BLINK_COOLDOWN < currTurn)
-            return true;
-        return false;
-    }
-
-    bool CanFogCloud(ulong currTurn)
-    {
-        if (!_lastCast.TryGetValue("FogCloud", out var last))
-            return true;
-        else if (last + FOG_CLOUD_COOLDOWN < currTurn)
-            return true;
-        return false;
-    }
-
-    bool CanEntangle(ulong currTurn)
-    {
-        if (!_lastCast.TryGetValue("Entangle", out var last))
-            return true;
-        else if (last + ENTANGLE_COOLDOWN < currTurn)
-            return true;
-        return false;
-    }
-
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
-    {
-        // if the trickster is injured and can blink away, it will
-        if (actor.Stats[Attribute.HP].Curr < actor.Stats[Attribute.HP].Max / 2)
-        {
-            if (CanBlink(gs.Turn))
-            {
-                _lastCast["Blink"] = gs.Turn;
-                return new BlinkAction(actor, gs);
-            }
-        }
-
-        int distanceFromPlayer = Util.Distance(actor.Loc, gs.Player.Loc);
-
-        if (distanceFromPlayer <= 1)
-        {
-            return new MeleeAttackAction(actor, gs.Player.Loc, gs, rng);
-        }
-
-        List<(Action, string)> spells = [];
-        if (distanceFromPlayer <= 7 && CanFogCloud(gs.Turn) && gs.CanSeeLoc(actor, gs.Player.Loc, 7))
-        {
-            spells.Add((new FogCloudAction(actor, gs, gs.Player.Loc), "FogCloud"));
-        }
-        if (distanceFromPlayer <= 7 && CanEntangle(gs.Turn) && gs.CanSeeLoc(actor, gs.Player.Loc, 7))
-        {
-            spells.Add((new EntangleAction(actor, gs, gs.Player.Loc), "Entangle"));
-        }
-        if (CanBlink(gs.Turn))
-        {
-            spells.Add((new BlinkAction(actor, gs), "Blink"));
-        }
-
-        if (spells.Count > 0)
-        {
-            var (act, name) = spells[rng.Next(spells.Count)];
-            _lastCast[name] = gs.Turn;
-            return act;
-        }
-
-        return _moveStrategy.MoveAction(actor, gs, rng);
-    }
-}
-
 class VillagerBehaviour : IBehaviour
-{
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
-    {
-        return new PassAction();
-    }
-}
-
-// Some barriers and such are implemented as monsters
-class InertBehaviour : IBehaviour
 {
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
     {
