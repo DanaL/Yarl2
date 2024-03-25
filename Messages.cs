@@ -49,7 +49,7 @@ enum Verb
 
 record Message(string Text, Loc Loc, bool Sound=false);
 
-class MessageFactory
+class MsgFactory
 {
     public static string CalcVerb(GameObj subject, Verb verb, bool thirdP = false)
     {

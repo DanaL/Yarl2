@@ -178,6 +178,14 @@ class ItemFactory
                                     Consumable = true };
                 item.Traits.Add(new CastMinorHealTrait());
                 break;
+            case "antidote":
+                item = new Item()
+                {
+                    Name = "antidote", Type = ItemType.Potion, Stackable = true, Value = 50,
+                    Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE), Consumable = true
+                };
+                item.Traits.Add(new CastAntidoteTrait());
+                break;
             case "scroll of blink":
                 item = new Item()
                 {

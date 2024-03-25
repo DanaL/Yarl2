@@ -172,10 +172,20 @@ class OpaqueTrait : Trait
     public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
+class CastAntidoteTrait : Trait, IUSeable
+{
+    public override string AsText() => "CastAntidote";
+
+    public UseResult Use(Actor user, GameState gs, int row, int col)
+    {
+        return new UseResult(true, "", new AntidoteAction(user, gs), null);
+    }
+}
+
 // For items that can cast blink
 class CastBlinkTrait : Trait, IUSeable
 {
-    public override string AsText() => "Blink";
+    public override string AsText() => "CastBlink";
 
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
@@ -185,7 +195,7 @@ class CastBlinkTrait : Trait, IUSeable
 
 class CastMinorHealTrait : Trait, IUSeable
 {
-    public override string AsText() => "MinorHeal";
+    public override string AsText() => "CastMinorHeal";
     
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {        
@@ -253,12 +263,12 @@ class PoisonedTrait : Trait, IGameEventListener
         var victim = (Actor?) gs.ObjDB.GetObj(VictimID);
         if (victim != null)
         {
-            bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.UI.Rng);            
+            bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.UI.Rng);
             if (conCheck)
             {
                 victim.Traits.Remove(this);
                 Expired = true;
-                string msg = $"{victim.FullName.Capitalize()} {MessageFactory.CalcVerb(victim, Verb.Feel)} better.";
+                string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
                 gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
             }
             else
@@ -338,7 +348,7 @@ class CountdownTrait : Trait, IGameEventListener
 
             // This is rather tied to Fog Cloud atm -- I should perhaps provide an
             // expiry message that can be set for each trait
-            var msg = MessageFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
+            var msg = MsgFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
             gs.UI.AlertPlayer([msg], "");
         }
     }
@@ -429,7 +439,7 @@ class FlameLightSourceTrait : Trait, IGameEventListener, IUSeable
                 gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
 
                 var cb = item.ContainedBy;
-                var msg = MessageFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
+                var msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
                 gs.UI.AlertPlayer([msg], "");
             }
         }

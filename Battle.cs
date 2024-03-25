@@ -88,11 +88,7 @@ class Battle
             {
                 var d = new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType);
                 dmg.Add(DamageRoll(d, rng));
-            }
-            if (trait is PoisonerTrait poison)
-            {
-                ApplyPoison(poison, target, gs, rng);
-            }
+            }            
         }
 
         int bonusDamage = 0;
@@ -101,12 +97,20 @@ class Battle
         if (attacker.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
 
-        Message msg = MessageFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
+        Message msg = MsgFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);
+
+        foreach (var trait in ammo.Traits)
+        {
+            if (trait is PoisonerTrait poison)
+            {
+                ApplyPoison(poison, target, gs, result, rng);
+            }
+        }
     }
 
-    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, Random rng)
+    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result, Random rng)
     {
         // We won't apply multiple poison statuses to one victim. Although maybe I
         // should replace the weaker poison with the stronger one?
@@ -124,6 +128,9 @@ class Battle
             };
             victim.Traits.Add(poisoned);
             gs.RegisterForEvent(UIEventType.EndOfRound, poisoned);
+
+            var msg = new Message($"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} poisoned!", victim.Loc);
+            result.Messages.Add(msg);
         }
     }
 
@@ -148,15 +155,15 @@ class Battle
         if (attacker.HasActiveTrait<RageTrait>())
             bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
 
+        Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
+        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+        ResolveHit(attacker, target, hpLeft, result, msg, gs);
+
         if (attacker.HasTrait<PoisonerTrait>())
         {
             var poison = attacker.Traits.OfType<PoisonerTrait>().First();
-            ApplyPoison(poison, target, gs, rng);            
+            ApplyPoison(poison, target, gs, result, rng);            
         }
-
-        Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
-        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
-        ResolveHit(attacker, target, hpLeft, result, msg, gs);
     }
 
     static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, Message msg, GameState gs)
@@ -172,7 +179,7 @@ class Battle
             {
                 var verb = target.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
                 var plural = target.HasTrait<PluralTrait>();
-                Message killMsg = MessageFactory.Phrase(target.ID, Verb.Etre, verb, plural, true, target.Loc, gs);
+                Message killMsg = MsgFactory.Phrase(target.ID, Verb.Etre, verb, plural, true, target.Loc, gs);
                 msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
 
                 if (attacker.ID == gs.Player.ID && target is Monster m)
@@ -215,7 +222,7 @@ class Battle
         }
         else
         {
-            Message msg = MessageFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
+            Message msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
             result.Messages.Add(msg);
         }
 
@@ -234,7 +241,7 @@ class Battle
         }
         else
         {
-            Message msg = MessageFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
+            Message msg = MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
             result.Messages.Add(msg);
         }
 
