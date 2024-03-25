@@ -126,6 +126,11 @@ class PluralTrait : Trait
     public override string AsText() => "Plural";
 }
 
+class TeflonTrait : Trait
+{
+    public override string AsText() => "Teflon";
+}
+
 class ImpaleTrait : Trait
 {
     public override string AsText() => "Impale";
@@ -443,6 +448,9 @@ class TraitFactory
                 break;
             case "Plural":
                 trait = new PluralTrait();
+                break;
+            case "Teflon":
+                trait = new TeflonTrait();
                 break;
             default:
                 throw new Exception("I don't know how to make that kind of Trait");
