@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 enum DamageType
@@ -172,8 +170,9 @@ class Battle
         {
             if (target is Player)
             {
-                result.PlayerKilled = true;
-                msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);                    
+                msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
+                result.Messages.Add(msg);
+                gs.UI.AlertPlayer(result.Messages, "");
             }
             else 
             {

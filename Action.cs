@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Yarl2;
 
@@ -21,8 +20,7 @@ class ActionResult
     public string MessageIfUnseen { get; set; } = "";
     public Action? AltAction { get; set; }
     public double EnergyCost { get; set; } = 0.0;
-    public bool PlayerKilled { get; set; } = false;
-
+    
     public ActionResult() { }
 }
 

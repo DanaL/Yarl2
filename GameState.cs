@@ -149,7 +149,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         if (victim == Player)
         {
             UI.KillScreen("You died :(");
-            throw new GameQuitException();
+            throw new PlayerKilledException();
         }
     }
 
@@ -249,7 +249,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     }
 
-    public void  ActorMoved(Actor actor, Loc start, Loc dest)
+    public void ActorMoved(Actor actor, Loc start, Loc dest)
     {        
         ObjDB.ActorMoved(actor, start, dest);
         

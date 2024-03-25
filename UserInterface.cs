@@ -645,7 +645,11 @@ abstract class UserInterface
             {
                 break;
             }
-            
+            catch (PlayerKilledException)
+            {
+                break;
+            }
+
             TimeSpan elapsed = DateTime.Now - refresh;
             if (elapsed.TotalMilliseconds > 60)
             {

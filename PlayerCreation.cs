@@ -77,7 +77,7 @@ class PlayerCreator
                 roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
                 if (roll > stats[Attribute.Strength].Curr)
                     stats[Attribute.Strength].SetMax(roll);
-                hp = 150 + stats[Attribute.Constitution].Curr;
+                hp = 15 + stats[Attribute.Constitution].Curr;
                 stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
                 stats.Add(Attribute.HitDie, new Stat(12));
                 break;

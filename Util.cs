@@ -399,4 +399,4 @@ class RegionFinder(IPassable pc)
 }
 
 class GameQuitException : Exception { }
-class PlayerKilledException(string message) : Exception(message) { }
+class PlayerKilledException() : Exception { }
