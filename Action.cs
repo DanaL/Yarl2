@@ -434,13 +434,13 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
         foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
         {
             var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
-            if (web is not null && !_actor.Traits.OfType<TeflonTrait>().Any())
+            if (web is not null && !_actor.HasTrait<TeflonTrait>())
             {
                 bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);
                 if (!strCheck)
                 {
                     result.EnergyCost = 1.0;
-                    result.Complete = false;
+                    result.Complete = true;
                     var txt = $"{_actor.FullName.Capitalize()} {MessageFactory.CalcVerb(_actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
                     var msg = new Message(txt, _actor.Loc);
                     result.Messages.Add(msg);

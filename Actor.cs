@@ -217,8 +217,8 @@ class MonsterFactory
         _ => new DumbMoveStrategy()
     };
 
-    //       0       1    2      3   4   5           6         7    8    9       10        11
-    // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions 
+    //       0       1    2      3   4   5           6         7    8    9       10        11       12
+    // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions, Other Traits 
     // skeleton        |z|white        |darkgrey  |12| 8|2| 1.0| 6|1|12|10|2|Basic|
     public static Actor Get(string name, Random rng)
     {

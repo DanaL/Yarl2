@@ -145,6 +145,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     {
         ((IPerformer)victim).RemoveFromQueue = true;
         ObjDB.RemoveActor(victim);
+
+        if (victim == Player)
+        {
+            UI.KillScreen("You died :(");
+            throw new GameQuitException();
+        }
     }
 
     public void BuildPerformersList()

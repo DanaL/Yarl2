@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 enum DamageType
@@ -17,7 +19,8 @@ enum DamageType
     Piercing,
     Blunt,
     Fire,
-    Cold
+    Cold,
+    Poison
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -86,6 +89,10 @@ class Battle
                 var d = new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType);
                 dmg.Add(DamageRoll(d, rng));
             }
+            if (trait is PoisonerTrait poison)
+            {
+                ApplyPoison(poison, target, gs, rng);
+            }
         }
 
         int bonusDamage = 0;
@@ -97,6 +104,27 @@ class Battle
         Message msg = MessageFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    }
+
+    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, Random rng)
+    {
+        // We won't apply multiple poison statuses to one victim. Although maybe I
+        // should replace the weaker poison with the stronger one?
+        if (victim.HasTrait<PoisonedTrait>())
+            return;
+
+        bool conCheck = victim.AbilityCheck(Attribute.Constitution, source.DC, rng);
+        if (!conCheck)
+        {
+            var poisoned = new PoisonedTrait()
+            {
+                DC = source.DC,
+                Strength = source.Strength,
+                VictimID = victim.ID
+            };
+            victim.Traits.Add(poisoned);
+            gs.RegisterForEvent(UIEventType.EndOfRound, poisoned);
+        }
     }
 
     static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
@@ -118,7 +146,14 @@ class Battle
         if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
         if (attacker.HasActiveTrait<RageTrait>())
-            bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);        
+            bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
+
+        if (attacker.HasTrait<PoisonerTrait>())
+        {
+            var poison = attacker.Traits.OfType<PoisonerTrait>().First();
+            ApplyPoison(poison, target, gs, rng);            
+        }
+
         Message msg = MessageFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);

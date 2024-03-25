@@ -233,6 +233,56 @@ class ShieldOfTheFaithfulTrait : ACModTrait
     public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
+class PoisonerTrait: Trait
+{
+    public int DC { get; set; }
+    public int Strength { get; set; }
+
+    public override string AsText() => $"Poisoner#{DC}#{Strength}";
+}
+
+class PoisonedTrait : Trait, IGameEventListener
+{
+    public int DC { get; set; }
+    public int Strength { get; set; }
+    public ulong VictimID { get; set; }
+    public bool Expired { get; set; } = false;
+
+    public void Alert(UIEventType eventType, GameState gs)
+    {
+        var victim = (Actor?) gs.ObjDB.GetObj(VictimID);
+        if (victim != null)
+        {
+            bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.UI.Rng);            
+            if (conCheck)
+            {
+                victim.Traits.Remove(this);
+                Expired = true;
+                string msg = $"{victim.FullName.Capitalize()} {MessageFactory.CalcVerb(victim, Verb.Feel)} better.";
+                gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+            }
+            else
+            {
+                List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
+                int hpLeft = victim.ReceiveDmg(p, 0);
+
+                if (hpLeft < 1)
+                {
+                    string msg = $"{victim.FullName.Capitalize()} from poison!";
+                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                    gs.ActorKilled(victim);
+                }
+                else if (victim is Player)
+                {
+                    gs.UI.AlertPlayer([new Message("You feel ill.", victim.Loc)], "");
+                }
+            }
+        }        
+    }
+
+    public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}";
+}
+
 class ReadableTrait(string text) : Trait, IUSeable
 {
     readonly string _text = text;
@@ -494,6 +544,15 @@ class TraitFactory
                     MaxRange = int.Parse(digits[3])
                 };
                 trait = entangle;
+                break;
+            case "Poisoner":
+                digits = Util.DigitsRegex().Split(text);
+                var poisoner = new PoisonerTrait()
+                {
+                    DC = int.Parse(digits[1]),
+                    Strength = int.Parse(digits[2])
+                };
+                trait = poisoner;
                 break;
             default:
                 ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);

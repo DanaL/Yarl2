@@ -43,7 +43,8 @@ enum Verb
     Blink,
     Cast,
     Destroy,
-    Tear
+    Tear,
+    Feel
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -76,7 +77,8 @@ class MessageFactory
             Verb.Blink => fp ? "blink" : "blinks",
             Verb.Cast => fp ? "cast" : "casts",
             Verb.Destroy => fp ? "destroy" : "destroys",
-            Verb.Tear => fp ? "tear" : "tears"
+            Verb.Tear => fp ? "tear" : "tears",
+            Verb.Feel => fp ? "feel" : "feels"
         };
     }
 

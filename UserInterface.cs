@@ -389,11 +389,21 @@ abstract class UserInterface
         }
 
         // Write statuses
+        int statusLineNum = ViewHeight - 3;
+        if (Player.HasTrait<PoisonedTrait>())
+        {
+            List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
+            WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+        }
         if (Player.HasActiveTrait<RageTrait>())
         {
-            List<(Colour, string)> rageLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
-            WriteText(rageLine, ViewHeight - 3, ViewWidth, SideBarWidth);
+            List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
+            WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
         }
+        
+        List<(Colour, string)> foo = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "BLUE STATUS")];
+        WriteText(foo, statusLineNum--, ViewWidth, SideBarWidth);
+        
 
         var tile = GameState!.TileAt(Player.Loc);
         var tileSq = TileToSqr(tile, true);
@@ -601,14 +611,7 @@ abstract class UserInterface
                 }
 
                 if (result.Messages.Count > 0)
-                    AlertPlayer(result.Messages, result.MessageIfUnseen);
-
-                if (result.PlayerKilled)
-                {
-                     KillScreen("You died :(");
-                     throw new GameQuitException();
-                }
-                    
+                    AlertPlayer(result.Messages, result.MessageIfUnseen);                
             }
             while (result.AltAction is not null);
         }
