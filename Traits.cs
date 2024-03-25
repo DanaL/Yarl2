@@ -391,11 +391,12 @@ class TraitFactory
     public static Trait FromText(string text)
     {
         var pieces = text.Split('#');
-        var type = pieces[0];
+        var name = pieces[0];
 
         Trait trait;
+        string[] digits;
 
-        switch (type)
+        switch (name)
         {
             case "Attack":
                 trait = new AttackTrait()
@@ -404,12 +405,12 @@ class TraitFactory
                 };
                 break;
             case "Damage":
-                Enum.TryParse(pieces[3], out DamageType damageType);
+                Enum.TryParse(pieces[3], out DamageType dt);
                 trait = new DamageTrait()
                 {
                     DamageDie = int.Parse(pieces[1]),
                     NumOfDie = int.Parse(pieces[2]),
-                    DamageType = damageType
+                    DamageType = dt
                 };
                 break;
             case "Armour":
@@ -452,8 +453,57 @@ class TraitFactory
             case "Teflon":
                 trait = new TeflonTrait();
                 break;
+            case "Melee":
+                Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
+                digits = Util.DigitsRegex().Split(text);
+                var at = new MobMeleeTrait()
+                {
+                    Name = "Melee",
+                    DamageDie = int.Parse(digits[1]),
+                    DamageDice = int.Parse(digits[2]),
+                    MinRange = 1,
+                    MaxRange = 1,
+                    DamageType = mdt
+
+                };
+                trait = at;
+                break;
+            case "Missile":
+                Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mmdt);
+                digits = Util.DigitsRegex().Split(text);
+                var missile = new MobMissileTrait()
+                {
+                    Name = "Missile",
+                    DamageDie = int.Parse(digits[1]),
+                    DamageDice = int.Parse(digits[2]),
+                    MinRange = int.Parse(digits[3]),
+                    MaxRange = int.Parse(digits[4]),
+                    DamageType = mmdt
+
+                };
+                trait = missile;
+                break;
+            case "Entangle":
+            case "Web":
+                digits = Util.DigitsRegex().Split(text);
+                var entangle = new SpellActionTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(digits[1]),
+                    MinRange = int.Parse(digits[2]),
+                    MaxRange = int.Parse(digits[3])
+                };
+                trait = entangle;
+                break;
             default:
-                throw new Exception("I don't know how to make that kind of Trait");
+                ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
+                var spell = new SpellActionTrait()
+                {
+                    Name = name,
+                    Cooldown = cooldown
+                };
+                trait = spell;
+                break;
         }
 
         return trait;

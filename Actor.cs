@@ -209,69 +209,6 @@ class MonsterFactory
         }
     }
 
-    static void ParseActions(Monster mob, string txt)
-    {
-        foreach (var act in txt.Split(','))
-        {
-            string name = act[..act.IndexOf('#')];
-            if (name == "Melee")
-            {
-                Enum.TryParse(act[(act.LastIndexOf('#') + 1)..], out DamageType damageType);
-                var digits = Util.DigitsRegex().Split(act);
-                var at = new MobMeleeTrait()
-                {
-                    Name = "Melee",
-                    DamageDie = int.Parse(digits[1]),
-                    DamageDice = int.Parse(digits[2]),
-                    MinRange = 1,
-                    MaxRange = 1,
-                    DamageType = damageType
-
-                };
-                mob.Actions.Add(at);
-            }
-            else if (name == "Missile")
-            {
-                Enum.TryParse(act[(act.LastIndexOf('#') + 1)..], out DamageType damageType);
-                var digits = Util.DigitsRegex().Split(act);
-                var at = new MobMissileTrait()
-                {
-                    Name = "Missile",
-                    DamageDie = int.Parse(digits[1]),
-                    DamageDice = int.Parse(digits[2]),
-                    MinRange = int.Parse(digits[3]),
-                    MaxRange = int.Parse(digits[4]),
-                    DamageType = damageType
-
-                };
-                mob.Actions.Add(at);
-            }
-            else if (name == "Entangle" || name == "Web")
-            {
-                var digits = Util.DigitsRegex().Split(act);
-                var spell = new SpellActionTrait()
-                {
-                    Name = name,
-                    Cooldown = ulong.Parse(digits[1]),
-                    MinRange = int.Parse(digits[2]),
-                    MaxRange = int.Parse(digits[3])
-                };
-                mob.Actions.Add(spell);
-            }            
-            // Default to assume it's a simple spell trait consisting of name + cool down
-            else 
-            {
-                ulong cooldown = ulong.Parse(act[(act.IndexOf('#') + 1)..]);
-                var spell = new SpellActionTrait()
-                {
-                    Name = name,
-                    Cooldown = cooldown
-                };
-                mob.Actions.Add(spell);
-            }            
-        }
-    }
-
     static IMoveStrategy TextToMove(string txt) => txt.ToLower() switch
     {
         "door" => new DoorOpeningMoveStrategy(),
@@ -319,7 +256,12 @@ class MonsterFactory
         m.Stats.Add(Attribute.XPValue, new Stat(xpValue));
         
         if (fields[11] != "")
-            ParseActions(m, fields[11]);
+        {
+            foreach (var actionTxt in fields[11].Split(',')) 
+            {
+                m.Actions.Add((ActionTrait)TraitFactory.FromText(actionTxt));
+            }
+        }
 
         if (!string.IsNullOrEmpty(fields[12]))
         {
