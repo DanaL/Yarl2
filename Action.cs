@@ -941,6 +941,9 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
     void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
+        var anim = new ThrownMissileAnimation(_ui, ammo.Glyph, pts, ammo);
+        _ui.PlayAnimation(anim);
+
         var landingPt = FinalLandingSpot(pts.Last());
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
         _gs.ItemDropped(ammo, landingPt);
@@ -955,9 +958,6 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
             var msg = new Message(txt, landingPt);
             result.Messages.Add(msg);
         }
-
-        var anim = new ThrownMissileAnimation(_ui, ammo.Glyph, pts, ammo);
-        _ui.RegisterAnimation(anim);
     }
 
     public override ActionResult Execute()

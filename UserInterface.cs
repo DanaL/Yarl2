@@ -138,6 +138,21 @@ abstract class UserInterface
         _animations.Add(animation);
     }
 
+    // This plays the full animation (as opposed to registering
+    // it to be played as part of the game loop). This means the
+    // UI will be blocked while it is playing
+    public void PlayAnimation(Animation animation)
+    {
+        while (animation.Expiry > DateTime.Now)
+        {
+            SetSqsOnScreen();
+            animation.Update();
+            UpdateDisplay();
+            Delay(75);
+            
+        }        
+    }
+
     protected void WriteMessagesSection()
     {
         var msgs = MessageHistory.Take(5)
