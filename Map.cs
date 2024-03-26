@@ -18,6 +18,7 @@ enum TerrainFlag
     None = 0,
     Lit = 1,
     Obscures = 2,
+    Wet = 4
 }
 
 enum TileType
@@ -124,6 +125,24 @@ abstract class Tile(TileType type) : IZLevel
         TileType.Portal => "a dungeon entrance",
         _ => "unknown"
     };
+
+    public List<TerrainFlag> TerrainFlags()
+    {
+        List<TerrainFlag> flags = [];
+
+        switch (Type)
+        {
+            case TileType.Water:
+            case TileType.DeepWater:
+                flags.Add(TerrainFlag.Wet);
+                break;
+            default:
+                flags.Add(TerrainFlag.None);
+                break;
+        }
+
+        return flags;
+    }
 }
 
 class BasicTile : Tile

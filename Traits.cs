@@ -23,6 +23,7 @@ interface IReadable
 interface IUSeable
 {
     UseResult Use(Actor user, GameState gs, int row, int col);
+    string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc);
 }
 
 abstract class Trait 
@@ -34,7 +35,7 @@ abstract class Trait
     public virtual TerrainFlag Effect => TerrainFlag.None;
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
     public virtual int Radius => 0;
-    public ulong ExpiresOn { get; set; } = ulong.MaxValue;
+    public ulong ExpiresOn { get; set; } = ulong.MaxValue;   
 }
 
 // To let me classify traits that mobs can take on their turns
@@ -173,9 +174,10 @@ class OpaqueTrait : Trait
 }
 
 class CastAntidoteTrait : Trait, IUSeable
-{
+{   
     public override string AsText() => "CastAntidote";
-
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
+ 
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
         return new UseResult(true, "", new AntidoteAction(user, gs), null);
@@ -190,7 +192,9 @@ class CastBlinkTrait : Trait, IUSeable
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
         return new UseResult(true, "", new BlinkAction(user, gs), null);
-    }    
+    }
+
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 class CastMinorHealTrait : Trait, IUSeable
@@ -201,6 +205,8 @@ class CastMinorHealTrait : Trait, IUSeable
     {        
         return new UseResult(true, "", new HealAction(user, gs, 4, 4), null);
     }
+
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 class AttackTrait : Trait
@@ -311,6 +317,8 @@ class ReadableTrait(string text) : Trait, IUSeable
         
         return new UseResult(false, "", action, acc);
     }
+
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
@@ -373,30 +381,44 @@ class FlameLightSourceTrait : Trait, IGameEventListener, IUSeable
         return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}";
     }
 
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) 
+    {
+        if (flag == TerrainFlag.Wet)
+            return Extinguish(gs, item, loc);
+        else
+            return "";
+    }
+
+    string Extinguish(GameState gs, Item item, Loc loc)
+    {
+        gs.StopListening(UIEventType.EndOfRound, this);
+
+        // Gotta set the lighting level before we extinguish the torch
+        // so it's radius is still 5 when calculating which squares to 
+        // affect            
+        gs.ToggleEffect(item, loc, TerrainFlag.Lit, false);
+        Lit = false;
+
+        for (int j = 0; j < item.Traits.Count; j++)
+        {
+            if (item.Traits[j] is DamageTrait dt && dt.DamageType == DamageType.Fire)
+            {
+                item.Traits.RemoveAt(j);
+                break;
+            }
+        }
+
+        return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
+    }
+
     public UseResult Use(Actor _, GameState gs, int row, int col)
     {
         Item? item = gs.ObjDB.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
         if (Lit)
-        {
-            gs.StopListening(UIEventType.EndOfRound, this);
-
-            // Gotta set the lighting level before we extinguish the torch
-            // so it's radius is still 5 when calculating which squares to 
-            // affect            
-            gs.ToggleEffect(item!, loc, TerrainFlag.Lit, false);
-            Lit = false;
-
-            for (int j = 0; j < item!.Traits.Count; j++)
-            {
-                if (item!.Traits[j] is DamageTrait dt && dt.DamageType == DamageType.Fire)
-                {
-                    item!.Traits.RemoveAt(j);
-                    break;
-                }
-            }
-
-            return new UseResult(true, $"You extinguish {item!.FullName.DefArticle()}.", null, null);
+        {            
+            var msg = Extinguish(gs, item!, loc);
+            return new UseResult(true, msg, null, null);
         }
         else if (Fuel > 0)
         {

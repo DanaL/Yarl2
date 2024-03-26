@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
 using System.Xml.Linq;
 
 namespace Yarl2;
@@ -76,6 +77,18 @@ class Item : GameObj
     {
         return Traits.Where(i => i is IPerformer p && i.Active)
                      .Select(t => (IPerformer) t).ToList();
+    }
+
+    public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
+    {
+        var sb = new StringBuilder();
+        var uts = Traits.OfType<IUSeable>().ToList();
+        foreach (var t in uts) 
+        { 
+            sb.Append(t.ApplyEffect(flag, gs, this, loc));
+        }
+
+        return sb.ToString();
     }
 }
 

@@ -139,6 +139,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         item.Loc = loc;
         item.ContainedBy = 0;
         ObjDB.SetToLoc(loc, item);
+
+        var tile = TileAt(loc);
+        List<Message> msgs = [];
+        foreach (var flag in tile.TerrainFlags().Where(t => t != TerrainFlag.None))
+        {
+            string msg = item.ApplyEffect(flag, this, loc);
+            if (msg != "")
+            {
+                msgs.Add(new Message(msg, loc));
+            }                
+        }
+        if (msgs.Count > 0)
+            UI.AlertPlayer(msgs, "");
     }
 
     public void ActorKilled(Actor victim)
