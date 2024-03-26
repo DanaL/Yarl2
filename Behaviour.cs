@@ -144,7 +144,7 @@ class MonsterBehaviour : IBehaviour
         else if (act is SpellActionTrait spell)
         {
             _lastUse[spell.Name] = gs.Turn;
-            if (spell.Name == "Blink")                
+            if (spell.Name == "Blink")
                 return new BlinkAction(mob, gs);
             else if (spell.Name == "FogCloud")
                 return new FogCloudAction(mob, gs, gs.Player.Loc);
@@ -152,6 +152,8 @@ class MonsterBehaviour : IBehaviour
                 return new EntangleAction(mob, gs, gs.Player.Loc);
             else if (spell.Name == "Web")
                 return new WebAction(mob, gs, gs.Player.Loc);
+            else if (spell.Name == "Firebolt")
+                return new FireboltAction(mob, gs, gs.Player.Loc);
         }
         
         return new NullAction();

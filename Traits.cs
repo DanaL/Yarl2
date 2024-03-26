@@ -567,15 +567,16 @@ class TraitFactory
                 break;
             case "Entangle":
             case "Web":
+            case "Firebolt":
                 digits = Util.DigitsRegex().Split(text);
-                var entangle = new SpellActionTrait()
+                var rangedSpell = new SpellActionTrait()
                 {
                     Name = name,
                     Cooldown = ulong.Parse(digits[1]),
                     MinRange = int.Parse(digits[2]),
                     MaxRange = int.Parse(digits[3])
                 };
-                trait = entangle;
+                trait = rangedSpell;
                 break;
             case "Poisoner":
                 digits = Util.DigitsRegex().Split(text);

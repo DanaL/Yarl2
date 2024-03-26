@@ -708,6 +708,27 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
     }
 }
 
+class FireboltAction(Actor caster, GameState gs, Loc target) : Action
+{
+    readonly Actor _caster = caster;
+    readonly GameState _gs = gs;
+    readonly Loc _target = target;
+
+    public override ActionResult Execute()
+    {
+               
+        //var arrowAnim = new ArrowAnimation(gs.UI, MobMissileTrait.Trajectory(_caster, gs.Player.Loc), Colours.YELLOW_ORANGE);
+        //gs.UI.RegisterAnimation(arrowAnim);
+
+        var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
+        var attack = new MissileAttackAction(_caster, _target, _gs, firebolt, _gs.UI.Rng);
+
+        var txt = MsgFactory.Phrase(_caster.ID, Verb.Cast, _target, _gs).Text;
+        var msg = new Message(txt + " Firebolt!", _target, false);
+        return new ActionResult() { Complete = true, Messages = [msg], AltAction = attack, EnergyCost = 0.0 };
+    }
+}
+
 class WebAction(Actor caster, GameState gs, Loc target) : Action
 {
     readonly ulong _casterID = caster.ID;
