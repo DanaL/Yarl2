@@ -153,7 +153,7 @@ class MonsterBehaviour : IBehaviour
             else if (spell.Name == "Web")
                 return new WebAction(mob, gs, gs.Player.Loc);
             else if (spell.Name == "Firebolt")
-                return new FireboltAction(mob, gs, gs.Player.Loc);
+                return new FireboltAction(mob, gs, gs.Player.Loc, ActionTrait.Trajectory(mob, gs.Player.Loc));
         }
         
         return new NullAction();
@@ -174,7 +174,7 @@ class MonsterBehaviour : IBehaviour
         // Actions should be in the list in order of prerfence
         foreach (var act in mob.Actions)
         {
-            if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown >= gs.Turn)
+            if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
                 continue;
 
             if (act.Available(mob, gs)) 

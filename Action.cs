@@ -708,17 +708,17 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
     }
 }
 
-class FireboltAction(Actor caster, GameState gs, Loc target) : Action
+class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajectory) : Action
 {
     readonly Actor _caster = caster;
     readonly GameState _gs = gs;
     readonly Loc _target = target;
+    readonly List<Loc> _trajectory = trajectory;
 
     public override ActionResult Execute()
     {
-               
-        //var arrowAnim = new ArrowAnimation(gs.UI, MobMissileTrait.Trajectory(_caster, gs.Player.Loc), Colours.YELLOW_ORANGE);
-        //gs.UI.RegisterAnimation(arrowAnim);
+        var anim = new ArrowAnimation(gs.UI, _trajectory, Colours.YELLOW_ORANGE);
+        gs.UI.RegisterAnimation(anim);
 
         var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
         var attack = new MissileAttackAction(_caster, _target, _gs, firebolt, _gs.UI.Rng);

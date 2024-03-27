@@ -56,12 +56,44 @@ abstract class ActionTrait : Trait
         int dist = Util.Distance(mob.Loc, gs.Player.Loc);
         return MinRange <= dist && MaxRange >= dist;
     }
+
+    protected static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
+    {
+        foreach (var loc in trajectory)
+        {
+            var tile = gs.TileAt(loc);
+            if (!(tile.Passable() || tile.PassableByFlight()))
+                return false;
+        }
+
+        return true;
+    }
+
+    public static List<Loc> Trajectory(Monster mob, Loc target)
+    {
+        return Util.Bresenham(mob.Loc.Row, mob.Loc.Col, target.Row, target.Col)
+                   .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
+                   .ToList();
+    }
 }
 
 class SpellActionTrait : ActionTrait
 {
-    public override string AsText() => $"SpellActionTraint#{Name}#{Cooldown}";
+    public override string AsText() => $"SpellActionTaint#{Name}#{Cooldown}";
     public override bool Available(Monster mob, GameState gs) => true;
+}
+
+class FireboltActionTrait : SpellActionTrait
+{    
+    public override string AsText() => $"FireboltActionTrait#{Cooldown}#{MinRange}#{MaxRange}";
+    public override bool Available(Monster mob, GameState gs)
+    {
+        if (!InRange(mob, gs))
+            return false;
+
+        var p = gs.Player;                
+        return ClearShot(gs, Trajectory(mob, p.Loc));
+    }
 }
 
 class MobMeleeTrait : ActionTrait
@@ -80,25 +112,6 @@ class MobMissileTrait : ActionTrait
     public int DamageDie { get; set; }
     public int DamageDice { get; set; }
     public DamageType DamageType { get; set; }
-
-    public static List<Loc> Trajectory(Monster mob, Loc target)
-    {
-        return Util.Bresenham(mob.Loc.Row, mob.Loc.Col, target.Row, target.Col)
-                   .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
-                   .ToList();
-    }
-
-    static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
-    {
-        foreach (var loc in trajectory)
-        {
-            var tile = gs.TileAt(loc);
-            if (!(tile.Passable() || tile.PassableByFlight()))
-                return false;
-        }
-
-        return true;
-    }
 
     public override bool Available(Monster mob, GameState gs)
     {
@@ -566,8 +579,7 @@ class TraitFactory
                 trait = missile;
                 break;
             case "Entangle":
-            case "Web":
-            case "Firebolt":
+            case "Web":            
                 digits = Util.DigitsRegex().Split(text);
                 var rangedSpell = new SpellActionTrait()
                 {
@@ -577,6 +589,17 @@ class TraitFactory
                     MaxRange = int.Parse(digits[3])
                 };
                 trait = rangedSpell;
+                break;
+            case "Firebolt":
+                digits = Util.DigitsRegex().Split(text);
+                var firebolt = new FireboltActionTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(digits[1]),
+                    MinRange = int.Parse(digits[2]),
+                    MaxRange = int.Parse(digits[3])
+                };
+                trait = firebolt;
                 break;
             case "Poisoner":
                 digits = Util.DigitsRegex().Split(text);
