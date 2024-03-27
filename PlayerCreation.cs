@@ -41,7 +41,7 @@ class PlayerCreator
 "                                "                                 
         ];
         var options = new HashSet<char>() { '1', '2' };
-        char choice = ui.FullScreenMenu(menu, options);
+        char choice = ui.FullScreenMenu(menu, options, null);
 
         return choice switch
         {

@@ -160,7 +160,7 @@ class SDLUserInterface : UserInterface
         return targetTexture;
     }
 
-    public override void UpdateDisplay()
+    public override void UpdateDisplay(GameState? gs)
     {        
         SDL_RenderClear(_renderer);
         if (_longMessage is not null) 
@@ -172,9 +172,9 @@ class SDLUserInterface : UserInterface
         }
         else
         {
-            if (Player is not null)
+            if (gs is not null && gs.Player is not null)
             {
-                WriteSideBar();
+                WriteSideBar(gs);
                 var texture = CreateMainTexture();
                 SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
                 SDL_DestroyTexture(texture);

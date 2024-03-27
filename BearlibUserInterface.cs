@@ -111,7 +111,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         Terminal.Print(col, lineNum, message.PadRight(width));
     }
 
-    public override void UpdateDisplay()
+    public override void UpdateDisplay(GameState? gs)
     {
         Terminal.Clear();
 
@@ -126,7 +126,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         else
         {
             //var faintRed = new Color() { A = 100, R = 255, G = 0, B = 0 };
-            if (Player is not null)
+            if (gs is not null && gs.Player is not null)
             {
                 for (int row = 0; row < ViewHeight; row++)
                 {
@@ -139,7 +139,7 @@ internal class BLUserInferface : UserInterface, IDisposable
                     }
                 }
 
-                WriteSideBar();
+                WriteSideBar(gs);
             }
 
             if (MessageHistory.Count > 0)

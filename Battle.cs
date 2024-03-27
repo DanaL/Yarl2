@@ -172,7 +172,7 @@ class Battle
             {
                 msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
                 result.Messages.Add(msg);
-                gs.UI.AlertPlayer(result.Messages, "");
+                gs.UI.AlertPlayer(result.Messages, "", gs);
             }
             else 
             {

@@ -158,7 +158,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         }
 
         if (msgs.Count > 0)
-            UI.AlertPlayer(msgs, "");        
+            UI.AlertPlayer(msgs, "", this);        
     }
 
     public void ItemDestroyed(Item item, Loc loc)
@@ -220,7 +220,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         }
 
         if (messages.Count > 0)
-            UI.AlertPlayer(messages, "");
+            UI.AlertPlayer(messages, "", this);
     }
 
     public void ActorKilled(Actor victim)
@@ -230,7 +230,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
 
         if (victim == Player)
         {
-            UI.KillScreen("You died :(");
+            UI.KillScreen("You died :(", this);
             throw new PlayerKilledException();
         }
     }

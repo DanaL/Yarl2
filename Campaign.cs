@@ -46,7 +46,7 @@ class Campaign
 
 class PreGameHandler(UserInterface ui)
 {
-    private UserInterface _ui { get; set; } = ui;
+    UserInterface _ui { get; set; } = ui;
    
     static bool StartSq(Map map, int row, int col)
     {
@@ -310,41 +310,49 @@ class PreGameHandler(UserInterface ui)
         }
     }
 
-    public bool StartUp(Random rng)
+    public GameState? StartUp(Random rng, Options options)
     {
         try
         {
             string playerName = _ui.BlockingGetResponse("Who are you?");
-            SetupGame(playerName, rng);
-
-            return true;
+            return SetupGame(playerName, rng, options);
         }
         catch (GameQuitException)
         {
-            return false;
+            return null;
         }
     }
 
-    private void SetupGame(string playerName, Random rng)
+    private GameState SetupGame(string playerName, Random rng, Options options)
     {
-        if (Serialize.SaveFileExists(playerName))
-        {
-            var (player, c, objDb, currentTurn, msgHistory) = Serialize.LoadSaveGame(playerName);
-            _ui.Player = player;
-            _ui.SetupGameState(c, objDb, currentTurn);
-            _ui.MessageHistory = msgHistory;
-        }
-        else
-        {
+        //if (Serialize.SaveFileExists(playerName))
+        //{
+        //    var (player, c, objDb, currentTurn, msgHistory) = Serialize.LoadSaveGame(playerName);
+        //    _ui.Player = player;
+        //    _ui.SetupGameState(c, objDb, currentTurn);
+        //    _ui.MessageHistory = msgHistory;
+        //}
+        //else
+        //{
             var objDb = new GameObjectDB();
             var (c, startRow, startCol) = BeginNewCampaign(rng, objDb);
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
+            var gameState = new GameState(player, c, options, _ui)
+            {
+                Map = c!.Dungeons[c.CurrentDungeon].LevelMaps[c.CurrentLevel],
+                CurrLevel = c.CurrentLevel,
+                CurrDungeon = c.CurrentDungeon,
+                ObjDB = objDb,
+                Turn = 1
+            };
             _ui.ClearLongMessage();
 
-            _ui.Player = player;
-            _ui.SetupGameState(c, objDb, 1);            
-        }
+            objDb.AddToLoc(player.Loc, player);
+            gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
+        //}
+
+        return gameState;
     }    
 }
 

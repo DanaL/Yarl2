@@ -24,13 +24,15 @@ class AimAnimation : Animation
     readonly int _scrW;
     readonly int _scrH;
     readonly UserInterface _ui;
+    readonly GameState _gs;
 
-    public AimAnimation(UserInterface ui, Loc origin, Loc initialTarget)
+    public AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget)
     {
         _start = origin;
         Target = initialTarget;
         Expiry = DateTime.MaxValue;
         _ui = ui;
+        _gs = gs;
         _scrW = UserInterface.ViewWidth;
         _scrH = UserInterface.ViewHeight;
     }
@@ -39,7 +41,7 @@ class AimAnimation : Animation
     {    
         foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
         {
-            var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2);
+            var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
              if (scrR > 0 && scrR < _scrH && scrC > 0 && scrC < _scrW)
              {
                 Sqr sq = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = Colours.HILITE };
@@ -52,15 +54,17 @@ class AimAnimation : Animation
 class ArrowAnimation : Animation
 {
     readonly UserInterface _ui;
+    readonly GameState _gs;
     List<(Loc, char)> _frames = [];
     int _frame = 0;    
     Colour _ammoColour;
     DateTime _lastFrame;
     
-    public ArrowAnimation(UserInterface ui, List<Loc> pts, Colour ammoColour)
+    public ArrowAnimation(UserInterface ui, GameState gs, List<Loc> pts, Colour ammoColour)
     {
         Expiry = DateTime.MaxValue;
         _ui = ui;
+        _gs = gs;
         _ammoColour = ammoColour;
 
         for (int j = 0; j < pts.Count - 1; j++)
@@ -87,7 +91,7 @@ class ArrowAnimation : Animation
     {
         var (loc, ch) = _frames[_frame];
         var sq = new Sqr(_ammoColour, Colours.BLACK, ch);        
-        var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+        var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
 
         if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
@@ -107,15 +111,17 @@ class ArrowAnimation : Animation
 class ThrownMissileAnimation : Animation 
 {
     readonly UserInterface _ui;
+    readonly GameState _gs;
     Glyph _glyph;
     List<Loc> _pts;
     int _frame;
     DateTime _lastFrame;
     Item _ammo;
 
-    public ThrownMissileAnimation(UserInterface ui, Glyph glyph, List<Loc> pts, Item ammo)
+    public ThrownMissileAnimation(UserInterface ui, GameState gs, Glyph glyph, List<Loc> pts, Item ammo)
     {
         _ui = ui;
+        _gs = gs;
         _glyph = glyph;
         _pts = pts;
         Expiry = DateTime.MaxValue;
@@ -128,7 +134,7 @@ class ThrownMissileAnimation : Animation
     {
         var pt = _pts[_frame];
         var sq = new Sqr(_glyph.Lit, Colours.BLACK, _glyph.Ch);
-        var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col);
+        var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
         
         if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
@@ -144,12 +150,12 @@ class ThrownMissileAnimation : Animation
 
             // This happens inside the animation class because I don't want the
             // message to be displayed until the animation has finished.
-            var tile = _ui.GameState.TileAt(_pts.Last());
+            var tile = _gs.TileAt(_pts.Last());
             if (tile.Type == TileType.DeepWater)
             {
                 var item = _ammo.FullName.DefArticle().Capitalize();
                 var msg = new Message($"{item} disappears with a splash.", _pts.Last());
-                _ui.AlertPlayer([msg], "You hear a splash.");
+                _ui.AlertPlayer([msg], "You hear a splash.", _gs);
             }
         }
     }
@@ -158,13 +164,15 @@ class ThrownMissileAnimation : Animation
 class BarkAnimation : Animation
 {    
     readonly UserInterface _ui;
-    Actor _actor;
-    string _bark;
+    readonly GameState _gs;
+    readonly Actor _actor;
+    readonly string _bark;
 
     // Duration in milliseconds
-    public BarkAnimation(UserInterface ui, int duration, Actor actor, string bark)
+    public BarkAnimation(UserInterface ui, GameState gs, int duration, Actor actor, string bark)
     {
         _ui = ui;
+        _gs = gs;
         Expiry = DateTime.Now.AddMilliseconds(duration);
         _actor = actor;
         _bark = bark;
@@ -208,19 +216,19 @@ class BarkAnimation : Animation
 
     public override void Update()
     {        
-        var gs = _ui.GameState;
         var loc = _actor.Loc;
+        var playerLoc = _gs.Player.Loc;
 
         // praise me I remembered the Pythagorean theorem existed...
         int maxDistance = (int) Math.Sqrt(UserInterface.ViewHeight * UserInterface.ViewHeight + UserInterface.ViewWidth * UserInterface.ViewWidth);
-        if (Util.Distance(loc, gs.Player.Loc) > maxDistance)
+        if (Util.Distance(loc, playerLoc) > maxDistance)
             return;
-        if (!gs.LOSBetween(loc, gs.Player.Loc)) 
+        if (!_gs.LOSBetween(loc, playerLoc)) 
             return;
 
-        if (loc.DungeonID == gs.CurrDungeon && loc.Level == gs.CurrLevel)
+        if (loc.DungeonID == _gs.CurrDungeon && loc.Level == _gs.CurrLevel)
         {
-            var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
+            var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, playerLoc.Row, playerLoc.Col);
             if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
             {
                 RenderLine(scrR, scrC, _bark);
@@ -252,7 +260,7 @@ class SqAnimation : Animation
 
     public override void Update()
     {
-        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col);
+        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
         if (!_gs.RecentlySeen.Contains(_loc))
             return;
@@ -287,7 +295,7 @@ class HitAnimation : Animation
         if (occ is null || occ.ID != _victimID)
             return;
 
-        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col);
+        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
         if (scrR > 0 && scrR < _gs.UI.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _gs.UI.SqsOnScreen.GetLength(1))
         {
@@ -299,22 +307,22 @@ class HitAnimation : Animation
 
 class TorchLightAnimationListener : Animation
 {
-    Random _rng;
     readonly UserInterface _ui;
+    readonly GameState _gs;
     DateTime _lastFrame;
     List<(int, int)> _flickered = [];
 
-    public TorchLightAnimationListener(UserInterface ui, Random rng)
+    public TorchLightAnimationListener(UserInterface ui, GameState gs)
     {
         Expiry = DateTime.MaxValue;
         _ui = ui;
-        _lastFrame = DateTime.Now;
-        _rng = rng;
+        _gs = gs;
+        _lastFrame = DateTime.Now;        
     }
 
     public override void Update()
     {
-        if (_ui.GameState.InWilderness)
+        if (_gs.InWilderness)
             return; // we're in the wilderness
         
         var dd = DateTime.Now - _lastFrame;
@@ -336,7 +344,7 @@ class TorchLightAnimationListener : Animation
         {
             for (int c = 0; c < UserInterface.ViewWidth; c++)
             {
-                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _rng.Next(20) == 0)
+                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _gs.UI.Rng.Next(20) == 0)
                 {
                     _flickered.Add((r, c));
                     if (++count > 3)
@@ -361,31 +369,31 @@ class TorchLightAnimationListener : Animation
 class CloudAnimationListener : Animation
 {
     readonly UserInterface _ui;
+    readonly GameState _gs;
     bool[] _cloud = new bool[9];
     int _row;
     int _col;
     DateTime _lastFrame;
     DateTime _nextCloud;
     bool _paused;
-    Random _rng;
     
-    public CloudAnimationListener(UserInterface ui, Random rng)
+    public CloudAnimationListener(UserInterface ui, GameState gs)
     {
         Expiry = DateTime.MaxValue;
         _ui = ui;
-        _lastFrame = DateTime.Now;
-        _rng = rng;
+        _gs = gs;
+        _lastFrame = DateTime.Now;        
     }
 
     void MakeCloud()
     {                
         int count = 0;
         List<int> locs = [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ];
-        locs.Shuffle(_rng);
+        locs.Shuffle(_gs.UI.Rng);
 
         foreach (var k in locs) 
         {
-            if (count < 7 && _rng.NextDouble() < 0.7)
+            if (count < 7 && _gs.UI.Rng.NextDouble() < 0.7)
             {
                 _cloud[k] = true;
                 ++ count;
@@ -396,15 +404,15 @@ class CloudAnimationListener : Animation
             }
         }
 
-        if (_rng.NextDouble() < 0.5)
+        if (_gs.UI.Rng.NextDouble() < 0.5)
         {
-            _row = _rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
+            _row = _gs.UI.Rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
             _col = -3;
         }
         else
         {
             _row = -3;
-            _col = _rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
+            _col = _gs.UI.Rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
         }
 
         _paused = false;
@@ -456,12 +464,12 @@ class CloudAnimationListener : Animation
     {
         var dd = DateTime.Now - _lastFrame;
 
-        if (!_paused && !_ui.GameState.InWilderness)
+        if (!_paused && !_gs.InWilderness)
         {
             _paused = true;
             EraseCloud();
         }
-        else if (_paused && _ui.GameState.InWilderness && DateTime.Now > _nextCloud)
+        else if (_paused && _gs.InWilderness && DateTime.Now > _nextCloud)
         {
             _paused = false;
             MakeCloud();
@@ -477,7 +485,7 @@ class CloudAnimationListener : Animation
             if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth) 
             {
                 _paused = true;
-                _nextCloud = DateTime.Now.AddSeconds(_rng.Next(5, 16));                
+                _nextCloud = DateTime.Now.AddSeconds(_gs.UI.Rng.Next(5, 16));                
             }
         }
     }

@@ -717,7 +717,7 @@ class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajector
 
     public override ActionResult Execute()
     {
-        var anim = new ArrowAnimation(gs.UI, _trajectory, Colours.YELLOW_ORANGE);
+        var anim = new ArrowAnimation(gs.UI, gs, _trajectory, Colours.YELLOW_ORANGE);
         gs.UI.RegisterAnimation(anim);
 
         var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
@@ -959,8 +959,8 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
     void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
-        var anim = new ThrownMissileAnimation(_ui, ammo.Glyph, pts, ammo);
-        _ui.PlayAnimation(anim);
+        var anim = new ThrownMissileAnimation(_ui, _gs, ammo.Glyph, pts, ammo);
+        _ui.PlayAnimation(anim, _gs);
 
         var landingPt = FinalLandingSpot(pts.Last());
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
@@ -1061,7 +1061,7 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
         var range = 7 + _player.Stats[Attribute.Strength].Curr;
         if (range < 2)
             range = 2;
-        var acc = new AimAccumulator(_ui, _player.Loc, range);
+        var acc = new AimAccumulator(_ui, _gs, _player.Loc, range);
         _player.ReplacePendingAction(action, acc);
 
         return new ActionResult() { Complete = false, EnergyCost = 0.0 };        
@@ -1079,7 +1079,7 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     public char Choice { get; set; }
     readonly UserInterface _ui = ui;
     readonly Actor _actor = actor;
-    readonly GameState _gameState = gs;
+    readonly GameState _gs = gs;
 
     public override ActionResult Execute()
     {
@@ -1090,10 +1090,10 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             var inventory = _actor.Inventory;
             if (inventory.Zorkmids == 0)
             {
-                var msg = MsgFactory.Phrase("You have no money!", _gameState.Player.Loc);
+                var msg = MsgFactory.Phrase("You have no money!", _gs.Player.Loc);
                 return new ActionResult() { Complete = false, Messages = [msg] };
             }
-            var dropMoney = new DropZorkmidsAction(_ui, _actor, _gameState);
+            var dropMoney = new DropZorkmidsAction(_ui, _actor, _gs);
             _ui.Popup("How much?");
             var acc = new NumericAccumulator(_ui, "How much?");
             if (_actor is Player player)
@@ -1109,12 +1109,12 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
         if (item.Equiped && item.Type == ItemType.Armour)
         {
-            var msg = MsgFactory.Phrase("You cannot drop something you're wearing.", _gameState.Player.Loc);
+            var msg = MsgFactory.Phrase("You cannot drop something you're wearing.", _gs.Player.Loc);
             return new ActionResult() { Complete = false, Messages = [msg] };
         }
         else if (itemCount > 1)
         {
-            var dropStackAction = new DropStackAction(_ui, _actor, _gameState, Choice);
+            var dropStackAction = new DropStackAction(_ui, _actor, _gs, Choice);
             var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
             _ui.Popup(prompt);
             var acc = new NumericAccumulator(_ui, prompt);
@@ -1130,12 +1130,12 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         else
         {
             _actor.Inventory.Remove(Choice, 1);
-            _gameState.ItemDropped(item, _actor.Loc);
+            _gs.ItemDropped(item, _actor.Loc);
             item.Equiped = false;
             _actor.CalcEquipmentModifiers();
 
-            var alert = MsgFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gameState);
-            _ui.AlertPlayer([alert], "");
+            var alert = MsgFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gs);
+            _ui.AlertPlayer([alert], "", _gs);
             return new ActionResult() { Complete = true, EnergyCost = 1.0 };
         }
     }

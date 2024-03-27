@@ -46,9 +46,10 @@ else
 display.TitleScreen();
 
 var pgh = new PreGameHandler(display);
-if (pgh.StartUp(rng))
+var gameState = pgh.StartUp(rng, options);
+if (gameState is not null)
 {
-    display.GameLoop();
+    display.GameLoop(gameState);
 }
 
 namespace Yarl2

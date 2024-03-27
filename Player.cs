@@ -285,7 +285,7 @@ class Player : Actor, IPerformer
                         _accumulator = null;
                         ui.CloseMenu();
                         ui.ClosePopup();
-                        ui.AlertPlayer([MsgFactory.Phrase("Nevermind.", gameState.Player.Loc)], "");
+                        ui.AlertPlayer([MsgFactory.Phrase("Nevermind.", gameState.Player.Loc)], "", gameState);
                         return new NullAction();
                     }
                 }
@@ -327,7 +327,7 @@ class Player : Actor, IPerformer
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
-                    ui.AlertPlayer([MsgFactory.Phrase("There's nothing there...", gameState.Player.Loc)], "");
+                    ui.AlertPlayer([MsgFactory.Phrase("There's nothing there...", gameState.Player.Loc)], "", gameState);
                     return new NullAction();
                 }
                 else if (itemStack.Count == 1) 
@@ -380,19 +380,19 @@ class Player : Actor, IPerformer
             {
                 _accumulator = new DirectionAccumulator();
                 _deferred = new CloseDoorAction(this, gameState.Map, gameState);                
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "");
+                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'C')
             {
                 _accumulator = new DirectionAccumulator();
                 _deferred = new ChatAction(this, gameState);
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "");
+                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'o')
             {
                 _accumulator = new DirectionAccumulator();
                 _deferred = new OpenDoorAction(this, gameState.Map, gameState);
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "");
+                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'Q')
             {
@@ -425,7 +425,7 @@ class Player : Actor, IPerformer
                 var minute = time.Item2.ToString().PadLeft(2, '0');
                 var msg = new Message($"The current time is {hour}:{minute}", Loc);
                 gameState.Turn += 1000;
-                ui.AlertPlayer([msg], "");
+                ui.AlertPlayer([msg], "", gameState);
             }
             else if (ch == 'W')
             {                

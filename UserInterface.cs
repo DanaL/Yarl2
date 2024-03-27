@@ -35,7 +35,7 @@ abstract class UserInterface
     public const int ViewWidth = ScreenWidth - SideBarWidth;
     public const int ViewHeight = ScreenHeight - 5;
 
-    public abstract void UpdateDisplay();
+    public abstract void UpdateDisplay(GameState? gs);
     protected abstract UIEvent PollForEvent();
     protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
     
@@ -46,10 +46,9 @@ abstract class UserInterface
     protected Options _options;
     bool _playing;
 
-    public Player? Player { get; set; } = null;
+    //public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
 
-    public GameState? GameState { get; private set; }
     public Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
@@ -77,9 +76,6 @@ abstract class UserInterface
         ZLayer = new Tile[ViewHeight, ViewWidth];
         Rng = rng;
         ClearZLayer();
-
-        _animations.Add(new CloudAnimationListener(this, Rng));
-        _animations.Add(new TorchLightAnimationListener(this, Rng));
     }
 
     public virtual void TitleScreen()
@@ -95,7 +91,7 @@ abstract class UserInterface
             "           this time in C#...)"
         ];
         
-        UpdateDisplay();
+        UpdateDisplay(null);
         BlockForInput();
         ClearLongMessage();
     }
@@ -105,11 +101,11 @@ abstract class UserInterface
         _longMessage = null;
     }
 
-    public void KillScreen(string message)
+    public void KillScreen(string message, GameState gs)
     {
         Popup(message);
-        SetSqsOnScreen();
-        UpdateDisplay();
+        SetSqsOnScreen(gs);
+        UpdateDisplay(gs);
         BlockForInput();
         ClearLongMessage();
     }
@@ -137,13 +133,13 @@ abstract class UserInterface
     // This plays the full animation (as opposed to registering
     // it to be played as part of the game loop). This means the
     // UI will be blocked while it is playing
-    public void PlayAnimation(Animation animation)
+    public void PlayAnimation(Animation animation, GameState gs)
     {
         while (animation.Expiry > DateTime.Now)
         {
-            SetSqsOnScreen();
+            SetSqsOnScreen(gs);
             animation.Update();
-            UpdateDisplay();
+            UpdateDisplay(gs);
             Delay(75);
             
         }        
@@ -371,22 +367,22 @@ abstract class UserInterface
         }
     }
 
-    protected void WriteSideBar()
+    protected void WriteSideBar(GameState gs)
     {
         int row = 0;
-        WriteLine($"| {Player!.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
-        int currHP = Player.Stats[Attribute.HP].Curr;
-        int maxHP = Player.Stats[Attribute.HP].Max;
+        WriteLine($"| {gs.Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+        int currHP = gs.Player.Stats[Attribute.HP].Curr;
+        int maxHP = gs.Player.Stats[Attribute.HP].Max;
         WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
-        WriteLine($"| AC: {Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+        WriteLine($"| AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
-        List<(Colour, string)> zorkmidLine = [ (Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {Player.Inventory.Zorkmids}")];
+        List<(Colour, string)> zorkmidLine = [ (Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];
         WriteText(zorkmidLine, row++, ViewWidth, SideBarWidth);
 
         string blank = "|".PadRight(ViewWidth);
         WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
-        var weapon = Player.Inventory.ReadiedWeapon();
+        var weapon = gs.Player.Inventory.ReadiedWeapon();
         if (weapon != null) 
         {
             List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
@@ -401,12 +397,12 @@ abstract class UserInterface
 
         // Write statuses
         int statusLineNum = ViewHeight - 3;
-        if (Player.HasTrait<PoisonedTrait>())
+        if (gs.Player.HasTrait<PoisonedTrait>())
         {
             List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
             WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
         }
-        if (Player.HasActiveTrait<RageTrait>())
+        if (gs.Player.HasActiveTrait<RageTrait>())
         {
             List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
             WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
@@ -416,10 +412,10 @@ abstract class UserInterface
         WriteText(foo, statusLineNum--, ViewWidth, SideBarWidth);
         
 
-        var tile = GameState!.TileAt(Player.Loc);
+        var tile = gs.TileAt(gs.Player.Loc);
         var tileSq = TileToSqr(tile, true);
         var tileText = Tile.TileDesc(tile.Type).Capitalize();
-        foreach (var item in GameState.ObjDB.EnvironmentsAt(Player.Loc))
+        foreach (var item in gs.ObjDB.EnvironmentsAt(gs.Player.Loc))
         {
             if (item.Type == ItemType.Environment)
             {
@@ -433,18 +429,16 @@ abstract class UserInterface
         List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
         WriteText(tileLine, ViewHeight - 2, ViewWidth, SideBarWidth);
 
-        if (GameState.CurrDungeon == 0) 
+        if (gs.CurrDungeon == 0) 
         {
-            var time = GameState.CurrTime();
+            var time = gs.CurrTime();
             var mins = time.Item2.ToString().PadLeft(2, '0');
             WriteLine($"| Outside {time.Item1}:{mins}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
         }
         else 
         {
-            WriteLine($"| Depth: {GameState.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+            WriteLine($"| Depth: {gs.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
         }
-
-        //WriteLine($"| Turn: {GameState.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     protected void WriteDropDown()
@@ -460,7 +454,7 @@ abstract class UserInterface
         WriteLine("", row, col, width, Colours.WHITE);
     }
 
-    public void AlertPlayer(List<Message> alerts, string ifNotSeen) 
+    public void AlertPlayer(List<Message> alerts, string ifNotSeen, GameState gs) 
     {
         // TODO: only display messages that are within the player's
         // current FOV
@@ -471,11 +465,11 @@ abstract class UserInterface
         // In the meantime, we have a few cases.
         List<string> msgs = [];
         foreach (var alert in alerts) {
-            if (!GameState.RecentlySeen.Contains(alert.Loc) && alert.Sound)
+            if (!gs.RecentlySeen.Contains(alert.Loc) && alert.Sound)
                 msgs.Add(alert.Text);
-            else if (GameState.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
+            else if (gs.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
                 msgs.Add(alert.Text);
-            else if (!GameState.RecentlySeen.Contains(alert.Loc))
+            else if (!gs.RecentlySeen.Contains(alert.Loc))
                 msgs.Add(ifNotSeen);
         }
 
@@ -574,24 +568,9 @@ abstract class UserInterface
         }        
     }
 
-    public void SetupGameState(Campaign campaign, GameObjectDB itemDB, ulong currentTurn)
+    bool TakeTurn(IPerformer performer, GameState gs)
     {
-        GameState = new GameState(Player, campaign, _options, this)
-        {
-            Map = campaign!.Dungeons[campaign.CurrentDungeon].LevelMaps[campaign.CurrentLevel],
-            CurrLevel = campaign.CurrentLevel,
-            CurrDungeon = campaign.CurrentDungeon,
-            ObjDB = itemDB,
-            Turn = currentTurn
-        };
-
-        itemDB.AddToLoc(Player.Loc, Player);
-        GameState.ToggleEffect(Player, Player.Loc, TerrainFlag.Lit, true);
-    }
-
-    bool TakeTurn(IPerformer performer)
-    {
-        var action = performer.TakeTurn(this, GameState);
+        var action = performer.TakeTurn(this, gs);
 
         if (action is NullAction)
         {
@@ -606,7 +585,7 @@ abstract class UserInterface
         }
         else if (action is SaveGameAction)
         {
-            Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
+            //Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
             throw new GameQuitException();
         }        
         else
@@ -619,14 +598,14 @@ abstract class UserInterface
                 if (result.AltAction is not null)
                 {
                     if (result.Messages.Count > 0)
-                        AlertPlayer(result.Messages, result.MessageIfUnseen);
+                        AlertPlayer(result.Messages, result.MessageIfUnseen, gs);
                     result = result.AltAction.Execute();
                     performer.Energy -= result.EnergyCost;
                     action = result.AltAction;
                 }
 
                 if (result.Messages.Count > 0)
-                    AlertPlayer(result.Messages, result.MessageIfUnseen);                
+                    AlertPlayer(result.Messages, result.MessageIfUnseen, gs);                
             }
             while (result.AltAction is not null);
         }
@@ -634,9 +613,11 @@ abstract class UserInterface
         return true;
     }
 
-    public void GameLoop()
-    {                
-        GameState.BuildPerformersList();
+    public void GameLoop(GameState gameState)
+    {
+        gameState.BuildPerformersList();
+        _animations.Add(new CloudAnimationListener(this, gameState));
+        _animations.Add(new TorchLightAnimationListener(this, gameState));
 
         _playing = true;
         DateTime refresh = DateTime.Now;
@@ -653,8 +634,8 @@ abstract class UserInterface
             {
                 // Update step! This is where all the current performers gets a chance
                 // to take their turn!
-                IPerformer performer = GameState.NextPerformer();
-                TakeTurn(performer);
+                IPerformer performer = gameState.NextPerformer();
+                TakeTurn(performer, gameState);
             }
             catch (GameQuitException)
             {
@@ -668,13 +649,13 @@ abstract class UserInterface
             TimeSpan elapsed = DateTime.Now - refresh;
             if (elapsed.TotalMilliseconds > 60)
             {
-                SetSqsOnScreen();
+                SetSqsOnScreen(gameState);
 
                 foreach (var l in _animations)
                    l.Update();
                 _animations = _animations.Where(a => a.Expiry > DateTime.Now)
                                          .ToList();
-                UpdateDisplay();
+                UpdateDisplay(gameState);
                 refresh = DateTime.Now;
             }
 
@@ -690,7 +671,7 @@ abstract class UserInterface
             " Be seeing you..."
         };
         WriteLongMessage(msg);
-        UpdateDisplay();
+        UpdateDisplay(gameState);
         BlockForInput();
     }
 
@@ -707,14 +688,14 @@ abstract class UserInterface
         while (e.Type == UIEventType.NoEvent);
     }
 
-    public char FullScreenMenu(List<string> menu, HashSet<char> options)
+    public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
     {
         UIEvent e;
 
         do
         {
             WriteLongMessage(menu);
-            UpdateDisplay();
+            UpdateDisplay(gs);
             e = PollForEvent();
 
             if (e.Type == UIEventType.NoEvent)
@@ -742,7 +723,7 @@ abstract class UserInterface
         do
         {
             Popup($"{prompt}\n{result}");
-            UpdateDisplay();
+            UpdateDisplay(null);
             e = PollForEvent();
 
             if (e.Type == UIEventType.NoEvent)
@@ -770,9 +751,9 @@ abstract class UserInterface
     }
 
     Sqr CalcSqrAtLoc(HashSet<(int, int)> visible, Dictionary<(int, int, int), Sqr> remembered, Map map,
-                int mapRow, int mapCol, int scrRow, int scrCol)
+                int mapRow, int mapCol, int scrRow, int scrCol, GameState gs)
     {
-        var loc = new Loc(GameState.CurrDungeon, GameState.CurrLevel, mapRow, mapCol);
+        var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, mapRow, mapCol);
        
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
@@ -780,7 +761,7 @@ abstract class UserInterface
 
         if (!isVisible || !map.HasEffect(TerrainFlag.Lit, mapRow, mapCol))
         {
-            if (remembered.TryGetValue((GameState.CurrLevel, mapRow, mapCol), out var remSq))
+            if (remembered.TryGetValue((gs.CurrLevel, mapRow, mapCol), out var remSq))
                 return remSq;
             else
                 return new Sqr(Colours.BLACK, Colours.BLACK, ' ');;
@@ -792,8 +773,8 @@ abstract class UserInterface
         Sqr? sqBelow = null;
         if (tile.Type == TileType.Chasm)
         {
-            Loc below = loc with { Level = GameState.CurrLevel + 1 };
-            Glyph glyphBelow = GameState.ObjDB.GlyphAt(below);
+            Loc below = loc with { Level = gs.CurrLevel + 1 };
+            Glyph glyphBelow = gs.ObjDB.GlyphAt(below);
             char ch;
             if (glyphBelow != GameObjectDB.EMPTY)
             {
@@ -801,21 +782,21 @@ abstract class UserInterface
             }
             else
             {
-                var belowTile = TileToSqr(GameState.CurrentDungeon.LevelMaps[GameState.CurrLevel + 1].TileAt(mapRow, mapCol), false);
+                var belowTile = TileToSqr(gs.CurrentDungeon.LevelMaps[gs.CurrLevel + 1].TileAt(mapRow, mapCol), false);
                 ch = belowTile.Ch;
             }
             sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);
         }
 
         //Sqr memory = TileToSqr(tile, false);
-        GameState.RecentlySeen.Add(loc);
+        gs.RecentlySeen.Add(loc);
 
         // The ZLayer trumps. Although maybe now that I've added a Z-coord
         // to items and actors I can get rid of the ZLayer?
         if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)        
             return TileToSqr(ZLayer[scrRow, scrCol], true);
         
-         var (glyph, z, item) = GameState.ObjDB.TopGlyph(loc);
+         var (glyph, z, item) = gs.ObjDB.TopGlyph(loc);
         // For a chasm sq, return the tile from the level below,
         // unless there's an Actor on this level (such as a flying
         // creature)
@@ -835,29 +816,31 @@ abstract class UserInterface
             sqr = TileToSqr(tile, true);
         }
 
-        remembered[(GameState.CurrLevel, mapRow, mapCol)] = memory;
+        remembered[(gs.CurrLevel, mapRow, mapCol)] = memory;
 
         return sqr;
     }
 
-    public (int, int) LocToScrLoc(int row, int col)
+    public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)
     {
-        int rowOffset = Player.Loc.Row - PlayerScreenRow;
-        int colOffset = Player.Loc.Col - PlayerScreenCol;
+        int rowOffset = playerRow - PlayerScreenRow;
+        int colOffset = playerCol - PlayerScreenCol;
 
         return (row - rowOffset, col - colOffset);
     }
     
-    void SetSqsOnScreen()
+    void SetSqsOnScreen(GameState gs)
     {
-        var cmpg = GameState!.Campaign;
-        var dungeon = cmpg!.Dungeons[GameState.CurrDungeon];
-        var map = dungeon.LevelMaps[GameState.CurrLevel];
-        GameState.Map = map;
-        var vs = FieldOfView.CalcVisible(Player!.MaxVisionRadius, Player!.Loc.Row, Player!.Loc.Col, map, GameState.CurrDungeon, GameState.CurrLevel, GameState.ObjDB);        
+        var cmpg = gs.Campaign;
+        var dungeon = cmpg!.Dungeons[gs.CurrDungeon];
+        var map = dungeon.LevelMaps[gs.CurrLevel];
+        gs.Map = map;
+        int playerRow = gs.Player.Loc.Row;
+        int playerCol = gs.Player.Loc.Col;
+        var vs = FieldOfView.CalcVisible(gs.Player.MaxVisionRadius, playerRow, playerCol, map, gs.CurrDungeon, gs.CurrLevel, gs.ObjDB);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
-        GameState.RecentlySeen = [];
+        gs.RecentlySeen = [];
 
         // There is a glitch here that I don't want to fix right now in that
         // I am remembering only (row, col). So if a monster picks up an item
@@ -867,8 +850,8 @@ abstract class UserInterface
         // every tile
         var rememberd = dungeon.RememberedSqs;
        
-        int rowOffset = Player.Loc.Row - PlayerScreenRow;
-        int colOffset = Player.Loc.Col - PlayerScreenCol;
+        int rowOffset = playerRow - PlayerScreenRow;
+        int colOffset = playerCol - PlayerScreenCol;
                 
         for (int r = 0; r < ViewHeight; r++) 
         {
@@ -877,7 +860,7 @@ abstract class UserInterface
                 // replace w/ LocToScrLoc?
                 int mapRow = r + rowOffset;
                 int mapCol = c + colOffset;
-                SqsOnScreen[r, c] = CalcSqrAtLoc(visible, rememberd, map, mapRow, mapCol, r, c);                
+                SqsOnScreen[r, c] = CalcSqrAtLoc(visible, rememberd, map, mapRow, mapCol, r, c, gs);                
             }
         }
 

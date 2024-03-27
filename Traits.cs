@@ -285,7 +285,7 @@ class OnFireTrait : Trait, IGameEventListener
 
     public void Extinguish(Item fireSrc, GameState gs)
     {
-        gs.UI.AlertPlayer([new Message("The fire burns out.", fireSrc.Loc)], "");
+        gs.UI.AlertPlayer([new Message("The fire burns out.", fireSrc.Loc)], "", gs);
         gs.ObjDB.RemoveItemFromGame(fireSrc.Loc, fireSrc);
         gs.ItemDestroyed(fireSrc, fireSrc.Loc);
 
@@ -312,13 +312,13 @@ class OnFireTrait : Trait, IGameEventListener
                 if (hpLeft < 1)
                 {
                     string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
-                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "", gs);
                     gs.ActorKilled(victim);
                 }
                 else
                 {
                     string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
-                    gs.UI.AlertPlayer([new Message(txt, victim.Loc)], "");
+                    gs.UI.AlertPlayer([new Message(txt, victim.Loc)], "", gs);
                 }
             }
 
@@ -353,7 +353,7 @@ class PoisonedTrait : Trait, IGameEventListener
                 victim.Traits.Remove(this);
                 Expired = true;
                 string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
-                gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "", gs);
             }
             else
             {
@@ -363,12 +363,12 @@ class PoisonedTrait : Trait, IGameEventListener
                 if (hpLeft < 1)
                 {
                     string msg = $"{victim.FullName.Capitalize()} from poison!";
-                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "", gs);
                     gs.ActorKilled(victim);
                 }
                 else if (victim is Player)
                 {
-                    gs.UI.AlertPlayer([new Message("You feel ill.", victim.Loc)], "");
+                    gs.UI.AlertPlayer([new Message("You feel ill.", victim.Loc)], "", gs);
                 }
             }
         }        
@@ -435,7 +435,7 @@ class CountdownTrait : Trait, IGameEventListener
             // This is rather tied to Fog Cloud atm -- I should perhaps provide an
             // expiry message that can be set for each trait
             var msg = MsgFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
-            gs.UI.AlertPlayer([msg], "");
+            gs.UI.AlertPlayer([msg], "", gs);
         }
     }
 }
@@ -553,7 +553,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
                 gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
 
                 var msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
-                gs.UI.AlertPlayer([msg], "");
+                gs.UI.AlertPlayer([msg], "", gs);
             }
         }
     }

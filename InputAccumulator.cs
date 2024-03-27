@@ -42,16 +42,16 @@ class AimAccumulator : InputAccumulator
     List<Loc> _monsters = [];
     int _targeted = -1;
 
-    public AimAccumulator(UserInterface ui, Loc start, int maxRange)
+    public AimAccumulator(UserInterface ui, GameState gs, Loc start, int maxRange)
     {
         _ui = ui;
         _start = start;
         _target = start;
         _maxRange = maxRange;
-        _gs = _ui.GameState!;
+        _gs = gs;
         FindTargets();
 
-        _anim = new AimAnimation(_ui, start, _target);
+        _anim = new AimAnimation(_ui, gs, start, _target);
         _ui.RegisterAnimation(_anim);        
     }
 
@@ -189,11 +189,13 @@ class ShopMenuAccumulator : InputAccumulator
 {
     readonly Villager _shopkeeper;
     readonly UserInterface _ui;
+    readonly GameState _gs;
     Dictionary<char, ShopMenuItem> _menuItems = [];
     
-    public ShopMenuAccumulator(Villager shopkeeper, UserInterface ui)
+    public ShopMenuAccumulator(Villager shopkeeper, UserInterface ui, GameState gs)
     {
         _ui = ui;
+        _gs = gs;
         _shopkeeper = shopkeeper;
         var items = _shopkeeper.Inventory.UsedSlots()
                              .Select(_shopkeeper.Inventory.ItemAt);
@@ -212,7 +214,7 @@ class ShopMenuAccumulator : InputAccumulator
             Done = true;
             Success = false;
         }
-        else if ((ch == '\n' || ch == '\r') && _ui.Player.Inventory.Zorkmids >= TotalInvoice())
+        else if ((ch == '\n' || ch == '\r') && _gs.Player.Inventory.Zorkmids >= TotalInvoice())
         {
             Done = true;
             Success = true;
@@ -315,7 +317,7 @@ class ShopMenuAccumulator : InputAccumulator
             sb.Append('\n');
         }
 
-        if (invoice > _ui.Player.Inventory.Zorkmids)
+        if (invoice > _gs.Player.Inventory.Zorkmids)
         {
             sb.Append("[brightred You don't have enough money for all that!]");
         }
