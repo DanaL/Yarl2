@@ -310,12 +310,12 @@ class PreGameHandler(UserInterface ui)
         }
     }
 
-    public GameState? StartUp(Random rng, Options options)
+    public GameState? StartUp(Options options)
     {
         try
         {
             string playerName = _ui.BlockingGetResponse("Who are you?");
-            return SetupGame(playerName, rng, options);
+            return SetupGame(playerName, options);
         }
         catch (GameQuitException)
         {
@@ -323,7 +323,7 @@ class PreGameHandler(UserInterface ui)
         }
     }
 
-    private GameState SetupGame(string playerName, Random rng, Options options)
+    private GameState SetupGame(string playerName, Options options)
     {
         //if (Serialize.SaveFileExists(playerName))
         //{
@@ -334,11 +334,29 @@ class PreGameHandler(UserInterface ui)
         //}
         //else
         //{
+
+            int seed = DateTime.Now.GetHashCode();
+
+            //seed = 601907053;
+            //seed = 1956722118;
+            //seed = 1003709949;
+            //seed = -1407912410;
+            //seed = 937420670;
+            //seed = -1514513425;
+            //seed = 1760989144;
+            //seed = 1067714652;
+            //seed = 562054470;
+            //seed = -1750061855;
+            //seed = 475720358;
+            seed = -910280873;
+            Console.WriteLine($"Seed: {seed}");
+
+            var rng = new Random(seed);
             var objDb = new GameObjectDB();
             var (c, startRow, startCol) = BeginNewCampaign(rng, objDb);
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
-            var gameState = new GameState(player, c, options, _ui, rng)
+            var gameState = new GameState(player, c, options, _ui, rng, seed)
             {
                 Map = c!.Dungeons[c.CurrentDungeon].LevelMaps[c.CurrentLevel],
                 CurrLevel = c.CurrentLevel,

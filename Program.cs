@@ -14,23 +14,6 @@ var options = Options.LoadOptions("options.json");
 // var path = dj.ShortestPath(16, 5, 0, 0);
 // return;
 
-int seed = DateTime.Now.GetHashCode();
-
-//seed = 601907053;
-//seed = 1956722118;
-//seed = 1003709949;
-//seed = -1407912410;
-//seed = 937420670;
-//seed = -1514513425;
-//seed = 1760989144;
-//seed = 1067714652;
-//seed = 562054470;
-//seed = -1750061855;
-//seed = 475720358;
-seed = -910280873;
-Console.WriteLine($"Seed: {seed}");
-var rng = new Random(seed);
-
 // var dm = new DungeonMap(rng);
 // var map = dm.DrawLevel(70, 30);
 // map.Dump();
@@ -46,7 +29,7 @@ else
 display.TitleScreen();
 
 var pgh = new PreGameHandler(display);
-var gameState = pgh.StartUp(rng, options);
+var gameState = pgh.StartUp(options);
 if (gameState is not null)
 {
     display.GameLoop(gameState);

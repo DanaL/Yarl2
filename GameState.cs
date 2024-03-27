@@ -16,8 +16,9 @@ using System.Diagnostics;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng)
+class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng, int seed)
 {
+    public int Seed { get; init; } = seed;
     public Random Rng { get; set; } = rng;
     public Map? Map { get; set; }
     public Options? Options { get; set; } = opts;
@@ -34,11 +35,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public HashSet<Loc> RecentlySeen { get; set; } = [];    
     public ulong LastTarget { get; set; } = 0;
 
-    private UserInterface UI { get; set; } = ui;
-
     // This might (probably will) expand into a hashtable of 
     // UIEventType mapped to a list of listeners
     List<IGameEventListener> _endOfRoundListeners { get; set; } = [];
+
+    private UserInterface UI { get; set; } = ui;
 
     private int _currPerformer = 0;
         
