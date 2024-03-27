@@ -52,11 +52,11 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
 
 class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo, Random rng) : Action
 {
-    GameState _gs = gs;
+    readonly GameState _gs = gs;
     Loc _loc = loc;
-    Actor _actor = actor;
-    Random _rng = rng;
-    Item _ammo = ammo;
+    readonly Actor _actor = actor;
+    readonly Random _rng = rng;
+    readonly Item _ammo = ammo;
 
     public override ActionResult Execute()
     {        

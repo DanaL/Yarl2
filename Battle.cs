@@ -244,6 +244,12 @@ class Battle
             result.Messages.Add(msg);
         }
 
+        // Firebolts, ice, should apply their effects to the square they hit
+        foreach (var dmg in ammo.Traits.OfType<DamageTrait>()) 
+        {
+            gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
+        }
+        
         return result;
     }
 }
