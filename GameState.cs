@@ -299,7 +299,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
 
         PlayerCreator.CheckLevelUp(Player, UI, UI.Rng);
 
-        foreach (var listener in _endOfRoundListeners)
+        var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
+        foreach (var listener in listeners)
         {
             listener.Alert(UIEventType.EndOfRound, this);
         }

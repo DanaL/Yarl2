@@ -288,6 +288,7 @@ class OnFireTrait : Trait, IGameEventListener
         gs.ObjDB.RemoveItemFromGame(fireSrc.Loc, fireSrc);
         Expired = true;
     }
+
     public void Alert(UIEventType eventType, GameState gs)
     {
         ++Lifetime;
@@ -300,23 +301,32 @@ class OnFireTrait : Trait, IGameEventListener
             }
 
             var victim = gs.ObjDB.Occupant(fireSrc.Loc);
-            if (victim is null)
-                return;
+            if (victim is not null) {
+                int fireDmg = gs.UI.Rng.Next(8) + 1;
+                List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
+                int hpLeft = victim.ReceiveDmg(fire, 0);
 
-            int fireDmg = gs.UI.Rng.Next(8) + 1;
-            List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-            int hpLeft = victim.ReceiveDmg(fire, 0);
-
-            if (hpLeft < 1)
-            {
-                string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
-                gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
-                gs.ActorKilled(victim);
+                if (hpLeft < 1)
+                {
+                    string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
+                    gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                    gs.ActorKilled(victim);
+                }
+                else
+                {
+                    string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
+                    gs.UI.AlertPlayer([new Message(txt, victim.Loc)], "");
+                }
             }
-            else
+
+            // The fire might spread!
+            if (Lifetime > 1) 
             {
-                string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
-                gs.UI.AlertPlayer([new Message(txt, victim.Loc)], "");
+                foreach (var sq in Util.Adj4Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
+                {
+                    var adj = fireSrc.Loc with { Row = sq.Item1, Col = sq.Item2 };
+                    gs.ApplyDamageEffectToLoc(adj, DamageType.Fire);
+                }
             }
         }        
     }
