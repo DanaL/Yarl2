@@ -138,7 +138,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        
+        ObjDB.SetToLoc(loc, item);
+
         var tile = TileAt(loc);
         List<Message> msgs = [];
         foreach (var flag in tile.TerrainFlags().Where(t => t != TerrainFlag.None))
@@ -157,9 +158,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         }
 
         if (msgs.Count > 0)
-            UI.AlertPlayer(msgs, "");
+            UI.AlertPlayer(msgs, "");        
+    }
 
-        ObjDB.SetToLoc(loc, item);
+    public void ItemDestroyed(Item item, Loc loc)
+    {
+        var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+        map.RemoveEffectsFor(item.ID);
+        ObjDB.RemoveItemFromGame(loc, item);
+
+        // I probably need to check for any listeners and such among its
+        // traits and clear them out too?
     }
 
     public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
@@ -168,17 +177,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         items.AddRange(ObjDB.ItemsAt(loc));
         items.AddRange(ObjDB.EnvironmentsAt(loc));
         List<Message> messages = [];
+        var tile = TileAt(loc);
         bool fireStarted = false;
 
         switch (damageType)
         {
             case DamageType.Fire:
+                if (tile.Flammable() && UI.Rng.NextDouble() < 0.15)
+                    fireStarted = true;
                 foreach (var item in items)
                 {
                     if (item.HasTrait<FlammableTrait>())
                     {
                         messages.Add(new Message($"{item.FullName.DefArticle().Capitalize()} burns up!", loc));
-                        ObjDB.RemoveItemFromGame(loc, item);
+                        ItemDestroyed(item, loc);
                         fireStarted = true;
                     }                        
                 }
@@ -186,10 +198,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             default:
                 break;
         }
-
-        var tile = TileAt(loc);
-        if (tile.Flammable() && UI.Rng.NextDouble() < 0.15)
-            fireStarted = true;
 
         if (fireStarted)
         {

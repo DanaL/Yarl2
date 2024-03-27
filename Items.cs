@@ -185,6 +185,7 @@ class ItemFactory
                     ContainerID = item.ID, Fuel = 500, Lit = false };
                 ls.Stats[Attribute.Radius] = new Stat(5);
                 item.Traits.Add(ls);
+                item.Traits.Add(new FlammableTrait());
                 break;
             case "zorkmids":
                 item = new Item() { Name = "zorkmid", Type = ItemType.Zorkmid, Stackable = true,
@@ -251,7 +252,7 @@ class ItemFactory
             glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_ORANGE);
         else
             glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_ORANGE);
-            
+
         var fire = new Item()
         {
             Name = "fire",
@@ -260,7 +261,7 @@ class ItemFactory
             Value = 0,
             Glyph = glyph
         };
-        fire.SetZ(10);        
+        fire.SetZ(3);        
         gs.ObjDB.Add(fire);
         var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
         gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
