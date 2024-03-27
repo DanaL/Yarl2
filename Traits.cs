@@ -280,15 +280,29 @@ class OnFireTrait : Trait, IGameEventListener
     public ulong ContainerID { get; set; }
     public override string AsText() => $"OnFire#{Expired}";
     public bool Expired { get; set; } = false;
+    public int Lifetime { get; set; } = 0;
 
+    public void Extinguish(Item fireSrc, GameState gs)
+    {
+        gs.UI.AlertPlayer([new Message("The fire burns out.", fireSrc.Loc)], "");
+        gs.ObjDB.RemoveItemFromGame(fireSrc.Loc, fireSrc);
+        Expired = true;
+    }
     public void Alert(UIEventType eventType, GameState gs)
     {
+        ++Lifetime;
         if (gs.ObjDB.GetObj(ContainerID) is Item fireSrc)
         {
+            if (Lifetime > 3 && gs.UI.Rng.NextDouble() < 0.5)
+            {
+                Extinguish(fireSrc, gs);
+                return;
+            }
+
             var victim = gs.ObjDB.Occupant(fireSrc.Loc);
             if (victim is null)
                 return;
-                
+
             int fireDmg = gs.UI.Rng.Next(8) + 1;
             List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
             int hpLeft = victim.ReceiveDmg(fire, 0);

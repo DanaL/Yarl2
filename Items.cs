@@ -251,12 +251,7 @@ class ItemFactory
             Value = 0,
             Glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE)
         };
-        fire.SetZ(10);
-        fire.Traits.Add(new CountdownTrait()
-        {
-            ContainerID = fire.ID,
-            ExpiresOn = gs.Turn + 5            
-        });
+        fire.SetZ(10);        
         gs.ObjDB.Add(fire);
         var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
         gs.RegisterForEvent(UIEventType.EndOfRound, onFire);

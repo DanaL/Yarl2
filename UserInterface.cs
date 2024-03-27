@@ -434,7 +434,7 @@ abstract class UserInterface
             }
         }
         
-        List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, $"{tileSq.Ch} "), (Colours.WHITE, tileText)];
+        List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
         WriteText(tileLine, ViewHeight - 2, ViewWidth, SideBarWidth);
 
         if (GameState.CurrDungeon == 0) 
