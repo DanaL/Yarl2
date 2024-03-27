@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using SDL2;
+
 namespace Yarl2;
 
 [Flags]
@@ -57,7 +59,9 @@ enum TileType
     WoodBridge,
     Statue,
     Landmark,
-    Chasm
+    Chasm,
+    CharredGrass,
+    CharredStump
 }
 
 abstract class Tile(TileType type) : IZLevel
@@ -86,6 +90,13 @@ abstract class Tile(TileType type) : IZLevel
         TileType.LockedDoor => true,        
         TileType.Mountain => true,
         TileType.SnowPeak => true,
+        _ => false
+    };
+
+    public bool Flammable() => Type switch
+    {
+        TileType.Tree => true,
+        TileType.Grass => true,
         _ => false
     };
 
@@ -123,6 +134,8 @@ abstract class Tile(TileType type) : IZLevel
         TileType.Upstairs => "some stairs up",
         TileType.Downstairs => "some stairs down",
         TileType.Portal => "a dungeon entrance",
+        TileType.CharredGrass => "charred grass",
+        TileType.CharredStump => "charred stump",
         _ => "unknown"
     };
 
@@ -268,6 +281,8 @@ class TileFactory
     private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
     private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true, false);
     private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
+    private static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
+    private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
 
     public static Tile Get(TileType type) => type switch
     {
@@ -298,6 +313,8 @@ class TileFactory
         TileType.Statue => Statue,
         TileType.Chasm => Chasm,
         TileType.StoneRoad => StoneRoad,
+        TileType.CharredGrass => CharredGrass,
+        TileType.CharredStump => CharredStump,
         _ => Unknown
     };
 }

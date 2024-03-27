@@ -569,6 +569,10 @@ abstract class UserInterface
                 return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '_') : new Sqr(Colours.GREY, Colours.BLACK, '_');
             case TileType.Chasm:
                 return lit ? new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237');
+            case TileType.CharredGrass:
+                return lit ? new Sqr(Colours.GREY, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, '.');
+            case TileType.CharredStump:
+                return lit ? new Sqr(Colours.GREY, Colours.BLACK, '|') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, '|');
             default:
                 return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
         }        

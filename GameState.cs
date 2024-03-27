@@ -187,11 +187,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
                 break;
         }
 
+        var tile = TileAt(loc);
+        if (tile.Flammable() && UI.Rng.NextDouble() < 0.15)
+            fireStarted = true;
+
         if (fireStarted)
         {
             var fire = ItemFactory.Fire(this);
             fire.Loc = loc;
             ObjDB.SetToLoc(loc, fire);
+
+            var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+            if (tile.Type == TileType.Grass)
+            {
+                map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredGrass));
+            }
+            else if (tile.Type == TileType.Tree)
+            {
+                map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredStump));
+            }
         }
 
         if (messages.Count > 0)
