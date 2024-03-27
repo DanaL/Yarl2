@@ -37,7 +37,7 @@ class Battle
         return (total, dmg.Type);
     }
 
-    static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, Random rng)
+    static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
     {
         bool success = false;
 
@@ -48,14 +48,14 @@ class Battle
         Actor? occ = gs.ObjDB.Occupant(checkLoc);
         if (occ is not null && attackRoll >= occ.AC)
         {
-            ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale, rng);
+            ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale);
             success = true;
         }
 
         return success;
     }
 
-    static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, Random rng)
+    static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
     {
         bool success = false;
         // Check for any cleave targets Adj4 to main target and Adj to attacker
@@ -68,7 +68,7 @@ class Battle
             {
                 if (attackRoll >= occ.AC)
                 {
-                    ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave, rng);
+                    ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave);
                     success = true;
                 }
             }
@@ -77,7 +77,7 @@ class Battle
         return success;
     }
 
-    static void ResolveMissileHit(Actor attacker, Actor target, Item ammo, GameState gs, ActionResult result, Random rng)
+    static void ResolveMissileHit(Actor attacker, Actor target, Item ammo, GameState gs, ActionResult result)
     {
         List<(int, DamageType)> dmg = [];
         foreach (var trait in ammo.Traits)
@@ -85,7 +85,7 @@ class Battle
             if (trait is DamageTrait dt)
             {
                 var d = new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType);
-                dmg.Add(DamageRoll(d, rng));
+                dmg.Add(DamageRoll(d, gs.Rng));
             }            
         }
 
@@ -103,19 +103,19 @@ class Battle
         {
             if (trait is PoisonerTrait poison)
             {
-                ApplyPoison(poison, target, gs, result, rng);
+                ApplyPoison(poison, target, gs, result);
             }
         }
     }
 
-    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result, Random rng)
+    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
     {
         // We won't apply multiple poison statuses to one victim. Although maybe I
         // should replace the weaker poison with the stronger one?
         if (victim.HasTrait<PoisonedTrait>())
             return;
 
-        bool conCheck = victim.AbilityCheck(Attribute.Constitution, source.DC, rng);
+        bool conCheck = victim.AbilityCheck(Attribute.Constitution, source.DC, gs.Rng);
         if (!conCheck)
         {
             var poisoned = new PoisonedTrait()
@@ -132,13 +132,13 @@ class Battle
         }
     }
 
-    static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, Random rng)
+    static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb)
     {
         // Need to handle the case where the player isn't currently wielding a weapon...
         List<(int, DamageType)> dmg = [];
         foreach (var d in attacker.MeleeDamage())
         {
-            var dr = DamageRoll(d, rng);
+            var dr = DamageRoll(d, gs.Rng);
             dmg.Add(dr);
         }
  
@@ -151,7 +151,7 @@ class Battle
         if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
             bonusDamage += mdb.Curr;
         if (attacker.HasActiveTrait<RageTrait>())
-            bonusDamage += rng.Next(1, 7) + rng.Next(1, 7);
+            bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
 
         Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
         int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
@@ -160,7 +160,7 @@ class Battle
         if (attacker.HasTrait<PoisonerTrait>())
         {
             var poison = attacker.Traits.OfType<PoisonerTrait>().First();
-            ApplyPoison(poison, target, gs, result, rng);            
+            ApplyPoison(poison, target, gs, result);            
         }
     }
 
@@ -197,14 +197,14 @@ class Battle
         result.Messages.Add(msg);
     }
 
-    public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs, Random rng)
+    public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
     {
         var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
-        int roll = AttackRoll(rng) + attacker.TotalMeleeAttackModifier();
+        int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier();
         if (roll >= target.AC)
         {
-            ResolveMeleeHit(attacker, target, gs, result, Verb.Hit, rng);
+            ResolveMeleeHit(attacker, target, gs, result, Verb.Hit);
             
             // in the future I'll need to make sure the other targets aren't friendly/allies
             // should I limit Impale and Cleave to weapon types? Maybe Slashing and Bludgeoning
@@ -212,11 +212,11 @@ class Battle
             bool specialAttack = false;
             if (attacker.HasActiveTrait<CleaveTrait>()) // && rng.NextDouble() < 0.3333)
             {
-                specialAttack = ResolveCleave(attacker, target, roll, gs, result, rng);
+                specialAttack = ResolveCleave(attacker, target, roll, gs, result);
             }
             if (!specialAttack && attacker.HasActiveTrait<ImpaleTrait>())
             {
-                specialAttack = ResolveImpale(attacker, target, roll, gs, result, rng);
+                specialAttack = ResolveImpale(attacker, target, roll, gs, result);
             }
         }
         else
@@ -228,14 +228,14 @@ class Battle
         return result;
     }
 
-    public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, Random rng)
+    public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo)
     {
         var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
-        int roll = AttackRoll(rng) + attacker.TotalMissileAttackModifier(ammo);
+        int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo);
         if (roll >= target.AC)
         {
-            ResolveMissileHit(attacker, target, ammo, gs, result, rng);
+            ResolveMissileHit(attacker, target, ammo, gs, result);
             result.Complete = true;
         }
         else

@@ -344,7 +344,7 @@ class TorchLightAnimationListener : Animation
         {
             for (int c = 0; c < UserInterface.ViewWidth; c++)
             {
-                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _gs.UI.Rng.Next(20) == 0)
+                if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _gs.Rng.Next(20) == 0)
                 {
                     _flickered.Add((r, c));
                     if (++count > 3)
@@ -389,11 +389,11 @@ class CloudAnimationListener : Animation
     {                
         int count = 0;
         List<int> locs = [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ];
-        locs.Shuffle(_gs.UI.Rng);
+        locs.Shuffle(_gs.Rng);
 
         foreach (var k in locs) 
         {
-            if (count < 7 && _gs.UI.Rng.NextDouble() < 0.7)
+            if (count < 7 && _gs.Rng.NextDouble() < 0.7)
             {
                 _cloud[k] = true;
                 ++ count;
@@ -404,15 +404,15 @@ class CloudAnimationListener : Animation
             }
         }
 
-        if (_gs.UI.Rng.NextDouble() < 0.5)
+        if (_gs.Rng.NextDouble() < 0.5)
         {
-            _row = _gs.UI.Rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
+            _row = _gs.Rng.Next(-3, (int) (0.33 * UserInterface.ViewHeight));
             _col = -3;
         }
         else
         {
             _row = -3;
-            _col = _gs.UI.Rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
+            _col = _gs.Rng.Next(-3, (int) (0.33 * UserInterface.ViewWidth));
         }
 
         _paused = false;
@@ -485,7 +485,7 @@ class CloudAnimationListener : Animation
             if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth) 
             {
                 _paused = true;
-                _nextCloud = DateTime.Now.AddSeconds(_gs.UI.Rng.Next(5, 16));                
+                _nextCloud = DateTime.Now.AddSeconds(_gs.Rng.Next(5, 16));                
             }
         }
     }

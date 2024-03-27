@@ -39,9 +39,9 @@ var rng = new Random(seed);
 
 UserInterface display;
 if (options.Display == "Bearlib")
-    display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options, rng);
+    display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options);
 else
-    display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options, rng);
+    display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
 
 display.TitleScreen();
 

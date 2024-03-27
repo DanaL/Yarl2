@@ -338,7 +338,7 @@ class PreGameHandler(UserInterface ui)
             var (c, startRow, startCol) = BeginNewCampaign(rng, objDb);
 
             var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
-            var gameState = new GameState(player, c, options, _ui)
+            var gameState = new GameState(player, c, options, _ui, rng)
             {
                 Map = c!.Dungeons[c.CurrentDungeon].LevelMaps[c.CurrentLevel],
                 CurrLevel = c.CurrentLevel,

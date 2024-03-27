@@ -15,8 +15,9 @@ using System.Diagnostics;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-class GameState(Player p, Campaign c, Options opts, UserInterface ui)
-{    
+class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng)
+{
+    public Random Rng { get; set; } = rng;
     public Map? Map { get; set; }
     public Options? Options { get; set; } = opts;
     public Player Player { get; set; } = p;
@@ -185,7 +186,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         switch (damageType)
         {
             case DamageType.Fire:
-                if (tile.Flammable() && UI.Rng.NextDouble() < 0.15)
+                if (tile.Flammable() && Rng.NextDouble() < 0.15)
                     fireStarted = true;
                 foreach (var item in items)
                 {
@@ -322,7 +323,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             Player.Stats[Attribute.HP].Change(1);
         }
 
-        PlayerCreator.CheckLevelUp(Player, UI, UI.Rng);
+        PlayerCreator.CheckLevelUp(Player, UI, Rng);
 
         var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
         foreach (var listener in listeners)

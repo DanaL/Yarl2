@@ -297,7 +297,7 @@ class OnFireTrait : Trait, IGameEventListener
         ++Lifetime;
         if (gs.ObjDB.GetObj(ContainerID) is Item fireSrc)
         {
-            if (Lifetime > 3 && gs.UI.Rng.NextDouble() < 0.5)
+            if (Lifetime > 3 && gs.Rng.NextDouble() < 0.5)
             {
                 Extinguish(fireSrc, gs);
                 return;
@@ -305,7 +305,7 @@ class OnFireTrait : Trait, IGameEventListener
 
             var victim = gs.ObjDB.Occupant(fireSrc.Loc);
             if (victim is not null) {
-                int fireDmg = gs.UI.Rng.Next(8) + 1;
+                int fireDmg = gs.Rng.Next(8) + 1;
                 List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
                 int hpLeft = victim.ReceiveDmg(fire, 0);
 
@@ -347,7 +347,7 @@ class PoisonedTrait : Trait, IGameEventListener
         var victim = (Actor?) gs.ObjDB.GetObj(VictimID);
         if (victim != null)
         {
-            bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.UI.Rng);
+            bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
             if (conCheck)
             {
                 victim.Traits.Remove(this);

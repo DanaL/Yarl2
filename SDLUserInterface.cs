@@ -15,7 +15,7 @@ class SDLUserInterface : UserInterface
     Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
     Dictionary<Colour, SDL_Color> _colours;
 
-    public SDLUserInterface(string windowTitle, Options opt, Random rng) : base(opt, rng)
+    public SDLUserInterface(string windowTitle, Options opt) : base(opt)
     {
         FontSize = opt.FontSize;
         SDL_Init(SDL_INIT_VIDEO);

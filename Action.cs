@@ -31,31 +31,29 @@ abstract class Action
     public virtual void ReceiveAccResult(AccumulatorResult result) {}
 }
 
-class MeleeAttackAction(Actor actor, Loc loc, GameState gs, Random rng) : Action
+class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
 {
     GameState _gs = gs;
     Loc _loc = loc;
     Actor _actor = actor;
-    Random _rng = rng;
-
+    
     public override ActionResult Execute()
     {        
         var result = new ActionResult() { Complete = true };
 
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null)
-            result = Battle.MeleeAttack(_actor, target, _gs, _rng);
+            result = Battle.MeleeAttack(_actor, target, _gs);
 
         return result;
     }
 }
 
-class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo, Random rng) : Action
+class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo) : Action
 {
     readonly GameState _gs = gs;
     Loc _loc = loc;
     readonly Actor _actor = actor;
-    readonly Random _rng = rng;
     readonly Item _ammo = ammo;
 
     public override ActionResult Execute()
@@ -64,7 +62,7 @@ class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo, Random 
 
         var target = _gs.ObjDB.Occupant(_loc);
         if (target is not null)
-            result = Battle.MissileAttack(_actor, target, _gs, _ammo, _rng);
+            result = Battle.MissileAttack(_actor, target, _gs, _ammo);
 
         return result;        
     }
@@ -355,15 +353,14 @@ class OpenDoorAction : DirectionalAction
     }
 }
 
-class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Action
+class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
 {
     readonly Actor _actor = actor;
     readonly Loc _loc = loc;
     readonly Map _map = gameState.Map!;
     readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
     readonly GameState _gs = gameState;
-    readonly Random _rng = rng;
-
+    
     static string BlockedMessage(Tile tile)
     {
         return tile.Type switch
@@ -435,7 +432,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
             if (web is not null && !_actor.HasTrait<TeflonTrait>())
             {
-                bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);
+                bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.Rng);
                 if (!strCheck)
                 {
                     result.EnergyCost = 1.0;
@@ -469,7 +466,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             if (occ is VillageAnimal)
             {
                 string msg;
-                if (_rng.NextDouble() < 0.5)
+                if (_gs.Rng.NextDouble() < 0.5)
                     msg = $"You pat {occ.FullName}.";
                 else
                     msg = $"You give {occ.FullName} some scritches.";
@@ -485,7 +482,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState, Random rng) : Actio
             }
             else
             {
-                var attackAction = new MeleeAttackAction(_actor, _loc, _gs, _rng);
+                var attackAction = new MeleeAttackAction(_actor, _loc, _gs);
                 result.AltAction = attackAction;
             }
         }
@@ -567,7 +564,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             var web = env.Traits.OfType<StickyTrait>().First();
             if (web is not null)
             {
-                bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.UI.Rng);
+                bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.Rng);
                 if (!strCheck)
                 {
                     var txt = $"{item.FullName.DefArticle().Capitalize()} {MsgFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
@@ -695,7 +692,7 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
             var tile = _gs.TileAt(loc);
             if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDB.Occupied(loc))
             {
-                Actor vines = MonsterFactory.Get("vines", _gs.UI.Rng);
+                Actor vines = MonsterFactory.Get("vines", _gs.Rng);
                 vines.Loc = loc;
                 _gs.ObjDB.Add(vines);
                 _gs.ObjDB.AddToLoc(loc, vines);
@@ -721,7 +718,7 @@ class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajector
         gs.UI.RegisterAnimation(anim);
 
         var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
-        var attack = new MissileAttackAction(_caster, _target, _gs, firebolt, _gs.UI.Rng);
+        var attack = new MissileAttackAction(_caster, _target, _gs, firebolt);
 
         var txt = MsgFactory.Phrase(_caster.ID, Verb.Cast, _target, _gs).Text;
         var msg = new Message(txt + " Firebolt!", _target, false);
@@ -742,7 +739,7 @@ class WebAction(GameState gs, Loc target) : Action
 
         foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
         {
-            if (_gs.UI.Rng.NextDouble() < 0.666)
+            if (_gs.Rng.NextDouble() < 0.666)
             {
                 w = ItemFactory.Web();
                 _gs.ObjDB.Add(w);
@@ -789,8 +786,8 @@ class BlinkAction(Actor caster, GameState gs) : Action
         }
         else
         {
-            var landingSpot = sqs[_gs.UI.Rng.Next(sqs.Count)];
-            var mv = new MoveAction(_caster, landingSpot, _gs, _gs.UI.Rng);
+            var landingSpot = sqs[_gs.Rng.Next(sqs.Count)];
+            var mv = new MoveAction(_caster, landingSpot, _gs);
             _gs.UI.RegisterAnimation(new SqAnimation(_gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
             _gs.UI.RegisterAnimation(new SqAnimation(_gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
             var msg = MsgFactory.Phrase(_caster.ID, Verb.Blink, _caster.Loc, _gs);
@@ -836,7 +833,7 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
     {
         var hp = 0;
         for (int j = 0; j < _healDice; j++)
-            hp += _gs.UI.Rng.Next(_healDie) + 1;
+            hp += _gs.Rng.Next(_healDie) + 1;
         _target.Stats[Attribute.HP].Change(hp);
         var plural = _target.HasTrait<PluralTrait>();
         var msg = MsgFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, plural, false, _target.Loc, _gs);
@@ -999,7 +996,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
                     // I'm not handling what happens if a projectile hits a friendly or 
                     // neutral NPCs
-                    var attackResult = Battle.MissileAttack(_actor, occ, _gs, ammo, _ui.Rng);
+                    var attackResult = Battle.MissileAttack(_actor, occ, _gs, ammo);
                     result.Messages.AddRange(attackResult.Messages);
                     result.EnergyCost = attackResult.EnergyCost;
                     if (attackResult.Complete)

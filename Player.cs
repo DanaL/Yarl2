@@ -294,21 +294,21 @@ class Player : Actor, IPerformer
             ui.ClosePopup();
 
             if (ch == 'h')
-                return new MoveAction(this, Loc.Move(0, -1), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(0, -1), gameState);
             else if (ch == 'j')
-                return new MoveAction(this, Loc.Move(1, 0), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(1, 0), gameState);
             else if (ch == 'k')
-                return new MoveAction(this, Loc.Move(-1, 0), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(-1, 0), gameState);
             else if (ch == 'l')
-                return new MoveAction(this, Loc.Move(0, 1), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(0, 1), gameState);
             else if (ch == 'y')
-                return new MoveAction(this,Loc.Move(-1, -1), gameState, ui.Rng);
+                return new MoveAction(this,Loc.Move(-1, -1), gameState);
             else if (ch == 'u')
-                return new MoveAction(this, Loc.Move(-1, 1), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(-1, 1), gameState);
             else if (ch == 'b')
-                return new MoveAction(this, Loc.Move(1, -1), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(1, -1), gameState);
             else if (ch == 'n')
-                return new MoveAction(this, Loc.Move(1, 1), gameState, ui.Rng);
+                return new MoveAction(this, Loc.Move(1, 1), gameState);
             else if (ch == 'E')
                 return new PortalAction(gameState);
             else if (ch == '>')
@@ -431,7 +431,7 @@ class Player : Actor, IPerformer
             {                
                 foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
                 {
-                    if (gameState.UI.Rng.NextDouble() < 0.666)
+                    if (gameState.Rng.NextDouble() < 0.666)
                     {
                         var w = ItemFactory.Web();
                         gameState.ObjDB.Add(w);

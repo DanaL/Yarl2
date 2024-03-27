@@ -46,10 +46,7 @@ abstract class UserInterface
     protected Options _options;
     bool _playing;
 
-    //public Player? Player { get; set; } = null;
     public Queue<char> InputBuffer = new Queue<char>();
-
-    public Random Rng { get; set; }
 
     public Sqr[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
@@ -67,14 +64,13 @@ abstract class UserInterface
     
     List<Animation> _animations = [];
 
-    public UserInterface(Options opts, Random rng)
+    public UserInterface(Options opts)
     {
         _options = opts;
         PlayerScreenRow = ViewHeight / 2;
         PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
         SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
         ZLayer = new Tile[ViewHeight, ViewWidth];
-        Rng = rng;
         ClearZLayer();
     }
 

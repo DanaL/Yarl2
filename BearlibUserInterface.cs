@@ -20,7 +20,7 @@ internal class BLUserInferface : UserInterface, IDisposable
     readonly Dictionary<int, char> KeyToChar = [];
     Dictionary<Colour, Color> _colours = [];
 
-    public BLUserInferface(string windowTitle, Options opt, Random rng) : base(opt, rng)
+    public BLUserInferface(string windowTitle, Options opt) : base(opt)
     {
         FontSize = opt.FontSize;
         SetUpKeyToCharMap();

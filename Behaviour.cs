@@ -15,19 +15,19 @@ namespace Yarl2;
 
 interface IMoveStrategy
 {
-    Action MoveAction(Actor actor, GameState gs, Random rng);
+    Action MoveAction(Actor actor, GameState gs);
 }
 
 class WallMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs, Random rng) =>
+    public Action MoveAction(Actor actor, GameState gs) =>
         new PassAction();
 }
 
 // For creatures that don't know how to open doors
 class DumbMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs, Random rng)
+    public Action MoveAction(Actor actor, GameState gs)
     {
         var adj = gs.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
@@ -36,7 +36,7 @@ class DumbMoveStrategy : IMoveStrategy
             if (!gs.ObjDB.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs, rng);
+                return new MoveAction(actor, loc, gs);
             }
         }
 
@@ -49,7 +49,7 @@ class DumbMoveStrategy : IMoveStrategy
 // can open doors. OpposableThumbMoveStrategy? :P
 class DoorOpeningMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs, Random rng)
+    public Action MoveAction(Actor actor, GameState gs)
     {
         // Move!
         var adj = gs.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
@@ -64,7 +64,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
             else if (!gs.ObjDB.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs, rng);
+                return new MoveAction(actor, loc, gs);
             }
         }
 
@@ -75,7 +75,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
 
 class SimpleFlightMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs, Random rng)
+    public Action MoveAction(Actor actor, GameState gs)
     {
         var adj = gs.DMapFlight.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
@@ -84,7 +84,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
             if (!gs.ObjDB.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs, rng);
+                return new MoveAction(actor, loc, gs);
             }
         }
 
@@ -101,7 +101,7 @@ interface IChatter
 
 interface IBehaviour
 {
-    Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng);
+    Action CalcAction(Actor actor, GameState gameState, UserInterface ui);
 }
 
 class MonsterBehaviour : IBehaviour
@@ -121,14 +121,14 @@ class MonsterBehaviour : IBehaviour
         return false;
     }
 
-    Action FromTrait(Monster mob, ActionTrait act, GameState gs, Random rng)
+    Action FromTrait(Monster mob, ActionTrait act, GameState gs)
     {
         if (act is MobMeleeTrait meleeAttack)
         {
             var p = gs.Player;
             mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
             _lastUse[act.Name] = gs.Turn;
-            return new MeleeAttackAction(mob, p.Loc, gs, rng);
+            return new MeleeAttackAction(mob, p.Loc, gs);
         }
         else if (act is MobMissileTrait missileAttack)
         {
@@ -139,7 +139,7 @@ class MonsterBehaviour : IBehaviour
             gs.UI.RegisterAnimation(arrowAnim);
 
             var arrow = ItemFactory.Get("arrow", gs.ObjDB);
-            return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow, rng);
+            return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow);
         }
         else if (act is SpellActionTrait spell)
         {
@@ -159,7 +159,7 @@ class MonsterBehaviour : IBehaviour
         return new NullAction();
     }
 
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui, Random rng)
+    public Action CalcAction(Actor actor, GameState gs, UserInterface ui)
     {
         Monster mob = (Monster)actor;
         
@@ -178,10 +178,10 @@ class MonsterBehaviour : IBehaviour
                 continue;
 
             if (act.Available(mob, gs)) 
-                return FromTrait(mob, act, gs, rng);
+                return FromTrait(mob, act, gs);
         }
 
-        return mob.MoveStrategy.MoveAction(mob, gs, rng);
+        return mob.MoveStrategy.MoveAction(mob, gs);
     }
 }
 
@@ -212,12 +212,12 @@ class VillagePupBehaviour : IBehaviour, IChatter
         _ => false
     };
 
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
     {
         var animal = (VillageAnimal)actor;
         var town = animal.Town;
 
-        double roll = rng.NextDouble();
+        double roll = gameState.Rng.NextDouble();
         if (roll < 0.25)
             return new PassAction();
 
@@ -256,7 +256,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
         if (mvOpts.Count == 0)
             return new PassAction();
         else
-            return new MoveAction(actor, mvOpts[rng.Next(mvOpts.Count)], gameState, rng);
+            return new MoveAction(actor, mvOpts[gameState.Rng.Next(mvOpts.Count)], gameState);
     }
 
     public (Action, InputAccumulator) Chat(Actor animal, GameState gs)
@@ -274,7 +274,7 @@ class PriestBehaviour : IBehaviour, IChatter
 {
     DateTime _lastIntonation = new(1900, 1, 1);
 
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
         {
@@ -348,11 +348,11 @@ class SmithBehaviour : IBehaviour, IChatter
         }
     }
 
-    public Action CalcAction(Actor smith, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor smith, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, gameState, 2500, smith, PickBark(smith, rng));
+            var bark = new BarkAnimation(ui, gameState, 2500, smith, PickBark(smith, gameState.Rng));
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
@@ -403,11 +403,11 @@ class GrocerBehaviour : IBehaviour, IChatter
             return "Store credit only.";
     }
 
-    public Action CalcAction(Actor grocer, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor grocer, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, gameState, 2500, grocer, PickBark(grocer, rng));
+            var bark = new BarkAnimation(ui, gameState, 2500, grocer, PickBark(grocer, gameState.Rng));
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
@@ -444,7 +444,7 @@ class GrocerBehaviour : IBehaviour, IChatter
 
 class VillagerBehaviour : IBehaviour
 {
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui, Random rng)
+    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
     {
         return new PassAction();
     }

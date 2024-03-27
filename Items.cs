@@ -244,7 +244,7 @@ class ItemFactory
     public static Item Fire(GameState gs)
     {
         Glyph glyph;
-        var roll = gs.UI.Rng.NextDouble();
+        var roll = gs.Rng.NextDouble();
         if (roll < 0.333)
             glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE);
         else if (roll < 0.666)

@@ -52,8 +52,7 @@ class Actor : GameObj, IPerformer, IZLevel
     static readonly int DEFAULT_Z = 4;
     
     public Dictionary<Attribute, Stat> Stats { get; set; } = [];
-    public List<Trait> Traits { get; set; } = [];
-
+    
     public ActorStatus Status { get; set; }
     public Inventory Inventory { get; set; }
 
@@ -102,7 +101,7 @@ class Actor : GameObj, IPerformer, IZLevel
 
     public virtual Action TakeTurn(UserInterface ui, GameState gameState)
     {
-        return _behaviour.CalcAction(this, gameState, ui, ui.Rng);
+        return _behaviour.CalcAction(this, gameState, ui);
     }
 
     public bool AbilityCheck(Attribute attr, int dc, Random rng)
