@@ -470,7 +470,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
                     msg = $"You pat {occ.FullName}.";
                 else
                     msg = $"You give {occ.FullName} some scritches.";
-                _gs.UI.Popup(msg);
+                _gs.WritePopup(msg, "");
                 result.EnergyCost = 1.0;
                 result.Complete = true;
                 //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
@@ -714,8 +714,8 @@ class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajector
 
     public override ActionResult Execute()
     {
-        var anim = new ArrowAnimation(gs.UI, gs, _trajectory, Colours.YELLOW_ORANGE);
-        gs.UI.RegisterAnimation(anim);
+        var anim = new ArrowAnimation(_gs, _trajectory, Colours.YELLOW_ORANGE);
+        _gs.UIRef().RegisterAnimation(anim);
 
         var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
         var attack = new MissileAttackAction(_caster, _target, _gs, firebolt);
@@ -788,8 +788,8 @@ class BlinkAction(Actor caster, GameState gs) : Action
         {
             var landingSpot = sqs[_gs.Rng.Next(sqs.Count)];
             var mv = new MoveAction(_caster, landingSpot, _gs);
-            _gs.UI.RegisterAnimation(new SqAnimation(_gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-            _gs.UI.RegisterAnimation(new SqAnimation(_gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            _gs.UIRef().RegisterAnimation(new SqAnimation(_gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+            _gs.UIRef().RegisterAnimation(new SqAnimation(_gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
             var msg = MsgFactory.Phrase(_caster.ID, Verb.Blink, _caster.Loc, _gs);
             var txt = $"Bamf! {msg.Text} away!";
             msg = new Message(txt, _caster.Loc);
@@ -956,8 +956,8 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
     void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
     {
-        var anim = new ThrownMissileAnimation(_ui, _gs, ammo.Glyph, pts, ammo);
-        _ui.PlayAnimation(anim, _gs);
+        var anim = new ThrownMissileAnimation(_gs, ammo.Glyph, pts, ammo);
+        _gs.UIRef().PlayAnimation(anim, _gs);
 
         var landingPt = FinalLandingSpot(pts.Last());
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
@@ -1204,14 +1204,14 @@ sealed class PassAction : Action
         => new() { Complete = true, EnergyCost = 1.0 };
 }
 
-class CloseMenuAction(UserInterface ui, double energyCost = 0.0) : Action 
+class CloseMenuAction(GameState gs, double energyCost = 0.0) : Action 
 {
-    private UserInterface _ui = ui;
-    private double _energyCost = energyCost;
+    readonly GameState _gs = gs;
+    readonly double _energyCost = energyCost;
 
     public override ActionResult Execute()
     {
-        _ui.CloseMenu();
+        _gs.ClearMenu();
         return new ActionResult() { Complete = true, EnergyCost = _energyCost };
     }
 }

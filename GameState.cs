@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Yarl2;
@@ -30,9 +31,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public DjikstraMap? DMap { get; private set; }
     public DjikstraMap? DMapDoors { get; private set; }
     public DjikstraMap? DMapFlight { get; private set; }
-    public HashSet<Loc> RecentlySeen { get; set; } = [];
-    public UserInterface UI { get; set; } = ui;
+    public HashSet<Loc> RecentlySeen { get; set; } = [];    
     public ulong LastTarget { get; set; } = 0;
+
+    private UserInterface UI { get; set; } = ui;
 
     // This might (probably will) expand into a hashtable of 
     // UIEventType mapped to a list of listeners
@@ -73,6 +75,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         { TileType.Water, 1 },
         { TileType.Chasm, 1 }
     };
+
+    public void WriteMessages(List<Message> alerts, string ifNotSeen) => UI.AlertPlayer(alerts, ifNotSeen, this);
+    public void WritePopup(string msg, string title) => UI.Popup(msg, title);
+    public void ClearMenu() => UI.CloseMenu();
+    public UserInterface UIRef() => UI;
 
     public void EnterLevel(int dungeon, int level)
     {

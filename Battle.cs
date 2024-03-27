@@ -172,7 +172,7 @@ class Battle
             {
                 msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
                 result.Messages.Add(msg);
-                gs.UI.AlertPlayer(result.Messages, "", gs);
+                gs.WriteMessages(result.Messages, "");
             }
             else 
             {
@@ -192,7 +192,7 @@ class Battle
         }
 
         var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
-        gs.UI.RegisterAnimation(hitAnim);
+        gs.UIRef().RegisterAnimation(hitAnim);
 
         result.Messages.Add(msg);
     }

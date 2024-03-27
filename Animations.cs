@@ -53,17 +53,15 @@ class AimAnimation : Animation
 
 class ArrowAnimation : Animation
 {
-    readonly UserInterface _ui;
     readonly GameState _gs;
     List<(Loc, char)> _frames = [];
     int _frame = 0;    
     Colour _ammoColour;
     DateTime _lastFrame;
     
-    public ArrowAnimation(UserInterface ui, GameState gs, List<Loc> pts, Colour ammoColour)
+    public ArrowAnimation(GameState gs, List<Loc> pts, Colour ammoColour)
     {
         Expiry = DateTime.MaxValue;
-        _ui = ui;
         _gs = gs;
         _ammoColour = ammoColour;
 
@@ -89,10 +87,11 @@ class ArrowAnimation : Animation
 
     public override void Update()
     {
+        var ui = _gs.UIRef();
         var (loc, ch) = _frames[_frame];
         var sq = new Sqr(_ammoColour, Colours.BLACK, ch);        
-        var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-        _ui.SqsOnScreen[scrR, scrC] = sq;
+        var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+        ui.SqsOnScreen[scrR, scrC] = sq;
 
         if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
         {
@@ -110,7 +109,6 @@ class ArrowAnimation : Animation
 
 class ThrownMissileAnimation : Animation 
 {
-    readonly UserInterface _ui;
     readonly GameState _gs;
     Glyph _glyph;
     List<Loc> _pts;
@@ -118,9 +116,8 @@ class ThrownMissileAnimation : Animation
     DateTime _lastFrame;
     Item _ammo;
 
-    public ThrownMissileAnimation(UserInterface ui, GameState gs, Glyph glyph, List<Loc> pts, Item ammo)
+    public ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo)
     {
-        _ui = ui;
         _gs = gs;
         _glyph = glyph;
         _pts = pts;
@@ -134,8 +131,9 @@ class ThrownMissileAnimation : Animation
     {
         var pt = _pts[_frame];
         var sq = new Sqr(_glyph.Lit, Colours.BLACK, _glyph.Ch);
-        var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-        _ui.SqsOnScreen[scrR, scrC] = sq;
+        var ui = _gs.UIRef();
+        var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+        ui.SqsOnScreen[scrR, scrC] = sq;
         
         if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
         {
@@ -155,7 +153,7 @@ class ThrownMissileAnimation : Animation
             {
                 var item = _ammo.FullName.DefArticle().Capitalize();
                 var msg = new Message($"{item} disappears with a splash.", _pts.Last());
-                _ui.AlertPlayer([msg], "You hear a splash.", _gs);
+                ui.AlertPlayer([msg], "You hear a splash.", _gs);
             }
         }
     }
@@ -163,15 +161,13 @@ class ThrownMissileAnimation : Animation
 
 class BarkAnimation : Animation
 {    
-    readonly UserInterface _ui;
     readonly GameState _gs;
     readonly Actor _actor;
     readonly string _bark;
 
     // Duration in milliseconds
-    public BarkAnimation(UserInterface ui, GameState gs, int duration, Actor actor, string bark)
+    public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
     {
-        _ui = ui;
         _gs = gs;
         Expiry = DateTime.Now.AddMilliseconds(duration);
         _actor = actor;
@@ -205,12 +201,13 @@ class BarkAnimation : Animation
             pointer = row > 3 ? '\\' : '/';
             pointerCol = screenCol - 1;
         }
-                
+
         // This is a dorky way to do this, but doesn't require me writing new UI functions :P
-        _ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);        
+        var ui = _gs.UIRef();
+        ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);        
         foreach (char ch in message) 
         {
-            _ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
+            ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
         }        
     }
 
@@ -228,7 +225,8 @@ class BarkAnimation : Animation
 
         if (loc.DungeonID == _gs.CurrDungeon && loc.Level == _gs.CurrLevel)
         {
-            var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, playerLoc.Row, playerLoc.Col);
+            var ui = _gs.UIRef();
+            var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, playerLoc.Row, playerLoc.Col);
             if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
             {
                 RenderLine(scrR, scrC, _bark);
@@ -260,15 +258,16 @@ class SqAnimation : Animation
 
     public override void Update()
     {
-        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+        var ui = _gs.UIRef();
+        var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
         if (!_gs.RecentlySeen.Contains(_loc))
             return;
 
-        if (scrR > 0 && scrR < _gs.UI.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _gs.UI.SqsOnScreen.GetLength(1))
+        if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
         {
             Sqr sq = new Sqr(_fgColour, _bgColour, _ch);
-            _gs.UI.SqsOnScreen[scrR, scrC] = sq;
+            ui.SqsOnScreen[scrR, scrC] = sq;
         }
     }
 }
@@ -295,12 +294,13 @@ class HitAnimation : Animation
         if (occ is null || occ.ID != _victimID)
             return;
 
-        var (scrR, scrC) = _gs.UI.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+        var ui = _gs.UIRef();
+        var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-        if (scrR > 0 && scrR < _gs.UI.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < _gs.UI.SqsOnScreen.GetLength(1))
+        if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
         {
-            Sqr sq = _gs.UI.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
-            _gs.UI.SqsOnScreen[scrR, scrC] = sq;
+            Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
+            ui.SqsOnScreen[scrR, scrC] = sq;
         }
     }
 }

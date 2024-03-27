@@ -188,13 +188,11 @@ class ShopMenuItem(char slot, Item item, int stockCount)
 class ShopMenuAccumulator : InputAccumulator
 {
     readonly Villager _shopkeeper;
-    readonly UserInterface _ui;
     readonly GameState _gs;
     Dictionary<char, ShopMenuItem> _menuItems = [];
     
-    public ShopMenuAccumulator(Villager shopkeeper, UserInterface ui, GameState gs)
+    public ShopMenuAccumulator(Villager shopkeeper, GameState gs)
     {
-        _ui = ui;
         _gs = gs;
         _shopkeeper = shopkeeper;
         var items = _shopkeeper.Inventory.UsedSlots()
@@ -322,7 +320,7 @@ class ShopMenuAccumulator : InputAccumulator
             sb.Append("[brightred You don't have enough money for all that!]");
         }
 
-        _ui.Popup(sb.ToString(), _shopkeeper.FullName);
+        _gs.WritePopup(sb.ToString(), _shopkeeper.FullName);
     }
 }
 

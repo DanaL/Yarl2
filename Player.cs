@@ -319,7 +319,7 @@ class Player : Actor, IPerformer
             {
                 ShowInventory(ui, "You are carrying:", "", true);
                 _accumulator = new PauseForMoreAccumulator();
-                _deferred = new CloseMenuAction(ui);
+                _deferred = new CloseMenuAction(gameState);
             }
             else if (ch == ',')
             {

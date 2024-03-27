@@ -135,8 +135,8 @@ class MonsterBehaviour : IBehaviour
             mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
             _lastUse[act.Name] = gs.Turn;
 
-            var arrowAnim = new ArrowAnimation(gs.UI, gs, MobMissileTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
-            gs.UI.RegisterAnimation(arrowAnim);
+            var arrowAnim = new ArrowAnimation(gs, MobMissileTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
+            gs.UIRef().RegisterAnimation(arrowAnim);
 
             var arrow = ItemFactory.Get("arrow", gs.ObjDB);
             return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow);
@@ -265,7 +265,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
         sb.Append(".\n\n");
         sb.Append(animal.ChatText());
 
-        gs.UI.Popup(sb.ToString());
+        gs.WritePopup(sb.ToString(), "");
         return (new PassAction(), new PauseForMoreAccumulator());
     }
 }
@@ -278,7 +278,7 @@ class PriestBehaviour : IBehaviour, IChatter
     {
         if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, gameState, 2500, actor, "Praise be to Huntokar!");
+            var bark = new BarkAnimation(gameState, 2500, actor, "Praise be to Huntokar!");
             ui.RegisterAnimation(bark);
             _lastIntonation = DateTime.Now;
 
@@ -297,7 +297,7 @@ class PriestBehaviour : IBehaviour, IChatter
         sb.Append(priest.ChatText());
         sb.Append("\n\n");
 
-        gs.UI.Popup(sb.ToString(), priest.FullName);
+        gs.WritePopup(sb.ToString(), priest.FullName);
         return (new PassAction(), new PauseForMoreAccumulator());
     }
 
@@ -352,7 +352,7 @@ class SmithBehaviour : IBehaviour, IChatter
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, gameState, 2500, smith, PickBark(smith, gameState.Rng));
+            var bark = new BarkAnimation(gameState, 2500, smith, PickBark(smith, gameState.Rng));
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
@@ -381,7 +381,7 @@ class SmithBehaviour : IBehaviour, IChatter
     public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
     {
         Villager smith = (Villager)actor;
-        var acc = new ShopMenuAccumulator(smith, gs.UI, gs);
+        var acc = new ShopMenuAccumulator(smith, gs);
         var action = new ShopAction(smith, gs);
 
         return (action, acc);
@@ -407,7 +407,7 @@ class GrocerBehaviour : IBehaviour, IChatter
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(ui, gameState, 2500, grocer, PickBark(grocer, gameState.Rng));
+            var bark = new BarkAnimation(gameState, 2500, grocer, PickBark(grocer, gameState.Rng));
             ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
@@ -435,7 +435,7 @@ class GrocerBehaviour : IBehaviour, IChatter
     public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
     {
         var smith = (Villager)actor;
-        var acc = new ShopMenuAccumulator(smith, gs.UI, gs);
+        var acc = new ShopMenuAccumulator(smith, gs);
         var action = new ShopAction(smith, gs);
 
         return (action, acc);
