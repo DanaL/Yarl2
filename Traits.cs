@@ -475,7 +475,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) 
     {
-        if (flag == TerrainFlag.Wet)
+        if (Lit && flag == TerrainFlag.Wet)
             return Extinguish(gs, item, loc);
         else
             return "";
