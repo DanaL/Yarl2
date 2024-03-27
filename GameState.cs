@@ -166,9 +166,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
         var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
         map.RemoveEffectsFor(item.ID);
         ObjDB.RemoveItemFromGame(loc, item);
-
-        // I probably need to check for any listeners and such among its
-        // traits and clear them out too?
+    
+        foreach (var listener in item.Traits.OfType<IGameEventListener>())
+        {
+            RemoveListener(listener);
+        }
     }
 
     public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
@@ -498,5 +500,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             _endOfRoundListeners.Remove(listener);
         else
             throw new NotImplementedException("I haven't created any other event listeners yet :o");
+    }
+
+    // Remove listener from all events it might be listening for, although I
+    // have only one type right now
+    public void RemoveListener(IGameEventListener listener)
+    {
+        _endOfRoundListeners.Remove(listener);
     }
 }

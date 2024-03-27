@@ -535,7 +535,6 @@ class FlameLightSourceTrait : Trait, IGameEventListener, IUSeable
 
                 gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
 
-                var cb = item.ContainedBy;
                 var msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
                 gs.UI.AlertPlayer([msg], "");
             }
