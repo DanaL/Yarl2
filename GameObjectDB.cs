@@ -34,7 +34,7 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
     }    
 }
 
-record struct Glyph(char Ch, Colour Lit, Colour Unlit);
+record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg);
 
 // This feels like a bit of a hack, but quite a bit into
 // development I decided to have a Z-level for both game objects
@@ -70,7 +70,8 @@ abstract class GameObj: IZLevel
     public virtual string FullName => Name;
     public virtual Glyph Glyph { get; set; }
     public Loc Loc { get; set; }
-    
+    public List<Trait> Traits { get; set; } = [];
+
     public ulong ID { get; set; }
 
     public virtual List<(ulong, int, TerrainFlag)> Auras(GameState gs) => [];
@@ -84,12 +85,16 @@ abstract class GameObj: IZLevel
     {
         return 0;
     }
+
+    public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
+                                       .OfType<T>().Any();
+    public bool HasTrait<T>() => Traits.OfType<T>().Any();
 }
 
 // Structure to store where items are in the world
 class GameObjectDB
 {
-    public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK);
+    public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK);
 
     public Dictionary<Loc, List<Item>> _itemLocs = [];
     public Dictionary<Loc, ulong> _actorLocs = [];

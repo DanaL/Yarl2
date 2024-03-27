@@ -284,7 +284,8 @@ class MainDungeonBuilder : DungeonBuilder
         }
 
         var doc = new Item() { Name = desc, Type = ItemType.Document, Stackable = false,
-                                    Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY), Adjectives = [ adjective] };
+                                    Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK), 
+                                    Adjectives = [ adjective] };
         var rt = new ReadableTrait(documentText)
         {
             ContainerID = doc.ID

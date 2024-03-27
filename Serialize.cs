@@ -220,7 +220,7 @@ class ItemSaver
     static Glyph TextToGlyph(string text)
     {
         var p = text.Split(';');
-        return new Glyph(p[0][0], ColourSave.TextToColour(p[1]), ColourSave.TextToColour(p[2]));
+        return new Glyph(p[0][0], ColourSave.TextToColour(p[1]), ColourSave.TextToColour(p[2]), Colours.BLACK);
     }
 
     static Loc TextToLoc(string text)

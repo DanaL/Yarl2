@@ -130,6 +130,11 @@ class StickyTrait : Trait
     public override string AsText() => "Sticky";
 }
 
+class FlammableTrait : Trait
+{
+    public override string AsText() => "Flammable";
+}
+
 class PlantTrait : Trait
 {
     public override string AsText() => "Plant";
@@ -268,6 +273,39 @@ class PoisonerTrait: Trait
     public int Strength { get; set; }
 
     public override string AsText() => $"Poisoner#{DC}#{Strength}";
+}
+
+class OnFireTrait : Trait, IGameEventListener
+{
+    public ulong ContainerID { get; set; }
+    public override string AsText() => $"OnFire#{Expired}";
+    public bool Expired { get; set; } = false;
+
+    public void Alert(UIEventType eventType, GameState gs)
+    {
+        if (gs.ObjDB.GetObj(ContainerID) is Item fireSrc)
+        {
+            var victim = gs.ObjDB.Occupant(fireSrc.Loc);
+            if (victim is null)
+                return;
+                
+            int fireDmg = gs.UI.Rng.Next(8) + 1;
+            List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
+            int hpLeft = victim.ReceiveDmg(fire, 0);
+
+            if (hpLeft < 1)
+            {
+                string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
+                gs.UI.AlertPlayer([new Message(msg, victim.Loc)], "");
+                gs.ActorKilled(victim);
+            }
+            else
+            {
+                string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
+                gs.UI.AlertPlayer([new Message(txt, victim.Loc)], "");
+            }
+        }        
+    }
 }
 
 class PoisonedTrait : Trait, IGameEventListener

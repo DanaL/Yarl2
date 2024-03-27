@@ -826,7 +826,7 @@ abstract class UserInterface
         Sqr sqr; 
         if (z > tile.Z())
         {            
-            sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
+            sqr = new Sqr(glyph.Lit, glyph.Bg, glyph.Ch);
             if (item)
                 memory = sqr with { Fg = glyph.Unlit};
         }

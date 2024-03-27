@@ -84,7 +84,7 @@ class Village
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
             Town = town,
-            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -104,7 +104,7 @@ class Village
             Appearance = VillagerAppearance(rng),
             Town = town,
             Markup = 1.25 + rng.NextDouble() / 2,
-            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Market.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -133,7 +133,7 @@ class Village
             Appearance = VillagerAppearance(rng),
             Town = town,
             Markup = 1.5 + rng.NextDouble() / 2,
-            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE)
+            Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
@@ -196,7 +196,7 @@ class Village
             Town = town,
             Status = ActorStatus.Indifferent,
             Appearance = $"{adj} {dogType} with {colourDesc} fur",
-            Glyph = new Glyph('d', colour, colour),
+            Glyph = new Glyph('d', colour, colour, Colours.BLACK),
             Loc = RandomOutdoorLoc(map, town, rng)
         };
 

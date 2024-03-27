@@ -729,9 +729,8 @@ class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajector
     }
 }
 
-class WebAction(Actor caster, GameState gs, Loc target) : Action
+class WebAction(GameState gs, Loc target) : Action
 {
-    readonly ulong _casterID = caster.ID;
     readonly GameState _gs = gs;
     readonly Loc _target = target;
 
@@ -740,8 +739,6 @@ class WebAction(Actor caster, GameState gs, Loc target) : Action
         var w = ItemFactory.Web();
         _gs.ObjDB.Add(w);
         _gs.ItemDropped(w, _target);
-
-        //_gs.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2 });
 
         foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
         {
@@ -968,8 +965,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
         var landingPt = FinalLandingSpot(pts.Last());
         _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
         _gs.ItemDropped(ammo, landingPt);
-        ammo.Equiped = false;
-        ammo.SetZ(-1);
+        ammo.Equiped = false;        
         _actor.CalcEquipmentModifiers();
 
         var tile = _gs.TileAt(landingPt);

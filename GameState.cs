@@ -138,8 +138,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        ObjDB.SetToLoc(loc, item);
-
+        
         var tile = TileAt(loc);
         List<Message> msgs = [];
         foreach (var flag in tile.TerrainFlags().Where(t => t != TerrainFlag.None))
@@ -150,8 +149,53 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
                 msgs.Add(new Message(msg, loc));
             }                
         }
+
+        foreach (var t in item.Traits)
+        {
+            if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)
+                ApplyDamageEffectToLoc(loc, DamageType.Fire);
+        }
+
         if (msgs.Count > 0)
             UI.AlertPlayer(msgs, "");
+
+        ObjDB.SetToLoc(loc, item);
+    }
+
+    public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
+    {
+        List<Item> items = [];
+        items.AddRange(ObjDB.ItemsAt(loc));
+        items.AddRange(ObjDB.EnvironmentsAt(loc));
+        List<Message> messages = [];
+        bool fireStarted = false;
+
+        switch (damageType)
+        {
+            case DamageType.Fire:
+                foreach (var item in items)
+                {
+                    if (item.HasTrait<FlammableTrait>())
+                    {
+                        messages.Add(new Message($"{item.FullName.DefArticle().Capitalize()} burns up!", loc));
+                        ObjDB.RemoveItemFromGame(loc, item);
+                        fireStarted = true;
+                    }                        
+                }
+                break;
+            default:
+                break;
+        }
+
+        if (fireStarted)
+        {
+            var fire = ItemFactory.Fire(this);
+            fire.Loc = loc;
+            ObjDB.SetToLoc(loc, fire);
+        }
+
+        if (messages.Count > 0)
+            UI.AlertPlayer(messages, "");
     }
 
     public void ActorKilled(Actor victim)

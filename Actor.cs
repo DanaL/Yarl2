@@ -68,10 +68,7 @@ class Actor : GameObj, IPerformer, IZLevel
     {
         Inventory = new Inventory(ID);        
     }
-
-    public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
-                                       .OfType<T>().Any();
-    public bool HasTrait<T>() => Traits.OfType<T>().Any();
+    
     public override int Z() => HasActiveTrait<FlyingTrait>() ? FLYING_Z : DEFAULT_Z;
     
     public override string FullName => Name.DefArticle();    
@@ -231,7 +228,7 @@ class MonsterFactory
         var fields = template.Split('|').Select(f => f.Trim()).ToArray();
 
         var glyph = new Glyph(fields[0][0], ColourSave.TextToColour(fields[1]),
-                                            ColourSave.TextToColour(fields[2]));
+                                            ColourSave.TextToColour(fields[2]), Colours.BLACK);
         
         var mv = TextToMove(fields[10]);
         var m = new Monster()
