@@ -55,10 +55,6 @@ abstract class UserInterface
     public Sqr[,] SqsOnScreen;
     public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
-    // It's convenient for other classes to ask what dungeon and level we're on
-    public int CurrentDungeon => GameState is not null ? GameState.CurrDungeon : -1;
-    public int CurrentLevel => GameState is not null ? GameState.CurrLevel : -1;
-
     protected List<string> MenuRows { get; set; } = [];
 
     protected bool ClosingPopUp { get; set; }

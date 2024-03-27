@@ -9,15 +9,12 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 abstract class Animation
 {
     public DateTime Expiry { get; set; }
     public abstract void Update();
-    public int Delay { get; init; }
 }
 
 class AimAnimation : Animation
@@ -70,7 +67,6 @@ class ArrowAnimation : Animation
         {
             _frames.Add((pts[j+1], CalcChar(pts[j], pts[j+1])));
         }
-        Delay = 150;
     }
 
     static char CalcChar(Loc a,  Loc b)
@@ -94,7 +90,7 @@ class ArrowAnimation : Animation
         var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
 
-        if ((DateTime.Now - _lastFrame).TotalMicroseconds > Delay)
+        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
         {
             _lastFrame = DateTime.Now;
             ++_frame;
@@ -126,20 +122,16 @@ class ThrownMissileAnimation : Animation
         _frame = 0;
         _lastFrame = DateTime.Now;
         _ammo = ammo;
-        Delay = 250;
     }
 
     public override void Update()
     {
         var pt = _pts[_frame];
-        if (_frame > 0)
-            _ui.GameState.CheckMovedEffects(_ammo, _pts[_frame - 1], _pts[_frame]);
-
-        var sq = new Sqr(_glyph.Lit, Colours.BLACK, _glyph.Ch);        
+        var sq = new Sqr(_glyph.Lit, Colours.BLACK, _glyph.Ch);
         var (scrR, scrC) = _ui.LocToScrLoc(pt.Row, pt.Col);
         _ui.SqsOnScreen[scrR, scrC] = sq;
         
-        if ((DateTime.Now - _lastFrame).TotalMicroseconds > Delay)
+        if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
         {
             _lastFrame = DateTime.Now;
             ++_frame;
@@ -166,8 +158,8 @@ class ThrownMissileAnimation : Animation
 class BarkAnimation : Animation
 {    
     readonly UserInterface _ui;
-    readonly Actor _actor;
-    readonly string _bark;
+    Actor _actor;
+    string _bark;
 
     // Duration in milliseconds
     public BarkAnimation(UserInterface ui, int duration, Actor actor, string bark)
@@ -247,7 +239,7 @@ class SqAnimation : Animation
     Colour _fgColour;
     Colour _bgColour;
     char _ch;
-    
+
     public SqAnimation(GameState gs, Loc loc, Colour fg, Colour bg, char ch)
     {
         _gs = gs;
@@ -318,17 +310,16 @@ class TorchLightAnimationListener : Animation
         _ui = ui;
         _lastFrame = DateTime.Now;
         _rng = rng;
-        Delay = 500;
     }
 
     public override void Update()
     {
-        if (_ui.CurrentDungeon == 0)
+        if (_ui.GameState.InWilderness)
             return; // we're in the wilderness
         
         var dd = DateTime.Now - _lastFrame;
 
-        if (dd.TotalMilliseconds > Delay)
+        if (dd.TotalMilliseconds > 500)
         {
             PickFlickeringSqs();
             _lastFrame = DateTime.Now;
@@ -378,20 +369,12 @@ class CloudAnimationListener : Animation
     bool _paused;
     Random _rng;
     
-    bool InWilderness => _ui.CurrentDungeon == 0 && _ui.CurrentLevel == 0;
-
     public CloudAnimationListener(UserInterface ui, Random rng)
     {
         Expiry = DateTime.MaxValue;
         _ui = ui;
         _lastFrame = DateTime.Now;
         _rng = rng;
-
-        // Only make a cloud if we're in the wilderness
-        if (InWilderness)
-            MakeCloud();
-
-        Delay = 200;
     }
 
     void MakeCloud()
@@ -473,18 +456,18 @@ class CloudAnimationListener : Animation
     {
         var dd = DateTime.Now - _lastFrame;
 
-        if (!_paused && !InWilderness)
+        if (!_paused && !_ui.GameState.InWilderness)
         {
             _paused = true;
             EraseCloud();
         }
-        else if (_paused && InWilderness && DateTime.Now > _nextCloud)
+        else if (_paused && _ui.GameState.InWilderness && DateTime.Now > _nextCloud)
         {
             _paused = false;
             MakeCloud();
         }
 
-        if (!_paused && dd.TotalMilliseconds >= Delay)
+        if (!_paused && dd.TotalMilliseconds >= 200)
         {            
             AnimationStep();
             _lastFrame = DateTime.Now;
