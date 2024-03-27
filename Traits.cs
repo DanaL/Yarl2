@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata.Ecma335;
+
 namespace Yarl2;
 
 record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
@@ -33,8 +35,7 @@ abstract class Trait
     public virtual bool Active => true;
     public virtual bool Aura => false;
     public virtual TerrainFlag Effect => TerrainFlag.None;
-    public Dictionary<Attribute, Stat> Stats { get; set; } = [];
-    public virtual int Radius => 0;
+    public virtual int Radius { get; set; } = 0;
     public ulong ExpiresOn { get; set; } = ulong.MaxValue;   
 }
 
@@ -286,6 +287,8 @@ class OnFireTrait : Trait, IGameEventListener
     {
         gs.UI.AlertPlayer([new Message("The fire burns out.", fireSrc.Loc)], "");
         gs.ObjDB.RemoveItemFromGame(fireSrc.Loc, fireSrc);
+        gs.ItemDestroyed(fireSrc, fireSrc.Loc);
+
         Expired = true;
     }
 
@@ -437,17 +440,31 @@ class CountdownTrait : Trait, IGameEventListener
     }
 }
 
-class FlameLightSourceTrait : Trait, IGameEventListener, IUSeable
+// A light source that doesn't have fuel/burn out on its own.
+class LightSourceTrait : Trait
+{
+    public ulong ContainerID { get; set; }
+    public override int Radius { get; set; }
+    public sealed override bool Aura => true;
+    public sealed override TerrainFlag Effect => TerrainFlag.Lit;
+
+    public override string AsText() => $"LightSource#{ContainerID}#{Radius}";    
+}
+
+class TorchTrait : Trait, IGameEventListener, IUSeable
 {
     public ulong ContainerID { get; set; }
     public bool Lit { get; set; }
     public int Fuel { get; set; }
-    public override bool Aura => true;
-    public override TerrainFlag Effect => TerrainFlag.Lit;
-    public override string Desc() => Lit ? "(lit)" : "";    
+    public sealed override bool Aura => true;
+    public sealed override TerrainFlag Effect => TerrainFlag.Lit;
+    public override string Desc() => Lit ? "(lit)" : "";
 
     public override bool Active => Lit;
-    public override int Radius => Lit ? Stats[Attribute.Radius].Max : 0;
+    public override int Radius
+    {
+        get => Lit ? 5 : 0;
+    }
 
     public bool Expired { get; set; } = false;
 
@@ -585,14 +602,13 @@ class TraitFactory
                     Bonus = int.Parse(pieces[3])
                 };
                 break;
-            case "LightSource":
-                trait = new FlameLightSourceTrait()
+            case "Torch":
+                trait = new TorchTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
                     Lit = bool.Parse(pieces[2]),                    
                     Fuel = int.Parse(pieces[4])                    
-                };
-                trait.Stats[Attribute.Radius].SetMax(5);
+                };                
                 break;
             case "Readable":
                 trait = new ReadableTrait(pieces[1].Replace("<br/>", "\n"));

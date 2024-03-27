@@ -148,7 +148,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             if (msg != "")
             {
                 msgs.Add(new Message(msg, loc));
-            }                
+            }
         }
 
         foreach (var t in item.Traits)
@@ -206,6 +206,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
             var fire = ItemFactory.Fire(this);
             fire.Loc = loc;
             ObjDB.SetToLoc(loc, fire);
+            CheckMovedEffects(fire, Loc.Nowhere, loc);
 
             var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
             if (tile.Type == TileType.Grass)
@@ -443,16 +444,21 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui)
 
     public void CheckMovedEffects(GameObj obj, Loc start, Loc dest)
     {
+        Map? startMap = null;
         // first we want to clear out the old effects
-        var startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
-        startMap.RemoveEffectsFor(obj.ID);
+        if (start != Loc.Nowhere)
+        {
+            startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
+            startMap.RemoveEffectsFor(obj.ID);
+        }
 
         var destMap = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
         var auras = obj.Auras(this).Where(a => a.Item2 > 0);
         foreach (var aura in auras)
         {
             ulong id = aura.Item1;
-            startMap.RemoveEffectsFor(id);
+
+            startMap?.RemoveEffectsFor(id);
             int radius = aura.Item2;
             TerrainFlag effect = aura.Item3;
             

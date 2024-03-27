@@ -181,9 +181,8 @@ class ItemFactory
             case "torch":
                 item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
                                     Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK) };
-                var ls = new FlameLightSourceTrait() {
+                var ls = new TorchTrait() {
                     ContainerID = item.ID, Fuel = 500, Lit = false };
-                ls.Stats[Attribute.Radius] = new Stat(5);
                 item.Traits.Add(ls);
                 item.Traits.Add(new FlammableTrait());
                 break;
@@ -266,7 +265,7 @@ class ItemFactory
         var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
         gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
         fire.Traits.Add(onFire);
-
+        fire.Traits.Add(new LightSourceTrait() { Radius = 1, ContainerID = fire.ID });
         return fire;
     }
 
