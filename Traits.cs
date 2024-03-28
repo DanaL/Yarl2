@@ -302,6 +302,8 @@ class OnFireTrait : Trait, IGameEventListener
             }
 
             var victim = gs.ObjDb.Occupant(fireSrc.Loc);
+            gs.ApplyDamageEffectToLoc(fireSrc.Loc, DamageType.Fire);
+
             if (victim is not null) {
                 int fireDmg = gs.Rng.Next(8) + 1;
                 List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
