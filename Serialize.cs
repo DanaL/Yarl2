@@ -14,6 +14,11 @@ using System.Text.Json.Serialization;
 
 namespace Yarl2;
 
+//record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
+//                                GameObjDBSaver ItemDB, ulong Turn, List<MsgHistory> MessageHistory);
+
+record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, PlayerSave Player);
+
 // When I started working on saving the game, I had a bunch of problems with
 // Json serialize. It particularly seemed to hate that Tile was an abstract
 // class would throw an Exception trying to deserialize BaseTiles (but
@@ -28,48 +33,92 @@ namespace Yarl2;
 // actually a concern for my game's save files)
 internal class Serialize
 {
-    public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState, List<MsgHistory> MessageHistory)
+    public static void WriteSaveGame(GameState gameState)
     {
-        var p = PlayerSaver.Shrink(player);
-        var sgi = new SaveGameInfo(p, CampaignSaver.Shrink(campaign), gameState.CurrLevel, 
-                                    gameState.CurrDungeon, 
-                                    GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn, MessageHistory);
+        GameObjDBSave.Shrink(gameState.ObjDb);
+
+        var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), PlayerSave.Shrink(gameState.Player));
+
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
-
         // In the future, when this is a real game, I'm going to have check player names for invalid characters or build a 
         // little database of players vs saved games
-        string filename = $"{playerName}.dat";
+        string filename = $"{gameState.Player.Name}.dat";
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
+    public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState, List<MsgHistory> MessageHistory)
+    {
+        //var p = PlayerSaver.Shrink(player);
+        //var sgi = new SaveGameInfo(p, CampaignSaver.Shrink(campaign), gameState.CurrLevel, 
+        //                            gameState.CurrDungeon, 
+        //                            GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn, MessageHistory);
+        //var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
+        //                new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
+
+        //// In the future, when this is a real game, I'm going to have check player names for invalid characters or build a 
+        //// little database of players vs saved games
+        //string filename = $"{playerName}.dat";
+        //File.WriteAllBytes(filename, bytes);
+    }
+
+    //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
+    public static (GameState, Loc) LoadSaveGame(string playerName, Options options, UserInterface ui)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
         var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
-        var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
 
-        var p = PlayerSaver.Inflate(sgi.Player, objDB);
-        var c = CampaignSaver.Inflate(sgi.Campaign);
-        c.CurrentDungeon = sgi.CurrentDungeon;
-        c.CurrentLevel = sgi.CurrentLevel;        
-        objDB._objs.Add(p.ID, p);
-        objDB.AddToLoc(p.Loc, p);
-        
-        return (p, c, objDB, sgi.Turn, sgi.MessageHistory);
+        var campaign = CampaignSaver.Inflate(sgi.Campaign);
+        var gs = GameStateSave.Inflate(campaign, sgi.GameStateSave, options, ui);
+        gs.Player = PlayerSave.Inflate(sgi.Player);
+        //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
+        return (gs, gs.Player.Loc);
     }
+    //{
+
+    //    var p = PlayerSaver.Inflate(sgi.Player, objDB);
+    //    var c = CampaignSaver.Inflate(sgi.Campaign);
+    //    c.CurrentDungeon = sgi.CurrentDungeon;
+    //    c.CurrentLevel = sgi.CurrentLevel;        
+    //    objDB._objs.Add(p.ID, p);
+    //    objDB.AddToLoc(p.Loc, p);
+
+    //    return (p, c, objDB, sgi.Turn, sgi.MessageHistory);
+    //}
 
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
 }
 
-class PlayerSaver
+class GameStateSave
+{
+    public int CurrLevel { get; set; }
+    public int CurrDungeonID { get; set; }
+    public ulong Turn { get; set; }
+
+    public static GameStateSave Shrink(GameState gs) => new GameStateSave()
+    {
+        CurrDungeonID = gs.CurrDungeonID,
+        CurrLevel = gs.CurrLevel,
+        Turn = gs.Turn
+    };
+
+    public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
+    {
+        var gs = new GameState(null, camp, opt, ui, new Random(), 0);
+        gs.CurrDungeonID = gss.CurrDungeonID;
+        gs.CurrLevel = gs.CurrLevel;
+        gs.Turn = gs.Turn;
+
+        return gs;
+    }
+}
+
+class PlayerSave
 {
     public ulong ID { get; set; }
     public string Name { get; set; }
-    public int MaxHP { get; set; }
-    public int CurrHP { get; set; }
-    public string Loc {  get; set; }
+    public Loc Loc {  get; set; }
 
     [JsonInclude]
     public InventorySaver Inventory { get; set; }
@@ -77,21 +126,23 @@ class PlayerSaver
     [JsonInclude]
     public List<AttrStatKVP> Stats { get; set; }
 
-    public static PlayerSaver Shrink(Player p) => new()
+    public static PlayerSave Shrink(Player p) => new()
     {
         ID = p.ID,
         Name = p.Name,
         Stats = AttrStatKVP.Save(p.Stats),
-        Inventory = InventorySaver.Shrink(p.Inventory),
-        Loc = p.Loc.ToString()
+        Loc = p.Loc
+        //Inventory = InventorySaver.Shrink(p.Inventory),
+        //Loc = p.Loc.ToString()
     };
 
-    public static Player Inflate(PlayerSaver sp, GameObjectDB objDb) => new Player(sp.Name)
+    public static Player Inflate(PlayerSave sp) => new Player(sp.Name)
     {
         ID = sp.ID,
         Stats = AttrStatKVP.Load(sp.Stats),
-        Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
-        Loc = Yarl2.Loc.FromText(sp.Loc)
+        Loc = sp.Loc
+        //Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
+        //Loc = Yarl2.Loc.FromText(sp.Loc)
     };
 }
 
@@ -148,59 +199,6 @@ record AttrStatKVP(string Attr, Stat Stat)
 
 record InvItemKVP(char Slot, string ItemText);
 
-class ColourSave
-{
-    public static string ColourToText(Colour colour)
-    {
-        if (colour == Colours.WHITE) return "white";
-        else if (colour == Colours.BLACK) return "black";
-        else if (colour == Colours.GREY) return "grey";
-        else if (colour == Colours.LIGHT_GREY) return "lightgrey";
-        else if (colour == Colours.DARK_GREY) return "darkgrey";
-        else if (colour == Colours.YELLOW) return "yellow";
-        else if (colour == Colours.YELLOW_ORANGE) return "yelloworange";
-        else if (colour == Colours.LIGHT_BROWN) return "lightbrown";
-        else if (colour == Colours.BROWN) return "brown";
-        else if (colour == Colours.GREEN) return "green";
-        else if (colour == Colours.DARK_GREEN) return "darkgreen";
-        else if (colour == Colours.LIME_GREEN) return "limegreen";
-        else if (colour == Colours.BLUE) return "blue";
-        else if (colour == Colours.LIGHT_BLUE) return "lightblue";
-        else if (colour == Colours.DARK_BLUE) return "darkblue";
-        else if (colour == Colours.BRIGHT_RED) return "brightred";
-        else if (colour == Colours.DULL_RED) return "dullred";
-        else if (colour == Colours.TORCH_ORANGE) return "torchorange";
-        else if (colour == Colours.TORCH_RED) return "torchred";
-        else if (colour == Colours.TORCH_YELLOW) return "torchyellow";
-        else throw new Exception("Hmm I don't know that colour");
-    }
-  
-    public static Colour TextToColour(string colour)
-    {
-        if (colour == "white") return Colours.WHITE;
-        else if (colour == "black") return Colours.BLACK;
-        else if (colour == "grey") return Colours.GREY;
-        else if (colour == "lightgrey") return Colours.LIGHT_GREY;
-        else if (colour == "darkgrey") return Colours.DARK_GREY;
-        else if (colour == "yellow") return Colours.YELLOW;
-        else if (colour == "yelloworange") return Colours.YELLOW_ORANGE;
-        else if (colour == "lightbrown") return Colours.LIGHT_BROWN;
-        else if (colour == "brown") return Colours.BROWN;
-        else if (colour == "green") return Colours.GREEN;
-        else if (colour == "darkgreen") return Colours.DARK_GREEN;
-        else if (colour == "limegreen") return Colours.LIME_GREEN;
-        else if (colour == "blue") return Colours.BLUE;
-        else if (colour == "lightblue") return Colours.LIGHT_BLUE;
-        else if (colour == "darkblue") return Colours.DARK_BLUE;
-        else if (colour == "brightred") return Colours.BRIGHT_RED;
-        else if (colour == "dullred") return Colours.DULL_RED;
-        else if (colour == "torchorange") return Colours.TORCH_ORANGE;
-        else if (colour == "torchred") return Colours.TORCH_RED;
-        else if (colour == "torchyellow") return Colours.TORCH_YELLOW;
-        else throw new Exception("Hmm I don't know that colour");
-    }
-}
-
 // The Item class and its subclasses has proven annoying to serialize so I'm
 // going to do a bespoke text format for them. Not too happy about this because
 // I'll probably create a bunch of bugs in the meantime :'(
@@ -215,12 +213,11 @@ class ItemSaver
         "Document" => ItemType.Document,
         _ => throw new Exception($"Hmm I don't know about Item Type {text}")
     };
-
-    static string GlyphToText(Glyph glyph) => $"{glyph.Ch};{ColourSave.ColourToText(glyph.Lit)};{ColourSave.ColourToText(glyph.Unlit)}";
+   
     static Glyph TextToGlyph(string text)
     {
         var p = text.Split(';');
-        return new Glyph(p[0][0], ColourSave.TextToColour(p[1]), ColourSave.TextToColour(p[2]), Colours.BLACK);
+        return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.BLACK);
     }
 
     static Loc TextToLoc(string text)
@@ -234,7 +231,7 @@ class ItemSaver
         string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.Stackable}|{item.Slot}|";
         txt += $"{item.Equiped}|{item.Value}|{item.ContainedBy}|";
         txt += string.Join(',', item.Adjectives);
-        txt += $"|" + GlyphToText(item.Glyph);
+        //txt += $"|" + GlyphToText(item.Glyph);
 
         var traits = string.Join(';', item.Traits.Select(t => t.AsText()));
         if (traits.Length > 0)
@@ -533,7 +530,7 @@ internal class MapSaver
 // key so I have to pack and unpack the ItemDB. I wonder how much of a problem
 // this is going to be when the there's a dungeon full of items... (I'd probably
 // need to switch to a per-level itemDB)
-class GameObjDBSaver
+class GameObjDBSave
 {
     // Come to think of it, maybe the ID seed belongs in the GameObjDB class
     // instead of being a static field in GameObj hmmm
@@ -544,28 +541,33 @@ class GameObjDBSaver
     [JsonInclude]
     public List<MonsterSaver> Monsters = [];
     
-    public static GameObjDBSaver Shrink(GameObjectDB goDB)
+    public static GameObjDBSave Shrink(GameObjectDB objDb)
     {
-        var sidb = new GameObjDBSaver{ GameObjSeed = GameObj.Seed };
+        var sidb = new GameObjDBSave{ GameObjSeed = GameObj.Seed };
 
-        foreach (var kvp in goDB._itemLocs)
+        foreach (var kvp in objDb.Objs)
         {
-            var itemStrs = kvp.Value.Select(ItemSaver.ItemToText).ToList();
-            sidb.ItemsAtLoc.Add(kvp.Key.ToString(), itemStrs);
+            var obj = kvp.Value;
+            Console.WriteLine(obj.ToString());
         }
+        //foreach (var kvp in goDB._itemLocs)
+        //{
+        //    var itemStrs = kvp.Value.Select(ItemSaver.ItemToText).ToList();
+        //    sidb.ItemsAtLoc.Add(kvp.Key.ToString(), itemStrs);
+        //}
 
-        foreach (var kvp in goDB._objs)
-        {
-            if (kvp.Value is Monster m)
-            {
-                sidb.Monsters.Add(MonsterSaver.Shrink(m));
-            }
-        }
+        //foreach (var kvp in goDB._objs)
+        //{
+        //    if (kvp.Value is Monster m)
+        //    {
+        //        sidb.Monsters.Add(MonsterSaver.Shrink(m));
+        //    }
+        //}
        
         return sidb;
     }
 
-    public static GameObjectDB Inflate(GameObjDBSaver sidb)
+    public static GameObjectDB Inflate(GameObjDBSave sidb)
     {
         GameObj.SetSeed(sidb.GameObjSeed);
         var goDB = new GameObjectDB();
@@ -576,7 +578,7 @@ class GameObjDBSaver
             goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
             foreach (var item in items)
             {
-                goDB._objs.Add(item.ID, item);
+                goDB.Objs.Add(item.ID, item);
             }
         }
 
@@ -590,9 +592,6 @@ class GameObjDBSaver
         return goDB;
     }
 }
-
-record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
-                                GameObjDBSaver ItemDB, ulong Turn, List<MsgHistory> MessageHistory);
 
 // SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
 // *can* be serialized

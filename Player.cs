@@ -20,7 +20,7 @@ enum PlayerClass
 
 class Player : Actor, IPerformer
 {
-    public int MaxVisionRadius { get; set; }
+    public const int MAX_VISION_RADIUS = 25;
     public int CurrVisionRadius { get; set; }    
     public PlayerClass CharClass { get; set; }
     
@@ -29,9 +29,7 @@ class Player : Actor, IPerformer
 
     public Player(string name)
     {
-        Name = name;
-        MaxVisionRadius = 25;
-        CurrVisionRadius = MaxVisionRadius;
+        Name = name;        
         Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                         // when a Player's recover is bolstered by, like, a Potion of Speed or such?        
     }
@@ -137,7 +135,7 @@ class Player : Actor, IPerformer
         {
             var (hour, _) = gs.CurrTime();
             if (hour >= 6 && hour <= 19)
-                playerVisionRadius = MaxVisionRadius;
+                playerVisionRadius = MAX_VISION_RADIUS;
             else if (hour >= 20 && hour <= 21)
                 playerVisionRadius = 7;
             else if (hour >= 21 && hour <= 23)
@@ -254,8 +252,6 @@ class Player : Actor, IPerformer
         _accumulator = newAccumulator;
     }
 
-    private DateTime lastTurnTime = DateTime.Now;
-
     public override Action TakeTurn(UserInterface ui, GameState gameState)
     {        
         if (ui.InputBuffer.Count > 0)
@@ -323,7 +319,7 @@ class Player : Actor, IPerformer
             }
             else if (ch == ',')
             {
-                var itemStack = gameState.ObjDB.ItemsAt(Loc);
+                var itemStack = gameState.ObjDb.ItemsAt(Loc);
 
                 if (itemStack is null || itemStack.Count == 0)
                 {
@@ -434,7 +430,7 @@ class Player : Actor, IPerformer
                     if (gameState.Rng.NextDouble() < 0.666)
                     {
                         var w = ItemFactory.Web();
-                        gameState.ObjDB.Add(w);
+                        gameState.ObjDb.Add(w);
                         gameState.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2});
                     }
                 }

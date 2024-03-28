@@ -142,8 +142,8 @@ class MsgFactory
     public static Message Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDB.GetObj(subject);
-        GameObj? victim = gs.ObjDB.GetObj(obj);
+        GameObj? sub = gs.ObjDb.GetObj(subject);
+        GameObj? victim = gs.ObjDb.GetObj(obj);
 
         if (sub is not null)
         {
@@ -166,7 +166,7 @@ class MsgFactory
     public static Message Phrase(ulong subject, Verb verb, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDB.GetObj(subject);
+        GameObj? sub = gs.ObjDb.GetObj(subject);
 
         if (sub is not null)
         {
@@ -181,7 +181,7 @@ class MsgFactory
     public static Message Phrase(ulong subject, Verb verb, string obj, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDB.GetObj(subject);
+        GameObj? sub = gs.ObjDb.GetObj(subject);
         
         if (sub is not null)
         {
@@ -199,7 +199,7 @@ class MsgFactory
     public static Message Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDB.GetObj(subject);
+        GameObj? sub = gs.ObjDb.GetObj(subject);
 
         if (sub is not null)
         {

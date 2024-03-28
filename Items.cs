@@ -261,7 +261,7 @@ class ItemFactory
             Glyph = glyph
         };
         fire.SetZ(3);        
-        gs.ObjDB.Add(fire);
+        gs.ObjDb.Add(fire);
         var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
         gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
         fire.Traits.Add(onFire);

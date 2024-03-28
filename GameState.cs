@@ -23,9 +23,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public Options? Options { get; set; } = opts;
     public Player Player { get; set; } = p;
     public int CurrLevel { get; set; }
-    public int CurrDungeon { get; set; }
+    public int CurrDungeonID { get; set; }
     public Campaign Campaign { get; set; } = c;
-    public GameObjectDB ObjDB { get; set; } = new GameObjectDB();
+    public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
     public List<IPerformer> Performers { get; set; } = [];
     public ulong Turn { get; set; }
     public DjikstraMap? DMap { get; private set; }
@@ -84,15 +84,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public void EnterLevel(int dungeon, int level)
     {
         CurrLevel = level;
-        CurrDungeon = dungeon;
+        CurrDungeonID = dungeon;
 
         // Once the queue of actors is implemented, we will need to switch them
         // out here.
     }
 
-    public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeon];
-    public Map CurrentMap => Campaign!.Dungeons[CurrDungeon].LevelMaps[CurrLevel];
-    public bool InWilderness => CurrDungeon == 0;
+    public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeonID];
+    public Map CurrentMap => Campaign!.Dungeons[CurrDungeonID].LevelMaps[CurrLevel];
+    public bool InWilderness => CurrDungeonID == 0;
 
     // I made life difficult for myself by deciding that Turn 0 of the game is 
     // 8:00am T_T 1 turn is 10 seconds (setting aside all concerns about 
@@ -122,7 +122,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         var (d, level, row, col) = viewer.Loc;
         var map = Campaign.Dungeons[d].LevelMaps[level];
-        var fov = FieldOfView.CalcVisible(radius, row, col, map, d, level, ObjDB);
+        var fov = FieldOfView.CalcVisible(radius, row, col, map, d, level, ObjDb);
 
         return fov.Contains((level, loc.Row, loc.Col));
     }
@@ -146,7 +146,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        ObjDB.SetToLoc(loc, item);
+        ObjDb.SetToLoc(loc, item);
 
         var tile = TileAt(loc);
         List<Message> msgs = [];
@@ -173,7 +173,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
         map.RemoveEffectsFor(item.ID);
-        ObjDB.RemoveItemFromGame(loc, item);
+        ObjDb.RemoveItemFromGame(loc, item);
     
         foreach (var listener in item.Traits.OfType<IGameEventListener>())
         {
@@ -184,8 +184,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
     {
         List<Item> items = [];
-        items.AddRange(ObjDB.ItemsAt(loc));
-        items.AddRange(ObjDB.EnvironmentsAt(loc));
+        items.AddRange(ObjDb.ItemsAt(loc));
+        items.AddRange(ObjDb.EnvironmentsAt(loc));
         List<Message> messages = [];
         var tile = TileAt(loc);
         bool fireStarted = false;
@@ -213,7 +213,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
             var fire = ItemFactory.Fire(this);
             fire.Loc = loc;
-            ObjDB.SetToLoc(loc, fire);
+            ObjDb.SetToLoc(loc, fire);
             CheckMovedEffects(fire, Loc.Nowhere, loc);
 
             var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
@@ -234,7 +234,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public void ActorKilled(Actor victim)
     {
         ((IPerformer)victim).RemoveFromQueue = true;
-        ObjDB.RemoveActor(victim);
+        ObjDb.RemoveActor(victim);
 
         if (victim == Player)
         {
@@ -268,7 +268,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         }
 
         Performers.Clear();
-        Performers.AddRange(ObjDB.GetPerformers(CurrDungeon, CurrLevel));
+        Performers.AddRange(ObjDb.GetPerformers(CurrDungeonID, CurrLevel));
 
         if (curr is not null)
         {
@@ -342,7 +342,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     public void ActorMoved(Actor actor, Loc start, Loc dest)
     {        
-        ObjDB.ActorMoved(actor, start, dest);
+        ObjDb.ActorMoved(actor, start, dest);
         
         // It might be more efficient to actually calculate the squares covered
         // by the old and new locations and toggle their set difference? But
@@ -386,7 +386,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             {
                 if ((effects[k] & effect) != TerrainFlag.None) 
                 {
-                    var o = ObjDB.GetObj(k);
+                    var o = ObjDb.GetObj(k);
                     if (o is not null)
                         objs.Add(o);
                 }
@@ -432,7 +432,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                 }
 
                 // alert actors
-                var occ = ObjDB.Occupant(new Loc(CurrDungeon, CurrLevel, n.Item1, n.Item2));
+                var occ = ObjDb.Occupant(new Loc(CurrDungeonID, CurrLevel, n.Item1, n.Item2));
                 if (occ is not null)
                 {
                     occ.HearNoise(sourceID, startRow, startCol, this);
@@ -470,7 +470,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             int radius = aura.Item2;
             TerrainFlag effect = aura.Item3;
             
-            foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.DungeonID, dest.Level, ObjDB))
+            foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.DungeonID, dest.Level, ObjDb))
             {
                 destMap.ApplyEffectAt(effect, sq.Item2, sq.Item3, id);
             }
@@ -488,7 +488,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
             if (aura.Item3 == effect)
             {
-                var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, dungeon, level, ObjDB);
+                var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, dungeon, level, ObjDb);
                 foreach (var sq in sqs)
                 {
                     if (on)

@@ -45,7 +45,7 @@ class Battle
         int diffRow = (attacker.Loc.Row - target.Loc.Row) * 2;
         int diffCol = (attacker.Loc.Col - target.Loc.Col) * 2;
         Loc checkLoc = attacker.Loc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-        Actor? occ = gs.ObjDB.Occupant(checkLoc);
+        Actor? occ = gs.ObjDb.Occupant(checkLoc);
         if (occ is not null && attackRoll >= occ.AC)
         {
             ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale);
@@ -63,7 +63,7 @@ class Battle
         foreach (var sq in Util.Adj4Sqs(target.Loc.Row, target.Loc.Col))
         {
             var loc = target.Loc with { Row = sq.Item1, Col = sq.Item2 };
-            var occ = gs.ObjDB.Occupant(loc);
+            var occ = gs.ObjDb.Occupant(loc);
             if (occ is not null && occ.ID != attacker.ID && adjToAtt.Contains((occ.Loc.Row, occ.Loc.Col)))
             {
                 if (attackRoll >= occ.AC)

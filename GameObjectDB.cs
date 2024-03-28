@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 // I'm only doing this because the JSONSerializer can't handle
@@ -24,7 +26,7 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
         return this with { Row = Row + RowDelta, Col = Col + ColDelta };
     }
 
-    public readonly override string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+    public override readonly string ToString() => $"{DungeonID},{Level},{Row},{Col}";
 
     public static Loc FromText(string text)
     {
@@ -34,7 +36,13 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
     }    
 }
 
-record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg);
+record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg)
+{
+    public override string ToString()
+    {
+        return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(Bg)}";
+    }
+}
 
 // This feels like a bit of a hack, but quite a bit into
 // development I decided to have a Z-level for both game objects
@@ -64,7 +72,6 @@ interface IGameEventListener
 
 abstract class GameObj: IZLevel
 {
-    public const ulong PLAYER_ID = 1;
     private static ulong IDSeed = 2;
     public string Name { get; set; } = "";
     public virtual string FullName => Name;
@@ -89,6 +96,23 @@ abstract class GameObj: IZLevel
     public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
                                        .OfType<T>().Any();
     public bool HasTrait<T>() => Traits.OfType<T>().Any();
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append(Name);
+        sb.Append('|');
+        sb.Append(ID);
+        sb.Append('|');
+        sb.Append(Glyph.ToString());
+        sb.Append('|');
+        sb.Append(Loc.ToString());
+        sb.Append('|');
+        string traits = string.Join(",", Traits.Select(t => t.AsText()));
+        sb.Append(traits);
+
+        return sb.ToString();
+    }
 }
 
 // Structure to store where items are in the world
@@ -98,7 +122,7 @@ class GameObjectDB
 
     public Dictionary<Loc, List<Item>> _itemLocs = [];
     public Dictionary<Loc, ulong> _actorLocs = [];
-    public Dictionary<ulong, GameObj> _objs = [];
+    public Dictionary<ulong, GameObj> Objs = [];
 
     public bool ItemsWithEffect(Loc loc, TerrainFlag flag)
     {
@@ -125,8 +149,8 @@ class GameObjectDB
 
         if (_actorLocs.TryGetValue(loc, out ulong id))
         {
-            glyph = _objs[id].Glyph;
-            z = _objs[id].Z();
+            glyph = Objs[id].Glyph;
+            z = Objs[id].Z();
         }
         
         if (_itemLocs.TryGetValue(loc, out var items))
@@ -152,7 +176,7 @@ class GameObjectDB
     public Glyph GlyphAt(Loc loc)
     {
         if (_actorLocs.TryGetValue(loc, out ulong id))
-            return _objs[id].Glyph;
+            return Objs[id].Glyph;
         else
             return ItemGlyphAt(loc);
     }
@@ -170,7 +194,7 @@ class GameObjectDB
 
     public void RemoveActor(Actor actor)
     {
-        _objs.Remove(actor.ID);
+        Objs.Remove(actor.ID);
         _actorLocs.Remove(actor.Loc);
     }
 
@@ -178,7 +202,7 @@ class GameObjectDB
     {
         if (_actorLocs.TryGetValue(loc, out ulong objId))
         {
-            if (_objs.TryGetValue(objId, out var actor))
+            if (Objs.TryGetValue(objId, out var actor))
             {
                 return (Actor)actor;
             }
@@ -191,14 +215,14 @@ class GameObjectDB
 
     public GameObj? GetObj(ulong id) 
     {
-        if (!_objs.TryGetValue(id, out GameObj? val))
+        if (!Objs.TryGetValue(id, out GameObj? val))
             return null;
         return val;
     }
 
     public void Add(GameObj obj)
     {
-        _objs[obj.ID] = obj;
+        Objs[obj.ID] = obj;
     }
 
     public void AddToLoc(Loc loc, Actor actor)
@@ -251,7 +275,7 @@ class GameObjectDB
     public void RemoveItemFromGame(Loc loc, Item item)
     {
         _itemLocs[loc].Remove(item);
-        _objs.Remove(item.ID);
+        Objs.Remove(item.ID);
     }
 
     public void ActorMoved(Actor a, Loc from, Loc to)
@@ -279,7 +303,7 @@ class GameObjectDB
 
         foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
         {
-            var actor = _objs[_actorLocs[loc]] as Actor;
+            var actor = Objs[_actorLocs[loc]] as Actor;
             if (actor is IPerformer performer)
                 performers.Add(performer);
 

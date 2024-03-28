@@ -223,7 +223,7 @@ class BarkAnimation : Animation
         if (!_gs.LOSBetween(loc, playerLoc)) 
             return;
 
-        if (loc.DungeonID == _gs.CurrDungeon && loc.Level == _gs.CurrLevel)
+        if (loc.DungeonID == _gs.CurrDungeonID && loc.Level == _gs.CurrLevel)
         {
             var ui = _gs.UIRef();
             var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, playerLoc.Row, playerLoc.Col);
@@ -290,7 +290,7 @@ class HitAnimation : Animation
 
     public override void Update()
     {
-        var occ = _gs.ObjDB.Occupant(_loc);
+        var occ = _gs.ObjDb.Occupant(_loc);
         if (occ is null || occ.ID != _victimID)
             return;
 

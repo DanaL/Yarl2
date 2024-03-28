@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace Yarl2;
@@ -23,6 +24,7 @@ enum Dir { North, South, East, West }
 
 class Colours
 {
+    public static readonly Colour NULL = new(0, 0, 0, 0);
     public static readonly Colour BLACK = new(0, 0 , 0, 255);
     public static readonly Colour WHITE = new(255, 255, 255, 255);
     public static readonly Colour GREY = new(136, 136, 136, 255);
@@ -47,6 +49,58 @@ class Colours
     public static readonly Colour FAR_BELOW = new(55, 198, 255, 75);
     public static readonly Colour HILITE = new(255, 255, 53, 128);
     public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);
+
+    public static string ColourToText(Colour colour)
+    {
+        if (colour == WHITE) return "white";
+        else if (colour == BLACK) return "black";
+        else if (colour == GREY) return "grey";
+        else if (colour == LIGHT_GREY) return "lightgrey";
+        else if (colour == DARK_GREY) return "darkgrey";
+        else if (colour == YELLOW) return "yellow";
+        else if (colour == YELLOW_ORANGE) return "yelloworange";
+        else if (colour == LIGHT_BROWN) return "lightbrown";
+        else if (colour == BROWN) return "brown";
+        else if (colour == GREEN) return "green";
+        else if (colour == DARK_GREEN) return "darkgreen";
+        else if (colour == LIME_GREEN) return "limegreen";
+        else if (colour == BLUE) return "blue";
+        else if (colour == LIGHT_BLUE) return "lightblue";
+        else if (colour == DARK_BLUE) return "darkblue";
+        else if (colour == BRIGHT_RED) return "brightred";
+        else if (colour == DULL_RED) return "dullred";
+        else if (colour == TORCH_ORANGE) return "torchorange";
+        else if (colour == TORCH_RED) return "torchred";
+        else if (colour == TORCH_YELLOW) return "torchyellow";
+        else if (colour == NULL) return "null";
+        else throw new Exception($"Hmm I don't know that colour {colour}");
+    }
+
+    public static Colour TextToColour(string colour)
+    {
+        if (colour == "white") return WHITE;
+        else if (colour == "black") return BLACK;
+        else if (colour == "grey") return GREY;
+        else if (colour == "lightgrey") return LIGHT_GREY;
+        else if (colour == "darkgrey") return DARK_GREY;
+        else if (colour == "yellow") return YELLOW;
+        else if (colour == "yelloworange") return YELLOW_ORANGE;
+        else if (colour == "lightbrown") return LIGHT_BROWN;
+        else if (colour == "brown") return BROWN;
+        else if (colour == "green") return GREEN;
+        else if (colour == "darkgreen") return DARK_GREEN;
+        else if (colour == "limegreen") return LIME_GREEN;
+        else if (colour == "blue") return BLUE;
+        else if (colour == "lightblue") return LIGHT_BLUE;
+        else if (colour == "darkblue") return DARK_BLUE;
+        else if (colour == "brightred") return BRIGHT_RED;
+        else if (colour == "dullred") return DULL_RED;
+        else if (colour == "torchorange") return TORCH_ORANGE;
+        else if (colour == "torchred") return TORCH_RED;
+        else if (colour == "torchyellow") return TORCH_YELLOW;
+        else if (colour == "null") return NULL;
+        else throw new Exception("Hmm I don't know that colour");
+    }
 }
 
 // Miscellaneous constants used in a few places

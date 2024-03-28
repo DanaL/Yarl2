@@ -33,7 +33,7 @@ class DumbMoveStrategy : IMoveStrategy
         foreach (var sq in adj)
         {
             var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-            if (!gs.ObjDB.Occupied(loc))
+            if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
                 return new MoveAction(actor, loc, gs);
@@ -61,7 +61,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
             {
                 return new OpenDoorAction(actor, gs.CurrentMap, loc, gs);
             }
-            else if (!gs.ObjDB.Occupied(loc))
+            else if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
                 return new MoveAction(actor, loc, gs);
@@ -81,7 +81,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
         foreach (var sq in adj)
         {
             var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-            if (!gs.ObjDB.Occupied(loc))
+            if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
                 return new MoveAction(actor, loc, gs);
@@ -138,7 +138,7 @@ class MonsterBehaviour : IBehaviour
             var arrowAnim = new ArrowAnimation(gs, MobMissileTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
             gs.UIRef().RegisterAnimation(arrowAnim);
 
-            var arrow = ItemFactory.Get("arrow", gs.ObjDB);
+            var arrow = ItemFactory.Get("arrow", gs.ObjDb);
             return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow);
         }
         else if (act is SpellActionTrait spell)
@@ -246,7 +246,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
         else if (animal.Loc.Row > centerRow && animal.Loc.Col < centerCol)
             adj = animal.Loc with { Row = animal.Loc.Row - 1, Col = animal.Loc.Col + 1 };
 
-        if (adj != animal.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDB.Occupied(adj))
+        if (adj != animal.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDb.Occupied(adj))
         {
             mvOpts.Add(adj);
             mvOpts.Add(adj);

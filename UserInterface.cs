@@ -278,11 +278,11 @@ abstract class UserInterface
                 while (line[a] != ' ')
                     ++a;
                 string colourText = line.Substring(s + 1, a - s - 1).ToLower();
-                Colour colour = ColourSave.TextToColour(colourText);
+                Colour colour = Colours.TextToColour(colourText);
                 s = ++a;
                 while (line[a] != ']')
                     a++;
-                txt = line.Substring(s, a - s);
+                txt = line[s..a];
                 pieces.Add((colour, txt));
                 s = a + 1;
             }
@@ -411,7 +411,7 @@ abstract class UserInterface
         var tile = gs.TileAt(gs.Player.Loc);
         var tileSq = TileToSqr(tile, true);
         var tileText = Tile.TileDesc(tile.Type).Capitalize();
-        foreach (var item in gs.ObjDB.EnvironmentsAt(gs.Player.Loc))
+        foreach (var item in gs.ObjDb.EnvironmentsAt(gs.Player.Loc))
         {
             if (item.Type == ItemType.Environment)
             {
@@ -425,7 +425,7 @@ abstract class UserInterface
         List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
         WriteText(tileLine, ViewHeight - 2, ViewWidth, SideBarWidth);
 
-        if (gs.CurrDungeon == 0) 
+        if (gs.CurrDungeonID == 0) 
         {
             var time = gs.CurrTime();
             var mins = time.Item2.ToString().PadLeft(2, '0');
@@ -582,6 +582,7 @@ abstract class UserInterface
         else if (action is SaveGameAction)
         {
             //Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
+            Serialize.WriteSaveGame(gs);
             throw new GameQuitException();
         }        
         else
@@ -749,7 +750,7 @@ abstract class UserInterface
     Sqr CalcSqrAtLoc(HashSet<(int, int)> visible, Dictionary<(int, int, int), Sqr> remembered, Map map,
                 int mapRow, int mapCol, int scrRow, int scrCol, GameState gs)
     {
-        var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, mapRow, mapCol);
+        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
        
         // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
         // For a square within visible that isn't lit, return remembered or Unknown
@@ -770,7 +771,7 @@ abstract class UserInterface
         if (tile.Type == TileType.Chasm)
         {
             Loc below = loc with { Level = gs.CurrLevel + 1 };
-            Glyph glyphBelow = gs.ObjDB.GlyphAt(below);
+            Glyph glyphBelow = gs.ObjDb.GlyphAt(below);
             char ch;
             if (glyphBelow != GameObjectDB.EMPTY)
             {
@@ -792,7 +793,7 @@ abstract class UserInterface
         if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)        
             return TileToSqr(ZLayer[scrRow, scrCol], true);
         
-         var (glyph, z, item) = gs.ObjDB.TopGlyph(loc);
+         var (glyph, z, item) = gs.ObjDb.TopGlyph(loc);
         // For a chasm sq, return the tile from the level below,
         // unless there's an Actor on this level (such as a flying
         // creature)
@@ -828,12 +829,12 @@ abstract class UserInterface
     void SetSqsOnScreen(GameState gs)
     {
         var cmpg = gs.Campaign;
-        var dungeon = cmpg!.Dungeons[gs.CurrDungeon];
+        var dungeon = cmpg!.Dungeons[gs.CurrDungeonID];
         var map = dungeon.LevelMaps[gs.CurrLevel];
         gs.Map = map;
         int playerRow = gs.Player.Loc.Row;
         int playerCol = gs.Player.Loc.Col;
-        var vs = FieldOfView.CalcVisible(gs.Player.MaxVisionRadius, playerRow, playerCol, map, gs.CurrDungeon, gs.CurrLevel, gs.ObjDB);        
+        var vs = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, playerRow, playerCol, map, gs.CurrDungeonID, gs.CurrLevel, gs.ObjDb);        
         var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
         gs.RecentlySeen = [];

@@ -9,13 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Metadata.Ecma335;
-
 namespace Yarl2;
 
 record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
-
-enum AuraEffect { Light }
 
 interface IReadable
 {
@@ -31,12 +27,12 @@ interface IUSeable
 abstract class Trait 
 {
     public virtual string Desc() => "";
-    public abstract string AsText();
     public virtual bool Active => true;
     public virtual bool Aura => false;
     public virtual TerrainFlag Effect => TerrainFlag.None;
     public virtual int Radius { get; set; } = 0;
-    public ulong ExpiresOn { get; set; } = ulong.MaxValue;   
+    public ulong ExpiresOn { get; set; } = ulong.MaxValue;
+    public virtual string AsText() => $"{ExpiresOn}#{Radius}";
 }
 
 // To let me classify traits that mobs can take on their turns
@@ -76,17 +72,19 @@ abstract class ActionTrait : Trait
                    .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
                    .ToList();
     }
+
+    public override string AsText() => $"{Name}#{MinRange}#{MaxRange}#{Cooldown}#" + base.AsText();
 }
 
 class SpellActionTrait : ActionTrait
 {
-    public override string AsText() => $"SpellActionTaint#{Name}#{Cooldown}";
+    public override string AsText() => $"SpellActionTrait#{Name}#{Cooldown}#" + base.AsText();
     public override bool Available(Monster mob, GameState gs) => true;
 }
 
 class FireboltActionTrait : SpellActionTrait
 {    
-    public override string AsText() => $"FireboltActionTrait#{Cooldown}#{MinRange}#{MaxRange}";
+    public override string AsText() => $"FireboltActionTrait#{Cooldown}#{MinRange}#{MaxRange}#" + base.AsText();
     public override bool Available(Monster mob, GameState gs)
     {
         if (!InRange(mob, gs))
@@ -99,7 +97,7 @@ class FireboltActionTrait : SpellActionTrait
 
 class MobMeleeTrait : ActionTrait
 {
-    public override string AsText() => $"MobMeleeTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}";
+    public override string AsText() => $"MobMeleeTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}#" + base.AsText();
     public int DamageDie { get; set; }
     public int DamageDice { get; set; }
     public DamageType DamageType { get; set; }
@@ -183,7 +181,7 @@ class FlyingTrait : Trait
     public FlyingTrait() { }
     public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
-    public override string AsText() => "Flying";
+    public override string AsText() => "Flying#" + base.ToString();
 }
 
 class OpaqueTrait : Trait
@@ -279,14 +277,14 @@ class PoisonerTrait: Trait
 class OnFireTrait : Trait, IGameEventListener
 {
     public ulong ContainerID { get; set; }
-    public override string AsText() => $"OnFire#{Expired}";
+    public override string AsText() => $"OnFire#{Expired}#{ContainerID}#{Expired}#{Lifetime}";
     public bool Expired { get; set; } = false;
     public int Lifetime { get; set; } = 0;
 
     public void Extinguish(Item fireSrc, GameState gs)
     {
         gs.WriteMessages([new Message("The fire burns out.", fireSrc.Loc)], "");
-        gs.ObjDB.RemoveItemFromGame(fireSrc.Loc, fireSrc);
+        gs.ObjDb.RemoveItemFromGame(fireSrc.Loc, fireSrc);
         gs.ItemDestroyed(fireSrc, fireSrc.Loc);
 
         Expired = true;
@@ -295,7 +293,7 @@ class OnFireTrait : Trait, IGameEventListener
     public void Alert(UIEventType eventType, GameState gs)
     {
         ++Lifetime;
-        if (gs.ObjDB.GetObj(ContainerID) is Item fireSrc)
+        if (gs.ObjDb.GetObj(ContainerID) is Item fireSrc)
         {
             if (Lifetime > 3 && gs.Rng.NextDouble() < 0.5)
             {
@@ -303,7 +301,7 @@ class OnFireTrait : Trait, IGameEventListener
                 return;
             }
 
-            var victim = gs.ObjDB.Occupant(fireSrc.Loc);
+            var victim = gs.ObjDb.Occupant(fireSrc.Loc);
             if (victim is not null) {
                 int fireDmg = gs.Rng.Next(8) + 1;
                 List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
@@ -342,9 +340,11 @@ class PoisonedTrait : Trait, IGameEventListener
     public ulong VictimID { get; set; }
     public bool Expired { get; set; } = false;
 
+    public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}#{Expired}";
+
     public void Alert(UIEventType eventType, GameState gs)
     {
-        var victim = (Actor?) gs.ObjDB.GetObj(VictimID);
+        var victim = (Actor?) gs.ObjDb.GetObj(VictimID);
         if (victim != null)
         {
             bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
@@ -373,20 +373,18 @@ class PoisonedTrait : Trait, IGameEventListener
             }
         }        
     }
-
-    public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}";
 }
 
 class ReadableTrait(string text) : Trait, IUSeable
 {
     readonly string _text = text;
     public ulong ContainerID { get; set; }
-    public override string AsText() => $"Document#{_text}";
+    public override string AsText() => $"Document#{_text}#{ContainerID}";
     public override bool Aura => false;
 
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
-        Item? doc = gs.ObjDB.GetObj(ContainerID) as Item;
+        Item? doc = gs.ObjDb.GetObj(ContainerID) as Item;
         string msg = $"{user.FullName.Capitalize()} read:\n{_text}";        
         gs.WritePopup(msg, doc!.FullName.IndefArticle().Capitalize());
 
@@ -403,7 +401,7 @@ class ReadableTrait(string text) : Trait, IUSeable
 class CountdownTrait : Trait, IGameEventListener
 {
     public bool Expired { get; set; } = false;
-    public override string AsText() => "CountdownTrait";
+    public override string AsText() => $"CountdownTrait#{ContainerID}#{Expired}";
     public ulong ContainerID { get; set; }
 
     public void Alert(UIEventType eventType, GameState gs)
@@ -413,14 +411,14 @@ class CountdownTrait : Trait, IGameEventListener
 
         Expired = true;
 
-        if (gs.ObjDB.GetObj(ContainerID) is Item item)
+        if (gs.ObjDb.GetObj(ContainerID) is Item item)
         {
             Loc loc = item.Loc;
 
             // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
             if (item.ContainedBy > 0)
             {
-                var owner = gs.ObjDB.GetObj(item.ContainedBy);
+                var owner = gs.ObjDb.GetObj(item.ContainedBy);
                 if (owner is not null)
                 {
                     // I don't think owner should ever be null, barring a bug
@@ -430,7 +428,7 @@ class CountdownTrait : Trait, IGameEventListener
                 }
             }
 
-            gs.ObjDB.RemoveItemFromGame(loc, item);
+            gs.ObjDb.RemoveItemFromGame(loc, item);
 
             // This is rather tied to Fog Cloud atm -- I should perhaps provide an
             // expiry message that can be set for each trait
@@ -470,7 +468,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
     public override string AsText()
     {
-        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}";
+        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Expired}";
     }
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) 
@@ -505,8 +503,8 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
     public UseResult Use(Actor _, GameState gs, int row, int col)
     {
-        Item? item = gs.ObjDB.GetObj(ContainerID) as Item;
-        var loc = new Loc(gs.CurrDungeon, gs.CurrLevel, row, col);
+        Item? item = gs.ObjDb.GetObj(ContainerID) as Item;
+        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, row, col);
         if (Lit)
         {            
             var msg = Extinguish(gs, item!, loc);
@@ -539,10 +537,10 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
             Lit = false;
             Expired = true;
 
-            if (gs.ObjDB.GetObj(ContainerID) is Item item)
+            if (gs.ObjDb.GetObj(ContainerID) is Item item)
             {
                 Loc loc = item.Loc;
-                if (item.ContainedBy > 0 && gs.ObjDB.GetObj(item.ContainedBy) is Actor owner)
+                if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
                 {                    
                     // I don't think owner should ever be null, barring a bug
                     // but this placates the warning in VS/VS Code

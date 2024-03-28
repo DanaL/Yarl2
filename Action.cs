@@ -41,7 +41,7 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
     {        
         var result = new ActionResult() { Complete = true };
 
-        var target = _gs.ObjDB.Occupant(_loc);
+        var target = _gs.ObjDb.Occupant(_loc);
         if (target is not null)
             result = Battle.MeleeAttack(_actor, target, _gs);
 
@@ -60,7 +60,7 @@ class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo) : Actio
     {        
         var result = new ActionResult() { Complete = true };
 
-        var target = _gs.ObjDB.Occupant(_loc);
+        var target = _gs.ObjDb.Occupant(_loc);
         if (target is not null)
             result = Battle.MissileAttack(_actor, target, _gs, _ammo);
 
@@ -223,7 +223,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
     {
         var result = new ActionResult() { Complete = false };
 
-        var other = _gs.ObjDB.Occupant(_loc);
+        var other = _gs.ObjDb.Occupant(_loc);
 
         if (other is null)
         {
@@ -380,7 +380,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
         var sb = new StringBuilder();
         sb.Append(_map.TileAt(_loc.Row, _loc.Col).StepMessage);
 
-        var items = _gs.ObjDB.ItemsAt(_loc);
+        var items = _gs.ObjDb.ItemsAt(_loc);
         if (items.Count > 1)
         {
             sb.Append(" There are several items here.");
@@ -397,7 +397,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
         }
 
-        foreach (var env in _gs.ObjDB.EnvironmentsAt(_loc)) 
+        foreach (var env in _gs.ObjDb.EnvironmentsAt(_loc)) 
         { 
             if (env.Traits.OfType<StickyTrait>().Any())
             {
@@ -427,7 +427,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
 
         // First, is there anything preventing the actor from moving off
         // of the square?
-        foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
+        foreach (var env in _gs.ObjDb.EnvironmentsAt(_actor.Loc))
         {
             var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
             if (web is not null && !_actor.HasTrait<TeflonTrait>())
@@ -446,7 +446,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
                 {
                     var txt = $"{_actor.FullName.Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Tear)} through {env.Name.DefArticle()}.";
                     var msg = MsgFactory.Phrase(txt, _actor.Loc);
-                    _gs.ObjDB.RemoveItemFromGame(env.Loc, env);
+                    _gs.ObjDb.RemoveItemFromGame(env.Loc, env);
                     result.Messages.Add(msg);
                 }
             }
@@ -459,10 +459,10 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             if (_actor is Player)
                 result.Messages.Add(MsgFactory.Phrase("You cannot go that way!", _gs.Player.Loc));
         }
-        else if (_gs.ObjDB.Occupied(_loc))
+        else if (_gs.ObjDb.Occupied(_loc))
         {
             result.Complete = false;
-            var occ = _gs.ObjDB.Occupant(_loc);
+            var occ = _gs.ObjDb.Occupant(_loc);
             if (occ is VillageAnimal)
             {
                 string msg;
@@ -545,7 +545,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
         _ui.CloseMenu();
-        var itemStack = _gs.ObjDB.ItemsAt(_actor.Loc);
+        var itemStack = _gs.ObjDb.ItemsAt(_actor.Loc);
         var inv = _actor.Inventory;
         bool freeSlot = inv.UsedSlots().Length < 26;
         int i = Choice - 'a';
@@ -559,7 +559,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 
         // First, is there anything preventing the actor from moving off
         // of the square?
-        foreach (var env in _gs.ObjDB.EnvironmentsAt(_actor.Loc))
+        foreach (var env in _gs.ObjDb.EnvironmentsAt(_actor.Loc))
         {
             var web = env.Traits.OfType<StickyTrait>().First();
             if (web is not null)
@@ -580,7 +580,7 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
             }
         }
 
-        _gs.ObjDB.RemoveItem(_actor.Loc, item);
+        _gs.ObjDb.RemoveItem(_actor.Loc, item);
         inv.Add(item, _actor.ID);
 
         result.Messages.Add(MsgFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gs));
@@ -667,7 +667,7 @@ class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
                 var mistLoc = _target with { Row = r, Col = c };
                 var timer = mist.Traits.OfType<CountdownTrait>().First();
                 _gs.RegisterForEvent(UIEventType.EndOfRound, timer);
-                _gs.ObjDB.Add(mist);
+                _gs.ObjDb.Add(mist);
                 _gs.ItemDropped(mist, mistLoc);
             }
         }
@@ -690,12 +690,12 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
         {
             var loc = _target with { Row = r, Col = c };
             var tile = _gs.TileAt(loc);
-            if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDB.Occupied(loc))
+            if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDb.Occupied(loc))
             {
                 Actor vines = MonsterFactory.Get("vines", _gs.Rng);
                 vines.Loc = loc;
-                _gs.ObjDB.Add(vines);
-                _gs.ObjDB.AddToLoc(loc, vines);
+                _gs.ObjDb.Add(vines);
+                _gs.ObjDb.AddToLoc(loc, vines);
             }
         }
 
@@ -717,7 +717,7 @@ class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajector
         var anim = new ArrowAnimation(_gs, _trajectory, Colours.YELLOW_ORANGE);
         _gs.UIRef().RegisterAnimation(anim);
 
-        var firebolt = ItemFactory.Get("firebolt", _gs.ObjDB);
+        var firebolt = ItemFactory.Get("firebolt", _gs.ObjDb);
         var attack = new MissileAttackAction(_caster, _target, _gs, firebolt);
 
         var txt = MsgFactory.Phrase(_caster.ID, Verb.Cast, _target, _gs).Text;
@@ -734,7 +734,7 @@ class WebAction(GameState gs, Loc target) : Action
     public override ActionResult Execute()
     {
         var w = ItemFactory.Web();
-        _gs.ObjDB.Add(w);
+        _gs.ObjDb.Add(w);
         _gs.ItemDropped(w, _target);
 
         foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
@@ -742,13 +742,13 @@ class WebAction(GameState gs, Loc target) : Action
             if (_gs.Rng.NextDouble() < 0.666)
             {
                 w = ItemFactory.Web();
-                _gs.ObjDB.Add(w);
+                _gs.ObjDb.Add(w);
                 _gs.ItemDropped(w, _target with { Row = sq.Item1, Col = sq.Item2});
             }
         }
 
         var txt = "";
-        var victim = _gs.ObjDB.Occupant(_target);
+        var victim = _gs.ObjDb.Occupant(_target);
         if (victim is not null)
             txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";        
         var msg = new Message(txt, _target, false);
@@ -772,7 +772,7 @@ class BlinkAction(Actor caster, GameState gs) : Action
             {
                 var loc = start with { Row = r, Col = c };
                 int d = Util.Distance(start, loc);
-                if (d >= 8 && d <= 12 && _gs.TileAt(loc).Passable() && !_gs.ObjDB.Occupied(loc))
+                if (d >= 8 && d <= 12 && _gs.TileAt(loc).Passable() && !_gs.ObjDb.Occupied(loc))
                 {
                     sqs.Add(loc);
                 }
@@ -871,7 +871,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
         else
         {
 
-            var coins = ItemFactory.Get("zorkmids", _gs.ObjDB);
+            var coins = ItemFactory.Get("zorkmids", _gs.ObjDb);
             _gs.ItemDropped(coins, _actor.Loc);
             coins.Value = _amount;
             string msg = $"{MsgFactory.CalcName(_actor).Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Drop)} ";
@@ -989,7 +989,7 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
             {
                 var pt = trajectory[j];
                 var tile = _gs.TileAt(pt);
-                var occ = _gs.ObjDB.Occupant(pt);
+                var occ = _gs.ObjDb.Occupant(pt);
                 if (j > 0 && occ != null)
                 {
                     pts.Add(pt);

@@ -61,7 +61,7 @@ class AimAccumulator : InputAccumulator
         {
             if (Util.Distance(loc, _start) <= _maxRange)
             {
-                var occ = _gs.ObjDB.Occupant(loc);
+                var occ = _gs.ObjDb.Occupant(loc);
                 if (occ is null || occ.ID == _gs.Player.ID)
                     continue;
 
@@ -128,7 +128,7 @@ class AimAccumulator : InputAccumulator
             Loc = _target 
         };
 
-        var occ = _gs.ObjDB.Occupant(_target);
+        var occ = _gs.ObjDb.Occupant(_target);
         if (occ is not null)
         {
             _gs.LastTarget = occ.ID;
