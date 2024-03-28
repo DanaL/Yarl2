@@ -21,7 +21,6 @@ enum PlayerClass
 class Player : Actor, IPerformer
 {
     public const int MAX_VISION_RADIUS = 25;
-    public int CurrVisionRadius { get; set; }    
     public PlayerClass CharClass { get; set; }
     
     InputAccumulator? _accumulator;

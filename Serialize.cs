@@ -548,7 +548,22 @@ class GameObjDBSave
         foreach (var kvp in objDb.Objs)
         {
             var obj = kvp.Value;
-            Console.WriteLine(obj.ToString());
+            if (obj is Player)
+            {
+                Console.WriteLine("Player:" + obj.ToString());
+            }
+            else if (obj is Monster)
+            {
+
+            }
+            else if (obj is Villager)
+            {
+
+            }
+            else if (obj is Item)
+            {
+
+            }            
         }
         //foreach (var kvp in goDB._itemLocs)
         //{
