@@ -146,8 +146,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        ObjDB.SetToLoc(loc, item);
-
+        
         var tile = TileAt(loc);
         List<Message> msgs = [];
         foreach (var flag in tile.TerrainFlags().Where(t => t != TerrainFlag.None))
@@ -165,6 +164,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                 ApplyDamageEffectToLoc(loc, DamageType.Fire);
         }
 
+        ObjDB.SetToLoc(loc, item);
+        
         if (msgs.Count > 0)
             UI.AlertPlayer(msgs, "", this);        
     }
