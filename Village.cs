@@ -103,14 +103,13 @@ class Village
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
             Town = town,
-            Markup = 1.25 + rng.NextDouble() / 2,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Market.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
         var sq = sqs[rng.Next(sqs.Count)];
         grocer.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
-        grocer.SetBehaviour(new GrocerBehaviour());
+        grocer.SetBehaviour(new GrocerBehaviour(1.25 + rng.NextDouble() / 2));
         
         grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
         grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
@@ -132,14 +131,13 @@ class Village
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
             Town = town,
-            Markup = 1.5 + rng.NextDouble() / 2,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
                                           map.TileAt(sq).Type == TileType.WoodFloor).ToList();
         var sq = sqs[rng.Next(sqs.Count)];
         smith.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
-        smith.SetBehaviour(new SmithBehaviour());
+        smith.SetBehaviour(new SmithBehaviour(1.5 + rng.NextDouble() / 2));
 
         smith.Inventory.Add(ItemFactory.Get("ringmail", objDb), smith.ID);
         smith.Inventory.Add(ItemFactory.Get("helmet", objDb), smith.ID);

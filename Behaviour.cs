@@ -312,8 +312,9 @@ class PriestBehaviour : IBehaviour, IChatter
     }
 }
 
-class SmithBehaviour : IBehaviour, IChatter
+class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
 {
+    public double Markup { get; set; } = markup;
     DateTime _lastBark = new(1900, 1, 1);
 
     static string PickBark(Actor smith, Random rng)
@@ -368,8 +369,7 @@ class SmithBehaviour : IBehaviour, IChatter
     {
         var sb = new StringBuilder();
         sb.Append('"');
-        double markup = ((Villager)smith).Markup;
-        if (markup > 1.75)
+        if (Markup > 1.75)
             sb.Append("If you're looking for arms or armour, I'm the only game in town!");
         else
             sb.Append("You'll want some weapons or better armour before venturing futher!");
@@ -388,8 +388,9 @@ class SmithBehaviour : IBehaviour, IChatter
     }
 }
 
-class GrocerBehaviour : IBehaviour, IChatter
+class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
 {
+    public double Markup { get; set; } = markup;
     DateTime _lastBark = new(1900, 1, 1);
 
     static string PickBark(Actor grocer, Random rng)
@@ -448,4 +449,9 @@ class VillagerBehaviour : IBehaviour
     {
         return new PassAction();
     }
+}
+
+interface IShopkeeper
+{
+    double Markup { get; set; }
 }

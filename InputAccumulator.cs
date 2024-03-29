@@ -243,7 +243,8 @@ class ShopMenuAccumulator : InputAccumulator
 
     int TotalInvoice()
     {
-        return _menuItems.Values.Select(mi => mi.SelectedCount * (int) (mi.Item.Value * _shopkeeper.Markup)).Sum();
+        double markup = ((IShopkeeper)_shopkeeper.Behaviour).Markup;
+        return _menuItems.Values.Select(mi => mi.SelectedCount * (int) (mi.Item.Value * markup)).Sum();
     }
 
     void WritePopup()
@@ -256,6 +257,7 @@ class ShopMenuAccumulator : InputAccumulator
         var keys = _menuItems.Keys.ToList();
         keys.Sort();
 
+        double markup = ((IShopkeeper)_shopkeeper.Behaviour).Markup;
         List<string> lines = [];
         foreach (var key in keys)
         {
@@ -271,7 +273,7 @@ class ShopMenuAccumulator : InputAccumulator
                 line.Append(')');
             }
 
-            int price = (int)(_menuItems[key].Item.Value * _shopkeeper.Markup);
+            int price = (int)(_menuItems[key].Item.Value * markup);
             line.Append(" - [YELLOW $]");
             line.Append(price);
             

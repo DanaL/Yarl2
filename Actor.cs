@@ -62,6 +62,7 @@ class Actor : GameObj, IPerformer, IZLevel
     public string Appearance { get; set; } = "";
 
     protected IBehaviour _behaviour;
+    public IBehaviour Behaviour => _behaviour;
     
     public Actor() 
     {
@@ -170,8 +171,7 @@ class Monster : Actor
 class Villager : Actor
 {    
     public Town Town { get; set; }
-    public double Markup { get; set; } // for villagers who sell stuff...
-
+    
     public override string FullName => Name.Capitalize();  
     public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
     public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
