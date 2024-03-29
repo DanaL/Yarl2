@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,7 +18,7 @@ namespace Yarl2;
 //record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
 //                                GameObjDBSaver ItemDB, ulong Turn, List<MsgHistory> MessageHistory);
 
-record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, PlayerSave Player);
+record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb);
 
 // When I started working on saving the game, I had a bunch of problems with
 // Json serialize. It particularly seemed to hate that Tile was an abstract
@@ -35,9 +36,9 @@ internal class Serialize
 {
     public static void WriteSaveGame(GameState gameState)
     {
-        GameObjDBSave.Shrink(gameState.ObjDb);
+        var objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
 
-        var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), PlayerSave.Shrink(gameState.Player));
+        var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave);
 
         var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                         new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
@@ -71,9 +72,12 @@ internal class Serialize
 
         var campaign = CampaignSaver.Inflate(sgi.Campaign);
         var gs = GameStateSave.Inflate(campaign, sgi.GameStateSave, options, ui);
-        gs.Player = PlayerSave.Inflate(sgi.Player);
+
+        var objDbSave = sgi.ObjDb;
+
+        //gs.Player = PlayerSave.Inflate(sgi.Player);
         //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
-        return (gs, gs.Player.Loc);
+        return (gs, Loc.Nowhere);
     }
     //{
 
@@ -537,10 +541,18 @@ class GameObjDBSave
     public ulong GameObjSeed { get; set; }
     
     [JsonInclude]
-    public Dictionary<string, List<string>> ItemsAtLoc = [];
-    [JsonInclude]
-    public List<MonsterSaver> Monsters = [];
-    
+    List<string> Objects { get; set; } = [];
+
+    static string StatsToText(Dictionary<Attribute, Stat> stats)
+    {
+        List<string> pieces = [];
+        foreach (var kvp in stats)
+        {
+            pieces.Add($"{kvp.Key}:{kvp.Value.Max}#{kvp.Value.Curr}");
+        }
+        return string.Join(',', pieces);
+    }
+
     public static GameObjDBSave Shrink(GameObjectDB objDb)
     {
         var sidb = new GameObjDBSave{ GameObjSeed = GameObj.Seed };
@@ -548,9 +560,26 @@ class GameObjDBSave
         foreach (var kvp in objDb.Objs)
         {
             var obj = kvp.Value;
-            if (obj is Player)
+            if (obj is Player player)
             {
-                Console.WriteLine("Player:" + obj.ToString());
+                var sb = new StringBuilder("Player:");
+                sb.Append(player.CharClass);
+                sb.Append('|');
+                sb.Append(obj.ToString());
+                sb.Append('|');
+                sb.Append(StatsToText(player.Stats));
+                sb.Append('|');
+                sb.Append(player.Energy);
+                sb.Append('|');
+                sb.Append(player.Recovery);
+                sb.Append('|');
+                sb.Append(player.Inventory.Zorkmids);
+                sb.Append('|');
+                sb.Append(player.Inventory.NextSlot);
+                sb.Append('|');
+                sb.Append(player.Inventory.ToText());
+
+                sidb.Objects.Add(sb.ToString());                
             }
             else if (obj is Monster)
             {
@@ -587,22 +616,22 @@ class GameObjDBSave
         GameObj.SetSeed(sidb.GameObjSeed);
         var goDB = new GameObjectDB();
         
-        foreach (var kvp in sidb.ItemsAtLoc)
-        {
-            var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();
-            goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
-            foreach (var item in items)
-            {
-                goDB.Objs.Add(item.ID, item);
-            }
-        }
+        // foreach (var kvp in sidb.ItemsAtLoc)
+        // {
+        //     var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();
+        //     goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
+        //     foreach (var item in items)
+        //     {
+        //         goDB.Objs.Add(item.ID, item);
+        //     }
+        // }
 
-        foreach (var ms in sidb.Monsters)
-        {
-            var m = MonsterSaver.Inflate(ms);
-            goDB.Add(m);
-            goDB.AddToLoc(m.Loc, m);
-        }
+        // foreach (var ms in sidb.Monsters)
+        // {
+        //     var m = MonsterSaver.Inflate(ms);
+        //     goDB.Add(m);
+        //     goDB.AddToLoc(m.Loc, m);
+        // }
 
         return goDB;
     }

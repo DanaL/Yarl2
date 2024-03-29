@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using System.Xml.Linq;
 
 namespace Yarl2;
 
@@ -524,9 +523,7 @@ class Inventory(ulong ownerID)
         return activeTraits;
     }
 
-    //public List<(char, Item)> ToKVP() => _items.Select(i => (i.Slot, i.Value))
-    //                                           .Where(p => p.Item2 is not null)
-    //                                           .ToList();
+    public string ToText() => string.Join(',', _items.Select(i => i.ID));
 }
 
 enum EquipingResult 
