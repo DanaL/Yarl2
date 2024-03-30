@@ -268,7 +268,7 @@ class ItemSaver
         };
 
         foreach (var traitStr in pieces[10].Split(';'))
-            item.Traits.Add(TraitFactory.FromText(traitStr));
+            item.Traits.Add(TraitFactory.FromText(traitStr, item));
         
         return item;
     }
@@ -587,8 +587,15 @@ class GameObjDBSave
         p.ID = ulong.Parse(fields[2]);
         p.Loc = Loc.FromText(fields[4]);
 
-        // Traits are field 5
-
+        // Parse the traits
+        if (fields[5] != "")
+        {
+            foreach (var t in fields[5].Split(','))
+            {
+                var trait = TraitFactory.FromText(t, p);
+                p.Traits.Add(trait);
+            }
+        }
         p.Stats = StatsFromText(fields[6]);
         p.Energy = double.Parse(fields[7]);
         p.Recovery = double.Parse(fields[8]);
@@ -619,12 +626,15 @@ class GameObjDBSave
         };
 
         // Parse the traits
-        foreach (var t in fields[5].Split(','))
+        if (fields[5] != "")
         {
-            var trait = TraitFactory.FromText(t);
-            item.Traits.Add(trait);
+            foreach (var t in fields[5].Split(','))
+            {
+                var trait = TraitFactory.FromText(t, item);
+                item.Traits.Add(trait);
+            }
         }
-
+        
         item.SetZ(int.Parse(fields[13]));
 
         return item;

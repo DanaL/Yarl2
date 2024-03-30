@@ -63,7 +63,7 @@ class Actor : GameObj, IPerformer, IZLevel
 
     protected IBehaviour _behaviour;
     public IBehaviour Behaviour => _behaviour;
-    
+
     public Actor() 
     {
         Inventory = new Inventory(ID);        
@@ -255,7 +255,7 @@ class MonsterFactory
         {
             foreach (var actionTxt in fields[11].Split(',')) 
             {
-                m.Actions.Add((ActionTrait)TraitFactory.FromText(actionTxt));
+                m.Actions.Add((ActionTrait)TraitFactory.FromText(actionTxt, m));
             }
         }
 
@@ -263,7 +263,7 @@ class MonsterFactory
         {
             foreach (var traitTxt in fields[12].Split(','))
             {
-                var trait = TraitFactory.FromText(traitTxt);
+                var trait = TraitFactory.FromText(traitTxt, m);
                 m.Traits.Add(trait);                
             }
         }

@@ -72,19 +72,17 @@ abstract class ActionTrait : Trait
                    .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
                    .ToList();
     }
-
-    public override string AsText() => $"{Name}#{MinRange}#{MaxRange}#{Cooldown}#" + base.AsText();
 }
 
 class SpellActionTrait : ActionTrait
 {
-    public override string AsText() => $"SpellActionTrait#{Name}#{Cooldown}#" + base.AsText();
+    public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
     public override bool Available(Monster mob, GameState gs) => true;
 }
 
 class FireboltActionTrait : SpellActionTrait
 {    
-    public override string AsText() => $"FireboltActionTrait#{Cooldown}#{MinRange}#{MaxRange}#" + base.AsText();
+    public override string AsText() => $"FireboltAction#{Cooldown}#{MinRange}#{MaxRange}#";
     public override bool Available(Monster mob, GameState gs)
     {
         if (!InRange(mob, gs))
@@ -97,7 +95,7 @@ class FireboltActionTrait : SpellActionTrait
 
 class MobMeleeTrait : ActionTrait
 {
-    public override string AsText() => $"MobMeleeTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}#" + base.AsText();
+    public override string AsText() => $"MobMelee#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
     public int DamageDie { get; set; }
     public int DamageDice { get; set; }
     public DamageType DamageType { get; set; }
@@ -107,7 +105,7 @@ class MobMeleeTrait : ActionTrait
 
 class MobMissileTrait : ActionTrait
 {
-    public override string AsText() => $"MobMissileTrait#{MinRange}#{MaxRange}#{Cooldown}#{DamageType}";
+    public override string AsText() => $"MobMissile#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
     public int DamageDie { get; set; }
     public int DamageDice { get; set; }
     public DamageType DamageType { get; set; }
@@ -181,7 +179,7 @@ class FlyingTrait : Trait
     public FlyingTrait() { }
     public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
-    public override string AsText() => "Flying#" + base.ToString();
+    public override string AsText() => $"Flying#{ExpiresOn}";
 }
 
 class OpaqueTrait : Trait
@@ -248,7 +246,7 @@ class DamageTrait : Trait
 class ACModTrait : Trait
 {
     public int ArmourMod { get; set; }
-    public override string AsText() => $"ACMode#{ArmourMod}";
+    public override string AsText() => $"ACMode{ArmourMod}";
 }
 
 class ArmourTrait : ACModTrait
@@ -276,10 +274,11 @@ class PoisonerTrait: Trait
 
 class OnFireTrait : Trait, IGameEventListener
 {
-    public ulong ContainerID { get; set; }
-    public override string AsText() => $"OnFire#{Expired}#{ContainerID}#{Expired}#{Lifetime}";
+    public ulong ContainerID { get; set; }    
     public bool Expired { get; set; } = false;
     public int Lifetime { get; set; } = 0;
+
+    public override string AsText() => $"OnFire#{Expired}#{ContainerID}#{Lifetime}";
 
     public void Extinguish(Item fireSrc, GameState gs)
     {
@@ -403,8 +402,9 @@ class ReadableTrait(string text) : Trait, IUSeable
 class CountdownTrait : Trait, IGameEventListener
 {
     public bool Expired { get; set; } = false;
-    public override string AsText() => $"CountdownTrait#{ContainerID}#{Expired}";
     public ulong ContainerID { get; set; }
+
+    public override string AsText() => $"Countdown#{ContainerID}#{Expired}";
 
     public void Alert(UIEventType eventType, GameState gs)
     {
@@ -470,7 +470,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
     public override string AsText()
     {
-        return $"TorchTrait#{ContainerID}#{Lit}#{Fuel}#{Expired}";
+        return $"Torch#{ContainerID}#{Lit}#{Fuel}#{Expired}";
     }
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) 
@@ -561,7 +561,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
 class TraitFactory
 {
-    public static Trait FromText(string text)
+    public static Trait FromText(string text, GameObj? container)
     {
         var pieces = text.Split('#');
         var name = pieces[0];
@@ -569,18 +569,10 @@ class TraitFactory
 
         switch (name)
         {
-            case "Attack":
-                return new AttackTrait()
+            case "ACMod":
+                return new ACModTrait()
                 {
-                    Bonus = int.Parse(pieces[1])
-                };
-            case "Damage":
-                Enum.TryParse(pieces[3], out DamageType dt);
-                return new DamageTrait()
-                {
-                    DamageDie = int.Parse(pieces[1]),
-                    NumOfDie = int.Parse(pieces[2]),
-                    DamageType = dt
+                    ArmourMod = int.Parse(pieces[1])
                 };
             case "Armour":
                 var part = pieces[1] switch
@@ -597,23 +589,65 @@ class TraitFactory
                     ArmourMod = int.Parse(pieces[2]),
                     Bonus = int.Parse(pieces[3])
                 };
-            case "Torch":
-                return new TorchTrait()
+            case "Attack":
+                return new AttackTrait()
+                {
+                    Bonus = int.Parse(pieces[1])
+                };
+            case "CastAntidote":
+                return new CastAntidoteTrait();
+            case "CastBlink":
+                return new CastBlinkTrait();
+            case "CastMinorHeal":
+                return new CastMinorHealTrait();
+            case "Cleave":
+                return new CleaveTrait();
+            case "Countdown":
+                return new CountdownTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
-                    Lit = bool.Parse(pieces[2]),                    
-                    Fuel = int.Parse(pieces[4])                    
+                    Expired = bool.Parse(pieces[2])
                 };
-            case "Readable":
-                return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));                
+            case "Damage":
+                Enum.TryParse(pieces[3], out DamageType dt);
+                return new DamageTrait()
+                {
+                    DamageDie = int.Parse(pieces[1]),
+                    NumOfDie = int.Parse(pieces[2]),
+                    DamageType = dt
+                };
+            case "Entangle":
+            case "Web":            
+                digits = Util.DigitsRegex().Split(text);
+                return new SpellActionTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(digits[1]),
+                    MinRange = int.Parse(digits[2]),
+                    MaxRange = int.Parse(digits[3])
+                };
+            case "FireboltAction":
+                digits = Util.DigitsRegex().Split(text);
+                return new FireboltActionTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(digits[1]),
+                    MinRange = int.Parse(digits[2]),
+                    MaxRange = int.Parse(digits[3])
+                };
+            case "Flammable":
+                return new FlammableTrait();
             case "Flying":
                 return new FlyingTrait();
-            case "Plant":
-                return new PlantTrait();
-            case "Plural":
-                return new PluralTrait();
-            case "Teflon":
-                return new TeflonTrait();
+            case "Impale":
+                return new ImpaleTrait();
+            // "LightSource#{ContainerID}#{Radius}"
+            case "LightSource":
+                return new LightSourceTrait()
+                {   
+                    ContainerID = ulong.Parse(pieces[1]),
+                    Radius = int.Parse(pieces[2])
+                };
             case "Melee":
                 Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
                 digits = Util.DigitsRegex().Split(text);
@@ -640,24 +674,44 @@ class TraitFactory
                     DamageType = mmdt
 
                 };
-            case "Entangle":
-            case "Web":            
-                digits = Util.DigitsRegex().Split(text);
-                return new SpellActionTrait()
+            case "MobMelee":
+                Enum.TryParse(pieces[5], out DamageType mmelDt);
+                return new MobMeleeTrait()
                 {
-                    Name = name,
-                    Cooldown = ulong.Parse(digits[1]),
-                    MinRange = int.Parse(digits[2]),
-                    MaxRange = int.Parse(digits[3])
+                    MinRange = int.Parse(pieces[1]),
+                    MaxRange = int.Parse(pieces[2]),
+                    DamageDie = int.Parse(pieces[3]),
+                    DamageDice = int.Parse(pieces[4]),
+                    DamageType = mmelDt
                 };
-            case "Firebolt":
-                digits = Util.DigitsRegex().Split(text);
-                return new FireboltActionTrait()
+            case "MobMissile":
+                Enum.TryParse(pieces[5], out DamageType mmisDt);
+                return new MobMeleeTrait()
                 {
-                    Name = name,
-                    Cooldown = ulong.Parse(digits[1]),
-                    MinRange = int.Parse(digits[2]),
-                    MaxRange = int.Parse(digits[3])
+                    MinRange = int.Parse(pieces[1]),
+                    MaxRange = int.Parse(pieces[2]),
+                    DamageDie = int.Parse(pieces[3]),
+                    DamageDice = int.Parse(pieces[4]),
+                    DamageType = mmisDt
+                };
+            case "OnFire":
+                return new OnFireTrait()
+                {
+                    Expired = bool.Parse(pieces[1]),
+                    ContainerID = ulong.Parse(pieces[2]),
+                    Lifetime = int.Parse(pieces[3])
+                };
+            case "Opaque":
+                return new OpaqueTrait();
+            case "Plant":
+                return new PlantTrait();
+            case "Poisoned":
+                return new PoisonedTrait()
+                {
+                    DC = int.Parse(pieces[1]),
+                    Strength = int.Parse(pieces[2]),
+                    VictimID = ulong.Parse(pieces[3]),
+                    Expired = bool.Parse(pieces[4])
                 };
             case "Poisoner":
                 digits = Util.DigitsRegex().Split(text);
@@ -666,16 +720,28 @@ class TraitFactory
                     DC = int.Parse(digits[1]),
                     Strength = int.Parse(digits[2])
                 };
-            case "TorchTrait":
+            case "Plural":
+                return new PluralTrait();
+            case "Rage":
+                return new RageTrait((Actor)container);
+            case "Readable":
+                return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
+            case "ShieldOfTheFaithful":
+                return new ShieldOfTheFaithfulTrait()
+                {
+                    ArmourMod = int.Parse(pieces[1])
+                };
+            case "Sticky":
+                return new StickyTrait();
+            case "Teflon":
+                return new TeflonTrait();
+            case "Torch":
                 return new TorchTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
-                    Lit = bool.Parse(pieces[2]),
-                    Fuel = int.Parse(pieces[3]),
-                    Expired = bool.Parse(pieces[4])
+                    Lit = bool.Parse(pieces[2]),                    
+                    Fuel = int.Parse(pieces[4])                    
                 };
-            case "Flammable":
-                return new FlammableTrait();
             default:
                 ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
                 return new SpellActionTrait()
