@@ -600,7 +600,7 @@ class GameObjDBSave
     static Item InflateItem(string txt)
     {
         var fields = txt.Split('|');
-
+        
         Enum.TryParse(fields[0], out ItemType itemType);
         var item = new Item()
         {
@@ -608,8 +608,24 @@ class GameObjDBSave
             Name = fields[1],
             ID = ulong.Parse(fields[2]),
             Glyph = TextToGlyph(fields[3]),
-            Loc = Loc.FromText(fields[4])
+            Loc = Loc.FromText(fields[4]),
+            Stackable = bool.Parse(fields[6].ToLower()),
+            Slot = fields[7][0],
+            Equiped = bool.Parse(fields[8].ToLower()),
+            ContainedBy = ulong.Parse(fields[9]),
+            Consumable = bool.Parse(fields[10]),
+            Adjectives = [.. fields[11].Split(',')],
+            Value = int.Parse(fields[12]),
         };
+
+        // Parse the traits
+        foreach (var t in fields[5].Split(','))
+        {
+            var trait = TraitFactory.FromText(t);
+            item.Traits.Add(trait);
+        }
+
+        item.SetZ(int.Parse(fields[13]));
 
         return item;
     }
@@ -686,7 +702,7 @@ class GameObjDBSave
                 sb.Append(item.Value);
                 sb.Append('|');
                 sb.Append(item.Z());
-                sb.Append('|');
+                
                 sidb.Objects.Add(sb.ToString());
             }            
         }

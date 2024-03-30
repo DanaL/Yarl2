@@ -470,7 +470,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
     public override string AsText()
     {
-        return $"FlameLightSourceTrait#{ContainerID}#{Lit}#{Fuel}#{Expired}";
+        return $"TorchTrait#{ContainerID}#{Lit}#{Fuel}#{Expired}";
     }
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) 
@@ -565,27 +565,23 @@ class TraitFactory
     {
         var pieces = text.Split('#');
         var name = pieces[0];
-
-        Trait trait;
         string[] digits;
 
         switch (name)
         {
             case "Attack":
-                trait = new AttackTrait()
+                return new AttackTrait()
                 {
                     Bonus = int.Parse(pieces[1])
                 };
-                break;
             case "Damage":
                 Enum.TryParse(pieces[3], out DamageType dt);
-                trait = new DamageTrait()
+                return new DamageTrait()
                 {
                     DamageDie = int.Parse(pieces[1]),
                     NumOfDie = int.Parse(pieces[2]),
                     DamageType = dt
                 };
-                break;
             case "Armour":
                 var part = pieces[1] switch
                 {
@@ -595,40 +591,33 @@ class TraitFactory
                     "Shirt" => ArmourParts.Shirt,
                     _ => throw new Exception("I don't know about that Armour Part")
                 };
-                trait = new ArmourTrait()
+                return new ArmourTrait()
                 {
                     Part = part,
                     ArmourMod = int.Parse(pieces[2]),
                     Bonus = int.Parse(pieces[3])
                 };
-                break;
             case "Torch":
-                trait = new TorchTrait()
+                return new TorchTrait()
                 {
                     ContainerID = ulong.Parse(pieces[1]),
                     Lit = bool.Parse(pieces[2]),                    
                     Fuel = int.Parse(pieces[4])                    
-                };                
-                break;
+                };
             case "Readable":
-                trait = new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
-                break;
+                return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));                
             case "Flying":
-                trait = new FlyingTrait();
-                break;
+                return new FlyingTrait();
             case "Plant":
-                trait = new PlantTrait();
-                break;
+                return new PlantTrait();
             case "Plural":
-                trait = new PluralTrait();
-                break;
+                return new PluralTrait();
             case "Teflon":
-                trait = new TeflonTrait();
-                break;
+                return new TeflonTrait();
             case "Melee":
                 Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
                 digits = Util.DigitsRegex().Split(text);
-                var at = new MobMeleeTrait()
+                return new MobMeleeTrait()
                 {
                     Name = "Melee",
                     DamageDie = int.Parse(digits[1]),
@@ -638,12 +627,10 @@ class TraitFactory
                     DamageType = mdt
 
                 };
-                trait = at;
-                break;
             case "Missile":
                 Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mmdt);
                 digits = Util.DigitsRegex().Split(text);
-                var missile = new MobMissileTrait()
+                return new MobMissileTrait()
                 {
                     Name = "Missile",
                     DamageDie = int.Parse(digits[1]),
@@ -653,51 +640,49 @@ class TraitFactory
                     DamageType = mmdt
 
                 };
-                trait = missile;
-                break;
             case "Entangle":
             case "Web":            
                 digits = Util.DigitsRegex().Split(text);
-                var rangedSpell = new SpellActionTrait()
+                return new SpellActionTrait()
                 {
                     Name = name,
                     Cooldown = ulong.Parse(digits[1]),
                     MinRange = int.Parse(digits[2]),
                     MaxRange = int.Parse(digits[3])
                 };
-                trait = rangedSpell;
-                break;
             case "Firebolt":
                 digits = Util.DigitsRegex().Split(text);
-                var firebolt = new FireboltActionTrait()
+                return new FireboltActionTrait()
                 {
                     Name = name,
                     Cooldown = ulong.Parse(digits[1]),
                     MinRange = int.Parse(digits[2]),
                     MaxRange = int.Parse(digits[3])
                 };
-                trait = firebolt;
-                break;
             case "Poisoner":
                 digits = Util.DigitsRegex().Split(text);
-                var poisoner = new PoisonerTrait()
+                return new PoisonerTrait()
                 {
                     DC = int.Parse(digits[1]),
                     Strength = int.Parse(digits[2])
                 };
-                trait = poisoner;
-                break;
+            case "TorchTrait":
+                return new TorchTrait()
+                {
+                    ContainerID = ulong.Parse(pieces[1]),
+                    Lit = bool.Parse(pieces[2]),
+                    Fuel = int.Parse(pieces[3]),
+                    Expired = bool.Parse(pieces[4])
+                };
+            case "Flammable":
+                return new FlammableTrait();
             default:
                 ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
-                var spell = new SpellActionTrait()
+                return new SpellActionTrait()
                 {
                     Name = name,
                     Cooldown = cooldown
                 };
-                trait = spell;
-                break;
         }
-
-        return trait;
     }
 }
