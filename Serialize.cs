@@ -74,7 +74,7 @@ internal class Serialize
         var gs = GameStateSave.Inflate(campaign, sgi.GameStateSave, options, ui);
 
         var objDbSave = sgi.ObjDb;
-
+        var objDb = GameObjDBSave.Inflate(objDbSave);
         //gs.Player = PlayerSave.Inflate(sgi.Player);
         //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
         return (gs, Loc.Nowhere);
@@ -543,14 +543,89 @@ class GameObjDBSave
     [JsonInclude]
     List<string> Objects { get; set; } = [];
 
+    static Glyph TextToGlyph(string text)
+    {
+        var p = text.Split(',');
+        return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]));
+    }
+
     static string StatsToText(Dictionary<Attribute, Stat> stats)
     {
         List<string> pieces = [];
         foreach (var kvp in stats)
         {
-            pieces.Add($"{kvp.Key}:{kvp.Value.Max}#{kvp.Value.Curr}");
+            pieces.Add($"{kvp.Key}#{kvp.Value.Max}#{kvp.Value.Curr}");
         }
         return string.Join(',', pieces);
+    }
+
+    static Dictionary<Attribute, Stat> StatsFromText(string txt)
+    {
+        Dictionary<Attribute, Stat> stats = [];
+
+        foreach (var s in txt.Split(','))
+        {
+            var pieces = s.Split('#');
+            Enum.TryParse(pieces[0], out Attribute attr);
+            var stat = new Stat() {
+                Max = int.Parse(pieces[1]),
+                Curr = int.Parse(pieces[2])
+            };
+            stats.Add(attr, stat);
+        }
+
+        return stats;
+    }
+
+    static Player InflatePlayer(string txt)
+    {
+        var fields = txt.Split('|');
+        var p = new Player(fields[1]);
+        
+        Enum.TryParse(fields[0], out PlayerClass charClass);
+        p.CharClass = charClass;
+        p.ID = ulong.Parse(fields[2]);
+        p.Loc = Loc.FromText(fields[4]);
+
+        // Traits are field 5
+
+        p.Stats = StatsFromText(fields[6]);
+        p.Energy = double.Parse(fields[7]);
+        p.Recovery = double.Parse(fields[8]);
+
+        return p;
+    }
+
+    // Weapon|spear|3|),white,grey,black|0,0,0,0|Attack#0,Damage#6#1#Piercing|False|a|True|2|False|old|10|2|
+    static Item InflateItem(string txt)
+    {
+        var fields = txt.Split('|');
+
+        Enum.TryParse(fields[0], out ItemType itemType);
+        var item = new Item()
+        {
+            Type = itemType,
+            Name = fields[1],
+            ID = ulong.Parse(fields[2]),
+            Glyph = TextToGlyph(fields[3]),
+            Loc = Loc.FromText(fields[4])
+        };
+
+        return item;
+    }
+
+    static GameObj InflateObj(string txt)
+    {
+        int j = txt.IndexOf(':');
+        var type = txt[..j];
+        var fields = txt[(j+1)..];
+
+        if (type == "Player")
+            return InflatePlayer(fields);
+        else if (type == "Item")
+            return InflateItem(fields);
+
+        return null;
     }
 
     public static GameObjDBSave Shrink(GameObjectDB objDb)
@@ -589,24 +664,32 @@ class GameObjDBSave
             {
 
             }
-            else if (obj is Item)
+            else if (obj is Item item)
             {
-
+                var sb = new StringBuilder("Item:");
+                sb.Append(item.Type);
+                sb.Append('|');
+                sb.Append(obj.ToString());
+                sb.Append('|');
+                sb.Append(item.Stackable);
+                sb.Append('|');
+                sb.Append(item.Slot);
+                sb.Append('|');
+                sb.Append(item.Equiped);
+                sb.Append('|');
+                sb.Append(item.ContainedBy);
+                sb.Append('|');
+                sb.Append(item.Consumable);
+                sb.Append('|');
+                sb.Append(string.Join(',', item.Adjectives));
+                sb.Append('|');
+                sb.Append(item.Value);
+                sb.Append('|');
+                sb.Append(item.Z());
+                sb.Append('|');
+                sidb.Objects.Add(sb.ToString());
             }            
         }
-        //foreach (var kvp in goDB._itemLocs)
-        //{
-        //    var itemStrs = kvp.Value.Select(ItemSaver.ItemToText).ToList();
-        //    sidb.ItemsAtLoc.Add(kvp.Key.ToString(), itemStrs);
-        //}
-
-        //foreach (var kvp in goDB._objs)
-        //{
-        //    if (kvp.Value is Monster m)
-        //    {
-        //        sidb.Monsters.Add(MonsterSaver.Shrink(m));
-        //    }
-        //}
        
         return sidb;
     }
@@ -616,6 +699,10 @@ class GameObjDBSave
         GameObj.SetSeed(sidb.GameObjSeed);
         var goDB = new GameObjectDB();
         
+        foreach (var line in sidb.Objects)
+        {
+            var obj = InflateObj(line);
+        }
         // foreach (var kvp in sidb.ItemsAtLoc)
         // {
         //     var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();

@@ -574,7 +574,7 @@ class TraitFactory
             case "Attack":
                 trait = new AttackTrait()
                 {
-                    Bonus = int.Parse(pieces[3])
+                    Bonus = int.Parse(pieces[1])
                 };
                 break;
             case "Damage":
