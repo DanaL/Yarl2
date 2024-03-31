@@ -215,7 +215,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
     {
         var animal = (VillageAnimal)actor;
-        var town = animal.Town;
+        var town = gameState.Campaign.Town;
 
         double roll = gameState.Rng.NextDouble();
         if (roll < 0.25)
@@ -304,9 +304,9 @@ class PriestBehaviour : IBehaviour, IChatter
     public string ChatText(Actor priest)
     {
         var sb = new StringBuilder();
-        sb.Append("\"It is my duty to look after the spiritual well-being of the village of ");
-        sb.Append(((Villager)priest).Town.Name);
-        sb.Append(".\"");
+        sb.Append("\"It is my duty to look after the spiritual well-being of the village.");
+        //sb.Append(((Villager)priest).Town.Name);
+        //sb.Append(".\"");
 
         return sb.ToString();
     }
@@ -425,9 +425,9 @@ class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         var grocer = (Villager)actor;
         var sb = new StringBuilder();
         sb.Append('"');
-        sb.Append("Welcome to ");
-        sb.Append(grocer.Town.Name.Capitalize());
-        sb.Append(" market!");
+        sb.Append("Welcome to the market!");
+        //sb.Append(grocer.Town.Name.Capitalize());
+        //sb.Append(" market!");
         sb.Append('"');
 
         return sb.ToString();

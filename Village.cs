@@ -11,7 +11,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using SDL2;
 
 namespace Yarl2;
 
@@ -83,7 +82,6 @@ class Village
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
-            Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Shrine.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
@@ -101,7 +99,6 @@ class Village
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
-            Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
@@ -129,7 +126,6 @@ class Village
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
             Appearance = VillagerAppearance(rng),
-            Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
@@ -190,7 +186,6 @@ class Village
         var pup = new VillageAnimal()
         {
             Name = $"{adj} {dogType}",
-            Town = town,
             Status = ActorStatus.Indifferent,
             Appearance = $"{adj} {dogType} with {colourDesc} fur",
             Glyph = new Glyph('d', colour, colour, Colours.BLACK),

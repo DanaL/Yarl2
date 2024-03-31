@@ -170,8 +170,6 @@ class Monster : Actor
 
 class Villager : Actor
 {    
-    public Town Town { get; set; }
-    
     public override string FullName => Name.Capitalize();  
     public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
     public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
@@ -179,8 +177,6 @@ class Villager : Actor
 
 class VillageAnimal : Actor
 {
-    public Town Town { get; set; }
-    
     public VillageAnimal()
     {
         _behaviour = new VillagePupBehaviour();
