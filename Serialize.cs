@@ -120,14 +120,57 @@ class GameStateSave
     }
 }
 
+class TownSave
+{
+    public string Name { get; set; } = "";
+     [JsonInclude]
+    public HashSet<Loc> Shrine { get; set; } = [];
+     [JsonInclude]
+    public HashSet<Loc> Tavern { get; set; } = [];
+     [JsonInclude]
+    public HashSet<Loc> Market { get; set; } = [];
+     [JsonInclude]
+    public HashSet<Loc> Smithy { get; set; } = [];
+     [JsonInclude]
+    public List<HashSet<Loc>> Homes { get; set; } = [];
+     [JsonInclude]
+    public List<int> TakenHomes { get; set; } = [];
+     [JsonInclude]
+    public HashSet<Loc> TownSquare { get; set; } = [];
+    public int Row { get; set; }
+    public int Col { get; set; }
+    public int Height { get; set; }
+    public int Width { get; set; }
+}
+
 class CampaignSaver
 {
     [JsonInclude]
     public Dictionary<int, DungeonSaver> Dungeons = [];
+    public TownSave? Town { get; set; }
 
     public static CampaignSaver Shrink(Campaign c)
     {
-        CampaignSaver sc = new();
+        var town = new TownSave()
+        {            
+            Shrine = c.Town!.Shrine,
+            Tavern = c.Town.Tavern,
+            Market = c.Town.Market,
+            Smithy = c.Town.Smithy,
+            Homes = c.Town.Homes,
+            TakenHomes = c.Town.TakenHomes,
+            TownSquare = c.Town.TownSquare,
+            Row = c.Town.Row,
+            Col = c.Town.Col,
+            Height = c.Town.Height,
+            Width = c.Town.Width,
+            Name = c.Town.Name
+        };
+        
+        CampaignSaver sc = new()
+        {
+            Town = town
+        };
        
         foreach (var k in c.Dungeons.Keys)
         {
@@ -139,7 +182,26 @@ class CampaignSaver
 
     public static Campaign Inflate(CampaignSaver sc)
     {
-        Campaign campaign = new();
+        var town = new Town()
+        {
+            Shrine = sc.Town!.Shrine,
+            Tavern = sc.Town.Tavern,
+            Market = sc.Town.Market,
+            Smithy = sc.Town.Smithy,
+            Homes = sc.Town.Homes,
+            TakenHomes = sc.Town.TakenHomes,
+            TownSquare = sc.Town.TownSquare,
+            Row = sc.Town.Row,
+            Col = sc.Town.Col,
+            Height = sc.Town.Height,
+            Width = sc.Town.Width,
+            Name = sc.Town.Name
+        };
+
+        Campaign campaign = new()
+        {
+            Town = town
+        };
 
         foreach (var k in  sc.Dungeons.Keys)
         {

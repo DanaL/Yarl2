@@ -26,11 +26,11 @@ enum BuildingType
 class Town
 {
     public string Name { get; set; } = "";
-    public HashSet<(int, int)> Shrine { get; set; } = [];
-    public HashSet<(int, int)> Tavern { get; set; } = [];
-    public HashSet<(int, int)> Market { get; set; } = [];
-    public HashSet<(int, int)> Smithy { get; set; } = [];
-    public List<HashSet<(int, int)>> Homes { get; set; } = [];
+    public HashSet<Loc> Shrine { get; set; } = [];
+    public HashSet<Loc> Tavern { get; set; } = [];
+    public HashSet<Loc> Market { get; set; } = [];
+    public HashSet<Loc> Smithy { get; set; } = [];
+    public List<HashSet<Loc>> Homes { get; set; } = [];
     public List<int> TakenHomes { get; set; } = [];
     public HashSet<Loc> TownSquare { get; set; } = [];
     public int Row { get; set; }
@@ -143,19 +143,19 @@ class TownBuilder
         switch (building)
         {
             case BuildingType.Shrine:
-                Town.Shrine = sqs;
+                Town.Shrine = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
                 break;
             case BuildingType.Tavern:
-                Town.Tavern = sqs;
+                Town.Tavern = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
                 break;
             case BuildingType.Market: 
-                Town.Market = sqs;
+                Town.Market = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
                 break;
             case BuildingType.Smithy:
-                Town.Smithy = sqs;
+                Town.Smithy = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
                 break;
             default:
-                Town.Homes.Add(sqs);
+                Town.Homes.Add(sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet());
                 break;
         }
     }
@@ -507,9 +507,9 @@ class TownBuilder
         while (true)
         {
             var loc = smithySqs[f++];
-            if (GoodSpotForForge(map, loc.Item1, loc.Item2)) 
+            if (GoodSpotForForge(map, loc.Row, loc.Col)) 
             {
-                map.SetTile(loc.Item1, loc.Item2, TileFactory.Get(TileType.Forge));
+                map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Forge));
                 break;
             }
         }

@@ -19,7 +19,7 @@ class Dungeon(int ID, string arrivalMessage)
     public Dictionary<(int, int, int), Sqr> RememberedSqs = [];
     public Dictionary<int, Map> LevelMaps = [];
     public string ArrivalMessage { get; } = arrivalMessage;
-
+    
     public void AddMap(Map map)
     {
         int id = LevelMaps.Count == 0 ? 0 : LevelMaps.Keys.Max() + 1;
@@ -31,6 +31,7 @@ class Dungeon(int ID, string arrivalMessage)
 // the 'story' of the game. All the dungeon levels, etc
 class Campaign
 {
+    public Town? Town { get; set; }
     public Dictionary<int, Dungeon> Dungeons = [];
         
     public void AddDungeon(Dungeon dungeon)
@@ -226,7 +227,8 @@ class PreGameHandler(UserInterface ui)
         };
         wildernessMap.SetTile(entrance, portal);
 
-       
+       campaign.Town = town;
+
         //PopulateDungeon(rng, objDb, history, mainDungeon);
         PopulateArena(rng, objDb, mainDungeon);
 

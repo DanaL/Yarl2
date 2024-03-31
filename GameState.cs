@@ -33,7 +33,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     public DjikstraMap? DMapFlight { get; private set; }
     public HashSet<Loc> RecentlySeen { get; set; } = [];    
     public ulong LastTarget { get; set; } = 0;
-
+    
     // This might (probably will) expand into a hashtable of 
     // UIEventType mapped to a list of listeners
     List<IGameEventListener> _endOfRoundListeners { get; set; } = [];

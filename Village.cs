@@ -86,10 +86,9 @@ class Village
             Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
-        var sqs = town.Shrine.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
-                                          map.TileAt(sq).Type == TileType.WoodFloor).ToList();
-        var sq = sqs[rng.Next(sqs.Count)];
-        cleric.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        var sqs = town.Shrine.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
+                                          map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
+        cleric.Loc = sqs[rng.Next(sqs.Count)];
         cleric.SetBehaviour(new PriestBehaviour());
 
         return cleric;
@@ -105,10 +104,9 @@ class Village
             Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
-        var sqs = town.Market.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
-                                          map.TileAt(sq).Type == TileType.WoodFloor).ToList();
-        var sq = sqs[rng.Next(sqs.Count)];
-        grocer.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
+                                          map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();        
+        grocer.Loc = sqs[rng.Next(sqs.Count)];
         grocer.SetBehaviour(new GrocerBehaviour(1.25 + rng.NextDouble() / 2));
         
         grocer.Inventory = new Inventory(grocer.ID, objDb);
@@ -134,10 +132,9 @@ class Village
             Town = town,
             Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
-        var sqs = town.Smithy.Where(sq => map.TileAt(sq).Type == TileType.StoneFloor ||
-                                          map.TileAt(sq).Type == TileType.WoodFloor).ToList();
-        var sq = sqs[rng.Next(sqs.Count)];
-        smith.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
+        var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
+                                          map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
+        smith.Loc = sqs[rng.Next(sqs.Count)];
         smith.SetBehaviour(new SmithBehaviour(1.5 + rng.NextDouble() / 2));
 
         smith.Inventory = new Inventory(smith.ID, objDb);
