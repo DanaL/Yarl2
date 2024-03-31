@@ -626,7 +626,7 @@ class TraitFactory
                     MinRange = int.Parse(digits[2]),
                     MaxRange = int.Parse(digits[3])
                 };
-            case "FireboltAction":
+            case "Firebolt":
                 digits = Util.DigitsRegex().Split(text);
                 return new FireboltActionTrait()
                 {

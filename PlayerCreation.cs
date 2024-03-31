@@ -166,7 +166,8 @@ class PlayerCreator
             CharClass = PickClass(ui)
         };
         player.Stats = RollStats(player.CharClass, rng);
-
+        player.Inventory = new Inventory(player.ID, objDb);
+        
         objDb.Add(player);
 
         SetStartingGear(player, objDb, rng);

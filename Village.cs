@@ -111,6 +111,7 @@ class Village
         grocer.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
         grocer.SetBehaviour(new GrocerBehaviour(1.25 + rng.NextDouble() / 2));
         
+        grocer.Inventory = new Inventory(grocer.ID, objDb);
         grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
         grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
         grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
@@ -139,6 +140,7 @@ class Village
         smith.Loc = new Loc(0, 0, sq.Item1, sq.Item2);
         smith.SetBehaviour(new SmithBehaviour(1.5 + rng.NextDouble() / 2));
 
+        smith.Inventory = new Inventory(smith.ID, objDb);
         smith.Inventory.Add(ItemFactory.Get("ringmail", objDb), smith.ID);
         smith.Inventory.Add(ItemFactory.Get("helmet", objDb), smith.ID);
         if (rng.NextDouble() < 0.25)

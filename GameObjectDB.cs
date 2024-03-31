@@ -20,6 +20,7 @@ namespace Yarl2;
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
     public static Loc Nowhere = new Loc(-1, -1, -1, -1);
+    public static Loc Zero = new Loc(0, 0, 0, 0);
     // A convenient method because this comes up a lot.
     public Loc Move(int RowDelta, int ColDelta)
     {
@@ -76,7 +77,7 @@ abstract class GameObj: IZLevel
     public string Name { get; set; } = "";
     public virtual string FullName => Name;
     public virtual Glyph Glyph { get; set; }
-    public Loc Loc { get; set; }
+    public Loc Loc { get; set; } = Loc.Nowhere;
     public List<Trait> Traits { get; set; } = [];
 
     public ulong ID { get; set; }

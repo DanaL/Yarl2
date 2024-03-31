@@ -64,11 +64,6 @@ class Actor : GameObj, IPerformer, IZLevel
     protected IBehaviour _behaviour;
     public IBehaviour Behaviour => _behaviour;
 
-    public Actor() 
-    {
-        Inventory = new Inventory(ID);        
-    }
-    
     public override int Z() => HasActiveTrait<FlyingTrait>() ? FLYING_Z : DEFAULT_Z;
     
     public override string FullName => Name.DefArticle();    
@@ -82,6 +77,11 @@ class Actor : GameObj, IPerformer, IZLevel
 
     public virtual string ChatText() => "";
     public virtual (Action, InputAccumulator) Chat(GameState gs) => (null, null);
+
+    public Actor()
+    {
+        Inventory = new EmptyInventory(ID);
+    }
 
     public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
     {

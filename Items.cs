@@ -298,12 +298,26 @@ class Armour : Item
     public ArmourParts Piece { get; set; }
 }
 
-class Inventory(ulong ownerID)
+class Inventory(ulong ownerID, GameObjectDB objDb)
 {
     public ulong OwnerID { get; init; } = ownerID;
     public int Zorkmids { get; set; }
-    List<Item> _items = [];
+    List<(char, ulong)> _items = [];
     public char NextSlot { get; set; } = 'a';
+    readonly GameObjectDB _objDb = objDb;
+
+    protected virtual List<Item> Items()
+    {
+        List<Item> items = [];
+        foreach (var itemID in _items.Select(i => i.Item2))
+        {
+            var item = _objDb.GetObj(itemID) as Item;
+            if (item is not null)
+                items.Add(item);
+        }
+
+        return items;
+    }
 
     void FindNextSlot() 
     {
@@ -329,18 +343,19 @@ class Inventory(ulong ownerID)
         }
     }
 
-    public char[] UsedSlots() => _items.Select(i => i.Slot).Distinct().ToArray();
+    public char[] UsedSlots() => _items.Select(i => i.Item1).Distinct().ToArray();
 
-    public (Item, int) ItemAt(char slot)
+    public (Item?, int) ItemAt(char slot)
     {
-        var inSlot = _items.Where(i => i.Slot == slot);
+        var inSlot = _items.Where(i => i.Item1 == slot).ToList();
+        var item = _objDb.GetObj(inSlot.First().Item2) as Item;
 
-        return (inSlot.First(), inSlot.Count());
+        return (item, inSlot.Count);
     }
 
     public Item? ReadiedWeapon()
     {        
-        foreach (var item in _items)
+        foreach (var item in Items())
         {
             if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equiped)
                 return item;
@@ -367,7 +382,7 @@ class Inventory(ulong ownerID)
         // available slot
         if (item.Stackable)
         {
-            foreach (var other in _items)
+            foreach (var other in Items())
             {
                 // Not yet worrying about +1 dagger vs +2 dagger which probably shouldn't stack together
                 // Maybe a CanStack() method on Item
@@ -394,7 +409,7 @@ class Inventory(ulong ownerID)
         {
             item.Slot = slotToUse;
             item.ContainedBy = ownerID;
-            _items.Add(item);
+            _items.Add((slotToUse, item.ID));
         }
         else
         {
@@ -403,20 +418,18 @@ class Inventory(ulong ownerID)
     }
 
     public Item? RemoveByID(ulong id) 
-    {
-        Item? item = null;
-
+    {        
         for (int j = 0; j < _items.Count; j++)
         {
-            if (_items[j].ID == id)
+            if (_items[j].Item2 == id)
             {
-                item = _items[j];
+                var item = _objDb.GetObj(_items[j].Item2) as Item;
                 _items.RemoveAt(j);
-                break;
+                return item;
             }
         }
 
-        return item;
+        return null;
     }
 
     public List<Item> Remove(char slot, int count)
@@ -424,7 +437,8 @@ class Inventory(ulong ownerID)
         List<int> indexes = [];
         for (int j = _items.Count - 1; j >= 0; j--)
         {
-            if (_items[j].Slot == slot)
+            var item = _objDb.GetObj(_items[j].Item2) as Item;
+            if (item.Slot == slot)
                 indexes.Add(j);
         }
 
@@ -433,8 +447,12 @@ class Inventory(ulong ownerID)
         for (int j = 0; j < totalToRemove; j++)
         {
             int index = indexes[j];
-            removed.Add(_items[index]);
-            _items.RemoveAt(index);
+            var item = _objDb.GetObj(_items[index].Item2) as Item;
+            if (item is not null)
+            {
+                removed.Add(item);
+                _items.RemoveAt(index);
+            }            
         }
 
         return removed;
@@ -449,11 +467,12 @@ class Inventory(ulong ownerID)
         // (or like it doesn't make sense for them to be) and I'll have
         // to check for that
         Item? item = null;
-        foreach (var i in  _items)
+        foreach (var (s, id) in  _items)
         {
-            if (i.Slot == slot)
+            
+            if (s == slot)
             {
-                item = i;
+                item = _objDb.GetObj(id) as Item;
                 break;
             }
         }
@@ -471,7 +490,7 @@ class Inventory(ulong ownerID)
             if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
             {
                 // If there is a weapon already equiped, unequip it
-                foreach (Item other in _items)
+                foreach (Item other in Items())
                 {
                     if (other.Type == ItemType.Weapon && other.Equiped)
                         other.Equiped = false;
@@ -492,7 +511,7 @@ class Inventory(ulong ownerID)
                 }
 
                 // check to see if there's another piece in that slot
-                foreach (var other  in _items.Where(a => a.Type == ItemType.Armour && a.Equiped))
+                foreach (var other  in Items().Where(a => a.Type == ItemType.Armour && a.Equiped))
                 {
                     foreach (var t in other.Traits)
                     {
@@ -515,7 +534,7 @@ class Inventory(ulong ownerID)
     {
         List<IPerformer> activeTraits = [];
 
-        foreach (var item in _items)
+        foreach (var item in Items())
         {
             activeTraits.AddRange(item.ActiveTraits());
         }
@@ -523,7 +542,13 @@ class Inventory(ulong ownerID)
         return activeTraits;
     }
 
-    public string ToText() => string.Join(',', _items.Select(i => i.ID));
+    public virtual string ToText() => string.Join(',', _items.Select(i => i.Item2));
+}
+
+class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)
+{
+    protected override List<Item> Items() => [];
+    public override string ToText() => "";
 }
 
 enum EquipingResult 

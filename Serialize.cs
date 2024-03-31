@@ -75,6 +75,8 @@ internal class Serialize
 
         var objDbSave = sgi.ObjDb;
         var objDb = GameObjDBSave.Inflate(objDbSave);
+        gs.ObjDb = objDb;
+
         //gs.Player = PlayerSave.Inflate(sgi.Player);
         //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
         return (gs, Loc.Nowhere);
@@ -115,197 +117,6 @@ class GameStateSave
         gs.Turn = gs.Turn;
 
         return gs;
-    }
-}
-
-class PlayerSave
-{
-    public ulong ID { get; set; }
-    public string Name { get; set; }
-    public Loc Loc {  get; set; }
-
-    [JsonInclude]
-    public InventorySaver Inventory { get; set; }
-
-    [JsonInclude]
-    public List<AttrStatKVP> Stats { get; set; }
-
-    public static PlayerSave Shrink(Player p) => new()
-    {
-        ID = p.ID,
-        Name = p.Name,
-        Stats = AttrStatKVP.Save(p.Stats),
-        Loc = p.Loc
-        //Inventory = InventorySaver.Shrink(p.Inventory),
-        //Loc = p.Loc.ToString()
-    };
-
-    public static Player Inflate(PlayerSave sp) => new Player(sp.Name)
-    {
-        ID = sp.ID,
-        Stats = AttrStatKVP.Load(sp.Stats),
-        Loc = sp.Loc
-        //Inventory = InventorySaver.Inflate(sp.Inventory, sp.ID, objDb),
-        //Loc = Yarl2.Loc.FromText(sp.Loc)
-    };
-}
-
-class MonsterSaver
-{
-    public ulong ID { get; set; }
-    public string Name { get; set; }
-    public string Loc { get; set; }
-
-    [JsonInclude]
-    public List<AttrStatKVP> Stats;
-
-    public static MonsterSaver Shrink(Monster m) => new()
-    {
-        ID = m.ID,
-        Name = m.Name,
-        Stats = AttrStatKVP.Save(m.Stats),
-        Loc = m.Loc.ToString()
-    };
-
-    public static Monster Inflate(MonsterSaver ms)
-    {
-        //var m = (Monster) MonsterFactory.Get(ms.Name);
-        //m.ID = ms.ID;
-        //m.Stats = AttrStatKVP.Load(ms.Stats);
-        //m.Loc = Yarl2.Loc.FromText(ms.Loc);
-
-        //return m;
-        return null;
-    }
-}
-
-record AttrStatKVP(string Attr, Stat Stat)
-{
-    public static Dictionary<Attribute, Stat> Load(List<AttrStatKVP> kvps)
-    {
-        Dictionary<Attribute, Stat> stats = [];
-
-        foreach (var kvp in kvps) 
-        {
-            Enum.TryParse(kvp.Attr, out Attribute a);
-            stats.Add(a, kvp.Stat);
-        }
-
-        return stats;
-    }
-
-    public static List<AttrStatKVP> Save(Dictionary<Attribute, Stat> stats)
-    {
-        return stats.Select(kvp => new AttrStatKVP(kvp.Key.ToString(), kvp.Value))
-                    .ToList();
-    }
-}
-
-record InvItemKVP(char Slot, string ItemText);
-
-// The Item class and its subclasses has proven annoying to serialize so I'm
-// going to do a bespoke text format for them. Not too happy about this because
-// I'll probably create a bunch of bugs in the meantime :'(
-class ItemSaver
-{
-    static ItemType TextToItemType(string text) => text switch
-    {
-        "Armour" => ItemType.Armour,
-        "Weapon" => ItemType.Weapon,
-        "Zorkmid" => ItemType.Zorkmid,
-        "Tool" => ItemType.Tool,
-        "Document" => ItemType.Document,
-        _ => throw new Exception($"Hmm I don't know about Item Type {text}")
-    };
-   
-    static Glyph TextToGlyph(string text)
-    {
-        var p = text.Split(';');
-        return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.BLACK);
-    }
-
-    static Loc TextToLoc(string text)
-    {
-        var digits = text.Split(',').Select(int.Parse).ToArray();
-        return new Loc(digits[0], digits[1], digits[2], digits[3]);
-    }
-
-    public static string ItemToText(Item item)
-    {
-        string txt = $"{item.ID}|{item.Loc}|{item.Name}|{item.Stackable}|{item.Slot}|";
-        txt += $"{item.Equiped}|{item.Value}|{item.ContainedBy}|";
-        txt += string.Join(',', item.Adjectives);
-        //txt += $"|" + GlyphToText(item.Glyph);
-
-        var traits = string.Join(';', item.Traits.Select(t => t.AsText()));
-        if (traits.Length > 0)
-            txt += "|" + traits;
-
-        txt += $"|{item.Type}";
-
-        return txt;
-    }
-
-    public static Item TextToItem(string text)
-    {
-        var pieces = text.Split('|');
-        
-        List<string> adjectives = pieces[8].Split(',').Where(s => s != "")
-                                                      .ToList();
-        var item = new Item()
-        {
-            ID = ulong.Parse(pieces[0]),
-            Loc = TextToLoc(pieces[1]),
-            Name = pieces[2],
-            Stackable = bool.Parse(pieces[3]),
-            Slot = pieces[4] == "" ? '\0' : pieces[4][0],
-            Equiped = bool.Parse(pieces[5]),
-            Value = int.Parse(pieces[6]),
-            ContainedBy = ulong.Parse(pieces[7]),
-            Adjectives = adjectives,
-            Glyph = TextToGlyph(pieces[9]),
-            Type = TextToItemType(pieces.Last())
-        };
-
-        foreach (var traitStr in pieces[10].Split(';'))
-            item.Traits.Add(TraitFactory.FromText(traitStr, item));
-        
-        return item;
-    }
-}
-
-class InventorySaver
-{
-    public char NextSlot { get; set; }
-    public int Zorkmids { get; set; }
-    [JsonInclude]
-    public List<InvItemKVP> Items { get; set; }
-
-    public static InventorySaver Shrink(Inventory inv)
-    {        
-        return new InventorySaver()
-        {
-            Zorkmids = inv.Zorkmids,
-            NextSlot = inv.NextSlot,
-            //Items = inv.ToKVP().Select(kvp => new InvItemKVP(kvp.Item1, ItemSaver.ItemToText(kvp.Item2))).ToList()
-        };
-    }
-
-    public static Inventory Inflate(InventorySaver sp, ulong ownerID, GameObjectDB objDb)
-    {
-        var inv = new Inventory(ownerID);
-        
-        foreach (var kvp in sp.Items)
-        {
-            var item = ItemSaver.TextToItem(kvp.ItemText);
-            objDb.Add(item);
-            inv.Add(item, ownerID);
-        }
-        
-        inv.Zorkmids = sp.Zorkmids;
-        inv.NextSlot = sp.NextSlot;
-
-        return inv;
     }
 }
 
@@ -634,7 +445,7 @@ class GameObjDBSave
                 item.Traits.Add(trait);
             }
         }
-        
+
         item.SetZ(int.Parse(fields[13]));
 
         return item;
@@ -725,27 +536,22 @@ class GameObjDBSave
         GameObj.SetSeed(sidb.GameObjSeed);
         var goDB = new GameObjectDB();
         
+        ulong maxID = 0;
         foreach (var line in sidb.Objects)
         {
             var obj = InflateObj(line);
+            if (obj.ID > maxID)
+                maxID = obj.ID;
+            goDB.Add(obj);
+            if (obj.Loc != Loc.Nowhere && obj.Loc != Loc.Zero)
+            {
+                if (obj is Item item)
+                    goDB.SetToLoc(obj.Loc, item);
+                else
+                    goDB.AddToLoc(obj.Loc, (Actor)obj);
+            }
         }
-        // foreach (var kvp in sidb.ItemsAtLoc)
-        // {
-        //     var items = kvp.Value.Select(ItemSaver.TextToItem).ToList();
-        //     goDB._itemLocs.Add(Loc.FromText(kvp.Key), items);
-        //     foreach (var item in items)
-        //     {
-        //         goDB.Objs.Add(item.ID, item);
-        //     }
-        // }
-
-        // foreach (var ms in sidb.Monsters)
-        // {
-        //     var m = MonsterSaver.Inflate(ms);
-        //     goDB.Add(m);
-        //     goDB.AddToLoc(m.Loc, m);
-        // }
-
+    
         return goDB;
     }
 }

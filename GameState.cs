@@ -165,7 +165,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                 ApplyDamageEffectToLoc(loc, DamageType.Fire);
         }
 
-        ObjDb.SetToLoc(loc, item);
+        //ObjDb.SetToLoc(loc, item);
         
         if (msgs.Count > 0)
             UI.AlertPlayer(msgs, "", this);        
