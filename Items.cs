@@ -542,13 +542,24 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         return activeTraits;
     }
 
-    public virtual string ToText() => string.Join(',', _items.Select(i => i.Item2));
+    public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
+
+    public virtual void RestoreFromText(string txt)
+    {
+        foreach (var i in txt.Split(','))
+        {
+            char slot = i[0];
+            ulong id = ulong.Parse(i.Substring(2));
+            _items.Add((slot, id));
+        }
+    }
 }
 
 class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)
 {
     protected override List<Item> Items() => [];
     public override string ToText() => "";
+    public override void RestoreFromText(string txt) { }
 }
 
 enum EquipingResult 

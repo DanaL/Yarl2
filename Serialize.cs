@@ -468,6 +468,9 @@ class GameObjDBSave
         p.Recovery = double.Parse(fields[8]);
 
         p.Inventory = new Inventory(p.ID, objDb);
+        p.Inventory.Zorkmids = int.Parse(fields[9]);
+        p.Inventory.NextSlot = fields[10][0];
+        p.Inventory.RestoreFromText(fields[11]);
 
         return p;
     }
