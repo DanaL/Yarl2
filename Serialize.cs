@@ -467,10 +467,15 @@ class GameObjDBSave
         p.Energy = double.Parse(fields[7]);
         p.Recovery = double.Parse(fields[8]);
 
-        p.Inventory = new Inventory(p.ID, objDb);
-        p.Inventory.Zorkmids = int.Parse(fields[9]);
-        p.Inventory.NextSlot = fields[10][0];
-        p.Inventory.RestoreFromText(fields[11]);
+        if (fields[11] != "")
+        {
+            p.Inventory = new Inventory(p.ID, objDb)
+            {
+                Zorkmids = int.Parse(fields[9]),
+                NextSlot = fields[10][0]
+            };
+            p.Inventory.RestoreFromText(fields[11]);
+        }
 
         return p;
     }
@@ -503,13 +508,16 @@ class GameObjDBSave
 
         mob.Stats = StatsFromText(fields[7]);
 
-        //mob.Inventory = new Inventory(mob.ID, objDb);
-        // zorkmids 10
-        // next slot 11
-        // inv list 12
+        if (fields[12] != "")
+        {
+            mob.Inventory = new Inventory(mob.ID, objDb)
+            {
+                Zorkmids = int.Parse(fields[10]),
+                NextSlot = fields[11][0]
+            };
+            mob.Inventory.RestoreFromText(fields[12]);
+        }
 
-
-        
         return mob;
     }
 
