@@ -209,7 +209,7 @@ class VillagePupBehaviour : IBehaviour
 
     public Action CalcAction(Mob pup, GameState gameState, UserInterface ui)
     {
-        var town = gameState.Campaign.Town;
+        var town = gameState.Campaign.Town!;
 
         double roll = gameState.Rng.NextDouble();
         if (roll < 0.25)
@@ -222,7 +222,7 @@ class VillagePupBehaviour : IBehaviour
             if (LocInTown(sq.Item1, sq.Item2, town))
             {
                 var loc = pup.Loc with { Row = sq.Item1, Col = sq.Item2 };
-                if (Passable(gameState.TileAt(loc).Type))
+                if (Passable(gameState.TileAt(loc).Type) && !gameState.ObjDb.Occupied(loc))
                     mvOpts.Add(loc);
             }
         }
