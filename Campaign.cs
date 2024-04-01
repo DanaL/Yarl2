@@ -263,7 +263,7 @@ class PreGameHandler(UserInterface ui)
 
         sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-        Actor mob = MonsterFactory.Get("kobold firestarter", rng);
+        Mob mob = MonsterFactory.Get("kobold firestarter", rng);
         mob.Loc = loc;
         objDb.Add(mob);
         objDb.AddToLoc(loc, mob);
@@ -297,7 +297,7 @@ class PreGameHandler(UserInterface ui)
                 if (deck.Indexes.Count == 0)
                     deck.Reshuffle(rng);
                 string m = deck.Monsters[deck.Indexes.Dequeue()];
-                Actor monster = MonsterFactory.Get(m, rng);
+                Mob monster = MonsterFactory.Get(m, rng);
                 monster.Loc = loc;
                 objDb.Add(monster);
                 objDb.AddToLoc(loc, monster);

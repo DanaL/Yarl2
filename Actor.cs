@@ -46,7 +46,7 @@ enum AIType
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
-class Actor : GameObj, IPerformer, IZLevel
+class Mob : GameObj, IPerformer, IZLevel
 {
     static readonly int FLYING_Z = 10;
     static readonly int DEFAULT_Z = 4;
@@ -78,7 +78,7 @@ class Actor : GameObj, IPerformer, IZLevel
     public virtual string ChatText() => "";
     public virtual (Action, InputAccumulator) Chat(GameState gs) => (null, null);
 
-    public Actor()
+    public Mob()
     {
         Inventory = new EmptyInventory(ID);
     }
@@ -116,7 +116,7 @@ class Actor : GameObj, IPerformer, IZLevel
 // for instan           ce are of type Monster even though it's a bit rude
 // to call them that. Dunno why I don't like the term NPC for
 // this class
-class Monster : Actor
+class Monster : Mob
 {
     public AIType AIType { get; set;}
     public IMoveStrategy MoveStrategy { get; set; }
@@ -168,22 +168,14 @@ class Monster : Actor
     }
 }
 
-class Villager : Actor
+class Villager : Mob
 {    
     public override string FullName => Name.Capitalize();  
-    public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
-    public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
 }
 
-class VillageAnimal : Actor
+class VillageAnimal : Mob
 {
-    public VillageAnimal()
-    {
-        _behaviour = new VillagePupBehaviour();
-    }
-    
-    public override string ChatText() => ((IChatter)_behaviour).ChatText(this);
-    public override (Action, InputAccumulator) Chat(GameState gs) => ((IChatter)_behaviour).Chat(this, gs);
+    public VillageAnimal() => _behaviour = new VillagePupBehaviour();
 }
 
 class MonsterFactory
@@ -212,7 +204,7 @@ class MonsterFactory
     //       0       1    2      3   4   5           6         7    8    9       10        11       12
     // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions, Other Traits 
     // skeleton        |z|white        |darkgrey  |12| 8|2| 1.0| 6|1|12|10|2|Basic|
-    public static Actor Get(string name, Random rng)
+    public static Mob Get(string name, Random rng)
     {
         if (_catalog.Count == 0)
             LoadCatalog();

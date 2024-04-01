@@ -15,12 +15,12 @@ record UseResult(bool Successful, string Message, Action? ReplacementAction, Inp
 
 interface IReadable
 {
-    void Read(Actor actor, UserInterface ui, Item document);
+    void Read(Mob actor, UserInterface ui, Item document);
 }
 
 interface IUSeable
 {
-    UseResult Use(Actor user, GameState gs, int row, int col);
+    UseResult Use(Mob user, GameState gs, int row, int col);
     string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc);
 }
 
@@ -157,9 +157,9 @@ class CleaveTrait : Trait
     public override string AsText() => "Cleave";
 }
 
-class RageTrait(Actor actor) : Trait
+class RageTrait(Mob actor) : Trait
 {
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
 
     public override bool Active
     {
@@ -193,7 +193,7 @@ class CastAntidoteTrait : Trait, IUSeable
     public override string AsText() => "CastAntidote";
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
  
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Mob user, GameState gs, int row, int col)
     {
         return new UseResult(true, "", new AntidoteAction(user, gs), null);
     }
@@ -204,7 +204,7 @@ class CastBlinkTrait : Trait, IUSeable
 {
     public override string AsText() => "CastBlink";
 
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Mob user, GameState gs, int row, int col)
     {
         return new UseResult(true, "", new BlinkAction(user, gs), null);
     }
@@ -216,7 +216,7 @@ class CastMinorHealTrait : Trait, IUSeable
 {
     public override string AsText() => "CastMinorHeal";
     
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Mob user, GameState gs, int row, int col)
     {        
         return new UseResult(true, "", new HealAction(user, gs, 4, 4), null);
     }
@@ -345,7 +345,7 @@ class PoisonedTrait : Trait, IGameEventListener
 
     public void Alert(UIEventType eventType, GameState gs)
     {
-        var victim = (Actor?) gs.ObjDb.GetObj(VictimID);
+        var victim = (Mob?) gs.ObjDb.GetObj(VictimID);
         if (victim != null)
         {
             bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
@@ -383,7 +383,7 @@ class ReadableTrait(string text) : Trait, IUSeable
     public override string AsText() => $"Document#{_text}#{ContainerID}";
     public override bool Aura => false;
 
-    public UseResult Use(Actor user, GameState gs, int row, int col)
+    public UseResult Use(Mob user, GameState gs, int row, int col)
     {
         Item? doc = gs.ObjDb.GetObj(ContainerID) as Item;
         string msg = $"{user.FullName.Capitalize()} read:\n{_text}";        
@@ -426,7 +426,7 @@ class CountdownTrait : Trait, IGameEventListener
                     // I don't think owner should ever be null, barring a bug
                     // but this placates the warning in VS/VS Code
                     loc = owner.Loc;
-                    ((Actor)owner).Inventory.Remove(item.Slot, 1);
+                    ((Mob)owner).Inventory.Remove(item.Slot, 1);
                 }
             }
 
@@ -503,7 +503,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
         return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
     }
 
-    public UseResult Use(Actor _, GameState gs, int row, int col)
+    public UseResult Use(Mob _, GameState gs, int row, int col)
     {
         Item? item = gs.ObjDb.GetObj(ContainerID) as Item;
         var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, row, col);
@@ -542,7 +542,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
             if (gs.ObjDb.GetObj(ContainerID) is Item item)
             {
                 Loc loc = item.Loc;
-                if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
+                if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Mob owner)
                 {                    
                     // I don't think owner should ever be null, barring a bug
                     // but this placates the warning in VS/VS Code
@@ -723,7 +723,7 @@ class TraitFactory
             case "Plural":
                 return new PluralTrait();
             case "Rage":
-                return new RageTrait((Actor)container);
+                return new RageTrait((Mob)container);
             case "Readable":
                 return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
             case "ShieldOfTheFaithful":

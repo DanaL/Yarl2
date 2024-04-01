@@ -31,11 +31,11 @@ abstract class Action
     public virtual void ReceiveAccResult(AccumulatorResult result) {}
 }
 
-class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
+class MeleeAttackAction(Mob actor, Loc loc, GameState gs) : Action
 {
     GameState _gs = gs;
     Loc _loc = loc;
-    Actor _actor = actor;
+    Mob _actor = actor;
     
     public override ActionResult Execute()
     {        
@@ -49,11 +49,11 @@ class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
     }
 }
 
-class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo) : Action
+class MissileAttackAction(Mob actor, Loc loc, GameState gs, Item ammo) : Action
 {
     readonly GameState _gs = gs;
     Loc _loc = loc;
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly Item _ammo = ammo;
 
     public override ActionResult Execute()
@@ -203,9 +203,9 @@ class ShopAction(Villager shopkeeper, GameState gs) : Action
     }
 }
 
-abstract class DirectionalAction(Actor actor) : Action
+abstract class DirectionalAction(Mob actor) : Action
 {
-    protected readonly Actor _actor = actor;
+    protected readonly Mob _actor = actor;
     protected Loc _loc { get; set; }
     
     public override void ReceiveAccResult(AccumulatorResult result)
@@ -215,9 +215,9 @@ abstract class DirectionalAction(Actor actor) : Action
     }
 }
 
-class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
+class ChatAction(Mob actor, GameState gs) : DirectionalAction(actor)
 {
-    private GameState _gs = gs;
+    readonly GameState _gs = gs;
 
     public override ActionResult Execute()
     {
@@ -231,8 +231,9 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         }
         else
         {
-            var txt = other.ChatText();
-            if (string.IsNullOrEmpty(txt))
+            var (chatAction, _) = other.Behaviour.Chat(other, _gs);
+
+            if (chatAction is NullAction)
             {
                 result.Messages.Add(MsgFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
                 result.Complete = true;
@@ -251,7 +252,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
     }
 }
 
-class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(actor)
+class CloseDoorAction(Mob actor, Map map, GameState gs) : DirectionalAction(actor)
 {
     private GameState _gs = gs;
     private readonly Map _map = map;
@@ -300,13 +301,13 @@ class OpenDoorAction : DirectionalAction
     private GameState _gs;
     private readonly Map _map;
 
-    public OpenDoorAction(Actor actor, Map map, GameState gs) : base(actor)
+    public OpenDoorAction(Mob actor, Map map, GameState gs) : base(actor)
     {
         _map = map;
         _gs = gs;
     }
 
-    public OpenDoorAction(Actor actor, Map map, Loc loc, GameState gs) : base(actor)
+    public OpenDoorAction(Mob actor, Map map, Loc loc, GameState gs) : base(actor)
     {
         _map = map;
         _loc = loc;
@@ -353,9 +354,9 @@ class OpenDoorAction : DirectionalAction
     }
 }
 
-class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
+class MoveAction(Mob actor,  Loc loc, GameState gameState) : Action
 {
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly Loc _loc = loc;
     readonly Map _map = gameState.Map!;
     readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
@@ -533,11 +534,11 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
     }    
 }
 
-class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class PickupItemAction(UserInterface ui, Mob actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     readonly UserInterface _ui = ui;
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly GameState _gs = gs;
 
     public override ActionResult Execute()
@@ -594,11 +595,11 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class UseItemAction(UserInterface ui, Mob actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     UserInterface _ui = ui;
-    Actor _actor = actor;
+    Mob _actor = actor;
     GameState _gs = gs;
 
     public override ActionResult Execute()
@@ -649,7 +650,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
+class FogCloudAction(Mob caster, GameState gs, Loc target) : Action
 {
     readonly ulong _casterID = caster.ID;
     readonly GameState _gs = gs;
@@ -678,7 +679,7 @@ class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
     }    
 }
 
-class EntangleAction(Actor caster, GameState gs, Loc target) : Action
+class EntangleAction(Mob caster, GameState gs, Loc target) : Action
 {
     readonly ulong _casterID = caster.ID;
     readonly GameState _gs = gs;
@@ -692,7 +693,7 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
             var tile = _gs.TileAt(loc);
             if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDb.Occupied(loc))
             {
-                Actor vines = MonsterFactory.Get("vines", _gs.Rng);
+                Mob vines = MonsterFactory.Get("vines", _gs.Rng);
                 vines.Loc = loc;
                 _gs.ObjDb.Add(vines);
                 _gs.ObjDb.AddToLoc(loc, vines);
@@ -705,9 +706,9 @@ class EntangleAction(Actor caster, GameState gs, Loc target) : Action
     }
 }
 
-class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajectory) : Action
+class FireboltAction(Mob caster, GameState gs, Loc target, List<Loc> trajectory) : Action
 {
-    readonly Actor _caster = caster;
+    readonly Mob _caster = caster;
     readonly GameState _gs = gs;
     readonly Loc _target = target;
     readonly List<Loc> _trajectory = trajectory;
@@ -756,9 +757,9 @@ class WebAction(GameState gs, Loc target) : Action
     }
 }
 
-class BlinkAction(Actor caster, GameState gs) : Action
+class BlinkAction(Mob caster, GameState gs) : Action
 {
-    readonly Actor _caster = caster;
+    readonly Mob _caster = caster;
     readonly GameState _gs = gs;
 
     public override ActionResult Execute()
@@ -799,9 +800,9 @@ class BlinkAction(Actor caster, GameState gs) : Action
     }    
 }
 
-class AntidoteAction(Actor target, GameState gs) : Action
+class AntidoteAction(Mob target, GameState gs) : Action
 {
-    readonly Actor _target = target;
+    readonly Mob _target = target;
     readonly GameState _gs = gs;
 
     public override ActionResult Execute()
@@ -822,9 +823,9 @@ class AntidoteAction(Actor target, GameState gs) : Action
     }
 }
 
-class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
+class HealAction(Mob target, GameState gs, int healDie, int healDice) : Action
 {
-    readonly Actor _target = target;
+    readonly Mob _target = target;
     readonly GameState _gs = gs;
     readonly int _healDie = healDie;
     readonly int _healDice = healDice;
@@ -843,10 +844,10 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
     }    
 }
 
-class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
+class DropZorkmidsAction(UserInterface ui, Mob actor, GameState gs) : Action
 {
     readonly UserInterface _ui = ui;
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly GameState _gs = gs;
     int _amount;
 
@@ -897,10 +898,10 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+class DropStackAction(UserInterface ui, Mob actor, GameState gs, char slot) : Action
 {
     private readonly UserInterface _ui = ui;
-    private readonly Actor _actor = actor;
+    private readonly Mob _actor = actor;
     private readonly GameState _gs = gs;
     private readonly char _slot = slot;
     private int _amount;
@@ -933,10 +934,10 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
     }
 }
 
-class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+class ThrowAction(UserInterface ui, Mob actor, GameState gs, char slot) : Action
 {    
     readonly UserInterface _ui = ui;
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly GameState _gs = gs;
     readonly char _slot = slot;
     Loc _target { get; set; }
@@ -1071,11 +1072,11 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
     }
 }
 
-class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class DropItemAction(UserInterface ui, Mob actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     readonly UserInterface _ui = ui;
-    readonly Actor _actor = actor;
+    readonly Mob _actor = actor;
     readonly GameState _gs = gs;
 
     public override ActionResult Execute()
@@ -1144,11 +1145,11 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
-class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
+class ToggleEquipedAction(UserInterface ui, Mob actor, GameState gs) : Action
 {
     public char Choice { get; set; }
     private UserInterface _ui = ui;
-    private Actor _actor = actor;
+    private Mob _actor = actor;
     private GameState _gameState = gs;
 
     public override ActionResult Execute()

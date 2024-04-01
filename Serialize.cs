@@ -610,7 +610,7 @@ class GameObjDBSave
                 if (obj is Item item)
                     goDB.SetToLoc(obj.Loc, item);
                 else
-                    goDB.AddToLoc(obj.Loc, (Actor)obj);
+                    goDB.AddToLoc(obj.Loc, (Mob)obj);
             }
         }
     

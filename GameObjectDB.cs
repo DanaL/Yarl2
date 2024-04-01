@@ -193,19 +193,19 @@ class GameObjectDB
         return EMPTY;
     }
 
-    public void RemoveActor(Actor actor)
+    public void RemoveActor(Mob actor)
     {
         Objs.Remove(actor.ID);
         _actorLocs.Remove(actor.Loc);
     }
 
-    public Actor? Occupant(Loc loc)
+    public Mob? Occupant(Loc loc)
     {
         if (_actorLocs.TryGetValue(loc, out ulong objId))
         {
             if (Objs.TryGetValue(objId, out var actor))
             {
-                return (Actor)actor;
+                return (Mob)actor;
             }
         }
 
@@ -226,7 +226,7 @@ class GameObjectDB
         Objs[obj.ID] = obj;
     }
 
-    public void AddToLoc(Loc loc, Actor actor)
+    public void AddToLoc(Loc loc, Mob actor)
     {
         _actorLocs[loc] = actor.ID;
     }
@@ -279,7 +279,7 @@ class GameObjectDB
         Objs.Remove(item.ID);
     }
 
-    public void ActorMoved(Actor a, Loc from, Loc to)
+    public void ActorMoved(Mob a, Loc from, Loc to)
     {
         if (_actorLocs[from] == a.ID)
         {
@@ -304,7 +304,7 @@ class GameObjectDB
 
         foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
         {
-            var actor = Objs[_actorLocs[loc]] as Actor;
+            var actor = Objs[_actorLocs[loc]] as Mob;
             if (actor is IPerformer performer)
                 performers.Add(performer);
 

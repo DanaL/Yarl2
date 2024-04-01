@@ -15,19 +15,19 @@ namespace Yarl2;
 
 interface IMoveStrategy
 {
-    Action MoveAction(Actor actor, GameState gs);
+    Action MoveAction(Mob actor, GameState gs);
 }
 
 class WallMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs) =>
+    public Action MoveAction(Mob actor, GameState gs) =>
         new PassAction();
 }
 
 // For creatures that don't know how to open doors
 class DumbMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs)
+    public Action MoveAction(Mob actor, GameState gs)
     {
         var adj = gs.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
@@ -49,7 +49,7 @@ class DumbMoveStrategy : IMoveStrategy
 // can open doors. OpposableThumbMoveStrategy? :P
 class DoorOpeningMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs)
+    public Action MoveAction(Mob actor, GameState gs)
     {
         // Move!
         var adj = gs.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
@@ -75,7 +75,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
 
 class SimpleFlightMoveStrategy : IMoveStrategy
 {
-    public Action MoveAction(Actor actor, GameState gs)
+    public Action MoveAction(Mob actor, GameState gs)
     {
         var adj = gs.DMapFlight.Neighbours(actor.Loc.Row, actor.Loc.Col);
         foreach (var sq in adj)
@@ -93,15 +93,10 @@ class SimpleFlightMoveStrategy : IMoveStrategy
     }
 }
 
-interface IChatter
-{
-    string ChatText(Actor actor);
-    (Action, InputAccumulator) Chat(Actor actro, GameState gs);
-}
-
 interface IBehaviour
 {
-    Action CalcAction(Actor actor, GameState gameState, UserInterface ui);
+    Action CalcAction(Mob actor, GameState gameState, UserInterface ui);
+    (Action, InputAccumulator?) Chat(Mob actor, GameState gameState);
 }
 
 class MonsterBehaviour : IBehaviour
@@ -159,7 +154,7 @@ class MonsterBehaviour : IBehaviour
         return new NullAction();
     }
 
-    public Action CalcAction(Actor actor, GameState gs, UserInterface ui)
+    public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
     {
         Monster mob = (Monster)actor;
         
@@ -183,12 +178,14 @@ class MonsterBehaviour : IBehaviour
 
         return mob.MoveStrategy.MoveAction(mob, gs);
     }
+
+    public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
 }
 
-class VillagePupBehaviour : IBehaviour, IChatter
+class VillagePupBehaviour : IBehaviour
 {
     // Eventually different messages depending on if the dog is friendly or not?
-    public string ChatText(Actor animal)
+    public string ChatText(Mob animal)
     {
         return "Arf! Arf!";
     }
@@ -212,7 +209,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
         _ => false
     };
 
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
+    public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
     {
         var animal = (VillageAnimal)actor;
         var town = gameState.Campaign.Town;
@@ -259,7 +256,7 @@ class VillagePupBehaviour : IBehaviour, IChatter
             return new MoveAction(actor, mvOpts[gameState.Rng.Next(mvOpts.Count)], gameState);
     }
 
-    public (Action, InputAccumulator) Chat(Actor animal, GameState gs)
+    public (Action, InputAccumulator) Chat(Mob animal, GameState gs)
     {
         var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
@@ -270,11 +267,11 @@ class VillagePupBehaviour : IBehaviour, IChatter
     }
 }
 
-class PriestBehaviour : IBehaviour, IChatter
+class PriestBehaviour : IBehaviour
 {
     DateTime _lastIntonation = new(1900, 1, 1);
 
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
+    public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
         {
@@ -290,7 +287,7 @@ class PriestBehaviour : IBehaviour, IChatter
         }
     }
 
-    public (Action, InputAccumulator) Chat(Actor priest, GameState gs)
+    public (Action, InputAccumulator) Chat(Mob priest, GameState gs)
     {
         var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
@@ -301,7 +298,7 @@ class PriestBehaviour : IBehaviour, IChatter
         return (new PassAction(), new PauseForMoreAccumulator());
     }
 
-    public string ChatText(Actor priest)
+    public string ChatText(Mob priest)
     {
         var sb = new StringBuilder();
         sb.Append("\"It is my duty to look after the spiritual well-being of the village.");
@@ -312,12 +309,12 @@ class PriestBehaviour : IBehaviour, IChatter
     }
 }
 
-class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
+class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
 {
     public double Markup { get; set; } = markup;
     DateTime _lastBark = new(1900, 1, 1);
 
-    static string PickBark(Actor smith, Random rng)
+    static string PickBark(Mob smith, Random rng)
     {
         var items = smith.Inventory.UsedSlots()
                                    .Select(smith.Inventory.ItemAt)
@@ -349,7 +346,7 @@ class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         }
     }
 
-    public Action CalcAction(Actor smith, GameState gameState, UserInterface ui)
+    public Action CalcAction(Mob smith, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
@@ -365,7 +362,7 @@ class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         }
     }
 
-    public string ChatText(Actor smith)
+    public string ChatText(Mob smith)
     {
         var sb = new StringBuilder();
         sb.Append('"');
@@ -378,7 +375,7 @@ class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         return sb.ToString();
     }
 
-    public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
+    public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
         Villager smith = (Villager)actor;
         var acc = new ShopMenuAccumulator(smith, gs);
@@ -388,12 +385,12 @@ class SmithBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
     }
 }
 
-class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
+class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
 {
     public double Markup { get; set; } = markup;
     DateTime _lastBark = new(1900, 1, 1);
 
-    static string PickBark(Actor grocer, Random rng)
+    static string PickBark(Mob grocer, Random rng)
     {
         int roll = rng.Next(3);
         if (roll == 0)
@@ -404,7 +401,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
             return "Store credit only.";
     }
 
-    public Action CalcAction(Actor grocer, GameState gameState, UserInterface ui)
+    public Action CalcAction(Mob grocer, GameState gameState, UserInterface ui)
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
@@ -420,7 +417,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         }
     }
 
-    public string ChatText(Actor actor)
+    public string ChatText(Mob actor)
     {
         var grocer = (Villager)actor;
         var sb = new StringBuilder();
@@ -433,7 +430,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
         return sb.ToString();
     }
 
-    public (Action, InputAccumulator) Chat(Actor actor, GameState gs)
+    public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
         var smith = (Villager)actor;
         var acc = new ShopMenuAccumulator(smith, gs);
@@ -443,13 +440,13 @@ class GrocerBehaviour(double markup) : IBehaviour, IChatter, IShopkeeper
     }
 }
 
-class VillagerBehaviour : IBehaviour
-{
-    public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
-    {
-        return new PassAction();
-    }
-}
+// class VillagerBehaviour : IBehaviour
+// {
+//     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
+//     {
+//         return new PassAction();
+//     }
+// }
 
 interface IShopkeeper
 {

@@ -18,7 +18,7 @@ enum PlayerClass
     DwarfStalwart
 }
 
-class Player : Actor, IPerformer
+class Player : Mob, IPerformer
 {
     public const int MAX_VISION_RADIUS = 25;
     public PlayerClass CharClass { get; set; }

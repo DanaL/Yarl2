@@ -118,7 +118,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                     : TileFactory.Get(TileType.Unknown);        
     }
 
-    public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
+    public bool CanSeeLoc(Mob viewer, Loc loc, int radius)
     {
         var (d, level, row, col) = viewer.Loc;
         var map = Campaign.Dungeons[d].LevelMaps[level];
@@ -233,7 +233,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             UI.AlertPlayer(messages, "", this);
     }
 
-    public void ActorKilled(Actor victim)
+    public void ActorKilled(Mob victim)
     {
         ((IPerformer)victim).RemoveFromQueue = true;
         ObjDb.RemoveActor(victim);
@@ -342,7 +342,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     }
 
-    public void ActorMoved(Actor actor, Loc start, Loc dest)
+    public void ActorMoved(Mob actor, Loc start, Loc dest)
     {        
         ObjDb.ActorMoved(actor, start, dest);
         

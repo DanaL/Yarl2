@@ -37,7 +37,7 @@ class Battle
         return (total, dmg.Type);
     }
 
-    static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
+    static bool ResolveImpale(Mob attacker, Mob target, int attackRoll, GameState gs, ActionResult result)
     {
         bool success = false;
 
@@ -45,7 +45,7 @@ class Battle
         int diffRow = (attacker.Loc.Row - target.Loc.Row) * 2;
         int diffCol = (attacker.Loc.Col - target.Loc.Col) * 2;
         Loc checkLoc = attacker.Loc with { Row = attacker.Loc.Row - diffRow, Col = attacker.Loc.Col - diffCol };
-        Actor? occ = gs.ObjDb.Occupant(checkLoc);
+        Mob? occ = gs.ObjDb.Occupant(checkLoc);
         if (occ is not null && attackRoll >= occ.AC)
         {
             ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale);
@@ -55,7 +55,7 @@ class Battle
         return success;
     }
 
-    static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
+    static bool ResolveCleave(Mob attacker, Mob target, int attackRoll, GameState gs, ActionResult result)
     {
         bool success = false;
         // Check for any cleave targets Adj4 to main target and Adj to attacker
@@ -77,7 +77,7 @@ class Battle
         return success;
     }
 
-    static void ResolveMissileHit(Actor attacker, Actor target, Item ammo, GameState gs, ActionResult result)
+    static void ResolveMissileHit(Mob attacker, Mob target, Item ammo, GameState gs, ActionResult result)
     {
         List<(int, DamageType)> dmg = [];
         foreach (var trait in ammo.Traits)
@@ -108,7 +108,7 @@ class Battle
         }
     }
 
-    static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
+    static void ApplyPoison(PoisonerTrait source, Mob victim, GameState gs, ActionResult result)
     {
         // We won't apply multiple poison statuses to one victim. Although maybe I
         // should replace the weaker poison with the stronger one?
@@ -132,7 +132,7 @@ class Battle
         }
     }
 
-    static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb)
+    static void ResolveMeleeHit(Mob attacker, Mob target, GameState gs, ActionResult result, Verb attackVerb)
     {
         // Need to handle the case where the player isn't currently wielding a weapon...
         List<(int, DamageType)> dmg = [];
@@ -164,7 +164,7 @@ class Battle
         }
     }
 
-    static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, Message msg, GameState gs)
+    static void ResolveHit(Mob attacker, Mob target, int hpLeft, ActionResult result, Message msg, GameState gs)
     {        
         if (hpLeft < 1)
         {
@@ -197,7 +197,7 @@ class Battle
         result.Messages.Add(msg);
     }
 
-    public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
+    public static ActionResult MeleeAttack(Mob attacker, Mob target, GameState gs)
     {
         var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
@@ -228,7 +228,7 @@ class Battle
         return result;
     }
 
-    public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo)
+    public static ActionResult MissileAttack(Mob attacker, Mob target, GameState gs, Item ammo)
     {
         var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 

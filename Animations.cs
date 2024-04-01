@@ -162,11 +162,11 @@ class ThrownMissileAnimation : Animation
 class BarkAnimation : Animation
 {    
     readonly GameState _gs;
-    readonly Actor _actor;
+    readonly Mob _actor;
     readonly string _bark;
 
     // Duration in milliseconds
-    public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
+    public BarkAnimation(GameState gs, int duration, Mob actor, string bark)
     {
         _gs = gs;
         Expiry = DateTime.Now.AddMilliseconds(duration);
