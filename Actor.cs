@@ -65,8 +65,29 @@ class Mob : GameObj, IPerformer, IZLevel
     public IBehaviour Behaviour => _behaviour;
 
     public override int Z() => HasActiveTrait<FlyingTrait>() ? FLYING_Z : DEFAULT_Z;
-    
-    public override string FullName => Name.DefArticle();    
+
+    public override string FullName
+    {
+        get
+        {         
+            // This is dumb, but I haven't decided the best way to differentiate 
+            // between monsters and villages, because their full names are calculated
+            // differently. (This will also be a problem if I want to want to have 
+            // boss monsters with proper names. I wouldn't want the game to refer to
+            // someone as like 'The Saruman the White', etc)
+            // Maybe I can stick a calc fullname function in IBehaviour and override it
+            // for those who need it?
+            if (_behaviour is PriestBehaviour)
+                return Name.Capitalize();
+            else if (_behaviour is GrocerBehaviour)
+                return Name.Capitalize();
+            else if (_behaviour is SmithBehaviour)
+                return Name.Capitalize();
+            
+            return Name.DefArticle();
+        }
+    }
+
     public virtual int TotalMeleeAttackModifier() => 0;
     public virtual int TotalMissileAttackModifier(Item weapon) => 0;
     public virtual int AC => 10;
@@ -112,17 +133,17 @@ class Mob : GameObj, IPerformer, IZLevel
     }
 }
 
-// Covers pretty much any actor that isn't the player. Villagers
-// for instan           ce are of type Monster even though it's a bit rude
-// to call them that. Dunno why I don't like the term NPC for
-// this class
 class Monster : Mob
 {
     public AIType AIType { get; set;}
     public IMoveStrategy MoveStrategy { get; set; }
     public List<ActionTrait> Actions { get; set; } = [];
 
-    public Monster() => _behaviour = new MonsterBehaviour();
+    public Monster()
+    {
+        _behaviour = new MonsterBehaviour();
+        MoveStrategy = new DumbMoveStrategy();
+    }
     
     public Damage? Dmg { get; set; }
     public override List<Damage> MeleeDamage()
@@ -142,40 +163,15 @@ class Monster : Mob
 
     public override int TotalMeleeAttackModifier() 
     {
-        if (Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab))
-            return ab.Curr;
-        else
-            return 0;
+        return Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab) ? ab.Curr : 0;
     }
 
     public override int TotalMissileAttackModifier(Item weapon)
     {
-        if (Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab))
-            return ab.Curr;
-        else
-            return 0;
+        return Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab) ? ab.Curr : 0;
     }
 
-    public override int AC 
-    {
-        get 
-        {
-            if (Stats.TryGetValue(Attribute.AC, out var ac))
-                return ac.Curr;
-            else
-                return base.AC;
-        }
-    }
-}
-
-class Villager : Mob
-{    
-    public override string FullName => Name.Capitalize();  
-}
-
-class VillageAnimal : Mob
-{
-    public VillageAnimal() => _behaviour = new VillagePupBehaviour();
+    public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 }
 
 class MonsterFactory

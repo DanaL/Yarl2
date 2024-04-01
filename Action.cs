@@ -464,7 +464,7 @@ class MoveAction(Mob actor,  Loc loc, GameState gameState) : Action
         {
             result.Complete = false;
             var occ = _gs.ObjDb.Occupant(_loc);
-            if (occ is VillageAnimal)
+            if (occ.Behaviour is VillagePupBehaviour)
             {
                 string msg;
                 if (_gs.Rng.NextDouble() < 0.5)

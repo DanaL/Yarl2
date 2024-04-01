@@ -153,7 +153,7 @@ class Village
         return smith;
     }
 
-    static VillageAnimal GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
+    static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
     {                
         int roll = rng.Next(4);
         var (colourDesc, colour) = roll switch
@@ -183,7 +183,7 @@ class Village
             _ => "hound"
         };
 
-        var pup = new VillageAnimal()
+        var pup = new Mob()
         {
             Name = $"{adj} {dogType}",
             Status = ActorStatus.Indifferent,
@@ -191,6 +191,7 @@ class Village
             Glyph = new Glyph('d', colour, colour, Colours.BLACK),
             Loc = RandomOutdoorLoc(map, town, rng)
         };
+        pup.SetBehaviour(new VillagePupBehaviour());
 
         return pup;
     }

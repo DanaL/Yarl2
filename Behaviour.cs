@@ -209,9 +209,8 @@ class VillagePupBehaviour : IBehaviour
         _ => false
     };
 
-    public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+    public Action CalcAction(Mob pup, GameState gameState, UserInterface ui)
     {
-        var animal = (VillageAnimal)actor;
         var town = gameState.Campaign.Town;
 
         double roll = gameState.Rng.NextDouble();
@@ -220,11 +219,11 @@ class VillagePupBehaviour : IBehaviour
 
         // in the future, when they become friendly with the player they'll move toward them
         List<Loc> mvOpts = [];
-        foreach (var sq in Util.Adj8Sqs(animal.Loc.Row, animal.Loc.Col))
+        foreach (var sq in Util.Adj8Sqs(pup.Loc.Row, pup.Loc.Col))
         {
             if (LocInTown(sq.Item1, sq.Item2, town))
             {
-                var loc = animal.Loc with { Row = sq.Item1, Col = sq.Item2 };
+                var loc = pup.Loc with { Row = sq.Item1, Col = sq.Item2 };
                 if (Passable(gameState.TileAt(loc).Type))
                     mvOpts.Add(loc);
             }
@@ -233,17 +232,17 @@ class VillagePupBehaviour : IBehaviour
         // Keep the animal tending somewhat to move toward the center of town
         var centerRow = town.Row + town.Height / 2;
         var centerCol = town.Col + town.Width / 2;
-        var adj = animal.Loc;
-        if (animal.Loc.Row < centerRow && animal.Loc.Col < centerCol)
-            adj = animal.Loc with { Row = animal.Loc.Row + 1, Col = animal.Loc.Col + 1 };
-        else if (animal.Loc.Row > centerRow && animal.Loc.Col > centerCol)
-            adj = animal.Loc with { Row = animal.Loc.Row - 1, Col = animal.Loc.Col - 1 };
-        else if (animal.Loc.Row < centerRow && animal.Loc.Col > centerCol)
-            adj = animal.Loc with { Row = animal.Loc.Row + 1, Col = animal.Loc.Col - 1 };
-        else if (animal.Loc.Row > centerRow && animal.Loc.Col < centerCol)
-            adj = animal.Loc with { Row = animal.Loc.Row - 1, Col = animal.Loc.Col + 1 };
+        var adj = pup.Loc;
+        if (pup.Loc.Row < centerRow && pup.Loc.Col < centerCol)
+            adj = pup.Loc with { Row = pup.Loc.Row + 1, Col = pup.Loc.Col + 1 };
+        else if (pup.Loc.Row > centerRow && pup.Loc.Col > centerCol)
+            adj = pup.Loc with { Row = pup.Loc.Row - 1, Col = pup.Loc.Col - 1 };
+        else if (pup.Loc.Row < centerRow && pup.Loc.Col > centerCol)
+            adj = pup.Loc with { Row = pup.Loc.Row + 1, Col = pup.Loc.Col - 1 };
+        else if (pup.Loc.Row > centerRow && pup.Loc.Col < centerCol)
+            adj = pup.Loc with { Row = pup.Loc.Row - 1, Col = pup.Loc.Col + 1 };
 
-        if (adj != animal.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDb.Occupied(adj))
+        if (adj != pup.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDb.Occupied(adj))
         {
             mvOpts.Add(adj);
             mvOpts.Add(adj);
@@ -253,7 +252,7 @@ class VillagePupBehaviour : IBehaviour
         if (mvOpts.Count == 0)
             return new PassAction();
         else
-            return new MoveAction(actor, mvOpts[gameState.Rng.Next(mvOpts.Count)], gameState);
+            return new MoveAction(pup, mvOpts[gameState.Rng.Next(mvOpts.Count)], gameState);
     }
 
     public (Action, InputAccumulator) Chat(Mob animal, GameState gs)
