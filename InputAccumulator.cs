@@ -187,14 +187,14 @@ class ShopMenuItem(char slot, Item item, int stockCount)
 
 class ShopMenuAccumulator : InputAccumulator
 {
-    readonly Villager _shopkeeper;
+    readonly Mob _shopkeeper;
     readonly GameState _gs;
     Dictionary<char, ShopMenuItem> _menuItems = [];
     
-    public ShopMenuAccumulator(Villager shopkeeper, GameState gs)
+    public ShopMenuAccumulator(Actor shopkeeper, GameState gs)
     {
         _gs = gs;
-        _shopkeeper = shopkeeper;
+        _shopkeeper = (Mob) shopkeeper;
         var items = _shopkeeper.Inventory.UsedSlots()
                              .Select(_shopkeeper.Inventory.ItemAt);
         

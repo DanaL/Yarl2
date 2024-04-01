@@ -116,7 +116,7 @@ class MonsterBehaviour : IBehaviour
         return false;
     }
 
-    Action FromTrait(Monster mob, ActionTrait act, GameState gs)
+    Action FromTrait(Mob mob, ActionTrait act, GameState gs)
     {
         if (act is MobMeleeTrait meleeAttack)
         {
@@ -155,9 +155,7 @@ class MonsterBehaviour : IBehaviour
     }
 
     public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
-    {
-        Monster mob = (Monster)actor;
-        
+    {        
         if (actor.Status == ActorStatus.Idle)
         {
             return new PassAction();
@@ -167,16 +165,16 @@ class MonsterBehaviour : IBehaviour
         // Maybe mobs can eventually have a bravery stat?
 
         // Actions should be in the list in order of prerfence
-        foreach (var act in mob.Actions)
+        foreach (var act in actor.Actions)
         {
             if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
                 continue;
 
-            if (act.Available(mob, gs)) 
-                return FromTrait(mob, act, gs);
+            if (act.Available(actor, gs)) 
+                return FromTrait(actor, act, gs);
         }
 
-        return mob.MoveStrategy.MoveAction(mob, gs);
+        return actor.MoveStrategy.MoveAction(actor, gs);
     }
 
     public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
@@ -376,9 +374,8 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
 
     public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
-        Villager smith = (Villager)actor;
-        var acc = new ShopMenuAccumulator(smith, gs);
-        var action = new ShopAction(smith, gs);
+        var acc = new ShopMenuAccumulator((Mob)actor, gs);
+        var action = new ShopAction(actor, gs);
 
         return (action, acc);
     }
@@ -416,9 +413,8 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
         }
     }
 
-    public string ChatText(Mob actor)
+    public string ChatText(Actor actor)
     {
-        var grocer = (Villager)actor;
         var sb = new StringBuilder();
         sb.Append('"');
         sb.Append("Welcome to the market!");
@@ -431,9 +427,8 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
 
     public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
-        var smith = (Villager)actor;
-        var acc = new ShopMenuAccumulator(smith, gs);
-        var action = new ShopAction(smith, gs);
+        var acc = new ShopMenuAccumulator(actor, gs);
+        var action = new ShopAction(actor, gs);
 
         return (action, acc);
     }

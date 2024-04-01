@@ -555,14 +555,10 @@ class GameObjDBSave
 
                 sidb.Objects.Add(sb.ToString());                
             }
-            else if (obj is Monster)
+            else if (obj is Mob)
             {
 
-            }
-            else if (obj is Villager)
-            {
-
-            }
+            }            
             else if (obj is Item item)
             {
                 var sb = new StringBuilder("Item:");
@@ -610,7 +606,7 @@ class GameObjDBSave
                 if (obj is Item item)
                     goDB.SetToLoc(obj.Loc, item);
                 else
-                    goDB.AddToLoc(obj.Loc, (Mob)obj);
+                    goDB.AddToLoc(obj.Loc, (Actor)obj);
             }
         }
     

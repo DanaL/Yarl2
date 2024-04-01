@@ -46,7 +46,7 @@ enum AIType
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
-class Mob : GameObj, IPerformer, IZLevel
+abstract class Actor : GameObj, IPerformer, IZLevel
 {
     static readonly int FLYING_Z = 10;
     static readonly int DEFAULT_Z = 4;
@@ -99,7 +99,7 @@ class Mob : GameObj, IPerformer, IZLevel
     public virtual string ChatText() => "";
     public virtual (Action, InputAccumulator) Chat(GameState gs) => (null, null);
 
-    public Mob()
+    public Actor()
     {
         Inventory = new EmptyInventory(ID);
     }
@@ -121,10 +121,7 @@ class Mob : GameObj, IPerformer, IZLevel
 
     public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
-    public virtual Action TakeTurn(UserInterface ui, GameState gameState)
-    {
-        return _behaviour.CalcAction(this, gameState, ui);
-    }
+    public abstract Action TakeTurn(UserInterface ui, GameState gameState);
 
     public bool AbilityCheck(Attribute attr, int dc, Random rng)
     {
@@ -133,13 +130,13 @@ class Mob : GameObj, IPerformer, IZLevel
     }
 }
 
-class Monster : Mob
+class Mob : Actor
 {
     public AIType AIType { get; set;}
     public IMoveStrategy MoveStrategy { get; set; }
     public List<ActionTrait> Actions { get; set; } = [];
 
-    public Monster()
+    public Mob()
     {
         _behaviour = new MonsterBehaviour();
         MoveStrategy = new DumbMoveStrategy();
@@ -172,6 +169,11 @@ class Monster : Mob
     }
 
     public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
+
+    public override Action TakeTurn(UserInterface ui, GameState gameState)
+    {
+        return _behaviour.CalcAction(this, gameState, ui);
+    }
 }
 
 class MonsterFactory
@@ -200,7 +202,7 @@ class MonsterFactory
     //       0       1    2      3   4   5           6         7    8    9       10        11       12
     // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions, Other Traits 
     // skeleton        |z|white        |darkgrey  |12| 8|2| 1.0| 6|1|12|10|2|Basic|
-    public static Mob Get(string name, Random rng)
+    public static Actor Get(string name, Random rng)
     {
         if (_catalog.Count == 0)
             LoadCatalog();
@@ -214,7 +216,7 @@ class MonsterFactory
                                             Colours.TextToColour(fields[2]), Colours.BLACK);
         
         var mv = TextToMove(fields[10]);
-        var m = new Monster()
+        var m = new Mob()
         {
             Name = name,
             Glyph = glyph,

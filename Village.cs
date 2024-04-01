@@ -75,9 +75,9 @@ class Village
         return appearance.ToString();
     }
 
-    static Villager GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
+    static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
     {        
-        var cleric = new Villager()
+        var cleric = new Mob()
         {
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
@@ -92,9 +92,9 @@ class Village
         return cleric;
     }
 
-    static Villager GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+    static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
     {
-        var grocer = new Villager()
+        var grocer = new Mob()
         {
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
@@ -119,9 +119,9 @@ class Village
         return grocer;
     }
 
-    static Villager GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+    static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
     {
-        var smith = new Villager()
+        var smith = new Mob()
         {
             Name = ng.GenerateName(rng.Next(5, 9)),
             Status = ActorStatus.Indifferent,
@@ -153,7 +153,7 @@ class Village
         return smith;
     }
 
-    static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
+    static Actor GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
     {                
         int roll = rng.Next(4);
         var (colourDesc, colour) = roll switch
