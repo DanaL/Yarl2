@@ -575,14 +575,7 @@ class TraitFactory
                     ArmourMod = int.Parse(pieces[1])
                 };
             case "Armour":
-                var part = pieces[1] switch
-                {
-                    "Helmet" => ArmourParts.Hat,
-                    "Boots" => ArmourParts.Boots,
-                    "Cloak" => ArmourParts.Cloak,
-                    "Shirt" => ArmourParts.Shirt,
-                    _ => throw new Exception("I don't know about that Armour Part")
-                };
+                Enum.TryParse(pieces[1], out ArmourParts part);
                 return new ArmourTrait()
                 {
                     Part = part,
@@ -617,8 +610,8 @@ class TraitFactory
                     DamageType = dt
                 };
             case "Entangle":
-            case "Web":            
-                digits = Util.DigitsRegex().Split(text);
+            case "Web":
+                digits = text.Split('#');
                 return new SpellActionTrait()
                 {
                     Name = name,
@@ -627,7 +620,7 @@ class TraitFactory
                     MaxRange = int.Parse(digits[3])
                 };
             case "Firebolt":
-                digits = Util.DigitsRegex().Split(text);
+                digits = text.Split('#');
                 return new FireboltActionTrait()
                 {
                     Name = name,
@@ -650,7 +643,7 @@ class TraitFactory
                 };
             case "Melee":
                 Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
-                digits = Util.DigitsRegex().Split(text);
+                digits = text.Split('#');
                 return new MobMeleeTrait()
                 {
                     Name = "Melee",
@@ -663,7 +656,7 @@ class TraitFactory
                 };
             case "Missile":
                 Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mmdt);
-                digits = Util.DigitsRegex().Split(text);
+                digits = text.Split('#');
                 return new MobMissileTrait()
                 {
                     Name = "Missile",
@@ -714,7 +707,7 @@ class TraitFactory
                     Expired = bool.Parse(pieces[4])
                 };
             case "Poisoner":
-                digits = Util.DigitsRegex().Split(text);
+                digits = text.Split('#');
                 return new PoisonerTrait()
                 {
                     DC = int.Parse(digits[1]),
@@ -740,7 +733,7 @@ class TraitFactory
                 {
                     ContainerID = ulong.Parse(pieces[1]),
                     Lit = bool.Parse(pieces[2]),                    
-                    Fuel = int.Parse(pieces[4])                    
+                    Fuel = int.Parse(pieces[3])                    
                 };
             default:
                 ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);

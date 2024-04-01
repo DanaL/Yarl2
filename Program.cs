@@ -2,6 +2,7 @@
 
 using Yarl2;
 
+
 var options = Options.LoadOptions("options.json");
 
 // var dm = Map.TestMap();
@@ -18,7 +19,6 @@ var options = Options.LoadOptions("options.json");
 // var map = dm.DrawLevel(70, 30);
 // map.Dump();
 //return;
-
 
 UserInterface display;
 if (options.Display == "Bearlib")

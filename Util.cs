@@ -112,9 +112,18 @@ class Constants
 
 partial class Util
 {
-    [GeneratedRegex(@"\D+")]
-    public static partial Regex DigitsRegex();
+    public static List<int> ToNums(string txt)
+    {
+        List<int> nums = [];
 
+        foreach (Match match in Regex.Matches(txt, @"-?\d+"))
+        {
+            nums.Add(int.Parse(match.Value));
+        }
+
+        return nums;
+    }
+    
     public static (int, int)[] Adj4 = [ (-1, 0), (1, 0), (0, 1), (0, -1)];
     public static (int, int)[] Adj8= [ (-1, -1), (-1, 0), (-1, 1),
                                         (0, -1), (0, 1),

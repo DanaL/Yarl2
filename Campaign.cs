@@ -335,9 +335,9 @@ class PreGameHandler(UserInterface ui)
 
         if (Serialize.SaveFileExists(playerName))
         {
-            (gameState, playerLoc) = Serialize.LoadSaveGame(playerName, options, ui);
-            gameState.ObjDb = objDb;
-            gameState.Player = player;
+            gameState = Serialize.LoadSaveGame(playerName, options, ui);
+            gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+            playerLoc = gameState.Player.Loc;
             //var (player, c, objDb, currentTurn, msgHistory) = Serialize.LoadSaveGame(playerName);
             //_ui.Player = player;
             //_ui.SetupGameState(c, objDb, currentTurn);

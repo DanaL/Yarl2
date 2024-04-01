@@ -482,6 +482,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // I only have light effects in the game right now, but I also have ambitions
     public void ToggleEffect(GameObj obj, Loc loc, TerrainFlag effect, bool on)
     {
+        if (loc == Loc.Nowhere)
+            return;
+
         var (dungeon, level, row, col) = loc;
         var currDungeon = Campaign.Dungeons[dungeon];
         var map = currDungeon.LevelMaps[level];

@@ -31,18 +31,6 @@ enum ActorStatus
     Friendly
 }
 
-enum AIType 
-{
-    Basic,
-    BasicHumanoid,
-    BasicFlyer,
-    Archer,
-    Spellcaster,
-    KoboldTrickster,
-    Villager,
-    Spider
-}
-
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
@@ -132,7 +120,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
 class Mob : Actor
 {
-    public AIType AIType { get; set;}
     public IMoveStrategy MoveStrategy { get; set; }
     public List<ActionTrait> Actions { get; set; } = [];
 

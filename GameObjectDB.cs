@@ -31,8 +31,7 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
 
     public static Loc FromText(string text)
     {
-        var digits = Util.DigitsRegex().Split(text)
-                                       .Select(int.Parse).ToArray();
+        var digits = Util.ToNums(text);
         return new Loc(digits[0], digits[1], digits[2], digits[3]);
     }    
 }
@@ -137,6 +136,17 @@ class GameObjectDB
         }
 
         return false;
+    }
+
+    public Player? FindPlayer()
+    {
+        foreach (var obj in Objs.Values)
+        {
+            if (obj is Player)
+                return (Player) obj;
+        }
+
+        return null;
     }
 
     // I'm returning isItem because when remembering what glyphs were seen

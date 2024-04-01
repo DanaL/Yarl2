@@ -15,9 +15,6 @@ using System.Text.Json.Serialization;
 
 namespace Yarl2;
 
-//record SaveGameInfo(PlayerSaver? Player, CampaignSaver? Campaign, int CurrentLevel, int CurrentDungeon,
-//                                GameObjDBSaver ItemDB, ulong Turn, List<MsgHistory> MessageHistory);
-
 record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb);
 
 // When I started working on saving the game, I had a bunch of problems with
@@ -64,7 +61,7 @@ internal class Serialize
     }
 
     //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
-    public static (GameState, Loc) LoadSaveGame(string playerName, Options options, UserInterface ui)
+    public static GameState LoadSaveGame(string playerName, Options options, UserInterface ui)
     {
         string filename = $"{playerName}.dat";
         var bytes = File.ReadAllBytes(filename);
@@ -75,11 +72,12 @@ internal class Serialize
 
         var objDbSave = sgi.ObjDb;
         var objDb = GameObjDBSave.Inflate(objDbSave);
+
         gs.ObjDb = objDb;
 
         //gs.Player = PlayerSave.Inflate(sgi.Player);
         //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
-        return (gs, Loc.Nowhere);
+        return gs;
     }
     //{
 
@@ -317,7 +315,7 @@ internal class MapSaver
         foreach (string s in shrunken)
         {
             Tile? tile = null;
-            int[] digits;
+            List<int> digits;
             var pieces = s.Split(';');
             var j = int.Parse(pieces[0]);
             var type = (TileType)int.Parse(pieces[1]);
@@ -326,20 +324,17 @@ internal class MapSaver
             {
                 case TileType.Portal:
                     tile = new Portal(pieces[3]);
-                    digits = Util.DigitsRegex().Split(pieces[2])
-                                               .Select(int.Parse).ToArray();
+                    digits = Util.ToNums(pieces[2]);
                     ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Upstairs:
                     tile = new Upstairs(pieces[3]);
-                    digits = Util.DigitsRegex().Split(pieces[2])
-                                    .Select(int.Parse).ToArray();
+                    digits = Util.ToNums(pieces[2]);
                     ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.Downstairs:
                     tile = new Downstairs(pieces[3]);
-                    digits = Util.DigitsRegex().Split(pieces[2])
-                                    .Select(int.Parse).ToArray();
+                    digits = Util.ToNums(pieces[2]);
                     ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
                     break;
                 case TileType.OpenDoor:
@@ -366,16 +361,15 @@ internal class MapSaver
 
     public static Map Inflate(MapSaver sm)
     {
-        Map map = new Map(sm.Width, sm.Height);
+        var map = new Map(sm.Width, sm.Height);
 
         if (sm.Tiles is null || sm.SpecialTiles is null)
             throw new Exception("Invalid save game data!");
 
         foreach (var kvp in sm.Effects)
         {
-            var d = Util.DigitsRegex().Split(kvp.Key);                                  
-            var key = (int.Parse(d[1]), int.Parse(d[2]));
-            map.Effects.Add(key, kvp.Value);
+            var d = Util.ToNums(kvp.Key);
+            map.Effects.Add((d[0], d[1]), kvp.Value);
         }
 
         try
@@ -408,11 +402,7 @@ internal class MapSaver
 // this is going to be when the there's a dungeon full of items... (I'd probably
 // need to switch to a per-level itemDB)
 class GameObjDBSave
-{
-    // Come to think of it, maybe the ID seed belongs in the GameObjDB class
-    // instead of being a static field in GameObj hmmm
-    public ulong GameObjSeed { get; set; }
-    
+{    
     [JsonInclude]
     List<string> Objects { get; set; } = [];
 
@@ -436,21 +426,25 @@ class GameObjDBSave
     {
         Dictionary<Attribute, Stat> stats = [];
 
-        foreach (var s in txt.Split(','))
+        if (txt != "")
         {
-            var pieces = s.Split('#');
-            Enum.TryParse(pieces[0], out Attribute attr);
-            var stat = new Stat() {
-                Max = int.Parse(pieces[1]),
-                Curr = int.Parse(pieces[2])
-            };
-            stats.Add(attr, stat);
+            foreach (var s in txt.Split(','))
+            {
+                var pieces = s.Split('#');
+                Enum.TryParse(pieces[0], out Attribute attr);
+                var stat = new Stat()
+                {
+                    Max = int.Parse(pieces[1]),
+                    Curr = int.Parse(pieces[2])
+                };
+                stats.Add(attr, stat);
+            }
         }
 
         return stats;
     }
 
-    static Player InflatePlayer(string txt)
+    static Player InflatePlayer(string txt, GameObjectDB objDb)
     {
         var fields = txt.Split('|');
         var p = new Player(fields[1]);
@@ -473,10 +467,49 @@ class GameObjDBSave
         p.Energy = double.Parse(fields[7]);
         p.Recovery = double.Parse(fields[8]);
 
+        p.Inventory = new Inventory(p.ID, objDb);
+
         return p;
     }
 
-    // Weapon|spear|3|),white,grey,black|0,0,0,0|Attack#0,Damage#6#1#Piercing|False|a|True|2|False|old|10|2|
+    // Mob:DumbMoveStrategy|PriestBehaviour|uiliorw|23|@,yellow,yelloworange,black|0,0,111,117|||1|1|0|a||False|tall elf with curly hair, and piercing eyes
+    static Mob InflateMob(string txt, GameObjectDB objDb)
+    {
+        var fields = txt.Split('|');
+        var mob = new Mob()
+        {
+            ID = ulong.Parse(fields[3]),
+            Name = fields[2],
+            Glyph = TextToGlyph(fields[4]),
+            Loc = Loc.FromText(fields[5]),
+            Energy = double.Parse(fields[8]),
+            Recovery = double.Parse(fields[9]),
+            RemoveFromQueue = bool.Parse(fields[13]),
+            Appearance = fields[14]
+        };
+
+        // Parse the traits
+        if (fields[6] != "")
+        {
+            foreach (var t in fields[6].Split(','))
+            {
+                var trait = TraitFactory.FromText(t, mob);
+                mob.Traits.Add(trait);
+            }
+        }
+
+        mob.Stats = StatsFromText(fields[7]);
+
+        //mob.Inventory = new Inventory(mob.ID, objDb);
+        // zorkmids 10
+        // next slot 11
+        // inv list 12
+
+
+        
+        return mob;
+    }
+
     static Item InflateItem(string txt)
     {
         var fields = txt.Split('|');
@@ -512,15 +545,16 @@ class GameObjDBSave
 
         return item;
     }
-
-    static GameObj InflateObj(string txt)
+        static GameObj InflateObj(string txt, GameObjectDB objDb)
     {
         int j = txt.IndexOf(':');
         var type = txt[..j];
         var fields = txt[(j+1)..];
 
         if (type == "Player")
-            return InflatePlayer(fields);
+            return InflatePlayer(fields, objDb);
+        else if (type == "Mob")
+            return InflateMob(fields, objDb);
         else if (type == "Item")
             return InflateItem(fields);
 
@@ -529,7 +563,7 @@ class GameObjDBSave
 
     public static GameObjDBSave Shrink(GameObjectDB objDb)
     {
-        var sidb = new GameObjDBSave{ GameObjSeed = GameObj.Seed };
+        var sidb = new GameObjDBSave();
 
         foreach (var kvp in objDb.Objs)
         {
@@ -553,11 +587,34 @@ class GameObjDBSave
                 sb.Append('|');
                 sb.Append(player.Inventory.ToText());
 
-                sidb.Objects.Add(sb.ToString());                
+                sidb.Objects.Add(sb.ToString());
             }
-            else if (obj is Mob)
+            else if (obj is Mob mob)
             {
+                var sb = new StringBuilder("Mob:");
+                sb.Append(mob.MoveStrategy.GetType().Name);
+                sb.Append('|');
+                sb.Append(mob.Behaviour.GetType().Name);
+                sb.Append('|');
+                sb.Append(obj.ToString());
+                sb.Append('|');
+                sb.Append(StatsToText(mob.Stats));
+                sb.Append('|');
+                sb.Append(mob.Energy);
+                sb.Append('|');
+                sb.Append(mob.Recovery);
+                sb.Append('|');
+                sb.Append(mob.Inventory.Zorkmids);
+                sb.Append('|');
+                sb.Append(mob.Inventory.NextSlot);
+                sb.Append('|');
+                sb.Append(mob.Inventory.ToText());                
+                sb.Append('|');
+                sb.Append(mob.RemoveFromQueue);
+                sb.Append('|');
+                sb.Append(mob.Appearance);
 
+                sidb.Objects.Add(sb.ToString());
             }            
             else if (obj is Item item)
             {
@@ -590,27 +647,27 @@ class GameObjDBSave
     }
 
     public static GameObjectDB Inflate(GameObjDBSave sidb)
-    {
-        GameObj.SetSeed(sidb.GameObjSeed);
-        var goDB = new GameObjectDB();
+    {        
+        var objDb = new GameObjectDB();
         
         ulong maxID = 0;
         foreach (var line in sidb.Objects)
         {
-            var obj = InflateObj(line);
+            var obj = InflateObj(line, objDb);
             if (obj.ID > maxID)
                 maxID = obj.ID;
-            goDB.Add(obj);
+            objDb.Add(obj);
             if (obj.Loc != Loc.Nowhere && obj.Loc != Loc.Zero)
             {
                 if (obj is Item item)
-                    goDB.SetToLoc(obj.Loc, item);
+                    objDb.SetToLoc(obj.Loc, item);
                 else
-                    goDB.AddToLoc(obj.Loc, (Actor)obj);
+                    objDb.AddToLoc(obj.Loc, (Actor)obj);
             }
         }
-    
-        return goDB;
+        GameObj.SetSeed(maxID + 1);
+
+        return objDb;
     }
 }
 
