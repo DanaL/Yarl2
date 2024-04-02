@@ -45,21 +45,6 @@ internal class Serialize
         File.WriteAllBytes(filename, bytes);
     }
 
-    public static void WriteSaveGame(string playerName, Player player, Campaign campaign, GameState gameState, List<MsgHistory> MessageHistory)
-    {
-        //var p = PlayerSaver.Shrink(player);
-        //var sgi = new SaveGameInfo(p, CampaignSaver.Shrink(campaign), gameState.CurrLevel, 
-        //                            gameState.CurrDungeon, 
-        //                            GameObjDBSaver.Shrink(gameState.ObjDB), gameState.Turn, MessageHistory);
-        //var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
-        //                new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
-
-        //// In the future, when this is a real game, I'm going to have check player names for invalid characters or build a 
-        //// little database of players vs saved games
-        //string filename = $"{playerName}.dat";
-        //File.WriteAllBytes(filename, bytes);
-    }
-
     //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
     public static GameState LoadSaveGame(string playerName, Options options, UserInterface ui)
     {
@@ -75,22 +60,15 @@ internal class Serialize
 
         gs.ObjDb = objDb;
 
-        //gs.Player = PlayerSave.Inflate(sgi.Player);
-        //var objDB = GameObjDBSaver.Inflate(sgi.ItemDB);
+        // At the moment, EndOfRound is the only type of listener in the game
+        foreach (var l in objDb.ActiveListeners()) 
+        {
+            gs.RegisterForEvent(UIEventType.EndOfRound, l);
+        }
+
         return gs;
     }
-    //{
-
-    //    var p = PlayerSaver.Inflate(sgi.Player, objDB);
-    //    var c = CampaignSaver.Inflate(sgi.Campaign);
-    //    c.CurrentDungeon = sgi.CurrentDungeon;
-    //    c.CurrentLevel = sgi.CurrentLevel;        
-    //    objDB._objs.Add(p.ID, p);
-    //    objDB.AddToLoc(p.Loc, p);
-
-    //    return (p, c, objDB, sgi.Turn, sgi.MessageHistory);
-    //}
-
+  
     public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");
 }
 
@@ -99,13 +77,18 @@ class GameStateSave
     public int CurrLevel { get; set; }
     public int CurrDungeonID { get; set; }
     public ulong Turn { get; set; }
-
-    public static GameStateSave Shrink(GameState gs) => new GameStateSave()
+    
+    public static GameStateSave Shrink(GameState gs)
     {
-        CurrDungeonID = gs.CurrDungeonID,
-        CurrLevel = gs.CurrLevel,
-        Turn = gs.Turn
-    };
+        var gss = new GameStateSave()
+        {
+            CurrDungeonID = gs.CurrDungeonID,
+            CurrLevel = gs.CurrLevel,
+            Turn = gs.Turn
+        };
+
+        return gss;
+    }
 
     public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
     {
@@ -121,19 +104,19 @@ class GameStateSave
 class TownSave
 {
     public string Name { get; set; } = "";
-     [JsonInclude]
+    [JsonInclude]
     public HashSet<Loc> Shrine { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public HashSet<Loc> Tavern { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public HashSet<Loc> Market { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public HashSet<Loc> Smithy { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public List<HashSet<Loc>> Homes { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public List<int> TakenHomes { get; set; } = [];
-     [JsonInclude]
+    [JsonInclude]
     public HashSet<Loc> TownSquare { get; set; } = [];
     public int Row { get; set; }
     public int Col { get; set; }

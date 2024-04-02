@@ -277,6 +277,7 @@ class OnFireTrait : Trait, IGameEventListener
     public ulong ContainerID { get; set; }    
     public bool Expired { get; set; } = false;
     public int Lifetime { get; set; } = 0;
+    public bool Listening => true;
 
     public override string AsText() => $"OnFire#{Expired}#{ContainerID}#{Lifetime}";
 
@@ -340,6 +341,7 @@ class PoisonedTrait : Trait, IGameEventListener
     public int Strength { get; set; }
     public ulong VictimID { get; set; }
     public bool Expired { get; set; } = false;
+    public bool Listening => true;
 
     public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}#{Expired}";
 
@@ -403,6 +405,7 @@ class CountdownTrait : Trait, IGameEventListener
 {
     public bool Expired { get; set; } = false;
     public ulong ContainerID { get; set; }
+    public bool Listening => true;
 
     public override string AsText() => $"Countdown#{ContainerID}#{Expired}";
 
@@ -467,6 +470,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
     }
 
     public bool Expired { get; set; } = false;
+    public bool Listening => Lit;
 
     public override string AsText()
     {

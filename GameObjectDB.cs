@@ -67,6 +67,7 @@ interface IZLevel
 interface IGameEventListener
 {
     public bool Expired { get; set; }
+    public bool Listening { get; }
     void Alert(UIEventType eventType, GameState gs);
 }
 
@@ -322,5 +323,18 @@ class GameObjectDB
         }
 
         return performers;
+    }
+
+    public List<IGameEventListener> ActiveListeners()
+    {
+        List<IGameEventListener> listeners = [];
+
+        foreach (var obj in Objs.Values)
+        {
+            listeners.AddRange(obj.Traits.OfType<IGameEventListener>()
+                                         .Where(l => l.Listening));
+        }
+
+        return listeners;
     }
 }

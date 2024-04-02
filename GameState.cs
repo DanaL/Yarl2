@@ -42,7 +42,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     private int _currPerformer = 0;
         
-    static readonly Dictionary<TileType, int> _passableBasic = new() { 
+    static readonly Dictionary<TileType, int> _passableBasic = new() 
+    { 
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },
         { TileType.Upstairs, 1 },
@@ -52,7 +53,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         { TileType.WoodBridge, 1 }
     };
 
-    static readonly Dictionary<TileType, int> _passableWithDoors = new() {
+    static readonly Dictionary<TileType, int> _passableWithDoors = new() 
+    {
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },
         { TileType.Upstairs, 1 },
@@ -63,7 +65,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         { TileType.WoodBridge, 1 }
     };
 
-    static readonly Dictionary<TileType, int> _passableFlying = new() {
+    static readonly Dictionary<TileType, int> _passableFlying = new() 
+    {
         { TileType.DungeonFloor, 1 },
         { TileType.Landmark, 1 },
         { TileType.Upstairs, 1 },
@@ -146,7 +149,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        ObjDb.SetToLoc(loc, item);
+        //ObjDb.SetToLoc(loc, item);
 
         var tile = TileAt(loc);
         List<Message> msgs = [];
@@ -165,7 +168,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                 ApplyDamageEffectToLoc(loc, DamageType.Fire);
         }
 
-        //ObjDb.SetToLoc(loc, item);
+        ObjDb.SetToLoc(loc, item);
         
         if (msgs.Count > 0)
             UI.AlertPlayer(msgs, "", this);        
