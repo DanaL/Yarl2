@@ -320,51 +320,39 @@ class PreGameHandler(UserInterface ui)
 
     private GameState SetupGame(string playerName, Options options, UserInterface ui)
     {        
-        GameState gameState;
-        Loc playerLoc;
-
-        int seed = DateTime.Now.GetHashCode();
-        seed = -1900333996;
-        Console.WriteLine($"Seed: {seed}");
-        var rng = new Random(seed);
-        var objDb = new GameObjectDB();
-        
-
-        var player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, _ui, rng);
-        _ui.ClearLongMessage();
+        GameState gameState;        
+        Player player;
 
         if (Serialize.SaveFileExists(playerName))
         {
             gameState = Serialize.LoadSaveGame(playerName, options, ui);
             gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
-            playerLoc = gameState.Player.Loc;
-            //var (player, c, objDb, currentTurn, msgHistory) = Serialize.LoadSaveGame(playerName);
-            //_ui.Player = player;
-            //_ui.SetupGameState(c, objDb, currentTurn);
-            //_ui.MessageHistory = msgHistory;
+            player = gameState.Player;
         }
         else
         {
+            int seed = DateTime.Now.GetHashCode();
+            seed = -1900333996;
+            Console.WriteLine($"Seed: {seed}");
+            var rng = new Random(seed);
+            var objDb = new GameObjectDB();
+
+            player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, _ui, rng);
+            _ui.ClearLongMessage();
             Campaign campaign;
             int startRow, startCol;
             (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);
-            playerLoc = new Loc(0, 0, startRow, startCol);
+            player.Loc = new Loc(0, 0, startRow, startCol);
             gameState = new GameState(player, campaign, options, _ui, rng, seed)
             {
-                //Map = c!.Dungeons[c.CurrentDungeon].LevelMaps[c.CurrentLevel],                
                 ObjDb = objDb,
                 Turn = 1
             };            
         }
 
-        player.Loc = playerLoc;
-        objDb.AddToLoc(playerLoc, player);
-        gameState.ToggleEffect(player, playerLoc, TerrainFlag.Lit, true);
-        //else
-        //{
-
-
-
+        gameState.ObjDb.AddToLoc(player.Loc, player);
+        gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
+       
         //seed = 601907053;
         //seed = 1956722118;
         //seed = 1003709949;
@@ -378,24 +366,6 @@ class PreGameHandler(UserInterface ui)
         //seed = 475720358;
         //seed = -910280873;
         //seed = -225039841;
-
-
-        //var rng = new Random(seed);
-        //var objDb = new GameObjectDB();
-        //var (c, startRow, startCol) = BeginNewCampaign(rng, objDb);
-
-        //var player = PlayerCreator.NewPlayer(playerName, objDb, startRow, startCol, _ui, rng);
-        //var gameState = new GameState(player, c, options, _ui, rng, seed)
-        //{
-        //    //Map = c!.Dungeons[c.CurrentDungeon].LevelMaps[c.CurrentLevel],                
-        //    ObjDB = objDb,
-        //    Turn = 1
-        //};
-        //_ui.ClearLongMessage();
-
-        //objDb.AddToLoc(player.Loc, player);
-        //gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
-        //}
 
         return gameState;
     }    

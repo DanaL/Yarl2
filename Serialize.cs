@@ -77,14 +77,16 @@ class GameStateSave
     public int CurrLevel { get; set; }
     public int CurrDungeonID { get; set; }
     public ulong Turn { get; set; }
-    
+    public int Seed { get; set; }
+
     public static GameStateSave Shrink(GameState gs)
     {
         var gss = new GameStateSave()
         {
             CurrDungeonID = gs.CurrDungeonID,
             CurrLevel = gs.CurrLevel,
-            Turn = gs.Turn
+            Turn = gs.Turn,
+            Seed = gs.Seed
         };
 
         return gss;
@@ -92,10 +94,13 @@ class GameStateSave
 
     public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
     {
-        var gs = new GameState(null, camp, opt, ui, new Random(), 0);
-        gs.CurrDungeonID = gss.CurrDungeonID;
-        gs.CurrLevel = gs.CurrLevel;
-        gs.Turn = gs.Turn;
+        var rng = new Random(gss.Seed);
+        var gs = new GameState(null, camp, opt, ui, rng, gss.Seed)
+        {
+            CurrDungeonID = gss.CurrDungeonID,
+            CurrLevel = gss.CurrLevel,
+            Turn = gss.Turn
+        };
 
         return gs;
     }
