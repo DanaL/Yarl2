@@ -253,8 +253,8 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
 
 class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(actor)
 {
-    private GameState _gs = gs;
-    private readonly Map _map = map;
+    readonly GameState _gs = gs;
+    readonly Map _map = map;
 
     public override ActionResult Execute()
     {
@@ -297,8 +297,8 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
 
 class OpenDoorAction : DirectionalAction
 {
-    private GameState _gs;
-    private readonly Map _map;
+    GameState _gs;
+    readonly Map _map;
 
     public OpenDoorAction(Actor actor, Map map, GameState gs) : base(actor)
     {
@@ -899,11 +899,11 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
 
 class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
 {
-    private readonly UserInterface _ui = ui;
-    private readonly Actor _actor = actor;
-    private readonly GameState _gs = gs;
-    private readonly char _slot = slot;
-    private int _amount;
+    readonly UserInterface _ui = ui;
+    readonly Actor _actor = actor;
+    readonly GameState _gs = gs;
+    readonly char _slot = slot;
+    int _amount;
 
     public override ActionResult Execute()
     {
@@ -1147,9 +1147,9 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
 class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
 {
     public char Choice { get; set; }
-    private UserInterface _ui = ui;
-    private Actor _actor = actor;
-    private GameState _gameState = gs;
+    UserInterface _ui = ui;
+    Actor _actor = actor;
+    GameState _gameState = gs;
 
     public override ActionResult Execute()
     {
