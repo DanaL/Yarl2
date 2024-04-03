@@ -169,6 +169,9 @@ done_dividing:
             Stats[Attribute.HP].Curr = hp;
             other.Stats[Attribute.HP].SetMax(half);
 
+            var msg = new Message($"{Name.DefArticle()} divides into two!!", Loc, false);
+            gs.UIRef().AlertPlayer([msg], "", gs);
+
             gs.ObjDb.AddNewActor(other, spot);
             gs.AddPerformer(other);
         }
