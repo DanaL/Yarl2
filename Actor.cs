@@ -85,9 +85,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
     public virtual void CalcEquipmentModifiers() { }
     public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
-
-    public virtual string ChatText() => "";
-    
+        
     public Actor()
     {
         Inventory = new EmptyInventory(ID);

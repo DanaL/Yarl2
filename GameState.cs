@@ -93,6 +93,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         // out here.
     }
 
+    public Town Town => Campaign!.Town!;    
     public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeonID];
     public Map CurrentMap => Campaign!.Dungeons[CurrDungeonID].LevelMaps[CurrLevel];
     public bool InWilderness => CurrDungeonID == 0;

@@ -189,11 +189,13 @@ class ShopMenuAccumulator : InputAccumulator
 {
     readonly Mob _shopkeeper;
     readonly GameState _gs;
-    Dictionary<char, ShopMenuItem> _menuItems = [];
-    
-    public ShopMenuAccumulator(Actor shopkeeper, GameState gs)
+    readonly Dictionary<char, ShopMenuItem> _menuItems = [];
+    readonly string _blurb;
+
+    public ShopMenuAccumulator(Actor shopkeeper, string blurb, GameState gs)
     {
         _gs = gs;
+        _blurb = blurb;
         _shopkeeper = (Mob) shopkeeper;
         var items = _shopkeeper.Inventory.UsedSlots()
                              .Select(_shopkeeper.Inventory.ItemAt);
@@ -251,7 +253,7 @@ class ShopMenuAccumulator : InputAccumulator
     {
         var sb = new StringBuilder(_shopkeeper.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
-        sb.Append(_shopkeeper.ChatText());
+        sb.Append(_blurb);
         sb.Append("\n\n");
 
         var keys = _menuItems.Keys.ToList();

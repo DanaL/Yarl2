@@ -181,13 +181,7 @@ class MonsterBehaviour : IBehaviour
 }
 
 class VillagePupBehaviour : IBehaviour
-{
-    // Eventually different messages depending on if the dog is friendly or not?
-    public string ChatText(Mob animal)
-    {
-        return "Arf! Arf!";
-    }
-
+{    
     static bool LocInTown(int row, int col, Town t)
     {
         if (row < t.Row || row >= t.Row + t.Height)
@@ -209,8 +203,6 @@ class VillagePupBehaviour : IBehaviour
 
     public Action CalcAction(Mob pup, GameState gameState, UserInterface ui)
     {
-        var town = gameState.Campaign.Town;
-
         double roll = gameState.Rng.NextDouble();
         if (roll < 0.25)
             return new PassAction();
@@ -219,7 +211,7 @@ class VillagePupBehaviour : IBehaviour
         List<Loc> mvOpts = [];
         foreach (var sq in Util.Adj8Sqs(pup.Loc.Row, pup.Loc.Col))
         {
-            if (LocInTown(sq.Item1, sq.Item2, town))
+            if (LocInTown(sq.Item1, sq.Item2, gameState.Town))
             {
                 var loc = pup.Loc with { Row = sq.Item1, Col = sq.Item2 };
                 if (Passable(gameState.TileAt(loc).Type) && !gameState.ObjDb.Occupied(loc))
@@ -228,8 +220,8 @@ class VillagePupBehaviour : IBehaviour
         }
 
         // Keep the animal tending somewhat to move toward the center of town
-        var centerRow = town.Row + town.Height / 2;
-        var centerCol = town.Col + town.Width / 2;
+        var centerRow = gameState.Town.Row + gameState.Town.Height / 2;
+        var centerCol = gameState.Town.Col + gameState.Town.Width / 2;
         var adj = pup.Loc;
         if (pup.Loc.Row < centerRow && pup.Loc.Col < centerCol)
             adj = pup.Loc with { Row = pup.Loc.Row + 1, Col = pup.Loc.Col + 1 };
@@ -257,7 +249,9 @@ class VillagePupBehaviour : IBehaviour
     {
         var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
         sb.Append(".\n\n");
-        sb.Append(animal.ChatText());
+
+        // Eventually the dog might have different sounds based on mood, etc
+        sb.Append("Arf! Arf!");
 
         gs.WritePopup(sb.ToString(), "");
         return (new PassAction(), new PauseForMoreAccumulator());
@@ -287,22 +281,12 @@ class PriestBehaviour : IBehaviour
     public (Action, InputAccumulator) Chat(Mob priest, GameState gs)
     {
         var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
-        sb.Append(".\n\n");
-        sb.Append(priest.ChatText());
-        sb.Append("\n\n");
+        sb.Append("\n\n\"It is my duty to look after the spiritual well-being of ");
+        sb.Append(gs.Town.Name);
+        sb.Append(".\"\n\n");
 
         gs.WritePopup(sb.ToString(), priest.FullName);
         return (new PassAction(), new PauseForMoreAccumulator());
-    }
-
-    public string ChatText(Mob priest)
-    {
-        var sb = new StringBuilder();
-        sb.Append("\"It is my duty to look after the spiritual well-being of the village.");
-        //sb.Append(((Villager)priest).Town.Name);
-        //sb.Append(".\"");
-
-        return sb.ToString();
     }
 }
 
@@ -359,7 +343,7 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
         }
     }
 
-    public string ChatText(Mob smith)
+    string Blurb()
     {
         var sb = new StringBuilder();
         sb.Append('"');
@@ -374,7 +358,7 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
 
     public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
-        var acc = new ShopMenuAccumulator((Mob)actor, gs);
+        var acc = new ShopMenuAccumulator(actor, Blurb(), gs);
         var action = new ShopAction(actor, gs);
 
         return (action, acc);
@@ -413,21 +397,14 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
         }
     }
 
-    public string ChatText(Actor actor)
-    {
-        var sb = new StringBuilder();
-        sb.Append('"');
-        sb.Append("Welcome to the market!");
-        //sb.Append(grocer.Town.Name.Capitalize());
-        //sb.Append(" market!");
-        sb.Append('"');
-
-        return sb.ToString();
-    }
-
     public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
-        var acc = new ShopMenuAccumulator(actor, gs);
+        var sb = new StringBuilder();
+        sb.Append("\"Welcome to the ");
+        sb.Append(gs.Town.Name);
+        sb.Append(" market!\"");
+
+        var acc = new ShopMenuAccumulator(actor, sb.ToString(), gs);
         var action = new ShopAction(actor, gs);
 
         return (action, acc);
