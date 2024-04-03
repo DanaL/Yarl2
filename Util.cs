@@ -48,7 +48,8 @@ class Colours
     public static readonly Colour FAR_BELOW = new(55, 198, 255, 75);
     public static readonly Colour HILITE = new(255, 255, 53, 128);
     public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);
-
+    public static readonly Colour PINK = new(255, 192, 203, 255);
+    
     public static string ColourToText(Colour colour)
     {
         if (colour == WHITE) return "white";
@@ -71,6 +72,9 @@ class Colours
         else if (colour == TORCH_ORANGE) return "torchorange";
         else if (colour == TORCH_RED) return "torchred";
         else if (colour == TORCH_YELLOW) return "torchyellow";
+        else if (colour == FAR_BELOW) return "farbelow";
+        else if (colour == LIGHT_PURPLE) return "lightpurple";
+        else if (colour == PINK) return "pink";
         else if (colour == NULL) return "null";
         else throw new Exception($"Hmm I don't know that colour {colour}");
     }
@@ -97,6 +101,9 @@ class Colours
         else if (colour == "torchorange") return TORCH_ORANGE;
         else if (colour == "torchred") return TORCH_RED;
         else if (colour == "torchyellow") return TORCH_YELLOW;
+        else if (colour == "farbelow") return FAR_BELOW;
+        else if (colour == "lightpurple") return LIGHT_PURPLE;
+        else if (colour == "pink") return PINK;
         else if (colour == "null") return NULL;
         else throw new Exception("Hmm I don't know that colour");
     }
@@ -142,6 +149,12 @@ partial class Util
     {
         foreach (var d in Adj8)
             yield return (r + d.Item1, c + d.Item2);
+    }
+
+    public static IEnumerable<Loc> Adj8Locs(Loc loc)
+    {
+        foreach (var d in Adj8)
+            yield return loc with { Row = loc.Row + d.Item1, Col = loc.Col + d.Item2};
     }
 
     public static int CountAdjTileType(Map map, int r, int c, TileType type)

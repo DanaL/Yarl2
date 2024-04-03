@@ -232,6 +232,12 @@ class GameObjectDB
         return val;
     }
 
+    public void AddNewActor(Actor actor, Loc loc)
+    {
+        actor.Loc = loc;
+        Add(actor);
+        AddToLoc(loc, actor);
+    }
     public void Add(GameObj obj)
     {
         Objs[obj.ID] = obj;

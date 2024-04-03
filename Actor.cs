@@ -92,7 +92,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         Inventory = new EmptyInventory(ID);
     }
 
-    public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage)
+    public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage, GameState gs)
     {
         if (Status == ActorStatus.Idle)
             Status = ActorStatus.Active;
@@ -104,7 +104,74 @@ abstract class Actor : GameObj, IPerformer, IZLevel
             total = 0;
         Stats[Attribute.HP].Curr -= total;
 
+        if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)
+        {
+            foreach (var dmg in damage)
+            {
+                switch (dmg.Item2)
+                {
+                    case DamageType.Piercing:
+                    case DamageType.Slashing:
+                    case DamageType.Blunt:
+                        Divide(gs);
+                        goto done_dividing;
+                    default:
+                        continue;
+                }
+            }            
+        }
+done_dividing:
+
         return Stats[Attribute.HP].Curr;
+    }
+
+    // Candidate spots will be spots adjacent to the contiguous group of the 
+    // same monster. (I'm just basing this on name since I don't really have
+    // a monster-type field) Yet another floodfill of sorts...
+    void Divide(GameState gs)
+    {
+        var map = gs.Campaign.Dungeons[Loc.DungeonID].LevelMaps[Loc.Level];
+        List<Loc> candidateSqs = [];
+        Queue<Loc> q = [];
+        q.Enqueue(Loc);
+        HashSet<Loc> visited = [];
+
+        while (q.Count > 0)
+        {
+            var curr = q.Dequeue();
+
+            if (visited.Contains(curr))
+                continue;
+
+            visited.Add(curr);
+
+            foreach (var adj in Util.Adj8Locs(curr))
+            {                
+                var tile = map.TileAt(adj.Row, adj.Col);
+                var occ = gs.ObjDb.Occupant(adj);
+                if (occ is null && tile.Passable())
+                {
+                    candidateSqs.Add(adj);
+                }
+                if (!visited.Contains(adj) && occ is not null && occ.Name == Name && occ is not Player)
+                {
+                    q.Enqueue(adj);
+                }
+            }
+        }
+
+        if (candidateSqs.Count > 0)
+        {
+            var spot = candidateSqs[gs.Rng.Next(candidateSqs.Count)];
+            var other = MonsterFactory.Get(Name, gs.Rng);
+            var hp = Stats[Attribute.HP].Curr / 2;
+            var half = Stats[Attribute.HP].Curr - hp;
+            Stats[Attribute.HP].Curr = hp;
+            other.Stats[Attribute.HP].SetMax(half);
+
+            gs.ObjDb.AddNewActor(other, spot);
+            gs.AddPerformer(other);
+        }
     }
 
     public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;

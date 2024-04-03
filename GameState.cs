@@ -264,6 +264,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         Performers.Insert(0, player);
     }
     
+    public void AddPerformer(IPerformer performer)
+    {
+        performer.Energy = 0.0;
+        Performers.Add(performer);
+    }
+
     public void RefreshPerformers()
     {
         IPerformer? curr = null;

@@ -18,7 +18,8 @@ enum DamageType
     Blunt,
     Fire,
     Cold,
-    Poison
+    Poison,
+    Acid
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -96,7 +97,7 @@ class Battle
             bonusDamage += mdb.Curr;
 
         Message msg = MsgFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
-        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+        int hpLeft = target.ReceiveDmg(dmg, bonusDamage, gs);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);
 
         foreach (var trait in ammo.Traits)
@@ -154,7 +155,7 @@ class Battle
             bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
 
         Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
-        int hpLeft = target.ReceiveDmg(dmg, bonusDamage);
+        int hpLeft = target.ReceiveDmg(dmg, bonusDamage, gs);
         ResolveHit(attacker, target, hpLeft, result, msg, gs);
 
         if (attacker.HasTrait<PoisonerTrait>())

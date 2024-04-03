@@ -127,6 +127,11 @@ class StickyTrait : Trait
     public override string AsText() => "Sticky";
 }
 
+class DividerTrait : Trait
+{
+    public override string AsText() => "Divider";    
+}
+
 class FlammableTrait : Trait
 {
     public override string AsText() => "Flammable";
@@ -307,7 +312,7 @@ class OnFireTrait : Trait, IGameEventListener
             if (victim is not null) {
                 int fireDmg = gs.Rng.Next(8) + 1;
                 List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-                int hpLeft = victim.ReceiveDmg(fire, 0);
+                int hpLeft = victim.ReceiveDmg(fire, 0, gs);
 
                 if (hpLeft < 1)
                 {
@@ -361,7 +366,7 @@ class PoisonedTrait : Trait, IGameEventListener
             else
             {
                 List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-                int hpLeft = victim.ReceiveDmg(p, 0);
+                int hpLeft = victim.ReceiveDmg(p, 0, gs);
 
                 if (hpLeft < 1)
                 {
@@ -698,6 +703,8 @@ class TraitFactory
                     ContainerID = ulong.Parse(pieces[2]),
                     Lifetime = int.Parse(pieces[3])
                 };
+            case "Divider":
+                return new DividerTrait();
             case "Opaque":
                 return new OpaqueTrait();
             case "Plant":
