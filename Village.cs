@@ -88,6 +88,7 @@ class Village
                                           map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
         cleric.Loc = sqs[rng.Next(sqs.Count)];
         cleric.SetBehaviour(new PriestBehaviour());
+        cleric.MoveStrategy = new WallMoveStrategy();
 
         return cleric;
     }
@@ -104,6 +105,7 @@ class Village
         var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                           map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();        
         grocer.Loc = sqs[rng.Next(sqs.Count)];
+        grocer.MoveStrategy = new WallMoveStrategy();
         grocer.SetBehaviour(new GrocerBehaviour(1.25 + rng.NextDouble() / 2));
         
         grocer.Inventory = new Inventory(grocer.ID, objDb);
@@ -132,6 +134,7 @@ class Village
                                           map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
         smith.Loc = sqs[rng.Next(sqs.Count)];
         smith.SetBehaviour(new SmithBehaviour(1.5 + rng.NextDouble() / 2));
+        smith.MoveStrategy = new WallMoveStrategy();
 
         smith.Inventory = new Inventory(smith.ID, objDb);
         smith.Inventory.Add(ItemFactory.Get("ringmail", objDb), smith.ID);

@@ -231,7 +231,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
         }
         else
         {
-            var (chatAction, _) = other.Behaviour.Chat((Mob)other, _gs);
+            var (chatAction, acc) = other.Behaviour.Chat((Mob)other, _gs);
 
             if (chatAction is NullAction)
             {
@@ -241,8 +241,7 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
             }
             else
             {
-                var (action, acc) = other.Chat(_gs);
-                _gs.Player.ReplacePendingAction(action, acc);
+                _gs.Player.ReplacePendingAction(chatAction, acc!);
             }
 
             return new ActionResult() { Complete = false, EnergyCost = 0.0 };

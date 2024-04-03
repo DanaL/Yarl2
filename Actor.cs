@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel.Design;
+
 namespace Yarl2;
 
 // Interface for anything that will get a turn in the game. The Player,
@@ -85,8 +87,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
 
     public virtual string ChatText() => "";
-    public virtual (Action, InputAccumulator) Chat(GameState gs) => (null, null);
-
+    
     public Actor()
     {
         Inventory = new EmptyInventory(ID);

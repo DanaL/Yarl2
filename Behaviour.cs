@@ -209,7 +209,7 @@ class VillagePupBehaviour : IBehaviour
 
     public Action CalcAction(Mob pup, GameState gameState, UserInterface ui)
     {
-        var town = gameState.Campaign.Town!;
+        var town = gameState.Campaign.Town;
 
         double roll = gameState.Rng.NextDouble();
         if (roll < 0.25)
