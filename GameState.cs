@@ -337,7 +337,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // Also not sure how often monsters should regenerate.
     void EndOfTurn()
     {
-        if (Turn % 23 == 0)
+        if (Turn % 11 == 0)
         {
             Player.Stats[Attribute.HP].Change(1);
         }

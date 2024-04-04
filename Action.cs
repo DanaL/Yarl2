@@ -519,7 +519,7 @@ class MoveAction(Actor actor,  Loc loc, GameState gameState) : Action
             }
             else
             {
-                var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 10);
+                var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 6);
                 if (alerted.Contains(_gs.Player.ID))
                 {
                     var txt = _actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."

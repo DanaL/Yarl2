@@ -210,6 +210,7 @@ class Mob : Actor
     {
         if (sourceID == gs.Player.ID && Status == ActorStatus.Idle)
         {
+            Console.WriteLine($"{Name} wakes up");
             Status = ActorStatus.Active;
         }
     }
@@ -310,7 +311,7 @@ class MonsterFactory
             }
         }
         
-        m.Status = rng.NextDouble() < 0.9 ? ActorStatus.Active : ActorStatus.Idle;
+        m.Status = rng.NextDouble() < 0.8 ? ActorStatus.Idle : ActorStatus.Active;
         
         return m;
     }
