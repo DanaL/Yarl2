@@ -60,6 +60,7 @@ class DeckBulder
         {
             for (int j = 0; j < 8; j++)
                 deck.Monsters.Add("kobold");
+
             deck.Monsters.Add("giant rat"); 
             deck.Monsters.Add("giant rat"); 
             deck.Monsters.Add("giant rat"); 
@@ -70,9 +71,7 @@ class DeckBulder
         {
             for (int j = 0; j < 6; j++)
                 deck.Monsters.Add("goblin");
-            deck.Monsters.Add("goblin archer");
-            deck.Monsters.Add("goblin archer");
-            deck.Monsters.Add("goblin archer");
+
             deck.Monsters.Add("wolf");
             deck.Monsters.Add("wolf");
         }
@@ -82,17 +81,34 @@ class DeckBulder
         deck.Monsters.Add("zombie");
         deck.Monsters.Add("zombie");
 
-        if (level > 1 && _earlyMainOccupant == "kobold")
+        if (level > 1)
         {
-            deck.Monsters.Add("kobold trickster");
-            deck.Monsters.Add("kobold foreman");
-            deck.Monsters.Add("kobold foreman");
+            if (_earlyMainOccupant == "kobold")
+            {
+                deck.Monsters.Add("kobold foreman");
+                deck.Monsters.Add("kobold foreman");
+            }
+            else if (_earlyMainOccupant == "goblin")
+            {
+                deck.Monsters.Add("hobgoblin");
+                deck.Monsters.Add("hobgoblin");
+                deck.Monsters.Add("goblin archer");
+            }
         }
-        else if (level > 1 && _earlyMainOccupant == "goblin")
+
+        if (level > 2)
         {
-            deck.Monsters.Add("goblin boss");
-            deck.Monsters.Add("hobgoblin");
-            deck.Monsters.Add("hobgoblin");
+            if (_earlyMainOccupant == "kobold")
+            {
+                deck.Monsters.Add("kobold trickster");                
+            }
+            else if (_earlyMainOccupant == "goblin")
+            {
+                deck.Monsters.Add("goblin boss");
+                deck.Monsters.Add("hobgoblin");
+                deck.Monsters.Add("hobgoblin");
+                deck.Monsters.Add("goblin firestarter");
+            }
         }
         
         return deck;
@@ -104,13 +120,11 @@ class DeckBulder
 
         int lvl = startLevel;
         while (lvl < startLevel + depth)
-        {
-            if (lvl == 1 || lvl == 2)
-            {
-                var deck = EarlyLevelDeck(lvl, rng);
-                deck.Reshuffle(rng);
-                decks.Add(deck);                
-            }
+        {            
+            var deck = EarlyLevelDeck(lvl, rng);
+            deck.Reshuffle(rng);
+            decks.Add(deck);                
+            
             ++lvl;
         }
         

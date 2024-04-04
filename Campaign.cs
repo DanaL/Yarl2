@@ -214,10 +214,10 @@ class PreGameHandler(UserInterface ui)
         history.CalcDungeonHistory();
         history.GenerateVillain();
 
-        //var dBuilder = new MainDungeonBuilder();
-        //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-        var dBuilder = new ArenaBuilder();
-        var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+        var dBuilder = new MainDungeonBuilder();
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+        //var dBuilder = new ArenaBuilder();
+        //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
 
         campaign.AddDungeon(mainDungeon);
 
@@ -227,15 +227,15 @@ class PreGameHandler(UserInterface ui)
         };
         wildernessMap.SetTile(entrance, portal);
 
-       campaign.Town = town;
+        campaign.Town = town;
 
-        //PopulateDungeon(rng, objDb, history, mainDungeon);
-        PopulateArena(rng, objDb, mainDungeon);
+        PopulateDungeon(rng, objDb, history, mainDungeon);
+        //PopulateArena(rng, objDb, mainDungeon);
 
         var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
-        return (campaign, startR, startC);
-        //return (campaign, entrance.Item1, entrance.Item2);
+        //return (campaign, startR, startC);
+        return (campaign, entrance.Item1, entrance.Item2);
     }
     
     private static void PopulateArena(Random rng, GameObjectDB objDb, Dungeon dungeon)
@@ -279,13 +279,14 @@ class PreGameHandler(UserInterface ui)
     // sort) because monsters will spawn as the player explores
     private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon)
     {
-        var decks = DeckBulder.MakeDecks(1, 2, history.Villain, rng);
+        int maxDepth = 3;
+        var decks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
 
         // Temp: generate monster decks and populate the first two levels of the dungeon.
         // I'll actually want to save the decks for reuse as random monsters are added
         // in, but I'm not sure where they should live. I guess maybe in the Map structure,
         // which has really come to represent a dungeon level
-        for (int lvl = 0; lvl < 2; lvl++)
+        for (int lvl = 0; lvl < maxDepth; lvl++)
         {
             for (int j = 0; j < rng.Next(8, 13); j++)
             {
@@ -330,7 +331,8 @@ class PreGameHandler(UserInterface ui)
         else
         {
             int seed = DateTime.Now.GetHashCode();
-            seed = -1900333996;
+            // -758465673 this seed doesn't have a valid entrance loc?
+            
             Console.WriteLine($"Seed: {seed}");
             var rng = new Random(seed);
             var objDb = new GameObjectDB();
