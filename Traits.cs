@@ -120,6 +120,11 @@ class MobMissileTrait : ActionTrait
     }
 }
 
+class PoorLootTrait : Trait
+{
+    public override string AsText() => "PoorLoot";
+}
+
 class StickyTrait : Trait
 {
     public int DC => 13;
@@ -709,6 +714,8 @@ class TraitFactory
                 return new OpaqueTrait();
             case "Plant":
                 return new PlantTrait();
+            case "Plural":
+                return new PluralTrait();
             case "Poisoned":
                 return new PoisonedTrait()
                 {
@@ -724,8 +731,8 @@ class TraitFactory
                     DC = int.Parse(digits[1]),
                     Strength = int.Parse(digits[2])
                 };
-            case "Plural":
-                return new PluralTrait();
+            case "PoorLoot":
+                return new PoorLootTrait();
             case "Rage":
                 return new RageTrait((Actor)container);
             case "Readable":

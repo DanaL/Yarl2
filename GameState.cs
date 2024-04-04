@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Diagnostics;
+using System.Numerics;
 
 namespace Yarl2;
 
@@ -150,7 +151,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
         item.Loc = loc;
         item.ContainedBy = 0;
-        //ObjDb.SetToLoc(loc, item);
 
         var tile = TileAt(loc);
         List<Message> msgs = [];
@@ -246,6 +246,28 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
             UI.KillScreen("You died :(", this);
             throw new PlayerKilledException();
+        }
+        
+        if (victim.HasTrait<PoorLootTrait>())
+        {
+            var roll = Rng.NextDouble();
+            
+            if (roll > 0.95)
+            {
+                var potion = ItemFactory.Get("potion of healing", ObjDb);
+                ItemDropped(potion, victim.Loc);
+            }
+            else if (roll > 0.80)
+            {
+                var torch = ItemFactory.Get("torch", ObjDb);
+                ItemDropped(torch, victim.Loc);
+            }
+            else if (roll > 0.5)
+            {
+                var cash = ItemFactory.Get("zorkmids", ObjDb);
+                cash.Value = Rng.Next(3, 11);
+                ItemDropped(cash, victim.Loc);
+            }
         }
     }
 
