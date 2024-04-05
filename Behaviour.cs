@@ -274,11 +274,14 @@ class PriestBehaviour : IBehaviour
     {
         if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(gameState, 2500, actor, "Praise be to Huntokar!");
-            ui.RegisterAnimation(bark);
             _lastIntonation = DateTime.Now;
 
-            return new PassAction();
+            return new PassAction()
+            {
+              Actor = actor,
+              GameState = gameState,
+              Quip = "Praise be to Huntokar!"
+            };
         }
         else
         {
@@ -339,11 +342,14 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(gameState, 2500, smith, PickBark(smith, gameState.Rng));
-            ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
-            return new PassAction();
+            return new PassAction()
+            {
+              Actor = smith,
+              GameState = gameState,
+              Quip = PickBark(smith, gameState.Rng)
+            };
         }
         else
         {
@@ -378,7 +384,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
     public double Markup { get; set; } = markup;
     DateTime _lastBark = new(1900, 1, 1);
 
-    static string PickBark(Mob grocer, Random rng)
+    static string PickBark(Random rng)
     {
         int roll = rng.Next(3);
         if (roll == 0)
@@ -393,11 +399,14 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
     {
         if ((DateTime.Now - _lastBark).TotalSeconds > 10)
         {
-            var bark = new BarkAnimation(gameState, 2500, grocer, PickBark(grocer, gameState.Rng));
-            ui.RegisterAnimation(bark);
             _lastBark = DateTime.Now;
 
-            return new PassAction();
+            return new PassAction()
+            {
+              Actor = grocer,
+              GameState = gameState,
+              Quip = PickBark(gameState.Rng)
+            };
         }
         else
         {
