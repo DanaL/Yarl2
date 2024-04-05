@@ -156,7 +156,12 @@ class MonsterBehaviour : IBehaviour
             var locs = Util.Adj8Locs(mob.Loc)
                            .Where(l => !gs.ObjDb.Occupied(l)).ToList();
             var target = locs[gs.Rng.Next(locs.Count)];
-            return new SummonAction(mob, gs, target, summon.Summons);
+            return new SummonAction(target, summon.Summons)
+            {
+              GameState = gs,
+              Actor = mob,
+              Quip = summon.Quip
+            };
         }
 
         return new NullAction();

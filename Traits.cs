@@ -76,22 +76,23 @@ abstract class ActionTrait : Trait
 
 class SummonTrait : ActionTrait
 {
-    public string Summons { get; set; } = "";
+  public string Summons { get; set; } = "";
+  public string Quip { get; set; } = "";
 
-    public override bool Available(Mob mob, GameState gs)
+  public override bool Available(Mob mob, GameState gs)
+  {
+    // I don't want them spamming the level with summons so they'll only
+    // perform a summons if they are near the player
+    if (Util.Distance(mob.Loc, gs.Player.Loc) > 3)
+      return false;
+
+    foreach (var adj in Util.Adj8Locs(mob.Loc))
     {
-        // I don't want them spamming the level with summons so they'll only
-        // perform a summons if they are near the player
-        if (Util.Distance(mob.Loc, gs.Player.Loc) > 3)
-            return false;
+      if (!gs.ObjDb.Occupied(adj))
+        return true;
+    }
 
-        foreach (var adj in Util.Adj8Locs(mob.Loc))
-        {
-            if (!gs.ObjDb.Occupied(adj))
-                return true;
-        }
-
-        return false;
+      return false;
     }
 }
 
@@ -768,7 +769,8 @@ class TraitFactory
                 {
                     Name = name,
                     Cooldown = ulong.Parse(pieces[1]),
-                    Summons = pieces[2]
+                    Summons = pieces[2],
+                    Quip = pieces[3]
                 };
             case "Teflon":
                 return new TeflonTrait();
