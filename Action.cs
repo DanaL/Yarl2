@@ -31,6 +31,13 @@ abstract class Action
   public string Quip { get; set; } = "";
   public int QuipDuration { get; set; } = 2500;
 
+  public Action() { }
+  public Action(GameState gs, Actor actor)
+  {
+    Actor = actor;
+    GameState = gs;
+  }
+
   public virtual ActionResult Execute()
   {
     if (!string.IsNullOrEmpty(Quip) && Actor is not null && GameState is not null)
@@ -45,66 +52,62 @@ abstract class Action
   public virtual void ReceiveAccResult(AccumulatorResult result) { }
 }
 
-class MeleeAttackAction(Actor actor, Loc loc, GameState gs) : Action
+class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 {
-  GameState _gs = gs;
   Loc _loc = loc;
-  Actor _actor = actor;
-
+  
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = true };
 
-    var target = _gs.ObjDb.Occupant(_loc);
+    var target = GameState!.ObjDb.Occupant(_loc);
     if (target is not null)
-      result = Battle.MeleeAttack(_actor, target, _gs);
+      result = Battle.MeleeAttack(Actor!, target, GameState);
 
     return result;
   }
 }
 
-class MissileAttackAction(Actor actor, Loc loc, GameState gs, Item ammo) : Action
+class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Action(gs, actor)
 {
-  readonly GameState _gs = gs;
   Loc _loc = loc;
-  readonly Actor _actor = actor;
   readonly Item _ammo = ammo;
 
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = true };
 
-    var target = _gs.ObjDb.Occupant(_loc);
+    var target = GameState!.ObjDb.Occupant(_loc);
     if (target is not null)
-      result = Battle.MissileAttack(_actor, target, _gs, _ammo);
+      result = Battle.MissileAttack(Actor!, target, GameState, _ammo);
 
     return result;
   }
 }
 
-class PortalAction(GameState gameState) : Action
-{
-  protected readonly GameState _gameState = gameState;
+class PortalAction : Action
+{  
+  public PortalAction(GameState gameState) => GameState = gameState;
 
   protected void UsePortal(Portal portal, ActionResult result)
   {
-    var start = _gameState.Player!.Loc;
+    var start = GameState!.Player!.Loc;
     var (dungeon, level, _, _) = portal.Destination;
-    _gameState.EnterLevel(dungeon, level);
-    _gameState.Player!.Loc = portal.Destination;
-    _gameState.ActorMoved(_gameState.Player!, start, portal.Destination);
-    _gameState.RefreshPerformers();
+    GameState.EnterLevel(dungeon, level);
+    GameState.Player!.Loc = portal.Destination;
+    GameState.ActorMoved(GameState.Player!, start, portal.Destination);
+    GameState.RefreshPerformers();
 
     result.Complete = true;
 
     if (start.DungeonID != portal.Destination.DungeonID)
-      result.Messages.Add(MsgFactory.Phrase(_gameState.CurrentDungeon.ArrivalMessage, portal.Destination));
+      result.Messages.Add(MsgFactory.Phrase(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
 
     if (portal.Destination.DungeonID > 0)
     {
-      int maxDepth = _gameState.Player!.Stats[Attribute.Depth].Max;
+      int maxDepth = GameState.Player!.Stats[Attribute.Depth].Max;
       if (portal.Destination.Level + 1 > maxDepth)
-        _gameState.Player!.Stats[Attribute.Depth].SetMax(portal.Destination.Level + 1);
+        GameState.Player!.Stats[Attribute.Depth].SetMax(portal.Destination.Level + 1);
     }
 
     result.EnergyCost = 1.0;
@@ -114,8 +117,8 @@ class PortalAction(GameState gameState) : Action
   {
     var result = new ActionResult() { Complete = false };
 
-    var p = _gameState.Player!;
-    var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
+    var p = GameState!.Player!;
+    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
     if (t.Type == TileType.Portal)
     {
@@ -123,7 +126,7 @@ class PortalAction(GameState gameState) : Action
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("There is nowhere to go here.", _gameState.Player.Loc));
+      result.Messages.Add(MsgFactory.Phrase("There is nowhere to go here.", GameState.Player.Loc));
     }
 
     return result;
@@ -136,8 +139,8 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
   {
     var result = new ActionResult() { Complete = false };
 
-    var p = _gameState.Player!;
-    var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
+    var p = GameState!.Player!;
+    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
     if (t.Type == TileType.Downstairs)
     {
@@ -145,7 +148,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("You cannot go down here.", _gameState.Player.Loc));
+      result.Messages.Add(MsgFactory.Phrase("You cannot go down here.", GameState.Player.Loc));
     }
 
     return result;
@@ -158,8 +161,8 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
   {
     var result = new ActionResult() { Complete = false };
 
-    var p = _gameState.Player!;
-    var t = _gameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
+    var p = GameState!.Player!;
+    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
     if (t.Type == TileType.Upstairs)
     {
@@ -167,19 +170,24 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("You cannot go up here.", _gameState.Player.Loc));
+      result.Messages.Add(MsgFactory.Phrase("You cannot go up here.", GameState.Player.Loc));
     }
 
     return result;
   }
 }
 
-class ShopAction(Mob shopkeeper, GameState gs) : Action
+class ShopAction : Action
 {
-  GameState _gs = gs;
-  Mob _shopkeeper = shopkeeper;
+  readonly Mob _shopkeeper;
   int _invoice;
   List<(char, int)> _selections = [];
+
+  public ShopAction(GameState gs, Mob shopkeeper)
+  {
+    GameState = gs;
+    _shopkeeper = shopkeeper;
+  }
 
   public override ActionResult Execute()
   {
@@ -189,13 +197,13 @@ class ShopAction(Mob shopkeeper, GameState gs) : Action
       EnergyCost = 1.0
     };
 
-    _gs.Player.Inventory.Zorkmids -= _invoice;
+    GameState!.Player.Inventory.Zorkmids -= _invoice;
 
     foreach (var (slot, count) in _selections)
     {
       List<Item> bought = _shopkeeper.Inventory.Remove(slot, count);
       foreach (var item in bought)
-        _gs.Player.Inventory.Add(item, _gs.Player.ID);
+        GameState.Player.Inventory.Add(item, GameState.Player.ID);
     }
 
     string txt = $"You pay {_shopkeeper.FullName} {_invoice} zorkmid";
@@ -203,7 +211,7 @@ class ShopAction(Mob shopkeeper, GameState gs) : Action
       txt += "s";
     txt += " and collect your goods.";
 
-    var msg = new Message(txt, _gs.Player.Loc);
+    var msg = new Message(txt, GameState.Player.Loc);
     result.Messages.Add(msg);
 
     return result;
@@ -217,45 +225,52 @@ class ShopAction(Mob shopkeeper, GameState gs) : Action
   }
 }
 
-abstract class DirectionalAction(Actor actor) : Action
+abstract class DirectionalAction : Action
 {
-  protected readonly Actor _actor = actor;
   protected Loc _loc { get; set; }
+
+  public DirectionalAction(Actor actor)
+  {
+    Actor = actor;
+  }
 
   public override void ReceiveAccResult(AccumulatorResult result)
   {
     var dirResult = (DirectionAccumulatorResult)result;
-    _loc = _actor.Loc with { Row = _actor.Loc.Row + dirResult.Row, Col = _actor.Loc.Col + dirResult.Col };
+    _loc = Actor!.Loc with { Row = Actor.Loc.Row + dirResult.Row, Col = Actor.Loc.Col + dirResult.Col };
   }
 }
 
-class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
+class ChatAction : DirectionalAction
 {
-  readonly GameState _gs = gs;
+  public ChatAction(GameState gs, Actor actor) : base(actor)
+  {
+    GameState = gs;   
+  }
 
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false };
 
-    var other = _gs.ObjDb.Occupant(_loc);
+    var other = GameState!.ObjDb.Occupant(_loc);
 
     if (other is null)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no one there!", _actor.Loc));
+      result.Messages.Add(MsgFactory.Phrase("There's no one there!", Actor!.Loc));
     }
     else
     {
-      var (chatAction, acc) = other.Behaviour.Chat((Mob)other, _gs);
+      var (chatAction, acc) = other.Behaviour.Chat((Mob)other, GameState);
 
       if (chatAction is NullAction)
       {
-        result.Messages.Add(MsgFactory.Phrase("They aren't interested in chatting.", _actor.Loc));
+        result.Messages.Add(MsgFactory.Phrase("They aren't interested in chatting.", Actor!.Loc));
         result.Complete = true;
         result.EnergyCost = 1.0;
       }
       else
       {
-        _gs.Player.ReplacePendingAction(chatAction, acc!);
+        GameState.Player.ReplacePendingAction(chatAction, acc!);
       }
 
       return new ActionResult() { Complete = false, EnergyCost = 0.0 };
@@ -265,10 +280,15 @@ class ChatAction(Actor actor, GameState gs) : DirectionalAction(actor)
   }
 }
 
-class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(actor)
+class CloseDoorAction : DirectionalAction
 {
-  readonly GameState _gs = gs;
-  readonly Map _map = map;
+  readonly Map _map;
+
+  public CloseDoorAction(GameState gs, Actor actor, Map map) : base(actor)
+  {
+    GameState = gs;
+    _map = map;
+  }
 
   public override ActionResult Execute()
   {
@@ -283,26 +303,26 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(_actor.ID, Verb.Close, "the door", false, _loc, _gs);
+        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, _loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door close.";
 
         // Find any light sources tht were affecting the door and update them, since
         // it's now open. (Eventually gotta extend it to any aura type effects)
-        foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
+        foreach (var src in GameState!.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
         {
-          _gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, src.ID);
-          _gs.ToggleEffect(src, _actor.Loc, TerrainFlag.Lit, true);
+          GameState.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, src.ID);
+          GameState.ToggleEffect(src, Actor.Loc, TerrainFlag.Lit, true);
         }
       }
-      else if (_actor is Player)
+      else if (Actor is Player)
       {
-        result.Messages.Add(MsgFactory.Phrase("The door is already closed.", _gs.Player.Loc));
+        result.Messages.Add(MsgFactory.Phrase("The door is already closed.", GameState!.Player.Loc));
       }
     }
-    else if (_actor is Player)
+    else if (Actor is Player)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no door there!", _gs.Player.Loc));
+      result.Messages.Add(MsgFactory.Phrase("There's no door there!", GameState!.Player.Loc));
     }
 
     return result;
@@ -311,20 +331,19 @@ class CloseDoorAction(Actor actor, Map map, GameState gs) : DirectionalAction(ac
 
 class OpenDoorAction : DirectionalAction
 {
-  GameState _gs;
   readonly Map _map;
 
-  public OpenDoorAction(Actor actor, Map map, GameState gs) : base(actor)
+  public OpenDoorAction(GameState gs, Actor actor, Map map) : base(actor)
   {
     _map = map;
-    _gs = gs;
+    GameState = gs;
   }
 
-  public OpenDoorAction(Actor actor, Map map, Loc loc, GameState gs) : base(actor)
+  public OpenDoorAction(GameState gs, Actor actor, Map map, Loc loc) : base(actor)
   {
     _map = map;
     _loc = loc;
-    _gs = gs;
+    GameState = gs;
   }
 
   public override ActionResult Execute()
@@ -340,41 +359,39 @@ class OpenDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(_actor.ID, Verb.Open, "door", false, _loc, _gs);
+        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Open, "door", false, _loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door open.";
 
         // Find any light sources tht were affecting the door and update them, since
         // it's now open. (Eventually gotta extend it to any aura type effects)
 
-        foreach (var src in _gs.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
+        foreach (var src in GameState!.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
         {
-          _gs.ToggleEffect(src, src.Loc, TerrainFlag.Lit, true);
+          GameState.ToggleEffect(src, src.Loc, TerrainFlag.Lit, true);
         }
-        _gs.ToggleEffect(_actor, _loc, TerrainFlag.Lit, true);
+        GameState.ToggleEffect(Actor, _loc, TerrainFlag.Lit, true);
       }
-      else if (_actor is Player)
+      else if (Actor is Player)
       {
-        result.Messages.Add(MsgFactory.Phrase("The door is already open.", _gs.Player.Loc));
+        result.Messages.Add(MsgFactory.Phrase("The door is already open.", GameState!.Player.Loc));
       }
     }
-    else if (_actor is Player)
+    else if (Actor is Player)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no door there!", _gs.Player.Loc));
+      result.Messages.Add(MsgFactory.Phrase("There's no door there!", GameState!.Player.Loc));
     }
 
     return result;
   }
 }
 
-class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
+class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
 {
-  readonly Actor _actor = actor;
   readonly Loc _loc = loc;
   readonly Map _map = gameState.Map!;
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
-  readonly GameState _gs = gameState;
-
+  
   static string BlockedMessage(Tile tile)
   {
     return tile.Type switch
@@ -388,13 +405,13 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
 
   string CalcDesc()
   {
-    if (_actor is not Player)
+    if (Actor is not Player)
       return "";
 
     var sb = new StringBuilder();
     sb.Append(_map.TileAt(_loc.Row, _loc.Col).StepMessage);
 
-    var items = _gs.ObjDb.ItemsAt(_loc);
+    var items = GameState!.ObjDb.ItemsAt(_loc);
     if (items.Count > 1)
     {
       sb.Append(" There are several items here.");
@@ -411,7 +428,7 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
       sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
     }
 
-    foreach (var env in _gs.ObjDb.EnvironmentsAt(_loc))
+    foreach (var env in GameState!.ObjDb.EnvironmentsAt(_loc))
     {
       if (env.Traits.OfType<StickyTrait>().Any())
       {
@@ -429,7 +446,7 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
 
     if (tile.Passable())
       return true;
-    else if (_actor.HasActiveTrait<FlyingTrait>() && tile.PassableByFlight())
+    else if (Actor!.HasActiveTrait<FlyingTrait>() && tile.PassableByFlight())
       return true;
 
     return false;
@@ -441,26 +458,26 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
 
     // First, is there anything preventing the actor from moving off
     // of the square?
-    foreach (var env in _gs.ObjDb.EnvironmentsAt(_actor.Loc))
+    foreach (var env in GameState!.ObjDb.EnvironmentsAt(Actor!.Loc))
     {
       var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
-      if (web is not null && !_actor.HasTrait<TeflonTrait>())
+      if (web is not null && !Actor.HasTrait<TeflonTrait>())
       {
-        bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.Rng);
+        bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
         if (!strCheck)
         {
           result.EnergyCost = 1.0;
           result.Complete = true;
-          var txt = $"{_actor.FullName.Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
-          var msg = new Message(txt, _actor.Loc);
+          var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
+          var msg = new Message(txt, Actor.Loc);
           result.Messages.Add(msg);
           return result;
         }
         else
         {
-          var txt = $"{_actor.FullName.Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Tear)} through {env.Name.DefArticle()}.";
-          var msg = MsgFactory.Phrase(txt, _actor.Loc);
-          _gs.ObjDb.RemoveItemFromGame(env.Loc, env);
+          var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} through {env.Name.DefArticle()}.";
+          var msg = MsgFactory.Phrase(txt, Actor.Loc);
+          GameState.ObjDb.RemoveItemFromGame(env.Loc, env);
           result.Messages.Add(msg);
         }
       }
@@ -470,21 +487,21 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
     {
       // in theory this shouldn't ever happen...
       result.Complete = false;
-      if (_actor is Player)
-        result.Messages.Add(MsgFactory.Phrase("You cannot go that way!", _gs.Player.Loc));
+      if (Actor is Player)
+        result.Messages.Add(MsgFactory.Phrase("You cannot go that way!", GameState.Player.Loc));
     }
-    else if (_gs.ObjDb.Occupied(_loc))
+    else if (GameState.ObjDb.Occupied(_loc))
     {
       result.Complete = false;
-      var occ = _gs.ObjDb.Occupant(_loc);
+      var occ = GameState.ObjDb.Occupant(_loc);
       if (occ.Behaviour is VillagePupBehaviour)
       {
         string msg;
-        if (_gs.Rng.NextDouble() < 0.5)
+        if (GameState.Rng.NextDouble() < 0.5)
           msg = $"You pat {occ.FullName}.";
         else
           msg = $"You give {occ.FullName} some scritches.";
-        _gs.WritePopup(msg, "");
+        GameState.WritePopup(msg, "");
         result.EnergyCost = 1.0;
         result.Complete = true;
         //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
@@ -492,11 +509,11 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
       else if (occ is not null && !occ.Hostile)
       {
         string msg = $"You don't want to attack {occ.FullName}!";
-        result.Messages.Add(MsgFactory.Phrase(msg, _gs.Player.Loc));
+        result.Messages.Add(MsgFactory.Phrase(msg, GameState.Player.Loc));
       }
       else
       {
-        var attackAction = new MeleeAttackAction(_actor, _loc, _gs);
+        var attackAction = new MeleeAttackAction(GameState, Actor, _loc);
         result.AltAction = attackAction;
       }
     }
@@ -504,17 +521,17 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
     {
       result.Complete = false;
 
-      if (_actor is Player)
+      if (Actor is Player)
       {
         var tile = _map.TileAt(_loc.Row, _loc.Col);
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
         {
-          var openAction = new OpenDoorAction(_actor, _map, _loc, _gs);
+          var openAction = new OpenDoorAction(GameState, Actor, _map, _loc);
           result.AltAction = openAction;
         }
         else
         {
-          result.Messages.Add(MsgFactory.Phrase(BlockedMessage(tile), _gs.Player.Loc));
+          result.Messages.Add(MsgFactory.Phrase(BlockedMessage(tile), GameState.Player.Loc));
         }
       }
     }
@@ -523,20 +540,20 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
       result.Complete = true;
       result.EnergyCost = 1.0;
 
-      _gs.ActorMoved(_actor, _actor.Loc, _loc);
-      _actor.Loc = _loc;
+      GameState.ActorMoved(Actor, Actor.Loc, _loc);
+      Actor.Loc = _loc;
 
-      if (_actor is Player)
+      if (Actor is Player)
       {
         result.Messages.Add(MsgFactory.Phrase(CalcDesc(), _loc));
-        _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 12);
+        GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
       }
       else
       {
-        var alerted = _gs.Noise(_actor.ID, _loc.Row, _loc.Col, 6);
-        if (alerted.Contains(_gs.Player.ID))
+        var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
+        if (alerted.Contains(GameState.Player.ID))
         {
-          var txt = _actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
+          var txt = Actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
                                                       : "You hear padding footsteps...";
           result.Messages.Add(new Message(txt, _loc, true));
         }
@@ -547,57 +564,54 @@ class MoveAction(Actor actor, Loc loc, GameState gameState) : Action
   }
 }
 
-class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
-  readonly UserInterface _ui = ui;
-  readonly Actor _actor = actor;
-  readonly GameState _gs = gs;
-
+  
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
-    _ui.CloseMenu();
-    var itemStack = _gs.ObjDb.ItemsAt(_actor.Loc);
-    var inv = _actor.Inventory;
+    GameState!.ClearMenu();
+    var itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
+    var inv = Actor.Inventory;
     bool freeSlot = inv.UsedSlots().Length < 26;
     int i = Choice - 'a';
     var item = itemStack[i];
 
     if (!freeSlot)
     {
-      var msg = MsgFactory.Phrase("There's no room in your inventory!", _gs.Player.Loc);
+      var msg = MsgFactory.Phrase("There's no room in your inventory!", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
 
     // First, is there anything preventing the actor from moving off
     // of the square?
-    foreach (var env in _gs.ObjDb.EnvironmentsAt(_actor.Loc))
+    foreach (var env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
       var web = env.Traits.OfType<StickyTrait>().First();
       if (web is not null)
       {
-        bool strCheck = _actor.AbilityCheck(Attribute.Strength, web.DC, _gs.Rng);
+        bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
         if (!strCheck)
         {
           var txt = $"{item.FullName.DefArticle().Capitalize()} {MsgFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
-          var stickyMsg = new Message(txt, _actor.Loc);
+          var stickyMsg = new Message(txt, Actor.Loc);
           return new ActionResult() { EnergyCost = 1.0, Complete = false, Messages = [stickyMsg] };
         }
         else
         {
-          var txt = $"{_actor.FullName.Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
-          var stickyMsg = MsgFactory.Phrase(txt, _actor.Loc);
+          var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
+          var stickyMsg = MsgFactory.Phrase(txt, Actor.Loc);
           result.Messages.Add(stickyMsg);
         }
       }
     }
 
-    _gs.ObjDb.RemoveItem(_actor.Loc, item);
-    inv.Add(item, _actor.ID);
+    GameState.ObjDb.RemoveItem(Actor.Loc, item);
+    inv.Add(item, Actor.ID);
 
-    result.Messages.Add(MsgFactory.Phrase(_actor.ID, Verb.Pickup, item.ID, 1, false, _actor.Loc, _gs));
+    result.Messages.Add(MsgFactory.Phrase(Actor.ID, Verb.Pickup, item.ID, 1, false, Actor.Loc, GameState));
     return result;
   }
 
@@ -608,34 +622,31 @@ class PickupItemAction(UserInterface ui, Actor actor, GameState gs) : Action
   }
 }
 
-class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
-  UserInterface _ui = ui;
-  Actor _actor = actor;
-  GameState _gs = gs;
-
+  
   public override ActionResult Execute()
   {
-    var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
-    _ui.CloseMenu();
+    var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
+    GameState!.ClearMenu();
 
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
     if (useableTraits.Count != 0)
     {
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
-      Item? toUse = _actor.Inventory.RemoveByID(item.ID)
+      Item? toUse = Actor.Inventory.RemoveByID(item.ID)
                       ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
       toUse.Stackable = false;
       if (!toUse.Consumable)
-        _actor.Inventory.Add(toUse, _actor.ID);
+        Actor.Inventory.Add(toUse, Actor.ID);
 
       bool success = false;
       foreach (IUSeable trait in useableTraits)
       {
-        var useResult = trait.Use(_actor, _gs, _actor.Loc.Row, _actor.Loc.Col);
+        var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col);
         result.Complete = useResult.Successful;
-        var alert = MsgFactory.Phrase(useResult.Message, _actor.Loc);
+        var alert = MsgFactory.Phrase(useResult.Message, Actor.Loc);
         result.Messages.Add(alert);
         success = useResult.Successful;
 
@@ -651,7 +662,7 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
     else
     {
-      var msg = MsgFactory.Phrase("You don't know a way to use that!", _gs.Player.Loc);
+      var msg = MsgFactory.Phrase("You don't know a way to use that!", GameState.Player.Loc);
       return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 0.0 };
     }
   }
@@ -684,106 +695,123 @@ class SummonAction(Loc target, string summons) : Action
   }
 }
 
-class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
+class FogCloudAction : Action
 {
-  readonly ulong _casterID = caster.ID;
-  readonly GameState _gs = gs;
-  readonly Loc _target = target;
+  readonly ulong _casterID;
+  readonly Loc _target;
+
+  public FogCloudAction(GameState gs, Actor caster, Loc target)
+  {
+    GameState = gs;
+    _casterID = caster.ID;
+    _target = target;
+  }
 
   public override ActionResult Execute()
   {
+    var gs = GameState!;
     for (int r = _target.Row - 2; r < _target.Row + 3; r++)
     {
       for (int c = _target.Col - 2; c < _target.Col + 3; c++)
       {
-        if (!_gs.CurrentMap.InBounds(r, c))
+        if (!gs.CurrentMap.InBounds(r, c))
           continue;
-        var mist = ItemFactory.Mist(_gs);
+        var mist = ItemFactory.Mist(gs);
         var mistLoc = _target with { Row = r, Col = c };
         var timer = mist.Traits.OfType<CountdownTrait>().First();
-        _gs.RegisterForEvent(UIEventType.EndOfRound, timer);
-        _gs.ObjDb.Add(mist);
-        _gs.ItemDropped(mist, mistLoc);
+        gs.RegisterForEvent(UIEventType.EndOfRound, timer);
+        gs.ObjDb.Add(mist);
+        gs.ItemDropped(mist, mistLoc);
       }
     }
 
-    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, _gs).Text;
+    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, gs).Text;
     var msg = new Message(txt + " Fog Cloud!", _target, false);
+
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
 }
 
-class EntangleAction(Actor caster, GameState gs, Loc target) : Action
+class EntangleAction : Action
 {
-  readonly ulong _casterID = caster.ID;
-  readonly GameState _gs = gs;
-  readonly Loc _target = target;
+  readonly ulong _casterID;
+  readonly Loc _target;
+
+  public EntangleAction(GameState gs, Actor caster, Loc target)
+  {
+    GameState = gs;
+    _casterID = caster.ID;
+    _target = target;
+  }
 
   public override ActionResult Execute()
   {
     foreach (var (r, c) in Util.Adj8Sqs(_target.Row, _target.Col))
     {
       var loc = _target with { Row = r, Col = c };
-      var tile = _gs.TileAt(loc);
-      if (tile.Type != TileType.Unknown && tile.Passable() && !_gs.ObjDb.Occupied(loc))
+      var tile = GameState!.TileAt(loc);
+      if (tile.Type != TileType.Unknown && tile.Passable() && !GameState.ObjDb.Occupied(loc))
       {
-        Actor vines = MonsterFactory.Get("vines", _gs.Rng);
+        Actor vines = MonsterFactory.Get("vines", GameState.Rng);
         vines.Loc = loc;
-        _gs.ObjDb.Add(vines);
-        _gs.ObjDb.AddToLoc(loc, vines);
+        GameState.ObjDb.Add(vines);
+        GameState.ObjDb.AddToLoc(loc, vines);
       }
     }
 
-    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, _gs).Text;
+    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, GameState!).Text;
     var msg = new Message(txt + " Entangle!", _target, false);
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
 }
 
-class FireboltAction(Actor caster, GameState gs, Loc target, List<Loc> trajectory) : Action
+class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajectory) : Action(gs, caster)
 {
-  readonly Actor _caster = caster;
-  readonly GameState _gs = gs;
   readonly Loc _target = target;
   readonly List<Loc> _trajectory = trajectory;
 
   public override ActionResult Execute()
   {
-    var anim = new ArrowAnimation(_gs, _trajectory, Colours.YELLOW_ORANGE);
-    _gs.UIRef().RegisterAnimation(anim);
+    var anim = new ArrowAnimation(GameState!, _trajectory, Colours.YELLOW_ORANGE);
+    GameState!.UIRef().RegisterAnimation(anim);
 
-    var firebolt = ItemFactory.Get("firebolt", _gs.ObjDb);
-    var attack = new MissileAttackAction(_caster, _target, _gs, firebolt);
+    var firebolt = ItemFactory.Get("firebolt", GameState!.ObjDb);
+    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
 
-    var txt = MsgFactory.Phrase(_caster.ID, Verb.Cast, _target, _gs).Text;
+    var txt = MsgFactory.Phrase(Actor!.ID, Verb.Cast, _target, GameState).Text;
     var msg = new Message(txt + " Firebolt!", _target, false);
     return new ActionResult() { Complete = true, Messages = [msg], AltAction = attack, EnergyCost = 0.0 };
   }
 }
 
-class WebAction(GameState gs, Loc target) : Action
+class WebAction : Action
 {
-  readonly GameState _gs = gs;
-  readonly Loc _target = target;
+  readonly Loc _target;
+
+  public WebAction(GameState gs, Loc target)
+  {
+    GameState = gs;
+    _target = target;
+  }
 
   public override ActionResult Execute()
   {
     var w = ItemFactory.Web();
-    _gs.ObjDb.Add(w);
-    _gs.ItemDropped(w, _target);
+    GameState!.ObjDb.Add(w);
+    GameState.ItemDropped(w, _target);
 
     foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
     {
-      if (_gs.Rng.NextDouble() < 0.666)
+      if (GameState.Rng.NextDouble() < 0.666)
       {
         w = ItemFactory.Web();
-        _gs.ObjDb.Add(w);
-        _gs.ItemDropped(w, _target with { Row = sq.Item1, Col = sq.Item2 });
+        GameState.ObjDb.Add(w);
+        GameState.ItemDropped(w, _target with { Row = sq.Item1, Col = sq.Item2 });
       }
     }
 
     var txt = "";
-    var victim = _gs.ObjDb.Occupant(_target);
+    var victim = GameState.ObjDb.Occupant(_target);
     if (victim is not null)
       txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
     var msg = new Message(txt, _target, false);
@@ -791,15 +819,12 @@ class WebAction(GameState gs, Loc target) : Action
   }
 }
 
-class BlinkAction(Actor caster, GameState gs) : Action
-{
-  readonly Actor _caster = caster;
-  readonly GameState _gs = gs;
-
+class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
+{  
   public override ActionResult Execute()
   {
     List<Loc> sqs = [];
-    var start = _caster.Loc;
+    var start = Actor!.Loc;
 
     for (var r = start.Row - 12; r < start.Row + 12; r++)
     {
@@ -807,7 +832,7 @@ class BlinkAction(Actor caster, GameState gs) : Action
       {
         var loc = start with { Row = r, Col = c };
         int d = Util.Distance(start, loc);
-        if (d >= 8 && d <= 12 && _gs.TileAt(loc).Passable() && !_gs.ObjDb.Occupied(loc))
+        if (d >= 8 && d <= 12 && GameState!.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
         {
           sqs.Add(loc);
         }
@@ -816,51 +841,47 @@ class BlinkAction(Actor caster, GameState gs) : Action
 
     if (sqs.Count == 0)
     {
-      var msg = new Message("A spell fizzles...", _caster.Loc);
+      var msg = new Message("A spell fizzles...", Actor.Loc);
       return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
     }
     else
     {
-      var landingSpot = sqs[_gs.Rng.Next(sqs.Count)];
-      var mv = new MoveAction(_caster, landingSpot, _gs);
-      _gs.UIRef().RegisterAnimation(new SqAnimation(_gs, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-      _gs.UIRef().RegisterAnimation(new SqAnimation(_gs, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-      var msg = MsgFactory.Phrase(_caster.ID, Verb.Blink, _caster.Loc, _gs);
+      var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
+      var mv = new MoveAction(GameState, Actor, landingSpot);
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+      var msg = MsgFactory.Phrase(Actor.ID, Verb.Blink, Actor.Loc, GameState);
       var txt = $"Bamf! {msg.Text} away!";
-      msg = new Message(txt, _caster.Loc);
+      msg = new Message(txt, Actor.Loc);
 
       return new ActionResult() { Complete = false, Messages = [msg], EnergyCost = 0.0, AltAction = mv };
     }
   }
 }
 
-class AntidoteAction(Actor target, GameState gs) : Action
+class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
 {
-  readonly Actor _target = target;
-  readonly GameState _gs = gs;
-
+  
   public override ActionResult Execute()
   {
-    if (!_target.HasTrait<PoisonedTrait>() && _target is Player)
+    if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
-      return new ActionResult() { Complete = true, Messages = [new Message("That tasted not bad.", _target.Loc)], EnergyCost = 1.0 };
+      return new ActionResult() { Complete = true, Messages = [new Message("That tasted not bad.", Actor.Loc)], EnergyCost = 1.0 };
     }
 
-    foreach (var t in _target.Traits.OfType<PoisonedTrait>())
+    foreach (var t in Actor!.Traits.OfType<PoisonedTrait>())
     {
-      _gs.StopListening(UIEventType.EndOfRound, t);
+      GameState!.StopListening(UIEventType.EndOfRound, t);
     }
-    _target.Traits = _target.Traits.Where(t => t is not PoisonedTrait).ToList();
-    var msg = new Message($"{_target.FullName.Capitalize()} {MsgFactory.CalcVerb(_target, Verb.Feel)} better.", _target.Loc);
+    Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
+    var msg = new Message($"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);
 
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
 }
 
-class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
+class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action(gs, target)
 {
-  readonly Actor _target = target;
-  readonly GameState _gs = gs;
   readonly int _healDie = healDie;
   readonly int _healDice = healDice;
 
@@ -868,21 +889,18 @@ class HealAction(Actor target, GameState gs, int healDie, int healDice) : Action
   {
     var hp = 0;
     for (int j = 0; j < _healDice; j++)
-      hp += _gs.Rng.Next(_healDie) + 1;
-    _target.Stats[Attribute.HP].Change(hp);
-    var plural = _target.HasTrait<PluralTrait>();
-    var msg = MsgFactory.Phrase(_target.ID, Verb.Etre, Verb.Heal, plural, false, _target.Loc, _gs);
+      hp += GameState!.Rng.Next(_healDie) + 1;
+    Actor!.Stats[Attribute.HP].Change(hp);
+    var plural = Actor.HasTrait<PluralTrait>();
+    var msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
     var txt = msg.Text[..^1] + $" for {hp} HP.";
 
-    return new ActionResult() { Complete = true, Messages = [new Message(txt, _target.Loc, false)], EnergyCost = 1.0 };
+    return new ActionResult() { Complete = true, Messages = [new Message(txt, Actor.Loc, false)], EnergyCost = 1.0 };
   }
 }
 
-class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
+class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  readonly UserInterface _ui = ui;
-  readonly Actor _actor = actor;
-  readonly GameState _gs = gs;
   int _amount;
 
   public override ActionResult Execute()
@@ -891,7 +909,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
     bool successful = true;
     Message alert;
 
-    var inventory = _actor.Inventory;
+    var inventory = Actor!.Inventory;
     if (_amount > inventory.Zorkmids)
     {
       _amount = inventory.Zorkmids;
@@ -901,15 +919,14 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
     {
       cost = 0.0; // we won't make the player spend an action if they drop nothing
       successful = false;
-      alert = new Message("You hold onto your zorkmids.", _actor.Loc);
+      alert = new Message("You hold onto your zorkmids.", Actor.Loc);
     }
     else
     {
-
-      var coins = ItemFactory.Get("zorkmids", _gs.ObjDb);
-      _gs.ItemDropped(coins, _actor.Loc);
+      var coins = ItemFactory.Get("zorkmids", GameState!.ObjDb);
+      GameState.ItemDropped(coins, Actor.Loc);
       coins.Value = _amount;
-      string msg = $"{MsgFactory.CalcName(_actor).Capitalize()} {MsgFactory.CalcVerb(_actor, Verb.Drop)} ";
+      string msg = $"{MsgFactory.CalcName(Actor).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";
       if (_amount == 1)
         msg += "a single zorkmid.";
       else if (_amount == inventory.Zorkmids)
@@ -917,7 +934,7 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
       else
         msg += $"{_amount} zorkmids.";
 
-      alert = new Message(msg, _actor.Loc);
+      alert = new Message(msg, Actor.Loc);
 
       inventory.Zorkmids -= _amount;
     }
@@ -932,31 +949,28 @@ class DropZorkmidsAction(UserInterface ui, Actor actor, GameState gs) : Action
   }
 }
 
-class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 {
-  readonly UserInterface _ui = ui;
-  readonly Actor _actor = actor;
-  readonly GameState _gs = gs;
   readonly char _slot = slot;
   int _amount;
 
   public override ActionResult Execute()
   {
-    var (item, itemCount) = _actor.Inventory.ItemAt(_slot);
-    _ui.ClosePopup();
+    var (item, itemCount) = Actor!.Inventory.ItemAt(_slot);
+    GameState!.UIRef().ClosePopup();
 
     if (_amount == 0 || _amount > itemCount)
       _amount = itemCount;
 
-    var droppedItems = _actor.Inventory.Remove(_slot, _amount);
+    var droppedItems = Actor.Inventory.Remove(_slot, _amount);
     foreach (var droppedItem in droppedItems)
     {
-      _gs.ItemDropped(droppedItem, _actor.Loc);
+      GameState.ItemDropped(droppedItem, Actor.Loc);
       droppedItem.Equiped = false;
     }
 
-    _actor.CalcEquipmentModifiers();
-    Message alert = MsgFactory.Phrase(_actor.ID, Verb.Drop, item.ID, _amount, false, _actor.Loc, _gs);
+    Actor.CalcEquipmentModifiers();
+    Message alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, Actor.Loc, GameState);
 
     return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
   }
@@ -968,22 +982,19 @@ class DropStackAction(UserInterface ui, Actor actor, GameState gs, char slot) : 
   }
 }
 
-class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Action
+class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 {
-  readonly UserInterface _ui = ui;
-  readonly Actor _actor = actor;
-  readonly GameState _gs = gs;
   readonly char _slot = slot;
   Loc _target { get; set; }
 
   Loc FinalLandingSpot(Loc loc)
   {
-    var tile = _gs.TileAt(loc);
+    var tile = GameState!.TileAt(loc);
 
     while (tile.Type == TileType.Chasm)
     {
       loc = loc with { Level = loc.Level + 1 };
-      tile = _gs.TileAt(loc);
+      tile = GameState.TileAt(loc);
     }
 
     return loc;
@@ -991,16 +1002,16 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
 
   void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
   {
-    var anim = new ThrownMissileAnimation(_gs, ammo.Glyph, pts, ammo);
-    _gs.UIRef().PlayAnimation(anim, _gs);
+    var anim = new ThrownMissileAnimation(GameState!, ammo.Glyph, pts, ammo);
+    GameState!.UIRef().PlayAnimation(anim, GameState);
 
     var landingPt = FinalLandingSpot(pts.Last());
-    _gs.CheckMovedEffects(ammo, _actor.Loc, landingPt);
-    _gs.ItemDropped(ammo, landingPt);
+    GameState.CheckMovedEffects(ammo, Actor!.Loc, landingPt);
+    GameState.ItemDropped(ammo, landingPt);
     ammo.Equiped = false;
-    _actor.CalcEquipmentModifiers();
+    Actor.CalcEquipmentModifiers();
 
-    var tile = _gs.TileAt(landingPt);
+    var tile = GameState.TileAt(landingPt);
     if (tile.Type == TileType.Chasm)
     {
       string txt = $"{ammo.FullName.DefArticle().Capitalize()} tumbles into the darkness.";
@@ -1012,26 +1023,26 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
-    var ammo = _actor.Inventory.Remove(_slot, 1).First();
+    var ammo = Actor!.Inventory.Remove(_slot, 1).First();
     if (ammo != null)
     {
       // Calculate where the projectile will actually stop
-      var trajectory = Util.Bresenham(_actor.Loc.Row, _actor.Loc.Col, _target.Row, _target.Col)
-                              .Select(p => new Loc(_actor.Loc.DungeonID, _actor.Loc.Level, p.Item1, p.Item2))
+      var trajectory = Util.Bresenham(Actor.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
+                              .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
                               .ToList();
       List<Loc> pts = [];
       for (int j = 0; j < trajectory.Count; j++)
       {
         var pt = trajectory[j];
-        var tile = _gs.TileAt(pt);
-        var occ = _gs.ObjDb.Occupant(pt);
+        var tile = GameState!.TileAt(pt);
+        var occ = GameState.ObjDb.Occupant(pt);
         if (j > 0 && occ != null)
         {
           pts.Add(pt);
 
           // I'm not handling what happens if a projectile hits a friendly or 
           // neutral NPCs
-          var attackResult = Battle.MissileAttack(_actor, occ, _gs, ammo);
+          var attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo);
           result.Messages.AddRange(attackResult.Messages);
           result.EnergyCost = attackResult.EnergyCost;
           if (attackResult.Complete)
@@ -1062,39 +1073,38 @@ class ThrowAction(UserInterface ui, Actor actor, GameState gs, char slot) : Acti
   }
 }
 
-class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Action
+class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
 {
   public char Choice { get; set; }
-  readonly UserInterface _ui = ui;
-  readonly Player _player = player;
-  readonly GameState _gs = gs;
-
+  
   public override ActionResult Execute()
   {
-    _ui.CloseMenu();
+    var ui = GameState!.UIRef();
+    ui.CloseMenu();
+    var player = Actor as Player;
 
-    var (item, _) = _player.Inventory.ItemAt(Choice);
+    var (item, _) = player!.Inventory.ItemAt(Choice);
     if (item is null)
     {
-      var msg = new Message("That doesn't make sense", _player.Loc);
+      var msg = new Message("That doesn't make sense", player.Loc);
       var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
       result.Messages.Add(msg);
       return result;
     }
     else if (item.Type == ItemType.Armour && item.Equiped)
     {
-      var msg = new Message("You're wearing that!", _player.Loc);
+      var msg = new Message("You're wearing that!", player.Loc);
       var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
       result.Messages.Add(msg);
       return result;
     }
 
-    var action = new ThrowAction(_ui, _player, _gs, Choice);
-    var range = 7 + _player.Stats[Attribute.Strength].Curr;
+    var action = new ThrowAction(GameState, player, Choice);
+    var range = 7 + player.Stats[Attribute.Strength].Curr;
     if (range < 2)
       range = 2;
-    var acc = new AimAccumulator(_ui, _gs, _player.Loc, range);
-    _player.ReplacePendingAction(action, acc);
+    var acc = new AimAccumulator(ui, GameState, player.Loc, range);
+    player.ReplacePendingAction(action, acc);
 
     return new ActionResult() { Complete = false, EnergyCost = 0.0 };
   }
@@ -1106,29 +1116,27 @@ class ThrowSelectionAction(UserInterface ui, Player player, GameState gs) : Acti
   }
 }
 
-class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
+class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
-  readonly UserInterface _ui = ui;
-  readonly Actor _actor = actor;
-  readonly GameState _gs = gs;
-
+  
   public override ActionResult Execute()
   {
-    _ui.CloseMenu();
+    var ui = GameState!.UIRef();
+    ui.CloseMenu();
 
     if (Choice == '$')
     {
-      var inventory = _actor.Inventory;
+      var inventory = Actor!.Inventory;
       if (inventory.Zorkmids == 0)
       {
-        var msg = MsgFactory.Phrase("You have no money!", _gs.Player.Loc);
+        var msg = MsgFactory.Phrase("You have no money!", GameState.Player.Loc);
         return new ActionResult() { Complete = false, Messages = [msg] };
       }
-      var dropMoney = new DropZorkmidsAction(_ui, _actor, _gs);
-      _ui.Popup("How much?");
-      var acc = new NumericAccumulator(_ui, "How much?");
-      if (_actor is Player player)
+      var dropMoney = new DropZorkmidsAction(GameState, Actor);
+      ui.Popup("How much?");
+      var acc = new NumericAccumulator(ui, "How much?");
+      if (Actor is Player player)
       {
         player.ReplacePendingAction(dropMoney, acc);
         return new ActionResult() { Complete = false, EnergyCost = 0.0 };
@@ -1138,19 +1146,19 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
         return new ActionResult() { Complete = true };
     }
 
-    var (item, itemCount) = _actor.Inventory.ItemAt(Choice);
+    var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
     if (item.Equiped && item.Type == ItemType.Armour)
     {
-      var msg = MsgFactory.Phrase("You cannot drop something you're wearing.", _gs.Player.Loc);
+      var msg = MsgFactory.Phrase("You cannot drop something you're wearing.", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
     else if (itemCount > 1)
     {
-      var dropStackAction = new DropStackAction(_ui, _actor, _gs, Choice);
+      var dropStackAction = new DropStackAction(GameState, Actor, Choice);
       var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
-      _ui.Popup(prompt);
-      var acc = new NumericAccumulator(_ui, prompt);
-      if (_actor is Player player)
+      ui.Popup(prompt);
+      var acc = new NumericAccumulator(ui, prompt);
+      if (Actor is Player player)
       {
         player.ReplacePendingAction(dropStackAction, acc);
         return new ActionResult() { Complete = false, EnergyCost = 0.0 };
@@ -1161,13 +1169,14 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
     else
     {
-      _actor.Inventory.Remove(Choice, 1);
-      _gs.ItemDropped(item, _actor.Loc);
+      Actor.Inventory.Remove(Choice, 1);
+      GameState.ItemDropped(item, Actor.Loc);
       item.Equiped = false;
-      _actor.CalcEquipmentModifiers();
+      Actor.CalcEquipmentModifiers();
 
-      var alert = MsgFactory.Phrase(_actor.ID, Verb.Drop, item.ID, 1, false, _actor.Loc, _gs);
-      _ui.AlertPlayer([alert], "", _gs);
+      var alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, Actor.Loc, GameState);
+      ui.AlertPlayer([alert], "", GameState);
+
       return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }
   }
@@ -1179,35 +1188,32 @@ class DropItemAction(UserInterface ui, Actor actor, GameState gs) : Action
   }
 }
 
-class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
+class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
-  UserInterface _ui = ui;
-  Actor _actor = actor;
-  GameState _gameState = gs;
-
+  
   public override ActionResult Execute()
   {
     ActionResult result;
-    var (item, _) = _actor.Inventory.ItemAt(Choice);
-    _ui.CloseMenu();
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+    GameState!.ClearMenu();
 
     if (!(item.Type == ItemType.Armour || item.Type == ItemType.Weapon || item.Type == ItemType.Tool))
     {
-      var msg = MsgFactory.Phrase("You cannot equip that!", _gameState.Player.Loc);
+      var msg = MsgFactory.Phrase("You cannot equip that!", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
 
-    var (equipResult, conflict) = ((Player)_actor).Inventory.ToggleEquipStatus(Choice);
+    var (equipResult, conflict) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
     Message alert;
     switch (equipResult)
     {
       case EquipingResult.Equiped:
-        alert = MsgFactory.Phrase(_actor.ID, Verb.Ready, item.ID, 1, false, _actor.Loc, _gameState);
+        alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, Actor.Loc, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
         break;
       case EquipingResult.Unequiped:
-        alert = MsgFactory.Phrase(_actor.ID, Verb.Unready, item.ID, 1, false, _actor.Loc, _gameState);
+        alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, Actor.Loc, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
         break;
       default:
@@ -1216,12 +1222,12 @@ class ToggleEquipedAction(UserInterface ui, Actor actor, GameState gs) : Action
           msg += "a helmet.";
         else if (conflict == ArmourParts.Shirt)
           msg += "some armour.";
-        alert = MsgFactory.Phrase(msg, _gameState.Player.Loc);
+        alert = MsgFactory.Phrase(msg, GameState.Player.Loc);
         result = new ActionResult() { Complete = true, Messages = [alert] };
         break;
     }
 
-    _actor.CalcEquipmentModifiers();
+    Actor.CalcEquipmentModifiers();
 
     return result;
   }
@@ -1250,14 +1256,19 @@ sealed class PassAction : Action
   }      
 }
 
-class CloseMenuAction(GameState gs, double energyCost = 0.0) : Action
+class CloseMenuAction : Action
 {
-  readonly GameState _gs = gs;
-  readonly double _energyCost = energyCost;
+  readonly double _energyCost;
+
+  public CloseMenuAction(GameState gs, double energyCost = 0.0)
+  {
+    GameState = gs;
+    _energyCost = energyCost;
+  }
 
   public override ActionResult Execute()
   {
-    _gs.ClearMenu();
+    GameState!.ClearMenu();
     return new ActionResult() { Complete = true, EnergyCost = _energyCost };
   }
 }

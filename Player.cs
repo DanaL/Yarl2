@@ -289,21 +289,21 @@ class Player : Actor, IPerformer
             ui.ClosePopup();
 
             if (ch == 'h')
-                return new MoveAction(this, Loc.Move(0, -1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(0, -1));
             else if (ch == 'j')
-                return new MoveAction(this, Loc.Move(1, 0), gameState);
+                return new MoveAction(gameState, this, Loc.Move(1, 0));
             else if (ch == 'k')
-                return new MoveAction(this, Loc.Move(-1, 0), gameState);
+                return new MoveAction(gameState, this, Loc.Move(-1, 0));
             else if (ch == 'l')
-                return new MoveAction(this, Loc.Move(0, 1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(0, 1));
             else if (ch == 'y')
-                return new MoveAction(this,Loc.Move(-1, -1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(-1, -1));
             else if (ch == 'u')
-                return new MoveAction(this, Loc.Move(-1, 1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(-1, 1));
             else if (ch == 'b')
-                return new MoveAction(this, Loc.Move(1, -1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(1, -1));
             else if (ch == 'n')
-                return new MoveAction(this, Loc.Move(1, 1), gameState);
+                return new MoveAction(gameState, this, Loc.Move(1, 1));
             else if (ch == 'E')
                 return new PortalAction(gameState);
             else if (ch == '>')
@@ -327,7 +327,7 @@ class Player : Actor, IPerformer
                 }
                 else if (itemStack.Count == 1) 
                 {
-                    var a = new PickupItemAction(ui, this, gameState);
+                    var a = new PickupItemAction(gameState, this);
                     // A bit kludgy but this sets up the Action as though
                     // the player had selected the first item in a list of one
                     var mr = new MenuAccumulatorResult() { Choice = 'a' };                
@@ -338,14 +338,14 @@ class Player : Actor, IPerformer
                 {
                     var opts = ShowPickupMenu(ui, itemStack);
                     _accumulator = new InventoryAccumulator(opts);
-                    _deferred = new PickupItemAction(ui, this, gameState);
+                    _deferred = new PickupItemAction(gameState, this);
                 }
             }
             else if (ch == 'a')
             {
                 ShowInventory(ui, "Use which item?", "");
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new UseItemAction(ui, this, gameState);
+                _deferred = new UseItemAction(gameState, this);
             }
             else if (ch == 'd')
             {
@@ -353,7 +353,7 @@ class Player : Actor, IPerformer
                 HashSet<char> slots = [.. Inventory.UsedSlots()];
                 slots.Add('$');
                 _accumulator = new InventoryAccumulator(slots);
-                _deferred = new DropItemAction(ui, this, gameState);
+                _deferred = new DropItemAction(gameState, this);
             }            
             else if (ch == 't')
             {
@@ -363,30 +363,30 @@ class Player : Actor, IPerformer
                 string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
                 ShowInventory(ui, "Throw what?", instructions);
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ThrowSelectionAction(ui, this, gameState);
+                _deferred = new ThrowSelectionAction(gameState, this);
             }
             else if (ch == 'e')
             {
                 _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ToggleEquipedAction(ui, this, gameState);
+                _deferred = new ToggleEquipedAction(gameState, this);
                 ShowInventory(ui, "Equip what?", "");
             }
             else if (ch == 'c')
             {
                 _accumulator = new DirectionAccumulator();
-                _deferred = new CloseDoorAction(this, gameState.Map, gameState);                
+                _deferred = new CloseDoorAction(gameState, this, gameState.Map);                
                 ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'C')
             {
                 _accumulator = new DirectionAccumulator();
-                _deferred = new ChatAction(this, gameState);
+                _deferred = new ChatAction(gameState, this);
                 ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'o')
             {
                 _accumulator = new DirectionAccumulator();
-                _deferred = new OpenDoorAction(this, gameState.Map, gameState);
+                _deferred = new OpenDoorAction(gameState, this, gameState.Map);
                 ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
             }
             else if (ch == 'Q')

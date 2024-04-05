@@ -36,7 +36,7 @@ class DumbMoveStrategy : IMoveStrategy
             if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs);
+                return new MoveAction(gs, actor, loc);
             }
         }
 
@@ -59,12 +59,12 @@ class DoorOpeningMoveStrategy : IMoveStrategy
 
             if (gs.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
             {
-                return new OpenDoorAction(actor, gs.CurrentMap, loc, gs);
+                return new OpenDoorAction(gs, actor, gs.CurrentMap, loc);
             }
             else if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs);
+                return new MoveAction(gs, actor, loc);
             }
         }
 
@@ -84,7 +84,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
             if (!gs.ObjDb.Occupied(loc))
             {
                 // the square is free so move there!
-                return new MoveAction(actor, loc, gs);
+                return new MoveAction(gs, actor, loc);
             }
         }
 
@@ -123,7 +123,7 @@ class MonsterBehaviour : IBehaviour
             var p = gs.Player;
             mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
             _lastUse[act.Name] = gs.Turn;
-            return new MeleeAttackAction(mob, p.Loc, gs);
+      return new MeleeAttackAction(gs, mob, p.Loc);
         }
         else if (act is MobMissileTrait missileAttack)
         {
@@ -134,21 +134,21 @@ class MonsterBehaviour : IBehaviour
             gs.UIRef().RegisterAnimation(arrowAnim);
 
             var arrow = ItemFactory.Get("arrow", gs.ObjDb);
-            return new MissileAttackAction(mob, gs.Player.Loc, gs, arrow);
+            return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow);
         }
         else if (act is SpellActionTrait spell)
         {
             _lastUse[spell.Name] = gs.Turn;
             if (spell.Name == "Blink")
-                return new BlinkAction(mob, gs);
+                return new BlinkAction(gs, mob);
             else if (spell.Name == "FogCloud")
-                return new FogCloudAction(mob, gs, gs.Player.Loc);
+                return new FogCloudAction(gs, mob, gs.Player.Loc);
             else if (spell.Name == "Entangle")
-                return new EntangleAction(mob, gs, gs.Player.Loc);
+                return new EntangleAction(gs, mob, gs.Player.Loc);
             else if (spell.Name == "Web")
                 return new WebAction(gs, gs.Player.Loc);
             else if (spell.Name == "Firebolt")
-                return new FireboltAction(mob, gs, gs.Player.Loc, ActionTrait.Trajectory(mob, gs.Player.Loc));
+                return new FireboltAction(gs, mob, gs.Player.Loc, ActionTrait.Trajectory(mob, gs.Player.Loc));
         }
         else if (act is SummonTrait summon)
         {
@@ -255,7 +255,7 @@ class VillagePupBehaviour : IBehaviour
         if (mvOpts.Count == 0)
             return new PassAction();
         else
-            return new MoveAction(pup, mvOpts[gameState.Rng.Next(mvOpts.Count)], gameState);
+            return new MoveAction(gameState, pup, mvOpts[gameState.Rng.Next(mvOpts.Count)]);
     }
 
     public (Action, InputAccumulator) Chat(Mob animal, GameState gs)
@@ -378,7 +378,7 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
     public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
     {
         var acc = new ShopMenuAccumulator(actor, Blurb(), gs);
-        var action = new ShopAction(actor, gs);
+        var action = new ShopAction(gs, actor);
 
         return (action, acc);
     }
@@ -427,7 +427,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
         sb.Append(" market!\"");
 
         var acc = new ShopMenuAccumulator(actor, sb.ToString(), gs);
-        var action = new ShopAction(actor, gs);
+        var action = new ShopAction(gs, actor);
 
         return (action, acc);
     }

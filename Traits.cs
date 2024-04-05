@@ -227,7 +227,7 @@ class CastAntidoteTrait : Trait, IUSeable
  
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
-        return new UseResult(true, "", new AntidoteAction(user, gs), null);
+        return new UseResult(true, "", new AntidoteAction(gs, user), null);
     }
 }
 
@@ -238,7 +238,7 @@ class CastBlinkTrait : Trait, IUSeable
 
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {
-        return new UseResult(true, "", new BlinkAction(user, gs), null);
+        return new UseResult(true, "", new BlinkAction(gs, user), null);
     }
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
@@ -250,7 +250,7 @@ class CastMinorHealTrait : Trait, IUSeable
     
     public UseResult Use(Actor user, GameState gs, int row, int col)
     {        
-        return new UseResult(true, "", new HealAction(user, gs, 4, 4), null);
+        return new UseResult(true, "", new HealAction(gs, user, 4, 4), null);
     }
 
     public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
