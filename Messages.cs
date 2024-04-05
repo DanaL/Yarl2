@@ -45,7 +45,8 @@ enum Verb
     Cast,
     Destroy,
     Tear,
-    Feel
+    Feel,
+    Summon
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -80,7 +81,8 @@ class MsgFactory
             Verb.Cast => fp ? "cast" : "casts",
             Verb.Destroy => fp ? "destroy" : "destroys",
             Verb.Tear => fp ? "tear" : "tears",
-            Verb.Feel => fp ? "feel" : "feels"
+            Verb.Feel => fp ? "feel" : "feels",
+            Verb.Summon => fp ? "summon" : "summons"
         };
     }
 

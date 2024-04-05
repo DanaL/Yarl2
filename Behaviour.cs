@@ -130,7 +130,7 @@ class MonsterBehaviour : IBehaviour
             mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
             _lastUse[act.Name] = gs.Turn;
 
-            var arrowAnim = new ArrowAnimation(gs, MobMissileTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
+            var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
             gs.UIRef().RegisterAnimation(arrowAnim);
 
             var arrow = ItemFactory.Get("arrow", gs.ObjDb);
@@ -150,7 +150,15 @@ class MonsterBehaviour : IBehaviour
             else if (spell.Name == "Firebolt")
                 return new FireboltAction(mob, gs, gs.Player.Loc, ActionTrait.Trajectory(mob, gs.Player.Loc));
         }
-        
+        else if (act is SummonTrait summon)
+        {
+            _lastUse[act.Name] = gs.Turn;
+            var locs = Util.Adj8Locs(mob.Loc)
+                           .Where(l => !gs.ObjDb.Occupied(l)).ToList();
+            var target = locs[gs.Rng.Next(locs.Count)];
+            return new SummonAction(mob, gs, target, summon.Summons);
+        }
+
         return new NullAction();
     }
 

@@ -649,6 +649,27 @@ class UseItemAction(UserInterface ui, Actor actor, GameState gs) : Action
     }
 }
 
+class SummonAction(Actor caster, GameState gs, Loc target, string summons) : Action
+{
+    readonly Actor _caster = caster;
+    readonly GameState _gs = gs;
+    readonly Loc _target = target;
+    readonly string _summons = summons;
+
+    public override ActionResult Execute()
+    {
+        var summoned = MonsterFactory.Get(_summons, _gs.Rng);
+        summoned.Loc = _target;
+        gs.ObjDb.AddNewActor(summoned, _target);
+        gs.AddPerformer(summoned);
+        
+        var mob = MonsterFactory.Get(_summons, _gs.Rng);
+        string txt = $"{_caster.FullName.Capitalize()} {MsgFactory.CalcVerb(_caster, Verb.Summon)} {mob.Name.IndefArticle()}!";
+        var msg = new Message(txt, _target);
+        return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+}
+
 class FogCloudAction(Actor caster, GameState gs, Loc target) : Action
 {
     readonly ulong _casterID = caster.ID;

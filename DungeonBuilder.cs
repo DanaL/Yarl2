@@ -21,12 +21,9 @@ abstract class DungeonBuilder
 // A class to build an arena type level for easy testing of monsters and items
 class ArenaBuilder : DungeonBuilder
 {
-    private int _dungeonID;
-    
     public Dungeon Generate(int id,  (int, int) entrance, GameObjectDB objDb, Random rng)
     {
         int _numOfLevels = 1;
-        _dungeonID = id;
         var dungeon = new Dungeon(id, "");
         var mapper = new DungeonMap(rng);
         Map[] levels = new Map[_numOfLevels];
@@ -183,7 +180,7 @@ class MainDungeonBuilder : DungeonBuilder
         }
     }
 
-    private void PlaceStatue(Map map, int height, int width, string statueDesc, Random rng)
+    void PlaceStatue(Map map, int height, int width, string statueDesc, Random rng)
     {
         List<(int, int)> candidateSqs = [];
         // Find all the candidate squares where the statue(s) might go
@@ -222,7 +219,7 @@ class MainDungeonBuilder : DungeonBuilder
         }
     }
 
-    private void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
+    void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
     {
         List<(int, int)> candidateSqs = [];
         // We're looking for any floor square that's adjacent to wall

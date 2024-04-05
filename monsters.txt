@@ -9,7 +9,7 @@ goblin boss       |g|green        |darkgreen |13|10|3| 1.0|13|10|4|Door|Melee#8#
 hobgoblin         |g|grey         |darkgrey  |14|15|3| 1.0|14|10|4|Door|Melee#8#1#Slashing|
 kobold            |k|brightred    |dullred   |12| 8|2| 1.0|10|10|3|Door|Melee#6#1#Slashing|PoorLoot
 kobold trickster  |k|lightblue    |blue      |14|20|3| 1.0|10|14|4|Door|Entangle#13#2#7,FogCloud#8,Blink#5,Melee#6#1#Slashing|
-kobold foreman    |k|yelloworange |dullred   |13|12|3| 1.0|12|10|4|Door|Melee#8#1#Slashing|
+kobold foreman    |k|yelloworange |dullred   |13|12|3| 1.0|12|10|4|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|
 vines             |:|green        |darkgreen |12|25|0| 1.0|10|10|0|Wall||Plant,Plural
 giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14|6|Dumb|Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
 goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14|4|Door|Firebolt#2#2#4,Melee#4#1#Slashing|

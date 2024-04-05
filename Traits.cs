@@ -74,6 +74,27 @@ abstract class ActionTrait : Trait
     }
 }
 
+class SummonTrait : ActionTrait
+{
+    public string Summons { get; set; } = "";
+
+    public override bool Available(Mob mob, GameState gs)
+    {
+        // I don't want them spamming the level with summons so they'll only
+        // perform a summons if they are near the player
+        if (Util.Distance(mob.Loc, gs.Player.Loc) > 3)
+            return false;
+
+        foreach (var adj in Util.Adj8Locs(mob.Loc))
+        {
+            if (!gs.ObjDb.Occupied(adj))
+                return true;
+        }
+
+        return false;
+    }
+}
+
 class SpellActionTrait : ActionTrait
 {
     public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
@@ -625,22 +646,20 @@ class TraitFactory
                 };
             case "Entangle":
             case "Web":
-                digits = text.Split('#');
                 return new SpellActionTrait()
                 {
                     Name = name,
-                    Cooldown = ulong.Parse(digits[1]),
-                    MinRange = int.Parse(digits[2]),
-                    MaxRange = int.Parse(digits[3])
+                    Cooldown = ulong.Parse(pieces[1]),
+                    MinRange = int.Parse(pieces[2]),
+                    MaxRange = int.Parse(pieces[3])
                 };
             case "Firebolt":
-                digits = text.Split('#');
                 return new FireboltActionTrait()
                 {
                     Name = name,
-                    Cooldown = ulong.Parse(digits[1]),
-                    MinRange = int.Parse(digits[2]),
-                    MaxRange = int.Parse(digits[3])
+                    Cooldown = ulong.Parse(pieces[1]),
+                    MinRange = int.Parse(pieces[2]),
+                    MaxRange = int.Parse(pieces[3])
                 };
             case "Flammable":
                 return new FlammableTrait();
@@ -744,6 +763,13 @@ class TraitFactory
                 };
             case "Sticky":
                 return new StickyTrait();
+            case "Summon":
+                return new SummonTrait()
+                {
+                    Name = name,
+                    Cooldown = ulong.Parse(pieces[1]),
+                    Summons = pieces[2]
+                };
             case "Teflon":
                 return new TeflonTrait();
             case "Torch":
