@@ -189,6 +189,11 @@ class CleaveTrait : Trait
     public override string AsText() => "Cleave";
 }
 
+class KnockBackTrait : Trait
+{
+    public override string AsText() => "KnockBack";
+}
+
 class RageTrait(Actor actor) : Trait
 {
     readonly Actor _actor = actor;
@@ -730,6 +735,8 @@ class TraitFactory
                 };
             case "Divider":
                 return new DividerTrait();
+            case "KnockBack":
+                return new KnockBackTrait();
             case "Opaque":
                 return new OpaqueTrait();
             case "Plant":

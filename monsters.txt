@@ -1,16 +1,17 @@
-skeleton          |z|white        |darkgrey  |12| 8|2| 1.0|12|10|2|Dumb|Melee#6#1#Slashing|
-zombie            |z|limegreen    |darkgreen | 8|10|2|0.75|12| 8|3|Dumb|Melee#6#1#Blunt|
-wolf              |d|lightgrey    |grey      |12| 8|2| 1.0|12|10|3|Dumb|Melee#6#1#Piercing|
-giant rat         |r|lightgrey    |grey      |11| 5|2| 1.0|10|10|2|Dumb|Melee#4#1#Piercing|
-dire bat          |v|lightbrown   |brown     |12| 5|2| 1.0|10|12|2|Flying|Melee#5#1#Piercing|Flying
-goblin            |g|lightbrown   |brown     |12| 8|2| 1.0|12|10|3|Door|Melee#6#1#Slashing|PoorLoot
-goblin archer     |g|blue         |darkblue  |12|10|2| 1.0|12|14|4|Door|Missile#6#1#2#7#Piercing,Melee#4#1#Slashing|
-goblin boss       |g|green        |darkgreen |13|10|3| 1.0|13|10|4|Door|Melee#8#1#Slashing|
-hobgoblin         |g|grey         |darkgrey  |14|15|3| 1.0|14|10|4|Door|Melee#8#1#Slashing|
-kobold            |k|brightred    |dullred   |12| 8|2| 1.0|10|10|3|Door|Melee#6#1#Slashing|PoorLoot
-kobold trickster  |k|lightblue    |blue      |14|20|3| 1.0|10|14|4|Door|Entangle#13#2#7,FogCloud#8,Blink#5,Melee#6#1#Slashing|
-kobold foreman    |k|yelloworange |dullred   |13|12|3| 1.0|12|10|4|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|
-vines             |:|green        |darkgreen |12|25|0| 1.0|10|10|0|Wall||Plant,Plural
-giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14|6|Dumb|Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
-goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14|4|Door|Firebolt#2#2#4,Melee#4#1#Slashing|
-jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10|4|Dumb|Melee#6#1#Acid|Divider
+skeleton          |z|white        |darkgrey  |12| 8|2| 1.0|12|10| 2|Dumb|Melee#6#1#Slashing|
+zombie            |z|limegreen    |darkgreen | 8|10|2|0.75|12| 8| 3|Dumb|Melee#6#1#Blunt|
+wolf              |d|lightgrey    |grey      |12| 8|2| 1.0|12|10| 3|Dumb|Melee#6#1#Piercing|
+giant rat         |r|lightgrey    |grey      |11| 5|2| 1.0|10|10| 2|Dumb|Melee#4#1#Piercing|
+dire bat          |v|lightbrown   |brown     |12| 5|2| 1.0|10|12| 2|Flying|Melee#5#1#Piercing|Flying
+goblin            |g|lightbrown   |brown     |12| 8|2| 1.0|12|10| 3|Door|Melee#6#1#Slashing|PoorLoot
+goblin archer     |g|blue         |darkblue  |12|10|2| 1.0|12|14| 4|Door|Missile#6#1#2#7#Piercing,Melee#4#1#Slashing|
+goblin boss       |g|green        |darkgreen |13|10|3| 1.0|13|10| 4|Door|Melee#8#1#Slashing|
+hobgoblin         |g|grey         |darkgrey  |14|15|3| 1.0|14|10| 4|Door|Melee#8#1#Slashing|
+kobold            |k|brightred    |dullred   |12| 8|2| 1.0|10|10| 3|Door|Melee#6#1#Slashing|PoorLoot
+kobold trickster  |k|lightblue    |blue      |14|20|3| 1.0|10|14| 4|Door|Entangle#13#2#7,FogCloud#8,Blink#5,Melee#6#1#Slashing|
+kobold foreman    |k|yelloworange |dullred   |13|12|3| 1.0|12|10| 4|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|
+vines             |:|green        |darkgreen |12|25|0| 1.0|10|10| 0|Wall||Plant,Plural
+giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14| 6|Dumb|Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
+goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14| 4|Door|Firebolt#2#2#4,Melee#4#1#Slashing|
+jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider
+ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6#2#Blunt|KnockBack

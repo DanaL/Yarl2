@@ -198,6 +198,38 @@ class Battle
         result.Messages.Add(msg);
     }
 
+    static Message ResolveKnockBack(Actor attacker, Actor target, GameState gs)
+    {
+        static bool CanPass(Loc loc, GameState gs)
+        {
+            var t = gs.TileAt(loc);
+            return t.Type != TileType.Unknown && !gs.ObjDb.Occupied(loc) && t.PassableByFlight();
+        }
+
+        int deltaRow = attacker.Loc.Row - target.Loc.Row;
+        int deltaCol = attacker.Loc.Col - target.Loc.Col; 
+
+        Loc first = target.Loc with { Row = target.Loc.Row - deltaRow, Col = target.Loc.Col - deltaCol };
+        Loc second = target.Loc with { Row = target.Loc.Row - 2 * deltaRow, Col = target.Loc.Col - 2 * deltaCol };
+
+        if (CanPass(first, gs) && CanPass(second, gs))
+        {            
+            gs.ActorMoved(target, target.Loc, second);
+            target.Loc = second;
+            var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";            
+            return new Message(txt, second);
+        }
+        else if (CanPass(first, gs))
+        {
+            gs.ActorMoved(target, target.Loc, first);
+            target.Loc = first;
+            var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stumble)} backward!";
+            return new Message(txt, first);
+        }
+        
+        return new Message("", Loc.Nowhere);
+    }
+
     public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
     {
         var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
@@ -218,6 +250,13 @@ class Battle
             if (!specialAttack && attacker.HasActiveTrait<ImpaleTrait>())
             {
                 specialAttack = ResolveImpale(attacker, target, roll, gs, result);
+            }
+
+            if (attacker.HasActiveTrait<KnockBackTrait>())
+            {
+                var msg = ResolveKnockBack(attacker, target, gs);
+                if (msg.Loc != Loc.Nowhere)
+                    result.Messages.Add(msg);
             }
         }
         else
