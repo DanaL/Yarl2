@@ -91,21 +91,27 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         Inventory = new EmptyInventory(ID);
     }
 
-    public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damage, int bonusDamage, GameState gs)
+    public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs)
     {
         if (Status == ActorStatus.Idle)
             Status = ActorStatus.Active;
 
-        // Really, in the future, we'll need to check each damage type to see
-        // if the Monster is resistant or immune to a particular type.
-        int total = damage.Select(d => d.Item1).Sum() + bonusDamage;
-        if (total < 0)
-            total = 0;
+        // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
+        int total = 0;
+        foreach (var dmg in damages)
+        {
+            int d = dmg.Item1;
+            if (dmg.Item2 == DamageType.Blunt && HasActiveTrait<ResistBluntTrait>())
+                d /= 2;
+            if (d > 0)
+                total += d;
+        }
+        total += bonusDamage;
         Stats[Attribute.HP].Curr -= total;
 
         if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)
         {
-            foreach (var dmg in damage)
+            foreach (var dmg in damages)
             {
                 switch (dmg.Item2)
                 {
@@ -167,7 +173,8 @@ done_dividing:
             var half = Stats[Attribute.HP].Curr - hp;
             Stats[Attribute.HP].Curr = hp;
             other.Stats[Attribute.HP].SetMax(half);
-
+            other.Status = ActorStatus.Active;
+            
             var msg = new Message($"{Name.DefArticle()} divides into two!!", Loc, false);
             gs.UIRef().AlertPlayer([msg], "", gs);
 

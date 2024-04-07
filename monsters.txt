@@ -13,5 +13,5 @@ kobold foreman    |k|yelloworange |dullred   |13|12|3| 1.0|12|10| 4|Door|Summon#
 vines             |:|green        |darkgreen |12|25|0| 1.0|10|10| 0|Wall||Plant,Plural
 giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14| 6|Dumb|Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
 goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14| 4|Door|Firebolt#2#2#4,Melee#4#1#Slashing|
-jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider
+jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider,ResistBlunt
 ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6#2#Blunt|KnockBack

@@ -142,6 +142,11 @@ class MobMissileTrait : ActionTrait
     }
 }
 
+class ResistBluntTrait : Trait
+{
+    public override string AsText() => "ResistBlunt";
+}
+
 class PoorLootTrait : Trait
 {
     public override string AsText() => "PoorLoot";
@@ -764,6 +769,8 @@ class TraitFactory
                 return new RageTrait((Actor)container);
             case "Readable":
                 return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
+            case "ResistBlunt":
+                return new ResistBluntTrait();
             case "ShieldOfTheFaithful":
                 return new ShieldOfTheFaithfulTrait()
                 {
