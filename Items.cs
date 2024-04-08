@@ -22,6 +22,7 @@ enum ItemType
     Document,
     Potion,
     Scroll,
+    Trinket,
     Environment // I'm implementing things like mist as 'items'
 }
 

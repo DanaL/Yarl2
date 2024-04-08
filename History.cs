@@ -28,10 +28,30 @@ enum VillainType
     Necromancer
 }
 
+enum FactCategory
+{
+    DeadAdventuer
+}
+
+class Fact { }
+
+class BelongedTo : Fact
+{
+    public ulong ItemID { get; set; }
+    public ulong OwnerID { get; set; }
+}
+
+class Relationship : Fact
+{
+    public ulong Person1 { get; set; }
+    public ulong Person2 { get; set; }
+    public string Desc { get; set; } = "";
+}
+
 // class to accumulate a list of facts about the world as historical
 // events are generated so that they can be reused.
 class WorldFacts
-{
+{    
     NameGenerator _nationNames;
     NameGenerator _peopleNames;
     Random _rng;
@@ -281,6 +301,7 @@ class RulerInfo
 
 class History 
 {
+    public List<Fact> Facts { get; set; } = [];
     WorldFacts _facts;
     RulerInfo _ruler;
     public VillainType Villain { get; set; }

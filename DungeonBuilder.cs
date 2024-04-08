@@ -321,6 +321,58 @@ class MainDungeonBuilder : DungeonBuilder
                 PlaceDocument(levels[0], 0, height, width, decoration.Desc, objDb, rng);
             }
         }
+
+        AddFallenAdventurer(objDb, levels[1], 1, history, rng);
+    }
+
+    void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, History history, Random rng)
+    {
+        var sq = level.RandomTile(TileType.DungeonFloor, rng);
+        var loc = new Loc(_dungeonID, levelNum, sq.Item1, sq.Item2);
+
+        for (int j = 0; j < 3; j++)
+        {
+            var torch = ItemFactory.Get("torch", objDb);
+            objDb.SetToLoc(loc, torch);
+        }
+        if (rng.NextDouble() < 0.25)
+        {
+            var poh = ItemFactory.Get("potion of healing", objDb);
+            objDb.SetToLoc(loc, poh);
+        }
+        if (rng.NextDouble() < 0.25)
+        {
+            var antidote = ItemFactory.Get("antidote", objDb);
+            objDb.SetToLoc(loc, antidote);
+        }
+        if (rng.NextDouble() < 0.25)
+        {
+            var blink = ItemFactory.Get("scroll of blink", objDb);
+            objDb.SetToLoc(loc, blink);
+        }
+
+        // add trinket
+        var trinket = new Item() { Name = "tin locket", Type = ItemType.Trinket, Stackable = false, Value = 1,
+                                        Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK) };
+        objDb.Add(trinket);
+        objDb.SetToLoc(loc, trinket);
+
+        string text = "Scratched into the stone: if only I'd managed to level up.";
+        var tile = new Landmark(text);
+        level.SetTile(sq, tile);
+
+        // Generate an actor for the fallen adventurer so I can store their 
+        // name and such in the objDb. Maybe sometimes they'll be an actual
+        // ghost?
+        var ng = new NameGenerator(rng, "names.txt");
+        var adventurer = new Mob()
+        {
+            Name = ng.GenerateName(rng.Next(5, 12))
+        };
+        objDb.Add(adventurer);
+
+        history.Facts.Add(new BelongedTo() { ItemID = trinket.ID, OwnerID = adventurer.ID });
+        Console.WriteLine($"The adventurer is named {adventurer.FullName}");
     }
 
     // I think this seed generated isolated rooms :O

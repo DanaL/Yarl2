@@ -214,10 +214,11 @@ class PreGameHandler(UserInterface ui)
         history.CalcDungeonHistory();
         history.GenerateVillain();
 
-        //var dBuilder = new MainDungeonBuilder();
-        //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-        var dBuilder = new ArenaBuilder();
-        var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+        var dBuilder = new MainDungeonBuilder();
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+        PopulateDungeon(rng, objDb, history, mainDungeon);
+        //var dBuilder = new ArenaBuilder();
+        //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
 
         campaign.AddDungeon(mainDungeon);
 
@@ -229,8 +230,8 @@ class PreGameHandler(UserInterface ui)
 
         campaign.Town = town;
 
-        //PopulateDungeon(rng, objDb, history, mainDungeon);
-        PopulateArena(rng, objDb, mainDungeon);
+        
+        //PopulateArena(rng, objDb, mainDungeon);
 
         var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
