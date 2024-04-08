@@ -28,17 +28,18 @@ enum VillainType
     Necromancer
 }
 
-enum FactCategory
-{
-    DeadAdventuer
-}
-
 class Fact { }
 
 class BelongedTo : Fact
 {
-    public ulong ItemID { get; set; }
-    public ulong OwnerID { get; set; }
+  public ulong ItemID { get; set; }
+  public ulong OwnerID { get; set; }
+}
+
+class FallenAdventurer : Fact
+{
+  public ulong ID { get; set; }
+  public Loc Loc { get; set; }
 }
 
 class Relationship : Fact

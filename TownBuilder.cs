@@ -31,7 +31,7 @@ class Town
     public HashSet<Loc> Market { get; set; } = [];
     public HashSet<Loc> Smithy { get; set; } = [];
     public List<HashSet<Loc>> Homes { get; set; } = [];
-    public List<int> TakenHomes { get; set; } = [];
+    public HashSet<int> TakenHomes { get; set; } = [];
     public HashSet<Loc> TownSquare { get; set; } = [];
     public int Row { get; set; }
     public int Col { get; set; }

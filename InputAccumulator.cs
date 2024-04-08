@@ -177,6 +177,43 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
     }
 }
 
+class DialogueAccumulator : InputAccumulator
+{
+  readonly Mob _interlocutor;
+  readonly GameState _gs;
+
+  public DialogueAccumulator(Mob interlocutor, GameState gs)
+  {
+    _interlocutor = interlocutor;
+    _gs = gs;
+
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else
+    {
+      WritePopup();
+    }
+  }
+
+  void WritePopup()
+  {
+    var sb = new StringBuilder(_interlocutor.Appearance.IndefArticle().Capitalize());
+    sb.Append(".\n\n");
+    //sb.Append(_blurb);
+    //sb.Append("\n\n");
+
+    _gs.WritePopup(sb.ToString(), _interlocutor.FullName);
+  }
+}
+
 class ShopMenuItem(char slot, Item item, int stockCount)
 {
     public char Slot { get; set; } = slot;

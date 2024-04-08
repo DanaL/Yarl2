@@ -120,7 +120,7 @@ class TownSave
     [JsonInclude]
     public List<HashSet<Loc>> Homes { get; set; } = [];
     [JsonInclude]
-    public List<int> TakenHomes { get; set; } = [];
+    public HashSet<int> TakenHomes { get; set; } = [];
     [JsonInclude]
     public HashSet<Loc> TownSquare { get; set; } = [];
     public int Row { get; set; }

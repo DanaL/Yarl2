@@ -371,6 +371,7 @@ class MainDungeonBuilder : DungeonBuilder
         };
         objDb.Add(adventurer);
 
+        history.Facts.Add(new FallenAdventurer() {  ID = adventurer.ID, Loc = loc });
         history.Facts.Add(new BelongedTo() { ItemID = trinket.ID, OwnerID = adventurer.ID });
         Console.WriteLine($"The adventurer is named {adventurer.FullName}");
     }
