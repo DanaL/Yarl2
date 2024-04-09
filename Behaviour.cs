@@ -99,6 +99,12 @@ interface IBehaviour
   (Action, InputAccumulator?) Chat(Mob actor, GameState gameState);
 }
 
+interface IDialoguer
+{
+  (string, List<(string, char)>) CurrentText(Mob mob, GameState gs);
+  void SelectOption(Mob actor, char opt);
+}
+
 class MonsterBehaviour : IBehaviour
 {
   Dictionary<string, ulong> _lastUse = [];
@@ -431,7 +437,7 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
   }
 }
 
-class WidowerBehaviour: IBehaviour
+class WidowerBehaviour: IBehaviour, IDialoguer
 {
   DateTime _lastBark = new(1900, 1, 1);
 
@@ -490,6 +496,47 @@ class WidowerBehaviour: IBehaviour
     var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
+  }
+
+  static Actor? Partner(Mob mob, GameState gs)
+  {
+    var facts = gs.Campaign.History.Facts;
+    foreach (var fact in facts)
+    {
+      if (fact is Relationship rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
+      {
+        ulong otherID = rel.Person1 == mob.ID ? rel.Person2 : rel.Person1;
+        return (Actor)gs.ObjDb.GetObj(otherID);
+      }
+    }
+
+    return null;
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    {
+      var partner = Partner(mob, gs);
+      string name = partner.Name.Capitalize();
+      var sb = new StringBuilder();
+      sb.Append("Oh? Are you an adventurer too? ");
+      sb.Append(name);
+      sb.Append(" also thought they could prevail in the ruins.");
+
+      List<(string, char)> options = [];
+      options.Add(($"Who is {name}?", 'a'));
+      options.Add(("Where are these ruins?", 'b'));
+
+      return (sb.ToString(), options);
+    }
+
+    return ("", []);
+  }
+
+  public void SelectOption(Mob actor, char opt)
+  {
+    
   }
 }
 

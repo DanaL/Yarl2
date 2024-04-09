@@ -205,10 +205,19 @@ class DialogueAccumulator : InputAccumulator
 
   void WritePopup()
   {
+    var dialgoue = _interlocutor.Behaviour as IDialoguer;
+
     var sb = new StringBuilder(_interlocutor.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
-    //sb.Append(_blurb);
-    //sb.Append("\n\n");
+
+    var (blurb, opts) = dialgoue.CurrentText(_interlocutor, _gs);
+    sb.Append(blurb);
+    sb.Append("\n\n");
+    foreach (var opt in opts)
+    {
+      sb.Append($"{opt.Item2}) {opt.Item1}\n");
+    }
+    sb.Append('\n');
 
     _gs.WritePopup(sb.ToString(), _interlocutor.FullName);
   }

@@ -37,7 +37,6 @@ enum Attribute
   MissileDmgBonus,
   Radius,
   HomeID,
-  MetPlayer,
   DialogueState
 }
 
