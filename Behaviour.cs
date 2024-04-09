@@ -378,7 +378,7 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
   public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
   {
     var acc = new ShopMenuAccumulator(actor, Blurb(), gs);
-    var action = new ShopAction(gs, actor);
+    var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
   }
@@ -425,15 +425,14 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
     sb.Append(" market!\"");
 
     var acc = new ShopMenuAccumulator(actor, sb.ToString(), gs);
-    var action = new ShopAction(gs, actor);
+    var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
   }
 }
 
-class WidowerBehaviour(int homeID) : IBehaviour
+class WidowerBehaviour: IBehaviour
 {
-  int _homeID = homeID;
   DateTime _lastBark = new(1900, 1, 1);
 
   static string PickBark(Random rng)
@@ -462,7 +461,8 @@ class WidowerBehaviour(int homeID) : IBehaviour
     }
 
     // Move to a random adj sq in their home
-    var sqs = gs.Town.Homes[_homeID];
+    int homeID = actor.Stats[Attribute.HomeID].Curr;
+    var sqs = gs.Town.Homes[homeID];
     List<Loc> adj = [];
     foreach (var sq in Util.Adj8Locs(actor.Loc))
     {
@@ -487,7 +487,7 @@ class WidowerBehaviour(int homeID) : IBehaviour
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
   {
     var acc = new DialogueAccumulator(actor, gameState);
-    var action = new CloseMenuAction(gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
   }

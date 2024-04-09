@@ -209,7 +209,7 @@ class Village
     }
   }
 
-  static Actor GenerateWidower(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FallenAdventurer fact, History history, Random rng)
+  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FallenAdventurer fact, History history, Random rng)
   {
     var (lit, unlit) = VillagerColour(rng);
     var widower = new Mob()
@@ -235,13 +235,14 @@ class Village
     }
     while (true);
 
+    widower.Stats.Add(Attribute.HomeID, new Stat(homeID));
     widower.MoveStrategy = new WallMoveStrategy();
-    widower.SetBehaviour(new WidowerBehaviour(homeID));
+    widower.SetBehaviour(new WidowerBehaviour());
 
     return widower;
   }
 
-  static Actor GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
+  static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
   {
     int roll = rng.Next(4);
     var (colourDesc, colour) = roll switch
@@ -304,18 +305,27 @@ class Village
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
 
+    FallenAdventurer? fallen = null;
     foreach (var fact in history.Facts)
     {
       if (fact is FallenAdventurer fa)
       {
-        // Add a villager who knew the fallen adventurer. (Eventually this will
-        // be a random chance of happening since we'll have several fallen 
-        // adventurers over many levels and not ALL of them will have had 
-        // relationships with villagers)
-        var widower = GenerateWidower(map, town, ng, objDb, fa, history, rng);
-        objDb.Add(widower);
-        objDb.AddToLoc(widower.Loc, widower);
+        fallen = fa;
       }
     }
+
+    if (fallen is not null)
+    {
+      // Add a villager who knew the fallen adventurer. (Eventually this will
+      // be a random chance of happening since we'll have several fallen 
+      // adventurers over many levels and not ALL of them will have had 
+      // relationships with villagers)
+      var widower = GenerateWidower(map, town, ng, objDb, fallen, history, rng);
+      objDb.Add(widower);
+      objDb.AddToLoc(widower.Loc, widower);
+
+      history.Facts.Add(new Relationship() { Person1 = widower.ID, Person2 = fallen.ID, Desc = "romantic" });
+    }
+    
   }
 }

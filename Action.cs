@@ -177,13 +177,13 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
   }
 }
 
-class ShopAction : Action
+class ShoppingCompletedAction : Action
 {
   readonly Mob _shopkeeper;
   int _invoice;
   List<(char, int)> _selections = [];
 
-  public ShopAction(GameState gs, Mob shopkeeper)
+  public ShoppingCompletedAction(GameState gs, Mob shopkeeper)
   {
     GameState = gs;
     _shopkeeper = shopkeeper;

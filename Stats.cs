@@ -15,65 +15,68 @@
 
 namespace Yarl2;
 
-enum Attribute 
+enum Attribute
 {
-    HP,
-    HitDie,
-    Strength,
-    Dexterity,
-    Constitution,
-    Piety, // What I renamed D&D's Wisdom
-    MeleeAttackBonus,
-    MissileAttackBonus,
-    MonsterAttackBonus, // not going to bother having separate melee/missile atk bonuses for monsters
-    Level,
-    XP,
-    Depth,
-    AC, // used for monsters who have a simple AC
-    DmgDie,
-    DmgRolls,
-    XPValue,
-    MeleeDmgBonus,
-    MissileDmgBonus,
-    Radius,    
+  HP,
+  HitDie,
+  Strength,
+  Dexterity,
+  Constitution,
+  Piety, // What I renamed D&D's Wisdom
+  MeleeAttackBonus,
+  MissileAttackBonus,
+  MonsterAttackBonus, // not going to bother having separate melee/missile atk bonuses for monsters
+  Level,
+  XP,
+  Depth,
+  AC, // used for monsters who have a simple AC
+  DmgDie,
+  DmgRolls,
+  XPValue,
+  MeleeDmgBonus,
+  MissileDmgBonus,
+  Radius,
+  HomeID,
+  MetPlayer,
+  DialogueState
 }
 
 class Stat
 {
-    // Empty constructor and public setter methods was just simpler
-    // for serialization
-    public int Max { get; set; }
-    public int Curr { get; set; }
+  // Empty constructor and public setter methods was just simpler
+  // for serialization
+  public int Max { get; set; }
+  public int Curr { get; set; }
 
-    public Stat() {}
+  public Stat() { }
 
-    public Stat(int maxValue)
-    {
-        Max = maxValue;
-        Curr = maxValue;
-    }
-    
-    public void SetMax(int newMax) 
-    {
-        Max = newMax;
-        Curr = newMax;
-    } 
+  public Stat(int maxValue)
+  {
+    Max = maxValue;
+    Curr = maxValue;
+  }
 
-    public int ChangeMax(int delta)
-    {
-        Max += delta;
-        return Max;
-    }
+  public void SetMax(int newMax)
+  {
+    Max = newMax;
+    Curr = newMax;
+  }
 
-    public int Change(int delta)
-    {
-        Curr += delta;
-        if (Curr > Max)
-            Curr = Max;
+  public int ChangeMax(int delta)
+  {
+    Max += delta;
+    return Max;
+  }
 
-        return Curr;
-    }
+  public int Change(int delta)
+  {
+    Curr += delta;
+    if (Curr > Max)
+      Curr = Max;
 
-    public void Reset() => Curr = Max;
+    return Curr;
+  }
+
+  public void Reset() => Curr = Max;
 }
 
