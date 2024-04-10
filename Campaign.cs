@@ -289,6 +289,7 @@ class PreGameHandler(UserInterface ui)
   {
     int maxDepth = 3;
     var decks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
+    history.Facts.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
 
     // Temp: generate monster decks and populate the first two levels of the dungeon.
     // I'll actually want to save the decks for reuse as random monsters are added

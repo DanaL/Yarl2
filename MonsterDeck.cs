@@ -42,7 +42,7 @@ class MonsterDeck
 
 class DeckBulder
 {
-    static string _earlyMainOccupant = "";
+    public static string EarlyMainOccupant { get; set; } = "";
 
     // The upper levels won't really follow theme, but we will choose a preference 
     // for goblin dominated or kobold dominated
@@ -51,12 +51,12 @@ class DeckBulder
     static MonsterDeck EarlyLevelDeck(int level, Random rng)
     {
         MonsterDeck deck = new();
-        if (_earlyMainOccupant == "")
+        if (EarlyMainOccupant == "")
         {
-            _earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
+            EarlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         }
 
-        if (_earlyMainOccupant == "kobold")
+        if (EarlyMainOccupant == "kobold")
         {
             for (int j = 0; j < 8; j++)
                 deck.Monsters.Add("kobold");
@@ -83,12 +83,12 @@ class DeckBulder
 
         if (level > 1)
         {
-            if (_earlyMainOccupant == "kobold")
+            if (EarlyMainOccupant == "kobold")
             {
                 deck.Monsters.Add("kobold foreman");
                 deck.Monsters.Add("kobold foreman");
             }
-            else if (_earlyMainOccupant == "goblin")
+            else if (EarlyMainOccupant == "goblin")
             {
                 deck.Monsters.Add("hobgoblin");
                 deck.Monsters.Add("hobgoblin");
@@ -98,11 +98,11 @@ class DeckBulder
 
         if (level > 2)
         {
-            if (_earlyMainOccupant == "kobold")
+            if (EarlyMainOccupant == "kobold")
             {
                 deck.Monsters.Add("kobold trickster");                
             }
-            else if (_earlyMainOccupant == "goblin")
+            else if (EarlyMainOccupant == "goblin")
             {
                 deck.Monsters.Add("goblin boss");
                 deck.Monsters.Add("hobgoblin");

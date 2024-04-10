@@ -209,7 +209,7 @@ class Village
     }
   }
 
-  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FallenAdventurer fact, History history, Random rng)
+  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FallenAdventurerFact fact, History history, Random rng)
   {
     var (lit, unlit) = VillagerColour(rng);
     var widower = new Mob()
@@ -305,10 +305,10 @@ class Village
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
 
-    FallenAdventurer? fallen = null;
+    FallenAdventurerFact? fallen = null;
     foreach (var fact in history.Facts)
     {
-      if (fact is FallenAdventurer fa)
+      if (fact is FallenAdventurerFact fa)
       {
         fallen = fa;
       }
@@ -324,7 +324,7 @@ class Village
       objDb.Add(widower);
       objDb.AddToLoc(widower.Loc, widower);
 
-      history.Facts.Add(new Relationship() { Person1 = widower.ID, Person2 = fallen.ID, Desc = "romantic" });
+      history.Facts.Add(new RelationshipFact() { Person1 = widower.ID, Person2 = fallen.ID, Desc = "romantic" });
     }
     
   }

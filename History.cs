@@ -30,7 +30,13 @@ enum VillainType
 
 class Fact { }
 
-class BelongedTo : Fact
+class SimpleFact : Fact
+{
+  public string Name { get; set; } = "";
+  public string Value { get; set; } = "";
+}
+
+class BelongedToFact : Fact
 {
   public ulong ItemID { get; set; }
   public ulong OwnerID { get; set; }
@@ -42,13 +48,13 @@ class LocationFact : Fact
   public string Desc { get; set; } = "";
 }
 
-class FallenAdventurer : Fact
+class FallenAdventurerFact : Fact
 {
   public ulong ID { get; set; }
   public Loc Loc { get; set; }
 }
 
-class Relationship : Fact
+class RelationshipFact : Fact
 {
     public ulong Person1 { get; set; }
     public ulong Person2 { get; set; }

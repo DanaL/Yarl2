@@ -503,7 +503,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     var facts = gs.Campaign.History.Facts;
     foreach (var fact in facts)
     {
-      if (fact is Relationship rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
+      if (fact is RelationshipFact rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
       {
         ulong otherID = rel.Person1 == mob.ID ? rel.Person2 : rel.Person1;
         return (Actor)gs.ObjDb.GetObj(otherID);
