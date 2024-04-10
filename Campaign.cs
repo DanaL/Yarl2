@@ -228,8 +228,13 @@ class PreGameHandler(UserInterface ui)
       Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
     };
     wildernessMap.SetTile(entrance, portal);
+    history.Facts.Add(new LocationFact() 
+    {
+      Loc = new Loc(0, 0, entrance.Item1, entrance.Item2),
+      Desc = "Dungeon Entrance"
+    });
 
-    Village.Populate(wildernessMap, town, objDb, history, rng);
+;    Village.Populate(wildernessMap, town, objDb, history, rng);
     campaign.Town = town;
 
 

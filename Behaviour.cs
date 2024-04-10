@@ -515,14 +515,15 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
+    var partner = Partner(mob, gs);
+    string name = partner.Name.Capitalize();
+
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
-    {
-      var partner = Partner(mob, gs);
-      string name = partner.Name.Capitalize();
+    {      
       var sb = new StringBuilder();
-      sb.Append("Oh? Are you an adventurer too? ");
+      sb.Append("Oh? Are you also an adventurer? ");
       sb.Append(name);
-      sb.Append(" also thought they could prevail in the ruins.");
+      sb.Append(" believed too they could prevail in the ruins.");
 
       List<(string, char)> options = [];
       options.Add(($"Who is {name}?", 'a'));
@@ -530,13 +531,42 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
       return (sb.ToString(), options);
     }
+    else if (state.Curr == 1)
+    {
+      Loc dungoenLoc = Loc.Nowhere;
+      foreach (LocationFact fact in gs.Campaign.History.Facts.OfType<LocationFact>())
+      {
+        if (fact.Desc == "Dungeon Entrance")
+          dungoenLoc = fact.Loc;
+      }
+      // Player asked where the ruins were
+      var sb = new StringBuilder();
+      sb.Append(name);
+      sb.Append(" strode off to the ");      
+      sb.Append(Util.RelativeDir(mob.Loc, dungoenLoc));
+      sb.Append(". Oh how resolute, heroic, they looked! The sun glinted on their spear tip,");
+      sb.Append(" the wind tousled their hair. I hope they return to me soon.");
 
+      return (sb.ToString(), []);
+    }
     return ("", []);
   }
 
-  public void SelectOption(Mob actor, char opt)
+  public void SelectOption(Mob mob, char opt)
   {
-    
+    int state;
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var attr))
+    {
+      mob.Stats.Add(Attribute.DialogueState, new Stat(0));
+      state = 0;
+    }
+    else
+    {
+      state = attr.Curr;
+    }
+
+    if (state == 0 && opt == 'b')
+      mob.Stats[Attribute.DialogueState].SetMax(1);
   }
 }
 

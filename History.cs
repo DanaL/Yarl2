@@ -36,6 +36,12 @@ class BelongedTo : Fact
   public ulong OwnerID { get; set; }
 }
 
+class LocationFact : Fact
+{
+  public Loc Loc { get; set; }
+  public string Desc { get; set; } = "";
+}
+
 class FallenAdventurer : Fact
 {
   public ulong ID { get; set; }

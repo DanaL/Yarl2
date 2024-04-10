@@ -179,6 +179,38 @@ partial class Util
 
     public static int Distance(Loc a, Loc b) => Distance(a.Row, a.Col, b.Row, b.Col);
 
+    public static double AngleBetweenLocs(Loc a, Loc b)
+    {
+      double dX = b.Col - a.Col;
+      double dY = -(b.Row - a.Row);
+
+      return Math.Atan2(dY, dX);
+    }
+
+    public static string RelativeDir(Loc a, Loc b)
+    {
+      double angle = AngleBetweenLocs(a, b);
+
+      if (angle >= 0 && angle < 0.25)
+        return "east";
+      else if (angle >= 0.25 && angle < 1.31)
+        return "northeast";
+      else if (angle >= 1.31 && angle < 1.82)
+        return "north";
+      else if (angle >= 1.82 && angle < 2.89)
+        return "northwest";
+      else if (angle >= 2.89 || angle < -2.89)
+        return "west";
+      else if (angle < 0.0 && angle > -0.25)
+        return "east";
+      else if (angle <= -0.25 && angle > -1.31)
+        return "southeast";
+      else if (angle <= -1.31 && angle > -1.82)
+        return "south";
+      else 
+        return "southeast";
+    }
+
     public static List<(int, int)> Bresenham(int r0, int c0, int r1, int c1)
     {
         List<(int, int)> pts = [];

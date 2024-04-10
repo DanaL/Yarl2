@@ -4,21 +4,6 @@ using Yarl2;
 
 var options = Options.LoadOptions("options.json");
 
-// var dm = Map.TestMap();
-// dm.Dump();
-
-// var dj = new DjikstraMap(dm, 0, 20, 0, 20);
-// Dictionary<TileType, int> passable = new() { { TileType.DungeonFloor, 1 }, { TileType.Door, 2 } };
-// dj.Generate(passable, (18, 1));
-
-// var path = dj.ShortestPath(16, 5, 0, 0);
-// return;
-
-// var dm = new DungeonMap(rng);
-// var map = dm.DrawLevel(70, 30);
-// map.Dump();
-//return;
-
 UserInterface display;
 if (options.Display == "Bearlib")
     display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options);
