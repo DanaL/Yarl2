@@ -37,7 +37,8 @@ enum Attribute
   MissileDmgBonus,
   Radius,
   HomeID,
-  DialogueState
+  DialogueState,
+  Markup
 }
 
 class Stat

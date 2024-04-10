@@ -312,9 +312,8 @@ class PriestBehaviour : IBehaviour
   }
 }
 
-class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
+class SmithBehaviour : IBehaviour
 {
-  public double Markup { get; set; } = markup;
   DateTime _lastBark = new(1900, 1, 1);
 
   static string PickBark(Mob smith, Random rng)
@@ -368,11 +367,12 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
     }
   }
 
-  string Blurb()
+  string Blurb(Mob mob)
   {
+    double markup = mob.Stats[Attribute.Markup].Curr / 100.0;
     var sb = new StringBuilder();
     sb.Append('"');
-    if (Markup > 1.75)
+    if (markup > 1.75)
       sb.Append("If you're looking for arms or armour, I'm the only game in town!");
     else
       sb.Append("You'll want some weapons or better armour before venturing futher!");
@@ -383,16 +383,15 @@ class SmithBehaviour(double markup) : IBehaviour, IShopkeeper
 
   public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
   {
-    var acc = new ShopMenuAccumulator(actor, Blurb(), gs);
+    var acc = new ShopMenuAccumulator(actor, Blurb(actor), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
   }
 }
 
-class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
+class GrocerBehaviour : IBehaviour
 {
-  public double Markup { get; set; } = markup;
   DateTime _lastBark = new(1900, 1, 1);
 
   static string PickBark(Random rng)
@@ -434,6 +433,68 @@ class GrocerBehaviour(double markup) : IBehaviour, IShopkeeper
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
+  }
+}
+
+// A simple villager who can tell the player a few things about the dungeon
+// and area around the town.
+class Villager1Behaviour : IBehaviour, IDialoguer
+{
+  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  {
+    return new PassAction();
+  }
+
+  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  {
+    var acc = new DialogueAccumulator(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    var sb = new StringBuilder();
+
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    {
+      sb.Append("\"Another adventurer come to town huh? You aren't the first, and you probably won't be the last...\"");
+      mob.Stats[Attribute.DialogueState] = new Stat(1);
+    }
+    else
+    {
+      var roll = gs.Rng.Next(2);
+
+      if (roll == 0)
+      {
+        sb.Append("\"How are your adventurers going?\"");
+      }
+      else
+      {
+        string monsters = "";
+        foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
+        {
+          if (fact.Name == "EarlyDenizen")
+          {
+            monsters = fact.Value;
+            break;
+          }
+        }
+
+        sb.Append("There was another raid by ");
+        sb.Append(monsters.Pluralize());
+        sb.Append(" a few days ago. Someone needs to do something!");
+      }
+    }
+    //List<(string, char)> options = [];
+    
+    return (sb.ToString(), []);
+  }
+
+  public void SelectOption(Mob actor, char opt)
+  {
+    
   }
 }
 
@@ -500,8 +561,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
   static Actor? Partner(Mob mob, GameState gs)
   {
-    var facts = gs.Campaign.History.Facts;
-    foreach (var fact in facts)
+    foreach (var fact in gs.Facts)
     {
       if (fact is RelationshipFact rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
       {
@@ -535,7 +595,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     {
       // Player asked where the ruins were
       Loc dungoenLoc = Loc.Nowhere;
-      foreach (LocationFact fact in gs.Campaign.History.Facts.OfType<LocationFact>())
+      foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
       {
         if (fact.Desc == "Dungeon Entrance")
           dungoenLoc = fact.Loc;
@@ -619,8 +679,3 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 //         return new PassAction();
 //     }
 // }
-
-interface IShopkeeper
-{
-  double Markup { get; set; }
-}

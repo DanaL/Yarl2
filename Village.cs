@@ -137,7 +137,8 @@ class Village
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
     grocer.Loc = sqs[rng.Next(sqs.Count)];
     grocer.MoveStrategy = new WallMoveStrategy();
-    grocer.SetBehaviour(new GrocerBehaviour(1.25 + rng.NextDouble() / 2));
+    grocer.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
+    grocer.SetBehaviour(new GrocerBehaviour());
 
     grocer.Inventory = new Inventory(grocer.ID, objDb);
     grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
@@ -167,7 +168,8 @@ class Village
     var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
     smith.Loc = sqs[rng.Next(sqs.Count)];
-    smith.SetBehaviour(new SmithBehaviour(1.5 + rng.NextDouble() / 2));
+    smith.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
+    smith.SetBehaviour(new SmithBehaviour());
     smith.MoveStrategy = new WallMoveStrategy();
 
     smith.Inventory = new Inventory(smith.ID, objDb);
@@ -209,7 +211,41 @@ class Village
     }
   }
 
-  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FallenAdventurerFact fact, History history, Random rng)
+
+  static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
+  {
+    var (lit, unlit) = VillagerColour(rng);
+    var villager = new Mob()
+    {
+      Name = ng.GenerateName(rng.Next(6, 11)),
+      Status = ActorStatus.Indifferent,
+      Appearance = VillagerAppearance(rng),
+      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+    };
+    villager.Traits.Add(new NamedTrait());
+
+    var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
+    do
+    {
+      int i = rng.Next(cottage.Count);
+      Loc loc = cottage[i];
+      var tile = map.TileAt(loc.Row, loc.Col).Type;
+      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
+      {
+        villager.Loc = loc;
+        break;
+      }
+    }
+    while (true);
+
+    villager.Stats.Add(Attribute.HomeID, new Stat(homeID));
+    villager.MoveStrategy = new WallMoveStrategy();
+    villager.SetBehaviour(new Villager1Behaviour());
+
+    return villager;
+  }
+
+  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Random rng)
   {
     var (lit, unlit) = VillagerColour(rng);
     var widower = new Mob()
@@ -305,6 +341,10 @@ class Village
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
 
+    var v1 = GenerateVillager1(map, town, ng, rng);
+    objDb.Add(v1);
+    objDb.AddToLoc(v1.Loc, v1);
+
     FallenAdventurerFact? fallen = null;
     foreach (var fact in history.Facts)
     {
@@ -320,7 +360,7 @@ class Village
       // be a random chance of happening since we'll have several fallen 
       // adventurers over many levels and not ALL of them will have had 
       // relationships with villagers)
-      var widower = GenerateWidower(map, town, ng, objDb, fallen, history, rng);
+      var widower = GenerateWidower(map, town, ng, rng);
       objDb.Add(widower);
       objDb.AddToLoc(widower.Loc, widower);
 

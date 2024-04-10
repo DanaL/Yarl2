@@ -431,7 +431,8 @@ class ReadableTrait(string text) : Trait, IUSeable
 {
   readonly string _text = text;
   public ulong ContainerID { get; set; }
-  public override string AsText() => $"Document#{_text}#{ContainerID}";
+  public override string AsText() => $"Readable#{_text.Replace("\n", "<br/>")}#{ContainerID}";
+  
   public override bool Aura => false;
 
   public UseResult Use(Actor user, GameState gs, int row, int col)
@@ -777,7 +778,10 @@ class TraitFactory
       case "Rage":
         return new RageTrait((Actor)container);
       case "Readable":
-        return new ReadableTrait(pieces[1].Replace("<br/>", "\n"));
+        return new ReadableTrait(pieces[1].Replace("<br/>", "\n"))
+        {
+          ContainerID = ulong.Parse(pieces[2])
+        };        
       case "ResistBlunt":
         return new ResistBluntTrait();
       case "ShieldOfTheFaithful":

@@ -109,7 +109,7 @@ abstract class GameObj: IZLevel
         sb.Append('|');
         sb.Append(Loc.ToString());
         sb.Append('|');
-        string traits = string.Join(",", Traits.Select(t => t.AsText()));
+        string traits = string.Join("`", Traits.Select(t => t.AsText()));
         sb.Append(traits);
 
         return sb.ToString();

@@ -308,7 +308,7 @@ class ShopMenuAccumulator : InputAccumulator
 
   int TotalInvoice()
   {
-    double markup = ((IShopkeeper)_shopkeeper.Behaviour).Markup;
+    double markup = _shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
     return _menuItems.Values.Select(mi => mi.SelectedCount * (int)(mi.Item.Value * markup)).Sum();
   }
 
@@ -322,7 +322,7 @@ class ShopMenuAccumulator : InputAccumulator
     var keys = _menuItems.Keys.ToList();
     keys.Sort();
 
-    double markup = ((IShopkeeper)_shopkeeper.Behaviour).Markup;
+    double markup = _shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
     List<string> lines = [];
     foreach (var key in keys)
     {
