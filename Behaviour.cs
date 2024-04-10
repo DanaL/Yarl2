@@ -521,9 +521,9 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
     {      
       var sb = new StringBuilder();
-      sb.Append("Oh? Are you also an adventurer? ");
+      sb.Append("\"Oh? Are you also an adventurer? ");
       sb.Append(name);
-      sb.Append(" believed too they could prevail in the ruins.");
+      sb.Append(" believed too they could prevail in the ruins.\"");
 
       List<(string, char)> options = [];
       options.Add(($"Who is {name}?", 'a'));
@@ -533,22 +533,58 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
     else if (state.Curr == 1)
     {
+      // Player asked where the ruins were
       Loc dungoenLoc = Loc.Nowhere;
       foreach (LocationFact fact in gs.Campaign.History.Facts.OfType<LocationFact>())
       {
         if (fact.Desc == "Dungeon Entrance")
           dungoenLoc = fact.Loc;
       }
-      // Player asked where the ruins were
+      
       var sb = new StringBuilder();
+      sb.Append('"');
       sb.Append(name);
       sb.Append(" strode off to the ");      
       sb.Append(Util.RelativeDir(mob.Loc, dungoenLoc));
       sb.Append(". Oh how resolute, heroic, they looked! The sun glinted on their spear tip,");
-      sb.Append(" the wind tousled their hair. I hope they return to me soon.");
+      sb.Append(" the wind tousled their hair. I hope they return to me soon.\"");
 
-      return (sb.ToString(), []);
+      List<(string, char)> options = [];
+      options.Add(($"Who is {name}?", 'a'));
+      
+      return (sb.ToString(), options);
     }
+    else if (state.Curr == 2)
+    {
+      // Player asked who the partner was
+      var sb = new StringBuilder();
+
+      if (gs.Rng.NextDouble() < 0.5)
+      {
+        sb.Append('"');
+        sb.Append(name);
+        sb.Append("? They came to ");
+        sb.Append(gs.Town.Name.Capitalize());
+        sb.Append(" seeking fame and glory in adventure. We danced in the tavern and walked together under the stars. ");
+        sb.Append(name);
+        sb.Append(" said would see the sights of Yendor together.\nIf you find them, please help them return to me.\"");
+      }
+      else
+      {
+        sb.Append("\"They are the most fearless soul I've known! ");
+        sb.Append(name);
+        sb.Append(" arrive in ");
+        sb.Append(gs.Town.Name.Capitalize());
+        sb.Append(", heard the tales of the ruins and the dangers within. They simply set their jaw and declared that they would drive away the darkness.\n");
+        sb.Append("\nHow brave! How dreamy!\"");
+      }
+
+      List<(string, char)> options = [];
+      options.Add(("Where are these ruins?", 'a'));
+
+      return (sb.ToString(), options);
+    }
+
     return ("", []);
   }
 
@@ -565,7 +601,13 @@ class WidowerBehaviour: IBehaviour, IDialoguer
       state = attr.Curr;
     }
 
-    if (state == 0 && opt == 'b')
+    if (state == 0 && opt == 'a')
+      mob.Stats[Attribute.DialogueState].SetMax(2);
+    else if (state == 0 && opt == 'b')
+      mob.Stats[Attribute.DialogueState].SetMax(1);
+    else if (state == 1 && opt == 'a')
+      mob.Stats[Attribute.DialogueState].SetMax(2);
+    else if (state == 2 && opt == 'a')
       mob.Stats[Attribute.DialogueState].SetMax(1);
   }
 }
