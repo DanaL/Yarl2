@@ -82,7 +82,7 @@ abstract class UserInterface
             "",
             "",
             "",
-            "     Welcome to Yarl2",
+            "     Welcome to Dana's Delve",
             "       (yet another attempt to make a roguelike,",
             "           this time in C#...)"
         ];

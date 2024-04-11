@@ -6,9 +6,9 @@ var options = Options.LoadOptions("options.json");
 
 UserInterface display;
 if (options.Display == "Bearlib")
-    display = new BLUserInferface("Yarl2 0.0.1 + Bearlib", options);
+    display = new BLUserInferface("Dana's Delve 0.0.1 + Bearlib", options);
 else
-    display = new SDLUserInterface("Yarl2 0.0.1 + SDL", options);
+    display = new SDLUserInterface("Dana's Delve 0.0.1 + SDL", options);
 
 display.TitleScreen();
 
