@@ -19,29 +19,29 @@ namespace Yarl2;
 // Although it does make a nicer parameter to pass around to methods
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
-    public static Loc Nowhere = new Loc(-1, -1, -1, -1);
-    public static Loc Zero = new Loc(0, 0, 0, 0);
-    // A convenient method because this comes up a lot.
-    public Loc Move(int RowDelta, int ColDelta)
-    {
-        return this with { Row = Row + RowDelta, Col = Col + ColDelta };
-    }
+  public static Loc Nowhere = new Loc(-1, -1, -1, -1);
+  public static Loc Zero = new Loc(0, 0, 0, 0);
+  // A convenient method because this comes up a lot.
+  public Loc Move(int RowDelta, int ColDelta)
+  {
+    return this with { Row = Row + RowDelta, Col = Col + ColDelta };
+  }
 
-    public override readonly string ToString() => $"{DungeonID},{Level},{Row},{Col}";
+  public override readonly string ToString() => $"{DungeonID},{Level},{Row},{Col}";
 
-    public static Loc FromStr(string text)
-    {
-        var digits = Util.ToNums(text);
-        return new Loc(digits[0], digits[1], digits[2], digits[3]);
-    }    
+  public static Loc FromStr(string text)
+  {
+    var digits = Util.ToNums(text);
+    return new Loc(digits[0], digits[1], digits[2], digits[3]);
+  }
 }
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg)
 {
-    public override string ToString()
-    {
-        return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(Bg)}";
-    }
+  public override string ToString()
+  {
+    return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(Bg)}";
+  }
 }
 
 // This feels like a bit of a hack, but quite a bit into
@@ -61,286 +61,287 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg)
 // making a proper superclass.
 interface IZLevel
 {
-    int Z();
+  int Z();
 }
 
 interface IGameEventListener
 {
-    public bool Expired { get; set; }
-    public bool Listening { get; }
-    void Alert(UIEventType eventType, GameState gs);
+  public bool Expired { get; set; }
+  public bool Listening { get; }
+  void Alert(UIEventType eventType, GameState gs);
 }
 
-abstract class GameObj: IZLevel
+abstract class GameObj : IZLevel
 {
-    private static ulong IDSeed = 2;
-    public string Name { get; set; } = "";
-    public virtual string FullName => Name;
-    public virtual Glyph Glyph { get; set; }
-    public Loc Loc { get; set; } = Loc.Nowhere;
-    public List<Trait> Traits { get; set; } = [];
+  private static ulong IDSeed = 2;
+  public string Name { get; set; } = "";
+  public virtual string FullName => Name;
+  public virtual Glyph Glyph { get; set; }
+  public Loc Loc { get; set; } = Loc.Nowhere;
+  public List<Trait> Traits { get; set; } = [];
 
-    public ulong ID { get; set; }
+  public ulong ID { get; set; }
 
-    public virtual List<(ulong, int, TerrainFlag)> Auras(GameState gs) => [];
-    public GameObj() => ID = IDSeed++;
-    public static ulong Seed => IDSeed;
-    public static void SetSeed(ulong seed) => IDSeed = seed;
+  public virtual List<(ulong, int, TerrainFlag)> Auras(GameState gs) => [];
+  public GameObj() => ID = IDSeed++;
+  public static ulong Seed => IDSeed;
+  public static void SetSeed(ulong seed) => IDSeed = seed;
 
-    public static ulong NextID => IDSeed++;
+  public static ulong NextID => IDSeed++;
 
-    public virtual int Z()
-    {
-        return 0;
-    }
+  public virtual int Z()
+  {
+    return 0;
+  }
 
-    public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
-                                       .OfType<T>().Any();
-    public bool HasTrait<T>() => Traits.OfType<T>().Any();
+  public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
+                                     .OfType<T>().Any();
+  public bool HasTrait<T>() => Traits.OfType<T>().Any();
 
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        sb.Append(Name);
-        sb.Append('|');
-        sb.Append(ID);
-        sb.Append('|');
-        sb.Append(Glyph.ToString());
-        sb.Append('|');
-        sb.Append(Loc.ToString());
-        sb.Append('|');
-        string traits = string.Join("`", Traits.Select(t => t.AsText()));
-        sb.Append(traits);
+  public override string ToString()
+  {
+    var sb = new StringBuilder();
+    sb.Append(Name);
+    sb.Append('|');
+    sb.Append(ID);
+    sb.Append('|');
+    sb.Append(Glyph.ToString());
+    sb.Append('|');
+    sb.Append(Loc.ToString());
+    sb.Append('|');
+    string traits = string.Join("`", Traits.Select(t => t.AsText()));
+    sb.Append(traits);
 
-        return sb.ToString();
-    }
+    return sb.ToString();
+  }
 }
 
 // Structure to store where items are in the world
 class GameObjectDB
 {
-    public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK);
+  public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK);
 
-    public Dictionary<Loc, List<Item>> _itemLocs = [];
-    public Dictionary<Loc, ulong> _actorLocs = [];
-    public Dictionary<ulong, GameObj> Objs = [];
+  public Dictionary<Loc, List<Item>> _itemLocs = [];
+  public Dictionary<Loc, ulong> _actorLocs = [];
+  public Dictionary<ulong, GameObj> Objs = [];
 
-    public bool ItemsWithEffect(Loc loc, TerrainFlag flag)
+  public bool ItemsWithEffect(Loc loc, TerrainFlag flag)
+  {
+    if (_itemLocs.TryGetValue(loc, out var items))
     {
-        if (_itemLocs.TryGetValue(loc, out var items))
+      foreach (var item in items)
+      {
+        if (item.Traits.Any(t => t.Effect == flag))
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  public Player? FindPlayer()
+  {
+    foreach (var obj in Objs.Values)
+    {
+      if (obj is Player)
+        return (Player)obj;
+    }
+
+    return null;
+  }
+
+  // I'm returning isItem because when remembering what glyphs were seen
+  // (for displaying visited but out of site tiles) I want to remember items
+  // but not actors
+  public (Glyph, int, bool) TopGlyph(Loc loc)
+  {
+    var glyph = EMPTY;
+    int z = 0;
+    bool isItem = false;
+
+    if (_actorLocs.TryGetValue(loc, out ulong id))
+    {
+      glyph = Objs[id].Glyph;
+      z = Objs[id].Z();
+    }
+
+    if (_itemLocs.TryGetValue(loc, out var items))
+    {
+      foreach (var item in items)
+      {
+        if (item.Z() > z)
         {
-            foreach (var item in items)
-            {
-                if (item.Traits.Any(t => t.Effect == flag))
-                    return true;
-            }    
+          glyph = item.Glyph;
+          z = item.Z();
+          isItem = true;
         }
-
-        return false;
+      }
     }
 
-    public Player? FindPlayer()
+    return (glyph, z, isItem);
+  }
+
+  // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
+  //   They're only used to querying what's below on chasm sqs
+  // Basically, the sqr ignoring the occupant since we only want to remember
+  // either the item stack or the tile
+  public Glyph GlyphAt(Loc loc)
+  {
+    if (_actorLocs.TryGetValue(loc, out ulong id))
+      return Objs[id].Glyph;
+    else
+      return ItemGlyphAt(loc);
+  }
+
+  public Glyph ItemGlyphAt(Loc loc)
+  {
+    if (_itemLocs.TryGetValue(loc, out var items))
     {
-        foreach (var obj in Objs.Values)
-        {
-            if (obj is Player)
-                return (Player) obj;
-        }
-
-        return null;
+      if (items is not null && items.Count > 0 && items[0].Z() >= 0)
+        return items[0].Glyph;
     }
 
-    // I'm returning isItem because when remembering what glyphs were seen
-    // (for displaying visited but out of site tiles) I want to remember items
-    // but not actors
-    public (Glyph, int, bool) TopGlyph(Loc loc)
+    return EMPTY;
+  }
+
+  public void RemoveActor(Actor actor)
+  {
+    Objs.Remove(actor.ID);
+    _actorLocs.Remove(actor.Loc);
+  }
+
+  public Actor? Occupant(Loc loc)
+  {
+    if (_actorLocs.TryGetValue(loc, out ulong objId))
     {
-        var glyph = EMPTY;
-        int z = 0;
-        bool isItem = false;
-
-        if (_actorLocs.TryGetValue(loc, out ulong id))
-        {
-            glyph = Objs[id].Glyph;
-            z = Objs[id].Z();
-        }
-        
-        if (_itemLocs.TryGetValue(loc, out var items))
-        {
-            foreach (var item in items)
-            {
-                if (item.Z() > z)
-                {
-                    glyph = item.Glyph;
-                    z = item.Z();
-                    isItem = true;
-                }
-            }
-        }
-
-        return (glyph, z, isItem);
+      if (Objs.TryGetValue(objId, out var actor))
+      {
+        return (Actor)actor;
+      }
     }
 
-    // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
-    //   They're only used to querying what's below on chasm sqs
-    // Basically, the sqr ignoring the occupant since we only want to remember
-    // either the item stack or the tile
-    public Glyph GlyphAt(Loc loc)
+    return null;
+  }
+
+  public bool Occupied(Loc loc) => _actorLocs.ContainsKey(loc);
+
+  public GameObj? GetObj(ulong id)
+  {
+    if (!Objs.TryGetValue(id, out GameObj? val))
+      return null;
+    return val;
+  }
+
+  public void AddNewActor(Actor actor, Loc loc)
+  {
+    actor.Loc = loc;
+    Add(actor);
+    AddToLoc(loc, actor);
+  }
+  public void Add(GameObj obj)
+  {
+    Objs[obj.ID] = obj;
+  }
+
+  public void AddToLoc(Loc loc, Actor actor)
+  {
+    _actorLocs[loc] = actor.ID;
+  }
+
+  public void SetToLoc(Loc loc, Item item)
+  {
+    item.Loc = loc;
+    if (!_itemLocs.TryGetValue(loc, out var stack))
     {
-        if (_actorLocs.TryGetValue(loc, out ulong id))
-            return Objs[id].Glyph;
-        else
-            return ItemGlyphAt(loc);
+      stack = [];
+      _itemLocs.Add(loc, stack);
     }
 
-    public Glyph ItemGlyphAt(Loc loc)
+    // I could have made _items Stack<Item> instead of a list, but there
+    // are times when I want to iterate over the items in a location,
+    // and sometimes the player will want to remove an item from the middle.
+    stack.Insert(0, item);
+  }
+
+  // This is really just used for restoring an itemdb from serialization
+  public void AddStack(Loc loc, List<Item> stack)
+  {
+    _itemLocs[loc] = stack;
+  }
+
+  // It's probably dangerous/bad practice to return the list of items
+  // so other parts of the game can manipulate it directly, but hey
+  // it's easy and convenient
+  public List<Item> ItemsAt(Loc loc)
+  {
+    if (!_itemLocs.TryGetValue(loc, out var stack))
+      return [];
+    else
+      return stack.Where(i => i.Type != ItemType.Environment)
+                  .ToList();
+  }
+
+  public List<Item> EnvironmentsAt(Loc loc)
+  {
+    if (!_itemLocs.TryGetValue(loc, out var stack))
+      return [];
+    else
+      return stack.Where(i => i.Type == ItemType.Environment)
+                  .ToList();
+  }
+
+  public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
+  public void RemoveItemFromGame(Loc loc, Item item)
+  {
+    _itemLocs[loc].Remove(item);
+    Objs.Remove(item.ID);
+  }
+
+  public void ActorMoved(Actor a, Loc from, Loc to)
+  {
+    if (_actorLocs[from] == a.ID)
     {
-        if (_itemLocs.TryGetValue(loc, out var items))
-        {
-            if (items is not null && items.Count > 0 && items[0].Z() >= 0)
-                return items[0].Glyph;
-        }
-
-        return EMPTY;
+      _actorLocs.Remove(from);
+      _actorLocs[to] = a.ID;
     }
+  }
 
-    public void RemoveActor(Actor actor)
+  public List<IPerformer> GetPerformers(int dungeonID, int level)
+  {
+    List<IPerformer> performers = [];
+
+    // I wonder if it's worth building 'indexes' of the objects by level and maybe dungeon?
+    // To speed stuff like this up when there's lots of game objects
+    foreach (var loc in _itemLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
     {
-        Objs.Remove(actor.ID);
-        _actorLocs.Remove(actor.Loc);
+      foreach (var item in _itemLocs[loc])
+      {
+        performers.AddRange(item.ActiveTraits());
+      }
     }
 
-    public Actor? Occupant(Loc loc)
+    foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
     {
-        if (_actorLocs.TryGetValue(loc, out ulong objId))
-        {
-            if (Objs.TryGetValue(objId, out var actor))
-            {
-                return (Actor)actor;
-            }
-        }
+      var actor = Objs[_actorLocs[loc]] as Actor;
+      if (actor is IPerformer performer)
+        performers.Add(performer);
 
-        return null;        
+      performers.AddRange(actor.Inventory.ActiveItemTraits());
     }
 
-    public bool Occupied(Loc loc) => _actorLocs.ContainsKey(loc);
+    return performers;
+  }
 
-    public GameObj? GetObj(ulong id) 
+  public List<IGameEventListener> ActiveListeners()
+  {
+    List<IGameEventListener> listeners = [];
+
+    foreach (var obj in Objs.Values)
     {
-        if (!Objs.TryGetValue(id, out GameObj? val))
-            return null;
-        return val;
+      listeners.AddRange(obj.Traits.OfType<IGameEventListener>()
+                                   .Where(l => l.Listening));
     }
 
-    public void AddNewActor(Actor actor, Loc loc)
-    {
-        actor.Loc = loc;
-        Add(actor);
-        AddToLoc(loc, actor);
-    }
-    public void Add(GameObj obj)
-    {
-        Objs[obj.ID] = obj;
-    }
-
-    public void AddToLoc(Loc loc, Actor actor)
-    {
-        _actorLocs[loc] = actor.ID;
-    }
-
-    public void SetToLoc(Loc loc, Item item)
-    {
-        if (!_itemLocs.TryGetValue(loc, out var stack))
-        {
-            stack = [];
-            _itemLocs.Add(loc, stack);
-        }
-
-        // I could have made _items Stack<Item> instead of a list, but there
-        // are times when I want to iterate over the items in a location,
-        // and sometimes the player will want to remove an item from the middle.
-        stack.Insert(0, item);
-    }
-    
-    // This is really just used for restoring an itemdb from serialization
-    public void AddStack(Loc loc, List<Item> stack)
-    {
-       _itemLocs[loc] = stack;
-    }
-
-    // It's probably dangerous/bad practice to return the list of items
-    // so other parts of the game can manipulate it directly, but hey
-    // it's easy and convenient
-    public List<Item> ItemsAt(Loc loc)
-    {
-        if (!_itemLocs.TryGetValue(loc, out var stack))
-            return [];
-        else
-            return stack.Where(i => i.Type != ItemType.Environment)
-                        .ToList();
-    }
-
-    public List<Item> EnvironmentsAt(Loc loc)
-    {
-        if (!_itemLocs.TryGetValue(loc, out var stack))
-            return [];
-        else
-            return stack.Where(i => i.Type == ItemType.Environment)
-                        .ToList();
-    }
-
-    public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
-    public void RemoveItemFromGame(Loc loc, Item item)
-    {
-        _itemLocs[loc].Remove(item);
-        Objs.Remove(item.ID);
-    }
-
-    public void ActorMoved(Actor a, Loc from, Loc to)
-    {
-        if (_actorLocs[from] == a.ID)
-        {
-            _actorLocs.Remove(from);
-            _actorLocs[to] = a.ID;
-        }
-    }
-
-    public List<IPerformer> GetPerformers(int dungeonID, int level)
-    {
-        List<IPerformer> performers = [];
-        
-        // I wonder if it's worth building 'indexes' of the objects by level and maybe dungeon?
-        // To speed stuff like this up when there's lots of game objects
-        foreach (var loc in _itemLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)) 
-        { 
-            foreach (var item in _itemLocs[loc]) 
-            {
-                performers.AddRange(item.ActiveTraits());                
-            }
-        }
-
-        foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
-        {
-            var actor = Objs[_actorLocs[loc]] as Actor;
-            if (actor is IPerformer performer)
-                performers.Add(performer);
-
-            performers.AddRange(actor.Inventory.ActiveItemTraits());
-        }
-
-        return performers;
-    }
-
-    public List<IGameEventListener> ActiveListeners()
-    {
-        List<IGameEventListener> listeners = [];
-
-        foreach (var obj in Objs.Values)
-        {
-            listeners.AddRange(obj.Traits.OfType<IGameEventListener>()
-                                         .Where(l => l.Listening));
-        }
-
-        return listeners;
-    }
+    return listeners;
+  }
 }

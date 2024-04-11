@@ -149,7 +149,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void ItemDropped(Item item, Loc loc)
   {
-    item.Loc = loc;
     item.ContainedBy = 0;
 
     var tile = TileAt(loc);
@@ -218,7 +217,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (fireStarted)
     {
       var fire = ItemFactory.Fire(this);
-      fire.Loc = loc;
       ObjDb.SetToLoc(loc, fire);
       CheckMovedEffects(fire, Loc.Nowhere, loc);
 

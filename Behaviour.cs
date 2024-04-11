@@ -99,10 +99,11 @@ interface IBehaviour
   (Action, InputAccumulator?) Chat(Mob actor, GameState gameState);
 }
 
+// I think I'll likely eventually merge this into IBehaviour
 interface IDialoguer
 {
   (string, List<(string, char)>) CurrentText(Mob mob, GameState gs);
-  void SelectOption(Mob actor, char opt);
+  void SelectOption(Mob actor, char opt, GameState gs);
 }
 
 class MonsterBehaviour : IBehaviour
@@ -492,7 +493,7 @@ class Villager1Behaviour : IBehaviour, IDialoguer
     return (sb.ToString(), []);
   }
 
-  public void SelectOption(Mob actor, char opt)
+  public void SelectOption(Mob actor, char opt, GameState gs)
   {
     
   }
@@ -502,15 +503,36 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  static string PickBark(Random rng)
+  static string PickBark(Mob mob, Random rng)
   {
-    int roll = rng.Next(3);
-    if (roll == 0)
-      return "Sigh...";
-    else if (roll == 1)
-      return "Are you safe?";
+    int state;
+
+    if (mob.Stats.TryGetValue(Attribute.DialogueState, out var stateState))
+      state = stateState.Curr;
     else
-      return "When will you return?";
+      state = 0;
+
+    if (state == 7)
+    {
+      // The player has retrieved the token and the widower is in mourning
+      string txt;
+      if (rng.Next(2) == 0)
+        txt = "I miss you so!";
+      else
+        txt = "Oh why did you have to be an adventurer?";
+
+      return txt;
+    }
+    else
+    {
+      int roll = rng.Next(3);
+      if (roll == 0)
+        return "Sigh...";
+      else if (roll == 1)
+        return "Are you safe?";
+      else
+        return "When will you return?";
+    }
   }
 
   public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
@@ -523,7 +545,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
       {
         Actor = actor,
         GameState = gs,
-        Quip = PickBark(gs.Rng)
+        Quip = PickBark(actor, gs.Rng)
       };
     }
 
@@ -572,13 +594,81 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
     return null;
   }
+  
+  ulong TrinketID(Actor partner, GameState gs) 
+  {
+    foreach (BelongedToFact fact in gs.Facts.OfType<BelongedToFact>())
+    {
+      if (fact.OwnerID == partner.ID)
+      {
+        return fact.ItemID;
+      }
+    }
+
+    return 0;
+  }
 
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     var partner = Partner(mob, gs);
     string name = partner.Name.Capitalize();
 
-    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    int state;
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var stateStat))
+      state = 0;
+    else
+      state = stateStat.Curr;
+
+    ulong trinketID = TrinketID(partner, gs);
+    bool playerHasTrinket = gs.Player.Inventory.Contains(trinketID);
+
+    // Player had the trinket but doesn't seem to have it
+    if ((state == 3 || state == 4) && !playerHasTrinket)
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(6);
+      state = 6;
+    }
+    else if (playerHasTrinket && state == 6)
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(4);
+      state = 4;
+    }
+
+    if (playerHasTrinket && state == 0)
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(3);
+      var item = (Item)gs.ObjDb.GetObj(trinketID);
+      var sb = new StringBuilder();
+      sb.Append("That ");            
+      sb.Append(item.Name);
+      sb.Append("! It belong to my love!\n");
+      sb.Append("Where did you find it?");
+
+      List<(string, char)> options = [];
+      options.Add(("In the ruins.", 'a'));
+      //options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
+
+      return (sb.ToString(), options);
+    }
+    else if (playerHasTrinket && state == 1)
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(3);
+      var item = (Item) gs.ObjDb.GetObj(trinketID);
+      var sb = new StringBuilder();
+      sb.Append("\"You've found ");
+      sb.Append(name);
+      sb.Append("'s ");
+      sb.Append(item.Name);
+      sb.Append("! So...then they fell in the dungeon?\n");
+      sb.Append("Will you give it to me as a keepsake?\"");
+
+      List<(string, char)> options = [];
+      options.Add(($"Hand over the {item.Name.DefArticle()}.", 'a'));
+      options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
+
+      return (sb.ToString(), options);
+    }
+    else if (state == 0)
     {      
       var sb = new StringBuilder();
       sb.Append("\"Oh? Are you also an adventurer? ");
@@ -591,7 +681,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
       return (sb.ToString(), options);
     }
-    else if (state.Curr == 1)
+    else if (state == 1)
     {
       // Player asked where the ruins were
       Loc dungoenLoc = Loc.Nowhere;
@@ -614,7 +704,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
       
       return (sb.ToString(), options);
     }
-    else if (state.Curr == 2)
+    else if (state == 2)
     {
       // Player asked who the partner was
       var sb = new StringBuilder();
@@ -644,11 +734,42 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
       return (sb.ToString(), options);
     }
+    else if (state == 4)
+    {
+      var item = (Item)gs.ObjDb.GetObj(trinketID);
+      var sb = new StringBuilder();
+      sb.Append("\"Please give me ");
+      sb.Append(name);
+      sb.Append("'s ");
+      sb.Append(item.Name);
+      sb.Append(" that I may remember them by it!\"");
+
+      List<(string, char)> options = [];
+      options.Add(($"Hand over the {item.Name.DefArticle()}.", 'a'));
+      options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
+
+      return (sb.ToString(), options);
+    }
+    else if (state == 5)
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(4);
+      return ("", []);
+    }
+    else if (state == 6)
+    {
+      string txt = "Please retrieve my love's token and bring it to me!";
+      return (txt, []);
+    }
+    else if (state == 7) 
+    {
+      string txt = "Thank you so much, I will treasure it forever!";
+      return (txt, []);
+    }
 
     return ("", []);
   }
 
-  public void SelectOption(Mob mob, char opt)
+  public void SelectOption(Mob mob, char opt, GameState gs)
   {
     int state;
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var attr))
@@ -662,20 +783,39 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
 
     if (state == 0 && opt == 'a')
+    {
       mob.Stats[Attribute.DialogueState].SetMax(2);
+    }
     else if (state == 0 && opt == 'b')
+    {
       mob.Stats[Attribute.DialogueState].SetMax(1);
+    }
     else if (state == 1 && opt == 'a')
+    {
       mob.Stats[Attribute.DialogueState].SetMax(2);
+    }
     else if (state == 2 && opt == 'a')
+    {
       mob.Stats[Attribute.DialogueState].SetMax(1);
+    }
+    else if (state == 3 && opt == 'a')
+    {
+      ulong trinketID = TrinketID(Partner(mob, gs), gs);
+      Item trinket = gs.Player.Inventory.RemoveByID(trinketID);
+      mob.Inventory.Add(trinket, mob.ID);
+
+      // TODO: need to give the player a reward!
+
+      // give the trinket to the NPC
+      mob.Stats[Attribute.DialogueState].SetMax(7);      
+    }
+    else if (state == 3 && opt == 'b')
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(5);
+    }
+    else if (state == 4 && opt == 'b')
+    {
+      mob.Stats[Attribute.DialogueState].SetMax(5);
+    }
   }
 }
-
-// class VillagerBehaviour : IBehaviour
-// {
-//     public Action CalcAction(Actor actor, GameState gameState, UserInterface ui)
-//     {
-//         return new PassAction();
-//     }
-// }

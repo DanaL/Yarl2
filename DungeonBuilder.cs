@@ -372,8 +372,7 @@ class MainDungeonBuilder : DungeonBuilder
         objDb.Add(adventurer);
 
         history.Facts.Add(new FallenAdventurerFact() {  ID = adventurer.ID, Loc = loc });
-        history.Facts.Add(new BelongedToFact() { ItemID = trinket.ID, OwnerID = adventurer.ID });
-        Console.WriteLine($"The adventurer is named {adventurer.FullName}");
+        history.Facts.Add(new BelongedToFact() { ItemID = trinket.ID, OwnerID = adventurer.ID });        
     }
 
     // I think this seed generated isolated rooms :O

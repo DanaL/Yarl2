@@ -208,7 +208,7 @@ class DialogueAccumulator : InputAccumulator
     else if (_currOptions.Contains(ch))
     {
       var dialgoue = (IDialoguer) _interlocutor.Behaviour;
-      dialgoue.SelectOption(_interlocutor, ch);
+      dialgoue.SelectOption(_interlocutor, ch, _gs);
 
       WritePopup();
     }
@@ -222,21 +222,32 @@ class DialogueAccumulator : InputAccumulator
     sb.Append(".\n\n");
 
     var (blurb, opts) = dialgoue.CurrentText(_interlocutor, _gs);
-    sb.Append(blurb);
-    sb.Append("\n\n");
-    char c = '`';
-    _currOptions = [];
-    foreach (var opt in opts)
+
+    if (blurb == "")
     {
-      c = opt.Item2;
-      _currOptions.Add(c);
-      sb.Append($"{c}) {opt.Item1}\n");
+      Done = true;
+      Success = true;
+      var msg = new Message($"{_interlocutor.FullName.Capitalize()} turns away from you.", _interlocutor.Loc);
+      _gs.UIRef().AlertPlayer([msg], "", _gs);
     }
-    ++c;
-    _exitOpt = c;
-    sb.Append($"{c}) Farewell.\n");
-    
-    _gs.WritePopup(sb.ToString(), _interlocutor.FullName);
+    else
+    {
+      sb.Append(blurb);
+      sb.Append("\n\n");
+      char c = '`';
+      _currOptions = [];
+      foreach (var opt in opts)
+      {
+        c = opt.Item2;
+        _currOptions.Add(c);
+        sb.Append($"{c}) {opt.Item1}\n");
+      }
+      ++c;
+      _exitOpt = c;
+      sb.Append($"{c}) Farewell.\n");
+
+      _gs.WritePopup(sb.ToString(), _interlocutor.FullName);
+    }
   }
 }
 

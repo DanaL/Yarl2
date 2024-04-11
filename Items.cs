@@ -15,557 +15,682 @@ namespace Yarl2;
 
 enum ItemType
 {
-    Weapon,
-    Armour,
-    Zorkmid,
-    Tool,
-    Document,
-    Potion,
-    Scroll,
-    Trinket,
-    Environment // I'm implementing things like mist as 'items'
+  Weapon,
+  Armour,
+  Zorkmid,
+  Tool,
+  Document,
+  Potion,
+  Scroll,
+  Trinket,
+  Environment // I'm implementing things like mist as 'items'
 }
 
 class Item : GameObj
 {
-    public static readonly int DEFAULT_Z = 2;
-    public ItemType Type { get; set; }
-    public bool Stackable { get; set; }
-    public char Slot { get; set; }
-    public bool Equiped { get; set; } = false;
-    public ulong ContainedBy { get; set; } = 0;
-    public bool Consumable { get; set; } = false;
-    public List<string> Adjectives { get; set; } = [];    
-    public int Value { get; set; }
-    int _z = DEFAULT_Z;
+  public static readonly int DEFAULT_Z = 2;
+  public ItemType Type { get; set; }
+  public bool Stackable { get; set; }
+  public char Slot { get; set; }
+  public bool Equiped { get; set; } = false;
+  public ulong ContainedBy { get; set; } = 0;
+  public bool Consumable { get; set; } = false;
+  public List<string> Adjectives { get; set; } = [];
+  public int Value { get; set; }
+  int _z = DEFAULT_Z;
 
-    public void SetZ(int z) => _z = z;
-    public override int Z()
+  public void SetZ(int z) => _z = z;
+  public override int Z()
+  {
+    return _z;
+  }
+
+  string CalcFullName()
+  {
+    string name = Name;
+
+    if (Adjectives.Count == 1)
+      name = $"{Adjectives[0]} {Name}";
+    else if (Adjectives.Count > 1)
+      name = $"{string.Join(", ", Adjectives)} {Name}";
+
+    string traitDescs = string.Join(' ', Traits.Select(t => t.Desc()));
+    if (traitDescs.Length > 0)
+      name = name + " " + traitDescs;
+
+    return name.Trim();
+  }
+
+  public override string FullName => CalcFullName();
+
+  public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
+  {
+    return Traits.Where(t => t.Aura)
+                 .Select(t => (ID, t.Radius, t.Effect))
+                 .ToList();
+  }
+
+  // Active in the sense of being an IPerformer who needs to be in the 
+  // turn order.
+  public List<IPerformer> ActiveTraits()
+  {
+    return Traits.Where(i => i is IPerformer p && i.Active)
+                 .Select(t => (IPerformer)t).ToList();
+  }
+
+  public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
+  {
+    var sb = new StringBuilder();
+    var uts = Traits.OfType<IUSeable>().ToList();
+    foreach (var t in uts)
     {
-        return _z;
+      sb.Append(t.ApplyEffect(flag, gs, this, loc));
     }
 
-    string CalcFullName()
-    {
-        string name = Name;
-
-        if (Adjectives.Count == 1)
-            name = $"{Adjectives[0]} {Name}";
-        else if (Adjectives.Count > 1)
-            name = $"{string.Join(", ", Adjectives)} {Name}";
-
-        string traitDescs = string.Join(' ', Traits.Select(t => t.Desc()));
-        if (traitDescs.Length > 0)
-            name = name + " " + traitDescs;
-
-        return name.Trim();
-    }
-
-    public override string FullName => CalcFullName();
-
-    public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
-    {        
-        return Traits.Where(t => t.Aura)
-                     .Select(t => (ID, t.Radius, t.Effect))
-                     .ToList();
-    }
-    
-    // Active in the sense of being an IPerformer who needs to be in the 
-    // turn order.
-    public List<IPerformer> ActiveTraits()
-    {
-        return Traits.Where(i => i is IPerformer p && i.Active)
-                     .Select(t => (IPerformer) t).ToList();
-    }
-
-    public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
-    {
-        var sb = new StringBuilder();
-        var uts = Traits.OfType<IUSeable>().ToList();
-        foreach (var t in uts) 
-        { 
-            sb.Append(t.ApplyEffect(flag, gs, this, loc));
-        }
-
-        return sb.ToString();
-    }
+    return sb.ToString();
+  }
 }
 
 class ItemFactory
-{    
-    public static Item Get(string name, GameObjectDB objDB) 
+{
+  public static Item Get(string name, GameObjectDB objDB)
+  {
+    Item item;
+
+    switch (name)
     {
-        Item item;
-
-        switch (name)
+      case "spear":
+        item = new Item()
         {
-            case "spear":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 10,
-                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
-                break;
-            case "dagger":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true, Value = 10,
-                                        Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
-                break;
-            case "hand axe":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 15,
-                                        Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });                
-                break;
-            case "battle axe":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
-                                        Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });                
-                break;
-            case "mace":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
-                                        Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });                
-                break;
-            case "longsword":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 25,
-                                        Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });                
-                break;
-            case "rapier":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 20,
-                                        Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });                
-                break;
-            case "arrow":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = true, Value = 2,
-                    Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
-                break;
-            case "firebolt":
-                item = new Item() { Name = name, Type = ItemType.Weapon, Stackable = false, Value = 0,
-                    Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK) };
-                item.Traits.Add(new AttackTrait() { Bonus = 0 });
-                item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
-                break;
-            case "leather armour":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
-                                    Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
-                break;
-            case "studded leather armour":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 25,
-                                    Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
-                break;
-            case "ringmail":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 45,
-                                    Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
-                break;
-            case "chainmail":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 75,
-                                    Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
-                break;
-            case "helmet":
-                item = new Item() { Name = name, Type = ItemType.Armour, Stackable = false, Value = 20,
-                                    Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK) };
-                item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
-                break;
-            case "torch":
-                item = new Item() { Name = name, Type = ItemType.Tool, Stackable = true, Value = 2,
-                                    Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK) };
-                var ls = new TorchTrait() {
-                    ContainerID = item.ID, Fuel = 500, Lit = false };
-                item.Traits.Add(ls);
-                item.Traits.Add(new FlammableTrait());
-                break;
-            case "zorkmids":
-                item = new Item() { Name = "zorkmid", Type = ItemType.Zorkmid, Stackable = true,
-                                    Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK) };
-                break;
-            case "potion of healing":
-                item = new Item() { Name = "potion of healing", Type = ItemType.Potion, Stackable = true, Value = 75,
-                                    Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK),
-                                    Consumable = true };
-                item.Traits.Add(new CastMinorHealTrait());
-                break;
-            case "antidote":
-                item = new Item()
-                {
-                    Name = "antidote", Type = ItemType.Potion, Stackable = true, Value = 50,
-                    Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK), Consumable = true
-                };
-                item.Traits.Add(new CastAntidoteTrait());
-                break;
-            case "scroll of blink":
-                item = new Item()
-                {
-                    Name = "scroll of blink", Type = ItemType.Scroll, Stackable = true, Value = 125,
-                                    Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK), Consumable = true };
-                item.Traits.Add(new CastBlinkTrait());
-                break;
-            default:
-                throw new Exception($"{name} doesn't seem exist in yarl2 :(");
-        }
-
-        objDB.Add(item);
-
-        return item;
-    }
-
-    public static Item Mist(GameState gs)
-    {
-        var mist = new Item()
-        {
-            Name = "mist",
-            Type = ItemType.Environment,
-            Stackable = false,
-            Value = 0,
-            Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 10,
+          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK)
         };
-        mist.SetZ(10);
-        mist.Traits.Add(new OpaqueTrait());
-        mist.Traits.Add(new CountdownTrait()
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        break;
+      case "dagger":
+        item = new Item()
         {
-            ContainerID = mist.ID,
-            ExpiresOn = gs.Turn + 7
-        });
-
-        return mist;
-    }
-
-    public static Item Fire(GameState gs)
-    {
-        Glyph glyph;
-        var roll = gs.Rng.NextDouble();
-        if (roll < 0.333)
-            glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE);
-        else if (roll < 0.666)
-            glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_ORANGE);
-        else
-            glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_ORANGE);
-
-        var fire = new Item()
-        {
-            Name = "fire",
-            Type = ItemType.Environment,
-            Stackable = false,
-            Value = 0,
-            Glyph = glyph
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = true,
+          Value = 10,
+          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK)
         };
-        fire.SetZ(3);        
-        gs.ObjDb.Add(fire);
-        var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
-        gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
-        fire.Traits.Add(onFire);
-        fire.Traits.Add(new LightSourceTrait() { Radius = 1, ContainerID = fire.ID });
-        return fire;
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
+        break;
+      case "hand axe":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 15,
+          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
+        break;
+      case "battle axe":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 25,
+          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });
+        break;
+      case "mace":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 25,
+          Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
+        break;
+      case "longsword":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 25,
+          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        break;
+      case "rapier":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 20,
+          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
+        break;
+      case "arrow":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = true,
+          Value = 2,
+          Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        break;
+      case "firebolt":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Weapon,
+          Stackable = false,
+          Value = 0,
+          Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
+        };
+        item.Traits.Add(new AttackTrait() { Bonus = 0 });
+        item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
+        break;
+      case "leather armour":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Armour,
+          Stackable = false,
+          Value = 20,
+          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK)
+        };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
+        break;
+      case "studded leather armour":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Armour,
+          Stackable = false,
+          Value = 25,
+          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK)
+        };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
+        break;
+      case "ringmail":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Armour,
+          Stackable = false,
+          Value = 45,
+          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
+        break;
+      case "chainmail":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Armour,
+          Stackable = false,
+          Value = 75,
+          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
+        break;
+      case "helmet":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Armour,
+          Stackable = false,
+          Value = 20,
+          Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK)
+        };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
+        break;
+      case "torch":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Tool,
+          Stackable = true,
+          Value = 2,
+          Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+        };
+        var ls = new TorchTrait()
+        {
+          ContainerID = item.ID,
+          Fuel = 500,
+          Lit = false
+        };
+        item.Traits.Add(ls);
+        item.Traits.Add(new FlammableTrait());
+        break;
+      case "zorkmids":
+        item = new Item()
+        {
+          Name = "zorkmid",
+          Type = ItemType.Zorkmid,
+          Stackable = true,
+          Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
+        };
+        break;
+      case "potion of healing":
+        item = new Item()
+        {
+          Name = "potion of healing",
+          Type = ItemType.Potion,
+          Stackable = true,
+          Value = 75,
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK),
+          Consumable = true
+        };
+        item.Traits.Add(new CastMinorHealTrait());
+        break;
+      case "antidote":
+        item = new Item()
+        {
+          Name = "antidote",
+          Type = ItemType.Potion,
+          Stackable = true,
+          Value = 50,
+          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK),
+          Consumable = true
+        };
+        item.Traits.Add(new CastAntidoteTrait());
+        break;
+      case "scroll of blink":
+        item = new Item()
+        {
+          Name = "scroll of blink",
+          Type = ItemType.Scroll,
+          Stackable = true,
+          Value = 125,
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK),
+          Consumable = true
+        };
+        item.Traits.Add(new CastBlinkTrait());
+        break;
+      default:
+        throw new Exception($"{name} doesn't seem exist in yarl2 :(");
     }
 
-    public static Item Web()
+    objDB.Add(item);
+
+    return item;
+  }
+
+  public static Item Mist(GameState gs)
+  {
+    var mist = new Item()
     {
-        var web = new Item()
-        {
-            Name = "webs",
-            Type = ItemType.Environment,
-            Stackable = false,
-            Value = 0,
-            Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK)
-        };
-        web.Traits.Add(new StickyTrait());
-        web.Traits.Add(new FlammableTrait());
-        return web;
-    }
+      Name = "mist",
+      Type = ItemType.Environment,
+      Stackable = false,
+      Value = 0,
+      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+    };
+    mist.SetZ(10);
+    mist.Traits.Add(new OpaqueTrait());
+    mist.Traits.Add(new CountdownTrait()
+    {
+      ContainerID = mist.ID,
+      ExpiresOn = gs.Turn + 7
+    });
+
+    return mist;
+  }
+
+  public static Item Fire(GameState gs)
+  {
+    Glyph glyph;
+    var roll = gs.Rng.NextDouble();
+    if (roll < 0.333)
+      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE);
+    else if (roll < 0.666)
+      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_ORANGE);
+    else
+      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_ORANGE);
+
+    var fire = new Item()
+    {
+      Name = "fire",
+      Type = ItemType.Environment,
+      Stackable = false,
+      Value = 0,
+      Glyph = glyph
+    };
+    fire.SetZ(3);
+    gs.ObjDb.Add(fire);
+    var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
+    gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
+    fire.Traits.Add(onFire);
+    fire.Traits.Add(new LightSourceTrait() { Radius = 1, ContainerID = fire.ID });
+    return fire;
+  }
+
+  public static Item Web()
+  {
+    var web = new Item()
+    {
+      Name = "webs",
+      Type = ItemType.Environment,
+      Stackable = false,
+      Value = 0,
+      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK)
+    };
+    web.Traits.Add(new StickyTrait());
+    web.Traits.Add(new FlammableTrait());
+    return web;
+  }
 }
 
 enum ArmourParts
 {
-    None,
-    Hat,
-    Boots,
-    Cloak,
-    Shirt
+  None,
+  Hat,
+  Boots,
+  Cloak,
+  Shirt
 }
 
 class Armour : Item
 {
-    public ArmourParts Piece { get; set; }
+  public ArmourParts Piece { get; set; }
 }
 
 class Inventory(ulong ownerID, GameObjectDB objDb)
 {
-    public ulong OwnerID { get; init; } = ownerID;
-    public int Zorkmids { get; set; }
-    List<(char, ulong)> _items = [];
-    public char NextSlot { get; set; } = 'a';
-    readonly GameObjectDB _objDb = objDb;
+  public ulong OwnerID { get; init; } = ownerID;
+  public int Zorkmids { get; set; }
+  List<(char, ulong)> _items = [];
+  public char NextSlot { get; set; } = 'a';
+  readonly GameObjectDB _objDb = objDb;
 
-    protected virtual List<Item> Items()
+  public bool Contains(ulong itemID)
+  {
+    foreach (var  item in _items)
     {
-        List<Item> items = [];
-        foreach (var itemID in _items.Select(i => i.Item2))
-        {
-            var item = _objDb.GetObj(itemID) as Item;
-            if (item is not null)
-                items.Add(item);
-        }
-
-        return items;
+      if (item.Item2 == itemID)
+        return true;
     }
 
-    void FindNextSlot() 
+    return false;
+  }
+
+  protected virtual List<Item> Items()
+  {
+    List<Item> items = [];
+    foreach (var itemID in _items.Select(i => i.Item2))
     {
-        char start = NextSlot;
-        var slots = UsedSlots().ToHashSet();
-
-        while (true)
-        {
-            ++NextSlot;
-            if (NextSlot == 123)
-                NextSlot = 'a';
-
-            if (!slots.Contains(NextSlot))
-            {
-                break;
-            }
-            if (NextSlot == start)
-            {
-                // there were no free slots
-                NextSlot = '\0';
-                break;
-            }
-        }
+      var item = _objDb.GetObj(itemID) as Item;
+      if (item is not null)
+        items.Add(item);
     }
 
-    public char[] UsedSlots() => _items.Select(i => i.Item1).Distinct().ToArray();
+    return items;
+  }
 
-    public (Item?, int) ItemAt(char slot)
+  void FindNextSlot()
+  {
+    char start = NextSlot;
+    var slots = UsedSlots().ToHashSet();
+
+    while (true)
     {
-        var inSlot = _items.Where(i => i.Item1 == slot).ToList();
-        var item = _objDb.GetObj(inSlot.First().Item2) as Item;
+      ++NextSlot;
+      if (NextSlot == 123)
+        NextSlot = 'a';
 
-        return (item, inSlot.Count);
+      if (!slots.Contains(NextSlot))
+      {
+        break;
+      }
+      if (NextSlot == start)
+      {
+        // there were no free slots
+        NextSlot = '\0';
+        break;
+      }
     }
+  }
 
-    public Item? ReadiedWeapon()
-    {        
-        foreach (var item in Items())
-        {
-            if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equiped)
-                return item;
-        }
+  public char[] UsedSlots() => _items.Select(i => i.Item1).Distinct().ToArray();
 
-        return null;
-    }
+  public (Item?, int) ItemAt(char slot)
+  {
+    var inSlot = _items.Where(i => i.Item1 == slot).ToList();
+    var item = _objDb.GetObj(inSlot.First().Item2) as Item;
 
-    public void Add(Item item, ulong ownerID)
+    return (item, inSlot.Count);
+  }
+
+  public Item? ReadiedWeapon()
+  {
+    foreach (var item in Items())
     {
-        if (item.Type == ItemType.Zorkmid) 
-        {
-            Zorkmids += item.Value;
-            return;
-        }
-
-        // Find the slot for the item
-        var usedSlots = UsedSlots().ToHashSet();
-        char slotToUse = '\0';
-
-        // If the item is stackable and there are others of the same item, use
-        // that slot. Otherwise, if the item has a previously assigned slot and
-        // it's still available, use that slot. Finally, look for the next
-        // available slot
-        if (item.Stackable)
-        {
-            foreach (var other in Items())
-            {
-                // Not yet worrying about +1 dagger vs +2 dagger which probably shouldn't stack together
-                // Maybe a CanStack() method on Item
-                if (other.Type == item.Type && other.Name == item.Name)
-                {
-                    slotToUse = other.Slot;
-                    break;
-                }
-            }
-        }
-        else if (item.Slot != '\0' && !usedSlots.Contains(item.Slot))
-        {
-            slotToUse = item.Slot;
-        }
-        
-        
-        if (slotToUse == '\0')
-        {
-            slotToUse = NextSlot;
-            FindNextSlot();
-        }
-
-        if (slotToUse != '\0')
-        {
-            item.Slot = slotToUse;
-            item.ContainedBy = ownerID;
-            _items.Add((slotToUse, item.ID));
-        }
-        else
-        {
-            // There was no free slot, which I am not currently handling...
-        }        
+      if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equiped)
+        return item;
     }
 
-    public Item? RemoveByID(ulong id) 
-    {        
-        for (int j = 0; j < _items.Count; j++)
-        {
-            if (_items[j].Item2 == id)
-            {
-                var item = _objDb.GetObj(_items[j].Item2) as Item;
-                _items.RemoveAt(j);
-                return item;
-            }
-        }
+    return null;
+  }
 
-        return null;
-    }
-
-    public List<Item> Remove(char slot, int count)
+  public void Add(Item item, ulong ownerID)
+  {
+    if (item.Type == ItemType.Zorkmid)
     {
-        List<int> indexes = [];
-        for (int j = _items.Count - 1; j >= 0; j--)
-        {
-            var item = _objDb.GetObj(_items[j].Item2) as Item;
-            if (item.Slot == slot)
-                indexes.Add(j);
-        }
-
-        List<Item> removed = [];
-        int totalToRemove = int.Min(count, indexes.Count);
-        for (int j = 0; j < totalToRemove; j++)
-        {
-            int index = indexes[j];
-            var item = _objDb.GetObj(_items[index].Item2) as Item;
-            if (item is not null)
-            {
-                removed.Add(item);
-                _items.RemoveAt(index);
-            }            
-        }
-
-        return removed;
+      Zorkmids += item.Value;
+      return;
     }
 
-    // This toggles the equip status of gear only and recalculation of stuff
-    // like armour class has to be done elsewhere because it felt icky to 
-    // have a reference back to the inventory's owner in the inventory object
-    public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
+    // Find the slot for the item
+    var usedSlots = UsedSlots().ToHashSet();
+    char slotToUse = '\0';
+
+    // If the item is stackable and there are others of the same item, use
+    // that slot. Otherwise, if the item has a previously assigned slot and
+    // it's still available, use that slot. Finally, look for the next
+    // available slot
+    if (item.Stackable)
     {
-        // I suppose at some point I'll have items that can't be equiped
-        // (or like it doesn't make sense for them to be) and I'll have
-        // to check for that
-        Item? item = null;
-        foreach (var (s, id) in  _items)
+      foreach (var other in Items())
+      {
+        // Not yet worrying about +1 dagger vs +2 dagger which probably shouldn't stack together
+        // Maybe a CanStack() method on Item
+        if (other.Type == item.Type && other.Name == item.Name)
         {
-            
-            if (s == slot)
-            {
-                item = _objDb.GetObj(id) as Item;
-                break;
-            }
+          slotToUse = other.Slot;
+          break;
         }
-
-        if (item is not null)
-        {
-            if (item.Equiped) 
-            {
-                // No cursed items or such yet to check for...
-                item.Equiped = false;
-                return (EquipingResult.Unequiped, ArmourParts.Shirt);
-            }
-
-            // Okay we are equiping new gear, which is a little more complicated
-            if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
-            {
-                // If there is a weapon already equiped, unequip it
-                foreach (Item other in Items())
-                {
-                    if (other.Type == ItemType.Weapon && other.Equiped)
-                        other.Equiped = false;
-                }
- 
-                item.Equiped = true;
-                return (EquipingResult.Equiped, ArmourParts.Shirt);
-            }
-            else if (item.Type == ItemType.Armour)
-            {
-                ArmourParts part = ArmourParts.None;
-                foreach (var t in item.Traits)
-                {
-                    if (t is ArmourTrait at)
-                    {
-                        part = at.Part;
-                    }
-                }
-
-                // check to see if there's another piece in that slot
-                foreach (var other  in Items().Where(a => a.Type == ItemType.Armour && a.Equiped))
-                {
-                    foreach (var t in other.Traits)
-                    {
-                        if (t is ArmourTrait at && at.Part == part)
-                            return (EquipingResult.Conflict, part);
-                    }                    
-                }
-                
-                item.Equiped = !item.Equiped;
-
-                return (EquipingResult.Equiped, ArmourParts.Shirt);
-            }
-        }
-
-        return (EquipingResult.Conflict, ArmourParts.Shirt);
+      }
     }
-
-    // Active as in has a trait that needs to be in the turn order
-    public List<IPerformer> ActiveItemTraits()
+    else if (item.Slot != '\0' && !usedSlots.Contains(item.Slot))
     {
-        List<IPerformer> activeTraits = [];
-
-        foreach (var item in Items())
-        {
-            activeTraits.AddRange(item.ActiveTraits());
-        }
-        
-        return activeTraits;
+      slotToUse = item.Slot;
     }
 
-    public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
 
-    public virtual void RestoreFromText(string txt)
+    if (slotToUse == '\0')
     {
-        foreach (var i in txt.Split(','))
-        {
-            char slot = i[0];
-            ulong id = ulong.Parse(i.Substring(2));
-            _items.Add((slot, id));
-        }
+      slotToUse = NextSlot;
+      FindNextSlot();
     }
+
+    if (slotToUse != '\0')
+    {
+      item.Slot = slotToUse;
+      item.ContainedBy = ownerID;
+      _items.Add((slotToUse, item.ID));
+    }
+    else
+    {
+      // There was no free slot, which I am not currently handling...
+    }
+  }
+
+  public Item? RemoveByID(ulong id)
+  {
+    for (int j = 0; j < _items.Count; j++)
+    {
+      if (_items[j].Item2 == id)
+      {
+        var item = _objDb.GetObj(_items[j].Item2) as Item;
+        _items.RemoveAt(j);
+        return item;
+      }
+    }
+
+    return null;
+  }
+
+  public List<Item> Remove(char slot, int count)
+  {
+    List<int> indexes = [];
+    for (int j = _items.Count - 1; j >= 0; j--)
+    {
+      var item = _objDb.GetObj(_items[j].Item2) as Item;
+      if (item.Slot == slot)
+        indexes.Add(j);
+    }
+
+    List<Item> removed = [];
+    int totalToRemove = int.Min(count, indexes.Count);
+    for (int j = 0; j < totalToRemove; j++)
+    {
+      int index = indexes[j];
+      var item = _objDb.GetObj(_items[index].Item2) as Item;
+      if (item is not null)
+      {
+        removed.Add(item);
+        _items.RemoveAt(index);
+      }
+    }
+
+    return removed;
+  }
+
+  // This toggles the equip status of gear only and recalculation of stuff
+  // like armour class has to be done elsewhere because it felt icky to 
+  // have a reference back to the inventory's owner in the inventory object
+  public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
+  {
+    // I suppose at some point I'll have items that can't be equiped
+    // (or like it doesn't make sense for them to be) and I'll have
+    // to check for that
+    Item? item = null;
+    foreach (var (s, id) in _items)
+    {
+
+      if (s == slot)
+      {
+        item = _objDb.GetObj(id) as Item;
+        break;
+      }
+    }
+
+    if (item is not null)
+    {
+      if (item.Equiped)
+      {
+        // No cursed items or such yet to check for...
+        item.Equiped = false;
+        return (EquipingResult.Unequiped, ArmourParts.Shirt);
+      }
+
+      // Okay we are equiping new gear, which is a little more complicated
+      if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
+      {
+        // If there is a weapon already equiped, unequip it
+        foreach (Item other in Items())
+        {
+          if (other.Type == ItemType.Weapon && other.Equiped)
+            other.Equiped = false;
+        }
+
+        item.Equiped = true;
+        return (EquipingResult.Equiped, ArmourParts.Shirt);
+      }
+      else if (item.Type == ItemType.Armour)
+      {
+        ArmourParts part = ArmourParts.None;
+        foreach (var t in item.Traits)
+        {
+          if (t is ArmourTrait at)
+          {
+            part = at.Part;
+          }
+        }
+
+        // check to see if there's another piece in that slot
+        foreach (var other in Items().Where(a => a.Type == ItemType.Armour && a.Equiped))
+        {
+          foreach (var t in other.Traits)
+          {
+            if (t is ArmourTrait at && at.Part == part)
+              return (EquipingResult.Conflict, part);
+          }
+        }
+
+        item.Equiped = !item.Equiped;
+
+        return (EquipingResult.Equiped, ArmourParts.Shirt);
+      }
+    }
+
+    return (EquipingResult.Conflict, ArmourParts.Shirt);
+  }
+
+  // Active as in has a trait that needs to be in the turn order
+  public List<IPerformer> ActiveItemTraits()
+  {
+    List<IPerformer> activeTraits = [];
+
+    foreach (var item in Items())
+    {
+      activeTraits.AddRange(item.ActiveTraits());
+    }
+
+    return activeTraits;
+  }
+
+  public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
+
+  public virtual void RestoreFromText(string txt)
+  {
+    foreach (var i in txt.Split(','))
+    {
+      char slot = i[0];
+      ulong id = ulong.Parse(i.Substring(2));
+      _items.Add((slot, id));
+    }
+  }
 }
 
 class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)
 {
-    protected override List<Item> Items() => [];
-    public override string ToText() => "";
-    public override void RestoreFromText(string txt) { }
+  protected override List<Item> Items() => [];
+  public override string ToText() => "";
+  public override void RestoreFromText(string txt) { }
 }
 
-enum EquipingResult 
+enum EquipingResult
 {
-    Equiped,
-    Unequiped,
-    Conflict
+  Equiped,
+  Unequiped,
+  Conflict
 }
