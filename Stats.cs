@@ -38,7 +38,8 @@ enum Attribute
   Radius,
   HomeID,
   DialogueState,
-  Markup
+  Markup,
+  Attitude
 }
 
 class Stat

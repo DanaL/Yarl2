@@ -25,12 +25,12 @@ interface IPerformer
 }
 
 // I wonder if a simple status will be enough
-enum ActorStatus
+enum MobAttitude
 {
-  Idle,
-  Active,
-  Indifferent,
-  Friendly
+  Idle = 0,
+  Active = 1,
+  Indifferent = 2,
+  Friendly = 3
 }
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -43,7 +43,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public Dictionary<Attribute, Stat> Stats { get; set; } = [];
 
-  public ActorStatus Status { get; set; }
   public Inventory Inventory { get; set; }
 
   public double Energy { get; set; } = 0.0;
@@ -64,7 +63,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual List<Damage> MeleeDamage() => [];
   public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual void CalcEquipmentModifiers() { }
-  public bool Hostile => !(Status == ActorStatus.Indifferent || Status == ActorStatus.Friendly);
+
+  public MobAttitude Status => (MobAttitude)Stats[Attribute.Attitude].Curr;
+  public bool Hostile => !(Status == MobAttitude.Indifferent || Status == MobAttitude.Friendly);
 
   public Actor()
   {
@@ -73,8 +74,8 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs)
   {
-    if (Status == ActorStatus.Idle)
-      Status = ActorStatus.Active;
+    if (Status == MobAttitude.Idle)
+      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
 
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;
@@ -153,8 +154,8 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       var half = Stats[Attribute.HP].Curr - hp;
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
-      other.Status = ActorStatus.Active;
-
+      other.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+      
       var msg = new Message($"{Name.DefArticle()} divides into two!!", Loc, false);
       gs.UIRef().AlertPlayer([msg], "", gs);
 
@@ -195,10 +196,10 @@ class Mob : Actor
 
   public override void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs)
   {
-    if (sourceID == gs.Player.ID && Status == ActorStatus.Idle)
+    if (sourceID == gs.Player.ID && Status == MobAttitude.Idle)
     {
       Console.WriteLine($"{Name} wakes up");
-      Status = ActorStatus.Active;
+      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);      
     }
   }
 
@@ -298,8 +299,8 @@ class MonsterFactory
       }
     }
 
-    m.Status = rng.NextDouble() < 0.8 ? ActorStatus.Idle : ActorStatus.Active;
-
+    var status = rng.NextDouble() < 0.8 ? MobAttitude.Idle : MobAttitude.Active;
+    m.Stats[Attribute.Attitude] = new Stat((int)status);
     return m;
   }
 }

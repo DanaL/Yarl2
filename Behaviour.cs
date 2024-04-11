@@ -174,8 +174,8 @@ class MonsterBehaviour : IBehaviour
   }
 
   public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
-  {
-    if (actor.Status == ActorStatus.Idle)
+  {     
+    if (actor.Status == MobAttitude.Idle)
     {
       return new PassAction();
     }

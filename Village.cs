@@ -107,10 +107,10 @@ class Village
     var cleric = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
-      Status = ActorStatus.Indifferent,
       Appearance = VillagerAppearance(rng),      
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
     };
+    cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
     var sqs = town.Shrine.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
@@ -127,10 +127,10 @@ class Village
     var grocer = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
-      Status = ActorStatus.Indifferent,
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
     };
+    grocer.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     grocer.Traits.Add(new NamedTrait());
 
     var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
@@ -159,10 +159,10 @@ class Village
     var smith = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
-      Status = ActorStatus.Indifferent,
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
     };
+    smith.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     smith.Traits.Add(new NamedTrait());
 
     var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
@@ -218,10 +218,10 @@ class Village
     var villager = new Mob()
     {
       Name = ng.GenerateName(rng.Next(6, 11)),
-      Status = ActorStatus.Indifferent,
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
     };
+    villager.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     villager.Traits.Add(new NamedTrait());
 
     var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
@@ -251,10 +251,10 @@ class Village
     var widower = new Mob()
     {
       Name = ng.GenerateName(rng.Next(6, 11)),
-      Status = ActorStatus.Indifferent,
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
     };
+    widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
 
     var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
@@ -311,11 +311,11 @@ class Village
     var pup = new Mob()
     {
       Name = $"{adj} {dogType}",
-      Status = ActorStatus.Indifferent,
       Appearance = $"{adj} {dogType} with {colourDesc} fur",
       Glyph = new Glyph('d', colour, colour, Colours.BLACK),
       Loc = RandomOutdoorLoc(map, town, rng)
     };
+    pup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     pup.SetBehaviour(new VillagePupBehaviour());
 
     return pup;
