@@ -521,6 +521,15 @@ class GameObjDBSave
       mob.Inventory.RestoreFromText(fields[12]);
     }
 
+    if (fields[15] != "")
+    {
+      foreach (var a in fields[15].Split('`'))
+      {
+        var action = (ActionTrait) TraitFactory.FromText(a, mob);
+        mob.Actions.Add(action);
+      }
+    }
+
     return mob;
   }
 
@@ -627,6 +636,10 @@ class GameObjDBSave
         sb.Append(mob.RemoveFromQueue);
         sb.Append('|');
         sb.Append(mob.Appearance);
+
+        string actions = string.Join("`", mob.Actions.Select(t => t.AsText()));
+        sb.Append('|');
+        sb.Append(actions);
 
         sidb.Objects.Add(sb.ToString());
       }

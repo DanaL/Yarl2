@@ -672,7 +672,7 @@ class TraitFactory
           MinRange = int.Parse(pieces[2]),
           MaxRange = int.Parse(pieces[3])
         };
-      case "Firebolt":
+      case "FireboltAction":
         return new FireboltActionTrait()
         {
           Name = name,

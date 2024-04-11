@@ -29,7 +29,7 @@ class DumbMoveStrategy : IMoveStrategy
 {
   public Action MoveAction(Mob actor, GameState gs)
   {
-    var adj = gs.DMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -52,7 +52,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
   public Action MoveAction(Mob actor, GameState gs)
   {
     // Move!
-    var adj = gs.DMapDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -77,7 +77,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
 {
   public Action MoveAction(Mob actor, GameState gs)
   {
-    var adj = gs.DMapFlight.Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var adj = gs.GetDMap("flying").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);

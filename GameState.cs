@@ -28,9 +28,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
-  public DjikstraMap? DMap { get; private set; }
-  public DjikstraMap? DMapDoors { get; private set; }
-  public DjikstraMap? DMapFlight { get; private set; }
+
+  DjikstraMap? DMap { get; set; }
+  DjikstraMap? DMapDoors { get; set; }
+  DjikstraMap? DMapFlight { get; set; }
+  public DjikstraMap GetDMap(string map = "")
+  {
+    if (DMap is null || DMapDoors is null || DMapFlight is null)
+      SetDMaps(Player.Loc);
+
+    if (map == "doors")
+      return DMapDoors;  
+    else if (map == "flying")
+      return DMapFlight;
+    else    
+      return DMap;    
+  }
+  
   public HashSet<Loc> RecentlySeen { get; set; } = [];
   public ulong LastTarget { get; set; } = 0;
   public List<Fact> Facts => Campaign.History != null ? Campaign.History.Facts : [];
@@ -372,6 +386,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
   }
 
+  void SetDMaps(Loc loc)
+  {
+    //long startTime = Stopwatch.GetTimestamp();
+
+    DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMap.Generate(_passableBasic, (loc.Row, loc.Col), 25);
+
+    // I wonder how complicated it would be to generate the maps in parallel...
+    DMapDoors = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMapDoors.Generate(_passableWithDoors, (loc.Row, loc.Col), 25);
+
+    DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMapFlight.Generate(_passableFlying, (loc.Row, loc.Col), 25);
+
+    //var elapsed = Stopwatch.GetElapsedTime(startTime);
+    //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
+  }
+
   public void ActorMoved(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
@@ -386,20 +418,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // monsters can open doors, fly, etc. Multiple maps??
     if (actor is Player && dest.DungeonID > 0)
     {
-      //long startTime = Stopwatch.GetTimestamp();
-
-      DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-      DMap.Generate(_passableBasic, (dest.Row, dest.Col), 25);
-
-      // I wonder how complicated it would be to generate the maps in parallel
-      DMapDoors = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-      DMapDoors.Generate(_passableWithDoors, (dest.Row, dest.Col), 25);
-
-      DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
-      DMapFlight.Generate(_passableFlying, (dest.Row, dest.Col), 25);
-
-      //var elapsed = Stopwatch.GetElapsedTime(startTime);
-      //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
+      SetDMaps(dest);      
     }
   }
 

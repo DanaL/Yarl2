@@ -64,7 +64,17 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual void CalcEquipmentModifiers() { }
 
-  public MobAttitude Status => (MobAttitude)Stats[Attribute.Attitude].Curr;
+  public MobAttitude Status
+  {
+    get
+    {
+      if (!Stats.ContainsKey(Attribute.Attitude))
+        return MobAttitude.Idle;
+
+      return (MobAttitude)Stats[Attribute.Attitude].Curr;
+    }    
+  }
+
   public bool Hostile => !(Status == MobAttitude.Indifferent || Status == MobAttitude.Friendly);
 
   public Actor()
