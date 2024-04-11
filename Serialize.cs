@@ -54,7 +54,7 @@ internal class Serialize
 
     var campaign = CampaignSaver.Inflate(sgi.Campaign);
     var gs = GameStateSave.Inflate(campaign, sgi.GameStateSave, options, ui);
-
+    
     var objDbSave = sgi.ObjDb;
     var objDb = GameObjDBSave.Inflate(objDbSave);
 
@@ -134,6 +134,8 @@ class CampaignSaver
   [JsonInclude]
   public Dictionary<int, DungeonSaver> Dungeons = [];
   public TownSave? Town { get; set; }
+  [JsonInclude]
+  public List<string> Facts { get; set; } = [];
 
   public static CampaignSaver Shrink(Campaign c)
   {
@@ -153,9 +155,11 @@ class CampaignSaver
       Name = c.Town.Name
     };
 
+    var facts =  c.History!.Facts.Select(f => f.ToString()).ToList();
     CampaignSaver sc = new()
     {
-      Town = town
+      Town = town,
+      Facts = facts
     };
 
     foreach (var k in c.Dungeons.Keys)
@@ -193,6 +197,12 @@ class CampaignSaver
     {
       campaign.Dungeons.Add(k, DungeonSaver.Inflate(sc.Dungeons[k]));
     }
+
+    List<Fact> facts = sc.Facts.Select(Fact.FromStr).ToList();
+    campaign.History = new History(new Random())
+    {
+      Facts = facts
+    };
 
     return campaign;
   }
@@ -440,7 +450,7 @@ class GameObjDBSave
     Enum.TryParse(fields[0], out PlayerClass charClass);
     p.CharClass = charClass;
     p.ID = ulong.Parse(fields[2]);
-    p.Loc = Loc.FromText(fields[4]);
+    p.Loc = Loc.FromStr(fields[4]);
 
     // Parse the traits
     if (fields[5] != "")
@@ -477,7 +487,7 @@ class GameObjDBSave
       ID = ulong.Parse(fields[3]),
       Name = fields[2],
       Glyph = TextToGlyph(fields[4]),
-      Loc = Loc.FromText(fields[5]),
+      Loc = Loc.FromStr(fields[5]),
       Energy = double.Parse(fields[8]),
       Recovery = double.Parse(fields[9]),
       RemoveFromQueue = bool.Parse(fields[13]),
@@ -525,7 +535,7 @@ class GameObjDBSave
       Name = fields[1],
       ID = ulong.Parse(fields[2]),
       Glyph = TextToGlyph(fields[3]),
-      Loc = Loc.FromText(fields[4]),
+      Loc = Loc.FromStr(fields[4]),
       Stackable = bool.Parse(fields[6].ToLower()),
       Slot = fields[7][0],
       Equiped = bool.Parse(fields[8].ToLower()),
