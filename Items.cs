@@ -324,6 +324,7 @@ class ItemFactory
           Consumable = true
         };
         item.Traits.Add(new CastBlinkTrait());
+        item.Traits.Add(new FlammableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
