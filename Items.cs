@@ -490,12 +490,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return null;
   }
 
-  public void Add(Item item, ulong ownerID)
+  public char Add(Item item, ulong ownerID)
   {
     if (item.Type == ItemType.Zorkmid)
     {
       Zorkmids += item.Value;
-      return;
+      return '\0';
     }
 
     // Find the slot for the item
@@ -541,6 +541,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     {
       // There was no free slot, which I am not currently handling...
     }
+
+    return slotToUse;
   }
 
   public Item? RemoveByID(ulong id)

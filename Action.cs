@@ -581,8 +581,10 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (!freeSlot)
     {
-      var msg = MsgFactory.Phrase("There's no room in your inventory!", GameState.Player.Loc);
-      return new ActionResult() { Complete = false, Messages = [msg] };
+      return new ActionResult() {
+        Complete = false,
+        Messages = [MsgFactory.Phrase("There's no room in your inventory!", GameState.Player.Loc)]
+      };
     }
 
     // First, is there anything preventing the actor from moving off
@@ -609,9 +611,13 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     GameState.ObjDb.RemoveItem(Actor.Loc, item);
-    inv.Add(item, Actor.ID);
+    char slot = inv.Add(item, Actor.ID);
+    
+    Message msg = MsgFactory.Phrase(Actor.ID, Verb.Pickup, item.ID, 1, false, Actor.Loc, GameState);
+    if (slot != '\0')
+      msg = msg with { Text = msg.Text + $" ({slot})" };
 
-    result.Messages.Add(MsgFactory.Phrase(Actor.ID, Verb.Pickup, item.ID, 1, false, Actor.Loc, GameState));
+    result.Messages.Add(msg);
     return result;
   }
 
