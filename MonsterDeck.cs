@@ -27,107 +27,114 @@ namespace Yarl2;
 
 class MonsterDeck
 {
-    public List<string> Monsters { get; set; } = [];
-    public Queue<int> Indexes { get; set; } = [];
+  public List<string> Monsters { get; set; } = [];
+  public Queue<int> Indexes { get; set; } = [];
 
-    public void Reshuffle(Random rng)
-    {
-        List<int> indexes = [];
-        for (int i = 0; i < Monsters.Count; i++)
-            indexes.Add(i);
-        indexes.Shuffle(rng);
-        Indexes = new Queue<int>(indexes);
-    }
+  public void Reshuffle(Random rng)
+  {
+    List<int> indexes = [];
+    for (int i = 0; i < Monsters.Count; i++)
+      indexes.Add(i);
+    indexes.Shuffle(rng);
+    Indexes = new Queue<int>(indexes);
+  }
 }
 
 class DeckBulder
 {
-    public static string EarlyMainOccupant { get; set; } = "";
+  public static string EarlyMainOccupant { get; set; } = "";
 
-    // The upper levels won't really follow theme, but we will choose a preference 
-    // for goblin dominated or kobold dominated
+  // The upper levels won't really follow theme, but we will choose a preference 
+  // for goblin dominated or kobold dominated
 
-    // I wonder if it would make more sense to have these in a text file and read them in?
-    static MonsterDeck EarlyLevelDeck(int level, Random rng)
+  // I wonder if it would make more sense to have these in a text file and read them in?
+  static MonsterDeck EarlyLevelDeck(int level, Random rng)
+  {
+    MonsterDeck deck = new();
+    if (EarlyMainOccupant == "")
     {
-        MonsterDeck deck = new();
-        if (EarlyMainOccupant == "")
-        {
-            EarlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
-        }
-
-        if (EarlyMainOccupant == "kobold")
-        {
-            for (int j = 0; j < 8; j++)
-                deck.Monsters.Add("kobold");
-
-            deck.Monsters.Add("giant rat"); 
-            deck.Monsters.Add("giant rat"); 
-            deck.Monsters.Add("giant rat"); 
-            deck.Monsters.Add("dire bat");
-            deck.Monsters.Add("dire bat");
-        }
-        else
-        {
-            for (int j = 0; j < 6; j++)
-                deck.Monsters.Add("goblin");
-
-            deck.Monsters.Add("wolf");
-            deck.Monsters.Add("wolf");
-        }
-
-        deck.Monsters.Add("skeleton");
-        deck.Monsters.Add("skeleton");
-        deck.Monsters.Add("zombie");
-        deck.Monsters.Add("zombie");
-
-        if (level > 1)
-        {
-            if (EarlyMainOccupant == "kobold")
-            {
-                deck.Monsters.Add("kobold foreman");
-                deck.Monsters.Add("kobold foreman");
-            }
-            else if (EarlyMainOccupant == "goblin")
-            {
-                deck.Monsters.Add("hobgoblin");
-                deck.Monsters.Add("hobgoblin");
-                deck.Monsters.Add("goblin archer");
-            }
-        }
-
-        if (level > 2)
-        {
-            if (EarlyMainOccupant == "kobold")
-            {
-                deck.Monsters.Add("kobold trickster");                
-            }
-            else if (EarlyMainOccupant == "goblin")
-            {
-                deck.Monsters.Add("goblin boss");
-                deck.Monsters.Add("hobgoblin");
-                deck.Monsters.Add("hobgoblin");
-                deck.Monsters.Add("goblin firestarter");
-            }
-        }
-        
-        return deck;
+      EarlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
     }
 
-    public static List<MonsterDeck> MakeDecks(int startLevel, int depth, VillainType villain, Random rng)
+    if (EarlyMainOccupant == "kobold")
     {
-        List<MonsterDeck> decks = [];
+      for (int j = 0; j < 8; j++)
+        deck.Monsters.Add("kobold");
 
-        int lvl = startLevel;
-        while (lvl < startLevel + depth)
-        {            
-            var deck = EarlyLevelDeck(lvl, rng);
-            deck.Reshuffle(rng);
-            decks.Add(deck);                
-            
-            ++lvl;
-        }
-        
-        return decks;
+      deck.Monsters.Add("giant rat");
+      deck.Monsters.Add("giant rat");
+      deck.Monsters.Add("giant rat");
+      deck.Monsters.Add("dire bat");
+      deck.Monsters.Add("dire bat");
+      deck.Monsters.Add("centipede");
+      deck.Monsters.Add("centipede");
+      deck.Monsters.Add("centipede");
     }
+    else
+    {
+      for (int j = 0; j < 6; j++)
+        deck.Monsters.Add("goblin");
+
+      deck.Monsters.Add("wolf");
+      deck.Monsters.Add("wolf");
+      deck.Monsters.Add("centipede");
+    }
+
+    deck.Monsters.Add("skeleton");
+    deck.Monsters.Add("skeleton");
+    deck.Monsters.Add("zombie");
+    deck.Monsters.Add("zombie");
+
+    if (level > 1)
+    {
+      if (EarlyMainOccupant == "kobold")
+      {
+        deck.Monsters.Add("kobold foreman");
+        deck.Monsters.Add("kobold foreman");
+        deck.Monsters.Add("centipede");
+        deck.Monsters.Add("centipede");
+      }
+      else if (EarlyMainOccupant == "goblin")
+      {
+        deck.Monsters.Add("hobgoblin");
+        deck.Monsters.Add("hobgoblin");
+        deck.Monsters.Add("goblin archer");
+        deck.Monsters.Add("centipede");
+      }
+    }
+
+    if (level > 2)
+    {
+      if (EarlyMainOccupant == "kobold")
+      {
+        deck.Monsters.Add("kobold trickster");
+      }
+      else if (EarlyMainOccupant == "goblin")
+      {
+        deck.Monsters.Add("goblin boss");
+        deck.Monsters.Add("hobgoblin");
+        deck.Monsters.Add("hobgoblin");
+        deck.Monsters.Add("goblin firestarter");
+      }
+    }
+
+    return deck;
+  }
+
+  public static List<MonsterDeck> MakeDecks(int startLevel, int depth, VillainType villain, Random rng)
+  {
+    List<MonsterDeck> decks = [];
+
+    int lvl = startLevel;
+    while (lvl < startLevel + depth)
+    {
+      var deck = EarlyLevelDeck(lvl, rng);
+      deck.Reshuffle(rng);
+      decks.Add(deck);
+
+      ++lvl;
+    }
+
+    return decks;
+  }
 }

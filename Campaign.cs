@@ -242,8 +242,8 @@ class PreGameHandler(UserInterface ui)
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
-    return (campaign, startR, startC);
-    //return (campaign, entrance.Item1, entrance.Item2);
+    //return (campaign, startR, startC);
+    return (campaign, entrance.Item1, entrance.Item2);
   }
 
   private static void PopulateArena(Random rng, GameObjectDB objDb, Dungeon dungeon)
