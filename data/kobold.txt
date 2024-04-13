@@ -1,0 +1,40 @@
+LEVEL 1
+kobold 8
+giant rat 3
+dire bat 2
+centipede 1
+skeleton 2
+zombie 2
+LEVEL 2
+kobold 4
+kobold foreman 2
+skeleton 2
+zombie 2
+centipede 2
+dire bat 2
+LEVEL 3
+kobold 4
+kobold foreman 2
+kobold trickster 1
+centipede 2
+skeleton 2
+zombie 2
+jelly 1
+LEVEL 4
+kobold 4
+kobold foreman 2
+kobold trickster 1
+centipede 2
+skeleton 2
+zombie 2
+jelly 1
+giant spider 1
+LEVEL 5
+kobold 4
+kobold foreman 2
+kobold trickster 1
+centipede 2
+skeleton 2
+zombie 2
+jelly 1
+giant spider 1

@@ -287,7 +287,7 @@ class PreGameHandler(UserInterface ui)
   // sort) because monsters will spawn as the player explores
   private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon)
   {
-    int maxDepth = 3;
+    int maxDepth = 5;
     var decks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
     history.Facts.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
 

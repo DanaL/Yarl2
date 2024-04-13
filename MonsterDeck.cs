@@ -56,66 +56,24 @@ class DeckBulder
       EarlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
     }
 
-    if (EarlyMainOccupant == "kobold")
+    // Someday in the future I'll need to check for invalid data files...
+    var lines = File.ReadAllLines($"data/{EarlyMainOccupant}.txt");
+    int j = 0;
+    while (j < lines.Length && !lines[j].Equals($"LEVEL {level}", StringComparison.CurrentCultureIgnoreCase))
     {
-      for (int j = 0; j < 8; j++)
-        deck.Monsters.Add("kobold");
-
-      deck.Monsters.Add("giant rat");
-      deck.Monsters.Add("giant rat");
-      deck.Monsters.Add("giant rat");
-      deck.Monsters.Add("dire bat");
-      deck.Monsters.Add("dire bat");
-      deck.Monsters.Add("centipede");
-      deck.Monsters.Add("centipede");
-      deck.Monsters.Add("centipede");
+      ++j;
     }
-    else
+    ++j;
+
+    while (j < lines.Length && !lines[j].StartsWith("level", StringComparison.CurrentCultureIgnoreCase))
     {
-      for (int j = 0; j < 6; j++)
-        deck.Monsters.Add("goblin");
-
-      deck.Monsters.Add("wolf");
-      deck.Monsters.Add("wolf");
-      deck.Monsters.Add("centipede");
-    }
-
-    deck.Monsters.Add("skeleton");
-    deck.Monsters.Add("skeleton");
-    deck.Monsters.Add("zombie");
-    deck.Monsters.Add("zombie");
-
-    if (level > 1)
-    {
-      if (EarlyMainOccupant == "kobold")
-      {
-        deck.Monsters.Add("kobold foreman");
-        deck.Monsters.Add("kobold foreman");
-        deck.Monsters.Add("centipede");
-        deck.Monsters.Add("centipede");
-      }
-      else if (EarlyMainOccupant == "goblin")
-      {
-        deck.Monsters.Add("hobgoblin");
-        deck.Monsters.Add("hobgoblin");
-        deck.Monsters.Add("goblin archer");
-        deck.Monsters.Add("centipede");
-      }
-    }
-
-    if (level > 2)
-    {
-      if (EarlyMainOccupant == "kobold")
-      {
-        deck.Monsters.Add("kobold trickster");
-      }
-      else if (EarlyMainOccupant == "goblin")
-      {
-        deck.Monsters.Add("goblin boss");
-        deck.Monsters.Add("hobgoblin");
-        deck.Monsters.Add("hobgoblin");
-        deck.Monsters.Add("goblin firestarter");
-      }
+      int k = lines[j].LastIndexOf(' ');
+      string monster = lines[j][..k];
+      if (!int.TryParse(lines[j][k..], out int count))
+        count = 1;
+      for (int i = 0; i < count; i++)
+        deck.Monsters.Add(monster);
+      ++j;
     }
 
     return deck;
