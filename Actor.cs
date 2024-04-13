@@ -237,7 +237,7 @@ class MonsterFactory
 
   static void LoadCatalog()
   {
-    foreach (var line in File.ReadAllLines("monsters.txt"))
+    foreach (var line in File.ReadAllLines("data/monsters.txt"))
     {
       int i = line.IndexOf('|');
       string name = line[..i].Trim();

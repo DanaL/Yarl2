@@ -666,7 +666,7 @@ class TownBuilder
         List<char> sqs = [];
         bool noRotate = false;
         string currBuildling = "";
-        foreach (var line in File.ReadLines("buildings.txt"))
+        foreach (var line in File.ReadLines("data/buildings.txt"))
         {
             if (line.StartsWith('%'))
             {

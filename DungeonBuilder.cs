@@ -378,7 +378,7 @@ class MainDungeonBuilder : DungeonBuilder
     // Generate an actor for the fallen adventurer so I can store their 
     // name and such in the objDb. Maybe sometimes they'll be an actual
     // ghost?
-    var ng = new NameGenerator(rng, "names.txt");
+    var ng = new NameGenerator(rng, "data/names.txt");
     var adventurer = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 12))

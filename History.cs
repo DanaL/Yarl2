@@ -140,8 +140,8 @@ class WorldFacts
   public WorldFacts(Random rng)
   {
     _rng = rng;
-    _nationNames = new NameGenerator(_rng, "countries.txt");
-    _peopleNames = new NameGenerator(_rng, "names.txt");
+    _nationNames = new NameGenerator(_rng, "data/countries.txt");
+    _peopleNames = new NameGenerator(_rng, "data/names.txt");
   }
 
   public string RulerName() => _peopleNames.GenerateName(_rng.Next(5, 10)).Capitalize();
@@ -417,7 +417,7 @@ class History
       //_ => OGRulerType.MadWizard
     };
 
-    var nameGen = new NameGenerator(_rng, "names.txt");
+    var nameGen = new NameGenerator(_rng, "data/names.txt");
     var name = _facts.RulerName();
 
     _ruler = new RulerInfo()
