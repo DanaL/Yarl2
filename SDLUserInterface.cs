@@ -101,7 +101,7 @@ class SDLUserInterface : UserInterface
     protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
     {
         message = message.PadRight(width);
-        var surface =  SDL_ttf.TTF_RenderText_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));        
+        var surface =  SDL_ttf.TTF_RenderUNICODE_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));        
         var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
         
         var texture = SDL_CreateTextureFromSurface(_renderer, surface);
