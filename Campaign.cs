@@ -215,12 +215,13 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
-    var dBuilder = new MainDungeonBuilder();
-    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
-    //var dBuilder = new ArenaBuilder();
-    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-
+    //var dBuilder = new MainDungeonBuilder();
+    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+    //PopulateDungeon(rng, objDb, history, mainDungeon);
+    var dBuilder = new ArenaBuilder();
+    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    PopulateArena(rng, objDb, mainDungeon);
+    
     campaign.AddDungeon(mainDungeon);
 
     var portal = new Portal("You stand before a looming portal.")
@@ -236,9 +237,6 @@ class PreGameHandler(UserInterface ui)
 
 ;    Village.Populate(wildernessMap, town, objDb, history, rng);
     campaign.Town = town;
-
-
-    //PopulateArena(rng, objDb, mainDungeon);
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
@@ -271,7 +269,7 @@ class PreGameHandler(UserInterface ui)
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    Actor mob = MonsterFactory.Get("jelly", rng);
+    Actor mob = MonsterFactory.Get("drow warrior", rng);
     objDb.AddNewActor(mob, loc);
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);

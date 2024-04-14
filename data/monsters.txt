@@ -16,3 +16,5 @@ goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14| 4|Door|Firebol
 jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider,ResistBlunt
 ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6#2#Blunt|KnockBack
 centipede         |c|darkgreen    |darkgreen |13|10|3| 1.0|12|12| 4|Dumb|Melee#4#1#Piercing|Poisoner#13#1
+duergar soldier   |h|lightgrey    |grey      |16|25|5| 1.0|14|12| 6|Door|Melee#10#1#Blunt|
+drow warrior      |h|grey         |darkgrey  |15|20|5| 1.0|12|16| 8|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|
