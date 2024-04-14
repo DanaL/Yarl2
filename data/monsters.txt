@@ -18,3 +18,4 @@ ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6
 centipede         |c|darkgreen    |darkgreen |13|10|3| 1.0|12|12| 4|Dumb|Melee#4#1#Piercing|Poisoner#13#1
 duergar soldier   |h|lightgrey    |grey      |16|25|5| 1.0|14|12| 6|Door|Melee#10#1#Blunt|
 drow warrior      |h|grey         |darkgrey  |15|20|5| 1.0|12|16| 8|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|
+owlbear           |Y|dullred      |brown     |13|25|4| 1.0|14|12| 5|Dumb|Melee#1#1#Piercing|Grappler#14

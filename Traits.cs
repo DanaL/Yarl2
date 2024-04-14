@@ -312,6 +312,21 @@ class ShieldOfTheFaithfulTrait : ACModTrait
   public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
+class GrappledTrait : Trait 
+{
+  public ulong GrapplerID { get; set; }
+  public int DC { get; set; }
+
+  public override string AsText() => $"Grappled#{GrapplerID}#{DC}";
+}
+
+class GrapplerTrait : Trait 
+{
+  public int DC { get; set; }
+
+  public override string AsText() => $"Grappler#{DC}";
+}
+
 class PoisonerTrait : Trait
 {
   public int DC { get; set; }
@@ -750,6 +765,17 @@ class TraitFactory
         };
       case "Divider":
         return new DividerTrait();
+      case "Grappled":
+        return new GrappledTrait()
+        {
+          GrapplerID = ulong.Parse(pieces[1]),
+          DC = int.Parse(pieces[2])
+        };
+      case "Grappler":
+        return new GrapplerTrait() 
+        {
+          DC = int.Parse(pieces[1])
+        };
       case "KnockBack":
         return new KnockBackTrait();
       case "Opaque":

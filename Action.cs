@@ -535,28 +535,57 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         }
       }
     }
-    else
+    else if (Actor.HasActiveTrait<GrappledTrait>())
     {
-      result.Complete = true;
-      result.EnergyCost = 1.0;
-
-      GameState.ActorMoved(Actor, Actor.Loc, _loc);
-      Actor.Loc = _loc;
-
-      if (Actor is Player)
+      var gt = Actor.Traits.OfType<GrappledTrait>().First();
+      if (Actor.AbilityCheck(Attribute.Strength, gt.DC, GameState.Rng))
       {
-        result.Messages.Add(MsgFactory.Phrase(CalcDesc(), _loc));
-        GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
+        Actor.Traits.Remove(gt);
+        string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Break)} free of the grapple!";        
+        result.Messages.Add(new Message(txt, Actor.Loc));
+        return ActuallyDoMove(result);
       }
       else
       {
-        var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
-        if (alerted.Contains(GameState.Player.ID))
-        {
-          var txt = Actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
-                                                      : "You hear padding footsteps...";
-          result.Messages.Add(new Message(txt, _loc, true));
-        }
+        string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} grappled by ";
+        var grappler = GameState.ObjDb.GetObj(gt.GrapplerID);
+        txt += $"{grappler.FullName}!";
+        result.Messages.Add(new Message(txt, Actor.Loc));
+        txt = $"{Actor.FullName.Capitalize()} cannot get away!";
+        result.Messages.Add(new Message(txt, Actor.Loc));
+        result.Complete = true;
+        result.EnergyCost = 1.0;        
+      }
+    }
+    else
+    {
+      return ActuallyDoMove(result);
+    }
+
+    return result;
+  }
+
+  ActionResult ActuallyDoMove(ActionResult result)
+  {
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    GameState.ActorMoved(Actor, Actor.Loc, _loc);
+    Actor.Loc = _loc;
+
+    if (Actor is Player)
+    {
+      result.Messages.Add(MsgFactory.Phrase(CalcDesc(), _loc));
+      GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
+    }
+    else
+    {
+      var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
+      if (alerted.Contains(GameState.Player.ID))
+      {
+        var txt = Actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
+                                                    : "You hear padding footsteps...";
+        result.Messages.Add(new Message(txt, _loc, true));
       }
     }
 
@@ -852,6 +881,12 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     }
     else
     {
+      // Teleporting removes the grapple trait
+      var grappled = Actor.Traits.OfType<GrappledTrait>()
+                                 .FirstOrDefault();
+      if (grappled is not null)
+        Actor.Traits.Remove(grappled);
+        
       var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
       var mv = new MoveAction(GameState, Actor, landingSpot);
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));

@@ -22,12 +22,13 @@ namespace Yarl2;
 // Is this dumb? should I just store a string in the Messages?
 enum Verb
 {
+    Break,
+    Close,
+    Drop,
     Hit,
     Miss,
-    Pickup,
-    Drop,
-    Open,
-    Close,
+    Pickup,    
+    Open,    
     Use,
     Ready,
     Unready,
@@ -59,12 +60,13 @@ class MsgFactory
         bool fp = subject is Player;
         return verb switch 
         {
+            Verb.Break => fp ? "break" : "breaks",
+            Verb.Close => fp ? "close" : "closes",
+            Verb.Drop => fp ? "drop" : "drops",
             Verb.Hit => fp ? "hit" : "hits",
             Verb.Miss => fp ? "miss" : "misses",
             Verb.Pickup => fp ? "pick up" : "picks up",
-            Verb.Drop => fp ? "drop" : "drops",
-            Verb.Open => fp ? "open" : "opens",
-            Verb.Close => fp ? "close" : "closes",
+            Verb.Open => fp ? "open" : "opens",            
             Verb.Use => fp ? "use" : "uses",
             Verb.Ready => fp ? "ready" : "readies",
             Verb.Unready => fp ? "unequip" : "unequips",

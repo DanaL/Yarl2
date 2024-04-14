@@ -27,7 +27,7 @@ class ArenaBuilder : DungeonBuilder
     var dungeon = new Dungeon(id, "");
     var mapper = new DungeonMap(rng);
     Map[] levels = new Map[_numOfLevels];
-    int h = 51, w = 51;
+    int h = 31, w = 31;
 
     var cave = CACave.GetCave(h - 1, w - 1, rng);
     var caveMap = new Map(w, h);
@@ -53,10 +53,10 @@ class ArenaBuilder : DungeonBuilder
     levels[0] = caveMap;
 
     // let's stick a pond in the centre
-    var pond = CACave.GetCave(20, 20, rng);
-    for (int r = 0; r < 20; r++)
+    var pond = CACave.GetCave(12, 12, rng);
+    for (int r = 0; r < 12; r++)
     {
-      for (int c = 0; c < 20; c++)
+      for (int c = 0; c < 12; c++)
       {
         if (pond[r, c])
         {
