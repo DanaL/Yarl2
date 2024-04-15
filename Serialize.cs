@@ -404,12 +404,6 @@ class GameObjDBSave
   [JsonInclude]
   List<string> Objects { get; set; } = [];
 
-  static Glyph TextToGlyph(string text)
-  {
-    var p = text.Split(',');
-    return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]));
-  }
-
   static string StatsToText(Dictionary<Attribute, Stat> stats)
   {
     List<string> pieces = [];
@@ -486,7 +480,7 @@ class GameObjDBSave
     {
       ID = ulong.Parse(fields[3]),
       Name = fields[2],
-      Glyph = TextToGlyph(fields[4]),
+      Glyph = Glyph.TextToGlyph(fields[4]),
       Loc = Loc.FromStr(fields[5]),
       Energy = double.Parse(fields[8]),
       Recovery = double.Parse(fields[9]),
@@ -543,7 +537,7 @@ class GameObjDBSave
       Type = itemType,
       Name = fields[1],
       ID = ulong.Parse(fields[2]),
-      Glyph = TextToGlyph(fields[3]),
+      Glyph = Glyph.TextToGlyph(fields[3]),
       Loc = Loc.FromStr(fields[4]),
       Stackable = bool.Parse(fields[6].ToLower()),
       Slot = fields[7][0],

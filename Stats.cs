@@ -39,7 +39,8 @@ enum Attribute
   HomeID,
   DialogueState,
   Markup,
-  Attitude
+  Attitude,
+  InDisguise
 }
 
 class Stat

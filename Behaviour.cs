@@ -184,7 +184,7 @@ class MonsterBehaviour : IBehaviour
     return new NullAction();
   }
 
-  public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
+  public virtual Action CalcAction(Mob actor, GameState gs, UserInterface ui)
   {     
     if (actor.Status == MobAttitude.Idle)
     {
@@ -208,6 +208,30 @@ class MonsterBehaviour : IBehaviour
   }
 
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+}
+
+// Disguised monsters behave differently while they are disguised, but then act like a normal monster
+// so it just seemed simple (or easy...) to extend MonsterBevaviour
+class DisguisedMonsterBehaviour : MonsterBehaviour
+{
+  public override Action CalcAction(Mob actor, GameState gs, UserInterface ui)
+  {
+    bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
+    if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
+      return new PassAction();
+
+    if (disguised)
+    {
+      var disguise = actor.Traits.OfType<DisguiseTrait>().First();
+      string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
+      var msg = new Message(txt, actor.Loc);
+      gs.UIRef().AlertPlayer([msg], "", gs);
+      actor.Glyph = disguise.TrueForm;
+      actor.Stats[Attribute.InDisguise].SetMax(0);
+    }
+
+    return base.CalcAction(actor, gs, ui);
+  }
 }
 
 class VillagePupBehaviour : IBehaviour

@@ -318,6 +318,15 @@ class DeathMessageTrait : Trait
   public override string AsText() => $"DeathMessage#{Message}";
 }
 
+class DisguiseTrait : Trait
+{
+  public Glyph Disguise {  get; set; }
+  public Glyph TrueForm { get; set; }
+  public string DisguiseForm { get; set; } = "";
+
+  public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}";
+}
+
 class IllusionTrait : Trait, IGameEventListener
 {
   public ulong SourceID {  get; set; }
@@ -716,6 +725,13 @@ class TraitFactory
         return new DeathMessageTrait()
         {
           Message = pieces[1]
+        };
+      case "Disguise":
+        return new DisguiseTrait()
+        {
+          Disguise = Glyph.TextToGlyph(pieces[1]),
+          TrueForm = Glyph.TextToGlyph(pieces[2]),
+          DisguiseForm = pieces[3]
         };
       case "Entangle":
       case "FireboltAction":

@@ -267,10 +267,11 @@ class PreGameHandler(UserInterface ui)
     //     objDb.AddToLoc(loc, k1);
     // }
 
-    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    Actor mob = MonsterFactory.Get("kobold foreman", rng);
-    objDb.AddNewActor(mob, loc);
+    //sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    //loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+    //Actor mob = MonsterFactory.Get("kobold foreman", rng);
+    //objDb.AddNewActor(mob, loc);
+    AddGargoyle(rng, objDb, dungeon, 0);
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     // loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
@@ -303,11 +304,67 @@ class PreGameHandler(UserInterface ui)
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
+
+        // Some monsters are a bit special and take a bit of extra work
         Actor monster = MonsterFactory.Get(m, rng);
         monster.Loc = loc;
         objDb.Add(monster);
         objDb.AddToLoc(loc, monster);
       }
+    }
+  }
+
+  static void AddGargoyle(Random rng, GameObjectDB objDb, Dungeon dungeon, int level)
+  {
+    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+    var gargoyle = new Mob()
+    {
+      Name = "gargoyle",
+      Recovery = 1.0,
+      MoveStrategy = new SimpleFlightMoveStrategy(),
+      Glyph = glyph
+    };
+    gargoyle.SetBehaviour(new DisguisedMonsterBehaviour());
+
+    gargoyle.Stats.Add(Attribute.HP, new Stat(40));
+    gargoyle.Stats.Add(Attribute.MonsterAttackBonus, new Stat(4));
+    gargoyle.Stats.Add(Attribute.AC, new Stat(15));
+    gargoyle.Stats.Add(Attribute.Strength, new Stat(1));
+    gargoyle.Stats.Add(Attribute.Dexterity, new Stat(1));
+    gargoyle.Stats.Add(Attribute.XPValue, new Stat(6));
+
+    gargoyle.Actions.Add(new MobMeleeTrait()
+    {
+      MinRange = 1,
+      MaxRange = 1,
+      DamageDie = 5,
+      DamageDice = 2,
+      DamageType = DamageType.Blunt
+    });
+
+    gargoyle.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+    gargoyle.Stats[Attribute.InDisguise] = new Stat(1);
+
+    var disguise = new DisguiseTrait()
+    {
+      Disguise = glyph,
+      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK),
+      DisguiseForm = "statue"
+    };
+    gargoyle.Traits.Add(disguise);
+    gargoyle.Traits.Add(new FlyingTrait());
+    // gargoyle should resist Piercing and Slashing damage
+
+    var sq = dungeon.LevelMaps[level].RandomTile(TileType.DungeonFloor, rng);
+    var loc = new Loc(dungeon.ID, level, sq.Item1, sq.Item2);
+    objDb.AddNewActor(gargoyle, loc);
+
+    var adj = Util.Adj4Locs(loc).ToList();
+    if (adj.Count > 0)
+    {
+      var pedestalLoc = adj[rng.Next(adj.Count)];
+      var pedetal = new Landmark("A stone pedestal.");
+      dungeon.LevelMaps[level].SetTile(pedestalLoc.Row, pedestalLoc.Col, pedetal);
     }
   }
 

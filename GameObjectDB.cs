@@ -42,6 +42,12 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg)
   {
     return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(Bg)}";
   }
+
+  public static Glyph TextToGlyph(string text)
+  {
+    var p = text.Split(',');
+    return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]));
+  }
 }
 
 // This feels like a bit of a hack, but quite a bit into
