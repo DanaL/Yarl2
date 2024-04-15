@@ -312,6 +312,25 @@ class ShieldOfTheFaithfulTrait : ACModTrait
   public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
+class IllusionTrait : Trait, IGameEventListener
+{
+  public ulong SourceID {  get; set; }
+  public ulong ObjID { get; set; } // the GameObj the illusion trait is attached to
+  public bool Expired { get => false; set { } }
+  public bool Listening => true;
+
+  public void Alert(GameEventType eventType, GameState gs)
+  {
+    var obj = gs.ObjDb.GetObj(ObjID);
+    if (obj is not null and Actor actor)
+    {
+      gs.ActorKilled(actor);
+    }    
+  }
+
+  public override string AsText() => $"Illusion#{SourceID}#{ObjID}";
+}
+
 class GrappledTrait : Trait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -702,6 +721,12 @@ class TraitFactory
         return new FlammableTrait();
       case "Flying":
         return new FlyingTrait();
+      case "Illusion":
+        return new IllusionTrait()
+        {
+          SourceID = ulong.Parse(pieces[1]),
+          ObjID = ulong.Parse(pieces[2])
+        };
       case "Impale":
         return new ImpaleTrait();      
       case "LightSource":

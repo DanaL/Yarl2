@@ -795,6 +795,15 @@ class MirrorImageAction : Action
       GameState.ObjDb.AddNewActor(dup, loc);
       GameState.AddPerformer(dup);
 
+      var illusion = new IllusionTrait()
+      {
+        SourceID = Actor.ID,
+        ObjID = dup.ID
+      };
+      dup.Traits.Add(illusion);
+
+      GameState.RegisterForEvent(GameEventType.Death, illusion, Actor.ID);
+
       images.Add(dup);
 
       --duplicates;
