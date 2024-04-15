@@ -123,6 +123,11 @@ class MonsterBehaviour : IBehaviour
     return false;
   }
 
+  // Eventually, if a mosnter is confused, or charmed, or any ally of the 
+  // player, etc, there will be a calculation of their target. At this point
+  // they pretty much always target the player
+  static Loc CalculateTarget(GameState gs) => gs.Player.Loc;
+
   Action FromTrait(Mob mob, ActionTrait act, GameState gs)
   {
     if (act is MobMeleeTrait meleeAttack)
@@ -143,19 +148,24 @@ class MonsterBehaviour : IBehaviour
       var arrow = ItemFactory.Get("arrow", gs.ObjDb);
       return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow);
     }
-    else if (act is SpellActionTrait spell)
+    else if (act is SpellActionTrait || act is RangedSpellActionTrait)
     {
-      _lastUse[spell.Name] = gs.Turn;
-      if (spell.Name == "Blink")
+      _lastUse[act.Name] = gs.Turn;
+      if (act.Name == "Blink")
         return new BlinkAction(gs, mob);
-      else if (spell.Name == "FogCloud")
-        return new FogCloudAction(gs, mob, gs.Player.Loc);
-      else if (spell.Name == "Entangle")
-        return new EntangleAction(gs, mob, gs.Player.Loc);
-      else if (spell.Name == "Web")
+      else if (act.Name == "FogCloud")
+        return new FogCloudAction(gs, mob, CalculateTarget(gs));
+      else if (act.Name == "Entangle")
+        return new EntangleAction(gs, mob, CalculateTarget(gs));
+      else if (act.Name == "Web")
         return new WebAction(gs, gs.Player.Loc);
-      else if (spell.Name == "Firebolt")
-        return new FireboltAction(gs, mob, gs.Player.Loc, ActionTrait.Trajectory(mob, gs.Player.Loc));
+      else if (act.Name == "Firebolt")
+      {
+        Loc targetLoc = CalculateTarget(gs);
+        return new FireboltAction(gs, mob, targetLoc, ActionTrait.Trajectory(mob, targetLoc));
+      }      
+      else if (act.Name == "MirrorImage")
+        return new MirrorImageAction(gs, mob, CalculateTarget(gs));
     }
     else if (act is SummonTrait summon)
     {

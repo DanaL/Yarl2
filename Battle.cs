@@ -214,14 +214,14 @@ class Battle
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
-      gs.ActorMoved(target, target.Loc, second);
+      gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
       return new Message(txt, second);
     }
     else if (CanPass(first, gs))
     {
-      gs.ActorMoved(target, target.Loc, first);
+      gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stumble)} backward!";
       return new Message(txt, first);

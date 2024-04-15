@@ -427,7 +427,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
   }
 
-  public void ActorMoved(Actor actor, Loc start, Loc dest)
+  public void SwapActors(Actor a, Actor b)
+  {
+    Loc tmp = a.Loc;
+
+    ObjDb.ClearActorLoc(a.Loc);
+    ObjDb.ClearActorLoc(b.Loc);
+
+    a.Loc = b.Loc;
+    
+    ResolveActorMove(b, b.Loc, tmp);
+    b.Loc = tmp;
+
+    ResolveActorMove(a, tmp, a.Loc);
+  }
+
+  public void ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
 

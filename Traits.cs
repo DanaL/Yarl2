@@ -102,9 +102,9 @@ class SpellActionTrait : ActionTrait
   public override bool Available(Mob mob, GameState gs) => true;
 }
 
-class FireboltActionTrait : SpellActionTrait
+class RangedSpellActionTrait : ActionTrait
 {
-  public override string AsText() => $"FireboltAction#{Cooldown}#{MinRange}#{MaxRange}#";
+  public override string AsText() => $"RangedSpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
   public override bool Available(Mob mob, GameState gs)
   {
     if (!InRange(mob, gs))
@@ -688,29 +688,22 @@ class TraitFactory
           DamageType = dt
         };
       case "Entangle":
-      case "Web":
-        return new SpellActionTrait()
-        {
-          Name = name,
-          Cooldown = ulong.Parse(pieces[1]),
-          MinRange = int.Parse(pieces[2]),
-          MaxRange = int.Parse(pieces[3])
-        };
       case "FireboltAction":
-        return new FireboltActionTrait()
+      case "MirrorImage":
+      case "Web":
+        return new RangedSpellActionTrait()
         {
           Name = name,
           Cooldown = ulong.Parse(pieces[1]),
           MinRange = int.Parse(pieces[2]),
           MaxRange = int.Parse(pieces[3])
-        };
+        };      
       case "Flammable":
         return new FlammableTrait();
       case "Flying":
         return new FlyingTrait();
       case "Impale":
-        return new ImpaleTrait();
-      // "LightSource#{ContainerID}#{Radius}"
+        return new ImpaleTrait();      
       case "LightSource":
         return new LightSourceTrait()
         {
@@ -729,7 +722,7 @@ class TraitFactory
           MaxRange = 1,
           DamageType = mdt
 
-        };
+        };      
       case "Missile":
         Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mmdt);
         digits = text.Split('#');

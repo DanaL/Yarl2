@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using System.Xml.Linq;
 
 namespace Yarl2;
 
@@ -95,7 +96,7 @@ class PortalAction : Action
     var (dungeon, level, _, _) = portal.Destination;
     GameState.EnterLevel(dungeon, level);
     GameState.Player!.Loc = portal.Destination;
-    GameState.ActorMoved(GameState.Player!, start, portal.Destination);
+    GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     GameState.RefreshPerformers();
 
     result.Complete = true;
@@ -570,7 +571,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    GameState.ActorMoved(Actor, Actor.Loc, _loc);
+    GameState.ResolveActorMove(Actor, Actor.Loc, _loc);
     Actor.Loc = _loc;
 
     if (Actor is Player)
@@ -727,6 +728,89 @@ class SummonAction(Loc target, string summons) : Action
     string txt = $"{Actor!.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Summon)} {mob.Name.IndefArticle()}!";
     var msg = new Message(txt, _target);
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+  }
+}
+
+class MirrorImageAction : Action
+{
+  readonly Loc _target;
+
+  public MirrorImageAction(GameState gs, Actor caster, Loc target)
+  {
+    GameState = gs;
+    Actor = caster;
+    _target = target;
+  }
+
+  Mob MakeDuplciate()
+  {
+    var glyph = new Glyph(Actor.Glyph.Ch, Actor.Glyph.Lit, Actor.Glyph.Unlit, Actor.Glyph.Bg);
+
+    // I originally implemented MirrorImage for cloakers, who can fly but I
+    // think it makes sense for all mirror images since they're illusions that
+    // may drift over water/lava 
+    var dup = new Mob()
+    {
+      Name = Actor.Name,
+      Glyph = glyph,
+      Recovery = 1.0,
+      MoveStrategy = new SimpleFlightMoveStrategy()
+    };
+
+    dup.Stats.Add(Attribute.HP, new Stat(1));
+    dup.Stats.Add(Attribute.AC, new Stat(10));
+    dup.Stats.Add(Attribute.XPValue, new Stat(0));
+    dup.Traits.Add(new FlyingTrait());
+    dup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+
+    return dup;
+  }
+
+  public override ActionResult Execute()
+  {
+    // Mirror image, create 4 duplicates of caster surrounding the target location
+    List<Loc> options = [];
+
+    foreach (var loc in Util.Adj8Locs(_target))
+    {
+      if (GameState!.TileAt(loc).PassableByFlight() && !GameState.ObjDb.Occupied(loc))
+        options.Add(loc);
+    }
+
+    if (options.Count == 0)
+    {
+      var msg = new Message("A spell fizzles...", Actor!.Loc);
+      return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    }
+
+    List<Mob> images = [];
+    int duplicates = int.Min(options.Count, 4);
+    while (duplicates > 0)
+    {
+      int i = GameState!.Rng.Next(options.Count);
+      Loc loc = options[i];
+      options.RemoveAt(i);
+
+      var dup = MakeDuplciate();
+      GameState.ObjDb.AddNewActor(dup, loc);
+      GameState.AddPerformer(dup);
+
+      images.Add(dup);
+
+      --duplicates;
+    }
+
+    // We've created the duplicates so now the caster swaps locations
+    // with one of them
+    Mob swap = images[GameState.Rng.Next(images.Count)];
+    GameState.SwapActors(Actor, swap);
+
+    var result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+    result.Messages.Add(new Message("How puzzling!", _target));
+
+    return result;
   }
 }
 

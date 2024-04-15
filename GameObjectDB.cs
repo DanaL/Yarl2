@@ -298,13 +298,13 @@ class GameObjectDB
     Objs.Remove(item.ID);
   }
 
+  public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
+
   public void ActorMoved(Actor a, Loc from, Loc to)
   {
-    if (_actorLocs[from] == a.ID)
-    {
+    if (_actorLocs.TryGetValue(from, out ulong fromID) && fromID == a.ID)
       _actorLocs.Remove(from);
-      _actorLocs[to] = a.ID;
-    }
+    _actorLocs[to] = a.ID;
   }
 
   public List<IPerformer> GetPerformers(int dungeonID, int level)
