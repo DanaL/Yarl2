@@ -378,7 +378,7 @@ class ItemFactory
     fire.SetZ(3);
     gs.ObjDb.Add(fire);
     var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
-    gs.RegisterForEvent(UIEventType.EndOfRound, onFire);
+    gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
     fire.Traits.Add(new LightSourceTrait() { Radius = 1, ContainerID = fire.ID });
     return fire;

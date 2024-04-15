@@ -13,8 +13,8 @@ using System.Text;
 
 namespace Yarl2;
 
-enum UIEventType { Quiting, KeyInput, EndOfRound, NoEvent }
-record struct UIEvent(UIEventType Type, char Value);
+enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death }
+record struct GameEvent(GameEventType Type, char Value);
 record Sqr(Colour Fg, Colour Bg, char Ch);
 
 record struct MsgHistory(string Message, int Count)
@@ -36,7 +36,7 @@ abstract class UserInterface
   public const int ViewHeight = ScreenHeight - 5;
 
   public abstract void UpdateDisplay(GameState? gs);
-  protected abstract UIEvent PollForEvent();
+  protected abstract GameEvent PollForEvent();
   protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
 
   protected int FontSize;
@@ -623,10 +623,10 @@ abstract class UserInterface
     while (_playing)
     {
       var e = PollForEvent();
-      if (e.Type == UIEventType.Quiting)
+      if (e.Type == GameEventType.Quiting)
         break;
 
-      if (e.Type == UIEventType.KeyInput)
+      if (e.Type == GameEventType.KeyInput)
         InputBuffer.Enqueue(e.Value);
 
       try
@@ -678,18 +678,18 @@ abstract class UserInterface
 
   void BlockForInput()
   {
-    UIEvent e;
+    GameEvent e;
     do
     {
       e = PollForEvent();
       Delay();
     }
-    while (e.Type == UIEventType.NoEvent);
+    while (e.Type == GameEventType.NoEvent);
   }
 
   public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
   {
-    UIEvent e;
+    GameEvent e;
 
     do
     {
@@ -697,12 +697,12 @@ abstract class UserInterface
       UpdateDisplay(gs);
       e = PollForEvent();
 
-      if (e.Type == UIEventType.NoEvent)
+      if (e.Type == GameEventType.NoEvent)
       {
         Delay();
         continue;
       }
-      else if (e.Value == Constants.ESC || e.Type == UIEventType.Quiting)
+      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
       {
         throw new GameQuitException();
       }
@@ -717,7 +717,7 @@ abstract class UserInterface
   public string BlockingGetResponse(string prompt)
   {
     string result = "";
-    UIEvent e;
+    GameEvent e;
 
     do
     {
@@ -725,12 +725,12 @@ abstract class UserInterface
       UpdateDisplay(null);
       e = PollForEvent();
 
-      if (e.Type == UIEventType.NoEvent)
+      if (e.Type == GameEventType.NoEvent)
       {
         Delay();
         continue;
       }
-      else if (e.Value == Constants.ESC || e.Type == UIEventType.Quiting)
+      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
       {
         throw new GameQuitException();
       }

@@ -754,7 +754,7 @@ class FogCloudAction : Action
         var mist = ItemFactory.Mist(gs);
         var mistLoc = _target with { Row = r, Col = c };
         var timer = mist.Traits.OfType<CountdownTrait>().First();
-        gs.RegisterForEvent(UIEventType.EndOfRound, timer);
+        gs.RegisterForEvent(GameEventType.EndOfRound, timer);
         gs.ObjDb.Add(mist);
         gs.ItemDropped(mist, mistLoc);
       }
@@ -912,7 +912,7 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
 
     foreach (var t in Actor!.Traits.OfType<PoisonedTrait>())
     {
-      GameState!.StopListening(UIEventType.EndOfRound, t);
+      GameState!.StopListening(GameEventType.EndOfRound, t);
     }
     Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
     var msg = new Message($"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);

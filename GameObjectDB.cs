@@ -68,7 +68,8 @@ interface IGameEventListener
 {
   public bool Expired { get; set; }
   public bool Listening { get; }
-  void Alert(UIEventType eventType, GameState gs);
+  
+  void Alert(GameEventType eventType, GameState gs);
 }
 
 abstract class GameObj : IZLevel

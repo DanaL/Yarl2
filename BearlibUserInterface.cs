@@ -68,13 +68,13 @@ internal class BLUserInferface : UserInterface, IDisposable
         KeyToChar.Add((int)TKCodes.InputEvents.TK_SLASH, '/');
     }
 
-    protected override UIEvent PollForEvent()
+    protected override GameEvent PollForEvent()
     {        
         if (Terminal.HasInput())
         {
             int key = Terminal.Read();
             if (key == (int)TKCodes.InputEvents.TK_CLOSE)
-                return new UIEvent(UIEventType.Quiting, '\0');
+                return new GameEvent(GameEventType.Quiting, '\0');
 
             if (KeyToChar.TryGetValue(key, out char value))
             {
@@ -99,10 +99,10 @@ internal class BLUserInferface : UserInterface, IDisposable
             // we only want to return a KeyInput event if there's an actual
             // value entered
             if (value != '\0')
-                return new UIEvent(UIEventType.KeyInput, value);
+                return new GameEvent(GameEventType.KeyInput, value);
         }
 
-        return new UIEvent(UIEventType.NoEvent, '\0');
+        return new GameEvent(GameEventType.NoEvent, '\0');
     }
      
     protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)

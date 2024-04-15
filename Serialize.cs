@@ -63,7 +63,7 @@ internal class Serialize
     // At the moment, EndOfRound is the only type of listener in the game
     foreach (var l in objDb.ActiveListeners())
     {
-      gs.RegisterForEvent(UIEventType.EndOfRound, l);
+      gs.RegisterForEvent(GameEventType.EndOfRound, l);
     }
 
     return gs;

@@ -126,7 +126,7 @@ class Battle
         VictimID = victim.ID
       };
       victim.Traits.Add(poisoned);
-      gs.RegisterForEvent(UIEventType.EndOfRound, poisoned);
+      gs.RegisterForEvent(GameEventType.EndOfRound, poisoned);
 
       var msg = new Message($"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} poisoned!", victim.Loc);
       result.Messages.Add(msg);
@@ -244,10 +244,12 @@ class Battle
 
     var grappled = new GrappledTrait()
     {
+      VictimID = target.ID,
       GrapplerID = actor.ID,
       DC = grapple.DC
     };
-
+    gs.RegisterForEvent(GameEventType.Death, grappled, actor.ID);
+    
     target.Traits.Add(grappled);
     var msg = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} grappled by "; 
     msg += actor.FullName + "!";

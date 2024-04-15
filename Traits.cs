@@ -312,12 +312,21 @@ class ShieldOfTheFaithfulTrait : ACModTrait
   public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
-class GrappledTrait : Trait 
+class GrappledTrait : Trait, IGameEventListener
 {
+  public ulong VictimID { get; set; }
   public ulong GrapplerID { get; set; }
   public int DC { get; set; }
+  public bool Expired { get => false; set {} }
+  public bool Listening => true;
 
-  public override string AsText() => $"Grappled#{GrapplerID}#{DC}";
+  public void Alert(GameEventType eventType, GameState gs)
+  {
+    var victim = gs.ObjDb.GetObj(VictimID);
+    victim?.Traits.Remove(this);    
+  }
+
+  public override string AsText() => $"Grappled#{VictimID}#{GrapplerID}#{DC}";
 }
 
 class GrapplerTrait : Trait 
@@ -353,7 +362,7 @@ class OnFireTrait : Trait, IGameEventListener
     Expired = true;
   }
 
-  public void Alert(UIEventType eventType, GameState gs)
+  public void Alert(GameEventType eventType, GameState gs)
   {
     ++Lifetime;
     if (gs.ObjDb.GetObj(ContainerID) is Item fireSrc)
@@ -409,7 +418,7 @@ class PoisonedTrait : Trait, IGameEventListener
 
   public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}#{Expired}";
 
-  public void Alert(UIEventType eventType, GameState gs)
+  public void Alert(GameEventType eventType, GameState gs)
   {
     var victim = (Actor?)gs.ObjDb.GetObj(VictimID);
     if (victim != null)
@@ -474,7 +483,7 @@ class CountdownTrait : Trait, IGameEventListener
 
   public override string AsText() => $"Countdown#{ContainerID}#{Expired}";
 
-  public void Alert(UIEventType eventType, GameState gs)
+  public void Alert(GameEventType eventType, GameState gs)
   {
     if (gs.Turn < ExpiresOn)
       return;
@@ -552,7 +561,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
 
   string Extinguish(GameState gs, Item item, Loc loc)
   {
-    gs.StopListening(UIEventType.EndOfRound, this);
+    gs.StopListening(GameEventType.EndOfRound, this);
 
     // Gotta set the lighting level before we extinguish the torch
     // so it's radius is still 5 when calculating which squares to 
@@ -585,7 +594,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
     {
       Lit = true;
       item!.Stackable = false;
-      gs.RegisterForEvent(UIEventType.EndOfRound, this);
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
       gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
@@ -597,7 +606,7 @@ class TorchTrait : Trait, IGameEventListener, IUSeable
     }
   }
 
-  public void Alert(UIEventType eventType, GameState gs)
+  public void Alert(GameEventType eventType, GameState gs)
   {
     // Although if it's not Lit, it shouldn't be listening for events
     if (!Lit)
@@ -768,8 +777,9 @@ class TraitFactory
       case "Grappled":
         return new GrappledTrait()
         {
-          GrapplerID = ulong.Parse(pieces[1]),
-          DC = int.Parse(pieces[2])
+          VictimID = ulong.Parse(pieces[1]),
+          GrapplerID = ulong.Parse(pieces[2]),
+          DC = int.Parse(pieces[3])
         };
       case "Grappler":
         return new GrapplerTrait() 

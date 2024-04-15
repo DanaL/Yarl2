@@ -52,6 +52,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // This might (probably will) expand into a hashtable of 
   // UIEventType mapped to a list of listeners
   List<IGameEventListener> _endOfRoundListeners { get; set; } = [];
+  List<(ulong, IGameEventListener)> _deathWatchListeners { get; set; } = [];
 
   private UserInterface UI { get; set; } = ui;
 
@@ -281,6 +282,28 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ItemDropped(cash, victim.Loc);
       }
     }
+
+    // Was anything listening for the the victims death?
+    foreach (var (targetID, listener) in _deathWatchListeners)
+    {
+      if (targetID == victim.ID) 
+        listener.Alert(GameEventType.Death, this);
+    }
+    ClearDeathWatch(victim.ID);
+  }
+
+  void ClearDeathWatch(ulong victimID)
+  {
+    Stack<int> indexes = [];
+    for (int j = 0; j < _deathWatchListeners.Count; j++)
+    {
+      if (_deathWatchListeners[j].Item1 == victimID)
+        indexes.Push(j);
+    }
+    while (indexes.Count > 0)
+    {      
+      _deathWatchListeners.RemoveAt(indexes.Pop());
+    }
   }
 
   public void BuildPerformersList()
@@ -381,7 +404,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
     {
-      listener.Alert(UIEventType.EndOfRound, this);
+      listener.Alert(GameEventType.EndOfRound, this);
     }
     _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
   }
@@ -554,26 +577,45 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public void RegisterForEvent(UIEventType eventType, IGameEventListener listener)
+  public void RegisterForEvent(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
   {
-    if (eventType == UIEventType.EndOfRound)
+    if (eventType == GameEventType.EndOfRound)
       _endOfRoundListeners.Add(listener);
+    else if (eventType == GameEventType.Death)
+      _deathWatchListeners.Add((targetID, listener));
     else
       throw new NotImplementedException("I haven't created any other event listeners yet :o");
   }
 
-  public void StopListening(UIEventType eventType, IGameEventListener listener)
+  public void StopListening(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
   {
-    if (eventType == UIEventType.EndOfRound)
+    if (eventType == GameEventType.EndOfRound) 
+    {
       _endOfRoundListeners.Remove(listener);
+    }
+    else if (eventType == GameEventType.Death)
+    {
+      _deathWatchListeners.Remove((targetID, listener));
+    }
     else
+    {
       throw new NotImplementedException("I haven't created any other event listeners yet :o");
+    }
   }
 
-  // Remove listener from all events it might be listening for, although I
-  // have only one type right now
+  // Remove listener from all events it might be listening for,
   public void RemoveListener(IGameEventListener listener)
   {
     _endOfRoundListeners.Remove(listener);
+
+    Stack<int> indexes = [];
+    for (int j = 0; j < _deathWatchListeners.Count; j++)
+    {
+      if (_deathWatchListeners[j].Item2 == listener)
+        indexes.Push(j);
+    }
+
+    while (indexes.Count > 0)
+      _deathWatchListeners.RemoveAt(indexes.Pop());
   }
 }
