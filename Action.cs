@@ -745,7 +745,7 @@ class MirrorImageAction : Action
   Mob MakeDuplciate()
   {
     var glyph = new Glyph(Actor.Glyph.Ch, Actor.Glyph.Lit, Actor.Glyph.Unlit, Actor.Glyph.Bg);
-
+    
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
     // may drift over water/lava 
@@ -762,6 +762,17 @@ class MirrorImageAction : Action
     dup.Stats.Add(Attribute.XPValue, new Stat(0));
     dup.Traits.Add(new FlyingTrait());
     dup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+
+    var illusion = new IllusionTrait()
+    {
+      SourceID = Actor.ID,
+      ObjID = dup.ID
+    };
+    dup.Traits.Add(illusion);   
+    GameState.RegisterForEvent(GameEventType.Death, illusion, Actor.ID);
+
+    var msg = new DeathMessageTrait() { Message = $"{dup.FullName.Capitalize()} fades away!" };
+    dup.Traits.Add(msg);
 
     return dup;
   }
@@ -794,15 +805,6 @@ class MirrorImageAction : Action
       var dup = MakeDuplciate();
       GameState.ObjDb.AddNewActor(dup, loc);
       GameState.AddPerformer(dup);
-
-      var illusion = new IllusionTrait()
-      {
-        SourceID = Actor.ID,
-        ObjID = dup.ID
-      };
-      dup.Traits.Add(illusion);
-
-      GameState.RegisterForEvent(GameEventType.Death, illusion, Actor.ID);
 
       images.Add(dup);
 

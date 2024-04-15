@@ -290,6 +290,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         listener.Alert(GameEventType.Death, this);
     }
     ClearDeathWatch(victim.ID);
+
+    // For illusory mobs, their death message is being displayed before the
+    // death message of the caster, which I find unsatisfying but it's a bit
+    // of work to change that. I'd have to return the message from here and
+    // then add it to the result message of whatever action called this message
+    // (Or create a more centralized queue of messages to display)
+    var deathMessage = victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault();
+    if (deathMessage != null)
+    {
+      var msg = new Message(deathMessage.Message, victim.Loc);
+      UI.AlertPlayer([msg], "", this);
+    }
   }
 
   void ClearDeathWatch(ulong victimID)

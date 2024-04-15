@@ -294,7 +294,7 @@ class DamageTrait : Trait
 class ACModTrait : Trait
 {
   public int ArmourMod { get; set; }
-  public override string AsText() => $"ACMode{ArmourMod}";
+  public override string AsText() => $"ACMode#{ArmourMod}";
 }
 
 class ArmourTrait : ACModTrait
@@ -310,6 +310,12 @@ class ArmourTrait : ACModTrait
 class ShieldOfTheFaithfulTrait : ACModTrait
 {
   public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
+}
+
+class DeathMessageTrait : Trait
+{
+  public string Message { get; set; } = "";
+  public override string AsText() => $"DeathMessage#{Message}";
 }
 
 class IllusionTrait : Trait, IGameEventListener
@@ -705,6 +711,11 @@ class TraitFactory
           DamageDie = int.Parse(pieces[1]),
           NumOfDie = int.Parse(pieces[2]),
           DamageType = dt
+        };
+      case "DeathMessage":
+        return new DeathMessageTrait()
+        {
+          Message = pieces[1]
         };
       case "Entangle":
       case "FireboltAction":
