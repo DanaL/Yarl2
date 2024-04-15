@@ -147,6 +147,16 @@ class ResistBluntTrait : Trait
   public override string AsText() => "ResistBlunt";
 }
 
+class ResistPiercingTrait : Trait
+{
+  public override string AsText() => "ResistPiercing";
+}
+
+class ResistSlashingTrait : Trait
+{
+  public override string AsText() => "ResistSlashing";
+}
+
 class PoorLootTrait : Trait
 {
   public override string AsText() => "PoorLoot";
@@ -865,6 +875,10 @@ class TraitFactory
         };        
       case "ResistBlunt":
         return new ResistBluntTrait();
+      case "ResistPiercing":
+        return new ResistPiercingTrait();
+      case "ResistSlashing":
+        return new ResistSlashingTrait();
       case "ShieldOfTheFaithful":
         return new ShieldOfTheFaithfulTrait()
         {

@@ -92,6 +92,11 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       int d = dmg.Item1;
       if (dmg.Item2 == DamageType.Blunt && HasActiveTrait<ResistBluntTrait>())
         d /= 2;
+      else if (dmg.Item2 == DamageType.Piercing && HasActiveTrait<ResistPiercingTrait>())
+        d /= 2;
+      else if (dmg.Item2 == DamageType.Slashing && HasActiveTrait<ResistSlashingTrait>())
+        d /= 2;
+
       if (d > 0)
         total += d;
     }

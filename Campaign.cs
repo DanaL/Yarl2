@@ -353,7 +353,8 @@ class PreGameHandler(UserInterface ui)
     };
     gargoyle.Traits.Add(disguise);
     gargoyle.Traits.Add(new FlyingTrait());
-    // gargoyle should resist Piercing and Slashing damage
+    gargoyle.Traits.Add(new ResistPiercingTrait());
+    gargoyle.Traits.Add(new ResistSlashingTrait());
 
     var sq = dungeon.LevelMaps[level].RandomTile(TileType.DungeonFloor, rng);
     var loc = new Loc(dungeon.ID, level, sq.Item1, sq.Item2);

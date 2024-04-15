@@ -108,7 +108,7 @@ class PlayerCreator
         switch (player.CharClass)
         {
             case PlayerClass.OrcReaver:
-                var spear = ItemFactory.Get("mace", objDb);
+                var spear = ItemFactory.Get("spear", objDb);
                 spear.Adjectives.Add("old");
                 spear.Equiped = true;
                 player.Inventory.Add(spear, player.ID);
