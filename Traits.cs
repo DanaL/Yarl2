@@ -35,6 +35,12 @@ abstract class Trait
   public virtual string AsText() => $"{ExpiresOn}#{Radius}";
 }
 
+abstract class EffectTrait : Trait
+{
+  public abstract string Apply(Actor victim, GameState gs);
+  public abstract bool IsAffected(Actor victim, GameState gs);
+}
+
 // To let me classify traits that mobs can take on their turns
 // Not sure if this is the best way to go...
 abstract class ActionTrait : Trait
@@ -398,7 +404,7 @@ class ParalyzingGazeTrait : Trait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
-class ParalyzedTrait : Trait, IGameEventListener
+class ParalyzedTrait : EffectTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
   public int DC { get; set; }
@@ -408,12 +414,18 @@ class ParalyzedTrait : Trait, IGameEventListener
 
   public override string AsText() => $"Paralyzed#{VictimID}#{DC}";
 
-  public string Apply(Actor victim, GameState gs)
+  public override bool IsAffected(Actor victim, GameState gs)
   {
     // We'll allow only one paralyzed trait at a time. Although perhaps
     // I should keep which one has the higher DC?
     if (victim.HasTrait<ParalyzedTrait>())
-      return "";
+      return false;
+
+    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);    
+  }
+
+  public override string Apply(Actor victim, GameState gs)
+  {    
     victim.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 

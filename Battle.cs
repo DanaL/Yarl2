@@ -224,19 +224,19 @@ class Battle
     // Paralyzing gaze only happens in melee range
     if (Util.Distance(attacker.Loc, target.Loc) < 2)
     {
-      if (target.Traits.OfType<Trait>().FirstOrDefault() is ParalyzingGazeTrait gaze)
+      if (target.Traits.OfType<ParalyzingGazeTrait>().FirstOrDefault() is ParalyzingGazeTrait gaze)
       {
-        if (!attacker.AbilityCheck(Attribute.Will, gaze.DC, gs.Rng))
+        var paralyzed = new ParalyzedTrait()
         {
-          var paralyzed = new ParalyzedTrait()
-          {
-            VictimID = attacker.ID,
-            DC = gaze.DC
-          };
-          string txt = paralyzed.Apply(attacker, gs);
-          if (txt != "")
-            result.Messages.Add(new Message(txt, attacker.Loc));
-        }
+          VictimID = attacker.ID,
+          DC = gaze.DC
+        };
+
+        if (paralyzed.IsAffected(attacker, gs))
+        {
+          string txt = paralyzed.Apply(attacker, gs);          
+          result.Messages.Add(new Message(txt, attacker.Loc));
+        }       
       }
     }
   }
