@@ -270,8 +270,9 @@ class MonsterFactory
 
     var fields = template.Split('|').Select(f => f.Trim()).ToArray();
 
-    var glyph = new Glyph(fields[0][0], Colours.TextToColour(fields[1]),
-                                        Colours.TextToColour(fields[2]), Colours.BLACK);
+    char ch = fields[0].Length == 0 ?  ' ' : fields[0][0];
+    var glyph = new Glyph(ch, Colours.TextToColour(fields[1]),
+                                Colours.TextToColour(fields[2]), Colours.BLACK);
 
     var mv = TextToMove(fields[10]);
     var m = new Mob()

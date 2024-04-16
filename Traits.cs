@@ -452,6 +452,49 @@ class OnFireTrait : Trait, IGameEventListener
   }
 }
 
+class WeakenTrait : Trait
+{
+  public int DC { get; set; }
+  public override string AsText() => $"Weaken#{DC}";
+}
+
+// Well, buff or debuff but that's fairly wordy...
+class StatBuffTrait : Trait, IGameEventListener
+{
+  public ulong VictimID { get; set; }
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+  public Attribute Attr { get; set; }
+  public int Amt { get; set; }
+  public override string AsText() => $"StatBuff#{VictimID}#{ExpiresOn}#{Attr}#{Amt}";
+
+  public void Apply(GameState gs)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      victim.Stats[Attr].Change(Amt);
+    }
+  }
+
+  // This perhaps doesn't need to be public?
+  public void Remove(GameState gs)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      victim.Stats[Attr].Change(-Amt);
+      victim.Traits.Remove(this);
+    }
+  }
+
+  public void Alert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+    }
+  }
+}
+
 class PoisonedTrait : Trait, IGameEventListener
 {
   public int DC { get; set; }
@@ -884,6 +927,15 @@ class TraitFactory
         {
           ArmourMod = int.Parse(pieces[1])
         };
+      case "StatBuff":
+        Enum.TryParse(pieces[3], out Attribute attr);
+        return new StatBuffTrait()
+        {
+          VictimID = ulong.Parse(pieces[1]),
+          ExpiresOn = ulong.Parse(pieces[2]),
+          Attr = attr,
+          Amt = int.Parse(pieces[4])
+        };
       case "Sticky":
         return new StickyTrait();
       case "Summon":
@@ -902,6 +954,11 @@ class TraitFactory
           ContainerID = ulong.Parse(pieces[1]),
           Lit = bool.Parse(pieces[2]),
           Fuel = int.Parse(pieces[3])
+        };
+      case "Weaken":
+        return new WeakenTrait()
+        {
+          DC = int.Parse(pieces[1])
         };
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);

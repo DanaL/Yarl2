@@ -267,10 +267,11 @@ class PreGameHandler(UserInterface ui)
     //     objDb.AddToLoc(loc, k1);
     // }
 
-    //sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    //loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    //Actor mob = MonsterFactory.Get("kobold foreman", rng);
-    //objDb.AddNewActor(mob, loc);
+    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+    Actor mob = MonsterFactory.Get("shadow", rng);
+    objDb.AddNewActor(mob, loc);
+
     AddGargoyle(rng, objDb, dungeon, 0);
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);

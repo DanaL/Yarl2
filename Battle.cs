@@ -19,7 +19,8 @@ enum DamageType
   Fire,
   Cold,
   Poison,
-  Acid
+  Acid,
+  Necrotic
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -162,6 +163,10 @@ class Battle
     {
       var poison = attacker.Traits.OfType<PoisonerTrait>().First();
       ApplyPoison(poison, target, gs, result);
+    }
+    if (attacker.HasTrait<WeakenTrait>())
+    {
+      Console.WriteLine("Maybe weaken :o");
     }
   }
 
