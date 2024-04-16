@@ -23,6 +23,7 @@ enum Attribute
   Dexterity,
   Constitution,
   Piety, // What I renamed D&D's Wisdom
+  Will,
   MeleeAttackBonus,
   MissileAttackBonus,
   MonsterAttackBonus, // not going to bother having separate melee/missile atk bonuses for monsters

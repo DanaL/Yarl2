@@ -51,8 +51,17 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   protected IBehaviour _behaviour;
   public IBehaviour Behaviour => _behaviour;
 
-  public override int Z() => HasActiveTrait<FlyingTrait>() ? FLYING_Z : DEFAULT_Z;
+  public override int Z() 
+  {
+    foreach (var trait in Traits)
+    {
+      if (trait is FlyingTrait || trait is FloatingTrait)
+        return FLYING_Z;
+    }
 
+    return DEFAULT_Z;
+  }
+  
   public override string FullName => HasTrait<NamedTrait>() ? Name.Capitalize() : Name.DefArticle();
 
   public virtual int TotalMeleeAttackModifier() => 0;
@@ -183,7 +192,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public bool AbilityCheck(Attribute attr, int dc, Random rng)
   {
-    int roll = rng.Next(20) + 1 + Stats[attr].Curr;
+    int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;
+    int roll = rng.Next(20) + 1 + statMod;
+
     return roll >= dc;
   }
 }
@@ -230,6 +241,9 @@ class Mob : Actor
 
   public override Action TakeTurn(UserInterface ui, GameState gameState)
   {
+    if (HasActiveTrait<ParalyzedTrait>())
+      return new PassAction(gameState, this);
+    
     return _behaviour.CalcAction(this, gameState, ui);
   }
 }
@@ -252,7 +266,7 @@ class MonsterFactory
   static IMoveStrategy TextToMove(string txt) => txt.ToLower() switch
   {
     "door" => new DoorOpeningMoveStrategy(),
-    "flying" => new SimpleFlightMoveStrategy(),
+    "flying" or "floating" => new SimpleFlightMoveStrategy(),
     "wall" => new WallMoveStrategy(),
     _ => new DumbMoveStrategy()
   };

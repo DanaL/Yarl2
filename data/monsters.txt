@@ -21,3 +21,4 @@ drow warrior      |h|grey         |darkgrey  |15|20|5| 1.0|12|16| 8|Door|Missile
 owlbear           |Y|dullred      |brown     |13|25|4| 1.0|14|12| 5|Dumb|Melee#1#1#Piercing|Grappler#14
 cloaker           |b|grey         |darkgrey  |13|20|4| 1.0|12|14| 5|Flying|MirrorImage#7#1#3,Melee#8#1#Piercing|Flying
 shadow            | |black        |black     |13|20|3| 1.0|10|14| 5|Dumb|Melee#4#1#Necrotic|Weaken#13#1
+floating eye      |e|lightblue    |blue      |13|20|0|0.25|10|10| 4|Floating||ParalyzingGaze#18,Floating

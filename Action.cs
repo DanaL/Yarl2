@@ -443,11 +443,16 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
   bool CanMoveTo()
   {
+    static bool CanFly(Actor actor)
+    {
+      return actor.HasActiveTrait<FlyingTrait>() ||
+                actor.HasActiveTrait<FloatingTrait>();
+    }
     var tile = _map.TileAt(_loc.Row, _loc.Col);
 
     if (tile.Passable())
       return true;
-    else if (Actor!.HasActiveTrait<FlyingTrait>() && tile.PassableByFlight())
+    else if (CanFly(Actor!) && tile.PassableByFlight())
       return true;
 
     return false;
@@ -584,9 +589,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
       if (alerted.Contains(GameState.Player.ID))
       {
-        var txt = Actor.HasActiveTrait<FlyingTrait>() ? "You hear softly beating wings..."
-                                                    : "You hear padding footsteps...";
-        result.Messages.Add(new Message(txt, _loc, true));
+        string moveText = "You hear padding footsteps...";
+        if (Actor.HasActiveTrait<FlyingTrait>())
+          moveText = "You hear softly beating wings...";
+        else if (Actor.HasActiveTrait<FloatingTrait>())
+          moveText = "";
+        
+        if (moveText != "")
+          result.Messages.Add(new Message(moveText, _loc, true));
       }
     }
 

@@ -269,8 +269,13 @@ class PreGameHandler(UserInterface ui)
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    Actor mob = MonsterFactory.Get("shadow", rng);
+    Actor mob = MonsterFactory.Get("floating eye", rng);
     objDb.AddNewActor(mob, loc);
+
+    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+    Mob goblin = (Mob) MonsterFactory.Get("goblin", rng);    
+    objDb.AddNewActor(goblin, loc);
 
     AddGargoyle(rng, objDb, dungeon, 0);
 
@@ -397,7 +402,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      seed = -4960496;
+      seed = -643295855;
       // -758465673 this seed doesn't have a valid entrance loc?
 
       Console.WriteLine($"Seed: {seed}");

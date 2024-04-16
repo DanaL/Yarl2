@@ -232,6 +232,17 @@ class RageTrait(Actor actor) : Trait
   public override string AsText() => "Rage";
 }
 
+// A bit dumb to have floating and flying and maybe I'll merge them
+// eventually but at the moment floating creatures won't make noise
+// while they move
+class FloatingTrait : Trait
+{
+  public FloatingTrait() { }
+  public FloatingTrait(ulong expiry) => ExpiresOn = expiry;
+
+  public override string AsText() => $"Floating#{ExpiresOn}";
+}
+
 class FlyingTrait : Trait
 {
   public FlyingTrait() { }
@@ -378,6 +389,51 @@ class GrapplerTrait : Trait
   public int DC { get; set; }
 
   public override string AsText() => $"Grappler#{DC}";
+}
+
+class ParalyzingGazeTrait : Trait
+{
+  public int DC { get; set; }
+
+  public override string AsText() => $"ParalyzingGaze#{DC}";
+}
+
+class ParalyzedTrait : Trait, IGameEventListener
+{
+  public ulong VictimID { get; set; }
+  public int DC { get; set; }
+  public bool Expired { get; set; } = false;
+
+  public bool Listening => throw new NotImplementedException();
+
+  public override string AsText() => $"Paralyzed#{VictimID}#{DC}";
+
+  public string Apply(Actor victim, GameState gs)
+  {
+    // We'll allow only one paralyzed trait at a time. Although perhaps
+    // I should keep which one has the higher DC?
+    if (victim.HasTrait<ParalyzedTrait>())
+      return "";
+    victim.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} paralyzed!";
+  }
+
+  public void Alert(GameEventType eventType, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      {
+        victim.Traits.Remove(this);
+        Expired = true;
+        string msg = $"{victim.FullName.Capitalize()} can move again!";
+        gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+        gs.StopListening(GameEventType.EndOfRound, this);
+      }
+    }
+  }
 }
 
 class PoisonerTrait : Trait
@@ -837,6 +893,8 @@ class TraitFactory
         };      
       case "Flammable":
         return new FlammableTrait();
+      case "Floating":
+        return new FloatingTrait();
       case "Flying":
         return new FlyingTrait();
       case "Illusion":
@@ -926,6 +984,17 @@ class TraitFactory
         return new KnockBackTrait();
       case "Opaque":
         return new OpaqueTrait();
+      case "Paralyzed":
+        return new ParalyzedTrait()
+        {
+          VictimID = ulong.Parse(pieces[1]),
+          DC = int.Parse(pieces[2])
+        };
+      case "ParalyzingGaze":
+        return new ParalyzingGazeTrait()
+        {
+          DC = int.Parse(pieces[1])
+        };
       case "Plant":
         return new PlantTrait();
       case "Plural":

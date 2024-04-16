@@ -241,7 +241,7 @@ class Player : Actor, IPerformer
 
     lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(CharClass)}");
     lines.Add("");
-    lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
+    lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");
     lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
     lines.Add("");
@@ -262,6 +262,12 @@ class Player : Actor, IPerformer
 
   public override Action TakeTurn(UserInterface ui, GameState gameState)
   {
+    if (HasActiveTrait<ParalyzedTrait>())
+    {
+      gameState.UIRef().AlertPlayer(new Message("You cannot move!", Loc), "", gameState);
+      return new PassAction(gameState, this);
+    }
+
     if (ui.InputBuffer.Count > 0)
     {
       char ch = ui.InputBuffer.Dequeue();

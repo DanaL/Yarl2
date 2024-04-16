@@ -412,6 +412,12 @@ abstract class UserInterface
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
       statuses.Add("GRAPPLED");
     }
+    if (!statuses.Contains("PARALYZED") && gs.Player.HasActiveTrait<ParalyzedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "PARALYZED")];
+      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("GRAPPLED");
+    }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)
@@ -462,6 +468,25 @@ abstract class UserInterface
       WriteLine(" " + line, row++, col, width, Colours.WHITE);
     }
     WriteLine("", row, col, width, Colours.WHITE);
+  }
+
+  // TODO: DRY the two versions of AlertPlayer
+  public void AlertPlayer(Message alert, string ifNotSeen, GameState gs)
+  {
+    if (string.IsNullOrEmpty(alert.Text) && string.IsNullOrEmpty(ifNotSeen))
+      return;
+
+    HistoryUpdated = true;
+
+    var textToShow = !gs.RecentlySeen.Contains(alert.Loc) ? ifNotSeen : alert.Text;
+
+    if (MessageHistory.Count > 0 && MessageHistory[0].Message == textToShow)
+      MessageHistory[0] = new MsgHistory(textToShow, MessageHistory[0].Count + 1);
+    else
+      MessageHistory.Insert(0, new MsgHistory(textToShow, 1));
+
+    if (MessageHistory.Count > MaxHistory)
+      MessageHistory.RemoveAt(MaxHistory);
   }
 
   public void AlertPlayer(List<Message> alerts, string ifNotSeen, GameState gs)
