@@ -168,22 +168,20 @@ class Battle
       }
 
       if (attacker.Traits.OfType<WeakenTrait>().FirstOrDefault() is WeakenTrait weaken)
-      {
-        // I think this should be moved elsewhere because buff/debuff traits 
-        // will happen elsewhere (say, Potions of Strength or Weakness, etc)
-        // but I'm not sure where yet.
-        if (!target.AbilityCheck(Attribute.Constitution, weaken.DC, gs.Rng))
+      {       
+        var debuff = new StatBuffTrait()
         {
-          var debuff = new StatBuffTrait()
-          {
-            VictimID = target.ID,
-            Attr = Attribute.Strength,
-            Amt = -weaken.Amt,
-            ExpiresOn = gs.Turn + 100
-          };
-          string txt = debuff.Apply(gs);
-          if (txt != "")
-            result.Messages.Add(new Message(txt, target.Loc));
+          DC = weaken.DC,
+          VictimID = target.ID,
+          Attr = Attribute.Strength,
+          Amt = -weaken.Amt,
+          ExpiresOn = gs.Turn + 100
+        };
+
+        if (debuff.IsAffected(target, gs))
+        {
+          string txt = debuff.Apply(target, gs);
+          result.Messages.Add(new Message(txt, target.Loc));
         }
       }
     }

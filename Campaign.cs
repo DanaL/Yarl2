@@ -269,13 +269,13 @@ class PreGameHandler(UserInterface ui)
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    Actor mob = MonsterFactory.Get("floating eye", rng);
+    Actor mob = MonsterFactory.Get("shadow", rng);
     objDb.AddNewActor(mob, loc);
 
-    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    Mob goblin = (Mob) MonsterFactory.Get("goblin", rng);    
-    objDb.AddNewActor(goblin, loc);
+    //sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    //loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
+    //Mob goblin = (Mob) MonsterFactory.Get("goblin", rng);    
+    //objDb.AddNewActor(goblin, loc);
 
     AddGargoyle(rng, objDb, dungeon, 0);
 

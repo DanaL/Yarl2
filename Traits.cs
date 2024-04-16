@@ -528,8 +528,9 @@ class WeakenTrait : Trait
 }
 
 // Well, buff or debuff but that's fairly wordy...
-class StatBuffTrait : Trait, IGameEventListener
+class StatBuffTrait : EffectTrait, IGameEventListener
 {
+  public int DC { get; set; } = 10;
   public ulong VictimID { get; set; }
   public bool Expired { get; set; } = false;
   public bool Listening => true;
@@ -558,27 +559,27 @@ class StatBuffTrait : Trait, IGameEventListener
     return player ? "You feel different!" : "";
   }
 
-  public string Apply(GameState gs)
+  public override bool IsAffected(Actor victim, GameState gs)
   {
-    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
-    {
-      // We won't let a staff debuff lower a stat below -5. Let's not get out
-      // of hand
-      if (Amt < 0 && victim.Stats[Attr].Curr < -4)
-        return "";
+    // We won't let a staff debuff lower a stat below -5. Let's not get out
+    // of hand
+    if (Amt < 0 && victim.Stats[Attr].Curr < -4)
+      return false;
 
-      victim.Stats[Attr].Change(Amt);
-      victim.Traits.Add(this);
-      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    return !victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
+  }
 
-      return CalcMessage(victim, Amt);
-    }
+  public override string Apply(Actor victim, GameState gs)
+  {        
+    victim.Stats[Attr].Change(Amt);
+    victim.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return "";
+    return CalcMessage(victim, Amt);
   }
 
   // This perhaps doesn't need to be public?
-  string Remove(Actor victim, GameState gs)
+  string Remove(Actor victim)
   {    
     victim.Stats[Attr].Change(-Amt);
     victim.Traits.Remove(this);
@@ -594,7 +595,7 @@ class StatBuffTrait : Trait, IGameEventListener
 
       if (gs.ObjDb.GetObj(VictimID) is Actor victim)
       {
-        string txt = Remove(victim, gs);
+        string txt = Remove(victim);
         gs.UIRef().AlertPlayer([new Message(txt, victim.Loc)], "", gs);
       }
     }
