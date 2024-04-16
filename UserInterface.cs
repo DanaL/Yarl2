@@ -795,7 +795,7 @@ abstract class UserInterface
     if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
       return TileToSqr(ZLayer[scrRow, scrCol], true);
 
-    var (glyph, z, item) = gs.ObjDb.TopGlyph(loc);
+    var (glyph, z, rememberGlyph) = gs.ObjDb.TopGlyph(loc);
     // For a chasm sq, return the tile from the level below,
     // unless there's an Actor on this level (such as a flying
     // creature)
@@ -807,7 +807,7 @@ abstract class UserInterface
     if (z > tile.Z())
     {
       sqr = new Sqr(glyph.Lit, glyph.Bg, glyph.Ch);
-      if (item)
+      if (rememberGlyph)
         memory = sqr with { Fg = glyph.Unlit };
     }
     else

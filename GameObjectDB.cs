@@ -157,6 +157,17 @@ class GameObjectDB
     return null;
   }
 
+  bool RememberActor(Actor actor)
+  {
+    if (!actor.HasActiveTrait<DisguiseTrait>())
+      return false;
+
+    if (actor.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
+      return true;
+
+    return false;
+  }
+
   // I'm returning isItem because when remembering what glyphs were seen
   // (for displaying visited but out of site tiles) I want to remember items
   // but not actors
@@ -164,12 +175,18 @@ class GameObjectDB
   {
     var glyph = EMPTY;
     int z = 0;
-    bool isItem = false;
+    bool remember = false;
 
     if (_actorLocs.TryGetValue(loc, out ulong id))
     {
       glyph = Objs[id].Glyph;
-      z = Objs[id].Z();
+      Actor actor = (Actor) Objs[id];
+
+      // Disguised monsters should  be retained in memory
+      if (RememberActor(actor))
+        remember = true;
+
+      z = actor.Z();
     }
 
     if (_itemLocs.TryGetValue(loc, out var items))
@@ -180,12 +197,12 @@ class GameObjectDB
         {
           glyph = item.Glyph;
           z = item.Z();
-          isItem = true;
+          remember = true;
         }
       }
     }
 
-    return (glyph, z, isItem);
+    return (glyph, z, remember);
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
