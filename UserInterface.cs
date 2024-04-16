@@ -393,20 +393,33 @@ abstract class UserInterface
 
     // Write statuses
     int statusLineNum = ViewHeight - 3;
-    if (gs.Player.HasTrait<PoisonedTrait>())
+    HashSet<string> statuses = [];
+    if (!statuses.Contains("POISONED") && gs.Player.HasTrait<PoisonedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("POISONED");
     }
-    if (gs.Player.HasActiveTrait<RageTrait>())
+    if (!statuses.Contains("RAGE") && gs.Player.HasActiveTrait<RageTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("RAGE");
     }
-    if (gs.Player.HasActiveTrait<GrappledTrait>())
+    if (!statuses.Contains("GRAPPLED") && gs.Player.HasActiveTrait<GrappledTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "GRAPPLED")];
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("GRAPPLED");
+    }
+    foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
+    {
+      if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "WEAKENED")];
+        WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+        statuses.Add("WEAKENED");
+      }
     }
     
     var tile = gs.TileAt(gs.Player.Loc);

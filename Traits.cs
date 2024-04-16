@@ -455,7 +455,8 @@ class OnFireTrait : Trait, IGameEventListener
 class WeakenTrait : Trait
 {
   public int DC { get; set; }
-  public override string AsText() => $"Weaken#{DC}";
+  public int Amt { get; set; }
+  public override string AsText() => $"Weaken#{DC}#{Amt}";
 }
 
 // Well, buff or debuff but that's fairly wordy...
@@ -468,29 +469,66 @@ class StatBuffTrait : Trait, IGameEventListener
   public int Amt { get; set; }
   public override string AsText() => $"StatBuff#{VictimID}#{ExpiresOn}#{Attr}#{Amt}";
 
-  public void Apply(GameState gs)
+  string CalcMessage(Actor victim, int amt)
+  {
+    bool player = victim is Player;
+    if (Attr == Attribute.Strength && amt > 0)
+    {
+      if (player)
+        return "You feel stronger!";
+      else
+        return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "look")} stronger!";
+    }
+    else if (Attr == Attribute.Strength && amt < 0)
+    {
+      if (player)
+        return "You feel weaker!";
+      else
+        return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "look")} weaker!";
+    }
+
+    return player ? "You feel different!" : "";
+  }
+
+  public string Apply(GameState gs)
   {
     if (gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
+      // We won't let a staff debuff lower a stat below -5. Let's not get out
+      // of hand
+      if (Amt < 0 && victim.Stats[Attr].Curr < -4)
+        return "";
+
       victim.Stats[Attr].Change(Amt);
+      victim.Traits.Add(this);
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+      return CalcMessage(victim, Amt);
     }
+
+    return "";
   }
 
   // This perhaps doesn't need to be public?
-  public void Remove(GameState gs)
-  {
-    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
-    {
-      victim.Stats[Attr].Change(-Amt);
-      victim.Traits.Remove(this);
-    }
+  string Remove(Actor victim, GameState gs)
+  {    
+    victim.Stats[Attr].Change(-Amt);
+    victim.Traits.Remove(this);
+    
+    return CalcMessage(victim, -Amt);    
   }
 
   public void Alert(GameEventType eventType, GameState gs)
   {
     if (gs.Turn > ExpiresOn)
     {
-      Remove(gs);
+      gs.StopListening(GameEventType.EndOfRound, this);
+
+      if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+      {
+        string txt = Remove(victim, gs);
+        gs.UIRef().AlertPlayer([new Message(txt, victim.Loc)], "", gs);
+      }
     }
   }
 }
@@ -958,7 +996,8 @@ class TraitFactory
       case "Weaken":
         return new WeakenTrait()
         {
-          DC = int.Parse(pieces[1])
+          DC = int.Parse(pieces[1]),
+          Amt = int.Parse(pieces[2])
         };
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);

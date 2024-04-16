@@ -159,14 +159,33 @@ class Battle
     int hpLeft = target.ReceiveDmg(dmg, bonusDamage, gs);
     ResolveHit(attacker, target, hpLeft, result, msg, gs);
 
-    if (attacker.HasTrait<PoisonerTrait>())
+    if (attacker.Traits.Count > 0)
     {
-      var poison = attacker.Traits.OfType<PoisonerTrait>().First();
-      ApplyPoison(poison, target, gs, result);
-    }
-    if (attacker.HasTrait<WeakenTrait>())
-    {
-      Console.WriteLine("Maybe weaken :o");
+      if (attacker.HasTrait<PoisonerTrait>())
+      {
+        var poison = attacker.Traits.OfType<PoisonerTrait>().First();
+        ApplyPoison(poison, target, gs, result);
+      }
+
+      if (attacker.Traits.OfType<WeakenTrait>().FirstOrDefault() is WeakenTrait weaken)
+      {
+        // I think this should be moved elsewhere because buff/debuff traits 
+        // will happen elsewhere (say, Potions of Strength or Weakness, etc)
+        // but I'm not sure where yet.
+        if (!target.AbilityCheck(Attribute.Constitution, weaken.DC, gs.Rng))
+        {
+          var debuff = new StatBuffTrait()
+          {
+            VictimID = target.ID,
+            Attr = Attribute.Strength,
+            Amt = -weaken.Amt,
+            ExpiresOn = gs.Turn + 100
+          };
+          string txt = debuff.Apply(gs);
+          if (txt != "")
+            result.Messages.Add(new Message(txt, target.Loc));
+        }
+      }
     }
   }
 

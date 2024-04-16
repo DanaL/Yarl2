@@ -53,6 +53,30 @@ enum Verb
 
 record Message(string Text, Loc Loc, bool Sound=false);
 
+// I think my verb enum and CalcVerb(), and maybe the whole MessageFactory
+// class were dumb ideas and I can just replace them with this 
+class Grammar
+{
+  public static string Conjugate(GameObj subject, string verb)
+  {
+    var player = subject is Player;
+
+    if (verb == "is" && player)
+      return "are";
+    else if (verb == "is")
+      return verb;
+    
+    if (subject is Player)
+      return verb;
+    else if (verb == "miss")
+      return "misses";
+    else if (verb == "ready")
+      return "readies";
+    else
+      return verb + "s";
+  }
+}
+
 class MsgFactory
 {
     public static string CalcVerb(GameObj subject, Verb verb, bool thirdP = false)

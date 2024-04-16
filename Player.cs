@@ -14,430 +14,439 @@ namespace Yarl2;
 
 enum PlayerClass
 {
-    OrcReaver,
-    DwarfStalwart
+  OrcReaver,
+  DwarfStalwart
 }
 
 class Player : Actor, IPerformer
 {
-    public const int MAX_VISION_RADIUS = 25;
-    public PlayerClass CharClass { get; set; }
-    
-    InputAccumulator? _accumulator;
-    Action? _deferred;
+  public const int MAX_VISION_RADIUS = 25;
+  public PlayerClass CharClass { get; set; }
 
-    public Player(string name)
+  InputAccumulator? _accumulator;
+  Action? _deferred;
+
+  public Player(string name)
+  {
+    Name = name;
+    Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
+                    // when a Player's recover is bolstered by, like, a Potion of Speed or such?        
+  }
+
+  public override int Z() => 12;
+
+  public override string FullName => "you";
+
+  public override int AC
+  {
+    get
     {
-        Name = name;        
-        Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
-                        // when a Player's recover is bolstered by, like, a Potion of Speed or such?        
-    }
+      int ac = 10 + Stats[Attribute.Dexterity].Curr;
 
-    public override int Z() => 12;
-
-    public override string FullName => "you";
-
-    public override int AC 
-    {
-        get 
+      int armour = 0;
+      foreach (var slot in Inventory.UsedSlots())
+      {
+        var (item, _) = Inventory.ItemAt(slot);
+        if (item.Equiped)
         {
-            int ac = 10 + Stats[Attribute.Dexterity].Curr;
-
-            int armour = 0;
-            foreach (var slot in Inventory.UsedSlots())
-            {
-                var (item, _) = Inventory.ItemAt(slot);
-                if (item.Equiped)
-                {
-                    armour += item.Traits.OfType<ArmourTrait>()
-                                         .Select(t => t.ArmourMod + t.Bonus)
-                                         .Sum();
-                }
-            }
-
-            ac += Traits.OfType<ACModTrait>()
-                        .Select(t => t.ArmourMod)
-                        .Sum();
-
-            return ac + armour;
+          armour += item.Traits.OfType<ArmourTrait>()
+                               .Select(t => t.ArmourMod + t.Bonus)
+                               .Sum();
         }
+      }
+
+      ac += Traits.OfType<ACModTrait>()
+                  .Select(t => t.ArmourMod)
+                  .Sum();
+
+      return ac + armour;
+    }
+  }
+
+  public override int TotalMissileAttackModifier(Item weapon)
+  {
+    int mod = Stats[Attribute.Dexterity].Curr;
+
+    if (Stats.TryGetValue(Attribute.MissileAttackBonus, out var missibleAttackBonus))
+      mod += missibleAttackBonus.Curr;
+
+    AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
+                                                .Where(t => t is AttackTrait)
+                                                .FirstOrDefault()
+                                        ?? new AttackTrait() { Bonus = 0 };
+    mod += attackTrait.Bonus;
+
+    return mod;
+  }
+
+  public override int TotalMeleeAttackModifier()
+  {
+    int mod = Stats[Attribute.Strength].Curr;
+
+    var weapon = Inventory.ReadiedWeapon();
+    if (weapon is not null)
+    {
+      AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
+                                                      .Where(t => t is AttackTrait)
+                                                      .FirstOrDefault()
+                                      ?? new AttackTrait() { Bonus = 0 };
+      mod += attackTrait.Bonus;
     }
 
-    public override int TotalMissileAttackModifier(Item weapon)
+    if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var meleeAttackBonus))
+      mod += meleeAttackBonus.Curr;
+
+    return mod;
+  }
+
+  public override List<Damage> MeleeDamage()
+  {
+    List<Damage> dmgs = [];
+
+    Item? weapon = Inventory.ReadiedWeapon();
+    if (weapon is not null)
     {
-       int mod = Stats[Attribute.Dexterity].Curr;
-
-       if (Stats.TryGetValue(Attribute.MissileAttackBonus, out var missibleAttackBonus))
-            mod += missibleAttackBonus.Curr;
-
-        AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
-                                                    .Where(t => t is AttackTrait)
-                                                    .FirstOrDefault()
-                                            ?? new AttackTrait() { Bonus = 0 };
-        mod += attackTrait.Bonus;
-
-        return mod;
-    }
-
-    public override int TotalMeleeAttackModifier()
-    {
-        int mod = Stats[Attribute.Strength].Curr;
-               
-        var weapon = Inventory.ReadiedWeapon();
-        if (weapon is not null)
+      foreach (var trait in weapon.Traits)
+      {
+        if (trait is DamageTrait dmg)
         {
-            AttackTrait? attackTrait = (AttackTrait?) weapon.Traits
-                                                            .Where(t => t is AttackTrait)
-                                                            .FirstOrDefault()
-                                            ?? new AttackTrait() { Bonus = 0 };
-            mod += attackTrait.Bonus;
+          dmgs.Add(new Damage(dmg.DamageDie, dmg.NumOfDie, dmg.DamageType));
         }
-
-        if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var meleeAttackBonus))
-            mod += meleeAttackBonus.Curr;
-
-        return mod;
+      }
+    }
+    else
+    {
+      // Perhaps eventually there will be a Monk Role, or one 
+      // with claws or such
+      dmgs.Add(new Damage(1, 1, DamageType.Blunt));
     }
 
-    public override List<Damage> MeleeDamage()
-    {
-        List<Damage> dmgs = [];
+    return dmgs;
+  }
 
-        Item? weapon = Inventory.ReadiedWeapon();
-        if (weapon is not null)
+  public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
+  {
+    int playerVisionRadius = 1;
+
+    // What latitude does the game take place out? Will I eventually
+    // have seasonal variation in the length of days? :O
+    if (gs.InWilderness)
+    {
+      var (hour, _) = gs.CurrTime();
+      if (hour >= 6 && hour <= 19)
+        playerVisionRadius = MAX_VISION_RADIUS;
+      else if (hour >= 20 && hour <= 21)
+        playerVisionRadius = 7;
+      else if (hour >= 21 && hour <= 23)
+        playerVisionRadius = 3;
+      else if (hour < 4)
+        playerVisionRadius = 2;
+      else if (hour == 4)
+        playerVisionRadius = 3;
+      else
+        playerVisionRadius = 7;
+    }
+
+    List<(ulong, int, TerrainFlag)> auras = [(ID, playerVisionRadius, TerrainFlag.Lit)];
+
+    foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
+    {
+      auras.AddRange(item.Auras(gs));
+    }
+
+    return auras;
+  }
+
+  void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
+  {
+    var slots = Inventory.UsedSlots().Order().ToArray();
+
+    if (slots.Length == 0)
+    {
+      //ui.AlertPlayer("You are empty handed!");
+      return;
+    }
+
+    List<string> lines = [title];
+    foreach (var s in slots)
+    {
+      var (item, count) = Inventory.ItemAt(s);
+      string desc = count == 1 ? item.FullName.IndefArticle()
+                               : $"{count} {item.FullName.Pluralize()}";
+
+      if (item.Equiped)
+      {
+        if (item.Type == ItemType.Weapon)
+          desc += " (in hand)";
+        else if (item.Type == ItemType.Armour)
+          desc += " (worn)";
+      }
+      lines.Add($"{s}) {desc}");
+    }
+
+    if (mentionMoney)
+    {
+      lines.Add("");
+      if (Inventory.Zorkmids == 0)
+        lines.Add("You seem to be broke.");
+      else if (Inventory.Zorkmids == 1)
+        lines.Add("You have a single zorkmid.");
+      else
+        lines.Add($"You wallet contains {Inventory.Zorkmids} zorkmids.");
+    }
+
+    if (!string.IsNullOrEmpty(instructions))
+    {
+      lines.Add("");
+      lines.AddRange(instructions.Split('\n'));
+    }
+
+    ui.ShowDropDown(lines);
+  }
+
+  static HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
+  {
+    HashSet<char> options = [];
+    List<string> lines = ["What do you pick up?"];
+    char slot = 'a';
+    foreach (var item in items)
+    {
+      options.Add(slot);
+      string desc = item.Name; // ItemMenuDesc(item);
+      lines.Add($"{slot++}) {desc}");
+    }
+    ui.ShowDropDown(lines);
+
+    return options;
+  }
+
+  string PrintStat(Attribute attr)
+  {
+    string Fmt(int v)
+    {
+      return v > 0 ? $"+{v}" : $"{v}";
+    }
+    int val = Stats[attr].Curr;
+    int max = Stats[attr].Max;
+
+    if (val != max)
+      return $"{Fmt(val)} ({Fmt(max)})";
+    else
+      return Fmt(val);
+  }
+
+  List<string> CharacterSheet()
+  {
+    List<string> lines = [];
+
+    lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(CharClass)}");
+    lines.Add("");
+    lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
+    lines.Add("");
+    lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
+    lines.Add("");
+
+    if (Stats[Attribute.Depth].Max == 0)
+      lines.Add("You have yet to venture into the Dungeon.");
+    else
+      lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
+
+    return lines;
+  }
+
+  public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
+  {
+    _deferred = newAction;
+    _accumulator = newAccumulator;
+  }
+
+  public override Action TakeTurn(UserInterface ui, GameState gameState)
+  {
+    if (ui.InputBuffer.Count > 0)
+    {
+      char ch = ui.InputBuffer.Dequeue();
+
+      if (_accumulator is not null)
+      {
+        _accumulator.Input(ch);
+        if (!_accumulator.Done)
         {
-            foreach (var trait in weapon.Traits)
-            {
-                if (trait is DamageTrait dmg)
-                {
-                    dmgs.Add(new Damage(dmg.DamageDie, dmg.NumOfDie, dmg.DamageType));
-                }
-            }
+          if (_accumulator.Msg != "")
+            ui.Popup(_accumulator.Msg);
+          return new NullAction();
         }
         else
         {
-            // Perhaps eventually there will be a Monk Role, or one 
-            // with claws or such
-            dmgs.Add(new Damage(1, 1, DamageType.Blunt));
-        }
-
-        return dmgs;
-    }
-
-    public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
-    {
-        int playerVisionRadius = 1;
-        
-        // What latitude does the game take place out? Will I eventually
-        // have seasonal variation in the length of days? :O
-        if (gs.InWilderness)
-        {
-            var (hour, _) = gs.CurrTime();
-            if (hour >= 6 && hour <= 19)
-                playerVisionRadius = MAX_VISION_RADIUS;
-            else if (hour >= 20 && hour <= 21)
-                playerVisionRadius = 7;
-            else if (hour >= 21 && hour <= 23)
-                playerVisionRadius = 3;
-            else if (hour < 4)
-                playerVisionRadius = 2;
-            else if (hour == 4)
-                playerVisionRadius = 3;
-            else
-                playerVisionRadius = 7;
-        }
-        
-        List<(ulong, int, TerrainFlag)> auras = [ (ID, playerVisionRadius, TerrainFlag.Lit)] ;
-
-        foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
-        {
-            auras.AddRange(item.Auras(gs));
-        }
-
-        return auras;
-    }
-        
-    void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
-    {
-        var slots = Inventory.UsedSlots().Order().ToArray();
-
-        if (slots.Length == 0)
-        {
-            //ui.AlertPlayer("You are empty handed!");
-            return;
-        }
-
-        List<string> lines = [ title ];
-        foreach (var s in slots)
-        {
-            var (item, count) = Inventory.ItemAt(s);
-            string desc = count == 1 ? item.FullName.IndefArticle()
-                                     : $"{count} {item.FullName.Pluralize()}";
-
-            if (item.Equiped)
-            {
-                if (item.Type == ItemType.Weapon)
-                    desc += " (in hand)";
-                else if (item.Type == ItemType.Armour)
-                    desc += " (worn)";
-            }
-            lines.Add($"{s}) {desc}");
-        }
-
-        if (mentionMoney)
-        {
-            lines.Add("");
-            if (Inventory.Zorkmids == 0)
-                lines.Add("You seem to be broke.");
-            else if (Inventory.Zorkmids == 1)
-                lines.Add("You have a single zorkmid.");
-            else
-                lines.Add($"You wallet contains {Inventory.Zorkmids} zorkmids.");                
-        }
-
-        if (!string.IsNullOrEmpty(instructions))
-        {
-            lines.Add("");
-            lines.AddRange(instructions.Split('\n'));
-        }
-
-        ui.ShowDropDown(lines);
-    }
-
-    static HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
-    {                    
-        HashSet<char> options = [];
-        List<string> lines = [ "What do you pick up?"] ;
-        char slot = 'a';
-        foreach (var item in items)
-        {
-            options.Add(slot);
-            string desc = item.Name; // ItemMenuDesc(item);
-            lines.Add($"{slot++}) {desc}");
-        }
-        ui.ShowDropDown(lines);
-
-        return options;
-    }
-    
-    string PrintStat(Attribute attr)
-    {
-        int val = Stats[attr].Curr;
-        return val > 0 ? $"+{val}" : $"{val}";
-    }
-
-    List<string> CharacterSheet()
-    {
-        List<string> lines = [];
-
-        lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(CharClass)}");
-        lines.Add("");
-        lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}");
-        lines.Add("");
-        lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
-        lines.Add("");
-
-        if (Stats[Attribute.Depth].Max == 0)
-            lines.Add("You have yet to venture into the Dungeon.");
-        else
-            lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
-
-        return lines;
-    }
-
-    public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
-    {
-        _deferred = newAction;
-        _accumulator = newAccumulator;
-    }
-
-    public override Action TakeTurn(UserInterface ui, GameState gameState)
-    {        
-        if (ui.InputBuffer.Count > 0)
-        {            
-            char ch = ui.InputBuffer.Dequeue();
-            
-            if (_accumulator is not null)
-            {
-                _accumulator.Input(ch);
-                if (!_accumulator.Done)
-                {
-                    if (_accumulator.Msg != "")
-                        ui.Popup(_accumulator.Msg);
-                    return new NullAction();
-                }
-                else
-                {                    
-                    if (_accumulator.Success)
-                    {
-                        _deferred.ReceiveAccResult(_accumulator.GetResult());
-                        _accumulator = null;
-                        ui.ClosePopup();
-                        return _deferred;
-                    }
-                    else
-                    {
-                        _accumulator = null;
-                        ui.CloseMenu();
-                        ui.ClosePopup();
-                        ui.AlertPlayer([MsgFactory.Phrase("Nevermind.", gameState.Player.Loc)], "", gameState);
-                        return new NullAction();
-                    }
-                }
-            }
-
+          if (_accumulator.Success)
+          {
+            _deferred.ReceiveAccResult(_accumulator.GetResult());
+            _accumulator = null;
             ui.ClosePopup();
-
-            if (ch == 'h')
-                return new MoveAction(gameState, this, Loc.Move(0, -1));
-            else if (ch == 'j')
-                return new MoveAction(gameState, this, Loc.Move(1, 0));
-            else if (ch == 'k')
-                return new MoveAction(gameState, this, Loc.Move(-1, 0));
-            else if (ch == 'l')
-                return new MoveAction(gameState, this, Loc.Move(0, 1));
-            else if (ch == 'y')
-                return new MoveAction(gameState, this, Loc.Move(-1, -1));
-            else if (ch == 'u')
-                return new MoveAction(gameState, this, Loc.Move(-1, 1));
-            else if (ch == 'b')
-                return new MoveAction(gameState, this, Loc.Move(1, -1));
-            else if (ch == 'n')
-                return new MoveAction(gameState, this, Loc.Move(1, 1));
-            else if (ch == 'E')
-                return new PortalAction(gameState);
-            else if (ch == '>')
-                return new DownstairsAction(gameState);
-            else if (ch == '<')
-                return new UpstairsAction(gameState);
-            else if (ch == 'i')
-            {
-                ShowInventory(ui, "You are carrying:", "", true);
-                _accumulator = new PauseForMoreAccumulator();
-                _deferred = new CloseMenuAction(gameState);
-            }
-            else if (ch == ',')
-            {
-                var itemStack = gameState.ObjDb.ItemsAt(Loc);
-
-                if (itemStack is null || itemStack.Count == 0)
-                {
-                    ui.AlertPlayer([MsgFactory.Phrase("There's nothing there...", gameState.Player.Loc)], "", gameState);
-                    return new NullAction();
-                }
-                else if (itemStack.Count == 1) 
-                {
-                    var a = new PickupItemAction(gameState, this);
-                    // A bit kludgy but this sets up the Action as though
-                    // the player had selected the first item in a list of one
-                    var mr = new MenuAccumulatorResult() { Choice = 'a' };                
-                    a.ReceiveAccResult(mr); 
-                    return a;
-                }
-                else 
-                {
-                    var opts = ShowPickupMenu(ui, itemStack);
-                    _accumulator = new InventoryAccumulator(opts);
-                    _deferred = new PickupItemAction(gameState, this);
-                }
-            }
-            else if (ch == 'a')
-            {
-                ShowInventory(ui, "Use which item?", "");
-                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new UseItemAction(gameState, this);
-            }
-            else if (ch == 'd')
-            {
-                ShowInventory(ui, "Drop what?", "", true);
-                HashSet<char> slots = [.. Inventory.UsedSlots()];
-                slots.Add('$');
-                _accumulator = new InventoryAccumulator(slots);
-                _deferred = new DropItemAction(gameState, this);
-            }            
-            else if (ch == 't')
-            {
-                // Eventually I'll want to remember the last item thrown
-                // so the player doesn't need to always select an item if
-                // they're throwing draggers several turns in a row
-                string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-                ShowInventory(ui, "Throw what?", instructions);
-                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ThrowSelectionAction(gameState, this);
-            }
-            else if (ch == 'e')
-            {
-                _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-                _deferred = new ToggleEquipedAction(gameState, this);
-                ShowInventory(ui, "Equip what?", "");
-            }
-            else if (ch == 'c')
-            {
-                _accumulator = new DirectionAccumulator();
-                _deferred = new CloseDoorAction(gameState, this, gameState.Map);                
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
-            }
-            else if (ch == 'C')
-            {
-                _accumulator = new DirectionAccumulator();
-                _deferred = new ChatAction(gameState, this);
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
-            }
-            else if (ch == 'o')
-            {
-                _accumulator = new DirectionAccumulator();
-                _deferred = new OpenDoorAction(gameState, this, gameState.Map);
-                ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
-            }
-            else if (ch == 'Q')
-            {
-                _accumulator = new YesNoAccumulator();
-                _deferred = new QuitAction();
-                ui.Popup("Really quit?\n\nYour game won't be saved! (y/n)");
-            }                
-            else if (ch == 'S')
-            {
-                _accumulator = new YesNoAccumulator();
-                _deferred = new SaveGameAction();
-                ui.Popup("Quit & Save? (y/n)");
-            }
-            else if (ch == '*')
-            {
-                var lines = ui.MessageHistory.Select(m => m.Fmt);
-                _accumulator = new LongMessageAccumulator(ui, lines);
-                _deferred = new NullAction();
-            }
-            else if (ch == '@')
-            {
-                var lines = CharacterSheet();
-                _accumulator = new LongMessageAccumulator(ui, lines);
-                _deferred = new NullAction();
-            }
-            else if (ch == '?')
-            {
-                var time = gameState.CurrTime();
-                var hour = time.Item1.ToString().PadLeft(2, '0');
-                var minute = time.Item2.ToString().PadLeft(2, '0');
-                var msg = new Message($"The current time is {hour}:{minute}", Loc);
-                gameState.Turn += 1000;
-                ui.AlertPlayer([msg], "", gameState);
-            }
-            else if (ch == 'W')
-            {                
-                foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
-                {
-                    if (gameState.Rng.NextDouble() < 0.666)
-                    {
-                        var w = ItemFactory.Web();
-                        gameState.ObjDb.Add(w);
-                        gameState.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2});
-                    }
-                }
-            }
-            else if (ch == ' ' || ch == '.')
-                return new PassAction();
+            return _deferred;
+          }
+          else
+          {
+            _accumulator = null;
+            ui.CloseMenu();
+            ui.ClosePopup();
+            ui.AlertPlayer([MsgFactory.Phrase("Nevermind.", gameState.Player.Loc)], "", gameState);
+            return new NullAction();
+          }
         }
+      }
 
-        return new NullAction();
+      ui.ClosePopup();
+
+      if (ch == 'h')
+        return new MoveAction(gameState, this, Loc.Move(0, -1));
+      else if (ch == 'j')
+        return new MoveAction(gameState, this, Loc.Move(1, 0));
+      else if (ch == 'k')
+        return new MoveAction(gameState, this, Loc.Move(-1, 0));
+      else if (ch == 'l')
+        return new MoveAction(gameState, this, Loc.Move(0, 1));
+      else if (ch == 'y')
+        return new MoveAction(gameState, this, Loc.Move(-1, -1));
+      else if (ch == 'u')
+        return new MoveAction(gameState, this, Loc.Move(-1, 1));
+      else if (ch == 'b')
+        return new MoveAction(gameState, this, Loc.Move(1, -1));
+      else if (ch == 'n')
+        return new MoveAction(gameState, this, Loc.Move(1, 1));
+      else if (ch == 'E')
+        return new PortalAction(gameState);
+      else if (ch == '>')
+        return new DownstairsAction(gameState);
+      else if (ch == '<')
+        return new UpstairsAction(gameState);
+      else if (ch == 'i')
+      {
+        ShowInventory(ui, "You are carrying:", "", true);
+        _accumulator = new PauseForMoreAccumulator();
+        _deferred = new CloseMenuAction(gameState);
+      }
+      else if (ch == ',')
+      {
+        var itemStack = gameState.ObjDb.ItemsAt(Loc);
+
+        if (itemStack is null || itemStack.Count == 0)
+        {
+          ui.AlertPlayer([MsgFactory.Phrase("There's nothing there...", gameState.Player.Loc)], "", gameState);
+          return new NullAction();
+        }
+        else if (itemStack.Count == 1)
+        {
+          var a = new PickupItemAction(gameState, this);
+          // A bit kludgy but this sets up the Action as though
+          // the player had selected the first item in a list of one
+          var mr = new MenuAccumulatorResult() { Choice = 'a' };
+          a.ReceiveAccResult(mr);
+          return a;
+        }
+        else
+        {
+          var opts = ShowPickupMenu(ui, itemStack);
+          _accumulator = new InventoryAccumulator(opts);
+          _deferred = new PickupItemAction(gameState, this);
+        }
+      }
+      else if (ch == 'a')
+      {
+        ShowInventory(ui, "Use which item?", "");
+        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _deferred = new UseItemAction(gameState, this);
+      }
+      else if (ch == 'd')
+      {
+        ShowInventory(ui, "Drop what?", "", true);
+        HashSet<char> slots = [.. Inventory.UsedSlots()];
+        slots.Add('$');
+        _accumulator = new InventoryAccumulator(slots);
+        _deferred = new DropItemAction(gameState, this);
+      }
+      else if (ch == 't')
+      {
+        // Eventually I'll want to remember the last item thrown
+        // so the player doesn't need to always select an item if
+        // they're throwing draggers several turns in a row
+        string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
+        ShowInventory(ui, "Throw what?", instructions);
+        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _deferred = new ThrowSelectionAction(gameState, this);
+      }
+      else if (ch == 'e')
+      {
+        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _deferred = new ToggleEquipedAction(gameState, this);
+        ShowInventory(ui, "Equip what?", "");
+      }
+      else if (ch == 'c')
+      {
+        _accumulator = new DirectionAccumulator();
+        _deferred = new CloseDoorAction(gameState, this, gameState.Map);
+        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+      }
+      else if (ch == 'C')
+      {
+        _accumulator = new DirectionAccumulator();
+        _deferred = new ChatAction(gameState, this);
+        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+      }
+      else if (ch == 'o')
+      {
+        _accumulator = new DirectionAccumulator();
+        _deferred = new OpenDoorAction(gameState, this, gameState.Map);
+        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+      }
+      else if (ch == 'Q')
+      {
+        _accumulator = new YesNoAccumulator();
+        _deferred = new QuitAction();
+        ui.Popup("Really quit?\n\nYour game won't be saved! (y/n)");
+      }
+      else if (ch == 'S')
+      {
+        _accumulator = new YesNoAccumulator();
+        _deferred = new SaveGameAction();
+        ui.Popup("Quit & Save? (y/n)");
+      }
+      else if (ch == '*')
+      {
+        var lines = ui.MessageHistory.Select(m => m.Fmt);
+        _accumulator = new LongMessageAccumulator(ui, lines);
+        _deferred = new NullAction();
+      }
+      else if (ch == '@')
+      {
+        var lines = CharacterSheet();
+        _accumulator = new LongMessageAccumulator(ui, lines);
+        _deferred = new NullAction();
+      }
+      else if (ch == '?')
+      {
+        var time = gameState.CurrTime();
+        var hour = time.Item1.ToString().PadLeft(2, '0');
+        var minute = time.Item2.ToString().PadLeft(2, '0');
+        var msg = new Message($"The current time is {hour}:{minute}", Loc);
+        gameState.Turn += 1000;
+        ui.AlertPlayer([msg], "", gameState);
+      }
+      else if (ch == 'W')
+      {
+        foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
+        {
+          if (gameState.Rng.NextDouble() < 0.666)
+          {
+            var w = ItemFactory.Web();
+            gameState.ObjDb.Add(w);
+            gameState.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2 });
+          }
+        }
+      }
+      else if (ch == ' ' || ch == '.')
+        return new PassAction();
     }
+
+    return new NullAction();
+  }
 }
