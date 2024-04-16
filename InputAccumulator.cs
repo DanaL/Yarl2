@@ -37,9 +37,9 @@ class AimAccumulator : InputAccumulator
   readonly GameState _gs;
   Loc _start;
   Loc _target;
-  AimAnimation _anim;
+  readonly AimAnimation _anim;
   readonly int _maxRange;
-  List<Loc> _monsters = [];
+  readonly List<Loc> _monsters = [];
   int _targeted = -1;
 
   public AimAccumulator(UserInterface ui, GameState gs, Loc start, int maxRange)
@@ -63,6 +63,9 @@ class AimAccumulator : InputAccumulator
       {
         var occ = _gs.ObjDb.Occupant(loc);
         if (occ is null || occ.ID == _gs.Player.ID)
+          continue;
+
+        if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
           continue;
 
         _monsters.Add(loc);

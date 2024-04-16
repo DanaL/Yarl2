@@ -157,7 +157,7 @@ class GameObjectDB
     return null;
   }
 
-  bool RememberActor(Actor actor)
+  static bool RememberActor(Actor actor)
   {
     if (!actor.HasActiveTrait<DisguiseTrait>())
       return false;
