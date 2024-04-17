@@ -478,13 +478,13 @@ abstract class UserInterface
 
   // TODO: DRY the two versions of AlertPlayer
   public void AlertPlayer(Message alert, string ifNotSeen, GameState gs)
-  {    
-    if (string.IsNullOrEmpty(alert.Text) && string.IsNullOrEmpty(ifNotSeen))
+  {            
+    var textToShow = gs.RecentlySeen.Contains(alert.Loc) ? alert.Text : ifNotSeen;
+
+    if (textToShow.Trim().Length == 0)
       return;
 
     HistoryUpdated = true;
-
-    var textToShow = !gs.RecentlySeen.Contains(alert.Loc) ? ifNotSeen : alert.Text;
 
     if (MessageHistory.Count > 0 && MessageHistory[0].Message == textToShow)
       MessageHistory[0] = new MsgHistory(textToShow, MessageHistory[0].Count + 1);
