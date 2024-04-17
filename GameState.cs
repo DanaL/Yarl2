@@ -498,12 +498,46 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return objs;
   }
 
+  // Sort of the same as Noise. I can probably DRY them?
+  public HashSet<Loc> Flood(Loc start, int radius)
+  {
+    HashSet<Loc> affected = [];
+    var map = CurrentMap;
+    var q = new Queue<Loc>();
+    q.Enqueue(start);
+    var visited = new HashSet<Loc>() { start };
+
+    while (q.Count > 0)
+    {
+      var curr = q.Dequeue();
+
+      foreach (var n in Util.Adj8Locs(curr))
+      {
+        if (Util.Distance(curr, n) > radius || !map.InBounds(n.Row, n.Col))
+          continue;
+        if (visited.Contains(n))
+          continue;
+
+        visited.Add(n);
+
+        var tile = map.TileAt(n.Row, n.Col);
+        if (!tile.PassableByFlight())
+          continue;
+
+        affected.Add(n);
+
+        q.Enqueue(n);
+      }
+    }
+
+    return affected;
+  }
+
   // Make a noise in the dungeon, start at the source and flood-fill out 
   // decrementing the volume until we hit 0. We'll alert any Actors found
   // the noise
   public HashSet<ulong> Noise(ulong sourceID, int startRow, int startCol, int volume)
   {
-    long startTime = Stopwatch.GetTimestamp();
     var alerted = new HashSet<ulong>();
     var map = CurrentMap;
     var q = new Queue<(int, int, int)>();
@@ -544,9 +578,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           q.Enqueue((n.Item1, n.Item2, curr.Item3 - 1));
       }
     }
-
-    var elapsed = Stopwatch.GetElapsedTime(startTime);
-    //Console.WriteLine($"noise time ({sourceID}): {elapsed.TotalMicroseconds}");
 
     return alerted;
   }

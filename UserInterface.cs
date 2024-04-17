@@ -416,7 +416,13 @@ abstract class UserInterface
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "PARALYZED")];
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
-      statuses.Add("GRAPPLED");
+      statuses.Add("PARALYZED");
+    }
+    if (!statuses.Contains("CONFUSED") && gs.Player.HasActiveTrait<ConfusedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "CONFUSED")];
+      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("CONFUSED");
     }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {
