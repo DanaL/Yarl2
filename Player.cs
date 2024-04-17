@@ -260,6 +260,43 @@ class Player : Actor, IPerformer
     _accumulator = newAccumulator;
   }
 
+  static bool IsMoveKey(char ch) => ch switch
+  {
+    'h' => true,
+    'j' => true,
+    'k' => true,
+    'l' => true,
+    'y' => true,
+    'u' => true,
+    'b' => true,
+    'n' => true,
+    _ => false
+  };
+
+  MoveAction CalcMovementAction(GameState gs, char ch)
+  {
+    if (HasTrait<ConfusedTrait>())
+    {
+      gs.UIRef().AlertPlayer(new Message("You are confused!", Loc), "", gs);
+      char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
+      ch = dirs[gs.Rng.Next(dirs.Length)];
+    }
+
+    (int dr, int dc) = ch switch
+    {
+      'h' => (0, -1),
+      'j' => (1, 0),
+      'k' => (-1, 0),
+      'l' => (0, 1),
+      'y' => (-1, -1),
+      'u' => (-1, 1),
+      'b' => (1, -1),
+      _ => (1, 1)
+    };
+
+    return new MoveAction(gs, this, Loc.Move(dr, dc));
+  }
+
   public override Action TakeTurn(UserInterface ui, GameState gameState)
   {
     if (HasActiveTrait<ParalyzedTrait>())
@@ -303,22 +340,8 @@ class Player : Actor, IPerformer
 
       ui.ClosePopup();
 
-      if (ch == 'h')
-        return new MoveAction(gameState, this, Loc.Move(0, -1));
-      else if (ch == 'j')
-        return new MoveAction(gameState, this, Loc.Move(1, 0));
-      else if (ch == 'k')
-        return new MoveAction(gameState, this, Loc.Move(-1, 0));
-      else if (ch == 'l')
-        return new MoveAction(gameState, this, Loc.Move(0, 1));
-      else if (ch == 'y')
-        return new MoveAction(gameState, this, Loc.Move(-1, -1));
-      else if (ch == 'u')
-        return new MoveAction(gameState, this, Loc.Move(-1, 1));
-      else if (ch == 'b')
-        return new MoveAction(gameState, this, Loc.Move(1, -1));
-      else if (ch == 'n')
-        return new MoveAction(gameState, this, Loc.Move(1, 1));
+      if (IsMoveKey(ch))
+        return CalcMovementAction(gameState, ch);
       else if (ch == 'E')
         return new PortalAction(gameState);
       else if (ch == '>')
