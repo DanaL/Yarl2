@@ -327,6 +327,11 @@ class MonsterFactory
       }
     }
 
+    // Yes, I will write code just to insert a joke/Simpsons reference
+    // into the game
+    if (name == "zombie" && rng.Next(100) == 0)
+      m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
+    
     var status = rng.NextDouble() < 0.8 ? MobAttitude.Idle : MobAttitude.Active;
     m.Stats[Attribute.Attitude] = new Stat((int)status);
     return m;
