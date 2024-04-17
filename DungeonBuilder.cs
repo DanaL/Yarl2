@@ -290,6 +290,7 @@ class MainDungeonBuilder : DungeonBuilder
       Adjectives = [adjective]
     };
     doc.Traits.Add(new FlammableTrait());
+    doc.Traits.Add(new WrittenTrait());
 
     var rt = new ReadableTrait(documentText)
     {

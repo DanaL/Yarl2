@@ -34,7 +34,6 @@ class Item : GameObj
   public char Slot { get; set; }
   public bool Equiped { get; set; } = false;
   public ulong ContainedBy { get; set; } = 0;
-  public bool Consumable { get; set; } = false;
   public List<string> Adjectives { get; set; } = [];
   public int Value { get; set; }
   int _z = DEFAULT_Z;
@@ -54,7 +53,7 @@ class Item : GameObj
     else if (Adjectives.Count > 1)
       name = $"{string.Join(", ", Adjectives)} {Name}";
 
-    string traitDescs = string.Join(' ', Traits.Select(t => t.Desc()));
+    string traitDescs = string.Join(' ', Traits.OfType<BasicTrait>().Select(t => t.Desc()));
     if (traitDescs.Length > 0)
       name = name + " " + traitDescs;
 
@@ -65,7 +64,8 @@ class Item : GameObj
 
   public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
   {
-    return Traits.Where(t => t.Aura)
+    return Traits.OfType<BasicTrait>()
+                  .Where(t => t.Aura)
                  .Select(t => (ID, t.Radius, t.Effect))
                  .ToList();
   }
@@ -296,10 +296,10 @@ class ItemFactory
           Type = ItemType.Potion,
           Stackable = true,
           Value = 75,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK),
-          Consumable = true
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK)        
         };
         item.Traits.Add(new CastMinorHealTrait());
+        item.Traits.Add(new ConsumableTrait());
         break;
       case "antidote":
         item = new Item()
@@ -308,10 +308,10 @@ class ItemFactory
           Type = ItemType.Potion,
           Stackable = true,
           Value = 50,
-          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK),
-          Consumable = true
+          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
         };
         item.Traits.Add(new CastAntidoteTrait());
+        item.Traits.Add(new ConsumableTrait());
         break;
       case "scroll of blink":
         item = new Item()
@@ -320,11 +320,12 @@ class ItemFactory
           Type = ItemType.Scroll,
           Stackable = true,
           Value = 125,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK),
-          Consumable = true
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK)
         };
+        item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new CastBlinkTrait());
         item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

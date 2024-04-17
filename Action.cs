@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using System.Xml.Linq;
 
 namespace Yarl2;
 
@@ -717,7 +716,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Item? toUse = Actor.Inventory.RemoveByID(item.ID)
                       ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
       toUse.Stackable = false;
-      if (!toUse.Consumable)
+      if (!toUse.HasTrait<ConsumableTrait>())
         Actor.Inventory.Add(toUse, Actor.ID);
 
       bool success = false;

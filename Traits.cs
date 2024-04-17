@@ -26,16 +26,21 @@ interface IUSeable
 
 abstract class Trait
 {
-  public virtual string Desc() => "";
   public virtual bool Active => true;
+  public abstract string AsText();
+}
+
+abstract class BasicTrait : Trait
+{
+  public virtual string Desc() => "";  
   public virtual bool Aura => false;
   public virtual TerrainFlag Effect => TerrainFlag.None;
   public virtual int Radius { get; set; } = 0;
   public ulong ExpiresOn { get; set; } = ulong.MaxValue;
-  public virtual string AsText() => $"{ExpiresOn}#{Radius}";
+  public override string AsText() => $"{ExpiresOn}#{Radius}";
 }
 
-abstract class EffectTrait : Trait
+abstract class EffectTrait : BasicTrait
 {
   public abstract string Apply(Actor victim, GameState gs);
   public abstract bool IsAffected(Actor victim, GameState gs);
@@ -43,7 +48,7 @@ abstract class EffectTrait : Trait
 
 // To let me classify traits that mobs can take on their turns
 // Not sure if this is the best way to go...
-abstract class ActionTrait : Trait
+abstract class ActionTrait : BasicTrait
 {
   // I was thinking I could use MinRange to set abilities a monster might use
   // from further away. Ie., gobin archer has one attack from distance 2 to 7
@@ -160,6 +165,11 @@ class MobMissileTrait : ActionTrait
   }
 }
 
+class ConsumableTrait : Trait
+{
+  public override string AsText() => "Consumable";
+}
+
 class ResistBluntTrait : Trait
 {
   public override string AsText() => "ResistBlunt";
@@ -180,7 +190,7 @@ class PoorLootTrait : Trait
   public override string AsText() => "PoorLoot";
 }
 
-class StickyTrait : Trait
+class StickyTrait : BasicTrait
 {
   public int DC => 13;
 
@@ -190,6 +200,11 @@ class StickyTrait : Trait
 class DividerTrait : Trait
 {
   public override string AsText() => "Divider";
+}
+
+class WrittenTrait : Trait
+{
+  public override string AsText() => "Written";
 }
 
 class FlammableTrait : Trait
@@ -233,7 +248,7 @@ class NamedTrait : Trait
   public override string AsText() => "Named";
 }
 
-class RageTrait(Actor actor) : Trait
+class RageTrait(Actor actor) : BasicTrait
 {
   readonly Actor _actor = actor;
 
@@ -253,7 +268,7 @@ class RageTrait(Actor actor) : Trait
 // A bit dumb to have floating and flying and maybe I'll merge them
 // eventually but at the moment floating creatures won't make noise
 // while they move
-class FloatingTrait : Trait
+class FloatingTrait : BasicTrait
 {
   public FloatingTrait() { }
   public FloatingTrait(ulong expiry) => ExpiresOn = expiry;
@@ -261,7 +276,7 @@ class FloatingTrait : Trait
   public override string AsText() => $"Floating#{ExpiresOn}";
 }
 
-class FlyingTrait : Trait
+class FlyingTrait : BasicTrait
 {
   public FlyingTrait() { }
   public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
@@ -269,13 +284,13 @@ class FlyingTrait : Trait
   public override string AsText() => $"Flying#{ExpiresOn}";
 }
 
-class OpaqueTrait : Trait
+class OpaqueTrait : BasicTrait
 {
   public override string AsText() => "Opaque";
   public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
-class CastAntidoteTrait : Trait, IUSeable
+class CastAntidoteTrait : BasicTrait, IUSeable
 {
   public override string AsText() => "CastAntidote";
   public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
@@ -287,7 +302,7 @@ class CastAntidoteTrait : Trait, IUSeable
 }
 
 // For items that can cast blink
-class CastBlinkTrait : Trait, IUSeable
+class CastBlinkTrait : BasicTrait, IUSeable
 {
   public override string AsText() => "CastBlink";
 
@@ -299,7 +314,7 @@ class CastBlinkTrait : Trait, IUSeable
   public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
-class CastMinorHealTrait : Trait, IUSeable
+class CastMinorHealTrait : BasicTrait, IUSeable
 {
   public override string AsText() => "CastMinorHeal";
 
@@ -311,7 +326,7 @@ class CastMinorHealTrait : Trait, IUSeable
   public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
-class AttackTrait : Trait
+class AttackTrait : BasicTrait
 {
   public int Bonus { get; set; }
 
@@ -319,7 +334,7 @@ class AttackTrait : Trait
   public override string AsText() => $"Attack#{Bonus}";
 }
 
-class DamageTrait : Trait
+class DamageTrait : BasicTrait
 {
   public int DamageDie { get; set; }
   public int NumOfDie { get; set; }
@@ -330,7 +345,7 @@ class DamageTrait : Trait
   public override bool Aura => false;
 }
 
-class ACModTrait : Trait
+class ACModTrait : BasicTrait
 {
   public int ArmourMod { get; set; }
   public override string AsText() => $"ACMode#{ArmourMod}";
@@ -351,13 +366,13 @@ class ShieldOfTheFaithfulTrait : ACModTrait
   public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
-class DeathMessageTrait : Trait
+class DeathMessageTrait : BasicTrait
 {
   public string Message { get; set; } = "";
   public override string AsText() => $"DeathMessage#{Message}";
 }
 
-class DisguiseTrait : Trait
+class DisguiseTrait : BasicTrait
 {
   public Glyph Disguise {  get; set; }
   public Glyph TrueForm { get; set; }
@@ -366,7 +381,7 @@ class DisguiseTrait : Trait
   public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}";
 }
 
-class IllusionTrait : Trait, IGameEventListener
+class IllusionTrait : BasicTrait, IGameEventListener
 {
   public ulong SourceID {  get; set; }
   public ulong ObjID { get; set; } // the GameObj the illusion trait is attached to
@@ -385,7 +400,7 @@ class IllusionTrait : Trait, IGameEventListener
   public override string AsText() => $"Illusion#{SourceID}#{ObjID}";
 }
 
-class GrappledTrait : Trait, IGameEventListener
+class GrappledTrait : BasicTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
   public ulong GrapplerID { get; set; }
@@ -402,14 +417,14 @@ class GrappledTrait : Trait, IGameEventListener
   public override string AsText() => $"Grappled#{VictimID}#{GrapplerID}#{DC}";
 }
 
-class GrapplerTrait : Trait 
+class GrapplerTrait : BasicTrait 
 {
   public int DC { get; set; }
 
   public override string AsText() => $"Grappler#{DC}";
 }
 
-class ParalyzingGazeTrait : Trait
+class ParalyzingGazeTrait : BasicTrait
 {
   public int DC { get; set; }
 
@@ -522,7 +537,7 @@ class ParalyzedTrait : EffectTrait, IGameEventListener
   }
 }
 
-class PoisonerTrait : Trait
+class PoisonerTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Strength { get; set; }
@@ -530,7 +545,7 @@ class PoisonerTrait : Trait
   public override string AsText() => $"Poisoner#{DC}#{Strength}";
 }
 
-class OnFireTrait : Trait, IGameEventListener
+class OnFireTrait : BasicTrait, IGameEventListener
 {
   public ulong ContainerID { get; set; }
   public bool Expired { get; set; } = false;
@@ -594,7 +609,7 @@ class OnFireTrait : Trait, IGameEventListener
   }
 }
 
-class WeakenTrait : Trait
+class WeakenTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Amt { get; set; }
@@ -676,7 +691,7 @@ class StatBuffTrait : EffectTrait, IGameEventListener
   }
 }
 
-class PoisonedTrait : Trait, IGameEventListener
+class PoisonedTrait : BasicTrait, IGameEventListener
 {
   public int DC { get; set; }
   public int Strength { get; set; }
@@ -719,7 +734,7 @@ class PoisonedTrait : Trait, IGameEventListener
   }
 }
 
-class ReadableTrait(string text) : Trait, IUSeable
+class ReadableTrait(string text) : BasicTrait, IUSeable
 {
   readonly string _text = text;
   public ulong ContainerID { get; set; }
@@ -743,7 +758,7 @@ class ReadableTrait(string text) : Trait, IUSeable
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
-class CountdownTrait : Trait, IGameEventListener
+class CountdownTrait : BasicTrait, IGameEventListener
 {
   public bool Expired { get; set; } = false;
   public ulong ContainerID { get; set; }
@@ -786,7 +801,7 @@ class CountdownTrait : Trait, IGameEventListener
 }
 
 // A light source that doesn't have fuel/burn out on its own.
-class LightSourceTrait : Trait
+class LightSourceTrait : BasicTrait
 {
   public ulong ContainerID { get; set; }
   public override int Radius { get; set; }
@@ -796,7 +811,7 @@ class LightSourceTrait : Trait
   public override string AsText() => $"LightSource#{ContainerID}#{Radius}";
 }
 
-class TorchTrait : Trait, IGameEventListener, IUSeable
+class TorchTrait : BasicTrait, IGameEventListener, IUSeable
 {
   public ulong ContainerID { get; set; }
   public bool Lit { get; set; }
@@ -948,6 +963,8 @@ class TraitFactory
           DC = int.Parse(pieces[2]),
           Cooldown = ulong.Parse(pieces[3])
         };
+      case "Consumable":
+        return new ConsumableTrait();
       case "Countdown":
         return new CountdownTrait()
         {
@@ -1168,6 +1185,8 @@ class TraitFactory
           DC = int.Parse(pieces[1]),
           Amt = int.Parse(pieces[2])
         };
+      case "Written":
+        return new WrittenTrait();
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
         return new SpellActionTrait()

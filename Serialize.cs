@@ -543,9 +543,8 @@ class GameObjDBSave
       Slot = fields[7][0],
       Equiped = bool.Parse(fields[8].ToLower()),
       ContainedBy = ulong.Parse(fields[9]),
-      Consumable = bool.Parse(fields[10]),
-      Adjectives = [.. fields[11].Split(',')],
-      Value = int.Parse(fields[12]),
+      Adjectives = [.. fields[10].Split(',')],
+      Value = int.Parse(fields[11]),
     };
 
     // Parse the traits
@@ -558,10 +557,11 @@ class GameObjDBSave
       }
     }
 
-    item.SetZ(int.Parse(fields[13]));
+    item.SetZ(int.Parse(fields[12]));
 
     return item;
   }
+
   static GameObj InflateObj(string txt, GameObjectDB objDb)
   {
     int j = txt.IndexOf(':');
@@ -575,7 +575,7 @@ class GameObjDBSave
     else if (type == "Item")
       return InflateItem(fields);
 
-    return null;
+    throw new Exception("Hmm this shouldn't happen!");
   }
 
   public static GameObjDBSave Shrink(GameObjectDB objDb)
@@ -651,8 +651,6 @@ class GameObjDBSave
         sb.Append(item.Equiped);
         sb.Append('|');
         sb.Append(item.ContainedBy);
-        sb.Append('|');
-        sb.Append(item.Consumable);
         sb.Append('|');
         sb.Append(string.Join(',', item.Adjectives));
         sb.Append('|');

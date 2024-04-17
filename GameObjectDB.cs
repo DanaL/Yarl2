@@ -138,7 +138,7 @@ class GameObjectDB
     {
       foreach (var item in items)
       {
-        if (item.Traits.Any(t => t.Effect == flag))
+        if (item.Traits.OfType<BasicTrait>().Any(t => t.Effect == flag))
           return true;
       }
     }
