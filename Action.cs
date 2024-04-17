@@ -86,6 +86,39 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   }
 }
 
+class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int radius, string txt) : Action(gs, actor)
+{
+  Loc _target { get; set; } = target;
+  EffectFactory _effectFactory { get; set; } = ef;
+  int _radius { get; set; } = radius;
+  string _effectText { get; set; } = txt;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.Messages.Add(new Message(_effectText, Actor.Loc));
+
+    var affected = GameState!.Flood(_target, _radius);
+    foreach (var loc in affected)
+    {
+      // Ugh at the moment I can't handle things like a fireball
+      // hitting an area and damaging items via this :/
+      if (GameState.ObjDb.Occupant(loc) is Actor occ)
+      {
+        var effect = _effectFactory.Get(occ.ID);
+        if (effect.IsAffected(occ, GameState))
+        {
+          string txt = effect.Apply(occ, GameState);
+          if (txt != "")
+            result.Messages.Add(new Message(txt, loc));
+        }
+      }
+    }
+
+    return result;
+  }
+}
+
 class PortalAction : Action
 {  
   public PortalAction(GameState gameState) => GameState = gameState;

@@ -170,8 +170,9 @@ class MonsterBehaviour : IBehaviour
     else if (act is ConfusingScreamTrait scream)
     {
       _lastUse[act.Name] = gs.Turn;
-      gs.UIRef().AlertPlayer(new Message("The screech bat would have screeched", mob.Loc), "", gs);
-      return new PassAction();
+      var ef = new EffectFactory("confused", scream.DC);
+      var txt = $"{mob.FullName.Capitalize()} screams!";
+      return new AoEAction(gs, mob, mob.Loc, ef, scream.Radius, txt);
     }
     else if (act is SummonTrait summon)
     {

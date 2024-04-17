@@ -416,6 +416,24 @@ class ParalyzingGazeTrait : Trait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
+// Ugh this feels like a dumb hack, but I wanted to keep AoEAction and
+// such fairly generic
+class EffectFactory(string effect, int dc)
+{
+  readonly string _effect = effect;
+  readonly int _dc = dc;
+
+  public EffectTrait Get(ulong victimID)
+  {
+    return _effect switch 
+    {
+      "confused" => new ConfusedTrait() { VictimID = victimID, DC = _dc },
+      "paralyzed" => new ParalyzedTrait() { VictimID = victimID, DC = _dc },
+      _ => throw new Exception($"I don't know about the effect '{_effect}'")
+    };
+  }
+}
+
 // EffectTrait subclasses I've implemented are *thiiiiiis* close to being
 // duplicates of each other...
 class ConfusedTrait : EffectTrait, IGameEventListener
