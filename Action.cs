@@ -61,6 +61,12 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     var target = GameState!.ObjDb.Occupant(_loc);
     if (target is not null)
       result = Battle.MeleeAttack(Actor!, target, GameState);
+    else
+    {
+      result.EnergyCost = 1.0;
+      var msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swing")} wildly!";
+      result.Messages.Add(new Message(msg, Actor.Loc));
+    }
 
     return result;
   }

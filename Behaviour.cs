@@ -51,7 +51,6 @@ class DoorOpeningMoveStrategy : IMoveStrategy
 {
   public Action MoveAction(Mob actor, GameState gs)
   {
-    // Move!
     var adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
@@ -123,10 +122,21 @@ class MonsterBehaviour : IBehaviour
     return false;
   }
 
-  // Eventually, if a mosnter is confused, or charmed, or any ally of the 
-  // player, etc, there will be a calculation of their target. At this point
-  // they pretty much always target the player
-  static Loc CalculateTarget(GameState gs) => gs.Player.Loc;
+  static Loc CalcRangedTarget(Mob mob, GameState gs)
+  {
+    if (mob.HasTrait<ConfusedTrait>())
+      return RandomAdjLoc(gs.Player.Loc, gs);
+    else
+      return gs.Player.Loc;
+  }
+
+  static Loc CalcAdjacentTarget(Mob mob, GameState gs)
+  {
+    if (mob.HasTrait<ConfusedTrait>())
+      return RandomAdjLoc(mob.Loc, gs);
+    else
+      return gs.Player.Loc;
+  }
 
   Action FromTrait(Mob mob, ActionTrait act, GameState gs)
   {
@@ -135,13 +145,14 @@ class MonsterBehaviour : IBehaviour
       var p = gs.Player;
       mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
       _lastUse[act.Name] = gs.Turn;
-      return new MeleeAttackAction(gs, mob, p.Loc);
+      return new MeleeAttackAction(gs, mob, CalcAdjacentTarget(mob, gs));
     }
     else if (act is MobMissileTrait missileAttack)
     {
       mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
       _lastUse[act.Name] = gs.Turn;
-
+      
+      Loc target = CalcRangedTarget(mob, gs);
       var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
       gs.UIRef().RegisterAnimation(arrowAnim);
 
@@ -154,18 +165,18 @@ class MonsterBehaviour : IBehaviour
       if (act.Name == "Blink")
         return new BlinkAction(gs, mob);
       else if (act.Name == "FogCloud")
-        return new FogCloudAction(gs, mob, CalculateTarget(gs));
+        return new FogCloudAction(gs, mob, CalcRangedTarget(mob, gs));
       else if (act.Name == "Entangle")
-        return new EntangleAction(gs, mob, CalculateTarget(gs));
+        return new EntangleAction(gs, mob, CalcRangedTarget(mob, gs));
       else if (act.Name == "Web")
         return new WebAction(gs, gs.Player.Loc);
       else if (act.Name == "Firebolt")
       {
-        Loc targetLoc = CalculateTarget(gs);
+        Loc targetLoc = CalcRangedTarget(mob, gs);
         return new FireboltAction(gs, mob, targetLoc, ActionTrait.Trajectory(mob, targetLoc));
       }      
       else if (act.Name == "MirrorImage")
-        return new MirrorImageAction(gs, mob, CalculateTarget(gs));
+        return new MirrorImageAction(gs, mob, CalcAdjacentTarget(mob, gs));
     }
     else if (act is ConfusingScreamTrait scream)
     {
@@ -191,6 +202,21 @@ class MonsterBehaviour : IBehaviour
     return new NullAction();
   }
 
+  static Loc RandomAdjLoc(Loc loc, GameState gs)
+  {
+    var adj = Util.Adj8Locs(loc).ToList();
+    return adj[gs.Rng.Next(adj.Count)];
+
+  }
+
+  static Action CalcMoveAction(Mob mob, GameState gs)
+  {
+    if (mob.HasTrait<ConfusedTrait>()) 
+      return new MoveAction(gs, mob, RandomAdjLoc(mob.Loc, gs));
+    else
+      return mob.MoveStrategy.MoveAction(mob, gs);
+  }
+
   public virtual Action CalcAction(Mob actor, GameState gs, UserInterface ui)
   {     
     if (actor.Status == MobAttitude.Idle)
@@ -211,7 +237,7 @@ class MonsterBehaviour : IBehaviour
         return FromTrait(actor, act, gs);
     }
 
-    return actor.MoveStrategy.MoveAction(actor, gs);
+    return CalcMoveAction(actor, gs);
   }
 
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);

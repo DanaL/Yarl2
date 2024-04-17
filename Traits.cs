@@ -170,6 +170,11 @@ class ConsumableTrait : Trait
   public override string AsText() => "Consumable";
 }
 
+class ImmuneConfusionTrait : Trait
+{
+  public override string AsText() => "ImmuneConfusion";
+}
+
 class ResistBluntTrait : Trait
 {
   public override string AsText() => "ResistBlunt";
@@ -463,9 +468,12 @@ class ConfusedTrait : EffectTrait, IGameEventListener
 
   public override bool IsAffected(Actor victim, GameState gs)
   {
-    if (victim.HasTrait<ConfusedTrait>())
-      return false;
-
+    foreach (Trait trait in victim.Traits)
+    {
+      if (trait is ConfusedTrait || trait is ImmuneConfusionTrait)
+        return false;
+    }
+ 
     return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);
   }
 
@@ -1014,6 +1022,8 @@ class TraitFactory
           SourceID = ulong.Parse(pieces[1]),
           ObjID = ulong.Parse(pieces[2])
         };
+      case "ImmuneConfusion":
+        return new ImmuneConfusionTrait();
       case "Impale":
         return new ImpaleTrait();      
       case "LightSource":

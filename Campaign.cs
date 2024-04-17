@@ -268,14 +268,17 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
     Actor mob = MonsterFactory.Get("screech bat", rng);
-    objDb.AddNewActor(mob, loc);
+    objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
+
+    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    Mob goblin = (Mob)MonsterFactory.Get("goblin", rng);
+    objDb.AddNewActor(goblin, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
     //sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     //loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-    //Mob goblin = (Mob) MonsterFactory.Get("goblin", rng);    
-    //objDb.AddNewActor(goblin, loc);
+    //Mob skellie = (Mob)MonsterFactory.Get("skeleton", rng);
+    //objDb.AddNewActor(skellie, loc);
 
     AddGargoyle(rng, objDb, dungeon, 0);
 
@@ -401,8 +404,9 @@ class PreGameHandler(UserInterface ui)
     }
     else
     {
-      int seed = DateTime.Now.GetHashCode();
-      seed = -643295855;
+      int seed = DateTime.Now.GetHashCode();      
+      //seed = -643295855;
+      //seed = 176296748;
       // -758465673 this seed doesn't have a valid entrance loc?
 
       Console.WriteLine($"Seed: {seed}");

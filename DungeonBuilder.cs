@@ -53,17 +53,17 @@ class ArenaBuilder : DungeonBuilder
     levels[0] = caveMap;
 
     // let's stick a pond in the centre
-    var pond = CACave.GetCave(12, 12, rng);
-    for (int r = 0; r < 12; r++)
-    {
-      for (int c = 0; c < 12; c++)
-      {
-        if (pond[r, c])
-        {
-          caveMap.SetTile(r + 15, c + 15, TileFactory.Get(TileType.DeepWater));
-        }
-      }
-    }
+    //var pond = CACave.GetCave(12, 12, rng);
+    //for (int r = 0; r < 12; r++)
+    //{
+    //  for (int c = 0; c < 12; c++)
+    //  {
+    //    if (pond[r, c])
+    //    {
+    //      caveMap.SetTile(r + 15, c + 15, TileFactory.Get(TileType.DeepWater));
+    //    }
+    //  }
+    //}
     //for (int l = 0; l < _numOfLevels; l++)
     //{
     //    levels[l] = mapper.DrawLevel(w, h);

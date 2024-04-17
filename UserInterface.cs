@@ -478,7 +478,7 @@ abstract class UserInterface
 
   // TODO: DRY the two versions of AlertPlayer
   public void AlertPlayer(Message alert, string ifNotSeen, GameState gs)
-  {
+  {    
     if (string.IsNullOrEmpty(alert.Text) && string.IsNullOrEmpty(ifNotSeen))
       return;
 
