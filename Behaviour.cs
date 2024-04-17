@@ -167,6 +167,12 @@ class MonsterBehaviour : IBehaviour
       else if (act.Name == "MirrorImage")
         return new MirrorImageAction(gs, mob, CalculateTarget(gs));
     }
+    else if (act is ConfusingScreamTrait scream)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      gs.UIRef().AlertPlayer(new Message("The screech bat would have screeched", mob.Loc), "", gs);
+      return new PassAction();
+    }
     else if (act is SummonTrait summon)
     {
       _lastUse[act.Name] = gs.Turn;

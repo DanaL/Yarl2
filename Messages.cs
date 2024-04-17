@@ -75,6 +75,16 @@ class Grammar
     else
       return verb + "s";
   }
+
+  public static string Possessive(GameObj subject)
+  {
+    if (subject is Player)
+      return "your";
+    else if (subject.Traits.OfType<NamedTrait>().Any())
+      return "their";
+    else
+      return "its";
+  }
 }
 
 class MsgFactory

@@ -102,6 +102,18 @@ class SummonTrait : ActionTrait
   }
 }
 
+class ConfusingScreamTrait : ActionTrait
+{
+  public int DC { get; set; }
+
+  public override bool Available(Mob mob, GameState gs)
+  {
+    return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
+  }
+
+  public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}#";
+}
+
 class SpellActionTrait : ActionTrait
 {
   public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
@@ -404,6 +416,50 @@ class ParalyzingGazeTrait : Trait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
+// EffectTrait subclasses I've implemented are *thiiiiiis* close to being
+// duplicates of each other...
+class ConfusedTrait : EffectTrait, IGameEventListener
+{
+  public ulong VictimID { get; set; }
+  public int DC { get; set; }
+  public bool Expired { get; set; } = false;
+
+  public override string AsText() => $"Confused#{VictimID}#{DC}";
+
+  public bool Listening => throw new NotImplementedException();
+
+  public override bool IsAffected(Actor victim, GameState gs)
+  {
+    if (victim.HasTrait<ConfusedTrait>())
+      return false;
+
+    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);
+  }
+
+  public override string Apply(Actor victim, GameState gs)
+  {
+    victim.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} confused!";
+  }
+
+  public void Alert(GameEventType eventType, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      {
+        victim.Traits.Remove(this);
+        Expired = true;
+        string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "regain")} {Grammar.Possessive(victim)} senses!";
+        gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+        gs.StopListening(GameEventType.EndOfRound, this);
+      }
+    }
+  }
+}
+
 class ParalyzedTrait : EffectTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -421,7 +477,7 @@ class ParalyzedTrait : EffectTrait, IGameEventListener
     if (victim.HasTrait<ParalyzedTrait>())
       return false;
 
-    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);    
+    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);
   }
 
   public override string Apply(Actor victim, GameState gs)
@@ -867,6 +923,13 @@ class TraitFactory
         return new CastMinorHealTrait();
       case "Cleave":
         return new CleaveTrait();
+      case "ConfusingScream":
+        return new ConfusingScreamTrait()
+        {
+          Radius = int.Parse(pieces[1]),
+          DC = int.Parse(pieces[2]),
+          Cooldown = ulong.Parse(pieces[3])
+        };
       case "Countdown":
         return new CountdownTrait()
         {
@@ -978,6 +1041,12 @@ class TraitFactory
           Expired = bool.Parse(pieces[1]),
           ContainerID = ulong.Parse(pieces[2]),
           Lifetime = int.Parse(pieces[3])
+        };
+      case "Confused":
+        return new ConfusedTrait()
+        {
+          VictimID = ulong.Parse(pieces[1]),
+          DC = int.Parse(pieces[2])
         };
       case "Divider":
         return new DividerTrait();
