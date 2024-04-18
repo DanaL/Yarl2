@@ -112,24 +112,10 @@ internal class BLUserInferface : UserInterface, IDisposable
     Terminal.Print(col, lineNum, message.PadRight(width));
   }
 
-  protected override void DrawFullScreen(Sqr[,] sqs)
-  {
-    Terminal.Clear();
+  protected override void ClearScreen() => Terminal.Clear();
+  protected override void Blit() => Terminal.Refresh();
 
-    var height = sqs.GetLength(0);
-    var width = sqs.GetLength(1);
-    for (int r = 0; r < height; r++) 
-    { 
-      for (int c = 0; c < width; c++) 
-      {
-        WriteSq(r, c, sqs[r, c]);
-      }
-    }
-
-    Terminal.Refresh();
-  }
-
-  void WriteSq(int row, int col, Sqr sq)
+  protected override void WriteSq(int row, int col, Sqr sq)
   {
     var (fg, bg, ch) = sq;
     Terminal.BkColor(ToBearLibColour(bg));

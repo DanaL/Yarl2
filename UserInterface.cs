@@ -38,7 +38,9 @@ abstract class UserInterface
   public abstract void UpdateDisplay(GameState? gs);
   protected abstract GameEvent PollForEvent();
   protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
-  protected abstract void DrawFullScreen(Sqr[,] sqs);
+  protected abstract void WriteSq(int row, int col, Sqr sq);
+  protected abstract void ClearScreen();
+  protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
   protected int PlayerScreenRow;
@@ -945,5 +947,22 @@ abstract class UserInterface
 
     DrawFullScreen(sqs);
     BlockForInput();
+  }
+
+  void DrawFullScreen(Sqr[,] sqs)
+  {
+    ClearScreen();
+
+    var height = sqs.GetLength(0);
+    var width = sqs.GetLength(1);
+    for (int r = 0; r < height; r++)
+    {
+      for (int c = 0; c < width; c++)
+      {
+        WriteSq(r, c, sqs[r, c]);
+      }
+    }
+
+    Blit();
   }
 }

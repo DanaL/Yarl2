@@ -1,3 +1,14 @@
+// Yarl2 - A roguelike computer RPG
+// Written in 2024 by Dana Larose <ywg.dana@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright
+// and related and neighboring rights to this software to the public domain
+// worldwide. This software is distributed without any warranty.
+//
+// You should have received a copy of the CC0 Public Domain Dedication along 
+// with this software. If not, 
+// see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
 using System.Runtime.InteropServices;
 
 using SDL2;
@@ -12,7 +23,7 @@ class SDLUserInterface : UserInterface
   readonly int _fontWidth;
   readonly int _fontHeight;
   SDL_Rect _mainFrameLoc;
-  Dictionary<(char, Colour, Colour), IntPtr> _cachedGlyphs;
+  Dictionary<Sqr, IntPtr> _cachedGlyphs = [];
   Dictionary<Colour, SDL_Color> _colours;
 
   public SDLUserInterface(string windowTitle, Options opt) : base(opt)
@@ -37,8 +48,6 @@ class SDLUserInterface : UserInterface
       h = ViewHeight * _fontHeight,
       w = ViewWidth * _fontWidth
     };
-
-    _cachedGlyphs = [];
   }
 
   protected override GameEvent PollForEvent()
@@ -120,26 +129,6 @@ class SDLUserInterface : UserInterface
     SDL_DestroyTexture(texture);
   }
 
-  void SDLPut(int row, int col, char ch, Colour fg, Colour bg)
-  {
-    var key = (ch, fg, bg);
-
-    if (!_cachedGlyphs.TryGetValue(key, out IntPtr texture))
-    {
-      nint surface;
-      surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, ch.ToString(), ToSDLColour(fg), ToSDLColour(bg));
-      var toCache = SDL_CreateTextureFromSurface(_renderer, surface);
-      SDL_FreeSurface(surface);
-      texture = toCache;
-      _cachedGlyphs.Add(key, texture);
-    }
-
-    var loc = new SDL_Rect { x = col * _fontWidth + 2, y = row * _fontHeight, h = _fontHeight, w = _fontWidth };
-
-    SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
-  }
-
-
   IntPtr CreateMainTexture()
   {
     var tw = ViewWidth * _fontWidth;
@@ -161,29 +150,26 @@ class SDLUserInterface : UserInterface
     return targetTexture;
   }
 
-  void WriteSq(int row, int col, Sqr sq)
+  protected override void WriteSq(int row, int col, Sqr sq)
   {
-    var (fg, bg, ch) = sq;
-    SDLPut(row, col, ch, fg, bg);
-  }
-
-  protected override void DrawFullScreen(Sqr[,] sqs)
-  {
-    SDL_RenderClear(_renderer);
-
-    var height = sqs.GetLength(0);
-    var width = sqs.GetLength(1);
-    for (int r = 0; r < height; r++)
+    if (!_cachedGlyphs.TryGetValue(sq, out IntPtr texture))
     {
-      for (int c = 0; c < width; c++)
-      {
-        WriteSq(r, c, sqs[r, c]);
-      }
+      nint surface;
+      surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, sq.Ch.ToString(), ToSDLColour(sq.Fg), ToSDLColour(sq.Bg));
+      var toCache = SDL_CreateTextureFromSurface(_renderer, surface);
+      SDL_FreeSurface(surface);
+      texture = toCache;
+      _cachedGlyphs.Add(sq, texture);
     }
 
-    SDL_RenderPresent(_renderer);
+    var loc = new SDL_Rect { x = col * _fontWidth + 2, y = row * _fontHeight, h = _fontHeight, w = _fontWidth };
+
+    SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref loc);
   }
 
+  protected override void ClearScreen() => SDL_RenderClear(_renderer);
+  protected override void Blit() => SDL_RenderPresent(_renderer);
+  
   public override void UpdateDisplay(GameState? gs)
   {
     SDL_RenderClear(_renderer);
