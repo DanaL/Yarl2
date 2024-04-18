@@ -45,7 +45,7 @@ class Item : GameObj
   }
 
   string CalcFullName()
-  {
+  {    
     string name = Name;
 
     if (Adjectives.Count == 1)

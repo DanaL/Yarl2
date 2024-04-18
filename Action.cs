@@ -446,8 +446,9 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       };
     }
 
-    // First, is there anything preventing the actor from moving off
-    // of the square?
+    // First, is there anything preventing the actor from picking items up
+    // off the floor? (At the moment it's just webs in the game, but a 
+    // Sword-in-the-Stone situation might be neat)
     foreach (var env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
       var web = env.Traits.OfType<StickyTrait>().First();
@@ -471,12 +472,20 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
     GameState.ObjDb.RemoveItem(Actor.Loc, item);
     char slot = inv.Add(item, Actor.ID);
-    
-    Message msg = MsgFactory.Phrase(Actor.ID, Verb.Pickup, item.ID, 1, false, Actor.Loc, GameState);
-    if (slot != '\0')
-      msg = msg with { Text = msg.Text + $" ({slot})" };
 
-    result.Messages.Add(msg);
+    var pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
+
+    if (item.Type == ItemType.Zorkmid && item.Value == 1)
+      pickupMsg += "a zorkmid.";
+    else if (item.Type == ItemType.Zorkmid)
+      pickupMsg += $"{item.Value} zorkmids.";
+    else
+      pickupMsg += item.FullName.DefArticle() + ".";
+    if (slot != '\0')
+      pickupMsg += $" ({slot})";
+    
+    result.Messages.Add(new Message(pickupMsg, Actor.Loc));
+
     return result;
   }
 
