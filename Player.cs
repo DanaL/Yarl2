@@ -451,6 +451,13 @@ class Player : Actor, IPerformer
         _accumulator = new LongMessageAccumulator(ui, lines);
         _deferred = new NullAction();
       }
+      else if (ch == 'M')
+      {
+        if (gameState.CurrDungeonID == 0)
+          ui.AlertPlayer([new Message("Not in the wilderness.", Loc)], "", gameState);
+        else
+          gameState.UIRef().DisplayMapView(gameState);
+      }
       else if (ch == '?')
       {
         var time = gameState.CurrTime();

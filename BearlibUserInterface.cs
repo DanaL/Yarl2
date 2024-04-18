@@ -16,159 +16,182 @@ using TKCodes = BearLibNET.TKCodes;
 namespace Yarl2;
 
 internal class BLUserInferface : UserInterface, IDisposable
-{        
-    readonly Dictionary<int, char> KeyToChar = [];
-    Dictionary<Colour, Color> _colours = [];
+{
+  readonly Dictionary<int, char> KeyToChar = [];
+  Dictionary<Colour, Color> _colours = [];
 
-    public BLUserInferface(string windowTitle, Options opt) : base(opt)
+  public BLUserInferface(string windowTitle, Options opt) : base(opt)
+  {
+    FontSize = opt.FontSize;
+    SetUpKeyToCharMap();
+    Terminal.Open();
+    Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
+    Terminal.Refresh();
+  }
+
+  Color ToBearLibColour(Colour colour)
+  {
+    if (!_colours.TryGetValue(colour, out Color value))
     {
-        FontSize = opt.FontSize;
-        SetUpKeyToCharMap();
-        Terminal.Open();
-        Terminal.Set($"window: size={ScreenWidth}x{ScreenHeight}, title={windowTitle}; font: DejaVuSansMono.ttf, size={FontSize}");
-        Terminal.Refresh();
+      value = new Color()
+      {
+        A = colour.Alpha,
+        R = colour.R,
+        G = colour.G,
+        B = colour.B
+      };
+      _colours.Add(colour, value);
     }
 
-    Color ToBearLibColour(Colour colour) 
-    {        
-        if (!_colours.TryGetValue(colour, out Color value)) 
-        {
-            value = new Color() { 
-                    A = colour.Alpha, 
-                    R = colour.R,
-                    G = colour.G,
-                    B = colour.B
-            };
-            _colours.Add(colour, value);
-        }
+    return value;
+  }
 
-        return value;
-    }
-
-    void SetUpKeyToCharMap()
+  void SetUpKeyToCharMap()
+  {
+    int curr = (int)TKCodes.InputEvents.TK_A;
+    for (int ch = 'a'; ch <= 'z'; ch++)
     {
-        int curr = (int)TKCodes.InputEvents.TK_A;
-        for (int ch = 'a'; ch <= 'z'; ch++)
-        {
-            KeyToChar.Add(curr++, (char)ch);
-        }
-        curr = (int)TKCodes.InputEvents.TK_1;
-        for (int ch = '1'; ch <= '9'; ch++)
-        {
-            KeyToChar.Add(curr++, (char)ch);
-        }
-        KeyToChar.Add(curr, '0');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)Constants.BACKSPACE);
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_TAB, (char)Constants.TAB);
-        KeyToChar.Add((int)TKCodes.InputEvents.TK_SLASH, '/');
+      KeyToChar.Add(curr++, (char)ch);
     }
-
-    protected override GameEvent PollForEvent()
-    {        
-        if (Terminal.HasInput())
-        {
-            int key = Terminal.Read();
-            if (key == (int)TKCodes.InputEvents.TK_CLOSE)
-                return new GameEvent(GameEventType.Quiting, '\0');
-
-            if (KeyToChar.TryGetValue(key, out char value))
-            {
-                // I feel like there has to be a better way to handle shifted characters
-                // in Bearlib but I haven't found it yet...
-                if (Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT))
-                {
-                    value = value switch
-                    {
-                        ',' => '<',
-                        '.' => '>',
-                        '8' => '*',
-                        '4' => '$',
-                        '2' => '@',
-                        '/' => '?',
-                        _ => char.ToUpper(value)
-                    };                   
-                }
-            }
-            
-            // When (SHIFT, CTRL, etc) is pressed HasInput() is still true but
-            // we only want to return a KeyInput event if there's an actual
-            // value entered
-            if (value != '\0')
-                return new GameEvent(GameEventType.KeyInput, value);
-        }
-
-        return new GameEvent(GameEventType.NoEvent, '\0');
-    }
-     
-    protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+    curr = (int)TKCodes.InputEvents.TK_1;
+    for (int ch = '1'; ch <= '9'; ch++)
     {
-        Terminal.Color(ToBearLibColour(textColour));
-        Terminal.Print(col, lineNum, message.PadRight(width));
+      KeyToChar.Add(curr++, (char)ch);
     }
+    KeyToChar.Add(curr, '0');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_RETURN_or_ENTER, '\n');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_SPACE, ' ');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_BACKSPACE, (char)Constants.BACKSPACE);
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_COMMA, ',');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_PERIOD, '.');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_TAB, (char)Constants.TAB);
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_SLASH, '/');
+  }
 
-    public override void UpdateDisplay(GameState? gs)
+  protected override GameEvent PollForEvent()
+  {
+    if (Terminal.HasInput())
     {
-        Terminal.Clear();
+      int key = Terminal.Read();
+      if (key == (int)TKCodes.InputEvents.TK_CLOSE)
+        return new GameEvent(GameEventType.Quiting, '\0');
 
-        if (_longMessage != null)
+      if (KeyToChar.TryGetValue(key, out char value))
+      {
+        // I feel like there has to be a better way to handle shifted characters
+        // in Bearlib but I haven't found it yet...
+        if (Terminal.Check((int)TKCodes.InputEvents.TK_SHIFT))
         {
-            Terminal.Color(ToBearLibColour(Colours.WHITE));
-            for (int row = 0; row < _longMessage.Count; row++)
-            {
-                Terminal.Print(0, row, _longMessage[row]);
-            }
+          value = value switch
+          {
+            ',' => '<',
+            '.' => '>',
+            '8' => '*',
+            '4' => '$',
+            '2' => '@',
+            '/' => '?',
+            _ => char.ToUpper(value)
+          };
         }
-        else
-        {
-            //var faintRed = new Color() { A = 100, R = 255, G = 0, B = 0 };
-            if (gs is not null && gs.Player is not null)
-            {
-                for (int row = 0; row < ViewHeight; row++)
-                {
-                    for (int col = 0; col < ViewWidth; col++)
-                    {                        
-                        var (fg, bg, ch) = SqsOnScreen[row, col];
-                        Terminal.BkColor(ToBearLibColour(bg));
-                        Terminal.Color(ToBearLibColour(fg));
-                        Terminal.Put(col, row, ch);
-                    }
-                }
+      }
 
-                WriteSideBar(gs);
-            }
-
-            if (MessageHistory.Count > 0)
-                WriteMessagesSection();
-
-            if (MenuRows.Count > 0)
-            {
-                WriteDropDown();
-            }
-
-            if (!string.IsNullOrEmpty(_popupBuffer))
-            {
-                WritePopUp();
-            }
-        }
-        
-        Terminal.Refresh();
+      // When (SHIFT, CTRL, etc) is pressed HasInput() is still true but
+      // we only want to return a KeyInput event if there's an actual
+      // value entered
+      if (value != '\0')
+        return new GameEvent(GameEventType.KeyInput, value);
     }
 
-    public void Dispose()
-    {            
-        Dispose(true);
+    return new GameEvent(GameEventType.NoEvent, '\0');
+  }
+
+  protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+  {
+    Terminal.Color(ToBearLibColour(textColour));
+    Terminal.Print(col, lineNum, message.PadRight(width));
+  }
+
+  protected override void DrawFullScreen(Sqr[,] sqs)
+  {
+    Terminal.Clear();
+
+    var height = sqs.GetLength(0);
+    var width = sqs.GetLength(1);
+    for (int r = 0; r < height; r++) 
+    { 
+      for (int c = 0; c < width; c++) 
+      {
+        WriteSq(r, c, sqs[r, c]);
+      }
     }
 
-    protected virtual void Dispose(bool disposing)
+    Terminal.Refresh();
+  }
+
+  void WriteSq(int row, int col, Sqr sq)
+  {
+    var (fg, bg, ch) = sq;
+    Terminal.BkColor(ToBearLibColour(bg));
+    Terminal.Color(ToBearLibColour(fg));
+    Terminal.Put(col, row, ch);    
+  }
+
+  public override void UpdateDisplay(GameState? gs)
+  {
+    Terminal.Clear();
+
+    if (_longMessage != null)
     {
-        if (disposing)
-        {
-            Terminal.Close();
-        }            
+      Terminal.Color(ToBearLibColour(Colours.WHITE));
+      for (int row = 0; row < _longMessage.Count; row++)
+      {
+        Terminal.Print(0, row, _longMessage[row]);
+      }
     }
+    else
+    {
+      //var faintRed = new Color() { A = 100, R = 255, G = 0, B = 0 };
+      if (gs is not null && gs.Player is not null)
+      {
+        for (int row = 0; row < ViewHeight; row++)
+        {
+          for (int col = 0; col < ViewWidth; col++)
+          {
+            WriteSq(row, col, SqsOnScreen[row, col]);
+          }
+        }
+
+        WriteSideBar(gs);
+      }
+
+      if (MessageHistory.Count > 0)
+        WriteMessagesSection();
+
+      if (MenuRows.Count > 0)
+      {
+        WriteDropDown();
+      }
+
+      if (!string.IsNullOrEmpty(_popupBuffer))
+      {
+        WritePopUp();
+      }
+    }
+
+    Terminal.Refresh();
+  }
+
+  public void Dispose()
+  {
+    Dispose(true);
+  }
+
+  protected virtual void Dispose(bool disposing)
+  {
+    if (disposing)
+    {
+      Terminal.Close();
+    }
+  }
 }

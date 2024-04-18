@@ -38,6 +38,7 @@ abstract class UserInterface
   public abstract void UpdateDisplay(GameState? gs);
   protected abstract GameEvent PollForEvent();
   protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
+  protected abstract void DrawFullScreen(Sqr[,] sqs);
 
   protected int FontSize;
   protected int PlayerScreenRow;
@@ -920,5 +921,29 @@ abstract class UserInterface
         ZLayer[r, c] = TileFactory.Get(TileType.Unknown);
       }
     }
+  }
+
+  public void DisplayMapView(GameState gs)
+  {
+    var dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
+    var remembered = dungeon.RememberedSqs;
+
+    Sqr blank = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
+    Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
+    for (int r = 0; r < ScreenHeight; r++)
+    {
+      for (int c= 0; c < ScreenWidth; c++)
+      {
+        var loc = (gs.CurrLevel, r, c);
+        sqs[r, c] = remembered.TryGetValue(loc, out Sqr? sq) ? sq : blank;                      
+      }
+    }
+
+    int playerRow = gs.Player.Loc.Row;
+    int playerCol = gs.Player.Loc.Col;
+    sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+
+    DrawFullScreen(sqs);
+    BlockForInput();
   }
 }
