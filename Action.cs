@@ -138,7 +138,7 @@ class PortalAction : Action
     result.Complete = true;
 
     if (start.DungeonID != portal.Destination.DungeonID)
-      result.Messages.Add(MsgFactory.Phrase(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
+      result.Messages.Add(new Message(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
 
     if (portal.Destination.DungeonID > 0)
     {
@@ -163,7 +163,7 @@ class PortalAction : Action
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("There is nowhere to go here.", GameState.Player.Loc));
+      result.Messages.Add(new Message("There is nowhere to go here.", GameState.Player.Loc));
     }
 
     return result;
@@ -185,7 +185,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("You cannot go down here.", GameState.Player.Loc));
+      result.Messages.Add(new Message("You cannot go down here.", GameState.Player.Loc));
     }
 
     return result;
@@ -207,7 +207,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase("You cannot go up here.", GameState.Player.Loc));
+      result.Messages.Add(new Message("You cannot go up here.", GameState.Player.Loc));
     }
 
     return result;
@@ -293,7 +293,7 @@ class ChatAction : DirectionalAction
 
     if (other is null)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no one there!", Actor!.Loc));
+      result.Messages.Add(new Message("There's no one there!", Actor!.Loc));
     }
     else
     {
@@ -301,7 +301,7 @@ class ChatAction : DirectionalAction
 
       if (chatAction is NullAction)
       {
-        result.Messages.Add(MsgFactory.Phrase("They aren't interested in chatting.", Actor!.Loc));
+        result.Messages.Add(new Message("They aren't interested in chatting.", Actor!.Loc));
         result.Complete = true;
         result.EnergyCost = 1.0;
       }
@@ -354,12 +354,12 @@ class CloseDoorAction : DirectionalAction
       }
       else if (Actor is Player)
       {
-        result.Messages.Add(MsgFactory.Phrase("The door is already closed.", GameState!.Player.Loc));
+        result.Messages.Add(new Message("The door is already closed.", GameState!.Player.Loc));
       }
     }
     else if (Actor is Player)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no door there!", GameState!.Player.Loc));
+      result.Messages.Add(new Message("There's no door there!", GameState!.Player.Loc));
     }
 
     return result;
@@ -411,12 +411,12 @@ class OpenDoorAction : DirectionalAction
       }
       else if (Actor is Player)
       {
-        result.Messages.Add(MsgFactory.Phrase("The door is already open.", GameState!.Player.Loc));
+        result.Messages.Add(new Message("The door is already open.", GameState!.Player.Loc));
       }
     }
     else if (Actor is Player)
     {
-      result.Messages.Add(MsgFactory.Phrase("There's no door there!", GameState!.Player.Loc));
+      result.Messages.Add(new Message("There's no door there!", GameState!.Player.Loc));
     }
 
     return result;
@@ -442,7 +442,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       return new ActionResult() {
         Complete = false,
-        Messages = [MsgFactory.Phrase("There's no room in your inventory!", GameState.Player.Loc)]
+        Messages = [new Message("There's no room in your inventory!", GameState.Player.Loc)]
       };
     }
 
@@ -464,8 +464,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         else
         {
           var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
-          var stickyMsg = MsgFactory.Phrase(txt, Actor.Loc);
-          result.Messages.Add(stickyMsg);
+          result.Messages.Add(new Message(txt, Actor.Loc));
         }
       }
     }
@@ -474,7 +473,6 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     char slot = inv.Add(item, Actor.ID);
 
     var pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
-
     if (item.Type == ItemType.Zorkmid && item.Value == 1)
       pickupMsg += "a zorkmid.";
     else if (item.Type == ItemType.Zorkmid)
@@ -532,8 +530,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col);
         result.Complete = useResult.Successful;
-        var alert = MsgFactory.Phrase(useResult.Message, Actor.Loc);
-        result.Messages.Add(alert);
+        result.Messages.Add(new Message(useResult.Message, Actor.Loc));
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
@@ -548,7 +545,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
-      var msg = MsgFactory.Phrase("You don't know a way to use that!", GameState.Player.Loc);
+      var msg = new Message("You don't know a way to use that!", GameState.Player.Loc);
       return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 0.0 };
     }
   }
@@ -1116,7 +1113,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var inventory = Actor!.Inventory;
       if (inventory.Zorkmids == 0)
       {
-        var msg = MsgFactory.Phrase("You have no money!", GameState.Player.Loc);
+        var msg = new Message("You have no money!", GameState.Player.Loc);
         return new ActionResult() { Complete = false, Messages = [msg] };
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
@@ -1135,7 +1132,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
     if (item.Equiped && item.Type == ItemType.Armour)
     {
-      var msg = MsgFactory.Phrase("You cannot drop something you're wearing.", GameState.Player.Loc);
+      var msg = new Message("You cannot drop something you're wearing.", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
     else if (itemCount > 1)
@@ -1186,7 +1183,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (!(item.Type == ItemType.Armour || item.Type == ItemType.Weapon || item.Type == ItemType.Tool))
     {
-      var msg = MsgFactory.Phrase("You cannot equip that!", GameState.Player.Loc);
+      var msg = new Message("You cannot equip that!", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
 
@@ -1208,7 +1205,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
           msg += "a helmet.";
         else if (conflict == ArmourParts.Shirt)
           msg += "some armour.";
-        alert = MsgFactory.Phrase(msg, GameState.Player.Loc);
+        alert = new Message(msg, GameState.Player.Loc);
         result = new ActionResult() { Complete = true, Messages = [alert] };
         break;
     }

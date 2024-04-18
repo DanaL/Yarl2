@@ -174,11 +174,6 @@ class MsgFactory
         return sb.ToString();
     }
 
-    public static Message Phrase(string text, Loc loc)
-    {
-        return new Message(text, loc);
-    }
-
     public static Message Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, Loc loc, GameState gs)
     {
         var sb = new StringBuilder();

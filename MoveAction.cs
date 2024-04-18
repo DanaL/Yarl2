@@ -110,9 +110,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         else
         {
           var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} through {env.Name.DefArticle()}.";
-          var msg = MsgFactory.Phrase(txt, Actor.Loc);
           GameState.ObjDb.RemoveItemFromGame(env.Loc, env);
-          result.Messages.Add(msg);
+          result.Messages.Add(new Message(txt, Actor.Loc));
         }
       }
     }
@@ -122,7 +121,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       // in theory this shouldn't ever happen...
       result.Complete = false;
       if (Actor is Player)
-        result.Messages.Add(MsgFactory.Phrase("You cannot go that way!", GameState.Player.Loc));
+        result.Messages.Add(new Message("You cannot go that way!", GameState.Player.Loc));
     }
     else if (GameState.ObjDb.Occupied(_loc))
     {
@@ -143,7 +142,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       else if (occ is not null && !occ.Hostile)
       {
         string msg = $"You don't want to attack {occ.FullName}!";
-        result.Messages.Add(MsgFactory.Phrase(msg, GameState.Player.Loc));
+        result.Messages.Add(new Message(msg, GameState.Player.Loc));
       }
       else
       {
@@ -181,7 +180,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         }
         else
         {
-          result.Messages.Add(MsgFactory.Phrase(BlockedMessage(tile), GameState.Player.Loc));
+          result.Messages.Add(new Message(BlockedMessage(tile), GameState.Player.Loc));
         }
       }
     }
@@ -225,7 +224,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
     if (Actor is Player)
     {
-      result.Messages.Add(MsgFactory.Phrase(CalcDesc(), _loc));
+      result.Messages.Add(new Message(CalcDesc(), _loc));
       GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
     }
     else

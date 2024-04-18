@@ -332,7 +332,7 @@ class Player : Actor, IPerformer
             _accumulator = null;
             ui.CloseMenu();
             ui.ClosePopup();
-            ui.AlertPlayer([MsgFactory.Phrase("Nevermind.", gameState.Player.Loc)], "", gameState);
+            ui.AlertPlayer([new Message("Nevermind.", gameState.Player.Loc)], "", gameState);
             return new NullAction();
           }
         }
@@ -360,7 +360,7 @@ class Player : Actor, IPerformer
 
         if (itemStack is null || itemStack.Count == 0)
         {
-          ui.AlertPlayer([MsgFactory.Phrase("There's nothing there...", gameState.Player.Loc)], "", gameState);
+          ui.AlertPlayer([new Message("There's nothing there...", gameState.Player.Loc)], "", gameState);
           return new NullAction();
         }
         else if (itemStack.Count == 1)
@@ -413,19 +413,19 @@ class Player : Actor, IPerformer
       {
         _accumulator = new DirectionAccumulator();
         _deferred = new CloseDoorAction(gameState, this, gameState.Map);
-        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'C')
       {
         _accumulator = new DirectionAccumulator();
         _deferred = new ChatAction(gameState, this);
-        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'o')
       {
         _accumulator = new DirectionAccumulator();
         _deferred = new OpenDoorAction(gameState, this, gameState.Map);
-        ui.AlertPlayer([MsgFactory.Phrase("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'Q')
       {
