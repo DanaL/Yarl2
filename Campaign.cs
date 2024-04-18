@@ -405,7 +405,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      seed = -998002449;
+      seed = -1522110263;
       //seed = 176296748;
       // -758465673 this seed doesn't have a valid entrance loc?
 

@@ -8,7 +8,6 @@ zombie 2
 floating eye 1
 LEVEL 2
 kobold 4
-kobold foreman 2
 skeleton 2
 zombie 2
 centipede 2
