@@ -399,22 +399,39 @@ class MainDungeonBuilder : DungeonBuilder
     var mapper = new DungeonMap(rng);
     Map[] levels = new Map[numOfLevels];
 
-    for (int l = 0; l < numOfLevels; l++)
+    for (int lvlNum = 0; lvlNum < numOfLevels; lvlNum++)
     {
-      levels[l] = mapper.DrawLevel(w, h);
-      dungeon.AddMap(levels[l]);
+      levels[lvlNum] = mapper.DrawLevel(w, h);
+      dungeon.AddMap(levels[lvlNum]);      
     }
 
-    DungeonMap.AddRiver(levels[0], w + 1, h + 1, TileType.DeepWater, rng);
-    // We want to make any square that's a wall below the chasm into dungeon floor
-    for (int r = 1; r < h; r++)
+    // All rivers/chasms to some of the levels
+    for (int lvlNum = 0; lvlNum < numOfLevels; lvlNum++)
     {
-      for (int c = 1; c < w; c++)
+      if (rng.Next(4) == 0)
       {
-        var pt = (r, c);
-        if (levels[0].IsTile(pt, TileType.Chasm) && levels[1].IsTile(pt, TileType.DungeonWall))
+        TileType riverTile;
+        if (lvlNum < numOfLevels - 1 && rng.Next(3) == 0)
+          riverTile = TileType.Chasm;
+        else
+          riverTile = TileType.DeepWater;
+        DungeonMap.AddRiver(levels[lvlNum], w + 1, h + 1, riverTile, rng);
+
+        // When making a chasm, we want to turn any walls below chasms on the 
+        // floor below into floors. 
+        if (riverTile == TileType.Chasm)
         {
-          levels[1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
+          for (int r = 1; r < h; r++)
+          {
+            for (int c = 1; c < w; c++)
+            {
+              var pt = (r, c);
+              if (levels[lvlNum].IsTile(pt, TileType.Chasm) && levels[lvlNum + 1].IsTile(pt, TileType.DungeonWall))
+              {
+                levels[lvlNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
+              }
+            }
+          }
         }
       }
     }

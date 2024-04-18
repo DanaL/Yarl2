@@ -215,13 +215,13 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
-    //var dBuilder = new MainDungeonBuilder();
-    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    //PopulateDungeon(rng, objDb, history, mainDungeon);
-    var dBuilder = new ArenaBuilder();
-    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    PopulateArena(rng, objDb, mainDungeon);
-    
+    var dBuilder = new MainDungeonBuilder();
+    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+    PopulateDungeon(rng, objDb, history, mainDungeon);
+    //var dBuilder = new ArenaBuilder();
+    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    //PopulateArena(rng, objDb, mainDungeon);
+
     campaign.AddDungeon(mainDungeon);
 
     var portal = new Portal("You stand before a looming portal.")
@@ -404,8 +404,8 @@ class PreGameHandler(UserInterface ui)
     }
     else
     {
-      int seed = DateTime.Now.GetHashCode();      
-      //seed = -643295855;
+      int seed = DateTime.Now.GetHashCode();
+      seed = -998002449;
       //seed = 176296748;
       // -758465673 this seed doesn't have a valid entrance loc?
 
