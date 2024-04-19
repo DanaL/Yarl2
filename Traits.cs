@@ -1000,6 +1000,11 @@ class TraitFactory
           DisguiseForm = pieces[3]
         };
       case "SpellAction":
+        return new SpellActionTrait()
+        {
+          Name = pieces[1],
+          Cooldown = ulong.Parse(pieces[2])
+        };
       case "RangedSpellAction":      
         return new RangedSpellActionTrait()
         {
@@ -1007,7 +1012,7 @@ class TraitFactory
           Cooldown = ulong.Parse(pieces[2]),
           MinRange = int.Parse(pieces[3]),
           MaxRange = int.Parse(pieces[4])
-        };      
+        };
       case "Flammable":
         return new FlammableTrait();
       case "Floating":

@@ -69,18 +69,18 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     return sb.ToString().Trim();
   }
 
-  bool CanMoveTo()
+  public static bool CanMoveTo(Actor actor, Map map, Loc loc)
   {
     static bool CanFly(Actor actor)
     {
       return actor.HasActiveTrait<FlyingTrait>() ||
                 actor.HasActiveTrait<FloatingTrait>();
     }
-    var tile = _map.TileAt(_loc.Row, _loc.Col);
 
+    var tile = map.TileAt(loc.Row, loc.Col);
     if (tile.Passable())
       return true;
-    else if (CanFly(Actor!) && tile.PassableByFlight())
+    else if (CanFly(actor) && tile.PassableByFlight())
       return true;
 
     return false;
@@ -89,6 +89,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
   public override ActionResult Execute()
   {
     var result = new ActionResult();
+    bool isPlayer = Actor is Player;
 
     // First, is there anything preventing the actor from moving off
     // of the square?
@@ -120,7 +121,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     {
       // in theory this shouldn't ever happen...
       result.Complete = false;
-      if (Actor is Player)
+      if (isPlayer)
         result.Messages.Add(new Message("You cannot go that way!", GameState.Player.Loc));
     }
     else if (GameState.ObjDb.Occupied(_loc))
@@ -150,7 +151,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.AltAction = attackAction;
       }
     }
-    else if (!CanMoveTo())
+    else if (!CanMoveTo(Actor, _map, _loc))
     {
       result.Complete = false;
 
@@ -161,7 +162,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         string stumbleText = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "stumble")} in confusion!";
         result.Messages.Add(new Message(stumbleText, Actor.Loc));
 
-        if (Actor is Player)
+        if (isPlayer)
         {
           var tile = _map.TileAt(_loc.Row, _loc.Col);
           result.Messages.Add(new Message(BlockedMessage(tile), Actor.Loc));
@@ -170,7 +171,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         return result;
       }
 
-      if (Actor is Player)
+      if (isPlayer)
       {
         var tile = _map.TileAt(_loc.Row, _loc.Col);
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)

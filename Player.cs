@@ -25,6 +25,9 @@ class Player : Actor, IPerformer
 
   InputAccumulator? _accumulator;
   Action? _deferred;
+  public bool Running { get; set; } = false;
+  char RepeatingCmd { get; set; }
+  HashSet<Loc> LocsRan { get; set; } = [];
 
   public Player(string name)
   {
@@ -222,7 +225,7 @@ class Player : Actor, IPerformer
 
   string PrintStat(Attribute attr)
   {
-    string Fmt(int v)
+    static string Fmt(int v)
     {
       return v > 0 ? $"+{v}" : $"{v}";
     }
@@ -273,6 +276,30 @@ class Player : Actor, IPerformer
     _ => false
   };
 
+  static (int, int) KeyToDir(char ch) => ch switch
+  {
+    'h' => (0, -1),
+    'j' => (1, 0),
+    'k' => (-1, 0),
+    'l' => (0, 1),
+    'y' => (-1, -1),
+    'u' => (-1, 1),
+    'b' => (1, -1),
+    _ => (1, 1)
+  };
+
+  static char DirToKey((int, int) dir) => dir switch
+  {
+    (0, -1)  => 'h',
+    (1, 0)   => 'j',
+    (-1, 0)  => 'k',
+    (0, 1)   => 'l',
+    (-1, -1) => 'y',
+    (-1, 1)  => 'u',
+    (1, -1)  => 'b',
+    _ => 'n'
+  };
+
   MoveAction CalcMovementAction(GameState gs, char ch)
   {
     if (HasTrait<ConfusedTrait>())
@@ -282,19 +309,92 @@ class Player : Actor, IPerformer
       ch = dirs[gs.Rng.Next(dirs.Length)];
     }
 
-    (int dr, int dc) = ch switch
-    {
-      'h' => (0, -1),
-      'j' => (1, 0),
-      'k' => (-1, 0),
-      'l' => (0, 1),
-      'y' => (-1, -1),
-      'u' => (-1, 1),
-      'b' => (1, -1),
-      _ => (1, 1)
-    };
+    (int dr, int dc) = KeyToDir(ch);
 
     return new MoveAction(gs, this, Loc.Move(dr, dc));
+  }
+
+  // 'Running' just means repeated moving
+  NullAction StartRunning(GameState gs, char ch)
+  {
+    if (HasTrait<ConfusedTrait>())
+    {
+      gs.UIRef().AlertPlayer(new Message("You are too confused!", Loc), "", gs);
+      Running = false;
+    }
+
+    Running = true;
+    RepeatingCmd = char.ToLower(ch);
+    LocsRan = [];
+    
+    return new NullAction();
+  }
+
+  Loc[] RunningToward(char ch) 
+  {
+    List<(int, int)> next = ch switch
+    {
+      'h' => [ (-1, -1), (0, -1), (1, -1), (1, 0), (-1, 0)],
+      'j' => [ (1, -1), (1, 0), (1, 1), (0, 1), (0, -1)],
+      'k' => [(-1, -1), (-1, 0), (-1, 1), (0, 1), (0, -1)],
+      'l' => [ (-1, 1), (0, 1), (1, 1), (1, 0), (-1, 0)],
+      'y' => [ (0, -1), (-1, -1), (-1, 0), (1, -1), (-1, 1) ],
+      'u' => [ (-1, 0), (-1, 1), (0, 1), (-1, -1), (1, 1) ],
+      'b' => [ (0, -1), (1, -1), (1, 0), (1, -1), (1, 1) ],
+      _ => [ (1, 0), (1, 1), (0, 1), (1, -1), (-1, 1) ]
+    };
+
+    return next.Select(n => Loc with {  Row = Loc.Row + n.Item1, Col = Loc.Col + n.Item2 })
+                .Where(l => !LocsRan.Contains(l))
+                .ToArray();    
+  }
+
+  char UpdateRunning(GameState gs)
+  {
+    Loc[] nextLocs = RunningToward(RepeatingCmd);
+    
+    // Running is interrupted by adj doors or items
+    foreach (var loc in nextLocs)
+    {
+      var tile = gs.TileAt(loc);
+      switch (tile.Type)
+      {
+        case TileType.ClosedDoor:
+        case TileType.OpenDoor:
+        case TileType.LockedDoor:
+        case TileType.BrokenDoor:
+        case TileType.Landmark:
+          Running = false;
+          return '\0';
+      }
+
+      if (gs.ObjDb.ItemsAt(loc).Count > 0)
+      {
+        Running = false;
+        return '\0';
+      }
+    }
+
+    var (dr, dc) = KeyToDir(RepeatingCmd);
+    var nextLoc = Loc with { Row = Loc.Row + dr, Col = Loc.Col + dc };
+    if (MoveAction.CanMoveTo(this, gs.CurrentMap, nextLoc)) 
+    {
+      LocsRan.Add(nextLoc);
+      return RepeatingCmd;
+    }
+
+    // If there's only one adjacent location we can run to, change directions and keep going
+    var open = nextLocs.Where(l => MoveAction.CanMoveTo(this, gs.CurrentMap, l)).ToList();
+    if (open.Count == 1)
+    {
+      var loc = (open[0].Row - Loc.Row, open[0].Col - Loc.Col);
+      LocsRan.Add(open[0]);
+      RepeatingCmd = DirToKey(loc);
+      return RepeatingCmd;
+    }
+
+    Running = false;
+    return '\0';
   }
 
   public override Action TakeTurn(UserInterface ui, GameState gameState)
@@ -305,10 +405,20 @@ class Player : Actor, IPerformer
       return new PassAction(gameState, this);
     }
 
-    if (ui.InputBuffer.Count > 0)
-    {
-      char ch = ui.InputBuffer.Dequeue();
+    char ch = '\0';
 
+    // Check for repeated action here?
+    if (Running)
+    {
+      ch = UpdateRunning(gameState);
+    }
+    else if (ui.InputBuffer.Count > 0)
+    {
+      ch = ui.InputBuffer.Dequeue();
+    }
+
+    if (ch != '\0')
+    {      
       if (_accumulator is not null)
       {
         _accumulator.Input(ch);
@@ -342,6 +452,8 @@ class Player : Actor, IPerformer
 
       if (IsMoveKey(ch))
         return CalcMovementAction(gameState, ch);
+      else if (IsMoveKey(char.ToLower(ch)))
+        return StartRunning(gameState, ch);
       else if (ch == 'E')
         return new PortalAction(gameState);
       else if (ch == '>')

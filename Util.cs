@@ -351,7 +351,7 @@ static class ListUtils
 
   public static List<T> Filled<T>(T val, int count)
   {
-    List<T> res = new List<T>();
+    List<T> res = [];
     for (int j = 0; j < count; j++)
       res.Add(val);
     return res;
