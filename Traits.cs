@@ -999,16 +999,14 @@ class TraitFactory
           TrueForm = Glyph.TextToGlyph(pieces[2]),
           DisguiseForm = pieces[3]
         };
-      case "Entangle":
-      case "FireboltAction":
-      case "MirrorImage":
-      case "Web":
+      case "SpellAction":
+      case "RangedSpellAction":      
         return new RangedSpellActionTrait()
         {
-          Name = name,
-          Cooldown = ulong.Parse(pieces[1]),
-          MinRange = int.Parse(pieces[2]),
-          MaxRange = int.Parse(pieces[3])
+          Name = pieces[1],
+          Cooldown = ulong.Parse(pieces[2]),
+          MinRange = int.Parse(pieces[3]),
+          MaxRange = int.Parse(pieces[4])
         };      
       case "Flammable":
         return new FlammableTrait();

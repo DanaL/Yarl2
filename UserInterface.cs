@@ -692,9 +692,9 @@ abstract class UserInterface
         break;
       }
 
-      TimeSpan elapsed = DateTime.Now - refresh;
-      if (elapsed.TotalMilliseconds > 60)
-      {
+      //TimeSpan elapsed = DateTime.Now - refresh;
+      //if (elapsed.TotalMilliseconds > 60)
+      //{
         SetSqsOnScreen(gameState);
 
         foreach (var l in _animations)
@@ -703,12 +703,13 @@ abstract class UserInterface
                                  .ToList();
         UpdateDisplay(gameState);
         refresh = DateTime.Now;
-      }
+      //}
 
-      if (elapsed.TotalMilliseconds < 10)
-      {
-        Delay((int)(10 - elapsed.TotalMilliseconds));
-      }
+      Delay(16);
+      //if (elapsed.TotalMilliseconds < 10)
+      //{
+      //  Delay((int)(10 - elapsed.TotalMilliseconds));
+      //}
     }
 
     var msg = new List<string>()
