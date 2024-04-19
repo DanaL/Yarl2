@@ -393,7 +393,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set { } }
   public bool Listening => true;
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     var obj = gs.ObjDb.GetObj(ObjID);
     if (obj is not null and Actor actor)
@@ -413,7 +413,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set {} }
   public bool Listening => true;
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     var victim = gs.ObjDb.GetObj(VictimID);
     victim?.Traits.Remove(this);    
@@ -485,7 +485,7 @@ class ConfusedTrait : EffectTrait, IGameEventListener
     return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} confused!";
   }
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     if (gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
@@ -529,7 +529,7 @@ class ParalyzedTrait : EffectTrait, IGameEventListener
     return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} paralyzed!";
   }
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     if (gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
@@ -571,7 +571,7 @@ class OnFireTrait : BasicTrait, IGameEventListener
     Expired = true;
   }
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     ++Lifetime;
     if (gs.ObjDb.GetObj(ContainerID) is Item fireSrc)
@@ -684,7 +684,7 @@ class StatBuffTrait : EffectTrait, IGameEventListener
     return CalcMessage(victim, -Amt);    
   }
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     if (gs.Turn > ExpiresOn)
     {
@@ -709,7 +709,7 @@ class PoisonedTrait : BasicTrait, IGameEventListener
 
   public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}#{Expired}";
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     var victim = (Actor?)gs.ObjDb.GetObj(VictimID);
     if (victim != null)
@@ -774,7 +774,7 @@ class CountdownTrait : BasicTrait, IGameEventListener
 
   public override string AsText() => $"Countdown#{ContainerID}#{Expired}";
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     if (gs.Turn < ExpiresOn)
       return;
@@ -897,7 +897,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable
     }
   }
 
-  public void Alert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs)
   {
     // Although if it's not Lit, it shouldn't be listening for events
     if (!Lit)

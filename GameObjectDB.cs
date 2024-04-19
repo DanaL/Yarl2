@@ -36,6 +36,8 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
   }
 }
 
+enum GlyphType { Terrain, Item, Mob }
+
 record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour Bg)
 {
   public override string ToString()
@@ -75,7 +77,7 @@ interface IGameEventListener
   public bool Expired { get; set; }
   public bool Listening { get; }
   
-  void Alert(GameEventType eventType, GameState gs);
+  void EventAlert(GameEventType eventType, GameState gs);
 }
 
 abstract class GameObj : IZLevel
@@ -157,7 +159,7 @@ class GameObjectDB
     return null;
   }
 
-  static bool RememberActor(Actor actor)
+  static bool RememberDisguisedActor(Actor actor)
   {
     if (!actor.HasActiveTrait<DisguiseTrait>())
       return false;
@@ -171,8 +173,9 @@ class GameObjectDB
   // I'm returning isItem because when remembering what glyphs were seen
   // (for displaying visited but out of site tiles) I want to remember items
   // but not actors
-  public (Glyph, int, bool) TopGlyph(Loc loc)
+  public (Glyph, int, bool, GlyphType) TopGlyph(Loc loc)
   {
+    var glyphType = GlyphType.Terrain;
     var glyph = EMPTY;
     int z = 0;
     bool remember = false;
@@ -181,11 +184,14 @@ class GameObjectDB
     {
       glyph = Objs[id].Glyph;
       Actor actor = (Actor) Objs[id];
+      glyphType = GlyphType.Mob;
 
       // Disguised monsters should  be retained in memory
-      if (RememberActor(actor))
+      if (RememberDisguisedActor(actor))
+      {
+        glyphType = GlyphType.Item;
         remember = true;
-
+      }
       z = actor.Z();
     }
 
@@ -198,11 +204,12 @@ class GameObjectDB
           glyph = item.Glyph;
           z = item.Z();
           remember = true;
+          glyphType = GlyphType.Item;
         }
       }
     }
 
-    return (glyph, z, remember);
+    return (glyph, z, remember, glyphType);
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()

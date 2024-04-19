@@ -18,7 +18,7 @@ enum PlayerClass
   DwarfStalwart
 }
 
-class Player : Actor, IPerformer
+class Player : Actor, IPerformer, IGameEventListener
 {
   public const int MAX_VISION_RADIUS = 25;
   public PlayerClass CharClass { get; set; }
@@ -65,6 +65,9 @@ class Player : Actor, IPerformer
       return ac + armour;
     }
   }
+
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
 
   public override int TotalMissileAttackModifier(Item weapon)
   {
@@ -600,5 +603,11 @@ class Player : Actor, IPerformer
     }
 
     return new NullAction();
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (eventType == GameEventType.MobSpotted)
+      Running = false;
   }
 }

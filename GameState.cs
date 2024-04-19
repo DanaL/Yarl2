@@ -287,7 +287,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var (targetID, listener) in _deathWatchListeners)
     {
       if (targetID == victim.ID) 
-        listener.Alert(GameEventType.Death, this);
+        listener.EventAlert(GameEventType.Death, this);
     }
     ClearDeathWatch(victim.ID);
 
@@ -416,7 +416,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
     {
-      listener.Alert(GameEventType.EndOfRound, this);
+      listener.EventAlert(GameEventType.EndOfRound, this);
     }
     _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
   }

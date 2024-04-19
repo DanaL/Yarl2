@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Yarl2;
 
-enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death }
+enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted }
 record struct GameEvent(GameEventType Type, char Value);
 record Sqr(Colour Fg, Colour Bg, char Ch);
 
@@ -66,6 +66,8 @@ abstract class UserInterface
   protected bool HistoryUpdated = false;
 
   List<Animation> _animations = [];
+
+  HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
 
   public UserInterface(Options opts)
   {
@@ -802,7 +804,7 @@ abstract class UserInterface
   {
     var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
 
-    // Okay, squares have to be lit and within visible radius to be seen and a visible, lit Z-Layer tile trumps
+    // Okay, squares have to be lit and within visible radius to be seen and visible, lit Z-Layer tile trumps
     // For a square within visible that isn't lit, return remembered or Unknown
     bool isVisible = visible.Contains((mapRow, mapCol));
 
@@ -835,7 +837,6 @@ abstract class UserInterface
       sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);
     }
 
-    //Sqr memory = TileToSqr(tile, false);
     gs.RecentlySeen.Add(loc);
 
     // The ZLayer trumps. Although maybe now that I've added a Z-coord
@@ -843,7 +844,8 @@ abstract class UserInterface
     if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
       return TileToSqr(ZLayer[scrRow, scrCol], true);
 
-    var (glyph, z, rememberGlyph) = gs.ObjDb.TopGlyph(loc);
+    var (glyph, z, rememberGlyph, glyphType) = gs.ObjDb.TopGlyph(loc);
+
     // For a chasm sq, return the tile from the level below,
     // unless there's an Actor on this level (such as a flying
     // creature)
@@ -857,6 +859,12 @@ abstract class UserInterface
       sqr = new Sqr(glyph.Lit, glyph.Bg, glyph.Ch);
       if (rememberGlyph)
         memory = sqr with { Fg = glyph.Unlit };
+
+      if (glyphType == GlyphType.Mob && loc != gs.Player.Loc)
+      {
+        var occ = gs.ObjDb.Occupant(loc);        
+        RecentlySeenMonsters.Add(occ.ID);
+      }
     }
     else
     {
@@ -888,6 +896,8 @@ abstract class UserInterface
     var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
 
     gs.RecentlySeen = [];
+    var prevSeenMonsters = RecentlySeenMonsters.Select(mloc => mloc).ToHashSet();
+    RecentlySeenMonsters = [];
 
     // There is a glitch here that I don't want to fix right now in that
     // I am remembering only (row, col). So if a monster picks up an item
@@ -910,6 +920,9 @@ abstract class UserInterface
         SqsOnScreen[r, c] = CalcSqrAtLoc(visible, rememberd, map, mapRow, mapCol, r, c, gs);
       }
     }
+
+    if (RecentlySeenMonsters.Except(prevSeenMonsters).Count() > 0)
+      gs.Player.EventAlert(GameEventType.MobSpotted, gs);
 
     if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
