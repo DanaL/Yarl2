@@ -210,11 +210,11 @@ class MainDungeonBuilder : DungeonBuilder
     if (candidateSqs.Count > 0)
     {
       var sq = candidateSqs[rng.Next(candidateSqs.Count)];
-      foreach (var n in Util.Adj4Sqs(sq.Item1, sq.Item2))
-      {
-        map.SetTile(n, TileFactory.Get(TileType.Statue));
-      }
 
+      var statueSqs = Util.Adj4Sqs(sq.Item1, sq.Item2).ToList();
+      var statueSq = statueSqs[rng.Next(statueSqs.Count)];
+      map.SetTile(statueSq, TileFactory.Get(TileType.Statue));
+      
       var tile = new Landmark(statueDesc.Capitalize());
       map.SetTile(sq, tile);
     }
