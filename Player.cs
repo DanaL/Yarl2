@@ -353,7 +353,7 @@ class Player : Actor, IPerformer
   {
     Loc[] nextLocs = RunningToward(RepeatingCmd);
     
-    // Running is interrupted by adj doors or items
+    // Running is interrupted by some tiles or sqs with items
     foreach (var loc in nextLocs)
     {
       var tile = gs.TileAt(loc);
@@ -364,6 +364,9 @@ class Player : Actor, IPerformer
         case TileType.LockedDoor:
         case TileType.BrokenDoor:
         case TileType.Landmark:
+        case TileType.Statue:
+        case TileType.Upstairs:
+        case TileType.Downstairs:
           Running = false;
           return '\0';
       }
@@ -383,7 +386,8 @@ class Player : Actor, IPerformer
       return RepeatingCmd;
     }
 
-    // If there's only one adjacent location we can run to, change directions and keep going
+    // If we can't travel any further in current direction and there's only one option 
+    // of where to continue, change directions and keep going.
     var open = nextLocs.Where(l => MoveAction.CanMoveTo(this, gs.CurrentMap, l)).ToList();
     if (open.Count == 1)
     {
