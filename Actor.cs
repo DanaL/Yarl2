@@ -11,14 +11,15 @@
 
 namespace Yarl2;
 
-// Interface for anything that will get a turn in the game. The Player,
-// NPCs/Monsters, even things like torches that are burning or a cursed
-// item that zaps the player once in a while
+// Interface for anything that will get a turn in the game. I'm not sure this
+// needs to exist outside of Actor. Originally I was going to have Items and
+// Traits take turns to handle things like torch fuel counting down but now
+// that's handled by EndOfTurn events
 interface IPerformer
 {
   double Energy { get; set; }
   double Recovery { get; set; }
-  bool RemoveFromQueue { get; set; }
+  
   Action TakeTurn(UserInterface ui, GameState gameState);
 }
 

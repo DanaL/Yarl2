@@ -47,8 +47,7 @@ abstract class UserInterface
   protected int PlayerScreenCol;
   protected List<string>? _longMessage;
   protected Options _options;
-  bool _playing;
-
+  
   public Queue<char> InputBuffer = new Queue<char>();
 
   public Sqr[,] SqsOnScreen;
@@ -615,14 +614,14 @@ abstract class UserInterface
     }
   }
 
-  bool TakeTurn(IPerformer performer, GameState gs)
+  void TakeTurn(IPerformer performer, GameState gs)
   {
     var action = performer.TakeTurn(this, gs);
 
     if (action is NullAction)
     {
       // Player is idling
-      return false;
+      return;
     }
 
     if (action is QuitAction)
@@ -635,7 +634,7 @@ abstract class UserInterface
       //Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
       Serialize.WriteSaveGame(gs);
       throw new GameQuitException();
-    }
+    }    
     else
     {
       ActionResult result;
@@ -657,8 +656,6 @@ abstract class UserInterface
       }
       while (result.AltAction is not null);
     }
-
-    return true;
   }
 
   public void GameLoop(GameState gameState)
@@ -667,9 +664,9 @@ abstract class UserInterface
     _animations.Add(new CloudAnimationListener(this, gameState));
     _animations.Add(new TorchLightAnimationListener(this, gameState));
 
-    _playing = true;
     DateTime refresh = DateTime.Now;
-    while (_playing)
+    IPerformer currPerformer = gameState.Player;
+    while (true)
     {
       var e = PollForEvent();
       if (e.Type == GameEventType.Quiting)
@@ -682,8 +679,9 @@ abstract class UserInterface
       {
         // Update step! This is where all the current performers gets a chance
         // to take their turn!
-        IPerformer performer = gameState.NextPerformer();
-        TakeTurn(performer, gameState);
+        if (currPerformer.Energy < 1.0)
+          currPerformer = gameState.NextPerformer();
+        TakeTurn(currPerformer, gameState);
       }
       catch (GameQuitException)
       {
@@ -694,9 +692,10 @@ abstract class UserInterface
         break;
       }
 
-      //TimeSpan elapsed = DateTime.Now - refresh;
-      //if (elapsed.TotalMilliseconds > 60)
-      //{
+      TimeSpan elapsed = DateTime.Now - refresh;
+      int totalMs = (int) elapsed.TotalMilliseconds;
+      if (totalMs >= 16)
+      {
         SetSqsOnScreen(gameState);
 
         foreach (var l in _animations)
@@ -705,13 +704,11 @@ abstract class UserInterface
                                  .ToList();
         UpdateDisplay(gameState);
         refresh = DateTime.Now;
-      //}
-
-      Delay(16);
-      //if (elapsed.TotalMilliseconds < 10)
-      //{
-      //  Delay((int)(10 - elapsed.TotalMilliseconds));
-      //}
+      }
+      else
+      {
+        Delay(5);
+      }      
     }
 
     var msg = new List<string>()

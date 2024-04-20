@@ -252,8 +252,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void ActorKilled(Actor victim)
   {
-    ((IPerformer)victim).RemoveFromQueue = true;
     ObjDb.RemoveActor(victim);
+    
+    // Need to remove the victim from the Performer queue but also update 
+    // current performer pointer if necessary. If _currPerformer > index
+    // of victim, we want to decrement it
+    var performerIndex = Performers.IndexOf(victim);
+    if (_currPerformer > performerIndex)
+      --_currPerformer;
+    Performers.Remove(victim);
 
     if (victim == Player)
     {
@@ -319,7 +326,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   public void BuildPerformersList()
-  {
+  {    
     RefreshPerformers();
 
     foreach (var performer in Performers)
@@ -336,7 +343,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void AddPerformer(IPerformer performer)
   {
-    performer.Energy = 0.0;
+    performer.Energy = 1.0;
     Performers.Add(performer);
   }
 
@@ -359,43 +366,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public IPerformer NextPerformer()
   {
-    do
-    {
-      // This is slightly different than a monster being killed because this just
-      // removes them from the queue. A burnt out torch still exists as an item in
-      // the game but a dead monster needs to be removed from the GameObjDb as well
-      if (Performers[_currPerformer].RemoveFromQueue)
-      {
-        // Don't need to increment p here, because removing the 'dead'
-        // performer will set up the next one
-        Performers.RemoveAt(_currPerformer);
-        if (_currPerformer >= Performers.Count)
-        {
-          ++Turn;
-          _currPerformer = 0;
-          EndOfTurn();
-        }
-      }
-
-      if (Performers[_currPerformer].Energy < 1.0)
-      {
-        Performers[_currPerformer].Energy += Performers[_currPerformer].Recovery;
-        ++_currPerformer;
-      }
-
-      if (_currPerformer >= Performers.Count)
-      {
-        ++Turn;
-        _currPerformer = 0;
-        EndOfTurn();
-      }
-
-      if (Performers[_currPerformer].Energy >= 1.0 && !Performers[_currPerformer].RemoveFromQueue)
-        return Performers[_currPerformer];
+    if (Performers[_currPerformer].Energy < 1.0) {
+      Performers[_currPerformer].Energy += Performers[_currPerformer].Recovery;
+      ++_currPerformer;
     }
-    while (Performers.Count > 0);
+    
+    if (_currPerformer >= Performers.Count)
+    {
+      ++Turn;
+      _currPerformer = 0;
+      EndOfTurn();
+    }
 
-    throw new Exception("Hmm we should never run out of performers");
+    return Performers[_currPerformer];    
   }
 
   // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait

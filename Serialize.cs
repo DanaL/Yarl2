@@ -484,8 +484,7 @@ class GameObjDBSave
       Loc = Loc.FromStr(fields[5]),
       Energy = double.Parse(fields[8]),
       Recovery = double.Parse(fields[9]),
-      RemoveFromQueue = bool.Parse(fields[13]),
-      Appearance = fields[14]
+      Appearance = fields[13]
     };
 
     string mvStrategyStr = fields[0];
@@ -515,9 +514,9 @@ class GameObjDBSave
       mob.Inventory.RestoreFromText(fields[12]);
     }
 
-    if (fields[15] != "")
+    if (fields[14] != "")
     {
-      foreach (var a in fields[15].Split('`'))
+      foreach (var a in fields[14].Split('`'))
       {
         var action = (ActionTrait) TraitFactory.FromText(a, mob);
         mob.Actions.Add(action);
@@ -626,8 +625,6 @@ class GameObjDBSave
         sb.Append(mob.Inventory.NextSlot);
         sb.Append('|');
         sb.Append(mob.Inventory.ToText());
-        sb.Append('|');
-        sb.Append(mob.RemoveFromQueue);
         sb.Append('|');
         sb.Append(mob.Appearance);
 

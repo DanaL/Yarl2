@@ -170,9 +170,6 @@ class GameObjectDB
     return false;
   }
 
-  // I'm returning isItem because when remembering what glyphs were seen
-  // (for displaying visited but out of site tiles) I want to remember items
-  // but not actors
   public (Glyph, int, bool, GlyphType) TopGlyph(Loc loc)
   {
     var glyphType = GlyphType.Terrain;
@@ -181,7 +178,7 @@ class GameObjectDB
     bool remember = false;
 
     if (_actorLocs.TryGetValue(loc, out ulong id))
-    {
+    {  
       glyph = Objs[id].Glyph;
       Actor actor = (Actor) Objs[id];
       glyphType = GlyphType.Mob;
@@ -332,8 +329,7 @@ class GameObjectDB
 
   public void ActorMoved(Actor a, Loc from, Loc to)
   {
-    if (_actorLocs.TryGetValue(from, out ulong fromID) && fromID == a.ID)
-      _actorLocs.Remove(from);
+    _actorLocs.Remove(from);
     _actorLocs[to] = a.ID;
   }
 

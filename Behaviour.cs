@@ -210,7 +210,7 @@ class MonsterBehaviour : IBehaviour
   }
 
   static Action CalcMoveAction(Mob mob, GameState gs)
-  {
+  {    
     if (mob.HasTrait<ConfusedTrait>()) 
       return new MoveAction(gs, mob, RandomAdjLoc(mob.Loc, gs));
     else
@@ -218,7 +218,7 @@ class MonsterBehaviour : IBehaviour
   }
 
   public virtual Action CalcAction(Mob actor, GameState gs, UserInterface ui)
-  {     
+  {
     if (actor.Status == MobAttitude.Idle)
     {
       return new PassAction();
