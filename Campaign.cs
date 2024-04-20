@@ -217,7 +217,7 @@ class PreGameHandler(UserInterface ui)
 
     var dBuilder = new MainDungeonBuilder();
     var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
+    //PopulateDungeon(rng, objDb, history, mainDungeon);
     //var dBuilder = new ArenaBuilder();
     //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
     //PopulateArena(rng, objDb, mainDungeon);

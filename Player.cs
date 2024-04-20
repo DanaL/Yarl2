@@ -414,6 +414,9 @@ class Player : Actor, IPerformer, IGameEventListener
 
     char ch = '\0';
 
+    if (ui.InputBuffer.Count > 0 && ui.InputBuffer.Peek() == ' ')
+      Running = false;
+
     // Check for repeated action here?
     if (Running)
     {
