@@ -18,7 +18,7 @@ namespace Yarl2;
 class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
 {
   readonly Loc _loc = loc;
-  readonly Map _map = gameState.Map!;
+  readonly Map _map = gameState.CurrMap!;
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
   
   static string BlockedMessage(Tile tile)

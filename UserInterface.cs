@@ -13,10 +13,6 @@ using System.Text;
 
 namespace Yarl2;
 
-enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted }
-record struct GameEvent(GameEventType Type, char Value);
-record Sqr(Colour Fg, Colour Bg, char Ch);
-
 record struct MsgHistory(string Message, int Count)
 {
   public readonly string Fmt => Count > 1 ? $"{Message} x{Count}" : Message;
@@ -483,7 +479,7 @@ abstract class UserInterface
   // TODO: DRY the two versions of AlertPlayer
   public void AlertPlayer(Message alert, string ifNotSeen, GameState gs)
   {            
-    var textToShow = gs.RecentlySeen.Contains(alert.Loc) ? alert.Text : ifNotSeen;
+    var textToShow = gs.LastPlayerFoV.Contains(alert.Loc) ? alert.Text : ifNotSeen;
 
     if (textToShow.Trim().Length == 0)
       return;
@@ -511,11 +507,11 @@ abstract class UserInterface
     List<string> msgs = [];
     foreach (var alert in alerts)
     {
-      if (!gs.RecentlySeen.Contains(alert.Loc) && alert.Sound)
+      if (!gs.LastPlayerFoV.Contains(alert.Loc) && alert.Sound)
         msgs.Add(alert.Text);
-      else if (gs.RecentlySeen.Contains(alert.Loc) && !alert.Sound)
+      else if (gs.LastPlayerFoV.Contains(alert.Loc) && !alert.Sound)
         msgs.Add(alert.Text);
-      else if (!gs.RecentlySeen.Contains(alert.Loc))
+      else if (!gs.LastPlayerFoV.Contains(alert.Loc))
         msgs.Add(ifNotSeen);
     }
 
@@ -653,6 +649,8 @@ abstract class UserInterface
 
         if (result.Messages.Count > 0)
           AlertPlayer(result.Messages, result.MessageIfUnseen, gs);
+
+        gs.UpdateFoV();
       }
       while (result.AltAction is not null);
     }
@@ -707,7 +705,7 @@ abstract class UserInterface
       }
       else
       {
-        Delay(5);
+        //Delay(5);
       }      
     }
 
@@ -796,6 +794,37 @@ abstract class UserInterface
     return result.Trim();
   }
 
+  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc)
+  {
+    Sqr sqr;
+    if (gs.LastPlayerFoV.Contains(loc))
+    {
+      Glyph glyph;
+      if (gs.ObjDb.Occupant(loc) is Actor actor)
+        glyph = actor.Glyph;
+      else
+        glyph = remembered[loc];
+      
+      char ch = glyph.Ch;
+      Colour bg;
+      if (gs.CurrDungeonID > 0 && (ch == '.' || ch == '#'))
+        bg = Colours.TORCH_ORANGE;
+      else
+        bg = Colours.BLACK;
+      sqr = new Sqr(glyph.Lit, bg, ch);
+    }
+    else if (remembered.TryGetValue(loc, out var glyph))
+    {
+      sqr = new Sqr(glyph.Unlit, Colours.BLACK, glyph.Ch);
+    }
+    else
+    {
+      sqr = Constants.BLANK_SQ;
+    }
+
+    return sqr;
+  }
+
   Sqr CalcSqrAtLoc(HashSet<(int, int)> visible, Dictionary<(int, int, int), Sqr> remembered, Map map,
               int mapRow, int mapCol, int scrRow, int scrCol, GameState gs)
   {
@@ -834,8 +863,6 @@ abstract class UserInterface
       sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);
     }
 
-    gs.RecentlySeen.Add(loc);
-
     // The ZLayer trumps. Although maybe now that I've added a Z-coord
     // to items and actors I can get rid of the ZLayer?
     if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
@@ -873,26 +900,17 @@ abstract class UserInterface
     return sqr;
   }
 
-  public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)
-  {
-    int rowOffset = playerRow - PlayerScreenRow;
-    int colOffset = playerCol - PlayerScreenCol;
-
-    return (row - rowOffset, col - colOffset);
-  }
-
   void SetSqsOnScreen(GameState gs)
   {
     var cmpg = gs.Campaign;
     var dungeon = cmpg!.Dungeons[gs.CurrDungeonID];
     var map = dungeon.LevelMaps[gs.CurrLevel];
-    gs.Map = map;
+    gs.CurrMap = map;
     int playerRow = gs.Player.Loc.Row;
     int playerCol = gs.Player.Loc.Col;
-    var vs = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, playerRow, playerCol, map, gs.CurrDungeonID, gs.CurrLevel, gs.ObjDb);
-    var visible = vs.Select(v => (v.Item2, v.Item3)).ToHashSet();
+    var vs = gs.LastPlayerFoV;
+    var visible = vs.Select(v => (v.Row, v.Col)).ToHashSet();
 
-    gs.RecentlySeen = [];
     var prevSeenMonsters = RecentlySeenMonsters.Select(mloc => mloc).ToHashSet();
     RecentlySeenMonsters = [];
 
@@ -914,15 +932,31 @@ abstract class UserInterface
         // replace w/ LocToScrLoc?
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
-        SqsOnScreen[r, c] = CalcSqrAtLoc(visible, rememberd, map, mapRow, mapCol, r, c, gs);
+
+        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
+        var sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc);
+
+        // The ZLayer trumps. Although maybe now that I've added a Z-coord
+        // to items and actors I can get rid of the ZLayer?
+        if (ZLayer[r, c].Type != TileType.Unknown)
+          sqr = TileToSqr(ZLayer[r, c], true);
+        SqsOnScreen[r, c] = sqr;
       }
     }
 
-    if (RecentlySeenMonsters.Except(prevSeenMonsters).Count() > 0)
+    if (RecentlySeenMonsters.Except(prevSeenMonsters).Any())
       gs.Player.EventAlert(GameEventType.MobSpotted, gs);
 
     if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+  }
+
+  public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)
+  {
+    int rowOffset = playerRow - PlayerScreenRow;
+    int colOffset = playerCol - PlayerScreenCol;
+
+    return (row - rowOffset, col - colOffset);
   }
 
   void ClearZLayer()
@@ -939,16 +973,16 @@ abstract class UserInterface
   public void DisplayMapView(GameState gs)
   {
     var dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
-    var remembered = dungeon.RememberedSqs;
+    var remembered = dungeon.RememberedLocs;
 
-    Sqr blank = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
+    var blank = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
     Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
     for (int r = 0; r < ScreenHeight; r++)
     {
       for (int c= 0; c < ScreenWidth; c++)
       {
-        var loc = (gs.CurrLevel, r, c);
-        sqs[r, c] = remembered.TryGetValue(loc, out Sqr? sq) ? sq : blank;                      
+        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
+        sqs[r, c] = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : blank;                      
       }
     }
 

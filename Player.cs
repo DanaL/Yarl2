@@ -534,7 +534,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'c')
       {
         _accumulator = new DirectionAccumulator();
-        _deferred = new CloseDoorAction(gameState, this, gameState.Map);
+        _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'C')
@@ -546,7 +546,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'o')
       {
         _accumulator = new DirectionAccumulator();
-        _deferred = new OpenDoorAction(gameState, this, gameState.Map);
+        _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'Q')

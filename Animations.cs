@@ -261,7 +261,7 @@ class SqAnimation : Animation
         var ui = _gs.UIRef();
         var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-        if (!_gs.RecentlySeen.Contains(_loc))
+        if (!_gs.LastPlayerFoV.Contains(_loc))
             return;
 
         if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))

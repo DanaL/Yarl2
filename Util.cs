@@ -14,6 +14,10 @@ using System.Text.RegularExpressions;
 
 namespace Yarl2;
 
+enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted }
+record struct GameEvent(GameEventType Type, char Value);
+record Sqr(Colour Fg, Colour Bg, char Ch);
+
 // I didn't want to be beholden to someone else's colour class and anyhow
 // Bearlib's didn't have a comparison operator implemented, which was 
 // inconvenient for me
@@ -32,7 +36,7 @@ class Colours
   public static readonly Colour YELLOW = new(255, 255, 53, 255);
   public static readonly Colour YELLOW_ORANGE = new(255, 159, 0, 255);
   public static readonly Colour LIGHT_BROWN = new(160, 82, 45, 255);
-  public static readonly Colour BROWN = new(43, 23, 0, 255);
+  public static readonly Colour BROWN = new(150, 75, 0, 255);
   public static readonly Colour GREEN = new(144, 238, 144, 255);
   public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
   public static readonly Colour LIME_GREEN = new(191, 255, 0, 255);
@@ -115,6 +119,7 @@ class Constants
   public const int BACKSPACE = 8;
   public const int TAB = 9;
   public const int ESC = 27;
+  public static readonly Sqr BLANK_SQ = new(Colours.BLACK, Colours.BLACK, ' ');
 }
 
 partial class Util
@@ -334,6 +339,77 @@ partial class Util
     'n' => (1, 1),
     _ => (0, 0)
   };
+
+  public static Glyph TileToGlyph(Tile tile)
+  {
+    switch (tile.Type)
+    {
+      case TileType.DungeonWall:
+      case TileType.PermWall:
+      case TileType.StoneWall:
+        return new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.DungeonFloor:
+        return new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK);
+      case TileType.StoneFloor:
+        return new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.StoneRoad:
+        return new Glyph('\'', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.ClosedDoor:
+        return new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+      case TileType.OpenDoor:
+        return new Glyph('\\', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+      case TileType.Water:
+      case TileType.DeepWater:
+        return new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK);
+      case TileType.Sand:
+        return new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK);
+      case TileType.Grass:
+        return new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK);  
+      case TileType.Tree:
+        return new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK);          
+      case TileType.Mountain:
+        return new Glyph('\u039B', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.SnowPeak:
+        return new Glyph('\u039B', Colours.WHITE, Colours.GREY, Colours.BLACK);        
+      case TileType.Portal:
+        return new Glyph('Ո', Colours.WHITE, Colours.GREY, Colours.BLACK);
+      case TileType.Downstairs:
+        return new Glyph('>', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+      case TileType.Upstairs:
+        return new Glyph('<', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.Cloud:
+        return new Glyph('#', Colours.WHITE, Colours.WHITE, Colours.BLACK);
+      case TileType.Dirt:
+      case TileType.WoodFloor:
+        return new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+      case TileType.WoodWall:
+        return new Glyph('#', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK);        
+      case TileType.HWindow:
+        return new Glyph('-', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+      case TileType.VWindow:
+        return new Glyph('|', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+      case TileType.Forge:
+        return new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK);
+      case TileType.Well:
+        return new Glyph('o', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+      case TileType.Bridge:
+        return new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+      case TileType.WoodBridge:
+        return new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);        
+      case TileType.Statue:
+        return new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);        
+      case TileType.Landmark:
+        return new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);        
+      case TileType.Chasm:
+        return new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK);        
+      case TileType.CharredGrass:
+        return new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+      case TileType.CharredStump:
+        return new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+      default:
+        return new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK);
+    }
+  }
 }
 
 static class ListUtils

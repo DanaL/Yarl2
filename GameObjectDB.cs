@@ -170,6 +170,43 @@ class GameObjectDB
     return false;
   }
 
+  public Glyph ItemGlyph(Loc loc)
+  {
+    static bool Disguised(Actor mob)
+    {
+      if (!mob.HasActiveTrait<DisguiseTrait>())
+        return false;
+
+      if (mob.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
+        return true;
+
+      return false;
+    }
+
+    Glyph glyph = EMPTY;
+
+    // If there is a Mob disguised as an item, we'll return that glyph
+    if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor mob)
+    {
+      if (Disguised(mob))
+        glyph = mob.Glyph;
+    }
+    else if (_itemLocs.TryGetValue(loc, out var items))
+    {
+      int z = 0;
+      foreach (var item in items)
+      {
+        if (item.Z() > z)
+        {
+          glyph = item.Glyph;
+          z = item.Z();          
+        }
+      }
+    }
+
+    return glyph;
+  }
+
   public (Glyph, int, bool, GlyphType) TopGlyph(Loc loc)
   {
     var glyphType = GlyphType.Terrain;

@@ -19,7 +19,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 {
   public int Seed { get; init; } = seed;
   public Random Rng { get; set; } = rng;
-  public Map? Map { get; set; }
+  public Map? CurrMap { get; set; }
   public Options? Options { get; set; } = opts;
   public Player Player { get; set; } = p;
   public int CurrLevel { get; set; }
@@ -29,6 +29,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
 
+  public HashSet<Loc> LastPlayerFoV = [];
   DjikstraMap? DMap { get; set; }
   DjikstraMap? DMapDoors { get; set; }
   DjikstraMap? DMapFlight { get; set; }
@@ -45,7 +46,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       return DMap;    
   }
   
-  public HashSet<Loc> RecentlySeen { get; set; } = [];
   public ulong LastTarget { get; set; } = 0;
   public List<Fact> Facts => Campaign.History != null ? Campaign.History.Facts : [];
 
@@ -658,5 +658,48 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     while (indexes.Count > 0)
       _deathWatchListeners.RemoveAt(indexes.Pop());
+  }
+
+  public void UpdateFoV()
+  {
+    CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
+    var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc.Row, Player.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
+                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3) ).ToHashSet();
+
+    LastPlayerFoV = fov;
+    
+    foreach (var loc in fov)
+    {
+      Glyph glyph = ObjDb.ItemGlyph(loc);
+      if (glyph == GameObjectDB.EMPTY)
+      {
+        // Remember the terrain tile if there's nothing on the square
+        Tile tile = CurrMap.TileAt(loc.Row, loc.Col);
+
+        // If it's a chasm, we display the tile from the level below
+        if (tile.Type != TileType.Chasm)
+        {
+          glyph = Util.TileToGlyph(tile);
+        }
+        else
+        {
+          Loc below = loc with { Level = CurrLevel + 1 };
+          Glyph glyphBelow = ObjDb.GlyphAt(below);
+          char ch;
+          if (glyphBelow != GameObjectDB.EMPTY)
+          {
+            ch = glyphBelow.Ch;
+          }
+          else
+          {
+            var belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
+            ch = belowTile.Ch;
+          }
+          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK);
+        }
+      }
+    
+      CurrentDungeon.RememberedLocs[loc] = glyph;
+    }
   }
 }

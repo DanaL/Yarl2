@@ -17,6 +17,7 @@ class Dungeon(int ID, string arrivalMessage)
 {
   public int ID { get; init; } = ID;
   public Dictionary<(int, int, int), Sqr> RememberedSqs = [];
+  public Dictionary<Loc, Glyph> RememberedLocs = [];
   public Dictionary<int, Map> LevelMaps = [];
   public string ArrivalMessage { get; } = arrivalMessage;
 
@@ -217,7 +218,7 @@ class PreGameHandler(UserInterface ui)
 
     var dBuilder = new MainDungeonBuilder();
     var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    //PopulateDungeon(rng, objDb, history, mainDungeon);
+    PopulateDungeon(rng, objDb, history, mainDungeon);
     //var dBuilder = new ArenaBuilder();
     //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
     //PopulateArena(rng, objDb, mainDungeon);
@@ -428,7 +429,8 @@ class PreGameHandler(UserInterface ui)
 
     gameState.ObjDb.AddToLoc(player.Loc, player);
     gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
-
+    gameState.UpdateFoV();
+    
     //seed = 601907053;
     //seed = 1956722118;
     //seed = 1003709949;

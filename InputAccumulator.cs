@@ -57,7 +57,7 @@ class AimAccumulator : InputAccumulator
 
   void FindTargets()
   {
-    foreach (var loc in _gs.RecentlySeen)
+    foreach (var loc in _gs.LastPlayerFoV)
     {
       if (Util.Distance(loc, _start) <= _maxRange)
       {
