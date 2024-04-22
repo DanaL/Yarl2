@@ -383,7 +383,7 @@ partial class Util
       case TileType.WoodFloor:
         return new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN);
       case TileType.WoodWall:
-        return new Glyph('#', Colours.YELLOW, Colours.YELLOW_ORANGE);        
+        return new Glyph('#', Colours.LIGHT_BROWN, Colours.BROWN);        
       case TileType.HWindow:
         return new Glyph('-', Colours.LIGHT_GREY, Colours.GREY);
       case TileType.VWindow:
