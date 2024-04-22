@@ -98,9 +98,11 @@ class Battle
       bonusDamage += mdb.Curr;
 
     Message msg = MsgFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
-    int hpLeft = target.ReceiveDmg(dmg, bonusDamage, gs);
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
     ResolveHit(attacker, target, hpLeft, result, msg, gs);
-
+    if (dmgMsg != "")
+      result.Messages.Add(new Message(dmgMsg, target.Loc));
+    
     foreach (var trait in ammo.Traits)
     {
       if (trait is PoisonerTrait poison)
@@ -156,8 +158,10 @@ class Battle
       bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
 
     Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
-    int hpLeft = target.ReceiveDmg(dmg, bonusDamage, gs);
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
     ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    if (dmgMsg != "")
+      result.Messages.Add(new Message(dmgMsg, target.Loc));
 
     if (attacker.Traits.Count > 0)
     {

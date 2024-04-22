@@ -90,8 +90,10 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     Inventory = new EmptyInventory(ID);
   }
 
-  public virtual int ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs)
+  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs)
   {
+    string msg = "";
+
     if (Status == MobAttitude.Idle)
       Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
 
@@ -106,6 +108,16 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         d /= 2;
       else if (dmg.Item2 == DamageType.Slashing && HasActiveTrait<ResistSlashingTrait>())
         d /= 2;
+
+      foreach (var immunity in Traits.OfType<Immunity>())
+      {
+        if (immunity.Active && immunity.Type == dmg.Item2)
+        {
+          d = 0;
+          bonusDamage = 0;
+          msg = "The attack seems ineffectual!";
+        }
+      }
 
       if (d > 0)
         total += d;
@@ -131,7 +143,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     }
     done_dividing:
 
-    return Stats[Attribute.HP].Curr;
+    return (Stats[Attribute.HP].Curr, msg);
   }
 
   // Candidate spots will be spots adjacent to the contiguous group of the 

@@ -41,7 +41,8 @@ enum Attribute
   DialogueState,
   Markup,
   Attitude,
-  InDisguise
+  InDisguise,
+  MonsterForm
 }
 
 class Stat

@@ -217,7 +217,12 @@ class PreGameHandler(UserInterface ui)
 
     var dBuilder = new MainDungeonBuilder();
     var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
+
+    //PopulateDungeon(rng, objDb, history, mainDungeon);
+    var prince = BossFactory.Get("Prince of Rats", rng);
+    var sq = mainDungeon.LevelMaps[0].RandomTile(TileType.DungeonFloor, rng);
+    var loc = new Loc(mainDungeon.ID, 0, sq.Item1, sq.Item2);
+    objDb.AddNewActor(prince, loc);
 
     //var dBuilder = new ArenaBuilder();
     //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);

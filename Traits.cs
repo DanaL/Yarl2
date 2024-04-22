@@ -175,6 +175,13 @@ class ImmuneConfusionTrait : Trait
   public override string AsText() => "ImmuneConfusion";
 }
 
+class Immunity : Trait
+{
+  public DamageType Type {  get; set; }
+
+  public override string AsText() => $"Immunity#{Type}";
+}
+
 class ResistBluntTrait : Trait
 {
   public override string AsText() => "ResistBlunt";
@@ -589,8 +596,12 @@ class OnFireTrait : BasicTrait, IGameEventListener
       {
         int fireDmg = gs.Rng.Next(8) + 1;
         List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-        int hpLeft = victim.ReceiveDmg(fire, 0, gs);
-
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs);
+        if (dmgMsg != "")
+        {
+          gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
+        }
+          
         if (hpLeft < 1)
         {
           string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
@@ -725,7 +736,11 @@ class PoisonedTrait : BasicTrait, IGameEventListener
       else
       {
         List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-        int hpLeft = victim.ReceiveDmg(p, 0, gs);
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs);
+        if (dmgMsg != "")
+        {
+          gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
+        }
 
         if (hpLeft < 1)
         {
@@ -1027,6 +1042,12 @@ class TraitFactory
         };
       case "ImmuneConfusion":
         return new ImmuneConfusionTrait();
+      case "Immunity":
+        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType idt);
+        return new Immunity()
+        {
+          Type = idt
+        };
       case "Impale":
         return new ImpaleTrait();      
       case "LightSource":
