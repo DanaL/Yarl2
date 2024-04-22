@@ -16,7 +16,6 @@ namespace Yarl2;
 class Dungeon(int ID, string arrivalMessage)
 {
   public int ID { get; init; } = ID;
-  public Dictionary<(int, int, int), Sqr> RememberedSqs = [];
   public Dictionary<Loc, Glyph> RememberedLocs = [];
   public Dictionary<int, Map> LevelMaps = [];
   public string ArrivalMessage { get; } = arrivalMessage;
@@ -430,7 +429,7 @@ class PreGameHandler(UserInterface ui)
     gameState.ObjDb.AddToLoc(player.Loc, player);
     gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
     gameState.UpdateFoV();
-    
+
     //seed = 601907053;
     //seed = 1956722118;
     //seed = 1003709949;

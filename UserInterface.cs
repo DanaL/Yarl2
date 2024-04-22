@@ -796,6 +796,20 @@ abstract class UserInterface
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc)
   {
+    static Colour BGColour(GameState gs, Loc loc, char ch)
+    {
+      if (gs.CurrDungeonID == 0)
+        return Colours.BLACK;
+
+      if (!gs.CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
+        return Colours.BLACK;
+
+      if (ch == '.' || ch == '#')
+        return Colours.TORCH_ORANGE;
+
+      return Colours.BLACK;
+    }
+
     Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
     {
@@ -806,11 +820,7 @@ abstract class UserInterface
         glyph = remembered[loc];
       
       char ch = glyph.Ch;
-      Colour bg;
-      if (gs.CurrDungeonID > 0 && (ch == '.' || ch == '#'))
-        bg = Colours.TORCH_ORANGE;
-      else
-        bg = Colours.BLACK;
+      Colour bg = BGColour(gs, loc, ch);
       sqr = new Sqr(glyph.Lit, bg, ch);
     }
     else if (remembered.TryGetValue(loc, out var glyph))
@@ -913,14 +923,6 @@ abstract class UserInterface
 
     var prevSeenMonsters = RecentlySeenMonsters.Select(mloc => mloc).ToHashSet();
     RecentlySeenMonsters = [];
-
-    // There is a glitch here that I don't want to fix right now in that
-    // I am remembering only (row, col). So if a monster picks up an item
-    // out of the player's FOV, the remembered square will then show the map
-    // tile not the remembered item. I need to store a dictionary of loc + glyph
-    // Or perhaps it just needs to be a collection of items + non-basic tiles not
-    // every tile
-    var rememberd = dungeon.RememberedSqs;
 
     int rowOffset = playerRow - PlayerScreenRow;
     int colOffset = playerCol - PlayerScreenCol;

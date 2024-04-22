@@ -238,10 +238,10 @@ internal class DungeonSaver
       sd.LevelMaps.Add(k, MapSaver.Shrink(dungeon.LevelMaps[k]));
     }
 
-    foreach (var sq in dungeon.RememberedSqs)
-    {
-      sd.RememberedSqs.Add(RememberedSq.FromTuple(sq.Key, sq.Value));
-    }
+    // foreach (var sq in dungeon.RememberedSqs)
+    // {
+    //   sd.RememberedSqs.Add(RememberedSq.FromTuple(sq.Key, sq.Value));
+    // }
 
     return sd;
   }
@@ -249,12 +249,12 @@ internal class DungeonSaver
   public static Dungeon Inflate(DungeonSaver sd)
   {
     Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage);
-    d.RememberedSqs = [];
+    // d.RememberedSqs = [];
 
-    foreach (var sq in sd.RememberedSqs)
-    {
-      d.RememberedSqs.Add(sq.ToTuple(), sq.Sqr);
-    }
+    // foreach (var sq in sd.RememberedSqs)
+    // {
+    //   d.RememberedSqs.Add(sq.ToTuple(), sq.Sqr);
+    // }
 
     foreach (var k in sd.LevelMaps.Keys)
     {
