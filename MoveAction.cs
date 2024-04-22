@@ -88,7 +88,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
   public override ActionResult Execute()
   {
-    var result = new ActionResult();
+    var result = base.Execute();
     bool isPlayer = Actor is Player;
 
     // First, is there anything preventing the actor from moving off

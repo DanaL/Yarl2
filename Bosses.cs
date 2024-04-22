@@ -31,19 +31,20 @@ class BossFactory
     {
       Name = "Prince of Rats",
       Recovery = 1.0,
-      MoveStrategy = new DumbMoveStrategy(),
+      MoveStrategy = new DoorOpeningMoveStrategy(),
       Glyph = glyph
     };
     prince.SetBehaviour(new PrinceOfRatsBehaviour());
-
+    prince.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Idle);
+    
     prince.Stats.Add(Attribute.HP, new Stat(80));
     prince.Stats.Add(Attribute.MonsterForm, new Stat(0));
 
-    //prince.Stats.Add(Attribute.MonsterAttackBonus, new Stat(4));
-    //prince.Stats.Add(Attribute.AC, new Stat(15));
-    //prince.Stats.Add(Attribute.Strength, new Stat(1));
-    //prince.Stats.Add(Attribute.Dexterity, new Stat(1));
-    //prince.Stats.Add(Attribute.XPValue, new Stat(6));
+    prince.Stats.Add(Attribute.MonsterAttackBonus, new Stat(7));
+    prince.Stats.Add(Attribute.AC, new Stat(15));
+    prince.Stats.Add(Attribute.Strength, new Stat(1));
+    prince.Stats.Add(Attribute.Dexterity, new Stat(3));
+    prince.Stats.Add(Attribute.XPValue, new Stat(20));
 
     //prince.Actions.Add(new MobMeleeTrait()
     //{
@@ -73,9 +74,9 @@ class BossFactory
     if (roll == 0)
       prince.Traits.Add(new Immunity() { Type = DamageType.Slashing });
     else if (roll == 1)
-      prince.Traits.Add(new Immunity() { Type = DamageType.Blunt });
-    else
       prince.Traits.Add(new Immunity() { Type = DamageType.Piercing });
+    else
+      prince.Traits.Add(new Immunity() { Type = DamageType.Blunt });
 
     return prince;
   }
@@ -88,41 +89,62 @@ class PrinceOfRatsBehaviour : IBehaviour
 
   DateTime _lastQuip = DateTime.Now;
 
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  static Action CalcMoveAction(Mob mob, GameState gs)
   {
-    int currForm = actor.Stats[Attribute.MonsterForm].Curr;
+    if (mob.HasTrait<ConfusedTrait>())
+      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
+    else
+      return mob.MoveStrategy.MoveAction(mob, gs);
+  }
 
-    if (gameState.Rng.NextDouble() < 0.1)
+  void CheckChangeForm(Mob prince, GameState gs, int currForm)
+  {
+    if (gs.Rng.NextDouble() < 0.1)
     {
-      if (actor.Stats[Attribute.MonsterForm].Curr == HUMAN_FORM)
+      if (prince.Stats[Attribute.MonsterForm].Curr == HUMAN_FORM)
       {
-        actor.Glyph = new Glyph('r', Colours.GREY, Colours.DARK_GREY);
-        actor.Stats[Attribute.MonsterForm].SetMax(RAT_FORM);
+        prince.Glyph = new Glyph('r', Colours.GREY, Colours.DARK_GREY);
+        prince.Stats[Attribute.MonsterForm].SetMax(RAT_FORM);
       }
       else
       {
-        actor.Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY);
-        actor.Stats[Attribute.MonsterForm].SetMax(HUMAN_FORM);
+        prince.Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY);
+        prince.Stats[Attribute.MonsterForm].SetMax(HUMAN_FORM);
       }
 
-      gameState.UIRef().AlertPlayer(new Message("The Prince of Rats shifts forms!", actor.Loc), "", gameState);
+      gs.UIRef().AlertPlayer(new Message("The Prince of Rats shifts forms!", prince.Loc), "", gs);
+    }
+  }
+
+  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  {
+    if (actor.Status == MobAttitude.Idle)
+    {
+      return new PassAction();
+    }
+
+    Action action;
+    int currForm = actor.Stats[Attribute.MonsterForm].Curr;
+
+    CheckChangeForm(actor, gameState, currForm);
+
+    if (Util.Distance(actor.Loc, gameState.Player.Loc) == 1)
+    {
+      actor.Dmg = new Damage(5, 2, DamageType.Slashing);
+      action = new MeleeAttackAction(gameState, actor, gameState.Player.Loc);     
+    }
+    else
+    {
+      action = CalcMoveAction(actor, gameState);
     }
 
     if (currForm == HUMAN_FORM && (DateTime.Now - _lastQuip).TotalSeconds > 10)
     {
       _lastQuip = DateTime.Now;
+      action.Quip = "Cheese for the Rat God!";
+    }
 
-      return new PassAction()
-      {
-        Actor = actor,
-        GameState = gameState,
-        Quip = "Cheese for the Rat God!"
-      };
-    }
-    else
-    {
-      return new PassAction();
-    }
+    return action;
   }
 
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);

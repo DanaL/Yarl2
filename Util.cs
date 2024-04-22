@@ -192,6 +192,13 @@ partial class Util
     return count;
   }
 
+  public static Loc RandomAdjLoc(Loc loc, GameState gs)
+  {
+    var adj = Adj8Locs(loc).ToList();
+
+    return adj[gs.Rng.Next(adj.Count)];
+  }
+
   public static int Distance(int x1, int y1, int x2, int y2)
   {
     int dx = Math.Abs(x1 - x2);

@@ -125,7 +125,7 @@ class MonsterBehaviour : IBehaviour
   static Loc CalcRangedTarget(Mob mob, GameState gs)
   {
     if (mob.HasTrait<ConfusedTrait>())
-      return RandomAdjLoc(gs.Player.Loc, gs);
+      return Util.RandomAdjLoc(gs.Player.Loc, gs);
     else
       return gs.Player.Loc;
   }
@@ -133,7 +133,7 @@ class MonsterBehaviour : IBehaviour
   static Loc CalcAdjacentTarget(Mob mob, GameState gs)
   {
     if (mob.HasTrait<ConfusedTrait>())
-      return RandomAdjLoc(mob.Loc, gs);
+      return Util.RandomAdjLoc(mob.Loc, gs);
     else
       return gs.Player.Loc;
   }
@@ -202,17 +202,10 @@ class MonsterBehaviour : IBehaviour
     return new NullAction();
   }
 
-  static Loc RandomAdjLoc(Loc loc, GameState gs)
-  {
-    var adj = Util.Adj8Locs(loc).ToList();
-    return adj[gs.Rng.Next(adj.Count)];
-
-  }
-
   static Action CalcMoveAction(Mob mob, GameState gs)
   {    
     if (mob.HasTrait<ConfusedTrait>()) 
-      return new MoveAction(gs, mob, RandomAdjLoc(mob.Loc, gs));
+      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
     else
       return mob.MoveStrategy.MoveAction(mob, gs);
   }

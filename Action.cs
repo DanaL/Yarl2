@@ -56,7 +56,8 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = true };
+    var result = base.Execute();
+    result.Complete = true;
 
     var target = GameState!.ObjDb.Occupant(_loc);
     if (target is not null)
