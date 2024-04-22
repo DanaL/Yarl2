@@ -159,17 +159,6 @@ class GameObjectDB
     return null;
   }
 
-  static bool RememberDisguisedActor(Actor actor)
-  {
-    if (!actor.HasActiveTrait<DisguiseTrait>())
-      return false;
-
-    if (actor.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
-      return true;
-
-    return false;
-  }
-
   public (Glyph, int) ItemGlyph(Loc loc)
   {
     static bool Disguised(Actor mob)
@@ -208,45 +197,6 @@ class GameObjectDB
     }
 
     return (glyph, z);
-  }
-
-  public (Glyph, int, bool, GlyphType) TopGlyph(Loc loc)
-  {
-    var glyphType = GlyphType.Terrain;
-    var glyph = EMPTY;
-    int z = 0;
-    bool remember = false;
-
-    if (_actorLocs.TryGetValue(loc, out ulong id))
-    {  
-      glyph = Objs[id].Glyph;
-      Actor actor = (Actor) Objs[id];
-      glyphType = GlyphType.Mob;
-
-      // Disguised monsters should  be retained in memory
-      if (RememberDisguisedActor(actor))
-      {
-        glyphType = GlyphType.Item;
-        remember = true;
-      }
-      z = actor.Z();
-    }
-
-    if (_itemLocs.TryGetValue(loc, out var items))
-    {
-      foreach (var item in items)
-      {
-        if (item.Z() > z)
-        {
-          glyph = item.Glyph;
-          z = item.Z();
-          remember = true;
-          glyphType = GlyphType.Item;
-        }
-      }
-    }
-
-    return (glyph, z, remember, glyphType);
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()

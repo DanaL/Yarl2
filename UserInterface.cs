@@ -435,7 +435,8 @@ abstract class UserInterface
     }
     
     var tile = gs.TileAt(gs.Player.Loc);
-    var tileSq = TileToSqr(tile, true);
+    var glyph = Util.TileToGlyph(tile);
+    var tileSq = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
     var tileText = Tile.TileDesc(tile.Type).Capitalize();
     foreach (var item in gs.ObjDb.EnvironmentsAt(gs.Player.Loc))
     {
@@ -533,82 +534,6 @@ abstract class UserInterface
   public void WriteLongMessage(List<string> message) => _longMessage = message;
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
   public void CloseMenu() => MenuRows = [];
-
-  // I dunno about having this here. In previous games, I had each Tile object
-  // know what its colours were, but maybe the UI class *is* the correct spot
-  // to decide how to draw the glyph
-  protected static Sqr TileToSqr(Tile tile, bool lit)
-  {
-    switch (tile.Type)
-    {
-      case TileType.DungeonWall:
-      case TileType.PermWall:
-        return lit ? new Sqr(Colours.GREY, Colours.TORCH_ORANGE, '#') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '#');
-      case TileType.StoneWall:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '#') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '#');
-      case TileType.DungeonFloor:
-        return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '.') : new Sqr(Colours.GREY, Colours.BLACK, '.');
-      case TileType.StoneFloor:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '.');
-      case TileType.StoneRoad:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '\'') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '\'');
-      case TileType.ClosedDoor:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '+') : new Sqr(Colours.BROWN, Colours.BLACK, '+');
-      case TileType.OpenDoor:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '\\') : new Sqr(Colours.BROWN, Colours.BLACK, '\\');
-      case TileType.Water:
-      case TileType.DeepWater:
-        return lit ? new Sqr(Colours.BLUE, Colours.BLACK, '}') : new Sqr(Colours.DARK_BLUE, Colours.BLACK, '}');
-      case TileType.Sand:
-        return lit ? new Sqr(Colours.YELLOW, Colours.BLACK, '.') : new Sqr(Colours.YELLOW_ORANGE, Colours.BLACK, '.');
-      case TileType.Grass:
-        return lit ? new Sqr(Colours.GREEN, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, '.');
-      case TileType.Tree:
-        return lit ? new Sqr(Colours.GREEN, Colours.BLACK, 'ϙ') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, 'ϙ');
-      case TileType.Mountain:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '\u039B') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u039B');
-      case TileType.SnowPeak:
-        return lit ? new Sqr(Colours.WHITE, Colours.BLACK, '\u039B') : new Sqr(Colours.GREY, Colours.BLACK, '\u039B');
-      case TileType.Portal:
-        return lit ? new Sqr(Colours.WHITE, Colours.BLACK, 'Ո') : new Sqr(Colours.GREY, Colours.BLACK, 'Ո');
-      case TileType.Downstairs:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '>') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '>');
-      case TileType.Upstairs:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '<') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '<');
-      case TileType.Cloud:
-        return lit ? new Sqr(Colours.WHITE, Colours.BLACK, '#') : new Sqr(Colours.WHITE, Colours.BLACK, '#');
-      case TileType.WoodFloor:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '.') : new Sqr(Colours.BROWN, Colours.BLACK, '.');
-      case TileType.WoodWall:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '#') : new Sqr(Colours.BROWN, Colours.BLACK, '#');
-      case TileType.HWindow:
-        return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, '-') : new Sqr(Colours.GREY, Colours.BLACK, '-');
-      case TileType.VWindow:
-        return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, '|') : new Sqr(Colours.GREY, Colours.BLACK, '|');
-      case TileType.Forge:
-        return lit ? new Sqr(Colours.BRIGHT_RED, Colours.TORCH_ORANGE, '^') : new Sqr(Colours.DULL_RED, Colours.BLACK, '^');
-      case TileType.Dirt:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '.') : new Sqr(Colours.BROWN, Colours.BLACK, '.');
-      case TileType.Well:
-        return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, 'o') : new Sqr(Colours.GREY, Colours.BLACK, 'o');
-      case TileType.Bridge:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '=') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '=');
-      case TileType.WoodBridge:
-        return lit ? new Sqr(Colours.LIGHT_BROWN, Colours.BLACK, '=') : new Sqr(Colours.BROWN, Colours.BLACK, '=');
-      case TileType.Statue:
-        return lit ? new Sqr(Colours.LIGHT_GREY, Colours.BLACK, '&') : new Sqr(Colours.GREY, Colours.BLACK, '&');
-      case TileType.Landmark:
-        return lit ? new Sqr(Colours.YELLOW, Colours.TORCH_ORANGE, '_') : new Sqr(Colours.GREY, Colours.BLACK, '_');
-      case TileType.Chasm:
-        return lit ? new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237') : new Sqr(Colours.DARK_GREY, Colours.BLACK, '\u2237');
-      case TileType.CharredGrass:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '.') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, '.');
-      case TileType.CharredStump:
-        return lit ? new Sqr(Colours.GREY, Colours.BLACK, '|') : new Sqr(Colours.DARK_GREEN, Colours.BLACK, '|');
-      default:
-        return new Sqr(Colours.BLACK, Colours.BLACK, ' ');
-    }
-  }
 
   void TakeTurn(IPerformer performer, GameState gs)
   {
@@ -835,81 +760,6 @@ abstract class UserInterface
     return sqr;
   }
 
-  Sqr CalcSqrAtLoc(HashSet<(int, int)> visible, Dictionary<(int, int, int), Sqr> remembered, Map map,
-              int mapRow, int mapCol, int scrRow, int scrCol, GameState gs)
-  {
-    var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-
-    // Okay, squares have to be lit and within visible radius to be seen and visible, lit Z-Layer tile trumps
-    // For a square within visible that isn't lit, return remembered or Unknown
-    bool isVisible = visible.Contains((mapRow, mapCol));
-
-    if (!isVisible || !map.HasEffect(TerrainFlag.Lit, mapRow, mapCol))
-    {
-      if (remembered.TryGetValue((gs.CurrLevel, mapRow, mapCol), out var remSq))
-        return remSq;
-      else
-        return new Sqr(Colours.BLACK, Colours.BLACK, ' '); ;
-    }
-
-    Tile tile = map.TileAt(mapRow, mapCol);
-    // First, check if we have a chasm square, in which case we'll look up info
-    // from the level below
-    Sqr? sqBelow = null;
-    if (tile.Type == TileType.Chasm)
-    {
-      Loc below = loc with { Level = gs.CurrLevel + 1 };
-      Glyph glyphBelow = gs.ObjDb.GlyphAt(below);
-      char ch;
-      if (glyphBelow != GameObjectDB.EMPTY)
-      {
-        ch = glyphBelow.Ch;
-      }
-      else
-      {
-        var belowTile = TileToSqr(gs.CurrentDungeon.LevelMaps[gs.CurrLevel + 1].TileAt(mapRow, mapCol), false);
-        ch = belowTile.Ch;
-      }
-      sqBelow = new Sqr(Colours.FAR_BELOW, Colours.BLACK, ch);
-    }
-
-    // The ZLayer trumps. Although maybe now that I've added a Z-coord
-    // to items and actors I can get rid of the ZLayer?
-    if (ZLayer[scrRow, scrCol].Type != TileType.Unknown)
-      return TileToSqr(ZLayer[scrRow, scrCol], true);
-
-    var (glyph, z, rememberGlyph, glyphType) = gs.ObjDb.TopGlyph(loc);
-
-    // For a chasm sq, return the tile from the level below,
-    // unless there's an Actor on this level (such as a flying
-    // creature)
-    if (sqBelow != null && glyph == GameObjectDB.EMPTY)
-      return sqBelow;
-
-    Sqr memory = TileToSqr(tile, false);
-    Sqr sqr;
-    if (z > tile.Z())
-    {
-      sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
-      if (rememberGlyph)
-        memory = sqr with { Fg = glyph.Unlit };
-
-      if (glyphType == GlyphType.Mob && loc != gs.Player.Loc)
-      {
-        var occ = gs.ObjDb.Occupant(loc);        
-        RecentlySeenMonsters.Add(occ.ID);
-      }
-    }
-    else
-    {
-      sqr = TileToSqr(tile, true);
-    }
-
-    remembered[(gs.CurrLevel, mapRow, mapCol)] = memory;
-
-    return sqr;
-  }
-
   void SetSqsOnScreen(GameState gs)
   {
     var cmpg = gs.Campaign;
@@ -941,7 +791,11 @@ abstract class UserInterface
         // The ZLayer trumps. Although maybe now that I've added a Z-coord
         // to items and actors I can get rid of the ZLayer?
         if (ZLayer[r, c].Type != TileType.Unknown)
-          sqr = TileToSqr(ZLayer[r, c], true);
+        {
+          var glyph = Util.TileToGlyph(ZLayer[r, c]);
+           sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
+        }
+         
         SqsOnScreen[r, c] = sqr;
       }
     }
