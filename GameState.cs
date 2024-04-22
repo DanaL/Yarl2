@@ -664,8 +664,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
     var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc.Row, Player.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
-                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3) ).ToHashSet();
+                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
+                         .Where(loc => CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
+                         .ToHashSet();
 
+    // Calculate which squares are newly viewed and check if there are
+    // monsters in any of them. If so, we alert the Player (mainly to 
+    // halt running when a monster comes into view)
+    var newLocs = fov.Except(LastPlayerFoV)
+                     .ToHashSet();
+    var mobSeen = newLocs.Select(loc => loc != Player.Loc && ObjDb.Occupied(loc))
+                         .Any();
+    if (mobSeen)
+    {
+      Player.EventAlert(GameEventType.MobSpotted, this);
+    }
+    
     LastPlayerFoV = fov;
     
     foreach (var loc in fov)
