@@ -29,6 +29,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
 
+  HashSet<ulong> RecentlySeenMonsters { get; set; } = [ p.ID ];
   public HashSet<Loc> LastPlayerFoV = [];
   DjikstraMap? DMap { get; set; }
   DjikstraMap? DMapDoors { get; set; }
@@ -667,20 +668,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                          .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
                          .Where(loc => CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
                          .ToHashSet();
+    LastPlayerFoV = fov;
 
     // Calculate which squares are newly viewed and check if there are
     // monsters in any of them. If so, we alert the Player (mainly to 
     // halt running when a monster comes into view)
-    var newLocs = fov.Except(LastPlayerFoV)
-                     .ToHashSet();
-    var mobSeen = newLocs.Select(loc => loc != Player.Loc && ObjDb.Occupied(loc))
-                         .Any();
-    if (mobSeen)
+    var prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
+    RecentlySeenMonsters = [ Player.ID ];
+    foreach (var loc in fov)
+    {
+      if (ObjDb.Occupant(loc) is Actor occ)
+        RecentlySeenMonsters.Add(occ.ID);
+    }
+
+    if (RecentlySeenMonsters.Except(prevSeenMonsters).Any())
     {
       Player.EventAlert(GameEventType.MobSpotted, this);
     }
-    
-    LastPlayerFoV = fov;
+    RecentlySeenMonsters = prevSeenMonsters;
     
     foreach (var loc in fov)
     {

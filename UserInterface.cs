@@ -62,8 +62,6 @@ abstract class UserInterface
 
   List<Animation> _animations = [];
 
-  HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
-
   public UserInterface(Options opts)
   {
     _options = opts;
@@ -762,18 +760,10 @@ abstract class UserInterface
 
   void SetSqsOnScreen(GameState gs)
   {
-    var cmpg = gs.Campaign;
-    var dungeon = cmpg!.Dungeons[gs.CurrDungeonID];
-    var map = dungeon.LevelMaps[gs.CurrLevel];
-    gs.CurrMap = map;
+    var dungeon = gs.CurrentDungeon;
     int playerRow = gs.Player.Loc.Row;
     int playerCol = gs.Player.Loc.Col;
-    var vs = gs.LastPlayerFoV;
-    var visible = vs.Select(v => (v.Row, v.Col)).ToHashSet();
-
-    var prevSeenMonsters = RecentlySeenMonsters.Select(mloc => mloc).ToHashSet();
-    RecentlySeenMonsters = [];
-
+    
     int rowOffset = playerRow - PlayerScreenRow;
     int colOffset = playerCol - PlayerScreenCol;
 
@@ -799,9 +789,6 @@ abstract class UserInterface
         SqsOnScreen[r, c] = sqr;
       }
     }
-
-    if (RecentlySeenMonsters.Except(prevSeenMonsters).Any())
-      gs.Player.EventAlert(GameEventType.MobSpotted, gs);
 
     if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
