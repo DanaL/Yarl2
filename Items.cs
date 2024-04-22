@@ -106,7 +106,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 10,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
@@ -118,7 +118,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = true,
           Value = 10,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
@@ -130,7 +130,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 15,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
@@ -142,7 +142,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 25,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });
@@ -154,7 +154,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 25,
-          Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
@@ -166,7 +166,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 25,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
@@ -178,7 +178,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 20,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK)
+          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
@@ -190,7 +190,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = true,
           Value = 2,
-          Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+          Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
@@ -202,7 +202,7 @@ class ItemFactory
           Type = ItemType.Weapon,
           Stackable = false,
           Value = 0,
-          Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
+          Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
@@ -214,7 +214,7 @@ class ItemFactory
           Type = ItemType.Armour,
           Stackable = false,
           Value = 20,
-          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK)
+          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
         break;
@@ -225,7 +225,7 @@ class ItemFactory
           Type = ItemType.Armour,
           Stackable = false,
           Value = 25,
-          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK)
+          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
         break;
@@ -236,7 +236,7 @@ class ItemFactory
           Type = ItemType.Armour,
           Stackable = false,
           Value = 45,
-          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
         break;
@@ -247,7 +247,7 @@ class ItemFactory
           Type = ItemType.Armour,
           Stackable = false,
           Value = 75,
-          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
         break;
@@ -258,7 +258,7 @@ class ItemFactory
           Type = ItemType.Armour,
           Stackable = false,
           Value = 20,
-          Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
         break;
@@ -269,7 +269,7 @@ class ItemFactory
           Type = ItemType.Tool,
           Stackable = true,
           Value = 2,
-          Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK)
+          Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN)
         };
         var ls = new TorchTrait()
         {
@@ -286,7 +286,7 @@ class ItemFactory
           Name = "zorkmid",
           Type = ItemType.Zorkmid,
           Stackable = true,
-          Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
+          Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         break;
       case "potion of healing":
@@ -296,7 +296,7 @@ class ItemFactory
           Type = ItemType.Potion,
           Stackable = true,
           Value = 75,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK)        
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE)        
         };
         item.Traits.Add(new CastMinorHealTrait());
         item.Traits.Add(new ConsumableTrait());
@@ -308,7 +308,7 @@ class ItemFactory
           Type = ItemType.Potion,
           Stackable = true,
           Value = 50,
-          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK)
+          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         item.Traits.Add(new CastAntidoteTrait());
         item.Traits.Add(new ConsumableTrait());
@@ -320,7 +320,7 @@ class ItemFactory
           Type = ItemType.Scroll,
           Stackable = true,
           Value = 125,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK)
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new CastBlinkTrait());
@@ -344,7 +344,7 @@ class ItemFactory
       Type = ItemType.Environment,
       Stackable = false,
       Value = 0,
-      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK)
+      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY)
     };
     mist.SetZ(10);
     mist.Traits.Add(new OpaqueTrait());
@@ -362,11 +362,11 @@ class ItemFactory
     Glyph glyph;
     var roll = gs.Rng.NextDouble();
     if (roll < 0.333)
-      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE);
+      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED);
     else if (roll < 0.666)
-      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_ORANGE);
+      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED);
     else
-      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_ORANGE);
+      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED);
 
     var fire = new Item()
     {
@@ -393,7 +393,7 @@ class ItemFactory
       Type = ItemType.Environment,
       Stackable = false,
       Value = 0,
-      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK)
+      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY)
     };
     web.Traits.Add(new StickyTrait());
     web.Traits.Add(new FlammableTrait());

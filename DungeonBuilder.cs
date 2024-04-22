@@ -286,7 +286,7 @@ class MainDungeonBuilder : DungeonBuilder
       Name = desc,
       Type = ItemType.Document,
       Stackable = false,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK),
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY),
       Adjectives = [adjective]
     };
     doc.Traits.Add(new FlammableTrait());
@@ -367,7 +367,7 @@ class MainDungeonBuilder : DungeonBuilder
       Type = ItemType.Trinket,
       Stackable = false,
       Value = 1,
-      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK)
+      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY)
     };
     objDb.Add(trinket);
     objDb.SetToLoc(loc, trinket);

@@ -347,67 +347,67 @@ partial class Util
       case TileType.DungeonWall:
       case TileType.PermWall:
       case TileType.StoneWall:
-        return new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('#', Colours.GREY, Colours.DARK_GREY);
       case TileType.DungeonFloor:
-        return new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK);
+        return new Glyph('.', Colours.YELLOW, Colours.GREY);
       case TileType.StoneFloor:
-        return new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('.', Colours.GREY, Colours.DARK_GREY);
       case TileType.StoneRoad:
-        return new Glyph('\'', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('\'', Colours.GREY, Colours.DARK_GREY);
       case TileType.ClosedDoor:
-        return new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+        return new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN);
       case TileType.OpenDoor:
-        return new Glyph('\\', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+        return new Glyph('\\', Colours.LIGHT_BROWN, Colours.BROWN);
       case TileType.Water:
       case TileType.DeepWater:
-        return new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK);
+        return new Glyph('}', Colours.BLUE, Colours.DARK_BLUE);
       case TileType.Sand:
-        return new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK);
+        return new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE);
       case TileType.Grass:
-        return new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK);  
+        return new Glyph('.', Colours.GREEN, Colours.DARK_GREEN);  
       case TileType.Tree:
-        return new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK);          
+        return new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN);          
       case TileType.Mountain:
-        return new Glyph('\u039B', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('\u039B', Colours.GREY, Colours.DARK_GREY);
       case TileType.SnowPeak:
-        return new Glyph('\u039B', Colours.WHITE, Colours.GREY, Colours.BLACK);        
+        return new Glyph('\u039B', Colours.WHITE, Colours.GREY);        
       case TileType.Portal:
-        return new Glyph('Ո', Colours.WHITE, Colours.GREY, Colours.BLACK);
+        return new Glyph('Ո', Colours.WHITE, Colours.GREY);
       case TileType.Downstairs:
-        return new Glyph('>', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+        return new Glyph('>', Colours.GREY, Colours.DARK_GREY);        
       case TileType.Upstairs:
-        return new Glyph('<', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('<', Colours.GREY, Colours.DARK_GREY);
       case TileType.Cloud:
-        return new Glyph('#', Colours.WHITE, Colours.WHITE, Colours.BLACK);
+        return new Glyph('#', Colours.WHITE, Colours.WHITE);
       case TileType.Dirt:
       case TileType.WoodFloor:
-        return new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);
+        return new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN);
       case TileType.WoodWall:
-        return new Glyph('#', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK);        
+        return new Glyph('#', Colours.YELLOW, Colours.YELLOW_ORANGE);        
       case TileType.HWindow:
-        return new Glyph('-', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+        return new Glyph('-', Colours.LIGHT_GREY, Colours.GREY);
       case TileType.VWindow:
-        return new Glyph('|', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+        return new Glyph('|', Colours.LIGHT_GREY, Colours.GREY);
       case TileType.Forge:
-        return new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK);
+        return new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED);
       case TileType.Well:
-        return new Glyph('o', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+        return new Glyph('o', Colours.LIGHT_GREY, Colours.GREY);
       case TileType.Bridge:
-        return new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);
+        return new Glyph('=', Colours.GREY, Colours.DARK_GREY);
       case TileType.WoodBridge:
-        return new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK);        
+        return new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN);        
       case TileType.Statue:
-        return new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);        
+        return new Glyph('&', Colours.LIGHT_GREY, Colours.GREY);        
       case TileType.Landmark:
-        return new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);        
+        return new Glyph('_', Colours.LIGHT_GREY, Colours.GREY);        
       case TileType.Chasm:
-        return new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK);        
+        return new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY);        
       case TileType.CharredGrass:
-        return new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+        return new Glyph('.', Colours.GREY, Colours.DARK_GREY);        
       case TileType.CharredStump:
-        return new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK);        
+        return new Glyph('|', Colours.GREY, Colours.DARK_GREY);        
       default:
-        return new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK);
+        return new Glyph(' ', Colours.BLACK, Colours.BLACK);
     }
   }
 }

@@ -287,7 +287,7 @@ class MonsterFactory
 
     char ch = fields[0].Length == 0 ?  ' ' : fields[0][0];
     var glyph = new Glyph(ch, Colours.TextToColour(fields[1]),
-                                Colours.TextToColour(fields[2]), Colours.BLACK);
+                                Colours.TextToColour(fields[2]));
 
     var mv = TextToMove(fields[10]);
     var m = new Mob()

@@ -107,8 +107,8 @@ class Village
     var cleric = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
-      Appearance = VillagerAppearance(rng),      
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+      Appearance = VillagerAppearance(rng),
+      Glyph = new Glyph('@', lit, unlit)
     };
     cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
@@ -128,7 +128,7 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+      Glyph = new Glyph('@', lit, unlit)
     };
     grocer.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     grocer.Traits.Add(new NamedTrait());
@@ -160,7 +160,7 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+      Glyph = new Glyph('@', lit, unlit)
     };
     smith.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     smith.Traits.Add(new NamedTrait());
@@ -219,7 +219,7 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(6, 11)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+      Glyph = new Glyph('@', lit, unlit)
     };
     villager.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     villager.Traits.Add(new NamedTrait());
@@ -252,7 +252,7 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(6, 11)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK)
+      Glyph = new Glyph('@', lit, unlit)
     };
     widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
@@ -312,7 +312,7 @@ class Village
     {
       Name = $"{adj} {dogType}",
       Appearance = $"{adj} {dogType} with {colourDesc} fur",
-      Glyph = new Glyph('d', colour, colour, Colours.BLACK),
+      Glyph = new Glyph('d', colour, colour),
       Loc = RandomOutdoorLoc(map, town, rng)
     };
     pup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);

@@ -325,7 +325,7 @@ class PreGameHandler(UserInterface ui)
 
   static void AddGargoyle(Random rng, GameObjectDB objDb, Dungeon dungeon, int level)
   {
-    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK);
+    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY);
     var gargoyle = new Mob()
     {
       Name = "gargoyle",
@@ -357,7 +357,7 @@ class PreGameHandler(UserInterface ui)
     var disguise = new DisguiseTrait()
     {
       Disguise = glyph,
-      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK),
+      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY),
       DisguiseForm = "statue"
     };
     gargoyle.Traits.Add(disguise);

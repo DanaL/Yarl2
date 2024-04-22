@@ -591,7 +591,7 @@ class MirrorImageAction : Action
 
   Mob MakeDuplciate()
   {
-    var glyph = new Glyph(Actor.Glyph.Ch, Actor.Glyph.Lit, Actor.Glyph.Unlit, Actor.Glyph.Bg);
+    var glyph = new Glyph(Actor.Glyph.Ch, Actor.Glyph.Lit, Actor.Glyph.Unlit);
     
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
