@@ -684,12 +684,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     
     foreach (var loc in fov)
     {
-      Glyph glyph = ObjDb.ItemGlyph(loc);
-      if (glyph == GameObjectDB.EMPTY)
+      Tile tile = CurrMap.TileAt(loc.Row, loc.Col);
+      var (glyph, z) = ObjDb.ItemGlyph(loc);
+      if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {
-        // Remember the terrain tile if there's nothing on the square
-        Tile tile = CurrMap.TileAt(loc.Row, loc.Col);
-
+        // Remember the terrain tile if there's nothing visible the square
+        
         // If it's a chasm, we display the tile from the level below
         if (tile.Type != TileType.Chasm)
         {

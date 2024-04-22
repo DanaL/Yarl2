@@ -170,7 +170,7 @@ class GameObjectDB
     return false;
   }
 
-  public Glyph ItemGlyph(Loc loc)
+  public (Glyph, int) ItemGlyph(Loc loc)
   {
     static bool Disguised(Actor mob)
     {
@@ -183,17 +183,20 @@ class GameObjectDB
       return false;
     }
 
+    int z = 0;
     Glyph glyph = EMPTY;
 
     // If there is a Mob disguised as an item, we'll return that glyph
     if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor mob)
     {
       if (Disguised(mob))
+      {
         glyph = mob.Glyph;
+        z = mob.Z();
+      }
     }
     else if (_itemLocs.TryGetValue(loc, out var items))
     {
-      int z = 0;
       foreach (var item in items)
       {
         if (item.Z() > z)
@@ -204,7 +207,7 @@ class GameObjectDB
       }
     }
 
-    return glyph;
+    return (glyph, z);
   }
 
   public (Glyph, int, bool, GlyphType) TopGlyph(Loc loc)
