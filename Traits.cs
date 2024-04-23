@@ -214,9 +214,9 @@ class DividerTrait : Trait
   public override string AsText() => "Divider";
 }
 
-class WrittenTrait : Trait
+class FinalBossTrait : Trait
 {
-  public override string AsText() => "Written";
+  public override string AsText() => "FinalBoss";
 }
 
 class FlammableTrait : Trait
@@ -237,6 +237,11 @@ class PluralTrait : Trait
 class TeflonTrait : Trait
 {
   public override string AsText() => "Teflon";
+}
+
+class WrittenTrait : Trait
+{
+  public override string AsText() => "Written";
 }
 
 class ImpaleTrait : Trait
@@ -1119,6 +1124,8 @@ class TraitFactory
         };
       case "Divider":
         return new DividerTrait();
+      case "FinalBoss":
+        return new FinalBossTrait();
       case "Grappled":
         return new GrappledTrait()
         {

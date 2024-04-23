@@ -77,7 +77,8 @@ class BossFactory
       prince.Traits.Add(new Immunity() { Type = DamageType.Piercing });
     else
       prince.Traits.Add(new Immunity() { Type = DamageType.Blunt });
-
+    prince.Traits.Add(new FinalBossTrait());
+    
     return prince;
   }
 }
@@ -123,7 +124,7 @@ class PrinceOfRatsBehaviour : IBehaviour
     {
       if (form != RAT_FORM)
         return false;
-        
+
       if (_lastUse.TryGetValue("Summon rats", out var last) && gameState.Turn - last < 7)
         return false;
       
