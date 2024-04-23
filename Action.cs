@@ -558,23 +558,59 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class SummonAction(Loc target, string summons) : Action
+class SummonAction(Loc target, string summons, int count) : Action()
 {
   readonly Loc _target = target;
   readonly string _summons = summons;
+  readonly int _count = count;
+
+  Loc SpawnPt()
+  {
+    var gs = GameState!;
+    if (gs.TileAt(_target).Passable() && !gs.ObjDb.Occupied(_target))
+      return _target;
+
+    var locs = Util.Adj8Locs(_target)
+                   .Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))
+                   .ToList();
+    if (locs.Count == 0)
+      return Loc.Nowhere;
+    else
+      return locs[gs.Rng.Next(locs.Count)];
+  }
 
   public override ActionResult Execute()
   {
     base.Execute();
 
-    var summoned = MonsterFactory.Get(_summons, GameState!.Rng);
-    summoned.Loc = _target;
-    GameState.ObjDb.AddNewActor(summoned, _target);
-    GameState.AddPerformer(summoned);
-
-    var mob = MonsterFactory.Get(_summons, GameState.Rng);
-    string txt = $"{Actor!.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Summon)} {mob.Name.IndefArticle()}!";
-    var msg = new Message(txt, _target);
+    int summonCount = 0;
+    for (int j = 0; j < _count; j++)
+    {
+      var loc = SpawnPt();
+      if (loc != Loc.Nowhere)
+      {
+        var summoned = MonsterFactory.Get(_summons, GameState!.Rng);
+        GameState.ObjDb.AddNewActor(summoned, loc);
+        GameState.AddPerformer(summoned);
+        ++summonCount;
+      }
+    }
+    
+    string txt;
+    if (summonCount == 0) 
+    {
+      txt = "A spell fizzles.";
+    }
+    else
+    {
+      txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} ";
+      if (_count == 1)
+        txt += _summons.IndefArticle() + "!";
+      else
+        txt += $"some {_summons.Pluralize()}!";
+    }
+    
+    var msg = new Message(txt, Actor!.Loc);
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
 }

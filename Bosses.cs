@@ -87,6 +87,7 @@ class PrinceOfRatsBehaviour : IBehaviour
   const int HUMAN_FORM = 0;
   const int RAT_FORM = 1;
 
+  Dictionary<string, ulong> _lastUse = [];
   DateTime _lastQuip = DateTime.Now;
 
   static Action CalcMoveAction(Mob mob, GameState gs)
@@ -97,7 +98,7 @@ class PrinceOfRatsBehaviour : IBehaviour
       return mob.MoveStrategy.MoveAction(mob, gs);
   }
 
-  void CheckChangeForm(Mob prince, GameState gs, int currForm)
+  static void CheckChangeForm(Mob prince, GameState gs, int currForm)
   {
     if (gs.Rng.NextDouble() < 0.1)
     {
@@ -118,6 +119,27 @@ class PrinceOfRatsBehaviour : IBehaviour
 
   public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
   {
+    bool CanSummonRats(Mob prince, GameState gs, int dist, int form)
+    {
+      if (form != RAT_FORM)
+        return false;
+        
+      if (_lastUse.TryGetValue("Summon rats", out var last) && gameState.Turn - last < 7)
+        return false;
+      
+      if (dist > 5)
+        return false;
+
+      var path = Util.Bresenham(prince.Loc.Row, prince.Loc.Col, gs.Player.Loc.Row, gs.Player.Loc.Col);
+      foreach (var sq in path)
+      {
+        if (gs.CurrentMap.TileAt(sq).Opaque())
+          return false;
+      }
+
+      return true;
+    }
+
     if (actor.Status == MobAttitude.Idle)
     {
       return new PassAction();
@@ -125,10 +147,22 @@ class PrinceOfRatsBehaviour : IBehaviour
 
     Action action;
     int currForm = actor.Stats[Attribute.MonsterForm].Curr;
+    int distFromPlayer = Util.Distance(actor.Loc, gameState.Player.Loc);
 
     CheckChangeForm(actor, gameState, currForm);
 
-    if (Util.Distance(actor.Loc, gameState.Player.Loc) == 1)
+    if (CanSummonRats(actor, gameState, distFromPlayer, currForm))
+    {
+      int ratCount = gameState.Rng.Next(3, 6);
+      action = new SummonAction(gameState.Player.Loc, "giant rat", ratCount)
+      {
+        GameState = gameState,
+        Actor = actor,
+        Quip = "Destroy them, my rats!"
+      };
+      _lastUse["Summon rats"] = gameState.Turn;
+    }
+    else if (distFromPlayer == 1)
     {
       actor.Dmg = new Damage(5, 2, DamageType.Slashing);
       action = new MeleeAttackAction(gameState, actor, gameState.Player.Loc);     
