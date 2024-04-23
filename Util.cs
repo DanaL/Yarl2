@@ -606,4 +606,5 @@ class RegionFinder(IPassable pc)
 }
 
 class GameQuitException : Exception { }
-class PlayerKilledException() : Exception { }
+class PlayerKilledException : Exception { }
+class VictoryException : Exception { }

@@ -112,6 +112,8 @@ class Village
     };
     cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
+    cleric.Traits.Add(new VillagerTrait());
+
     var sqs = town.Shrine.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
     cleric.Loc = sqs[rng.Next(sqs.Count)];
@@ -132,6 +134,7 @@ class Village
     };
     grocer.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     grocer.Traits.Add(new NamedTrait());
+    grocer.Traits.Add(new VillagerTrait());
 
     var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
@@ -164,6 +167,7 @@ class Village
     };
     smith.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     smith.Traits.Add(new NamedTrait());
+    smith.Traits.Add(new VillagerTrait());
 
     var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
                                       map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
@@ -223,6 +227,7 @@ class Village
     };
     villager.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     villager.Traits.Add(new NamedTrait());
+    villager.Traits.Add(new VillagerTrait());
 
     var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
     do
@@ -256,6 +261,7 @@ class Village
     };
     widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
+    widower.Traits.Add(new VillagerTrait());
 
     var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
     do
@@ -317,6 +323,7 @@ class Village
     };
     pup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     pup.SetBehaviour(new VillagePupBehaviour());
+    pup.Traits.Add(new VillagerTrait());
 
     return pup;
   }

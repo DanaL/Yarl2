@@ -95,6 +95,192 @@ abstract class UserInterface
     _longMessage = null;
   }
 
+  public void VictoryScreen(string bossName, GameState gs)
+  {
+    int WriteParagraph(string txt, int startLine)
+    {
+      var words = txt.Split(' ');
+      string line = "";
+      foreach (var word in words)
+      {
+        if (41 + line.Length + word.Length >= 80)
+        {
+          WriteLine(line, startLine++, 40, 40, Colours.WHITE);
+          line = "";
+        }
+        line += word + " ";
+      }
+      WriteLine(line, startLine++, 40, 40, Colours.WHITE);
+
+      return startLine;
+    }
+
+    void PlaceVillager(GameState gs, Actor villager, int centerRow, int centerCol)
+    {
+      List<Loc> locs = [];
+
+      for (int r = centerRow - 5; r < centerRow + 5; r++)
+      {
+        for (int c = centerCol - 5; c < centerCol + 5; c++)
+        {
+          var loc = new Loc(0, 0, r, c);
+          if (gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))
+            locs.Add(loc);
+        }
+      }
+
+      if (locs.Count > 0)
+      {
+        var loc = locs[gs.Rng.Next(locs.Count)];
+        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);
+        villager.Loc = loc;
+      }
+    }
+
+    gs.CurrDungeonID = 0;
+    gs.CurrLevel = 0;
+
+    Popup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory");
+    UpdateDisplay(gs);
+    BlockForInput();
+    ClearLongMessage();
+
+    ClearScreen();
+
+    var town = gs.Campaign.Town!;
+    
+    int minRow = int.MaxValue, minCol = int.MaxValue, maxRow = 0, maxCol = 0;
+    foreach (var loc in town.TownSquare)
+    {
+      if (loc.Row < minRow)
+        minRow = loc.Row;
+      if (loc.Col < minCol)
+        minCol = loc.Col;
+      if (loc.Row > maxRow)
+        maxRow = loc.Row;
+      if (loc.Col > maxCol)
+        maxCol = loc.Col;
+    }
+    
+    int playerRow = (minRow + maxRow) / 2;
+    int playerCol = (minCol + maxCol) / 2;
+    var playerLoc = new Loc(0, 0, playerRow, playerCol);
+    gs.ObjDb.ActorMoved(gs.Player, gs.Player.Loc, playerLoc);
+    gs.Player.Loc = playerLoc;
+
+    List<Actor> villagers = [];
+    foreach (var obj in gs.ObjDb.Objs)
+    {
+      if (obj.Value is Actor actor && actor.HasTrait<VillagerTrait>())
+      {
+        villagers.Add(actor);
+        PlaceVillager(gs, actor, playerRow, playerCol);
+      }
+    }
+
+    Animation? bark = null;    
+    GameEvent e;
+    do
+    {
+      for (int r = 0; r < ViewHeight; r++)
+      {
+        for (int c = 0; c < ScreenWidth / 2; c++)
+        {
+          SqsOnScreen[r, c] = Constants.BLANK_SQ;
+        }
+      }
+
+      int screenR = 6;
+      int screenC = 7;
+      for (int r = minRow - 6; r < maxRow + 6; r++)
+      {
+        for (int c = minCol - 6; c < maxCol + 11; c++)
+        {
+          Glyph glyph;
+          if (r == playerRow && c == playerCol)
+          {
+            glyph = new Glyph('@', Colours.WHITE, Colours.BLACK);
+            PlayerScreenRow = screenR;
+            PlayerScreenCol = screenC;
+          }
+          else if (gs.ObjDb.Occupant(new Loc(0, 0, r, c)) is Actor actor)
+          {
+            glyph = actor.Glyph;
+          }
+          else
+          {
+            var tile = gs.TileAt(new Loc(0, 0, r, c));
+            glyph = Util.TileToGlyph(tile);
+          }
+        
+          var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
+          SqsOnScreen[screenR, screenC++] = sqr;
+        }
+        ++screenR;
+        screenC = 7;
+      }
+
+      if (bark is not null && bark.Expiry > DateTime.Now)
+      {
+        bark.Update();        
+      }
+      else if (villagers.Count > 0)
+      {
+        var v = villagers[gs.Rng.Next(villagers.Count)];
+
+        var cheer = "";
+        if (v.Glyph.Ch == 'd')
+        {
+          cheer = "Arf! Arf!";
+        }
+        else
+        {
+          int roll = gs.Rng.Next(4);
+          if (roll == 0)
+            cheer = "Huzzah!";
+          else if (roll == 1)
+            cheer = "Praise them with great praise!";
+          else if (roll == 2)
+            cheer = "Our hero!";
+          else
+            cheer = "We'll be safe now!";
+        }
+
+        bark = new BarkAnimation(gs, 2000, v, cheer);        
+      }
+
+      for (int r = 0; r < ViewHeight; r++)
+      {
+        for (int c = 0; c < ScreenWidth / 2; c++)
+        {
+          WriteSq(r, c, SqsOnScreen[r, c]);
+        }
+      }
+
+      int lineNum = WriteParagraph("Congratulations, Hero!!", 1);
+
+      var sb = new StringBuilder();
+      sb.Append("After your defeat of ");
+      sb.Append(bossName);
+      sb.Append(" you return to ");
+      sb.Append(town.Name);
+      sb.Append(" and receive the accoldates of the townsfolk.");
+
+      lineNum = WriteParagraph(sb.ToString(), lineNum + 1);    
+      var para2 = "The darkness has been lifted from the region and the village will soon begin again to prosper. Yet after resting for a time and enjoying the villagers' gratitude and hospitality, the yearning for adventure begins to overtake you.";
+      lineNum = WriteParagraph(para2, lineNum + 1);
+      var para3 = "You've heard, for instance, tales of a fabled dungeon in whose depths lies the legendary Amulet of Yender...";
+      lineNum = WriteParagraph(para3, lineNum + 1);
+      WriteParagraph("Press any key to exit.", lineNum + 1);
+
+      Blit();
+    
+      e = PollForEvent();
+      Delay();
+    }
+    while (e.Type == GameEventType.NoEvent);
+  }
+
   public void KillScreen(string message, GameState gs)
   {
     Popup(message);
@@ -135,7 +321,6 @@ abstract class UserInterface
       animation.Update();
       UpdateDisplay(gs);
       Delay(75);
-
     }
   }
 
@@ -295,8 +480,9 @@ abstract class UserInterface
     return pieces;
   }
 
-  int PopupLineWidth(List<(Colour, string)> line) => line.Select(p => p.Item2.Length).Sum();
-  int WidestPopupLine(List<List<(Colour, string)>> lines)
+  static int PopupLineWidth(List<(Colour, string)> line) => line.Select(p => p.Item2.Length).Sum();
+
+  static int WidestPopupLine(List<List<(Colour, string)>> lines)
   {
     int bufferWidth = 0;
     foreach (var line in lines)
@@ -308,6 +494,7 @@ abstract class UserInterface
 
     return (bufferWidth > 20 ? bufferWidth : 20) + 4;
   }
+
   protected void WritePopUp()
   {
     int maxPopUpWidth = ViewWidth - 4;
@@ -609,6 +796,10 @@ abstract class UserInterface
         break;
       }
       catch (PlayerKilledException)
+      {
+        break;
+      }
+      catch (VictoryException) 
       {
         break;
       }

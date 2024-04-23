@@ -268,6 +268,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.KillScreen("You died :(", this);
       throw new PlayerKilledException();
     }
+    else if (victim.HasTrait<FinalBossTrait>()) 
+    {
+      UI.VictoryScreen(victim.FullName, this);
+      throw new VictoryException();
+    }
 
     if (victim.HasTrait<PoorLootTrait>())
     {

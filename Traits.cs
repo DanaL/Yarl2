@@ -239,6 +239,11 @@ class TeflonTrait : Trait
   public override string AsText() => "Teflon";
 }
 
+class VillagerTrait : Trait
+{
+  public override string AsText() => "Villager";
+}
+
 class WrittenTrait : Trait
 {
   public override string AsText() => "Written";
@@ -1228,6 +1233,8 @@ class TraitFactory
         };
       case "Written":
         return new WrittenTrait();
+      case "Villager":
+        return new VillagerTrait();
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
         return new SpellActionTrait()
