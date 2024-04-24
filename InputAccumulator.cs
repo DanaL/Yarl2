@@ -13,9 +13,9 @@ using System.Text;
 
 namespace Yarl2;
 
-// Handers to keep state while we are waiting for user input.
-// I'm sure someone smarter could come up with a cleaner 
-// solution...
+// Handers to keep state while we are waiting for user input. I'm sure someone
+// smarter could come up with a cleaner solution but this is what I hit on
+// when I decided to switch my Game Loop to be non-blocking
 
 abstract class InputAccumulator
 {

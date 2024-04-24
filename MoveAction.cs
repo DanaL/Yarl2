@@ -15,6 +15,7 @@ namespace Yarl2;
 
 // The code for MoveAction was getting lengthy enough that I figured I
 // should move it to its own file
+
 class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
 {
   readonly Loc _loc = loc;
@@ -178,6 +179,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         {
           var openAction = new OpenDoorAction(GameState, Actor, _map, _loc);
           result.AltAction = openAction;
+        }
+        else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
+        {
+          // If we are in the dungeon, we'll let the player jump into rivers
+          // (and/or they can stumble in while confused, etc)
+          GameState.UIRef().Popup("Really jump into the water? (y/n)");
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
         }
         else
         {

@@ -37,7 +37,7 @@ class BossFactory
     prince.SetBehaviour(new PrinceOfRatsBehaviour());
     prince.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Idle);
     
-    prince.Stats.Add(Attribute.HP, new Stat(1));
+    prince.Stats.Add(Attribute.HP, new Stat(80));
     prince.Stats.Add(Attribute.MonsterForm, new Stat(0));
 
     prince.Stats.Add(Attribute.MonsterAttackBonus, new Stat(7));
@@ -165,8 +165,7 @@ class PrinceOfRatsBehaviour : IBehaviour
     }
     else if (distFromPlayer == 1)
     {
-      //actor.Dmg = new Damage(5, 2, DamageType.Slashing);
-      actor.Dmg = new Damage(0, 0, DamageType.Slashing);
+      actor.Dmg = new Damage(5, 2, DamageType.Slashing);
       action = new MeleeAttackAction(gameState, actor, gameState.Player.Loc);     
     }
     else

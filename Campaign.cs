@@ -251,8 +251,8 @@ class PreGameHandler(UserInterface ui)
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
   {
     var prince = BossFactory.Get("Prince of Rats", rng);
-    var sq = dungeon.LevelMaps[0].RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(dungeon.ID, 0, sq.Item1, sq.Item2);
+    var sq = dungeon.LevelMaps[4].RandomTile(TileType.DungeonFloor, rng);
+    var loc = new Loc(dungeon.ID, 4, sq.Item1, sq.Item2);
     objDb.AddNewActor(prince, loc);
 
     // Drop a hint somewhere about the Prince of Rat's immunity

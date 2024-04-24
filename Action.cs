@@ -123,6 +123,88 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
   }
 }
 
+// Action for when an actor jumps into a river or chasm (and eventually lava?)
+class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+{
+  Loc _loc { get; set; } = loc;
+
+  void PlungeIntoWater(Actor actor, GameState gs, ActionResult result)
+  {
+    // When someone jumps/falls into water, they wash ashore at a random loc
+    // and incur the Exhausted condition
+    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!", actor.Loc), "", gs);
+    
+    // first, find candidate shore sqs
+    var q = new Queue<Loc>();
+    q.Enqueue(_loc);
+    HashSet<Loc> visited = [];
+    HashSet<Loc> shores = [];
+
+    while (q.Count > 0) 
+    {
+      var curr = q.Dequeue();
+
+      if (visited.Contains(curr)) 
+        continue;
+
+      visited.Add(curr);
+      foreach (var adj in Util.Adj8Locs(curr))
+      {
+        var tile = gs.TileAt(adj);
+        if (tile.Passable() && !gs.ObjDb.Occupied(adj)) 
+        {
+          shores.Add(adj); 
+        }
+        else if (tile.Type == TileType.DeepWater && !visited.Contains(adj))
+        {
+          q.Enqueue(adj);
+        }
+      }
+    }
+
+    if (shores.Count > 0) 
+    {
+      var candidates = shores.ToList();
+      var destination = candidates[gs.Rng.Next(candidates.Count)];
+      gs.ResolveActorMove(actor, actor.Loc, destination);
+      actor.Loc = destination;
+
+      string invMsgs = actor.Inventory.ApplyEffect(TerrainFlag.Wet, gs, actor.Loc);
+      if (invMsgs.Length > 0)
+      {
+        result.Messages.Add(new Message(invMsgs, actor.Loc));
+      }
+      
+      gs.UpdateFoV();
+
+      result.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!", actor.Loc));
+    }
+    else
+    {
+      // What happens if there are somehow no free shore sqs? Does the mob drown??
+    }    
+  }
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+
+    var tile = GameState!.TileAt(_loc);
+    if (tile.Type == TileType.DeepWater)
+    {
+      PlungeIntoWater(Actor!, GameState, result);
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    
+  }
+}
+
 class PortalAction : Action
 {  
   public PortalAction(GameState gameState) => GameState = gameState;

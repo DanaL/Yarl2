@@ -65,11 +65,11 @@ class Grammar
       return "are";
     else if (verb == "is")
       return verb;
-    
+
     if (subject is Player)
       return verb;
-    else if (verb == "miss")
-      return "misses";
+    else if (verb.EndsWith("ss") || verb.EndsWith("sh"))
+      return verb + "es";
     else if (verb == "ready")
       return "readies";
     else

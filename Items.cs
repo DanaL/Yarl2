@@ -672,6 +672,23 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return activeTraits;
   }
 
+  public string ApplyEffect(TerrainFlag effect, GameState gs, Loc loc)
+  {
+    List<string> msgs = [];
+
+    foreach (var (_, itemID) in _items)
+    {
+      var i = gs.ObjDb.GetObj(itemID);
+      if (i is Item item)
+      {
+        string m = item.ApplyEffect(effect, gs, loc);
+        msgs.Add(m);
+      }
+    }
+
+    return string.Join(' ', msgs).Trim();
+  }
+
   public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
 
   public virtual void RestoreFromText(string txt)
