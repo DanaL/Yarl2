@@ -210,23 +210,9 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!", actor.Loc), "", gs);
     var landingSpot = new Loc(_loc.DungeonID, _loc.Level + 1, _loc.Row, _loc.Col);
 
-    gs.EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);    
-    gs.ResolveActorMove(actor, actor.Loc,landingSpot);
-    actor.Loc = landingSpot;
-    gs.RefreshPerformers();
-    gs.UpdateFoV();
-
-    string msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
-    result.Messages.Add(new Message(msg, actor.Loc));
-
-    int fallDamage = gs.Rng.Next(6) + gs.Rng.Next(6) + 2;
-    var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, gs);
-    if (hpLeft < 1)
-    {
-      gs.ActorKilled(actor);
-    }
-
-    result.Messages.Add(new Message(gs.LocDesc(landingSpot), actor.Loc));
+    string msg = gs.FallIntoChasm(actor, landingSpot);
+    result.Messages.Add(new Message(msg, landingSpot));
+    result.Messages.Add(new Message(gs.LocDesc(landingSpot), landingSpot));
   }
 
   public override ActionResult Execute()
