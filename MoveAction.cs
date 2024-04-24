@@ -33,43 +33,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     };
   }
 
-  string CalcDesc()
-  {
-    if (Actor is not Player)
-      return "";
-
-    var sb = new StringBuilder();
-    sb.Append(_map.TileAt(_loc.Row, _loc.Col).StepMessage);
-
-    var items = GameState!.ObjDb.ItemsAt(_loc);
-    if (items.Count > 1)
-    {
-      sb.Append(" There are several items here.");
-    }
-    else if (items.Count == 1 && items[0].Type == ItemType.Zorkmid)
-    {
-      if (items[0].Value == 1)
-        sb.Append($" There is a lone zorkmid here.");
-      else
-        sb.Append($" There are {items[0].Value} zorkmids here!");
-    }
-    else if (items.Count == 1)
-    {
-      sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
-    }
-
-    foreach (var env in GameState!.ObjDb.EnvironmentsAt(_loc))
-    {
-      if (env.Traits.OfType<StickyTrait>().Any())
-      {
-        sb.Append(" There are some sticky ");
-        sb.Append(env.Name);
-        sb.Append(" here.");
-      }
-    }
-    return sb.ToString().Trim();
-  }
-
   public static bool CanMoveTo(Actor actor, Map map, Loc loc)
   {
     static bool CanFly(Actor actor)
@@ -187,6 +150,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           GameState.UIRef().Popup("Really jump into the water? (y/n)");
           GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
         }
+        else if (tile.Type == TileType.Chasm)
+        {
+          GameState.UIRef().Popup("Really jump into the chasm? (y/n)");
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
+        }
         else
         {
           result.Messages.Add(new Message(BlockedMessage(tile), GameState.Player.Loc));
@@ -228,12 +196,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    GameState.ResolveActorMove(Actor, Actor.Loc, _loc);
+    GameState!.ResolveActorMove(Actor!, Actor.Loc, _loc);
     Actor.Loc = _loc;
 
     if (Actor is Player)
     {
-      result.Messages.Add(new Message(CalcDesc(), _loc));
+      result.Messages.Add(new Message(GameState.LocDesc(_loc), _loc));
       GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
     }
     else

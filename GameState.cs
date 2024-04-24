@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Diagnostics;
+using System.Text;
 
 namespace Yarl2;
 
@@ -101,13 +102,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 
-  public void EnterLevel(int dungeon, int level)
+  public void EnterLevel(Actor actor, int dungeon, int level)
   {
     CurrLevel = level;
     CurrDungeonID = dungeon;
 
-    // Once the queue of actors is implemented, we will need to switch them
-    // out here.
+    if (dungeon == 1 && actor is Player)
+    {
+      int maxDepth = Player.Stats[Attribute.Depth].Max;
+      if (level + 1 > maxDepth)
+        Player.Stats[Attribute.Depth].SetMax(level + 1);
+    }
   }
 
   public Town Town => Campaign!.Town!;
@@ -485,6 +490,42 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     return objs;
+  }
+
+  public string LocDesc(Loc loc)
+  {
+    var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    var sb = new StringBuilder();
+    sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
+
+    var items = ObjDb.ItemsAt(loc);
+    if (items.Count > 1)
+    {
+      sb.Append(" There are several items here.");
+    }
+    else if (items.Count == 1 && items[0].Type == ItemType.Zorkmid)
+    {
+      if (items[0].Value == 1)
+        sb.Append($" There is a lone zorkmid here.");
+      else
+        sb.Append($" There are {items[0].Value} zorkmids here!");
+    }
+    else if (items.Count == 1)
+    {
+      sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
+    }
+
+    foreach (var env in ObjDb.EnvironmentsAt(loc))
+    {
+      if (env.Traits.OfType<StickyTrait>().Any())
+      {
+        sb.Append(" There are some sticky ");
+        sb.Append(env.Name);
+        sb.Append(" here.");
+      }
+    }
+
+    return sb.ToString().Trim();
   }
 
   // Sort of the same as Noise. I can probably DRY them?

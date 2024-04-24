@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 class ActionResult
@@ -203,6 +205,30 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     }    
   }
 
+  void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
+  {
+    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!", actor.Loc), "", gs);
+    var landingSpot = new Loc(_loc.DungeonID, _loc.Level + 1, _loc.Row, _loc.Col);
+
+    gs.EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);    
+    gs.ResolveActorMove(actor, actor.Loc,landingSpot);
+    actor.Loc = landingSpot;
+    gs.RefreshPerformers();
+    gs.UpdateFoV();
+
+    string msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+    result.Messages.Add(new Message(msg, actor.Loc));
+
+    int fallDamage = gs.Rng.Next(6) + gs.Rng.Next(6) + 2;
+    var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, gs);
+    if (hpLeft < 1)
+    {
+      gs.ActorKilled(actor);
+    }
+
+    result.Messages.Add(new Message(gs.LocDesc(landingSpot), actor.Loc));
+  }
+
   public override ActionResult Execute()
   {
     var result = base.Execute();
@@ -213,14 +239,15 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     {
       PlungeIntoWater(Actor!, GameState, result);
     }
+    else if (tile.Type == TileType.Chasm)
+    {
+      PlungeIntoChasm(Actor!, GameState, result);
+    }
 
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) { }
 }
 
 class PortalAction : Action
@@ -231,7 +258,7 @@ class PortalAction : Action
   {
     var start = GameState!.Player!.Loc;
     var (dungeon, level, _, _) = portal.Destination;
-    GameState.EnterLevel(dungeon, level);
+    GameState.EnterLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     GameState.RefreshPerformers();
@@ -240,13 +267,6 @@ class PortalAction : Action
 
     if (start.DungeonID != portal.Destination.DungeonID)
       result.Messages.Add(new Message(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
-
-    if (portal.Destination.DungeonID > 0)
-    {
-      int maxDepth = GameState.Player!.Stats[Attribute.Depth].Max;
-      if (portal.Destination.Level + 1 > maxDepth)
-        GameState.Player!.Stats[Attribute.Depth].SetMax(portal.Destination.Level + 1);
-    }
 
     result.EnergyCost = 1.0;
   }
