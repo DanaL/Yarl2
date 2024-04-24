@@ -916,12 +916,17 @@ abstract class UserInterface
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc)
   {
-    static Colour BGColour(GameState gs, Loc loc, char ch)
+    static Colour BGColour(GameState gs, Loc loc, char ch, Colour fg)
     {
       if (gs.CurrDungeonID == 0)
         return Colours.BLACK;
 
       if (!gs.CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
+        return Colours.BLACK;
+
+      // We don't want to light the background of chasm tiles and this is 
+      // a (kludgy) approximation of them
+      if (fg == Colours.FAR_BELOW)
         return Colours.BLACK;
 
       if (ch == '.' || ch == '#')
@@ -940,7 +945,7 @@ abstract class UserInterface
         glyph = remembered[loc];
       
       char ch = glyph.Ch;
-      Colour bg = BGColour(gs, loc, ch);
+      Colour bg = BGColour(gs, loc, ch, glyph.Lit);
       sqr = new Sqr(glyph.Lit, bg, ch);
     }
     else if (remembered.TryGetValue(loc, out var glyph))
