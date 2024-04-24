@@ -177,6 +177,24 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
       
       gs.UpdateFoV();
 
+      int conMod;
+      if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
+        conMod = stat.Curr;
+      else
+        conMod = 0;
+      ulong endsOn = gs.Turn + (ulong)(250 - 10 * conMod);
+      var exhausted = new ExhaustedTrait()
+      {
+        VictimID = actor.ID,
+        EndsOn = endsOn
+      };
+      if (exhausted.IsAffected(actor, gs))
+      {
+        string msg = exhausted.Apply(actor, gs);
+        if (msg.Length > 0) 
+          result.Messages.Add(new Message(msg, actor.Loc));        
+      }
+
       result.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!", actor.Loc));
     }
     else

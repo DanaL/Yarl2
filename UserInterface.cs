@@ -609,6 +609,12 @@ abstract class UserInterface
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
       statuses.Add("CONFUSED");
     }
+    if (gs.Player.HasActiveTrait<ExhaustedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "EXHAUSTED")];
+      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("EXHAUSTED");
+    }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)
