@@ -124,8 +124,19 @@ abstract class UserInterface
         for (int c = centerCol - 5; c < centerCol + 5; c++)
         {
           var loc = new Loc(0, 0, r, c);
-          if (gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))
-            locs.Add(loc);
+
+          if (gs.ObjDb.Occupied(loc))
+            continue;
+
+          switch (gs.TileAt(loc).Type)
+          {
+            case TileType.Bridge:
+            case TileType.Dirt:
+            case TileType.Grass:
+            case TileType.Tree:
+              locs.Add(loc);
+              break;
+          }
         }
       }
 
@@ -144,8 +155,6 @@ abstract class UserInterface
     UpdateDisplay(gs);
     BlockForInput();
     ClearLongMessage();
-
-    ClearScreen();
 
     var town = gs.Campaign.Town!;
     
@@ -182,6 +191,7 @@ abstract class UserInterface
     GameEvent e;
     do
     {
+      ClearScreen(); 
       for (int r = 0; r < ViewHeight; r++)
       {
         for (int c = 0; c < ScreenWidth / 2; c++)
@@ -766,73 +776,6 @@ abstract class UserInterface
     }
   }
 
-  public void GameLoop(GameState gameState)
-  {
-    gameState.BuildPerformersList();
-    _animations.Add(new CloudAnimationListener(this, gameState));
-    _animations.Add(new TorchLightAnimationListener(this, gameState));
-
-    DateTime refresh = DateTime.Now;
-    IPerformer currPerformer = gameState.Player;
-    while (true)
-    {
-      var e = PollForEvent();
-      if (e.Type == GameEventType.Quiting)
-        break;
-
-      if (e.Type == GameEventType.KeyInput)
-        InputBuffer.Enqueue(e.Value);
-
-      try
-      {
-        // Update step! This is where all the current performers gets a chance
-        // to take their turn!
-        if (currPerformer.Energy < 1.0)
-          currPerformer = gameState.NextPerformer();
-        TakeTurn(currPerformer, gameState);
-      }
-      catch (GameQuitException)
-      {
-        break;
-      }
-      catch (PlayerKilledException)
-      {
-        break;
-      }
-      catch (VictoryException) 
-      {
-        break;
-      }
-
-      TimeSpan elapsed = DateTime.Now - refresh;
-      int totalMs = (int) elapsed.TotalMilliseconds;
-      if (totalMs >= 16)
-      {
-        SetSqsOnScreen(gameState);
-
-        foreach (var l in _animations)
-          l.Update();
-        _animations = _animations.Where(a => a.Expiry > DateTime.Now)
-                                 .ToList();
-        UpdateDisplay(gameState);
-        refresh = DateTime.Now;
-      }
-      else
-      {
-        //Delay(5);
-      }      
-    }
-
-    var msg = new List<string>()
-        {
-            "",
-            " Be seeing you..."
-        };
-    WriteLongMessage(msg);
-    UpdateDisplay(gameState);
-    BlockForInput();
-  }
-
   static void Delay(int ms = 10) => Thread.Sleep(ms);
 
   void BlockForInput()
@@ -1043,5 +986,72 @@ abstract class UserInterface
     }
 
     Blit();
+  }
+
+  public void GameLoop(GameState gameState)
+  {
+    gameState.BuildPerformersList();
+    _animations.Add(new CloudAnimationListener(this, gameState));
+    _animations.Add(new TorchLightAnimationListener(this, gameState));
+
+    DateTime refresh = DateTime.Now;
+    IPerformer currPerformer = gameState.Player;
+    while (true)
+    {
+      var e = PollForEvent();
+      if (e.Type == GameEventType.Quiting)
+        break;
+
+      if (e.Type == GameEventType.KeyInput)
+        InputBuffer.Enqueue(e.Value);
+
+      try
+      {
+        // Update step! This is where all the current performers gets a chance
+        // to take their turn!
+        if (currPerformer.Energy < 1.0)
+          currPerformer = gameState.NextPerformer();
+        TakeTurn(currPerformer, gameState);
+      }
+      catch (GameQuitException)
+      {
+        break;
+      }
+      catch (PlayerKilledException)
+      {
+        break;
+      }
+      catch (VictoryException) 
+      {
+        break;
+      }
+
+      TimeSpan elapsed = DateTime.Now - refresh;
+      int totalMs = (int) elapsed.TotalMilliseconds;
+      if (totalMs >= 16)
+      {
+        SetSqsOnScreen(gameState);
+
+        foreach (var l in _animations)
+          l.Update();
+        _animations = _animations.Where(a => a.Expiry > DateTime.Now)
+                                 .ToList();
+        UpdateDisplay(gameState);
+        refresh = DateTime.Now;
+      }
+      else
+      {
+        //Delay(5);
+      }      
+    }
+
+    var msg = new List<string>()
+        {
+            "",
+            " Be seeing you..."
+        };
+    WriteLongMessage(msg);
+    UpdateDisplay(gameState);
+    BlockForInput();
   }
 }
