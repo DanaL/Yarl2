@@ -51,7 +51,8 @@ class Colours
   public static readonly Colour FX_RED = new(128, 00, 00, 175);
   public static readonly Colour FAR_BELOW = new(55, 198, 255, 50);
   public static readonly Colour HILITE = new(255, 255, 53, 128);
-  public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);
+  public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);  
+  public static readonly Colour PURPLE = new(148, 0, 211, 255);
   public static readonly Colour PINK = new(255, 192, 203, 255);
 
   public static string ColourToText(Colour colour)
@@ -78,6 +79,7 @@ class Colours
     else if (colour == TORCH_YELLOW) return "torchyellow";
     else if (colour == FAR_BELOW) return "farbelow";
     else if (colour == LIGHT_PURPLE) return "lightpurple";
+    else if (colour == PURPLE) return "purple";
     else if (colour == PINK) return "pink";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
@@ -107,6 +109,7 @@ class Colours
     else if (colour == "torchyellow") return TORCH_YELLOW;
     else if (colour == "farbelow") return FAR_BELOW;
     else if (colour == "lightpurple") return LIGHT_PURPLE;
+    else if (colour == "purple") return PURPLE;
     else if (colour == "pink") return PINK;
     else if (colour == "null") return NULL;
     else throw new Exception("Hmm I don't know that colour");

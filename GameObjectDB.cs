@@ -200,7 +200,7 @@ class GameObjectDB
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
-  //   They're only used to querying what's below on chasm sqs
+  // They're only used to querying what's below on chasm sqs
   // Basically, the sqr ignoring the occupant since we only want to remember
   // either the item stack or the tile
   public Glyph GlyphAt(Loc loc)
@@ -248,6 +248,25 @@ class GameObjectDB
     if (!Objs.TryGetValue(id, out GameObj? val))
       return null;
     return val;
+  }
+
+  public List<Actor> ActorsWithin(Loc loc, int range)
+  {
+    static bool InRange(Loc a, Loc b, int r)
+    {
+      return (a.DungeonID == b.DungeonID && a.Level == b.Level && Util.Distance(a, b) <= r);
+    }
+
+    List<Actor> actors = [];
+    foreach (var actorLoc in _actorLocs.Keys)
+    {
+      if (InRange(loc, actorLoc, range) && Objs[_actorLocs[actorLoc]] is Actor actor)
+      {
+        actors.Add(actor);
+      }
+    }
+
+    return actors;
   }
 
   public void AddNewActor(Actor actor, Loc loc)

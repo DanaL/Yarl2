@@ -625,6 +625,12 @@ abstract class UserInterface
       WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
       statuses.Add("EXHAUSTED");
     }
+    if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PURPLE, "TELEPATHIC")];
+      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+      statuses.Add("TELEPATHIC");
+    }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)
@@ -929,10 +935,41 @@ abstract class UserInterface
       }
     }
 
+    if (gs.Player.HasActiveTrait<TelepathyTrait>())
+    {
+      // If the player has telepathy, find any nearby monsters and display them
+      // plus the squares adjacent to them
+      int range = int.Max(ViewHeight / 2, ViewWidth / 2);
+      foreach (var mob in gs.ObjDb.ActorsWithin(gs.Player.Loc, range))
+      {
+        if (mob != gs.Player)
+        {
+          var viewed = Util.Adj8Locs(mob.Loc).ToList();
+          viewed.Add(mob.Loc);
+          foreach (Loc loc in viewed)
+          {
+            if (gs.LastPlayerFoV.Contains(loc))
+              continue;
+            int screenRow = loc.Row - rowOffset;
+            int screenCol = loc.Col - colOffset;
+            if (screenRow >= 0 && screenRow < ViewHeight && screenCol >= 0 && screenCol < ViewWidth)
+            {
+              Glyph g = gs.ObjDb.GlyphAt(loc);
+              if (g == GameObjectDB.EMPTY)
+                g = Util.TileToGlyph(gs.TileAt(loc));
+
+              var sqr = new Sqr(Colours.LIGHT_GREY, Colours.LIGHT_PURPLE, g.Ch);
+              SqsOnScreen[screenRow, screenCol] = sqr;
+            }
+          }
+        }
+      }
+    }
+
     if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
   }
-
+  
   public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)
   {
     int rowOffset = playerRow - PlayerScreenRow;

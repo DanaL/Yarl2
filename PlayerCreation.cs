@@ -173,6 +173,14 @@ class PlayerCreator
 
     SetStartingGear(player, objDb, rng);
 
+    player.Traits.Add(
+      new TelepathyTrait()
+      {
+        ExpiresOn = 100_000
+      }
+    );
+
+
     return player;
   }
 

@@ -239,6 +239,29 @@ class TeflonTrait : Trait
   public override string AsText() => "Teflon";
 }
 
+class TelepathyTrait : BasicTrait, IGameEventListener
+{
+  public ulong ActorID {  get; set; }
+  public bool Expired { get; set; }
+  public bool Listening => true;
+
+  public override string AsText() => "Telepathy";
+
+  void Remove(GameState gs)
+  {
+    var obj = gs.ObjDb.GetObj(ActorID);
+    obj?.Traits.Remove(this);
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+    }    
+  }
+}
+
 class VillagerTrait : Trait
 {
   public override string AsText() => "Villager";
@@ -1270,6 +1293,8 @@ class TraitFactory
         };
       case "Teflon":
         return new TeflonTrait();
+      case "Telepathy":
+        return new TelepathyTrait();
       case "Torch":
         return new TorchTrait()
         {
