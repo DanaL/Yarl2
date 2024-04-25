@@ -683,6 +683,77 @@ class SummonAction(Loc target, string summons, int count) : Action()
   }
 }
 
+class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
+{
+  // Essentially we want to flood fill out and mark all reachable squares as 
+  // remembered, ignoreable Passable() or not but stopping a walls. This will
+  // currently not fully map a level with disjoint spaces but I'm not sure if
+  // I think that's a problem or not.
+  void FloodFillMap(GameState gs, Loc start)
+  {  
+    Dungeon dungeon = gs.CurrentDungeon;
+    
+    HashSet<Loc> visited = [];
+    var q = new Queue<Loc>();
+    q.Enqueue(start);
+
+    while (q.Count > 0) 
+    { 
+      var curr = q.Dequeue();
+      visited.Add(curr);
+
+      foreach (var adj in Util.Adj8Locs(curr)) 
+      {        
+        if (visited.Contains(adj))
+          continue;
+
+        var tile = gs.TileAt(adj);
+        if (!dungeon.RememberedLocs.ContainsKey(adj))
+          dungeon.RememberedLocs.Add(adj, Util.TileToGlyph(tile));
+
+        switch (tile.Type)
+        {
+          case TileType.Unknown:
+          case TileType.DungeonWall:
+          case TileType.PermWall:
+          case TileType.WorldBorder:            
+            break;
+          default:
+            if (!visited.Contains(adj))
+              q.Enqueue(adj);
+            break;
+        }
+
+        visited.Add(adj);
+      }
+    }    
+  }
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    // It's probably a bug if a monster invokes this action??
+    if (Actor is Player player)
+    {
+      result.Complete = true;
+      result.EnergyCost = 1.0;
+
+      if (GameState!.InWilderness)
+      {
+        result.Messages.Add(new Message("The wide world is big for the spell! The magic fizzles!", player.Loc));
+      }
+      else
+      {
+        result.Messages.Add(new Message("A vision of your surroundings fills your mind!", player.Loc));
+        FloodFillMap(GameState, player.Loc);
+      }      
+    }
+
+    return result;
+  }
+}
+
 class MirrorImageAction : Action
 {
   readonly Loc _target;

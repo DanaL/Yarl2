@@ -339,6 +339,20 @@ class ItemFactory
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         break;
+      case "scroll of magic mapping":
+        item = new Item()
+        {
+          Name = "scroll of magic mapping",
+          Type = ItemType.Scroll,
+          Stackable = true,
+          Value = 100,
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("magicmap"));
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
+        break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
     }

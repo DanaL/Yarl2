@@ -362,7 +362,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
     "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
-    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),    
+    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
+    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }
