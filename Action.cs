@@ -92,6 +92,32 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   }
 }
 
+class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs, actor)
+{
+  readonly BasicTrait _trait = trait;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+
+    if (Actor is not null)
+    {
+      Actor.Traits.Add(_trait);
+      if (_trait is IGameEventListener listener)
+        GameState!.RegisterForEvent(GameEventType.EndOfRound, listener);
+      if (_trait is IOwned owned)
+        owned.OwnerID = Actor.ID;
+
+      string desc = _trait.Desc();
+      if (desc.Length > 0)
+        result.Messages.Add(new Message(Actor.FullName.Capitalize() + " " + desc, Actor.Loc));    
+    }
+    
+    return result;
+  }
+}
+
 class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int radius, string txt) : Action(gs, actor)
 {
   Loc _target { get; set; } = target;

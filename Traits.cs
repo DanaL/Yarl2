@@ -28,6 +28,12 @@ interface IEffectApplier
   string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc);
 }
 
+// Some traits need a reference to the object they are applied to
+interface IOwned
+{
+  ulong OwnerID { get; set; }
+}
+
 abstract class Trait
 {
   public virtual bool Active => true;
@@ -243,18 +249,23 @@ class TeflonTrait : Trait
   public override string AsText() => "Teflon";
 }
 
-class TelepathyTrait : BasicTrait, IGameEventListener
+class TelepathyTrait : BasicTrait, IGameEventListener, IOwned
 {
-  public ulong ActorID {  get; set; }
+  public ulong OwnerID {  get; set; }
   public bool Expired { get; set; }
   public bool Listening => true;
+  public override string Desc() => "can sense others' minds";
 
-  public override string AsText() => "Telepathy";
+  public override string AsText() => $"Telepathy#{ExpiresOn}#{OwnerID}";
 
   void Remove(GameState gs)
   {
-    var obj = gs.ObjDb.GetObj(ActorID);
+    var obj = gs.ObjDb.GetObj(OwnerID);
     obj?.Traits.Remove(this);
+    gs.RemoveListener(this);
+
+    if (obj is Player)
+      gs.UIRef().AlertPlayer(new Message("You can no longer sense others' minds!", obj.Loc), "", gs);
   }
 
   public void EventAlert(GameEventType eventType, GameState gs)
@@ -351,6 +362,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
     "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
+    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }
@@ -1271,7 +1283,11 @@ class TraitFactory
       case "Teflon":
         return new TeflonTrait();
       case "Telepathy":
-        return new TelepathyTrait();
+        return new TelepathyTrait()
+        {
+          ExpiresOn = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[2])
+        };
       case "Torch":
         return new TorchTrait()
         {
