@@ -21,6 +21,10 @@ interface IReadable
 interface IUSeable
 {
   UseResult Use(Actor user, GameState gs, int row, int col);
+}
+
+interface IEffectApplier
+{
   string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc);
 }
 
@@ -338,8 +342,7 @@ class OpaqueTrait : BasicTrait
 class CastAntidoteTrait : BasicTrait, IUSeable
 {
   public override string AsText() => "CastAntidote";
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
-
+  
   public UseResult Use(Actor user, GameState gs, int row, int col)
   {
     return new UseResult(true, "", new AntidoteAction(gs, user), null);
@@ -355,8 +358,6 @@ class CastBlinkTrait : BasicTrait, IUSeable
   {
     return new UseResult(true, "", new BlinkAction(gs, user), null);
   }
-
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 class CastMinorHealTrait : BasicTrait, IUSeable
@@ -367,8 +368,6 @@ class CastMinorHealTrait : BasicTrait, IUSeable
   {
     return new UseResult(true, "", new HealAction(gs, user, 4, 4), null);
   }
-
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 class AttackTrait : BasicTrait
@@ -855,8 +854,6 @@ class ReadableTrait(string text) : BasicTrait, IUSeable
 
     return new UseResult(false, "", action, acc);
   }
-
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc) => "";
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
@@ -913,7 +910,8 @@ class LightSourceTrait : BasicTrait
   public override string AsText() => $"LightSource#{ContainerID}#{Radius}";
 }
 
-class TorchTrait : BasicTrait, IGameEventListener, IUSeable
+// Who knew torches would be so complicated...
+class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier
 {
   public ulong ContainerID { get; set; }
   public bool Lit { get; set; }

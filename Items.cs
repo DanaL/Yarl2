@@ -81,7 +81,7 @@ class Item : GameObj
   public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
   {
     var sb = new StringBuilder();
-    var uts = Traits.OfType<IUSeable>().ToList();
+    var uts = Traits.OfType<IEffectApplier>().ToList();
     foreach (var t in uts)
     {
       sb.Append(t.ApplyEffect(flag, gs, this, loc));
