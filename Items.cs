@@ -376,7 +376,7 @@ class ItemFactory
       Value = 0,
       Glyph = glyph
     };
-    fire.SetZ(3);
+    fire.SetZ(7);
     gs.ObjDb.Add(fire);
     var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);

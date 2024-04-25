@@ -428,7 +428,7 @@ class MainDungeonBuilder : DungeonBuilder
           riverTile = TileType.Chasm;
         else
           riverTile = TileType.DeepWater;
-        riverTile = TileType.Chasm;
+        riverTile = TileType.DeepWater;
         DungeonMap.AddRiver(levels[lvlNum], w + 1, h + 1, riverTile, rng);
 
         // When making a chasm, we want to turn any walls below chasms on the 

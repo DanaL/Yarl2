@@ -287,14 +287,35 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(type));
         
         if (type == TileType.Chasm)
-        {
           BridgeCollapseOverChasm(loc);
-        }
+        else if (type == TileType.DeepWater)
+          BridgeCollapseOverWater(loc);
       }
     }
 
     if (messages.Count > 0)
       UI.AlertPlayer(messages, "", this);
+  }
+
+  void BridgeCollapseOverWater(Loc loc)
+  {
+  if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
+    {
+      UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the water!", actor.Loc), "", this);
+      
+      string msg = FallIntoWater(actor, loc);
+      if (msg.Length > 0)
+        UI.AlertPlayer(new Message(msg, loc), "", this);
+    }
+
+    var itemsToFall = ObjDb.ItemsAt(loc);
+    foreach (var item in itemsToFall)
+    {
+      UI.AlertPlayer(new Message($"{item.Name.DefArticle().Capitalize()} sinks!", loc), "", this);
+      ObjDb.RemoveItem(loc, item);
+      CheckMovedEffects(item, loc, loc);
+      ItemDropped(item, loc);
+    }
   }
 
   void BridgeCollapseOverChasm(Loc loc)
@@ -306,7 +327,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!", actor.Loc), "", this);
       
       string msg = FallIntoChasm(actor, landingSpot);
-      UI.AlertPlayer(new Message(msg, landingSpot), "", this);
+      if (msg.Length > 0)
+        UI.AlertPlayer(new Message(msg, landingSpot), "", this);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -317,6 +339,84 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       CheckMovedEffects(item, loc, landingSpot);
       ItemDropped(item, landingSpot);
     }
+    UpdateFoV();
+  }
+
+  public string FallIntoWater(Actor actor, Loc loc)
+  {
+    List<string> messages = [];
+
+    // When someone jumps/falls into water, they wash ashore at a random loc
+    // and incur the Exhausted condition
+    // first, find candidate shore sqs
+    var q = new Queue<Loc>();
+    q.Enqueue(loc);
+    HashSet<Loc> visited = [];
+    HashSet<Loc> shores = [];
+
+    while (q.Count > 0) 
+    {
+      var curr = q.Dequeue();
+
+      if (visited.Contains(curr)) 
+        continue;
+
+      visited.Add(curr);
+      foreach (var adj in Util.Adj8Locs(curr))
+      {
+        var tile = TileAt(adj);
+        if (tile.Passable() && !ObjDb.Occupied(adj)) 
+        {
+          shores.Add(adj); 
+        }
+        else if (tile.Type == TileType.DeepWater && !visited.Contains(adj))
+        {
+          q.Enqueue(adj);
+        }
+      }
+    }
+
+    if (shores.Count > 0) 
+    {
+      var candidates = shores.ToList();
+      var destination = candidates[Rng.Next(candidates.Count)];
+      ResolveActorMove(actor, actor.Loc, destination);
+      actor.Loc = destination;
+
+      string invMsgs = actor.Inventory.ApplyEffect(TerrainFlag.Wet, this, actor.Loc);
+      if (invMsgs.Length > 0)
+      {
+        messages.Add(invMsgs);
+      }
+      
+      UpdateFoV();
+
+      int conMod;
+      if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
+        conMod = stat.Curr;
+      else
+        conMod = 0;
+      ulong endsOn = Turn + (ulong)(250 - 10 * conMod);
+      var exhausted = new ExhaustedTrait()
+      {
+        VictimID = actor.ID,
+        EndsOn = endsOn
+      };
+      if (exhausted.IsAffected(actor, this))
+      {
+        string msg = exhausted.Apply(actor, this);
+        if (msg.Length > 0) 
+          messages.Add(msg);
+      }
+
+      messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!");
+    }
+    else
+    {
+      // What happens if there are somehow no free shore sqs? Does the mob drown??
+    }
+
+    return string.Join(' ', messages).Trim();
   }
 
   public string FallIntoChasm(Actor actor, Loc landingSpot)

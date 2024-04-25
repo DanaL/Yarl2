@@ -131,78 +131,14 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   Loc _loc { get; set; } = loc;
 
   void PlungeIntoWater(Actor actor, GameState gs, ActionResult result)
-  {
-    // When someone jumps/falls into water, they wash ashore at a random loc
-    // and incur the Exhausted condition
+  {    
     gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!", actor.Loc), "", gs);
     
-    // first, find candidate shore sqs
-    var q = new Queue<Loc>();
-    q.Enqueue(_loc);
-    HashSet<Loc> visited = [];
-    HashSet<Loc> shores = [];
-
-    while (q.Count > 0) 
+    string msg = gs.FallIntoWater(actor, _loc);
+    if (msg.Length > 0)
     {
-      var curr = q.Dequeue();
-
-      if (visited.Contains(curr)) 
-        continue;
-
-      visited.Add(curr);
-      foreach (var adj in Util.Adj8Locs(curr))
-      {
-        var tile = gs.TileAt(adj);
-        if (tile.Passable() && !gs.ObjDb.Occupied(adj)) 
-        {
-          shores.Add(adj); 
-        }
-        else if (tile.Type == TileType.DeepWater && !visited.Contains(adj))
-        {
-          q.Enqueue(adj);
-        }
-      }
+      result.Messages.Add(new Message(msg, actor.Loc));
     }
-
-    if (shores.Count > 0) 
-    {
-      var candidates = shores.ToList();
-      var destination = candidates[gs.Rng.Next(candidates.Count)];
-      gs.ResolveActorMove(actor, actor.Loc, destination);
-      actor.Loc = destination;
-
-      string invMsgs = actor.Inventory.ApplyEffect(TerrainFlag.Wet, gs, actor.Loc);
-      if (invMsgs.Length > 0)
-      {
-        result.Messages.Add(new Message(invMsgs, actor.Loc));
-      }
-      
-      gs.UpdateFoV();
-
-      int conMod;
-      if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
-        conMod = stat.Curr;
-      else
-        conMod = 0;
-      ulong endsOn = gs.Turn + (ulong)(250 - 10 * conMod);
-      var exhausted = new ExhaustedTrait()
-      {
-        VictimID = actor.ID,
-        EndsOn = endsOn
-      };
-      if (exhausted.IsAffected(actor, gs))
-      {
-        string msg = exhausted.Apply(actor, gs);
-        if (msg.Length > 0) 
-          result.Messages.Add(new Message(msg, actor.Loc));        
-      }
-
-      result.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!", actor.Loc));
-    }
-    else
-    {
-      // What happens if there are somehow no free shore sqs? Does the mob drown??
-    }    
   }
 
   void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
