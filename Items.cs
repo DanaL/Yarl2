@@ -298,7 +298,19 @@ class ItemFactory
           Value = 75,
           Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE)        
         };
-        item.Traits.Add(new CastMinorHealTrait());
+        item.Traits.Add(new UseSimpleTrait("minorheal"));
+        item.Traits.Add(new ConsumableTrait());
+        break;
+      case "potion of mind reading":
+        item = new Item()
+        {
+          Name = "potion of mind reading",
+          Type = ItemType.Potion,
+          Stackable = true,
+          Value = 100,
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE)
+        };
+        item.Traits.Add(new UseSimpleTrait("telepathy"));
         item.Traits.Add(new ConsumableTrait());
         break;
       case "antidote":
@@ -310,7 +322,7 @@ class ItemFactory
           Value = 50,
           Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
-        item.Traits.Add(new CastAntidoteTrait());
+        item.Traits.Add(new UseSimpleTrait("antidote"));
         item.Traits.Add(new ConsumableTrait());
         break;
       case "scroll of blink":
@@ -323,7 +335,7 @@ class ItemFactory
           Glyph = new Glyph('?', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new CastBlinkTrait());
+        item.Traits.Add(new UseSimpleTrait("blink"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         break;

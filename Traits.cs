@@ -339,35 +339,20 @@ class OpaqueTrait : BasicTrait
   public override TerrainFlag Effect => TerrainFlag.Obscures;
 }
 
-class CastAntidoteTrait : BasicTrait, IUSeable
+// Simple in that I don't need any extra info like a target to use the effect.
+class UseSimpleTrait(string spell) : Trait, IUSeable
 {
-  public override string AsText() => "CastAntidote";
-  
-  public UseResult Use(Actor user, GameState gs, int row, int col)
+  public string Spell { get; set; } = spell;
+
+  public override string AsText() => $"UseSimpleTrait#{Spell}";
+
+  public UseResult Use(Actor user, GameState gs, int row, int col) => Spell switch
   {
-    return new UseResult(true, "", new AntidoteAction(gs, user), null);
-  }
-}
-
-// For items that can cast blink
-class CastBlinkTrait : BasicTrait, IUSeable
-{
-  public override string AsText() => "CastBlink";
-
-  public UseResult Use(Actor user, GameState gs, int row, int col)
-  {
-    return new UseResult(true, "", new BlinkAction(gs, user), null);
-  }
-}
-
-class CastMinorHealTrait : BasicTrait, IUSeable
-{
-  public override string AsText() => "CastMinorHeal";
-
-  public UseResult Use(Actor user, GameState gs, int row, int col)
-  {
-    return new UseResult(true, "", new HealAction(gs, user, 4, 4), null);
-  }
+    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
+    "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
+    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
+    _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
+  };
 }
 
 class AttackTrait : BasicTrait
@@ -1048,12 +1033,6 @@ class TraitFactory
         {
           Bonus = int.Parse(pieces[1])
         };
-      case "CastAntidote":
-        return new CastAntidoteTrait();
-      case "CastBlink":
-        return new CastBlinkTrait();
-      case "CastMinorHeal":
-        return new CastMinorHealTrait();
       case "Cleave":
         return new CleaveTrait();
       case "ConfusingScream":
@@ -1300,6 +1279,8 @@ class TraitFactory
           Lit = bool.Parse(pieces[2]),
           Fuel = int.Parse(pieces[3])
         };
+      case "UseSimple":
+        return new UseSimpleTrait(pieces[1]);
       case "Weaken":
         return new WeakenTrait()
         {

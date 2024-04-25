@@ -154,6 +154,8 @@ class PlayerCreator
     player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
@@ -172,14 +174,6 @@ class PlayerCreator
     objDb.Add(player);
 
     SetStartingGear(player, objDb, rng);
-
-    player.Traits.Add(
-      new TelepathyTrait()
-      {
-        ExpiresOn = 100_000
-      }
-    );
-
 
     return player;
   }
