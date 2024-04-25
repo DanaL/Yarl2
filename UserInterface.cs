@@ -857,7 +857,7 @@ abstract class UserInterface
     return result.Trim();
   }
 
-  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc)
+  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Tile ztile)
   {
     static Colour BGColour(GameState gs, Loc loc, char ch, Colour fg)
     {
@@ -882,7 +882,9 @@ abstract class UserInterface
     if (gs.LastPlayerFoV.Contains(loc))
     {
       Glyph glyph;
-      if (gs.ObjDb.Occupant(loc) is Actor actor)
+      if (ztile.Type != TileType.Unknown)
+        glyph = Util.TileToGlyph(ztile);
+      else if (gs.ObjDb.Occupant(loc) is Actor actor)
         glyph = actor.Glyph;
       else
         glyph = remembered[loc];
@@ -919,17 +921,9 @@ abstract class UserInterface
         // replace w/ LocToScrLoc?
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
-
+        
         var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-        var sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc);
-
-        // The ZLayer trumps. Although maybe now that I've added a Z-coord
-        // to items and actors I can get rid of the ZLayer?
-        if (ZLayer[r, c].Type != TileType.Unknown)
-        {
-          var glyph = Util.TileToGlyph(ZLayer[r, c]);
-           sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
-        }
+        var sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
          
         SqsOnScreen[r, c] = sqr;
       }
