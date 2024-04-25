@@ -106,7 +106,7 @@ class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs,
       Actor.Traits.Add(_trait);
       if (_trait is IGameEventListener listener)
         GameState!.RegisterForEvent(GameEventType.EndOfRound, listener);
-      if (_trait is IOwned owned)
+      if (_trait is IOwner owned)
         owned.OwnerID = Actor.ID;
 
       string desc = _trait.Desc();

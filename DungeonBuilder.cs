@@ -294,7 +294,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     var rt = new ReadableTrait(documentText)
     {
-      ContainerID = doc.ID
+      OwnerID = doc.ID
     };
     doc.Traits.Add(rt);
     var (row, col) = candidateSqs[rng.Next(candidateSqs.Count)];

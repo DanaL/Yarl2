@@ -273,7 +273,7 @@ class ItemFactory
         };
         var ls = new TorchTrait()
         {
-          ContainerID = item.ID,
+          OwnerID = item.ID,
           Fuel = 1500,
           Lit = false
         };
@@ -362,7 +362,7 @@ class ItemFactory
     mist.Traits.Add(new OpaqueTrait());
     mist.Traits.Add(new CountdownTrait()
     {
-      ContainerID = mist.ID,
+      OwnerID = mist.ID,
       ExpiresOn = gs.Turn + 7
     });
 
@@ -390,10 +390,10 @@ class ItemFactory
     };
     fire.SetZ(7);
     gs.ObjDb.Add(fire);
-    var onFire = new OnFireTrait() { Expired = false, ContainerID = fire.ID };
+    var onFire = new OnFireTrait() { Expired = false, OwnerID = fire.ID };
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
-    fire.Traits.Add(new LightSourceTrait() { Radius = 1, ContainerID = fire.ID });
+    fire.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = fire.ID });
     return fire;
   }
 

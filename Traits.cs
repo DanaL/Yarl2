@@ -29,7 +29,7 @@ interface IEffectApplier
 }
 
 // Some traits need a reference to the object they are applied to
-interface IOwned
+interface IOwner
 {
   ulong OwnerID { get; set; }
 }
@@ -249,7 +249,7 @@ class TeflonTrait : Trait
   public override string AsText() => "Teflon";
 }
 
-class TelepathyTrait : BasicTrait, IGameEventListener, IOwned
+class TelepathyTrait : BasicTrait, IGameEventListener, IOwner
 {
   public ulong OwnerID {  get; set; }
   public bool Expired { get; set; }
@@ -362,7 +362,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
     "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
-    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
+    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),    
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 }
@@ -635,14 +635,14 @@ class PoisonerTrait : BasicTrait
   public override string AsText() => $"Poisoner#{DC}#{Strength}";
 }
 
-class OnFireTrait : BasicTrait, IGameEventListener
+class OnFireTrait : BasicTrait, IGameEventListener, IOwner
 {
-  public ulong ContainerID { get; set; }
+  public ulong OwnerID { get; set; }
   public bool Expired { get; set; } = false;
   public int Lifetime { get; set; } = 0;
   public bool Listening => true;
 
-  public override string AsText() => $"OnFire#{Expired}#{ContainerID}#{Lifetime}";
+  public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}";
 
   public void Extinguish(Item fireSrc, GameState gs)
   {
@@ -656,7 +656,7 @@ class OnFireTrait : BasicTrait, IGameEventListener
   public void EventAlert(GameEventType eventType, GameState gs)
   {
     ++Lifetime;
-    if (gs.ObjDb.GetObj(ContainerID) is Item fireSrc)
+    if (gs.ObjDb.GetObj(OwnerID) is Item fireSrc)
     {
       if (Lifetime > 3 && gs.Rng.NextDouble() < 0.5)
       {
@@ -832,17 +832,17 @@ class PoisonedTrait : BasicTrait, IGameEventListener
   }
 }
 
-class ReadableTrait(string text) : BasicTrait, IUSeable
+class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 {
+  public ulong OwnerID { get; set; }
   readonly string _text = text;
-  public ulong ContainerID { get; set; }
-  public override string AsText() => $"Readable#{_text.Replace("\n", "<br/>")}#{ContainerID}";
+  public override string AsText() => $"Readable#{_text.Replace("\n", "<br/>")}#{OwnerID}";
   
   public override bool Aura => false;
 
   public UseResult Use(Actor user, GameState gs, int row, int col)
   {
-    Item? doc = gs.ObjDb.GetObj(ContainerID) as Item;
+    Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
     string msg = $"{user.FullName.Capitalize()} read:\n{_text}";
     gs.WritePopup(msg, doc!.FullName.IndefArticle().Capitalize());
 
@@ -854,13 +854,13 @@ class ReadableTrait(string text) : BasicTrait, IUSeable
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
-class CountdownTrait : BasicTrait, IGameEventListener
+class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {
+  public ulong OwnerID { get; set; }
   public bool Expired { get; set; } = false;
-  public ulong ContainerID { get; set; }
   public bool Listening => true;
 
-  public override string AsText() => $"Countdown#{ContainerID}#{Expired}";
+  public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
 
   public void EventAlert(GameEventType eventType, GameState gs)
   {
@@ -869,7 +869,7 @@ class CountdownTrait : BasicTrait, IGameEventListener
 
     Expired = true;
 
-    if (gs.ObjDb.GetObj(ContainerID) is Item item)
+    if (gs.ObjDb.GetObj(OwnerID) is Item item)
     {
       Loc loc = item.Loc;
 
@@ -897,20 +897,20 @@ class CountdownTrait : BasicTrait, IGameEventListener
 }
 
 // A light source that doesn't have fuel/burn out on its own.
-class LightSourceTrait : BasicTrait
+class LightSourceTrait : BasicTrait, IOwner
 {
-  public ulong ContainerID { get; set; }
+  public ulong OwnerID { get; set; }
   public override int Radius { get; set; }
   public sealed override bool Aura => true;
   public sealed override TerrainFlag Effect => TerrainFlag.Lit;
 
-  public override string AsText() => $"LightSource#{ContainerID}#{Radius}";
+  public override string AsText() => $"LightSource#{OwnerID}#{Radius}";
 }
 
 // Who knew torches would be so complicated...
-class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier
+class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOwner
 {
-  public ulong ContainerID { get; set; }
+  public ulong OwnerID { get; set; }
   public bool Lit { get; set; }
   public int Fuel { get; set; }
   public sealed override bool Aura => true;
@@ -928,7 +928,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier
 
   public override string AsText()
   {
-    return $"Torch#{ContainerID}#{Lit}#{Fuel}#{Expired}";
+    return $"Torch#{OwnerID}#{Lit}#{Fuel}#{Expired}";
   }
 
   public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc)
@@ -963,7 +963,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier
 
   public UseResult Use(Actor _, GameState gs, int row, int col)
   {
-    Item? item = gs.ObjDb.GetObj(ContainerID) as Item;
+    Item? item = gs.ObjDb.GetObj(OwnerID) as Item;
     var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, row, col);
     if (Lit)
     {
@@ -997,7 +997,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier
       Lit = false;
       Expired = true;
 
-      if (gs.ObjDb.GetObj(ContainerID) is Item item)
+      if (gs.ObjDb.GetObj(OwnerID) is Item item)
       {
         Loc loc = item.Loc;
         if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
@@ -1059,7 +1059,7 @@ class TraitFactory
       case "Countdown":
         return new CountdownTrait()
         {
-          ContainerID = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[1]),
           Expired = bool.Parse(pieces[2])
         };
       case "Damage":
@@ -1127,7 +1127,7 @@ class TraitFactory
       case "LightSource":
         return new LightSourceTrait()
         {
-          ContainerID = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[1]),
           Radius = int.Parse(pieces[2])
         };
       case "Melee":
@@ -1182,7 +1182,7 @@ class TraitFactory
         return new OnFireTrait()
         {
           Expired = bool.Parse(pieces[1]),
-          ContainerID = ulong.Parse(pieces[2]),
+          OwnerID = ulong.Parse(pieces[2]),
           Lifetime = int.Parse(pieces[3])
         };
       case "Confused":
@@ -1248,7 +1248,7 @@ class TraitFactory
       case "Readable":
         return new ReadableTrait(pieces[1].Replace("<br/>", "\n"))
         {
-          ContainerID = ulong.Parse(pieces[2])
+          OwnerID = ulong.Parse(pieces[2])
         };        
       case "ResistBlunt":
         return new ResistBluntTrait();
@@ -1291,7 +1291,7 @@ class TraitFactory
       case "Torch":
         return new TorchTrait()
         {
-          ContainerID = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[1]),
           Lit = bool.Parse(pieces[2]),
           Fuel = int.Parse(pieces[3])
         };
