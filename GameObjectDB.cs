@@ -152,8 +152,8 @@ class GameObjectDB
   {
     foreach (var obj in Objs.Values)
     {
-      if (obj is Player)
-        return (Player)obj;
+      if (obj is Player player)
+        return player;
     }
 
     return null;

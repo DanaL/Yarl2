@@ -210,7 +210,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // I don't have a way to track what square is below a bridge, so I have to do 
   // something kludgy. Maybe in the future I should turn bridges into Items
   // that can be walked on?
-  TileType SquareBelowBridge(Map map, Loc start)
+  static TileType SquareBelowBridge(Map map, Loc start)
   {
     var q = new Queue<Loc>();
     q.Enqueue(start);
@@ -285,20 +285,38 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         var type = SquareBelowBridge(map, loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(type));
-
-        if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
+        
+        if (type == TileType.Chasm)
         {
-          UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!", actor.Loc), "", this);
-
-          var landingSpot = loc with { Level = loc.Level + 1 };
-          string msg = FallIntoChasm(actor, landingSpot);
-          UI.AlertPlayer(new Message(msg, landingSpot), "", this);
+          BridgeCollapseOverChasm(loc);
         }
       }
     }
 
     if (messages.Count > 0)
       UI.AlertPlayer(messages, "", this);
+  }
+
+  void BridgeCollapseOverChasm(Loc loc)
+  {
+    var landingSpot = loc with { Level = loc.Level + 1 };
+
+    if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
+    {
+      UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!", actor.Loc), "", this);
+      
+      string msg = FallIntoChasm(actor, landingSpot);
+      UI.AlertPlayer(new Message(msg, landingSpot), "", this);
+    }
+
+    var itemsToFall = ObjDb.ItemsAt(loc);
+    foreach (var item in itemsToFall)
+    {
+      UI.AlertPlayer(new Message($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", loc), "", this);
+      ObjDb.RemoveItem(loc, item);
+      CheckMovedEffects(item, loc, landingSpot);
+      ItemDropped(item, landingSpot);
+    }
   }
 
   public string FallIntoChasm(Actor actor, Loc landingSpot)
