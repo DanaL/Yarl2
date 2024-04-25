@@ -274,7 +274,7 @@ class ItemFactory
         var ls = new TorchTrait()
         {
           ContainerID = item.ID,
-          Fuel = 500,
+          Fuel = 1500,
           Lit = false
         };
         item.Traits.Add(ls);
