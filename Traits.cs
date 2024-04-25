@@ -518,6 +518,52 @@ class ConfusedTrait : EffectTrait, IGameEventListener
   }
 }
 
+class ExhaustedTrait : EffectTrait, IGameEventListener
+{
+  public ulong VictimID { get; set; }
+  public ulong EndsOn { get; set; }
+  public bool Expired { get; set; } = false;
+
+  public override string AsText() => $"Exhausted#{VictimID}#{EndsOn}";
+
+  public bool Listening => throw new NotImplementedException();
+
+  public override string Apply(Actor victim, GameState gs)
+  {    
+    // if the actor already has the exhausted trait, just set the EndsOn
+    // of the existing trait to the higher value
+    foreach (var t in victim.Traits)
+    {
+      if (t is ExhaustedTrait exhausted)
+      {
+        exhausted.EndsOn = ulong.Max(EndsOn, exhausted.EndsOn);
+        return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "become")} more exhausted!";
+      }
+    }
+
+    victim.Traits.Add(this);
+    victim.Recovery -= 0.5;
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "become")} exhausted!";
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > EndsOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      victim.Recovery += 0.5;
+      victim.Traits.Remove(this);
+      Expired = true;
+      string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} less exhausted!";
+      gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+      gs.StopListening(GameEventType.EndOfRound, this);
+    }      
+  }
+
+  public override bool IsAffected(Actor victim, GameState gs) => true;
+}
+
 class ParalyzedTrait : EffectTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -1023,6 +1069,12 @@ class TraitFactory
           Disguise = Glyph.TextToGlyph(pieces[1]),
           TrueForm = Glyph.TextToGlyph(pieces[2]),
           DisguiseForm = pieces[3]
+        };
+      case "Exhausted":
+        return new ExhaustedTrait()
+        {
+          VictimID = ulong.Parse(pieces[1]),
+          EndsOn = ulong.Parse(pieces[2])
         };
       case "SpellAction":
         return new SpellActionTrait()

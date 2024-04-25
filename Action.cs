@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 class ActionResult
@@ -123,6 +125,117 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
   }
 }
 
+// Action for when an actor jumps into a river or chasm (and eventually lava?)
+class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+{
+  Loc _loc { get; set; } = loc;
+
+  void PlungeIntoWater(Actor actor, GameState gs, ActionResult result)
+  {
+    // When someone jumps/falls into water, they wash ashore at a random loc
+    // and incur the Exhausted condition
+    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!", actor.Loc), "", gs);
+    
+    // first, find candidate shore sqs
+    var q = new Queue<Loc>();
+    q.Enqueue(_loc);
+    HashSet<Loc> visited = [];
+    HashSet<Loc> shores = [];
+
+    while (q.Count > 0) 
+    {
+      var curr = q.Dequeue();
+
+      if (visited.Contains(curr)) 
+        continue;
+
+      visited.Add(curr);
+      foreach (var adj in Util.Adj8Locs(curr))
+      {
+        var tile = gs.TileAt(adj);
+        if (tile.Passable() && !gs.ObjDb.Occupied(adj)) 
+        {
+          shores.Add(adj); 
+        }
+        else if (tile.Type == TileType.DeepWater && !visited.Contains(adj))
+        {
+          q.Enqueue(adj);
+        }
+      }
+    }
+
+    if (shores.Count > 0) 
+    {
+      var candidates = shores.ToList();
+      var destination = candidates[gs.Rng.Next(candidates.Count)];
+      gs.ResolveActorMove(actor, actor.Loc, destination);
+      actor.Loc = destination;
+
+      string invMsgs = actor.Inventory.ApplyEffect(TerrainFlag.Wet, gs, actor.Loc);
+      if (invMsgs.Length > 0)
+      {
+        result.Messages.Add(new Message(invMsgs, actor.Loc));
+      }
+      
+      gs.UpdateFoV();
+
+      int conMod;
+      if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
+        conMod = stat.Curr;
+      else
+        conMod = 0;
+      ulong endsOn = gs.Turn + (ulong)(250 - 10 * conMod);
+      var exhausted = new ExhaustedTrait()
+      {
+        VictimID = actor.ID,
+        EndsOn = endsOn
+      };
+      if (exhausted.IsAffected(actor, gs))
+      {
+        string msg = exhausted.Apply(actor, gs);
+        if (msg.Length > 0) 
+          result.Messages.Add(new Message(msg, actor.Loc));        
+      }
+
+      result.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!", actor.Loc));
+    }
+    else
+    {
+      // What happens if there are somehow no free shore sqs? Does the mob drown??
+    }    
+  }
+
+  void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
+  {
+    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!", actor.Loc), "", gs);
+    var landingSpot = new Loc(_loc.DungeonID, _loc.Level + 1, _loc.Row, _loc.Col);
+
+    string msg = gs.FallIntoChasm(actor, landingSpot);
+    result.Messages.Add(new Message(msg, landingSpot));
+    result.Messages.Add(new Message(gs.LocDesc(landingSpot), landingSpot));
+  }
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+
+    var tile = GameState!.TileAt(_loc);
+    if (tile.Type == TileType.DeepWater)
+    {
+      PlungeIntoWater(Actor!, GameState, result);
+    }
+    else if (tile.Type == TileType.Chasm)
+    {
+      PlungeIntoChasm(Actor!, GameState, result);
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result) { }
+}
+
 class PortalAction : Action
 {  
   public PortalAction(GameState gameState) => GameState = gameState;
@@ -131,7 +244,7 @@ class PortalAction : Action
   {
     var start = GameState!.Player!.Loc;
     var (dungeon, level, _, _) = portal.Destination;
-    GameState.EnterLevel(dungeon, level);
+    GameState.EnterLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     GameState.RefreshPerformers();
@@ -140,13 +253,6 @@ class PortalAction : Action
 
     if (start.DungeonID != portal.Destination.DungeonID)
       result.Messages.Add(new Message(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
-
-    if (portal.Destination.DungeonID > 0)
-    {
-      int maxDepth = GameState.Player!.Stats[Attribute.Depth].Max;
-      if (portal.Destination.Level + 1 > maxDepth)
-        GameState.Player!.Stats[Attribute.Depth].SetMax(portal.Destination.Level + 1);
-    }
 
     result.EnergyCost = 1.0;
   }

@@ -394,6 +394,19 @@ class MainDungeonBuilder : DungeonBuilder
   //    -5586292
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng)
   {
+    static bool ReplaceChasm(Map map, (int, int) pt)
+    {
+      switch (map.TileAt(pt).Type)
+      {
+        case TileType.Chasm:
+        case TileType.Bridge:
+        case TileType.WoodBridge:
+          return true;
+        default:
+          return false;
+      }      
+    }
+
     _dungeonID = id;
     var dungeon = new Dungeon(id, arrivalMessage);
     var mapper = new DungeonMap(rng);
@@ -406,7 +419,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     // All rivers/chasms to some of the levels
-    for (int lvlNum = 0; lvlNum < numOfLevels; lvlNum++)
+    for (int lvlNum = 0; lvlNum < numOfLevels - 1; lvlNum++)
     {
       if (rng.Next(4) == 0)
       {
@@ -415,6 +428,7 @@ class MainDungeonBuilder : DungeonBuilder
           riverTile = TileType.Chasm;
         else
           riverTile = TileType.DeepWater;
+        riverTile = TileType.Chasm;
         DungeonMap.AddRiver(levels[lvlNum], w + 1, h + 1, riverTile, rng);
 
         // When making a chasm, we want to turn any walls below chasms on the 
@@ -425,8 +439,8 @@ class MainDungeonBuilder : DungeonBuilder
           {
             for (int c = 1; c < w; c++)
             {
-              var pt = (r, c);
-              if (levels[lvlNum].IsTile(pt, TileType.Chasm) && levels[lvlNum + 1].IsTile(pt, TileType.DungeonWall))
+              var pt = (r, c);              
+              if (ReplaceChasm(levels[lvlNum], pt) && levels[lvlNum + 1].IsTile(pt, TileType.DungeonWall))
               {
                 levels[lvlNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
               }
