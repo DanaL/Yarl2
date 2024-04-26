@@ -682,22 +682,39 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     var sb = new StringBuilder();
     sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
+    
+    Dictionary<Item, int> items = new Dictionary<Item, int>();
+    foreach (var item in ObjDb.ItemsAt(loc))
+    {
+      if (items.ContainsKey(item))
+        items[item] += 1;
+      else
+        items[item] = 1;
+    }
 
-    var items = ObjDb.ItemsAt(loc);
     if (items.Count > 1)
     {
       sb.Append(" There are several items here.");
     }
-    else if (items.Count == 1 && items[0].Type == ItemType.Zorkmid)
-    {
-      if (items[0].Value == 1)
-        sb.Append($" There is a lone zorkmid here.");
-      else
-        sb.Append($" There are {items[0].Value} zorkmids here!");
-    }
     else if (items.Count == 1)
     {
-      sb.Append($" There is {items[0].FullName.IndefArticle()} here.");
+      Item item = items.Keys.First();
+      int count = items[item];
+      if (item.Type == ItemType.Zorkmid)
+      {
+        if (item.Value == 1)
+          sb.Append($" There is a lone zorkmid here.");
+        else
+          sb.Append($" There are {item.Value} zorkmids here!");
+      }
+      else if (count == 1)
+      {
+        sb.Append($" There is {item.FullName.IndefArticle()} here.");
+      }
+      else
+      {
+        sb.Append($" There are {count} {item.FullName.Pluralize()} here.");
+      }      
     }
 
     foreach (var env in ObjDb.EnvironmentsAt(loc))

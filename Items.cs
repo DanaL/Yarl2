@@ -26,7 +26,7 @@ enum ItemType
   Environment // I'm implementing things like mist as 'items'
 }
 
-class Item : GameObj
+class Item : GameObj, IEquatable<Item>
 {
   public static readonly int DEFAULT_Z = 2;
   public ItemType Type { get; set; }
@@ -88,6 +88,40 @@ class Item : GameObj
 
     return sb.ToString();
   }
+
+  public override int GetHashCode() => $"{Type}+{Name}".GetHashCode();
+  public override bool Equals(object? obj) => Equals(obj as Item);
+  
+  public bool Equals(Item? i)
+  {
+    if (i is null)
+      return false;
+
+    if (ReferenceEquals(this, i)) 
+      return true;
+
+    if (GetType() != i.GetType()) 
+      return false;
+
+    if (HasTrait<StackableTrait>() != i.HasTrait<StackableTrait>()) 
+      return false;
+
+    return i.Name == Name && i.Type == Type;
+  }
+
+  public static bool operator==(Item? a, Item? b)
+  {
+    if (a is null)
+    {
+      if (b is null)
+        return true;
+      return false;
+    }
+    
+    return a.Equals(b);
+  }
+
+  public static bool operator!=(Item? a, Item? b) => !(a == b);
 }
 
 class ItemFactory
