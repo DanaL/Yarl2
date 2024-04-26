@@ -108,6 +108,7 @@ internal class BLUserInferface : UserInterface, IDisposable
 
   protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
   {
+    Terminal.BkColor(ToBearLibColour(Colours.BLACK));
     Terminal.Color(ToBearLibColour(textColour));
     Terminal.Print(col, lineNum, message.PadRight(width));
   }

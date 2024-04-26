@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Yarl2;
 
@@ -690,13 +691,13 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
   // currently not fully map a level with disjoint spaces but I'm not sure if
   // I think that's a problem or not.
   void FloodFillMap(GameState gs, Loc start)
-  {  
+  {    
     Dungeon dungeon = gs.CurrentDungeon;
-    
+    PriorityQueue<Loc, int> locsQ = new();
     HashSet<Loc> visited = [];
     var q = new Queue<Loc>();
     q.Enqueue(start);
-
+    
     while (q.Count > 0) 
     { 
       var curr = q.Dequeue();
@@ -708,8 +709,7 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
           continue;
 
         var tile = gs.TileAt(adj);
-        if (!dungeon.RememberedLocs.ContainsKey(adj))
-          dungeon.RememberedLocs.Add(adj, Util.TileToGlyph(tile));
+        locsQ.Enqueue(adj, Util.Distance(Actor!.Loc, adj));
 
         switch (tile.Type)
         {
@@ -726,7 +726,14 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
 
         visited.Add(adj);
       }
-    }    
+    }
+
+    List<Loc> locs = [];
+    while (locsQ.Count > 0)
+      locs.Add(locsQ.Dequeue());
+    
+    var anim = new MagicMapAnimation(gs, dungeon, locs);
+    gs.UIRef().RegisterAnimation(anim);
   }
 
   public override ActionResult Execute()

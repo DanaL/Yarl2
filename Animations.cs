@@ -13,7 +13,7 @@ namespace Yarl2;
 
 abstract class Animation
 {
-  public DateTime Expiry { get; set; }
+  public DateTime Expiry { get; set; } = DateTime.MaxValue;
   public abstract void Update();
 }
 
@@ -30,7 +30,6 @@ class AimAnimation : Animation
   {
     _start = origin;
     Target = initialTarget;
-    Expiry = DateTime.MaxValue;
     _ui = ui;
     _gs = gs;
     _scrW = UserInterface.ViewWidth;
@@ -61,7 +60,6 @@ class ArrowAnimation : Animation
 
   public ArrowAnimation(GameState gs, List<Loc> pts, Colour ammoColour)
   {
-    Expiry = DateTime.MaxValue;
     _gs = gs;
     _ammoColour = ammoColour;
 
@@ -121,7 +119,6 @@ class ThrownMissileAnimation : Animation
     _gs = gs;
     _glyph = glyph;
     _pts = pts;
-    Expiry = DateTime.MaxValue;
     _frame = 0;
     _lastFrame = DateTime.Now;
     _ammo = ammo;
@@ -273,6 +270,61 @@ class SqAnimation : Animation
   }
 }
 
+record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Expiry);
+
+class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animation
+{
+  readonly GameState _gs = gs;
+  readonly Dungeon _dungeon = dungeon;
+  readonly UserInterface _ui = gs.UIRef();
+  readonly List<Loc> _locs = locs;
+  int _index = 0;
+  DateTime _lastFrame = DateTime.Now;
+  readonly Queue<HighlightSqr> _sqsToMark = [];
+  
+  public override void Update()
+  {    
+    var dd = DateTime.Now - _lastFrame;
+    if (dd.TotalMilliseconds < 15)
+      return;
+
+    int next = int.Min(_index + 25, _locs.Count);      
+    while (_index < next)
+    {
+      var loc = _locs[_index];
+      Tile tile = _gs.TileAt(loc);
+      Glyph glyph = Util.TileToGlyph(tile);
+
+      Sqr sqr = _gs.Rng.NextDouble() < 0.1 
+                  ? new Sqr(glyph.Lit, Colours.LIGHT_PURPLE, glyph.Ch)
+                  : new Sqr(glyph.Lit, Colours.FAINT_PINK, glyph.Ch);        
+      var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.Now.AddMilliseconds(750)));
+
+      ++_index;
+    }
+
+    while (_sqsToMark.Count > 0 && _sqsToMark.Peek().Expiry < DateTime.Now)
+      _sqsToMark.Dequeue();
+
+    foreach (var sq in _sqsToMark)
+    {
+      if (sq.Row >= 0 && sq.Col >= 0 && sq.Row < UserInterface.ViewHeight && sq.Col < UserInterface.ViewWidth)
+        _ui.SqsOnScreen[sq.Row, sq.Col] = sq.Sqr;
+      _dungeon.RememberedLocs.TryAdd(sq.Loc, sq.Glyph);
+    }
+
+    if (_index >= _locs.Count)
+    {
+      if (_sqsToMark.Count == 0)
+        Expiry = DateTime.Now;
+      return;
+    }
+
+    _lastFrame = DateTime.Now;
+  }
+}
+
 class HitAnimation : Animation
 {
   readonly GameState _gs;
@@ -315,7 +367,6 @@ class TorchLightAnimationListener : Animation
 
   public TorchLightAnimationListener(UserInterface ui, GameState gs)
   {
-    Expiry = DateTime.MaxValue;
     _ui = ui;
     _gs = gs;
     _lastFrame = DateTime.Now;
@@ -367,34 +418,24 @@ class TorchLightAnimationListener : Animation
   }
 }
 
-class CloudAnimationListener : Animation
+class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
 {
-  readonly UserInterface _ui;
-  readonly GameState _gs;
   bool[] _cloud = new bool[9];
   int _row;
   int _col;
-  DateTime _lastFrame;
+  DateTime _lastFrame = DateTime.Now;
   DateTime _nextCloud;
   bool _paused;
-
-  public CloudAnimationListener(UserInterface ui, GameState gs)
-  {
-    Expiry = DateTime.MaxValue;
-    _ui = ui;
-    _gs = gs;
-    _lastFrame = DateTime.Now;
-  }
 
   void MakeCloud()
   {
     int count = 0;
     List<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    locs.Shuffle(_gs.Rng);
+    locs.Shuffle(gs.Rng);
 
     foreach (var k in locs)
     {
-      if (count < 7 && _gs.Rng.NextDouble() < 0.7)
+      if (count < 7 && gs.Rng.NextDouble() < 0.7)
       {
         _cloud[k] = true;
         ++count;
@@ -405,15 +446,15 @@ class CloudAnimationListener : Animation
       }
     }
 
-    if (_gs.Rng.NextDouble() < 0.5)
+    if (gs.Rng.NextDouble() < 0.5)
     {
-      _row = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewHeight));
+      _row = gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewHeight));
       _col = -3;
     }
     else
     {
       _row = -3;
-      _col = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewWidth));
+      _col = gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewWidth));
     }
 
     _paused = false;
@@ -431,7 +472,7 @@ class CloudAnimationListener : Animation
         int cr = _row + r;
         int cc = _col + c;
         if (cr >= 0 && cr < h && cc >= 0 && cc < w)
-          _ui.ZLayer[cr, cc] = TileFactory.Get(TileType.Unknown);
+          ui.ZLayer[cr, cc] = TileFactory.Get(TileType.Unknown);
       }
     }
   }
@@ -455,9 +496,9 @@ class CloudAnimationListener : Animation
       if (zrow < 0 || zrow >= h || zcol < 0 || zcol >= w)
         continue;
       if (_cloud[j])
-        _ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Cloud);
+        ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Cloud);
       else
-        _ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Unknown);
+        ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Unknown);
     }
   }
 
@@ -465,12 +506,12 @@ class CloudAnimationListener : Animation
   {
     var dd = DateTime.Now - _lastFrame;
 
-    if (!_paused && !_gs.InWilderness)
+    if (!_paused && !gs.InWilderness)
     {
       _paused = true;
       EraseCloud();
     }
-    else if (_paused && _gs.InWilderness && DateTime.Now > _nextCloud)
+    else if (_paused && gs.InWilderness && DateTime.Now > _nextCloud)
     {
       _paused = false;
       MakeCloud();
@@ -486,7 +527,7 @@ class CloudAnimationListener : Animation
       if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth)
       {
         _paused = true;
-        _nextCloud = DateTime.Now.AddSeconds(_gs.Rng.Next(5, 16));
+        _nextCloud = DateTime.Now.AddSeconds(gs.Rng.Next(5, 16));
       }
     }
   }
