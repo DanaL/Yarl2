@@ -30,7 +30,6 @@ class Item : GameObj
 {
   public static readonly int DEFAULT_Z = 2;
   public ItemType Type { get; set; }
-  public bool Stackable { get; set; }
   public char Slot { get; set; }
   public bool Equiped { get; set; } = false;
   public ulong ContainedBy { get; set; } = 0;
@@ -104,7 +103,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 10,
           Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
@@ -116,19 +114,18 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = true,
           Value = 10,
           Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new StackableTrait());
         break;
       case "hand axe":
         item = new Item()
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 15,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
@@ -140,7 +137,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 25,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
@@ -152,7 +148,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 25,
           Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY)
         };
@@ -164,7 +159,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 25,
           Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
         };
@@ -176,7 +170,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 20,
           Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
         };
@@ -188,19 +181,18 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = true,
           Value = 2,
           Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN)
         };
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new StackableTrait());
         break;
       case "firebolt":
         item = new Item()
         {
           Name = name,
           Type = ItemType.Weapon,
-          Stackable = false,
           Value = 0,
           Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
@@ -212,7 +204,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Armour,
-          Stackable = false,
           Value = 20,
           Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
         };
@@ -223,7 +214,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Armour,
-          Stackable = false,
           Value = 25,
           Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
         };
@@ -234,7 +224,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Armour,
-          Stackable = false,
           Value = 45,
           Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY)
         };
@@ -245,7 +234,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Armour,
-          Stackable = false,
           Value = 75,
           Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY)
         };
@@ -256,7 +244,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Armour,
-          Stackable = false,
           Value = 20,
           Glyph = new Glyph('[', Colours.WHITE, Colours.GREY)
         };
@@ -267,7 +254,6 @@ class ItemFactory
         {
           Name = name,
           Type = ItemType.Tool,
-          Stackable = true,
           Value = 2,
           Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN)
         };
@@ -279,58 +265,58 @@ class ItemFactory
         };
         item.Traits.Add(ls);
         item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       case "zorkmids":
         item = new Item()
         {
           Name = "zorkmid",
           Type = ItemType.Zorkmid,
-          Stackable = true,
           Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
-        break;
+        item.Traits.Add(new StackableTrait());
+        break;        
       case "potion of healing":
         item = new Item()
         {
           Name = "potion of healing",
           Type = ItemType.Potion,
-          Stackable = true,
           Value = 75,
           Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE)        
         };
         item.Traits.Add(new UseSimpleTrait("minorheal"));
         item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       case "potion of mind reading":
         item = new Item()
         {
           Name = "potion of mind reading",
           Type = ItemType.Potion,
-          Stackable = true,
           Value = 100,
           Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE)
         };
         item.Traits.Add(new UseSimpleTrait("telepathy"));
         item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       case "antidote":
         item = new Item()
         {
           Name = "antidote",
           Type = ItemType.Potion,
-          Stackable = true,
           Value = 50,
           Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
         item.Traits.Add(new UseSimpleTrait("antidote"));
         item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       case "scroll of blink":
         item = new Item()
         {
           Name = "scroll of blink",
           Type = ItemType.Scroll,
-          Stackable = true,
           Value = 125,
           Glyph = new Glyph('?', Colours.WHITE, Colours.GREY)
         };
@@ -338,13 +324,13 @@ class ItemFactory
         item.Traits.Add(new UseSimpleTrait("blink"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       case "scroll of magic mapping":
         item = new Item()
         {
           Name = "scroll of magic mapping",
           Type = ItemType.Scroll,
-          Stackable = true,
           Value = 100,
           Glyph = new Glyph('?', Colours.WHITE, Colours.GREY)
         };
@@ -352,6 +338,7 @@ class ItemFactory
         item.Traits.Add(new UseSimpleTrait("magicmap"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
@@ -368,7 +355,6 @@ class ItemFactory
     {
       Name = "mist",
       Type = ItemType.Environment,
-      Stackable = false,
       Value = 0,
       Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY)
     };
@@ -398,7 +384,6 @@ class ItemFactory
     {
       Name = "fire",
       Type = ItemType.Environment,
-      Stackable = false,
       Value = 0,
       Glyph = glyph
     };
@@ -417,7 +402,6 @@ class ItemFactory
     {
       Name = "webs",
       Type = ItemType.Environment,
-      Stackable = false,
       Value = 0,
       Glyph = new Glyph(':', Colours.WHITE, Colours.GREY)
     };
@@ -534,7 +518,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     // that slot. Otherwise, if the item has a previously assigned slot and
     // it's still available, use that slot. Finally, look for the next
     // available slot
-    if (item.Stackable)
+    if (item.HasTrait<StackableTrait>())
     {
       foreach (var other in Items())
       {

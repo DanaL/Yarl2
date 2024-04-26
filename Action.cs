@@ -579,7 +579,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
       Item? toUse = Actor.Inventory.RemoveByID(item.ID)
                       ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
-      toUse.Stackable = false;
+
+      toUse.Traits = toUse.Traits.Where(t => t is not StackableTrait).ToList();
+
       if (!toUse.HasTrait<ConsumableTrait>())
         Actor.Inventory.Add(toUse, Actor.ID);
 

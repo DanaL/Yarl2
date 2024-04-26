@@ -538,12 +538,11 @@ class GameObjDBSave
       ID = ulong.Parse(fields[2]),
       Glyph = Glyph.TextToGlyph(fields[3]),
       Loc = Loc.FromStr(fields[4]),
-      Stackable = bool.Parse(fields[6].ToLower()),
-      Slot = fields[7][0],
-      Equiped = bool.Parse(fields[8].ToLower()),
-      ContainedBy = ulong.Parse(fields[9]),
-      Adjectives = [.. fields[10].Split(',')],
-      Value = int.Parse(fields[11]),
+      Slot = fields[6][0],
+      Equiped = bool.Parse(fields[7].ToLower()),
+      ContainedBy = ulong.Parse(fields[8]),
+      Adjectives = [.. fields[9].Split(',')],
+      Value = int.Parse(fields[10]),
     };
 
     // Parse the traits
@@ -556,7 +555,7 @@ class GameObjDBSave
       }
     }
 
-    item.SetZ(int.Parse(fields[12]));
+    item.SetZ(int.Parse(fields[11]));
 
     return item;
   }
@@ -640,8 +639,6 @@ class GameObjDBSave
         sb.Append(item.Type);
         sb.Append('|');
         sb.Append(obj.ToString());
-        sb.Append('|');
-        sb.Append(item.Stackable);
         sb.Append('|');
         sb.Append(item.Slot);
         sb.Append('|');

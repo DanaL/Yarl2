@@ -285,7 +285,6 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = desc,
       Type = ItemType.Document,
-      Stackable = false,
       Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY),
       Adjectives = [adjective]
     };
@@ -365,7 +364,6 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = "tin locket",
       Type = ItemType.Trinket,
-      Stackable = false,
       Value = 1,
       Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY)
     };

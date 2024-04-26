@@ -277,24 +277,14 @@ class TelepathyTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
-class VillagerTrait : Trait
+class CleaveTrait : Trait
 {
-  public override string AsText() => "Villager";
-}
-
-class WrittenTrait : Trait
-{
-  public override string AsText() => "Written";
+  public override string AsText() => "Cleave";
 }
 
 class ImpaleTrait : Trait
 {
   public override string AsText() => "Impale";
-}
-
-class CleaveTrait : Trait
-{
-  public override string AsText() => "Cleave";
 }
 
 class KnockBackTrait : Trait
@@ -323,6 +313,21 @@ class RageTrait(Actor actor) : BasicTrait
   }
 
   public override string AsText() => "Rage";
+}
+
+class StackableTrait() : Trait
+{
+  public override string AsText() => "Stackable";
+}
+
+class VillagerTrait : Trait
+{
+  public override string AsText() => "Villager";
+}
+
+class WrittenTrait : Trait
+{
+  public override string AsText() => "Written";
 }
 
 // A bit dumb to have floating and flying and maybe I'll merge them
@@ -974,7 +979,6 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
     else if (Fuel > 0)
     {
       Lit = true;
-      item!.Stackable = false;
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
 
@@ -1262,6 +1266,8 @@ class TraitFactory
         {
           ArmourMod = int.Parse(pieces[1])
         };
+      case "Stackable":
+        return new StackableTrait();
       case "StatBuff":
         Enum.TryParse(pieces[3], out Attribute attr);
         return new StatBuffTrait()
