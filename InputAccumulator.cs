@@ -405,10 +405,44 @@ class ShopMenuAccumulator : InputAccumulator
   }
 }
 
+class PickupAccumulator(HashSet<(char, ulong)> options) : InputAccumulator
+{
+  ulong _choice;
+  readonly HashSet<(char, ulong)> _options = options;
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (_options.Any(o => o.Item1 == ch))
+    {
+      Msg = "";
+      ulong itemID = _options.Where(o => o.Item1 == ch).First().Item2;
+      _choice = itemID;
+      Done = true;
+      Success = true;
+    }
+    else
+    {
+      Msg = "That doesn't seem ot exist.";
+      Done = false;
+      Success = false;
+    }
+  }
+
+  public override AccumulatorResult GetResult() => new ObjIDAccumulatorResult()
+  {
+    ID = _choice
+  };
+}
+
 class InventoryAccumulator(HashSet<char> options) : InputAccumulator
 {
   char _choice;
-  HashSet<char> _options = options;
+  readonly HashSet<char> _options = options;
 
   public override void Input(char ch)
   {
@@ -559,6 +593,11 @@ class DirectionAccumulatorResult : AccumulatorResult
 {
   public int Row { get; set; }
   public int Col { get; set; }
+}
+
+class ObjIDAccumulatorResult: AccumulatorResult
+{
+  public ulong ID { get; set; }
 }
 
 class MenuAccumulatorResult : AccumulatorResult

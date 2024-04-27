@@ -495,7 +495,7 @@ class OpenDoorAction : DirectionalAction
 
 class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  public char Choice { get; set; }
+  public ulong ItemID { get; set; }
   
   public override ActionResult Execute()
   {
@@ -505,8 +505,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     var itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
     var inv = Actor.Inventory;
     bool freeSlot = inv.UsedSlots().Length < 26;
-    int i = Choice - 'a';
-    var item = itemStack[i];
+    Item item = itemStack.Where(i => i.ID == ItemID).First();
 
     if (!freeSlot)
     {
@@ -539,16 +538,33 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
 
-    GameState.ObjDb.RemoveItem(Actor.Loc, item);
-    char slot = inv.Add(item, Actor.ID);
+    char slot = '\0';
+    int count = 0;
+    if (item.HasTrait<StackableTrait>())
+    {
+      foreach (var pickedUp in itemStack.Where(i => i == item))
+      {
+        GameState.ObjDb.RemoveItem(Actor.Loc, item);
+        slot = inv.Add(item, Actor.ID);
+        ++count;
+      }
+    }
+    else
+    {
+      GameState.ObjDb.RemoveItem(Actor.Loc, item);
+      slot = inv.Add(item, Actor.ID);
+    }
 
     var pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
     if (item.Type == ItemType.Zorkmid && item.Value == 1)
       pickupMsg += "a zorkmid.";
     else if (item.Type == ItemType.Zorkmid)
       pickupMsg += $"{item.Value} zorkmids.";
+    else if (count > 1)
+      pickupMsg += $"{count} {item.FullName.Pluralize()}.";
     else
       pickupMsg += item.FullName.DefArticle() + ".";
+
     if (slot != '\0')
       pickupMsg += $" ({slot})";
     
@@ -559,8 +575,8 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
   public override void ReceiveAccResult(AccumulatorResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
-    Choice = menuResult.Choice;
+    var objIDResult = (ObjIDAccumulatorResult)result;
+    ItemID = objIDResult.ID;
   }
 }
 

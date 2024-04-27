@@ -89,7 +89,7 @@ class Item : GameObj, IEquatable<Item>
     return sb.ToString();
   }
 
-  public override int GetHashCode() => $"{Type}+{Name}".GetHashCode();
+  public override int GetHashCode() => $"{Type}+{Name}+{HasTrait<StackableTrait>()}".GetHashCode();
   public override bool Equals(object? obj) => Equals(obj as Item);
   
   public bool Equals(Item? i)

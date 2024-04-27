@@ -210,15 +210,24 @@ class Player : Actor, IPerformer, IGameEventListener
     ui.ShowDropDown(lines);
   }
 
-  static HashSet<char> ShowPickupMenu(UserInterface ui, List<Item> items)
-  {
-    HashSet<char> options = [];
-    List<string> lines = ["What do you pick up?"];
-    char slot = 'a';
+  static HashSet<(char, ulong)> ShowPickupMenu(UserInterface ui, List<Item> items)
+  {    
+    var counts = new Dictionary<Item, int>();
     foreach (var item in items)
     {
-      options.Add(slot);
-      string desc = item.Name; // ItemMenuDesc(item);
+      if (item.HasTrait<StackableTrait>() && counts.TryGetValue(item, out int value))
+        counts[item] = value + 1;
+      else
+        counts.Add(item, 1);      
+    }
+
+    HashSet<(char, ulong)> options = [];
+    List<string> lines = ["What do you pick up?"];
+    char slot = 'a';
+    foreach (var (item, count) in counts)
+    {
+      options.Add((slot, item.ID));
+      string desc = count > 1 ? $"{count} {item.Name.Pluralize()}" : item.Name;
       lines.Add($"{slot++}) {desc}");
     }
     ui.ShowDropDown(lines);
@@ -490,14 +499,14 @@ class Player : Actor, IPerformer, IGameEventListener
           var a = new PickupItemAction(gameState, this);
           // A bit kludgy but this sets up the Action as though
           // the player had selected the first item in a list of one
-          var mr = new MenuAccumulatorResult() { Choice = 'a' };
-          a.ReceiveAccResult(mr);
+          var r = new ObjIDAccumulatorResult() { ID = itemStack[0].ID };
+          a.ReceiveAccResult(r);
           return a;
         }
         else
         {
           var opts = ShowPickupMenu(ui, itemStack);
-          _accumulator = new InventoryAccumulator(opts);
+          _accumulator = new PickupAccumulator(opts);
           _deferred = new PickupItemAction(gameState, this);
         }
       }
