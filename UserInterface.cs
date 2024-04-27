@@ -39,8 +39,8 @@ abstract class UserInterface
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
-  protected int PlayerScreenRow;
-  protected int PlayerScreenCol;
+  public int PlayerScreenRow { get; protected set; }
+  public int PlayerScreenCol { get; protected set; }
   protected List<string>? _longMessage;
   protected Options _options;
   

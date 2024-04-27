@@ -31,6 +31,99 @@ abstract class InputAccumulator
   }
 }
 
+// I might be able to merge some code between this and AimAccumulator
+class ExamineAccumulator : InputAccumulator
+{
+  readonly GameState _gs;
+  Loc _target;
+  readonly List<Loc> _targets = [];
+  SqAnimation? _highlight;
+  int _currTarget;
+
+  public ExamineAccumulator(GameState gs, Loc start)
+  {
+    _gs = gs;
+    _target = start;
+    _highlight = new SqAnimation(gs, _target, Colours.WHITE, Colours.HILITE, '@')
+    {
+      Expiry = DateTime.MaxValue
+    };
+    //_gs.UIRef().RegisterAnimation(_highlight);
+
+    FindTargets();
+  }
+
+  void FindTargets()
+  {
+    var ui = _gs.UIRef();
+    int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
+    int startCol = _gs.Player.Loc.Col - ui.PlayerScreenCol;
+
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {
+        var loc = new Loc(_target.DungeonID, _target.Level, startRow + r, startCol + c);
+        if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
+          continue;
+        
+        if (_gs.ObjDb.Occupied(loc)) 
+        {
+          _targets.Add(loc);
+          if (loc == _gs.Player.Loc)
+            _currTarget = _targets.Count - 1;          
+        }
+        else if (_gs.ObjDb.ItemsAt(loc).Count > 0)
+        {
+          _targets.Add(loc);
+        }
+        else
+        {
+            var tile = _gs.TileAt(loc);
+            switch (tile.Type)
+            {
+              case TileType.Upstairs:
+              case TileType.Downstairs:
+              case TileType.Portal:
+              case TileType.Statue:
+              case TileType.Landmark:
+                _targets.Add(loc);
+              break;
+            }
+        }
+      }
+    }
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+
+      ClearHighlight();
+      return;
+    }
+    else if (ch == Constants.TAB)
+    {
+      _currTarget = (_currTarget + 1) % _targets.Count;
+      ClearHighlight();
+      _highlight = new SqAnimation(_gs, _targets[_currTarget], Colours.WHITE, Colours.HILITE, '!')
+      {
+        Expiry = DateTime.MaxValue
+      };
+      //_gs.UIRef().RegisterAnimation(_highlight);
+    }
+  }
+
+  void ClearHighlight()
+  {
+    if (_highlight is not null)
+      _highlight.Expiry = DateTime.Now;
+  }
+}
+
 class AimAccumulator : InputAccumulator
 {
   readonly UserInterface _ui;

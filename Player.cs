@@ -610,6 +610,11 @@ class Player : Actor, IPerformer, IGameEventListener
           }
         }
       }
+      else if (ch == 'X')
+      {
+        _accumulator = new ExamineAccumulator(gameState, Loc);
+        _deferred = new NullAction();
+      }
       else if (ch == ' ' || ch == '.')
         return new PassAction();
     }
