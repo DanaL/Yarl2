@@ -420,6 +420,7 @@ class TorchLightAnimationListener : Animation
 
 class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
 {
+  static Sqr _cloudSqr = new Sqr(Colours.WHITE, Colours.BLACK, '#');
   bool[] _cloud = new bool[9];
   int _row;
   int _col;
@@ -472,7 +473,7 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
         int cr = _row + r;
         int cc = _col + c;
         if (cr >= 0 && cr < h && cc >= 0 && cc < w)
-          ui.ZLayer[cr, cc] = TileFactory.Get(TileType.Unknown);
+          ui.ZLayer[cr, cc] = Constants.BLANK_SQ;
       }
     }
   }
@@ -496,9 +497,9 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
       if (zrow < 0 || zrow >= h || zcol < 0 || zcol >= w)
         continue;
       if (_cloud[j])
-        ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Cloud);
+        ui.ZLayer[zrow, zcol] = _cloudSqr;
       else
-        ui.ZLayer[zrow, zcol] = TileFactory.Get(TileType.Unknown);
+        ui.ZLayer[zrow, zcol] = Constants.BLANK_SQ;
     }
   }
 

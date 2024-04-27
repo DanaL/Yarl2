@@ -47,7 +47,7 @@ abstract class UserInterface
   public Queue<char> InputBuffer = new Queue<char>();
 
   public Sqr[,] SqsOnScreen;
-  public Tile[,] ZLayer; // An extra layer of tiles to use for effects like clouds
+  public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
   protected List<string> MenuRows { get; set; } = [];
 
@@ -68,7 +68,7 @@ abstract class UserInterface
     PlayerScreenRow = ViewHeight / 2;
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
-    ZLayer = new Tile[ViewHeight, ViewWidth];
+    ZLayer = new Sqr[ViewHeight, ViewWidth];
     ClearZLayer();
   }
 
@@ -863,7 +863,7 @@ abstract class UserInterface
     return result.Trim();
   }
 
-  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Tile ztile)
+  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Sqr zsqr)
   {
     static Colour BGColour(GameState gs, Loc loc, char ch, Colour fg)
     {
@@ -887,17 +887,21 @@ abstract class UserInterface
     Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
     {
-      Glyph glyph;
-      if (ztile.Type != TileType.Unknown)
-        glyph = Util.TileToGlyph(ztile);
-      else if (gs.ObjDb.Occupant(loc) is Actor actor)
-        glyph = actor.Glyph;
+      if (zsqr != Constants.BLANK_SQ)
+      {
+        sqr = zsqr;
+      }
       else
-        glyph = remembered[loc];
-      
-      char ch = glyph.Ch;
-      Colour bg = BGColour(gs, loc, ch, glyph.Lit);
-      sqr = new Sqr(glyph.Lit, bg, ch);
+      {
+        Glyph glyph;
+        if (gs.ObjDb.Occupant(loc) is Actor actor)
+          glyph = actor.Glyph;
+        else
+          glyph = remembered[loc];
+        char ch = glyph.Ch;
+        Colour bg = BGColour(gs, loc, ch, glyph.Lit);
+        sqr = new Sqr(glyph.Lit, bg, ch);
+      }
     }
     else if (remembered.TryGetValue(loc, out var glyph))
     {
@@ -966,7 +970,7 @@ abstract class UserInterface
       }
     }
 
-    if (ZLayer[PlayerScreenRow, PlayerScreenCol].Type == TileType.Unknown)
+    if (ZLayer[PlayerScreenRow, PlayerScreenCol] == Constants.BLANK_SQ)
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
   }
   
@@ -984,7 +988,7 @@ abstract class UserInterface
     {
       for (int c = 0; c < ViewWidth; c++)
       {
-        ZLayer[r, c] = TileFactory.Get(TileType.Unknown);
+        ZLayer[r, c] = Constants.BLANK_SQ;
       }
     }
   }
