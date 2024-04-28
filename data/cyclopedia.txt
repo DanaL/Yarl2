@@ -1,0 +1,33 @@
+#
+kobold
+Small, reptillian humanoids who love to serve a powerful overlord, preferably a dragon.
+#
+skeleton
+Weak undead, animated by necromancy.
+#
+zombie
+An animated corpse. Mindless and slow-moving.
+#
+wolf
+Normally not a threat, but sometimes wolves are kept by goblins as guard animals.
+#
+giant rat
+Like a normal rat, but much bigger and much meaner.
+#
+goblin
+Green-skinned humanoids who love nothing more than chaos and harassing adventurers.
+#
+portal
+An entrance leading from the surface into a dungeon. Use the (E)nter command to enter!
+#
+upstairs
+A stairway leading upwards.
+#
+downstairs
+A stairway leading deeper into the depths. Generally, more fearsome monsters await the deeper you venture.
+#
+statue
+A monument of historical interest.
+#
+landmark
+An engraving, marking, or other artwork.

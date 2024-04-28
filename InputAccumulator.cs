@@ -121,10 +121,11 @@ class ExamineAccumulator : InputAccumulator
 
   LocDetails LocInfo(Loc loc)
   {
+    string name;
+    string desc = "I have no further info about this object. This is probably Dana's fault.";
+
     if (_gs.ObjDb.Occupant(loc) is Actor actor) 
-    {
-      string name;
-      string desc = "I have no further info about this object. This is probably Dana's fault.";
+    {      
       if (actor is Player) 
       {
         name = actor.Name;
@@ -153,7 +154,10 @@ class ExamineAccumulator : InputAccumulator
     }
 
     Tile tile = _gs.TileAt(loc);
-    return new LocDetails("Terrain", "", Util.TileToGlyph(tile).Ch);
+    name = tile.Type.ToString().ToLower();
+    if (_cyclopedia.TryGetValue(name, out string? v2))
+          desc = v2;
+    return new LocDetails(name.Capitalize(), desc, Util.TileToGlyph(tile).Ch);
   }
 
   void ClearHighlight()
