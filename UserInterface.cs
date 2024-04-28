@@ -32,8 +32,9 @@ abstract class UserInterface
   public const int ViewHeight = ScreenHeight - 5;
 
   public abstract void UpdateDisplay(GameState? gs);
+  public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
+
   protected abstract GameEvent PollForEvent();
-  protected abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
   protected abstract void WriteSq(int row, int col, Sqr sq);
   protected abstract void ClearScreen();
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
@@ -53,8 +54,7 @@ abstract class UserInterface
 
   protected bool ClosingPopUp { get; set; }
   protected bool OpeningPopUp { get; set; }
-  protected string _popupBuffer = "";
-  protected string _popupTitle = "";
+  Popup? _popup = null;
 
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
@@ -151,7 +151,7 @@ abstract class UserInterface
     gs.CurrDungeonID = 0;
     gs.CurrLevel = 0;
 
-    Popup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory");
+    SetPopup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory");
     UpdateDisplay(gs);
     BlockForInput();
     ClearLongMessage();
@@ -293,7 +293,7 @@ abstract class UserInterface
 
   public void KillScreen(string message, GameState gs)
   {
-    Popup(message);
+    SetPopup(message);
     SetSqsOnScreen(gs);
     UpdateDisplay(gs);
     BlockForInput();
@@ -302,15 +302,13 @@ abstract class UserInterface
 
   public void ClosePopup()
   {
-    _popupBuffer = "";
-    _popupTitle = "";
+    _popup = null;
     ClosingPopUp = true;
   }
 
-  public void Popup(string message, string title = "")
+  public void SetPopup(string message, string title = "")
   {
-    _popupBuffer = message;
-    _popupTitle = title;
+    _popup = new Popup(message, title);
     OpeningPopUp = true;
     ClosingPopUp = false;
   }
@@ -333,6 +331,8 @@ abstract class UserInterface
       Delay(75);
     }
   }
+
+  protected void WritePopUp() => _popup?.Draw(this);
 
   protected void WriteMessagesSection()
   {
@@ -375,176 +375,6 @@ abstract class UserInterface
       else if (colour == Colours.GREY)
         colour = Colours.DARK_GREY;
     }
-  }
-
-  List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
-  {
-    List<(Colour, string)> split = [];
-
-    var sb = new StringBuilder();
-    foreach (var word in piece.Item2.Split(' '))
-    {
-      if (sb.Length + word.Length < maxWidth)
-      {
-        sb.Append(word);
-        sb.Append(' ');
-      }
-      else
-      {
-        split.Add((piece.Item1, sb.ToString()));
-        sb = new StringBuilder(word);
-        sb.Append(' ');
-      }
-    }
-    if (sb.Length > 0)
-      split.Add((piece.Item1, sb.ToString()));
-
-    return split;
-  }
-
-  // This is going to look ugly if a message contains a long line
-  // followed by a line break then short line but I don't know
-  // if I'm ever going to need to worry about that in my game.
-  List<List<(Colour, string)>> ResizePopupLines(List<List<(Colour, string)>> lines, int maxWidth)
-  {
-    List<List<(Colour, string)>> resized = [];
-    foreach (var line in lines)
-    {
-      if (PopupLineWidth(line) < maxWidth)
-      {
-        resized.Add(line);
-      }
-      else
-      {
-        Queue<(Colour, string)> q = [];
-        foreach (var p in line)
-        {
-          if (p.Item2.Length < maxWidth)
-          {
-            q.Enqueue(p);
-          }
-          else
-          {
-            foreach (var split in SplitPopupPiece(p, maxWidth))
-              q.Enqueue(split);
-          }
-        }
-
-        List<(Colour, string)> resizedLine = [];
-        while (q.Count > 0)
-        {
-          var curr = q.Dequeue();
-          if (PopupLineWidth(resizedLine) + curr.Item2.Length < maxWidth)
-          {
-            resizedLine.Add(curr);
-          }
-          else
-          {
-            resized.Add(resizedLine);
-            resizedLine = [curr];
-          }
-        }
-        if (resizedLine.Count > 0)
-          resized.Add(resizedLine);
-      }
-    }
-
-    return resized;
-  }
-
-  // I'm sure there is a much cleaner version of this using a stack, but I
-  // just want to add some colour to the shopkeeper pop-up menu right now T_T
-  List<(Colour, string)> ParsePopupLine(string line)
-  {
-    string txt = "";
-    List<(Colour, string)> pieces = [];
-    int a = 0, s = 0;
-    while (a < line.Length)
-    {
-      if (line[a] == '[')
-      {
-        txt = line.Substring(s, a - s);
-        if (txt.Length > 0)
-          pieces.Add((Colours.WHITE, txt));
-
-        s = a;
-        while (line[a] != ' ')
-          ++a;
-        string colourText = line.Substring(s + 1, a - s - 1).ToLower();
-        Colour colour = Colours.TextToColour(colourText);
-        s = ++a;
-        while (line[a] != ']')
-          a++;
-        txt = line[s..a];
-        pieces.Add((colour, txt));
-        s = a + 1;
-      }
-      ++a;
-
-    }
-
-    txt = line.Substring(s, a - s);
-    if (txt.Length > 0)
-      pieces.Add((Colours.WHITE, txt));
-
-    return pieces;
-  }
-
-  static int PopupLineWidth(List<(Colour, string)> line) => line.Select(p => p.Item2.Length).Sum();
-
-  static int WidestPopupLine(List<List<(Colour, string)>> lines)
-  {
-    int bufferWidth = 0;
-    foreach (var line in lines)
-    {
-      int length = PopupLineWidth(line);
-      if (length > bufferWidth)
-        bufferWidth = length;
-    }
-
-    return (bufferWidth > 20 ? bufferWidth : 20) + 4;
-  }
-
-  protected void WritePopUp()
-  {
-    int maxPopUpWidth = ViewWidth - 4;
-    var lines = _popupBuffer.Split('\n').Select(ParsePopupLine).ToList();
-    int width = WidestPopupLine(lines);
-
-    if (width >= maxPopUpWidth)
-    {
-      lines = ResizePopupLines(lines, maxPopUpWidth - 4);
-      width = WidestPopupLine(lines);
-    }
-
-    int col = (ViewWidth - width) / 2;
-    int row = 5;
-
-    string border = "+".PadRight(width - 1, '-') + "+";
-
-    if (_popupTitle.Length > 0)
-    {
-      int left = (width - _popupTitle.Length) / 2 - 2;
-      string title = "+".PadRight(left, '-') + ' ';
-      title += _popupTitle + ' ';
-      title = title.PadRight(width - 1, '-') + "+";
-      WriteLine(title, row++, col, width, Colours.WHITE);
-    }
-    else
-    {
-      WriteLine(border, row++, col, width, Colours.WHITE);
-    }
-
-    foreach (var line in lines)
-    {
-      List<(Colour, string)> lt = [(Colours.WHITE, "| ")];
-      lt.AddRange(line);
-      var padding = (Colours.WHITE, "".PadRight(width - PopupLineWidth(line) - 4));
-      lt.Add(padding);
-      lt.Add((Colours.WHITE, " |"));
-      WriteText(lt, row++, col, width - 4);
-    }
-    WriteLine(border, row, col, width, Colours.WHITE);
   }
 
   public void WriteText(List<(Colour, string)> pieces, int lineNum, int col, int width)
@@ -835,7 +665,7 @@ abstract class UserInterface
 
     do
     {
-      Popup($"{prompt}\n{result}");
+      SetPopup($"{prompt}\n{result}");
       UpdateDisplay(null);
       e = PollForEvent();
 

@@ -359,7 +359,7 @@ class PlayerCreator
 
       msg += "\n";
 
-      ui.Popup(msg, "Level up!");
+      ui.SetPopup(msg, "Level up!");
     }
   }
 }

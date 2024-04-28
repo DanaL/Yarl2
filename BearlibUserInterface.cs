@@ -106,7 +106,7 @@ internal class BLUserInferface : UserInterface, IDisposable
     return new GameEvent(GameEventType.NoEvent, '\0');
   }
 
-  protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+  public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
   {
     Terminal.BkColor(ToBearLibColour(Colours.BLACK));
     Terminal.Color(ToBearLibColour(textColour));
@@ -160,10 +160,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         WriteDropDown();
       }
 
-      if (!string.IsNullOrEmpty(_popupBuffer))
-      {
-        WritePopUp();
-      }
+      WritePopUp();
     }
 
     Terminal.Refresh();

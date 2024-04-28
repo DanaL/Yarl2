@@ -1318,7 +1318,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
         return new ActionResult() { Complete = false, Messages = [msg] };
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
-      ui.Popup("How much?");
+      ui.SetPopup("How much?");
       var acc = new NumericAccumulator(ui, "How much?");
       if (Actor is Player player)
       {
@@ -1340,7 +1340,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       var dropStackAction = new DropStackAction(GameState, Actor, Choice);
       var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
-      ui.Popup(prompt);
+      ui.SetPopup(prompt);
       var acc = new NumericAccumulator(ui, prompt);
       if (Actor is Player player)
       {

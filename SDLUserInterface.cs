@@ -108,7 +108,7 @@ class SDLUserInterface : UserInterface
     return value;
   }
 
-  protected override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
+  public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
   {
     message = message.PadRight(width);
     var surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));
@@ -198,11 +198,9 @@ class SDLUserInterface : UserInterface
         WriteDropDown();
       }
 
-      if (!string.IsNullOrEmpty(_popupBuffer))
-      {
-        WritePopUp();
-      }
+      WritePopUp();      
     }
+    
     SDL_RenderPresent(_renderer);
   }
 }

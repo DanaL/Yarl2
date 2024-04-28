@@ -98,7 +98,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     };
 
   public void WriteMessages(List<Message> alerts, string ifNotSeen) => UI.AlertPlayer(alerts, ifNotSeen, this);
-  public void WritePopup(string msg, string title) => UI.Popup(msg, title);
+  public void WritePopup(string msg, string title) => UI.SetPopup(msg, title);
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 

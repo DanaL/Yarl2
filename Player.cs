@@ -445,7 +445,7 @@ class Player : Actor, IPerformer, IGameEventListener
         if (!_accumulator.Done)
         {
           if (_accumulator.Msg != "")
-            ui.Popup(_accumulator.Msg);
+            ui.SetPopup(_accumulator.Msg);
           return new NullAction();
         }
         else
@@ -563,13 +563,13 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _accumulator = new YesNoAccumulator();
         _deferred = new QuitAction();
-        ui.Popup("Really quit?\n\nYour game won't be saved! (y/n)");
+        ui.SetPopup("Really quit?\n\nYour game won't be saved! (y/n)");
       }
       else if (ch == 'S')
       {
         _accumulator = new YesNoAccumulator();
         _deferred = new SaveGameAction();
-        ui.Popup("Quit & Save? (y/n)");
+        ui.SetPopup("Quit & Save? (y/n)");
       }
       else if (ch == '*')
       {

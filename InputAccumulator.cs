@@ -123,7 +123,7 @@ class ExamineAccumulator : InputAccumulator
     var item = _gs.ObjDb.ItemGlyphAt(loc);
     if (item != GameObjectDB.EMPTY)
       return item.Ch;
-      
+
     Tile tile = _gs.TileAt(loc);
     return Util.TileToGlyph(tile).Ch;
   }
@@ -274,7 +274,7 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
       _value += ch;
     }
 
-    _ui.Popup($"{_prompt}\n{_value}");
+    _ui.SetPopup($"{_prompt}\n{_value}");
   }
 
   public override AccumulatorResult GetResult()
