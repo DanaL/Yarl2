@@ -149,7 +149,8 @@ abstract class UserInterface
     gs.CurrDungeonID = 0;
     gs.CurrLevel = 0;
 
-    SetPopup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory");
+    var popup = new Popup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory", -1, -1);
+    SetPopup(popup);
     UpdateDisplay(gs);
     BlockForInput();
     ClearLongMessage();
@@ -291,7 +292,7 @@ abstract class UserInterface
 
   public void KillScreen(string message, GameState gs)
   {
-    SetPopup(message);
+    SetPopup(new Popup(message, "", -1, -1));
     SetSqsOnScreen(gs);
     UpdateDisplay(gs);
     BlockForInput();
@@ -299,10 +300,7 @@ abstract class UserInterface
   }
 
   public void ClosePopup() => _popup = null;
-  public void SetPopup(string message, string title = "")
-  {
-    _popup = new Popup(message, title);
-  }
+  public void SetPopup(Popup popup) => _popup = popup;
 
   public void RegisterAnimation(Animation animation)
   {
@@ -656,7 +654,7 @@ abstract class UserInterface
 
     do
     {
-      SetPopup($"{prompt}\n{result}");
+      SetPopup(new Popup($"{prompt}\n{result}", "", -1, -1));
       UpdateDisplay(null);
       e = PollForEvent();
 

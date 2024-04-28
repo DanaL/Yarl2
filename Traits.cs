@@ -850,7 +850,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   {
     Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
     string msg = $"{user.FullName.Capitalize()} read:\n{_text}";
-    gs.WritePopup(msg, doc!.FullName.IndefArticle().Capitalize());
+    gs.UIRef().SetPopup(new Popup(msg, doc!.FullName.IndefArticle().Capitalize(), -1, -1));
 
     var action = new CloseMenuAction(gs, 1.0);
     var acc = new PauseForMoreAccumulator();

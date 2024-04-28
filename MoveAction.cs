@@ -97,7 +97,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           msg = $"You pat {occ.FullName}.";
         else
           msg = $"You give {occ.FullName} some scritches.";
-        GameState.WritePopup(msg, "");
+        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
         result.EnergyCost = 1.0;
         result.Complete = true;
         //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
@@ -145,12 +145,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         {
           // If we are in the dungeon, we'll let the player jump into rivers
           // (and/or they can stumble in while confused, etc)
-          GameState.UIRef().SetPopup("Really jump into the water? (y/n)");
+          GameState.UIRef().SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
           GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
         }
         else if (tile.Type == TileType.Chasm)
         {
-          GameState.UIRef().SetPopup("Really jump into the chasm? (y/n)");
+          GameState.UIRef().SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
           GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
         }
         else

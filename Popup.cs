@@ -17,9 +17,9 @@ class Popup
 {
   readonly string _title;
   List<List<(Colour, string)>> _pieces;
-  int _popUpWidth;
+  int _width, _preferredRow, _preferredCol;
 
-  public Popup(string message, string title = "")
+  public Popup(string message, string title, int preferredRow, int preferredCol)
   {
     _title = title;
     _pieces = message.Split('\n').Select(Parse).ToList();
@@ -27,8 +27,13 @@ class Popup
     int maxWidth = UserInterface.ViewWidth - 4;
     int widest = WidestPopupLine(_pieces);
     if (widest >= maxWidth)
-      _pieces = ResizePopupLines(_pieces, _popUpWidth - 4);  
-    _popUpWidth = WidestPopupLine(_pieces);
+      _pieces = ResizePopupLines(_pieces, maxWidth - 4);  
+    _width = WidestPopupLine(_pieces);
+
+    // preferredRow is the ideal row for the bottom of the box
+    // and the preferredCol is the ideals col for the centre of it
+    _preferredRow = preferredRow;
+    _preferredCol = preferredCol;
   }
 
   List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
@@ -110,9 +115,9 @@ class Popup
   // just want to add some colour to the shopkeeper pop-up menu right now T_T
   List<(Colour, string)> Parse(string line)
   {
-    string txt = "";
     List<(Colour, string)> pieces = [];
     int a = 0, s = 0;
+    string txt;
     while (a < line.Length)
     {
       if (line[a] == '[')
@@ -161,34 +166,46 @@ class Popup
 
   public void Draw(UserInterface ui)
   {
-    int col = (UserInterface.ViewWidth - _popUpWidth) / 2;
-    int row = 5;
+    int col, row;
+    if (_preferredCol == -1)
+      col = (UserInterface.ViewWidth - _width) / 2;
+    else
+      col = _preferredCol - (_width / 2);
+    if (_preferredRow == -1)
+      row = 5;
+    else
+      row = _preferredRow - _pieces.Count;
 
-    string border = "+".PadRight(_popUpWidth - 1, '-') + "+";
+    if (row < 0)
+      row = _preferredRow + 3;
+    if (col < 0)
+      col = 0;
+
+    string border = "+".PadRight(_width - 1, '-') + "+";
 
     if (_title.Length > 0)
     {
-      int left = (_popUpWidth - _title.Length) / 2 - 2;
+      int left = (_width - _title.Length) / 2 - 2;
       string title = "+".PadRight(left, '-') + ' ';
       title += _title + ' ';
-      title = title.PadRight(_popUpWidth - 1, '-') + "+";
-      ui.WriteLine(title, row++, col, _popUpWidth, Colours.WHITE);
+      title = title.PadRight(_width - 1, '-') + "+";
+      ui.WriteLine(title, row++, col, _width, Colours.WHITE);
     }
     else
     {
-      ui.WriteLine(border, row++, col, _popUpWidth, Colours.WHITE);
+      ui.WriteLine(border, row++, col, _width, Colours.WHITE);
     }
 
     foreach (var line in _pieces)
     {
       List<(Colour, string)> lt = [(Colours.WHITE, "| ")];
       lt.AddRange(line);
-      var padding = (Colours.WHITE, "".PadRight(_popUpWidth - PopupLineWidth(line) - 4));
+      var padding = (Colours.WHITE, "".PadRight(_width - PopupLineWidth(line) - 4));
       lt.Add(padding);
       lt.Add((Colours.WHITE, " |"));
-      ui.WriteText(lt, row++, col, _popUpWidth - 4);
+      ui.WriteText(lt, row++, col, _width - 4);
     }
 
-    ui.WriteLine(border, row, col, _popUpWidth, Colours.WHITE);
+    ui.WriteLine(border, row, col, _width, Colours.WHITE);
   }
 }

@@ -330,7 +330,7 @@ class VillagePupBehaviour : IBehaviour
     // Eventually the dog might have different sounds based on mood, etc
     sb.Append("Arf! Arf!");
 
-    gs.WritePopup(sb.ToString(), "");
+    gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
     return (new PassAction(), new PauseForMoreAccumulator());
   }
 }
@@ -365,7 +365,7 @@ class PriestBehaviour : IBehaviour
     sb.Append(gs.Town.Name);
     sb.Append(".\"\n\n");
 
-    gs.WritePopup(sb.ToString(), priest.FullName);
+    gs.UIRef().SetPopup(new Popup(sb.ToString(), priest.FullName, -1, -1));
     return (new PassAction(), new PauseForMoreAccumulator());
   }
 }

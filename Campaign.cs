@@ -431,6 +431,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
+      seed = 1544607475;
       //seed = -1698096328;
 
       //seed = -1522110263;

@@ -421,6 +421,20 @@ partial class Util
         return new Glyph(' ', Colours.BLACK, Colours.BLACK);
     }
   }
+
+  public static Dictionary<string, string> LoadCyclopedia()
+  {
+    Dictionary<string, string> cyclopedia = [];
+
+    var lines = File.ReadAllLines("data/cyclopedia.txt");
+    
+    for (int j = 0; j < lines.Length; j += 3)
+    {
+      cyclopedia.Add(lines[j + 1], lines[j + 2]);
+    }
+
+    return cyclopedia;
+  }
 }
 
 static class ListUtils

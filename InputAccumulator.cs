@@ -31,6 +31,8 @@ abstract class InputAccumulator
   }
 }
 
+record LocDetails(string Title, string Desc, char Ch);
+
 // I might be able to merge some code between this and AimAccumulator
 class ExamineAccumulator : InputAccumulator
 {
@@ -38,11 +40,13 @@ class ExamineAccumulator : InputAccumulator
   readonly List<Loc> _targets = [];
   int _currTarget;
   (int, int) _curr;
+  readonly Dictionary<string, string> _cyclopedia;
 
   public ExamineAccumulator(GameState gs, Loc start)
   {
     _gs = gs;    
     FindTargets(start);
+    _cyclopedia = Util.LoadCyclopedia();
   }
 
   void FindTargets(Loc start)
@@ -96,8 +100,7 @@ class ExamineAccumulator : InputAccumulator
     if (ch == Constants.ESC)
     {
       Done = true;
-      Success = false;
-
+      Success = true;
       ClearHighlight();
       return;
     }
@@ -108,29 +111,55 @@ class ExamineAccumulator : InputAccumulator
       var loc = _targets[_currTarget];
       var (r, c) = _gs.UIRef().LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-      char locCh = LocInfo(loc);
-      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, locCh);
+      LocDetails details = LocInfo(loc);
+      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, details.Ch);
+      _gs.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
       _curr = (r, c);
       _gs.LastPlayerFoV.Add(loc);
     }
   }
 
-  char LocInfo(Loc loc)
+  LocDetails LocInfo(Loc loc)
   {
-    if (_gs.ObjDb.Occupant(loc) is Actor actor)
-      return actor.Glyph.Ch;
-    
-    var item = _gs.ObjDb.ItemGlyphAt(loc);
-    if (item != GameObjectDB.EMPTY)
-      return item.Ch;
+    if (_gs.ObjDb.Occupant(loc) is Actor actor) 
+    {
+      string name;
+      string desc = "I have no further info about this object. This is probably Dana's fault.";
+      if (actor is Player) 
+      {
+        name = actor.Name;
+        desc = "You. A stalwart, rugged adventurer (probably). Keen for danger and glory. Currently alive.";
+      }
+      else if (actor.HasTrait<VillagerTrait>())
+      {
+        name = actor.FullName.Capitalize();
+        desc = "A villager.";
+      }
+      else
+      {
+        name = actor.Name.IndefArticle().Capitalize();
+        if (_cyclopedia.TryGetValue(actor.Name, out string? v))
+          desc = v;
+      }
+
+      return new LocDetails(name, desc, actor.Glyph.Ch);
+    }
+
+    var items = _gs.ObjDb.ItemsAt(loc);
+    if (items.Count > 0) 
+    {
+      var item = items[0];
+      return new LocDetails(item.Name.IndefArticle().Capitalize(), "", item.Glyph.Ch);
+    }
 
     Tile tile = _gs.TileAt(loc);
-    return Util.TileToGlyph(tile).Ch;
+    return new LocDetails("Terrain", "", Util.TileToGlyph(tile).Ch);
   }
 
   void ClearHighlight()
   {
     _gs.UIRef().ZLayer[_curr.Item1, _curr.Item2] = Constants.BLANK_SQ;
+    _gs.UIRef().ClosePopup();
   }
 }
 
@@ -274,7 +303,7 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
       _value += ch;
     }
 
-    _ui.SetPopup($"{_prompt}\n{_value}");
+    _ui.SetPopup(new Popup($"{_prompt}\n{_value}", "", -1, -1));
   }
 
   public override AccumulatorResult GetResult()
@@ -352,7 +381,7 @@ class DialogueAccumulator : InputAccumulator
       _exitOpt = c;
       sb.Append($"{c}) Farewell.\n");
 
-      _gs.WritePopup(sb.ToString(), _interlocutor.FullName);
+      _gs.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -1, -1));
     }
   }
 }
@@ -504,7 +533,7 @@ class ShopMenuAccumulator : InputAccumulator
       sb.Append("[brightred You don't have enough money for all that!]");
     }
 
-    _gs.WritePopup(sb.ToString(), _shopkeeper.FullName);
+    _gs.UIRef().SetPopup(new Popup(sb.ToString(), _shopkeeper.FullName, -1, -1));
   }
 }
 
