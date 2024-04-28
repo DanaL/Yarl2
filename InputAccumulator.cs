@@ -35,25 +35,17 @@ abstract class InputAccumulator
 class ExamineAccumulator : InputAccumulator
 {
   readonly GameState _gs;
-  Loc _target;
   readonly List<Loc> _targets = [];
-  SqAnimation? _highlight;
   int _currTarget;
+  (int, int) _curr;
 
   public ExamineAccumulator(GameState gs, Loc start)
   {
-    _gs = gs;
-    _target = start;
-    _highlight = new SqAnimation(gs, _target, Colours.WHITE, Colours.HILITE, '@')
-    {
-      Expiry = DateTime.MaxValue
-    };
-    //_gs.UIRef().RegisterAnimation(_highlight);
-
-    FindTargets();
+    _gs = gs;    
+    FindTargets(start);
   }
 
-  void FindTargets()
+  void FindTargets(Loc start)
   {
     var ui = _gs.UIRef();
     int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
@@ -63,15 +55,19 @@ class ExamineAccumulator : InputAccumulator
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        var loc = new Loc(_target.DungeonID, _target.Level, startRow + r, startCol + c);
+        var loc = new Loc(start.DungeonID, start.Level, startRow + r, startCol + c);
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
         
         if (_gs.ObjDb.Occupied(loc)) 
         {
           _targets.Add(loc);
-          if (loc == _gs.Player.Loc)
-            _currTarget = _targets.Count - 1;          
+          if (loc == _gs.Player.Loc) 
+          {
+            _currTarget = _targets.Count - 1;
+            ui.ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, '@');
+            _curr = (r, c);
+          }
         }
         else if (_gs.ObjDb.ItemsAt(loc).Count > 0)
         {
@@ -109,18 +105,32 @@ class ExamineAccumulator : InputAccumulator
     {
       _currTarget = (_currTarget + 1) % _targets.Count;
       ClearHighlight();
-      _highlight = new SqAnimation(_gs, _targets[_currTarget], Colours.WHITE, Colours.HILITE, '!')
-      {
-        Expiry = DateTime.MaxValue
-      };
-      //_gs.UIRef().RegisterAnimation(_highlight);
+      var loc = _targets[_currTarget];
+      var (r, c) = _gs.UIRef().LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+
+      char locCh = LocInfo(loc);
+      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, locCh);
+      _curr = (r, c);
+      _gs.LastPlayerFoV.Add(loc);
     }
+  }
+
+  char LocInfo(Loc loc)
+  {
+    if (_gs.ObjDb.Occupant(loc) is Actor actor)
+      return actor.Glyph.Ch;
+    
+    var item = _gs.ObjDb.ItemGlyphAt(loc);
+    if (item != GameObjectDB.EMPTY)
+      return item.Ch;
+      
+    Tile tile = _gs.TileAt(loc);
+    return Util.TileToGlyph(tile).Ch;
   }
 
   void ClearHighlight()
   {
-    if (_highlight is not null)
-      _highlight.Expiry = DateTime.Now;
+    _gs.UIRef().ZLayer[_curr.Item1, _curr.Item2] = Constants.BLANK_SQ;
   }
 }
 
