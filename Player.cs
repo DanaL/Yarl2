@@ -228,7 +228,21 @@ class Player : Actor, IPerformer, IGameEventListener
     foreach (var (item, count) in counts)
     {
       options.Add((slot, item.ID));
-      string desc = count > 1 ? $"{count} {item.Name.Pluralize()}" : item.Name;
+      string desc;
+      if (count > 1) 
+      {
+        desc = $"{count} {item.Name.Pluralize()}";
+      }
+      else if (item.Type == ItemType.Zorkmid)
+      {
+        desc = $"{item.Value} zorkmid";
+        if (item.Value != 1)
+          desc += "s";
+      }
+      else
+      {
+        desc = item.Name;
+      }
       lines.Add($"{slot++}) {desc}");
     }
     ui.ShowDropDown(lines);
