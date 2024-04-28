@@ -52,8 +52,6 @@ abstract class UserInterface
 
   protected List<string> MenuRows { get; set; } = [];
 
-  protected bool ClosingPopUp { get; set; }
-  protected bool OpeningPopUp { get; set; }
   Popup? _popup = null;
 
   public List<MsgHistory> MessageHistory = [];
@@ -300,17 +298,10 @@ abstract class UserInterface
     ClearLongMessage();
   }
 
-  public void ClosePopup()
-  {
-    _popup = null;
-    ClosingPopUp = true;
-  }
-
+  public void ClosePopup() => _popup = null;
   public void SetPopup(string message, string title = "")
   {
     _popup = new Popup(message, title);
-    OpeningPopUp = true;
-    ClosingPopUp = false;
   }
 
   public void RegisterAnimation(Animation animation)
