@@ -679,6 +679,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public string LocDesc(Loc loc)
   {
+    static (string, string) ItemText(Item item, int count)
+    {
+      if (item.Type == ItemType.Zorkmid)
+      {
+        if (item.Value == 1)
+          return ("a", "lone zorkmid");
+        else
+          return ("are", $"{item.Value} zorkmids");
+      }
+      else if (count != 1)
+      {
+        return ("are", $"{count} {item.FullName.Pluralize()}");
+      }
+      else
+      {
+        return ("is", $"{item.FullName.IndefArticle()}");
+      }
+    }
+
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     var sb = new StringBuilder();
     sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
@@ -692,7 +711,21 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         items[item] = 1;
     }
 
-    if (items.Count > 1)
+    if (items.Count == 2)
+    {
+      var keys = items.Keys.ToList();
+
+      var (v, str) = ItemText(keys[0], items[keys[0]]);
+      sb.Append(" There ");
+      sb.Append(v);
+      sb.Append(' ');
+      sb.Append(str);
+      sb.Append(" and ");
+      (_, str) = ItemText(keys[1], items[keys[1]]);
+      sb.Append(str);
+      sb.Append(" here.");
+    }
+    else if (items.Count > 1)
     {
       sb.Append(" There are several items here.");
     }
