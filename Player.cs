@@ -606,25 +606,9 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == '?')
       {
-        var time = gameState.CurrTime();
-        var hour = time.Item1.ToString().PadLeft(2, '0');
-        var minute = time.Item2.ToString().PadLeft(2, '0');
-        var msg = new Message($"The current time is {hour}:{minute}", Loc);
-        gameState.Turn += 1000;
-        ui.AlertPlayer([msg], "", gameState);
-      }
-      else if (ch == 'W')
-      {
-        foreach (var sq in Util.Adj8Sqs(Loc.Row, Loc.Col))
-        {
-          if (gameState.Rng.NextDouble() < 0.666)
-          {
-            var w = ItemFactory.Web();
-            gameState.ObjDb.Add(w);
-            gameState.ItemDropped(w, Loc with { Row = sq.Item1, Col = sq.Item2 });
-          }
-        }
-      }
+        _accumulator = new HelpScreenAccumualtor(gameState.UIRef());
+        _deferred = new NullAction();
+      }      
       else if (ch == 'X')
       {
         _accumulator = new ExamineAccumulator(gameState, Loc);

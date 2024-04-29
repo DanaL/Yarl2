@@ -319,6 +319,184 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
   }
 }
 
+record HelpEntry(string Title, List<string> Entry);
+
+class HelpScreenAccumualtor : InputAccumulator
+{
+  static readonly int PageSize = UserInterface.ScreenHeight - 6;
+  readonly UserInterface _ui;
+  Dictionary<char, HelpEntry> _entries;
+  char _selected;
+  readonly int _textAreaWidth;
+  int _page = 0;
+
+  public HelpScreenAccumualtor(UserInterface ui)
+  {
+    _ui = ui;
+    _entries = [];
+
+    var lines = File.ReadAllLines("data/help.txt")
+                    .Select(line => line.TrimEnd()).ToArray();
+    int l = 0;
+    char ch = 'a';
+    string title;
+    do
+    {
+      title = lines[l++].Trim();
+      List<string> entry = [];
+      while (lines[l].Trim() != "#")
+      {
+        entry.Add(lines[l++]);
+      }
+      _entries.Add(ch, new HelpEntry(title, entry));
+      ch = (char)(ch + 1);
+      ++l;
+    }
+    while (l < lines.Length);
+
+    // Figure out how wide the menu column is
+    int menuWidth = _entries.Values.Select(v => v.Title.Length).Max() + 6;
+    _textAreaWidth = UserInterface.ScreenWidth - menuWidth;
+
+    // Make the lines of text fit the screen width.
+    ResizeEntries();
+
+    _page = 0;
+    _selected = 'a';
+    WriteHelpScreen();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = true;
+      _ui.ClearLongMessage();
+      return;
+    }
+    else if (_entries.ContainsKey(ch))
+    {
+      _selected = ch;
+      _page = 0;
+    }
+    else if (ch == ' ')
+    {
+      _page = (_page + 1) % CurrPageCount;
+    }
+
+    WriteHelpScreen();
+  }
+
+  int CurrPageCount
+  {
+    get
+    {
+      int lineCount = _entries[_selected].Entry.Count;
+      int pageCount = lineCount / PageSize;
+      if (lineCount - pageCount * PageSize > 0)
+        ++pageCount;
+
+      return pageCount;
+    }
+  }
+
+  void WriteHelpScreen()
+  {
+    List<string> help = [];
+    help.Add("");
+    help.Add(" Help for the Harried Adventurer!");
+    help.Add("");
+
+    int menuWidth = UserInterface.ScreenWidth - _textAreaWidth;
+    foreach (char k in _entries.Keys)
+    {
+      var entry = _entries[k];
+      string line = $" ({k}) {entry.Title}";
+      line = line.PadRight(menuWidth);
+      line += '|';
+      help.Add(line);
+    }
+
+    for (int l = 2 + _entries.Count; l < UserInterface.ScreenHeight; l++)
+      help.Add("|".PadLeft(menuWidth + 1));
+
+    WriteHelpEntry(help);
+    _ui.WriteLongMessage(help);
+  }
+
+  List<string> SplitLine(string line)
+  {
+    List<string> pieces = [];
+
+    while (line.Length >= _textAreaWidth - 2)
+    {
+      int c = _textAreaWidth - 3;
+      while (c >= 0 && line[c] != ' ')
+        --c;
+      string slice = line[..c].TrimEnd();
+      if (slice[0] == ' ' && slice[1] != ' ')
+        slice = slice.Trim();
+      pieces.Add(slice);
+      line = line[c..];
+    }
+    if (line.Trim().Length > 0)
+    {
+      if (line.Length > 1 && line[0] == ' ' && line[1] != ' ')
+        pieces.Add(line.Trim());
+      else
+        pieces.Add(line.TrimEnd());
+    }
+
+    return pieces;
+  }
+
+  void ResizeEntries()
+  {
+    foreach (var k in _entries.Keys)
+    {
+      List<string> reformated = [];
+      var entry = _entries[k];
+      foreach (var line in entry.Entry)
+      {
+        if (line.Length < _textAreaWidth - 2)
+          reformated.Add(line);
+        else
+          reformated.AddRange(SplitLine(line));
+      }
+
+      _entries[k] = entry with { Entry = reformated };
+    }
+  }
+
+  void WriteHelpEntry(List<string> help)
+  {
+    var entry = _entries[_selected];
+    int l = 3;
+
+    help[l++] += $" ** {entry.Title} **";
+    
+    List<string> lines;
+    if (entry.Entry.Count > PageSize)
+    {
+      lines = entry.Entry.Skip(_page * PageSize)
+                         .Take(PageSize)
+                         .ToList();
+      lines.Add("");
+      lines.Add($"- SPACE for next page ({_page + 1} of {CurrPageCount}) -".PadLeft(_textAreaWidth / 2 + 4)); 
+    }
+    else
+    {
+      lines = entry.Entry;
+    }
+
+    foreach (var line in lines)
+    {
+      help[l++] += " " + line;
+    }
+  }
+}
+
 class DialogueAccumulator : InputAccumulator
 {
   readonly Mob _interlocutor;
