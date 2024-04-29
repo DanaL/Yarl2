@@ -215,6 +215,40 @@ class Village
     }
   }
 
+  static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Random rng)
+  {
+    var (lit, unlit) = VillagerColour(rng);
+    var mayor = new Mob()
+    {
+      Name = ng.GenerateName(rng.Next(6, 11)),
+      Appearance = VillagerAppearance(rng),
+      Glyph = new Glyph('@', lit, unlit)
+    };
+    mayor.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
+    mayor.Traits.Add(new NamedTrait());
+    mayor.Traits.Add(new VillagerTrait());
+
+    var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
+    do
+    {
+      int i = rng.Next(cottage.Count);
+      Loc loc = cottage[i];
+      var tile = map.TileAt(loc.Row, loc.Col).Type;
+      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
+      {
+        mayor.Loc = loc;
+        break;
+      }
+    }
+    while (true);
+
+    mayor.Stats.Add(Attribute.HomeID, new Stat(homeID));
+    mayor.MoveStrategy = new WallMoveStrategy();
+    mayor.SetBehaviour(new MayorBehaviour());
+
+    return mayor;
+  }
+
 
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
   {
@@ -347,6 +381,10 @@ class Village
     var pup = GeneratePuppy(map, town, objDb, rng);
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
+
+    var mayor = GenerateMayor(map, town, ng, rng);
+    objDb.Add(mayor);
+    objDb.AddToLoc(mayor.Loc, mayor);
 
     var v1 = GenerateVillager1(map, town, ng, rng);
     objDb.Add(v1);

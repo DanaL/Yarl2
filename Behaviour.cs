@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using SDL2;
 
 namespace Yarl2;
 
@@ -491,6 +492,87 @@ class GrocerBehaviour : IBehaviour
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
+  }
+}
+
+class MayorBehaviour : IBehaviour, IDialoguer
+{
+  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  {
+    return new PassAction();
+  }
+
+  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  {
+    var acc = new DialogueAccumulator(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    var sb = new StringBuilder();
+
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    {
+      sb.Append("\"Welcome to ");
+      sb.Append(gs.Town.Name);
+      sb.Append("! It's heartwarming to see another adventuerer combing to our aid! ");
+      sb.Append("I have every confidence you'll do better than that last fellow! ");
+      sb.Append("And before you venture into danger, spend some zorkmids in our shops and tavern!");
+      sb.Append("\n\n");
+      sb.Append("Here take this: perhaps it will aid you.\"");
+      mob.Stats[Attribute.DialogueState] = new Stat(1);
+
+      int roll = gs.Rng.Next(4);
+      Item item = roll switch
+      {
+        0 => ItemFactory.Get("potion of healing", gs.ObjDb),
+        1 => ItemFactory.Get("scroll of blink", gs.ObjDb),
+        2 => ItemFactory.Get("antidote", gs.ObjDb),
+        _ => ItemFactory.Get("potion of mind reading", gs.ObjDb)
+      };
+
+      sb.Append("\n\nThe mayor gives you ");
+      sb.Append(item.Name.IndefArticle());
+      sb.Append('!');
+
+      gs.Player.Inventory.Add(item, gs.Player.ID);
+    }
+    else
+    {
+      var roll = gs.Rng.Next(2);
+
+      if (roll == 0)
+      {
+        sb.Append("\"How are your adventurers going?\"");
+      }
+      else
+      {
+        string monsters = "";
+        foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
+        {
+          if (fact.Name == "EarlyDenizen")
+          {
+            monsters = fact.Value;
+            break;
+          }
+        }
+
+        sb.Append("There was another raid by ");
+        sb.Append(monsters.Pluralize());
+        sb.Append(" a few days ago. Someone needs to do something!");
+      }
+    }
+    //List<(string, char)> options = [];
+    
+    return (sb.ToString(), []);
+  }
+
+  public void SelectOption(Mob actor, char opt, GameState gs)
+  {
+    
   }
 }
 
