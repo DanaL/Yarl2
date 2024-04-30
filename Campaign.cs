@@ -431,6 +431,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
+      seed = 653131709;
       //seed = -1698096328;
 
       // seed -114792486 crashes when generated village

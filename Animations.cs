@@ -213,11 +213,7 @@ class BarkAnimation : Animation
     var loc = _actor.Loc;
     var playerLoc = _gs.Player.Loc;
 
-    // praise me I remembered the Pythagorean theorem existed...
-    int maxDistance = (int)Math.Sqrt(UserInterface.ViewHeight * UserInterface.ViewHeight + UserInterface.ViewWidth * UserInterface.ViewWidth);
-    if (Util.Distance(loc, playerLoc) > maxDistance)
-      return;
-    if (!_gs.LOSBetween(loc, playerLoc))
+    if (!_gs.LastPlayerFoV.Contains(loc))
       return;
 
     if (loc.DungeonID == _gs.CurrDungeonID && loc.Level == _gs.CurrLevel)
