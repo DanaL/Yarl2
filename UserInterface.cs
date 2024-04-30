@@ -647,7 +647,7 @@ abstract class UserInterface
     while (true);
   }
 
-  public string BlockingGetResponse(string prompt)
+  public string BlockingGetResponse(string prompt, IInputChecker? validator = null)
   {
     string result = "";
     GameEvent e;
@@ -672,6 +672,8 @@ abstract class UserInterface
         break;
       else if (e.Value == Constants.BACKSPACE)
         result = result.Length > 0 ? result[..^1] : "";
+      else if (validator is not null && !validator.Valid(result + e.Value))
+        continue;
       else
         result += e.Value;
     }
@@ -918,5 +920,30 @@ abstract class UserInterface
     WriteLongMessage(msg);
     UpdateDisplay(gameState);
     BlockForInput();
+  }
+}
+
+interface IInputChecker
+{
+  bool Valid(string iput);
+}
+
+class PlayerNameInputChecker : IInputChecker
+{
+  // This can be done with regex but as I write this I'm feeling too braindead
+  // to write one up. $[azAZ][azAZ0-9 ] maybe?
+  public bool Valid(string input)
+  {
+    if (input.Length < 1)
+      return false;
+
+    if (input.Length == 1 && char.IsAsciiLetter(input[0]))
+      return true;
+
+    char ch = input.Last();
+    if (input.Length > 1 && (char.IsAsciiLetterOrDigit(ch) || ch == ' '))
+      return true;
+
+    return false;
   }
 }

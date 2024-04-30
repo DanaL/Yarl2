@@ -408,7 +408,13 @@ class PreGameHandler(UserInterface ui)
   {
     try
     {
-      string playerName = _ui.BlockingGetResponse("Who are you?");
+      string playerName;
+      do 
+      {
+        playerName = _ui.BlockingGetResponse("Who are you?", new PlayerNameInputChecker()).Trim();
+      }
+      while (playerName.Length == 0);
+
       return SetupGame(playerName, options, _ui);
     }
     catch (GameQuitException)
@@ -431,10 +437,9 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      seed = 653131709;
       //seed = -1698096328;
 
-      // seed -114792486 crashes when generated village
+      // seed -114792486 crashes when generating village
       //seed = -1522110263;
       //seed = 176296748;
       // -758465673 this seed doesn't have a valid entrance loc?
