@@ -78,7 +78,7 @@ class PlayerCreator
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Strength].Curr)
           stats[Attribute.Strength].SetMax(roll);
-        hp = 150 + stats[Attribute.Constitution].Curr;
+        hp = 15 + stats[Attribute.Constitution].Curr;
         stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
         stats.Add(Attribute.HitDie, new Stat(12));
         break;
@@ -156,11 +156,11 @@ class PlayerCreator
 
     // player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
 
-    // player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    // player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    // player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    // player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    // player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);

@@ -180,7 +180,7 @@ class PreGameHandler(UserInterface ui)
     var campaign = new Campaign();
     var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
     var wildernessGenerator = new Wilderness(rng);
-    var wildernessMap = wildernessGenerator.DrawLevel(257);
+    var wildernessMap = wildernessGenerator.DrawLevel(129);
 
     var tb = new TownBuilder();
     wildernessMap = tb.DrawnTown(wildernessMap, rng);
@@ -242,8 +242,8 @@ class PreGameHandler(UserInterface ui)
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
-    return (campaign, startR, startC);
-    //return (campaign, entrance.Item1, entrance.Item2);
+    //return (campaign, startR, startC);
+    return (campaign, entrance.Item1, entrance.Item2);
   }
 
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
