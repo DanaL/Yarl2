@@ -203,6 +203,13 @@ partial class Util
     return adj[gs.Rng.Next(adj.Count)];
   }
 
+  public static int Manhattan(Loc a, Loc b)
+  {
+    int dx = Math.Abs(a.Col - b.Col);
+    int dy = Math.Abs(a.Row - b.Row);
+    return dx + dy;
+  }
+
   public static int Distance(int x1, int y1, int x2, int y2)
   {
     int dx = Math.Abs(x1 - x2);
