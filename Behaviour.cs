@@ -498,6 +498,7 @@ class GrocerBehaviour : IBehaviour
 class MayorBehaviour : IBehaviour, IDialoguer
 {
   Stack<Loc> _path = [];
+  DateTime _lastBark = new(1900, 1, 1);
 
   public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
   {
@@ -547,7 +548,9 @@ class MayorBehaviour : IBehaviour, IDialoguer
   }
 
   Action DayTimeSchedule(Actor mayor, GameState gs)
-  {    
+  {
+    Action action = new PassAction();
+
     // The mayor wants to be hanging out in the town square
     if (gs.Town.TownSquare.Contains(mayor.Loc))
     {
@@ -557,7 +560,15 @@ class MayorBehaviour : IBehaviour, IDialoguer
         var loc = Util.RandomAdjLoc(mayor.Loc, gs);
         var tile = gs.TileAt(loc);
         if (tile.Passable() && !gs.ObjDb.Occupied(loc))
-          return new MoveAction(gs, mayor, loc);
+        {
+          action = new MoveAction(gs, mayor, loc);
+          if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+          {
+            action.Quip = "Today at least seems peaceful";
+            _lastBark = DateTime.Now;
+          }
+          return action;
+        }
       }
     }
     else if (_path.Count == 0)
@@ -567,7 +578,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
       _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
     }
 
-    return new PassAction();
+    return action;
   }
 
   Action EveningSchedule(Actor mayor, GameState gs)
