@@ -458,10 +458,8 @@ class PreGameHandler(UserInterface ui)
       int seed = DateTime.Now.GetHashCode();
       //seed = -1698096328;
 
-      // seed -114792486 crashes when generating village
       //seed = -1522110263;
       //seed = 176296748;
-      // -758465673 this seed doesn't have a valid entrance loc?
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
@@ -493,20 +491,6 @@ class PreGameHandler(UserInterface ui)
     gameState.ObjDb.AddToLoc(player.Loc, player);
     gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
     gameState.UpdateFoV();
-
-    //seed = 601907053;
-    //seed = 1956722118;
-    //seed = 1003709949;
-    //seed = -1407912410;
-    //seed = 937420670;
-    //seed = -1514513425;
-    //seed = 1760989144;
-    //seed = 1067714652;
-    //seed = 562054470;
-    //seed = -1750061855;
-    //seed = 475720358;
-    //seed = -910280873;
-    //seed = -225039841;
 
     return gameState;
   }

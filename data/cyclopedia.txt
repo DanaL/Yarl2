@@ -31,3 +31,12 @@ A monument of historical interest.
 #
 landmark
 An engraving, marking, or other artwork.
+#
+dire bat
+A large bat, with glowing red eyes and glistening fangs.
+#
+centipede
+A large, skittering bug. Something unpleasant seems to be oozing from its pincers.
+#
+floating eye
+A bloodshot eye drifting through the dungeon. Something about it draws your gaze...
