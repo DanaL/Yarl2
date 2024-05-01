@@ -219,6 +219,9 @@ class BarkAnimation : Animation
     {
       var ui = _gs.UIRef();
       var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, playerLoc.Row, playerLoc.Col);
+      if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
+        return;
+
       RenderLine(scrR, scrC, _bark);
       if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
       {
