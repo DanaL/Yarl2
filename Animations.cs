@@ -199,9 +199,8 @@ class BarkAnimation : Animation
       pointerCol = screenCol - 1;
     }
 
-    // This is a dorky way to do this, but doesn't require me writing new UI functions :P
     var ui = _gs.UIRef();
-    ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);
+    ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);    
     foreach (char ch in message)
     {
       ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
