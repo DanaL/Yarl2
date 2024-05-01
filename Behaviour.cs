@@ -497,9 +497,128 @@ class GrocerBehaviour : IBehaviour
 
 class MayorBehaviour : IBehaviour, IDialoguer
 {
+  Stack<Loc> _path = [];
+
   public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
   {
+    if (_path.Count > 0)
+    {
+      // The mayor is on their way somewhere
+      var mv = _path.Pop();
+
+      // Maybe have them say 'Excuse me' in a bark?
+      // Should probably also have a bail out if space is still occupied
+      // after a few turns
+      if (gameState.ObjDb.Occupied(mv)) 
+      {
+        _path.Push(mv);
+        return new PassAction();
+      }
+
+      Tile tile = gameState.TileAt(mv);
+      if (tile.Type == TileType.ClosedDoor)
+      {
+        // Should I implement code to make them polite and close the door after?
+        _path.Push(mv);
+        return new OpenDoorAction(gameState, actor, gameState.Wilderness, mv);
+      }
+      else
+      {
+        return new MoveAction(gameState, actor, mv);
+      }
+    }
+
+    // The mayor's schedule is that from 8:00am to 6:00pm, they'll hang out in the 
+    // town square. From 6:00pm to 9:00pm they'll be in the tavern
+    var time = gameState.CurrTime();
+
+    if (time.Item1 >= 8 && time.Item1 < 18)
+    {
+      return DayTimeSchedule(actor, gameState); 
+    }
+    else if (time.Item1 >= 18 && time.Item1 < 22)
+    {
+      return EveningSchedule(actor, gameState);
+    }
+
     return new PassAction();
+  }
+
+  Action DayTimeSchedule(Actor mayor, GameState gs)
+  {    
+    // The mayor wants to be hanging out in the town square
+    if (gs.Town.TownSquare.Contains(mayor.Loc))
+    {
+      // Pick a random move once in a while
+      if (gs.Rng.Next(4) == 0)
+      {
+        var loc = Util.RandomAdjLoc(mayor.Loc, gs);
+        var tile = gs.TileAt(loc);
+        if (tile.Passable() && !gs.ObjDb.Occupied(loc))
+          return new MoveAction(gs, mayor, loc);
+      }
+    }
+    else if (_path.Count == 0)
+    {
+      var townSqaure = gs.Town.TownSquare.ToList();
+      Loc goal = PickDestination(gs.Wilderness, townSqaure, TravelCosts, gs.Rng);
+      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
+    }
+
+    return new PassAction();
+  }
+
+  Action EveningSchedule(Actor mayor, GameState gs)
+  {
+    // In the evening, the mayor will be in the tavern
+    if (gs.Town.Tavern.Contains(mayor.Loc))
+    {
+      var loc = Util.RandomAdjLoc(mayor.Loc, gs);
+      var tile = gs.TileAt(loc);
+      if (tile.Passable() && !gs.ObjDb.Occupied(loc))
+        return new MoveAction(gs, mayor, loc);
+    }
+    else if (_path.Count == 0)
+    {
+      var tavern = gs.Town.Tavern.ToList();
+      Loc goal = PickDestination(gs.Wilderness, tavern, TravelCosts, gs.Rng);
+      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
+    }
+
+    return new PassAction();
+  }
+
+  static Dictionary<TileType, int> TravelCosts
+  {
+    get
+    {
+      Dictionary<TileType, int> costs = [];
+      costs.Add(TileType.Grass, 1);
+      costs.Add(TileType.Sand, 1);
+      costs.Add(TileType.Dirt, 1);
+      costs.Add(TileType.Bridge, 1);
+      costs.Add(TileType.Tree, 1);
+      costs.Add(TileType.StoneFloor, 1);
+      costs.Add(TileType.WoodFloor, 1);
+      costs.Add(TileType.OpenDoor, 1);
+      costs.Add(TileType.Well, 1);
+      costs.Add(TileType.ClosedDoor, 2);
+      costs.Add(TileType.Water, 3);
+
+      return costs;
+    }
+  }
+
+  static Loc PickDestination(Map map, List<Loc> options, Dictionary<TileType, int> passable, Random rng)
+  {
+    do
+    {
+      Loc goal = options[rng.Next(options.Count)];
+      Tile tile = map.TileAt(goal.Row, goal.Col);
+      if (passable.ContainsKey(tile.Type))
+        return goal;
+    }
+    while (true);
   }
 
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
@@ -542,30 +661,22 @@ class MayorBehaviour : IBehaviour, IDialoguer
     }
     else
     {
-      var roll = gs.Rng.Next(2);
+      var roll = gs.Rng.Next(3);
 
       if (roll == 0)
       {
         sb.Append("\"How are your adventurers going?\"");
       }
+      else if (roll == 1)
+      {
+        sb.Append("\"Thank goodness it isn't an election year.\"");
+      }
       else
       {
-        string monsters = "";
-        foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
-        {
-          if (fact.Name == "EarlyDenizen")
-          {
-            monsters = fact.Value;
-            break;
-          }
-        }
-
-        sb.Append("There was another raid by ");
-        sb.Append(monsters.Pluralize());
-        sb.Append(" a few days ago. Someone needs to do something!");
+        sb.Append("\"This looming, terrible evil is terrible for tourism. ");
+        sb.Append("Adventurers aside, of course.\"");
       }
     }
-    //List<(string, char)> options = [];
     
     return (sb.ToString(), []);
   }

@@ -118,11 +118,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Dungeon CurrentDungeon => Campaign!.Dungeons[CurrDungeonID];
   public Map CurrentMap => Campaign!.Dungeons[CurrDungeonID].LevelMaps[CurrLevel];
   public bool InWilderness => CurrDungeonID == 0;
-
+  public Map Wilderness => Campaign.Dungeons[0].LevelMaps[0];
+  
   // I made life difficult for myself by deciding that Turn 0 of the game is 
   // 8:00am T_T 1 turn is 10 seconds (setting aside all concerns about 
   // realism and how the amount of stuff one can do in 10 seconds will in no 
-  // way correspond to one action in the game...) so an hour is  360 turns
+  // way correspond to one action in the game...) so an hour is 360 turns
   public (int, int) CurrTime()
   {
     // There are 1440 turns/day
