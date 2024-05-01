@@ -540,8 +540,10 @@ class MayorBehaviour : IBehaviour, IDialoguer
     {
       return EveningSchedule(actor, gameState);
     }
-
-    return new PassAction();
+    else
+    {
+      return NightSchedule(actor, gameState);
+    }
   }
 
   Action DayTimeSchedule(Actor mayor, GameState gs)
@@ -582,6 +584,20 @@ class MayorBehaviour : IBehaviour, IDialoguer
     {
       var tavern = gs.Town.Tavern.ToList();
       Loc goal = PickDestination(gs.Wilderness, tavern, TravelCosts, gs.Rng);
+      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
+    }
+
+    return new PassAction();
+  }
+
+  Action NightSchedule(Actor mayor, GameState gs)
+  {
+    int homeID = mayor.Stats[Attribute.HomeID].Curr;
+    var home = gs.Town.Homes[homeID];
+
+    if (!home.Contains(mayor.Loc))
+    {
+      Loc goal = PickDestination(gs.Wilderness, [.. home], TravelCosts, gs.Rng);
       _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
     }
 
