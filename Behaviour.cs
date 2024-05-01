@@ -700,7 +700,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
       }
       else
       {
-        sb.Append("\"This looming, terrible evil is terrible for tourism. ");
+        sb.Append("\"This looming doom is terrible for tourism. ");
         sb.Append("Adventurers aside, of course.\"");
       }
     }

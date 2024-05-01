@@ -177,18 +177,37 @@ class PreGameHandler(UserInterface ui)
 
   static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
   {
-    var campaign = new Campaign();
-    var wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
-    var wildernessGenerator = new Wilderness(rng);
-    var wildernessMap = wildernessGenerator.DrawLevel(129);
+    Campaign campaign;
+    Dungeon wilderness;
+    Map wildernessMap;
+    Town town;
 
-    var tb = new TownBuilder();
-    wildernessMap = tb.DrawnTown(wildernessMap, rng);
+    do
+    {
+      try
+      {
+        campaign = new Campaign();
+        wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
+        var wildernessGenerator = new Wilderness(rng);
+        wildernessMap = wildernessGenerator.DrawLevel(129);
 
-    Town town = tb.Town;
-    town.Name = NameGenerator.TownName(rng);
-    Console.WriteLine(town.Name);
+        var tb = new TownBuilder();
+        wildernessMap = tb.DrawnTown(wildernessMap, rng);
+        town = tb.Town;
+        town.Name = NameGenerator.TownName(rng);
+        Console.WriteLine(town.Name);
 
+        break;
+      }
+      catch (InvalidTownException)
+      {
+        Console.WriteLine($"Oh no not enough cottages");
+        // Should I just bail out after too many tries? I can't imagine it 
+        // will take more than 1 or 2 more tries
+      }
+    }
+    while (true);
+    
     wilderness.AddMap(wildernessMap);
     campaign.AddDungeon(wilderness);
 
