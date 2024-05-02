@@ -101,15 +101,20 @@ class Village
     return appearance.ToString();
   }
 
-  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
+  static Mob BaseVillager(NameGenerator ng, Random rng)
   {
     var (lit, unlit) = VillagerColour(rng);
-    var cleric = new Mob()
+    return new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit)
     };
+  }
+
+  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
+  {
+    Mob cleric = BaseVillager(ng, rng);
     cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
     cleric.Traits.Add(new VillagerTrait());
@@ -125,13 +130,7 @@ class Village
 
   static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var grocer = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(5, 9)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob grocer = BaseVillager(ng, rng);
     grocer.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     grocer.Traits.Add(new NamedTrait());
     grocer.Traits.Add(new VillagerTrait());
@@ -158,13 +157,7 @@ class Village
 
   static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var smith = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(5, 9)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob smith = BaseVillager(ng, rng);
     smith.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     smith.Traits.Add(new NamedTrait());
     smith.Traits.Add(new VillagerTrait());
@@ -217,13 +210,7 @@ class Village
 
   static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var mayor = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(6, 11)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob mayor = BaseVillager(ng, rng);
     mayor.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     mayor.Traits.Add(new NamedTrait());
     mayor.Traits.Add(new VillagerTrait());
@@ -251,13 +238,7 @@ class Village
 
   static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var veteran = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(6, 11)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob veteran = BaseVillager(ng, rng);
     veteran.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     veteran.Traits.Add(new NamedTrait());
     veteran.Traits.Add(new VillagerTrait());
@@ -283,13 +264,7 @@ class Village
 
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var villager = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(6, 11)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob villager = BaseVillager(ng, rng);
     villager.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     villager.Traits.Add(new NamedTrait());
     villager.Traits.Add(new VillagerTrait());
@@ -317,13 +292,7 @@ class Village
 
   static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Random rng)
   {
-    var (lit, unlit) = VillagerColour(rng);
-    var widower = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(6, 11)),
-      Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
-    };
+    Mob widower = BaseVillager(ng, rng);
     widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
     widower.Traits.Add(new VillagerTrait());
