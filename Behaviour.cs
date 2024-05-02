@@ -499,7 +499,15 @@ class VeteranBehaviour : IBehaviour, IDialoguer
 {
   public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
   {
-    return new PassAction();
+    if (gameState.Rng.Next(3) == 0)
+    {
+      Loc loc = Util.RandomAdjLoc(actor.Loc, gameState);
+      TileType tile = gameState.TileAt(loc).Type;
+      if (!gameState.ObjDb.Occupied(loc) && (tile == TileType.WoodFloor || tile == TileType.StoneFloor))
+        return new MoveAction(gameState, actor, loc);      
+    }
+    
+    return new PassAction();    
   }
 
   public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
@@ -513,6 +521,7 @@ class VeteranBehaviour : IBehaviour, IDialoguer
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     var sb = new StringBuilder();
+    List<(string, char)> opts = [];
 
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
     {
@@ -534,19 +543,62 @@ class VeteranBehaviour : IBehaviour, IDialoguer
       {
         sb.Append("\n\n");
         sb.Append("Buy me a drink and I'll repay you in wisdom.\"");
+
+        opts.Add(($"Buy {mob.FullName} a drink. ([YELLOW $]2)", 'a'));        
       }
       else
       {
         sb.Append(" My advice is to take up woodcutting. Or have you considered goat farming?\"");
       }
     }
-        
-    return (sb.ToString(), []);
+    else if (state.Curr == 1)
+    {
+      int maxDepth = gs.Player.Stats[Attribute.Depth].Max;
+      if (maxDepth == 0)
+        sb.Append("\"Stock up on torches and maybe a flagon of whiskey before you head into the depths!\"");
+      else if (maxDepth <= 2)
+        sb.Append("\"Some free advice: grind around on the first few floors and save up enough for your retirement!\"");
+      else
+        sb.Append("\"You've been HOW deep? The horrors that await you...\"");
+
+      if (gs.Player.Inventory.Zorkmids > 2)
+      {
+        sb.Append("\n\n");
+        sb.Append("Buy me a drink and I'll repay you in wisdom.\"");
+
+        opts.Add(($"Buy {mob.FullName} a drink. ([YELLOW $]2)", 'a'));
+      }
+    }
+    else if (state.Curr == 2)
+    {
+      sb.Append('"');
+      sb.Append(Advice(gs.Rng));
+      sb.Append('"');
+      mob.Stats[Attribute.DialogueState] = new Stat(1);
+    }
+
+    return (sb.ToString(), opts);
   }
 
-  public void SelectOption(Mob actor, char opt, GameState gs)
+  // When there's more content in the game, I'll create a proper rumours file
+  static string Advice(Random rng) => rng.Next(6) switch
   {
-    
+    0 => "Swords aren't so great against skeletons.",
+    1 => "Owlbears definitely inherited the bear hug genes.",
+    2 => "Someone once told me cloakers make their own flocks.",
+    3 => "Mind your torch around wooden structures!",
+    4 => "They say swinelings spread plague.",
+    _ => "Never drink water. Fish pee in there!"
+  };
+
+  public void SelectOption(Mob veteran, char opt, GameState gs)
+  {    
+    if (opt == 'a')
+    {
+      // Buy veteran a drink
+      gs.Player.Inventory.Zorkmids -= 2;
+      veteran.Stats[Attribute.DialogueState] = new Stat(2);
+    }
   }
 }
 
@@ -820,7 +872,6 @@ class Villager1Behaviour : IBehaviour, IDialoguer
         sb.Append(" a few days ago. Someone needs to do something!");
       }
     }
-    //List<(string, char)> options = [];
     
     return (sb.ToString(), []);
   }
