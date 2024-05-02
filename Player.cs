@@ -428,8 +428,10 @@ class Player : Actor, IPerformer, IGameEventListener
     return '\0';
   }
 
-  public override Action TakeTurn(UserInterface ui, GameState gameState)
+  public override Action TakeTurn(GameState gameState)
   {
+    UserInterface ui = gameState.UIRef();
+
     if (HasActiveTrait<ParalyzedTrait>())
     {
       gameState.UIRef().AlertPlayer(new Message("You cannot move!", Loc), "", gameState);

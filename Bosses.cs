@@ -118,7 +118,7 @@ class PrinceOfRatsBehaviour : IBehaviour
     }
   }
 
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gameState)
   {
     bool CanSummonRats(Mob prince, GameState gs, int dist, int form)
     {

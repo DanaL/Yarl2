@@ -20,7 +20,7 @@ interface IPerformer
   double Energy { get; set; }
   double Recovery { get; set; }
   
-  Action TakeTurn(UserInterface ui, GameState gameState);
+  Action TakeTurn(GameState gameState);
 }
 
 // I wonder if a simple status will be enough
@@ -201,7 +201,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
-  public abstract Action TakeTurn(UserInterface ui, GameState gameState);
+  public abstract Action TakeTurn(GameState gameState);
 
   public bool AbilityCheck(Attribute attr, int dc, Random rng)
   {
@@ -252,12 +252,12 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public override Action TakeTurn(UserInterface ui, GameState gameState)
+  public override Action TakeTurn(GameState gameState)
   {
     if (HasActiveTrait<ParalyzedTrait>())
       return new PassAction(gameState, this);
     
-    return _behaviour.CalcAction(this, gameState, ui);
+    return _behaviour.CalcAction(this, gameState);
   }
 }
 

@@ -563,7 +563,7 @@ abstract class UserInterface
 
   void TakeTurn(IPerformer performer, GameState gs)
   {
-    var action = performer.TakeTurn(this, gs);
+    var action = performer.TakeTurn(gs);
 
     if (action is NullAction)
     {

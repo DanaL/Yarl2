@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using SDL2;
 
 namespace Yarl2;
 
@@ -95,7 +94,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
 
 interface IBehaviour
 {
-  Action CalcAction(Mob actor, GameState gameState, UserInterface ui);
+  Action CalcAction(Mob actor, GameState gameState);
   (Action, InputAccumulator?) Chat(Mob actor, GameState gameState);
 }
 
@@ -208,7 +207,7 @@ class MonsterBehaviour : IBehaviour
       return mob.MoveStrategy.MoveAction(mob, gs);
   }
 
-  public virtual Action CalcAction(Mob actor, GameState gs, UserInterface ui)
+  public virtual Action CalcAction(Mob actor, GameState gs)
   {
     if (actor.Status == MobAttitude.Idle)
     {
@@ -238,7 +237,7 @@ class MonsterBehaviour : IBehaviour
 // so it just seemed simple (or easy...) to extend MonsterBevaviour
 class DisguisedMonsterBehaviour : MonsterBehaviour
 {
-  public override Action CalcAction(Mob actor, GameState gs, UserInterface ui)
+  public override Action CalcAction(Mob actor, GameState gs)
   {
     bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
     if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
@@ -254,7 +253,7 @@ class DisguisedMonsterBehaviour : MonsterBehaviour
       actor.Stats[Attribute.InDisguise].SetMax(0);
     }
 
-    return base.CalcAction(actor, gs, ui);
+    return base.CalcAction(actor, gs);
   }
 }
 
@@ -279,7 +278,7 @@ class VillagePupBehaviour : IBehaviour
     _ => false
   };
 
-  public Action CalcAction(Mob pup, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob pup, GameState gameState)
   {
     double roll = gameState.Rng.NextDouble();
     if (roll < 0.25)
@@ -340,7 +339,7 @@ class PriestBehaviour : IBehaviour
 {
   DateTime _lastIntonation = new(1900, 1, 1);
 
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gameState)
   {
     if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
     {
@@ -407,7 +406,7 @@ class SmithBehaviour : IBehaviour
     }
   }
 
-  public Action CalcAction(Mob smith, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob smith, GameState gameState)
   {
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
     {
@@ -464,7 +463,7 @@ class GrocerBehaviour : IBehaviour
       return "Store credit only.";
   }
 
-  public Action CalcAction(Mob grocer, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob grocer, GameState gameState)
   {
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
     {
@@ -497,7 +496,7 @@ class GrocerBehaviour : IBehaviour
 
 class VeteranBehaviour : IBehaviour, IDialoguer
 {
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gameState)
   {
     if (gameState.Rng.Next(3) == 0)
     {
@@ -607,7 +606,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
   Stack<Loc> _path = [];
   DateTime _lastBark = new(1900, 1, 1);
 
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gameState)
   {
     if (_path.Count > 0)
     {
@@ -825,7 +824,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
 // and area around the town.
 class Villager1Behaviour : IBehaviour, IDialoguer
 {
-  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gameState)
   {
     return new PassAction();
   }
@@ -918,7 +917,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
   }
 
-  public Action CalcAction(Mob actor, GameState gs, UserInterface ui)
+  public Action CalcAction(Mob actor, GameState gs)
   {
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
     {
@@ -1190,7 +1189,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
       // TODO: need to give the player a reward!
 
       // give the trinket to the NPC
-      mob.Stats[Attribute.DialogueState].SetMax(7);      
+      mob.Stats[Attribute.DialogueState].SetMax(7);
     }
     else if (state == 3 && opt == 'b')
     {
