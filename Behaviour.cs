@@ -495,6 +495,61 @@ class GrocerBehaviour : IBehaviour
   }
 }
 
+class VeteranBehaviour : IBehaviour, IDialoguer
+{
+  public Action CalcAction(Mob actor, GameState gameState, UserInterface ui)
+  {
+    return new PassAction();
+  }
+
+  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  {
+    var acc = new DialogueAccumulator(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    var sb = new StringBuilder();
+
+    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    {
+      string monsters = "";
+      foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
+      {
+        if (fact.Name == "EarlyDenizen")
+        {
+          monsters = fact.Value;
+          break;
+        }
+      }
+
+      sb.Append("\"I used to be an adventurer like you! Sure the top floors of the dungeon are all ");
+      sb.Append(monsters.Pluralize());
+      sb.Append(" and rats, but then things get a lot worse.");
+
+      if (gs.Player.Inventory.Zorkmids > 2)
+      {
+        sb.Append("\n\n");
+        sb.Append("Buy me a drink and I'll repay you in wisdom.\"");
+      }
+      else
+      {
+        sb.Append(" My advice is to take up woodcutting. Or have you considered goat farming?\"");
+      }
+    }
+        
+    return (sb.ToString(), []);
+  }
+
+  public void SelectOption(Mob actor, char opt, GameState gs)
+  {
+    
+  }
+}
+
 class MayorBehaviour : IBehaviour, IDialoguer
 {
   Stack<Loc> _path = [];

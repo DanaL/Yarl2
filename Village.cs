@@ -249,6 +249,37 @@ class Village
     return mayor;
   }
 
+  static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  {
+    var (lit, unlit) = VillagerColour(rng);
+    var veteran = new Mob()
+    {
+      Name = ng.GenerateName(rng.Next(6, 11)),
+      Appearance = VillagerAppearance(rng),
+      Glyph = new Glyph('@', lit, unlit)
+    };
+    veteran.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
+    veteran.Traits.Add(new NamedTrait());
+    veteran.Traits.Add(new VillagerTrait());
+
+    veteran.MoveStrategy = new WallMoveStrategy();
+    veteran.SetBehaviour(new VeteranBehaviour());
+
+    var tavernSqs = town.Tavern.ToList();
+    do
+    {
+      Loc loc = tavernSqs[rng.Next(tavernSqs.Count)];
+      var tile = map.TileAt(loc.Row, loc.Col).Type;
+      if ((tile == TileType.WoodFloor || tile == TileType.StoneFloor) && !objDb.Occupied(loc))
+      {
+        veteran.Loc = loc;
+        break;
+      }
+    }
+    while (true);
+
+    return veteran;
+  }
 
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
   {
@@ -389,6 +420,10 @@ class Village
     var v1 = GenerateVillager1(map, town, ng, rng);
     objDb.Add(v1);
     objDb.AddToLoc(v1.Loc, v1);
+
+    var vet = GenerateVeteran(map, town, ng, objDb, rng);
+    objDb.Add(vet);
+    objDb.AddToLoc(vet.Loc, vet);
 
     FallenAdventurerFact? fallen = null;
     foreach (var fact in history.Facts)
