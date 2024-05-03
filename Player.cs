@@ -12,16 +12,26 @@
 
 namespace Yarl2;
 
-enum PlayerClass
+enum PlayerLineage
 {
-  OrcReaver,
-  DwarfStalwart
+  Human,
+  Elf,
+  Orc,
+  Dwarf
+}
+
+enum PlayerBackground
+{
+  Warrior,
+  Scholar,
+  Skullduggery
 }
 
 class Player : Actor, IPerformer, IGameEventListener
 {
   public const int MAX_VISION_RADIUS = 25;
-  public PlayerClass CharClass { get; set; }
+  public PlayerLineage Lineage { get; set; }
+  public PlayerBackground Background { get; set; }
 
   InputAccumulator? _accumulator;
   Action? _deferred;
@@ -269,7 +279,7 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     List<string> lines = [];
 
-    lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(CharClass)}");
+    lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(Lineage)}");
     lines.Add("");
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");

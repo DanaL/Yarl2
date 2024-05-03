@@ -439,34 +439,37 @@ class GameObjDBSave
   static Player InflatePlayer(string txt, GameObjectDB objDb)
   {
     var fields = txt.Split('|');
-    var p = new Player(fields[1]);
+    var p = new Player(fields[2]);
 
-    Enum.TryParse(fields[0], out PlayerClass charClass);
-    p.CharClass = charClass;
-    p.ID = ulong.Parse(fields[2]);
-    p.Loc = Loc.FromStr(fields[4]);
+    Enum.TryParse(fields[0], out PlayerLineage charClass);
+    p.Lineage = charClass;
+    Enum.TryParse(fields[1], out PlayerBackground background);
+    p.Background = background;
+
+    p.ID = ulong.Parse(fields[3]);
+    p.Loc = Loc.FromStr(fields[5]);
 
     // Parse the traits
-    if (fields[5] != "")
+    if (fields[6] != "")
     {
-      foreach (var t in fields[5].Split('`'))
+      foreach (var t in fields[6].Split('`'))
       {
         var trait = TraitFactory.FromText(t, p);
         p.Traits.Add(trait);
       }
     }
-    p.Stats = StatsFromText(fields[6]);
-    p.Energy = double.Parse(fields[7]);
-    p.Recovery = double.Parse(fields[8]);
+    p.Stats = StatsFromText(fields[7]);
+    p.Energy = double.Parse(fields[8]);
+    p.Recovery = double.Parse(fields[9]);
 
-    if (fields[11] != "")
+    if (fields[12] != "")
     {
       p.Inventory = new Inventory(p.ID, objDb)
       {
-        Zorkmids = int.Parse(fields[9]),
-        NextSlot = fields[10][0]
+        Zorkmids = int.Parse(fields[10]),
+        NextSlot = fields[11][0]
       };
-      p.Inventory.RestoreFromText(fields[11]);
+      p.Inventory.RestoreFromText(fields[12]);
     }
 
     return p;
@@ -586,7 +589,9 @@ class GameObjDBSave
       if (obj is Player player)
       {
         var sb = new StringBuilder("Player:");
-        sb.Append(player.CharClass);
+        sb.Append(player.Lineage);
+        sb.Append('|');
+        sb.Append(player.Background);
         sb.Append('|');
         sb.Append(obj.ToString());
         sb.Append('|');

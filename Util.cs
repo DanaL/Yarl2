@@ -315,9 +315,9 @@ partial class Util
     return sqs;
   }
 
-  public static string PlayerClassToStr(PlayerClass charClass) => charClass switch
+  public static string PlayerClassToStr(PlayerLineage charClass) => charClass switch
   {
-    PlayerClass.OrcReaver => "Orc Reaver",
+    PlayerLineage.Orc => "Orc Reaver",
     _ => "Dwarf Stalwart"
   };
 

@@ -28,34 +28,77 @@ enum Boon
 
 class PlayerCreator
 {
-  static PlayerClass PickClass(UserInterface ui)
+  static PlayerLineage PickLineage(UserInterface ui)
   {
     List<string> menu = [
-"Which role will you assume this time?",
+      "To create a new character, first please select your lineage:",
       "",
-      " (1) Orcish Reaver                 (2) Dwarven Stalwart",
+      " (1) Human                           (2) Orc",
       "",
-      " An intimidating orc warrior,      A dwarf paladin oath-sworn",
-      " trained to defend their clan in   to root out evil. Strong knights",
-      " battle. Fierce and tough.         who can call upon holy magic.",
-      "                                "
+      " Your standard homo sapien. Thanks   Naturally strong, orcs receive ",
+      " to progressive tax policy in this   bonus hit points. Due do participating",
+      " world of fantastical beings,        in orc hockey as a child, you start",
+      " humans begin with more gold.        with the ability to Rage.",
+      "                              ",
+      "",
+      " (3) Elf                            (4) Dwarf",
+      "",
+      " Magical, ethereal, fond of wine    Stout and bearded. Dwarves in Delve",
+      " and grammar. Elves also benefit    absoultely do not have Scottish",
+      " from mandatory archery classes     acceents. They are less prone to illness",
+      " in Elf Grade School.               and poison, and accrue stress more",
+      "                                    slowly when exploring dungeons."
     ];
-    var options = new HashSet<char>() { '1', '2' };
+    var options = new HashSet<char>() { '1', '2', '3', '4' };
     char choice = ui.FullScreenMenu(menu, options, null);
 
     return choice switch
     {
-      '1' => PlayerClass.OrcReaver,
-      _ => PlayerClass.DwarfStalwart
+      '1' => PlayerLineage.Human,
+      '2' => PlayerLineage.Orc,
+      '3' => PlayerLineage.Elf,
+      _ => PlayerLineage.Dwarf
     };
 
+  }
+
+  static PlayerBackground PickBackground(UserInterface ui)
+  {
+    List<string> menu = [
+     "What was your major in Adventurer College?",
+      "",
+      " (1) Warrior                         (2) Scholar",
+      "",
+      " A broad curriculum in beating       You spent your time in college hitting",
+      " people up has left you skilled in   the books. You passed Magic 101 and",
+      " most weapons, as well as strong     thanks to your studies and student",
+      " and tough.                          frugality, when you read scrolls there's",
+      "                                     a small chance they won't be consumed.",
+      "",
+      " (3) Skullduggery                    ",
+      "",
+      " Most of your time in school was     ",
+      " spent sneaking into parties you    ",
+      " weren't invited to. Skills which",
+      " translate directly to adventuring."
+    ];
+
+    var options = new HashSet<char>() { '1', '2', '3' };
+    char choice = ui.FullScreenMenu(menu, options, null);
+
+    return choice switch
+    {
+      '1' => PlayerBackground.Warrior,
+      '2' => PlayerBackground.Scholar,
+      _ => PlayerBackground.Skullduggery
+    };
   }
 
   // If I use this enough, move it to Utils?
   static int Roll3d6(Random rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
   static int StatRoll(Random rng) => Util.StatRollToMod(Roll3d6(rng));
 
-  static Dictionary<Attribute, Stat> RollStats(PlayerClass charClass, Random rng)
+  static Dictionary<Attribute, Stat> RollStats(PlayerLineage charClass, Random rng)
   {
     // First, set the basic stats
     var stats = new Dictionary<Attribute, Stat>()
@@ -74,7 +117,7 @@ class PlayerCreator
     int roll, hp = 1;
     switch (charClass)
     {
-      case PlayerClass.OrcReaver:
+      case PlayerLineage.Orc:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Strength].Curr)
           stats[Attribute.Strength].SetMax(roll);
@@ -82,7 +125,7 @@ class PlayerCreator
         stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
         stats.Add(Attribute.HitDie, new Stat(12));
         break;
-      case PlayerClass.DwarfStalwart:
+      case PlayerLineage.Dwarf:
         // Should Stalwarts also be strength based?
         roll = Util.StatRollToMod(8 + rng.Next(1, 6) + rng.Next(1, 6));
         if (roll > stats[Attribute.Strength].Curr)
@@ -106,9 +149,9 @@ class PlayerCreator
 
   public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
   {
-    switch (player.CharClass)
+    switch (player.Lineage)
     {
-      case PlayerClass.OrcReaver:
+      case PlayerLineage.Orc:
         var spear = ItemFactory.Get("spear", objDb);
         spear.Adjectives.Add("old");
         spear.Equiped = true;
@@ -118,7 +161,7 @@ class PlayerCreator
         slarmour.Equiped = true;
         player.Inventory.Add(slarmour, player.ID);
         break;
-      case PlayerClass.DwarfStalwart:
+      case PlayerLineage.Dwarf:
         var axe = ItemFactory.Get("hand axe", objDb);
         axe.Equiped = true;
         player.Inventory.Add(axe, player.ID);
@@ -169,12 +212,16 @@ class PlayerCreator
 
   public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Random rng)
   {
+    var lineage = PickLineage(ui);
+    var background = PickBackground(ui);
+
     Player player = new(playerName)
     {
       Loc = new Loc(0, 0, startRow, startCol),
-      CharClass = PickClass(ui)
+      Lineage = lineage,
+      Background = background
     };
-    player.Stats = RollStats(player.CharClass, rng);
+    player.Stats = RollStats(player.Lineage, rng);
     player.Inventory = new Inventory(player.ID, objDb);
 
     objDb.Add(player);
@@ -347,12 +394,12 @@ class PlayerCreator
       string msg = $"\nWelcome to level {level}!";
       msg += $"\n  +{newHP} HP";
 
-      switch (player.CharClass)
+      switch (player.Lineage)
       {
-        case PlayerClass.OrcReaver:
+        case PlayerLineage.Orc:
           msg += LevelUpReaver(player, level, rng);
           break;
-        case PlayerClass.DwarfStalwart:
+        case PlayerLineage.Dwarf:
           msg += LevelUpStalwart(player, level, rng);
           break;
       }
