@@ -481,7 +481,7 @@ class PreGameHandler(UserInterface ui)
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
       welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
       welcomeText += "\n\n";
-      welcomeText += "You may wish to speak with the townsfolk before your first delve into ruins. They may have advice for you, and supplies to help you survive.";
+      welcomeText += "You may wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
       welcomeText += "\n";
       welcomeText += "Press ? for help, and X will allow you to examine interesting features on screen.";
       
