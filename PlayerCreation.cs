@@ -167,6 +167,16 @@ class PlayerCreator
     return stats;
   }
 
+  public static void SetInitialAbilities(Player player)
+  {
+    switch (player.Lineage)
+    {
+      case PlayerLineage.Orc:
+        player.Traits.Add(new RageTrait(player));
+        break;
+    }
+  }
+
   public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
   {
     switch (player.Lineage)
@@ -246,6 +256,7 @@ class PlayerCreator
 
     objDb.Add(player);
 
+    SetInitialAbilities(player);
     SetStartingGear(player, objDb, rng);
 
     return player;
