@@ -98,7 +98,7 @@ class PlayerCreator
   static int Roll3d6(Random rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
   static int StatRoll(Random rng) => Util.StatRollToMod(Roll3d6(rng));
 
-  static Dictionary<Attribute, Stat> RollStats(PlayerLineage charClass, Random rng)
+  static Dictionary<Attribute, Stat> RollStats(PlayerLineage lineage, PlayerBackground background, Random rng)
   {
     // First, set the basic stats
     var stats = new Dictionary<Attribute, Stat>()
@@ -113,33 +113,53 @@ class PlayerCreator
       { Attribute.Depth, new Stat(0) }
     };
 
-    // Now the class-specific stuff
-    int roll, hp = 1;
-    switch (charClass)
+    int roll, hp = 0;
+
+    switch (lineage)
     {
       case PlayerLineage.Orc:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Strength].Curr)
           stats[Attribute.Strength].SetMax(roll);
-        hp = 15 + stats[Attribute.Constitution].Curr;
-        stats.Add(Attribute.MeleeAttackBonus, new Stat(3));
-        stats.Add(Attribute.HitDie, new Stat(12));
+        hp = 5;
+        break;
+      case PlayerLineage.Elf:
+        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
+        if (roll > stats[Attribute.Dexterity].Curr)
+          stats[Attribute.Dexterity].SetMax(roll);
         break;
       case PlayerLineage.Dwarf:
-        // Should Stalwarts also be strength based?
-        roll = Util.StatRollToMod(8 + rng.Next(1, 6) + rng.Next(1, 6));
-        if (roll > stats[Attribute.Strength].Curr)
-          stats[Attribute.Strength].SetMax(roll);
-
-        if (stats[Attribute.Piety].Curr < 0)
-          stats[Attribute.Piety].SetMax(0);
-
-        hp = 10 + stats[Attribute.Constitution].Curr;
-        stats.Add(Attribute.MeleeAttackBonus, new Stat(2));
-        stats.Add(Attribute.HitDie, new Stat(10));
+        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
+        if (roll > stats[Attribute.Constitution].Curr)
+          stats[Attribute.Constitution].SetMax(roll);
         break;
     }
 
+    switch (background)
+    {
+      case PlayerBackground.Warrior:
+        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
+        if (roll > stats[Attribute.Strength].Curr)
+          stats[Attribute.Strength].SetMax(roll);
+        hp += 12 + stats[Attribute.Constitution].Curr;
+        stats.Add(Attribute.HitDie, new Stat(12));
+        break;
+      case PlayerBackground.Skullduggery:
+        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
+        if (roll > stats[Attribute.Dexterity].Curr)
+          stats[Attribute.Dexterity].SetMax(roll);
+        hp += 10 + stats[Attribute.Constitution].Curr;
+        stats.Add(Attribute.HitDie, new Stat(10));
+        break;
+      case PlayerBackground.Scholar:
+        roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
+        if (roll > stats[Attribute.Will].Curr)
+          stats[Attribute.Will].SetMax(roll);
+        hp += 8 + stats[Attribute.Constitution].Curr;
+        stats.Add(Attribute.HitDie, new Stat(8));
+        break;      
+    }
+    
     if (hp < 1)
       hp = 1;
     stats.Add(Attribute.HP, new Stat(hp));
@@ -221,7 +241,7 @@ class PlayerCreator
       Lineage = lineage,
       Background = background
     };
-    player.Stats = RollStats(player.Lineage, rng);
+    player.Stats = RollStats(player.Lineage, player.Background, rng);
     player.Inventory = new Inventory(player.ID, objDb);
 
     objDb.Add(player);
