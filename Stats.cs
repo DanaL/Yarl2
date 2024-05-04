@@ -24,9 +24,7 @@ enum Attribute
   Constitution,
   Piety, // What I renamed D&D's Wisdom
   Will,
-  MeleeAttackBonus,
-  MissileAttackBonus,
-  MonsterAttackBonus, // not going to bother having separate melee/missile atk bonuses for monsters
+  AttackBonus,
   Level,
   XP,
   Depth,
@@ -42,7 +40,8 @@ enum Attribute
   Markup,
   Attitude,
   InDisguise,
-  MonsterForm
+  MonsterForm,
+  ArcheryBonus
 }
 
 class Stat

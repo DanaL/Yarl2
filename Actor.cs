@@ -242,12 +242,12 @@ class Mob : Actor
 
   public override int TotalMeleeAttackModifier()
   {
-    return Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab) ? ab.Curr : 0;
+    return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }
 
   public override int TotalMissileAttackModifier(Item weapon)
   {
-    return Stats.TryGetValue(Attribute.MonsterAttackBonus, out var ab) ? ab.Curr : 0;
+    return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
@@ -313,7 +313,7 @@ class MonsterFactory
     int hp = int.Parse(fields[4]);
     m.Stats.Add(Attribute.HP, new Stat(hp));
     int attBonus = int.Parse(fields[5]);
-    m.Stats.Add(Attribute.MonsterAttackBonus, new Stat(attBonus));
+    m.Stats.Add(Attribute.AttackBonus, new Stat(attBonus));
     int ac = int.Parse(fields[3]);
     m.Stats.Add(Attribute.AC, new Stat(ac));
     int str = Util.StatRollToMod(int.Parse(fields[7]));

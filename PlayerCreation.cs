@@ -127,6 +127,7 @@ class PlayerCreator
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Dexterity].Curr)
           stats[Attribute.Dexterity].SetMax(roll);
+        stats[Attribute.ArcheryBonus].SetMax(2);
         break;
       case PlayerLineage.Dwarf:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
@@ -345,8 +346,8 @@ class PlayerCreator
 
     if (newLevel % 2 == 0)
     {
-      int ab = player.Stats[Attribute.MeleeAttackBonus].Max;
-      player.Stats[Attribute.MeleeAttackBonus].SetMax(ab + 1);
+      int ab = player.Stats[Attribute.AttackBonus].Max;
+      player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
       msg += $"\n  Attack Bonus increases to {ab + 1}";
     }
     else
@@ -377,8 +378,8 @@ class PlayerCreator
 
     if (newLevel % 2 == 0)
     {
-      int ab = player.Stats[Attribute.MeleeAttackBonus].Max;
-      player.Stats[Attribute.MeleeAttackBonus].SetMax(ab + 1);
+      int ab = player.Stats[Attribute.AttackBonus].Max;
+      player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
       msg += $"\n  Attack Bonus increases to {ab + 1}";
     }
     else

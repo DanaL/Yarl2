@@ -381,7 +381,7 @@ class PreGameHandler(UserInterface ui)
     gargoyle.SetBehaviour(new DisguisedMonsterBehaviour());
 
     gargoyle.Stats.Add(Attribute.HP, new Stat(40));
-    gargoyle.Stats.Add(Attribute.MonsterAttackBonus, new Stat(4));
+    gargoyle.Stats.Add(Attribute.AttackBonus, new Stat(4));
     gargoyle.Stats.Add(Attribute.AC, new Stat(15));
     gargoyle.Stats.Add(Attribute.Strength, new Stat(1));
     gargoyle.Stats.Add(Attribute.Dexterity, new Stat(1));

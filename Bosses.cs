@@ -40,7 +40,7 @@ class BossFactory
     prince.Stats.Add(Attribute.HP, new Stat(80));
     prince.Stats.Add(Attribute.MonsterForm, new Stat(0));
 
-    prince.Stats.Add(Attribute.MonsterAttackBonus, new Stat(7));
+    prince.Stats.Add(Attribute.AttackBonus, new Stat(7));
     prince.Stats.Add(Attribute.AC, new Stat(15));
     prince.Stats.Add(Attribute.Strength, new Stat(1));
     prince.Stats.Add(Attribute.Dexterity, new Stat(3));
