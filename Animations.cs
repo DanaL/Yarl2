@@ -102,7 +102,6 @@ class ArrowAnimation : Animation
       Expiry = DateTime.MinValue;
     }
   }
-
 }
 
 class ThrownMissileAnimation : Animation

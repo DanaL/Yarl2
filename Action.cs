@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using Microsoft.VisualBasic;
-
 namespace Yarl2;
 
 class ActionResult
@@ -95,11 +93,11 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
                            .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
                            .ToList();
       List<Loc> pts = [];
-      for (int j = 1; j < trajectory.Count; j++)
+      for (int j = 0; j < trajectory.Count; j++)
       {
         var pt = trajectory[j];
         var tile = GameState!.TileAt(pt);
-        if (GameState.ObjDb.Occupant(pt) is Actor occ)
+        if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
         {
           pts.Add(pt);
           var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus);
