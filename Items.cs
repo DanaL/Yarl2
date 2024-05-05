@@ -683,7 +683,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       }
 
       // Okay we are equiping new gear, which is a little more complicated
-      if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
+      if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
         // If there is a weapon already equiped, unequip it
         foreach (Item other in Items())

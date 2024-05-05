@@ -1510,7 +1510,16 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
     GameState!.ClearMenu();
 
-    if (!(item.Type == ItemType.Armour || item.Type == ItemType.Weapon || item.Type == ItemType.Tool))
+    bool equipable = item is null || item.Type switch
+    {
+      ItemType.Armour => true,
+      ItemType.Weapon => true,
+      ItemType.Tool => true,
+      ItemType.Bow => true,
+      _ => false
+    };
+
+    if (!equipable)
     {
       var msg = new Message("You cannot equip that!", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
