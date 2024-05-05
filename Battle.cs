@@ -92,8 +92,11 @@ class Battle
     }
 
     int bonusDamage = 0;
-    if (attacker.Stats.TryGetValue(Attribute.Dexterity, out var dex))
-      bonusDamage += dex.Curr;
+    // I don't know if I actually want to add Dex to missile dmg. 5e does 
+    // course but archery is fairly OP in 5e. I don't want archery to be
+    // blatantly the best play still in my game
+    // if (attacker.Stats.TryGetValue(Attribute.Dexterity, out var dex))
+    //   bonusDamage += dex.Curr;
     if (attacker.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
 

@@ -1353,6 +1353,9 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
       item.Equiped = true;
 
       var acc = new AimAccumulator(ui, GameState, player.Loc, 9);
+
+      // Generate a generic arrow but replace its damage with the
+      // bow's since different types of bows will do different dmg
       var ammo = ItemFactory.Get("arrow", GameState.ObjDb);
       if (item.Traits.OfType<AmmoTrait>().Any())
       {
