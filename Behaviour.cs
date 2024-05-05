@@ -157,7 +157,7 @@ class MonsterBehaviour : IBehaviour
       gs.UIRef().RegisterAnimation(arrowAnim);
 
       var arrow = ItemFactory.Get("arrow", gs.ObjDb);
-      return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow);
+      return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow, 0);
     }
     else if (act is SpellActionTrait || act is RangedSpellActionTrait)
     {

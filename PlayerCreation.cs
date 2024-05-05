@@ -20,7 +20,6 @@ enum Boon
   PietyInc,
   BonusHP,
   MeleeDmgBonus,
-  ShieldOfFaith,
   Cleave,
   Impale,
   Rage
@@ -127,7 +126,7 @@ class PlayerCreator
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Dexterity].Curr)
           stats[Attribute.Dexterity].SetMax(roll);
-        stats[Attribute.ArcheryBonus].SetMax(2);
+        stats.Add(Attribute.ArcheryBonus, new Stat(2));
         break;
       case PlayerLineage.Dwarf:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
@@ -202,6 +201,12 @@ class PlayerCreator
         var helmet = ItemFactory.Get("helmet", objDb);
         helmet.Equiped = true;
         player.Inventory.Add(helmet, player.ID);
+        break;
+      case PlayerLineage.Elf:
+        var bow = ItemFactory.Get("longbow", objDb);
+        player.Inventory.Add(bow, player.ID);
+        var dagger = ItemFactory.Get("dagger", objDb);
+        player.Inventory.Add(dagger, player.ID);
         break;
     }
 
@@ -318,11 +323,7 @@ class PlayerCreator
         else
           player.Stats[Attribute.MeleeDmgBonus] = new Stat(2);
         msg = "\n  a bonus to melee damage";
-        break;
-      case Boon.ShieldOfFaith:
-        player.Traits.Add(new ShieldOfTheFaithfulTrait() { ArmourMod = 2 });
-        msg = "\n  Shield of the Faithful";
-        break;
+        break;      
       case Boon.Cleave:
         player.Traits.Add(new CleaveTrait());
         msg = "\n  the ability to Cleave";
@@ -392,9 +393,7 @@ class PlayerCreator
       if (player.Stats[Attribute.Constitution].Max < 4)
         boons.Add(Boon.ConInc);
       if (player.Stats[Attribute.Piety].Max < 4)
-        boons.Add(Boon.PietyInc);
-      if (!player.HasTrait<ShieldOfTheFaithfulTrait>())
-        boons.Add(Boon.ShieldOfFaith);
+        boons.Add(Boon.PietyInc);      
       if (!player.HasTrait<ImpaleTrait>())
         boons.Add(Boon.Impale);
 

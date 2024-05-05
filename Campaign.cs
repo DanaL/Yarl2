@@ -261,8 +261,8 @@ class PreGameHandler(UserInterface ui)
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
-    return (campaign, startR, startC);
-    //return (campaign, entrance.Item1, entrance.Item2);
+    //return (campaign, startR, startC);
+    return (campaign, entrance.Item1, entrance.Item2);
   }
 
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)

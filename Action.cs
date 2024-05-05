@@ -9,8 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.VisualBasic;
 
 namespace Yarl2;
 
@@ -76,20 +75,95 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   }
 }
 
-class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Action(gs, actor)
+// This is a different class from MissileAttackAction because it will take the result the 
+// aim selection. It also handles the animation and following the path of the arrow
+class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : Action(gs, actor)
 {
-  Loc _loc = loc;
+  Loc? _loc;
   readonly Item _ammo = ammo;
+  readonly int _attackBonus = attackBonus;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    if (_loc is Loc loc)
+    {      
+      // Calculate the path the arrow will tkae. If there is a monster in the way of the one
+      // actually targetted, it might be struck instead
+      var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, loc.Row, loc.Col)
+                           .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+                           .ToList();
+      List<Loc> pts = [];
+      for (int j = 1; j < trajectory.Count; j++)
+      {
+        var pt = trajectory[j];
+        var tile = GameState!.TileAt(pt);
+        if (GameState.ObjDb.Occupant(pt) is Actor occ)
+        {
+          pts.Add(pt);
+          var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus);
+          result.Messages.AddRange(attackResult.Messages);
+          result.EnergyCost = attackResult.EnergyCost;
+          if (attackResult.Complete)
+            break;
+        }
+        else if (tile.Passable() || tile.PassableByFlight())
+        {
+          pts.Add(pt);
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
+      GameState!.UIRef().PlayAnimation(anim, GameState);
+    }
+    else
+    {
+      throw new Exception("Null location passed to ArrowShotAction. Why would you do that?");
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _loc = locResult.Loc;
+  }
+}
+
+class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int attackBonus) : Action(gs, actor)
+{
+  Loc? _loc = loc;
+  readonly Item _ammo = ammo;
+  readonly int _attackBonus = attackBonus;
 
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = true };
 
-    var target = GameState!.ObjDb.Occupant(_loc);
-    if (target is not null)
-      result = Battle.MissileAttack(Actor!, target, GameState, _ammo);
+    if (_loc is Loc loc)
+    {
+      var target = GameState!.ObjDb.Occupant(loc);
+      if (target is not null)
+        result = Battle.MissileAttack(Actor!, target, GameState, _ammo, _attackBonus);
 
-    return result;
+      return result;
+    }
+    else
+    {
+      throw new Exception("Null location passed to MissileAttackAction. Why would you do that?");
+    }
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _loc = locResult.Loc;
   }
 }
 
@@ -954,7 +1028,7 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
     GameState!.UIRef().RegisterAnimation(anim);
 
     var firebolt = ItemFactory.Get("firebolt", GameState!.ObjDb);
-    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
+    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt, 0);
 
     var txt = MsgFactory.Phrase(Actor!.ID, Verb.Cast, _target, GameState).Text;
     var msg = new Message(txt + " Firebolt!", _target, false);
@@ -1226,7 +1300,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
           // I'm not handling what happens if a projectile hits a friendly or 
           // neutral NPCs
-          var attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo);
+          var attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo, 0);
           result.Messages.AddRange(attackResult.Messages);
           result.EnergyCost = attackResult.EnergyCost;
           if (attackResult.Complete)
@@ -1254,6 +1328,60 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
   {
     var locResult = result as LocAccumulatorResult;
     _target = locResult.Loc;
+  }
+}
+
+class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
+{
+  public char Choice { get; set; }
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    var ui = GameState!.UIRef();
+    ui.CloseMenu();
+    var player = Actor as Player;
+
+    var (item, _) = player!.Inventory.ItemAt(Choice);
+    if (item is null || item.Type != ItemType.Bow)
+    {
+      result.Messages.Add(new Message("That doesn't make any sense!", player.Loc));
+    }
+    else
+    {
+      item.Equiped = true;
+
+      var acc = new AimAccumulator(ui, GameState, player.Loc, 9);
+      var ammo = ItemFactory.Get("arrow", GameState.ObjDb);
+      if (item.Traits.OfType<AmmoTrait>().Any())
+      {
+        var ammoTrait = item.Traits.OfType<AmmoTrait>().First();
+        ammo.Traits = ammo.Traits.Where(t => t is not DamageTrait).ToList();
+        ammo.Traits.Add(new DamageTrait()
+        { 
+          DamageDie = ammoTrait.DamageDie, 
+          NumOfDie = ammoTrait.NumOfDie,
+          DamageType = ammoTrait.DamageType
+        });
+      }
+
+      int archeryBonus = 0;
+      if (player.Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
+        archeryBonus = ab.Curr;
+      var missleAction = new ArrowShotAction(GameState, player, ammo, archeryBonus); 
+      player.ReplacePendingAction(missleAction, acc);
+      result.EnergyCost = 0.0;
+      result.Complete = false;
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var menuResult = (MenuAccumulatorResult)result;
+    Choice = menuResult.Choice;
   }
 }
 

@@ -381,15 +381,22 @@ class AttackTrait : BasicTrait
   public override string AsText() => $"Attack#{Bonus}";
 }
 
-class DamageTrait : BasicTrait
+class AmmoTrait : Trait
 {
   public int DamageDie { get; set; }
   public int NumOfDie { get; set; }
   public DamageType DamageType { get; set; }
 
-  public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}";
-  public override string Desc() => "";
-  public override bool Aura => false;
+  public override string AsText() => $"Ammo#{DamageDie}#{NumOfDie}#{DamageType}";
+}
+
+class DamageTrait : Trait
+{
+  public int DamageDie { get; set; }
+  public int NumOfDie { get; set; }
+  public DamageType DamageType { get; set; }
+
+  public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}";  
 }
 
 class ACModTrait : BasicTrait
@@ -406,11 +413,6 @@ class ArmourTrait : ACModTrait
   public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";
   public override bool Aura => false;
-}
-
-class ShieldOfTheFaithfulTrait : ACModTrait
-{
-  public override string AsText() => $"ShieldOfTheFaithful#{ArmourMod}";
 }
 
 class DeathMessageTrait : BasicTrait
@@ -1037,6 +1039,14 @@ class TraitFactory
         {
           ArmourMod = int.Parse(pieces[1])
         };
+      case "Ammo":
+        Enum.TryParse(pieces[3], out DamageType ammoDt);
+        return new AmmoTrait()
+        {
+          DamageDie = int.Parse(pieces[1]),
+          NumOfDie = int.Parse(pieces[2]),
+          DamageType = ammoDt
+        };
       case "Armour":
         Enum.TryParse(pieces[1], out ArmourParts part);
         return new ArmourTrait()
@@ -1260,12 +1270,7 @@ class TraitFactory
       case "ResistPiercing":
         return new ResistPiercingTrait();
       case "ResistSlashing":
-        return new ResistSlashingTrait();
-      case "ShieldOfTheFaithful":
-        return new ShieldOfTheFaithfulTrait()
-        {
-          ArmourMod = int.Parse(pieces[1])
-        };
+        return new ResistSlashingTrait();      
       case "Stackable":
         return new StackableTrait();
       case "StatBuff":

@@ -84,8 +84,8 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     int mod = Stats[Attribute.Dexterity].Curr;
 
-    if (Stats.TryGetValue(Attribute.MissileAttackBonus, out var missibleAttackBonus))
-      mod += missibleAttackBonus.Curr;
+    if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
+      mod += attackBonus.Curr;
 
     AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
                                                 .Where(t => t is AttackTrait)
@@ -110,8 +110,8 @@ class Player : Actor, IPerformer, IGameEventListener
       mod += attackTrait.Bonus;
     }
 
-    if (Stats.TryGetValue(Attribute.MeleeAttackBonus, out var meleeAttackBonus))
-      mod += meleeAttackBonus.Curr;
+    if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
+      mod += attackBonus.Curr;
 
     return mod;
   }
@@ -550,6 +550,15 @@ class Player : Actor, IPerformer, IGameEventListener
         slots.Add('$');
         _accumulator = new InventoryAccumulator(slots);
         _deferred = new DropItemAction(gameState, this);
+      }
+      else if (ch == 'f')
+      {
+        // If the player has an equiped bow, automatically select that, otherwise
+        // have them pick a bow (and then equip it)
+        string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
+        ShowInventory(ui, "Fire what?", instructions);
+        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _deferred = new FireSelectedBowAction(gameState, this);
       }
       else if (ch == 't')
       {
