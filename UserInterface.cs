@@ -393,10 +393,17 @@ abstract class UserInterface
     WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
     var weapon = gs.Player.Inventory.ReadiedWeapon();
-    if (weapon != null)
+    if (weapon is not null)
     {
       List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
       weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));
+      WriteText(weaponLine, row++, ViewWidth, SideBarWidth);
+    }
+    var bow = gs.Player.Inventory.ReadiedBow();
+    if (bow is not null)
+    {
+      List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (bow.Glyph.Lit, bow.Glyph.Ch.ToString())];
+      weaponLine.Add((Colours.WHITE, $" {bow.FullName.IndefArticle()} (equiped)"));
       WriteText(weaponLine, row++, ViewWidth, SideBarWidth);
     }
 

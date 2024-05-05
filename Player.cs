@@ -197,6 +197,8 @@ class Player : Actor, IPerformer, IGameEventListener
           desc += " (in hand)";
         else if (item.Type == ItemType.Armour)
           desc += " (worn)";
+        else if (item.Type == ItemType.Bow)
+          desc += " (equiped)";
       }
       lines.Add($"{s}) {desc}");
     }

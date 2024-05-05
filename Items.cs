@@ -550,6 +550,14 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return null;
   }
 
+  public Item? ReadiedBow() 
+  {
+    foreach (var bow in Items().Where(i => i.Type == ItemType.Bow && i.Equiped))
+      return bow;
+
+    return null;
+  }
+
   public char Add(Item item, ulong ownerID)
   {
     if (item.Type == ItemType.Zorkmid)
