@@ -299,24 +299,27 @@ class Player : Actor, IPerformer, IGameEventListener
   }
 
   public void FireReadedBow(Item bow, GameState gs)
-  {
-    var acc = new AimAccumulator(gs, Loc, 9);
-
+  {    
+    int range;
     Item arrow;
     if (bow.Traits.OfType<AmmoTrait>().Any())
     {
       var ammoTrait = bow.Traits.OfType<AmmoTrait>().First();
       arrow = ammoTrait.Arrow(gs);
+      range = ammoTrait.Range;
     }
     else
     {
       arrow = ItemFactory.Get("arrow", gs.ObjDb);
+      range = 6;
     }
 
     int archeryBonus = 0;
     if (Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
       archeryBonus = ab.Curr;
     var missleAction = new ArrowShotAction(gs, this, arrow, archeryBonus);
+
+    var acc = new AimAccumulator(gs, Loc, range);
     ReplacePendingAction(missleAction, acc);
   }
 

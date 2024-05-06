@@ -222,7 +222,7 @@ class ItemFactory
         item.Traits.Add(new AttackTrait() { Bonus = 0 });
         // This is for if the player happens to be wielding the bow for some reason
         item.Traits.Add(new DamageTrait() { DamageDie = 1, NumOfDie = 1, DamageType = DamageType.Blunt });
-        item.Traits.Add(new AmmoTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new AmmoTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing, Range = 9 });
         break;
       case "arrow":
         item = new Item()

@@ -390,8 +390,9 @@ class AmmoTrait : Trait
   public int DamageDie { get; set; }
   public int NumOfDie { get; set; }
   public DamageType DamageType { get; set; }
+  public int Range { get; set; }
 
-  public override string AsText() => $"Ammo#{DamageDie}#{NumOfDie}#{DamageType}";
+  public override string AsText() => $"Ammo#{DamageDie}#{NumOfDie}#{DamageType}#{Range}";
 
   public Item Arrow(GameState gs)
   {    
@@ -1068,7 +1069,8 @@ class TraitFactory
         {
           DamageDie = int.Parse(pieces[1]),
           NumOfDie = int.Parse(pieces[2]),
-          DamageType = ammoDt
+          DamageType = ammoDt,
+          Range = int.Parse(pieces[4])
         };
       case "Armour":
         Enum.TryParse(pieces[1], out ArmourParts part);
