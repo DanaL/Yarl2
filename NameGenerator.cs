@@ -37,8 +37,8 @@ namespace Yarl2
         public static string TownName(Random rng)
         {
             string[] prefixes = [ "Upper ", "Lower ", "North ", "South ", "East ", "West ", "New ", "Old "];
-            string[] main = [ "Stone", "Black", "Green", "Red", "Deer", "Bar", "Burr", "Cor", "Ar", "Gold", "Silver", "Iron"];
-            string[] suffixes = [ "ton", "town", " By-the-Sea", " Shore", " Downs", "wood", "moor", " Woods"];
+            string[] main = [ "Stone", "Black", "Green", "Red", "Deer", "Gold", "Silver", "Blue", "Iron", "Last", "Lost"];
+            string[] suffixes = [ "ton", "ville", "ford", " By-the-Sea", " Shore", " Downs", "wood", "moor", "peak", "burg", " Peaks" ," Woods", " Meadow", "road"];
 
             string name = "";
             if (rng.NextDouble() < 0.5)
