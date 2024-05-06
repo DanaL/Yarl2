@@ -183,11 +183,11 @@ class PlayerCreator
     {
       case PlayerLineage.Orc:
         var spear = ItemFactory.Get("spear", objDb);
-        spear.Adjectives.Add("old");
+        spear.Traits.Add(new AdjectiveTrait("old"));
         spear.Equiped = true;
         player.Inventory.Add(spear, player.ID);
         var slarmour = ItemFactory.Get("studded leather armour", objDb);
-        slarmour.Adjectives.Add("battered");
+        slarmour.Traits.Add(new AdjectiveTrait("battered"));
         slarmour.Equiped = true;
         player.Inventory.Add(slarmour, player.ID);
         break;

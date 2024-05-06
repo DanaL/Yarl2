@@ -285,11 +285,11 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = desc,
       Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY),
-      Adjectives = [adjective]
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY)
     };
     doc.Traits.Add(new FlammableTrait());
     doc.Traits.Add(new WrittenTrait());
+    doc.Traits.Add(new AdjectiveTrait(adjective));
 
     var rt = new ReadableTrait(documentText)
     {

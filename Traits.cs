@@ -97,6 +97,13 @@ abstract class ActionTrait : BasicTrait
   }
 }
 
+class AdjectiveTrait(string adj) : Trait
+{
+  public string Adj { get; set; } = adj;
+
+  public override string AsText() => $"Adjective#{Adj}";
+}
+
 class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
@@ -1063,6 +1070,10 @@ class TraitFactory
         {
           ArmourMod = int.Parse(pieces[1])
         };
+      case "Adjective":
+      {
+          return new AdjectiveTrait(pieces[1]);
+      }
       case "Ammo":
         Enum.TryParse(pieces[3], out DamageType ammoDt);
         return new AmmoTrait()

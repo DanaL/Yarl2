@@ -34,7 +34,6 @@ class Item : GameObj, IEquatable<Item>
   public char Slot { get; set; }
   public bool Equiped { get; set; } = false;
   public ulong ContainedBy { get; set; } = 0;
-  public List<string> Adjectives { get; set; } = [];
   public int Value { get; set; }
   int _z = DEFAULT_Z;
 
@@ -45,13 +44,9 @@ class Item : GameObj, IEquatable<Item>
   }
 
   string CalcFullName()
-  {    
-    string name = Name;
-
-    if (Adjectives.Count == 1)
-      name = $"{Adjectives[0]} {Name}";
-    else if (Adjectives.Count > 1)
-      name = $"{string.Join(", ", Adjectives)} {Name}";
+  {        
+    string adjectives = string.Join(", ", Traits.OfType<AdjectiveTrait>().Select(a => a.Adj));
+    string name = $"{adjectives} {Name}".Trim();
 
     string traitDescs = string.Join(' ', Traits.OfType<BasicTrait>().Select(t => t.Desc()));
     if (traitDescs.Length > 0)
@@ -65,7 +60,7 @@ class Item : GameObj, IEquatable<Item>
   public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
   {
     return Traits.OfType<BasicTrait>()
-                  .Where(t => t.Aura)
+                 .Where(t => t.Aura)
                  .Select(t => (ID, t.Radius, t.Effect))
                  .ToList();
   }

@@ -544,8 +544,7 @@ class GameObjDBSave
       Slot = fields[6][0],
       Equiped = bool.Parse(fields[7].ToLower()),
       ContainedBy = ulong.Parse(fields[8]),
-      Adjectives = [.. fields[9].Split(',')],
-      Value = int.Parse(fields[10]),
+      Value = int.Parse(fields[9]),
     };
 
     // Parse the traits
@@ -558,7 +557,7 @@ class GameObjDBSave
       }
     }
 
-    item.SetZ(int.Parse(fields[11]));
+    item.SetZ(int.Parse(fields[10]));
 
     return item;
   }
@@ -650,8 +649,6 @@ class GameObjDBSave
         sb.Append(item.Equiped);
         sb.Append('|');
         sb.Append(item.ContainedBy);
-        sb.Append('|');
-        sb.Append(string.Join(',', item.Adjectives));
         sb.Append('|');
         sb.Append(item.Value);
         sb.Append('|');
