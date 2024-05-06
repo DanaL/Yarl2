@@ -187,6 +187,13 @@ class AimAccumulator : InputAccumulator
     _gs = gs;
     FindTargets();
 
+    // If there's only one valid target, select it by default
+    if (_monsters.Count == 1)
+    {
+      _targeted = 0;
+      _target = _monsters[0];
+    }
+
     _anim = new AimAnimation(_ui, gs, start, _target);
     _ui.RegisterAnimation(_anim);
   }
