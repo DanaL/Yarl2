@@ -1352,25 +1352,21 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
 
       var acc = new AimAccumulator(ui, GameState, player.Loc, 9);
 
-      // Generate a generic arrow but replace its damage with the
-      // bow's since different types of bows will do different dmg
-      var ammo = ItemFactory.Get("arrow", GameState.ObjDb);
+      Item arrow;
       if (item.Traits.OfType<AmmoTrait>().Any())
       {
         var ammoTrait = item.Traits.OfType<AmmoTrait>().First();
-        ammo.Traits = ammo.Traits.Where(t => t is not DamageTrait).ToList();
-        ammo.Traits.Add(new DamageTrait()
-        { 
-          DamageDie = ammoTrait.DamageDie, 
-          NumOfDie = ammoTrait.NumOfDie,
-          DamageType = ammoTrait.DamageType
-        });
+        arrow = ammoTrait.Arrow();
+      }
+      else
+      {
+        arrow = ItemFactory.Get("arrow", GameState.ObjDb);
       }
 
       int archeryBonus = 0;
       if (player.Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
         archeryBonus = ab.Curr;
-      var missleAction = new ArrowShotAction(GameState, player, ammo, archeryBonus); 
+      var missleAction = new ArrowShotAction(GameState, player, arrow, archeryBonus); 
       player.ReplacePendingAction(missleAction, acc);
       result.EnergyCost = 0.0;
       result.Complete = false;

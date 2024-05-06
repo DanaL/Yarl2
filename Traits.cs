@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Xml.Linq;
+
 namespace Yarl2;
 
 record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
@@ -381,6 +383,8 @@ class AttackTrait : BasicTrait
   public override string AsText() => $"Attack#{Bonus}";
 }
 
+// Generate a generic arrow but replace its damage with the
+// bow's since different types of bows will do different dmg
 class AmmoTrait : Trait
 {
   public int DamageDie { get; set; }
@@ -388,6 +392,23 @@ class AmmoTrait : Trait
   public DamageType DamageType { get; set; }
 
   public override string AsText() => $"Ammo#{DamageDie}#{NumOfDie}#{DamageType}";
+
+  public Item Arrow()
+  {    
+    Item arrow = new()
+    {
+      Name = "arrow",
+      Type = ItemType.Weapon,
+      Value = 0,
+      Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN)
+    };
+
+    arrow.Traits.Add(new AttackTrait() { Bonus = 0 });
+    arrow.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType });
+    arrow.Traits.Add(new StackableTrait());
+
+    return arrow;
+  }
 }
 
 class DamageTrait : Trait
