@@ -15,7 +15,7 @@ using System.Text.Json.Serialization;
 
 namespace Yarl2;
 
-record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb);
+record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo);
 
 // When I started working on saving the game, I had a bunch of problems with
 // Json serialize. It particularly seemed to hate that Tile was an abstract
@@ -35,7 +35,7 @@ internal class Serialize
   {
     var objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
 
-    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave);
+    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo);
 
     var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                     new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
@@ -65,6 +65,8 @@ internal class Serialize
     {
       gs.RegisterForEvent(GameEventType.EndOfRound, l);
     }
+
+    Item.IDInfo = sgi.IDInfo;
 
     return gs;
   }

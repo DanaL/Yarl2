@@ -369,7 +369,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 {
   public string Spell { get; set; } = spell;
 
-  public override string AsText() => $"UseSimpleTrait#{Spell}";
+  public override string AsText() => $"UseSimple#{Spell}";
 
   public UseResult Use(Actor user, GameState gs, int row, int col) => Spell switch
   {
@@ -1052,6 +1052,18 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
         gs.WriteMessages([msg], "");
       }
     }
+  }
+}
+
+class WandTrait : Trait, IUSeable
+{
+  public int Charges { get; set; }
+
+  public override string AsText() => $"Wand#{Charges}";
+
+  public UseResult Use(Actor user, GameState gs, int row, int col)
+  {
+    throw new NotImplementedException();
   }
 }
 

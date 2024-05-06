@@ -241,6 +241,8 @@ class PlayerCreator
     player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get("wand of magic missiles", objDb), player.ID);
+
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);

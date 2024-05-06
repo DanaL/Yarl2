@@ -175,6 +175,17 @@ class PreGameHandler(UserInterface ui)
     }
   }
 
+  static void SetItemIDInfo(Random rng)
+  {
+    List<string> wandMaterials = [ "maple", "oak", "birch", "ebony", "tin", "glass", "iron", "silver", "balsa" ];
+    
+    int j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of magic missiles", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
+    j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of swapping", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+  }
+
   static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
   {
     Campaign campaign;
@@ -258,6 +269,8 @@ class PreGameHandler(UserInterface ui)
 
 ;    Village.Populate(wildernessMap, town, objDb, history, rng);
     campaign.Town = town;
+
+    SetItemIDInfo(rng);
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 

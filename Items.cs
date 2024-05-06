@@ -24,11 +24,14 @@ enum ItemType
   Potion,
   Scroll,
   Trinket,
+  Wand,
   Environment // I'm implementing things like mist as 'items'
 }
 
+record ItemIDInfo(bool Known, string Desc);
 class Item : GameObj, IEquatable<Item>
 {
+  public static Dictionary<string, ItemIDInfo> IDInfo { get; set; } = [];
   public static readonly int DEFAULT_Z = 2;
   public ItemType Type { get; set; }
   public char Slot { get; set; }
@@ -44,9 +47,19 @@ class Item : GameObj, IEquatable<Item>
   }
 
   string CalcFullName()
-  {        
+  {
+    string name;
+    if (Item.IDInfo.TryGetValue(Name, out var idInfo) && idInfo.Known == false)
+    {
+      name = idInfo.Desc;
+    }
+    else
+    {
+      name = Name;
+    }
+
     string adjectives = string.Join(", ", Traits.OfType<AdjectiveTrait>().Select(a => a.Adj));
-    string name = $"{adjectives} {Name}".Trim();
+    name = $"{adjectives} {name}".Trim();
 
     string traitDescs = string.Join(' ', Traits.OfType<BasicTrait>().Select(t => t.Desc()));
     if (traitDescs.Length > 0)
@@ -382,6 +395,15 @@ class ItemFactory
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());
+        break;
+      case "wand of magic missiles":
+        item = new Item()
+        {
+          Name = name,
+          Type = ItemType.Wand,
+          Value = 150,
+          Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE)
+        };
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
