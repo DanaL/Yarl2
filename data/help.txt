@@ -30,6 +30,12 @@ e   Equip/Ready a weapon or piece of armour. Hit e again
     to un-equip the item.
 E   Enter a dungeon, which are indicated on the world map 
     by a Ո symbol
+f   Fire a bow. You can select a target via the movement
+    keys or by tabbing through visible targets. The game  
+    will remember the last monster you targetted. If you 
+    have a bow equiped, it will be automatically selected. 
+    Note that you have unlimited ammunition but may also 
+    find magical or special consumable arrows.
 i   Iventory: view what you are currently carrying
 o   Open a door. You will also automatically open doors by 
     bumping into them.
