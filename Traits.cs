@@ -393,7 +393,7 @@ class AmmoTrait : Trait
 
   public override string AsText() => $"Ammo#{DamageDie}#{NumOfDie}#{DamageType}";
 
-  public Item Arrow()
+  public Item Arrow(GameState gs)
   {    
     Item arrow = new()
     {
@@ -406,6 +406,8 @@ class AmmoTrait : Trait
     arrow.Traits.Add(new AttackTrait() { Bonus = 0 });
     arrow.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType });
     arrow.Traits.Add(new StackableTrait());
+
+    gs.ObjDb.Add(arrow);
 
     return arrow;
   }

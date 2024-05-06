@@ -1356,7 +1356,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
       if (item.Traits.OfType<AmmoTrait>().Any())
       {
         var ammoTrait = item.Traits.OfType<AmmoTrait>().First();
-        arrow = ammoTrait.Arrow();
+        arrow = ammoTrait.Arrow(GameState);
       }
       else
       {
