@@ -1324,7 +1324,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
   public override void ReceiveAccResult(AccumulatorResult result)
   {
-    var locResult = result as LocAccumulatorResult;
+    var locResult = (LocAccumulatorResult)result;
     _target = locResult.Loc;
   }
 }
@@ -1349,25 +1349,8 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     else
     {
       item.Equiped = true;
-
-      var acc = new AimAccumulator(ui, GameState, player.Loc, 9);
-
-      Item arrow;
-      if (item.Traits.OfType<AmmoTrait>().Any())
-      {
-        var ammoTrait = item.Traits.OfType<AmmoTrait>().First();
-        arrow = ammoTrait.Arrow(GameState);
-      }
-      else
-      {
-        arrow = ItemFactory.Get("arrow", GameState.ObjDb);
-      }
-
-      int archeryBonus = 0;
-      if (player.Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
-        archeryBonus = ab.Curr;
-      var missleAction = new ArrowShotAction(GameState, player, arrow, archeryBonus); 
-      player.ReplacePendingAction(missleAction, acc);
+      player.FireReadedBow(item, gs);
+      
       result.EnergyCost = 0.0;
       result.Complete = false;
     }
@@ -1412,7 +1395,7 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var range = 7 + player.Stats[Attribute.Strength].Curr;
     if (range < 2)
       range = 2;
-    var acc = new AimAccumulator(ui, GameState, player.Loc, range);
+    var acc = new AimAccumulator(GameState, player.Loc, range);
     player.ReplacePendingAction(action, acc);
 
     return new ActionResult() { Complete = false, EnergyCost = 0.0 };

@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 enum PlayerLineage
@@ -224,14 +226,14 @@ class Player : Actor, IPerformer, IGameEventListener
   }
 
   static HashSet<(char, ulong)> ShowPickupMenu(UserInterface ui, List<Item> items)
-  {    
+  {
     var counts = new Dictionary<Item, int>();
     foreach (var item in items)
     {
       if (item.HasTrait<StackableTrait>() && counts.TryGetValue(item, out int value))
         counts[item] = value + 1;
       else
-        counts.Add(item, 1);      
+        counts.Add(item, 1);
     }
 
     HashSet<(char, ulong)> options = [];
@@ -241,7 +243,7 @@ class Player : Actor, IPerformer, IGameEventListener
     {
       options.Add((slot, item.ID));
       string desc;
-      if (count > 1) 
+      if (count > 1)
       {
         desc = $"{count} {item.Name.Pluralize()}";
       }
@@ -296,6 +298,28 @@ class Player : Actor, IPerformer, IGameEventListener
     return lines;
   }
 
+  public void FireReadedBow(Item bow, GameState gs)
+  {
+    var acc = new AimAccumulator(gs, Loc, 9);
+
+    Item arrow;
+    if (bow.Traits.OfType<AmmoTrait>().Any())
+    {
+      var ammoTrait = bow.Traits.OfType<AmmoTrait>().First();
+      arrow = ammoTrait.Arrow(gs);
+    }
+    else
+    {
+      arrow = ItemFactory.Get("arrow", gs.ObjDb);
+    }
+
+    int archeryBonus = 0;
+    if (Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
+      archeryBonus = ab.Curr;
+    var missleAction = new ArrowShotAction(gs, this, arrow, archeryBonus);
+    ReplacePendingAction(missleAction, acc);
+  }
+
   public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
   {
     _deferred = newAction;
@@ -329,13 +353,13 @@ class Player : Actor, IPerformer, IGameEventListener
 
   static char DirToKey((int, int) dir) => dir switch
   {
-    (0, -1)  => 'h',
-    (1, 0)   => 'j',
-    (-1, 0)  => 'k',
-    (0, 1)   => 'l',
+    (0, -1) => 'h',
+    (1, 0) => 'j',
+    (-1, 0) => 'k',
+    (0, 1) => 'l',
     (-1, -1) => 'y',
-    (-1, 1)  => 'u',
-    (1, -1)  => 'b',
+    (-1, 1) => 'u',
+    (1, -1) => 'b',
     _ => 'n'
   };
 
@@ -365,33 +389,33 @@ class Player : Actor, IPerformer, IGameEventListener
     Running = true;
     RepeatingCmd = char.ToLower(ch);
     LocsRan = [];
-    
+
     return new NullAction();
   }
 
-  Loc[] RunningToward(char ch) 
+  Loc[] RunningToward(char ch)
   {
     List<(int, int)> next = ch switch
     {
-      'h' => [ (-1, -1), (0, -1), (1, -1), (1, 0), (-1, 0)],
-      'j' => [ (1, -1), (1, 0), (1, 1), (0, 1), (0, -1)],
+      'h' => [(-1, -1), (0, -1), (1, -1), (1, 0), (-1, 0)],
+      'j' => [(1, -1), (1, 0), (1, 1), (0, 1), (0, -1)],
       'k' => [(-1, -1), (-1, 0), (-1, 1), (0, 1), (0, -1)],
-      'l' => [ (-1, 1), (0, 1), (1, 1), (1, 0), (-1, 0)],
-      'y' => [ (0, -1), (-1, -1), (-1, 0), (1, -1), (-1, 1) ],
-      'u' => [ (-1, 0), (-1, 1), (0, 1), (-1, -1), (1, 1) ],
-      'b' => [ (0, -1), (1, -1), (1, 0), (1, -1), (1, 1) ],
-      _ => [ (1, 0), (1, 1), (0, 1), (1, -1), (-1, 1) ]
+      'l' => [(-1, 1), (0, 1), (1, 1), (1, 0), (-1, 0)],
+      'y' => [(0, -1), (-1, -1), (-1, 0), (1, -1), (-1, 1)],
+      'u' => [(-1, 0), (-1, 1), (0, 1), (-1, -1), (1, 1)],
+      'b' => [(0, -1), (1, -1), (1, 0), (1, -1), (1, 1)],
+      _ => [(1, 0), (1, 1), (0, 1), (1, -1), (-1, 1)]
     };
 
-    return next.Select(n => Loc with {  Row = Loc.Row + n.Item1, Col = Loc.Col + n.Item2 })
+    return next.Select(n => Loc with { Row = Loc.Row + n.Item1, Col = Loc.Col + n.Item2 })
                 .Where(l => !LocsRan.Contains(l))
-                .ToArray();    
+                .ToArray();
   }
 
   char UpdateRunning(GameState gs)
   {
     Loc[] nextLocs = RunningToward(RepeatingCmd);
-    
+
     // Running is interrupted by some tiles or sqs with items
     foreach (var loc in nextLocs)
     {
@@ -419,7 +443,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
     var (dr, dc) = KeyToDir(RepeatingCmd);
     var nextLoc = Loc with { Row = Loc.Row + dr, Col = Loc.Col + dc };
-    if (MoveAction.CanMoveTo(this, gs.CurrentMap, nextLoc)) 
+    if (MoveAction.CanMoveTo(this, gs.CurrentMap, nextLoc))
     {
       LocsRan.Add(nextLoc);
       return RepeatingCmd;
@@ -466,7 +490,7 @@ class Player : Actor, IPerformer, IGameEventListener
     }
 
     if (ch != '\0')
-    {      
+    {
       if (_accumulator is not null)
       {
         _accumulator.Input(ch);
@@ -557,10 +581,17 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         // If the player has an equiped bow, automatically select that, otherwise
         // have them pick a bow (and then equip it)
-        string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-        ShowInventory(ui, "Fire what?", instructions);
-        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
-        _deferred = new FireSelectedBowAction(gameState, this);
+        if (Inventory.ReadiedBow() is Item bow)
+        {
+          FireReadedBow(bow, gameState);
+        }
+        else
+        {          
+          string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
+          ShowInventory(ui, "Fire what?", instructions);
+          _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+          _deferred = new FireSelectedBowAction(gameState, this);
+        }
       }
       else if (ch == 't')
       {
@@ -631,7 +662,7 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _accumulator = new HelpScreenAccumualtor(gameState.UIRef());
         _deferred = new NullAction();
-      }      
+      }
       else if (ch == 'X')
       {
         _accumulator = new ExamineAccumulator(gameState, Loc);

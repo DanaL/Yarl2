@@ -178,9 +178,9 @@ class AimAccumulator : InputAccumulator
   readonly List<Loc> _monsters = [];
   int _targeted = -1;
 
-  public AimAccumulator(UserInterface ui, GameState gs, Loc start, int maxRange)
+  public AimAccumulator(GameState gs, Loc start, int maxRange)
   {
-    _ui = ui;
+    _ui = gs.UIRef();
     _start = start;
     _target = start;
     _maxRange = maxRange;
