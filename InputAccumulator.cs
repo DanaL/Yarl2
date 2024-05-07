@@ -200,26 +200,47 @@ class AimAccumulator : InputAccumulator
 
   void FindTargets()
   {
-    foreach (var loc in _gs.LastPlayerFoV)
+    var ui = _gs.UIRef();
+    int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
+    int startCol = _gs.Player.Loc.Col - ui.PlayerScreenCol;
+
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
-      if (Util.Distance(loc, _start) <= _maxRange)
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        var occ = _gs.ObjDb.Occupant(loc);
-        if (occ is null || occ.ID == _gs.Player.ID)
+        var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);
+        if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
+          continue;
+        if (Util.Distance(_start, loc) > _maxRange)
           continue;
 
-        if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
-          continue;
-
-        _monsters.Add(loc);
-
-        if (occ.ID == _gs.LastTarget)
+        if (_gs.ObjDb.Occupied(loc) && loc != _gs.Player.Loc)
         {
-          _targeted = _monsters.Count - 1;
-          _target = loc;
+          _monsters.Add(loc);
         }
       }
     }
+
+    //foreach (var loc in _gs.LastPlayerFoV)
+    //{
+    //  if (Util.Distance(loc, _start) <= _maxRange)
+    //  {
+    //    var occ = _gs.ObjDb.Occupant(loc);
+    //    if (occ is null || occ.ID == _gs.Player.ID)
+    //      continue;
+
+    //    if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
+    //      continue;
+
+    //    _monsters.Add(loc);
+
+    //    if (occ.ID == _gs.LastTarget)
+    //    {
+    //      _targeted = _monsters.Count - 1;
+    //      _target = loc;
+    //    }
+    //  }
+    //}
   }
 
   public override void Input(char ch)
