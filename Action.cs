@@ -1642,8 +1642,23 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
         wand.Used();
       }
 
-      GameState.SwapActors(Actor!, victim);
-      result.Messages.Add(new Message("Bamf!", Actor.Loc));
+      if (Actor!.ID == victim.ID)
+      {        
+        var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} a sense of vertigo followed by existential dread.";
+        result.Messages.Add(new Message(txt, Actor.Loc));
+
+        var confused = new ConfusedTrait() { VictimID = Actor.ID, DC = 15 };
+        if (confused.IsAffected(Actor, GameState))
+        {
+          confused.Apply(victim, GameState);
+          result.Messages.Add(new Message($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} confused.", Actor.Loc));
+        }
+      }
+      else
+      {
+        GameState.SwapActors(Actor!, victim);
+        result.Messages.Add(new Message("Bamf!", Actor.Loc));
+      }      
     }
     else
     {
