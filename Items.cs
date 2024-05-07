@@ -397,17 +397,20 @@ class ItemFactory
         item.Traits.Add(new StackableTrait());
         break;
       case "wand of magic missiles":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Wand,
-          Value = 150,
-          Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE)
-        };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 150, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
         item.Traits.Add(new WandTrait() 
         {
           Charges = 20, // Probably later I'll randomize it
           Effect = "magicmissile",
+          IDed = false
+        });
+        break;
+      case "wand of swap":
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 175, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
+        item.Traits.Add(new WandTrait()
+        {
+          Charges = 15, // Probably later I'll randomize it
+          Effect = "swap",
           IDed = false
         });
         break;

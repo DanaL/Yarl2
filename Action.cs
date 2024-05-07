@@ -1547,8 +1547,9 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
 
   public override ActionResult Execute()
   {
-    var result = base.Execute();
+    ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
+    result.Complete = true;
 
     var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
                           .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
@@ -1616,6 +1617,46 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
   }
 }
 
+class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+{
+  readonly Trait _source = src;
+  Loc _target;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    if (GameState!.ObjDb.Occupant(_target) is Actor victim)
+    {
+      if (_source is WandTrait wand)
+      {
+        Item.IDInfo["wand of swap"] = Item.IDInfo["wand of swap"] with { Known = true };
+        wand.Used();
+      }
+
+      GameState.SwapActors(Actor!, victim);
+      result.Messages.Add(new Message("Bamf!", Actor.Loc));
+    }
+    else
+    {
+      if (_source is IUSeable useable)
+        useable.Used();
+      result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _target = locResult.Loc;
+  }
+
+}
+
 class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
 {
   readonly WandTrait _wand = wand;
@@ -1631,11 +1672,16 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
     if (Actor is not Player player)
       throw new Exception("Boy did something sure go wrong!");
 
+    InputAccumulator acc;
     switch (_wand.Effect)
     {
       case "magicmissile":
-        var acc = new AimAccumulator(GameState!, player.Loc, 7);
+        acc = new AimAccumulator(GameState!, player.Loc, 7);
         player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), acc);
+        break;
+      case "swap":
+        acc = new AimAccumulator(GameState!, player.Loc, 25);
+        player.ReplacePendingAction(new SwapWithMobAction(GameState!, player, _wand), acc);
         break;
     }
     

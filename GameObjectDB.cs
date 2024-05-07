@@ -335,6 +335,7 @@ class GameObjectDB
   }
 
   public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
+  public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
 
   public void ActorMoved(Actor a, Loc from, Loc to)
   {

@@ -182,8 +182,9 @@ class PreGameHandler(UserInterface ui)
     int j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of magic missiles", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
     wandMaterials.RemoveAt(j);
+
     j = rng.Next(wandMaterials.Count);
-    Item.IDInfo.Add("wand of swapping", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    Item.IDInfo.Add("wand of swap", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
   }
 
   static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)

@@ -618,19 +618,35 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
   }
 
+  // At the moment I can't use ResolveActorMove because it calls
+  // ObjDb.ActorMoved() which clears out GameObjDb's memory of who
+  // is at a particular location, which doesn't work while trying to
+  // swap two Mobs. If I change that, I can get rid of some repeated
+  // code in this method
   public void SwapActors(Actor a, Actor b)
   {
-    Loc tmp = a.Loc;
+    Loc startA = a.Loc;
+    Loc startB = b.Loc;
 
     ObjDb.ClearActorLoc(a.Loc);
     ObjDb.ClearActorLoc(b.Loc);
 
-    a.Loc = b.Loc;
+    a.Loc = startB;
+    ObjDb.SetActorToLoc(startB, a.ID);
+    CheckMovedEffects(a, startA, startB);
     
-    ResolveActorMove(b, b.Loc, tmp);
-    b.Loc = tmp;
+    b.Loc = startA;
+    ObjDb.SetActorToLoc(startA, b.ID);
+    CheckMovedEffects(b, startB, startA);
 
-    ResolveActorMove(a, tmp, a.Loc);
+    if (a is Player && startB.DungeonID > 0)
+    {
+      SetDMaps(startB);
+    }
+    else if (b is Player && startA.DungeonID > 0)
+    {
+      SetDMaps(startA);
+    }
   }
 
   public void ResolveActorMove(Actor actor, Loc start, Loc dest)
