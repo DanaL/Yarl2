@@ -542,8 +542,8 @@ class ConfusedTrait : EffectTrait, IGameEventListener
   public ulong VictimID { get; set; }
   public int DC { get; set; }
   public bool Expired { get; set; } = false;
-
-  public override string AsText() => $"Confused#{VictimID}#{DC}";
+  
+  public override string AsText() => $"Confused#{VictimID}#{DC}#{ExpiresOn}";
 
   public bool Listening => throw new NotImplementedException();
 
@@ -562,23 +562,20 @@ class ConfusedTrait : EffectTrait, IGameEventListener
   {
     victim.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(10, 21);
     return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} confused!";
   }
 
   public void EventAlert(GameEventType eventType, GameState gs)
   {
-    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
-      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng))
-      {
-        victim.Traits.Remove(this);
-        Expired = true;
-        string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "regain")} {Grammar.Possessive(victim)} senses!";
-        gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
-        gs.StopListening(GameEventType.EndOfRound, this);
-      }
-    }
+      victim.Traits.Remove(this);
+      Expired = true;
+      string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "regain")} {Grammar.Possessive(victim)} senses!";
+      gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+      gs.StopListening(GameEventType.EndOfRound, this);
+    }    
   }
 }
 
@@ -1281,7 +1278,8 @@ class TraitFactory
         return new ConfusedTrait()
         {
           VictimID = ulong.Parse(pieces[1]),
-          DC = int.Parse(pieces[2])
+          DC = int.Parse(pieces[2]),
+          ExpiresOn = ulong.Parse(pieces[3])
         };
       case "Divider":
         return new DividerTrait();
