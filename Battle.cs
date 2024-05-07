@@ -101,9 +101,10 @@ class Battle
     if (attacker.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
 
-    Message msg = MsgFactory.Phrase(ammo.ID, Verb.Hit, target.ID, 0, true, target.Loc, gs);
+    string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
+    result.Messages.Add(new Message(txt, target.Loc));
     var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
-    ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    ResolveHit(attacker, target, hpLeft, result, gs);
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
     
@@ -163,7 +164,7 @@ class Battle
 
     Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
     var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
-    ResolveHit(attacker, target, hpLeft, result, msg, gs);
+    ResolveHit(attacker, target, hpLeft, result, gs);
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
 
@@ -195,13 +196,13 @@ class Battle
     }
   }
 
-  static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, Message msg, GameState gs)
+  static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
   {
     if (hpLeft < 1)
     {
       if (target is Player)
       {
-        msg = new Message(msg.Text + $" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
+        Message msg = new Message($" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
         result.Messages.Add(msg);
         gs.WriteMessages(result.Messages, "");
       }
@@ -210,8 +211,7 @@ class Battle
         var verb = target.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
         var plural = target.HasTrait<PluralTrait>();
         Message killMsg = MsgFactory.Phrase(target.ID, Verb.Etre, verb, plural, true, target.Loc, gs);
-        msg = new Message(msg.Text + " " + killMsg.Text, target.Loc);
-
+        result.Messages.Add(killMsg);
         if (attacker.ID == gs.Player.ID && target is Mob m)
         {
           int xpv = m.Stats[Attribute.XPValue].Curr;
@@ -224,8 +224,6 @@ class Battle
 
     var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
     gs.UIRef().RegisterAnimation(hitAnim);
-
-    result.Messages.Add(msg);
 
     // Paralyzing gaze only happens in melee range
     if (Util.Distance(attacker.Loc, target.Loc) < 2)
@@ -376,14 +374,29 @@ class Battle
     return result;
   }
 
-  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus)
+  // This is identical to MissileAttack, save for which ability is used for the attack roll. Not
+  // going to merge them just yet in case they diverge as I develop more spells
+  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation anim)
   {
     var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
     if (roll >= target.AC)
     {
+      gs.UIRef().PlayAnimation(anim, gs);
+      ResolveMissileHit(attacker, target, spell, gs, result);
+      result.Complete = true;
+    }
+    else
+    {
+      string txt = $"{spell.FullName.DefArticle().Capitalize()} misses {target.FullName}.";
+      result.Messages.Add(new Message(txt, target.Loc));
+    }
 
+    // Firebolts, ice, should apply their effects to the square they hit
+    foreach (var dmg in spell.Traits.OfType<DamageTrait>())
+    {
+      gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
     }
 
     return result;

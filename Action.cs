@@ -1542,7 +1542,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 {
-  Trait _source = src;
+  readonly Trait _source = src;
   Loc _target;
 
   public override ActionResult Execute()
@@ -1560,7 +1560,8 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.BLUE)
     };
     missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
-    
+    GameState!.ObjDb.Add(missile);
+
     List<Loc> pts = [];
     foreach (var pt in trajectory)
     {
@@ -1568,11 +1569,17 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
         pts.Add(pt);
-            //       var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus);
-    //       result.Messages.AddRange(attackResult.Messages);
-    //       result.EnergyCost = attackResult.EnergyCost;
-    //       if (attackResult.Complete)
-    //         break;
+
+        // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
+        // attack bonus
+        int attackMod = 3;
+        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE));
+        result.Messages.AddRange(attackResult.Messages);
+        if (attackResult.Complete)
+        {
+          pts = [];
+          break;
+        }
       }
       else if (tile.Passable() || tile.PassableByFlight())
       {
