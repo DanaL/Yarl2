@@ -208,39 +208,32 @@ class AimAccumulator : InputAccumulator
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);
-        if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
-          continue;
+        var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);        
         if (Util.Distance(_start, loc) > _maxRange)
           continue;
+        if (!_gs.ObjDb.Occupied(loc) || loc == _gs.Player.Loc)
+          continue;
 
-        if (_gs.ObjDb.Occupied(loc) && loc != _gs.Player.Loc)
+        if (_gs.ObjDb.Occupant(loc) is Actor occ)
         {
-          _monsters.Add(loc);
+          if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
+            continue;
+
+          // Bit of a hackey way to determine if something is visible, but this will cover monsters
+          // seen via mind reading and such
+          if (occ.Glyph.Ch == ui.SqsOnScreen[r, c].Ch)
+          {
+            _monsters.Add(loc);
+
+            if (occ.ID == _gs.LastTarget)
+            {
+              _targeted = _monsters.Count - 1;
+              _target = loc;
+            }
+          }
         }
       }
     }
-
-    //foreach (var loc in _gs.LastPlayerFoV)
-    //{
-    //  if (Util.Distance(loc, _start) <= _maxRange)
-    //  {
-    //    var occ = _gs.ObjDb.Occupant(loc);
-    //    if (occ is null || occ.ID == _gs.Player.ID)
-    //      continue;
-
-    //    if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
-    //      continue;
-
-    //    _monsters.Add(loc);
-
-    //    if (occ.ID == _gs.LastTarget)
-    //    {
-    //      _targeted = _monsters.Count - 1;
-    //      _target = loc;
-    //    }
-    //  }
-    //}
   }
 
   public override void Input(char ch)
