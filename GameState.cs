@@ -30,7 +30,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
 
-  HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
+  public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
   DjikstraMap? DMap { get; set; }
   DjikstraMap? DMapDoors { get; set; }

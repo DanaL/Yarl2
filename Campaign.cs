@@ -507,6 +507,7 @@ class PreGameHandler(UserInterface ui)
     gameState.ObjDb.AddToLoc(player.Loc, player);
     gameState.ToggleEffect(player, player.Loc, TerrainFlag.Lit, true);
     gameState.UpdateFoV();
+    gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
     return gameState;
   }
