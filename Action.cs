@@ -1540,20 +1540,29 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class MagicMissleAction(GameState gs, Actor actor) : Action(gs, actor)
+class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 {
+  Trait _source = src;
   Loc _target;
 
   public override ActionResult Execute()
   {
     var result = base.Execute();
+    result.EnergyCost = 1.0;
 
     var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
                           .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
                           .ToList();
-
+    Item missile = new()
+    {
+      Name = "magic missile",
+      Type = ItemType.Weapon,
+      Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.BLUE)
+    };
+    missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
+    
     List<Loc> pts = [];
-    foreach (var pt in pts)
+    foreach (var pt in trajectory)
     {
       var tile = GameState!.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
@@ -1575,8 +1584,20 @@ class MagicMissleAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
    
-    //var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
-    //GameState!.UIRef().PlayAnimation(anim, GameState);
+    if (_source is WandTrait wand)
+    {
+      Item.IDInfo["wand of magic missiles"] = Item.IDInfo["wand of magic missiles"] with { Known = true };
+      wand.Used();
+    }
+    else if (_source is IUSeable useable) 
+    {
+      useable.Used();
+    }
+
+    var anim = new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE);
+    GameState!.UIRef().PlayAnimation(anim, GameState);
+
+    result.Messages.Add(new Message("Pew pew pew!", Actor.Loc));
 
     return result;
   }
@@ -1607,7 +1628,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
     {
       case "magicmissile":
         var acc = new AimAccumulator(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new MagicMissleAction(GameState!, player), acc);
+        player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), acc);
         break;
     }
     

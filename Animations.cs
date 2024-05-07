@@ -85,6 +85,12 @@ class ArrowAnimation : Animation
 
   public override void Update()
   {
+    if (_frame >= _frames.Count)
+    {
+      Expiry = DateTime.MinValue;
+      return;
+    }
+
     var ui = _gs.UIRef();
     var (loc, ch) = _frames[_frame];
     var sq = new Sqr(_ammoColour, Colours.BLACK, ch);
@@ -95,12 +101,7 @@ class ArrowAnimation : Animation
     {
       _lastFrame = DateTime.Now;
       ++_frame;
-    }
-
-    if (_frame >= _frames.Count)
-    {
-      Expiry = DateTime.MinValue;
-    }
+    }    
   }
 }
 

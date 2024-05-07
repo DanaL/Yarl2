@@ -26,6 +26,7 @@ interface IReadable
 interface IUSeable
 {
   UseResult Use(Actor user, GameState gs, int row, int col);
+  void Used();
 }
 
 interface IEffectApplier
@@ -383,6 +384,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
+
+  public void Used() {}
 }
 
 class AttackTrait : BasicTrait
@@ -893,6 +896,8 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 
     return new UseResult(false, "", action, acc);
   }
+
+  public void Used() {}
 }
 
 // Technically I suppose this is a Count Up not a Count Down...
@@ -972,6 +977,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
   {
     return $"Torch#{OwnerID}#{Lit}#{Fuel}#{Expired}";
   }
+
+  public void Used() {}
 
   public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc)
   {
@@ -1077,11 +1084,16 @@ class WandTrait : Trait, IUSeable, INeedsID
 
   public UseResult Use(Actor user, GameState gs, int row, int col)
   {
-    if (Charges == 0)    
+    if (Charges == 0) 
+    {
+      IDed = true;
       return new UseResult(true, "Nothing happens", new PassAction(), null);
+    }
 
     return new UseResult(true, "", new UseWandAction(gs, user, this), null);  
   }
+
+  public void Used() => --Charges;
 }
 
 class TraitFactory

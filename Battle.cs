@@ -20,7 +20,8 @@ enum DamageType
   Cold,
   Poison,
   Acid,
-  Necrotic
+  Necrotic,
+  Force
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);

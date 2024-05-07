@@ -408,7 +408,7 @@ class ItemFactory
         {
           Charges = 20, // Probably later I'll randomize it
           Effect = "magicmissile",
-          IDed = true
+          IDed = false
         });
         break;
       default:
