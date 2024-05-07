@@ -414,6 +414,15 @@ class ItemFactory
           IDed = false
         });
         break;
+      case "wand of heal monster":
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 25, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
+        item.Traits.Add(new WandTrait()
+        {
+          Charges = 35, // Probably later I'll randomize it
+          Effect = "healmonster",
+          IDed = false
+        });
+        break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
     }

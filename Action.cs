@@ -1675,7 +1675,56 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     var locResult = result as LocAccumulatorResult;
     _target = locResult.Loc;
   }
+}
 
+class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+{
+  readonly Trait _source = src;
+  Loc _target;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+
+    if (GameState!.ObjDb.Occupant(_target) is Actor target)
+    {
+      if (target is Player)
+      {
+        result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+      }
+      else
+      {
+        var healAction = new HealAction(GameState, target, 6, 2);
+        result.AltAction = healAction;
+        result.EnergyCost = 0.0;
+        result.Complete = false;
+      }
+
+      if (_source is WandTrait wand)
+      {
+        Item.IDInfo["wand of heal monster"] = Item.IDInfo["wand of heal monster"] with { Known = true };
+        wand.Used();
+      }
+    }
+    else
+    {
+      result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+    }
+
+    if (_source is IUSeable useable)
+      useable.Used();
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _target = locResult.Loc;
+  }
 }
 
 class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
@@ -1703,6 +1752,10 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
       case "swap":
         acc = new AimAccumulator(GameState!, player.Loc, 25);
         player.ReplacePendingAction(new SwapWithMobAction(GameState!, player, _wand), acc);
+        break;
+      case "healmonster":
+        acc = new AimAccumulator(GameState!, player.Loc, 7);
+        player.ReplacePendingAction(new CastHealMonster(GameState!, player, _wand), acc);
         break;
     }
     
