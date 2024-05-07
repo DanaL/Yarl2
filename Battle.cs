@@ -349,14 +349,17 @@ class Battle
 
   // attackBonus is because at this point I don't know what weapon shot the ammunition so pass
   // bonsuses related to that here
-  public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus)
+  public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
   {
     var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (roll >= target.AC)
-    {
+    {      
+      if (anim is not null)
+        gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, ammo, gs, result);
+
       result.Complete = true;
     }
     else

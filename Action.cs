@@ -100,11 +100,14 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
         if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
         {
           pts.Add(pt);
-          var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus);
+          var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit));
           result.Messages.AddRange(attackResult.Messages);
           result.EnergyCost = attackResult.EnergyCost;
           if (attackResult.Complete)
+          {
+            pts = [];
             break;
+          }
         }
         else if (tile.Passable() || tile.PassableByFlight())
         {
@@ -116,8 +119,11 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
         }
       }
 
-      var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
-      GameState!.UIRef().PlayAnimation(anim, GameState);
+      if (pts.Count > 0)
+      {
+        var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
+        GameState!.UIRef().PlayAnimation(anim, GameState);
+      }
     }
     else
     {
@@ -148,7 +154,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
     {
       var target = GameState!.ObjDb.Occupant(loc);
       if (target is not null)
-        result = Battle.MissileAttack(Actor!, target, GameState, _ammo, _attackBonus);
+        result = Battle.MissileAttack(Actor!, target, GameState, _ammo, _attackBonus, null);
 
       return result;
     }
@@ -1298,7 +1304,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
           // I'm not handling what happens if a projectile hits a friendly or 
           // neutral NPCs
-          var attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo, 0);
+          var attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo, 0, null);
           result.Messages.AddRange(attackResult.Messages);
           result.EnergyCost = attackResult.EnergyCost;
           if (attackResult.Complete)
