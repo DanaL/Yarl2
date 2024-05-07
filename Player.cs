@@ -118,6 +118,14 @@ class Player : Actor, IPerformer, IGameEventListener
     return mod;
   }
 
+  public override int TotalSpellAttackModifier()
+  {
+    int mod = Stats[Attribute.Will].Curr;
+    if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
+      mod += attackBonus.Curr;
+    return mod;
+  }
+
   public override List<Damage> MeleeDamage()
   {
     List<Damage> dmgs = [];

@@ -1540,6 +1540,81 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class MagicMissleAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  Loc _target;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
+                          .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+                          .ToList();
+
+    List<Loc> pts = [];
+    foreach (var pt in pts)
+    {
+      var tile = GameState!.TileAt(pt);
+      if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+      {
+        pts.Add(pt);
+            //       var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus);
+    //       result.Messages.AddRange(attackResult.Messages);
+    //       result.EnergyCost = attackResult.EnergyCost;
+    //       if (attackResult.Complete)
+    //         break;
+      }
+      else if (tile.Passable() || tile.PassableByFlight())
+      {
+        pts.Add(pt);
+      }
+      else
+      {
+        break;
+      }
+    }
+   
+    //var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
+    //GameState!.UIRef().PlayAnimation(anim, GameState);
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _target = locResult.Loc;
+  }
+}
+
+class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
+{
+  readonly WandTrait _wand = wand;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = new()
+    {
+      Complete = false,
+      EnergyCost = 0.0
+    };
+
+    if (Actor is not Player player)
+      throw new Exception("Boy did something sure go wrong!");
+
+    switch (_wand.Effect)
+    {
+      case "magicmissile":
+        var acc = new AimAccumulator(GameState!, player.Loc, 7);
+        player.ReplacePendingAction(new MagicMissleAction(GameState!, player), acc);
+        break;
+    }
+    
+    return result;
+  }
+}
+
 sealed class PassAction : Action
 {
   public PassAction() { }

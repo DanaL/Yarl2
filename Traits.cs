@@ -9,11 +9,14 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Xml.Linq;
-
 namespace Yarl2;
 
 record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
+
+interface INeedsID
+{
+  bool IDed { get; set; }
+}
 
 interface IReadable
 {
@@ -40,11 +43,11 @@ abstract class Trait
 {
   public virtual bool Active => true;
   public abstract string AsText();
+  public virtual string Desc() => "";
 }
 
 abstract class BasicTrait : Trait
 {
-  public virtual string Desc() => "";  
   public virtual bool Aura => false;
   public virtual TerrainFlag Effect => TerrainFlag.None;
   public virtual int Radius { get; set; } = 0;
@@ -1055,15 +1058,29 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
   }
 }
 
-class WandTrait : Trait, IUSeable
+class WandTrait : Trait, IUSeable, INeedsID
 {
   public int Charges { get; set; }
+  public bool IDed { get; set; }
+  public string Effect { get; set; } = "";
+  public override string Desc()
+  {
+    if (!IDed)
+      return "";
+    else if (Charges == 0)
+      return "(empty)";
+    else
+      return $"({Charges})";
+  }
 
-  public override string AsText() => $"Wand#{Charges}";
+  public override string AsText() => $"Wand#{Charges}#{IDed}#{Effect}";
 
   public UseResult Use(Actor user, GameState gs, int row, int col)
   {
-    throw new NotImplementedException();
+    if (Charges == 0)    
+      return new UseResult(true, "Nothing happens", new PassAction(), null);
+
+    return new UseResult(true, "", new UseWandAction(gs, user, this), null);  
   }
 }
 
@@ -1367,6 +1384,13 @@ class TraitFactory
         return new WrittenTrait();
       case "Villager":
         return new VillagerTrait();
+      case "Wand":
+        return new WandTrait()
+        {
+          Charges = int.Parse(pieces[1]),
+          IDed = bool.Parse(pieces[2]),
+          Effect = pieces[3]
+        };
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
         return new SpellActionTrait()

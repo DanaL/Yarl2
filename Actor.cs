@@ -67,6 +67,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public virtual int TotalMeleeAttackModifier() => 0;
   public virtual int TotalMissileAttackModifier(Item weapon) => 0;
+  public virtual int TotalSpellAttackModifier() => 0;
   public virtual int AC => 10;
   public virtual List<Damage> MeleeDamage() => [];
   public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
@@ -246,6 +247,11 @@ class Mob : Actor
   }
 
   public override int TotalMissileAttackModifier(Item weapon)
+  {
+    return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
+  }
+
+  public override int TotalSpellAttackModifier()
   {
     return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }

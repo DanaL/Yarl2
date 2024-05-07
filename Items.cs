@@ -61,7 +61,7 @@ class Item : GameObj, IEquatable<Item>
     string adjectives = string.Join(", ", Traits.OfType<AdjectiveTrait>().Select(a => a.Adj));
     name = $"{adjectives} {name}".Trim();
 
-    string traitDescs = string.Join(' ', Traits.OfType<BasicTrait>().Select(t => t.Desc()));
+    string traitDescs = string.Join(' ', Traits.OfType<Trait>().Select(t => t.Desc()));
     if (traitDescs.Length > 0)
       name = name + " " + traitDescs;
 
@@ -404,6 +404,12 @@ class ItemFactory
           Value = 150,
           Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE)
         };
+        item.Traits.Add(new WandTrait() 
+        {
+          Charges = 20, // Probably later I'll randomize it
+          Effect = "magicmissile",
+          IDed = true
+        });
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

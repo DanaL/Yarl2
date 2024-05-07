@@ -374,4 +374,17 @@ class Battle
 
     return result;
   }
+
+  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus)
+  {
+    var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
+
+    int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
+    if (roll >= target.AC)
+    {
+
+    }
+
+    return result;
+  }
 }
