@@ -1546,6 +1546,73 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+{
+  readonly Trait _source = src;
+  Loc _target;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    // Fireball shoots toward the target and then explodes, but its path may be
+    // interrupted
+    var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
+                          .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+                          .ToList();
+    
+    List<Loc> pts = [];
+    Loc actualLoc = _target;
+    foreach (var pt in trajectory)
+    {      
+      var tile = GameState!.TileAt(pt);
+      if (!(tile.Passable() || tile.PassableByFlight()))
+        break;
+
+      actualLoc = pt;
+      pts.Add(pt);
+
+      if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+        break;      
+    }
+
+    var ui = GameState!.UIRef();
+
+    var anim = new ArrowAnimation(GameState!, pts, Colours.BRIGHT_RED);
+    ui.PlayAnimation(anim, GameState);
+
+    var affected = GameState!.Flood(actualLoc, 3);
+    affected.Add(actualLoc);
+
+    var explosion = new ExplosionAnimation(GameState!)
+    {
+      MainColour = Colours.BRIGHT_RED,
+      AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,
+      Highlight = Colours.WHITE,
+      Centre = actualLoc,
+      Sqs = affected
+    };
+    //ui.RegisterAnimation(explosion);
+    ui.PlayAnimation(explosion, GameState);
+
+    foreach (var pt in affected)
+    {
+      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+    }
+
+    return result;
+  }
+
+  public override void ReceiveAccResult(AccumulatorResult result)
+  {
+    var locResult = result as LocAccumulatorResult;
+    _target = locResult.Loc;
+  }
+}
+
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 {
   readonly Trait _source = src;
@@ -1748,6 +1815,10 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
       case "magicmissile":
         acc = new AimAccumulator(GameState!, player.Loc, 7);
         player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), acc);
+        break;
+      case "fireball":
+        acc = new AimAccumulator(GameState!, player.Loc, 12);
+        player.ReplacePendingAction(new FireballAction(GameState!, player, _wand), acc);
         break;
       case "swap":
         acc = new AimAccumulator(GameState!, player.Loc, 25);

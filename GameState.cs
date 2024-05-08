@@ -794,7 +794,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       foreach (var n in Util.Adj8Locs(curr))
       {
-        if (Util.Distance(curr, n) > radius || !map.InBounds(n.Row, n.Col))
+        if (Util.Distance(start, n) > radius || !map.InBounds(n.Row, n.Col))
           continue;
         if (visited.Contains(n))
           continue;

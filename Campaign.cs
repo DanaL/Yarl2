@@ -189,7 +189,10 @@ class PreGameHandler(UserInterface ui)
 
     j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of heal monster", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
 
+    j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of fireballs", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
   }
 
   static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)

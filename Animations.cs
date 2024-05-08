@@ -105,6 +105,63 @@ class ArrowAnimation : Animation
   }
 }
 
+class ExplosionAnimation(GameState gs) : Animation
+{
+  public Colour MainColour { get; set; }
+  public Colour AltColour1 { get; set; }
+  public Colour AltColour2 {  get; set; }
+  public Colour Highlight { get; set; }
+  public Loc Centre {  get; set; }
+  public HashSet<Loc> Sqs { get; set; } = [];
+  Dictionary<Loc, Sqr> _toDraw = [];
+  int _radius = 0;
+  DateTime _lastFrame;
+  readonly GameState _gs = gs;
+  bool _finalFrame = false;
+
+  public override void Update()
+  {
+    var ui = _gs.UIRef();
+
+    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 125)
+    {      
+      var newSqs = Sqs.Where(s => Util.Distance(s, Centre) == _radius).ToList();
+      if (newSqs.Count == 0 && !_finalFrame)
+      {
+
+        Expiry = DateTime.Now.AddMilliseconds(200);
+        _finalFrame = true;
+      }
+      else
+      {
+        foreach (var loc in newSqs)
+        {
+          double roll = _gs.Rng.NextDouble();
+          Colour colour;
+          if (roll < 0.8)
+            colour = MainColour;
+          else if (roll < 0.9)
+            colour = AltColour1;
+          else
+            colour = AltColour2;
+          _toDraw.Add(loc, new Sqr(Highlight, colour, '*'));
+        }
+
+        ++_radius;
+        _lastFrame = DateTime.Now;
+      }
+    }
+
+    foreach (var pt in _toDraw.Keys)
+    {
+      double roll = _gs.Rng.NextDouble();
+      
+      var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);      
+      ui.SqsOnScreen[scrR, scrC] = _toDraw[pt];
+    }
+  }
+}
+
 class ThrownMissileAnimation : Animation
 {
   readonly GameState _gs;
