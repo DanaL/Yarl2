@@ -667,24 +667,21 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override ActionResult Execute()
   {
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
+    if (item is null)
+      throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
+
+    bool consumable = item.HasTrait<ConsumableTrait>();
+    bool stackable = item.HasTrait<StackableTrait>();
+    bool written = item.HasTrait<WrittenTrait>();
+
     GameState!.ClearMenu();
 
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
     if (useableTraits.Count != 0)
     {
-      var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
-      Item? toUse = Actor.Inventory.RemoveByID(item.ID)
-                      ?? throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
-
-      toUse.Traits = toUse.Traits.Where(t => t is not StackableTrait).ToList();
-
-      if (!toUse.HasTrait<ConsumableTrait>())
-        Actor.Inventory.Add(toUse, Actor.ID);
-
-      if (toUse.HasTrait<WrittenTrait>())
+      if (written)
       {
         // Eventually being blind will prevent you from reading things
-
         if (Actor.HasTrait<ConfusedTrait>())
         {
           string txt = $"{Actor.FullName} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
@@ -693,6 +690,31 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         }
       }
 
+      if (consumable || stackable)
+      {
+        Actor.Inventory.RemoveByID(item.ID);
+
+        // If we are using a stackable item (say, a Torch), get rid of the
+        // stackable trait, then add it back to the inventory
+        if (stackable && !consumable)
+        {
+          item.Traits = item.Traits.Where(t => t is not StackableTrait).ToList();
+          Actor.Inventory.Add(item, Actor.ID);
+        }
+        
+        // Sometimes, when a player with the scholar background reads a scroll,
+        // it won't be consumed.
+        if (consumable && written && Actor is Player player && player.Background == PlayerBackground.Scholar)
+        {
+          double roll = GameState.Rng.NextDouble();
+          if (roll <= 0.2)
+          {
+            Actor.Inventory.Add(item, Actor.ID);
+          }
+        }
+      }
+
+      var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
       bool success = false;
       foreach (IUSeable trait in useableTraits)
       {
