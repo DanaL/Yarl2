@@ -266,7 +266,8 @@ class PlayerCreator
     {
       Loc = new Loc(0, 0, startRow, startCol),
       Lineage = lineage,
-      Background = background
+      Background = background,
+      Energy = 1.0
     };
     player.Stats = RollStats(player.Lineage, player.Background, rng);
     player.Inventory = new Inventory(player.ID, objDb);

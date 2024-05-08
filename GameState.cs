@@ -556,7 +556,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void AddPerformer(IPerformer performer)
   {
-    performer.Energy = 1.0;
+    performer.Energy = performer.Recovery;
     Performers.Add(performer);
   }
 
@@ -579,19 +579,30 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public IPerformer NextPerformer()
   {
-    if (Performers[_currPerformer].Energy < 1.0) {
-      Performers[_currPerformer].Energy += Performers[_currPerformer].Recovery;
-      ++_currPerformer;
-    }
-    
-    if (_currPerformer >= Performers.Count)
-    {
-      ++Turn;
-      _currPerformer = 0;
-      EndOfTurn();
-    }
+    IPerformer nextPerformer;
 
-    return Performers[_currPerformer];    
+    do
+    {
+      nextPerformer = Performers[_currPerformer];
+
+      if (nextPerformer.Energy < 1.0)
+      {
+        nextPerformer.Energy += nextPerformer.Recovery;
+        ++_currPerformer;
+      }
+      else
+      {
+        return nextPerformer;
+      }
+
+      if (_currPerformer >= Performers.Count)
+      {
+        ++Turn;
+        _currPerformer = 0;
+        EndOfTurn();
+      }
+    }
+    while (true);
   }
 
   // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait

@@ -254,14 +254,14 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
-    var dBuilder = new MainDungeonBuilder();
-    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
-    PrinceOfRats(mainDungeon, objDb, rng);
+    //var dBuilder = new MainDungeonBuilder();
+    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+    //PopulateDungeon(rng, objDb, history, mainDungeon);
+    //PrinceOfRats(mainDungeon, objDb, rng);
 
-    //var dBuilder = new ArenaBuilder();
-    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    //PopulateArena(rng, objDb, mainDungeon);
+    var dBuilder = new ArenaBuilder();
+    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    PopulateArena(rng, objDb, mainDungeon);
 
     campaign.AddDungeon(mainDungeon);
 
@@ -335,7 +335,7 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Actor mob = MonsterFactory.Get("screech bat", rng);
+    Actor mob = MonsterFactory.Get("floating eye", rng);
     objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
