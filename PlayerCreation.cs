@@ -179,34 +179,44 @@ class PlayerCreator
 
   public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
   {
+    var leather = ItemFactory.Get("leather armour", objDb);
+    leather.Traits.Add(new AdjectiveTrait("battered"));
+    leather.Equiped = true;
+
     switch (player.Lineage)
     {
       case PlayerLineage.Orc:
         var spear = ItemFactory.Get("spear", objDb);
         spear.Traits.Add(new AdjectiveTrait("old"));
         spear.Equiped = true;
-        player.Inventory.Add(spear, player.ID);
-        var slarmour = ItemFactory.Get("studded leather armour", objDb);
-        slarmour.Traits.Add(new AdjectiveTrait("battered"));
-        slarmour.Equiped = true;
-        player.Inventory.Add(slarmour, player.ID);
+        player.Inventory.Add(spear, player.ID);        
+        player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:
         var axe = ItemFactory.Get("hand axe", objDb);
         axe.Equiped = true;
         player.Inventory.Add(axe, player.ID);
-        var chain = ItemFactory.Get("ringmail", objDb);
-        chain.Equiped = true;
-        player.Inventory.Add(chain, player.ID);
+        var studded = ItemFactory.Get("studded leather armour", objDb);
+        studded.Equiped = true;
+        player.Inventory.Add(studded, player.ID);
         var helmet = ItemFactory.Get("helmet", objDb);
         helmet.Equiped = true;
         player.Inventory.Add(helmet, player.ID);
         break;
       case PlayerLineage.Elf:
         var bow = ItemFactory.Get("longbow", objDb);
+        bow.Equiped = true;
         player.Inventory.Add(bow, player.ID);
         var dagger = ItemFactory.Get("dagger", objDb);
+        dagger.Equiped = true;
         player.Inventory.Add(dagger, player.ID);
+        player.Inventory.Add(leather, player.ID);
+        break;
+      case PlayerLineage.Human:
+        var sword = ItemFactory.Get("shortsword", objDb);
+        sword.Equiped = true;
+        player.Inventory.Add(sword, player.ID);
+        player.Inventory.Add(leather, player.ID);
         break;
     }
 
@@ -227,21 +237,18 @@ class PlayerCreator
     // player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     // player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
 
-    for (int j = 0; j < 2; j++)
-      player.Inventory.Add(ItemFactory.Get("dagger", objDb), player.ID);
-
     // player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
     // player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    // player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    // player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    // player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
     player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
 

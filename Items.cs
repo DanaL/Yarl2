@@ -194,6 +194,10 @@ class ItemFactory
         break;
       case "longsword":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        break;
+      case "shortsword":
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
         break;
       case "rapier":
@@ -240,13 +244,7 @@ class ItemFactory
         item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
         break;
       case "leather armour":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Armour,
-          Value = 20,
-          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN)
-        };
+        item = new Item() { Name = name, Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
         break;
       case "studded leather armour":
