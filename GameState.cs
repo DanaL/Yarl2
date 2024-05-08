@@ -435,14 +435,42 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this);
     if (hpLeft < 1)
     {
-      ActorKilled(actor);
+      ActorKilled(actor, "a fall", null);
     }
 
     return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
   }
 
-  public void ActorKilled(Actor victim)
+  public void ActorKilled(Actor victim, string killedBy, ActionResult? result)
   {
+    if (victim is Player)
+    {      
+      Message msg = new($"Oh noes you've been killed by {killedBy} :(", victim.Loc);
+      UI.AlertPlayer(msg, "", this);
+      UI.KillScreen("You died :(", this);
+      throw new PlayerKilledException();
+    }
+    else if (victim.HasTrait<FinalBossTrait>())
+    {
+      UI.VictoryScreen(victim.FullName, this);
+      throw new VictoryException();
+    }
+    else if (result is not null)
+    {      
+      
+        var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
+        var plural = victim.HasTrait<PluralTrait>();
+
+        Message killMsg = MsgFactory.Phrase(victim.ID, Verb.Etre, verb, plural, true, victim.Loc, this);
+        result.Messages.Add(killMsg);
+    }
+
+    if (victim.ID != Player.ID && victim is Mob m)
+    {
+      int xpv = m.Stats[Attribute.XPValue].Curr;
+      Player.Stats[Attribute.XP].ChangeMax(xpv);
+    }
+
     ObjDb.RemoveActor(victim);
     
     // Need to remove the victim from the Performer queue but also update 
@@ -452,17 +480,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (_currPerformer > performerIndex)
       --_currPerformer;
     Performers.Remove(victim);
-
-    if (victim == Player)
-    {
-      UI.KillScreen("You died :(", this);
-      throw new PlayerKilledException();
-    }
-    else if (victim.HasTrait<FinalBossTrait>()) 
-    {
-      UI.VictoryScreen(victim.FullName, this);
-      throw new VictoryException();
-    }
 
     if (victim.HasTrait<PoorLootTrait>())
     {

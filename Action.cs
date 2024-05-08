@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Yarl2;
 
 class ActionResult
@@ -1557,8 +1559,8 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     result.EnergyCost = 1.0;
     result.Complete = true;
 
-    // Fireball shoots toward the target and then explodes, but its path may be
-    // interrupted
+    // Fireball shoots toward the target and then explodes, but its path 
+    // may be interrupted
     var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
                           .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
                           .ToList();
@@ -1595,12 +1597,35 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
       Centre = actualLoc,
       Sqs = affected
     };
-    //ui.RegisterAnimation(explosion);
-    ui.PlayAnimation(explosion, GameState);
+    ui.RegisterAnimation(explosion);
 
+    int total = 0;
+    for (int j = 0; j < 4; j++)
+      total += GameState.Rng.Next(6) + 1;
+    List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
     foreach (var pt in affected)
     {
       GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      if (GameState.ObjDb.Occupant(pt) is Actor victim)
+      {
+        result.Messages.Add(new Message($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!", pt));
+
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, GameState);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(victim, "a fireball", result);
+        }        
+      }
+    }
+
+    if (_source is WandTrait wand)
+    {
+      Item.IDInfo["wand of fireballs"] = Item.IDInfo["wand of fireballs"] with { Known = true };
+      wand.Used();
+    }
+    else if (_source is IUSeable useable)
+    {
+      useable.Used();
     }
 
     return result;

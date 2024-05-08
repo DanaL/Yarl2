@@ -199,27 +199,8 @@ class Battle
   static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
   {
     if (hpLeft < 1)
-    {
-      if (target is Player)
-      {
-        Message msg = new Message($" Oh noes you've been killed by {attacker.Name.IndefArticle()} :(", target.Loc);
-        result.Messages.Add(msg);
-        gs.WriteMessages(result.Messages, "");
-      }
-      else
-      {
-        var verb = target.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
-        var plural = target.HasTrait<PluralTrait>();
-        Message killMsg = MsgFactory.Phrase(target.ID, Verb.Etre, verb, plural, true, target.Loc, gs);
-        result.Messages.Add(killMsg);
-        if (attacker.ID == gs.Player.ID && target is Mob m)
-        {
-          int xpv = m.Stats[Attribute.XPValue].Curr;
-          attacker.Stats[Attribute.XP].ChangeMax(xpv);
-        }
-      }
-
-      gs.ActorKilled(target);
+    {      
+      gs.ActorKilled(target, attacker.Name.IndefArticle(), result);
     }
 
     var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
