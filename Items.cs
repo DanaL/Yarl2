@@ -149,7 +149,6 @@ class ItemFactory
           Value = 10,
           Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
         break;
       case "dagger":
@@ -160,7 +159,6 @@ class ItemFactory
           Value = 10,
           Glyph = new Glyph(')', Colours.WHITE, Colours.GREY)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
         break;
@@ -172,7 +170,6 @@ class ItemFactory
           Value = 15,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
         break;
       case "battle axe":
@@ -183,7 +180,6 @@ class ItemFactory
           Value = 25,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });
         break;
       case "mace":
@@ -194,19 +190,11 @@ class ItemFactory
           Value = 25,
           Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
         break;
       case "longsword":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Weapon,
-          Value = 25,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
-        };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
-        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
         break;
       case "rapier":
         item = new Item()
@@ -216,7 +204,6 @@ class ItemFactory
           Value = 20,
           Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
         break;
       case "longbow":
@@ -227,7 +214,6 @@ class ItemFactory
           Value = 30,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         // This is for if the player happens to be wielding the bow for some reason
         item.Traits.Add(new DamageTrait() { DamageDie = 1, NumOfDie = 1, DamageType = DamageType.Blunt });
         item.Traits.Add(new AmmoTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing, Range = 9 });
@@ -240,7 +226,6 @@ class ItemFactory
           Value = 2,
           Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
         break;
@@ -252,7 +237,6 @@ class ItemFactory
           Value = 0,
           Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE)
         };
-        item.Traits.Add(new AttackTrait() { Bonus = 0 });
         item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
         break;
       case "leather armour":

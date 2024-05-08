@@ -388,14 +388,6 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
   public void Used() {}
 }
 
-class AttackTrait : BasicTrait
-{
-  public int Bonus { get; set; }
-
-  public override string Desc() => Bonus == 0 ? "" : $"({Bonus})";
-  public override string AsText() => $"Attack#{Bonus}";
-}
-
 // Generate a generic arrow but replace its damage with the
 // bow's since different types of bows will do different dmg
 class AmmoTrait : Trait
@@ -417,7 +409,6 @@ class AmmoTrait : Trait
       Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN)
     };
 
-    arrow.Traits.Add(new AttackTrait() { Bonus = 0 });
     arrow.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType });
     arrow.Traits.Add(new StackableTrait());
 
@@ -1128,11 +1119,6 @@ class TraitFactory
           Part = part,
           ArmourMod = int.Parse(pieces[2]),
           Bonus = int.Parse(pieces[3])
-        };
-      case "Attack":
-        return new AttackTrait()
-        {
-          Bonus = int.Parse(pieces[1])
         };
       case "Cleave":
         return new CleaveTrait();

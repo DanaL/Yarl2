@@ -89,28 +89,12 @@ class Player : Actor, IPerformer, IGameEventListener
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
       mod += attackBonus.Curr;
 
-    AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
-                                                .Where(t => t is AttackTrait)
-                                                .FirstOrDefault()
-                                        ?? new AttackTrait() { Bonus = 0 };
-    mod += attackTrait.Bonus;
-
     return mod;
   }
 
   public override int TotalMeleeAttackModifier()
   {
     int mod = Stats[Attribute.Strength].Curr;
-
-    var weapon = Inventory.ReadiedWeapon();
-    if (weapon is not null)
-    {
-      AttackTrait? attackTrait = (AttackTrait?)weapon.Traits
-                                                      .Where(t => t is AttackTrait)
-                                                      .FirstOrDefault()
-                                      ?? new AttackTrait() { Bonus = 0 };
-      mod += attackTrait.Bonus;
-    }
 
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
       mod += attackBonus.Curr;
