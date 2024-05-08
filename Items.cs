@@ -599,7 +599,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
       }
     }
-    else if (item.Slot != '\0' && !usedSlots.Contains(item.Slot))
+    
+    if (slotToUse == '\0' && item.Slot != '\0' && !usedSlots.Contains(item.Slot))
     {
       slotToUse = item.Slot;
     }
