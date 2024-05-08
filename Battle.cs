@@ -163,6 +163,7 @@ class Battle
       bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
 
     Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
+    result.Messages.Add(msg);
     var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
     ResolveHit(attacker, target, hpLeft, result, gs);
     if (dmgMsg != "")
