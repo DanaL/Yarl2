@@ -21,7 +21,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public int Seed { get; init; } = seed;
   public Random Rng { get; set; } = rng;
   public Map? CurrMap { get; set; }
-  public Options? Options { get; set; } = opts;
+  public Options Options { get; set; } = opts;
   public Player Player { get; set; } = p;
   public int CurrLevel { get; set; }
   public int CurrDungeonID { get; set; }

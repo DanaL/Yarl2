@@ -21,11 +21,22 @@ if (gameState is not null)
 
 namespace Yarl2
 {
+  public class Configuration
+  {
+    public string? Display { get; set; }
+    public int FontSize { get; set; }
+    public bool BumpToOpen { get; set; }
+    public Dictionary<string, string> KeyRemaps { get; set; } = [];
+  }
+
   public class Options
   {
     public string? Display { get; set; }
     public int FontSize { get; set; }
     public bool BumpToOpen { get; set; }
+    public Dictionary<char, string> KeyRemaps { get; set; } = [];
+
+    public Options() { }
 
     public static Options LoadOptions()
     {
@@ -39,7 +50,7 @@ namespace Yarl2
         BumpToOpen = true
       };
 
-      var userDir = new DirectoryInfo(Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+      var userDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
       if (userDir.Exists)
       {
         string optionsPath = "ddoptions.json";
@@ -56,16 +67,9 @@ namespace Yarl2
         if (File.Exists(optionsPath))
         {
           var json = File.ReadAllText(optionsPath);
-          var opts = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+          var opts = JsonSerializer.Deserialize<Options>(json);
           if (opts is not null)
-          {
-            if (opts.TryGetValue("Display", out var displayValue))
-              options.Display = displayValue;
-            if (opts.TryGetValue("FontSize", out var fsValue))
-              options.FontSize = int.Parse(fsValue);
-            if (opts.TryGetValue("BumpToOpen", out var btoValue))
-              options.BumpToOpen = bool.Parse(btoValue);
-          }
+            options = opts;
         }
       }
 
