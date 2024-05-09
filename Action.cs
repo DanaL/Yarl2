@@ -654,11 +654,18 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item is null)
       throw new Exception("Using item in inventory that doesn't exist :O This shouldn't happen :O");
 
+    if (item.Type == ItemType.Bow)
+    {
+      GameState!.UIRef().CloseMenu();
+      ((Player)Actor).FireReadedBow(item, GameState!);
+      return new ActionResult() { Complete = false, EnergyCost = 0.0 };      
+    }
+
     bool consumable = item.HasTrait<ConsumableTrait>();
     bool stackable = item.HasTrait<StackableTrait>();
     bool written = item.HasTrait<WrittenTrait>();
 
-    GameState!.ClearMenu();
+    GameState.ClearMenu();
 
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
     if (useableTraits.Count != 0)
@@ -1332,8 +1339,8 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
   {
     var result = base.Execute();
 
-    var ui = GameState!.UIRef();
-    ui.CloseMenu();
+    GameState!.UIRef().CloseMenu();
+
     var player = Actor as Player;
 
     var (item, _) = player!.Inventory.ItemAt(Choice);
