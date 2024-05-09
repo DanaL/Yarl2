@@ -33,7 +33,7 @@ class Player : Actor, IPerformer, IGameEventListener
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
 
-  Inputer? _accumulator;
+  Inputer? _inputController;
   Action? _deferred;
   public bool Running { get; set; } = false;
   char RepeatingCmd { get; set; }
@@ -313,10 +313,10 @@ class Player : Actor, IPerformer, IGameEventListener
     ReplacePendingAction(missleAction, acc);
   }
 
-  public void ReplacePendingAction(Action newAction, Inputer newAccumulator)
+  public void ReplacePendingAction(Action newAction, Inputer inputer)
   {
     _deferred = newAction;
-    _accumulator = newAccumulator;
+    _inputController = inputer;
   }
 
   static bool IsMoveKey(char ch) => ch switch
@@ -457,6 +457,13 @@ class Player : Actor, IPerformer, IGameEventListener
     return '\0';
   }
 
+  static Loc SingleAdjTile(GameState gs, Loc centre, TileType seeking)
+  {
+    var adj = Util.Adj8Locs(centre)
+                  .Where(loc => gs.TileAt(loc).Type == seeking);
+    return adj.Count() == 1 ? adj.First() : Loc.Nowhere;
+  }
+
   public override Action TakeTurn(GameState gameState)
   {
     UserInterface ui = gameState.UIRef();
@@ -484,27 +491,27 @@ class Player : Actor, IPerformer, IGameEventListener
 
     if (ch != '\0')
     {
-      if (_accumulator is not null)
+      if (_inputController is not null)
       {
-        _accumulator.Input(ch);
-        if (!_accumulator.Done)
+        _inputController.Input(ch);
+        if (!_inputController.Done)
         {
-          if (_accumulator.Msg != "")
-            ui.SetPopup(new Popup(_accumulator.Msg, "", -1, -1));
+          if (_inputController.Msg != "")
+            ui.SetPopup(new Popup(_inputController.Msg, "", -1, -1));
           return new NullAction();
         }
         else
         {
-          if (_accumulator.Success)
+          if (_inputController.Success)
           {
-            _deferred.ReceiveUIResult(_accumulator.GetResult());
-            _accumulator = null;
+            _deferred.ReceiveUIResult(_inputController.GetResult());
+            _inputController = null;
             ui.ClosePopup();
             return _deferred;
           }
           else
           {
-            _accumulator = null;
+            _inputController = null;
             ui.CloseMenu();
             ui.ClosePopup();
             ui.AlertPlayer([new Message("Nevermind.", gameState.Player.Loc)], "", gameState);
@@ -528,7 +535,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'i')
       {
         ShowInventory(ui, "You are carrying:", "", true);
-        _accumulator = new PauseForMoreInputer();
+        _inputController = new PauseForMoreInputer();
         _deferred = new CloseMenuAction(gameState);
       }
       else if (ch == ',')
@@ -552,14 +559,14 @@ class Player : Actor, IPerformer, IGameEventListener
         else
         {
           var opts = ShowPickupMenu(ui, itemStack);
-          _accumulator = new PickUpper(opts);
+          _inputController = new PickUpper(opts);
           _deferred = new PickupItemAction(gameState, this);
         }
       }
       else if (ch == 'a')
       {
         ShowInventory(ui, "Use which item?", "");
-        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
+        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new UseItemAction(gameState, this);
       }
       else if (ch == 'd')
@@ -567,7 +574,7 @@ class Player : Actor, IPerformer, IGameEventListener
         ShowInventory(ui, "Drop what?", "", true);
         HashSet<char> slots = [.. Inventory.UsedSlots()];
         slots.Add('$');
-        _accumulator = new Inventorier(slots);
+        _inputController = new Inventorier(slots);
         _deferred = new DropItemAction(gameState, this);
       }
       else if (ch == 'f')
@@ -582,7 +589,7 @@ class Player : Actor, IPerformer, IGameEventListener
         {          
           string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
           ShowInventory(ui, "Fire what?", instructions);
-          _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
+          _inputController = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
         }
       }
@@ -593,55 +600,63 @@ class Player : Actor, IPerformer, IGameEventListener
         // they're throwing draggers several turns in a row
         string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
         ShowInventory(ui, "Throw what?", instructions);
-        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
+        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
       else if (ch == 'e')
       {
-        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
+        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ToggleEquipedAction(gameState, this);
         ShowInventory(ui, "Equip what?", "");
       }
       else if (ch == 'c')
       {
-        _accumulator = new DirectionalInputer();
+        Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.OpenDoor);
+        if (singleDoor != Loc.Nowhere)
+          return new CloseDoorAction(gameState, this, gameState.CurrentMap) {  Loc = singleDoor };
+
+        _inputController = new DirectionalInputer();
         _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'C')
       {
-        _accumulator = new DirectionalInputer();
+        _inputController = new DirectionalInputer();
         _deferred = new ChatAction(gameState, this);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'o')
       {
-        _accumulator = new DirectionalInputer();
+        Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.ClosedDoor);
+        if (singleDoor != Loc.Nowhere)
+          return new OpenDoorAction(gameState, this, gameState.CurrentMap) { Loc = singleDoor };
+
+        _inputController = new DirectionalInputer();
         _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'Q')
       {
-        _accumulator = new YesOrNoInputer();
+        _inputController = new YesOrNoInputer();
         _deferred = new QuitAction();
         ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
       }
       else if (ch == 'S')
       {
-        _accumulator = new YesOrNoInputer();
+        _inputController = new YesOrNoInputer();
         _deferred = new SaveGameAction();
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
       }
       else if (ch == '*')
       {
         var lines = ui.MessageHistory.Select(m => m.Fmt);
-        _accumulator = new LongMessagerInputer(ui, lines);
+        _inputController = new LongMessagerInputer(ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == '@')
       {
         var lines = CharacterSheet();
-        _accumulator = new LongMessagerInputer(ui, lines);
+        _inputController = new LongMessagerInputer(ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == 'M')
@@ -653,12 +668,12 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == '?')
       {
-        _accumulator = new HelpScreenInputer(gameState.UIRef());
+        _inputController = new HelpScreenInputer(gameState.UIRef());
         _deferred = new NullAction();
       }
       else if (ch == 'X')
       {
-        _accumulator = new Examiner(gameState, Loc);
+        _inputController = new Examiner(gameState, Loc);
         _deferred = new NullAction();
       }
       else if (ch == ' ' || ch == '.')

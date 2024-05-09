@@ -402,7 +402,7 @@ class ShoppingCompletedAction : Action
 
 abstract class DirectionalAction : Action
 {
-  protected Loc _loc { get; set; }
+  public Loc Loc { get; set; }
 
   public DirectionalAction(Actor actor)
   {
@@ -412,7 +412,7 @@ abstract class DirectionalAction : Action
   public override void ReceiveUIResult(UIResult result)
   {
     var dirResult = (DirectionUIResult)result;
-    _loc = Actor!.Loc with { Row = Actor.Loc.Row + dirResult.Row, Col = Actor.Loc.Col + dirResult.Col };
+    Loc = Actor!.Loc with { Row = Actor.Loc.Row + dirResult.Row, Col = Actor.Loc.Col + dirResult.Col };
   }
 }
 
@@ -427,7 +427,7 @@ class ChatAction : DirectionalAction
   {
     var result = new ActionResult() { Complete = false };
 
-    var other = GameState!.ObjDb.Occupant(_loc);
+    var other = GameState!.ObjDb.Occupant(Loc);
 
     if (other is null)
     {
@@ -468,7 +468,7 @@ class CloseDoorAction : DirectionalAction
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false };
-    var door = _map.TileAt(_loc.Row, _loc.Col);
+    var door = _map.TileAt(Loc.Row, Loc.Col);
 
     if (door is Door d)
     {
@@ -478,13 +478,13 @@ class CloseDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, _loc, GameState!);
+        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, Loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door close.";
 
         // Find any light sources tht were affecting the door and update them, since
         // it's now open. (Eventually gotta extend it to any aura type effects)
-        foreach (var src in GameState!.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
+        foreach (var src in GameState!.ObjsAffectingLoc(Loc, TerrainFlag.Lit))
         {
           GameState.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, src.ID);
           GameState.ToggleEffect(src, Actor.Loc, TerrainFlag.Lit, true);
@@ -517,14 +517,14 @@ class OpenDoorAction : DirectionalAction
   public OpenDoorAction(GameState gs, Actor actor, Map map, Loc loc) : base(actor)
   {
     _map = map;
-    _loc = loc;
+    Loc = loc;
     GameState = gs;
   }
 
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false };
-    var door = _map.TileAt(_loc.Row, _loc.Col);
+    var door = _map.TileAt(Loc.Row, Loc.Col);
 
     if (door is Door d)
     {
@@ -534,18 +534,18 @@ class OpenDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Open, "door", false, _loc, GameState!);
+        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Open, "door", false, Loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door open.";
 
         // Find any light sources tht were affecting the door and update them, since
         // it's now open. (Eventually gotta extend it to any aura type effects)
 
-        foreach (var src in GameState!.ObjsAffectingLoc(_loc, TerrainFlag.Lit))
+        foreach (var src in GameState!.ObjsAffectingLoc(Loc, TerrainFlag.Lit))
         {
           GameState.ToggleEffect(src, src.Loc, TerrainFlag.Lit, true);
         }
-        GameState.ToggleEffect(Actor, _loc, TerrainFlag.Lit, true);
+        GameState.ToggleEffect(Actor, Loc, TerrainFlag.Lit, true);
       }
       else if (Actor is Player)
       {
