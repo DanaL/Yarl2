@@ -95,7 +95,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
 interface IBehaviour
 {
   Action CalcAction(Mob actor, GameState gameState);
-  (Action, Inputers?) Chat(Mob actor, GameState gameState);
+  (Action, Inputer?) Chat(Mob actor, GameState gameState);
 }
 
 // I think I'll likely eventually merge this into IBehaviour
@@ -230,7 +230,7 @@ class MonsterBehaviour : IBehaviour
     return CalcMoveAction(actor, gs);
   }
 
-  public (Action, Inputers?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
 }
 
 // Disguised monsters behave differently while they are disguised, but then act like a normal monster
@@ -322,7 +322,7 @@ class VillagePupBehaviour : IBehaviour
       return new MoveAction(gameState, pup, mvOpts[gameState.Rng.Next(mvOpts.Count)]);
   }
 
-  public (Action, Inputers) Chat(Mob animal, GameState gs)
+  public (Action, Inputer) Chat(Mob animal, GameState gs)
   {
     var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
@@ -358,7 +358,7 @@ class PriestBehaviour : IBehaviour
     }
   }
 
-  public (Action, Inputers) Chat(Mob priest, GameState gs)
+  public (Action, Inputer) Chat(Mob priest, GameState gs)
   {
     var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
     sb.Append("\n\n\"It is my duty to look after the spiritual well-being of ");
@@ -439,7 +439,7 @@ class SmithBehaviour : IBehaviour
     return sb.ToString();
   }
 
-  public (Action, Inputers) Chat(Mob actor, GameState gs)
+  public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     var acc = new ShopMenuInputer(actor, Blurb(actor), gs);
     var action = new ShoppingCompletedAction(gs, actor);
@@ -480,7 +480,7 @@ class GrocerBehaviour : IBehaviour
     return new PassAction();    
   }
 
-  public (Action, Inputers) Chat(Mob actor, GameState gs)
+  public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     var sb = new StringBuilder();
     sb.Append("\"Welcome to the ");
@@ -509,7 +509,7 @@ class VeteranBehaviour : IBehaviour, IDialoguer
     return new PassAction();    
   }
 
-  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
@@ -754,7 +754,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
     while (true);
   }
 
-  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
@@ -829,7 +829,7 @@ class Villager1Behaviour : IBehaviour, IDialoguer
     return new PassAction();
   }
 
-  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
@@ -955,7 +955,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
   }
 
-  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);

@@ -265,8 +265,6 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
     return result;
   }
-
-  public override void ReceiveUIResult(UIResult result) { }
 }
 
 class PortalAction : Action
@@ -396,7 +394,7 @@ class ShoppingCompletedAction : Action
 
   public override void ReceiveUIResult(UIResult result)
   {
-    var shopResult = result as ShoppingUIResuilt;
+    var shopResult = (ShoppingUIResuilt) result;
     _invoice = shopResult.Zorkminds;
     _selections = shopResult.Selections;
   }
@@ -643,11 +641,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var objIDResult = (ObjIdUIResult)result;
-    ItemID = objIDResult.ID;
-  }
+  public override void ReceiveUIResult(UIResult result) => ItemID = ((ObjIdUIResult)result).ID;
 }
 
 class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
@@ -730,11 +724,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var menuResult = (MenuUIResult)result;
-    Choice = menuResult.Choice;
-  }
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
 class SummonAction(Loc target, string summons, int count) : Action()
@@ -882,7 +872,7 @@ class MirrorImageAction : Action
     _target = target;
   }
 
-  Mob MakeDuplciate(GameState gs, Actor src)
+  static Mob MakeDuplciate(GameState gs, Actor src)
   { 
     var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit);
     
@@ -1215,11 +1205,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     return new ActionResult() { Complete = successful, Messages = [alert], EnergyCost = cost };
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var count = ((NumericUIResult)result).Amount;
-    _amount = count;
-  }
+  public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
 }
 
 class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
@@ -1248,11 +1234,7 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var count = ((NumericUIResult)result).Amount;
-    _amount = count;
-  }
+  public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
 }
 
 class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
@@ -1371,11 +1353,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     return result;
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var menuResult = (MenuUIResult)result;
-    Choice = menuResult.Choice;
-  }
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
 class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
@@ -1414,11 +1392,7 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     return new ActionResult() { Complete = false, EnergyCost = 0.0 };
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var menuResult = (MenuUIResult)result;
-    Choice = menuResult.Choice;
-  }
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
 class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
@@ -1486,11 +1460,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var menuResult = (MenuUIResult)result;
-    Choice = menuResult.Choice;
-  }
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
 class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
@@ -1546,11 +1516,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveUIResult(UIResult result)
-  {
-    var menuResult = (MenuUIResult)result;
-    Choice = menuResult.Choice;
-  }
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
 class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)

@@ -35,7 +35,7 @@ class Player : Actor, IPerformer, IGameEventListener
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
 
-  Inputers? _accumulator;
+  Inputer? _accumulator;
   Action? _deferred;
   public bool Running { get; set; } = false;
   char RepeatingCmd { get; set; }
@@ -315,7 +315,7 @@ class Player : Actor, IPerformer, IGameEventListener
     ReplacePendingAction(missleAction, acc);
   }
 
-  public void ReplacePendingAction(Action newAction, Inputers newAccumulator)
+  public void ReplacePendingAction(Action newAction, Inputer newAccumulator)
   {
     _deferred = newAction;
     _accumulator = newAccumulator;
