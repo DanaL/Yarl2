@@ -899,7 +899,7 @@ class DungeonMap(Random rng)
 
     ConnectRegions(map, rooms);
     FillInDeadEnds(map);
-    ConnectRooms(map, rooms, rng);
+    ConnectRooms(map, rooms, _rng);
 
     // We want to surround the level with permanent walls
     var finalMap = new Map(width + 2, height + 2, TileType.PermWall);

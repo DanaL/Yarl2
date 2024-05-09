@@ -397,8 +397,12 @@ class ItemFactory
         item.Traits.Add(new WandTrait() { Charges = 35, Effect = "healmonster", IDed = false });
         break;
       case "wand of fireballs":
-        item = new Item() { Name = name, Type = ItemType.Wand, Value = 25, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
         item.Traits.Add(new WandTrait() { Charges = 10, Effect = "fireball", IDed = false });
+        break;
+      case "wand of frost":
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE) };
+        item.Traits.Add(new WandTrait() { Charges = 10, Effect = "frost", IDed = false });
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

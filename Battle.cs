@@ -361,14 +361,15 @@ class Battle
 
   // This is identical to MissileAttack, save for which ability is used for the attack roll. Not
   // going to merge them just yet in case they diverge as I develop more spells
-  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation anim)
+  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation? anim)
   {
     var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
     if (roll >= target.AC)
     {
-      gs.UIRef().PlayAnimation(anim, gs);
+      if (anim is not null)
+        gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, spell, gs, result);
       result.Complete = true;
     }

@@ -262,6 +262,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           }
         }
         break;
+      case DamageType.Cold:
+        break;
       default:
         break;
     }

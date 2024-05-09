@@ -40,7 +40,7 @@ enum GlyphType { Terrain, Item, Mob }
 
 record struct Glyph(char Ch, Colour Lit, Colour Unlit)
 {
-  public override string ToString()
+  public override readonly string ToString()
   {
     return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)}";
   }

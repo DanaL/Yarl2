@@ -38,6 +38,8 @@ enum TileType
   VWindow,
   DeepWater,
   Water,
+  FrozenDeepWater,
+  FrozenWater,
   Sand,
   Grass,
   Tree,
@@ -282,6 +284,8 @@ class TileFactory
   private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
   private static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
   private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
+  private static readonly Tile FrozenDeepWater = new BasicTile(TileType.FrozenDeepWater, true, false, true);
+  private static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -314,6 +318,8 @@ class TileFactory
     TileType.StoneRoad => StoneRoad,
     TileType.CharredGrass => CharredGrass,
     TileType.CharredStump => CharredStump,
+    TileType.FrozenDeepWater => FrozenDeepWater,
+    TileType.FrozenWater => FrozenWater,
     _ => Unknown
   };
 }

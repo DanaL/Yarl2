@@ -423,7 +423,11 @@ partial class Util
       case TileType.CharredGrass:
         return new Glyph('.', Colours.GREY, Colours.DARK_GREY);        
       case TileType.CharredStump:
-        return new Glyph('|', Colours.GREY, Colours.DARK_GREY);        
+        return new Glyph('|', Colours.GREY, Colours.DARK_GREY);
+      case TileType.FrozenDeepWater:
+        return new Glyph('{', Colours.WHITE, Colours.GREY);
+      case TileType.FrozenWater:
+        return new Glyph('{', Colours.WHITE, Colours.GREY);
       default:
         return new Glyph(' ', Colours.BLACK, Colours.BLACK);
     }

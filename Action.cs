@@ -1600,10 +1600,73 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
-class FrostRayAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(gs, actor)
 {
   readonly Trait _source = src;
-  
+  Loc _target;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+        
+    var path = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
+                   .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+                   .ToList();
+
+    Item ray = new()
+    {
+      Name = "ray of frost",
+      Type = ItemType.Weapon,
+      Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE)
+    };
+    ray.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 3, DamageType = DamageType.Cold });
+    GameState!.ObjDb.Add(ray);
+
+    // Ray of frost is a beam so unlike things like magic missle, it doesn't stop 
+    // when it hits an occupant.
+    List<Loc> pts = [];
+    foreach (var pt in path)
+    {
+      var tile = GameState!.TileAt(pt);
+      if (!(tile.Passable() || tile.PassableByFlight()))
+        break;
+      pts.Add(pt);
+    }
+    var anim = new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE);
+    GameState!.UIRef().PlayAnimation(anim, GameState);
+
+    foreach (var pt in pts)
+    {      
+      if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+      {
+        GameState.ApplyDamageEffectToLoc(pt, DamageType.Cold);
+
+        // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
+        // attack bonus
+        int attackMod = 3;
+        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, ray, attackMod, null);
+        result.Messages.AddRange(attackResult.Messages);        
+      }
+
+      var tile = GameState.TileAt(pt);
+    }
+
+    if (_source is WandTrait wand)
+    {
+      Item.IDInfo["wand of frost"] = Item.IDInfo["wand of frost"] with { Known = true };
+      wand.Used();
+    }
+    else if (_source is IUSeable useable)
+    {
+      useable.Used();
+    }
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1639,7 +1702,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
 
         // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
         // attack bonus
-        int attackMod = 3;
+        int attackMod = 5;
         var attackResult = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE));
         result.Messages.AddRange(attackResult.Messages);
         if (attackResult.Complete)
@@ -1808,6 +1871,11 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
       case "healmonster":
         inputer = new Aimer(GameState!, player.Loc, 7);
         player.ReplacePendingAction(new CastHealMonster(GameState!, player, _wand), inputer);
+        break;
+      case "frost":
+        inputer = new Aimer(GameState!, player.Loc, 7);
+        player.ReplacePendingAction(new FrostRayAction(GameState!, player, _wand), inputer);
+        result.Messages.Add(new Message("Which way?", player.Loc));
         break;
     }
     
