@@ -400,14 +400,9 @@ class ShoppingCompletedAction : Action
   }
 }
 
-abstract class DirectionalAction : Action
+abstract class DirectionalAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public Loc Loc { get; set; }
-
-  public DirectionalAction(Actor actor)
-  {
-    Actor = actor;
-  }
 
   public override void ReceiveUIResult(UIResult result)
   {
@@ -416,13 +411,8 @@ abstract class DirectionalAction : Action
   }
 }
 
-class ChatAction : DirectionalAction
-{
-  public ChatAction(GameState gs, Actor actor) : base(actor)
-  {
-    GameState = gs;   
-  }
-
+class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
+{  
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false };
@@ -459,7 +449,7 @@ class CloseDoorAction : DirectionalAction
 {
   readonly Map _map;
 
-  public CloseDoorAction(GameState gs, Actor actor, Map map) : base(actor)
+  public CloseDoorAction(GameState gs, Actor actor, Map map) : base(gs, actor)
   {
     GameState = gs;
     _map = map;
@@ -508,13 +498,13 @@ class OpenDoorAction : DirectionalAction
 {
   readonly Map _map;
 
-  public OpenDoorAction(GameState gs, Actor actor, Map map) : base(actor)
+  public OpenDoorAction(GameState gs, Actor actor, Map map) : base(gs, actor)
   {
     _map = map;
     GameState = gs;
   }
 
-  public OpenDoorAction(GameState gs, Actor actor, Map map, Loc loc) : base(actor)
+  public OpenDoorAction(GameState gs, Actor actor, Map map, Loc loc) : base(gs, actor)
   {
     _map = map;
     Loc = loc;
@@ -1608,6 +1598,12 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   }
 
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
+}
+
+class FrostRayAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+{
+  readonly Trait _source = src;
+  
 }
 
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
