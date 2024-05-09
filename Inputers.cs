@@ -17,7 +17,7 @@ namespace Yarl2;
 // smarter could come up with a cleaner solution but this is what I hit on
 // when I decided to switch my Game Loop to be non-blocking
 
-abstract class InputAccumulator
+abstract class Inputer
 {
   public virtual bool Success { get; set; }
   public virtual bool Done { get; set; }
@@ -25,16 +25,16 @@ abstract class InputAccumulator
 
   public abstract void Input(char ch);
 
-  public virtual AccumulatorResult GetResult()
+  public virtual UIResult GetResult()
   {
-    return new AccumulatorResult();
+    return new UIResult();
   }
 }
 
 record LocDetails(string Title, string Desc, char Ch);
 
 // I might be able to merge some code between this and AimAccumulator
-class ExamineAccumulator : InputAccumulator
+class Examiner : Inputer
 {
   readonly GameState _gs;
   readonly List<Loc> _targets = [];
@@ -42,7 +42,7 @@ class ExamineAccumulator : InputAccumulator
   (int, int) _curr;
   readonly Dictionary<string, string> _cyclopedia;
 
-  public ExamineAccumulator(GameState gs, Loc start)
+  public Examiner(GameState gs, Loc start)
   {
     _gs = gs;    
     FindTargets(start);
@@ -167,7 +167,7 @@ class ExamineAccumulator : InputAccumulator
   }
 }
 
-class AimAccumulator : InputAccumulator
+class Aimer : Inputer
 {
   readonly UserInterface _ui;
   readonly GameState _gs;
@@ -178,7 +178,7 @@ class AimAccumulator : InputAccumulator
   readonly List<Loc> _monsters = [];
   int _targeted = -1;
 
-  public AimAccumulator(GameState gs, Loc start, int maxRange)
+  public Aimer(GameState gs, Loc start, int maxRange)
   {
     _ui = gs.UIRef();
     _start = start;
@@ -284,9 +284,9 @@ class AimAccumulator : InputAccumulator
     _anim.Expiry = DateTime.MinValue;
   }
 
-  public override AccumulatorResult GetResult()
+  public override UIResult GetResult()
   {
-    var result = new LocAccumulatorResult()
+    var result = new LocUIResult()
     {
       Loc = _target
     };
@@ -301,7 +301,7 @@ class AimAccumulator : InputAccumulator
   }
 }
 
-class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
+class NumericInputer(UserInterface ui, string prompt) : Inputer
 {
   UserInterface _ui = ui;
   string _prompt = prompt;
@@ -331,18 +331,18 @@ class NumericAccumulator(UserInterface ui, string prompt) : InputAccumulator
     _ui.SetPopup(new Popup($"{_prompt}\n{_value}", "", -1, -1));
   }
 
-  public override AccumulatorResult GetResult()
+  public override UIResult GetResult()
   {
     if (int.TryParse(_value, out int result))
-      return new NumericAccumulatorResult() { Amount = result };
+      return new NumericUIResult() { Amount = result };
     else
-      return new NumericAccumulatorResult() { Amount = 0 };
+      return new NumericUIResult() { Amount = 0 };
   }
 }
 
 record HelpEntry(string Title, List<string> Entry);
 
-class HelpScreenAccumualtor : InputAccumulator
+class HelpScreenInputer : Inputer
 {
   static readonly int PageSize = UserInterface.ScreenHeight - 6;
   readonly UserInterface _ui;
@@ -351,7 +351,7 @@ class HelpScreenAccumualtor : InputAccumulator
   readonly int _textAreaWidth;
   int _page = 0;
 
-  public HelpScreenAccumualtor(UserInterface ui)
+  public HelpScreenInputer(UserInterface ui)
   {
     _ui = ui;
     _entries = [];
@@ -518,14 +518,14 @@ class HelpScreenAccumualtor : InputAccumulator
   }
 }
 
-class DialogueAccumulator : InputAccumulator
+class Dialoguer : Inputer
 {
   readonly Mob _interlocutor;
   readonly GameState _gs;
   HashSet<char> _currOptions = [];
   char _exitOpt = '\0';
 
-  public DialogueAccumulator(Mob interlocutor, GameState gs)
+  public Dialoguer(Mob interlocutor, GameState gs)
   {
     _interlocutor = interlocutor;
     _gs = gs;
@@ -597,14 +597,14 @@ class ShopMenuItem(char slot, Item item, int stockCount)
   public int SelectedCount { get; set; } = 0;
 }
 
-class ShopMenuAccumulator : InputAccumulator
+class ShopMenuInputer : Inputer
 {
   readonly Mob _shopkeeper;
   readonly GameState _gs;
   readonly Dictionary<char, ShopMenuItem> _menuItems = [];
   readonly string _blurb;
 
-  public ShopMenuAccumulator(Actor shopkeeper, string blurb, GameState gs)
+  public ShopMenuInputer(Actor shopkeeper, string blurb, GameState gs)
   {
     _gs = gs;
     _blurb = blurb;
@@ -647,7 +647,7 @@ class ShopMenuAccumulator : InputAccumulator
     }
   }
 
-  public override AccumulatorResult GetResult() => new ShoppingAccumulatorResult()
+  public override UIResult GetResult() => new ShoppingUIResuilt()
   {
     Zorkminds = TotalInvoice(),
     Selections = _menuItems.Values.Where(i => i.SelectedCount > 0)
@@ -740,7 +740,7 @@ class ShopMenuAccumulator : InputAccumulator
   }
 }
 
-class PickupAccumulator(HashSet<(char, ulong)> options) : InputAccumulator
+class PickUpper(HashSet<(char, ulong)> options) : Inputer
 {
   ulong _choice;
   readonly HashSet<(char, ulong)> _options = options;
@@ -768,13 +768,13 @@ class PickupAccumulator(HashSet<(char, ulong)> options) : InputAccumulator
     }
   }
 
-  public override AccumulatorResult GetResult() => new ObjIDAccumulatorResult()
+  public override UIResult GetResult() => new ObjIdUIResult()
   {
     ID = _choice
   };
 }
 
-class InventoryAccumulator(HashSet<char> options) : InputAccumulator
+class Inventorier(HashSet<char> options) : Inputer
 {
   char _choice;
   readonly HashSet<char> _options = options;
@@ -801,16 +801,16 @@ class InventoryAccumulator(HashSet<char> options) : InputAccumulator
     }
   }
 
-  public override AccumulatorResult GetResult()
+  public override UIResult GetResult()
   {
-    return new MenuAccumulatorResult()
+    return new MenuUIResult()
     {
       Choice = _choice
     };
   }
 }
 
-class PauseForMoreAccumulator : InputAccumulator
+class PauseForMoreInputer : Inputer
 {
   bool _keyPressed;
 
@@ -821,7 +821,7 @@ class PauseForMoreAccumulator : InputAccumulator
   public override void Input(char ch) => _keyPressed = true;
 }
 
-class LongMessageAccumulator : InputAccumulator
+class LongMessagerInputer : Inputer
 {
   UserInterface _ui;
   int _row;
@@ -832,7 +832,7 @@ class LongMessageAccumulator : InputAccumulator
   public override bool Done => _done;
   public override bool Success => true;
 
-  public LongMessageAccumulator(UserInterface ui, IEnumerable<string> lines)
+  public LongMessagerInputer(UserInterface ui, IEnumerable<string> lines)
   {
     _ui = ui;
     _lines = lines;
@@ -863,9 +863,9 @@ class LongMessageAccumulator : InputAccumulator
   }
 }
 
-class YesNoAccumulator : InputAccumulator
+class YesOrNoInputer : Inputer
 {
-  public YesNoAccumulator() => Done = false;
+  public YesOrNoInputer() => Done = false;
 
   public override void Input(char ch)
   {
@@ -883,10 +883,10 @@ class YesNoAccumulator : InputAccumulator
   }
 }
 
-class DirectionAccumulator : InputAccumulator
+class DirectionalInputer : Inputer
 {
   (int, int) _result;
-  public DirectionAccumulator() => Done = false;
+  public DirectionalInputer() => Done = false;
 
   public override void Input(char ch)
   {
@@ -907,9 +907,9 @@ class DirectionAccumulator : InputAccumulator
     }
   }
 
-  public override AccumulatorResult GetResult()
+  public override UIResult GetResult()
   {
-    return new DirectionAccumulatorResult()
+    return new DirectionUIResult()
     {
       Row = _result.Item1,
       Col = _result.Item2
@@ -917,35 +917,35 @@ class DirectionAccumulator : InputAccumulator
   }
 }
 
-class AccumulatorResult { }
+class UIResult { }
 
-class LocAccumulatorResult : AccumulatorResult
+class LocUIResult : UIResult
 {
   public Loc Loc { get; set; }
 }
 
-class DirectionAccumulatorResult : AccumulatorResult
+class DirectionUIResult : UIResult
 {
   public int Row { get; set; }
   public int Col { get; set; }
 }
 
-class ObjIDAccumulatorResult: AccumulatorResult
+class ObjIdUIResult: UIResult
 {
   public ulong ID { get; set; }
 }
 
-class MenuAccumulatorResult : AccumulatorResult
+class MenuUIResult : UIResult
 {
   public char Choice { get; set; }
 }
 
-class NumericAccumulatorResult : AccumulatorResult
+class NumericUIResult : UIResult
 {
   public int Amount { get; set; }
 }
 
-class ShoppingAccumulatorResult : AccumulatorResult
+class ShoppingUIResuilt : UIResult
 {
   public List<(char, int)> Selections { get; set; } = [];
   public int Zorkminds { get; set; } = 0;

@@ -146,12 +146,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           // If we are in the dungeon, we'll let the player jump into rivers
           // (and/or they can stumble in while confused, etc)
           GameState.UIRef().SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesOrNoInputer());
         }
         else if (tile.Type == TileType.Chasm)
         {
           GameState.UIRef().SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesNoAccumulator());
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesOrNoInputer());
         }
         else
         {

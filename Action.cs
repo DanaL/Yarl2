@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 class ActionResult
@@ -49,7 +47,7 @@ abstract class Action
     return new ActionResult();
   }
 
-  public virtual void ReceiveAccResult(AccumulatorResult result) { }
+  public virtual void ReceiveUIResult(UIResult result) { }
 }
 
 class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
@@ -135,7 +133,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _loc = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
 }
 
 class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int attackBonus) : Action(gs, actor)
@@ -162,7 +160,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
     }
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _loc = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
 }
 
 class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs, actor)
@@ -268,7 +266,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) { }
+  public override void ReceiveUIResult(UIResult result) { }
 }
 
 class PortalAction : Action
@@ -396,9 +394,9 @@ class ShoppingCompletedAction : Action
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var shopResult = result as ShoppingAccumulatorResult;
+    var shopResult = result as ShoppingUIResuilt;
     _invoice = shopResult.Zorkminds;
     _selections = shopResult.Selections;
   }
@@ -413,9 +411,9 @@ abstract class DirectionalAction : Action
     Actor = actor;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var dirResult = (DirectionAccumulatorResult)result;
+    var dirResult = (DirectionUIResult)result;
     _loc = Actor!.Loc with { Row = Actor.Loc.Row + dirResult.Row, Col = Actor.Loc.Col + dirResult.Col };
   }
 }
@@ -645,9 +643,9 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var objIDResult = (ObjIDAccumulatorResult)result;
+    var objIDResult = (ObjIdUIResult)result;
     ItemID = objIDResult.ID;
   }
 }
@@ -732,9 +730,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
+    var menuResult = (MenuUIResult)result;
     Choice = menuResult.Choice;
   }
 }
@@ -1217,9 +1215,9 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     return new ActionResult() { Complete = successful, Messages = [alert], EnergyCost = cost };
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var count = ((NumericAccumulatorResult)result).Amount;
+    var count = ((NumericUIResult)result).Amount;
     _amount = count;
   }
 }
@@ -1250,9 +1248,9 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var count = ((NumericAccumulatorResult)result).Amount;
+    var count = ((NumericUIResult)result).Amount;
     _amount = count;
   }
 }
@@ -1341,7 +1339,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
@@ -1373,9 +1371,9 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
+    var menuResult = (MenuUIResult)result;
     Choice = menuResult.Choice;
   }
 }
@@ -1410,15 +1408,15 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var range = 7 + player.Stats[Attribute.Strength].Curr;
     if (range < 2)
       range = 2;
-    var acc = new AimAccumulator(GameState, player.Loc, range);
+    var acc = new Aimer(GameState, player.Loc, range);
     player.ReplacePendingAction(action, acc);
 
     return new ActionResult() { Complete = false, EnergyCost = 0.0 };
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
+    var menuResult = (MenuUIResult)result;
     Choice = menuResult.Choice;
   }
 }
@@ -1442,7 +1440,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
       ui.SetPopup(new Popup("How much?", "", -1, -1));
-      var acc = new NumericAccumulator(ui, "How much?");
+      var acc = new NumericInputer(ui, "How much?");
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropMoney, acc);
@@ -1464,7 +1462,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var dropStackAction = new DropStackAction(GameState, Actor, Choice);
       var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
       ui.SetPopup(new Popup(prompt, "", -1, -1));
-      var acc = new NumericAccumulator(ui, prompt);
+      var acc = new NumericInputer(ui, prompt);
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropStackAction, acc);
@@ -1488,9 +1486,9 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
+    var menuResult = (MenuUIResult)result;
     Choice = menuResult.Choice;
   }
 }
@@ -1548,9 +1546,9 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
+  public override void ReceiveUIResult(UIResult result)
   {
-    var menuResult = (MenuAccumulatorResult)result;
+    var menuResult = (MenuUIResult)result;
     Choice = menuResult.Choice;
   }
 }
@@ -1638,7 +1636,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1711,7 +1709,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1761,7 +1759,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1807,7 +1805,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
 class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
@@ -1825,24 +1823,24 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
     if (Actor is not Player player)
       throw new Exception("Boy did something sure go wrong!");
 
-    InputAccumulator acc;
+    Inputer inputer;
     switch (_wand.Effect)
     {
       case "magicmissile":
-        acc = new AimAccumulator(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), acc);
+        inputer = new Aimer(GameState!, player.Loc, 7);
+        player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), inputer);
         break;
       case "fireball":
-        acc = new AimAccumulator(GameState!, player.Loc, 12);
-        player.ReplacePendingAction(new FireballAction(GameState!, player, _wand), acc);
+        inputer = new Aimer(GameState!, player.Loc, 12);
+        player.ReplacePendingAction(new FireballAction(GameState!, player, _wand), inputer);
         break;
       case "swap":
-        acc = new AimAccumulator(GameState!, player.Loc, 25);
-        player.ReplacePendingAction(new SwapWithMobAction(GameState!, player, _wand), acc);
+        inputer = new Aimer(GameState!, player.Loc, 25);
+        player.ReplacePendingAction(new SwapWithMobAction(GameState!, player, _wand), inputer);
         break;
       case "healmonster":
-        acc = new AimAccumulator(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new CastHealMonster(GameState!, player, _wand), acc);
+        inputer = new Aimer(GameState!, player.Loc, 7);
+        player.ReplacePendingAction(new CastHealMonster(GameState!, player, _wand), inputer);
         break;
     }
     

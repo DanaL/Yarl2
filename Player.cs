@@ -35,7 +35,7 @@ class Player : Actor, IPerformer, IGameEventListener
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
 
-  InputAccumulator? _accumulator;
+  Inputers? _accumulator;
   Action? _deferred;
   public bool Running { get; set; } = false;
   char RepeatingCmd { get; set; }
@@ -311,11 +311,11 @@ class Player : Actor, IPerformer, IGameEventListener
       archeryBonus = ab.Curr;
     var missleAction = new ArrowShotAction(gs, this, arrow, archeryBonus);
 
-    var acc = new AimAccumulator(gs, Loc, range);
+    var acc = new Aimer(gs, Loc, range);
     ReplacePendingAction(missleAction, acc);
   }
 
-  public void ReplacePendingAction(Action newAction, InputAccumulator newAccumulator)
+  public void ReplacePendingAction(Action newAction, Inputers newAccumulator)
   {
     _deferred = newAction;
     _accumulator = newAccumulator;
@@ -499,7 +499,7 @@ class Player : Actor, IPerformer, IGameEventListener
         {
           if (_accumulator.Success)
           {
-            _deferred.ReceiveAccResult(_accumulator.GetResult());
+            _deferred.ReceiveUIResult(_accumulator.GetResult());
             _accumulator = null;
             ui.ClosePopup();
             return _deferred;
@@ -530,7 +530,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'i')
       {
         ShowInventory(ui, "You are carrying:", "", true);
-        _accumulator = new PauseForMoreAccumulator();
+        _accumulator = new PauseForMoreInputer();
         _deferred = new CloseMenuAction(gameState);
       }
       else if (ch == ',')
@@ -547,21 +547,21 @@ class Player : Actor, IPerformer, IGameEventListener
           var a = new PickupItemAction(gameState, this);
           // A bit kludgy but this sets up the Action as though
           // the player had selected the first item in a list of one
-          var r = new ObjIDAccumulatorResult() { ID = itemStack[0].ID };
-          a.ReceiveAccResult(r);
+          var r = new ObjIdUIResult() { ID = itemStack[0].ID };
+          a.ReceiveUIResult(r);
           return a;
         }
         else
         {
           var opts = ShowPickupMenu(ui, itemStack);
-          _accumulator = new PickupAccumulator(opts);
+          _accumulator = new PickUpper(opts);
           _deferred = new PickupItemAction(gameState, this);
         }
       }
       else if (ch == 'a')
       {
         ShowInventory(ui, "Use which item?", "");
-        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new UseItemAction(gameState, this);
       }
       else if (ch == 'd')
@@ -569,7 +569,7 @@ class Player : Actor, IPerformer, IGameEventListener
         ShowInventory(ui, "Drop what?", "", true);
         HashSet<char> slots = [.. Inventory.UsedSlots()];
         slots.Add('$');
-        _accumulator = new InventoryAccumulator(slots);
+        _accumulator = new Inventorier(slots);
         _deferred = new DropItemAction(gameState, this);
       }
       else if (ch == 'f')
@@ -584,7 +584,7 @@ class Player : Actor, IPerformer, IGameEventListener
         {          
           string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
           ShowInventory(ui, "Fire what?", instructions);
-          _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+          _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
         }
       }
@@ -595,55 +595,55 @@ class Player : Actor, IPerformer, IGameEventListener
         // they're throwing draggers several turns in a row
         string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
         ShowInventory(ui, "Throw what?", instructions);
-        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
       else if (ch == 'e')
       {
-        _accumulator = new InventoryAccumulator([.. Inventory.UsedSlots()]);
+        _accumulator = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ToggleEquipedAction(gameState, this);
         ShowInventory(ui, "Equip what?", "");
       }
       else if (ch == 'c')
       {
-        _accumulator = new DirectionAccumulator();
+        _accumulator = new DirectionalInputer();
         _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'C')
       {
-        _accumulator = new DirectionAccumulator();
+        _accumulator = new DirectionalInputer();
         _deferred = new ChatAction(gameState, this);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'o')
       {
-        _accumulator = new DirectionAccumulator();
+        _accumulator = new DirectionalInputer();
         _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
         ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
       }
       else if (ch == 'Q')
       {
-        _accumulator = new YesNoAccumulator();
+        _accumulator = new YesOrNoInputer();
         _deferred = new QuitAction();
         ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
       }
       else if (ch == 'S')
       {
-        _accumulator = new YesNoAccumulator();
+        _accumulator = new YesOrNoInputer();
         _deferred = new SaveGameAction();
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
       }
       else if (ch == '*')
       {
         var lines = ui.MessageHistory.Select(m => m.Fmt);
-        _accumulator = new LongMessageAccumulator(ui, lines);
+        _accumulator = new LongMessagerInputer(ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == '@')
       {
         var lines = CharacterSheet();
-        _accumulator = new LongMessageAccumulator(ui, lines);
+        _accumulator = new LongMessagerInputer(ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == 'M')
@@ -655,12 +655,12 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == '?')
       {
-        _accumulator = new HelpScreenAccumualtor(gameState.UIRef());
+        _accumulator = new HelpScreenInputer(gameState.UIRef());
         _deferred = new NullAction();
       }
       else if (ch == 'X')
       {
-        _accumulator = new ExamineAccumulator(gameState, Loc);
+        _accumulator = new Examiner(gameState, Loc);
         _deferred = new NullAction();
       }
       else if (ch == ' ' || ch == '.')

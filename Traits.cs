@@ -11,7 +11,7 @@
 
 namespace Yarl2;
 
-record UseResult(bool Successful, string Message, Action? ReplacementAction, InputAccumulator? Accumulator);
+record UseResult(bool Successful, string Message, Action? ReplacementAction, Inputer? Accumulator);
 
 interface INeedsID
 {
@@ -880,7 +880,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
     gs.UIRef().SetPopup(new Popup(msg, doc!.FullName.IndefArticle().Capitalize(), -1, -1));
 
     var action = new CloseMenuAction(gs, 1.0);
-    var acc = new PauseForMoreAccumulator();
+    var acc = new PauseForMoreInputer();
 
     return new UseResult(false, "", action, acc);
   }

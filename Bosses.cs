@@ -182,5 +182,5 @@ class PrinceOfRatsBehaviour : IBehaviour
     return action;
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
 }

@@ -95,7 +95,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
 interface IBehaviour
 {
   Action CalcAction(Mob actor, GameState gameState);
-  (Action, InputAccumulator?) Chat(Mob actor, GameState gameState);
+  (Action, Inputers?) Chat(Mob actor, GameState gameState);
 }
 
 // I think I'll likely eventually merge this into IBehaviour
@@ -230,7 +230,7 @@ class MonsterBehaviour : IBehaviour
     return CalcMoveAction(actor, gs);
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+  public (Action, Inputers?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
 }
 
 // Disguised monsters behave differently while they are disguised, but then act like a normal monster
@@ -322,7 +322,7 @@ class VillagePupBehaviour : IBehaviour
       return new MoveAction(gameState, pup, mvOpts[gameState.Rng.Next(mvOpts.Count)]);
   }
 
-  public (Action, InputAccumulator) Chat(Mob animal, GameState gs)
+  public (Action, Inputers) Chat(Mob animal, GameState gs)
   {
     var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
@@ -331,7 +331,7 @@ class VillagePupBehaviour : IBehaviour
     sb.Append("Arf! Arf!");
 
     gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
-    return (new PassAction(), new PauseForMoreAccumulator());
+    return (new PassAction(), new PauseForMoreInputer());
   }
 }
 
@@ -358,7 +358,7 @@ class PriestBehaviour : IBehaviour
     }
   }
 
-  public (Action, InputAccumulator) Chat(Mob priest, GameState gs)
+  public (Action, Inputers) Chat(Mob priest, GameState gs)
   {
     var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
     sb.Append("\n\n\"It is my duty to look after the spiritual well-being of ");
@@ -366,7 +366,7 @@ class PriestBehaviour : IBehaviour
     sb.Append(".\"\n\n");
 
     gs.UIRef().SetPopup(new Popup(sb.ToString(), priest.FullName, -1, -1));
-    return (new PassAction(), new PauseForMoreAccumulator());
+    return (new PassAction(), new PauseForMoreInputer());
   }
 }
 
@@ -439,9 +439,9 @@ class SmithBehaviour : IBehaviour
     return sb.ToString();
   }
 
-  public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
+  public (Action, Inputers) Chat(Mob actor, GameState gs)
   {
-    var acc = new ShopMenuAccumulator(actor, Blurb(actor), gs);
+    var acc = new ShopMenuInputer(actor, Blurb(actor), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
@@ -480,14 +480,14 @@ class GrocerBehaviour : IBehaviour
     return new PassAction();    
   }
 
-  public (Action, InputAccumulator) Chat(Mob actor, GameState gs)
+  public (Action, Inputers) Chat(Mob actor, GameState gs)
   {
     var sb = new StringBuilder();
     sb.Append("\"Welcome to the ");
     sb.Append(gs.Town.Name);
     sb.Append(" market!\"");
 
-    var acc = new ShopMenuAccumulator(actor, sb.ToString(), gs);
+    var acc = new ShopMenuInputer(actor, sb.ToString(), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
@@ -509,9 +509,9 @@ class VeteranBehaviour : IBehaviour, IDialoguer
     return new PassAction();    
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new DialogueAccumulator(actor, gameState);
+    var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
@@ -754,9 +754,9 @@ class MayorBehaviour : IBehaviour, IDialoguer
     while (true);
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new DialogueAccumulator(actor, gameState);
+    var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
@@ -829,9 +829,9 @@ class Villager1Behaviour : IBehaviour, IDialoguer
     return new PassAction();
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new DialogueAccumulator(actor, gameState);
+    var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
@@ -955,9 +955,9 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
   }
 
-  public (Action, InputAccumulator?) Chat(Mob actor, GameState gameState)
+  public (Action, Inputers?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new DialogueAccumulator(actor, gameState);
+    var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
 
     return (action, acc);
