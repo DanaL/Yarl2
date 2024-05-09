@@ -1350,7 +1350,6 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     }
     else
     {
-      item.Equiped = true;
       player.FireReadedBow(item, gs);
       
       result.EnergyCost = 0.0;
