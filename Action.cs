@@ -135,11 +135,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _loc = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _loc = ((LocAccumulatorResult)result).Loc;
 }
 
 class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int attackBonus) : Action(gs, actor)
@@ -166,11 +162,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
     }
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _loc = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _loc = ((LocAccumulatorResult)result).Loc;
 }
 
 class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs, actor)
@@ -892,16 +884,16 @@ class MirrorImageAction : Action
     _target = target;
   }
 
-  Mob MakeDuplciate()
-  {
-    var glyph = new Glyph(Actor.Glyph.Ch, Actor.Glyph.Lit, Actor.Glyph.Unlit);
+  Mob MakeDuplciate(GameState gs, Actor src)
+  { 
+    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit);
     
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
     // may drift over water/lava 
     var dup = new Mob()
     {
-      Name = Actor.Name,
+      Name = src.Name,
       Glyph = glyph,
       Recovery = 1.0,
       MoveStrategy = new SimpleFlightMoveStrategy()
@@ -915,11 +907,11 @@ class MirrorImageAction : Action
 
     var illusion = new IllusionTrait()
     {
-      SourceID = Actor.ID,
+      SourceID = src.ID,
       ObjID = dup.ID
     };
     dup.Traits.Add(illusion);   
-    GameState.RegisterForEvent(GameEventType.Death, illusion, Actor.ID);
+    gs.RegisterForEvent(GameEventType.Death, illusion, src.ID);
 
     var msg = new DeathMessageTrait() { Message = $"{dup.FullName.Capitalize()} fades away!" };
     dup.Traits.Add(msg);
@@ -952,7 +944,7 @@ class MirrorImageAction : Action
       Loc loc = options[i];
       options.RemoveAt(i);
 
-      var dup = MakeDuplciate();
+      var dup = MakeDuplciate(GameState, Actor!);
       GameState.ObjDb.AddNewActor(dup, loc);
       GameState.AddPerformer(dup);
 
@@ -963,8 +955,8 @@ class MirrorImageAction : Action
 
     // We've created the duplicates so now the caster swaps locations
     // with one of them
-    Mob swap = images[GameState.Rng.Next(images.Count)];
-    GameState.SwapActors(Actor, swap);
+    Mob swap = images[GameState!.Rng.Next(images.Count)];
+    GameState.SwapActors(Actor!, swap);
 
     var result = base.Execute();
     result.Complete = true;
@@ -1127,10 +1119,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     else
     {
       // Teleporting removes the grapple trait
-      var grappled = Actor.Traits.OfType<GrappledTrait>()
-                                 .FirstOrDefault();
-      if (grappled is not null)
-        Actor.Traits.Remove(grappled);
+      Actor.Traits = Actor.Traits.Where(t => t is not GrappledTrait).ToList();
         
       var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
       var mv = new MoveAction(GameState, Actor, landingSpot);
@@ -1352,11 +1341,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = (LocAccumulatorResult)result;
-    _target = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
 }
 
 class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
@@ -1653,11 +1638,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _target = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
 }
 
 class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1730,11 +1711,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _target = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
 }
 
 class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1784,11 +1761,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _target = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
 }
 
 class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
@@ -1834,11 +1807,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     return result;
   }
 
-  public override void ReceiveAccResult(AccumulatorResult result)
-  {
-    var locResult = result as LocAccumulatorResult;
-    _target = locResult.Loc;
-  }
+  public override void ReceiveAccResult(AccumulatorResult result) => _target = ((LocAccumulatorResult)result).Loc;
 }
 
 class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
