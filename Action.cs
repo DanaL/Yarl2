@@ -1638,19 +1638,15 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(g
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
     foreach (var pt in pts)
-    {      
+    {
+      GameState.ApplyDamageEffectToLoc(pt, DamageType.Cold);
+
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
-        GameState.ApplyDamageEffectToLoc(pt, DamageType.Cold);
-
-        // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
-        // attack bonus
         int attackMod = 3;
         var attackResult = Battle.MagicAttack(Actor!, occ, GameState, ray, attackMod, null);
         result.Messages.AddRange(attackResult.Messages);        
       }
-
-      var tile = GameState.TileAt(pt);
     }
 
     if (_source is WandTrait wand)

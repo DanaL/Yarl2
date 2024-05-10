@@ -137,6 +137,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Portal => "a dungeon entrance",
     TileType.CharredGrass => "charred grass",
     TileType.CharredStump => "charred stump",
+    TileType.FrozenWater => "ice",
+    TileType.FrozenDeepWater => "ice",
     _ => "unknown"
   };
 

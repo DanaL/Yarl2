@@ -252,6 +252,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         // Wooden bridges always burn for comedy reasons
         if (tile.Flammable() && (tile.Type == TileType.WoodBridge || Rng.NextDouble() < 0.15))
           fireStarted = true;
+
         foreach (var item in items)
         {
           if (item.HasTrait<FlammableTrait>())
@@ -263,6 +264,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         }
         break;
       case DamageType.Cold:
+        if (tile.Type == TileType.Water)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenWater));
+        }
+        else if (tile.Type == TileType.DeepWater)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
+        }
         break;
       default:
         break;
