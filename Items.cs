@@ -438,11 +438,11 @@ class ItemFactory
     Glyph glyph;
     var roll = gs.Rng.NextDouble();
     if (roll < 0.333)
-      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, Colours.BLACK);
     else if (roll < 0.666)
-      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.BLACK, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_RED, Colours.BLACK);
     else
-      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.BLACK, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, Colours.BLACK);
 
     var fire = new Item()
     {

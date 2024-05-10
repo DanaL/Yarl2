@@ -253,6 +253,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (tile.Flammable() && (tile.Type == TileType.WoodBridge || Rng.NextDouble() < 0.15))
           fireStarted = true;
 
+        if (tile.Type == TileType.FrozenWater)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Water));
+          UI.AlertPlayer(new Message("The ice melts!", loc), "You hear a hiss!", this);
+        }
+        else if (tile.Type == TileType.FrozenDeepWater)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
+          UI.AlertPlayer(new Message("The ice melts!", loc), "You hear a hiss!", this);
+        }
+
         foreach (var item in items)
         {
           if (item.HasTrait<FlammableTrait>())
@@ -264,15 +277,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         }
         break;
       case DamageType.Cold:
+        // Perhaps Cold can destroy poitions on the ground and such?
+
         if (tile.Type == TileType.Water)
         {
           var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenWater));
+          UI.AlertPlayer(new Message("The water freezes!", loc), "You hear a cracking sound!", this);
         }
         else if (tile.Type == TileType.DeepWater)
         {
           var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
+          UI.AlertPlayer(new Message("The water freezes!", loc), "You hear a cracking sound!", this);
         }
         break;
       default:
