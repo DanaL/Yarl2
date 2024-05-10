@@ -52,10 +52,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
   {
     var result = base.Execute();
     bool isPlayer = Actor is Player;
+    Tile currTile = GameState!.TileAt(Actor!.Loc);
 
     // First, is there anything preventing the actor from moving off
     // of the square?
-    foreach (var env in GameState!.ObjDb.EnvironmentsAt(Actor!.Loc))
+    foreach (var env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
       var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
       if (web is not null && !Actor.HasTrait<TeflonTrait>())
@@ -168,7 +169,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Break)} free of the grapple!";        
         result.Messages.Add(new Message(txt, Actor.Loc));
         return ActuallyDoMove(result);
-      }
+      }      
       else
       {
         string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} grappled by ";
@@ -179,6 +180,27 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.Messages.Add(new Message(txt, Actor.Loc));
         result.Complete = true;
         result.EnergyCost = 1.0;        
+      }
+    }
+    else if (currTile.Type == TileType.FrozenDeepWater || currTile.Type == TileType.FrozenWater)
+    {
+      // For slippery tiles, the actor needs to succeed on a dex check before moving, unless 
+      // the Actor is flying or floating
+      if (Actor.HasActiveTrait<FlyingTrait>() || Actor.HasActiveTrait<FloatingTrait>()) 
+      {
+        return ActuallyDoMove(result);
+      }
+      else if (Actor.AbilityCheck(Attribute.Dexterity, 11, GameState.Rng))
+      {
+        return ActuallyDoMove(result);
+      }
+      else
+      {
+        Message msg = new($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "slip")} on the ice!", Actor.Loc);
+        result.Complete = true;
+        result.EnergyCost = 1.0;
+        result.Messages.Add(msg);
+        result.MessageIfUnseen = Actor is Player ? "" : "You hear a clatter!";
       }
     }
     else

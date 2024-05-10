@@ -396,8 +396,8 @@ partial class Util
     TileType.Chasm => new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.CharredStump => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.FrozenDeepWater => new Glyph('}', Colours.WHITE, Colours.GREY, Colours.ICE_BLUE, Colours.LIGHT_GREY),
-    TileType.FrozenWater => new Glyph('}', Colours.WHITE, Colours.GREY, Colours.ICE_BLUE, Colours.LIGHT_GREY),
+    TileType.FrozenDeepWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
+    TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
