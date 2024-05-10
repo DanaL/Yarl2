@@ -692,26 +692,7 @@ abstract class UserInterface
   }
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Sqr zsqr)
-  {
-    static Colour BGColour(GameState gs, Loc loc, char ch, Colour fg)
-    {
-      if (gs.CurrDungeonID == 0)
-        return Colours.BLACK;
-
-      if (!gs.CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
-        return Colours.BLACK;
-
-      // We don't want to light the background of chasm tiles and this is 
-      // a (kludgy) approximation of them
-      if (fg == Colours.FAR_BELOW)
-        return Colours.BLACK;
-
-      if (ch == '.' || ch == '#')
-        return Colours.TORCH_ORANGE;
-
-      return Colours.BLACK;
-    }
-
+  {    
     Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
     {
@@ -721,19 +702,13 @@ abstract class UserInterface
       }
       else
       {
-        Glyph glyph;
-        if (gs.ObjDb.Occupant(loc) is Actor actor)
-          glyph = actor.Glyph;
-        else
-          glyph = remembered[loc];
-        char ch = glyph.Ch;
-        Colour bg = BGColour(gs, loc, ch, glyph.Lit);
-        sqr = new Sqr(glyph.Lit, bg, ch);
+        Glyph glyph = gs.ObjDb.Occupant(loc) is Actor actor ? actor.Glyph : remembered[loc];        
+        sqr = new Sqr(glyph.Lit, glyph.BGLit, glyph.Ch);
       }
     }
     else if (remembered.TryGetValue(loc, out var glyph))
     {
-      sqr = new Sqr(glyph.Unlit, Colours.BLACK, glyph.Ch);
+      sqr = new Sqr(glyph.Unlit, glyph.BGUnlit, glyph.Ch);
     }
     else
     {

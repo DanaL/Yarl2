@@ -18,12 +18,12 @@ enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted }
 record struct GameEvent(GameEventType Type, char Value);
 record Sqr(Colour Fg, Colour Bg, char Ch);
 
+enum Dir { North, South, East, West }
+
 // I didn't want to be beholden to someone else's colour class and anyhow
 // Bearlib's didn't have a comparison operator implemented, which was 
 // inconvenient for me
 record struct Colour(int R, int G, int B, int Alpha);
-
-enum Dir { North, South, East, West }
 
 class Colours
 {
@@ -55,7 +55,8 @@ class Colours
   public static readonly Colour PINK = new(255, 192, 203, 255);
   public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);  
   public static readonly Colour FAINT_PINK = new(178, 102, 255, 125);
-
+  public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
+  
   public static string ColourToText(Colour colour)
   {
     if (colour == WHITE) return "white";
@@ -82,39 +83,41 @@ class Colours
     else if (colour == LIGHT_PURPLE) return "lightpurple";
     else if (colour == PURPLE) return "purple";
     else if (colour == PINK) return "pink";
+    else if (colour == ICE_BLUE) return "iceblue";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
 
-  public static Colour TextToColour(string colour)
+  public static Colour TextToColour(string colour) => colour switch
   {
-    if (colour == "white") return WHITE;
-    else if (colour == "black") return BLACK;
-    else if (colour == "grey") return GREY;
-    else if (colour == "lightgrey") return LIGHT_GREY;
-    else if (colour == "darkgrey") return DARK_GREY;
-    else if (colour == "yellow") return YELLOW;
-    else if (colour == "yelloworange") return YELLOW_ORANGE;
-    else if (colour == "lightbrown") return LIGHT_BROWN;
-    else if (colour == "brown") return BROWN;
-    else if (colour == "green") return GREEN;
-    else if (colour == "darkgreen") return DARK_GREEN;
-    else if (colour == "limegreen") return LIME_GREEN;
-    else if (colour == "blue") return BLUE;
-    else if (colour == "lightblue") return LIGHT_BLUE;
-    else if (colour == "darkblue") return DARK_BLUE;
-    else if (colour == "brightred") return BRIGHT_RED;
-    else if (colour == "dullred") return DULL_RED;
-    else if (colour == "torchorange") return TORCH_ORANGE;
-    else if (colour == "torchred") return TORCH_RED;
-    else if (colour == "torchyellow") return TORCH_YELLOW;
-    else if (colour == "farbelow") return FAR_BELOW;
-    else if (colour == "lightpurple") return LIGHT_PURPLE;
-    else if (colour == "purple") return PURPLE;
-    else if (colour == "pink") return PINK;
-    else if (colour == "null") return NULL;
-    else throw new Exception("Hmm I don't know that colour");
-  }
+    "white" => WHITE,
+    "black" => BLACK,
+    "grey" => GREY,
+    "lightgrey" => LIGHT_GREY,
+    "darkgrey" => DARK_GREY,
+    "yellow" => YELLOW,
+    "yelloworange" => YELLOW_ORANGE,
+    "lightbrown" => LIGHT_BROWN,
+    "brown" => BROWN,
+    "green" => GREEN,
+    "darkgreen" => DARK_GREEN,
+    "limegreen" => LIME_GREEN,
+    "blue" => BLUE,
+    "lightblue" => LIGHT_BLUE,
+    "darkblue" => DARK_BLUE,
+    "brightred" => BRIGHT_RED,
+    "dullred" => DULL_RED,
+    "torchorange" => TORCH_ORANGE,
+    "torchred" => TORCH_RED,
+    "torchyellow" => TORCH_YELLOW,
+    "farbelow" => FAR_BELOW,
+    "lightpurple" => LIGHT_PURPLE,
+    "purple" => PURPLE,
+    "pink" => PINK,
+    "iceblue" => ICE_BLUE,
+    "null" => NULL,
+    _ => throw new Exception("Hmm I don't know that colour")
+  };
 }
 
 // Miscellaneous constants used in a few places
@@ -361,13 +364,14 @@ partial class Util
   public static Glyph TileToGlyph(Tile tile)
   {
     switch (tile.Type)
-    {
-      case TileType.DungeonWall:
+    {      
       case TileType.PermWall:
       case TileType.StoneWall:
         return new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
+      case TileType.DungeonWall:
+        return new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK);
       case TileType.DungeonFloor:
-        return new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK);
+        return new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK);
       case TileType.StoneFloor:
         return new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
       case TileType.StoneRoad:
@@ -426,7 +430,7 @@ partial class Util
         return new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
       case TileType.FrozenDeepWater:        
       case TileType.FrozenWater:
-        return new Glyph('{', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK);
+        return new Glyph('}', Colours.WHITE, Colours.GREY, Colours.ICE_BLUE, Colours.BLUE);
       default:
         return new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK);
     }
