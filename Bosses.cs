@@ -26,7 +26,7 @@ class BossFactory
 
   static Mob PrintOfRats(Random rng)
   {
-    var glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY);
+    var glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
     var prince = new Mob()
     {
       Name = "Prince of Rats",
@@ -105,12 +105,12 @@ class PrinceOfRatsBehaviour : IBehaviour
     {
       if (prince.Stats[Attribute.MonsterForm].Curr == HUMAN_FORM)
       {
-        prince.Glyph = new Glyph('r', Colours.GREY, Colours.DARK_GREY);
+        prince.Glyph = new Glyph('r', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
         prince.Stats[Attribute.MonsterForm].SetMax(RAT_FORM);
       }
       else
       {
-        prince.Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY);
+        prince.Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
         prince.Stats[Attribute.MonsterForm].SetMax(HUMAN_FORM);
       }
 

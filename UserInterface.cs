@@ -208,7 +208,7 @@ abstract class UserInterface
           Glyph glyph;
           if (r == playerRow && c == playerCol)
           {
-            glyph = new Glyph('@', Colours.WHITE, Colours.BLACK);
+            glyph = new Glyph('@', Colours.WHITE, Colours.BLACK, Colours.BLACK, Colours.BLACK);
             PlayerScreenRow = screenR;
             PlayerScreenCol = screenC;
           }

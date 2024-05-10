@@ -871,7 +871,7 @@ class MirrorImageAction : Action
 
   static Mob MakeDuplciate(GameState gs, Actor src)
   { 
-    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit);
+    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit, src.Glyph.BGLit, src.Glyph.BGUnlit);
     
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
@@ -1619,7 +1619,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(g
     {
       Name = "ray of frost",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE)
+      Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
     };
     ray.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 3, DamageType = DamageType.Cold });
     GameState!.ObjDb.Add(ray);
@@ -1687,7 +1687,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
     {
       Name = "magic missile",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.BLUE)
+      Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
     };
     missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
     GameState!.ObjDb.Add(missile);

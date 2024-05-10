@@ -108,7 +108,7 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit)
+      Glyph = new Glyph('@', lit, unlit, Colours.BLACK, Colours.BLACK)
     };
   }
 
@@ -352,7 +352,7 @@ class Village
     {
       Name = $"{adj} {dogType}",
       Appearance = $"{adj} {dogType} with {colourDesc} fur",
-      Glyph = new Glyph('d', colour, colour),
+      Glyph = new Glyph('d', colour, colour, Colours.BLACK, Colours.BLACK),
       Loc = RandomOutdoorLoc(map, town, rng)
     };
     pup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);

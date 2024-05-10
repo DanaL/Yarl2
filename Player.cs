@@ -44,7 +44,7 @@ class Player : Actor, IPerformer, IGameEventListener
     Name = name;
     Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                     // when a Player's recover is bolstered by, like, a Potion of Speed or such?
-    Glyph = new Glyph('@', Colours.WHITE, Colours.WHITE);
+    Glyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
   }
 
   public override int Z() => 12;

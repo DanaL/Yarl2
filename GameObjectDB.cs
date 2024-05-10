@@ -38,17 +38,17 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
 
 enum GlyphType { Terrain, Item, Mob }
 
-record struct Glyph(char Ch, Colour Lit, Colour Unlit)
+record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BGLit, Colour BGUnlit)
 {
   public override readonly string ToString()
   {
-    return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)}";
+    return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(BGLit)},{Colours.ColourToText(BGUnlit)}";
   }
 
   public static Glyph TextToGlyph(string text)
   {
     var p = text.Split(',');
-    return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]));
+    return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]), Colours.TextToColour(p[4]));
   }
 }
 
@@ -128,7 +128,7 @@ abstract class GameObj : IZLevel
 // Structure to store where items are in the world
 class GameObjectDB
 {
-  public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK);
+  public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK);
 
   public Dictionary<Loc, List<Item>> _itemLocs = [];
   public Dictionary<Loc, ulong> _actorLocs = [];

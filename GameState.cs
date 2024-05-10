@@ -1041,7 +1041,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             var belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
             ch = belowTile.Ch;
           }
-          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW);
+          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, Colours.BLACK);
         }
       }
     

@@ -285,7 +285,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = desc,
       Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY)
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
     };
     doc.Traits.Add(new FlammableTrait());
     doc.Traits.Add(new WrittenTrait());
@@ -365,7 +365,7 @@ class MainDungeonBuilder : DungeonBuilder
       Name = "tin locket",
       Type = ItemType.Trinket,
       Value = 1,
-      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY)
+      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
     };
     objDb.Add(trinket);
     objDb.SetToLoc(loc, trinket);
