@@ -264,6 +264,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
           UI.AlertPlayer(new Message("The ice melts!", loc), "You hear a hiss!", this);
+          BridgeDestroyedOverWater(loc);
         }
 
         foreach (var item in items)
@@ -319,15 +320,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (type == TileType.Chasm)
           BridgeCollapseOverChasm(loc);
         else if (type == TileType.DeepWater)
-          BridgeCollapseOverWater(loc);
-      }
+          BridgeDestroyedOverWater(loc);
+      }      
     }
 
     if (messages.Count > 0)
       UI.AlertPlayer(messages, "", this);
   }
 
-  void BridgeCollapseOverWater(Loc loc)
+  void BridgeDestroyedOverWater(Loc loc)
   {
   if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
