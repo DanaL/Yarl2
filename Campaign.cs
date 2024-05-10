@@ -280,10 +280,8 @@ class PreGameHandler(UserInterface ui)
       Desc = "Dungeon Entrance"
     });
 
-;    Village.Populate(wildernessMap, town, objDb, history, rng);
+;   Village.Populate(wildernessMap, town, objDb, history, rng);
     campaign.Town = town;
-
-    SetItemIDInfo(rng);
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
 
@@ -483,15 +481,13 @@ class PreGameHandler(UserInterface ui)
     {
       int seed = DateTime.Now.GetHashCode();
       // seed = -83301249 <- fails to find dungeon entrance
-
-      //seed = -1698096328;
-
-      //seed = -1522110263;
-      //seed = 176296748;
+      // seed =  -1187959671 <- infinite loop while starting new game :o
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
+
+      SetItemIDInfo(rng);
 
       player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, _ui, rng);
       _ui.ClearLongMessage();

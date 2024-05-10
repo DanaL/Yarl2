@@ -389,19 +389,19 @@ class ItemFactory
         });
         break;
       case "wand of swap":
-        item = new Item() { Name = name, Type = ItemType.Wand, Value = 175, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 175, Glyph = GlyphForWand(name) };
         item.Traits.Add(new WandTrait() { Charges = 15, Effect = "swap", IDed = false });
         break;
       case "wand of heal monster":
-        item = new Item() { Name = name, Type = ItemType.Wand, Value = 25, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 25, Glyph = GlyphForWand(name) };
         item.Traits.Add(new WandTrait() { Charges = 35, Effect = "healmonster", IDed = false });
         break;
       case "wand of fireballs":
-        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = GlyphForWand(name) };
         item.Traits.Add(new WandTrait() { Charges = 10, Effect = "fireball", IDed = false });
         break;
       case "wand of frost":
-        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = name, Type = ItemType.Wand, Value = 125, Glyph = GlyphForWand(name) };
         item.Traits.Add(new WandTrait() { Charges = 10, Effect = "frost", IDed = false });
         break;
       default:
@@ -411,6 +411,25 @@ class ItemFactory
     objDB.Add(item);
 
     return item;
+  }
+
+  static Glyph GlyphForWand(string name)
+  {
+    string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
+
+    return material switch
+    {
+      "maple wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
+      "oak wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
+      "birch wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
+      "balsa wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
+      "glass wand" => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
+      "silver wand" => new Glyph('/', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
+      "tin wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+      "iron wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+      "ebony wand" => new Glyph('/', Colours.DARK_BLUE, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+      _ => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+    };
   }
 
   public static Item Mist(GameState gs)
