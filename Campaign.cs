@@ -258,14 +258,14 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
-    var dBuilder = new MainDungeonBuilder();
-    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
-    PrinceOfRats(mainDungeon, objDb, rng);
+    // var dBuilder = new MainDungeonBuilder();
+    // var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
+    // PopulateDungeon(rng, objDb, history, mainDungeon);
+    // PrinceOfRats(mainDungeon, objDb, rng);
 
-    //var dBuilder = new ArenaBuilder();
-    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    //PopulateArena(rng, objDb, mainDungeon);
+    var dBuilder = new ArenaBuilder();
+    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    PopulateArena(rng, objDb, mainDungeon);
 
     campaign.AddDungeon(mainDungeon);
 
@@ -337,19 +337,19 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Actor mob = MonsterFactory.Get("floating eye", rng);
+    Actor mob = MonsterFactory.Get("acrid blob", rng);
     objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
-    sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Mob goblin = (Mob)MonsterFactory.Get("goblin", rng);
-    objDb.AddNewActor(goblin, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
+    // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+    // Mob goblin = (Mob)MonsterFactory.Get("goblin", rng);
+    // objDb.AddNewActor(goblin, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
     //sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     //loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
     //Mob skellie = (Mob)MonsterFactory.Get("skeleton", rng);
     //objDb.AddNewActor(skellie, loc);
 
-    AddGargoyle(rng, objDb, dungeon, 0);
+    //AddGargoyle(rng, objDb, dungeon, 0);
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     // loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);

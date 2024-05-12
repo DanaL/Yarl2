@@ -475,7 +475,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result)
   {
     if (victim is Player)
-    {      
+    {            
+      if (result is not null && result.Messages.Count > 0)
+      {
+        UI.AlertPlayer(result.Messages, result.MessageIfUnseen, this);
+      }
+
       Message msg = new($"Oh noes you've been killed by {killedBy} :(", victim.Loc);
       UI.AlertPlayer(msg, "", this);
       UI.KillScreen("You died :(", this);

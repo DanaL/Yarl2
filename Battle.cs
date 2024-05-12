@@ -199,13 +199,37 @@ class Battle
 
   static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
   {
-    if (hpLeft < 1)
-    {      
-      gs.ActorKilled(target, attacker.Name.IndefArticle(), result);
+    static void HitAnim(Actor target, GameState gs)
+    {
+      var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
+      gs.UIRef().RegisterAnimation(hitAnim);
     }
 
-    var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
-    gs.UIRef().RegisterAnimation(hitAnim);
+    if (hpLeft < 1)
+      gs.ActorKilled(target, attacker.Name.IndefArticle(), result);
+    
+    HitAnim(target, gs);
+
+    if (target.HasTrait<AcidSplashTrait>())
+    {
+      foreach (var adj in Util.Adj8Locs(target.Loc))
+      {
+        if (gs.ObjDb.Occupant(adj) is Actor victim)
+        {
+          string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
+          result.Messages.Add(new Message(txt, victim.Loc));
+          int roll = gs.Rng.Next(4) + 1;
+          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs);   
+          
+          HitAnim(victim, gs);
+          
+          if (hpLeftAfterAcid < 1)
+            gs.ActorKilled(victim, "acid", result);
+          if (acidMsg != "")
+            result.Messages.Add(new Message(acidMsg, victim.Loc));
+        }
+      }      
+    }
 
     // Paralyzing gaze only happens in melee range
     if (Util.Distance(attacker.Loc, target.Loc) < 2)

@@ -188,6 +188,11 @@ class MobMissileTrait : ActionTrait
   }
 }
 
+class AcidSplashTrait : Trait
+{
+  public override string AsText() => "AcidSplash";
+}
+
 class ConsumableTrait : Trait
 {
   public override string AsText() => "Consumable";
@@ -1094,6 +1099,8 @@ class TraitFactory
 
     switch (name)
     {
+      case "AcidSplash":
+        return new AcidSplashTrait();
       case "ACMod":
         return new ACModTrait()
         {

@@ -14,8 +14,9 @@ vines             |:|green        |darkgreen |12|25|0| 1.0|10|10| 0|Wall||Plant,
 giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14| 6|Dumb|RangedSpellAction#Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
 goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14| 4|Door|RangedSpellAction#FireboltAction#2#2#4,Melee#4#1#Slashing|
 jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider,ResistBlunt,ImmuneConfusion
+acrid blob        |b|green        |darkgreen |12|20|3| 1.0|10|10| 6|Dumb|Melee#6#1#Acid|AcidSplash,ResistBlunt,ImmuneConfusion,Immunity#Acid
 ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6#2#Blunt|KnockBack
-centipede         |c|darkgreen    |darkgreen |13|10|3| 1.0|12|12| 4|Dumb|Melee#4#1#Piercing|Poisoner#13#1
+centipede         |c|green        |darkgreen |13|10|3| 1.0|12|12| 4|Dumb|Melee#4#1#Piercing|Poisoner#13#1
 duergar soldier   |h|lightgrey    |grey      |16|25|5| 1.0|14|12| 6|Door|Melee#10#1#Blunt|
 drow warrior      |h|grey         |darkgrey  |15|20|5| 1.0|12|16| 8|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|
 owlbear           |Y|dullred      |brown     |13|25|4| 1.0|14|12| 5|Dumb|Melee#1#1#Piercing|Grappler#14
