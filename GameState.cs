@@ -539,6 +539,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
 
+    foreach (RetributionTrait rt in victim.Traits.OfType<RetributionTrait>())
+    {
+      RetributionDamage(victim, rt, result);
+    }
+
     // Was anything listening for the the victims death?
     foreach (var (targetID, listener) in _deathWatchListeners)
     {
@@ -558,6 +563,51 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       var msg = new Message(deathMessage.Message, victim.Loc);
       UI.AlertPlayer([msg], "", this);
     }
+  }
+
+  void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)
+  {
+    string dmgDesc = retribution.Type.ToString().ToLower();
+
+    if (result is not null)
+    {      
+      string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
+      result.Messages.Add(new Message(txt, src.Loc));
+    }
+
+    int dmg = 0;
+    for (int i = 0; i < retribution.NumOfDice; i++)
+      dmg += Rng.Next(retribution.DmgDie) + 1;
+    HashSet<Loc> pts = [ src.Loc ];
+    foreach (Loc adj in Util.Adj8Locs(src.Loc))
+    {
+      if (ObjDb.Occupant(adj) is Actor actor)
+      {
+        result?.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!", adj));
+        var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this);
+        result?.Messages.Add(new Message(msg, actor.Loc));
+        if (hpLeft < 1)
+           ActorKilled(actor, dmgDesc, result);
+      }
+      ApplyDamageEffectToLoc(adj, retribution.Type);
+      pts.Add(adj);
+    }
+
+    switch (retribution.Type)
+    {
+      case DamageType.Cold:
+        var anim = new ExplosionAnimation(this)
+        {
+          MainColour = Colours.LIGHT_BLUE,
+          AltColour1 = Colours.ICE_BLUE,
+          AltColour2 = Colours.BLUE,
+          Highlight = Colours.WHITE,
+          Centre = src.Loc,
+          Sqs = pts
+        };
+        UI.PlayAnimation(anim, this);
+        break;
+    }    
   }
 
   void ClearDeathWatch(ulong victimID)

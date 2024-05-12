@@ -15,6 +15,7 @@ giant spider      |M|lightgrey    |grey      |13|25|3| 1.0|12|14| 6|Dumb|RangedS
 goblin firestarter|g|brightred    |dullred   |12|10|2| 1.0|10|14| 4|Door|RangedSpellAction#FireboltAction#2#2#4,Melee#4#1#Slashing|
 jelly             |b|pink         |dullred   |12|40|3| 1.0|10|10| 4|Dumb|Melee#6#1#Acid|Divider,ResistBlunt,ImmuneConfusion
 acrid blob        |b|green        |darkgreen |12|20|3| 1.0|10|10| 6|Dumb|Melee#6#1#Acid|AcidSplash,ResistBlunt,ImmuneConfusion,Immunity#Acid
+chilled jelly     |b|lightblue    |blue      |12|20|3|0.75|10|10| 6|Dumb|Melee#6#1#Cold|ResistBlunt,ImmuneConfusion,Retribution#Cold#8#1
 ogre              |O|lightgrey    |grey      |13|30|6| 1.0|18|10|10|Door|Melee#6#2#Blunt|KnockBack
 centipede         |c|green        |darkgreen |13|10|3| 1.0|12|12| 4|Dumb|Melee#4#1#Piercing|Poisoner#13#1
 duergar soldier   |h|lightgrey    |grey      |16|25|5| 1.0|14|12| 6|Door|Melee#10#1#Blunt|

@@ -162,6 +162,7 @@ class PlayerCreator
     
     if (hp < 1)
       hp = 1;
+      
     stats.Add(Attribute.HP, new Stat(hp));
 
     return stats;

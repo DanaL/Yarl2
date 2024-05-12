@@ -741,6 +741,14 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class RetributionTrait : Trait
+{
+  public DamageType Type {  get; set; }
+  public int DmgDie { get; set; }
+  public int NumOfDice {get; set; }
+  public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}";
+}
+
 class WeakenTrait : BasicTrait
 {
   public int DC { get; set; }
@@ -1338,7 +1346,10 @@ class TraitFactory
       case "ResistPiercing":
         return new ResistPiercingTrait();
       case "ResistSlashing":
-        return new ResistSlashingTrait();      
+        return new ResistSlashingTrait();   
+      case "Retribution":
+        Enum.TryParse(pieces[1], out DamageType rdt);
+        return new RetributionTrait() { Type = rdt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
       case "Stackable":
         return new StackableTrait();
       case "StatBuff":
