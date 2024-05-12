@@ -481,6 +481,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         UI.AlertPlayer(result.Messages, result.MessageIfUnseen, this);
       }
 
+      // Play any queued explosions in case it was one of the explosions
+      // that killed the player
+      UI.PlayQueuedExplosions(this);
+
       Message msg = new($"Oh noes you've been killed by {killedBy} :(", victim.Loc);
       UI.AlertPlayer(msg, "", this);
       UI.KillScreen("You died :(", this);

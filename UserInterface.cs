@@ -302,6 +302,12 @@ abstract class UserInterface
   public void ClosePopup() => _popup = null;
   public void SetPopup(Popup popup) => _popup = popup;
 
+  public void PlayQueuedExplosions(GameState gs)
+  {
+    foreach (var anim in _animations.OfType<ExplosionAnimation>())
+      PlayAnimation(anim, gs);
+  }
+
   public void RegisterAnimation(Animation animation)
   {
     _animations.Add(animation);
