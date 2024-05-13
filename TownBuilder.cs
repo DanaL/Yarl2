@@ -696,13 +696,13 @@ class TownBuilder
 
     int wildernessSize = map.Height;
 
-    // We want to find a spot without too many water or mountain squares.
-    // I probably need to be concerned about infinite loops, so probably if
-    // have several tries I can't find an acceptable spot, I probably want to
-    // bail out and generate a new wilderness map.
+    // Try to find a spot on the map without too many water/mountain squares.
+    // We'll loop up to 5 times and then try to place buildings. (If we can't
+    // place enough cottages the map will be rejected anyhow)
     int startRow, startCol;
     int acceptableBlocked = (int)((TOWN_WIDTH * TOWN_HEIGHT) * 0.15);
-    while (true)
+    int tries = 0;
+    do
     {
       // Pick starting co-ordinates that are in the centre-ish area of the map
       startRow = rng.Next(wildernessSize / 4, wildernessSize / 2);
@@ -711,7 +711,9 @@ class TownBuilder
       int blockedSqs = CountBlockedSqs(map, startRow, startCol);
       if (blockedSqs <= acceptableBlocked)
         break;
+      ++tries;
     }
+    while (tries < 5);
 
     Town.Row = startRow;
     Town.Col = startCol;

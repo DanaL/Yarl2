@@ -480,9 +480,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      // seed = -83301249 <- fails to find dungeon entrance
-      // seed =  -1187959671 <- infinite loop while starting new game :o
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
