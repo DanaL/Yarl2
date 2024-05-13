@@ -273,18 +273,19 @@ class PortalAction : Action
 
   protected void UsePortal(Portal portal, ActionResult result)
   {
-    var start = GameState!.Player!.Loc;
+    var start = GameState!.Player!.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
+    
     GameState.EnterLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     GameState.RefreshPerformers();
-
-    result.Complete = true;
+    GameState.UpdateFoV();
 
     if (start.DungeonID != portal.Destination.DungeonID)
       result.Messages.Add(new Message(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
 
+    result.Complete = true;
     result.EnergyCost = 1.0;
   }
 
