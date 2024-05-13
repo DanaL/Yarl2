@@ -1514,11 +1514,10 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
-  Loc _target;
-
+  
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
@@ -1527,13 +1526,9 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 
     // Fireball shoots toward the target and then explodes, but its path 
     // may be interrupted
-    var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
-                          .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                          .ToList();
-    
     List<Loc> pts = [];
-    Loc actualLoc = _target;
-    foreach (var pt in trajectory)
+    Loc actualLoc = Target;
+    foreach (var pt in Trajectory())
     {      
       var tile = GameState!.TileAt(pt);
       if (!(tile.Passable() || tile.PassableByFlight()))
@@ -1596,24 +1591,17 @@ class FireballAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 
     return result;
   }
-
-  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
-class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(gs, actor)
+class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
-  Loc _target;
 
   public override ActionResult Execute()
   {
     var result = base.Execute();
     result.EnergyCost = 1.0;
     result.Complete = true;
-        
-    var path = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
-                   .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                   .ToList();
 
     Item ray = new()
     {
@@ -1627,7 +1615,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(g
     // Ray of frost is a beam so unlike things like magic missle, it doesn't stop 
     // when it hits an occupant.
     List<Loc> pts = [];
-    foreach (var pt in path)
+    foreach (var pt in Trajectory())
     {
       var tile = GameState!.TileAt(pt);
       if (!(tile.Passable() || tile.PassableByFlight()))
@@ -1661,35 +1649,29 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : DirectionalAction(g
 
     return result;
   }
-
-  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
-class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
+class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
-  Loc _target;
-
+  
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
     result.Complete = true;
 
-    var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
-                          .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                          .ToList();
     Item missile = new()
     {
       Name = "magic missile",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('-', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
     };
     missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
     GameState!.ObjDb.Add(missile);
 
     List<Loc> pts = [];
-    foreach (var pt in trajectory)
+    foreach (var pt in Trajectory())
     {
       var tile = GameState!.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
@@ -1699,7 +1681,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
         // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
         // attack bonus
         int attackMod = 5;
-        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE));
+        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE));
         result.Messages.AddRange(attackResult.Messages);
         if (attackResult.Complete)
         {
@@ -1727,15 +1709,27 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       useable.Used();
     }
 
-    var anim = new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE);
+    var anim = new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
-    result.Messages.Add(new Message("Pew pew pew!", Actor.Loc));
+    result.Messages.Add(new Message("Pew pew pew!", Actor!.Loc));
 
     return result;
   }
+}
 
-  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
+abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  protected Loc Target { get; set; }
+
+  protected List<Loc> Trajectory()
+  {
+    return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
+               .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+               .ToList();
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Target = ((LocUIResult)result).Loc;
 }
 
 class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
