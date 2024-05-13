@@ -75,9 +75,8 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
 // This is a different class from MissileAttackAction because it will take the result the 
 // aim selection. It also handles the animation and following the path of the arrow
-class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : Action(gs, actor)
+class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : TargetedAction(gs, actor)
 {
-  Loc? _loc;
   readonly Item _ammo = ammo;
   readonly int _attackBonus = attackBonus;
 
@@ -85,13 +84,9 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
   {
     var result = base.Execute();
 
-    if (_loc is Loc loc)
-    {      
-      // Calculate the path the arrow will tkae. If there is a monster in the way of the one
-      // actually targetted, it might be struck instead
-      var trajectory = Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, loc.Row, loc.Col)
-                           .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                           .ToList();
+    if (Target is Loc loc)
+    {
+      var trajectory = Trajectory();
       List<Loc> pts = [];
       for (int j = 0; j < trajectory.Count; j++)
       {
@@ -130,10 +125,13 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : A
       throw new Exception("Null location passed to ArrowShotAction. Why would you do that?");
     }
 
+    if (Actor is Player player)
+    {
+      player.ExerciseStat(Attribute.BowUse);
+    }
+
     return result;
   }
-
-  public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
 }
 
 class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int attackBonus) : Action(gs, actor)

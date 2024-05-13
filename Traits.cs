@@ -262,6 +262,11 @@ class PluralTrait : Trait
   public override string AsText() => "Plural";
 }
 
+class PolearmTrait : Trait
+{
+  public override string AsText() => "Polearm";
+}
+
 class TeflonTrait : Trait
 {
   public override string AsText() => "Teflon";
@@ -1275,6 +1280,8 @@ class TraitFactory
           OwnerID = ulong.Parse(pieces[2]),
           Lifetime = int.Parse(pieces[3])
         };
+      case "Polearm":
+        return new PolearmTrait();
       case "Confused":
         return new ConfusedTrait()
         {

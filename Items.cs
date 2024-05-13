@@ -142,14 +142,10 @@ class ItemFactory
     switch (name)
     {
       case "spear":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Weapon,
-          Value = 10,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 10,
+          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new PolearmTrait());
         break;
       case "dagger":
         item = new Item()

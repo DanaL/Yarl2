@@ -187,10 +187,9 @@ class PlayerCreator
     switch (player.Lineage)
     {
       case PlayerLineage.Orc:
-        var spear = ItemFactory.Get("spear", objDb);
-        spear.Traits.Add(new AdjectiveTrait("old"));
-        spear.Equiped = true;
-        player.Inventory.Add(spear, player.ID);        
+        var sword = ItemFactory.Get("shortsword", objDb);        
+        sword.Equiped = true;
+        player.Inventory.Add(sword, player.ID);        
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:
@@ -214,9 +213,10 @@ class PlayerCreator
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Human:
-        var sword = ItemFactory.Get("shortsword", objDb);
-        sword.Equiped = true;
-        player.Inventory.Add(sword, player.ID);
+        var spear = ItemFactory.Get("spear", objDb);
+        spear.Traits.Add(new AdjectiveTrait("old"));
+        spear.Equiped = true;
+        player.Inventory.Add(spear, player.ID);
         player.Inventory.Add(leather, player.ID);
         break;
     }

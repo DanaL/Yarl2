@@ -41,7 +41,9 @@ enum Attribute
   Attitude,
   InDisguise,
   MonsterForm,
-  ArcheryBonus
+  ArcheryBonus,
+  PolearmsUse,
+  BowUse
 }
 
 class Stat

@@ -337,6 +337,7 @@ class Battle
         if (msg.Loc != Loc.Nowhere)
           result.Messages.Add(msg);
       }
+      
       if (attacker.HasActiveTrait<GrapplerTrait>())
       {
         var msg = ResolveGrapple(attacker, target, gs);
@@ -348,6 +349,12 @@ class Battle
     {
       Message msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
       result.Messages.Add(msg);
+    }
+
+    if (attacker is Player player && player.Inventory.ReadiedWeapon() is Item weapon)
+    {
+      if (weapon.HasTrait<PolearmTrait>())
+        player.ExerciseStat(Attribute.PolearmsUse);
     }
 
     return result;

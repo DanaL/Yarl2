@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 enum PlayerLineage
@@ -106,6 +108,14 @@ class Player : Actor, IPerformer, IGameEventListener
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
       mod += attackBonus.Curr;
     return mod;
+  }
+
+  public void ExerciseStat(Attribute attr)
+  {
+    if (Stats.TryGetValue(attr, out Stat? value))
+      value.ChangeMax(1);
+    else
+      Stats.Add(attr, new Stat(1));
   }
 
   public override List<Damage> MeleeDamage()
