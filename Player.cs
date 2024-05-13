@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 enum PlayerLineage
@@ -681,10 +679,14 @@ class Player : Actor, IPerformer, IGameEventListener
         _inputController = new HelpScreenInputer(gameState.UIRef());
         _deferred = new NullAction();
       }
-      else if (ch == 'X')
+      else if (ch == 'x')
       {
         _inputController = new Examiner(gameState, Loc);
         _deferred = new NullAction();
+      }
+      else if (ch == 'X')
+      {
+        Stats[Attribute.XP].ChangeMax(10);
       }
       else if (ch == ' ' || ch == '.')
         return new PassAction();

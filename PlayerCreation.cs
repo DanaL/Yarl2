@@ -19,7 +19,6 @@ enum Boon
   DexInc,
   PietyInc,
   BonusHP,
-  MeleeDmgBonus,
   Cleave,
   Impale,
   Rage
@@ -109,7 +108,8 @@ class PlayerCreator
       { Attribute.Will, new Stat(StatRoll(rng)) },
       { Attribute.Level, new Stat(1) },
       { Attribute.XP, new Stat(0) },
-      { Attribute.Depth, new Stat(0) }
+      { Attribute.Depth, new Stat(0) },
+      { Attribute.AttackBonus, new Stat(2) }
     };
 
     int roll, hp = 0;
@@ -231,8 +231,10 @@ class PlayerCreator
     }
 
     player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
 
     player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
@@ -251,8 +253,8 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
 
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);
@@ -331,13 +333,6 @@ class PlayerCreator
         player.Stats[Attribute.HP].Change(5);
         msg = "\n  +5 extra HP";
         break;
-      case Boon.MeleeDmgBonus:
-        if (player.Stats.TryGetValue(Attribute.MeleeDmgBonus, out Stat? stat))
-          stat.ChangeMax(2);
-        else
-          player.Stats[Attribute.MeleeDmgBonus] = new Stat(2);
-        msg = "\n  a bonus to melee damage";
-        break;      
       case Boon.Cleave:
         player.Traits.Add(new CleaveTrait());
         msg = "\n  the ability to Cleave";
@@ -368,7 +363,7 @@ class PlayerCreator
     else
     {
       // eventually add 'feats' like Cleave, etc
-      List<Boon> boons = [Boon.BonusHP, Boon.MeleeDmgBonus];
+      List<Boon> boons = [ Boon.BonusHP ];
       if (player.Stats[Attribute.Strength].Max < 4)
         boons.Add(Boon.StrInc);
       if (player.Stats[Attribute.Constitution].Max < 4)
@@ -418,40 +413,93 @@ class PlayerCreator
     return msg;
   }
 
+  // Determine what boons are available for the player to pick from.
+  public static List<Boon> AvailableBoons(Player player)
+  {
+    List<Boon> boons = [];
+
+    if (player.Stats[Attribute.Constitution].Max < 4)
+      boons.Add(Boon.ConInc);
+
+    if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
+    {
+      if (!player.HasTrait<ImpaleTrait>())
+        boons.Add(Boon.Impale);
+    }
+
+    return boons;
+  }
+
   // Am I going to have effects that reduce a player's XP/level? I dunno.
   // Classic D&D stuff but those effects have most been dropped from the 
   // modern rulesets
-  public static void CheckLevelUp(Player player, UserInterface ui, Random rng)
+  public static void CheckLevelUp(Player player, GameState gs, Random rng)
   {
     int level = LevelForXP(player.Stats[Attribute.XP].Max);
 
     if (level > player.Stats[Attribute.Level].Curr)
     {
       player.Stats[Attribute.Level].SetMax(level);
-
+      
       int hitDie = player.Stats[Attribute.HitDie].Max;
       int newHP = rng.Next(hitDie) + 1 + player.Stats[Attribute.Constitution].Max;
       if (newHP < 1)
         newHP = 1;
       player.Stats[Attribute.HP].ChangeMax(newHP);
       player.Stats[Attribute.HP].Change(newHP);
+      
+      //switch (player.Lineage)
+      //{
+      //  case PlayerLineage.Orc:
+      //    msg += LevelUpReaver(player, level, rng);
+      //    break;
+      //  case PlayerLineage.Dwarf:
+      //    msg += LevelUpStalwart(player, level, rng);
+      //    break;
+      //}
 
       string msg = $"\nWelcome to level {level}!";
       msg += $"\n  +{newHP} HP";
 
-      switch (player.Lineage)
+      var ui = gs.UIRef();
+      // On even levels, the player's attack bonus increases
+      if (level % 2 == 0)
       {
-        case PlayerLineage.Orc:
-          msg += LevelUpReaver(player, level, rng);
-          break;
-        case PlayerLineage.Dwarf:
-          msg += LevelUpStalwart(player, level, rng);
-          break;
+        int ab = player.Stats[Attribute.AttackBonus].Max;
+        player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
+        msg += $"\n  Attack Bonus increases to {ab + 1}";
+        ui.SetPopup(new Popup(msg, "Level up!", -1, -1));
+        ui.BlockForInput();
       }
-
-      msg += "\n";
-
-      ui.SetPopup(new Popup(msg, "Level up!", -1, -1));
+      else
+      {
+        var boons = AvailableBoons(player);
+        if (boons .Count > 0)
+        {
+          ChooseBoon(player, gs, msg, boons);
+        }
+        else
+        {
+          ui.SetPopup(new Popup(msg, "Level up!", -1, -1));
+          ui.BlockForInput();
+        }        
+      }
     }
+  }
+
+  static void ChooseBoon(Player player, GameState gs, string msg, List<Boon> boons)
+  {
+    msg += "\nPlease choose a new feature for your character:";
+    HashSet<char> opts = [];
+
+    for (int j = 0; j < boons.Count; j++) 
+    {
+      msg += $" ({j+1}) {boons[j]}   ";
+      if (j % 2 != 0)
+        msg += "\n";
+      opts.Add((char)(j + 49));
+    }
+
+    gs.UIRef().BlockingPopupMenu(msg, "Level up!", opts, gs);
   }
 }

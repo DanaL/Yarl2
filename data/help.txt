@@ -50,7 +50,7 @@ t   Throw an item at a location. Your range will depend on
 <   Use an updward staircase.
 @   View your character's details.
 M   View the full map of the dungeon level you are on.
-X   Examine interesting features on screen. Hit TAB to 
+x   Examine interesting features on screen. Hit TAB to 
     cycle through monsters and items that you can see to 
     learn some information about them.
 S   Save and exit. 

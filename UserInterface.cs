@@ -622,7 +622,7 @@ abstract class UserInterface
 
   static void Delay(int ms = 10) => Thread.Sleep(ms);
 
-  void BlockForInput()
+  public void BlockForInput()
   {
     GameEvent e;
     do
@@ -640,6 +640,33 @@ abstract class UserInterface
     do
     {
       WriteLongMessage(menu);
+      UpdateDisplay(gs);
+      e = PollForEvent();
+
+      if (e.Type == GameEventType.NoEvent)
+      {
+        Delay();
+        continue;
+      }
+      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
+      {
+        throw new GameQuitException();
+      }
+      else if (options.Contains(e.Value))
+      {
+        return e.Value;
+      }
+    }
+    while (true);
+  }
+
+  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState? gs)
+  {
+    GameEvent e;
+
+    do
+    {
+      SetPopup(new Popup(menu, title, -1, -1));
       UpdateDisplay(gs);
       e = PollForEvent();
 

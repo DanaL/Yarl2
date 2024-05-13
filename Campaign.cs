@@ -506,7 +506,7 @@ class PreGameHandler(UserInterface ui)
       welcomeText += "\n\n";
       welcomeText += "You may wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
       welcomeText += "\n";
-      welcomeText += "Press ? for help, and X will allow you to examine interesting features on screen.";
+      welcomeText += "Press ? for help, and x will allow you to examine interesting features on screen.";
       
       _ui.SetPopup(new Popup(welcomeText, "", -1, -1));
     }

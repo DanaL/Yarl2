@@ -701,6 +701,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // maybe Actors can have a list of effects I check for each turn?
   //
   // Also not sure how often monsters should regenerate.
+  //
+  // TODO: gotta eventually add monster respawns
   void EndOfTurn()
   {
     if (Turn % 11 == 0)
@@ -708,7 +710,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Player.Stats[Attribute.HP].Change(1);
     }
 
-    PlayerCreator.CheckLevelUp(Player, UI, Rng);
+    PlayerCreator.CheckLevelUp(Player, this, Rng);
 
     var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
@@ -720,8 +722,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void SetDMaps(Loc loc)
   {
-    //long startTime = Stopwatch.GetTimestamp();
-
     DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
     DMap.Generate(_passableBasic, (loc.Row, loc.Col), 25);
 
@@ -731,9 +731,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
     DMapFlight.Generate(_passableFlying, (loc.Row, loc.Col), 25);
-
-    //var elapsed = Stopwatch.GetElapsedTime(startTime);
-    //Console.WriteLine($"djikstra map time: {elapsed.TotalMicroseconds}");
   }
 
   // At the moment I can't use ResolveActorMove because it calls
