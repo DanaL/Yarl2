@@ -302,119 +302,45 @@ class PlayerCreator
       return 5;
   }
 
-  static string ApplyBoon(Player player, Boon boon)
-  {
-    string msg = "";
-
+  static void ApplyBoon(Player player, Boon boon)
+  {    
     switch (boon)
     {
       case Boon.StrInc:
         player.Stats[Attribute.Strength].ChangeMax(1);
         player.Stats[Attribute.Strength].Change(1);
-        msg = "\n  a Str increase";
         break;
       case Boon.ConInc:
         player.Stats[Attribute.Constitution].ChangeMax(1);
         player.Stats[Attribute.Constitution].Change(1);
 
         // Con went up, so we increase max HP for levels earned so far
-        player.Stats[Attribute.HP].ChangeMax(player.Stats[Attribute.Level].Max);
-
-        msg = "\n  a Con increase";
+        int level = player.Stats[Attribute.Level].Max;
+        player.Stats[Attribute.HP].ChangeMax(level);
+        player.Stats[Attribute.HP].Change(level);
         break;
       case Boon.DexInc:
         player.Stats[Attribute.Dexterity].ChangeMax(1);
         player.Stats[Attribute.Dexterity].Change(1);
-        msg = "\n  a Dex increase";
         break;
       case Boon.PietyInc:
         player.Stats[Attribute.Piety].ChangeMax(1);
         player.Stats[Attribute.Piety].Change(1);
-        msg = "\n  a Piety increase";
         break;
       case Boon.BonusHP:
         player.Stats[Attribute.HP].ChangeMax(5);
         player.Stats[Attribute.HP].Change(5);
-        msg = "\n  +5 extra HP";
         break;
       case Boon.Cleave:
         player.Traits.Add(new CleaveTrait());
-        msg = "\n  the ability to Cleave";
         break;
       case Boon.Impale:
         player.Traits.Add(new ImpaleTrait());
-        msg = "\n  the ability to Impale";
         break;
       case Boon.Rage:
         player.Traits.Add(new RageTrait(player));
-        msg = "\n  you may now Rage";
         break;
     }
-
-    return msg;
-  }
-
-  static string LevelUpReaver(Player player, int newLevel, Random rng)
-  {
-    string msg = "";
-
-    if (newLevel % 2 == 0)
-    {
-      int ab = player.Stats[Attribute.AttackBonus].Max;
-      player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
-      msg += $"\n  Attack Bonus increases to {ab + 1}";
-    }
-    else
-    {
-      // eventually add 'feats' like Cleave, etc
-      List<Boon> boons = [ Boon.BonusHP ];
-      if (player.Stats[Attribute.Strength].Max < 4)
-        boons.Add(Boon.StrInc);
-      if (player.Stats[Attribute.Constitution].Max < 4)
-        boons.Add(Boon.ConInc);
-      if (!player.HasTrait<CleaveTrait>())
-        boons.Add(Boon.Cleave);
-      if (!player.HasTrait<ImpaleTrait>())
-        boons.Add(Boon.Impale);
-      if (!player.HasTrait<RageTrait>())
-        boons.Add(Boon.Rage);
-
-      Boon boon = boons[rng.Next(boons.Count)];
-      msg += ApplyBoon(player, boon);
-    }
-
-    return msg;
-  }
-
-  static string LevelUpStalwart(Player player, int newLevel, Random rng)
-  {
-    string msg = "";
-
-    if (newLevel % 2 == 0)
-    {
-      int ab = player.Stats[Attribute.AttackBonus].Max;
-      player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
-      msg += $"\n  Attack Bonus increases to {ab + 1}";
-    }
-    else
-    {
-      // Need more boons for Stalwarts. Probably Prayers once I have
-      // some implemented
-      List<Boon> boons = [];
-      if (player.Stats[Attribute.Strength].Max < 4)
-        boons.Add(Boon.StrInc);
-      if (player.Stats[Attribute.Constitution].Max < 4)
-        boons.Add(Boon.ConInc);
-      if (player.Stats[Attribute.Piety].Max < 4)
-        boons.Add(Boon.PietyInc);      
-      if (!player.HasTrait<ImpaleTrait>())
-        boons.Add(Boon.Impale);
-
-      Boon boon = boons[rng.Next(boons.Count)];
-      msg += ApplyBoon(player, boon);
-    }
-
-    return msg;
   }
 
   // Determine what boons are available for the player to pick from.
@@ -458,16 +384,6 @@ class PlayerCreator
       player.Stats[Attribute.HP].ChangeMax(newHP);
       player.Stats[Attribute.HP].Change(newHP);
       
-      //switch (player.Lineage)
-      //{
-      //  case PlayerLineage.Orc:
-      //    msg += LevelUpReaver(player, level, rng);
-      //    break;
-      //  case PlayerLineage.Dwarf:
-      //    msg += LevelUpStalwart(player, level, rng);
-      //    break;
-      //}
-
       string msg = $"\nWelcome to level {level}!";
       msg += $"\n  +{newHP} HP";
 
@@ -566,7 +482,8 @@ class PlayerCreator
     }
     while (true);
 
-    Console.WriteLine($"You picked: {boons[choice].Name}");
+    ApplyBoon(player, boons[choice].Boon);
+
     ui.ClosePopup();
   }
 
