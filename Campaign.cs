@@ -481,6 +481,7 @@ class PreGameHandler(UserInterface ui)
     {
       int seed = DateTime.Now.GetHashCode();
       //  346203263 fails to generate valid entrance
+      //  978628054 also fails
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);

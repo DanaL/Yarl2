@@ -34,7 +34,7 @@ class Popup
     _width = WidestPopupLine(_pieces);
 
     // preferredRow is the ideal row for the bottom of the box
-    // and the preferredCol is the ideals col for the centre of it
+    // and the preferredCol is the ideal col for the centre of it
     _preferredRow = preferredRow;
     _preferredCol = preferredCol;
   }

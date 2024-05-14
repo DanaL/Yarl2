@@ -664,9 +664,10 @@ abstract class UserInterface
   {
     GameEvent e;
 
+    int col = (ScreenWidth / 2) - (ScreenWidth - popupWidth) / 2 + 2;
     do
     {
-      SetPopup(new Popup(menu, title, -1, 36, popupWidth));
+      SetPopup(new Popup(menu, title, -1, col, popupWidth));
       UpdateDisplay(gs);
       e = PollForEvent();
 

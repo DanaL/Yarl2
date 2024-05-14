@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 enum Boon
@@ -23,6 +25,8 @@ enum Boon
   Impale,
   Rage
 }
+
+record BoonInfo(Boon Boon, string Name, string Desc);
 
 class PlayerCreator
 {
@@ -414,17 +418,23 @@ class PlayerCreator
   }
 
   // Determine what boons are available for the player to pick from.
-  public static List<Boon> AvailableBoons(Player player)
+  public static List<BoonInfo> AvailableBoons(Player player)
   {
-    List<Boon> boons = [];
+    List<BoonInfo> boons = [];
 
     if (player.Stats[Attribute.Constitution].Max < 4)
-      boons.Add(Boon.ConInc);
+      boons.Add(new (Boon.ConInc, "Con Increase", "Increase your Con. This will increase your max HP."));
 
-    if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
+    if (player.Stats[Attribute.Strength].Max < 4)
+      boons.Add(new(Boon.StrInc, "Str Increase", "Increase your Str. You'll be more effective in melee combat."));
+
+    if (player.Stats[Attribute.Dexterity].Max < 4)
+      boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
+
+    //if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
     {
       if (!player.HasTrait<ImpaleTrait>())
-        boons.Add(Boon.Impale);
+        boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm may also strike an opponent behind the target."));
     }
 
     return boons;
@@ -487,19 +497,85 @@ class PlayerCreator
     }
   }
 
-  static void ChooseBoon(Player player, GameState gs, string msg, List<Boon> boons)
+  static void ChooseBoon(Player player, GameState gs, string msg, List<BoonInfo> boons)
   {
-    msg += "\n\nPlease choose a new feature for your character:\n";
+    var sb = new StringBuilder();
+    sb.Append(msg);
+    sb.Append("\n\nPlease choose an upgrade for your character:\n\n");
+    
     HashSet<char> opts = [];
-
-    for (int j = 0; j < boons.Count; j++) 
+    for (int j = 0; j < boons.Count; j += 2) 
     {
-      msg += $" ({j+1}) {boons[j]}   ";
-      if (j % 2 != 0)
-        msg += "\n";
+      BoonInfo a = boons[j];
+      BoonInfo? b = j + 1 < boons.Count ? boons[j + 1] : null;
+
+      sb.Append($" {j+1}) {a.Name}   ".PadRight(31));
       opts.Add((char)(j + 49));
+      if (b is not null)
+      {
+        sb.Append($"{j + 2}) {b.Name}");
+        opts.Add((char)(j + 50));
+      }
+      sb.Append('\n');
+
+      List<string> descA = SplitToLines(a.Desc, 26);
+      List<string> descB = [];
+      if (b is not null)
+      {
+        descB = SplitToLines(b.Desc, 34);
+      }
+      int x = int.Max(descA.Count, descB.Count);
+      for (int k = 0; k < x; k++)
+      {
+        if (k < descA.Count)
+        {
+          string txt = $"    {descA[k]}".PadRight(34);
+          sb.Append(txt);
+        }
+        else
+        {
+          sb.Append(" ".PadRight(34));
+        }
+
+        if (k < descB.Count)
+        {
+          sb.Append(descB[k]);
+        }
+
+        sb.Append('\n');
+      }
+
+      sb.Append('\n');
     }
 
-    gs.UIRef().BlockingPopupMenu(msg, "Level up!", opts, gs, 60);
+    gs.UIRef().BlockingPopupMenu(sb.ToString(), "Level up!", opts, gs, 72);
+  }
+
+  static List<string> SplitToLines(string txt, int lineLen)
+  {        
+    if (txt.Length <= lineLen)
+      return [ txt ];
+
+    List<string> lines = [];
+    while (txt.Length > lineLen)
+    {
+      int x = WhitespaceLoc(txt, lineLen);
+      lines.Add(txt[..x]);
+      txt = txt[x..].TrimStart();
+    }
+    lines.Add(txt);
+
+    return lines;
+  }
+
+  static int WhitespaceLoc(string txt, int start)
+  {
+    for (int j = start; j > 0; j--)
+    {
+      if (txt[j] == ' ')
+        return j;
+    }
+
+    return -1;
   }
 }
