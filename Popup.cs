@@ -15,29 +15,44 @@ namespace Yarl2;
 
 class Popup
 {
+  Colour DefaultTextColour { get; set; } = Colours.WHITE;
   readonly string _title;
-  List<List<(Colour, string)>> _pieces;
-  int _width, _preferredRow, _preferredCol;
+  List<List<(Colour, string)>> _pieces = [];
+  int _width;
+  readonly int _preferredRow;
+  readonly int _preferredCol;
+  readonly string _originalText;
+  readonly int _originalWidth;
 
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     _title = title;
-    _pieces = message.Split('\n').Select(Parse).ToList();
+    _originalText = message;
+    _originalWidth = width;
 
-    int maxWidth = UserInterface.ViewWidth - 4;
-    if (width > maxWidth)
-      maxWidth = width;
-
-    int widest = WidestPopupLine(_pieces);
-    if (widest >= maxWidth)
-      _pieces = ResizePopupLines(_pieces, maxWidth - 4);  
-    _width = WidestPopupLine(_pieces);
+    ParseMessage();
 
     // preferredRow is the ideal row for the bottom of the box
     // and the preferredCol is the ideal col for the centre of it
     _preferredRow = preferredRow;
     _preferredCol = preferredCol;
   }
+
+  public void ParseMessage()
+  {
+    _pieces = _originalText.Split('\n').Select(Parse).ToList();
+
+    int maxWidth = UserInterface.ViewWidth - 4;
+    if (_originalWidth > maxWidth)
+      maxWidth = _originalWidth;
+
+    int widest = WidestPopupLine(_pieces);
+    if (widest >= maxWidth)
+      _pieces = ResizePopupLines(_pieces, maxWidth - 4);
+    _width = WidestPopupLine(_pieces);
+  }
+
+  public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 
   List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
   {
@@ -125,9 +140,9 @@ class Popup
     {
       if (line[a] == '[')
       {
-        txt = line.Substring(s, a - s);
+        txt = line[s..a];
         if (txt.Length > 0)
-          pieces.Add((Colours.WHITE, txt));
+          pieces.Add((DefaultTextColour, txt));
 
         s = a;
         while (line[a] != ' ')
@@ -147,7 +162,7 @@ class Popup
 
     txt = line[s..a];
     if (txt.Length > 0)
-      pieces.Add((Colours.WHITE, txt));
+      pieces.Add((DefaultTextColour, txt));
 
     return pieces;
   }
@@ -192,23 +207,23 @@ class Popup
       string title = "+".PadRight(left, '-') + ' ';
       title += _title + ' ';
       title = title.PadRight(_width - 1, '-') + "+";
-      ui.WriteLine(title, row++, col, _width, Colours.WHITE);
+      ui.WriteLine(title, row++, col, _width, DefaultTextColour);
     }
     else
     {
-      ui.WriteLine(border, row++, col, _width, Colours.WHITE);
+      ui.WriteLine(border, row++, col, _width, DefaultTextColour);
     }
 
     foreach (var line in _pieces)
     {
-      List<(Colour, string)> lt = [(Colours.WHITE, "| ")];
+      List<(Colour, string)> lt = [(DefaultTextColour, "| ")];
       lt.AddRange(line);
-      var padding = (Colours.WHITE, "".PadRight(_width - PopupLineWidth(line) - 4));
+      var padding = (DefaultTextColour, "".PadRight(_width - PopupLineWidth(line) - 4));
       lt.Add(padding);
-      lt.Add((Colours.WHITE, " |"));
+      lt.Add((DefaultTextColour, " |"));
       ui.WriteText(lt, row++, col, _width - 4);
     }
 
-    ui.WriteLine(border, row, col, _width, Colours.WHITE);
+    ui.WriteLine(border, row, col, _width, DefaultTextColour);
   }
 }

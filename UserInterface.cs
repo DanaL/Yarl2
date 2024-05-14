@@ -53,6 +53,7 @@ abstract class UserInterface
   protected List<string> MenuRows { get; set; } = [];
 
   Popup? _popup = null;
+  Popup? _confirm = null;
 
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
@@ -299,7 +300,14 @@ abstract class UserInterface
     ClearLongMessage();
   }
 
-  public void ClosePopup() => _popup = null;
+  public void ClosePopup()
+  {
+    _popup = null;
+    _confirm = null;
+  }
+
+  public void CloseConfirmation() => _confirm = null;
+
   public void SetPopup(Popup popup) => _popup = popup;
 
   public void PlayQueuedExplosions(GameState gs)
@@ -327,7 +335,8 @@ abstract class UserInterface
     }
   }
 
-  protected void WritePopUp() => _popup?.Draw(this);
+  protected void WritePopUp() =>  _popup?.Draw(this);
+  protected void WriteConfirmation() => _confirm?.Draw(this);
 
   protected void WriteMessagesSection()
   {
@@ -630,7 +639,7 @@ abstract class UserInterface
       e = PollForEvent();
       Delay();
     }
-    while (e.Type == GameEventType.NoEvent);
+    while (e.Type == GameEventType.NoEvent);    
   }
 
   public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
@@ -660,7 +669,7 @@ abstract class UserInterface
     while (true);
   }
 
-  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState? gs, int popupWidth)
+  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState gs, int popupWidth)
   {
     GameEvent e;
 
@@ -669,8 +678,8 @@ abstract class UserInterface
     {
       SetPopup(new Popup(menu, title, -1, col, popupWidth));
       UpdateDisplay(gs);
-      e = PollForEvent();
 
+      e = PollForEvent();
       if (e.Type == GameEventType.NoEvent)
       {
         Delay();
@@ -686,6 +695,42 @@ abstract class UserInterface
       }
     }
     while (true);
+  }
+
+  public bool Confirmation(string txt, GameState gs)
+  {
+    GameEvent e;
+    char ch = '\0';
+
+    do
+    {
+      _confirm = new Popup(txt, "", ViewHeight / 2 - 2,  ScreenWidth / 2);
+      _popup?.SetDefaultTextColour(Colours.DARK_GREY);
+      _popup?.ParseMessage();
+
+      UpdateDisplay(gs);
+
+      e = PollForEvent();
+      if (e.Type == GameEventType.NoEvent)
+      {
+        Delay();
+        continue;
+      }
+      else if (e.Type == GameEventType.Quiting)
+      {
+        throw new GameQuitException();
+      }
+      else 
+      {
+        ch = e.Value;
+      }
+    }
+    while (!(ch == 'y' || ch == 'n'));
+
+    _popup?.SetDefaultTextColour(Colours.WHITE);
+    _popup?.ParseMessage();
+
+    return ch == 'y';
   }
 
   public string BlockingGetResponse(string prompt, IInputChecker? validator = null)

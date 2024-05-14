@@ -198,7 +198,8 @@ class SDLUserInterface : UserInterface
         WriteDropDown();
       }
 
-      WritePopUp();      
+      WritePopUp();
+      WriteConfirmation();
     }
     
     SDL_RenderPresent(_renderer);

@@ -548,7 +548,26 @@ class PlayerCreator
       sb.Append('\n');
     }
 
-    gs.UIRef().BlockingPopupMenu(sb.ToString(), "Level up!", opts, gs, 72);
+    var ui = gs.UIRef();
+    int choice = 0;
+    do
+    {
+      char ch = ui.BlockingPopupMenu(sb.ToString(), "Level up!", opts, gs, 72);
+
+      if (opts.Contains(ch))
+      {
+        choice = ch - '0' - 1;
+        bool confirmed = ui.Confirmation($"\nSelect {boons[choice].Name}? (y/n)\n", gs);
+        if (confirmed)
+          break;
+        
+        ui.CloseConfirmation();
+      }
+    }
+    while (true);
+
+    Console.WriteLine($"You picked: {boons[choice].Name}");
+    ui.ClosePopup();
   }
 
   static List<string> SplitToLines(string txt, int lineLen)

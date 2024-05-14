@@ -161,6 +161,7 @@ internal class BLUserInferface : UserInterface, IDisposable
       }
 
       WritePopUp();
+      WriteConfirmation();
     }
 
     Terminal.Refresh();
