@@ -19,12 +19,15 @@ class Popup
   List<List<(Colour, string)>> _pieces;
   int _width, _preferredRow, _preferredCol;
 
-  public Popup(string message, string title, int preferredRow, int preferredCol)
+  public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     _title = title;
     _pieces = message.Split('\n').Select(Parse).ToList();
 
     int maxWidth = UserInterface.ViewWidth - 4;
+    if (width > maxWidth)
+      maxWidth = width;
+
     int widest = WidestPopupLine(_pieces);
     if (widest >= maxWidth)
       _pieces = ResizePopupLines(_pieces, maxWidth - 4);  
@@ -142,7 +145,7 @@ class Popup
 
     }
 
-    txt = line.Substring(s, a - s);
+    txt = line[s..a];
     if (txt.Length > 0)
       pieces.Add((Colours.WHITE, txt));
 

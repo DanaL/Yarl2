@@ -660,13 +660,13 @@ abstract class UserInterface
     while (true);
   }
 
-  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState? gs)
+  public char BlockingPopupMenu(string menu, string title, HashSet<char> options, GameState? gs, int popupWidth)
   {
     GameEvent e;
 
     do
     {
-      SetPopup(new Popup(menu, title, -1, -1));
+      SetPopup(new Popup(menu, title, -1, 36, popupWidth));
       UpdateDisplay(gs);
       e = PollForEvent();
 
@@ -675,7 +675,7 @@ abstract class UserInterface
         Delay();
         continue;
       }
-      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
+      else if (e.Type == GameEventType.Quiting)
       {
         throw new GameQuitException();
       }

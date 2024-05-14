@@ -489,7 +489,7 @@ class PlayerCreator
 
   static void ChooseBoon(Player player, GameState gs, string msg, List<Boon> boons)
   {
-    msg += "\nPlease choose a new feature for your character:";
+    msg += "\n\nPlease choose a new feature for your character:\n";
     HashSet<char> opts = [];
 
     for (int j = 0; j < boons.Count; j++) 
@@ -500,6 +500,6 @@ class PlayerCreator
       opts.Add((char)(j + 49));
     }
 
-    gs.UIRef().BlockingPopupMenu(msg, "Level up!", opts, gs);
+    gs.UIRef().BlockingPopupMenu(msg, "Level up!", opts, gs, 60);
   }
 }

@@ -110,8 +110,8 @@ class Player : Actor, IPerformer, IGameEventListener
 
   public void ExerciseStat(Attribute attr)
   {
-    if (Stats.TryGetValue(attr, out Stat? value))
-      value.ChangeMax(1);
+    if (Stats.TryGetValue(attr, out Stat? stat))
+      stat.SetMax(stat.Curr + 1);
     else
       Stats.Add(attr, new Stat(1));
   }
