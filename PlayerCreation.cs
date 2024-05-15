@@ -285,6 +285,8 @@ class PlayerCreator
     SetInitialAbilities(player);
     SetStartingGear(player, objDb, rng);
 
+    player.Traits.Add(new ReachTrait());
+
     return player;
   }
 

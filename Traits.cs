@@ -319,6 +319,11 @@ class KnockBackTrait : FeatTrait
   public override string AsText() => "KnockBack";
 }
 
+class ReachTrait : FeatTrait
+{
+  public override string AsText() => "Reach";
+}
+
 // For actors who go by a proper name
 class NamedTrait : Trait
 {
@@ -1347,6 +1352,8 @@ class TraitFactory
         return new PoorLootTrait();
       case "Rage":
         return new RageTrait((Actor)container);
+      case "Reach":
+        return new ReachTrait();
       case "Readable":
         return new ReadableTrait(pieces[1].Replace("<br/>", "\n"))
         {

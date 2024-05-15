@@ -100,8 +100,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           msg = $"You give {occ.FullName} some scritches.";
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
         result.EnergyCost = 1.0;
-        result.Complete = true;
-        //result.Messages.Add(MessageFactory.Phrase(msg, _gs.Player.Loc));
+        result.Complete = true;        
       }
       else if (occ is not null && !occ.Hostile)
       {

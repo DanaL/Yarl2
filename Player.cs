@@ -371,7 +371,19 @@ class Player : Actor, IPerformer, IGameEventListener
     _ => 'n'
   };
 
-  MoveAction CalcMovementAction(GameState gs, char ch)
+  bool AttackingWithReach()
+  {
+    if (!HasTrait<ReachTrait>())
+      return false;
+
+    // Eventually you'll need a Polearm with Long trait
+    if (Inventory.ReadiedWeapon() is Item item && item.HasTrait<PolearmTrait>() && item.HasTrait<ReachTrait>())
+      return true;
+
+    return false;
+  }
+
+  Action CalcMovementAction(GameState gs, char ch)
   {
     if (HasTrait<ConfusedTrait>())
     {
@@ -381,6 +393,16 @@ class Player : Actor, IPerformer, IGameEventListener
     }
 
     (int dr, int dc) = KeyToDir(ch);
+
+    // I'm not sure this is the best spot for this but it is a convenient place
+    // to calculate attacking with Reach
+    if (AttackingWithReach())
+    {
+      Loc adj = Loc.Move(dc, dr);
+      Loc adj2 = Loc.Move(dr * 2, dc * 2);
+      if (!gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && occ.Hostile)
+        return new MeleeAttackAction(gs, this, adj2);
+    }
 
     return new MoveAction(gs, this, Loc.Move(dr, dc));
   }

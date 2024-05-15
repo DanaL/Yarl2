@@ -383,14 +383,12 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animati
 class HitAnimation : Animation
 {
   readonly GameState _gs;
-  Loc _loc;
   Colour _colour;
-  ulong _victimID;
+  readonly ulong _victimID;
 
-  public HitAnimation(ulong victimID, GameState gs, Loc loc, Colour colour)
+  public HitAnimation(ulong victimID, GameState gs, Colour colour)
   {
     _gs = gs;
-    _loc = loc;
     _colour = colour;
     _victimID = victimID;
     Expiry = DateTime.Now.AddMilliseconds(400);
@@ -398,15 +396,11 @@ class HitAnimation : Animation
 
   public override void Update()
   {
-    var occ = _gs.ObjDb.Occupant(_loc);
-    if (occ is null || occ.ID != _victimID)
-      return;
-
-    var ui = _gs.UIRef();
-    var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-
-    if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
+    if (_gs.ObjDb.GetObj(_victimID) is Actor victim)
     {
+      var ui = _gs.UIRef();
+      var (scrR, scrC) = ui.LocToScrLoc(victim.Loc.Row, victim.Loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+
       Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
       ui.SqsOnScreen[scrR, scrC] = sq;
     }

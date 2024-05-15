@@ -201,7 +201,7 @@ class Battle
   {
     static void HitAnim(Actor target, GameState gs)
     {
-      var hitAnim = new HitAnimation(target.ID, gs, target.Loc, Colours.FX_RED);
+      var hitAnim = new HitAnimation(target.ID, gs, Colours.FX_RED);
       gs.UIRef().RegisterAnimation(hitAnim);
     }
 
@@ -326,7 +326,13 @@ class Battle
       {
         specialAttack = ResolveCleave(attacker, target, roll, gs, result);
       }
-      if (!specialAttack && attacker.HasActiveTrait<ImpaleTrait>())
+
+      // Check the distance because if a player has both Impale and Reach and 
+      // is attacking with Reach, we don't want to allow this:
+      //          @.gh
+      // We don't want Impale feature to cause the player to impale the h 
+      // when attacking g with reach
+      if (!specialAttack && attacker.HasActiveTrait<ImpaleTrait>() && Util.Distance(attacker.Loc, target.Loc) == 1)
       {
         specialAttack = ResolveImpale(attacker, target, roll, gs, result);
       }
