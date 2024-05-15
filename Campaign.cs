@@ -215,6 +215,19 @@ class PreGameHandler(UserInterface ui)
         var wildernessGenerator = new Wilderness(rng);
         wildernessMap = wildernessGenerator.DrawLevel(129);
 
+        // Redraw map if there aren't enough mountains
+        int mountains = 0;
+        for (int r = 0; r < wildernessMap.Height; r++)
+        {
+          for (int c = 0; c < wildernessMap.Width; c++)
+          {
+            if (wildernessMap.TileAt(r, c).Type == TileType.Mountain)
+              ++mountains;
+          }
+        }
+        if (mountains < 20)
+          continue;
+
         var tb = new TownBuilder();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
         town = tb.Town;
@@ -480,9 +493,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      //  346203263 fails to generate valid entrance
-      //  978628054 also fails
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
