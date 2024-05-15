@@ -23,7 +23,8 @@ enum Boon
   BonusHP,
   Cleave,
   Impale,
-  Rage
+  Rage,
+  Reach
 }
 
 record BoonInfo(Boon Boon, string Name, string Desc);
@@ -285,8 +286,6 @@ class PlayerCreator
     SetInitialAbilities(player);
     SetStartingGear(player, objDb, rng);
 
-    player.Traits.Add(new ReachTrait());
-
     return player;
   }
 
@@ -342,6 +341,9 @@ class PlayerCreator
       case Boon.Rage:
         player.Traits.Add(new RageTrait(player));
         break;
+      case Boon.Reach:
+        player.Traits.Add(new ReachTrait());
+        break;
     }
   }
 
@@ -363,6 +365,9 @@ class PlayerCreator
     {
       if (!player.HasTrait<ImpaleTrait>())
         boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm may also strike an opponent behind the target."));
+
+      if (!player.HasTrait<ReachTrait>())
+        boons.Add(new(Boon.Reach, "Reach", "With a long polearm, you can attack 2 squares away."));
     }
 
     return boons;
