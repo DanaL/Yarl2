@@ -354,10 +354,10 @@ class PlayerCreator
     if (player.Stats[Attribute.Strength].Max < 4)
       boons.Add(new(Boon.StrInc, "Str Increase", "Increase your Str. You'll be more effective in melee combat."));
 
-    if (player.Stats[Attribute.Dexterity].Max < 4)
-      boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
+    //if (player.Stats[Attribute.Dexterity].Max < 4)
+    //  boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
 
-    //if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
+    if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
     {
       if (!player.HasTrait<ImpaleTrait>())
         boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm may also strike an opponent behind the target."));

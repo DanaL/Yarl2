@@ -47,6 +47,10 @@ abstract class Trait
   public virtual string Desc() => "";
 }
 
+// This lets me easily group traits that are upgrades for the player. Name
+// cribbed from 5e's Feats
+abstract class FeatTrait : Trait { }
+
 abstract class BasicTrait : Trait
 {
   public virtual bool Aura => false;
@@ -300,17 +304,17 @@ class TelepathyTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
-class CleaveTrait : Trait
+class CleaveTrait : FeatTrait
 {
   public override string AsText() => "Cleave";
 }
 
-class ImpaleTrait : Trait
+class ImpaleTrait : FeatTrait
 {
   public override string AsText() => "Impale";
 }
 
-class KnockBackTrait : Trait
+class KnockBackTrait : FeatTrait
 {
   public override string AsText() => "KnockBack";
 }
@@ -321,7 +325,7 @@ class NamedTrait : Trait
   public override string AsText() => "Named";
 }
 
-class RageTrait(Actor actor) : BasicTrait
+class RageTrait(Actor actor) : FeatTrait
 {
   readonly Actor _actor = actor;
 

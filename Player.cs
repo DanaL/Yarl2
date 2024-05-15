@@ -288,6 +288,13 @@ class Player : Actor, IPerformer, IGameEventListener
     lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
     lines.Add("");
 
+    var feats = string.Join(", ", Traits.OfType<FeatTrait>().Select(f => f.AsText()));
+    if (feats.Length > 0)
+    {
+      lines.Add($"You have the following perks/upgrades: {feats}");
+      lines.Add("");
+    }
+       
     if (Stats[Attribute.Depth].Max == 0)
       lines.Add("You have yet to venture into the Dungeon.");
     else
