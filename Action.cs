@@ -473,13 +473,9 @@ class CloseDoorAction : DirectionalAction
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door close.";
 
-        // Find any light sources tht were affecting the door and update them, since
-        // it's now open. (Eventually gotta extend it to any aura type effects)
-        foreach (var src in GameState!.ObjsAffectingLoc(Loc, TerrainFlag.Lit))
-        {
-          GameState.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, src.ID);
-          GameState.ToggleEffect(src, Actor.Loc, TerrainFlag.Lit, true);
-        }
+        // This will update things like squares lit by the player's torchlight
+        // upon the door being closed
+        GameState!.CheckMovedEffects(Actor, Actor.Loc, Actor.Loc);
       }
       else if (Actor is Player)
       {
@@ -529,14 +525,9 @@ class OpenDoorAction : DirectionalAction
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door open.";
 
-        // Find any light sources tht were affecting the door and update them, since
-        // it's now open. (Eventually gotta extend it to any aura type effects)
-
-        foreach (var src in GameState!.ObjsAffectingLoc(Loc, TerrainFlag.Lit))
-        {
-          GameState.ToggleEffect(src, src.Loc, TerrainFlag.Lit, true);
-        }
-        GameState.ToggleEffect(Actor, Loc, TerrainFlag.Lit, true);
+        // This will update things like squares lit by the player's torchlight
+        // upon the door being opened
+        GameState!.CheckMovedEffects(Actor, Actor.Loc, Actor.Loc);
       }
       else if (Actor is Player)
       {
