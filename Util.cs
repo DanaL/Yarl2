@@ -129,7 +129,7 @@ class Constants
   public static readonly Sqr BLANK_SQ = new(Colours.BLACK, Colours.BLACK, ' ');
 }
 
-partial class Util
+class Util
 {
   public static List<int> ToNums(string txt)
   {
@@ -360,6 +360,20 @@ partial class Util
     'n' => (1, 1),
     _ => (0, 0)
   };
+
+  public static char ArrowChar(Loc a, Loc b)
+  {
+    if (a.Row == b.Row)
+      return '-';
+    else if (a.Col == b.Col)
+      return '|';
+    else if (a.Col < b.Col && a.Row < b.Row)
+      return '\\';
+    else if (a.Col > b.Col && a.Row > b.Row)
+      return '\\';
+    else
+      return '/';
+  }
 
   public static Glyph TileToGlyph(Tile tile) => tile.Type switch
   {

@@ -65,22 +65,8 @@ class ArrowAnimation : Animation
 
     for (int j = 0; j < pts.Count - 1; j++)
     {
-      _frames.Add((pts[j + 1], CalcChar(pts[j], pts[j + 1])));
+      _frames.Add((pts[j + 1], Util.ArrowChar(pts[j], pts[j + 1])));
     }
-  }
-
-  static char CalcChar(Loc a, Loc b)
-  {
-    if (a.Row == b.Row)
-      return '-';
-    else if (a.Col == b.Col)
-      return '|';
-    else if (a.Col < b.Col && a.Row < b.Row)
-      return '\\';
-    else if (a.Col > b.Col && a.Row > b.Row)
-      return '\\';
-    else
-      return '/';
   }
 
   public override void Update()
@@ -319,7 +305,7 @@ class SqAnimation : Animation
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
     {
-      Sqr sq = new Sqr(_fgColour, _bgColour, _ch);
+      Sqr sq = new(_fgColour, _bgColour, _ch);
       ui.SqsOnScreen[scrR, scrC] = sq;
     }
   }
@@ -404,6 +390,34 @@ class HitAnimation : Animation
       Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
       ui.SqsOnScreen[scrR, scrC] = sq;
     }
+  }
+}
+
+// This is also pretty close to SqAnimation...
+class PolearmAnimation : Animation
+{
+  readonly GameState _gs;
+  Colour _colour;
+  Loc _origin;
+  Loc _target;
+
+  public PolearmAnimation(GameState gs, Colour colour, Loc origin, Loc target) 
+  { 
+    _gs = gs;
+    _colour = colour;
+    _origin = origin;
+    _target = target;
+    Expiry = DateTime.Now.AddMilliseconds(400);
+  }
+
+  public override void Update()
+  {
+    var ui = _gs.UIRef();
+    Sqr sq = new(_colour, Colours.BLACK, Util.ArrowChar(_origin, _target));
+    int dr = (_target.Row - _origin.Row) / 2;
+    int dc = (_target.Col - _origin.Col) / 2;
+    var (scrR, scrC) = ui.LocToScrLoc(_origin.Row + dr, _origin.Col + dc, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+    ui.SqsOnScreen[scrR, scrC] = sq;
   }
 }
 

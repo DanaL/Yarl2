@@ -400,8 +400,15 @@ class Player : Actor, IPerformer, IGameEventListener
     {
       Loc adj = Loc.Move(dc, dr);
       Loc adj2 = Loc.Move(dr * 2, dc * 2);
+
       if (!gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && occ.Hostile)
+      {
+        var colour = Inventory.ReadiedWeapon()!.Glyph.Lit;
+        var anim = new PolearmAnimation(gs, colour, Loc, adj2);
+        gs.UIRef().RegisterAnimation(anim);
+
         return new MeleeAttackAction(gs, this, adj2);
+      }
     }
 
     return new MoveAction(gs, this, Loc.Move(dr, dc));

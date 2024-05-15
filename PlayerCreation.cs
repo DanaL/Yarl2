@@ -218,7 +218,7 @@ class PlayerCreator
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Human:
-        var spear = ItemFactory.Get("spear", objDb);
+        var spear = ItemFactory.Get("guisarme", objDb);
         spear.Traits.Add(new AdjectiveTrait("old"));
         spear.Equiped = true;
         player.Inventory.Add(spear, player.ID);
@@ -285,6 +285,8 @@ class PlayerCreator
 
     SetInitialAbilities(player);
     SetStartingGear(player, objDb, rng);
+
+    player.Traits.Add(new ReachTrait());
 
     return player;
   }
