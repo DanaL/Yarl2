@@ -37,7 +37,7 @@ class DumbMoveStrategy : IMoveStrategy
       // We still check if the tile is passable because, say, a door might be
       // closed after the current djikstra map is calculated and before it is
       // refreshed
-      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(actor.Loc).Passable())
+      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
         // the square is free so move there!
         return new MoveAction(gs, actor, loc);
@@ -64,7 +64,7 @@ class DoorOpeningMoveStrategy : IMoveStrategy
       {
         return new OpenDoorAction(gs, actor, gs.CurrentMap, loc);
       }
-      else if (!gs.ObjDb.Occupied(loc))
+      else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
         // the square is free so move there!
         return new MoveAction(gs, actor, loc);
@@ -84,7 +84,7 @@ class SimpleFlightMoveStrategy : IMoveStrategy
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-      if (!gs.ObjDb.Occupied(loc))
+      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).PassableByFlight())
       {
         // the square is free so move there!
         return new MoveAction(gs, actor, loc);

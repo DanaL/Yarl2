@@ -398,10 +398,11 @@ class Player : Actor, IPerformer, IGameEventListener
     // to calculate attacking with Reach
     if (AttackingWithReach())
     {
-      Loc adj = Loc.Move(dc, dr);
+      Loc adj = Loc.Move(dr, dc);
+      Tile adjTile = gs.TileAt(adj);
       Loc adj2 = Loc.Move(dr * 2, dc * 2);
 
-      if (!gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && occ.Hostile)
+      if (adjTile.PassableByFlight() && !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && occ.Hostile)
       {
         var colour = Inventory.ReadiedWeapon()!.Glyph.Lit;
         var anim = new PolearmAnimation(gs, colour, Loc, adj2);
