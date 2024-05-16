@@ -990,7 +990,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
   }
 
   string Extinguish(GameState gs, Item item, Loc loc)
-  {
+  {    
     gs.StopListening(GameEventType.EndOfRound, this);
 
     // Gotta set the lighting level before we extinguish the torch

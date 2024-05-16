@@ -12,13 +12,12 @@
 
 namespace Yarl2;
 
+// I suspect I might eventually drop this?
 [Flags]
 enum TerrainFlag
 {
   None = 0,
-  Lit = 1,
-  Obscures = 2,
-  Wet = 4
+  Wet = 1
 }
 
 enum TileType
