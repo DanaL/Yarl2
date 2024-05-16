@@ -189,18 +189,16 @@ class PlayerCreator
     leather.Traits.Add(new AdjectiveTrait("battered"));
     leather.Equiped = true;
 
+    Item startWeapon;
+
     switch (player.Lineage)
     {
       case PlayerLineage.Orc:
-        var sword = ItemFactory.Get("shortsword", objDb);        
-        sword.Equiped = true;
-        player.Inventory.Add(sword, player.ID);        
+        startWeapon = ItemFactory.Get("shortsword", objDb);
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:
-        var axe = ItemFactory.Get("hand axe", objDb);
-        axe.Equiped = true;
-        player.Inventory.Add(axe, player.ID);
+        startWeapon = ItemFactory.Get("hand axe", objDb);
         var studded = ItemFactory.Get("studded leather armour", objDb);
         studded.Equiped = true;
         player.Inventory.Add(studded, player.ID);
@@ -212,19 +210,25 @@ class PlayerCreator
         var bow = ItemFactory.Get("longbow", objDb);
         bow.Equiped = true;
         player.Inventory.Add(bow, player.ID);
-        var dagger = ItemFactory.Get("dagger", objDb);
-        dagger.Equiped = true;
-        player.Inventory.Add(dagger, player.ID);
+        startWeapon = ItemFactory.Get("dagger", objDb);
         player.Inventory.Add(leather, player.ID);
         break;
-      case PlayerLineage.Human:
-        var spear = ItemFactory.Get("guisarme", objDb);
-        spear.Traits.Add(new AdjectiveTrait("old"));
-        spear.Equiped = true;
-        player.Inventory.Add(spear, player.ID);
+      default:
+        startWeapon = ItemFactory.Get("spear", objDb);
+        startWeapon.Traits.Add(new AdjectiveTrait("old"));
         player.Inventory.Add(leather, player.ID);
         break;
     }
+
+    switch (player.Background)
+    {
+      case PlayerBackground.Skullduggery:
+        startWeapon = ItemFactory.Get("dagger", objDb);
+        break;
+    }
+
+    startWeapon.Equiped = true;
+    player.Inventory.Add(startWeapon, player.ID);
 
     // Everyone gets 3 to 5 torches to start with
     player.Inventory.Add(ItemFactory.Get("torch", objDb), player.ID);
