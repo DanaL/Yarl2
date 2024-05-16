@@ -195,9 +195,19 @@ class AcidSplashTrait : Trait
   public override string AsText() => "AcidSplash";
 }
 
+class AxeTrait : Trait
+{
+  public override string AsText() => "Axe";
+}
+
 class ConsumableTrait : Trait
 {
   public override string AsText() => "Consumable";
+}
+
+class FinesseTrait : Trait
+{
+  public override string AsText() => "Finesse";
 }
 
 class ImmuneConfusionTrait : Trait
@@ -267,6 +277,11 @@ class PluralTrait : Trait
 class PolearmTrait : Trait
 {
   public override string AsText() => "Polearm";
+}
+
+class SwordTrait : Trait
+{
+  public override string AsText() => "Sword";
 }
 
 class TeflonTrait : Trait
@@ -1136,6 +1151,8 @@ class TraitFactory
           ArmourMod = int.Parse(pieces[2]),
           Bonus = int.Parse(pieces[3])
         };
+      case "Axe":
+        return new AxeTrait();
       case "Cleave":
         return new CleaveTrait();
       case "ConfusingScream":
@@ -1278,6 +1295,8 @@ class TraitFactory
         };
       case "Polearm":
         return new PolearmTrait();
+      case "Sword":
+        return new SwordTrait();
       case "Confused":
         return new ConfusedTrait()
         {
@@ -1289,6 +1308,8 @@ class TraitFactory
         return new DividerTrait();
       case "FinalBoss":
         return new FinalBossTrait();
+      case "Finesse":
+        return new FinesseTrait();
       case "Grappled":
         return new GrappledTrait()
         {

@@ -43,7 +43,10 @@ enum Attribute
   MonsterForm,
   ArcheryBonus,
   PolearmsUse,
-  BowUse
+  SwordUse,
+  AxeUse,
+  BowUse,
+  FinesseUse
 }
 
 class Stat

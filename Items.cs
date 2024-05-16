@@ -146,25 +146,15 @@ class ItemFactory
         item.Traits.Add(new ReachTrait());
         break;
       case "dagger":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Weapon,
-          Value = 10,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new FinesseTrait());
         break;
       case "hand axe":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Weapon,
-          Value = 15,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new AxeTrait());
         break;
       case "battle axe":
         item = new Item()
@@ -174,7 +164,8 @@ class ItemFactory
           Value = 25,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
         };
-        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Slashing });
+        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 3, DamageType = DamageType.Slashing });
+        item.Traits.Add(new AxeTrait());
         break;
       case "mace":
         item = new Item()
@@ -189,20 +180,17 @@ class ItemFactory
       case "longsword":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new SwordTrait());
         break;
       case "shortsword":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new SwordTrait());
         break;
       case "rapier":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Weapon,
-          Value = 20,
-          Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
-        };
+        item = new Item() { Name = name, Type = ItemType.Weapon, Value = 20, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new FinesseTrait());
         break;
       case "longbow":
         item = new Item()

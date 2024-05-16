@@ -359,8 +359,24 @@ class Battle
 
     if (attacker is Player player && player.Inventory.ReadiedWeapon() is Item weapon)
     {
-      if (weapon.HasTrait<PolearmTrait>())
-        player.ExerciseStat(Attribute.PolearmsUse);
+      foreach (Trait t in  weapon.Traits) 
+      {
+        switch (t)
+        {
+          case PolearmTrait:
+            player.ExerciseStat(Attribute.PolearmsUse);
+            break;
+          case SwordTrait:
+            player.ExerciseStat(Attribute.SwordUse);
+            break;
+          case AxeTrait:
+            player.ExerciseStat(Attribute.AxeUse); 
+            break;
+          case FinesseTrait:
+            player.ExerciseStat(Attribute.FinesseUse);
+            break;
+        }
+      }
     }
 
     return result;
