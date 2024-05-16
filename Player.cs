@@ -141,39 +141,6 @@ class Player : Actor, IPerformer, IGameEventListener
     return dmgs;
   }
 
-  public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
-  {
-    int playerVisionRadius = 1;
-
-    // What latitude does the game take place out? Will I eventually
-    // have seasonal variation in the length of days? :O
-    if (gs.InWilderness)
-    {
-      var (hour, _) = gs.CurrTime();
-      if (hour >= 6 && hour <= 19)
-        playerVisionRadius = MAX_VISION_RADIUS;
-      else if (hour >= 20 && hour <= 21)
-        playerVisionRadius = 7;
-      else if (hour >= 21 && hour <= 23)
-        playerVisionRadius = 3;
-      else if (hour < 4)
-        playerVisionRadius = 2;
-      else if (hour == 4)
-        playerVisionRadius = 3;
-      else
-        playerVisionRadius = 7;
-    }
-
-    List<(ulong, int, TerrainFlag)> auras = [(ID, playerVisionRadius, TerrainFlag.Lit)];
-
-    foreach (var (item, _) in Inventory.UsedSlots().Select(Inventory.ItemAt))
-    {
-      auras.AddRange(item.Auras(gs));
-    }
-
-    return auras;
-  }
-
   void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
   {
     var slots = Inventory.UsedSlots().Order().ToArray();

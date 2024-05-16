@@ -193,7 +193,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
 {
   Loc _target { get; set; } = target;
   EffectFactory _effectFactory { get; set; } = ef;
-  int _radius { get; set; } = radius;
+  public int Radius { get; set; } = radius;
   string _effectText { get; set; } = txt;
 
   public override ActionResult Execute()
@@ -201,7 +201,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
     var result = base.Execute();
     result.Messages.Add(new Message(_effectText, Actor.Loc));
 
-    var affected = GameState!.Flood(_target, _radius);
+    var affected = GameState!.Flood(_target, Radius);
     foreach (var loc in affected)
     {
       // Ugh at the moment I can't handle things like a fireball
@@ -472,10 +472,6 @@ class CloseDoorAction : DirectionalAction
         var msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, Loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door close.";
-
-        // This will update things like squares lit by the player's torchlight
-        // upon the door being closed
-        GameState!.CheckMovedEffects(Actor, Actor.Loc, Actor.Loc);
       }
       else if (Actor is Player)
       {
@@ -524,10 +520,6 @@ class OpenDoorAction : DirectionalAction
         var msg = MsgFactory.Phrase(Actor!.ID, Verb.Open, "door", false, Loc, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door open.";
-
-        // This will update things like squares lit by the player's torchlight
-        // upon the door being opened
-        GameState!.CheckMovedEffects(Actor, Actor.Loc, Actor.Loc);
       }
       else if (Actor is Player)
       {
@@ -1250,7 +1242,6 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
     var landingPt = FinalLandingSpot(pts.Last());
-    GameState.CheckMovedEffects(ammo, Actor!.Loc, landingPt);
     GameState.ItemDropped(ammo, landingPt);
     ammo.Equiped = false;
     Actor.CalcEquipmentModifiers();

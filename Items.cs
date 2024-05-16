@@ -70,14 +70,6 @@ class Item : GameObj, IEquatable<Item>
 
   public override string FullName => CalcFullName();
 
-  public override List<(ulong, int, TerrainFlag)> Auras(GameState gs)
-  {
-    return Traits.OfType<BasicTrait>()
-                 .Where(t => t.Aura)
-                 .Select(t => (ID, t.Radius, t.Effect))
-                 .ToList();
-  }
-
   // Active in the sense of being an IPerformer who needs to be in the 
   // turn order.
   public List<IPerformer> ActiveTraits()
@@ -529,7 +521,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return false;
   }
 
-  protected virtual List<Item> Items()
+  public virtual List<Item> Items()
   {
     List<Item> items = [];
     foreach (var itemID in _items.Select(i => i.Item2))
@@ -808,7 +800,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
 class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)
 {
-  protected override List<Item> Items() => [];
+  public override List<Item> Items() => [];
   public override string ToText() => "";
   public override void RestoreFromText(string txt) { }
 }

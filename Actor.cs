@@ -62,7 +62,23 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
     return DEFAULT_Z;
   }
-  
+
+  public override int LightRadius()
+  {
+    int radius = base.LightRadius();
+
+    foreach (var item in Inventory.Items())
+    {
+      foreach (LightSourceTrait light in item.Traits.OfType<LightSourceTrait>())
+      {
+        if (light.Radius > radius)
+          radius = light.Radius;
+      }
+    }
+
+    return radius;
+  }
+
   public override string FullName => HasTrait<NamedTrait>() ? Name.Capitalize() : Name.DefArticle();
 
   public virtual int TotalMeleeAttackModifier() => 0;

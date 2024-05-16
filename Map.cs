@@ -332,7 +332,6 @@ class Map : ICloneable
   public readonly int Height;
 
   public Tile[] Tiles;
-  public Dictionary<(int, int), Dictionary<ulong, TerrainFlag>> Effects = [];
 
   public Map(int width, int height)
   {
@@ -347,55 +346,6 @@ class Map : ICloneable
     Width = width;
     Height = height;
     Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
-  }
-
-  // I could speed this up maybe by calculating the intersections
-  // whenever the effects are updated. But otoh maybe with things
-  // moving around the map it'll just be constantly updating anyhow
-  public bool HasEffect(TerrainFlag effect, int row, int col)
-  {
-    if (!InBounds(row, col) || !Effects.ContainsKey((row, col)))
-      return false;
-
-    foreach (var flags in Effects[(row, col)].Values)
-    {
-      if ((effect & flags) != TerrainFlag.None)
-        return true;
-    }
-
-    return false;
-  }
-
-  public void ApplyEffectAt(TerrainFlag effect, int row, int col, ulong objID)
-  {
-    if (!Effects.TryGetValue((row, col), out var flagsDict))
-    {
-      flagsDict = new() { { objID, effect } };
-      Effects.Add((row, col), flagsDict);
-    }
-
-    if (!flagsDict.TryAdd(objID, effect))
-    {
-      flagsDict[objID] |= effect;
-    }
-  }
-
-  // Don't think I need both this method and RemoveEffectsFor()
-  public void RemoveEffectFromMap(TerrainFlag effect, ulong objID)
-  {
-    foreach (var flagsDict in Effects.Values)
-    {
-      if (flagsDict.ContainsKey(objID))
-        flagsDict[objID] &= ~effect;
-    }
-  }
-
-  public void RemoveEffectsFor(ulong objID)
-  {
-    foreach (var k in Effects.Keys)
-    {
-      Effects[k].Remove(objID);
-    }
   }
 
   public bool IsTile((int, int) pt, TileType type) => InBounds(pt) && TileAt(pt).Type == type;

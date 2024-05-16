@@ -117,7 +117,7 @@ class FieldOfView
                     visibleSqs.Add((r, c));
 
                     var loc = new Loc(dungeonID, level, r, c);
-                    if (map.TileAt(r, c).Opaque() || objDb.ItemsWithEffect(loc, TerrainFlag.Obscures)) 
+                    if (map.TileAt(r, c).Opaque() || objDb.ItemsWithTrait<OpaqueTrait>(loc)) 
                     {
                         line.Add(projection);
                         fullShadow = line.IsFullShadow();

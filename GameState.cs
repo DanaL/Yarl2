@@ -198,7 +198,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ItemDestroyed(Item item, Loc loc)
   {
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    map.RemoveEffectsFor(item.ID);
     ObjDb.RemoveItemFromGame(loc, item);
 
     foreach (var listener in item.Traits.OfType<IGameEventListener>())
@@ -301,8 +300,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var fire = ItemFactory.Fire(this);
       ObjDb.SetToLoc(loc, fire);
-      CheckMovedEffects(fire, Loc.Nowhere, loc);
-
+      
       var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
       if (tile.Type == TileType.Grass)
       {
@@ -343,8 +341,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var item in itemsToFall)
     {
       UI.AlertPlayer(new Message($"{item.Name.DefArticle().Capitalize()} sinks!", loc), "", this);
-      ObjDb.RemoveItem(loc, item);
-      CheckMovedEffects(item, loc, loc);
+      ObjDb.RemoveItem(loc, item);      
       ItemDropped(item, loc);
     }
   }
@@ -367,7 +364,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       UI.AlertPlayer(new Message($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", loc), "", this);
       ObjDb.RemoveItem(loc, item);
-      CheckMovedEffects(item, loc, landingSpot);
       ItemDropped(item, landingSpot);
     }
     UpdateFoV();
@@ -748,12 +744,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     a.Loc = startB;
     ObjDb.SetActorToLoc(startB, a.ID);
-    CheckMovedEffects(a, startA, startB);
     
     b.Loc = startA;
     ObjDb.SetActorToLoc(startA, b.ID);
-    CheckMovedEffects(b, startB, startA);
-
+    
     if (a is Player && startB.DungeonID > 0)
     {
       SetDMaps(startB);
@@ -768,11 +762,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     ObjDb.ActorMoved(actor, start, dest);
 
-    // It might be more efficient to actually calculate the squares covered
-    // by the old and new locations and toggle their set difference? But
-    // maybe not enough for the more complicated code?        
-    CheckMovedEffects(actor, start, dest);
-
     // Not making djikstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
     // monsters can open doors, fly, etc. Multiple maps??
@@ -780,32 +769,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       SetDMaps(dest);      
     }
-  }
-
-  // Find all the game objects affecting a square with a particular
-  // effect
-  public List<GameObj> ObjsAffectingLoc(Loc loc, TerrainFlag effect)
-  {
-    var objs = new List<GameObj>();
-
-    var (dungeon, level, row, col) = loc;
-    var map = Campaign.Dungeons[dungeon].LevelMaps[level];
-    if (map.Effects.ContainsKey((row, col)) && map.Effects[(row, col)].Count > 0)
-    {
-      var effects = map.Effects[(row, col)];
-      foreach (var k in effects.Keys)
-      {
-        if ((effects[k] & effect) != TerrainFlag.None)
-        {
-          var o = ObjDb.GetObj(k);
-          if (o is not null)
-            objs.Add(o);
-        }
-
-      }
-    }
-
-    return objs;
   }
 
   public string LocDesc(Loc loc)
@@ -978,59 +941,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return alerted;
   }
 
-  public void CheckMovedEffects(GameObj obj, Loc start, Loc dest)
-  {
-    Map? startMap = null;
-    // first we want to clear out the old effects
-    if (start != Loc.Nowhere)
-    {
-      startMap = Campaign.Dungeons[start.DungeonID].LevelMaps[start.Level];
-      startMap.RemoveEffectsFor(obj.ID);
-    }
-
-    var destMap = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
-    var auras = obj.Auras(this).Where(a => a.Item2 > 0);
-    foreach (var aura in auras)
-    {
-      ulong id = aura.Item1;
-
-      startMap?.RemoveEffectsFor(id);
-      int radius = aura.Item2;
-      TerrainFlag effect = aura.Item3;
-
-      foreach (var sq in FieldOfView.CalcVisible(radius, dest.Row, dest.Col, destMap, dest.DungeonID, dest.Level, ObjDb))
-      {
-        destMap.ApplyEffectAt(effect, sq.Item2, sq.Item3, id);
-      }
-    }
-  }
-
-  // I only have light effects in the game right now, but I also have ambitions
-  public void ToggleEffect(GameObj obj, Loc loc, TerrainFlag effect, bool on)
-  {
-    if (loc == Loc.Nowhere)
-      return;
-
-    var (dungeon, level, row, col) = loc;
-    var currDungeon = Campaign.Dungeons[dungeon];
-    var map = currDungeon.LevelMaps[level];
-
-    foreach (var aura in obj.Auras(this))
-    {
-      if (aura.Item3 == effect)
-      {
-        var sqs = FieldOfView.CalcVisible(aura.Item2, row, col, map, dungeon, level, ObjDb);
-        foreach (var sq in sqs)
-        {
-          if (on)
-            map.ApplyEffectAt(effect, sq.Item2, sq.Item3, aura.Item1);
-          else
-            map.RemoveEffectFromMap(effect, aura.Item1);
-        }
-      }
-    }
-  }
-
   public void RegisterForEvent(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
   {
     if (eventType == GameEventType.EndOfRound)
@@ -1073,12 +983,61 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       _deathWatchListeners.RemoveAt(indexes.Pop());
   }
 
+  // Between this and UpdateFoV(), I wonder if I should just start returning 
+  HashSet<Loc> LitLocations(int dungeonID, int level)
+  {
+    HashSet<Loc> lit = [];
+
+    foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level)) 
+    {
+      int lightRadius = obj.LightRadius();
+
+      if (obj.ID == Player.ID && lightRadius == 0)
+      {
+        // What latitude does the game take place out? Will I eventually
+        // have seasonal variation in the length of days? :O
+        if (!InWilderness)
+        {
+          lightRadius = 1;
+        }
+        else
+        {
+          var (hour, _) = CurrTime();
+          if (hour >= 6 && hour <= 19)
+            lightRadius = Player.MAX_VISION_RADIUS;
+          else if (hour >= 20 && hour <= 21)
+            lightRadius = 7;
+          else if (hour >= 21 && hour <= 23)
+            lightRadius = 3;
+          else if (hour < 4)
+            lightRadius = 2;
+          else if (hour == 4)
+            lightRadius = 3;
+          else
+            lightRadius = 7;
+        }        
+      }
+
+      if (lightRadius > 0)
+      {
+        lit = FieldOfView.CalcVisible(lightRadius, obj.Loc.Row, obj.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
+                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
+                         .ToHashSet();
+      }
+    }
+
+    return lit;
+  }
+
   public void UpdateFoV()
   {
     CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
+
+    HashSet<Loc> litLocations = LitLocations(CurrDungeonID, CurrLevel);
+
     var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc.Row, Player.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
                          .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
-                         .Where(loc => CurrentMap.HasEffect(TerrainFlag.Lit, loc.Row, loc.Col))
+                         .Where(loc => litLocations.Contains(loc))
                          .ToHashSet();
     LastPlayerFoV = fov;
 

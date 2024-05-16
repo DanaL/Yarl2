@@ -53,11 +53,8 @@ abstract class FeatTrait : Trait { }
 
 abstract class BasicTrait : Trait
 {
-  public virtual bool Aura => false;
-  public virtual TerrainFlag Effect => TerrainFlag.None;
-  public virtual int Radius { get; set; } = 0;
   public ulong ExpiresOn { get; set; } = ulong.MaxValue;
-  public override string AsText() => $"{ExpiresOn}#{Radius}";
+  public override string AsText() => $"{ExpiresOn}";
 }
 
 abstract class EffectTrait : BasicTrait
@@ -137,6 +134,7 @@ class SummonTrait : ActionTrait
 class ConfusingScreamTrait : ActionTrait
 {
   public int DC { get; set; }
+  public int Radius { get; set; }
 
   public override bool Available(Mob mob, GameState gs)
   {
@@ -381,10 +379,9 @@ class FlyingTrait : BasicTrait
   public override string AsText() => $"Flying#{ExpiresOn}";
 }
 
-class OpaqueTrait : BasicTrait
+class OpaqueTrait : Trait
 {
-  public override string AsText() => "Opaque";
-  public override TerrainFlag Effect => TerrainFlag.Obscures;
+  public override string AsText() => "Opaque";  
 }
 
 // Simple in that I don't need any extra info like a target to use the effect.
@@ -458,8 +455,7 @@ class ArmourTrait : ACModTrait
   public int Bonus { set; get; }
 
   public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
-  public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";
-  public override bool Aura => false;
+  public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
 }
 
 class DeathMessageTrait : BasicTrait
@@ -898,8 +894,6 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   readonly string _text = text;
   public override string AsText() => $"Readable#{_text.Replace("\n", "<br/>")}#{OwnerID}";
   
-  public override bool Aura => false;
-
   public UseResult Use(Actor user, GameState gs, int row, int col)
   {
     Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
@@ -962,10 +956,8 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 class LightSourceTrait : BasicTrait, IOwner
 {
   public ulong OwnerID { get; set; }
-  public override int Radius { get; set; }
-  public sealed override bool Aura => true;
-  public sealed override TerrainFlag Effect => TerrainFlag.Lit;
-
+  public int Radius { get; set; }
+  
   public override string AsText() => $"LightSource#{OwnerID}#{Radius}";
 }
 
@@ -975,16 +967,10 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
   public ulong OwnerID { get; set; }
   public bool Lit { get; set; }
   public int Fuel { get; set; }
-  public sealed override bool Aura => true;
-  public sealed override TerrainFlag Effect => TerrainFlag.Lit;
   public override string Desc() => Lit ? "(lit)" : "";
 
   public override bool Active => Lit;
-  public override int Radius
-  {
-    get => Lit ? 5 : 0;
-  }
-
+  
   public bool Expired { get; set; } = false;
   public bool Listening => Lit;
 
@@ -1010,7 +996,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
     // Gotta set the lighting level before we extinguish the torch
     // so it's radius is still 5 when calculating which squares to 
     // affect            
-    gs.ToggleEffect(item, loc, TerrainFlag.Lit, false);
+    //gs.ToggleEffect(item, loc, TerrainFlag.Lit, false);
     Lit = false;
 
     for (int j = 0; j < item.Traits.Count; j++)
@@ -1021,6 +1007,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
         break;
       }
     }
+
+    item.Traits = item.Traits.Where(t => t is not LightSourceTrait).ToList();
 
     return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
   }
@@ -1038,9 +1026,10 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
     {
       Lit = true;
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
-      gs.ToggleEffect(item, loc, TerrainFlag.Lit, true);
-
+      
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
+      item.Traits.Add(new LightSourceTrait() { Radius = 5 });
+
       return new UseResult(true, $"The {item.Name} sparks to life!", null, null);
     }
     else
@@ -1070,8 +1059,6 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
           loc = owner.Loc;
           owner.Inventory.Remove(item.Slot, 1);
         }
-
-        gs.CurrentMap.RemoveEffectFromMap(TerrainFlag.Lit, (item).ID);
 
         var msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
         gs.WriteMessages([msg], "");

@@ -91,7 +91,6 @@ abstract class GameObj : IZLevel
 
   public ulong ID { get; set; }
 
-  public virtual List<(ulong, int, TerrainFlag)> Auras(GameState gs) => [];
   public GameObj() => ID = IDSeed++;
   public static ulong Seed => IDSeed;
   public static void SetSeed(ulong seed) => IDSeed = seed;
@@ -123,6 +122,13 @@ abstract class GameObj : IZLevel
 
     return sb.ToString();
   }
+
+  public virtual int LightRadius()
+  {
+    var lights = Traits.OfType<LightSourceTrait>().Select(l => l.Radius);
+
+    return lights.Any() ? lights.Max() : 0;
+  }
 }
 
 // Structure to store where items are in the world
@@ -134,13 +140,13 @@ class GameObjectDB
   public Dictionary<Loc, ulong> _actorLocs = [];
   public Dictionary<ulong, GameObj> Objs = [];
 
-  public bool ItemsWithEffect(Loc loc, TerrainFlag flag)
+  public bool ItemsWithTrait<T>(Loc loc)
   {
     if (_itemLocs.TryGetValue(loc, out var items))
     {
       foreach (var item in items)
       {
-        if (item.Traits.OfType<BasicTrait>().Any(t => t.Effect == flag))
+        if (item.HasActiveTrait<T>())
           return true;
       }
     }
@@ -248,6 +254,29 @@ class GameObjectDB
     if (!Objs.TryGetValue(id, out GameObj? val))
       return null;
     return val;
+  }
+
+  // If this ever becomes too slow, I guess I can add indexing for items/actors
+  // on a level?
+  public List<GameObj> ObjectsOnLevel(int dungeonID, int level)
+  {
+    List<GameObj> objs = [];
+
+    foreach (var loc in _actorLocs.Keys)
+    {
+      if (loc.DungeonID == dungeonID && loc.Level == level)
+        objs.Add(Objs[_actorLocs[loc]]);
+    }
+
+    foreach (var loc in _itemLocs.Keys)
+    {
+      if (loc.DungeonID == dungeonID && loc.Level == level && _itemLocs.TryGetValue(loc, out var itemStack) && itemStack.Count > 0) 
+      {
+        objs.AddRange(itemStack);
+      }
+    }
+
+    return objs;
   }
 
   public List<Actor> ActorsWithin(Loc loc, int range)

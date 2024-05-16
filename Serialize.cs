@@ -275,24 +275,15 @@ internal class MapSaver
   int[]? Tiles { get; set; }
   [JsonInclude]
   List<string>? SpecialTiles { get; set; }
-  [JsonInclude]
-  Dictionary<string, Dictionary<ulong, TerrainFlag>> Effects { get; set; }
-
+  
   public static MapSaver Shrink(Map map)
-  {
-    Dictionary<string, Dictionary<ulong, TerrainFlag>> effectsInfo = [];
-    foreach (var kvp in map.Effects)
-    {
-      effectsInfo.Add(kvp.Key.ToString(), kvp.Value);
-    }
-
+  {  
     MapSaver sm = new MapSaver
     {
       Height = map.Height,
       Width = map.Width,
       Tiles = new int[map.Tiles.Length],
-      SpecialTiles = [],
-      Effects = effectsInfo
+      SpecialTiles = [],   
     };
 
     for (int j = 0; j < map.Tiles.Length; j++)
@@ -365,12 +356,6 @@ internal class MapSaver
 
     if (sm.Tiles is null || sm.SpecialTiles is null)
       throw new Exception("Invalid save game data!");
-
-    foreach (var kvp in sm.Effects)
-    {
-      var d = Util.ToNums(kvp.Key);
-      map.Effects.Add((d[0], d[1]), kvp.Value);
-    }
 
     try
     {
