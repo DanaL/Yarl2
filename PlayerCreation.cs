@@ -364,19 +364,40 @@ class PlayerCreator
     if (player.Stats[Attribute.Strength].Max < 4)
       boons.Add(new(Boon.StrInc, "Str Increase", "Increase your Str. You'll be more effective in melee combat."));
 
-    //if (player.Stats[Attribute.Dexterity].Max < 4)
-    //  boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
-
-    if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p) && p.Curr > 10)
+    if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p))
     {
-      if (!player.HasTrait<ImpaleTrait>())
+      if (!player.HasTrait<ImpaleTrait>() && p.Curr > 25)
         boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm may also strike an opponent behind the target."));
 
-      if (!player.HasTrait<ReachTrait>())
+      if (!player.HasTrait<ReachTrait>() && p.Curr > 25)
         boons.Add(new(Boon.Reach, "Reach", "With a long polearm, you can attack 2 squares away."));
     }
 
-    return boons;
+    if (player.Stats.TryGetValue(Attribute.SwordUse, out var sw) && sw.Curr > 25)
+    {
+      if (!player.HasTrait<CleaveTrait>())
+        boons.Add(new(Boon.Cleave, "Cleave", "When you attack with sword or axe, you may also strike targets adjacent to your opponent."));
+
+      if (player.Stats[Attribute.Strength].Max < 4)
+        boons.Add(new(Boon.StrInc, "Str Increase", "Increase your Str. You'll be more effective in melee combat."));
+    }
+
+    if (player.Stats.TryGetValue(Attribute.AxeUse, out var axe))
+    {
+      if (!player.HasTrait<CleaveTrait>() && axe.Curr > 25)
+        boons.Add(new(Boon.Cleave, "Cleave", "When you attack with sword or axe, you may also strike targets adjacent to your opponent."));
+
+      if (player.Stats[Attribute.Strength].Max < 4 && axe.Curr > 10)
+        boons.Add(new(Boon.StrInc, "Str Increase", "Increase your Str. You'll be more effective in melee combat."));
+    }
+
+    if (player.Stats.TryGetValue(Attribute.FinesseUse, out var fin))
+    {
+      if (player.Stats[Attribute.Dexterity].Max < 4 && fin.Curr > 10)
+        boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
+    }
+
+    return boons.Distinct().ToList();
   }
 
   // Am I going to have effects that reduce a player's XP/level? I dunno.
