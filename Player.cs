@@ -244,11 +244,23 @@ class Player : Actor, IPerformer, IGameEventListener
       return Fmt(val);
   }
 
+  string CharDesc()
+  {
+    string major = Background switch
+    {
+      PlayerBackground.Warrior => "Arms & Armour",
+      PlayerBackground.Scholar => "Lore & History",
+      PlayerBackground.Skullduggery => "Fine Sneaky Arts"
+    };
+
+    return $"{Lineage.ToString().ToLower().IndefArticle()} who majored in {major}";
+  }
+
   List<string> CharacterSheet()
   {
     List<string> lines = [];
 
-    lines.Add($"{Name}, a level {Stats[Attribute.Level].Curr} {Util.PlayerClassToStr(Lineage)}");
+    lines.Add($"{Name}, level {Stats[Attribute.Level].Curr}, {CharDesc()}");
     lines.Add("");
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");

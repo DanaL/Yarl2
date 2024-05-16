@@ -318,12 +318,6 @@ class Util
     return sqs;
   }
 
-  public static string PlayerClassToStr(PlayerLineage charClass) => charClass switch
-  {
-    PlayerLineage.Orc => "Orc Reaver",
-    _ => "Dwarf Stalwart"
-  };
-
   // I am very bravely breaking from D&D traidtion and I'm just going to 
   // store the stat's modifier instead of the score from 3-18 :O
   public static int StatRollToMod(int roll)
