@@ -317,6 +317,11 @@ class TelepathyTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class TwoHandedTrait : Trait
+{
+  public override string AsText() => "TwoHanded";
+}
+
 class CleaveTrait : FeatTrait
 {
   public override string AsText() => "Cleave";
@@ -1405,6 +1410,8 @@ class TraitFactory
           ExpiresOn = ulong.Parse(pieces[1]),
           OwnerID = ulong.Parse(pieces[2])
         };
+      case "TwoHanded":
+        return new TwoHandedTrait();
       case "Torch":
         return new TorchTrait()
         {

@@ -1451,12 +1451,18 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
     GameState!.ClearMenu();
 
-    bool equipable = item is null || item.Type switch
+    if (item is null)
+    {
+      var msg = new Message("You cannot equip that!", GameState.Player.Loc);
+      return new ActionResult() { Complete = false, Messages = [msg] };
+    }
+
+    bool equipable = item.Type switch
     {
       ItemType.Armour => true,
       ItemType.Weapon => true,
       ItemType.Tool => true,
-      ItemType.Bow => true,
+      ItemType.Bow => true,      
       _ => false
     };
 
@@ -1478,12 +1484,24 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, Actor.Loc, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
         break;
+      case EquipingResult.TwoHandedConflict:
+        alert = new Message("You cannot wear a shield with a two-handed weapon!", Actor.Loc);
+        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        break;
+      case EquipingResult.ShieldConflict:
+        alert = new Message("You cannot use a two-handed weapon with a shield!", Actor.Loc);
+        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        break;
       default:
         string msg = "You are already wearing ";
-        if (conflict == ArmourParts.Hat)
-          msg += "a helmet.";
-        else if (conflict == ArmourParts.Shirt)
-          msg += "some armour.";
+        msg += conflict switch
+        {
+          ArmourParts.Hat => "a helmet.",
+          ArmourParts.Shield => "a shield.",
+          ArmourParts.Boots => "boots.",
+          ArmourParts.Cloak => "a cloak.",
+          _ => "some armour."
+        };
         alert = new Message(msg, GameState.Player.Loc);
         result = new ActionResult() { Complete = true, Messages = [alert] };
         break;

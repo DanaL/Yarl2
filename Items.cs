@@ -144,6 +144,7 @@ class ItemFactory
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new PolearmTrait());
         item.Traits.Add(new ReachTrait());
+        item.Traits.Add(new TwoHandedTrait());
         break;
       case "dagger":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
@@ -260,14 +261,12 @@ class ItemFactory
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
         break;
       case "helmet":
-        item = new Item()
-        {
-          Name = name,
-          Type = ItemType.Armour,
-          Value = 20,
-          Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
+        item = new Item() { Name = name, Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
+        break;
+      case "shield":
+        item = new Item() { Name = name, Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shield, ArmourMod = 1, Bonus = 0 });
         break;
       case "torch":
         item = new Item()
@@ -482,7 +481,8 @@ enum ArmourParts
   Hat,
   Boots,
   Cloak,
-  Shirt
+  Shirt,
+  Shield
 }
 
 class Armour : Item
@@ -677,13 +677,25 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
   {
+    bool EquipedShield()
+    {
+      foreach (var item in Items().Where(i => i.Type == ItemType.Armour && i.Equiped))
+      {
+        if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at && at.Part == ArmourParts.Shield)
+          return true;
+      }
+
+      return false;
+    }
+
+    bool EquipedTwoHandedWeapon() => ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
+
     // I suppose at some point I'll have items that can't be equiped
     // (or like it doesn't make sense for them to be) and I'll have
     // to check for that
     Item? item = null;
     foreach (var (s, id) in _items)
     {
-
       if (s == slot)
       {
         item = _objDb.GetObj(id) as Item;
@@ -703,6 +715,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       // Okay we are equiping new gear, which is a little more complicated
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
+        if (item.HasTrait<TwoHandedTrait>() && EquipedShield())
+        {
+          return (EquipingResult.ShieldConflict, ArmourParts.Shield);
+        }
+
         // If there is a weapon already equiped, unequip it
         foreach (Item other in Items())
         {
@@ -716,22 +733,25 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       else if (item.Type == ItemType.Armour)
       {
         ArmourParts part = ArmourParts.None;
-        foreach (var t in item.Traits)
-        {
-          if (t is ArmourTrait at)
-          {
-            part = at.Part;
-          }
+        foreach (ArmourTrait t in item.Traits.OfType<ArmourTrait>())
+        {          
+          part = t.Part;
+          break;          
         }
 
         // check to see if there's another piece in that slot
         foreach (var other in Items().Where(a => a.Type == ItemType.Armour && a.Equiped))
         {
-          foreach (var t in other.Traits)
+          foreach (var t in other.Traits.OfType<ArmourTrait>())
           {
-            if (t is ArmourTrait at && at.Part == part)
+            if (t.Part == part)
               return (EquipingResult.Conflict, part);
           }
+        }
+
+        if (part is ArmourParts.Shield && EquipedTwoHandedWeapon())
+        {
+          return (EquipingResult.TwoHandedConflict, part);
         }
 
         item.Equiped = !item.Equiped;
@@ -743,7 +763,6 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (EquipingResult.Conflict, ArmourParts.Shirt);
   }
 
-  // Active as in has a trait that needs to be in the turn order
   public List<IPerformer> ActiveItemTraits()
   {
     List<IPerformer> activeTraits = [];
@@ -797,5 +816,7 @@ enum EquipingResult
 {
   Equiped,
   Unequiped,
-  Conflict
+  Conflict,
+  ShieldConflict,
+  TwoHandedConflict
 }

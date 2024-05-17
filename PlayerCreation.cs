@@ -217,6 +217,13 @@ class PlayerCreator
         startWeapon = ItemFactory.Get("spear", objDb);
         startWeapon.Traits.Add(new AdjectiveTrait("old"));
         player.Inventory.Add(leather, player.ID);
+        var shield = ItemFactory.Get("shield", objDb);
+        shield.Equiped = true;
+        player.Inventory.Add(shield, player.ID);
+
+        var guisarme = ItemFactory.Get("guisarme", objDb);
+        player.Inventory.Add(guisarme, player.ID);
+
         break;
     }
 
