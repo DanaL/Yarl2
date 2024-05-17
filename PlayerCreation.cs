@@ -188,42 +188,42 @@ class PlayerCreator
     var leather = ItemFactory.Get("leather armour", objDb);
     leather.Traits.Add(new AdjectiveTrait("battered"));
     leather.Equiped = true;
+    leather.Slot = 'b';
 
     Item startWeapon;
 
     switch (player.Lineage)
     {
       case PlayerLineage.Orc:
-        startWeapon = ItemFactory.Get("shortsword", objDb);
+        startWeapon = ItemFactory.Get("shortsword", objDb);        
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get("hand axe", objDb);
         var studded = ItemFactory.Get("studded leather armour", objDb);
         studded.Equiped = true;
+        studded.Slot = 'b';
         player.Inventory.Add(studded, player.ID);
         var helmet = ItemFactory.Get("helmet", objDb);
         helmet.Equiped = true;
+        helmet.Slot = 'c';
         player.Inventory.Add(helmet, player.ID);
         break;
       case PlayerLineage.Elf:
+        startWeapon = ItemFactory.Get("dagger", objDb);
+
         var bow = ItemFactory.Get("longbow", objDb);
         bow.Equiped = true;
+        bow.Slot = 'b';
         player.Inventory.Add(bow, player.ID);
-        startWeapon = ItemFactory.Get("dagger", objDb);
-        player.Inventory.Add(leather, player.ID);
+        
+        leather.Slot = 'c';
+        player.Inventory.Add(leather, player.ID);        
         break;
       default:
         startWeapon = ItemFactory.Get("spear", objDb);
-        startWeapon.Traits.Add(new AdjectiveTrait("old"));
+        startWeapon.Traits.Add(new AdjectiveTrait("old"));        
         player.Inventory.Add(leather, player.ID);
-        var shield = ItemFactory.Get("shield", objDb);
-        shield.Equiped = true;
-        player.Inventory.Add(shield, player.ID);
-
-        var guisarme = ItemFactory.Get("guisarme", objDb);
-        player.Inventory.Add(guisarme, player.ID);
-
         break;
     }
 
@@ -248,31 +248,26 @@ class PlayerCreator
 
     player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of healing", objDb), player.ID);
-
-    player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
+    
+    //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
 
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
-
-    Console.WriteLine(player.LightRadius());
 
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);

@@ -142,7 +142,7 @@ class Battle
   }
 
   static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb)
-  {
+  {    
     // Need to handle the case where the player isn't currently wielding a weapon...
     List<(int, DamageType)> dmg = [];
     foreach (var d in attacker.MeleeDamage())
@@ -311,6 +311,44 @@ class Battle
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
   {
+    static bool CanCleave(Actor attacker)
+    {
+      if (!attacker.HasTrait<CleaveTrait>())
+        return false;
+
+      if (attacker.Inventory.ReadiedWeapon() is Item weapon)
+      {
+        if (!(weapon.HasTrait<SwordTrait>() || weapon.HasTrait<AxeTrait>()))
+          return false;
+
+        return true;
+      }
+
+      return false;
+    }
+
+    static bool CanImpale(Actor attacker, Actor target)
+    {
+      if (!attacker.HasTrait<ImpaleTrait>())
+        return false;
+
+      if (attacker.Inventory.ReadiedWeapon() is Item weapon)
+      {
+        if (weapon.HasTrait<PolearmTrait>())
+        {
+          // We check the distance because if the player has a weapon with Reach,
+          // we don't want them to attack monsters 3 squares away. Ie.,
+          //      ...@.gh...
+          // When attacking g with reach, the player shouldn't be able to hit
+          // the h via Reach
+          if (Util.Distance(attacker.Loc, target.Loc) == 1)
+            return true;
+        }
+      }
+
+      return false;
+    }
+
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier();
@@ -318,25 +356,12 @@ class Battle
     {
       ResolveMeleeHit(attacker, target, gs, result, Verb.Hit);
 
-      // in the future I'll need to make sure the other targets aren't friendly/allies
-      // should I limit Impale and Cleave to weapon types? Maybe Slashing and Bludgeoning
-      // can Cleave and Piercing can Impale?            
-      bool specialAttack = false;
-      if (attacker.HasActiveTrait<CleaveTrait>()) // && rng.NextDouble() < 0.3333)
-      {
-        specialAttack = ResolveCleave(attacker, target, roll, gs, result);
-      }
-
-      // Check the distance because if a player has both Impale and Reach and 
-      // is attacking with Reach, we don't want to allow this:
-      //          @.gh
-      // We don't want Impale feature to cause the player to impale the h 
-      // when attacking g with reach
-      if (!specialAttack && attacker.HasActiveTrait<ImpaleTrait>() && Util.Distance(attacker.Loc, target.Loc) == 1)
-      {
-        specialAttack = ResolveImpale(attacker, target, roll, gs, result);
-      }
-
+      if (CanCleave(attacker))
+        ResolveCleave(attacker, target, roll, gs, result);
+     
+      if (CanImpale(attacker, target))
+        ResolveImpale(attacker, target, roll, gs, result);
+      
       if (attacker.HasActiveTrait<KnockBackTrait>())
       {
         var msg = ResolveKnockBack(attacker, target, gs);
