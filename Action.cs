@@ -1623,7 +1623,8 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
         break;
       pts.Add(pt);
     }
-    var anim = new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE);
+
+    var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
     foreach (var pt in pts)

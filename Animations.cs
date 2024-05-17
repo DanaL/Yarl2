@@ -38,6 +38,9 @@ class AimAnimation : Animation
 
   public override void Update()
   {
+    if (Expiry < DateTime.Now)
+      return;
+
     foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
     {
       var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
@@ -53,7 +56,7 @@ class AimAnimation : Animation
 class ArrowAnimation : Animation
 {
   readonly GameState _gs;
-  List<(Loc, char)> _frames = [];
+  readonly List<(Loc, char)> _frames = [];
   int _frame = 0;
   Colour _ammoColour;
   DateTime _lastFrame;
@@ -87,7 +90,49 @@ class ArrowAnimation : Animation
     {
       _lastFrame = DateTime.Now;
       ++_frame;
-    }    
+    }
+  }
+}
+
+class BeamAnimation : Animation
+{
+  readonly GameState _gs;
+  readonly List<Loc> _pts;
+  int _end = 0;
+  DateTime _lastFrame;
+  Colour _background;
+  Colour _foreground;
+
+  public BeamAnimation(GameState gs, List<Loc> pts, Colour background, Colour foreground)
+  {
+    _gs = gs;
+    _background = background;
+    _foreground = foreground;
+    _pts = pts;
+  }
+
+  public override void Update()
+  {
+    if (_end >= _pts.Count)
+    {
+      Expiry = DateTime.MinValue;
+      return;
+    }
+
+    var ui = _gs.UIRef();
+    for (int p = 0; p < _end; p++)
+    {
+      var loc = _pts[p];
+      var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+      char ch = ui.SqsOnScreen[scrR, scrC].Ch;
+      ui.SqsOnScreen[scrR, scrC] = new Sqr(_foreground, _background, ch);
+    }
+
+    if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
+    {
+      _lastFrame = DateTime.Now;
+      ++_end;
+    }
   }
 }
 
