@@ -40,3 +40,15 @@ A large, skittering bug. Something unpleasant seems to be oozing from its pincer
 #
 floating eye
 A bloodshot eye drifting through the dungeon. Something about it draws your gaze...
+#
+jelly
+A pink blob of jelly. Is it sentient? It seems to be moving toward you.
+#
+acrid blob
+A blob of acidic jelly oozing across the floor toward you. Why does this thing even exist?
+#
+chillled jelly
+A frost-covered blob chills the nearby air. Probably the result of some mad wizard's experiments.
+#
+screech bat
+A common dungeon predator. Its screams are known to temporarily scramble the brains of adventurers.
