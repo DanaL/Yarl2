@@ -91,8 +91,15 @@ class Player : Actor, IPerformer, IGameEventListener
   }
 
   public override int TotalMeleeAttackModifier()
-  {
+  {    
     int mod = Stats[Attribute.Strength].Curr;
+
+    if (Inventory.ReadiedWeapon() is Item item && item.HasTrait<FinesseTrait>())
+    {
+      int dexMod = Stats[Attribute.Dexterity].Curr;
+      if (dexMod > mod)
+        mod = dexMod;
+    }
 
     if (Stats.TryGetValue(Attribute.AttackBonus, out var attackBonus))
       mod += attackBonus.Curr;
