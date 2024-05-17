@@ -49,7 +49,7 @@ class Item : GameObj, IEquatable<Item>
   string CalcFullName()
   {
     string name;
-    if (Item.IDInfo.TryGetValue(Name, out var idInfo) && idInfo.Known == false)
+    if (IDInfo.TryGetValue(Name, out var idInfo) && idInfo.Known == false)
     {
       name = idInfo.Desc;
     }
@@ -759,14 +759,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     List<string> msgs = [];
 
-    foreach (var (_, itemID) in _items)
+    foreach (var item in Items())
     {
-      var i = gs.ObjDb.GetObj(itemID);
-      if (i is Item item)
-      {
-        string m = item.ApplyEffect(effect, gs, loc);
-        msgs.Add(m);
-      }
+      string m = item.ApplyEffect(effect, gs, loc);
+      msgs.Add(m);
     }
 
     return string.Join(' ', msgs).Trim();

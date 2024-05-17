@@ -269,8 +269,8 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
-    //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
 
     Console.WriteLine(player.LightRadius());
 
