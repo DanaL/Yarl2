@@ -579,7 +579,10 @@ class TownBuilder
 
     foreach (var doorstep in doors)
     {
-      var path = dmap.ShortestPath(doorstep.Item1, doorstep.Item2, townRow, townCol);
+      List<(int, int)> path;
+
+      path = dmap.ShortestPath(doorstep.Item1, doorstep.Item2, townRow, townCol);
+      
       foreach (var sq in path)
       {
         var tile = map.TileAt(sq);

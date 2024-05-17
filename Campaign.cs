@@ -264,7 +264,20 @@ class PreGameHandler(UserInterface ui)
       }
     }
     var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
-    DrawOldRoad(wildernessMap, mainRegion, entrance, town, rng);
+
+    try
+    {
+      DrawOldRoad(wildernessMap, mainRegion, entrance, town, rng);
+    }
+    catch (IndexOutOfRangeException)
+    {
+      // Some configurations it isn't possible to draw the old road.
+      // I might need to revisit this and see if it's a legit bug I
+      // should fix. It might happen when the Entrance is too close to the town?
+
+      // seed = -2098577891 causes it at the time I'm making my comment but
+      // it'll stop erroring as I add/remove Rng calls
+    }
 
     var history = new History(rng);
     history.CalcDungeonHistory();
@@ -493,7 +506,8 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      
+      seed = -2098577891;
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
