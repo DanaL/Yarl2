@@ -70,14 +70,6 @@ class Item : GameObj, IEquatable<Item>
 
   public override string FullName => CalcFullName();
 
-  // Active in the sense of being an IPerformer who needs to be in the 
-  // turn order.
-  public List<IPerformer> ActiveTraits()
-  {
-    return Traits.Where(i => i is IPerformer p && i.Active)
-                 .Select(t => (IPerformer)t).ToList();
-  }
-
   public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
   {
     var sb = new StringBuilder();
@@ -761,18 +753,6 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     return (EquipingResult.Conflict, ArmourParts.Shirt);
-  }
-
-  public List<IPerformer> ActiveItemTraits()
-  {
-    List<IPerformer> activeTraits = [];
-
-    foreach (var item in Items())
-    {
-      activeTraits.AddRange(item.ActiveTraits());
-    }
-
-    return activeTraits;
   }
 
   public string ApplyEffect(TerrainFlag effect, GameState gs, Loc loc)

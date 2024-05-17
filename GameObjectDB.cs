@@ -376,23 +376,11 @@ class GameObjectDB
   {
     List<IPerformer> performers = [];
 
-    // I wonder if it's worth building 'indexes' of the objects by level and maybe dungeon?
-    // To speed stuff like this up when there's lots of game objects
-    foreach (var loc in _itemLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
-    {
-      foreach (var item in _itemLocs[loc])
-      {
-        performers.AddRange(item.ActiveTraits());
-      }
-    }
-
     foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
     {
       var actor = Objs[_actorLocs[loc]] as Actor;
       if (actor is IPerformer performer)
         performers.Add(performer);
-
-      performers.AddRange(actor.Inventory.ActiveItemTraits());
     }
 
     return performers;
