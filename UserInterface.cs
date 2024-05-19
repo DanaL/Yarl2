@@ -887,7 +887,14 @@ abstract class UserInterface
       for (int c= 0; c < ScreenWidth; c++)
       {
         var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
-        sqs[r, c] = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : blank;                      
+        var sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : blank;
+
+        // We'll make the stairs more prominent on the map so they stand out 
+        // better to the player
+        if (sq.Ch == '>' || sq.Ch == '<')
+          sq = sq with { Fg = Colours.WHITE };
+
+        sqs[r, c] = sq;                  
       }
     }
 
