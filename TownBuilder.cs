@@ -574,14 +574,14 @@ class TownBuilder
     passable.Add(TileType.Water, 3);
     passable.Add(TileType.DeepWater, 3);
 
-    var dmap = new DjikstraMap(map, townRow, townRow + TOWN_HEIGHT, townCol, townCol + TOWN_WIDTH);
+    var dmap = new DjikstraMap(map, 129, 129);
     dmap.Generate(passable, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)
     {
       List<(int, int)> path;
 
-      path = dmap.ShortestPath(doorstep.Item1, doorstep.Item2, townRow, townCol);
+      path = dmap.ShortestPath(doorstep.Item1, doorstep.Item2);
       
       foreach (var sq in path)
       {

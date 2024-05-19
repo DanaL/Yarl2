@@ -694,7 +694,7 @@ class DungeonMap(Random rng)
       }
     }
 
-    var djmap = new DjikstraMap(map, 0, height, 0, width);
+    var djmap = new DjikstraMap(map, height, width);
     var passable = new Dictionary<TileType, int>
         {
             { TileType.DungeonFloor, 1 },
@@ -714,7 +714,7 @@ class DungeonMap(Random rng)
         djmap.Generate(passable, pair.Item2, 70);
 
         var start = pair.Item1;
-        var path = djmap.ShortestPath(start.Item1, start.Item2, 0, 0);
+        var path = djmap.ShortestPath(start.Item1, start.Item2);
         foreach (var pt in path)
         {
           if (map.IsTile(pt, riverTile))

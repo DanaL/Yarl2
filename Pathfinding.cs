@@ -13,13 +13,11 @@ using Yarl2;
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
-class DjikstraMap(Map map, int lowRow, int highRow, int loCol, int hiCol)
+class DjikstraMap(Map map, int height, int width)
 {
-  Map _map { get; set; } = map;
-  int _loRow { get; set; } = lowRow;
-  int _hiRow { get; set; } = highRow;
-  int _loCol { get; set; } = loCol;
-  int _hiCol { get; set; } = hiCol;
+  Map Map { get; set; } = map;
+  int Height { get; set; } = height;
+  int Width { get; set; } = width;
   int[,]? _djikstraMap { get; set; }
 
   // Passable defines the squares to be used in the pathfinding and their weight
@@ -27,37 +25,32 @@ class DjikstraMap(Map map, int lowRow, int highRow, int loCol, int hiCol)
   // slightly more expensive)
   // I'm going to make life easy on myself for now and just work with a 
   // single goal.
-  public void Generate(Dictionary<TileType, int> passable, (int, int) goal, int maxRange)
+  public void Generate(Dictionary<TileType, int> passable, (int Row, int Col) goal, int maxRange)
   {
-    int height = _hiRow - _loRow;
-    int width = _hiCol - _loCol;
-    _djikstraMap = new int[height, width];
+    _djikstraMap = new int[Height, Width];
 
-    for (int r = 0; r < height; r++)
+    for (int r = 0; r < Height; r++)
     {
-      for (int c = 0; c < width; c++)
+      for (int c = 0; c < Width; c++)
       {
         _djikstraMap[r, c] = int.MaxValue;
       }
     }
 
-    // Mark the goal square
-    int goalRow = goal.Item1 - _loRow;
-    int goalCol = goal.Item2 - _loCol;
-    _djikstraMap[goalRow, goalCol] = 0;
+    _djikstraMap[goal.Row, goal.Col] = 0;
 
     var q = new Queue<(int, int)>();
-    foreach (var sq in Util.Adj4Sqs(goalRow, goalCol))
+    foreach (var sq in Util.Adj4Sqs(goal.Row, goal.Col))
     {
       if (sq.Item1 >= 0 && sq.Item2 >= 0 && sq.Item1 < height && sq.Item2 < width)
         q.Enqueue(sq);
     }
-    HashSet<(int, int)> visited = [(goalRow, goalCol)];
+    HashSet<(int, int)> visited = [(goal.Row, goal.Col)];
 
     while (q.Count > 0)
     {
       var sq = q.Dequeue();
-      if (Util.Distance(sq.Item1, sq.Item2, goalRow, goalCol) >= maxRange)
+      if (Util.Distance(sq.Item1, sq.Item2, goal.Row, goal.Col) >= maxRange)
       {
         visited.Add(sq);
         continue;
@@ -65,7 +58,7 @@ class DjikstraMap(Map map, int lowRow, int highRow, int loCol, int hiCol)
 
       if (visited.Contains(sq))
         continue;
-      var tile = _map.TileAt(sq.Item1 + _loRow, sq.Item2 + _loCol);
+      var tile = Map.TileAt(sq.Item1, sq.Item2);
 
       if (!passable.TryGetValue(tile.Type, out int cost))
         continue;
@@ -85,13 +78,13 @@ class DjikstraMap(Map map, int lowRow, int highRow, int loCol, int hiCol)
     }
   }
 
-  public List<(int, int)> ShortestPath(int row, int col, int offsetRow, int offsetCol)
+  public List<(int, int)> ShortestPath(int row, int col)
   {
     int height = _djikstraMap!.GetLength(0);
     int width = _djikstraMap.GetLength(1);
     List<(int, int)> path = [(row, col)];
-    int currRow = row - offsetRow;
-    int currCol = col - offsetCol;
+    int currRow = row;
+    int currCol = col;
 
     if (currRow < 0 || currCol < 0)
     {
@@ -118,7 +111,7 @@ class DjikstraMap(Map map, int lowRow, int highRow, int loCol, int hiCol)
       if (cost == int.MaxValue)
         break;
 
-      path.Add((next.Item1 + offsetRow, next.Item2 + offsetCol));
+      path.Add((next.Item1, next.Item2));
       score = cost;
       (currRow, currCol) = next;
     }

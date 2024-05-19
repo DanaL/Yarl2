@@ -115,21 +115,8 @@ class PreGameHandler(UserInterface ui)
   static bool InTown(int row, int col, Town town) =>
       row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width;
 
-  static void DrawOldRoad(Map map, HashSet<(int, int)> region, (int, int) entrance, Town town, Random rng)
-  {
-    int loRow = 257, loCol = 257, hiRow = 0, hiCol = 0;
-    foreach (var sq in region)
-    {
-      if (sq.Item1 < loRow)
-        loRow = sq.Item1;
-      if (sq.Item1 > hiRow)
-        hiRow = sq.Item1;
-      if (sq.Item2 < loCol)
-        loCol = sq.Item2;
-      if (sq.Item2 > hiCol)
-        hiCol = sq.Item2;
-    }
-
+  static void DrawOldRoad(Map map, HashSet<(int, int)> region, int overWorldWidth, (int, int) entrance, Town town, Random rng)
+  {    
     Dictionary<TileType, int> passable = [];
     passable.Add(TileType.Grass, 1);
     passable.Add(TileType.Sand, 1);
@@ -153,9 +140,11 @@ class PreGameHandler(UserInterface ui)
     int tcRow = town.Row + town.Height / 2;
     int tcCol = town.Col + town.Width / 2;
 
-    var dmap = new DjikstraMap(map, loRow, hiRow, loCol, hiCol);
+    var dmap = new DjikstraMap(map, overWorldWidth, overWorldWidth);
+    var tt = map.TileAt(tcRow, tcCol);
+
     dmap.Generate(passable, (tcRow, tcCol), 257);
-    var road = dmap.ShortestPath(entrance.Item1, entrance.Item2, 0, 0);
+    var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
 
     double draw = 1.0;
     double delta = 2.0 / road.Count;
@@ -265,20 +254,8 @@ class PreGameHandler(UserInterface ui)
     }
     var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
 
-    try
-    {
-      DrawOldRoad(wildernessMap, mainRegion, entrance, town, rng);
-    }
-    catch (IndexOutOfRangeException)
-    {
-      // Some configurations it isn't possible to draw the old road.
-      // I might need to revisit this and see if it's a legit bug I
-      // should fix. It might happen when the Entrance is too close to the town?
-
-      // seed = -2098577891 causes it at the time I'm making my comment but
-      // it'll stop erroring as I add/remove Rng calls
-    }
-
+    DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
+    
     var history = new History(rng);
     history.CalcDungeonHistory();
     history.GenerateVillain();
@@ -506,8 +483,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      seed = -2098577891;
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();

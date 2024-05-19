@@ -718,14 +718,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void SetDMaps(Loc loc)
   {
-    DMap = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMap = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMap.Generate(_passableBasic, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMapDoors = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMapDoors.Generate(_passableWithDoors, (loc.Row, loc.Col), 25);
 
-    DMapFlight = new DjikstraMap(CurrentMap, 0, CurrentMap.Height, 0, CurrentMap.Width);
+    DMapFlight = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMapFlight.Generate(_passableFlying, (loc.Row, loc.Col), 25);
   }
 
