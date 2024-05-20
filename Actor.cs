@@ -102,6 +102,19 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public bool Hostile => !(Status == MobAttitude.Indifferent || Status == MobAttitude.Friendly);
 
+  public bool AbleToMove() 
+  {
+    foreach (var t in Traits)
+    {
+      if (t is ParalyzedTrait)
+        return false;
+      if (t is GrappledTrait)
+        return false;
+    }
+
+    return true;
+  }
+
   public Actor()
   {
     Inventory = new EmptyInventory(ID);

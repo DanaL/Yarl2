@@ -205,11 +205,11 @@ class ConsumableTrait : Trait
   public override string AsText() => "Consumable";
 }
 
-class DodgeTrait : Trait
+class DodgeTrait : FeatTrait
 {
   public int Rate { get; set; }
 
-  public override string AsText() => "Dodge#Rate";
+  public override string AsText() => $"Dodge#{Rate}";
 }
 
 class FinesseTrait : Trait

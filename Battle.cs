@@ -354,7 +354,19 @@ class Battle
     int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier();
     if (roll >= target.AC)
     {
-      
+      if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
+      {
+        int dodgeChance = target.Traits.OfType<DodgeTrait>().First().Rate;
+        int dodgeRoll = gs.Rng.Next(100);
+        if (dodgeRoll < dodgeChance && HandleDodge(attacker, target, gs))
+        {
+          string txt = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "dodge")} out of the way!";
+          var msg = new Message(txt, target.Loc);
+          result.Messages.Add(msg);
+          return result;
+        }        
+      }
+
       ResolveMeleeHit(attacker, target, gs, result, Verb.Hit);
 
       if (CanCleave(attacker))
@@ -406,6 +418,30 @@ class Battle
     }
 
     return result;
+  }
+
+  public static bool HandleDodge(Actor attacker, Actor target, GameState gs)
+  {
+    // Find square to dodge to
+    HashSet<Loc> options = [];
+
+    foreach (var adj in Util.Adj8Locs(attacker.Loc).Intersect(Util.Adj8Locs(target.Loc)))
+    {
+      var tile = gs.TileAt(adj);
+      if (!gs.ObjDb.Occupied(adj) && tile.Passable())
+        options.Add(adj);
+    }
+
+    if (options.Count > 0)
+    {
+      var sq = options.ToList()[gs.Rng.Next(options.Count)];
+      gs.ResolveActorMove(target, target.Loc, sq);
+      target.Loc = sq;
+
+      return true;
+    }
+
+    return false;
   }
 
   // attackBonus is because at this point I don't know what weapon shot the ammunition so pass

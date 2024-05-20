@@ -24,7 +24,8 @@ enum Boon
   Cleave,
   Impale,
   Rage,
-  Reach
+  Reach,
+  Dodge
 }
 
 record BoonInfo(Boon Boon, string Name, string Desc);
@@ -269,8 +270,6 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get("rapier", objDb), player.ID);
-
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
@@ -354,6 +353,9 @@ class PlayerCreator
       case Boon.Reach:
         player.Traits.Add(new ReachTrait());
         break;
+      case Boon.Dodge:
+        player.Traits.Add(new DodgeTrait() { Rate = 10 });
+        break;
     }
   }
 
@@ -402,6 +404,9 @@ class PlayerCreator
 
       if (!player.HasTrait<ImpaleTrait>() && fin.Curr > 25)
         boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm or rapier may also strike an opponent behind the target."));
+
+      if (!player.HasTrait<DodgeTrait>() && fin.Curr > 25)
+        boons.Add(new (Boon.Dodge, "Dodge", "In melee, you have a chance to leap out of the way of an attack that might have hit you."));
     }
 
     return boons.Distinct().ToList();
