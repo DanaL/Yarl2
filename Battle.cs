@@ -334,7 +334,7 @@ class Battle
 
       if (attacker.Inventory.ReadiedWeapon() is Item weapon)
       {
-        if (weapon.HasTrait<PolearmTrait>())
+        if (weapon.HasTrait<PolearmTrait>() || weapon.HasTrait<StabbyTrait>())
         {
           // We check the distance because if the player has a weapon with Reach,
           // we don't want them to attack monsters 3 squares away. Ie.,
@@ -354,6 +354,7 @@ class Battle
     int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier();
     if (roll >= target.AC)
     {
+      
       ResolveMeleeHit(attacker, target, gs, result, Verb.Hit);
 
       if (CanCleave(attacker))

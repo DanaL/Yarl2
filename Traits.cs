@@ -205,6 +205,13 @@ class ConsumableTrait : Trait
   public override string AsText() => "Consumable";
 }
 
+class DodgeTrait : Trait
+{
+  public int Rate { get; set; }
+
+  public override string AsText() => "Dodge#Rate";
+}
+
 class FinesseTrait : Trait
 {
   public override string AsText() => "Finesse";
@@ -363,6 +370,14 @@ class RageTrait(Actor actor) : FeatTrait
   }
 
   public override string AsText() => "Rage";
+}
+
+// One could argue lots of weapons are stabby but I created this one to 
+// differentiate between a Rapier (which can impale) and a Dagger which
+// cannot
+class StabbyTrait() : Trait
+{
+  public override string AsText() => "Stabby";
 }
 
 class StackableTrait() : Trait
@@ -1195,6 +1210,11 @@ class TraitFactory
           TrueForm = Glyph.TextToGlyph(pieces[2]),
           DisguiseForm = pieces[3]
         };
+      case "Dodge":
+        return new DodgeTrait()
+        {
+          Rate = int.Parse(pieces[1])
+        };
       case "Exhausted":
         return new ExhaustedTrait()
         {
@@ -1381,6 +1401,8 @@ class TraitFactory
       case "Retribution":
         Enum.TryParse(pieces[1], out DamageType rdt);
         return new RetributionTrait() { Type = rdt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
+      case "Stabby":
+        return new StabbyTrait();
       case "Stackable":
         return new StackableTrait();
       case "StatBuff":

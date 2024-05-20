@@ -269,6 +269,8 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get("rapier", objDb), player.ID);
+
     var money = ItemFactory.Get("zorkmids", objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
@@ -397,6 +399,9 @@ class PlayerCreator
     {
       if (player.Stats[Attribute.Dexterity].Max < 4 && fin.Curr > 10)
         boons.Add(new(Boon.DexInc, "Dex Increase", "Increase your Dex."));
+
+      if (!player.HasTrait<ImpaleTrait>() && fin.Curr > 25)
+        boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm or rapier may also strike an opponent behind the target."));
     }
 
     return boons.Distinct().ToList();

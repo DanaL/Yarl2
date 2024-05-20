@@ -184,6 +184,7 @@ class ItemFactory
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 20, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new FinesseTrait());
+        item.Traits.Add(new StabbyTrait());
         break;
       case "longbow":
         item = new Item()
