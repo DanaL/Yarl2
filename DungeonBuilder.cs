@@ -416,7 +416,7 @@ class MainDungeonBuilder : DungeonBuilder
       dungeon.AddMap(levels[lvlNum]);      
     }
 
-    // All rivers/chasms to some of the levels
+    // Add rivers/chasms to some of the levels
     for (int lvlNum = 0; lvlNum < numOfLevels - 1; lvlNum++)
     {
       if (rng.Next(4) == 0)

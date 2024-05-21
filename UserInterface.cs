@@ -639,7 +639,19 @@ abstract class UserInterface
       e = PollForEvent();
       Delay();
     }
-    while (e.Type == GameEventType.NoEvent);    
+    while (e.Type == GameEventType.NoEvent);
+  }
+
+  public void BlockingPopup(GameState gs)
+  {
+    GameEvent e;
+    do
+    {
+      UpdateDisplay(gs);
+      e = PollForEvent();
+      Delay();
+    }
+    while (e.Type == GameEventType.NoEvent);
   }
 
   public char FullScreenMenu(List<string> menu, HashSet<char> options, GameState? gs)
@@ -952,7 +964,7 @@ abstract class UserInterface
         // to take their turn!
         if (currPerformer.Energy < 1.0)
           currPerformer = gameState.NextPerformer();
-        TakeTurn(currPerformer, gameState);
+        TakeTurn(currPerformer, gameState);        
       }
       catch (GameQuitException)
       {

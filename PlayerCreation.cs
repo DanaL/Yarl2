@@ -415,8 +415,10 @@ class PlayerCreator
   // Am I going to have effects that reduce a player's XP/level? I dunno.
   // Classic D&D stuff but those effects have most been dropped from the 
   // modern rulesets
-  public static void CheckLevelUp(Player player, GameState gs, Random rng)
+  public static void CheckLevelUp(GameState gs)
   {
+    Player player = gs.Player;
+
     int level = LevelForXP(player.Stats[Attribute.XP].Max);
 
     if (level > player.Stats[Attribute.Level].Curr)
@@ -424,7 +426,7 @@ class PlayerCreator
       player.Stats[Attribute.Level].SetMax(level);
       
       int hitDie = player.Stats[Attribute.HitDie].Max;
-      int newHP = rng.Next(hitDie) + 1 + player.Stats[Attribute.Constitution].Max;
+      int newHP = gs.Rng.Next(hitDie) + 1 + player.Stats[Attribute.Constitution].Max;
       if (newHP < 1)
         newHP = 1;
       player.Stats[Attribute.HP].ChangeMax(newHP);
@@ -441,22 +443,24 @@ class PlayerCreator
         player.Stats[Attribute.AttackBonus].SetMax(ab + 1);
         msg += $"\n  Attack Bonus increases to {ab + 1}";
         ui.SetPopup(new Popup(msg, "Level up!", -1, -1));
-        ui.BlockForInput();
+        ui.BlockingPopup(gs);
       }
       else
       {
         var boons = AvailableBoons(player);
-        if (boons .Count > 0)
+        if (boons.Count > 0)
         {
           ChooseBoon(player, gs, msg, boons);
         }
         else
         {
           ui.SetPopup(new Popup(msg, "Level up!", -1, -1));
-          ui.BlockForInput();
+          ui.BlockingPopup(gs);
         }        
       }
-    }
+
+      ui.ClosePopup();
+    }    
   }
 
   static void ChooseBoon(Player player, GameState gs, string msg, List<BoonInfo> boons)

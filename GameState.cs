@@ -706,7 +706,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Player.Stats[Attribute.HP].Change(1);
     }
 
-    PlayerCreator.CheckLevelUp(Player, this, Rng);
+    PlayerCreator.CheckLevelUp(this);
 
     var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
