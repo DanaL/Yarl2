@@ -215,7 +215,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    GameState!.ResolveActorMove(Actor!, Actor.Loc, _loc);
+    GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
     Actor.Loc = _loc;
 
     if (Actor is Player)
@@ -225,18 +225,23 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     }
     else
     {
-      var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
-      if (alerted.Contains(GameState.Player.ID))
-      {
-        string moveText = "You hear padding footsteps...";
-        if (Actor.HasActiveTrait<FlyingTrait>())
-          moveText = "You hear softly beating wings...";
-        else if (Actor.HasActiveTrait<FloatingTrait>())
-          moveText = "";
+      // Not 100% sure what I want to do with this. ATM a monster can
+      // wake up other monsters and not sure if I want that. And if I keep
+      // on with the "You hear padding footsteps..." stuff I'm going to have
+      // provide different messages for all the different kinds of mobs
+
+      //var alerted = GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 6);
+      //if (alerted.Contains(GameState.Player.ID))
+      //{
+      //  string moveText = "You hear padding footsteps...";
+      //  if (Actor.HasActiveTrait<FlyingTrait>())
+      //    moveText = "You hear softly beating wings...";
+      //  else if (Actor.HasActiveTrait<FloatingTrait>())
+      //    moveText = "";
         
-        if (moveText != "")
-          result.Messages.Add(new Message(moveText, _loc, true));
-      }
+      //  if (moveText != "")
+      //    result.Messages.Add(new Message(moveText, _loc, true));
+      //}
     }
 
     return result;

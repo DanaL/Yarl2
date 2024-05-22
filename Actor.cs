@@ -86,7 +86,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual int TotalSpellAttackModifier() => 0;
   public virtual int AC => 10;
   public virtual List<Damage> MeleeDamage() => [];
-  public virtual void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
+  public virtual void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual void CalcEquipmentModifiers() { }
 
   public MobAttitude Status
@@ -261,13 +261,19 @@ class Mob : Actor
     return dmgs;
   }
 
-  public override void HearNoise(ulong sourceID, int sourceRow, int sourceColumn, GameState gs)
+  public override void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs)
   {
-    if (sourceID == gs.Player.ID && Status == MobAttitude.Idle)
+    if (gs.ObjDb.GetObj(sourceID) is Actor sourceActor)
     {
-      Console.WriteLine($"{Name} wakes up");
-      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);      
-    }
+      int threshold = volume - Util.Distance(sourceActor.Loc, Loc);
+      bool heard = gs.Rng.Next(11) < threshold;
+      Console.WriteLine($"{FullName} volume: {volume}  threshold: {threshold}  heard: {heard}");
+      if (heard && sourceID == gs.Player.ID && Status == MobAttitude.Idle)
+      {
+        Console.WriteLine($"{Name} wakes up");
+        Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+      }
+    }    
   }
 
   public override int TotalMeleeAttackModifier()

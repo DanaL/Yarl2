@@ -929,7 +929,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         var occ = ObjDb.Occupant(new Loc(CurrDungeonID, CurrLevel, n.Item1, n.Item2));
         if (occ is not null)
         {
-          occ.HearNoise(sourceID, startRow, startCol, this);
+          occ.HearNoise(volume, sourceID, startRow, startCol, this);
           alerted.Add(occ.ID);
         }
 
