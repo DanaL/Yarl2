@@ -52,3 +52,6 @@ A frost-covered blob chills the nearby air. Probably the result of some mad wiza
 #
 screech bat
 A common dungeon predator. Its screams are known to temporarily scramble the brains of adventurers.
+#
+deep one
+Strange humanoid fish people who worship strange, alien gods in darkness.

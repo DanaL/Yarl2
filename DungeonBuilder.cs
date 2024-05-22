@@ -390,7 +390,7 @@ class MainDungeonBuilder : DungeonBuilder
 
   // I think this seed generated isolated rooms :O
   //    -5586292
-  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng)
+  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
   {
     static bool ReplaceChasm(Map map, (int, int) pt)
     {
@@ -425,8 +425,7 @@ class MainDungeonBuilder : DungeonBuilder
         if (lvlNum < numOfLevels - 1 && rng.Next(3) == 0)
           riverTile = TileType.Chasm;
         else
-          riverTile = TileType.DeepWater;
-        riverTile = TileType.DeepWater;
+          riverTile = TileType.DeepWater;        
         DungeonMap.AddRiver(levels[lvlNum], w + 1, h + 1, riverTile, rng);
 
         // When making a chasm, we want to turn any walls below chasms on the 
@@ -444,6 +443,14 @@ class MainDungeonBuilder : DungeonBuilder
               }
             }
           }
+        }
+
+        if (riverTile == TileType.DeepWater && lvlNum > 0)
+        {
+          monsterDecks[lvlNum].Monsters.Add("deep one");
+          monsterDecks[lvlNum].Monsters.Add("deep one");
+          monsterDecks[lvlNum].Monsters.Add("deep one");
+          monsterDecks[lvlNum].Reshuffle(rng);
         }
       }
     }

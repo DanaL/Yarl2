@@ -261,9 +261,11 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
+    int maxDepth = 5;
+    var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
     var dBuilder = new MainDungeonBuilder();
-    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng);
-    PopulateDungeon(rng, objDb, history, mainDungeon);
+    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
+    PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
     PrinceOfRats(mainDungeon, objDb, rng);
 
     //var dBuilder = new ArenaBuilder();
@@ -365,10 +367,8 @@ class PreGameHandler(UserInterface ui)
   // This is very temporary/early code since eventually dungeons will need to
   // know how to populate themselves (or receive a populator class of some 
   // sort) because monsters will spawn as the player explores
-  private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon)
+  private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
   {
-    int maxDepth = 5;
-    var decks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
     history.Facts.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
 
     // Temp: generate monster decks and populate the first two levels of the dungeon.
@@ -379,12 +379,15 @@ class PreGameHandler(UserInterface ui)
     {
       for (int j = 0; j < rng.Next(8, 13); j++)
       {
-        var deck = decks[lvl];
+        var deck = monsterDecks[lvl];
         var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
+
+        if (m == "deep one")
+          Console.WriteLine(m);
 
         // Some monsters are a bit special and take a bit of extra work
         Actor monster = MonsterFactory.Get(m, rng);
