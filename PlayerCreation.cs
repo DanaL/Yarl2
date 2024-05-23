@@ -382,7 +382,7 @@ class PlayerCreator
     if (player.Stats.TryGetValue(Attribute.PolearmsUse, out var p))
     {
       if (!player.HasTrait<ImpaleTrait>() && p.Curr > 25)
-        boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm may also strike an opponent behind the target."));
+        boons.Add(new (Boon.Impale, "Impale", "Attacks with a polearm or rapier may also strike an opponent behind the target."));
 
       if (!player.HasTrait<ReachTrait>() && p.Curr > 25)
         boons.Add(new(Boon.Reach, "Reach", "With a long polearm, you can attack 2 squares away."));
@@ -497,7 +497,7 @@ class PlayerCreator
       List<string> descB = [];
       if (b is not null)
       {
-        descB = SplitToLines(b.Desc, 34);
+        descB = SplitToLines(b.Desc, 32);
       }
       int x = int.Max(descA.Count, descB.Count);
       for (int k = 0; k < x; k++)
