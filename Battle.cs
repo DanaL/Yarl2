@@ -151,6 +151,21 @@ class Battle
       dmg.Add(dr);
     }
 
+    // If melee attacking an Idle target, deal double damage.
+    // Note: I need to make sure immobile monsters like vines 
+    // aren't always getting double dmg
+    if (target.Status == MobAttitude.Idle)
+    {
+      string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "strike")} {target.FullName} at unawares.";
+      result.Messages.Add(new Message(txt, target.Loc));
+
+      foreach (var d in attacker.MeleeDamage())
+      {
+        var dr = DamageRoll(d, gs.Rng);
+        dmg.Add(dr);
+      }
+    }
+
     int bonusDamage = 0; // this is separate from the damage types because, say,
                          // a flaming sword that does 1d8 slashing, 1d6 fire has
                          // two damage types but we only want to add the player's
