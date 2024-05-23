@@ -222,11 +222,21 @@ class ImmuneConfusionTrait : Trait
   public override string AsText() => "ImmuneConfusion";
 }
 
-class Immunity : Trait
+class ImmunityTrait : Trait
 {
   public DamageType Type {  get; set; }
 
   public override string AsText() => $"Immunity#{Type}";
+}
+
+class LightStepTrait : Trait
+{
+  public override string AsText() => "LightStep";
+}
+
+class PoorLootTrait : Trait
+{
+  public override string AsText() => "PoorLoot";
 }
 
 class ResistBluntTrait : Trait
@@ -242,11 +252,6 @@ class ResistPiercingTrait : Trait
 class ResistSlashingTrait : Trait
 {
   public override string AsText() => "ResistSlashing";
-}
-
-class PoorLootTrait : Trait
-{
-  public override string AsText() => "PoorLoot";
 }
 
 class StickyTrait : BasicTrait
@@ -1251,7 +1256,7 @@ class TraitFactory
         return new ImmuneConfusionTrait();
       case "Immunity":
         Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType idt);
-        return new Immunity()
+        return new ImmunityTrait()
         {
           Type = idt
         };
@@ -1263,6 +1268,8 @@ class TraitFactory
           OwnerID = ulong.Parse(pieces[1]),
           Radius = int.Parse(pieces[2])
         };
+      case "LightStep":
+        return new LightStepTrait();
       case "Melee":
         Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
         digits = text.Split('#');

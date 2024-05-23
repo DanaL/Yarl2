@@ -221,7 +221,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     if (Actor is Player)
     {
       result.Messages.Add(new Message(GameState.LocDesc(_loc), _loc));
-      GameState.Noise(Actor.ID, _loc.Row, _loc.Col, 12);
+      GameState.Noise(Actor.ID, _loc.Row, _loc.Col, Actor.MovementNoise);
     }
     else
     {

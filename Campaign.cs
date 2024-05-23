@@ -302,7 +302,7 @@ class PreGameHandler(UserInterface ui)
     objDb.AddNewActor(prince, loc);
 
     // Drop a hint somewhere about the Prince of Rat's immunity
-    var immunity = prince.Traits.OfType<Immunity>().First();
+    var immunity = prince.Traits.OfType<ImmunityTrait>().First();
     string desc;
     if (immunity.Type == DamageType.Slashing)
       desc = "axe";

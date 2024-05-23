@@ -72,11 +72,11 @@ class BossFactory
     // The Prince is immune to one of slashing, blunt, or piercing damage
     int roll = rng.Next(3);
     if (roll == 0)
-      prince.Traits.Add(new Immunity() { Type = DamageType.Slashing });
+      prince.Traits.Add(new ImmunityTrait() { Type = DamageType.Slashing });
     else if (roll == 1)
-      prince.Traits.Add(new Immunity() { Type = DamageType.Piercing });
+      prince.Traits.Add(new ImmunityTrait() { Type = DamageType.Piercing });
     else
-      prince.Traits.Add(new Immunity() { Type = DamageType.Blunt });
+      prince.Traits.Add(new ImmunityTrait() { Type = DamageType.Blunt });
     prince.Traits.Add(new FinalBossTrait());
     
     return prince;

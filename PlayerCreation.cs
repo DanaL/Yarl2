@@ -182,6 +182,13 @@ class PlayerCreator
         player.Traits.Add(new RageTrait(player));
         break;
     }
+
+    switch (player.Background)
+    {
+      case PlayerBackground.Skullduggery:
+        player.Traits.Add(new LightStepTrait());
+        break;
+    }
   }
 
   public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)

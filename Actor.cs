@@ -52,7 +52,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   protected IBehaviour _behaviour;
   public IBehaviour Behaviour => _behaviour;
 
-  public override int Z() 
+  public override int Z()
   {
     foreach (var trait in Traits)
     {
@@ -88,6 +88,10 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual List<Damage> MeleeDamage() => [];
   public virtual void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual void CalcEquipmentModifiers() { }
+
+  // I'm sure eventually there will be more factors that do into determining
+  // how noisy an Actor's walking is. Wearing metal armour for instance
+  public int MovementNoise => HasTrait<LightStepTrait>() ? 3 : 12;
 
   public MobAttitude Status
   {
@@ -139,7 +143,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       else if (dmg.Item2 == DamageType.Slashing && HasActiveTrait<ResistSlashingTrait>())
         d /= 2;
 
-      foreach (var immunity in Traits.OfType<Immunity>())
+      foreach (var immunity in Traits.OfType<ImmunityTrait>())
       {
         if (immunity.Active && immunity.Type == dmg.Item2)
         {
