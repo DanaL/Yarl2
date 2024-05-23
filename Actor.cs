@@ -97,10 +97,10 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     get
     {
-      if (!Stats.ContainsKey(Attribute.Attitude))
+      if (!Stats.TryGetValue(Attribute.Attitude, out Stat? value))
         return MobAttitude.Idle;
 
-      return (MobAttitude)Stats[Attribute.Attitude].Curr;
+      return (MobAttitude)value.Curr;
     }    
   }
 
