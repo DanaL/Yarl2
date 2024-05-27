@@ -388,6 +388,74 @@ class MainDungeonBuilder : DungeonBuilder
     history.Facts.Add(new BelongedToFact() { ItemID = trinket.ID, OwnerID = adventurer.ID });
   }
 
+  List<(int, int)> FloorsNearWater(Map map, int row, int col, int d)
+  {
+    List<(int, int)> sqs = [];
+
+    int loR = int.Max(0, row - d);
+    int hiR = int.Min(map.Height - 1, row + d);
+    for (int r = loR; r < hiR; r++)
+    {
+      if (map.TileAt(r, col).Type == TileType.DungeonFloor)
+        sqs.Add((r, col));
+    }
+
+    int loC = int.Max(0, col - d);
+    int hiC = int.Min(map.Width - 1, col + d);
+    for (int c = loC; c < hiC; c++)
+    {
+      if (map.TileAt(row, c).Type == TileType.DungeonFloor)
+        sqs.Add((row, c));
+    }
+    
+    return sqs;
+  }
+
+  // Add a deep one shrine near the river that was generated on the map, if
+  // possible
+  void DeepOneShrine(Map map, int dungeonID, int level, GameObjectDB objDb, Random rng)
+  {
+    HashSet<(int, int)> candidates = [];
+
+    for (int r = 0; r < map.Height; r++) 
+    { 
+      for (int c = 0; c < map.Width; c++) 
+      { 
+        if (map.TileAt(r, c).Type == TileType.DeepWater)
+        {
+          foreach (var sq in FloorsNearWater(map, r, c, 3))
+            candidates.Add(sq);
+        }
+      }
+    }
+
+    if (candidates.Count == 0)
+      // can't place the shrine
+      return;
+
+    var floors = candidates.ToList();
+    var loc = floors[rng.Next(floors.Count)];
+
+    Tile shrine = new Landmark("A kuo-ta shrine!");
+    map.SetTile(loc, shrine);
+    Loc shrineLoc = new(dungeonID, level, loc.Item1, loc.Item2);
+
+    List<Loc> deepOneLocs = floors.Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
+                                  .Where(l => Util.Distance(shrineLoc, l) <= 3)
+                                  .ToList();
+    
+    int deepOnes = int.Min(rng.Next(3) + 2, deepOneLocs.Count);
+    for (int j = 0; j < deepOnes; j++)
+    {      
+      Actor d = MonsterFactory.Get("deep one", rng);
+      int x = rng.Next(deepOneLocs.Count);
+      Loc pickedLoc = deepOneLocs[x];
+      deepOneLocs.RemoveAt(x);
+
+      objDb.AddNewActor(d, pickedLoc);
+    }    
+  }
+
   // I think this seed generated isolated rooms :O
   //    -5586292
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
@@ -451,6 +519,8 @@ class MainDungeonBuilder : DungeonBuilder
           monsterDecks[lvlNum].Monsters.Add("deep one");
           monsterDecks[lvlNum].Monsters.Add("deep one");
           monsterDecks[lvlNum].Reshuffle(rng);
+
+          DeepOneShrine(levels[lvlNum], _dungeonID, lvlNum, objDb, rng);
         }
       }
     }
