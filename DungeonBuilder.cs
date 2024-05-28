@@ -11,6 +11,8 @@
 
 // Herein is the code for building the main dungeon of the game
 
+using System.Text;
+
 namespace Yarl2;
 
 abstract class DungeonBuilder
@@ -411,6 +413,62 @@ class MainDungeonBuilder : DungeonBuilder
     return sqs;
   }
 
+  string DeepOneShrineDesc(Random rng)
+  {
+    var sb = new StringBuilder();
+    sb.Append("A shrine depicting ");
+
+    string adj = rng.Next(4) switch
+    {
+      0 => "a grotesque ",
+      1 => "a misshapen ",
+      2 => "a rough-hewn ",
+      _ => "a crudely carved "
+    };
+    sb.Append(adj);
+
+    string feature;
+    switch (rng.Next(4))
+    {
+      case 0:
+        sb.Append("humanoid with ");
+        feature = rng.Next(3) switch
+        {
+          0 => "eyestalks and lobster claws.",
+          1 => "the head of a carp.",
+          _ => "a crab's body."
+        };
+        sb.Append(feature);
+        break;        
+      case 1:
+        sb.Append("shark with ");
+        feature = rng.Next(2) == 0 ? "the arms of a human." : "eyestalks.";
+        sb.Append(feature);
+        break;
+      case 2:
+        sb.Append("turtle with ");
+        feature = rng.Next(2) == 0 ? "a human face." : "a shark's head.";
+        sb.Append(feature);
+        break;
+      default:
+        sb.Append("lobster with ");
+        feature = rng.Next(2) == 0 ? "a human face." : "a shark's head.";
+        sb.Append(feature);
+        break;
+    }
+
+    string decoration = rng.Next(4) switch
+    {
+      0 => " It is strewn with shells and glass bleads.",
+      1 => " It is streaked with blood.",
+      2 => " It is adorned with teeth and driftwood.",
+      3 => " It is decorated with rotting meat and worthless baubles."
+    };
+    sb.Append(decoration);
+
+    return sb.ToString();
+  }
+
   // Add a deep one shrine near the river that was generated on the map, if
   // possible
   void DeepOneShrine(Map map, int dungeonID, int level, GameObjectDB objDb, Random rng)
@@ -436,7 +494,7 @@ class MainDungeonBuilder : DungeonBuilder
     var floors = candidates.ToList();
     var loc = floors[rng.Next(floors.Count)];
 
-    Tile shrine = new Landmark("A kuo-ta shrine!");
+    Tile shrine = new Landmark(DeepOneShrineDesc(rng));
     map.SetTile(loc, shrine);
     Loc shrineLoc = new(dungeonID, level, loc.Item1, loc.Item2);
 
