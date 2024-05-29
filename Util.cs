@@ -512,6 +512,8 @@ class WildernessPassable : IPassable
     TileType.SnowPeak => false,
     TileType.Water => false,
     TileType.DeepWater => false,
+    TileType.StoneWall => false,
+    TileType.WoodWall => false,
     _ => true
   };
 }

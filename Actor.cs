@@ -271,7 +271,7 @@ class Mob : Actor
     {
       int threshold = volume - Util.Distance(sourceActor.Loc, Loc);
       bool heard = gs.Rng.Next(11) < threshold;
-      Console.WriteLine($"{FullName} volume: {volume}  threshold: {threshold}  heard: {heard}");
+      
       if (heard && sourceID == gs.Player.ID && Status == MobAttitude.Idle)
       {
         Console.WriteLine($"{Name} wakes up");
