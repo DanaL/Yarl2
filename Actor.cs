@@ -29,7 +29,8 @@ enum MobAttitude
   Idle = 0,
   Active = 1,
   Indifferent = 2,
-  Friendly = 3
+  Friendly = 3,
+  Hostile = 4
 }
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -104,7 +105,12 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     }    
   }
 
-  public bool Hostile => !(Status == MobAttitude.Indifferent || Status == MobAttitude.Friendly);
+  public bool Hostile => Status switch
+  {
+    MobAttitude.Active => true,
+    MobAttitude.Hostile => true,
+    _ => false,
+  };
 
   public bool AbleToMove() 
   {
@@ -128,8 +134,22 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     string msg = "";
 
-    if (Status == MobAttitude.Idle)
-      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+    if (Status == MobAttitude.Idle || Status == MobAttitude.Active)
+    {
+      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
+
+      // If we have allies, let them know we've turned hostile
+      if (Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
+      {
+        foreach (ulong id in allies.IDs)
+        {
+          if (gs.ObjDb.GetObj(id) is Mob ally && ally.Status != MobAttitude.Hostile && gs.CanSeeLoc(ally, Loc, 6))
+          {
+            ally.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
+          }
+        }
+      }
+    }
 
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;

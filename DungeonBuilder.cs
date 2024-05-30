@@ -502,16 +502,31 @@ class MainDungeonBuilder : DungeonBuilder
                                   .Where(l => Util.Distance(shrineLoc, l) <= 3)
                                   .ToList();
     
-    int deepOnes = int.Min(rng.Next(3) + 2, deepOneLocs.Count);
-    for (int j = 0; j < deepOnes; j++)
+    int numOfDeepOnes = int.Min(rng.Next(3) + 2, deepOneLocs.Count);
+    List<Actor> deepOnes = [];
+    for (int j = 0; j < numOfDeepOnes; j++)
     {      
       Actor d = MonsterFactory.Get("deep one", rng);
+      d.Traits.Add(new WorshiperTrait() 
+      { 
+        Altar = shrineLoc,
+        Chant = "The deep one blurbles."
+      });
       int x = rng.Next(deepOneLocs.Count);
       Loc pickedLoc = deepOneLocs[x];
       deepOneLocs.RemoveAt(x);
 
       objDb.AddNewActor(d, pickedLoc);
-    }    
+      deepOnes.Add(d);
+    }
+
+    foreach (Actor deepOne in deepOnes)
+    {
+      List<ulong> allies = deepOnes.Select(k => k.ID)
+                                   .Where(id => id != deepOne.ID)
+                                   .ToList();
+      deepOne.Traits.Add(new AlliesTrait() { IDs = allies });
+    }
   }
 
   // I think this seed generated isolated rooms :O

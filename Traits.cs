@@ -195,6 +195,13 @@ class AcidSplashTrait : Trait
   public override string AsText() => "AcidSplash";
 }
 
+class AlliesTrait : Trait
+{
+  public List<ulong> IDs = [];
+
+  public override string AsText() => $"Allies#{string.Join(',', IDs)}";
+}
+
 class AxeTrait : Trait
 {
   public override string AsText() => "Axe";
@@ -1138,6 +1145,14 @@ class WandTrait : Trait, IUSeable, INeedsID
   public void Used() => --Charges;
 }
 
+class WorshiperTrait : Trait
+{
+  public Loc Altar { get; set; }
+  public string Chant { get; set; } = "";
+
+  public override string AsText() => $"Worshiper#{Altar}#{Chant}";
+}
+
 class TraitFactory
 {
   public static Trait FromText(string text, GameObj? container)
@@ -1159,6 +1174,12 @@ class TraitFactory
       {
           return new AdjectiveTrait(pieces[1]);
       }
+      case "Allies":
+        var ids = pieces[1].Split(',').Select(ulong.Parse).ToList();
+        return new AlliesTrait()
+        {
+          IDs = ids
+        };
       case "Ammo":
         Enum.TryParse(pieces[3], out DamageType ammoDt);
         return new AmmoTrait()
@@ -1466,6 +1487,12 @@ class TraitFactory
           Charges = int.Parse(pieces[1]),
           IDed = bool.Parse(pieces[2]),
           Effect = pieces[3]
+        };
+      case "Worshiper":
+        return new WorshiperTrait()
+        {
+          Altar = Loc.FromStr(pieces[1]),
+          Chant = pieces[2]
         };
       default:
         ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);

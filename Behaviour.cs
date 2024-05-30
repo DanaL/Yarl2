@@ -220,6 +220,25 @@ class MonsterBehaviour : IBehaviour
 
     // Should prioritize an escape action if the monster is hurt?
     // Maybe mobs can eventually have a bravery stat?
+    // Maybe there should be MobAttitude.Scare or Fleeing and then
+    // if they are Fleeing try to get away
+    
+    if (actor.HasTrait<WorshiperTrait>() && (actor.Status == MobAttitude.Active || actor.Status == MobAttitude.Indifferent))
+    {
+      var wt = actor.Traits.OfType<WorshiperTrait>().First();
+      // Worshippers just hang out near their altar until they become hostile.
+      Loc loc = Util.RandomAdjLoc(actor.Loc, gs);
+
+      Action act;
+      if (!gs.ObjDb.Occupied(loc) && Util.Distance(wt.Altar, loc) < 4)
+        act = new MoveAction(gs, actor, loc);
+      else
+        act = new PassAction(gs, actor);
+      if (wt.Chant != "" && gs.Rng.Next(7) == 0)
+        act.Quip = wt.Chant;
+
+      return act;
+    }
 
     // Actions should be in the list in order of prerfence
     foreach (var act in actor.Actions)
