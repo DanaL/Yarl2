@@ -234,7 +234,7 @@ class MonsterBehaviour : IBehaviour
         act = new MoveAction(gs, actor, loc);
       else
         act = new PassAction(gs, actor);
-      if (wt.Chant != "" && gs.Rng.Next(7) == 0)
+      if (wt.Chant != "" && gs.Rng.Next(13) == 0)
         act.Quip = wt.Chant;
 
       return act;

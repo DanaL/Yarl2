@@ -473,6 +473,22 @@ class MainDungeonBuilder : DungeonBuilder
   // possible
   void DeepOneShrine(Map map, int dungeonID, int level, GameObjectDB objDb, Random rng)
   {
+    static string CalcChant(Random rng)
+    {
+      int roll = rng.Next(4);
+
+      char[] subs = { 'w', 'v', 'u', 'm', 'n', '\'', ' ' };
+      var sb = new StringBuilder("Ooooooo");     
+      for (int i = 0; i < 5; i++)
+      {
+        int c = rng.Next(1, sb.Length - 1);
+        sb[c] = subs[rng.Next(subs.Length)];
+      }
+      sb.Append('!');
+      
+      return sb.ToString();
+    }
+
     HashSet<(int, int)> candidates = [];
 
     for (int r = 0; r < map.Height; r++) 
@@ -510,7 +526,7 @@ class MainDungeonBuilder : DungeonBuilder
       d.Traits.Add(new WorshiperTrait() 
       { 
         Altar = shrineLoc,
-        Chant = "The deep one blurbles."
+        Chant = CalcChant(rng)
       });
       int x = rng.Next(deepOneLocs.Count);
       Loc pickedLoc = deepOneLocs[x];
