@@ -155,7 +155,7 @@ class MonsterBehaviour : IBehaviour
     {
       mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
       _lastUse[act.Name] = gs.Turn;
-      
+
       Loc target = CalcRangedTarget(mob, gs);
       var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
       gs.UIRef().RegisterAnimation(arrowAnim);
@@ -178,7 +178,7 @@ class MonsterBehaviour : IBehaviour
       {
         Loc targetLoc = CalcRangedTarget(mob, gs);
         return new FireboltAction(gs, mob, targetLoc, ActionTrait.Trajectory(mob, targetLoc));
-      }      
+      }
       else if (act.Name == "MirrorImage")
         return new MirrorImageAction(gs, mob, CalcAdjacentTarget(mob, gs));
     }
@@ -191,13 +191,17 @@ class MonsterBehaviour : IBehaviour
     }
     else if (act is SummonTrait summon)
     {
-      _lastUse[act.Name] = gs.Turn;      
+      _lastUse[act.Name] = gs.Turn;
       return new SummonAction(mob.Loc, summon.Summons, 1)
       {
         GameState = gs,
         Actor = mob,
         Quip = summon.Quip
       };
+    }
+    else if (act is HealAlliesTrait heal)
+    {
+      return new PassAction() { Quip = "I heal!!" };
     }
 
     return new NullAction();
@@ -249,6 +253,7 @@ class MonsterBehaviour : IBehaviour
       if (act.Available(actor, gs))
         return FromTrait(actor, act, gs);
     }
+
 
     return CalcMoveAction(actor, gs);
   }

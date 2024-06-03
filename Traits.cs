@@ -131,6 +131,34 @@ class SummonTrait : ActionTrait
   }
 }
 
+class HealAlliesTrait : ActionTrait
+{
+  // Bsaically, if there is an ally the trait owner can see nearby who needs healing, indicate 
+  // that the action is available
+  public override bool Available(Mob mob, GameState gs)
+  {
+    if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
+    {
+      Loc loc = mob.Loc;
+      var fov = FieldOfView.CalcVisible(6, loc.Row, loc.Col, gs.CurrentMap, loc.DungeonID, loc.Level, gs.ObjDb);
+      foreach (ulong id in allies.IDs)
+      {
+        if (gs.ObjDb.GetObj(id) is Actor ally)
+        {
+          Stat hp = ally.Stats[Attribute.HP];
+          (int, int, int) allySq = (ally.Loc.Level, ally.Loc.Row, ally.Loc.Col);
+          if (fov.Contains(allySq) && hp.Curr < hp.Max)
+            return true;
+        }        
+      }
+    }
+
+    return false;
+  }
+
+  public override string AsText() => $"HealAllies#{Cooldown}";
+}
+
 class ConfusingScreamTrait : ActionTrait
 {
   public int DC { get; set; }
@@ -142,25 +170,6 @@ class ConfusingScreamTrait : ActionTrait
   }
 
   public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}#";
-}
-
-class SpellActionTrait : ActionTrait
-{
-  public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
-  public override bool Available(Mob mob, GameState gs) => true;
-}
-
-class RangedSpellActionTrait : ActionTrait
-{
-  public override string AsText() => $"RangedSpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
-  public override bool Available(Mob mob, GameState gs)
-  {
-    if (!InRange(mob, gs))
-      return false;
-
-    var p = gs.Player;
-    return ClearShot(gs, Trajectory(mob, p.Loc));
-  }
 }
 
 class MobMeleeTrait : ActionTrait
@@ -188,6 +197,25 @@ class MobMissileTrait : ActionTrait
     var p = gs.Player;
     return ClearShot(gs, Trajectory(mob, p.Loc));
   }
+}
+
+class RangedSpellActionTrait : ActionTrait
+{
+  public override string AsText() => $"RangedSpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
+  public override bool Available(Mob mob, GameState gs)
+  {
+    if (!InRange(mob, gs))
+      return false;
+
+    var p = gs.Player;
+    return ClearShot(gs, Trajectory(mob, p.Loc));
+  }
+}
+
+class SpellActionTrait : ActionTrait
+{
+  public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
+  public override bool Available(Mob mob, GameState gs) => true;
 }
 
 class AcidSplashTrait : Trait
@@ -1246,6 +1274,11 @@ class TraitFactory
         {
           VictimID = ulong.Parse(pieces[1]),
           EndsOn = ulong.Parse(pieces[2])
+        };
+      case "HealAllies":
+        return new HealAlliesTrait()
+        {
+          Cooldown = ulong.Parse(pieces[1])
         };
       case "SpellAction":
         return new SpellActionTrait()
