@@ -26,3 +26,4 @@ shadow            | |black        |black     |13|20|3| 1.0|10|14| 5|Dumb|Melee#4
 floating eye      |e|lightblue    |blue      |13|20|0|0.25|10|10| 4|Floating||ParalyzingGaze#18,Floating
 screech bat       |v|green        |darkgreen |13|15|2| 1.0|10|16| 4|Flying|ConfusingScream#3#14#7,Melee#6#1#Piercing|Flying,ImmuneConfusion
 deep one          |h|green        |darkgreen |13|20|5| 1.0|12|12| 5|Door|Melee#8#1#Piercing|
+deep one shaman   |h|limegreen    |green     |13|25|4| 1.0|12|12| 6|Door|HealAllies#7,Melee#8#1#Piercing|

@@ -477,7 +477,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       int roll = rng.Next(4);
 
-      char[] subs = { 'w', 'v', 'u', 'm', 'n', '\'', ' ' };
+      char[] subs = ['w', 'v', 'u', 'm', 'n', '\'', ' '];
       var sb = new StringBuilder("Ooooooo");     
       for (int i = 0; i < 5; i++)
       {
@@ -535,6 +535,16 @@ class MainDungeonBuilder : DungeonBuilder
       objDb.AddNewActor(d, pickedLoc);
       deepOnes.Add(d);
     }
+
+    Actor shaman = MonsterFactory.Get("deep one shaman", rng);
+    shaman.Traits.Add(new WorshiperTrait() 
+    { 
+      Altar = shrineLoc,
+      Chant = CalcChant(rng)
+    });
+    Loc shamanLoc = deepOneLocs[rng.Next(deepOneLocs.Count)];
+    objDb.AddNewActor(shaman, shamanLoc);
+    deepOnes.Add(shaman);
 
     foreach (Actor deepOne in deepOnes)
     {
