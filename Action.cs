@@ -27,6 +27,7 @@ abstract class Action
   public Actor? Actor { get; set; }
   public GameState? GameState { get; set; }
   public string Quip { get; set; } = "";
+  public Message? Message { get; set; } = null;
   public int QuipDuration { get; set; } = 2500;
 
   public Action() { }
@@ -44,7 +45,11 @@ abstract class Action
       GameState.UIRef().RegisterAnimation(bark);      
     }
 
-    return new ActionResult();
+    ActionResult result = new();
+    if (Message is not null)
+      result.Messages.Add(Message);
+
+    return result;
   }
 
   public virtual void ReceiveUIResult(UIResult result) { }
@@ -1131,6 +1136,8 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
 
   public override ActionResult Execute()
   {
+    ActionResult result = base.Execute();
+
     var hp = 0;
     for (int j = 0; j < _healDice; j++)
       hp += GameState!.Rng.Next(_healDie) + 1;
@@ -1139,7 +1146,13 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     var msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
     var txt = msg.Text[..^1] + $" for {hp} HP.";
 
-    return new ActionResult() { Complete = true, Messages = [new Message(txt, Actor.Loc, false)], EnergyCost = 1.0 };
+    var healAnim = new SqAnimation(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
+    GameState!.UIRef().RegisterAnimation(healAnim);
+
+    result.Messages.Add(new Message(txt, Actor.Loc, false));
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+    return result;
   }
 }
 

@@ -199,9 +199,31 @@ class MonsterBehaviour : IBehaviour
         Quip = summon.Quip
       };
     }
-    else if (act is HealAlliesTrait heal)
+    else if (act is HealAlliesTrait heal && mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait alliesTrait)
     {
-      return new PassAction() { Quip = "I heal!!" };
+      _lastUse[act.Name] = gs.Turn;
+      List<Mob> candidates = [];
+      foreach (ulong id in alliesTrait.IDs)
+      {
+        var m = gs.ObjDb.GetObj(id) as Mob;
+        var hp = m.Stats[Attribute.HP];
+        if (hp.Curr < hp.Max)
+          candidates.Add(m);
+      }
+
+      if (candidates.Count > 0)
+      { 
+        int i = gs.Rng.Next(candidates.Count);
+
+        string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
+        Message msg = new Message(castText, mob.Loc);
+        return new HealAction(gs, candidates[i], 4, 4)
+        {
+          Message = msg
+        };
+      }
+
+      return new PassAction();
     }
 
     return new NullAction();

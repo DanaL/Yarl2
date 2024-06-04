@@ -328,7 +328,7 @@ class SqAnimation : Animation
   Loc _loc;
   Colour _fgColour;
   Colour _bgColour;
-  char _ch;
+  readonly char _ch;
 
   public SqAnimation(GameState gs, Loc loc, Colour fg, Colour bg, char ch)
   {
