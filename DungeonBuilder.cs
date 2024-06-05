@@ -553,6 +553,8 @@ class MainDungeonBuilder : DungeonBuilder
                                    .ToList();
       deepOne.Traits.Add(new AlliesTrait() { IDs = allies });
     }
+
+    // Add a few items
   }
 
   // I think this seed generated isolated rooms :O

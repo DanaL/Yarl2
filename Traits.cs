@@ -706,6 +706,17 @@ class ExhaustedTrait : EffectTrait, IGameEventListener
   public override bool IsAffected(Actor victim, GameState gs) => true;
 }
 
+// Trait for items who have a specific owner, mainly so I can alert them when,
+// say, the player picks them up, etc
+class OwnedTrait : Trait
+{
+  // An item can have more than one or more owner. Maybe 'CaresAbout' is a 
+  // better name for this trait?
+  public List<ulong> OwnerIDs { get; set; } = [];
+
+  public override string AsText() => $"Owned#{string.Join(',', OwnerIDs)}";
+}
+
 class ParalyzedTrait : EffectTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -1379,6 +1390,14 @@ class TraitFactory
           OwnerID = ulong.Parse(pieces[2]),
           Lifetime = int.Parse(pieces[3])
         };
+      case "Owned":
+      {
+        return new OwnedTrait()
+        {
+          OwnerIDs = pieces[1].Split(',')
+                              .Select(ulong.Parse).ToList()
+        };
+      }
       case "Polearm":
         return new PolearmTrait();
       case "Sword":
