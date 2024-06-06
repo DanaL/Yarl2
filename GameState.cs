@@ -519,24 +519,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (victim.HasTrait<PoorLootTrait>())
     {
-      var roll = Rng.NextDouble();
-
-      if (roll > 0.95)
-      {
-        var potion = ItemFactory.Get("potion of healing", ObjDb);
-        ItemDropped(potion, victim.Loc);
-      }
-      else if (roll > 0.80)
-      {
-        var torch = ItemFactory.Get("torch", ObjDb);
-        ItemDropped(torch, victim.Loc);
-      }
-      else if (roll > 0.5)
-      {
-        var cash = ItemFactory.Get("zorkmids", ObjDb);
-        cash.Value = Rng.Next(3, 11);
-        ItemDropped(cash, victim.Loc);
-      }
+      var loot = Treasure.PoorTreasure(1, Rng, ObjDb);
+      if (loot.Count > 0)
+        ItemDropped(loot[0], victim.Loc);
     }
 
     foreach (RetributionTrait rt in victim.Traits.OfType<RetributionTrait>())
