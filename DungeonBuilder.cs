@@ -554,7 +554,31 @@ class MainDungeonBuilder : DungeonBuilder
       deepOne.Traits.Add(new AlliesTrait() { IDs = allies });
     }
 
-    // Add a few items
+    // Add a few items nearby
+    List<Loc> nearbyLocs = [];
+    for (int r = -2; r < 3; r++)
+    {
+      for (int c = -2;  c < 3; c++)
+      {
+        Loc l = shrineLoc with { Row = shrineLoc.Row + r, Col = shrineLoc.Col + c };
+        if (map.InBounds(l.Row, l.Col) && map.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)
+        {
+          nearbyLocs.Add(l);
+        }
+      }
+    }
+
+    if (nearbyLocs.Count > 0)
+    {
+      foreach (Item loot in Treasure.PoorTreasure(4, rng, objDb))
+      {
+        loot.Traits.Add(new OwnedTrait() { 
+          OwnerIDs = deepOnes.Select(d => d.ID).ToList()
+        });
+        Loc itemLoc = nearbyLocs[rng.Next(nearbyLocs.Count)];
+        objDb.SetToLoc(itemLoc, loot);
+      }
+    }
   }
 
   // I think this seed generated isolated rooms :O
