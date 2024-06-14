@@ -264,6 +264,20 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
     return roll >= dc;
   }
+
+  // The default is that a monster/NPC will get angry if the player picks up 
+  // something which belongs to them
+  public virtual Message? PossessionPickedUp(ulong itemID, Actor other, GameState gameState)
+  {
+    if (gameState.CanSeeLoc(this, other.Loc, 6))
+    {
+      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
+      string txt = $"{FullName.Capitalize()} gets angry!";
+      return new Message(txt, Loc);
+    }
+
+    return null;
+  }
 }
 
 class Mob : Actor

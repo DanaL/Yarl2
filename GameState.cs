@@ -968,6 +968,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       _deathWatchListeners.RemoveAt(indexes.Pop());
   }
 
+  public List<Message> OwnedItemPickedUp(List<ulong> ownerIDs, Actor picker, ulong itemID)
+  {
+    List<Message> messages = [];
+
+    foreach (ulong id in ownerIDs)
+    {
+      if (ObjDb.GetObj(id) is Actor actor)
+      {
+        Message? msg = actor.PossessionPickedUp(itemID, picker, this);
+        if (msg is not null)
+          messages.Add(msg);
+      }
+    }
+
+    return messages;
+  }
+
   // Between this and UpdateFoV(), I wonder if I should just start returning 
   HashSet<Loc> LitLocations(int dungeonID, int level)
   {
