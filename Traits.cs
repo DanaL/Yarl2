@@ -252,11 +252,6 @@ class FinesseTrait : Trait
   public override string AsText() => "Finesse";
 }
 
-class ImmuneConfusionTrait : Trait
-{
-  public override string AsText() => "ImmuneConfusion";
-}
-
 class ImmunityTrait : Trait
 {
   public DamageType Type {  get; set; }
@@ -632,7 +627,10 @@ class ConfusedTrait : EffectTrait, IGameEventListener
   {
     foreach (Trait trait in victim.Traits)
     {
-      if (trait is ConfusedTrait || trait is ImmuneConfusionTrait)
+      if (trait is ConfusedTrait)
+        return false;
+
+      if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Confusion)
         return false;
     }
  
@@ -1316,9 +1314,7 @@ class TraitFactory
         {
           SourceID = ulong.Parse(pieces[1]),
           ObjID = ulong.Parse(pieces[2])
-        };
-      case "ImmuneConfusion":
-        return new ImmuneConfusionTrait();
+        };      
       case "Immunity":
         Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType idt);
         return new ImmunityTrait()
