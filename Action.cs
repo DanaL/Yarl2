@@ -615,7 +615,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (slot != '\0')
       pickupMsg += $" ({slot})";
     
-    if (item.Traits.OfType<OwnedTrait>().First() is OwnedTrait ownedTrait)
+    if (item.Traits.OfType<OwnedTrait>().FirstOrDefault() is OwnedTrait ownedTrait)
     {
       List<Message> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);
       result.Messages.AddRange(msgs);
