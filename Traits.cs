@@ -240,7 +240,7 @@ class ConsumableTrait : Trait
   public override string AsText() => "Consumable";
 }
 
-class DodgeTrait : FeatTrait
+ class DodgeTrait : FeatTrait
 {
   public int Rate { get; set; }
 
@@ -252,11 +252,11 @@ class FinesseTrait : Trait
   public override string AsText() => "Finesse";
 }
 
-class ImmunityTrait : Trait
+class ImmunityTrait : BasicTrait
 {
   public DamageType Type {  get; set; }
 
-  public override string AsText() => $"Immunity#{Type}";
+  public override string AsText() => $"Immunity#{Type}#{ExpiresOn}";
 }
 
 class LightStepTrait : Trait
@@ -1316,10 +1316,12 @@ class TraitFactory
           ObjID = ulong.Parse(pieces[2])
         };      
       case "Immunity":
-        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType idt);
+        Enum.TryParse(pieces[1], out DamageType idt);
+        ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
         return new ImmunityTrait()
         {
-          Type = idt
+          Type = idt,
+          ExpiresOn = expiresOn
         };
       case "Impale":
         return new ImpaleTrait();      
