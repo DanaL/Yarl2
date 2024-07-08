@@ -264,8 +264,8 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
 
-    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
 
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);

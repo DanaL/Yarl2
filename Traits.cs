@@ -284,6 +284,14 @@ class ResistSlashingTrait : Trait
   public override string AsText() => "ResistSlashing";
 }
 
+// I should replace the above 3 traits with this one
+class ResistanceTrait : TemporaryTrait
+{
+  public DamageType Type { get; set; }
+  protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
+  public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
+}
+
 class StickyTrait : BasicTrait
 {
   public int DC => 13;
@@ -331,32 +339,39 @@ class TeflonTrait : Trait
   public override string AsText() => "Teflon";
 }
 
-class TelepathyTrait : BasicTrait, IGameEventListener, IOwner
+abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
 {
-  public ulong OwnerID {  get; set; }
   public bool Expired { get; set; }
   public bool Listening => true;
-  public override string Desc() => "can sense others' minds";
+  public ulong OwnerID {  get; set; }
+  protected virtual string ExpiryMsg() => "";
 
-  public override string AsText() => $"Telepathy#{ExpiresOn}#{OwnerID}";
-
-  void Remove(GameState gs)
+  protected virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
     obj?.Traits.Remove(this);
     gs.RemoveListener(this);
 
     if (obj is Player)
-      gs.UIRef().AlertPlayer(new Message("You can no longer sense others' minds!", obj.Loc), "", gs);
+      gs.UIRef().AlertPlayer(new Message(ExpiryMsg(), obj.Loc), "", gs);
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public virtual void EventAlert(GameEventType eventType, GameState gs)
   {
     if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
     {
       Remove(gs);
     }    
   }
+
+  public override string AsText() => $"{ExpiresOn}#{OwnerID}";
+}
+
+class TelepathyTrait : TemporaryTrait
+{
+  public override string Desc() => "can sense others' minds";
+  protected override string ExpiryMsg() => "You can no longer sense others' minds!";
+  public override string AsText() => $"Telepathy#{base.AsText()}";
 }
 
 class TwoHandedTrait : Trait
@@ -468,6 +483,10 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
     "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
     "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
+    "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
+    "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1197,6 +1216,9 @@ class TraitFactory
     var pieces = text.Split('#');
     var name = pieces[0];
     string[] digits;
+    ulong expiresOn;
+    ulong ownerID;
+    DamageType dt;
 
     switch (name)
     {
@@ -1254,7 +1276,7 @@ class TraitFactory
           Expired = bool.Parse(pieces[2])
         };
       case "Damage":
-        Enum.TryParse(pieces[3], out DamageType dt);
+        Enum.TryParse(pieces[3], out dt);
         return new DamageTrait()
         {
           DamageDie = int.Parse(pieces[1]),
@@ -1316,11 +1338,11 @@ class TraitFactory
           ObjID = ulong.Parse(pieces[2])
         };      
       case "Immunity":
-        Enum.TryParse(pieces[1], out DamageType idt);
-        ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
+        Enum.TryParse(pieces[1], out dt);
+        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
         return new ImmunityTrait()
         {
-          Type = idt,
+          Type = dt,
           ExpiresOn = expiresOn
         };
       case "Impale":
@@ -1334,7 +1356,7 @@ class TraitFactory
       case "LightStep":
         return new LightStepTrait();
       case "Melee":
-        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mdt);
+        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out dt);
         digits = text.Split('#');
         return new MobMeleeTrait()
         {
@@ -1343,11 +1365,11 @@ class TraitFactory
           DamageDice = int.Parse(digits[2]),
           MinRange = 1,
           MaxRange = 1,
-          DamageType = mdt
+          DamageType = dt
 
         };      
       case "Missile":
-        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out DamageType mmdt);
+        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out dt);
         digits = text.Split('#');
         return new MobMissileTrait()
         {
@@ -1356,28 +1378,28 @@ class TraitFactory
           DamageDice = int.Parse(digits[2]),
           MinRange = int.Parse(digits[3]),
           MaxRange = int.Parse(digits[4]),
-          DamageType = mmdt
+          DamageType = dt
 
         };
       case "MobMelee":
-        Enum.TryParse(pieces[5], out DamageType mmelDt);
+        Enum.TryParse(pieces[5], out dt);
         return new MobMeleeTrait()
         {
           MinRange = int.Parse(pieces[1]),
           MaxRange = int.Parse(pieces[2]),
           DamageDie = int.Parse(pieces[3]),
           DamageDice = int.Parse(pieces[4]),
-          DamageType = mmelDt
+          DamageType = dt
         };
       case "MobMissile":
-        Enum.TryParse(pieces[5], out DamageType mmisDt);
+        Enum.TryParse(pieces[5], out dt);
         return new MobMeleeTrait()
         {
           MinRange = int.Parse(pieces[1]),
           MaxRange = int.Parse(pieces[2]),
           DamageDie = int.Parse(pieces[3]),
           DamageDice = int.Parse(pieces[4]),
-          DamageType = mmisDt
+          DamageType = dt
         };
       case "Named":
         return new NamedTrait();
@@ -1398,6 +1420,16 @@ class TraitFactory
       }
       case "Polearm":
         return new PolearmTrait();
+      case "Resistance":
+        Enum.TryParse(pieces[1], out DamageType rdt);
+        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
+        ownerID = pieces.Length > 3 ? ulong.Parse(pieces[2]): 0;
+        return new ResistanceTrait()
+        {
+          Type = rdt,
+          ExpiresOn = expiresOn,
+          OwnerID = ownerID
+        };
       case "Sword":
         return new SwordTrait();
       case "Confused":
@@ -1477,8 +1509,8 @@ class TraitFactory
       case "ResistSlashing":
         return new ResistSlashingTrait();   
       case "Retribution":
-        Enum.TryParse(pieces[1], out DamageType rdt);
-        return new RetributionTrait() { Type = rdt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
+        Enum.TryParse(pieces[1], out dt);
+        return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
       case "Stabby":
         return new StabbyTrait();
       case "Stackable":
