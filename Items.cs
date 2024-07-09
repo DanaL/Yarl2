@@ -305,10 +305,34 @@ class ItemFactory
         {
           Name = "potion of mind reading",
           Type = ItemType.Potion,
-          Value = 100,
+          Value = 125,
           Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new UseSimpleTrait("telepathy"));
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
+      case "potion of fire resistance":
+        item = new Item()
+        {
+          Name = "potion of fire resistance",
+          Type = ItemType.Potion,
+          Value = 100,
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new UseSimpleTrait("resistfire"));
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
+      case "potion of cold resistance":
+        item = new Item()
+        {
+          Name = "potion of cold resistance",
+          Type = ItemType.Potion,
+          Value = 100,
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new UseSimpleTrait("resistcold"));
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         break;

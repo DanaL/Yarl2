@@ -486,7 +486,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 

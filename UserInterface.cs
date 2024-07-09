@@ -430,17 +430,37 @@ abstract class UserInterface
     // Write statuses
     int statusLineNum = ViewHeight - 3;
     HashSet<string> statuses = [];
-    if (!statuses.Contains("POISONED") && gs.Player.HasTrait<PoisonedTrait>())
+    foreach (var trait in gs.Player.Traits)
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
-      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
-      statuses.Add("POISONED");
-    }
-    if (!statuses.Contains("RAGE") && gs.Player.HasActiveTrait<RageTrait>())
-    {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
-      WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
-      statuses.Add("RAGE");
+      if (!statuses.Contains("POISONED") && trait is PoisonedTrait)
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
+        WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+        statuses.Add("POISONED");
+      }
+      else if (!statuses.Contains("RAGE") && trait is RageTrait rage && rage.Active) 
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
+        WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+        statuses.Add("RAGE");
+      }
+      else if (trait is ResistanceTrait resist) 
+      {
+        List<(Colour, string)> statusLine;
+        switch (resist.Type)
+        {
+          case DamageType.Fire:
+            statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RESIST FIRE")];
+            WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+            statuses.Add("RESIST FIRE");
+            break;
+          case DamageType.Cold:
+            statusLine = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "RESIST COLD")];
+            WriteText(statusLine, statusLineNum--, ViewWidth, SideBarWidth);
+            statuses.Add("RESIST COLD");
+            break;
+        }
+      }
     }
     if (!statuses.Contains("GRAPPLED") && gs.Player.HasActiveTrait<GrappledTrait>())
     {
