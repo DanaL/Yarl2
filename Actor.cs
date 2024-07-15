@@ -92,7 +92,31 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   // I'm sure eventually there will be more factors that do into determining
   // how noisy an Actor's walking is. Wearing metal armour for instance
-  public int MovementNoise => HasTrait<LightStepTrait>() ? 3 : 12;
+  public int GetMovementNoise()
+  {
+    int baseNoise = HasTrait<LightStepTrait>() ? 3 : 9;
+
+    // If the actor is wearing a shirt that's made of non-mithril metal, it will add
+    // to the noisiness. (Only shirts because I feel like a metal helmet wouldn't 
+    // be especially loud)
+    var armour = Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equiped);
+    foreach (var piece in armour)
+    {      
+      ArmourTrait? armourTrait = piece.Traits.OfType<ArmourTrait>().FirstOrDefault();
+      // It would actually be an error for this to be null
+      if (armourTrait is not null && (armourTrait.Part == ArmourParts.Shirt))
+      {
+        var metal = piece.IsMetal();
+        if (metal != Metals.NotMetal && metal != Metals.Mithril)
+        {
+          baseNoise += 3;
+          break;
+        }
+      }
+    }
+
+    return baseNoise;
+  }
 
   public MobAttitude Status
   {

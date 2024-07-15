@@ -208,7 +208,7 @@ class PlayerCreator
         break;
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get("hand axe", objDb);
-        var studded = ItemFactory.Get("studded leather armour", objDb);
+        var studded = ItemFactory.Get("ringmail", objDb);
         studded.Equiped = true;
         studded.Slot = 'b';
         player.Inventory.Add(studded, player.ID);

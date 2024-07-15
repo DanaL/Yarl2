@@ -120,6 +120,8 @@ class Colours
   };
 }
 
+enum Metals { NotMetal, Iron, Steel, Bronze, Mithril }
+
 // Miscellaneous constants used in a few places
 class Constants
 {

@@ -264,6 +264,13 @@ class LightStepTrait : Trait
   public override string AsText() => "LightStep";
 }
 
+class MetalTrait : Trait
+{
+  public Metals Type {  get; set; }
+
+  public override string AsText() => $"Metal#{(int)Type}";
+}
+
 class PoorLootTrait : Trait
 {
   public override string AsText() => "PoorLoot";
@@ -1459,6 +1466,11 @@ class TraitFactory
         };
       case "KnockBack":
         return new KnockBackTrait();
+      case "Metal":
+        return new MetalTrait()
+        {
+          Type = (Metals)int.Parse(pieces[1])
+        };
       case "Opaque":
         return new OpaqueTrait();
       case "Paralyzed":

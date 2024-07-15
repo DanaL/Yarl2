@@ -82,6 +82,13 @@ class Item : GameObj, IEquatable<Item>
     return sb.ToString();
   }
 
+  public Metals IsMetal()
+  {
+    var t = Traits.OfType<MetalTrait>().FirstOrDefault();
+
+    return t is not null ? t.Type : Metals.NotMetal;
+  }
+
   public override int GetHashCode() => $"{Type}+{Name}+{HasTrait<StackableTrait>()}".GetHashCode();
   public override bool Equals(object? obj) => Equals(obj as Item);
   
@@ -115,6 +122,7 @@ class Item : GameObj, IEquatable<Item>
   }
 
   public static bool operator!=(Item? a, Item? b) => !(a == b);
+
 }
 
 class ItemFactory
@@ -143,6 +151,7 @@ class ItemFactory
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new FinesseTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         break;
       case "hand axe":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
@@ -159,6 +168,7 @@ class ItemFactory
         };
         item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 3, DamageType = DamageType.Slashing });
         item.Traits.Add(new AxeTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         break;
       case "mace":
         item = new Item()
@@ -169,22 +179,26 @@ class ItemFactory
           Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case "longsword":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
         item.Traits.Add(new SwordTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         break;
       case "shortsword":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
         item.Traits.Add(new SwordTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         break;
       case "rapier":
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 20, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new StabbyTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         break;
       case "longbow":
         item = new Item()
@@ -242,6 +256,7 @@ class ItemFactory
           Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case "chainmail":
         item = new Item()
@@ -252,10 +267,12 @@ class ItemFactory
           Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case "helmet":
         item = new Item() { Name = name, Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case "shield":
         item = new Item() { Name = name, Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };

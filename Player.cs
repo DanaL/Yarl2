@@ -61,7 +61,7 @@ class Player : Actor, IPerformer, IGameEventListener
       foreach (var slot in Inventory.UsedSlots())
       {
         var (item, _) = Inventory.ItemAt(slot);
-        if (item.Equiped)
+        if (item is not null && item.Equiped)
         {
           armour += item.Traits.OfType<ArmourTrait>()
                                .Select(t => t.ArmourMod + t.Bonus)
