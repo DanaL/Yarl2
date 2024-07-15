@@ -474,6 +474,7 @@ class ItemFactory
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
     fire.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = fire.ID });
+    
     return fire;
   }
 

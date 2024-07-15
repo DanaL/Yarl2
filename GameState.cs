@@ -985,7 +985,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
-  // Between this and UpdateFoV(), I wonder if I should just start returning 
   HashSet<Loc> LitLocations(int dungeonID, int level)
   {
     HashSet<Loc> lit = [];
@@ -1022,9 +1021,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (lightRadius > 0)
       {
-        lit = FieldOfView.CalcVisible(lightRadius, obj.Loc.Row, obj.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
-                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
-                         .ToHashSet();
+        foreach (var sq in FieldOfView.CalcVisible(lightRadius, obj.Loc.Row, obj.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb))
+        {
+          lit.Add(new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3));
+        }
       }
     }
 
