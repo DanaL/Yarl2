@@ -144,7 +144,7 @@ class ExplosionAnimation(GameState gs) : Animation
   public Colour Highlight { get; set; }
   public Loc Centre {  get; set; }
   public HashSet<Loc> Sqs { get; set; } = [];
-  Dictionary<Loc, Sqr> _toDraw = [];
+  readonly Dictionary<Loc, Sqr> _toDraw = [];
   int _radius = 0;
   DateTime _lastFrame;
   readonly GameState _gs = gs;
@@ -154,13 +154,13 @@ class ExplosionAnimation(GameState gs) : Animation
   {
     var ui = _gs.UIRef();
 
-    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 100)
+    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 25)
     {      
       var newSqs = Sqs.Where(s => Util.Distance(s, Centre) == _radius).ToList();
       if (newSqs.Count == 0 && !_finalFrame)
       {
 
-        Expiry = DateTime.Now.AddMilliseconds(200);
+        Expiry = DateTime.Now.AddMilliseconds(50);
         _finalFrame = true;
       }
       else

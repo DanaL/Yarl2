@@ -1565,7 +1565,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
     var anim = new ArrowAnimation(GameState!, pts, Colours.BRIGHT_RED);
     ui.PlayAnimation(anim, GameState);
-
+    
     var affected = GameState!.Flood(actualLoc, 3);
     affected.Add(actualLoc);
 
@@ -1578,7 +1578,8 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       Centre = actualLoc,
       Sqs = affected
     };
-    ui.RegisterAnimation(explosion);
+    ui.PlayAnimation(explosion, GameState);
+    //ui.RegisterAnimation(explosion);
 
     int total = 0;
     for (int j = 0; j < 4; j++)
