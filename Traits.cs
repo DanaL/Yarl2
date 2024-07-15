@@ -336,6 +336,13 @@ class PolearmTrait : Trait
   public override string AsText() => "Polearm";
 }
 
+class RustedTrait : Trait
+{
+  public Rust Amount { get; set; }
+
+  public override string AsText() => $"Rusted#{(int)Amount}";
+}
+
 class SwordTrait : Trait
 {
   public override string AsText() => "Sword";
@@ -550,7 +557,7 @@ class ArmourTrait : ACModTrait
   public ArmourParts Part { get; set; }
   public int Bonus { set; get; }
 
-  public override string Desc() => Bonus == 0 ? "" : $"[{Bonus}]";
+  public override string Desc() => "";
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
 }
 
@@ -1523,6 +1530,11 @@ class TraitFactory
       case "Retribution":
         Enum.TryParse(pieces[1], out dt);
         return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
+      case "Rusted":
+        return new RustedTrait()
+        {
+          Amount = (Rust)int.Parse(pieces[1])
+        };
       case "Stabby":
         return new StabbyTrait();
       case "Stackable":

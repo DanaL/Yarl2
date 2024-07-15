@@ -122,6 +122,8 @@ class Colours
 
 enum Metals { NotMetal, Iron, Steel, Bronze, Mithril }
 
+enum Rust { Rusted, Corroded }
+
 // Miscellaneous constants used in a few places
 class Constants
 {

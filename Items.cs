@@ -58,14 +58,30 @@ class Item : GameObj, IEquatable<Item>
       name = Name;
     }
 
-    string adjectives = string.Join(", ", Traits.OfType<AdjectiveTrait>().Select(a => a.Adj));
-    name = $"{adjectives} {name}".Trim();
+    List<string> adjs = [];
+    int bonus = 0;
+    foreach (Trait trait in Traits)
+    {
+      if (trait is AdjectiveTrait adj)
+        adjs.Add(adj.Adj.ToLower());
+      else if (trait is ArmourTrait armour && armour.Bonus != 0)
+        bonus = armour.Bonus;
+      // weapons don't yet have +/- modifiers
+    }
 
+    string adjectives = string.Join(", ", adjs);
+    string fullname = adjectives.Trim();
+    if (bonus > 0)
+      fullname += $" +{bonus}";
+    else if (bonus < 0)
+      fullname += $" {bonus}";
+    fullname += " " + name;
+    
     string traitDescs = string.Join(' ', Traits.OfType<Trait>().Select(t => t.Desc()));
     if (traitDescs.Length > 0)
-      name = name + " " + traitDescs;
+      fullname += " " + traitDescs;
 
-    return name.Trim();
+    return fullname.Trim();
   }
 
   public override string FullName => CalcFullName();
@@ -80,6 +96,26 @@ class Item : GameObj, IEquatable<Item>
     }
 
     return sb.ToString();
+  }
+
+  public void ApplyRust()
+  {
+    Metals metal = IsMetal();
+    if (metal == Metals.NotMetal || metal == Metals.Mithril)
+      return;
+
+    RustedTrait? rusted = Traits.OfType<RustedTrait>().FirstOrDefault();
+    if (rusted is null)
+    {
+      Traits.Add(new AdjectiveTrait("Rusted"));
+      var armour = Traits.OfType<ArmourTrait>().FirstOrDefault();
+      if (armour is not null)
+        armour.Bonus -= 1;
+    }
+    else
+    {
+
+    }
   }
 
   public Metals IsMetal()
