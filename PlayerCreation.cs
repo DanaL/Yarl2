@@ -205,11 +205,13 @@ class PlayerCreator
       case PlayerLineage.Orc:
         startWeapon = ItemFactory.Get("shortsword", objDb);
         startWeapon.ApplyRust();
+        startWeapon.ApplyRust();
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get("hand axe", objDb);
         var studded = ItemFactory.Get("ringmail", objDb);
+        studded.ApplyRust();
         studded.ApplyRust();
         studded.Equiped = true;
         studded.Slot = 'b';

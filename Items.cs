@@ -111,10 +111,17 @@ class Item : GameObj, IEquatable<Item>
       var armour = Traits.OfType<ArmourTrait>().FirstOrDefault();
       if (armour is not null)
         armour.Bonus -= 1;
+      Traits.Add(new RustedTrait() { Amount = Rust.Rusted });
     }
-    else
+    else if (rusted.Amount == Rust.Rusted)
     {
-
+      // If already rusted, upgrade to Corroded
+      Traits = Traits.Where(t => !(t is AdjectiveTrait adj && adj.Adj == "Rusted")).ToList();
+      Traits.Add(new AdjectiveTrait("Corroded"));
+      var armour = Traits.OfType<ArmourTrait>().FirstOrDefault();
+      if (armour is not null)
+        armour.Bonus -= 1;
+      rusted.Amount = Rust.Corroded;
     }
   }
 
