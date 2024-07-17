@@ -557,7 +557,6 @@ class ArmourTrait : ACModTrait
   public ArmourParts Part { get; set; }
   public int Bonus { set; get; }
 
-  public override string Desc() => "";
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
 }
 
