@@ -392,9 +392,53 @@ abstract class UserInterface
     } 
   }
 
+  int FindSplit(string txt)
+  {
+    int start = int.Min(txt.Length - 1, SideBarWidth);
+    for (int j = start; j > 0; j--)
+    {
+      if (txt[j] == ' ')
+        return j;
+    }
+
+    return -1;
+  }
+
   int WriteSideBarLine(List<(Colour, string)> line, int row)
   {
-    WriteText(line, row++, ViewWidth, SideBarWidth);
+    int lineWidth = line.Select(item => item.Item2.Length).Sum();
+
+    if (lineWidth < SideBarWidth)
+    {
+      WriteText(line, row++, ViewWidth, SideBarWidth);
+    }
+    else
+    {
+      // Split the line if it's too wide for the sidebar. Currently handling
+      // only the simplest possible case. This won't work if the message sent
+      // has to go across 3 lines, or there are no spaces in the text
+      List<(Colour, string)> pieces = [];
+      int width = 0;
+
+      foreach (var piece in line)
+      {
+        if (piece.Item2.Length + width < SideBarWidth)
+        {
+          pieces.Add(piece);
+        }
+        else
+        {
+          int pos = FindSplit(piece.Item2);
+          string part1 = piece.Item2[..pos];
+          string part2 = "|  " + piece.Item2[pos..];
+          pieces.Add((piece.Item1, part1));
+          WriteText(pieces, row++, ViewWidth, SideBarWidth);
+          WriteText([(piece.Item1, part2)], row++, ViewWidth, SideBarWidth);
+          width = 0;
+          pieces = [];
+        }
+      }
+    }
 
     return row;
   }
