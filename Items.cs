@@ -66,7 +66,8 @@ class Item : GameObj, IEquatable<Item>
         adjs.Add(adj.Adj.ToLower());
       else if (trait is ArmourTrait armour && armour.Bonus != 0)
         bonus = armour.Bonus;
-      // weapons don't yet have +/- modifiers
+      else if (trait is WeaponBonusTrait wb && wb.Bonus != 0)
+        bonus = wb.Bonus;
     }
 
     string adjectives = string.Join(", ", adjs);

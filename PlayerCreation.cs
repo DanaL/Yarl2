@@ -204,6 +204,7 @@ class PlayerCreator
     {
       case PlayerLineage.Orc:
         startWeapon = ItemFactory.Get("shortsword", objDb);
+        startWeapon.Traits.Add(new WeaponBonusTrait() { Bonus = 2 });
         player.Inventory.Add(leather, player.ID);
         break;
       case PlayerLineage.Dwarf:

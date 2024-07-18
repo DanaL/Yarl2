@@ -41,7 +41,7 @@ class Battle
     return (total, dmg.Type);
   }
 
-  static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
+  static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, int weaponBonus)
   {
     bool success = false;
 
@@ -52,14 +52,14 @@ class Battle
     Actor? occ = gs.ObjDb.Occupant(checkLoc);
     if (occ is not null && attackRoll >= occ.AC)
     {
-      ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale);
+      ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale, weaponBonus);
       success = true;
     }
 
     return success;
   }
 
-  static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result)
+  static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, int weaponBonus)
   {
     bool success = false;
     // Check for any cleave targets Adj4 to main target and Adj to attacker
@@ -72,7 +72,7 @@ class Battle
       {
         if (attackRoll >= occ.AC)
         {
-          ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave);
+          ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave, weaponBonus);
           success = true;
         }
       }
@@ -142,7 +142,7 @@ class Battle
     }
   }
 
-  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb)
+  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, int weaponBonus)
   {    
     // Need to handle the case where the player isn't currently wielding a weapon...
     List<(int, DamageType)> dmg = [];
@@ -167,16 +167,16 @@ class Battle
       }
     }
 
-    int bonusDamage = 0; // this is separate from the damage types because, say,
-                         // a flaming sword that does 1d8 slashing, 1d6 fire has
-                         // two damage types but we only want to add the player's
-                         // strength modifier once
+    int bonusDamage = weaponBonus; // this is separate from the damage types because, say,
+                                   // a flaming sword that does 1d8 slashing, 1d6 fire has
+                                   // two damage types but we only want to add the player's
+                                   // strength modifier once
     if (attacker.Stats.TryGetValue(Attribute.Strength, out var str))
       bonusDamage += str.Curr;
     if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
     if (attacker.HasActiveTrait<RageTrait>())
-      bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+      bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);    
 
     Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
     result.Messages.Add(msg);
@@ -405,8 +405,14 @@ class Battle
     }
 
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    Item? weapon = attacker.Inventory.ReadiedWeapon();
+    int weaponBonus = 0;    
+    if (weapon is not null && weapon.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait wb)
+    {
+      weaponBonus = wb.Bonus;
+    }
 
-    int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier();
+    int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier() + weaponBonus;
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
@@ -422,13 +428,13 @@ class Battle
         }        
       }
 
-      ResolveMeleeHit(attacker, target, gs, result, Verb.Hit);
+      ResolveMeleeHit(attacker, target, gs, result, Verb.Hit, weaponBonus);
 
       if (CanCleave(attacker))
-        ResolveCleave(attacker, target, roll, gs, result);
+        ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
      
       if (CanImpale(attacker, target))
-        ResolveImpale(attacker, target, roll, gs, result);
+        ResolveImpale(attacker, target, roll, gs, result, weaponBonus);
       
       if (attacker.HasActiveTrait<KnockBackTrait>())
       {
@@ -450,7 +456,7 @@ class Battle
       result.Messages.Add(msg);
     }
 
-    if (attacker is Player player && player.Inventory.ReadiedWeapon() is Item weapon)
+    if (attacker is Player player && weapon is not null)
     {
       foreach (Trait t in  weapon.Traits) 
       {

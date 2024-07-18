@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System;
+
 namespace Yarl2;
 
 record UseResult(bool Successful, string Message, Action? ReplacementAction, Inputer? Accumulator);
@@ -1219,6 +1221,15 @@ class WandTrait : Trait, IUSeable, INeedsID
   public void Used() => --Charges;
 }
 
+// ArmourTrait also has a bonus field but I don't think I want to merge them
+// into a single BonusTrait because perhaps there will be something like a
+// Defender Sword which provides separate att/dmg and AC bonuses
+class WeaponBonusTrait : Trait
+{
+  public int Bonus {  get; set; }
+  public override string AsText() => $"WeaponBonus#{Bonus}";
+}
+
 class WorshiperTrait : Trait
 {
   public Loc Altar { get; set; }
@@ -1599,6 +1610,11 @@ class TraitFactory
           Charges = int.Parse(pieces[1]),
           IDed = bool.Parse(pieces[2]),
           Effect = pieces[3]
+        };
+      case "WeaponBonus":
+        return new WeaponBonusTrait()
+        {
+          Bonus = int.Parse(pieces[1])
         };
       case "Worshiper":
         return new WorshiperTrait()
