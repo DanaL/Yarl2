@@ -487,6 +487,16 @@ static class StringUtils
     else
       return s;
   }
+
+  public static string Possessive(this string s, Actor owner)
+  {
+    if (owner is Player)
+      return "your " + s;
+    else if (owner.Name.EndsWith("s"))
+      return $"{owner.FullName}' {s}";
+    else
+      return $"{owner.FullName}'s {s}";
+  }
 }
 
 interface IPassable
