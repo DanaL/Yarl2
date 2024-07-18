@@ -240,6 +240,11 @@ class ConsumableTrait : Trait
   public override string AsText() => "Consumable";
 }
 
+class CorrosiveTrait : Trait
+{
+  public override string AsText() => "Corrosive";
+}
+
  class DodgeTrait : FeatTrait
 {
   public int Rate { get; set; }
@@ -1282,6 +1287,8 @@ class TraitFactory
         };
       case "Consumable":
         return new ConsumableTrait();
+      case "Corrosive":
+        return new CorrosiveTrait();
       case "Countdown":
         return new CountdownTrait()
         {

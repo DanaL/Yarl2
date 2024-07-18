@@ -185,16 +185,15 @@ class Battle
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
 
-    if (attacker.Traits.Count > 0)
+    foreach (Trait trait in attacker.Traits)
     {
-      if (attacker.HasTrait<PoisonerTrait>())
+      if (trait is PoisonerTrait poison)
       {
-        var poison = attacker.Traits.OfType<PoisonerTrait>().First();
         ApplyPoison(poison, target, gs, result);
       }
 
-      if (attacker.Traits.OfType<WeakenTrait>().FirstOrDefault() is WeakenTrait weaken)
-      {       
+      if (trait is WeakenTrait weaken)
+      {
         var debuff = new StatBuffTrait()
         {
           DC = weaken.DC,
@@ -210,7 +209,28 @@ class Battle
           result.Messages.Add(new Message(txt, target.Loc));
         }
       }
-    }
+
+      if (trait is CorrosiveTrait)
+      {
+        // Or is it more fair to just pick a random inventory item and not
+        // specifically target metal ones?
+        List<Item> metalItems = [];
+        foreach (var item in target.Inventory.Items())
+        {
+          Metals metal = item.IsMetal();
+          if (metal != Metals.NotMetal && metal != Metals.Mithril)
+            metalItems.Add(item);
+        }
+
+        if (metalItems.Count > 0)
+        {
+          var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
+          string corrosionMsg = $"{damagedItem.Name.Possessive(target).Capitalize()} corrodes!";
+          result.Messages.Add(new Message(corrosionMsg, target.Loc));
+          damagedItem.ApplyRust();
+        }
+      }
+    }    
   }
 
   static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
@@ -245,6 +265,25 @@ class Battle
             result.Messages.Add(new Message(acidMsg, victim.Loc));
         }
       }      
+    }
+
+    if (target.HasTrait<CorrosiveTrait>())
+    {
+      Item? weapon = attacker.Inventory.ReadiedWeapon();
+      if (weapon is not null)
+      {
+        Metals metal = weapon.IsMetal();
+        if (metal != Metals.NotMetal && metal != Metals.Mithril)
+        {          
+          if (attacker is Player)
+          {
+            string msg = $"{weapon.Name.Possessive(attacker).Capitalize()} rusts!";
+            result.Messages.Add(new Message(msg, attacker.Loc));
+          }
+
+          weapon.ApplyRust();
+        }
+      }
     }
 
     // Paralyzing gaze only happens in melee range

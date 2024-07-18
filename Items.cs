@@ -200,6 +200,7 @@ class ItemFactory
         item = new Item() { Name = name, Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
         item.Traits.Add(new AxeTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case "battle axe":
         item = new Item()
