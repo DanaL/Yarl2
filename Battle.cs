@@ -225,9 +225,12 @@ class Battle
         if (metalItems.Count > 0)
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          string corrosionMsg = $"{damagedItem.Name.Possessive(target).Capitalize()} corrodes!";
-          result.Messages.Add(new Message(corrosionMsg, target.Loc));
-          damagedItem.ApplyRust();
+          bool affected = damagedItem.ApplyRust();
+          if  (affected)
+          {
+            string corrosionMsg = $"{damagedItem.Name.Possessive(target).Capitalize()} corrodes!";
+            result.Messages.Add(new Message(corrosionMsg, target.Loc));
+          }
         }
       }
     }    
@@ -274,14 +277,13 @@ class Battle
       {
         Metals metal = weapon.IsMetal();
         if (metal != Metals.NotMetal && metal != Metals.Mithril)
-        {          
-          if (attacker is Player)
+        {
+          bool affected = weapon.ApplyRust();
+          if (affected && attacker is Player)
           {
             string msg = $"{weapon.Name.Possessive(attacker).Capitalize()} rusts!";
             result.Messages.Add(new Message(msg, attacker.Loc));
-          }
-
-          weapon.ApplyRust();
+          }          
         }
       }
     }
