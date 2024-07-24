@@ -261,16 +261,16 @@ class PreGameHandler(UserInterface ui)
     history.GenerateVillain();
     campaign.History = history;
 
-    //int maxDepth = 5;
-    //var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
-    //var dBuilder = new MainDungeonBuilder();
-    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
-    //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
-    //PrinceOfRats(mainDungeon, objDb, rng);
+    int maxDepth = 5;
+    var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
+    var dBuilder = new MainDungeonBuilder();
+    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
+    PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
+    PrinceOfRats(mainDungeon, objDb, rng);
 
-    var dBuilder = new ArenaBuilder();
-    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    PopulateArena(rng, objDb, mainDungeon);
+    //var dBuilder = new ArenaBuilder();
+    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    //PopulateArena(rng, objDb, mainDungeon);
 
     campaign.AddDungeon(mainDungeon);
 
