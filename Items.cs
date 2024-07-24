@@ -99,31 +99,50 @@ class Item : GameObj, IEquatable<Item>
     return sb.ToString();
   }
 
-  public void ApplyRust()
+  public bool ApplyRust()
   {
     Metals metal = IsMetal();
     if (metal == Metals.NotMetal || metal == Metals.Mithril)
-      return;
+      return false;
 
     RustedTrait? rusted = Traits.OfType<RustedTrait>().FirstOrDefault();
-    if (rusted is null)
+    
+    if (rusted == null)
     {
       Traits.Add(new AdjectiveTrait("Rusted"));
-      var armour = Traits.OfType<ArmourTrait>().FirstOrDefault();
-      if (armour is not null)
-        armour.Bonus -= 1;
       Traits.Add(new RustedTrait() { Amount = Rust.Rusted });
     }
     else if (rusted.Amount == Rust.Rusted)
     {
-      // If already rusted, upgrade to Corroded
+      // An already rusted item becomes corroded
       Traits = Traits.Where(t => !(t is AdjectiveTrait adj && adj.Adj == "Rusted")).ToList();
       Traits.Add(new AdjectiveTrait("Corroded"));
-      var armour = Traits.OfType<ArmourTrait>().FirstOrDefault();
-      if (armour is not null)
-        armour.Bonus -= 1;
       rusted.Amount = Rust.Corroded;
     }
+    else
+    {
+      // Right now we have only two degrees of rust: Rusted and Corroded and hence
+      // a max penalty of -2 to item bonuses
+      return false;
+    }
+
+    // Some items have their bonuses lowered by being rusted/corroded
+    var armourTrait = Traits.OfType<ArmourTrait>().FirstOrDefault();
+    if (armourTrait is not null)
+    {
+      armourTrait.Bonus -= 1;
+    }
+    
+    if (Type == ItemType.Weapon)
+    {
+      var wb = Traits.OfType<WeaponBonusTrait>().FirstOrDefault();
+      if (wb is null)
+        Traits.Add(new WeaponBonusTrait() { Bonus = -1 });
+      else       
+        wb.Bonus -= 1;
+    }
+
+    return true;
   }
 
   public Metals IsMetal()
