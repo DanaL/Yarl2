@@ -143,14 +143,14 @@ class Village
     grocer.SetBehaviour(new GrocerBehaviour());
 
     grocer.Inventory = new Inventory(grocer.ID, objDb);
-    grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
-    grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
-    grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
-    grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+    grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
+    grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
+    grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
+    grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
     for (int j = 0; j < rng.Next(4); j++)
-      grocer.Inventory.Add(ItemFactory.Get("torch", objDb), grocer.ID);
+      grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
     for (int j = 0; j < rng.Next(1, 4); j++)
-      grocer.Inventory.Add(ItemFactory.Get("potion of healing", objDb), grocer.ID);
+      grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), grocer.ID);
 
     return grocer;
   }
@@ -170,21 +170,21 @@ class Village
     smith.MoveStrategy = new WallMoveStrategy();
 
     smith.Inventory = new Inventory(smith.ID, objDb);
-    smith.Inventory.Add(ItemFactory.Get("ringmail", objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get("helmet", objDb), smith.ID);
+    smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
+    smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
     if (rng.NextDouble() < 0.25)
-      smith.Inventory.Add(ItemFactory.Get("chainmail", objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
-    smith.Inventory.Add(ItemFactory.Get("dagger", objDb), smith.ID);
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, objDb), smith.ID);
+    smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
+    smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
+    smith.Inventory.Add(ItemFactory.Get(ItemNames.DAGGER, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
-      smith.Inventory.Add(ItemFactory.Get("battle axe", objDb), smith.ID);
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.BATTLE_AXE, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
-      smith.Inventory.Add(ItemFactory.Get("mace", objDb), smith.ID);
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.MACE, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
-      smith.Inventory.Add(ItemFactory.Get("longsword", objDb), smith.ID);
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.LONGSWORD, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
-      smith.Inventory.Add(ItemFactory.Get("rapier", objDb), smith.ID);
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
 
     return smith;
   }

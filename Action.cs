@@ -1027,7 +1027,7 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
     var anim = new ArrowAnimation(GameState!, _trajectory, Colours.YELLOW_ORANGE);
     GameState!.UIRef().RegisterAnimation(anim);
 
-    var firebolt = ItemFactory.Get("firebolt", GameState!.ObjDb);
+    var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
     var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt, 0);
 
     var txt = MsgFactory.Phrase(Actor!.ID, Verb.Cast, _target, GameState).Text;
@@ -1186,7 +1186,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
-      var coins = ItemFactory.Get("zorkmids", GameState!.ObjDb);
+      var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       GameState.ItemDropped(coins, Actor.Loc);
       coins.Value = _amount;
       string msg = $"{MsgFactory.CalcName(Actor).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";

@@ -354,30 +354,30 @@ class MainDungeonBuilder : DungeonBuilder
       int numItems = rng.Next(0, 4);
       for (int j = 0; j < numItems; j++)
       {
-        Item item = ItemFactory.Get("torch", objDb);
+        Item item = ItemFactory.Get(ItemNames.TORCH, objDb);
 
         double roll = rng.NextDouble();
         if (roll < 0.33)
         {
-          var money = ItemFactory.Get("zorkmids", objDb);
+          var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
           money.Value = rng.Next(5, 16);
           item = money;
         }       
         else if (roll >= 0.65 && roll < 0.75)
         {
-          item = ItemFactory.Get("potion of healing", objDb);
+          item = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
         }
         else if (roll >= 0.65 && roll < 0.85)
         {
-          item = ItemFactory.Get("potion of mind reading", objDb);
+          item = ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb);
         }
         else if (roll >= 0.65 && roll < 0.95)
         {
-          item = ItemFactory.Get("antidote", objDb);
+          item = ItemFactory.Get(ItemNames.ANTITODE, objDb);
         }
         else if (roll >= 0.95)
         {
-          item = ItemFactory.Get("scroll of blink", objDb);
+          item = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
         }
 
         var sq = level.RandomTile(TileType.DungeonFloor, rng);
@@ -395,22 +395,22 @@ class MainDungeonBuilder : DungeonBuilder
 
     for (int j = 0; j < 3; j++)
     {
-      var torch = ItemFactory.Get("torch", objDb);
+      var torch = ItemFactory.Get(ItemNames.TORCH, objDb);
       objDb.SetToLoc(loc, torch);
     }
     if (rng.NextDouble() < 0.25)
     {
-      var poh = ItemFactory.Get("potion of healing", objDb);
+      var poh = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
       objDb.SetToLoc(loc, poh);
     }
     if (rng.NextDouble() < 0.25)
     {
-      var antidote = ItemFactory.Get("antidote", objDb);
+      var antidote = ItemFactory.Get(ItemNames.ANTITODE, objDb);
       objDb.SetToLoc(loc, antidote);
     }
     if (rng.NextDouble() < 0.25)
     {
-      var blink = ItemFactory.Get("scroll of blink", objDb);
+      var blink = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
       objDb.SetToLoc(loc, blink);
     }
 

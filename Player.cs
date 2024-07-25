@@ -301,7 +301,7 @@ class Player : Actor, IPerformer, IGameEventListener
     }
     else
     {
-      arrow = ItemFactory.Get("arrow", gs.ObjDb);
+      arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
       range = 6;
     }
 

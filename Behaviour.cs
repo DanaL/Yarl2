@@ -160,7 +160,7 @@ class MonsterBehaviour : IBehaviour
       var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
       gs.UIRef().RegisterAnimation(arrowAnim);
 
-      var arrow = ItemFactory.Get("arrow", gs.ObjDb);
+      var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
       return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow, 0);
     }
     else if (act is SpellActionTrait || act is RangedSpellActionTrait)
@@ -830,10 +830,10 @@ class MayorBehaviour : IBehaviour, IDialoguer
       int roll = gs.Rng.Next(4);
       Item item = roll switch
       {
-        0 => ItemFactory.Get("potion of healing", gs.ObjDb),
-        1 => ItemFactory.Get("scroll of blink", gs.ObjDb),
-        2 => ItemFactory.Get("antidote", gs.ObjDb),
-        _ => ItemFactory.Get("potion of mind reading", gs.ObjDb)
+        0 => ItemFactory.Get(ItemNames.POTION_HEALING, gs.ObjDb),
+        1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, gs.ObjDb),
+        2 => ItemFactory.Get(ItemNames.ANTITODE, gs.ObjDb),
+        _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, gs.ObjDb)
       };
 
       sb.Append("\n\nThe mayor gives you ");

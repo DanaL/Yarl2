@@ -22,15 +22,15 @@ class Treasure
       double roll = rng.NextDouble();
       if (roll > 0.95)
       {
-        loot.Add(ItemFactory.Get("potion of healing", objDb));
+        loot.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb));
       }
       else if (roll > 0.80)
       {
-        loot.Add(ItemFactory.Get("torch", objDb));        
+        loot.Add(ItemFactory.Get(ItemNames.TORCH, objDb));        
       }
       else if (roll > 0.5)
       {
-        var cash = ItemFactory.Get("zorkmids", objDb);
+        var cash = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
         cash.Value = rng.Next(3, 11);        
       }
     }
