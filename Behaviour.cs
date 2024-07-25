@@ -832,7 +832,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
       {
         0 => ItemFactory.Get(ItemNames.POTION_HEALING, gs.ObjDb),
         1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, gs.ObjDb),
-        2 => ItemFactory.Get(ItemNames.ANTITODE, gs.ObjDb),
+        2 => ItemFactory.Get(ItemNames.ANTIDOTE, gs.ObjDb),
         _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, gs.ObjDb)
       };
 

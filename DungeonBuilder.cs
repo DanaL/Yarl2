@@ -336,55 +336,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
-      AddTreasure(objDb, levels[levelNum], levelNum, rng);
-    }
-  }
-
-  void AddTreasure(GameObjectDB objDb, Map level, int levelNum, Random rng)
-  {
-    // I wonder the best way to structure this to avoid a couple hundred lines 
-    // of code when I am populating 20+ levels
-
-    // I wonder if I should add a RandomItem(int dungeonLevel) sort of memory
-    // to ItemFactory?
-    if (levelNum < 2)
-    {
-      // For the early levels just throw in a bit of money and the occasional 
-      // potion or better item
-      int numItems = rng.Next(0, 4);
-      for (int j = 0; j < numItems; j++)
-      {
-        Item item = ItemFactory.Get(ItemNames.TORCH, objDb);
-
-        double roll = rng.NextDouble();
-        if (roll < 0.33)
-        {
-          var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-          money.Value = rng.Next(5, 16);
-          item = money;
-        }       
-        else if (roll >= 0.65 && roll < 0.75)
-        {
-          item = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
-        }
-        else if (roll >= 0.65 && roll < 0.85)
-        {
-          item = ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb);
-        }
-        else if (roll >= 0.65 && roll < 0.95)
-        {
-          item = ItemFactory.Get(ItemNames.ANTITODE, objDb);
-        }
-        else if (roll >= 0.95)
-        {
-          item = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
-        }
-
-        var sq = level.RandomTile(TileType.DungeonFloor, rng);
-        var loc = new Loc(_dungeonID, levelNum, sq.Item1, sq.Item2);
-        objDb.Add(item);
-        objDb.SetToLoc(loc, item);
-      }
+      Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], _dungeonID, levelNum, rng);
     }
   }
 
@@ -405,7 +357,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
     if (rng.NextDouble() < 0.25)
     {
-      var antidote = ItemFactory.Get(ItemNames.ANTITODE, objDb);
+      var antidote = ItemFactory.Get(ItemNames.ANTIDOTE, objDb);
       objDb.SetToLoc(loc, antidote);
     }
     if (rng.NextDouble() < 0.25)
