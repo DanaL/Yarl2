@@ -142,14 +142,13 @@ class HealAlliesTrait : ActionTrait
     if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
     {
       Loc loc = mob.Loc;
-      var fov = FieldOfView.CalcVisible(6, loc.Row, loc.Col, gs.CurrentMap, loc.DungeonID, loc.Level, gs.ObjDb);
+      var fov = FieldOfView.CalcVisible(6, loc, gs.CurrentMap, gs.ObjDb);
       foreach (ulong id in allies.IDs)
       {
         if (gs.ObjDb.GetObj(id) is Actor ally)
         {
           Stat hp = ally.Stats[Attribute.HP];
-          (int, int, int) allySq = (ally.Loc.Level, ally.Loc.Row, ally.Loc.Col);
-          if (fov.Contains(allySq) && hp.Curr < hp.Max)
+          if (fov.Contains(ally.Loc) && hp.Curr < hp.Max)
             return true;
         }        
       }

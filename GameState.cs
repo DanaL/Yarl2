@@ -146,11 +146,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
   {
-    var (d, level, row, col) = viewer.Loc;
-    var map = Campaign.Dungeons[d].LevelMaps[level];
-    var fov = FieldOfView.CalcVisible(radius, row, col, map, d, level, ObjDb);
+    var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    var fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
 
-    return fov.Contains((level, loc.Row, loc.Col));
+    return fov.Contains(loc);
   }
 
   public bool LOSBetween(Loc a, Loc b)
@@ -1023,10 +1022,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       
       if (lightRadius > 0)
       {
-        foreach (var sq in FieldOfView.CalcVisible(lightRadius, obj.Loc.Row, obj.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb))
-        {
-          lit.Add(new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3));
-        }
+        lit.UnionWith(FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb));
       }
     }
 
@@ -1039,10 +1035,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     HashSet<Loc> litLocations = LitLocations(CurrDungeonID, CurrLevel);
 
-    var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc.Row, Player.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb)
-                         .Select(sq => new Loc(CurrDungeonID, sq.Item1, sq.Item2, sq.Item3))
-                         .Where(loc => litLocations.Contains(loc))
-                         .ToHashSet();
+    var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc, CurrentMap, ObjDb)
+                         .Intersect(litLocations).ToHashSet();
     LastPlayerFoV = fov;
 
     // Calculate which squares are newly viewed and check if there are
