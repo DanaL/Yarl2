@@ -996,33 +996,31 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level)) 
     {
       int lightRadius = obj.LightRadius();
-
-      if (obj.ID == Player.ID && lightRadius == 0)
-      {
-        // What latitude does the game take place out? Will I eventually
-        // have seasonal variation in the length of days? :O
-        if (!InWilderness)
-        {
-          lightRadius = 1;
-        }
-        else
+      if (obj.ID == Player.ID)
+      {        
+        if (InWilderness)
         {
           var (hour, _) = CurrTime();
+          int daylight;
           if (hour >= 6 && hour <= 19)
-            lightRadius = Player.MAX_VISION_RADIUS;
+            daylight = Player.MAX_VISION_RADIUS;
           else if (hour >= 20 && hour <= 21)
-            lightRadius = 7;
+            daylight = 7;
           else if (hour >= 21 && hour <= 23)
-            lightRadius = 3;
+            daylight = 3;
           else if (hour < 4)
-            lightRadius = 2;
+            daylight = 2;
           else if (hour == 4)
-            lightRadius = 3;
+            daylight = 3;
           else
-            lightRadius = 7;
-        }        
-      }
+            daylight = 7;
 
+          lightRadius = int.Max(lightRadius, daylight);
+        }
+        if (lightRadius == 0)
+          lightRadius = 1;
+      }
+      
       if (lightRadius > 0)
       {
         foreach (var sq in FieldOfView.CalcVisible(lightRadius, obj.Loc.Row, obj.Loc.Col, CurrentMap, CurrDungeonID, CurrLevel, ObjDb))
