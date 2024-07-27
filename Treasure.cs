@@ -13,15 +13,19 @@ namespace Yarl2;
 
 class Treasure
 {  
-  static readonly List<ItemNames> CommonItems = [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH,
-                                                  ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-                                                  ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ];
-  static readonly List<ItemNames> UncommonItems = [ ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-                                                    ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
-                                                    ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER,
-                                                    ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, 
-                                                    ItemNames.SCROLL_MAGIC_MAP ]; 
-    
+  static readonly List<ItemNames> CommonItems = 
+    [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH,
+      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
+      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ];
+  static readonly List<ItemNames> UncommonItems = [
+      ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
+      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
+      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER,
+      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, 
+      ItemNames.SCROLL_MAGIC_MAP, ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES,
+      ItemNames.POTION_MIND_READING, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
+      ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE ]; 
+
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {
     List<Item> loot = [];
@@ -45,17 +49,22 @@ class Treasure
 
   static Item GenerateItem(ItemNames name, GameObjectDB objDb, Random rng)
   {
-    if (name == ItemNames.ZORKMIDS_PITTANCE) 
+    Item zorkmids;
+    switch (name) 
     {
-      var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-      zorkmids.Value = rng.Next(1, 11);
-      return zorkmids;
-    }
-    else
-    {
-      return ItemFactory.Get(name, objDb);
-    }
+      case ItemNames.ZORKMIDS_PITTANCE:
+        zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(1, 11);
+        return zorkmids;
+      case ItemNames.ZORKMIDS_MEDIOCRE:
+        zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(1, 11);
+        return zorkmids;
+      default:
+        return ItemFactory.Get(name, objDb);
+    } 
   }
+
   public static void AddTreasureToDungeonLevel(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
   {
     if (levelNum == 0) 
@@ -75,6 +84,17 @@ class Treasure
       {
         double roll = rng.NextDouble();
         var name = roll <= 0.9 ? CommonItems[rng.Next(CommonItems.Count)] : UncommonItems[rng.Next(UncommonItems.Count)];
+        var item = GenerateItem(name, objDb, rng);
+        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+    }
+    else if (levelNum == 2 || levelNum == 3)
+    {
+      int numItems = rng.Next(1, 5);
+      for (int j = 0; j < numItems; j++)
+      {
+        double roll = rng.NextDouble();
+        var name = roll <= 0.5 ? CommonItems[rng.Next(CommonItems.Count)] : UncommonItems[rng.Next(UncommonItems.Count)];
         var item = GenerateItem(name, objDb, rng);
         AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
