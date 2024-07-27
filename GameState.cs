@@ -644,7 +644,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (curr is not null)
     {
-      _currPerformer = Performers.IndexOf(curr);
+      // If the player changes dungeons/level on someone else's turn
+      // _currPerformer may no longer be in the list, so default to
+      // index 0 in that case.
+      int i = Performers.IndexOf(curr);
+      _currPerformer = i > -1 ? i : 0;
     }
   }
 

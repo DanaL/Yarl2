@@ -508,6 +508,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
+    "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1032,6 +1033,55 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   public void Used() {}
 }
 
+// I am making the assumption it will only be the Player who uses Recall.
+class RecallTrait : BasicTrait, IGameEventListener
+{
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+
+  public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn < ExpiresOn)
+      return;
+
+    Expired = true;
+
+    var player = gs.Player;
+    player.Traits.Remove(this);
+
+    // We can get the entrance to the main dungeon via the History
+    // object in Campaign. (I'd like to eventually have side quest
+    // dungeons, though, where Recall will also need to be handled
+    // but I'm not going to bother with that yet)
+    if (gs.Campaign is null || gs.Campaign.History is null)
+      throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
+
+    LocationFact? entrance = null;
+    foreach (var fact in gs.Campaign.History.Facts) 
+    {
+      if (fact is LocationFact loc && loc.Desc == "Dungeon Entrance")
+      {
+        entrance = loc;
+        break;
+      }
+    }
+
+    if (entrance is not null)
+    {
+      gs.EnterLevel(player, 0, 0);
+      var start = player.Loc;
+      player.Loc = entrance.Loc;
+      gs.ResolveActorMove(player, start, entrance.Loc);
+      gs.RefreshPerformers();
+      gs.UpdateFoV();
+      var msg = new Message("A wave of vertigo...", player.Loc, false);
+      gs.WriteMessages([msg], "");
+    }
+  }
+}
+
 // Technically I suppose this is a Count Up not a Count Down...
 class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {
@@ -1537,7 +1587,13 @@ class TraitFactory
         return new ReadableTrait(pieces[1].Replace("<br/>", "\n"))
         {
           OwnerID = ulong.Parse(pieces[2])
-        };        
+        };
+      case "Recall":
+        return new RecallTrait() 
+        { 
+          ExpiresOn = ulong.Parse(pieces[1]),
+          Expired = bool.Parse(pieces[2])
+        };
       case "ResistBlunt":
         return new ResistBluntTrait();
       case "ResistPiercing":

@@ -48,16 +48,12 @@ class PreGameHandler(UserInterface ui)
 
   static bool StartSq(Map map, int row, int col)
   {
-    switch (map.TileAt(row, col).Type)
+    return map.TileAt(row, col).Type switch
     {
-      case TileType.Grass:
-      case TileType.Sand:
-      case TileType.Tree:
-      case TileType.Dirt:
-        return true;
-      default:
-        return false;
-    }
+      TileType.Grass or TileType.Sand or 
+      TileType.Tree or TileType.Dirt => true,
+      _ => false,
+    };
   }
 
   static (int, int) PickStartLoc(Map map, Town town, Random rng)
@@ -285,7 +281,7 @@ class PreGameHandler(UserInterface ui)
       Desc = "Dungeon Entrance"
     });
 
-;   Village.Populate(wildernessMap, town, objDb, history, rng);
+    Village.Populate(wildernessMap, town, objDb, history, rng);
     campaign.Town = town;
 
     var (startR, startC) = PickStartLoc(wildernessMap, town, rng);

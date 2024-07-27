@@ -1071,6 +1071,39 @@ class WebAction : Action
   }
 }
 
+class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
+{
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    var player = GameState!.Player;
+    if (player.HasTrait<RecallTrait>() || player.Loc.DungeonID == 0)
+    {
+      result.Messages.Add(new Message("You shudder for a moment.", player.Loc));
+      result.Complete = true;
+      result.EnergyCost = 1.0;
+
+      return result;
+    }
+
+    ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(10, 21);
+    var recall = new RecallTrait()
+    {
+      ExpiresOn = happensOn
+    };
+
+    GameState.RegisterForEvent(GameEventType.EndOfRound, recall);
+    GameState.Player.Traits.Add(recall);
+
+    result.Messages.Add(new Message("The air crackles around you.", player.Loc));
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    return result;
+  }
+};
+
 class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 {  
   public override ActionResult Execute()

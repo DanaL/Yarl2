@@ -195,7 +195,7 @@ enum ItemNames
   RINGMAIL, CHAINMAIL, HELMET, SHIELD, TORCH, ZORKMIDS, POTION_HEALING,
   POTION_MIND_READING, ANTIDOTE, POTION_FIRE_RES, POTION_COLD_RES,
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
-  WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST
+  WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL
 }
 
 class ItemFactory
@@ -463,6 +463,15 @@ class ItemFactory
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("magicmap"));
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.SCROLL_RECALL:
+        item = new Item() { Name = "scroll of word of recall", Type = ItemType.Scroll, Value = 100,
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("recall"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());
