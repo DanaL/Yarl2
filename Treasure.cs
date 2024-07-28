@@ -21,10 +21,19 @@ class Treasure
       ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
       ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER,
-      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, 
+      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, ItemNames.HAND_AXE,
       ItemNames.SCROLL_MAGIC_MAP, ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES,
       ItemNames.POTION_MIND_READING, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE ]; 
+  static readonly List<ItemNames> GoodItems = [ 
+      ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
+      ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
+      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK,
+      ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL,
+      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD,
+      ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL,
+      ItemNames.SPEAR, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
+      ItemNames.WAND_FROST, ItemNames.WAND_SWAP ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {
@@ -60,6 +69,10 @@ class Treasure
         zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
         zorkmids.Value = rng.Next(1, 11);
         return zorkmids;
+      case ItemNames.ZORKMIDS_GOOD:
+        zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(15, 31);
+        return zorkmids;
       default:
         return ItemFactory.Get(name, objDb);
     } 
@@ -93,8 +106,31 @@ class Treasure
       int numItems = rng.Next(1, 5);
       for (int j = 0; j < numItems; j++)
       {
+        ItemNames name;
         double roll = rng.NextDouble();
-        var name = roll <= 0.5 ? CommonItems[rng.Next(CommonItems.Count)] : UncommonItems[rng.Next(UncommonItems.Count)];
+        if (roll <= 0.4)
+          name = CommonItems[rng.Next(CommonItems.Count)];
+        else if (roll <= 0.9)
+          name = UncommonItems[rng.Next(UncommonItems.Count)];
+        else
+          name = GoodItems[rng.Next(GoodItems.Count)];
+        var item = GenerateItem(name, objDb, rng);
+        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+    }
+    else if (levelNum == 5)
+    {
+      int numItems = rng.Next(1, 5);
+      for (int j = 0; j < numItems; j++)
+      {
+        ItemNames name;
+        double roll = rng.NextDouble();
+        if (roll <= 0.2)
+          name = CommonItems[rng.Next(CommonItems.Count)];
+        else if (roll <= 0.7)
+          name = UncommonItems[rng.Next(UncommonItems.Count)];
+        else
+          name = GoodItems[rng.Next(GoodItems.Count)];
         var item = GenerateItem(name, objDb, rng);
         AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
