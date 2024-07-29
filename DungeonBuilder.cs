@@ -619,7 +619,7 @@ class MainDungeonBuilder : DungeonBuilder
     // Add rivers/chasms to some of the levels
     for (int lvlNum = 0; lvlNum < numOfLevels - 1; lvlNum++)
     {
-      if (rng.Next(4) == 0 || true)
+      if (rng.Next(4) == 0)
       {
         TileType riverTile;
         if (lvlNum < numOfLevels - 1 && rng.Next(3) == 0)

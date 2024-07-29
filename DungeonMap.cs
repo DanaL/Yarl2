@@ -255,17 +255,25 @@ class DungeonMap(Random rng)
     return adjoining;
   }
 
+  // Pick a wall along the perimeter of the room that will join the room to a hallway.
+  // If a room is surround by walls that are 2 squares deep (or more likely a room in
+  // the corner of the map that is surrounded on 2 sides with walls that are 2 sqs deep)
+  // just reject it. This happens so rarely in map generation that I didn't think it was
+  // worth coding around it by drawing a short tunnel or such. I generated many hundred
+  // maps before the situation came up.
   void AddDoorToRectRoom(Map map, Room room)
   {
-    while (true)
+    var candidates = room.CalcDoorCandidates()
+                         .Where(d => ValidDoor(map, d.Item1, d.Item2))
+                         .ToList();
+
+    if (candidates.Count == 0)
     {
-      var door = room.DoorCandidate(_rng);
-      if (ValidDoor(map, door.Item1, door.Item2))
-      {
-        map.SetTile(door, TileFactory.Get(TileType.ClosedDoor));
-        return;
-      }
+      throw new InvalidRoomException();
     }
+
+    var door = candidates[_rng.Next(candidates.Count)];
+    map.SetTile(door, TileFactory.Get(TileType.ClosedDoor));    
   }
 
   // Circular rooms end up with wall at least two squares away from
@@ -410,7 +418,7 @@ class DungeonMap(Random rng)
   }
 
   void ConnectRegions(Map map, List<Room> rooms)
-  {
+  {    
     // For rectangular rooms, each perimeter sqpare should be next to a hallway
     // (rounded rooms are more complicated)
     // So start by picking a random perimeter sq to turn into a door from each room
@@ -877,29 +885,43 @@ class DungeonMap(Random rng)
   {
     var map = new Map(width, height);
 
-    for (int j = 0; j < width * height; j++)
-      map.Tiles[j] = TileFactory.Get(TileType.DungeonWall);
-
-    var rooms = AddRooms(map);
-    // Draw in the room perimeters
-    foreach (var room in rooms)
+    while (true)
     {
-      foreach (var sq in room.Permieter)
+      for (int j = 0; j < width * height; j++)
+        map.Tiles[j] = TileFactory.Get(TileType.DungeonWall);
+
+      try
       {
-        if (map.InBounds(sq.Item1, sq.Item2))
-          map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.DungeonWall));
+        var rooms = AddRooms(map);
+        // Draw in the room perimeters
+        foreach (var room in rooms)
+        {
+          foreach (var sq in room.Permieter)
+          {
+            if (map.InBounds(sq.Item1, sq.Item2))
+              map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.DungeonWall));
+          }
+        }
+
+        bool mazing = true;
+        while (mazing)
+        {
+          mazing = CarveMaze(map);
+        }
+
+        ConnectRegions(map, rooms);
+        FillInDeadEnds(map);
+        ConnectRooms(map, rooms, _rng);
       }
-    }
+      catch (InvalidRoomException)
+      {
+        map = new Map(width, height);
+        continue;  
+      }
 
-    bool mazing = true;
-    while (mazing)
-    {
-      mazing = CarveMaze(map);
+      break;
     }
-
-    ConnectRegions(map, rooms);
-    FillInDeadEnds(map);
-    ConnectRooms(map, rooms, _rng);
+    
 
     // We want to surround the level with permanent walls
     var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
@@ -913,7 +935,6 @@ class DungeonMap(Random rng)
 
     TidyUp(finalMap);
 
-    //Dump(finalMap, width, height);
     return finalMap;
   }
 }
@@ -968,21 +989,24 @@ class Room
         Permieter.Intersect(other.Sqs).Any();
   }
 
-  public (int, int) DoorCandidate(Random rng)
+  public List<(int, int)> CalcDoorCandidates()
   {
-    do
+    List<(int, int)> candidates = [];
+
+    foreach (var (dr, dc) in Permieter)
     {
-      var (dr, dc) = Permieter.ElementAt(rng.Next(Permieter.Count));
       foreach (var n in Util.Adj4)
       {
         int nr = dr + n.Item1;
         int nc = dc + n.Item2;
-        if (nr >= 0 && nc >= 0 && Sqs.Contains((nr, nc)))
+        if (nr >= 0 && nc >- 0 && Sqs.Contains((nr, nc)))
         {
-          return (dr, dc);
+          candidates.Add((nr, nc));
+          break;
         }
       }
     }
-    while (true);
+
+    return candidates;
   }
 }

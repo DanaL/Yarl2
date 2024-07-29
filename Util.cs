@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Yarl2;
@@ -626,8 +628,51 @@ class RegionFinder(IPassable pc)
   }
 }
 
+class MapUtils
+{
+  public static void Dump(Map map)
+  {
+    for (int r = 0; r < map.Height; r++)
+    {
+      var row = new StringBuilder();
+      for (int c = 0; c < map.Width; c++)
+      {
+        switch (map.TileAt(r, c).Type)
+        {
+          case TileType.DungeonWall:
+          case TileType.StoneWall:
+            row.Append('#');
+            break;
+          case TileType.DungeonFloor:
+          case TileType.StoneFloor:
+            row.Append('.');
+            break;
+          case TileType.DeepWater:
+          case TileType.Water:
+            row.Append('}');
+            break;
+          case TileType.ClosedDoor:
+          case TileType.LockedDoor:
+            row.Append('+');
+            break;
+          case TileType.OpenDoor:
+          case TileType.BrokenDoor:
+            row.Append("/");
+            break;
+          case TileType.Bridge:
+          case TileType.WoodBridge:
+            row.Append('=');
+            break;
+        }
+      }
+      Console.WriteLine(row.ToString());
+    }
+  }
+}
+
 class GameQuitException : Exception { }
 class PlayerKilledException : Exception { }
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }
+class InvalidRoomException : Exception { }
