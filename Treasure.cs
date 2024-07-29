@@ -33,7 +33,7 @@ class Treasure
       ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD,
       ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL,
       ItemNames.SPEAR, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
-      ItemNames.WAND_FROST, ItemNames.WAND_SWAP ];
+      ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {

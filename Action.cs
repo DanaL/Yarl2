@@ -1261,7 +1261,6 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
       droppedItem.Equiped = false;
     }
 
-    Actor.CalcEquipmentModifiers();
     Message alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, Actor.Loc, GameState);
 
     return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
@@ -1296,8 +1295,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     var landingPt = FinalLandingSpot(pts.Last());
     GameState.ItemDropped(ammo, landingPt);
     ammo.Equiped = false;
-    Actor.CalcEquipmentModifiers();
-
+    
     var tile = GameState.TileAt(landingPt);
     if (tile.Type == TileType.Chasm)
     {
@@ -1481,7 +1479,6 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.Remove(Choice, 1);
       GameState.ItemDropped(item, Actor.Loc);
       item.Equiped = false;
-      Actor.CalcEquipmentModifiers();
 
       var alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, Actor.Loc, GameState);
       ui.AlertPlayer([alert], "", GameState);
@@ -1514,7 +1511,8 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
       ItemType.Armour => true,
       ItemType.Weapon => true,
       ItemType.Tool => true,
-      ItemType.Bow => true,      
+      ItemType.Bow => true,
+      ItemType.Ring => true,
       _ => false
     };
 
@@ -1544,6 +1542,10 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         alert = new Message("You cannot use a two-handed weapon with a shield!", Actor.Loc);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
         break;
+      case EquipingResult.TooManyRings:
+        alert = new Message("You are already wearing two rings!", Actor.Loc);
+        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        break;
       default:
         string msg = "You are already wearing ";
         msg += conflict switch
@@ -1558,8 +1560,6 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         result = new ActionResult() { Complete = true, Messages = [alert] };
         break;
     }
-
-    Actor.CalcEquipmentModifiers();
 
     return result;
   }

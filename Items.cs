@@ -25,6 +25,7 @@ enum ItemType
   Scroll,
   Trinket,
   Wand,
+  Ring,
   Environment // I'm implementing things like mist as 'items'
 }
 
@@ -196,7 +197,8 @@ enum ItemNames
   POTION_MIND_READING, ANTIDOTE, POTION_FIRE_RES, POTION_COLD_RES,
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
-  ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD
+  ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
+  RING_OF_PROTECTION
 }
 
 class ItemFactory
@@ -502,6 +504,11 @@ class ItemFactory
       case ItemNames.WAND_FROST:
         item = new Item() { Name = "wand of frost", Type = ItemType.Wand, Value = 125, Glyph = GlyphForWand("wand of frost") };
         item.Traits.Add(new WandTrait() { Charges = 10, Effect = "frost", IDed = false });
+        break;
+      case ItemNames.RING_OF_PROTECTION:
+        item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, 
+          Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ACModTrait() { ArmourMod = 1 });
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
@@ -877,6 +884,23 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
         return (EquipingResult.Equiped, ArmourParts.Shirt);
       }
+      else if (item.Type == ItemType.Ring)
+      {
+        if (item.Equiped)
+        {
+          item.Equiped = false;
+        }
+        else
+        {
+          int ringCount = Items().Where(i => i.Type == ItemType.Ring && i.Equiped).Count();
+          if (ringCount == 2)
+            return (EquipingResult.TooManyRings, ArmourParts.None);
+          
+          item.Equiped = true;
+          
+          return (EquipingResult.Equiped, ArmourParts.None);
+        }
+      }
     }
 
     return (EquipingResult.Conflict, ArmourParts.Shirt);
@@ -921,5 +945,6 @@ enum EquipingResult
   Unequiped,
   Conflict,
   ShieldConflict,
-  TwoHandedConflict
+  TwoHandedConflict,
+  TooManyRings
 }

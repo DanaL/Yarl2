@@ -66,6 +66,9 @@ class Player : Actor, IPerformer, IGameEventListener
           armour += item.Traits.OfType<ArmourTrait>()
                                .Select(t => t.ArmourMod + t.Bonus)
                                .Sum();
+          armour += item.Traits.OfType<ACModTrait>()
+                               .Select(t => t.ArmourMod)
+                               .Sum();
         }
       }
 
@@ -173,6 +176,8 @@ class Player : Actor, IPerformer, IGameEventListener
           desc += " (worn)";
         else if (item.Type == ItemType.Bow)
           desc += " (equiped)";
+        else if (item.Type == ItemType.Ring)
+          desc += " (wearing)";
       }
       lines.Add($"{s}) {desc}");
     }

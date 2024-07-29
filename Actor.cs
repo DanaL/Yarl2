@@ -88,7 +88,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual int AC => 10;
   public virtual List<Damage> MeleeDamage() => [];
   public virtual void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
-  public virtual void CalcEquipmentModifiers() { }
 
   // I'm sure eventually there will be more factors that do into determining
   // how noisy an Actor's walking is. Wearing metal armour for instance
