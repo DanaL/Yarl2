@@ -430,6 +430,7 @@ class DungeonMap(Random rng)
         ConnectCircularRoom(map, room);
     }
 
+    //return;
     var regionFinder = new RegionFinder(new DungeonPassable());
     var regions = regionFinder.Find(map, true, TileType.DungeonWall);
 
@@ -1002,7 +1003,6 @@ class Room
         if (nr >= 0 && nc >- 0 && Sqs.Contains((nr, nc)))
         {
           candidates.Add((nr, nc));
-          break;
         }
       }
     }

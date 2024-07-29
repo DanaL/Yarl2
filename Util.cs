@@ -663,6 +663,12 @@ class MapUtils
           case TileType.WoodBridge:
             row.Append('=');
             break;
+          case TileType.Upstairs:
+            row.Append('<');
+            break;
+          case TileType.Downstairs:
+            row.Append('>');
+            break;
         }
       }
       Console.WriteLine(row.ToString());
