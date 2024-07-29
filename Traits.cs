@@ -1057,6 +1057,13 @@ class RecallTrait : BasicTrait, IGameEventListener
     if (gs.Campaign is null || gs.Campaign.History is null)
       throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
 
+    if (player.Loc.DungeonID == 0)
+    {
+      var msg = new Message("You sudenly teleport exactly 1 cm to the left.", player.Loc, false);
+      gs.WriteMessages([msg], "");
+      return;
+    }
+
     LocationFact? entrance = null;
     foreach (var fact in gs.Campaign.History.Facts) 
     {
