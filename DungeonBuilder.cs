@@ -311,27 +311,29 @@ class MainDungeonBuilder : DungeonBuilder
     // I eventually probably won't include every decoration from every fact
     foreach (var decoration in decorations)
     {
+      int level = rng.Next(numOfLevels);
+
       if (decoration.Type == DecorationType.Statue)
       {
-        PlaceStatue(levels[0], height, width, decoration.Desc, rng);
+        PlaceStatue(levels[level], height, width, decoration.Desc, rng);
       }
       else if (decoration.Type == DecorationType.Mosaic)
       {
-        var sq = levels[0].RandomTile(TileType.DungeonFloor, rng);
+        var sq = levels[level].RandomTile(TileType.DungeonFloor, rng);
         var mosaic = new Landmark(decoration.Desc.Capitalize());
-        levels[0].SetTile(sq, mosaic);
+        levels[level].SetTile(sq, mosaic);
       }
       else if (decoration.Type == DecorationType.Fresco)
       {
-        PlaceFresco(levels[0], height, width, decoration.Desc, rng);
+        PlaceFresco(levels[level], height, width, decoration.Desc, rng);
       }
       else if (decoration.Type == DecorationType.ScholarJournal)
       {
-        PlaceDocument(levels[0], 0, height, width, decoration.Desc, objDb, rng);
+        PlaceDocument(levels[level], level, height, width, decoration.Desc, objDb, rng);
       }
     }
 
-    int fallenAdventurer = rng.Next(1, 4);
+    int fallenAdventurer = rng.Next(1, numOfLevels);
     AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, history, rng);
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)

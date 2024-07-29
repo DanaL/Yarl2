@@ -482,9 +482,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      seed = 1042126707;
-      // this seed generates a trapped player when orc warrior selected
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
