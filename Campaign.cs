@@ -223,9 +223,13 @@ class PreGameHandler(UserInterface ui)
       }
       catch (InvalidTownException)
       {
-        Console.WriteLine($"Oh no not enough cottages");
+        Console.WriteLine("Oh no not enough cottages");
         // Should I just bail out after too many tries? I can't imagine it 
         // will take more than 1 or 2 more tries
+      }
+      catch (PlacingBuldingException)
+      {
+        Console.WriteLine("Failed to place a building");
       }
     }
     while (true);
@@ -482,7 +486,8 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      
+      seed = 459067577;
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();

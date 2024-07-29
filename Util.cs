@@ -630,3 +630,4 @@ class GameQuitException : Exception { }
 class PlayerKilledException : Exception { }
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
+class PlacingBuldingException : Exception { }

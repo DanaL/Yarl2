@@ -502,6 +502,10 @@ class TownBuilder
     j = cottages[rng.Next(cottages.Count)];
     PlaceBuilding(map, townRow, townCol, Templates[j], BuildingType.Smithy, rng);
     var smithySqs = Town.Smithy.ToList();
+
+    if (smithySqs.Count == 0)
+      throw new PlacingBuldingException();
+
     smithySqs.Shuffle(rng);
     int f = 0;
     while (true)
