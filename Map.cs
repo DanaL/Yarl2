@@ -12,14 +12,6 @@
 
 namespace Yarl2;
 
-// I suspect I might eventually drop this?
-[Flags]
-enum TerrainFlag
-{
-  None = 0,
-  Wet = 1
-}
-
 enum TileType
 {
   WorldBorder,
@@ -141,18 +133,18 @@ abstract class Tile(TileType type) : IZLevel
     _ => "unknown"
   };
 
-  public List<TerrainFlag> TerrainFlags()
+  public List<EffectFlag> TerrainFlags()
   {
-    List<TerrainFlag> flags = [];
+    List<EffectFlag> flags = [];
 
     switch (Type)
     {
       case TileType.Water:
       case TileType.DeepWater:
-        flags.Add(TerrainFlag.Wet);
+        flags.Add(EffectFlag.Wet);
         break;
       default:
-        flags.Add(TerrainFlag.None);
+        flags.Add(EffectFlag.None);
         break;
     }
 

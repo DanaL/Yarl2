@@ -88,64 +88,6 @@ class Item : GameObj, IEquatable<Item>
 
   public override string FullName => CalcFullName();
 
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Loc loc)
-  {
-    var sb = new StringBuilder();
-    var uts = Traits.OfType<IEffectApplier>().ToList();
-    foreach (var t in uts)
-    {
-      sb.Append(t.ApplyEffect(flag, gs, this, loc));
-    }
-
-    return sb.ToString();
-  }
-
-  public bool ApplyRust()
-  {
-    Metals metal = IsMetal();
-    if (metal == Metals.NotMetal || metal == Metals.Mithril)
-      return false;
-
-    RustedTrait? rusted = Traits.OfType<RustedTrait>().FirstOrDefault();
-    
-    if (rusted == null)
-    {
-      Traits.Add(new AdjectiveTrait("Rusted"));
-      Traits.Add(new RustedTrait() { Amount = Rust.Rusted });
-    }
-    else if (rusted.Amount == Rust.Rusted)
-    {
-      // An already rusted item becomes corroded
-      Traits = Traits.Where(t => !(t is AdjectiveTrait adj && adj.Adj == "Rusted")).ToList();
-      Traits.Add(new AdjectiveTrait("Corroded"));
-      rusted.Amount = Rust.Corroded;
-    }
-    else
-    {
-      // Right now we have only two degrees of rust: Rusted and Corroded and hence
-      // a max penalty of -2 to item bonuses
-      return false;
-    }
-
-    // Some items have their bonuses lowered by being rusted/corroded
-    var armourTrait = Traits.OfType<ArmourTrait>().FirstOrDefault();
-    if (armourTrait is not null)
-    {
-      armourTrait.Bonus -= 1;
-    }
-    
-    if (Type == ItemType.Weapon)
-    {
-      var wb = Traits.OfType<WeaponBonusTrait>().FirstOrDefault();
-      if (wb is null)
-        Traits.Add(new WeaponBonusTrait() { Bonus = -1 });
-      else       
-        wb.Bonus -= 1;
-    }
-
-    return true;
-  }
-
   public Metals IsMetal()
   {
     var t = Traits.OfType<MetalTrait>().FirstOrDefault();
@@ -906,14 +848,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (EquipingResult.Conflict, ArmourParts.Shirt);
   }
 
-  public string ApplyEffect(TerrainFlag effect, GameState gs, Loc loc)
+  public string ApplyEffectToInv(EffectFlag effect, GameState gs, Loc loc)
   {
+    Actor? owner = (Actor?) gs.ObjDb.GetObj(OwnerID);
     List<string> msgs = [];
 
     foreach (var item in Items())
     {
-      string m = item.ApplyEffect(effect, gs, loc);
-      msgs.Add(m);
+      string s = EffectApplier.Apply(effect, gs, item, owner);
+      if (s != "")
+        msgs.Add(s);
     }
 
     return string.Join(' ', msgs).Trim();

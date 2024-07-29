@@ -31,11 +31,6 @@ interface IUSeable
   void Used();
 }
 
-interface IEffectApplier
-{
-  string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc);
-}
-
 // Some traits need a reference to the object they are applied to
 interface IOwner
 {
@@ -1141,7 +1136,7 @@ class LightSourceTrait : BasicTrait, IOwner
 }
 
 // Who knew torches would be so complicated...
-class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOwner
+class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner
 {
   public ulong OwnerID { get; set; }
   public bool Lit { get; set; }
@@ -1160,15 +1155,15 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IEffectApplier, IOw
 
   public void Used() {}
 
-  public string ApplyEffect(TerrainFlag flag, GameState gs, Item item, Loc loc)
+  public string ReceiveEffect(EffectFlag flag, GameState gs, Item item, Loc loc)
   {
-    if (Lit && flag == TerrainFlag.Wet)
+    if (Lit && flag == EffectFlag.Wet)
       return Extinguish(gs, item, loc);
     else
       return "";
   }
 
-  string Extinguish(GameState gs, Item item, Loc loc)
+  public string Extinguish(GameState gs, Item item, Loc loc)
   {    
     gs.StopListening(GameEventType.EndOfRound, this);
 

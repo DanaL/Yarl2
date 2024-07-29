@@ -173,12 +173,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     var tile = TileAt(loc);
     List<Message> msgs = [];
-    foreach (var flag in tile.TerrainFlags().Where(t => t != TerrainFlag.None))
+    foreach (var flag in tile.TerrainFlags().Where(t => t != EffectFlag.None))
     {
-      string msg = item.ApplyEffect(flag, this, loc);
-      if (msg != "")
+      string s = EffectApplier.Apply(flag, this, item, null);
+      if (s != "")
       {
-        msgs.Add(new Message(msg, loc));
+        msgs.Add(new Message(s, loc));
       }
     }
 
@@ -373,13 +373,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     List<string> messages = [];
 
     // When someone jumps/falls into water, they wash ashore at a random loc
-    // and incur the Exhausted condition
-    // first, find candidate shore sqs
+    // and incur the Exhausted condition first, find candidate shore sqs
     var q = new Queue<Loc>();
     q.Enqueue(loc);
     HashSet<Loc> visited = [];
     HashSet<Loc> shores = [];
 
+    // Build set of potential places for the actor to wash ashore
     while (q.Count > 0) 
     {
       var curr = q.Dequeue();
@@ -409,7 +409,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ResolveActorMove(actor, actor.Loc, destination);
       actor.Loc = destination;
 
-      string invMsgs = actor.Inventory.ApplyEffect(TerrainFlag.Wet, this, actor.Loc);
+      string invMsgs = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, this, actor.Loc);
       if (invMsgs.Length > 0)
       {
         messages.Add(invMsgs);

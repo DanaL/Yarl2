@@ -225,11 +225,10 @@ class Battle
         if (metalItems.Count > 0)
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          bool affected = damagedItem.ApplyRust();
-          if  (affected)
+          string s = EffectApplier.Apply(EffectFlag.Rust, gs, damagedItem, target);
+          if  (s != "")
           {
-            string corrosionMsg = $"{damagedItem.Name.Possessive(target).Capitalize()} corrodes!";
-            result.Messages.Add(new Message(corrosionMsg, target.Loc));
+            result.Messages.Add(new Message(s, target.Loc));
           }
         }
       }
@@ -275,16 +274,11 @@ class Battle
       Item? weapon = attacker.Inventory.ReadiedWeapon();
       if (weapon is not null)
       {
-        Metals metal = weapon.IsMetal();
-        if (metal != Metals.NotMetal && metal != Metals.Mithril)
+        string s = EffectApplier.Apply(EffectFlag.Rust, gs, weapon, attacker);
+        if (s != "" && attacker is Player)
         {
-          bool affected = weapon.ApplyRust();
-          if (affected && attacker is Player)
-          {
-            string msg = $"{weapon.Name.Possessive(attacker).Capitalize()} rusts!";
-            result.Messages.Add(new Message(msg, attacker.Loc));
-          }          
-        }
+          result.Messages.Add(new Message(s, attacker.Loc));
+        }        
       }
     }
 
