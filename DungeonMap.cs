@@ -883,6 +883,7 @@ class DungeonMap(Random rng)
   public Map DrawLevel(int width, int height)
   {
     var map = new Map(width, height);
+    List<Room> rooms = [];
 
     while (true)
     {
@@ -891,7 +892,7 @@ class DungeonMap(Random rng)
 
       try
       {
-        var rooms = AddRooms(map);
+        rooms = AddRooms(map);
         // Draw in the room perimeters
         foreach (var room in rooms)
         {
@@ -921,7 +922,6 @@ class DungeonMap(Random rng)
       break;
     }
     
-
     // We want to surround the level with permanent walls
     var finalMap = new Map(width + 2, height + 2, TileType.PermWall);
     for (int r = 0; r < map.Height; r++)

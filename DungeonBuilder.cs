@@ -304,7 +304,7 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.SetToLoc(loc, doc);
   }
 
-  private void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, GameObjectDB objDb, Random rng)
+  void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, GameObjectDB objDb, Random rng)
   {
     var decorations = history.GetDecorations();
 
@@ -588,6 +588,79 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  // How many times can I implement flood fill in one project?
+  static HashSet<(int, int)> MarkRegion(Map map, int startRow, int startCol)
+  {
+    HashSet<(int, int)> region = [ (startRow, startCol) ];
+    Queue<(int, int)> q = [];
+    q.Enqueue((startRow, startCol));
+
+    while (q.Count > 0)
+    {
+      var (currRow, currCol) = q.Dequeue();
+      region.Add((currRow, currCol));
+
+      foreach (var adj in Util.Adj8Sqs(currRow, currCol))
+      {
+        if (!map.InBounds(adj))
+          continue;
+
+        Tile tile = map.TileAt(adj);
+        bool open;
+        switch (tile.Type)
+        {
+          case TileType.DungeonFloor:
+          case TileType.DeepWater:
+          case TileType.WoodBridge:
+          case TileType.Landmark:
+          case TileType.Upstairs:
+          case TileType.Downstairs:
+          case TileType.Chasm:
+            open = true;
+            break;
+          default:
+            open = false;
+            break;
+        }
+        
+        if (open && !region.Contains(adj))
+        {
+          region.Add(adj);
+          q.Enqueue(adj);
+        }
+      }
+    }
+
+    return region;
+  }
+
+  void FindVaults(Map map, int h, int w)
+  {
+    Dictionary<(int, int), int> areas = [];
+    int areaID = 0;
+
+    var tile = map.TileAt(0, 0);
+    for (int r = 1; r < h - 1; r++)
+    {
+      for (int c = 1; c < w - 1; c++)
+      {
+        if (!map.InBounds(r, c))
+          continue;
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor && !areas.ContainsKey((r, c)))
+        {
+          var region = MarkRegion(map, r, c);
+          foreach (var sq in region)
+          {
+            areas.Add(sq, areaID);
+          }
+          areaID++;
+        }
+      }
+    }
+
+    MapUtils.Dump(map, areas);
+  }
+
   // I think this seed generated isolated rooms :O
   //    -5586292
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
@@ -659,6 +732,12 @@ class MainDungeonBuilder : DungeonBuilder
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
     DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
+
+    foreach (var lvl in levels)
+    {
+      FindVaults(lvl, h, w);
+    }
+    
 
     return dungeon;
   }

@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Data.SqlTypes;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -630,48 +631,76 @@ class RegionFinder(IPassable pc)
 
 class MapUtils
 {
-  public static void Dump(Map map)
+  public static void Dump(Map map, Dictionary<(int, int), int> areas)
   {
+    char RegionNum(int num)
+    {
+      if (num < 10)
+        return (char)('0' + num);
+
+      return (char) ('A' + (10 - num));
+    }
+
+    char[,] sqs = new char[map.Height, map.Width];
+
     for (int r = 0; r < map.Height; r++)
     {
-      var row = new StringBuilder();
       for (int c = 0; c < map.Width; c++)
       {
         switch (map.TileAt(r, c).Type)
         {
+          case TileType.PermWall:
           case TileType.DungeonWall:
           case TileType.StoneWall:
-            row.Append('#');
+            sqs[r, c] = ' ';
             break;
           case TileType.DungeonFloor:
           case TileType.StoneFloor:
-            row.Append('.');
+            sqs[r, c] = '.';
             break;
           case TileType.DeepWater:
           case TileType.Water:
-            row.Append('}');
+            sqs[r, c] = '}';
             break;
           case TileType.ClosedDoor:
           case TileType.LockedDoor:
-            row.Append('+');
+            sqs[r, c] = '+';
             break;
           case TileType.OpenDoor:
           case TileType.BrokenDoor:
-            row.Append("/");
+            sqs[r, c] = '/';
             break;
           case TileType.Bridge:
           case TileType.WoodBridge:
-            row.Append('=');
+            sqs[r, c] = '=';
             break;
           case TileType.Upstairs:
-            row.Append('<');
+            sqs[r, c] = '<';
             break;
           case TileType.Downstairs:
-            row.Append('>');
+            sqs[r, c] = '>';
+            break;
+          case TileType.Chasm:
+            sqs[r, c] = ':';
+            break;
+          default:
+            sqs[r, c] = '?';
             break;
         }
       }
-      Console.WriteLine(row.ToString());
+    }
+
+    for (int r = 0; r < map.Height; r++)
+    {
+      var sb = new StringBuilder();
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (areas.ContainsKey((r, c)))
+          sb.Append(RegionNum(areas[(r, c)]));
+        else
+          sb.Append(sqs[r, c]);
+      }
+      Console.WriteLine(sb.ToString());
     }
   }
 }
