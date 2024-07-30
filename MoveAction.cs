@@ -102,7 +102,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.EnergyCost = 1.0;
         result.Complete = true;        
       }
-      else if (occ is not null && !occ.Hostile)
+      else if (occ is not null && !Battle.PlayerWillAttack(occ))
       {
         string msg = $"You don't want to attack {occ.FullName}!";
         result.Messages.Add(new Message(msg, GameState.Player.Loc));

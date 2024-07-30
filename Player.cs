@@ -393,7 +393,7 @@ class Player : Actor, IPerformer, IGameEventListener
       Tile adjTile = gs.TileAt(adj);
       Loc adj2 = Loc.Move(dr * 2, dc * 2);
 
-      if (adjTile.PassableByFlight() && !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && occ.Hostile)
+      if (adjTile.PassableByFlight() && !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Battle.PlayerWillAttack(occ))
       {
         var colour = Inventory.ReadiedWeapon()!.Glyph.Lit;
         var anim = new PolearmAnimation(gs, colour, Loc, adj2);

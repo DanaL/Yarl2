@@ -559,4 +559,8 @@ class Battle
 
     return result;
   }
+
+  // At the moment I won't have the player attack villagers because I don't 
+  // want to make decisions about consequences, etc at the moment.
+  public static bool PlayerWillAttack(Actor target) => !target.HasTrait<VillagerTrait>();
 }

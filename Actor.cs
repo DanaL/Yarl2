@@ -128,13 +128,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     }    
   }
 
-  public bool Hostile => Status switch
-  {
-    MobAttitude.Active => true,
-    MobAttitude.Hostile => true,
-    _ => false,
-  };
-
   public bool AbleToMove() 
   {
     foreach (var t in Traits)
