@@ -112,6 +112,36 @@ class Village
     };
   }
 
+  // Pick a location inside a building (based on it being a floor screen) 
+  // which isn't adjacent to the door
+  static Loc LocForVillager(Map map, HashSet<Loc> sqs, Random rng)
+  {
+    List<Loc> locs = [];
+
+    foreach (var sq in sqs)
+    {
+      Tile tile = map.TileAt(sq.Row, sq.Col);
+      if (!(tile.Type == TileType.StoneFloor || tile.Type == TileType.WoodFloor))
+        continue;
+
+      bool adjToDoor = false;
+      foreach (var (ar, ac) in Util.Adj4Sqs(sq.Row, sq.Col))
+      {
+        TileType adjTile = map.TileAt(ar, ac).Type;
+        if (adjTile == TileType.ClosedDoor || adjTile == TileType.OpenDoor || adjTile == TileType.LockedDoor)
+        {
+          adjToDoor = true;
+          break;
+        }
+      }
+
+      if (!adjToDoor)
+        locs.Add(sq);
+    }
+
+    return locs[rng.Next(locs.Count)];
+  }
+
   static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob cleric = BaseVillager(ng, rng);
@@ -119,9 +149,7 @@ class Village
     cleric.Traits.Add(new NamedTrait());
     cleric.Traits.Add(new VillagerTrait());
 
-    var sqs = town.Shrine.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
-                                      map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
-    cleric.Loc = sqs[rng.Next(sqs.Count)];
+    cleric.Loc = LocForVillager(map, town.Shrine, rng);
     cleric.SetBehaviour(new PriestBehaviour());
     cleric.MoveStrategy = new WallMoveStrategy();
 
@@ -135,9 +163,7 @@ class Village
     grocer.Traits.Add(new NamedTrait());
     grocer.Traits.Add(new VillagerTrait());
 
-    var sqs = town.Market.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
-                                      map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
-    grocer.Loc = sqs[rng.Next(sqs.Count)];
+    grocer.Loc = LocForVillager(map, town.Market, rng);
     grocer.MoveStrategy = new WallMoveStrategy();
     grocer.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
     grocer.SetBehaviour(new GrocerBehaviour());
@@ -162,9 +188,7 @@ class Village
     smith.Traits.Add(new NamedTrait());
     smith.Traits.Add(new VillagerTrait());
 
-    var sqs = town.Smithy.Where(sq => map.TileAt(sq.Row, sq.Col).Type == TileType.StoneFloor ||
-                                      map.TileAt(sq.Row, sq.Col).Type == TileType.WoodFloor).ToList();
-    smith.Loc = sqs[rng.Next(sqs.Count)];
+    smith.Loc = LocForVillager(map, town.Smithy, rng);
     smith.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
     smith.SetBehaviour(new SmithBehaviour());
     smith.MoveStrategy = new WallMoveStrategy();
@@ -189,7 +213,7 @@ class Village
     return smith;
   }
 
-  static (int, List<Loc>) PickUnoccuppiedCottage(Town town, Random rng)
+  static int PickUnoccuppiedCottage(Town town, Random rng)
   {
     List<int> available = [];
     for (int i = 0; i < town.Homes.Count; i++) 
@@ -199,12 +223,12 @@ class Village
     }
 
     if (available.Count == 0)
-      return (-1, []);
+      return -1;
     else
     {
       var c = available[rng.Next(available.Count)];
       town.TakenHomes.Add(c);
-      return (c, town.Homes[c].ToList());
+      return c;
     }
   }
 
@@ -215,20 +239,8 @@ class Village
     mayor.Traits.Add(new NamedTrait());
     mayor.Traits.Add(new VillagerTrait());
 
-    var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
-    do
-    {
-      int i = rng.Next(cottage.Count);
-      Loc loc = cottage[i];
-      var tile = map.TileAt(loc.Row, loc.Col).Type;
-      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
-      {
-        mayor.Loc = loc;
-        break;
-      }
-    }
-    while (true);
-
+    var homeID = PickUnoccuppiedCottage(town, rng);
+    mayor.Loc = LocForVillager(map, town.Homes[homeID], rng);
     mayor.Stats.Add(Attribute.HomeID, new Stat(homeID));
     mayor.MoveStrategy = new WallMoveStrategy();
     mayor.SetBehaviour(new MayorBehaviour());
@@ -269,20 +281,8 @@ class Village
     villager.Traits.Add(new NamedTrait());
     villager.Traits.Add(new VillagerTrait());
 
-    var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
-    do
-    {
-      int i = rng.Next(cottage.Count);
-      Loc loc = cottage[i];
-      var tile = map.TileAt(loc.Row, loc.Col).Type;
-      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
-      {
-        villager.Loc = loc;
-        break;
-      }
-    }
-    while (true);
-
+    int homeID  = PickUnoccuppiedCottage(town, rng);
+    villager.Loc = LocForVillager(map, town.Homes[homeID], rng);
     villager.Stats.Add(Attribute.HomeID, new Stat(homeID));
     villager.MoveStrategy = new WallMoveStrategy();
     villager.SetBehaviour(new Villager1Behaviour());
@@ -297,20 +297,9 @@ class Village
     widower.Traits.Add(new NamedTrait());
     widower.Traits.Add(new VillagerTrait());
 
-    var (homeID, cottage) = PickUnoccuppiedCottage(town, rng);
-    do
-    {
-      int i = rng.Next(cottage.Count);
-      Loc loc = cottage[i];
-      var tile = map.TileAt(loc.Row, loc.Col).Type;
-      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
-      {
-        widower.Loc = loc;
-        break;
-      }
-    }
-    while (true);
-
+    int homeID = PickUnoccuppiedCottage(town, rng);
+    widower.Loc = LocForVillager(map, town.Homes[homeID], rng);
+    
     widower.Stats.Add(Attribute.HomeID, new Stat(homeID));
     widower.MoveStrategy = new WallMoveStrategy();
     widower.SetBehaviour(new WidowerBehaviour());
