@@ -430,7 +430,6 @@ class DungeonMap(Random rng)
         ConnectCircularRoom(map, room);
     }
 
-    //return;
     var regionFinder = new RegionFinder(new DungeonPassable());
     var regions = regionFinder.Find(map, true, TileType.DungeonWall);
 
@@ -843,7 +842,6 @@ class DungeonMap(Random rng)
 
     HashSet<(int, int)> shared = [];
 
-    int passagesMade = 0;
     for (int j = 0; j < rooms.Count; j++)
     {
       for (int k = j + 1; k < rooms.Count; k++)
@@ -1002,7 +1000,7 @@ class Room
         int nc = dc + n.Item2;
         if (nr >= 0 && nc >- 0 && Sqs.Contains((nr, nc)))
         {
-          candidates.Add((nr, nc));
+          candidates.Add((dr, dc));
         }
       }
     }

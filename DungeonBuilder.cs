@@ -658,13 +658,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
-
-    foreach (var map in levels)
-    {
-      MapUtils.Dump(map);
-      Console.WriteLine();
-    }
-
     DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
     return dungeon;
