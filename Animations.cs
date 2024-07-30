@@ -249,6 +249,7 @@ class BarkAnimation : Animation
   readonly GameState _gs;
   readonly Actor _actor;
   readonly string _bark;
+  readonly UserInterface _ui;
 
   // Duration in milliseconds
   public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
@@ -257,12 +258,13 @@ class BarkAnimation : Animation
     Expiry = DateTime.Now.AddMilliseconds(duration);
     _actor = actor;
     _bark = bark;
+    _ui = gs.UIRef();
   }
 
   // Need to actually calculate where to place the bark if the
   // speaker is near an edge of the screen/
   // screenRow and screenCol are the speaker's row/col
-  private void RenderLine(int screenRow, int screenCol, string message)
+  void RenderLine(int screenRow, int screenCol, string message)
   {
     int pointerCol = screenCol + 1;
     int row = screenRow + (screenRow < 3 ? 1 : -1);
@@ -287,19 +289,32 @@ class BarkAnimation : Animation
       pointerCol = screenCol - 1;
     }
 
-    var ui = _gs.UIRef();
-    ui.SqsOnScreen[row, pointerCol] = new Sqr(Colours.WHITE, Colours.BLACK, pointer);    
+    SetSqr(row, pointerCol, new Sqr(Colours.WHITE, Colours.BLACK, pointer));
     foreach (char ch in message)
     {
-      ui.SqsOnScreen[row2, col++] = new Sqr(Colours.WHITE, Colours.BLACK, ch);
+      SetSqr(row2, col++, new Sqr(Colours.WHITE, Colours.BLACK, ch));      
+    }
+
+    void SetSqr(int row, int col, Sqr sqr)
+    {
+      // If a loc is occupied, don't hide the Actor glyph
+      Loc playerLoc = _gs.Player.Loc;
+      var (mapRow, mapCol) = _ui.ScrLocToGameLoc(row, col, playerLoc.Row, playerLoc.Col);
+      Loc mapLoc = playerLoc with { Row = mapRow, Col = mapCol };
+
+      if (!_gs.ObjDb.Occupied(mapLoc))
+        _ui.SqsOnScreen[row, col] = sqr;
     }
   }
 
   public override void Update()
   {
-    var loc = _actor.Loc;
-    var playerLoc = _gs.Player.Loc;
+    Loc loc = _actor.Loc;
+    Loc playerLoc = _gs.Player.Loc;
 
+    // I thought about having part of the message appear on screen even if the
+    // speaker is off screen, but didn't want to deal with the extra 
+    // complication
     if (!_gs.LastPlayerFoV.Contains(loc))
       return;
 

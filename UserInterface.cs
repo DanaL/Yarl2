@@ -947,6 +947,15 @@ abstract class UserInterface
     return (row - rowOffset, col - colOffset);
   }
 
+  public (int, int) ScrLocToGameLoc(int screenRow, int screenCol, int playerRow, int playerCol)
+  {
+    int rowOffset = playerRow - PlayerScreenRow;
+    int colOffset = playerCol - PlayerScreenCol;
+
+    return (screenRow + rowOffset, screenCol + colOffset);
+  }
+
+
   void ClearZLayer()
   {
     for (int r = 0; r < ViewHeight; r++)
