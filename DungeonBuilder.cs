@@ -637,9 +637,9 @@ class MainDungeonBuilder : DungeonBuilder
   void FindVaults(Map map, int h, int w)
   {
     Dictionary<(int, int), int> areas = [];
-    int areaID = 0;
+    Dictionary<int, HashSet<(int, int)>> rooms = [];
 
-    var tile = map.TileAt(0, 0);
+    int areaID = 0;
     for (int r = 1; r < h - 1; r++)
     {
       for (int c = 1; c < w - 1; c++)
@@ -649,6 +649,7 @@ class MainDungeonBuilder : DungeonBuilder
         if (map.TileAt(r, c).Type == TileType.DungeonFloor && !areas.ContainsKey((r, c)))
         {
           var region = MarkRegion(map, r, c);
+          rooms.Add(areaID, region);
           foreach (var sq in region)
           {
             areas.Add(sq, areaID);
@@ -658,6 +659,34 @@ class MainDungeonBuilder : DungeonBuilder
       }
     }
 
+    foreach (int roomID in rooms.Keys)
+    {
+      if (rooms[roomID].Count > 75)
+        continue;
+
+      
+      // A potential vault will have only one door adj to its squares
+      int doorCount = 0;
+      foreach (var sq in rooms[roomID]) 
+      {
+        foreach (var adj in Util.Adj4Sqs(sq.Item1, sq.Item2)) 
+        {
+          if (!map.InBounds(adj))
+            continue;
+          TileType type = map.TileAt(adj).Type;
+          if (type == TileType.ClosedDoor || type == TileType.LockedDoor)
+            ++doorCount;               
+        }  
+        if (doorCount > 1)
+            break;     
+      }
+
+      if (doorCount == 1)
+      {
+        Console.WriteLine($"Room {roomID} is a potential vault");
+      }
+    }
+    
     MapUtils.Dump(map, areas);
   }
 
