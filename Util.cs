@@ -1,4 +1,3 @@
-
 // Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
@@ -10,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Data.SqlTypes;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -197,7 +194,7 @@ class Util
   {
     int count = 0;
 
-    foreach (var loc in Util.Adj8Sqs(r, c))
+    foreach (var loc in Adj8Sqs(r, c))
     {
       if (map.TileAt(loc).Type == type)
         ++count;
@@ -413,6 +410,9 @@ class Util
     TileType.CharredStump => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.FrozenDeepWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
+    TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.Trigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
@@ -682,6 +682,13 @@ class MapUtils
             break;
           case TileType.Chasm:
             sqs[r, c] = ':';
+            break;
+          case TileType.Portcullis:
+          case TileType.OpenPortcullis:
+            sqs[r, c] = '"';
+            break;
+          case TileType.Trigger:
+            sqs[r, c] = '`';
             break;
           default:
             sqs[r, c] = '?';

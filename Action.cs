@@ -283,7 +283,11 @@ class PortalAction : Action
     
     GameState.EnterLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
-    GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
+    Message? moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
+    if (moveMsg != null)
+    {
+      result.Messages.Add(moveMsg);
+    }
     GameState.RefreshPerformers();
     GameState.UpdateFoV();
 

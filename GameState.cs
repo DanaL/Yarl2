@@ -406,7 +406,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var candidates = shores.ToList();
       var destination = candidates[Rng.Next(candidates.Count)];
-      ResolveActorMove(actor, actor.Loc, destination);
+      Message? moveMsg = ResolveActorMove(actor, actor.Loc, destination);
+      if (moveMsg is not null)
+      {
+        messages.Add(moveMsg.Text);
+      }
       actor.Loc = destination;
 
       string invMsgs = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, this, actor.Loc);
@@ -448,7 +452,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public string FallIntoChasm(Actor actor, Loc landingSpot)
   {
     EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
-    ResolveActorMove(actor, actor.Loc, landingSpot);
+    Message? moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
+    if (moveMsg is not null)
+    {
+      WriteMessages([moveMsg], "");
+    }
     actor.Loc = landingSpot;
 
     if (actor is Player)
@@ -746,7 +754,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public void ResolveActorMove(Actor actor, Loc start, Loc dest)
+  public Message? ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
 
@@ -757,6 +765,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       SetDMaps(dest);      
     }
+
+    var tile = CurrentMap.TileAt(dest.Row, dest.Col);
+    if (tile.Type == TileType.Trigger)
+    {
+      var trigger = (Trigger)tile;
+      if (CurrentMap.TileAt(trigger.Gate.Row, trigger.Gate.Col) is ITriggerable gate)
+      {
+        gate.Trigger();
+        Message msg = new Message("You hear a metallic grinding!", dest, false);
+        return msg;
+      }            
+    }
+
+    return null;
   }
 
   public string LocDesc(Loc loc)

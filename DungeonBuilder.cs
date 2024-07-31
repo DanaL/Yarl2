@@ -588,108 +588,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  // How many times can I implement flood fill in one project?
-  static HashSet<(int, int)> MarkRegion(Map map, int startRow, int startCol)
-  {
-    HashSet<(int, int)> region = [ (startRow, startCol) ];
-    Queue<(int, int)> q = [];
-    q.Enqueue((startRow, startCol));
-
-    while (q.Count > 0)
-    {
-      var (currRow, currCol) = q.Dequeue();
-      region.Add((currRow, currCol));
-
-      foreach (var adj in Util.Adj8Sqs(currRow, currCol))
-      {
-        if (!map.InBounds(adj))
-          continue;
-
-        Tile tile = map.TileAt(adj);
-        bool open;
-        switch (tile.Type)
-        {
-          case TileType.DungeonFloor:
-          case TileType.DeepWater:
-          case TileType.WoodBridge:
-          case TileType.Landmark:
-          case TileType.Upstairs:
-          case TileType.Downstairs:
-          case TileType.Chasm:
-            open = true;
-            break;
-          default:
-            open = false;
-            break;
-        }
-        
-        if (open && !region.Contains(adj))
-        {
-          region.Add(adj);
-          q.Enqueue(adj);
-        }
-      }
-    }
-
-    return region;
-  }
-
-  void FindVaults(Map map, int h, int w)
-  {
-    Dictionary<(int, int), int> areas = [];
-    Dictionary<int, HashSet<(int, int)>> rooms = [];
-
-    int areaID = 0;
-    for (int r = 1; r < h - 1; r++)
-    {
-      for (int c = 1; c < w - 1; c++)
-      {
-        if (!map.InBounds(r, c))
-          continue;
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor && !areas.ContainsKey((r, c)))
-        {
-          var region = MarkRegion(map, r, c);
-          rooms.Add(areaID, region);
-          foreach (var sq in region)
-          {
-            areas.Add(sq, areaID);
-          }
-          areaID++;
-        }
-      }
-    }
-
-    foreach (int roomID in rooms.Keys)
-    {
-      if (rooms[roomID].Count > 75)
-        continue;
-
-      
-      // A potential vault will have only one door adj to its squares
-      int doorCount = 0;
-      foreach (var sq in rooms[roomID]) 
-      {
-        foreach (var adj in Util.Adj4Sqs(sq.Item1, sq.Item2)) 
-        {
-          if (!map.InBounds(adj))
-            continue;
-          TileType type = map.TileAt(adj).Type;
-          if (type == TileType.ClosedDoor || type == TileType.LockedDoor)
-            ++doorCount;               
-        }  
-        if (doorCount > 1)
-            break;     
-      }
-
-      if (doorCount == 1)
-      {
-        Console.WriteLine($"Room {roomID} is a potential vault");
-      }
-    }
-    
-    MapUtils.Dump(map, areas);
-  }
-
   // I think this seed generated isolated rooms :O
   //    -5586292
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
@@ -712,23 +610,23 @@ class MainDungeonBuilder : DungeonBuilder
     var mapper = new DungeonMap(rng);
     Map[] levels = new Map[numOfLevels];
 
-    for (int lvlNum = 0; lvlNum < numOfLevels; lvlNum++)
+    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
-      levels[lvlNum] = mapper.DrawLevel(w, h);
-      dungeon.AddMap(levels[lvlNum]);      
+      levels[levelNum] = mapper.DrawLevel(w, h);
+      dungeon.AddMap(levels[levelNum]);      
     }
 
     // Add rivers/chasms to some of the levels
-    for (int lvlNum = 0; lvlNum < numOfLevels - 1; lvlNum++)
+    for (int levelNum = 0; levelNum < numOfLevels - 1; levelNum++)
     {
       if (rng.Next(4) == 0)
       {
         TileType riverTile;
-        if (lvlNum < numOfLevels - 1 && rng.Next(3) == 0)
+        if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
           riverTile = TileType.Chasm;
         else
           riverTile = TileType.DeepWater;        
-        DungeonMap.AddRiver(levels[lvlNum], w + 1, h + 1, riverTile, rng);
+        DungeonMap.AddRiver(levels[levelNum], w + 1, h + 1, riverTile, rng);
 
         // When making a chasm, we want to turn any walls below chasms on the 
         // floor below into floors. 
@@ -739,22 +637,22 @@ class MainDungeonBuilder : DungeonBuilder
             for (int c = 1; c < w; c++)
             {
               var pt = (r, c);              
-              if (ReplaceChasm(levels[lvlNum], pt) && levels[lvlNum + 1].IsTile(pt, TileType.DungeonWall))
+              if (ReplaceChasm(levels[levelNum], pt) && levels[levelNum + 1].IsTile(pt, TileType.DungeonWall))
               {
-                levels[lvlNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
+                levels[levelNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
               }
             }
           }
         }
 
-        if (riverTile == TileType.DeepWater && lvlNum > 0)
+        if (riverTile == TileType.DeepWater && levelNum > 0)
         {
-          monsterDecks[lvlNum].Monsters.Add("deep one");
-          monsterDecks[lvlNum].Monsters.Add("deep one");
-          monsterDecks[lvlNum].Monsters.Add("deep one");
-          monsterDecks[lvlNum].Reshuffle(rng);
+          monsterDecks[levelNum].Monsters.Add("deep one");
+          monsterDecks[levelNum].Monsters.Add("deep one");
+          monsterDecks[levelNum].Monsters.Add("deep one");
+          monsterDecks[levelNum].Reshuffle(rng);
 
-          DeepOneShrine(levels[lvlNum], _dungeonID, lvlNum, objDb, rng);
+          DeepOneShrine(levels[levelNum], _dungeonID, levelNum, objDb, rng);
         }
       }
     }
@@ -762,12 +660,11 @@ class MainDungeonBuilder : DungeonBuilder
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
     DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
-    foreach (var lvl in levels)
+    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
     {
-      FindVaults(lvl, h, w);
+      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum);
     }
     
-
     return dungeon;
   }
 }

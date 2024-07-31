@@ -19,17 +19,15 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
   readonly Loc _loc = loc;
   readonly Map _map = gameState.CurrMap!;
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
-  
-  static string BlockedMessage(Tile tile)
+
+  static string BlockedMessage(Tile tile) => tile.Type switch
   {
-    return tile.Type switch
-    {
-      TileType.DeepWater => "The water seems deep and cold.",
-      TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
-      TileType.Chasm => "Do you really want to jump into the chasm?",
-      _ => "You cannot go that way!"
-    };
-  }
+    TileType.DeepWater => "The water seems deep and cold.",
+    TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
+    TileType.Chasm => "Do you really want to jump into the chasm?",
+    TileType.Portcullis => "The portcullis is closed.",
+    _ => "You cannot go that way!"
+  };
 
   public static bool CanMoveTo(Actor actor, Map map, Loc loc)
   {
@@ -215,8 +213,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
+    Message? moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
     Actor.Loc = _loc;
+    if (moveMsg is not null)
+    {
+      result.Messages.Add(moveMsg);
+    }
 
     if (Actor is Player)
     {

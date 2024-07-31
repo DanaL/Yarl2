@@ -302,6 +302,7 @@ internal class MapSaver
   static Dictionary<int, Tile> InflateSpecialTiles(List<string> shrunken)
   {
     var tiles = new Dictionary<int, Tile>();
+    bool open;
 
     foreach (string s in shrunken)
     {
@@ -330,10 +331,18 @@ internal class MapSaver
           break;
         case TileType.OpenDoor:
         case TileType.ClosedDoor:
-          bool open = Convert.ToBoolean(pieces[2]);
+          open = Convert.ToBoolean(pieces[2]);
           // technically wrong for open doors but the internal state
           // of the door will work itself out
           tile = new Door(TileType.ClosedDoor, open);
+          break;
+        case TileType.Portcullis:
+          open = Convert.ToBoolean(pieces[2]);
+          tile = new Portcullis(open);
+          break;
+        case TileType.Trigger:
+          digits = Util.ToNums(pieces[2]);
+          tile = new Trigger(new Loc(digits[0], digits[1], digits[2], digits[3]));
           break;
         case TileType.Landmark:
           string msg = pieces[2];

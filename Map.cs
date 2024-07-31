@@ -1,5 +1,4 @@
-﻿
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -52,7 +51,15 @@ enum TileType
   Landmark,
   Chasm,
   CharredGrass,
-  CharredStump
+  CharredStump,
+  Portcullis,
+  OpenPortcullis,
+  Trigger
+}
+
+interface ITriggerable
+{
+  void Trigger();
 }
 
 abstract class Tile(TileType type) : IZLevel
@@ -130,6 +137,9 @@ abstract class Tile(TileType type) : IZLevel
     TileType.CharredStump => "charred stump",
     TileType.FrozenWater => "ice",
     TileType.FrozenDeepWater => "ice",
+    TileType.Portcullis => "portcullis",
+    TileType.OpenPortcullis => "open portcullis",
+    TileType.Trigger => "trigger/pressure plate",
     _ => "unknown"
   };
 
@@ -187,18 +197,41 @@ class Door(TileType type, bool open) : Tile(type)
 
   // Not sure if this is a good way to handle this for places like 
   // the pathfinding code or if it's a gross hack
-  public override TileType Type
-  {
-    get => Open ? TileType.OpenDoor : TileType.ClosedDoor;
-  }
+  public override TileType Type => Open ? TileType.OpenDoor : TileType.ClosedDoor;  
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
   public override bool Opaque() => !Open;
 
-  public override string ToString()
-  {
-    return $"{(int)Type};{Open}";
-  }
+  public override string ToString() => $"{(int)Type};{Open}";
+}
+
+// Portcullis is pretty close to the door, but I didn't want to connect them
+// in a class hierarchy because I didn't want to have to worry about bugs 
+// where I was doing, like, "if (foo is Door) { ... }" and implicitly treat
+// a portcullis like a door when I didn't intend to.
+class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
+{
+  public bool Open { get; set; } = open;
+
+  public override TileType Type => Open ? TileType.OpenPortcullis : TileType.Portcullis;
+  public override bool Passable() => Open;
+  public override bool PassableByFlight() => Open;
+  public override bool Opaque() => false;
+
+  public override string ToString() => $"{(int)Type};{Open}";
+
+  public void Trigger() => Open = !Open;
+}
+
+class Trigger(Loc gate) : Tile(TileType.Trigger)
+{
+  public Loc Gate { get; set; } = gate;
+
+  public override bool Passable() => true;
+  public override bool PassableByFlight() => true;
+  public override bool Opaque() => false;
+
+  public override string ToString() => $"{(int)Type};{Gate}";
 }
 
 class Portal(string stepMessage) : Tile(TileType.Portal)

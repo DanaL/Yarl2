@@ -318,16 +318,20 @@ class Battle
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
-      gs.ResolveActorMove(target, target.Loc, second);
+      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
+      if (moveMsg is not null)
+        txt += " " + moveMsg.Text;
       return new Message(txt, second);
     }
     else if (CanPass(first, gs))
     {
-      gs.ResolveActorMove(target, target.Loc, first);
+      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stumble)} backward!";
+      if (moveMsg is not null)
+        txt += " " + moveMsg.Text;
       return new Message(txt, first);
     }
 
@@ -492,7 +496,11 @@ class Battle
     if (options.Count > 0)
     {
       var sq = options.ToList()[gs.Rng.Next(options.Count)];
-      gs.ResolveActorMove(target, target.Loc, sq);
+      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
+      if (moveMsg is not null)
+      {
+        gs.WriteMessages([moveMsg], "");
+      }
       target.Loc = sq;
 
       return true;
