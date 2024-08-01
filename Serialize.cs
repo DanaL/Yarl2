@@ -340,9 +340,9 @@ internal class MapSaver
           open = Convert.ToBoolean(pieces[2]);
           tile = new Portcullis(open);
           break;
-        case TileType.Trigger:
+        case TileType.GateTrigger:
           digits = Util.ToNums(pieces[2]);
-          tile = new Trigger(new Loc(digits[0], digits[1], digits[2], digits[3]));
+          tile = new GateTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]));
           break;
         case TileType.Landmark:
           string msg = pieces[2];

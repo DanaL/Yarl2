@@ -412,7 +412,7 @@ class Util
     TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.Trigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.GateTrigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
@@ -687,7 +687,7 @@ class MapUtils
           case TileType.OpenPortcullis:
             sqs[r, c] = '"';
             break;
-          case TileType.Trigger:
+          case TileType.GateTrigger:
             sqs[r, c] = '`';
             break;
           default:

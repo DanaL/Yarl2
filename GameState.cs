@@ -189,6 +189,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ObjDb.SetToLoc(loc, item);
+    Message? msg = ThingAddedToLoc(loc);
+    if (msg != null)
+      msgs.Add(msg);
 
     if (msgs.Count > 0)
       UI.AlertPlayer(msgs, "", this);
@@ -757,7 +760,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Message? ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
-
+    
     // Not making djikstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
     // monsters can open doors, fly, etc. Multiple maps??
@@ -766,16 +769,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       SetDMaps(dest);      
     }
 
-    var tile = CurrentMap.TileAt(dest.Row, dest.Col);
-    if (tile.Type == TileType.Trigger)
+    return ThingAddedToLoc(dest);
+  }
+
+  public Message? ThingAddedToLoc(Loc loc)
+  {
+    Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
+
+    if (tile is GateTrigger trigger)
     {
-      var trigger = (Trigger)tile;
-      if (CurrentMap.TileAt(trigger.Gate.Row, trigger.Gate.Col) is ITriggerable gate)
-      {
-        gate.Trigger();
-        Message msg = new Message("You hear a metallic grinding!", dest, false);
-        return msg;
-      }            
+      Loc gateLoc = ((GateTrigger)tile).Gate;
+      if (CurrentMap.TileAt(gateLoc.Row, gateLoc.Col) is Portcullis portcullis)
+      {        
+        portcullis.Trigger();
+        Message msg = new Message("You hear a metallic grinding!", loc, false);
+        return msg;        
+      }
     }
 
     return null;

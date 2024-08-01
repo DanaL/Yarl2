@@ -54,7 +54,7 @@ enum TileType
   CharredStump,
   Portcullis,
   OpenPortcullis,
-  Trigger
+  GateTrigger
 }
 
 interface ITriggerable
@@ -139,7 +139,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.FrozenDeepWater => "ice",
     TileType.Portcullis => "portcullis",
     TileType.OpenPortcullis => "open portcullis",
-    TileType.Trigger => "trigger/pressure plate",
+    TileType.GateTrigger => "trigger/pressure plate",
     _ => "unknown"
   };
 
@@ -223,7 +223,7 @@ class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
   public void Trigger() => Open = !Open;
 }
 
-class Trigger(Loc gate) : Tile(TileType.Trigger)
+class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
 {
   public Loc Gate { get; set; } = gate;
 

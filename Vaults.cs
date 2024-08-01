@@ -158,7 +158,7 @@ class Vaults
         {
           Console.WriteLine($"Make room {roomID} a vault");
           map.SetTile(doorRow, doorCol, new Portcullis(false));
-          map.SetTile(triggerRow, triggerCol, new Trigger(new Loc(dungeonID, levelNum, doorRow, doorCol)));
+          map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, levelNum, doorRow, doorCol)));
         }        
       }
     }
