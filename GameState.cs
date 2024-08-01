@@ -189,9 +189,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ObjDb.SetToLoc(loc, item);
-    Message? msg = ThingAddedToLoc(loc);
-    if (msg != null)
-      msgs.Add(msg);
+    Message msg = ThingAddedToLoc(loc);
+    msgs.Add(msg);
 
     if (msgs.Count > 0)
       UI.AlertPlayer(msgs, "", this);
@@ -409,11 +408,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var candidates = shores.ToList();
       var destination = candidates[Rng.Next(candidates.Count)];
-      Message? moveMsg = ResolveActorMove(actor, actor.Loc, destination);
-      if (moveMsg is not null)
-      {
-        messages.Add(moveMsg.Text);
-      }
+      Message moveMsg = ResolveActorMove(actor, actor.Loc, destination);
+      messages.Add(moveMsg.Text);
       actor.Loc = destination;
 
       string invMsgs = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, this, actor.Loc);
@@ -455,11 +451,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public string FallIntoChasm(Actor actor, Loc landingSpot)
   {
     EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
-    Message? moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-    if (moveMsg is not null)
-    {
-      WriteMessages([moveMsg], "");
-    }
+    Message moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
+    WriteMessages([moveMsg], "");    
     actor.Loc = landingSpot;
 
     if (actor is Player)
@@ -757,7 +750,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public Message? ResolveActorMove(Actor actor, Loc start, Loc dest)
+  public Message ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
     
@@ -772,7 +765,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return ThingAddedToLoc(dest);
   }
 
-  public Message? ThingAddedToLoc(Loc loc)
+  public Message ThingAddedToLoc(Loc loc)
   {
     Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
 
@@ -782,12 +775,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (CurrentMap.TileAt(gateLoc.Row, gateLoc.Col) is Portcullis portcullis)
       {        
         portcullis.Trigger();
-        Message msg = new Message("You hear a metallic grinding!", loc, false);
-        return msg;        
+        return new Message("You hear a metallic grinding!", loc, false);
       }
     }
 
-    return null;
+    return NullMessage.Instance;
   }
 
   public string LocDesc(Loc loc)
@@ -1010,9 +1002,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       if (ObjDb.GetObj(id) is Actor actor)
       {
-        Message? msg = actor.PossessionPickedUp(itemID, picker, this);
-        if (msg is not null)
-          messages.Add(msg);
+        Message msg = actor.PossessionPickedUp(itemID, picker, this);
+        messages.Add(msg);
       }
     }
 

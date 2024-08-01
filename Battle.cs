@@ -318,37 +318,39 @@ class Battle
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
-      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, second);
+      Message moveMsg = gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
-      if (moveMsg is not null)
+      if (moveMsg.Text != "")
         txt += " " + moveMsg.Text;
+
       return new Message(txt, second);
     }
     else if (CanPass(first, gs))
     {
-      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, first);
+      Message moveMsg = gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stumble)} backward!";
-      if (moveMsg is not null)
+      if (moveMsg.Text != "")
         txt += " " + moveMsg.Text;
+
       return new Message(txt, first);
     }
 
-    return new Message("", Loc.Nowhere);
+    return NullMessage.Instance;
   }
 
   static Message ResolveGrapple(Actor actor, Actor target, GameState gs)
   {
     // You can only be grappled by one thing at a time
     if (target.HasTrait<GrappledTrait>())
-      return new Message("", Loc.Nowhere);
+      return NullMessage.Instance;
 
     var grapple = actor.Traits
                        .OfType<GrapplerTrait>()
                        .First();
     if (target.AbilityCheck(Attribute.Strength, grapple.DC, gs.Rng))
-      return new Message("", Loc.Nowhere);
+      return NullMessage.Instance;
 
     var grappled = new GrappledTrait()
     {
@@ -496,11 +498,8 @@ class Battle
     if (options.Count > 0)
     {
       var sq = options.ToList()[gs.Rng.Next(options.Count)];
-      Message? moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
-      if (moveMsg is not null)
-      {
-        gs.WriteMessages([moveMsg], "");
-      }
+      Message moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
+      gs.WriteMessages([moveMsg], "");      
       target.Loc = sq;
 
       return true;

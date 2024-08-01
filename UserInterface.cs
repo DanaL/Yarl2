@@ -627,6 +627,8 @@ abstract class UserInterface
     List<string> msgs = [];
     foreach (var alert in alerts)
     {
+      if (alert is NullMessage) 
+        continue;
       if (!gs.LastPlayerFoV.Contains(alert.Loc) && alert.Sound)
         msgs.Add(alert.Text);
       else if (gs.LastPlayerFoV.Contains(alert.Loc) && !alert.Sound)

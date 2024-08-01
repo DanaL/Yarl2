@@ -213,13 +213,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    Message? moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
+    Message moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
     Actor.Loc = _loc;
-    if (moveMsg is not null)
-    {
-      result.Messages.Add(moveMsg);
-    }
-
+    result.Messages.Add(moveMsg);
+    
     if (Actor is Player)
     {
       result.Messages.Add(new Message(GameState.LocDesc(_loc), _loc));

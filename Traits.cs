@@ -1072,14 +1072,11 @@ class RecallTrait : BasicTrait, IGameEventListener
       gs.EnterLevel(player, 0, 0);
       var start = player.Loc;
       player.Loc = entrance.Loc;
-      Message? moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
+      Message moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
       gs.RefreshPerformers();
       gs.UpdateFoV();
       var msg = new Message("A wave of vertigo...", player.Loc, false);
-      List<Message> messages = [msg];
-      if (moveMsg is not null)
-        messages.Add(moveMsg);
-      gs.WriteMessages(messages, "");
+      gs.WriteMessages([msg, moveMsg], "");
     }
   }
 }

@@ -52,6 +52,10 @@ enum Verb
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
+record NullMessage() : Message("", Loc.Nowhere, false)
+{
+  public static readonly NullMessage Instance = new NullMessage();
+}
 
 // I think my verb enum and CalcVerb(), and maybe the whole MessageFactory
 // class were dumb ideas and I can just replace them with this 
