@@ -278,7 +278,7 @@ internal class MapSaver
   
   public static MapSaver Shrink(Map map)
   {  
-    MapSaver sm = new MapSaver
+    MapSaver sm = new()
     {
       Height = map.Height,
       Width = map.Width,
@@ -336,6 +336,7 @@ internal class MapSaver
           // of the door will work itself out
           tile = new Door(TileType.ClosedDoor, open);
           break;
+        case TileType.OpenPortcullis:
         case TileType.Portcullis:
           open = Convert.ToBoolean(pieces[2]);
           tile = new Portcullis(open);
@@ -347,6 +348,11 @@ internal class MapSaver
         case TileType.Landmark:
           string msg = pieces[2];
           tile = new Landmark(msg);
+          break;
+        case TileType.VaultDOor:
+          open = Convert.ToBoolean(pieces[2]);
+          Enum.TryParse(pieces[3], out Metals met);
+          tile = new VaultDoor(open, met);
           break;
       }
 

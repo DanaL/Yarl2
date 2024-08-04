@@ -373,6 +373,30 @@ class Util
       return '/';
   }
 
+  static Glyph VaultDoorGlyph(VaultDoor door)
+  {
+    char ch = door.Open ? '\\' : '+';
+    Colour fg, bg;
+
+    switch (door.Material)
+    {
+      case Metals.Bronze:
+        fg = Colours.BROWN;
+        bg = Colours.DARK_GREY;
+        break;
+      case Metals.Mithril:
+        fg = Colours.LIGHT_BLUE;
+        bg = Colours.LIGHT_GREY;
+        break;
+      default:
+        fg = Colours.DARK_GREY;
+        bg = Colours.DARK_GREY;
+        break;
+    }
+
+    return new Glyph(ch, fg, bg, Colours.BLACK, Colours.BLACK);
+  }
+
   public static Glyph TileToGlyph(Tile tile) => tile.Type switch
   {
     TileType.PermWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
@@ -413,6 +437,7 @@ class Util
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.GateTrigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.VaultDOor => VaultDoorGlyph((VaultDoor)tile),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
@@ -689,6 +714,9 @@ class MapUtils
             break;
           case TileType.GateTrigger:
             sqs[r, c] = '`';
+            break;
+          case TileType.VaultDOor:
+            sqs[r, c] = '#';
             break;
           default:
             sqs[r, c] = '?';

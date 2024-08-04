@@ -533,6 +533,11 @@ class OpenDoorAction : DirectionalAction
         result.Messages.Add(new Message("The door is already open.", GameState!.Player.Loc));
       }
     }
+    else if (door is VaultDoor vd)
+    {
+      string msg = vd.Open ? "The doors stand open." : "You'll need a key!";
+      result.Messages.Add(new Message(msg, GameState!.Player.Loc));
+    }
     else if (Actor is Player)
     {
       result.Messages.Add(new Message("There's no door there!", GameState!.Player.Loc));

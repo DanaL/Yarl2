@@ -150,19 +150,43 @@ class Vaults
           break;
       }
 
-      if (doorCount == 1)
+      if (doorCount == 1) // && rng.NextDouble() < 0.25)
       {
-        int triggerRow, triggerCol;
-        (triggerRow, triggerCol) = FindVaultTrigger(map, doorRow, doorCol, height, width, rooms[roomID], rng);
-        if (triggerRow != -1 && triggerCol != -1)
-        {
-          Console.WriteLine($"Make room {roomID} a vault");
-          map.SetTile(doorRow, doorCol, new Portcullis(false));
-          map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, levelNum, doorRow, doorCol)));
-        }        
+        SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng);
+        //SetPortcullisVault(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
       }
     }
 
     MapUtils.Dump(map, areas);
   }
+
+  static void SetVaultDoor(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng)
+  {
+    Metals material;
+    int roll = rng.Next(10);
+    if (roll < 5)
+      material = Metals.Iron;
+    else if (roll < 9)
+      material = Metals.Bronze;
+    else
+      material = Metals.Mithril;
+    VaultDoor door = new(false, material);
+    map.SetTile(doorRow, doorCol, door);
+  }
+
+  static void SetPortcullisVault(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
+  {
+    int triggerRow, triggerCol;
+    (triggerRow, triggerCol) = FindVaultTrigger(map, doorRow, doorCol, h, w, room, rng);
+    if (triggerRow != -1 && triggerCol != -1)
+    {
+      Console.WriteLine($"Vault!!");
+      map.SetTile(doorRow, doorCol, new Portcullis(false));
+      map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, level, doorRow, doorCol)));
+
+      // need to actually put stuff in the vaults
+    }
+  }
+
+  
 }

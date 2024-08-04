@@ -54,7 +54,8 @@ enum TileType
   CharredStump,
   Portcullis,
   OpenPortcullis,
-  GateTrigger
+  GateTrigger,
+  VaultDOor
 }
 
 interface ITriggerable
@@ -88,6 +89,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.LockedDoor => true,
     TileType.Mountain => true,
     TileType.SnowPeak => true,
+    TileType.VaultDOor => true,
     _ => false
   };
 
@@ -140,6 +142,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Portcullis => "portcullis",
     TileType.OpenPortcullis => "open portcullis",
     TileType.GateTrigger => "trigger/pressure plate",
+    TileType.VaultDOor => "vault door",
     _ => "unknown"
   };
 
@@ -232,6 +235,18 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
   public override bool Opaque() => false;
 
   public override string ToString() => $"{(int)Type};{Gate}";
+}
+
+class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDOor)
+{
+  public Metals Material { get;set; } = material;
+  public bool Open { get; set; } = open;
+
+  public override bool Passable() => Open;
+  public override bool PassableByFlight() => Open;
+  public override bool Opaque() => !Open;
+
+  public override string ToString() => $"{(int)Type};{Open};{Material}";
 }
 
 class Portal(string stepMessage) : Tile(TileType.Portal)
