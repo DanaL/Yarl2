@@ -359,7 +359,8 @@ class GameObjectDB
   public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
   public void RemoveItemFromGame(Loc loc, Item item)
   {
-    _itemLocs[loc].Remove(item);
+    if (_itemLocs.TryGetValue(loc, out List<Item>? value))
+      value.Remove(item);
     Objs.Remove(item.ID);
   }
 

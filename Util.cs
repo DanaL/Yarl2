@@ -376,23 +376,7 @@ class Util
   static Glyph VaultDoorGlyph(VaultDoor door)
   {
     char ch = door.Open ? '\\' : '+';
-    Colour fg, bg;
-
-    switch (door.Material)
-    {
-      case Metals.Bronze:
-        fg = Colours.BROWN;
-        bg = Colours.DARK_GREY;
-        break;
-      case Metals.Mithril:
-        fg = Colours.LIGHT_BLUE;
-        bg = Colours.LIGHT_GREY;
-        break;
-      default:
-        fg = Colours.DARK_GREY;
-        bg = Colours.DARK_GREY;
-        break;
-    }
+    var (fg, bg) = MetallicColour(door.Material);
 
     return new Glyph(ch, fg, bg, Colours.BLACK, Colours.BLACK);
   }
@@ -454,6 +438,14 @@ class Util
 
     return cyclopedia;
   }
+
+  public static (Colour, Colour) MetallicColour(Metals metal) => metal switch
+  {
+    Metals.NotMetal => (Colours.BLACK, Colours.BLACK), // should this be an error condition?
+    Metals.Bronze => (Colours.BROWN, Colours.DARK_GREY),
+    Metals.Mithril => (Colours.LIGHT_BLUE, Colours.LIGHT_GREY),
+    _ => (Colours.DARK_GREY, Colours.DARK_GREY)
+  };
 }
 
 static class ListUtils

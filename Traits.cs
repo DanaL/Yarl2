@@ -392,9 +392,9 @@ class TwoHandedTrait : Trait
   public override string AsText() => "TwoHanded";
 }
 
-class VaultKey(Loc loc) : Trait
+class VaultKeyTrait(Loc loc) : Trait
 {
-  Loc VaultLoc { get; set; } = loc;
+  public Loc VaultLoc { get; set; } = loc;
 
   public override string AsText() => $"VaultKey#{VaultLoc}";
 }
@@ -1657,7 +1657,7 @@ class TraitFactory
       case "UseSimple":
         return new UseSimpleTrait(pieces[1]);
       case "VaultKey":
-        return new VaultKey(Loc.FromStr(pieces[1]));
+        return new VaultKeyTrait(Loc.FromStr(pieces[1]));
       case "Villager":
         return new VillagerTrait();
       case "Weaken":

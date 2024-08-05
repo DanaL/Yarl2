@@ -89,7 +89,7 @@ class Vaults
     return region;
   }
 
-  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum)
+  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb)
   {
     Dictionary<(int, int), int> areas = [];
     Dictionary<int, HashSet<(int, int)>> rooms = [];
@@ -152,7 +152,7 @@ class Vaults
 
       if (doorCount == 1) // && rng.NextDouble() < 0.25)
       {
-        SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng);
+        SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
         //SetPortcullisVault(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
       }
     }
@@ -160,7 +160,7 @@ class Vaults
     MapUtils.Dump(map, areas);
   }
 
-  static void SetVaultDoor(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng)
+  static void SetVaultDoor(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng, GameObjectDB objDb)
   {
     Metals material;
     int roll = rng.Next(10);
@@ -172,6 +172,31 @@ class Vaults
       material = Metals.Mithril;
     VaultDoor door = new(false, material);
     map.SetTile(doorRow, doorCol, door);
+
+    var (fg, bg) = Util.MetallicColour(material);
+    Item key = new() { Name = "key", Type = ItemType.Tool, Value = 1,
+                        Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
+    };
+    key.Traits.Add(new MetalTrait() { Type = material });
+    key.Traits.Add(new VaultKeyTrait(new Loc(dungeonID, level, doorRow, doorCol)));
+
+    // Find a random spot for key. Eventually we'll place keys potentially on other
+    // levels. I'll also need to check for a key that's potentially impossible to get
+    // to. (Imagine a level with two vaults and each other's key is locked inside the
+    // other vault)
+    List<(int, int)> sqs = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor && !room.Contains((r, c)))
+          sqs.Add((r, c));
+      }
+    }
+    var (keyRow, keyCol) = sqs[rng.Next(sqs.Count)];
+    Loc keyLoc = new(dungeonID, level, keyRow, keyCol);
+    objDb.Add(key);
+    objDb.SetToLoc(keyLoc, key);
   }
 
   static void SetPortcullisVault(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)

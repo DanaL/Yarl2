@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text;
-
 namespace Yarl2;
 
 enum ItemType
@@ -69,6 +67,8 @@ class Item : GameObj, IEquatable<Item>
         bonus = armour.Bonus;
       else if (trait is WeaponBonusTrait wb && wb.Bonus != 0)
         bonus = wb.Bonus;
+      else if (trait is MetalTrait metal && Type == ItemType.Tool)
+        adjs.Add(metal.Type.ToString().ToLower());
     }
 
     string adjectives = string.Join(", ", adjs);
