@@ -442,7 +442,7 @@ class Util
   public static (Colour, Colour) MetallicColour(Metals metal) => metal switch
   {
     Metals.NotMetal => (Colours.BLACK, Colours.BLACK), // should this be an error condition?
-    Metals.Bronze => (Colours.BROWN, Colours.DARK_GREY),
+    Metals.Bronze => (Colours.DULL_RED, Colours.BROWN),
     Metals.Mithril => (Colours.LIGHT_BLUE, Colours.LIGHT_GREY),
     _ => (Colours.DARK_GREY, Colours.DARK_GREY)
   };
