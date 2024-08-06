@@ -171,8 +171,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       else
       {
         string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} grappled by ";
-        var grappler = GameState.ObjDb.GetObj(gt.GrapplerID);
-        txt += $"{grappler.FullName}!";
+        GameObj? grappler = GameState.ObjDb.GetObj(gt.GrapplerID);
+        txt += $"{grappler!.FullName}!";
         result.Messages.Add(new Message(txt, Actor.Loc));
         txt = $"{Actor.FullName.Capitalize()} cannot get away!";
         result.Messages.Add(new Message(txt, Actor.Loc));

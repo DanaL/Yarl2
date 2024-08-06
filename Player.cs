@@ -260,9 +260,9 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     string major = Background switch
     {
-      PlayerBackground.Warrior => "Arms & Armour",
       PlayerBackground.Scholar => "Lore & History",
-      PlayerBackground.Skullduggery => "Fine Sneaky Arts"
+      PlayerBackground.Skullduggery => "Fine Sneaky Arts",
+      _ => "Arms & Armour",
     };
 
     return $"{Lineage.ToString().ToLower().IndefArticle()} who majored in {major}";

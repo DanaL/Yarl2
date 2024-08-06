@@ -42,7 +42,7 @@ class DjikstraMap(Map map, int height, int width)
     var q = new Queue<(int, int)>();
     foreach (var sq in Util.Adj4Sqs(goal.Row, goal.Col))
     {
-      if (sq.Item1 >= 0 && sq.Item2 >= 0 && sq.Item1 < height && sq.Item2 < width)
+      if (sq.Item1 >= 0 && sq.Item2 >= 0 && sq.Item1 < Height && sq.Item2 < Width)
         q.Enqueue(sq);
     }
     HashSet<(int, int)> visited = [(goal.Row, goal.Col)];
@@ -66,7 +66,7 @@ class DjikstraMap(Map map, int height, int width)
       int cheapestNeighbour = int.MaxValue;
       foreach (var n in Util.Adj4Sqs(sq.Item1, sq.Item2))
       {
-        if (n.Item1 < 0 || n.Item2 < 0 || n.Item1 >= height || n.Item2 >= width)
+        if (n.Item1 < 0 || n.Item2 < 0 || n.Item1 >= Height || n.Item2 >= Width)
           continue;
         if (_djikstraMap[n.Item1, n.Item2] < cheapestNeighbour)
           cheapestNeighbour = _djikstraMap[n.Item1, n.Item2];
@@ -99,7 +99,7 @@ class DjikstraMap(Map map, int height, int width)
       (int, int) next = (-1, -1);
       foreach (var adj in Util.Adj4Sqs(currRow, currCol))
       {
-        if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= height || adj.Item2 >= width)
+        if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= Height || adj.Item2 >= Width)
           continue;
         if (_djikstraMap[adj.Item1, adj.Item2] < cost)
         {

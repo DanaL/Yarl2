@@ -35,17 +35,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   DjikstraMap? DMap { get; set; }
   DjikstraMap? DMapDoors { get; set; }
   DjikstraMap? DMapFlight { get; set; }
-  public DjikstraMap GetDMap(string map = "")
+  public DjikstraMap? GetDMap(string map = "")
   {
     if (DMap is null || DMapDoors is null || DMapFlight is null)
       SetDMaps(Player.Loc);
 
-    if (map == "doors")
-      return DMapDoors;  
-    else if (map == "flying")
-      return DMapFlight;
-    else    
-      return DMap;    
+    return map switch
+    {
+      "doors" => DMapDoors,
+      "flying" => DMapFlight,
+      _ => DMap
+    };   
   }
   
   public ulong LastTarget { get; set; } = 0;
