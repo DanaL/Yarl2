@@ -250,7 +250,7 @@ internal class DungeonSaver
 
   public static Dungeon Inflate(DungeonSaver sd)
   {
-    Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage);
+    Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage ?? "");
     // d.RememberedSqs = [];
 
     // foreach (var sq in sd.RememberedSqs)

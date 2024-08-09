@@ -204,7 +204,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Messages.Add(new Message(_effectText, Actor.Loc));
+    result.Messages.Add(new Message(_effectText, Actor!.Loc));
 
     var affected = GameState!.Flood(_target, Radius);
     foreach (var loc in affected)
@@ -1290,7 +1290,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     }
     else
     {
-      player.FireReadedBow(item, gs);
+      player.FireReadedBow(item, GameState);
       
       result.EnergyCost = 0.0;
       result.Complete = false;
