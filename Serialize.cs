@@ -349,7 +349,7 @@ internal class MapSaver
           string msg = pieces[2];
           tile = new Landmark(msg);
           break;
-        case TileType.VaultDOor:
+        case TileType.VaultDoor:
           open = Convert.ToBoolean(pieces[2]);
           Enum.TryParse(pieces[3], out Metals met);
           tile = new VaultDoor(open, met);

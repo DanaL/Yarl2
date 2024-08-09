@@ -421,7 +421,9 @@ class Util
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.GateTrigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.VaultDOor => VaultDoorGlyph((VaultDoor)tile),
+    TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
+    TileType.Pit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.OpenPit => new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
@@ -707,7 +709,7 @@ class MapUtils
           case TileType.GateTrigger:
             sqs[r, c] = '`';
             break;
-          case TileType.VaultDOor:
+          case TileType.VaultDoor:
             sqs[r, c] = '#';
             break;
           default:
@@ -738,3 +740,7 @@ class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }
 class InvalidRoomException : Exception { }
+class AbnormalMovement(Loc dest) : Exception
+{
+  public Loc Dest { get; set; } = dest; 
+}

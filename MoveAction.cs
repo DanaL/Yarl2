@@ -26,7 +26,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     TileType.Mountain or TileType.SnowPeak => "You cannot scale the mountain!",
     TileType.Chasm => "Do you really want to jump into the chasm?",
     TileType.Portcullis => "The portcullis is closed.",
-    TileType.VaultDOor => "Metal doors bar your path!",
+    TileType.VaultDoor => "Metal doors bar your path!",
     _ => "You cannot go that way!"
   };
 
@@ -214,13 +214,20 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    Message moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
-    Actor.Loc = _loc;
-    result.Messages.Add(moveMsg);
+    try 
+    {
+      Message moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
+      Actor.Loc = _loc;
+      result.Messages.Add(moveMsg);
+    }
+    catch (AbnormalMovement abMov)
+    {
+      Actor!.Loc = abMov.Dest;
+    }
     
     if (Actor is Player)
     {
-      result.Messages.Add(new Message(GameState.LocDesc(_loc), _loc));
+      result.Messages.Add(new Message(GameState!.LocDesc(_loc), _loc));
       GameState.Noise(Actor.ID, _loc.Row, _loc.Col, Actor.GetMovementNoise());
     }
     else

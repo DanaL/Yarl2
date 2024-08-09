@@ -588,6 +588,21 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
+  {
+    // At the moment I just have pits, and pits can't be on the lowest level 
+    // of the dungeon obv. Hmm I'm calling these pits but I guess they are 
+    // more like nethack's trapdoors 
+    if (level == depth - 1)
+      return;
+    
+    for (int j = 0 ; j < 3; j++)
+    {
+      var sq = map.RandomTile(TileType.DungeonFloor, rng);
+      map.SetTile(sq, TileFactory.Get(TileType.Pit));
+    }
+  }
+
   // I think this seed generated isolated rooms :O
   //    -5586292
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
@@ -655,6 +670,8 @@ class MainDungeonBuilder : DungeonBuilder
           DeepOneShrine(levels[levelNum], _dungeonID, levelNum, objDb, rng);
         }
       }
+
+      SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);

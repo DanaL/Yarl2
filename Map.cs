@@ -55,7 +55,9 @@ enum TileType
   Portcullis,
   OpenPortcullis,
   GateTrigger,
-  VaultDOor
+  VaultDoor,
+  Pit,
+  OpenPit
 }
 
 interface ITriggerable
@@ -89,7 +91,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.LockedDoor => true,
     TileType.Mountain => true,
     TileType.SnowPeak => true,
-    TileType.VaultDOor => true,
+    TileType.VaultDoor => true,
     _ => false
   };
 
@@ -142,7 +144,9 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Portcullis => "portcullis",
     TileType.OpenPortcullis => "open portcullis",
     TileType.GateTrigger => "trigger/pressure plate",
-    TileType.VaultDOor => "vault door",
+    TileType.VaultDoor => "vault door",
+    TileType.Pit => "stone floor",
+    TileType.OpenPit => "pit",
     _ => "unknown"
   };
 
@@ -237,7 +241,7 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
   public override string ToString() => $"{(int)Type};{Gate}";
 }
 
-class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDOor)
+class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)
 {
   public Metals Material { get;set; } = material;
   public bool Open { get; set; } = open;
@@ -327,6 +331,8 @@ class TileFactory
   private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
   private static readonly Tile FrozenDeepWater = new BasicTile(TileType.FrozenDeepWater, true, false, true);
   private static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
+  private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
+  private static readonly Tile OpenPit = new BasicTile(TileType.OpenPit, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -361,6 +367,8 @@ class TileFactory
     TileType.CharredStump => CharredStump,
     TileType.FrozenDeepWater => FrozenDeepWater,
     TileType.FrozenWater => FrozenWater,
+    TileType.Pit => Pit,
+    TileType.OpenPit => OpenPit,
     _ => Unknown
   };
 }
@@ -532,7 +540,7 @@ class Map : ICloneable
 
   public object Clone()
   {
-    Map temp = new Map(Width, Height);
+    var temp = new Map(Width, Height);
     if (Tiles is not null)
       temp.Tiles = (Tile[])Tiles.Clone();
 

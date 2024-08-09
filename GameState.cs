@@ -750,9 +750,65 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
+  Loc FallIntoPit(Actor actor, Loc pitLoc)
+  {
+    // find a clear, random landing spot on the level below
+    Map lowerLevel = CurrentDungeon.LevelMaps[pitLoc.Level + 1];
+    List<Loc> candidateSpots = [];
+    for (int r = 0; r < lowerLevel.Height; r++)
+    {
+      for (int c = 0; c < lowerLevel.Width; c++)
+      {
+        var loc = new Loc(CurrDungeonID, pitLoc.Level + 1, r, c);
+        if (lowerLevel.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
+        {
+          candidateSpots.Add(loc);
+        }
+      }
+    }
+
+    if (candidateSpots.Count > 0)
+    {
+      // NB, this code is basically the same as in FaillIntoChasm
+      Loc landingSpot = candidateSpots[Rng.Next(candidateSpots.Count)];
+      EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+      List<Message> messages = [];
+      Message moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
+      messages.Add(moveMsg);
+
+      ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
+      actor.Loc = landingSpot;
+
+      if (actor is Player)
+      {
+        RefreshPerformers();
+        UpdateFoV();
+      }
+
+      int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
+      var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this);
+      if (hpLeft < 1)
+      {
+        ActorKilled(actor, "a fall", null);
+      }
+
+      var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+      messages.Add(new Message(s, landingSpot, false));
+
+      WriteMessages(messages, "");
+    }
+    else
+    {
+      // huh, what should happen if the level below is completely full??
+    }
+
+    return actor.Loc;
+  }
+
   public Message ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
+    actor.Loc = dest;
     
     // Not making djikstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
@@ -760,6 +816,33 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (actor is Player && dest.DungeonID > 0)
     {
       SetDMaps(dest);      
+    }
+
+    // I think just for now, I'll have only the player trigger traps/pits
+    // mainly because I don't want to complicate my pathfinding code
+    if (actor is Player)
+    {
+      Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
+      bool flying = Player.HasActiveTrait<FlyingTrait>();
+      
+      if (tile.Type == TileType.Pit && !flying)
+      {
+        CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.OpenPit));
+        dest = FallIntoPit(actor, dest);
+        List<Message> msgs = [ new Message("A pit opens up underneath you!", dest, false) ];
+        msgs.Add(ThingAddedToLoc(dest));
+        WriteMessages(msgs, "");
+        throw new AbnormalMovement(dest);
+      }
+      
+      if (tile.Type == TileType.OpenPit && !flying)
+      {
+        dest = FallIntoPit(actor, dest);
+        List<Message> msgs = [ new Message("You tumble into the pit!", dest, false) ];
+        msgs.Add(ThingAddedToLoc(dest));
+        WriteMessages(msgs, "");
+        throw new AbnormalMovement(dest);
+      }
     }
 
     return ThingAddedToLoc(dest);
@@ -771,7 +854,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (tile is GateTrigger trigger)
     {
-      Loc gateLoc = ((GateTrigger)tile).Gate;
+      Loc gateLoc = trigger.Gate;
       if (CurrentMap.TileAt(gateLoc.Row, gateLoc.Col) is Portcullis portcullis)
       {        
         portcullis.Trigger();
