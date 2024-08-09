@@ -142,8 +142,7 @@ abstract class UserInterface
       if (locs.Count > 0)
       {
         var loc = locs[gs.Rng.Next(locs.Count)];
-        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);
-        villager.Loc = loc;
+        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);        
       }
     }
 
@@ -175,7 +174,6 @@ abstract class UserInterface
     int playerCol = (minCol + maxCol) / 2;
     var playerLoc = new Loc(0, 0, playerRow, playerCol);
     gs.ObjDb.ActorMoved(gs.Player, gs.Player.Loc, playerLoc);
-    gs.Player.Loc = playerLoc;
 
     List<Actor> villagers = [];
     foreach (var obj in gs.ObjDb.Objs)

@@ -371,6 +371,7 @@ class GameObjectDB
   {
     _actorLocs.Remove(from);
     _actorLocs[to] = a.ID;
+    a.Loc = to;
   }
 
   public List<IPerformer> GetPerformers(int dungeonID, int level)

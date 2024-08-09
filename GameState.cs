@@ -777,8 +777,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       messages.Add(moveMsg);
 
       ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
-      actor.Loc = landingSpot;
-
+      
       if (actor is Player)
       {
         RefreshPerformers();
@@ -808,7 +807,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Message ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
-    actor.Loc = dest;
     
     // Not making djikstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
