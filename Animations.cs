@@ -375,6 +375,9 @@ record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Ex
 
 class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animation
 {
+  public bool Fast { get; set; } = false;
+  public Colour Colour { get; set; } = Colours.FAINT_PINK;
+  public Colour AltColour { get; set; } = Colours.LIGHT_PURPLE;
   readonly GameState _gs = gs;
   readonly Dungeon _dungeon = dungeon;
   readonly UserInterface _ui = gs.UIRef();
@@ -386,21 +389,23 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animati
   public override void Update()
   {    
     var dd = DateTime.Now - _lastFrame;
-    if (dd.TotalMilliseconds < 15)
+    if (dd.TotalMilliseconds < 35)
       return;
 
     int next = int.Min(_index + 25, _locs.Count);      
     while (_index < next)
     {
-      var loc = _locs[_index];
+      Loc loc = _locs[_index];
       Tile tile = _gs.TileAt(loc);
       Glyph glyph = Util.TileToGlyph(tile);
-
+      char ch = loc != _gs.Player.Loc ? glyph.Ch : '@';
       Sqr sqr = _gs.Rng.NextDouble() < 0.1 
-                  ? new Sqr(glyph.Lit, Colours.LIGHT_PURPLE, glyph.Ch)
-                  : new Sqr(glyph.Lit, Colours.FAINT_PINK, glyph.Ch);        
+                  ? new Sqr(glyph.Lit, AltColour, ch)
+                  : new Sqr(glyph.Lit, Colour, ch);
+      
       var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.Now.AddMilliseconds(750)));
+      double delay = Fast ? 250 : 750;
+      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.Now.AddMilliseconds(delay)));
 
       ++_index;
     }

@@ -87,6 +87,9 @@ class Examiner : Inputer
               case TileType.Portal:
               case TileType.Statue:
               case TileType.Landmark:
+              case TileType.OpenPit:
+              case TileType.Portcullis:
+              case TileType.OpenPortcullis:
                 _targets.Add(loc);
               break;
             }

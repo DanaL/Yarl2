@@ -57,7 +57,8 @@ enum TileType
   GateTrigger,
   VaultDoor,
   Pit,
-  OpenPit
+  OpenPit,
+  SecretDoor
 }
 
 interface ITriggerable
@@ -92,6 +93,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Mountain => true,
     TileType.SnowPeak => true,
     TileType.VaultDoor => true,
+    TileType.SecretDoor => true,
     _ => false
   };
 
@@ -147,6 +149,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.VaultDoor => "vault door",
     TileType.Pit => "stone floor",
     TileType.OpenPit => "pit",
+    TileType.SecretDoor => "a wall",
     _ => "unknown"
   };
 
@@ -333,6 +336,7 @@ class TileFactory
   private static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
   private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
   private static readonly Tile OpenPit = new BasicTile(TileType.OpenPit, true, false, true);
+  private static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -369,6 +373,7 @@ class TileFactory
     TileType.FrozenWater => FrozenWater,
     TileType.Pit => Pit,
     TileType.OpenPit => OpenPit,
+    TileType.SecretDoor => SecretDoor,
     _ => Unknown
   };
 }

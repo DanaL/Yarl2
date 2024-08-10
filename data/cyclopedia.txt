@@ -26,6 +26,9 @@ A stairway leading upwards.
 downstairs
 A stairway leading deeper into the depths. Generally, more fearsome monsters await the deeper you venture.
 #
+openpit
+An open pit. You'll plummet to the next level of the dungoen!
+#
 statue
 A monument of historical interest.
 #

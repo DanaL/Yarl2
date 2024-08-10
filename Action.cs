@@ -693,6 +693,65 @@ class SummonAction(Loc target, string summons, int count) : Action()
   }
 }
 
+class SearchAction(GameState gs, Actor player) : Action(gs, player)
+{
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    GameState gs = GameState!;    
+    Loc playerLoc = Actor!.Loc;
+    List<Loc> sqsToSearch = gs.LastPlayerFoV
+                              .Where(loc => Util.Distance(playerLoc, loc) <= 3).ToList();
+
+    bool rogue = gs.Player.Background == PlayerBackground.Skullduggery;
+    int dc;
+    foreach (Loc loc in sqsToSearch)
+    {
+      Tile tile = gs.TileAt(loc);
+      switch (tile.Type)
+      {
+        case TileType.SecretDoor:
+          dc = 10 + gs.CurrLevel + 1;
+          if (rogue)
+            dc -= 2;
+          dc = int.Min(dc, 20);
+          if (gs.Rng.Next(1, 21) <= dc) 
+          {
+            result.Messages.Add(new Message("You spot a secret door!", loc, false));
+            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
+          }
+          break;
+        case TileType.Pit:
+          dc = 15 + gs.CurrLevel + 1;
+          if (rogue)
+            dc -= 2;
+          dc = int.Min(dc, 20);
+          if (gs.Rng.Next(1, 21) <= dc)
+          {
+            result.Messages.Add(new Message("You spot a trap!", loc, false));
+            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.OpenPit));
+          }          
+          break;
+        // Eventually I probably want to add searching for gargoyles, mimics, 
+        // invisible monsters, etc
+      }      
+    }
+
+    var anim = new MagicMapAnimation(gs, gs.CurrentDungeon, sqsToSearch)
+    {
+      Fast = true,
+      Colour = Colours.SEARCH_RED,
+      AltColour = Colours.SEARCH_RED
+    };
+    gs.UIRef().RegisterAnimation(anim);
+
+    return result;
+  }
+}
+
 class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   // Essentially we want to flood fill out and mark all reachable squares as 

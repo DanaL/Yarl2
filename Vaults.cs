@@ -152,7 +152,8 @@ class Vaults
 
       if (doorCount == 1) // && rng.NextDouble() < 0.25)
       {
-        SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
+        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
+        //SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
         //SetPortcullisVault(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
       }
     }
@@ -206,6 +207,7 @@ class Vaults
     if (triggerRow != -1 && triggerCol != -1)
     {
       Console.WriteLine($"Vault!!");
+      
       map.SetTile(doorRow, doorCol, new Portcullis(false));
       map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, level, doorRow, doorCol)));
 

@@ -683,6 +683,10 @@ class Player : Actor, IPerformer, IGameEventListener
         _deferred = new SaveGameAction();
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
       }
+      else if (ch == 's')
+      {
+        return new SearchAction(gameState, this);
+      }
       else if (ch == '*')
       {
         var lines = ui.MessageHistory.Select(m => m.Fmt);
