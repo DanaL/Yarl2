@@ -27,6 +27,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     TileType.Chasm => "Do you really want to jump into the chasm?",
     TileType.Portcullis => "The portcullis is closed.",
     TileType.VaultDoor => "Metal doors bar your path!",
+    TileType.LockedDoor => "The door is locked!",
     _ => "You cannot go that way!"
   };
 

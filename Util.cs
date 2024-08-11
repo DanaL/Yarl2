@@ -391,6 +391,7 @@ class Util
     TileType.StoneFloor => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.StoneRoad => new Glyph('\'', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.ClosedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
+    TileType.LockedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.OpenDoor => new Glyph('\\', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.DeepWater => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK),
     TileType.Water => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK),

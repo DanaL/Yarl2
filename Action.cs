@@ -518,7 +518,14 @@ class OpenDoorAction : DirectionalAction
 
     if (door is Door d)
     {
-      if (!d.Open)
+      if (d.Type == TileType.LockedDoor)
+      {
+        result.Complete = true;
+        result.EnergyCost = 1.0;
+
+        result.Messages.Add(new Message("The door is locked!", Loc, false));
+      }
+      else if (!d.Open)
       {
         d.Open = true;
         result.Complete = true;

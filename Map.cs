@@ -204,10 +204,10 @@ class BasicTile : Tile
 class Door(TileType type, bool open) : Tile(type)
 {
   public bool Open { get; set; } = open;
-
+  
   // Not sure if this is a good way to handle this for places like 
   // the pathfinding code or if it's a gross hack
-  public override TileType Type => Open ? TileType.OpenDoor : TileType.ClosedDoor;  
+  public override TileType Type => Open ? TileType.OpenDoor : base.Type;  
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
   public override bool Opaque() => !Open;
@@ -353,6 +353,7 @@ class TileFactory
     TileType.Mountain => Mountain,
     TileType.SnowPeak => SnowPeak,
     TileType.ClosedDoor => new Door(type, false),
+    TileType.LockedDoor => new Door(type, false),
     TileType.Water => Water,
     TileType.Cloud => Cloud,
     TileType.HWindow => HWindow,

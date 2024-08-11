@@ -80,8 +80,6 @@ class DjikstraMap(Map map, int height, int width)
 
   public List<(int, int)> ShortestPath(int row, int col)
   {
-    int height = _djikstraMap!.GetLength(0);
-    int width = _djikstraMap.GetLength(1);
     List<(int, int)> path = [(row, col)];
     int currRow = row;
     int currCol = col;
