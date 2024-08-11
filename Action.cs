@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class ActionResult
 {
-  public bool Complete { get; set; }
+  public bool Complete { get; set; } = false;
   public List<Message> Messages { get; set; } = [];
   public string MessageIfUnseen { get; set; } = "";
   public Action? AltAction { get; set; }
@@ -227,6 +227,56 @@ class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int rad
   }
 }
 
+class BashAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  Loc Target { get; set; }
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    var gs = GameState!;
+
+    // I'll probably want to do a knock-back kind of thing?
+    if (gs.ObjDb.Occupied(Target))
+    {
+      result.Messages.Add(new Message("There's someone in your way!", Target));
+      return result;
+    }
+
+    Tile tile = gs.TileAt(Target);
+    if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
+    {
+      result.Messages.Add(new Message("Bam!", Target));
+      result.EnergyCost = 1.0;
+      result.Complete = false;
+
+      int dc = 13 + gs.CurrLevel + 1;
+      int roll = gs.Rng.Next(1, 21) + Actor!.Stats[Attribute.Strength].Curr;
+
+      if (roll >= dc)
+      {
+        result.Messages.Add(new Message("You smash open the door!", Target));
+        gs.CurrentMap.SetTile(Target.Row, Target.Col, TileFactory.Get(TileType.BrokenDoor));
+      }
+      else
+      {
+        result.Messages.Add(new Message("The door holds firm!", Target));
+      }
+
+      gs.Noise(Actor!.ID, Target.Row, Target.Col, 5);
+    }
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var dirResult = (DirectionUIResult)result;
+    var actorLoc = Actor!.Loc;
+    Target = actorLoc with { Row = actorLoc.Row + dirResult.Row, 
+                            Col = actorLoc.Col + dirResult.Col };
+  }
+}
 // Action for when an actor jumps into a river or chasm (and eventually lava?)
 class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 {

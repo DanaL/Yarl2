@@ -337,6 +337,7 @@ class TileFactory
   private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
   private static readonly Tile OpenPit = new BasicTile(TileType.OpenPit, true, false, true);
   private static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
+  private static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -375,6 +376,7 @@ class TileFactory
     TileType.Pit => Pit,
     TileType.OpenPit => OpenPit,
     TileType.SecretDoor => SecretDoor,
+    TileType.BrokenDoor => BrokenDoor,
     _ => Unknown
   };
 }

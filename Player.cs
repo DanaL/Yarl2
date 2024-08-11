@@ -604,7 +604,7 @@ class Player : Actor, IPerformer, IGameEventListener
         ShowInventory(ui, "Use which item?", "");
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new UseItemAction(gameState, this);
-      }
+      }      
       else if (ch == 'd')
       {
         ShowInventory(ui, "Drop what?", "", true);
@@ -628,6 +628,12 @@ class Player : Actor, IPerformer, IGameEventListener
           _inputController = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
         }
+      }
+      else if (ch == 'F')
+      {
+        gameState.WriteMessages([ new Message("Bash in what direction?", Loc)], "");
+        _inputController = new DirectionalInputer();
+        _deferred = new BashAction(gameState, this);
       }
       else if (ch == 't')
       {

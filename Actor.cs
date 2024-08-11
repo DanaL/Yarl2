@@ -325,7 +325,7 @@ class Mob : Actor
     if (gs.ObjDb.GetObj(sourceID) is Actor sourceActor)
     {
       int threshold = volume - Util.Distance(sourceActor.Loc, Loc);
-      bool heard = gs.Rng.Next(11) < threshold;
+      bool heard = gs.Rng.Next(11) <= threshold;
       
       if (heard && sourceID == gs.Player.ID && Status == MobAttitude.Idle)
       {
