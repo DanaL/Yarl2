@@ -48,10 +48,27 @@ class Treasure
     return loot;
   }
 
-  static void AddToLevel(Item item, GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
+  static void AddObjectToLevel(Item item, GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
   {
-    var sq = level.RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(dungeonID, levelNum, sq.Item1, sq.Item2);
+    List<Loc> candidates = [];
+    for (int r = 0; r < level.Height; r++)
+    {
+      for (int c = 0; c < level.Width; c++)
+      {
+        switch (level.TileAt(r, c).Type)
+        {
+          case TileType.DungeonFloor:
+          case TileType.Pit:
+          case TileType.OpenPit:
+          case TileType.TeleportTrap:
+          case TileType.HiddenTeleportTrap:
+            candidates.Add(new Loc(dungeonID, levelNum, r, c));
+            break;
+        }
+      }
+    }
+
+    Loc loc = candidates[rng.Next(candidates.Count)];
     objDb.Add(item);
     objDb.SetToLoc(loc, item);
   }
@@ -87,7 +104,7 @@ class Treasure
       {
         var name = CommonItems[rng.Next(CommonItems.Count)];
         var item = GenerateItem(name, objDb, rng);
-        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
     else if (levelNum == 1)
@@ -98,7 +115,7 @@ class Treasure
         double roll = rng.NextDouble();
         var name = roll <= 0.9 ? CommonItems[rng.Next(CommonItems.Count)] : UncommonItems[rng.Next(UncommonItems.Count)];
         var item = GenerateItem(name, objDb, rng);
-        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
     else if (levelNum == 2 || levelNum == 3)
@@ -115,7 +132,7 @@ class Treasure
         else
           name = GoodItems[rng.Next(GoodItems.Count)];
         var item = GenerateItem(name, objDb, rng);
-        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
     else if (levelNum == 5)
@@ -132,7 +149,7 @@ class Treasure
         else
           name = GoodItems[rng.Next(GoodItems.Count)];
         var item = GenerateItem(name, objDb, rng);
-        AddToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
   }
