@@ -618,7 +618,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     foreach (var performer in Performers)
     {
-      performer.Energy = performer.Recovery;
+      performer.Energy = double.Max(0.0, performer.Recovery);
     }
 
     // Let the player go first when starting a session
@@ -630,7 +630,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void AddPerformer(IPerformer performer)
   {
-    performer.Energy = performer.Recovery;
+    performer.Energy = double.Max(0.0, performer.Recovery);
     Performers.Add(performer);
   }
 
@@ -665,7 +665,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (nextPerformer.Energy < 1.0)
       {
-        nextPerformer.Energy += nextPerformer.Recovery;
+        nextPerformer.Energy += double.Max(0.0, nextPerformer.Recovery);
         ++_currPerformer;
       }
       else

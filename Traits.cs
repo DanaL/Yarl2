@@ -697,6 +697,53 @@ class ConfusedTrait : EffectTrait, IGameEventListener
   }
 }
 
+class LameTrait : EffectTrait, IGameEventListener
+{
+  public ulong VictimID { get; set; }
+  public ulong EndsOn { get; set; }
+  public bool Expired { get; set; } = false;
+
+  public override string AsText() => $"Lame#{VictimID}#{EndsOn}";
+  public bool Listening => throw new NotImplementedException();
+
+  public override string Apply(Actor victim, GameState gs)
+  {    
+    // if the actor already has the exhausted trait, just set the EndsOn
+    // of the existing trait to the higher value
+    foreach (var t in victim.Traits)
+    {
+      if (t is LameTrait trait)
+      {
+        trait.EndsOn = ulong.Max(EndsOn, trait.EndsOn);
+        return "You hurt your leg even more.";
+      }
+    }
+
+    victim.Traits.Add(this);
+    victim.Recovery -= 0.25;
+    victim.Stats[Attribute.Dexterity].Change(-1);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return "";
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > EndsOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      victim.Recovery += 0.25;
+      victim.Stats[Attribute.Dexterity].Change(1);
+      victim.Traits.Remove(this);
+      Expired = true;
+      gs.UIRef().AlertPlayer(new Message("Your leg feels better.", victim.Loc), "", gs);
+      gs.StopListening(GameEventType.EndOfRound, this);
+    }      
+  }
+
+  public override bool IsAffected(Actor victim, GameState gs) => true;
+}
+
 class ExhaustedTrait : EffectTrait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -1389,6 +1436,12 @@ class TraitFactory
         };
       case "Exhausted":
         return new ExhaustedTrait()
+        {
+          VictimID = ulong.Parse(pieces[1]),
+          EndsOn = ulong.Parse(pieces[2])
+        };
+      case "Lame":
+        return new LameTrait()
         {
           VictimID = ulong.Parse(pieces[1]),
           EndsOn = ulong.Parse(pieces[2])

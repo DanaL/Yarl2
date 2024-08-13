@@ -231,6 +231,18 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   Loc Target { get; set; }
 
+  bool CheckForInjury(TileType type) => type switch
+  {
+    TileType.ClosedDoor => true,
+    TileType.LockedDoor => true,
+    TileType.WoodWall => true,
+    TileType.PermWall => true,
+    TileType.StoneWall => true,
+    TileType.DungeonWall => true,
+    TileType.Tree => true,
+    _ => false
+  };
+
   public override ActionResult Execute()
   {
     var result = base.Execute();
@@ -264,6 +276,25 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
       }
 
       gs.Noise(Actor!.ID, Target.Row, Target.Col, 5);
+    }
+
+    // I should impose a small chance of penalty/injury so that spamming
+    // bashing is a little risky
+    if (CheckForInjury(tile.Type) && gs.Rng.Next(4) == 0) {
+      var lame = new LameTrait()
+      {
+        VictimID = actor.ID,
+        EndsOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)
+      };
+
+      string msg = lame.Apply(actor, gs);
+      if (msg.Length > 0)
+        result.Messages.Add(new Message(msg, Actor!.Loc));
+      else
+      {
+        msg = $"You injure your leg kicking {Tile.TileDesc(tile.Type)}!";
+        result.Messages.Add(new Message(msg, Actor!.Loc));
+      }
     }
 
     return result;
