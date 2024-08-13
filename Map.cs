@@ -58,7 +58,9 @@ enum TileType
   VaultDoor,
   Pit,
   OpenPit,
-  SecretDoor
+  SecretDoor,
+  HiddenTeleportTrap,
+  TeleportTrap
 }
 
 interface ITriggerable
@@ -150,6 +152,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pit => "stone floor",
     TileType.OpenPit => "pit",
     TileType.SecretDoor => "a wall",
+    TileType.HiddenTeleportTrap => "stone floor",
+    TileType.TeleportTrap => "teleport trap",
     _ => "unknown"
   };
 
@@ -338,6 +342,8 @@ class TileFactory
   private static readonly Tile OpenPit = new BasicTile(TileType.OpenPit, true, false, true);
   private static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
   private static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
+  private static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
+  private static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -377,6 +383,8 @@ class TileFactory
     TileType.OpenPit => OpenPit,
     TileType.SecretDoor => SecretDoor,
     TileType.BrokenDoor => BrokenDoor,
+    TileType.HiddenTeleportTrap => TeleportTrap,
+    TileType.TeleportTrap => VisibileTeleportTrap,
     _ => Unknown
   };
 }

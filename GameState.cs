@@ -10,7 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -831,15 +830,37 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
         throw new AbnormalMovement(dest);
-      }
-      
-      if (tile.Type == TileType.OpenPit && !flying)
+      }      
+      else if (tile.Type == TileType.OpenPit && !flying)
       {
         dest = FallIntoPit(actor, dest);
         List<Message> msgs = [ new Message("You tumble into the pit!", dest, false) ];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
         throw new AbnormalMovement(dest);
+      }
+      else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
+      {
+        CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.TeleportTrap));
+
+        // Find candidate locations to teleport to
+        List<Loc> candidates = [];
+        for (int r = 0; r < CurrentMap.Height; r++)
+        {
+          for (int c = 0; c < CurrentMap.Width; c++)
+          {
+            var loc = new Loc(CurrDungeonID, CurrLevel, r, c);
+            if (CurrentMap.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
+              candidates.Add(loc);
+          }
+        }
+
+        WriteMessages([new Message("Your stomach lurches!", start, false)], "");
+        if (candidates.Count > 0)
+        {
+          Loc newDest = candidates[Rng.Next(candidates.Count)];
+          return ResolveActorMove(actor, dest, newDest);
+        }        
       }
     }
 

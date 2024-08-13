@@ -218,7 +218,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     try 
     {
       Message moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
-      Actor.Loc = _loc;
       result.Messages.Add(moveMsg);
     }
     catch (AbnormalMovement abMov)
@@ -228,8 +227,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     
     if (Actor is Player)
     {
-      result.Messages.Add(new Message(GameState!.LocDesc(_loc), _loc));
-      GameState.Noise(Actor.ID, _loc.Row, _loc.Col, Actor.GetMovementNoise());
+      result.Messages.Add(new Message(GameState!.LocDesc(Actor.Loc), Actor.Loc));
+      GameState.Noise(Actor.ID, Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
     }
     else
     {

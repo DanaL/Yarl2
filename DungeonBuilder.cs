@@ -588,18 +588,19 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
+  static void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
   {
     // At the moment I just have pits, and pits can't be on the lowest level 
     // of the dungeon obv. Hmm I'm calling these pits but I guess they are 
     // more like nethack's trapdoors 
     if (level == depth - 1)
       return;
-    
-    for (int j = 0 ; j < 3; j++)
+
+    int numOfTraps = rng.Next(1, 4);
+    for (int j = 0 ; j < numOfTraps; j++)
     {
       var sq = map.RandomTile(TileType.DungeonFloor, rng);
-      map.SetTile(sq, TileFactory.Get(TileType.Pit));
+      map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
     }
   }
 
@@ -631,7 +632,7 @@ class MainDungeonBuilder : DungeonBuilder
       dungeon.AddMap(levels[levelNum]);      
     }
 
-    // Add rivers/chasms to some of the levels
+    // Add rivers/chasms and traps to some of the levels
     for (int levelNum = 0; levelNum < numOfLevels - 1; levelNum++)
     {
       if (rng.Next(4) == 0)

@@ -16,14 +16,11 @@ class DungeonMap(Random rng)
 {
   readonly Random _rng = rng;
 
-  static Tile PickDoor(Random rng)
-  {
-    TileType doorType = rng.Next(4) == 0 ? TileType.LockedDoor : TileType.ClosedDoor;
-    //return TileFactory.Get(doorType);
-    return TileFactory.Get(TileType.LockedDoor);
-  }
-
-  static bool IsDoor(Tile tile) => tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor;
+  static Tile PickDoor(Random rng) =>
+    TileFactory.Get(rng.Next(4) == 0 ? TileType.LockedDoor : TileType.ClosedDoor);
+  
+  static bool IsDoor(Tile tile) => 
+    tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor;
 
   // Pick a room template to overlay onto the map (currently either 
   // rectangular or circular)
