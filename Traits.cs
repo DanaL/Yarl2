@@ -1479,7 +1479,7 @@ class TraitFactory
         };      
       case "Immunity":
         Enum.TryParse(pieces[1], out dt);
-        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
+        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
         return new ImmunityTrait()
         {
           Type = dt,
