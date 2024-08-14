@@ -46,8 +46,7 @@ class Colours
   public static readonly Colour BRIGHT_RED = new(208, 28, 31, 255);
   public static readonly Colour DULL_RED = new(129, 12, 12, 255);
   public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
-  public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
-  public static readonly Colour SEARCH_RED = new(208, 28, 31, 75);
+  public static readonly Colour TORCH_RED = new(208, 28, 31, 25);  
   public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 15);
   public static readonly Colour FX_RED = new(128, 00, 00, 175);
   public static readonly Colour FAR_BELOW = new(55, 198, 255, 50);
@@ -57,7 +56,8 @@ class Colours
   public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);  
   public static readonly Colour FAINT_PINK = new(178, 102, 255, 125);
   public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
-  
+  public static readonly Colour SEARCH_HIGHLIGHT = new(55, 198, 255, 75);
+
   public static string ColourToText(Colour colour)
   {
     if (colour == WHITE) return "white";

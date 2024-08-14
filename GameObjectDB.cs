@@ -205,7 +205,7 @@ class GameObjectDB
     return (glyph, z);
   }
 
-  // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with TopGlyph()
+  // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with a TopGlyph() method
   // They're only used to querying what's below on chasm sqs
   // Basically, the sqr ignoring the occupant since we only want to remember
   // either the item stack or the tile

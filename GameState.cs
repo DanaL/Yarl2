@@ -820,7 +820,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (actor is Player)
     {
       Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
-      bool flying = Player.HasActiveTrait<FlyingTrait>();
+      bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
       
       if (tile.Type == TileType.Pit && !flying)
       {

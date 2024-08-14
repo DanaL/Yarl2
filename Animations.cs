@@ -373,11 +373,12 @@ class SqAnimation : Animation
 
 record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Expiry);
 
-class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animation
+class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tilesOnly = true) : Animation
 {
   public bool Fast { get; set; } = false;
   public Colour Colour { get; set; } = Colours.FAINT_PINK;
   public Colour AltColour { get; set; } = Colours.LIGHT_PURPLE;
+  bool TilesOnly { get; set; } = tilesOnly;
   readonly GameState _gs = gs;
   readonly Dungeon _dungeon = dungeon;
   readonly UserInterface _ui = gs.UIRef();
@@ -398,7 +399,14 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs) : Animati
       Loc loc = _locs[_index];
       Tile tile = _gs.TileAt(loc);
       Glyph glyph = Util.TileToGlyph(tile);
-      char ch = loc != _gs.Player.Loc ? glyph.Ch : '@';
+      char ch = glyph.Ch;
+      if (!TilesOnly)
+      {
+        Glyph g = _gs.ObjDb.GlyphAt(loc);
+        if (g != GameObjectDB.EMPTY)
+          ch = g.Ch;
+      }
+      
       Sqr sqr = _gs.Rng.NextDouble() < 0.1 
                   ? new Sqr(glyph.Lit, AltColour, ch)
                   : new Sqr(glyph.Lit, Colour, ch);

@@ -828,11 +828,11 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
       }      
     }
 
-    var anim = new MagicMapAnimation(gs, gs.CurrentDungeon, sqsToSearch)
+    var anim = new MagicMapAnimation(gs, gs.CurrentDungeon, sqsToSearch, false)
     {
       Fast = true,
-      Colour = Colours.SEARCH_RED,
-      AltColour = Colours.SEARCH_RED
+      Colour = Colours.SEARCH_HIGHLIGHT,
+      AltColour = Colours.SEARCH_HIGHLIGHT
     };
     gs.UIRef().RegisterAnimation(anim);
 
