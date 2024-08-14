@@ -36,6 +36,7 @@ f   Fire a bow. You can select a target via the movement
     have a bow equiped, it will be automatically selected. 
     Note that you have unlimited ammunition but may also 
     find magical or special consumable arrows.
+F   Bash open a locked or closed door.
 i   Iventory: view what you are currently carrying
 o   Open a door. You will also automatically open doors by 
     bumping into them.
