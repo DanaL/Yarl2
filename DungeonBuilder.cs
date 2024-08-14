@@ -311,6 +311,9 @@ class MainDungeonBuilder : DungeonBuilder
     // I eventually probably won't include every decoration from every fact
     foreach (var decoration in decorations)
     {
+      if (rng.NextDouble() < 0.1)
+        continue;
+        
       int level = rng.Next(numOfLevels);
 
       if (decoration.Type == DecorationType.Statue)

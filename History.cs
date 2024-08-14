@@ -352,12 +352,12 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   {
     var decorations = new List<Decoration>
         {
-            new Decoration(DecorationType.Statue, StatueDesc()),
-            new Decoration(DecorationType.Fresco, FrescoDesc()),
-            new Decoration(DecorationType.Mosaic, MosaicDesc()),
-            new Decoration(DecorationType.ScholarJournal, ScholarJournal1()),
-            new Decoration(DecorationType.ScholarJournal, ScholarJounral2()),
-            new Decoration(DecorationType.ScholarJournal, ScholarJounral3())
+            new(DecorationType.Statue, StatueDesc()),
+            new(DecorationType.Fresco, FrescoDesc()),
+            new(DecorationType.Mosaic, MosaicDesc()),
+            new(DecorationType.ScholarJournal, ScholarJournal1()),
+            new(DecorationType.ScholarJournal, ScholarJounral2()),
+            new(DecorationType.ScholarJournal, ScholarJounral3())
         };
 
     return decorations;
@@ -375,7 +375,7 @@ class RulerInfo
   public string FullName => $"{PrefixTitle} {Name} {Epithet}".Trim();
 }
 
-class History
+class History(Random rng)
 {
   // Storing a plain list of facts and iterating through them might eventually
   // get goofy, but I don't have a sense of how many facts will end up being 
@@ -386,12 +386,7 @@ class History
   RulerInfo _ruler;
   public VillainType Villain { get; set; }
 
-  private Random _rng;
-
-  public History(Random rng)
-  {
-    _rng = rng;
-  }
+  private Random _rng = rng;
 
   public List<Decoration> GetDecorations()
   {
