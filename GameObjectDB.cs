@@ -356,7 +356,12 @@ class GameObjectDB
                   .ToList();
   }
 
-  public void RemoveItem(Loc loc, Item item) => _itemLocs[loc].Remove(item);
+  public void RemoveItem(Loc loc, Item item)
+  {
+    _itemLocs[loc].Remove(item);
+    item.Loc = Loc.Nowhere;
+  }
+
   public void RemoveItemFromGame(Loc loc, Item item)
   {
     if (_itemLocs.TryGetValue(loc, out List<Item>? value))
