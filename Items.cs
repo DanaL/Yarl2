@@ -140,7 +140,7 @@ enum ItemNames
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION, POTION_OF_LEVITATION
+  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD
 }
 
 class ItemFactory
@@ -179,15 +179,18 @@ class ItemFactory
         break;
       case ItemNames.BATTLE_AXE:
         item = new Item()
-        {
-          Name = "battle axe",
-          Type = ItemType.Weapon,
-          Value = 25,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
+        { Name = "battle axe", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 3, DamageType = DamageType.Slashing });
         item.Traits.Add(new AxeTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        break;
+      case ItemNames.GREATSWORD:
+        item = new Item()
+        { Name = "greatsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Slashing });
+        item.Traits.Add(new SwordTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        item.Traits.Add(new TwoHandedTrait());
         break;
       case ItemNames.MACE:
         item = new Item()
