@@ -140,7 +140,7 @@ enum ItemNames
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION
+  RING_OF_PROTECTION, POTION_OF_LEVITATION
 }
 
 class ItemFactory
@@ -451,6 +451,16 @@ class ItemFactory
         item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, 
           Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ACModTrait() { ArmourMod = 1 });
+        break;
+      case ItemNames.POTION_OF_LEVITATION:
+        item = new Item()
+        {
+          Name = "potion of levitation", Type = ItemType.Potion, Value = 100,
+          Glyph = new Glyph('!', Colours.PINK, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new UseSimpleTrait("levitation"));
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

@@ -168,9 +168,9 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
   public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
 }
 
-class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs, actor)
+class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : Action(gs, actor)
 {
-  readonly BasicTrait _trait = trait;
+  readonly TemporaryTrait _trait = trait;
 
   public override ActionResult Execute()
   {
@@ -179,11 +179,7 @@ class ApplyTraitAction(GameState gs, Actor actor, BasicTrait trait) : Action(gs,
 
     if (Actor is not null)
     {
-      Actor.Traits.Add(_trait);
-      if (_trait is IGameEventListener listener)
-        GameState!.RegisterForEvent(GameEventType.EndOfRound, listener);
-      if (_trait is IOwner owned)
-        owned.OwnerID = Actor.ID;
+      _trait.Apply(Actor, GameState!);
 
       string desc = _trait.Desc();
       if (desc.Length > 0)

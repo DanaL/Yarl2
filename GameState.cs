@@ -326,15 +326,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(messages, "", this);
   }
 
+  void ActorFallsIntoWater(Actor actor, Loc loc)
+  {
+    UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the water!", actor.Loc), "", this);
+
+    string msg = FallIntoWater(actor, loc);
+    if (msg.Length > 0)
+      UI.AlertPlayer(new Message(msg, loc), "", this);
+  }
+
   void BridgeDestroyedOverWater(Loc loc)
   {
-  if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
+    if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
-      UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the water!", actor.Loc), "", this);
-      
-      string msg = FallIntoWater(actor, loc);
-      if (msg.Length > 0)
-        UI.AlertPlayer(new Message(msg, loc), "", this);
+      ActorFallsIntoWater(actor, loc);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -346,17 +351,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
+  void ActorFallsIntoChasm(Actor actor, Loc landingSpot)
+  {
+    UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!", actor.Loc), "", this);
+
+    string msg = FallIntoChasm(actor, landingSpot);
+    if (msg.Length > 0)
+      UI.AlertPlayer(new Message(msg, landingSpot), "", this);
+  }
+
   void BridgeCollapseOverChasm(Loc loc)
   {
     var landingSpot = loc with { Level = loc.Level + 1 };
 
     if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
-      UI.AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!", actor.Loc), "", this);
-      
-      string msg = FallIntoChasm(actor, landingSpot);
-      if (msg.Length > 0)
-        UI.AlertPlayer(new Message(msg, landingSpot), "", this);
+      ActorFallsIntoChasm(actor, landingSpot);      
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -861,6 +871,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           Loc newDest = candidates[Rng.Next(candidates.Count)];
           return ResolveActorMove(actor, dest, newDest);
         }        
+      }
+      else if (tile.Type == TileType.Chasm && !flying)
+      {
+        Loc landingSpot = dest with { Level = dest.Level + 1 };
+        ActorFallsIntoChasm(actor, landingSpot);
+      }
+      else if (tile.Type == TileType.DeepWater && !flying)
+      {
+        ActorFallsIntoWater(actor, dest);
       }
     }
 

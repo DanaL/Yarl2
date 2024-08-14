@@ -259,7 +259,9 @@ class PlayerCreator
     
     player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
-    
+
+    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), player.ID);
+
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);

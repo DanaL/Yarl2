@@ -536,10 +536,17 @@ abstract class UserInterface
       statuses.Add("EXHAUSTED");
     }
     if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
-    {
+    {      
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PURPLE, "TELEPATHIC")];
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TELEPATHIC");
+    }
+    if (!statuses.Contains("LEVITATING") && gs.Player.HasActiveTrait<LevitationTrait>())
+    {
+      // Maybe change the colour if the effect is going to expire soon?
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "LEVITATING")];
+      row = WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("LEVITATING");
     }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {

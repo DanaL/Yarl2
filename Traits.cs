@@ -54,8 +54,8 @@ abstract class BasicTrait : Trait
 
 abstract class EffectTrait : BasicTrait
 {
-  public abstract string Apply(Actor victim, GameState gs);
-  public abstract bool IsAffected(Actor victim, GameState gs);
+  public abstract string Apply(Actor target, GameState gs);
+  public abstract bool IsAffected(Actor target, GameState gs);
 }
 
 // To let me classify traits that mobs can take on their turns
@@ -296,6 +296,13 @@ class ResistanceTrait : TemporaryTrait
   public DamageType Type { get; set; }
   protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
+
+  public override void Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = target.ID;
+  }
 }
 
 class StickyTrait : BasicTrait
@@ -374,8 +381,10 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
     {
       Remove(gs);
-    }    
+    }
   }
+
+  public abstract void Apply(Actor target, GameState gs);
 
   public override string AsText() => $"{ExpiresOn}#{OwnerID}";
 }
@@ -385,6 +394,62 @@ class TelepathyTrait : TemporaryTrait
   public override string Desc() => "can sense others' minds";
   protected override string ExpiryMsg() => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
+
+  public override void Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);    
+    OwnerID = target.ID;
+  }
+}
+
+class LevitationTrait : TemporaryTrait
+{
+  public override string Desc() => "begin to float in the air!";
+  protected override string ExpiryMsg() => "You alight on the ground.";
+
+  public override string AsText() => $"Levitation#{OwnerID}#{ExpiresOn}";
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
+    {
+      if (ExpiresOn - gs.Turn == 15)
+      {
+        string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wobble")} in the air.";
+        gs.WriteMessages([new Message(s, actor.Loc)], "");
+      }
+
+      if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+      {
+        Remove(gs);
+
+        // I am assuming if someone has more than one FloatingTrait, we can just remove one of them
+        // and it doesn't matter.
+        int i = -1;
+        for (int j = 0; j < actor.Traits.Count; j++)
+        {
+          if (actor.Traits[j] is FloatingTrait)
+          {
+            i = j;
+            break;
+          }
+        }
+        if (i != -1)
+          actor.Traits.RemoveAt(i);
+
+        gs.ResolveActorMove(actor, actor.Loc, actor.Loc);
+      }
+    }    
+  }
+
+  public override void Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    target.Traits.Add(new FloatingTrait());
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = target.ID;
+  }
 }
 
 class TwoHandedTrait : Trait
@@ -468,12 +533,9 @@ class WrittenTrait : Trait
 // A bit dumb to have floating and flying and maybe I'll merge them
 // eventually but at the moment floating creatures won't make noise
 // while they move
-class FloatingTrait : BasicTrait
+class FloatingTrait : Trait
 {
-  public FloatingTrait() { }
-  public FloatingTrait(ulong expiry) => ExpiresOn = expiry;
-
-  public override string AsText() => $"Floating#{ExpiresOn}";
+  public override string AsText() => $"Floating";
 }
 
 class FlyingTrait : BasicTrait
@@ -508,6 +570,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
     "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
+    "levitation" => new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
+                                              { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1599,6 +1663,12 @@ class TraitFactory
         };
       case "KnockBack":
         return new KnockBackTrait();
+      case "Levitation":
+        return new LevitationTrait()
+        {
+          OwnerID = ulong.Parse(pieces[1]),
+          ExpiresOn = ulong.Parse(pieces[2])
+        };
       case "Metal":
         return new MetalTrait()
         {
