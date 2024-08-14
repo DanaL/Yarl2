@@ -531,13 +531,17 @@ class MainDungeonBuilder : DungeonBuilder
     int numOfDeepOnes = int.Min(rng.Next(3) + 2, deepOneLocs.Count);
     List<Actor> deepOnes = [];
     for (int j = 0; j < numOfDeepOnes; j++)
-    {      
+    {
+      if (deepOneLocs.Count == 0)
+        break;
+
       Actor d = MonsterFactory.Get("deep one", rng);
       d.Traits.Add(new WorshiperTrait() 
       { 
         Altar = shrineLoc,
         Chant = CalcChant(rng)
       });
+
       int x = rng.Next(deepOneLocs.Count);
       Loc pickedLoc = deepOneLocs[x];
       deepOneLocs.RemoveAt(x);
@@ -552,9 +556,13 @@ class MainDungeonBuilder : DungeonBuilder
       Altar = shrineLoc,
       Chant = CalcChant(rng)
     });
-    Loc shamanLoc = deepOneLocs[rng.Next(deepOneLocs.Count)];
-    objDb.AddNewActor(shaman, shamanLoc);
-    deepOnes.Add(shaman);
+
+    if (deepOneLocs.Count > 0)
+    {
+      Loc shamanLoc = deepOneLocs[rng.Next(deepOneLocs.Count)];
+      objDb.AddNewActor(shaman, shamanLoc);
+      deepOnes.Add(shaman);
+    }
 
     foreach (Actor deepOne in deepOnes)
     {
