@@ -576,7 +576,8 @@ class CloseDoorAction : DirectionalAction
     }
     else if (Actor is Player)
     {
-      result.Messages.Add(new Message("There's no door there!", GameState!.Player.Loc));
+      string s = door.Type == TileType.BrokenDoor ? "The door is broken!" : "There's no door there!";
+      result.Messages.Add(new Message(s, GameState!.Player.Loc));
     }
 
     return result;
