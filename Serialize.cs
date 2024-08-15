@@ -216,13 +216,13 @@ internal class DungeonSaver
   public string? ArrivalMessage { get; set; }
 
   [JsonInclude]
-  public List<RememberedSq> RememberedSqs;
+  public List<string> RememberedLocs;
   [JsonInclude]
   public Dictionary<int, MapSaver> LevelMaps;
 
   public DungeonSaver()
   {
-    RememberedSqs = [];
+    RememberedLocs = [];
     LevelMaps = [];
   }
 
@@ -232,7 +232,7 @@ internal class DungeonSaver
     {
       ID = dungeon.ID,
       ArrivalMessage = dungeon.ArrivalMessage,
-      RememberedSqs = []
+      RememberedLocs = []
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -240,10 +240,11 @@ internal class DungeonSaver
       sd.LevelMaps.Add(k, MapSaver.Shrink(dungeon.LevelMaps[k]));
     }
 
-    // foreach (var sq in dungeon.RememberedSqs)
-    // {
-    //   sd.RememberedSqs.Add(RememberedSq.FromTuple(sq.Key, sq.Value));
-    // }
+    foreach (var kvp in dungeon.RememberedLocs)
+    {
+      string s = $"{kvp.Key};{kvp.Value}";
+      sd.RememberedLocs.Add(s);      
+    }
 
     return sd;
   }
@@ -251,13 +252,15 @@ internal class DungeonSaver
   public static Dungeon Inflate(DungeonSaver sd)
   {
     Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage ?? "");
-    // d.RememberedSqs = [];
-
-    // foreach (var sq in sd.RememberedSqs)
-    // {
-    //   d.RememberedSqs.Add(sq.ToTuple(), sq.Sqr);
-    // }
-
+    
+    foreach (string s in sd.RememberedLocs)
+    {
+      var pieces = s.Split(';');
+      Loc loc = Loc.FromStr(pieces[0]);
+      Glyph g = Glyph.TextToGlyph(pieces[1]);
+      d.RememberedLocs[loc] = g;
+    }
+ 
     foreach (var k in sd.LevelMaps.Keys)
     {
       d.LevelMaps.Add(k, MapSaver.Inflate(sd.LevelMaps[k]));
@@ -686,12 +689,4 @@ class GameObjDBSave
 
     return objDb;
   }
-}
-
-// SIGH so for tuples, the JsonSerliazer won't serialize a tuple of ints. So, let's make a little object that
-// *can* be serialized
-record struct RememberedSq(int A, int B, int C, Sqr Sqr)
-{
-  public static RememberedSq FromTuple((int, int, int) t, Sqr sqr) => new RememberedSq(t.Item1, t.Item2, t.Item3, sqr);
-  public (int, int, int) ToTuple() => (A, B, C);
 }

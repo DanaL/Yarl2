@@ -138,7 +138,6 @@ internal class BLUserInferface : UserInterface, IDisposable
     }
     else
     {
-      //var faintRed = new Color() { A = 100, R = 255, G = 0, B = 0 };
       if (gs is not null && gs.Player is not null)
       {
         for (int row = 0; row < ViewHeight; row++)
