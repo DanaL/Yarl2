@@ -614,6 +614,31 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static void PutSecretDoorInHallway(Map map, Random rng)
+  {
+    List<(int, int)> candidates = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        {
+          int adjFloors = Util.Adj8Sqs(r, c)
+                              .Select(sq => map.TileAt(sq))
+                              .Where(t => t.Type == TileType.DungeonFloor).Count();
+          if (adjFloors == 2)
+            candidates.Add((r, c));
+        }
+      }
+    }
+
+    if (candidates.Count > 0)
+    {
+      (int, int) sq = candidates[rng.Next(candidates.Count)];
+      map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
+    }
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
   {
     static bool ReplaceChasm(Map map, (int, int) pt)
@@ -681,6 +706,9 @@ class MainDungeonBuilder : DungeonBuilder
       }
 
       SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
+
+      // Sometimes add a secret door or two in hallways
+      PutSecretDoorInHallway(levels[levelNum], rng);
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
