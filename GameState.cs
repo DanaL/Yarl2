@@ -44,9 +44,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       "doors" => DMapDoors,
       "flying" => DMapFlight,
       _ => DMap
-    };   
+    };
   }
-  
+
   public ulong LastTarget { get; set; } = 0;
   public List<Fact> Facts => Campaign.History != null ? Campaign.History.Facts : [];
 
@@ -60,41 +60,44 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   private int _currPerformer = 0;
 
   static readonly Dictionary<TileType, int> _passableBasic = new()
-    {
-        { TileType.DungeonFloor, 1 },
-        { TileType.Landmark, 1 },
-        { TileType.Upstairs, 1 },
-        { TileType.Downstairs, 1 },
-        { TileType.OpenDoor, 1 },
-        { TileType.BrokenDoor, 1 },
-        { TileType.WoodBridge, 1 }
-    };
+  {
+    { TileType.DungeonFloor, 1 },
+    { TileType.Landmark, 1 },
+    { TileType.Upstairs, 1 },
+    { TileType.Downstairs, 1 },
+    { TileType.OpenDoor, 1 },
+    { TileType.BrokenDoor, 1 },
+    { TileType.WoodBridge, 1 },
+    { TileType.OpenPortcullis, 1 },
+  };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
-    {
-        { TileType.DungeonFloor, 1 },
-        { TileType.Landmark, 1 },
-        { TileType.Upstairs, 1 },
-        { TileType.Downstairs, 1 },
-        { TileType.OpenDoor, 1 },
-        { TileType.BrokenDoor, 1 },
-        { TileType.ClosedDoor, 1 },
-        { TileType.WoodBridge, 1 }
-    };
+  {
+    { TileType.DungeonFloor, 1 },
+    { TileType.Landmark, 1 },
+    { TileType.Upstairs, 1 },
+    { TileType.Downstairs, 1 },
+    { TileType.OpenDoor, 1 },
+    { TileType.BrokenDoor, 1 },
+    { TileType.ClosedDoor, 1 },
+    { TileType.WoodBridge, 1 },
+    { TileType.OpenPortcullis, 1 }
+  };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
-    {
-        { TileType.DungeonFloor, 1 },
-        { TileType.Landmark, 1 },
-        { TileType.Upstairs, 1 },
-        { TileType.Downstairs, 1 },
-        { TileType.OpenDoor, 1 },
-        { TileType.BrokenDoor, 1 },
-        { TileType.WoodBridge, 1 },
-        { TileType.DeepWater, 1 },
-        { TileType.Water, 1 },
-        { TileType.Chasm, 1 }
-    };
+  {
+    { TileType.DungeonFloor, 1 },
+    { TileType.Landmark, 1 },
+    { TileType.Upstairs, 1 },
+    { TileType.Downstairs, 1 },
+    { TileType.OpenDoor, 1 },
+    { TileType.BrokenDoor, 1 },
+    { TileType.WoodBridge, 1 },
+    { TileType.DeepWater, 1 },
+    { TileType.Water, 1 },
+    { TileType.Chasm, 1 },
+    { TileType.OpenPortcullis, 1 }
+  };
 
   public void WriteMessages(List<Message> alerts, string ifNotSeen) => UI.AlertPlayer(alerts, ifNotSeen, this);
   public void ClearMenu() => UI.CloseMenu();
@@ -118,7 +121,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Map CurrentMap => Campaign!.Dungeons[CurrDungeonID].LevelMaps[CurrLevel];
   public bool InWilderness => CurrDungeonID == 0;
   public Map Wilderness => Campaign.Dungeons[0].LevelMaps[0];
-  
+
   // I made life difficult for myself by deciding that Turn 0 of the game is 
   // 8:00am T_T 1 turn is 10 seconds (setting aside all concerns about 
   // realism and how the amount of stuff one can do in 10 seconds will in no 
@@ -215,8 +218,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     q.Enqueue(start);
     HashSet<Loc> visited = [];
 
-    while (q.Count > 0) 
-    { 
+    while (q.Count > 0)
+    {
       var curr = q.Dequeue();
       visited.Add(curr);
 
@@ -227,7 +230,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (tileType == TileType.Chasm || tileType == TileType.DeepWater)
           return tileType;
         else if (tileType == TileType.WoodBridge && !visited.Contains(adj))
-          q.Enqueue(adj);        
+          q.Enqueue(adj);
       }
     }
 
@@ -300,7 +303,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var fire = ItemFactory.Fire(this);
       ObjDb.SetToLoc(loc, fire);
-      
+
       var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
       if (tile.Type == TileType.Grass)
       {
@@ -314,12 +317,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         var type = SquareBelowBridge(map, loc);
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(type));
-        
+
         if (type == TileType.Chasm)
           BridgeCollapseOverChasm(loc);
         else if (type == TileType.DeepWater)
           BridgeDestroyedOverWater(loc);
-      }      
+      }
     }
 
     if (messages.Count > 0)
@@ -346,7 +349,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var item in itemsToFall)
     {
       UI.AlertPlayer(new Message($"{item.Name.DefArticle().Capitalize()} sinks!", loc), "", this);
-      ObjDb.RemoveItem(loc, item);      
+      ObjDb.RemoveItem(loc, item);
       ItemDropped(item, loc);
     }
   }
@@ -366,7 +369,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
-      ActorFallsIntoChasm(actor, landingSpot);      
+      ActorFallsIntoChasm(actor, landingSpot);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -391,20 +394,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     HashSet<Loc> shores = [];
 
     // Build set of potential places for the actor to wash ashore
-    while (q.Count > 0) 
+    while (q.Count > 0)
     {
       var curr = q.Dequeue();
 
-      if (visited.Contains(curr)) 
+      if (visited.Contains(curr))
         continue;
 
       visited.Add(curr);
       foreach (var adj in Util.Adj8Locs(curr))
       {
         var tile = TileAt(adj);
-        if (tile.Passable() && !ObjDb.Occupied(adj)) 
+        if (tile.Passable() && !ObjDb.Occupied(adj))
         {
-          shores.Add(adj); 
+          shores.Add(adj);
         }
         else if (tile.Type == TileType.DeepWater && !visited.Contains(adj))
         {
@@ -413,7 +416,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
 
-    if (shores.Count > 0) 
+    if (shores.Count > 0)
     {
       var candidates = shores.ToList();
       var destination = candidates[Rng.Next(candidates.Count)];
@@ -426,7 +429,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         messages.Add(invMsgs);
       }
-      
+
       UpdateFoV();
 
       int conMod;
@@ -443,7 +446,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (exhausted.IsAffected(actor, this))
       {
         string msg = exhausted.Apply(actor, this);
-        if (msg.Length > 0) 
+        if (msg.Length > 0)
           messages.Add(msg);
       }
 
@@ -461,7 +464,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
     Message moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-    WriteMessages([moveMsg], "");    
+    WriteMessages([moveMsg], "");
     actor.Loc = landingSpot;
 
     if (actor is Player)
@@ -483,7 +486,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result)
   {
     if (victim is Player)
-    {            
+    {
       if (result is not null && result.Messages.Count > 0)
       {
         UI.AlertPlayer(result.Messages, result.MessageIfUnseen, this);
@@ -504,13 +507,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       throw new VictoryException();
     }
     else if (result is not null)
-    {      
-      
-        var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
-        var plural = victim.HasTrait<PluralTrait>();
+    {
 
-        Message killMsg = MsgFactory.Phrase(victim.ID, Verb.Etre, verb, plural, true, victim.Loc, this);
-        result.Messages.Add(killMsg);
+      var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
+      var plural = victim.HasTrait<PluralTrait>();
+
+      Message killMsg = MsgFactory.Phrase(victim.ID, Verb.Etre, verb, plural, true, victim.Loc, this);
+      result.Messages.Add(killMsg);
     }
 
     if (victim.ID != Player.ID && victim is Mob m)
@@ -520,7 +523,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ObjDb.RemoveActor(victim);
-    
+
     // Need to remove the victim from the Performer queue but also update 
     // current performer pointer if necessary. If _currPerformer > index
     // of victim, we want to decrement it
@@ -544,7 +547,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // Was anything listening for the the victims death?
     foreach (var (targetID, listener) in _deathWatchListeners)
     {
-      if (targetID == victim.ID) 
+      if (targetID == victim.ID)
         listener.EventAlert(GameEventType.Death, this);
     }
     ClearDeathWatch(victim.ID);
@@ -567,7 +570,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     string dmgDesc = retribution.Type.ToString().ToLower();
 
     if (result is not null)
-    {      
+    {
       string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
       result.Messages.Add(new Message(txt, src.Loc));
     }
@@ -575,7 +578,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     int dmg = 0;
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
-    HashSet<Loc> pts = [ src.Loc ];
+    HashSet<Loc> pts = [src.Loc];
     foreach (Loc adj in Util.Adj8Locs(src.Loc))
     {
       if (ObjDb.Occupant(adj) is Actor actor)
@@ -584,7 +587,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this);
         result?.Messages.Add(new Message(msg, actor.Loc));
         if (hpLeft < 1)
-           ActorKilled(actor, dmgDesc, result);
+          ActorKilled(actor, dmgDesc, result);
       }
       ApplyDamageEffectToLoc(adj, retribution.Type);
       pts.Add(adj);
@@ -604,7 +607,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         };
         UI.PlayAnimation(anim, this);
         break;
-    }    
+    }
   }
 
   void ClearDeathWatch(ulong victimID)
@@ -616,13 +619,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         indexes.Push(j);
     }
     while (indexes.Count > 0)
-    {      
+    {
       _deathWatchListeners.RemoveAt(indexes.Pop());
     }
   }
 
   public void BuildPerformersList()
-  {    
+  {
     RefreshPerformers();
 
     foreach (var performer in Performers)
@@ -745,10 +748,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     a.Loc = startB;
     ObjDb.SetActorToLoc(startB, a.ID);
-    
+
     b.Loc = startA;
     ObjDb.SetActorToLoc(startA, b.ID);
-    
+
     if (a is Player && startB.DungeonID > 0)
     {
       SetDMaps(startB);
@@ -786,7 +789,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       messages.Add(moveMsg);
 
       ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
-      
+
       if (actor is Player)
       {
         RefreshPerformers();
@@ -816,13 +819,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Message ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
-    
+
     // Not making djikstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
     // monsters can open doors, fly, etc. Multiple maps??
     if (actor is Player && dest.DungeonID > 0)
     {
-      SetDMaps(dest);      
+      SetDMaps(dest);
     }
 
     // I think just for now, I'll have only the player trigger traps/pits
@@ -831,22 +834,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
       bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
-      
+
       if (tile.Type == TileType.Pit && !flying)
       {
         CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.OpenPit));
         dest = FallIntoPit(actor, dest);
         ui.SetPopup(new Popup("A pit opens up underneath you!", "", -1, -1));
-        List<Message> msgs = [ new Message("A pit opens up underneath you!", dest, false) ];
+        List<Message> msgs = [new Message("A pit opens up underneath you!", dest, false)];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
         throw new AbnormalMovement(dest);
-      }      
+      }
       else if (tile.Type == TileType.OpenPit && !flying)
       {
         dest = FallIntoPit(actor, dest);
         ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));
-        List<Message> msgs = [ new Message("You tumble into the pit!", dest, false) ];
+        List<Message> msgs = [new Message("You tumble into the pit!", dest, false)];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
         throw new AbnormalMovement(dest);
@@ -872,7 +875,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
           Loc newDest = candidates[Rng.Next(candidates.Count)];
           return ResolveActorMove(actor, dest, newDest);
-        }        
+        }
       }
       else if (tile.Type == TileType.Chasm && !flying)
       {
@@ -891,7 +894,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Message ThingAddedToLoc(Loc loc)
   {
     Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-    
+
     if (tile is GateTrigger trigger)
     {
       Loc gateLoc = trigger.Gate;
@@ -931,7 +934,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     var sb = new StringBuilder();
     sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
-    
+
     Dictionary<Item, int> items = new Dictionary<Item, int>();
     foreach (var item in ObjDb.ItemsAt(loc))
     {
@@ -977,7 +980,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       else
       {
         sb.Append($" There are {count} {item.FullName.Pluralize()} here.");
-      }      
+      }
     }
 
     foreach (var env in ObjDb.EnvironmentsAt(loc))
@@ -1089,7 +1092,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void StopListening(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
   {
-    if (eventType == GameEventType.EndOfRound) 
+    if (eventType == GameEventType.EndOfRound)
     {
       _endOfRoundListeners.Remove(listener);
     }
@@ -1139,11 +1142,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     HashSet<Loc> lit = [];
 
-    foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level)) 
+    foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       int lightRadius = obj.LightRadius();
       if (obj.ID == Player.ID)
-      {        
+      {
         if (InWilderness)
         {
           var (hour, _) = CurrTime();
@@ -1166,7 +1169,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (lightRadius == 0)
           lightRadius = 1;
       }
-      
+
       if (lightRadius > 0)
       {
         lit.UnionWith(FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb));
@@ -1190,7 +1193,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // monsters in any of them. If so, we alert the Player (mainly to 
     // halt running when a monster comes into view)
     var prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
-    RecentlySeenMonsters = [ Player.ID ];
+    RecentlySeenMonsters = [Player.ID];
     foreach (var loc in fov)
     {
       if (ObjDb.Occupant(loc) is Actor occ)
@@ -1202,7 +1205,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Player.EventAlert(GameEventType.MobSpotted, this);
     }
     RecentlySeenMonsters = prevSeenMonsters;
-    
+
     foreach (var loc in fov)
     {
       Tile tile = CurrMap.TileAt(loc.Row, loc.Col);
@@ -1210,7 +1213,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {
         // Remember the terrain tile if there's nothing visible the square
-        
+
         // If it's a chasm, we display the tile from the level below
         if (tile.Type != TileType.Chasm)
         {
@@ -1233,7 +1236,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, Colours.BLACK);
         }
       }
-    
+
       CurrentDungeon.RememberedLocs[loc] = glyph;
     }
   }
