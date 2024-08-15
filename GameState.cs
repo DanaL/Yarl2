@@ -836,6 +836,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.OpenPit));
         dest = FallIntoPit(actor, dest);
+        ui.SetPopup(new Popup("A pit opens up underneath you!", "", -1, -1));
         List<Message> msgs = [ new Message("A pit opens up underneath you!", dest, false) ];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
@@ -844,6 +845,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       else if (tile.Type == TileType.OpenPit && !flying)
       {
         dest = FallIntoPit(actor, dest);
+        ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));
         List<Message> msgs = [ new Message("You tumble into the pit!", dest, false) ];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");
