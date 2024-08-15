@@ -896,10 +896,77 @@ class DungeonMap(Random rng)
     }
   }
 
+  // Okay, so we still have two separate regions after other tweaks so I'm just 
+  // going to draw a straight tunnel between the two regions
+  static void BruteForceJoinRegions(Map map, HashSet<(int, int)> a, HashSet<(int, int)> b, Random rng)
+  {    
+    List<(int, int)> smaller, larger;
+    if (a.Count > b.Count)
+    {
+      larger = a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+      smaller = b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+    }
+    else
+    {
+      larger = b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+      smaller = a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+    }
+
+    bool done = false;
+    while (!done)
+    {
+      int i = rng.Next(smaller.Count);
+      var (startR, startC) = smaller[i];
+      smaller.RemoveAt(i);
+
+      List<(int, int)> endSqs = [];
+      foreach (var sq in larger)
+      {
+        if (Util.Distance(sq.Item1, sq.Item2, startR, startC) < 6 && (sq.Item1 == startR || sq.Item2 == startC))
+          endSqs.Add(sq);
+      }
+
+      if (endSqs.Count > 0)
+      {
+        var (endR, endC) = endSqs[rng.Next(endSqs.Count)];
+        int deltaR;
+        if (startR == endR)
+          deltaR = 0;
+        else if (startR < endR)
+          deltaR = 1;
+        else
+          deltaR = -1;
+        int deltaC;
+        if (startC == endC)
+          deltaC = 0;
+        else if (startC < endC)
+          deltaC = 1;
+        else
+          deltaC = -1;
+
+        int row = startR, col = startC;
+        while (row != endR || col != endC)
+        {
+          map.SetTile(row, col, TileFactory.Get(TileType.DungeonFloor));
+          row += deltaR;
+          col += deltaC;
+        }
+        
+        return;
+      }
+      else
+      {
+        done = false;
+      }
+    }
+
+    throw new InvalidRoomException();
+  }
+
   public Map DrawLevel(int width, int height)
   {
     var map = new Map(width, height);
-    List<Room> rooms = [];
+    List<Room> rooms;
 
     while (true)
     {
@@ -928,6 +995,19 @@ class DungeonMap(Random rng)
         ConnectRegions(map, rooms);
         FillInDeadEnds(map);
         ConnectRooms(map, rooms, _rng);
+
+        var regionFinder = new RegionFinder(new DungeonPassable());
+        var regions = regionFinder.Find(map, true, TileType.DungeonWall);
+        if (regions.Count == 2)
+        {
+          BruteForceJoinRegions(map, regions[0], regions[1], rng);
+        }
+        else if (regions.Count > 2)
+        {
+          // If there are still 3 or more disjoint regions, assume the map
+          // is hopeless and start over
+          throw new InvalidRoomException();
+        }
       }
       catch (InvalidRoomException)
       {

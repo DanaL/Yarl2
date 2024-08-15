@@ -487,7 +487,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      // seed = 481497046; // generated isolated rooms
+      seed = 481497046; // generated isolated rooms
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
