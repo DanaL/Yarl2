@@ -671,7 +671,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     // Sword-in-the-Stone situation might be neat)
     foreach (var env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
-      var web = env.Traits.OfType<StickyTrait>().First();
+      var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
       if (web is not null)
       {
         bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
