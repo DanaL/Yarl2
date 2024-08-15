@@ -165,7 +165,7 @@ class Vaults
           1 => VaultDoorType.Trigger,
           _ => VaultDoorType.SecretDoor
         };
-
+        
         switch (doorType)
         {
           case VaultDoorType.Key:
