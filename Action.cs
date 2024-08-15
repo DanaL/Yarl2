@@ -271,7 +271,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
         result.Messages.Add(new Message("The door holds firm!", Target));
       }
 
-      gs.Noise(Actor!.ID, Target.Row, Target.Col, 5);
+      gs.Noise(Target.Row, Target.Col, 5);
     }
 
     // I should impose a small chance of penalty/injury so that spamming

@@ -87,7 +87,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public virtual int TotalSpellAttackModifier() => 0;
   public virtual int AC => 10;
   public virtual List<Damage> MeleeDamage() => [];
-  public virtual void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs) { }
+  public virtual void HearNoise(int volume, int sourceRow, int sourceColumn, GameState gs) { }
 
   // I'm sure eventually there will be more factors that do into determining
   // how noisy an Actor's walking is. Wearing metal armour for instance
@@ -320,19 +320,16 @@ class Mob : Actor
     return dmgs;
   }
 
-  public override void HearNoise(int volume, ulong sourceID, int sourceRow, int sourceColumn, GameState gs)
+  public override void HearNoise(int volume, int sourceRow, int sourceColumn, GameState gs)
   {
-    if (gs.ObjDb.GetObj(sourceID) is Actor sourceActor)
+    int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
+    bool heard = gs.Rng.Next(11) <= threshold;
+
+    if (heard && Status == MobAttitude.Idle)
     {
-      int threshold = volume - Util.Distance(sourceActor.Loc, Loc);
-      bool heard = gs.Rng.Next(11) <= threshold;
-      
-      if (heard && sourceID == gs.Player.ID && Status == MobAttitude.Idle)
-      {
-        Console.WriteLine($"{Name} wakes up");
-        Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
-      }
-    }    
+      Console.WriteLine($"{Name} wakes up");
+      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+    }
   }
 
   public override int TotalMeleeAttackModifier()
