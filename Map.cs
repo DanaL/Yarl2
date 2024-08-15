@@ -240,12 +240,13 @@ class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
 class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
 {
   public Loc Gate { get; set; } = gate;
+  public bool Found { get; set; } = false;
 
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
   public override bool Opaque() => false;
-
-  public override string ToString() => $"{(int)Type};{Gate}";
+  
+  public override string ToString() => $"{(int)Type};{Gate};{Found}";
 }
 
 class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)

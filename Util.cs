@@ -423,7 +423,7 @@ class Util
     TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.GateTrigger => new Glyph('.', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? ',' : '.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
     TileType.Pit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.OpenPit => new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),

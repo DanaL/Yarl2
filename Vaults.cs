@@ -20,7 +20,7 @@ enum VaultDoorType
 
 class Vaults
 {
-  static (int, int) FindVaultTrigger(Map map, int row, int col, int height, int width, HashSet<(int, int)> vault, Random rng)
+  static (int, int) PickVaultTriggerLoc(Map map, int row, int col, int height, int width, HashSet<(int, int)> vault, Random rng)
   {
     int startRow = int.Max(row - 10, 1);
     int endRow = int.Min(row + 10, height);
@@ -230,7 +230,7 @@ class Vaults
   static void SetPortcullis(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
   {
     int triggerRow, triggerCol;
-    (triggerRow, triggerCol) = FindVaultTrigger(map, doorRow, doorCol, h, w, room, rng);
+    (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, h, w, room, rng);
     if (triggerRow != -1 && triggerCol != -1)
     {
       Console.WriteLine($"Vault!!");

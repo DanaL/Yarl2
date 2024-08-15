@@ -891,13 +891,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Message ThingAddedToLoc(Loc loc)
   {
     Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-
+    
     if (tile is GateTrigger trigger)
     {
       Loc gateLoc = trigger.Gate;
       if (CurrentMap.TileAt(gateLoc.Row, gateLoc.Col) is Portcullis portcullis)
-      {        
+      {
         portcullis.Trigger();
+        if (LastPlayerFoV.Contains(loc))
+          trigger.Found = true;
         return new Message("You hear a metallic grinding!", loc, false);
       }
     }

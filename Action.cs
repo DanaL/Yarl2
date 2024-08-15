@@ -831,6 +831,22 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.OpenPit));
           }          
           break;
+        case TileType.GateTrigger:
+          GateTrigger gt = (GateTrigger)tile;
+          if (!gt.Found)
+          {
+            dc = 12 + gs.CurrLevel + 1;
+            if (rogue)
+              dc -= 2;
+            dc = int.Min(dc, 20);
+            if (gs.Rng.Next(1, 21) <= dc)
+            {
+              result.Messages.Add(new Message("You spot a pressure plate!", loc, false));
+              gt.Found = true;
+            }
+          }
+          
+          break;
         // Eventually I probably want to add searching for gargoyles, mimics, 
         // invisible monsters, etc
       }      

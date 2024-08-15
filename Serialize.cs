@@ -346,7 +346,9 @@ internal class MapSaver
           break;
         case TileType.GateTrigger:
           digits = Util.ToNums(pieces[2]);
-          tile = new GateTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]));
+          GateTrigger gt = new(new Loc(digits[0], digits[1], digits[2], digits[3]));
+          gt.Found = bool.Parse(pieces[3]);
+          tile = gt;
           break;
         case TileType.Landmark:
           string msg = pieces[2];
