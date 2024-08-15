@@ -11,6 +11,12 @@
 
 namespace Yarl2;
 
+enum VaultDoorType
+{
+  SecretDoor,
+  Trigger,
+  Key
+}
 
 class Vaults
 {
@@ -114,6 +120,7 @@ class Vaults
       }
     }
 
+    int vaultsPlaced = 0;
     foreach (int roomID in rooms.Keys)
     {
       if (rooms[roomID].Count > 75)
@@ -150,18 +157,37 @@ class Vaults
           break;
       }
 
-      if (doorCount == 1) // && rng.NextDouble() < 0.25)
+      if (doorCount == 1 && rng.NextDouble() < 0.25)
       {
-        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
-        //SetVaultDoor(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
-        //SetPortcullisVault(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
-      }
-    }
+        VaultDoorType doorType = rng.Next(3) switch
+        {
+          0 => VaultDoorType.Key,
+          1 => VaultDoorType.Trigger,
+          _ => VaultDoorType.SecretDoor
+        };
 
-    MapUtils.Dump(map, areas);
+        switch (doorType)
+        {
+          case VaultDoorType.Key:
+            SetVaultDoorKey(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
+            break;
+          case VaultDoorType.Trigger:
+            SetPortcullis(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
+            break;
+          case VaultDoorType.SecretDoor:
+            map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
+            break;
+        }
+        
+        ++vaultsPlaced;
+      }
+
+      if (vaultsPlaced == 2)
+        break;
+    }
   }
 
-  static void SetVaultDoor(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng, GameObjectDB objDb)
+  static void SetVaultDoorKey(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng, GameObjectDB objDb)
   {
     Metals material;
     int roll = rng.Next(10);
@@ -175,8 +201,9 @@ class Vaults
     map.SetTile(doorRow, doorCol, door);
 
     var (fg, bg) = Util.MetallicColour(material);
-    Item key = new() { Name = "key", Type = ItemType.Tool, Value = 1,
-                        Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
+    Item key = new() { 
+      Name = "key", Type = ItemType.Tool, Value = 1,
+      Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
     };
     key.Traits.Add(new MetalTrait() { Type = material });
     key.Traits.Add(new VaultKeyTrait(new Loc(dungeonID, level, doorRow, doorCol)));
@@ -200,7 +227,7 @@ class Vaults
     objDb.SetToLoc(keyLoc, key);
   }
 
-  static void SetPortcullisVault(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
+  static void SetPortcullis(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
   {
     int triggerRow, triggerCol;
     (triggerRow, triggerCol) = FindVaultTrigger(map, doorRow, doorCol, h, w, room, rng);
@@ -210,10 +237,6 @@ class Vaults
       
       map.SetTile(doorRow, doorCol, new Portcullis(false));
       map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, level, doorRow, doorCol)));
-
-      // need to actually put stuff in the vaults
     }
   }
-
-  
 }
