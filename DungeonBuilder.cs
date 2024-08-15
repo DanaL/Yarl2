@@ -614,7 +614,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void PutSecretDoorInHallway(Map map, Random rng)
+  static void PutSecretsDoorInHallways(Map map, Random rng)
   {
     List<(int, int)> candidates = [];
     for (int r = 0; r < map.Height; r++)
@@ -624,7 +624,7 @@ class MainDungeonBuilder : DungeonBuilder
         if (map.TileAt(r, c).Type == TileType.DungeonFloor)
         {
           int adjFloors = Util.Adj8Sqs(r, c)
-                              .Select(sq => map.TileAt(sq))
+                              .Select(map.TileAt)
                               .Where(t => t.Type == TileType.DungeonFloor).Count();
           if (adjFloors == 2)
             candidates.Add((r, c));
@@ -634,8 +634,12 @@ class MainDungeonBuilder : DungeonBuilder
 
     if (candidates.Count > 0)
     {
-      (int, int) sq = candidates[rng.Next(candidates.Count)];
-      map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
+      int numtoAdd = rng.Next(1, 4);
+      for (int j = 0; j < numtoAdd; j++)
+      {
+        (int, int) sq = candidates[rng.Next(candidates.Count)];
+        map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
+      }      
     }
   }
 
@@ -708,7 +712,8 @@ class MainDungeonBuilder : DungeonBuilder
       SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
 
       // Sometimes add a secret door or two in hallways
-      PutSecretDoorInHallway(levels[levelNum], rng);
+      if (rng.Next(2) == 0)
+        PutSecretsDoorInHallways(levels[levelNum], rng);
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);

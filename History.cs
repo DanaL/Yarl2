@@ -388,6 +388,8 @@ class History(Random rng)
 
   private Random _rng = rng;
 
+  public OGRulerType RulerType => _ruler.Type;
+
   public List<Decoration> GetDecorations()
   {
     var historicalEvent = new InvasionHistoricalEvent(_ruler, _facts, _rng);
