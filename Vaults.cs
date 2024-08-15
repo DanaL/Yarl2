@@ -29,9 +29,9 @@ class Vaults
     int triggerRow = -1, triggerCol = -1;
 
     List<(int, int)> candidates = [];
-    for (int r = startRow; r <= endRow; r++)
+    for (int r = startRow; r < endRow; r++)
     {
-      for (int c = startCol; c <= endCol; c++)
+      for (int c = startCol; c < endCol; c++)
       {
         var sq = (r, c);
         if (!vault.Contains(sq) && map.TileAt(sq).Type == TileType.DungeonFloor)
@@ -159,30 +159,34 @@ class Vaults
 
       if (doorCount == 1 && rng.NextDouble() < 0.25)
       {
-        VaultDoorType doorType = rng.Next(3) switch
-        {
-          0 => VaultDoorType.Key,
-          1 => VaultDoorType.Trigger,
-          _ => VaultDoorType.SecretDoor
-        };
-        
-        switch (doorType)
-        {
-          case VaultDoorType.Key:
-            SetVaultDoorKey(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
-            break;
-          case VaultDoorType.Trigger:
-            SetPortcullis(map, height, width, dungeonID, levelNum, rooms[roomID], doorRow, doorCol, rng);
-            break;
-          case VaultDoorType.SecretDoor:
-            map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
-            break;
-        }
-        
+        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
         ++vaultsPlaced;
       }
 
       if (vaultsPlaced == 2)
+        break;
+    }
+  }
+
+  static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb)
+  {
+    VaultDoorType doorType = rng.Next(3) switch
+    {
+      0 => VaultDoorType.Key,
+      1 => VaultDoorType.Trigger,
+      _ => VaultDoorType.SecretDoor
+    };
+
+    switch (doorType)
+    {
+      case VaultDoorType.Key:
+        SetVaultDoorKey(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb);
+        break;
+      case VaultDoorType.Trigger:
+        SetPortcullis(map, dungeonID, level, vault, doorRow, doorCol, rng);
+        break;
+      case VaultDoorType.SecretDoor:
+        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
         break;
     }
   }
@@ -227,10 +231,10 @@ class Vaults
     objDb.SetToLoc(keyLoc, key);
   }
 
-  static void SetPortcullis(Map map, int h, int w, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
+  static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
   {
     int triggerRow, triggerCol;
-    (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, h, w, room, rng);
+    (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, map.Height, map.Width, room, rng);
     if (triggerRow != -1 && triggerCol != -1)
     {
       Console.WriteLine($"Vault!!");
