@@ -542,11 +542,23 @@ class CloseDoorAction : DirectionalAction
 
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = false };
+    var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
     var door = _map.TileAt(Loc.Row, Loc.Col);
 
     if (door is Door d)
     {
+      var gs = GameState!;
+      if (gs.ObjDb.Occupied(Loc))
+      {
+        result.Messages.Add(new Message("There is someone in the way.", Loc));
+        return result;
+      }
+      if (gs.ObjDb.ItemsAt(Loc).Count > 0)
+      {
+        result.Messages.Add(new Message("There is something in the way.", Loc));
+        return result;
+      }
+
       if (d.Open)
       {
         d.Open = false;
