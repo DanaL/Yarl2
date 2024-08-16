@@ -1001,7 +1001,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   // Sort of the same as Noise. I can probably DRY them?
-  public HashSet<Loc> Flood(Loc start, int radius)
+  public HashSet<Loc> Flood(Loc start, int radius, bool inclusive = false)
   {
     HashSet<Loc> affected = [];
     var map = CurrentMap;
@@ -1023,8 +1023,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         visited.Add(n);
 
         var tile = map.TileAt(n.Row, n.Col);
-        if (!tile.PassableByFlight())
+        if (!tile.PassableByFlight()) 
+        {
+          if (inclusive)
+            affected.Add(n);
           continue;
+        }
 
         affected.Add(n);
 

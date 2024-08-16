@@ -572,6 +572,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
     "levitation" => new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
                                               { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
+    "knock" => new UseResult(true, "", new KnockAction(gs, user), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 

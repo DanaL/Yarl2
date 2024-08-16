@@ -140,7 +140,7 @@ enum ItemNames
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD
+  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK
 }
 
 class ItemFactory
@@ -397,6 +397,20 @@ class ItemFactory
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("blink"));
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.SCROLL_KNOCK:
+        item = new Item()
+        {
+          Name = "scroll of knock",
+          Type = ItemType.Scroll,
+          Value = 100,
+          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("knock"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());

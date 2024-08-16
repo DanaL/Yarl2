@@ -1193,6 +1193,36 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
   }
 };
 
+class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
+{
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    if (Actor is Actor caster)
+    {
+      result.Messages.Add(new Message("You hear a spectral knocking.", caster.Loc));
+      result.EnergyCost = 1.0;
+
+      var sqs = GameState!.Flood(caster.Loc, 4, true);
+      foreach (Loc sq in sqs)
+      {
+        Tile tile = GameState.TileAt(sq);
+        if (tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
+        {
+          result.Messages.Add(new Message("Click!", caster.Loc));
+          GameState.CurrentMap.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.ClosedDoor));
+        }
+      }
+      
+      var anim = new MagicMapAnimation(GameState, GameState.CurrentDungeon, [.. sqs]);
+      GameState.UIRef().RegisterAnimation(anim);
+    }
+    
+    return result;
+  }
+}
+
 class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 {  
   public override ActionResult Execute()
