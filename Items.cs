@@ -133,14 +133,14 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  SPEAR, GUISARME, DAGGER, HAND_AXE, BATTLE_AXE, MACE, LONGSWORD, SHORTSHORD, 
+  SPEAR, GUISARME, DAGGER, HAND_AXE, BATTLE_AXE, MACE, LONGSWORD, SHORTSHORD,  
   RAPIER, LONGBOW, ARROW, FIREBOLT, LEATHER_ARMOUR, STUDDED_LEATHER_ARMOUR,
-  RINGMAIL, CHAINMAIL, HELMET, SHIELD, TORCH, POTION_HEALING,
+  RINGMAIL, CHAINMAIL, HELMET, SHIELD, TORCH, POTION_HEALING, 
   POTION_MIND_READING, ANTIDOTE, POTION_FIRE_RES, POTION_COLD_RES,
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK
+  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, LOCK_PICK
 }
 
 class ItemFactory
@@ -299,6 +299,10 @@ class ItemFactory
       case ItemNames.SHIELD:
         item = new Item() { Name = "shield", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shield, ArmourMod = 1, Bonus = 0 });
+        break;
+      case ItemNames.LOCK_PICK:
+        item = new Item() { Name = "lock pick", Type = ItemType.Tool, Value = 20,
+          Glyph = new Glyph('(', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         break;
       case ItemNames.TORCH:
         item = new Item()

@@ -262,7 +262,8 @@ class PlayerCreator
 
     player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
-    
+
+    player.Inventory.Add(ItemFactory.Get(ItemNames.LOCK_PICK, objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);

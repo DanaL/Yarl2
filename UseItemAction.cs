@@ -11,6 +11,76 @@
 
 namespace Yarl2;
 
+class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  int Row;
+  int Col;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    
+    Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+    Tile tile = GameState!.TileAt(loc);
+
+    if (tile.Type == TileType.VaultDoor)
+    {
+      result.Messages.Add(new Message("That door requires a special key.", loc));
+      result.Complete = false;
+      result.EnergyCost = 0.0;
+    }
+    else if (tile.Type == TileType.OpenDoor)
+    {
+      result.Messages.Add(new Message("That door is not closed.", loc));
+      result.Complete = false;
+      result.EnergyCost = 0.0;
+    }
+    else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
+    {
+      result.Messages.Add(new Message("You find no lock there.", loc));
+      result.Complete = false;
+      result.EnergyCost = 0.0;
+    }
+    else 
+    {
+      result.Complete = true;
+      result.EnergyCost = 1.0;
+
+      bool rogue = gs.Player.Background == PlayerBackground.Skullduggery;
+      int dc = 12 + gs.CurrLevel + 1;
+      if (rogue)
+        dc -= 5;
+      int roll = GameState.Rng.Next(1, 21);
+      if (roll + Actor.Stats[Attribute.Dexterity].Curr > dc)
+      {
+        if (tile.Type == TileType.LockedDoor)
+        {
+          result.Messages.Add(new Message("The lock releases with a click.", loc));
+          GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
+        }
+        else
+        {
+          result.Messages.Add(new Message("You lock the door.", loc));
+          GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.LockedDoor));
+        }
+      }
+      else
+      {
+        result.Messages.Add(new Message("You fumble at the lock.", loc));
+      }
+    }
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) 
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
 class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
@@ -61,8 +131,18 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item.Type == ItemType.Bow)
     {
       GameState!.ClearMenu();
-      ((Player)Actor).FireReadedBow(item, GameState);
-      return new ActionResult() { Complete = false, EnergyCost = 0.0 };      
+      ((Player)Actor).FireReadedBow(item, GameState);      
+      return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+    }
+
+    if (item.Type == ItemType.Tool && item.Name == "lock pick")
+    {
+      GameState!.ClearMenu();
+      UserInterface ui = GameState.UIRef();
+      ui.SetPopup(new Popup("Which direction?", "", ui.PlayerScreenRow - 3, -1));
+
+      ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer());
+      return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
 
     bool consumable = item.HasTrait<ConsumableTrait>();
