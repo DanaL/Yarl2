@@ -848,7 +848,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       else if (tile.Type == TileType.OpenPit && !flying)
       {
         dest = FallIntoPit(actor, dest);
-        ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));
+        ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));        
         List<Message> msgs = [new Message("You tumble into the pit!", dest, false)];
         msgs.Add(ThingAddedToLoc(dest));
         WriteMessages(msgs, "");

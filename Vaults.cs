@@ -163,13 +163,34 @@ class Vaults
         ++vaultsPlaced;
       }
 
-      if (vaultsPlaced == 2)
+      if (vaultsPlaced == 2 || (levelNum == 0 && vaultsPlaced > 0))
         break;
     }
   }
 
   static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb)
   {
+    if (level == 0)
+    {
+      map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+
+      return;
+    }
+
+    if (level == 1 )
+    {
+      if (rng.Next(3) == 0)
+      {
+        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
+      }
+      else
+      {
+        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+      }
+      
+      return;
+    }
+
     VaultDoorType doorType = rng.Next(3) switch
     {
       0 => VaultDoorType.Key,

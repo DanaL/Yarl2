@@ -54,6 +54,7 @@ enum TileType
   CharredStump,
   Portcullis,
   OpenPortcullis,
+  BrokenPortcullis,
   GateTrigger,
   VaultDoor,
   Pit,
@@ -147,6 +148,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.FrozenDeepWater => "ice",
     TileType.Portcullis => "portcullis",
     TileType.OpenPortcullis => "open portcullis",
+    TileType.BrokenPortcullis => "broken portcullis",
     TileType.GateTrigger => "trigger/pressure plate",
     TileType.VaultDoor => "vault door",
     TileType.Pit => "stone floor",
@@ -345,6 +347,7 @@ class TileFactory
   private static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
   private static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
   private static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
+  private static readonly Tile BrokenPortcullis = new BasicTile(TileType.BrokenPortcullis, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -386,6 +389,7 @@ class TileFactory
     TileType.BrokenDoor => BrokenDoor,
     TileType.HiddenTeleportTrap => TeleportTrap,
     TileType.TeleportTrap => VisibileTeleportTrap,
+    TileType.BrokenPortcullis => BrokenPortcullis,
     _ => Unknown
   };
 }
