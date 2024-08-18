@@ -175,6 +175,9 @@ class Player : Actor, IPerformer, IGameEventListener
 
       if (item.Equiped)
       {
+        if (item.HasTrait<CursedTrait>())
+          desc += " *cursed";
+          
         if (item.Type == ItemType.Weapon)
           desc += " (in hand)";
         else if (item.Type == ItemType.Armour)
