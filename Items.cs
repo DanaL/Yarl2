@@ -470,13 +470,11 @@ class ItemFactory
         item.Traits.Add(new WandTrait() { Charges = 10, Effect = "frost", IDed = false });
         break;
       case ItemNames.RING_OF_PROTECTION:
-        item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, 
-          Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, Glyph = GlyphForRing("ring of protection") };
         item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ACMod#1" ] });        
         break;
       case ItemNames.RING_OF_AGGRESSION:
-        item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, 
-          Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, Glyph = GlyphForRing("ring of aggression") };
         GrantsTrait grants = new()
         {
           TraitsGranted = [ "ACMod#-3", "Berzerk" ]
@@ -503,6 +501,20 @@ class ItemFactory
     return item;
   }
 
+  static Glyph GlyphForRing(string name)
+  {
+    string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
+
+    return material switch
+    {
+      "silver ring" => new Glyph('o', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
+      "iron ring" => new Glyph('o', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+      "gold ring" => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
+      "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
+      "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
+      _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
+    };
+  }
   static Glyph GlyphForWand(string name)
   {
     string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
