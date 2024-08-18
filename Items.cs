@@ -477,8 +477,11 @@ class ItemFactory
       case ItemNames.RING_OF_AGGRESSION:
         item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, 
           Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ACModTrait() { ArmourMod = -3 });
-        item.Traits.Add(new BerzerkTrait() {});
+        GrantsTrait grants = new()
+        {
+          TraitsGranted = [ "ACMod#-3", "Berzerk" ]
+        };
+        item.Traits.Add(grants);
         item.Traits.Add(new CursedTrait() {});
         break;
       case ItemNames.POTION_OF_LEVITATION:

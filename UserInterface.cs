@@ -493,6 +493,12 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("RAGE");
       }
+      else if (!statuses.Contains("BERZERK") && trait is BerzerkTrait) 
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "BERZERK")];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+        statuses.Add("BERZERK");
+      }
       else if (trait is ResistanceTrait resist) 
       {
         List<(Colour, string)> statusLine;

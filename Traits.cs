@@ -35,11 +35,25 @@ interface IOwner
   ulong OwnerID { get; set; }
 }
 
-abstract class Trait
+abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
   public abstract string AsText();
   public virtual string Desc() => "";
+
+  public bool Equals(Trait? other)
+  {
+    if (other is null)
+      return false;
+
+    if (ReferenceEquals(this, other)) 
+      return true;
+
+    return AsText() == other.AsText();
+  }
+
+  public override bool Equals(object? obj) => Equals(obj as Trait);
+  public override int GetHashCode() => AsText().GetHashCode();
 }
 
 // This lets me easily group traits that are upgrades for the player. Name
@@ -325,6 +339,31 @@ class FinalBossTrait : Trait
 class FlammableTrait : Trait
 {
   public override string AsText() => "Flammable";
+}
+
+class GrantsTrait : Trait
+{
+  public string[] TraitsGranted = [];
+
+  public override string AsText() => "Grants#" + string.Join(';', TraitsGranted);
+
+  public void Grant(Actor actor)
+  {
+    foreach (string t in TraitsGranted)
+    {
+      Trait trait = TraitFactory.FromText(t, actor);
+      actor.Traits.Add(trait);
+    }
+  }
+
+  public void Remove(Actor actor)
+  {
+    foreach (string t in TraitsGranted)
+    {
+      Trait granted = TraitFactory.FromText(t, actor);
+      actor.Traits.Remove(granted);
+    }
+  }
 }
 
 class PlantTrait : Trait
@@ -1468,7 +1507,7 @@ class TraitFactory
         };
       case "Axe":
         return new AxeTrait();
-      case "Bezerk":
+      case "Berzerk":
         return new BerzerkTrait();
       case "Cleave":
         return new CleaveTrait();
@@ -1667,6 +1706,12 @@ class TraitFactory
         return new FinalBossTrait();
       case "Finesse":
         return new FinesseTrait();
+      case "Grants":
+        string[] traits = pieces[1].Split(';');
+        return new GrantsTrait()
+        {
+          TraitsGranted = traits
+        };
       case "Grappled":
         return new GrappledTrait()
         {

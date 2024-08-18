@@ -1690,6 +1690,18 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         break;
     }
 
+    if (item.Traits.OfType<GrantsTrait>().FirstOrDefault() is GrantsTrait grants)
+    {
+      if (equipResult == EquipingResult.Equiped)
+      {
+        grants.Grant(Actor);
+      }
+      else if (equipResult == EquipingResult.Unequiped)
+      {
+        grants.Remove(Actor);
+      }
+    }
+
     return result;
   }
 
