@@ -140,7 +140,8 @@ enum ItemNames
   SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, LOCK_PICK
+  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
+  LOCK_PICK, RING_OF_AGGRESSION
 }
 
 class ItemFactory
@@ -472,6 +473,13 @@ class ItemFactory
         item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, 
           Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ACModTrait() { ArmourMod = 1 });
+        break;
+      case ItemNames.RING_OF_AGGRESSION:
+        item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, 
+          Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ACModTrait() { ArmourMod = -3 });
+        item.Traits.Add(new BerzerkTrait() {});
+        item.Traits.Add(new CursedTrait() {});
         break;
       case ItemNames.POTION_OF_LEVITATION:
         item = new Item()
@@ -806,9 +814,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     {
       if (item.Equiped)
       {
-        // No cursed items or such yet to check for...
+        if (item.HasTrait<CursedTrait>())
+        {
+          return (EquipingResult.Cursed, ArmourParts.None);
+        }
+        
         item.Equiped = false;
-        return (EquipingResult.Unequiped, ArmourParts.Shirt);
+        return (EquipingResult.Unequiped, ArmourParts.None);
       }
 
       // Okay we are equiping new gear, which is a little more complicated
@@ -921,5 +933,6 @@ enum EquipingResult
   Conflict,
   ShieldConflict,
   TwoHandedConflict,
-  TooManyRings
+  TooManyRings,
+  Cursed
 }

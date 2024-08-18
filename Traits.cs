@@ -490,6 +490,14 @@ class NamedTrait : Trait
   public override string AsText() => "Named";
 }
 
+// I think I want to sort out/merge Bezerk and Rage
+// I implemented Rage pretty early on before most of the
+// rest of the traits
+class BerzerkTrait : Trait
+{
+  public override string AsText() => "Berzerk";
+}
+
 class RageTrait(Actor actor) : FeatTrait
 {
   readonly Actor _actor = actor;
@@ -630,6 +638,11 @@ class ArmourTrait : ACModTrait
   public int Bonus { set; get; }
 
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
+}
+
+class CursedTrait : Trait 
+{
+  public override string AsText() => $"Cursed";
 }
 
 class DeathMessageTrait : BasicTrait
@@ -1455,6 +1468,8 @@ class TraitFactory
         };
       case "Axe":
         return new AxeTrait();
+      case "Bezerk":
+        return new BerzerkTrait();
       case "Cleave":
         return new CleaveTrait();
       case "ConfusingScream":
@@ -1474,6 +1489,8 @@ class TraitFactory
           OwnerID = ulong.Parse(pieces[1]),
           Expired = bool.Parse(pieces[2])
         };
+      case "Cursed":
+        return new CursedTrait() {};
       case "Damage":
         Enum.TryParse(pieces[3], out dt);
         return new DamageTrait()

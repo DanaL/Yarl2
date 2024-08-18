@@ -1648,6 +1648,16 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
       case EquipingResult.Equiped:
         alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, Actor.Loc, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
+
+        if (item.HasTrait<CursedTrait>())
+        {
+          if (item.Type == ItemType.Ring)
+            result.Messages.Add(new Message("The ring tightens around your finger!", Actor.Loc));
+        }
+        break;
+      case EquipingResult.Cursed:
+        alert = new Message("You cannot remove it! It seems to be cursed!", Actor.Loc);
+        result = new ActionResult() { Messages = [alert], Complete = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.Unequiped:
         alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, Actor.Loc, GameState);
