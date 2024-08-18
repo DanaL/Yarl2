@@ -1578,6 +1578,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var msg = new Message("You cannot drop something you're wearing.", GameState.Player.Loc);
       return new ActionResult() { Complete = false, Messages = [msg] };
     }
+    if (item.Equiped && item.Type == ItemType.Ring)
+    {
+      var msg = new Message("You'll need to take it off first.", GameState.Player.Loc);
+      return new ActionResult() { Complete = false, Messages = [msg] };
+    }
     else if (itemCount > 1)
     {
       var dropStackAction = new DropStackAction(GameState, Actor, Choice);
