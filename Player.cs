@@ -148,6 +148,11 @@ class Player : Actor, IPerformer, IGameEventListener
       dmgs.Add(new Damage(1, 1, DamageType.Blunt));
     }
 
+    if (HasTrait<BerzerkTrait>())
+    {
+      dmgs.Add(new Damage(10, 1, DamageType.Force));
+    }
+
     return dmgs;
   }
 
