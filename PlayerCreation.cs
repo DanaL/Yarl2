@@ -265,6 +265,7 @@ class PlayerCreator
 
     player.Inventory.Add(ItemFactory.Get(ItemNames.LOCK_PICK, objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_PROTECTION, objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_AGGRESSION, objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);

@@ -182,6 +182,15 @@ class PreGameHandler(UserInterface ui)
 
     j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of frost", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+
+    List<string> ringMaterials = [ "silver", "iron", "ring", "diamond", "gold" ];
+    j = rng.Next(ringMaterials.Count);
+    Item.IDInfo.Add("ring of protection", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
+    ringMaterials.RemoveAt(j);
+
+    j = rng.Next(ringMaterials.Count);
+    Item.IDInfo.Add("ring of aggression", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
+    ringMaterials.RemoveAt(j);
   }
 
   static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)

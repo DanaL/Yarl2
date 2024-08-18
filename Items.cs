@@ -472,7 +472,7 @@ class ItemFactory
       case ItemNames.RING_OF_PROTECTION:
         item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, 
           Glyph = new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ACModTrait() { ArmourMod = 1 });
+        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ACMod#1" ] });        
         break;
       case ItemNames.RING_OF_AGGRESSION:
         item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, 

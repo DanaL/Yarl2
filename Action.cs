@@ -1692,6 +1692,9 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (item.Traits.OfType<GrantsTrait>().FirstOrDefault() is GrantsTrait grants)
     {
+      if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? value))
+        Item.IDInfo[item.Name] = value with { Known = true };
+
       if (equipResult == EquipingResult.Equiped)
       {
         grants.Grant(Actor);
