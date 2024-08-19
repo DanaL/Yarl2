@@ -283,8 +283,13 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
 
-    //player.Inventory.Add(ItemFactory.Get("wand of frost", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("wand of fireballs", objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.WAND_FROST, objDb), player.ID);
+
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
+
 
     var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(25, 51);

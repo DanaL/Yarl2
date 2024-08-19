@@ -141,7 +141,7 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_OF_IDENTIFY
 }
 
 class ItemFactory
@@ -406,6 +406,15 @@ class ItemFactory
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());
         break;
+      case ItemNames.SCROLL_OF_IDENTIFY:
+        item = new Item { Name = "scroll of identify", Type = ItemType.Scroll, Value = 75, 
+            Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("identify"));
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
       case ItemNames.SCROLL_KNOCK:
         item = new Item()
         {
@@ -442,7 +451,7 @@ class ItemFactory
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());
-        break;
+        break;      
       // Probably later I'll randomize how many charges wands have?
       case ItemNames.WAND_OF_MAGIC_MISSILES:
         item = new Item() { Name = "wand of magic missiles", Type = ItemType.Wand, Value = 150, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
@@ -512,6 +521,7 @@ class ItemFactory
       "gold ring" => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
       "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
       "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
+      "emerald ring" => new Glyph('o', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
       _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
     };
   }
@@ -919,6 +929,60 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     return string.Join(' ', msgs).Trim();
+  }
+
+  public void ShowMenu(UserInterface ui, string title, string instructions, bool mentionMoney = false)
+  {
+    var slots = UsedSlots().Order().ToArray();
+
+    if (slots.Length == 0)
+    {
+      //ui.AlertPlayer("You are empty handed!");
+      return;
+    }
+
+    List<string> lines = [title];
+    foreach (var s in slots)
+    {
+      var (item, count) = ItemAt(s);
+      string desc = count == 1 ? item.FullName.IndefArticle()
+                               : $"{count} {item.FullName.Pluralize()}";
+
+      if (item.Equiped)
+      {
+        if (item.HasTrait<CursedTrait>())
+          desc += " *cursed";
+
+        if (item.Type == ItemType.Weapon)
+          desc += " (in hand)";
+        else if (item.Type == ItemType.Armour)
+          desc += " (worn)";
+        else if (item.Type == ItemType.Bow)
+          desc += " (equiped)";
+        else if (item.Type == ItemType.Ring)
+          desc += " (wearing)";
+      }
+      lines.Add($"{s}) {desc}");
+    }
+
+    if (mentionMoney)
+    {
+      lines.Add("");
+      if (Zorkmids == 0)
+        lines.Add("You seem to be broke.");
+      else if (Zorkmids == 1)
+        lines.Add("You have a single zorkmid.");
+      else
+        lines.Add($"You wallet contains {Zorkmids} zorkmids.");
+    }
+
+    if (!string.IsNullOrEmpty(instructions))
+    {
+      lines.Add("");
+      lines.AddRange(instructions.Split('\n'));
+    }
+
+    ui.ShowDropDown(lines);
   }
 
   public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));

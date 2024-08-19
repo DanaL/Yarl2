@@ -156,60 +156,6 @@ class Player : Actor, IPerformer, IGameEventListener
     return dmgs;
   }
 
-  void ShowInventory(UserInterface ui, string title, string instructions, bool mentionMoney = false)
-  {
-    var slots = Inventory.UsedSlots().Order().ToArray();
-
-    if (slots.Length == 0)
-    {
-      //ui.AlertPlayer("You are empty handed!");
-      return;
-    }
-
-    List<string> lines = [title];
-    foreach (var s in slots)
-    {
-      var (item, count) = Inventory.ItemAt(s);
-      string desc = count == 1 ? item.FullName.IndefArticle()
-                               : $"{count} {item.FullName.Pluralize()}";
-
-      if (item.Equiped)
-      {
-        if (item.HasTrait<CursedTrait>())
-          desc += " *cursed";
-          
-        if (item.Type == ItemType.Weapon)
-          desc += " (in hand)";
-        else if (item.Type == ItemType.Armour)
-          desc += " (worn)";
-        else if (item.Type == ItemType.Bow)
-          desc += " (equiped)";
-        else if (item.Type == ItemType.Ring)
-          desc += " (wearing)";
-      }
-      lines.Add($"{s}) {desc}");
-    }
-
-    if (mentionMoney)
-    {
-      lines.Add("");
-      if (Inventory.Zorkmids == 0)
-        lines.Add("You seem to be broke.");
-      else if (Inventory.Zorkmids == 1)
-        lines.Add("You have a single zorkmid.");
-      else
-        lines.Add($"You wallet contains {Inventory.Zorkmids} zorkmids.");
-    }
-
-    if (!string.IsNullOrEmpty(instructions))
-    {
-      lines.Add("");
-      lines.AddRange(instructions.Split('\n'));
-    }
-
-    ui.ShowDropDown(lines);
-  }
-
   static HashSet<(char, ulong)> ShowPickupMenu(UserInterface ui, List<Item> items)
   {
     var counts = new Dictionary<Item, int>();
@@ -578,7 +524,7 @@ class Player : Actor, IPerformer, IGameEventListener
         return new UpstairsAction(gameState);
       else if (ch == 'i')
       {
-        ShowInventory(ui, "You are carrying:", "", true);
+        Inventory.ShowMenu(ui, "You are carrying:", "", true);
         _inputController = new PauseForMoreInputer();
         _deferred = new CloseMenuAction(gameState);
       }
@@ -609,13 +555,13 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'a')
       {
-        ShowInventory(ui, "Use which item?", "");
+        Inventory.ShowMenu(ui, "Use which item?", "");
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new UseItemAction(gameState, this);
       }      
       else if (ch == 'd')
       {
-        ShowInventory(ui, "Drop what?", "", true);
+        Inventory.ShowMenu(ui, "Drop what?", "", true);
         HashSet<char> slots = [.. Inventory.UsedSlots()];
         slots.Add('$');
         _inputController = new Inventorier(slots);
@@ -632,7 +578,7 @@ class Player : Actor, IPerformer, IGameEventListener
         else
         {          
           string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-          ShowInventory(ui, "Fire what?", instructions);
+          Inventory.ShowMenu(ui, "Fire what?", instructions);
           _inputController = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
         }
@@ -649,7 +595,7 @@ class Player : Actor, IPerformer, IGameEventListener
         // so the player doesn't need to always select an item if
         // they're throwing draggers several turns in a row
         string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-        ShowInventory(ui, "Throw what?", instructions);
+        Inventory.ShowMenu(ui, "Throw what?", instructions);
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
@@ -657,7 +603,7 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ToggleEquipedAction(gameState, this);
-        ShowInventory(ui, "Equip what?", "");
+        Inventory.ShowMenu(ui, "Equip what?", "");
       }
       else if (ch == 'c')
       {

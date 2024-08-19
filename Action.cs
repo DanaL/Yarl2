@@ -1614,6 +1614,38 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
+class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public char Choice { get; set; }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+
+    GameState!.ClearMenu();
+        
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+
+    if (Item.IDInfo.TryGetValue(item.Name, out var idInfo))
+    {
+      Item.IDInfo[item.Name] = idInfo with { Known = true };
+    }
+
+    string s = $"\n It's {item.FullName.IndefArticle()}! \n";
+    GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
+    result.Messages.Add(new Message(m, Actor.Loc));
+    
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
+}
+
 class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
@@ -2030,6 +2062,27 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   }
 
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
+}
+
+class InventoryChoiceAction(GameState gs, Actor actor, string title, Action replacementAction) : Action(gs, actor)
+{
+  string MenuTitle { get; set; } = title;
+  Action ReplacementAction { get; set; } = replacementAction;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+
+    if (Actor is Player player)
+    {
+      char[] slots = player.Inventory.UsedSlots();
+      player.Inventory.ShowMenu(GameState!.UIRef(), MenuTitle, "");
+      Inputer inputer = new Inventorier([.. slots]);
+      player.ReplacePendingAction(ReplacementAction, inputer);
+    }
+
+    return result;
+  }
 }
 
 class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
