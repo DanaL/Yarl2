@@ -254,38 +254,30 @@ class PlayerCreator
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
     
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
 
     player.Inventory.Add(ItemFactory.Get(ItemNames.LOCK_PICK, objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_AGGRESSION, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_AGGRESSION, objDb), player.ID);
 
-    //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of blink", objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get("potion of mind reading", objDb), player.ID);
-
-
-    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("scroll of magic mapping", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
     
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_OF_IDENTIFY, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
+
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), player.ID);
+
+
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb), player.ID);
+    
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_IDENTIFY, objDb), player.ID);
 
 
     var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);

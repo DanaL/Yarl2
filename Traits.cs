@@ -25,7 +25,7 @@ interface IReadable
 
 interface IUSeable
 {
-  UseResult Use(Actor user, GameState gs, int row, int col);
+  UseResult Use(Actor user, GameState gs, int row, int col, Item? item);
   void Used();
 }
 
@@ -429,7 +429,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
 }
 
 class TelepathyTrait : TemporaryTrait
-{
+{  
   public override string Desc() => "can sense others' minds";
   protected override string ExpiryMsg() => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
@@ -605,25 +605,25 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public override string AsText() => $"UseSimple#{Spell}";
 
-  public UseResult Use(Actor user, GameState gs, int row, int col) => Spell switch
+  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
-    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
-    "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
-    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
-    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
-    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
+    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user, item), null),
+    "blink" => new UseResult(true, "", new BlinkAction(gs, user, item), null),
+    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4, item), null),
+    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }, item), null),
+    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user, item), null),
     "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}, item), null),
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}, item), null),
     "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
     "levitation" => new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                              { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
-    "knock" => new UseResult(true, "", new KnockAction(gs, user), null),
+                                              { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
+    "knock" => new UseResult(true, "", new KnockAction(gs, user, item), null),
     "identify" => new UseResult(true, "", 
         new InventoryChoiceAction(gs, user, 
           new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
-          new IdentifyItemAction(gs, user)), null),
+          new IdentifyItemAction(gs, user, item)), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1185,7 +1185,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   readonly string _text = text;
   public override string AsText() => $"Readable#{_text.Replace("\n", "<br/>")}#{OwnerID}";
   
-  public UseResult Use(Actor user, GameState gs, int row, int col)
+  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
   {
     Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
     string msg = $"{user.FullName.Capitalize()} read:\n{_text}";
@@ -1360,7 +1360,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner
     return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
   }
 
-  public UseResult Use(Actor _, GameState gs, int row, int col)
+  public UseResult Use(Actor _, GameState gs, int row, int col, Item? iitem)
   {
     Item? item = gs.ObjDb.GetObj(OwnerID) as Item;
     var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, row, col);
@@ -1431,7 +1431,7 @@ class WandTrait : Trait, IUSeable, INeedsID
 
   public override string AsText() => $"Wand#{Charges}#{IDed}#{Effect}";
 
-  public UseResult Use(Actor user, GameState gs, int row, int col)
+  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
   {
     if (Charges == 0) 
     {

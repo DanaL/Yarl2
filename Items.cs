@@ -143,7 +143,7 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_OF_IDENTIFY
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY
 }
 
 class ItemFactory
@@ -308,20 +308,10 @@ class ItemFactory
           Glyph = new Glyph('(', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
         break;
       case ItemNames.TORCH:
-        item = new Item()
-        {
-          Name = "torch",
-          Type = ItemType.Tool,
-          Value = 2,
+        item = new Item() { Name = "torch", Type = ItemType.Tool, Value = 2,
           Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
         };
-        var ls = new TorchTrait()
-        {
-          OwnerID = item.ID,
-          Fuel = 1500,
-          Lit = false
-        };
-        item.Traits.Add(ls);
+        item.Traits.Add(new TorchTrait() { OwnerID = item.ID, Fuel = 1500, Lit = false });
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new StackableTrait());
         break;
@@ -408,7 +398,7 @@ class ItemFactory
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());
         break;
-      case ItemNames.SCROLL_OF_IDENTIFY:
+      case ItemNames.SCROLL_IDENTIFY:
         item = new Item { Name = "scroll of identify", Type = ItemType.Scroll, Value = 75, 
             Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ConsumableTrait());
@@ -523,7 +513,7 @@ class ItemFactory
       "gold ring" => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
       "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
       "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
-      "emerald ring" => new Glyph('o', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
+      "jade ring" => new Glyph('o', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
       _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
     };
   }
@@ -931,6 +921,20 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     return string.Join(' ', msgs).Trim();
+  }
+
+  public void ConsumeItem(Item item, Actor actor, Random rng)
+  {
+    // A character with the Scholar background has a chance of not actually consuming a scroll
+    // when they read it.
+    if (item.HasTrait<WrittenTrait>())
+    {
+      double roll = rng.NextDouble();
+      if (actor is Player player && player.Background == PlayerBackground.Scholar && roll < 0.2)
+        return;
+    }
+    
+    RemoveByID(item.ID);
   }
 
   public void ShowMenu(UserInterface ui, InventoryOptions options)

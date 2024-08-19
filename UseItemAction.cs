@@ -146,7 +146,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     bool consumable = item.HasTrait<ConsumableTrait>();
-    bool stackable = item.HasTrait<StackableTrait>();
+    bool torch = item.HasTrait<TorchTrait>();
     bool written = item.HasTrait<WrittenTrait>();
     bool vaultKey = item.HasTrait<VaultKeyTrait>();
 
@@ -169,35 +169,20 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         }
       }
 
-      if (consumable || stackable)
+      // When a torch has been lit, we want to remove it from the stack of 
+      // other torches
+      if (torch)
       {
-        Actor.Inventory.RemoveByID(item.ID);
-
-        // If we are using a stackable item (say, a Torch), get rid of the
-        // stackable trait, then add it back to the inventory
-        if (stackable && !consumable)
-        {
-          item.Traits = item.Traits.Where(t => t is not StackableTrait).ToList();
-          Actor.Inventory.Add(item, Actor.ID);
-        }
-        
-        // Sometimes, when a player with the scholar background reads a scroll,
-        // it won't be consumed.
-        if (consumable && written && Actor is Player player && player.Background == PlayerBackground.Scholar)
-        {
-          double roll = GameState.Rng.NextDouble();
-          if (roll <= 0.2)
-          {
-            Actor.Inventory.Add(item, Actor.ID);
-          }
-        }
+        Actor.Inventory.RemoveByID(item.ID);        
+        item.Traits = item.Traits.Where(t => t is not StackableTrait).ToList();
+        Actor.Inventory.Add(item, Actor.ID);
       }
 
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
       bool success = false;
       foreach (IUSeable trait in useableTraits)
       {
-        var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col);
+        var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         result.Complete = useResult.Successful;
         result.Messages.Add(new Message(useResult.Message, Actor.Loc));
         success = useResult.Successful;
