@@ -390,7 +390,7 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
   public override void Update()
   {    
     var dd = DateTime.Now - _lastFrame;
-    if (dd.TotalMilliseconds < 35)
+    if (dd.TotalMilliseconds < 15)
       return;
 
     int next = int.Min(_index + 25, _locs.Count);      
