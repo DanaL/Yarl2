@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection;
+
 namespace Yarl2;
 
 enum ItemType
@@ -931,7 +933,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return string.Join(' ', msgs).Trim();
   }
 
-  public void ShowMenu(UserInterface ui, string title, string instructions, bool mentionMoney = false)
+  public void ShowMenu(UserInterface ui, InventoryOptions options)
   {
     var slots = UsedSlots().Order().ToArray();
 
@@ -941,12 +943,19 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       return;
     }
 
-    List<string> lines = [title];
+    List<string> lines = [options.Title];
     foreach (var s in slots)
-    {
+    {      
       var (item, count) = ItemAt(s);
+
+      if ((options.Options & InvOption.UnidentifiedOnly) == InvOption.UnidentifiedOnly)
+      {
+        if (!Item.IDInfo.TryGetValue(item.Name, out var idInfo) || idInfo.Known)
+          continue;
+      }
+      
       string desc = count == 1 ? item.FullName.IndefArticle()
-                               : $"{count} {item.FullName.Pluralize()}";
+                              : $"{count} {item.FullName.Pluralize()}";
 
       if (item.Equiped)
       {
@@ -965,7 +974,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       lines.Add($"{s}) {desc}");
     }
 
-    if (mentionMoney)
+    if ((options.Options & InvOption.MentionMoney) == InvOption.MentionMoney)
     {
       lines.Add("");
       if (Zorkmids == 0)
@@ -976,10 +985,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         lines.Add($"You wallet contains {Zorkmids} zorkmids.");
     }
 
-    if (!string.IsNullOrEmpty(instructions))
+    if (!string.IsNullOrEmpty(options.Instructions))
     {
       lines.Add("");
-      lines.AddRange(instructions.Split('\n'));
+      lines.AddRange(options.Instructions.Split('\n'));
     }
 
     ui.ShowDropDown(lines);
@@ -996,6 +1005,24 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       _items.Add((slot, id));
     }
   }
+}
+
+[Flags]
+enum InvOption
+{
+  None = 0,
+  MentionMoney = 1,
+  UnidentifiedOnly = 2
+}
+
+class InventoryOptions
+{
+  public string Title { get; set; } = "";
+  public string Instructions { get; set; } = "";
+  public InvOption Options { get; set; } = InvOption.None;
+
+  public InventoryOptions() { }
+  public InventoryOptions(string title) => Title = title;  
 }
 
 class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)

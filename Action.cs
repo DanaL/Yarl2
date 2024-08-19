@@ -2064,9 +2064,9 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
 }
 
-class InventoryChoiceAction(GameState gs, Actor actor, string title, Action replacementAction) : Action(gs, actor)
+class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Action replacementAction) : Action(gs, actor)
 {
-  string MenuTitle { get; set; } = title;
+  InventoryOptions InvOptions = opts;
   Action ReplacementAction { get; set; } = replacementAction;
 
   public override ActionResult Execute()
@@ -2076,7 +2076,7 @@ class InventoryChoiceAction(GameState gs, Actor actor, string title, Action repl
     if (Actor is Player player)
     {
       char[] slots = player.Inventory.UsedSlots();
-      player.Inventory.ShowMenu(GameState!.UIRef(), MenuTitle, "");
+      player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
       Inputer inputer = new Inventorier([.. slots]);
       player.ReplacePendingAction(ReplacementAction, inputer);
     }

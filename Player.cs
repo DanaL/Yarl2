@@ -524,7 +524,7 @@ class Player : Actor, IPerformer, IGameEventListener
         return new UpstairsAction(gameState);
       else if (ch == 'i')
       {
-        Inventory.ShowMenu(ui, "You are carrying:", "", true);
+        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "You are carrying:", Options = InvOption.MentionMoney });
         _inputController = new PauseForMoreInputer();
         _deferred = new CloseMenuAction(gameState);
       }
@@ -555,13 +555,13 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'a')
       {
-        Inventory.ShowMenu(ui, "Use which item?", "");
+        Inventory.ShowMenu(ui, new InventoryOptions("Use which item?"));
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new UseItemAction(gameState, this);
       }      
       else if (ch == 'd')
       {
-        Inventory.ShowMenu(ui, "Drop what?", "", true);
+        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
         HashSet<char> slots = [.. Inventory.UsedSlots()];
         slots.Add('$');
         _inputController = new Inventorier(slots);
@@ -578,7 +578,7 @@ class Player : Actor, IPerformer, IGameEventListener
         else
         {          
           string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-          Inventory.ShowMenu(ui, "Fire what?", instructions);
+          Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Fire what?", Instructions = instructions });
           _inputController = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
         }
@@ -595,7 +595,7 @@ class Player : Actor, IPerformer, IGameEventListener
         // so the player doesn't need to always select an item if
         // they're throwing draggers several turns in a row
         string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
-        Inventory.ShowMenu(ui, "Throw what?", instructions);
+        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?", Instructions = instructions });
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
@@ -603,7 +603,7 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ToggleEquipedAction(gameState, this);
-        Inventory.ShowMenu(ui, "Equip what?", "");
+        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?" });
       }
       else if (ch == 'c')
       {

@@ -621,7 +621,9 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                                               { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
     "knock" => new UseResult(true, "", new KnockAction(gs, user), null),
     "identify" => new UseResult(true, "", 
-        new InventoryChoiceAction(gs, user, "Identify which item?", new IdentifyItemAction(gs, user)), null),
+        new InventoryChoiceAction(gs, user, 
+          new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
+          new IdentifyItemAction(gs, user)), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
