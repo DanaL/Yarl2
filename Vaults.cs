@@ -173,23 +173,33 @@ class Vaults
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
 
     double roll = rng.NextDouble();
+    TileType statueType;
     string statueDesc;
     if (roll < 0.5)
+    {
       statueDesc = "Broken remains of a statute.";
+      statueType = TileType.Statue;
+    }
     else
     {
-      statueDesc = history.RulerType switch 
-      { 
-        OGRulerType.ElfLord => "A graffitied, defaced statue of an elf.",
-        _ => "A graffitied, defaced statue of a dwarf."
-      };
+      switch (history.RulerType)
+      {
+        case OGRulerType.ElfLord:
+          statueDesc = "A graffitied, defaced statue of an elf.";
+          statueType = TileType.HumanStatue;
+          break;
+        default:
+          statueDesc = "A graffitied, defaced statue of a dwarf.";
+          statueType = TileType.DemihumanStatue;
+          break;
+      }
     }
 
     List<(int, int)> sqs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).ToList();
     if (sqs.Count == 0)
       return; // I can't imagine this actually ever happening
     (int, int) loc = sqs[rng.Next(sqs.Count)];
-    map.SetTile(loc, TileFactory.Get(TileType.Statue));
+    map.SetTile(loc, TileFactory.Get(statueType));
     List<(int, int)> adj = Util.Adj4Sqs(loc.Item1, loc.Item2)
                                .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
                                .ToList();

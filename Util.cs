@@ -415,6 +415,8 @@ class Util
     TileType.Bridge => new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.Statue => new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.HumanStatue => new Glyph('@', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.DemihumanStatue => new Glyph('h', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Landmark => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Chasm => new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),

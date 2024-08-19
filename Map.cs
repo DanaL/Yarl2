@@ -47,7 +47,9 @@ enum TileType
   Well,
   Bridge,
   WoodBridge,
-  Statue,
+  Statue,           // Most statues can be simple tiles so I'm just defining a few different types
+  HumanStatue,      // rather than creating a statue subclass where I need to track state during
+  DemihumanStatue,  // serialization, etc
   Landmark,
   Chasm,
   CharredGrass,
@@ -139,6 +141,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Landmark => "a landmark",
     TileType.Forge => "a forge",
     TileType.Statue => "a statue",
+    TileType.HumanStatue => "a statue",
+    TileType.DemihumanStatue => "a statue",
     TileType.Upstairs => "some stairs up",
     TileType.Downstairs => "some stairs down",
     TileType.Portal => "a dungeon entrance",
@@ -336,6 +340,8 @@ class TileFactory
   private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
   private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
   private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true, false);
+  private static readonly Tile HumanStatue = new BasicTile(TileType.HumanStatue, false, true, false);
+  private static readonly Tile DemihumanStatue = new BasicTile(TileType.DemihumanStatue, false, true, false);
   private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
   private static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
   private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
@@ -377,6 +383,8 @@ class TileFactory
     TileType.Bridge => Bridge,
     TileType.WoodBridge => WoodBridge,
     TileType.Statue => Statue,
+    TileType.HumanStatue => HumanStatue,
+    TileType.DemihumanStatue => DemihumanStatue,
     TileType.Chasm => Chasm,
     TileType.StoneRoad => StoneRoad,
     TileType.CharredGrass => CharredGrass,
