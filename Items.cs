@@ -986,7 +986,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       else if (Zorkmids == 1)
         lines.Add("You have a single zorkmid.");
       else
-        lines.Add($"You wallet contains {Zorkmids} zorkmids.");
+        lines.Add($"Your wallet contains {Zorkmids} zorkmids.");
     }
 
     if (!string.IsNullOrEmpty(options.Instructions))
