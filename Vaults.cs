@@ -95,7 +95,7 @@ class Vaults
     return region;
   }
 
-  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb)
+  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb, History history)
   {
     Dictionary<(int, int), int> areas = [];
     Dictionary<int, HashSet<(int, int)>> rooms = [];
@@ -159,7 +159,7 @@ class Vaults
 
       if (doorCount == 1 && rng.NextDouble() < 0.25)
       {
-        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb);
+        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb, history);
         ++vaultsPlaced;
       }
 
@@ -168,11 +168,49 @@ class Vaults
     }
   }
 
-  static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb)
+  static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
+  {
+    map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+
+    double roll = rng.NextDouble();
+    string statueDesc;
+    if (roll < 0.5)
+      statueDesc = "Broken remains of a statute.";
+    else
+    {
+      statueDesc = history.RulerType switch 
+      { 
+        OGRulerType.ElfLord => "A graffitied, defaced statue of an elf.",
+        _ => "A graffitied, defaced statue of a dwarf."
+      };
+    }
+
+    List<(int, int)> sqs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).ToList();
+    if (sqs.Count == 0)
+      return; // I can't imagine this actually ever happening
+    (int, int) loc = sqs[rng.Next(sqs.Count)];
+    map.SetTile(loc, TileFactory.Get(TileType.Statue));
+    List<(int, int)> adj = Util.Adj4Sqs(loc.Item1, loc.Item2)
+                               .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
+                               .ToList();
+    if (adj.Count == 0) 
+      return; // I also can't imagine this actually happing
+    (int, int) landmarkSq = adj[rng.Next(adj.Count)];
+    Tile landmark = new Landmark(statueDesc.Capitalize());
+    map.SetTile(landmarkSq, landmark);
+  }
+
+  static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
   {
     if (level == 0)
     {
-      map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+
+      // A level zero vault has been vandalized or plundered by past
+      // adventurers.
+      VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
+
+      // var tile = new Landmark(statueDesc.Capitalize());
+      // map.SetTile(sq, tile);
 
       return;
     }
@@ -185,7 +223,7 @@ class Vaults
       }
       else
       {
-        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+        VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
       }
       
       return;

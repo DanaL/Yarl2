@@ -721,7 +721,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
     {
-      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb);
+      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
     }
     
     return dungeon;
