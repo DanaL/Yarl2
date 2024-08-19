@@ -415,8 +415,8 @@ class Util
     TileType.Bridge => new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.Statue => new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.HumanStatue => new Glyph('@', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.DemihumanStatue => new Glyph('h', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.ElfStatue => new Glyph('@', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.DwarfStatue => new Glyph('h', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Landmark => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Chasm => new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
@@ -436,15 +436,33 @@ class Util
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 
-  public static Dictionary<string, string> LoadCyclopedia()
+  public record CyclopediaEntry(string Title, string Text);
+  public static Dictionary<string, CyclopediaEntry> LoadCyclopedia()
   {
-    Dictionary<string, string> cyclopedia = [];
+    Dictionary<string, CyclopediaEntry> cyclopedia = [];
 
     var lines = File.ReadAllLines("data/cyclopedia.txt");
     
     for (int j = 0; j < lines.Length; j += 3)
     {
-      cyclopedia.Add(lines[j + 1], lines[j + 2]);
+      string s = lines[j + 1];
+      string key, title;
+      int k = s.IndexOf('|');
+      CyclopediaEntry entry;
+      if (k > -1)
+      {
+        key = s[..k];
+        title = s[(k+1)..];
+        entry = new CyclopediaEntry(title, lines[j + 2]);
+      }
+      else
+      {
+        key = s;
+        title = s;
+        entry = new CyclopediaEntry(s, lines[j + 2]);
+      }
+      
+      cyclopedia.Add(key, entry);
     }
 
     return cyclopedia;

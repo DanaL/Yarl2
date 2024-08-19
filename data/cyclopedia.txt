@@ -20,17 +20,23 @@ Green-skinned humanoids who love nothing more than chaos and harassing adventure
 portal
 An entrance leading from the surface into a dungeon. Use the (E)nter command to enter!
 #
-upstairs
-A stairway leading upwards.
+upstairs|stairs up
+A staircase leading upwards.
 #
-downstairs
-A stairway leading deeper into the depths. Generally, more fearsome monsters await the deeper you venture.
+downstairs|stairs down
+A staircase leading deeper into the depths. Generally, more fearsome monsters await the deeper you venture.
 #
-openpit
+openpit|pit trap
 An open pit. You'll plummet to the next level of the dungoen!
 #
 statue
 A monument of historical interest.
+#
+elfstatue|elf statue
+A statute depicting an elf.
+#
+dwarfstatue|dwarf statue
+A statue depicting a dwarf.
 #
 landmark
 An engraving, marking, or other artwork.

@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using static Yarl2.Util;
 
 namespace Yarl2;
 
@@ -40,13 +41,13 @@ class Examiner : Inputer
   readonly List<Loc> _targets = [];
   int _currTarget;
   (int, int) _curr;
-  readonly Dictionary<string, string> _cyclopedia;
+  readonly Dictionary<string, CyclopediaEntry> _cyclopedia;
 
   public Examiner(GameState gs, Loc start)
   {
-    _gs = gs;    
+    _gs = gs;
     FindTargets(start);
-    _cyclopedia = Util.LoadCyclopedia();
+    _cyclopedia = LoadCyclopedia();
   }
 
   void FindTargets(Loc start)
@@ -62,11 +63,11 @@ class Examiner : Inputer
         var loc = new Loc(start.DungeonID, start.Level, startRow + r, startCol + c);
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
-        
-        if (_gs.ObjDb.Occupied(loc)) 
+
+        if (_gs.ObjDb.Occupied(loc))
         {
           _targets.Add(loc);
-          if (loc == _gs.Player.Loc) 
+          if (loc == _gs.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
             ui.ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, '@');
@@ -79,20 +80,22 @@ class Examiner : Inputer
         }
         else
         {
-            var tile = _gs.TileAt(loc);
-            switch (tile.Type)
-            {
-              case TileType.Upstairs:
-              case TileType.Downstairs:
-              case TileType.Portal:
-              case TileType.Statue:
-              case TileType.Landmark:
-              case TileType.OpenPit:
-              case TileType.Portcullis:
-              case TileType.OpenPortcullis:
-                _targets.Add(loc);
+          var tile = _gs.TileAt(loc);
+          switch (tile.Type)
+          {
+            case TileType.Upstairs:
+            case TileType.Downstairs:
+            case TileType.Portal:
+            case TileType.Statue:
+            case TileType.ElfStatue:
+            case TileType.DwarfStatue:
+            case TileType.Landmark:
+            case TileType.OpenPit:
+            case TileType.Portcullis:
+            case TileType.OpenPortcullis:
+              _targets.Add(loc);
               break;
-            }
+          }
         }
       }
     }
@@ -127,9 +130,9 @@ class Examiner : Inputer
     string name;
     string desc = "I have no further info about this object. This is probably Dana's fault.";
 
-    if (_gs.ObjDb.Occupant(loc) is Actor actor) 
-    {      
-      if (actor is Player) 
+    if (_gs.ObjDb.Occupant(loc) is Actor actor)
+    {
+      if (actor is Player)
       {
         name = actor.Name;
         desc = "You. A stalwart, rugged adventurer (probably). Keen for danger and glory. Currently alive.";
@@ -142,15 +145,15 @@ class Examiner : Inputer
       else
       {
         name = actor.Name.IndefArticle().Capitalize();
-        if (_cyclopedia.TryGetValue(actor.Name, out string? v))
-          desc = v;
+        if (_cyclopedia.TryGetValue(actor.Name, out var v))
+          desc = v.Text;
       }
 
       return new LocDetails(name, desc, actor.Glyph.Ch);
     }
 
     var items = _gs.ObjDb.ItemsAt(loc);
-    if (items.Count > 0) 
+    if (items.Count > 0)
     {
       var item = items[0];
       return new LocDetails(item.Name.IndefArticle().Capitalize(), "", item.Glyph.Ch);
@@ -158,8 +161,12 @@ class Examiner : Inputer
 
     Tile tile = _gs.TileAt(loc);
     name = tile.Type.ToString().ToLower();
-    if (_cyclopedia.TryGetValue(name, out string? v2))
-          desc = v2;
+    if (_cyclopedia.TryGetValue(name, out var v2))
+    {
+      name = v2.Title;
+      desc = v2.Text;
+    }
+
     return new LocDetails(name.Capitalize(), desc, Util.TileToGlyph(tile).Ch);
   }
 
@@ -211,7 +218,7 @@ class Aimer : Inputer
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);        
+        var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);
         if (Util.Distance(_start, loc) > _maxRange)
           continue;
         if (!_gs.ObjDb.Occupied(loc) || loc == _gs.Player.Loc)
@@ -499,7 +506,7 @@ class HelpScreenInputer : Inputer
     int l = 3;
 
     help[l++] += $" ** {entry.Title} **";
-    
+
     List<string> lines;
     if (entry.Entry.Count > PageSize)
     {
@@ -507,7 +514,7 @@ class HelpScreenInputer : Inputer
                          .Take(PageSize)
                          .ToList();
       lines.Add("");
-      lines.Add($"- SPACE for next page ({_page + 1} of {CurrPageCount}) -".PadLeft(_textAreaWidth / 2 + 4)); 
+      lines.Add($"- SPACE for next page ({_page + 1} of {CurrPageCount}) -".PadLeft(_textAreaWidth / 2 + 4));
     }
     else
     {
@@ -548,7 +555,7 @@ class Dialoguer : Inputer
     }
     else if (_currOptions.Contains(ch))
     {
-      var dialgoue = (IDialoguer) _interlocutor.Behaviour;
+      var dialgoue = (IDialoguer)_interlocutor.Behaviour;
       dialgoue.SelectOption(_interlocutor, ch, _gs);
 
       WritePopup();
@@ -933,7 +940,7 @@ class DirectionUIResult : UIResult
   public int Col { get; set; }
 }
 
-class ObjIdUIResult: UIResult
+class ObjIdUIResult : UIResult
 {
   public ulong ID { get; set; }
 }

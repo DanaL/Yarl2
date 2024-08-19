@@ -186,11 +186,11 @@ class Vaults
       {
         case OGRulerType.ElfLord:
           statueDesc = "A graffitied, defaced statue of an elf.";
-          statueType = TileType.HumanStatue;
+          statueType = TileType.ElfStatue;
           break;
         default:
           statueDesc = "A graffitied, defaced statue of a dwarf.";
-          statueType = TileType.DemihumanStatue;
+          statueType = TileType.DwarfStatue;
           break;
       }
     }
