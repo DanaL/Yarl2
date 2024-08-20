@@ -26,6 +26,7 @@ enum ItemType
   Trinket,
   Wand,
   Ring,
+  Bone,
   Environment // I'm implementing things like mist as 'items'
 }
 
@@ -143,7 +144,7 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL
 }
 
 class ItemFactory
@@ -492,6 +493,13 @@ class ItemFactory
         item.Traits.Add(new UseSimpleTrait("levitation"));
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.SKULL:
+        item = new Item() 
+        {
+          Name = "skull", Type = ItemType.Bone, Value = 0, 
+          Glyph = new Glyph('(', Colours.WHITE, Colours.YELLOW, Colours.BLACK, Colours.BLACK)
+        };
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

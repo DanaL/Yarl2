@@ -175,10 +175,12 @@ class Vaults
     double roll = rng.NextDouble();
     TileType statueType;
     string statueDesc;
+    string skullType;
     if (roll < 0.5)
     {
-      statueDesc = "Broken remains of a statute.";
+      statueDesc = "Broken remains of a statue.";
       statueType = TileType.Statue;
+      skullType = "";
     }
     else
     {
@@ -187,10 +189,12 @@ class Vaults
         case OGRulerType.ElfLord:
           statueDesc = "A graffitied, defaced statue of an elf.";
           statueType = TileType.ElfStatue;
+          skullType = "elf";
           break;
         default:
           statueDesc = "A graffitied, defaced statue of a dwarf.";
           statueType = TileType.DwarfStatue;
+          skullType = "dwarf";
           break;
       }
     }
@@ -198,7 +202,9 @@ class Vaults
     List<(int, int)> sqs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).ToList();
     if (sqs.Count == 0)
       return; // I can't imagine this actually ever happening
-    (int, int) loc = sqs[rng.Next(sqs.Count)];
+    int i = rng.Next(sqs.Count);
+    (int, int) loc = sqs[i];
+    sqs.RemoveAt(i);
     map.SetTile(loc, TileFactory.Get(statueType));
     List<(int, int)> adj = Util.Adj4Sqs(loc.Item1, loc.Item2)
                                .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
@@ -208,6 +214,16 @@ class Vaults
     (int, int) landmarkSq = adj[rng.Next(adj.Count)];
     Tile landmark = new Landmark(statueDesc.Capitalize());
     map.SetTile(landmarkSq, landmark);
+
+    if (rng.NextDouble() < 0.15)
+    {
+      Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);
+      if (skullType != "")
+        skull.Traits.Add(new AdjectiveTrait(skullType));
+      (int skullRow, int skullCol) = adj[rng.Next(adj.Count)];
+      Loc skullLoc = new(dungeonID, level, skullRow, skullCol);
+      objDb.SetToLoc(skullLoc, skull);
+    }
   }
 
   static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
