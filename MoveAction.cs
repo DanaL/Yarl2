@@ -28,6 +28,9 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     TileType.Portcullis => "The portcullis is closed.",
     TileType.VaultDoor => "Metal doors bar your path!",
     TileType.LockedDoor => "The door is locked!",
+    TileType.Statue => "A statue is in your way!",
+    TileType.DwarfStatue => "A stone dwarf blocks your way!",
+    TileType.ElfStatue => "The statue of an elf is in your way!",
     _ => "You cannot go that way!"
   };
 
