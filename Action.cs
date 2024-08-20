@@ -1299,7 +1299,12 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
 
   public override ActionResult Execute()
   {
-    if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
+    if (Item is not null && Item.HasTrait<ConsumableTrait>())
+    {
+      Actor!.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
+    }
+
+    if (Actor is Player && Actor.HasTrait<PoisonedTrait>())
     {
       return new ActionResult() { Complete = true, Messages = [new Message("That tasted not bad.", Actor.Loc)], EnergyCost = 1.0 };
     }
@@ -1310,11 +1315,6 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
     }
     Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
     var msg = new Message($"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);
-
-    if (Item is not null && Item.HasTrait<ConsumableTrait>())
-    {
-      Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
-    }
 
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
