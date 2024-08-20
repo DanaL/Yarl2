@@ -389,6 +389,7 @@ class History(Random rng)
   private Random _rng = rng;
 
   public OGRulerType RulerType => _ruler.Type;
+  public string RulerName => _ruler.FullName;
 
   public List<Decoration> GetDecorations()
   {

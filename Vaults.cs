@@ -9,14 +9,12 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
-enum VaultDoorType
-{
-  SecretDoor,
-  Trigger,
-  Key
-}
+enum VaultDoorType { SecretDoor, Trigger, Key }
+enum VaultType { Tomb } // I think I'll eventually have more...
 
 class Vaults
 {
@@ -226,6 +224,91 @@ class Vaults
     }
   }
 
+  static Tile GetTombMarker(NameGenerator ng, Random rng, History history)
+  {
+    string name = ng.GenerateName(rng.Next(6, 12));
+    string relation = rng.Next(10) switch
+    {
+      0 => "Consort",
+      1 => "Grandchild",
+      2 => "Uncle",
+      3 => "Aunt",
+      4 => "Child",
+      5 => "Mother",
+      7 => "Father",
+      _ => "Cousin"
+    };
+    string causeOfDeath = rng.Next(11) switch
+    {
+      0 => "died from plague",
+      1 => "died by illness",
+      2 => "died from a riding injury",
+      3 => "was felled in battle",
+      4 => "died under mysterious circumstances",
+      5 => "perished from misadventure",
+      6 => "died from natural causes",
+      7 => "disappeared",
+      8 => "died from the family curse",
+      9 => "murdered by rebels",
+      _ => "we don't talk about"
+    };
+
+    var sb = new StringBuilder();
+    sb.Append("The tomb of ");
+    sb.Append(name.Capitalize());
+    sb.Append(", ");
+    sb.Append(relation);
+    sb.Append(" of ");
+    sb.Append(history.RulerName);
+    sb.Append(", who ");
+    sb.Append(causeOfDeath);
+    sb.Append('.');
+
+    return new Landmark(sb.ToString());
+  } 
+
+  static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
+  {
+    map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
+    List<Loc> locs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
+                          .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2)).ToList();
+
+    void SetItem(TreasureQuality quality)
+    {
+      if (locs.Count == 0)
+        return;
+
+      int i = rng.Next(locs.Count);
+      Loc loc = locs[i];
+      locs.RemoveAt(i);
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      objDb.SetToLoc(loc, item);
+    }
+
+    NameGenerator ng = new(rng, "data/names.txt");
+    if (level <= 2)
+    {
+      SetItem(TreasureQuality.Uncommon);
+      SetItem(TreasureQuality.Uncommon);
+      SetItem(TreasureQuality.Good);
+
+      // place the marker on the other side of the door
+      var adj = Util.Adj4Sqs(doorRow, doorCol).Where(sq => vault.Contains(sq)).ToList();
+      if (adj.Count > 0)
+      {
+        Tile marker = GetTombMarker(ng, rng, history);
+        map.SetTile(adj[0], marker);
+      }
+
+      bool haunted = rng.Next(5) == 0;
+      if (haunted)
+      {
+        Actor spirit = MonsterFactory.Get("shadow", rng);
+        objDb.AddNewActor(spirit, locs[rng.Next(locs.Count)]);
+      }
+    }
+  }
+
   static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
   {
     if (level == 0)
@@ -234,23 +317,16 @@ class Vaults
       // A level zero vault has been vandalized or plundered by past
       // adventurers.
       VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
-
-      // var tile = new Landmark(statueDesc.Capitalize());
-      // map.SetTile(sq, tile);
-
       return;
     }
 
     if (level == 1 )
     {
       if (rng.Next(3) == 0)
-      {
-        map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
-      }
+        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
       else
-      {
-        VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
-      }
+        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
+        //VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
       
       return;
     }

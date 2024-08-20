@@ -11,6 +11,8 @@
 
 namespace Yarl2;
 
+enum TreasureQuality { Common, Uncommon, Good }
+
 class Treasure
 {  
   static readonly List<ItemNames> CommonItems = 
@@ -72,8 +74,27 @@ class Treasure
     }
 
     Loc loc = candidates[rng.Next(candidates.Count)];
-    objDb.Add(item);
     objDb.SetToLoc(loc, item);
+  }
+
+  public static Item ItemByQuality(TreasureQuality quality, GameObjectDB objDb, Random rng)
+  {
+    ItemNames name;
+    switch (quality)
+    {
+      case TreasureQuality.Uncommon:
+        name = UncommonItems[rng.Next(UncommonItems.Count)];
+        break;
+      case TreasureQuality.Good:
+        name = GoodItems[rng.Next(GoodItems.Count)];
+        break;
+      default:
+        name = CommonItems[rng.Next(CommonItems.Count)];
+        break;
+
+    }
+
+    return GenerateItem(name, objDb, rng);
   }
 
   static Item GenerateItem(ItemNames name, GameObjectDB objDb, Random rng)
@@ -105,8 +126,7 @@ class Treasure
       int numItems = rng.Next(1, 4);
       for (int j = 0; j < numItems; j++) 
       {
-        var name = CommonItems[rng.Next(CommonItems.Count)];
-        var item = GenerateItem(name, objDb, rng);
+        Item item = ItemByQuality(TreasureQuality.Common, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
@@ -116,8 +136,8 @@ class Treasure
       for (int j = 0; j < numItems; j++)
       {
         double roll = rng.NextDouble();
-        var name = roll <= 0.9 ? CommonItems[rng.Next(CommonItems.Count)] : UncommonItems[rng.Next(UncommonItems.Count)];
-        var item = GenerateItem(name, objDb, rng);
+        TreasureQuality quality = roll <= 0.9 ? TreasureQuality.Common : TreasureQuality.Uncommon;
+        Item item = ItemByQuality(quality, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
@@ -126,15 +146,15 @@ class Treasure
       int numItems = rng.Next(1, 5);
       for (int j = 0; j < numItems; j++)
       {
-        ItemNames name;
+        TreasureQuality quality;
         double roll = rng.NextDouble();
         if (roll <= 0.4)
-          name = CommonItems[rng.Next(CommonItems.Count)];
+          quality = TreasureQuality.Common;
         else if (roll <= 0.9)
-          name = UncommonItems[rng.Next(UncommonItems.Count)];
+          quality = TreasureQuality.Uncommon;
         else
-          name = GoodItems[rng.Next(GoodItems.Count)];
-        var item = GenerateItem(name, objDb, rng);
+          quality = TreasureQuality.Good;
+        Item item = ItemByQuality(quality, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
@@ -143,15 +163,15 @@ class Treasure
       int numItems = rng.Next(1, 5);
       for (int j = 0; j < numItems; j++)
       {
-        ItemNames name;
+        TreasureQuality quality;
         double roll = rng.NextDouble();
         if (roll <= 0.2)
-          name = CommonItems[rng.Next(CommonItems.Count)];
+          quality = TreasureQuality.Common;
         else if (roll <= 0.7)
-          name = UncommonItems[rng.Next(UncommonItems.Count)];
+          quality = TreasureQuality.Uncommon;          
         else
-          name = GoodItems[rng.Next(GoodItems.Count)];
-        var item = GenerateItem(name, objDb, rng);
+          quality = TreasureQuality.Good;          
+        Item item = ItemByQuality(quality, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
