@@ -55,6 +55,7 @@ class Examiner : Inputer
     var ui = _gs.UIRef();
     int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
     int startCol = _gs.Player.Loc.Col - ui.PlayerScreenCol;
+    var pq = new PriorityQueue<Loc, int>();
 
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
@@ -66,17 +67,20 @@ class Examiner : Inputer
 
         if (_gs.ObjDb.Occupied(loc) && _gs.LastPlayerFoV.Contains(loc))
         {
-          _targets.Add(loc);
+          int distance = Util.Distance(_gs.Player.Loc, loc);          
           if (loc == _gs.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
             ui.ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, '@');
             _curr = (r, c);
+            distance = int.MaxValue;
           }
+
+          pq.Enqueue(loc, distance);
         }
         else if (_gs.ObjDb.ItemsAt(loc).Count > 0)
         {
-          _targets.Add(loc);
+          pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));          
         }
         else
         {
@@ -94,11 +98,16 @@ class Examiner : Inputer
             case TileType.Portcullis:
             case TileType.OpenPortcullis:
             case TileType.TeleportTrap:
-              _targets.Add(loc);
+              pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));              
               break;
           }
         }
       }
+    }
+
+    while (pq.Count > 0)
+    {
+      _targets.Add(pq.Dequeue());
     }
   }
 
