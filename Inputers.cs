@@ -64,7 +64,7 @@ class Examiner : Inputer
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
 
-        if (_gs.ObjDb.Occupied(loc))
+        if (_gs.ObjDb.Occupied(loc) && _gs.LastPlayerFoV.Contains(loc))
         {
           _targets.Add(loc);
           if (loc == _gs.Player.Loc)
