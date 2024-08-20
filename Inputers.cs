@@ -93,6 +93,7 @@ class Examiner : Inputer
             case TileType.OpenPit:
             case TileType.Portcullis:
             case TileType.OpenPortcullis:
+            case TileType.TeleportTrap:
               _targets.Add(loc);
               break;
           }

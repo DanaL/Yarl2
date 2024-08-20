@@ -29,6 +29,9 @@ A staircase leading deeper into the depths. Generally, more fearsome monsters aw
 openpit|pit trap
 An open pit. You'll plummet to the next level of the dungoen!
 #
+teleporttrap|teleport trap
+A trap that will teleport you to a random spot on this dungeon level.
+#
 statue
 A monument of historical interest.
 #
