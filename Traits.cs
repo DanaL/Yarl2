@@ -825,7 +825,7 @@ class LameTrait : EffectTrait, IGameEventListener
   public bool Expired { get; set; } = false;
 
   public override string AsText() => $"Lame#{VictimID}#{EndsOn}";
-  public bool Listening => throw new NotImplementedException();
+  public bool Listening => true;
 
   public override string Apply(Actor victim, GameState gs)
   {    

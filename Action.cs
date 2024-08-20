@@ -1304,7 +1304,7 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
       Actor!.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
     }
 
-    if (Actor is Player && Actor.HasTrait<PoisonedTrait>())
+    if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
       return new ActionResult() { Complete = true, Messages = [new Message("That tasted not bad.", Actor.Loc)], EnergyCost = 1.0 };
     }
@@ -1314,7 +1314,7 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
       GameState!.StopListening(GameEventType.EndOfRound, t);
     }
     Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
-    var msg = new Message($"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);
+    var msg = new Message($"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);
 
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
