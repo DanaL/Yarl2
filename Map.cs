@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Linq.Expressions;
+
 namespace Yarl2;
 
 enum TileType
@@ -107,6 +109,15 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Tree => true,
     TileType.Grass => true,
     TileType.WoodBridge => true,
+    _ => false
+  };
+
+  public bool IsTrap() => Type switch
+  {
+    TileType.OpenPit => true,
+    TileType.Pit => true,
+    TileType.HiddenTeleportTrap => true,
+    TileType.TeleportTrap => true,
     _ => false
   };
 

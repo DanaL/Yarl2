@@ -762,7 +762,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  Loc FallIntoPit(Actor actor, Loc pitLoc)
+  public Loc FallIntoPit(Actor actor, Loc pitLoc)
   {
     // find a clear, random landing spot on the level below
     Map lowerLevel = CurrentDungeon.LevelMaps[pitLoc.Level + 1];
@@ -835,48 +835,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
       bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
 
-      if (tile.Type == TileType.Pit && !flying)
+      if (tile.IsTrap())
       {
-        CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.OpenPit));
-        dest = FallIntoPit(actor, dest);
-        ui.SetPopup(new Popup("A pit opens up underneath you!", "", -1, -1));
-        List<Message> msgs = [new Message("A pit opens up underneath you!", dest, false)];
-        msgs.Add(ThingAddedToLoc(dest));
-        WriteMessages(msgs, "");
-        throw new AbnormalMovement(dest);
-      }
-      else if (tile.Type == TileType.OpenPit && !flying)
-      {
-        dest = FallIntoPit(actor, dest);
-        ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));        
-        List<Message> msgs = [new Message("You tumble into the pit!", dest, false)];
-        msgs.Add(ThingAddedToLoc(dest));
-        WriteMessages(msgs, "");
-        throw new AbnormalMovement(dest);
-      }
-      else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
-      {
-        CurrentMap.SetTile(dest.Row, dest.Col, TileFactory.Get(TileType.TeleportTrap));
-
-        // Find candidate locations to teleport to
-        List<Loc> candidates = [];
-        for (int r = 0; r < CurrentMap.Height; r++)
-        {
-          for (int c = 0; c < CurrentMap.Width; c++)
-          {
-            var loc = new Loc(CurrDungeonID, CurrLevel, r, c);
-            if (CurrentMap.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
-              candidates.Add(loc);
-          }
-        }
-
-        WriteMessages([new Message("Your stomach lurches!", start, false)], "");
-        if (candidates.Count > 0)
-        {
-          Loc newDest = candidates[Rng.Next(candidates.Count)];
-          return ResolveActorMove(actor, dest, newDest);
-        }
-      }
+        Traps.TriggerTrap(this, Player, dest, tile, flying);
+      }      
       else if (tile.Type == TileType.Chasm && !flying)
       {
         Loc landingSpot = dest with { Level = dest.Level + 1 };
