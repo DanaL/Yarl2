@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class Traps
 {
-  public static Message TriggerTrap(GameState gs, Player player, Loc loc, Tile tile, bool flying)
+  public static void TriggerTrap(GameState gs, Player player, Loc loc, Tile tile, bool flying)
   {
     UserInterface ui = gs.UIRef();
 
@@ -56,10 +56,16 @@ class Traps
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
-        return gs.ResolveActorMove(player, loc, newDest);
+        var msg = gs.ResolveActorMove(player, loc, newDest);
+        if (msg != NullMessage.Instance)
+          gs.WriteMessages([msg], "");
       }
     }
+    else if (tile.Type == TileType.PoisonDartTrap || tile.Type == TileType.HiddenPoisonDartTrap)
+    {
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.PoisonDartTrap));
 
-    return NullMessage.Instance;
+      gs.WriteMessages([new Message("A dart flies at you!", player.Loc, false)], "");
+    }
   }
 }
