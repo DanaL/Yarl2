@@ -224,7 +224,30 @@ class Vaults
     }
   }
 
-  static Tile GetTombMarker(NameGenerator ng, Random rng, History history)
+  static Landmark GetTombDecoration(Random rng, History history)
+  {
+    string s = history.RulerType switch
+    {
+      OGRulerType.ElfLord => rng.Next(4) switch
+      {
+        0 => "A bas relief carving of a mighty forest.",
+        1 => "A fading fresco of elves dancing under a crescent moon.",
+        2 => "A bas relief carving depicting a funeral procession.",
+        _ => "A fading fresco of a great hunt."
+      },
+      _ => rng.Next(3) switch
+      {
+        0 => "A stone craving of a noble dwarf laying in state.",
+        1 => "A stone carving of subterranean city.",
+        _ => "A stone carving of a dwarven smith at work."
+      },
+    };
+    Landmark landmark = new(s);
+
+    return landmark;
+  }
+
+  static Landmark GetTombMarker(NameGenerator ng, Random rng, History history)
   {
     string name = ng.GenerateName(rng.Next(6, 12));
     string relation = rng.Next(10) switch
@@ -298,6 +321,22 @@ class Vaults
       {
         Tile marker = GetTombMarker(ng, rng, history);
         map.SetTile(adj[0], marker);
+      }
+
+      List<Loc> decorationLocs = [];
+      foreach (Loc loc in locs)
+      {
+        var adjWall = Util.Adj4Sqs(loc.Row, loc.Col)
+                          .Where(sq => map.TileAt(sq).Type == TileType.DungeonWall)
+                          .Any();
+        if (adjWall)
+          decorationLocs.Add(loc);
+      }
+      if (decorationLocs.Count > 0)
+      {
+        Landmark landmark = GetTombDecoration(rng, history);
+        Loc loc = decorationLocs[rng.Next(decorationLocs.Count)];
+        map.SetTile(loc.Row, loc.Col, landmark);
       }
 
       bool haunted = rng.Next(5) == 0;
