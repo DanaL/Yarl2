@@ -624,6 +624,10 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
         new InventoryChoiceAction(gs, user, 
           new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
           new IdentifyItemAction(gs, user, item)), null),
+    "applypoison" => new UseResult(true, "",
+        new InventoryChoiceAction(gs, user,
+          new InventoryOptions() { Title = "Apply it to which item?" },
+          new ApplyPoisonAction(gs, user, item)), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 

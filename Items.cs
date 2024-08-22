@@ -142,7 +142,7 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON
 }
 
 class ItemFactory
@@ -507,6 +507,16 @@ class ItemFactory
           Name = "skull", Type = ItemType.Bone, Value = 0, 
           Glyph = new Glyph('(', Colours.WHITE, Colours.YELLOW, Colours.BLACK, Colours.BLACK)
         };
+        break;
+      case ItemNames.VIAL_OF_POISON:
+        item = new Item
+        {
+          Name = "vial of poison", Type = ItemType.Potion, Value = 100,
+          Glyph = new Glyph('!', Colours.LIME_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("applypoison"));
+        item.Traits.Add(new StackableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

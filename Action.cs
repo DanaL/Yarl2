@@ -1663,6 +1663,45 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
+class ApplyPoisonAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs, actor)
+{
+  Item? SourceItem { get; set; } = sourceItem;
+  public char Choice { get; set; }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+
+    GameState!.ClearMenu();
+
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+
+    if (item != null)
+    {
+      string name = Actor.FullName.Capitalize();
+      string verb = Grammar.Conjugate(Actor, "smear");
+      string objName = item.FullName.DefArticle();
+      string s = $"{name} {verb} some poison on {objName}.";
+
+      item.Traits.Add(new PoisonCoatedTrait());
+      item.Traits.Add(new AdjectiveTrait("poisoned"));
+      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1 });
+
+      result.Messages.Add(new Message(s, Actor.Loc));
+    }
+
+    if (SourceItem is not null)
+      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState!.Rng);
+
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
+}
+
 class IdentifyItemAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs, actor)
 {
   Item? SourceItem {  get; set; } = sourceItem;

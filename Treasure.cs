@@ -27,7 +27,7 @@ class Treasure
       ItemNames.SCROLL_MAGIC_MAP, ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES,
       ItemNames.POTION_MIND_READING, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
-      ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY ]; 
+      ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON ]; 
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
       ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
@@ -38,7 +38,7 @@ class Treasure
       ItemNames.SPEAR, ItemNames.WAND_OF_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK,
-      ItemNames.SCROLL_IDENTIFY];
+      ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {

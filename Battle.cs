@@ -147,6 +147,63 @@ class Battle
     }
   }
 
+  static void CheckAttackTraits(Actor target, GameState gs, ActionResult result, GameObj obj)
+  {
+    bool poisoner = false;
+    foreach (Trait trait in obj.Traits)
+    {
+      if (trait is PoisonerTrait poison)
+      {
+        ApplyPoison(poison, target, gs, result);
+        poisoner = true;
+      }
+
+      if (trait is WeakenTrait weaken)
+      {
+        var debuff = new StatBuffTrait()
+        {
+          DC = weaken.DC,
+          VictimID = target.ID,
+          Attr = Attribute.Strength,
+          Amt = -weaken.Amt,
+          ExpiresOn = gs.Turn + 100
+        };
+
+        if (debuff.IsAffected(target, gs))
+        {
+          string txt = debuff.Apply(target, gs);
+          result.Messages.Add(new Message(txt, target.Loc));
+        }
+      }
+
+      if (trait is CorrosiveTrait)
+      {
+        // Or is it more fair to just pick a random inventory item and not
+        // specifically target metal ones?
+        List<Item> metalItems = [];
+        foreach (var item in target.Inventory.Items())
+        {
+          Metals metal = item.IsMetal();
+          if (metal != Metals.NotMetal && metal != Metals.Mithril)
+            metalItems.Add(item);
+        }
+
+        if (metalItems.Count > 0)
+        {
+          var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
+          string s = EffectApplier.Apply(EffectFlag.Rust, gs, damagedItem, target);
+          if (s != "")
+          {
+            result.Messages.Add(new Message(s, target.Loc));
+          }
+        }
+      }
+    }
+
+    if (poisoner)
+      CheckCoatedPoison(obj, gs.Rng);
+  }
+
   static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, int weaponBonus)
   {    
     // Need to handle the case where the player isn't currently wielding a weapon...
@@ -190,60 +247,14 @@ class Battle
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
 
-    bool poisoner = false;
-    foreach (Trait trait in attacker.Traits)
-    {
-      if (trait is PoisonerTrait poison)
-      {
-        ApplyPoison(poison, target, gs, result);
-        poisoner = true;
-      }
-
-      if (trait is WeakenTrait weaken)
-      {
-        var debuff = new StatBuffTrait()
-        {
-          DC = weaken.DC,
-          VictimID = target.ID,
-          Attr = Attribute.Strength,
-          Amt = -weaken.Amt,
-          ExpiresOn = gs.Turn + 100
-        };
-
-        if (debuff.IsAffected(target, gs))
-        {
-          string txt = debuff.Apply(target, gs);
-          result.Messages.Add(new Message(txt, target.Loc));
-        }
-      }
-
-      if (trait is CorrosiveTrait)
-      {
-        // Or is it more fair to just pick a random inventory item and not
-        // specifically target metal ones?
-        List<Item> metalItems = [];
-        foreach (var item in target.Inventory.Items())
-        {
-          Metals metal = item.IsMetal();
-          if (metal != Metals.NotMetal && metal != Metals.Mithril)
-            metalItems.Add(item);
-        }
-
-        if (metalItems.Count > 0)
-        {
-          var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          string s = EffectApplier.Apply(EffectFlag.Rust, gs, damagedItem, target);
-          if  (s != "")
-          {
-            result.Messages.Add(new Message(s, target.Loc));
-          }
-        }
-      }
-    }
-
     Item? weapon = attacker.Inventory.ReadiedWeapon();
-    if (poisoner && weapon is not null)
-      CheckCoatedPoison(weapon, gs.Rng);
+   
+    CheckAttackTraits(target, gs, result, attacker);
+
+    if (weapon is not null) 
+    { 
+      CheckAttackTraits(target, gs, result, weapon);      
+    }      
   }
 
   static void ResolveHit(GameObj attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
