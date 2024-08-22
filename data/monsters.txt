@@ -1,4 +1,4 @@
-skeleton          |z|white        |darkgrey  |12| 8|2| 1.0|12|10| 2|Dumb|Melee#6#1#Slashing|Immunity#Confusion,ResistPiercing
+skeleton          |z|white        |darkgrey  |12| 8|2| 1.0|12|10| 2|Dumb|Melee#6#1#Slashing|Immunity#Confusion,Immunity#Poison,ResistPiercing
 zombie            |z|limegreen    |darkgreen | 8|10|2|0.75|12| 8| 3|Dumb|Melee#6#1#Blunt|Immunity#Confusion
 wolf              |d|lightgrey    |grey      |12| 8|2| 1.0|12|10| 3|Dumb|Melee#6#1#Piercing|
 giant rat         |r|lightgrey    |grey      |11| 5|2| 1.0|10|10| 2|Dumb|Melee#4#1#Piercing|

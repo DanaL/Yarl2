@@ -125,11 +125,17 @@ class Battle
 
   static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
   {
-    // We won't apply multiple poison statuses to one victim. Although maybe I
-    // should replace the weaker poison with the stronger one?
-    if (victim.HasTrait<PoisonedTrait>())
-      return;
+    foreach (Trait t in victim.Traits)
+    {
+      // We won't apply multiple poison statuses to one victim. Although maybe I
+      // should replace the weaker poison with the stronger one?
+      if (t is PoisonedTrait)
+        return;
 
+      if (t is ImmunityTrait imm && imm.Type == DamageType.Poison)
+        return;
+    }
+    
     bool conCheck = victim.AbilityCheck(Attribute.Constitution, source.DC, gs.Rng);
     if (!conCheck)
     {

@@ -613,8 +613,6 @@ class MainDungeonBuilder : DungeonBuilder
        else
         trapType = TileType.Pit;
 
-      trapType = TileType.HiddenDartTrap;
-
       var sq = map.RandomTile(TileType.DungeonFloor, rng);
       map.SetTile(sq, TileFactory.Get(trapType));
     }
