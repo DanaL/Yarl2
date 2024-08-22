@@ -66,8 +66,8 @@ enum TileType
   SecretDoor,
   HiddenTeleportTrap,
   TeleportTrap,
-  HiddenPoisonDartTrap,
-  PoisonDartTrap
+  HiddenDartTrap,
+  DartTrap
 }
 
 interface ITriggerable
@@ -120,8 +120,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pit => true,
     TileType.HiddenTeleportTrap => true,
     TileType.TeleportTrap => true,
-    TileType.HiddenPoisonDartTrap => true,
-    TileType.PoisonDartTrap => true,
+    TileType.HiddenDartTrap => true,
+    TileType.DartTrap => true,
     _ => false
   };
 
@@ -175,8 +175,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.SecretDoor => "a wall",
     TileType.HiddenTeleportTrap => "stone floor",
     TileType.TeleportTrap => "teleport trap",
-    TileType.HiddenPoisonDartTrap => "stone floor",
-    TileType.PoisonDartTrap => "poison dart trap",
+    TileType.HiddenDartTrap => "stone floor",
+    TileType.DartTrap => "dart trap",
     _ => "unknown"
   };
 
@@ -371,8 +371,8 @@ class TileFactory
   private static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
   private static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
   private static readonly Tile BrokenPortcullis = new BasicTile(TileType.BrokenPortcullis, true, false, true);
-  private static readonly Tile HiddenPoisonDartTrap = new BasicTile(TileType.HiddenPoisonDartTrap, true, false, true);
-  private static readonly Tile PoisonDartTrap = new BasicTile(TileType.PoisonDartTrap, true, false, true);
+  private static readonly Tile HiddenDartTrap = new BasicTile(TileType.HiddenDartTrap, true, false, true);
+  private static readonly Tile DartTrap = new BasicTile(TileType.DartTrap, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -417,8 +417,8 @@ class TileFactory
     TileType.HiddenTeleportTrap => TeleportTrap,
     TileType.TeleportTrap => VisibileTeleportTrap,
     TileType.BrokenPortcullis => BrokenPortcullis,
-    TileType.PoisonDartTrap => PoisonDartTrap,
-    TileType.HiddenPoisonDartTrap => HiddenPoisonDartTrap,
+    TileType.DartTrap => DartTrap,
+    TileType.HiddenDartTrap => HiddenDartTrap,
     _ => Unknown
   };
 }

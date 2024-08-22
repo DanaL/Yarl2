@@ -609,11 +609,11 @@ class MainDungeonBuilder : DungeonBuilder
       if (roll == 0 && level < depth - 1)
         trapType = TileType.HiddenTeleportTrap;
       else if (roll == 1)
-        trapType = TileType.HiddenPoisonDartTrap;
+        trapType = TileType.HiddenDartTrap;
        else
         trapType = TileType.Pit;
 
-      trapType = TileType.HiddenPoisonDartTrap;
+      trapType = TileType.HiddenDartTrap;
 
       var sq = map.RandomTile(TileType.DungeonFloor, rng);
       map.SetTile(sq, TileFactory.Get(trapType));

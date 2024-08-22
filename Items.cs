@@ -144,7 +144,7 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART
 }
 
 class ItemFactory
@@ -247,6 +247,15 @@ class ItemFactory
           Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.DART:
+        item = new Item()
+        {
+          Name = "dart", Type = ItemType.Weapon, Value = 1,
+          Glyph = new Glyph('-', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.FIREBOLT:

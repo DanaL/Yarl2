@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using SDL2;
+
 namespace Yarl2;
 
 class ActionResult
@@ -828,14 +830,22 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           }
           break;
         case TileType.Pit:
+        case TileType.HiddenTeleportTrap:
+        case TileType.HiddenDartTrap:
           dc = 15 + gs.CurrLevel + 1;
           if (rogue)
             dc -= 2;
           dc = int.Min(dc, 20);
           if (gs.Rng.Next(1, 21) <= dc)
           {
+            TileType replacementTile = tile.Type switch 
+            {
+              TileType.HiddenTeleportTrap => TileType.TeleportTrap,
+              TileType.HiddenDartTrap => TileType.DartTrap,
+              _ => TileType.OpenPit
+            };
             result.Messages.Add(new Message("You spot a trap!", loc, false));
-            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.OpenPit));
+            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
           }          
           break;
         case TileType.GateTrigger:

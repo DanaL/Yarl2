@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Formats.Asn1;
+
 namespace Yarl2;
 
 enum DamageType
@@ -81,7 +83,7 @@ class Battle
     return success;
   }
 
-  static void ResolveMissileHit(Actor attacker, Actor target, Item ammo, GameState gs, ActionResult result)
+  public static void ResolveMissileHit(GameObj attacker, Actor target, Item ammo, GameState gs, ActionResult result)
   {
     List<(int, DamageType)> dmg = [];
     foreach (var trait in ammo.Traits)
@@ -97,9 +99,7 @@ class Battle
     // I don't know if I actually want to add Dex to missile dmg. 5e does 
     // course but archery is fairly OP in 5e. I don't want archery to be
     // blatantly the best play still in my game
-    // if (attacker.Stats.TryGetValue(Attribute.Dexterity, out var dex))
-    //   bonusDamage += dex.Curr;
-    if (attacker.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
+    if (attacker is Actor actor && actor.Stats.TryGetValue(Attribute.MissileDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
@@ -235,7 +235,7 @@ class Battle
     }    
   }
 
-  static void ResolveHit(Actor attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
+  static void ResolveHit(GameObj attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
   {
     static void HitAnim(Actor target, GameState gs)
     {
@@ -269,12 +269,14 @@ class Battle
       }      
     }
 
-    if (target.HasTrait<CorrosiveTrait>())
+    Actor?  actor = attacker as Actor ?? null;
+
+    if (actor is not null && target.HasTrait<CorrosiveTrait>())
     {
-      Item? weapon = attacker.Inventory.ReadiedWeapon();
+      Item? weapon = actor.Inventory.ReadiedWeapon();
       if (weapon is not null)
       {
-        string s = EffectApplier.Apply(EffectFlag.Rust, gs, weapon, attacker);
+        string s = EffectApplier.Apply(EffectFlag.Rust, gs, weapon, actor);
         if (s != "" && attacker is Player)
         {
           result.Messages.Add(new Message(s, attacker.Loc));
@@ -283,20 +285,20 @@ class Battle
     }
 
     // Paralyzing gaze only happens in melee range
-    if (Util.Distance(attacker.Loc, target.Loc) < 2)
+    if (actor is not null && Util.Distance(actor.Loc, target.Loc) < 2)
     {
       if (target.Traits.OfType<ParalyzingGazeTrait>().FirstOrDefault() is ParalyzingGazeTrait gaze)
       {
         var paralyzed = new ParalyzedTrait()
         {
-          VictimID = attacker.ID,
+          VictimID = actor.ID,
           DC = gaze.DC
         };
 
-        if (paralyzed.IsAffected(attacker, gs))
+        if (paralyzed.IsAffected(actor, gs))
         {
-          string txt = paralyzed.Apply(attacker, gs);          
-          result.Messages.Add(new Message(txt, attacker.Loc));
+          string txt = paralyzed.Apply(actor, gs);          
+          result.Messages.Add(new Message(txt, actor.Loc));
         }       
       }
     }

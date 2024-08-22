@@ -347,21 +347,21 @@ class GrantsTrait : Trait
 
   public override string AsText() => "Grants#" + string.Join(';', TraitsGranted);
 
-  public void Grant(Actor actor)
+  public void Grant(GameObj obj)
   {
     foreach (string t in TraitsGranted)
     {
-      Trait trait = TraitFactory.FromText(t, actor);
-      actor.Traits.Add(trait);
+      Trait trait = TraitFactory.FromText(t, obj);
+      obj.Traits.Add(trait);
     }
   }
 
-  public void Remove(Actor actor)
+  public void Remove(GameObj obj)
   {
     foreach (string t in TraitsGranted)
     {
-      Trait granted = TraitFactory.FromText(t, actor);
-      actor.Traits.Remove(granted);
+      Trait granted = TraitFactory.FromText(t, obj);
+      obj.Traits.Remove(granted);
     }
   }
 }

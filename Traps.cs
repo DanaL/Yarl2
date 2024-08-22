@@ -61,11 +61,33 @@ class Traps
           gs.WriteMessages([msg], "");
       }
     }
-    else if (tile.Type == TileType.PoisonDartTrap || tile.Type == TileType.HiddenPoisonDartTrap)
+    else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.PoisonDartTrap));
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
 
-      gs.WriteMessages([new Message("A dart flies at you!", player.Loc, false)], "");
+      gs.WriteMessages([new Message("A dart flies at you!", player.Loc)], "");
+
+      Item dart = ItemFactory.Get(ItemNames.DART, gs.ObjDb);
+      dart.Loc = loc;
+      
+      int attackRoll = gs.Rng.Next(1, 21) + loc.Level / 3;
+      if (attackRoll > player.AC)
+      {
+        ActionResult result = new ActionResult();
+        Battle.ResolveMissileHit(dart, player, dart, gs, result);
+        if (result.Messages.Count > 0)
+          gs.WriteMessages(result.Messages, "");
+      }
+
+      gs.ItemDropped(dart, loc);
+
+      // To simulate eventually running out of ammuniation, each time the dart
+      // trap is triggered there's a 5% chane of switching it to a dungeon floor
+      if (gs.Rng.Next(20) == 0) 
+      {
+        gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        gs.WriteMessages([new Message("Click.", player.Loc, false)], "");
+      }
     }
   }
 }
