@@ -64,16 +64,18 @@ class Traps
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
-
       gs.WriteMessages([new Message("A dart flies at you!", player.Loc)], "");
 
       Item dart = ItemFactory.Get(ItemNames.DART, gs.ObjDb);
       dart.Loc = loc;
-      
+      dart.Traits.Add(new PoisonCoatedTrait());
+      dart.Traits.Add(new AdjectiveTrait("poisoned"));
+      dart.Traits.Add(new PoisonerTrait() { DC = 11 + gs.CurrLevel, Strength = int.Max(1, gs.CurrLevel / 4) });
+
       int attackRoll = gs.Rng.Next(1, 21) + loc.Level / 3;
       if (attackRoll > player.AC)
       {
-        ActionResult result = new ActionResult();
+        ActionResult result = new();
         Battle.ResolveMissileHit(dart, player, dart, gs, result);
         if (result.Messages.Count > 0)
           gs.WriteMessages(result.Messages, "");

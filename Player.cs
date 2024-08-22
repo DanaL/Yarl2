@@ -176,7 +176,7 @@ class Player : Actor, IPerformer, IGameEventListener
       string desc;
       if (count > 1)
       {
-        desc = $"{count} {item.Name.Pluralize()}";
+        desc = $"{count} {item.FullName.Pluralize()}";
       }
       else if (item.Type == ItemType.Zorkmid)
       {
@@ -186,7 +186,7 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else
       {
-        desc = item.Name;
+        desc = item.FullName;
       }
       lines.Add($"{slot++}) {desc}");
     }

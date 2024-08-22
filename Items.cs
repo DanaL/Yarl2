@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection;
-
 namespace Yarl2;
 
 enum ItemType
@@ -115,7 +113,7 @@ class Item : GameObj, IEquatable<Item>
     if (HasTrait<StackableTrait>() != i.HasTrait<StackableTrait>()) 
       return false;
 
-    return i.Name == Name && i.Type == Type;
+    return i.FullName == FullName && i.Type == Type;
   }
 
   public static bool operator==(Item? a, Item? b)
@@ -738,7 +736,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         // Not yet worrying about +1 dagger vs +2 dagger which probably shouldn't stack together
         // Maybe a CanStack() method on Item
-        if (other.Type == item.Type && other.Name == item.Name)
+        if (other.Type == item.Type && other.FullName == item.FullName)
         {
           slotToUse = other.Slot;
           break;

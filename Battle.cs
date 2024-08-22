@@ -108,14 +108,19 @@ class Battle
     ResolveHit(attacker, target, hpLeft, result, gs);
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
-    
+
+    bool poisoner = false;
     foreach (var trait in ammo.Traits)
     {
       if (trait is PoisonerTrait poison)
       {
         ApplyPoison(poison, target, gs, result);
+        poisoner = true;
       }
     }
+
+    if (poisoner)
+      CheckCoatedPoison(ammo, gs.Rng);
   }
 
   static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
@@ -185,11 +190,13 @@ class Battle
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
 
+    bool poisoner = false;
     foreach (Trait trait in attacker.Traits)
     {
       if (trait is PoisonerTrait poison)
       {
         ApplyPoison(poison, target, gs, result);
+        poisoner = true;
       }
 
       if (trait is WeakenTrait weaken)
@@ -232,7 +239,11 @@ class Battle
           }
         }
       }
-    }    
+    }
+
+    Item? weapon = attacker.Inventory.ReadiedWeapon();
+    if (poisoner && weapon is not null)
+      CheckCoatedPoison(weapon, gs.Rng);
   }
 
   static void ResolveHit(GameObj attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
@@ -567,6 +578,25 @@ class Battle
     }
 
     return result;
+  }
+
+  // A poison source that is just coated in poison (like a poison dart) has a 
+  // chance of the poison wearing out during an attack so check for that here.
+  static void CheckCoatedPoison(GameObj obj, Random rng)
+  {
+    if (obj.HasTrait<PoisonCoatedTrait>() && rng.NextDouble() < 0.5)
+    {
+      List<Trait> traits = [];
+      foreach (Trait t in obj.Traits) 
+      {
+        if (t is PoisonCoatedTrait || t is PoisonerTrait)
+          continue;
+        if (t is AdjectiveTrait adj && adj.Adj == "poisoned")
+          continue;
+        traits.Add(t);
+      }
+      obj.Traits = traits;
+    }
   }
 
   // At the moment I won't have the player attack villagers because I don't 

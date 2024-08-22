@@ -268,7 +268,7 @@ class PlayerCreator
     //player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_AGGRESSION, objDb), player.ID);
 
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
-    
+
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
 
@@ -276,7 +276,7 @@ class PlayerCreator
 
 
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb), player.ID);
-    
+
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_IDENTIFY, objDb), player.ID);
 
 

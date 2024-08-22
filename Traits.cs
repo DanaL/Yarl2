@@ -966,6 +966,11 @@ class ParalyzedTrait : EffectTrait, IGameEventListener
   }
 }
 
+class PoisonCoatedTrait : Trait
+{
+  public override string AsText() => "PoisonCoated";
+}
+
 class PoisonerTrait : BasicTrait
 {
   public int DC { get; set; }
@@ -1758,6 +1763,8 @@ class TraitFactory
         return new PlantTrait();
       case "Plural":
         return new PluralTrait();
+      case "PoisonCoated":
+        return new PoisonCoatedTrait();
       case "Poisoned":
         return new PoisonedTrait()
         {
