@@ -599,6 +599,50 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static bool IsTopLeftCorner(Map map, int row, int col)
+  {
+    bool IsWall(TileType type)
+    {
+      return type == TileType.DungeonWall || type == TileType.PermWall;
+    }
+
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row, col - 1).Type))
+      return false;
+    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static List<(Loc, string)> FindCorners(Map map, int dungeonID, int level)
+  {
+    List<(Loc, string)> corners = [];
+
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        TileType tile = map.TileAt(r, c).Type;
+
+        if (tile != TileType.DungeonFloor)
+          continue;
+      }
+    }
+    return corners;
+  }
+
   static void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
   {    
     int numOfTraps = rng.Next(1, 4);
