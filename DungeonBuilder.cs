@@ -599,13 +599,13 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static bool IsTopLeftCorner(Map map, int row, int col)
+  static  bool IsWall(TileType type)
   {
-    bool IsWall(TileType type)
-    {
-      return type == TileType.DungeonWall || type == TileType.PermWall;
-    }
+    return type == TileType.DungeonWall || type == TileType.PermWall;
+  }
 
+  static bool IsNWCorner(Map map, int row, int col)
+  {
     if (!IsWall(map.TileAt(row - 1, col - 1).Type))
       return false;
     if (!IsWall(map.TileAt(row - 1, col).Type))
@@ -626,6 +626,72 @@ class MainDungeonBuilder : DungeonBuilder
     return true;
   }
 
+  static bool IsNECorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;    
+    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row, col + 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static bool IsSWCorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
+      return false;    
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row, col - 1).Type))
+      return false;
+    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static bool IsSECorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;    
+    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row, col + 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
   static List<(Loc, string)> FindCorners(Map map, int dungeonID, int level)
   {
     List<(Loc, string)> corners = [];
@@ -638,8 +704,18 @@ class MainDungeonBuilder : DungeonBuilder
 
         if (tile != TileType.DungeonFloor)
           continue;
+
+        if (IsNWCorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "nw"));
+        else if (IsNECorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "ne"));
+        else if (IsSWCorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "sw"));
+        else if (IsSECorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "se"));
       }
     }
+
     return corners;
   }
 
@@ -660,6 +736,10 @@ class MainDungeonBuilder : DungeonBuilder
       var sq = map.RandomTile(TileType.DungeonFloor, rng);
       map.SetTile(sq, TileFactory.Get(trapType));
     }
+
+    var corners = FindCorners(map, dungeonID, level);
+    var (tl, _) = corners[0];
+    map.SetTile(tl.Row, tl.Col, TileFactory.Get(TileType.Tree));
   }
 
   static void PutSecretsDoorInHallways(Map map, Random rng)
