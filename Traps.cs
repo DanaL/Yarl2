@@ -47,8 +47,8 @@ class Traps
         for (int c = 0; c < gs.CurrentMap.Width; c++)
         {
           var dest = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
-          if (gs.CurrentMap.TileAt(r, c).Type == TileType.DungeonFloor && !gs.ObjDb.Occupied(loc))
-            candidates.Add(loc);
+          if (gs.CurrentMap.TileAt(r, c).Type == TileType.DungeonFloor && !gs.ObjDb.Occupied(dest))
+            candidates.Add(dest);
         }
       }
 
