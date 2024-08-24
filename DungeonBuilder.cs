@@ -724,22 +724,120 @@ class MainDungeonBuilder : DungeonBuilder
     int numOfTraps = rng.Next(1, 4);
     for (int j = 0 ; j < numOfTraps; j++)
     {
-      TileType trapType;
-      int roll = rng.Next(4);
+      int roll = rng.Next(5);
       if (roll == 0 && level < depth - 1)
-        trapType = TileType.HiddenTeleportTrap;
+      {
+        var sq = map.RandomTile(TileType.DungeonFloor, rng);
+        map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
+      }
       else if (roll == 1)
-        trapType = TileType.HiddenDartTrap;
-       else
-        trapType = TileType.Pit;
+      {
+        var sq = map.RandomTile(TileType.DungeonFloor, rng);
+        map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
+      }
+      else if (roll == 2)
+      {
+        var corners = FindCorners(map, dungeonID, level);
+        var (corner, dir) = corners[0];
+        FireJetTrap(map, corner, dir, rng);
+      }
+      else
+      {
+        var sq = map.RandomTile(TileType.DungeonFloor, rng);
+        map.SetTile(sq, TileFactory.Get(TileType.Pit));
+      }        
+    }
+  }
 
-      var sq = map.RandomTile(TileType.DungeonFloor, rng);
-      map.SetTile(sq, TileFactory.Get(trapType));
+  static bool CanPlaceJetTrigger(Map map, (int, int) corner, (int, int) delta)
+  {
+    (int, int) loc = corner;
+    int count = 0;
+
+    while (map.InBounds(loc) && map.TileAt(loc).Type == TileType.DungeonFloor && count < 4)
+    {
+      ++count;
+      loc = (loc.Item1 + delta.Item1, loc.Item2 + delta.Item2);
     }
 
-    var corners = FindCorners(map, dungeonID, level);
-    var (tl, _) = corners[0];
-    map.SetTile(tl.Row, tl.Col, TileFactory.Get(TileType.Tree));
+    return count == 4;
+  }
+
+  static void FireJetTrap(Map map, Loc cornerLoc, string dir, Random rng)
+  {
+    (int, int) deltaH, deltaV;
+    Dir horizontalDir, verticalDir;
+    switch (dir)
+    {
+      case "nw":
+        deltaH = (0, 1);
+        deltaV = (1, 0);
+        horizontalDir = Dir.East;
+        verticalDir = Dir.South;
+        break;
+      case "ne":
+        deltaH = (0, -1);
+        deltaV = (0, 1);
+        horizontalDir = Dir.West;
+        verticalDir = Dir.South;
+        break;
+      case "sw":
+        deltaH = (0, 1);
+        deltaV = (-1, 0);
+        horizontalDir = Dir.East;
+        verticalDir = Dir.North;
+        break;
+      default:
+        deltaH = (0, -1);
+        deltaV = (-1, 0);
+        horizontalDir = Dir.West;
+        verticalDir = Dir.North;
+        break;
+    }
+
+    bool horizontalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaH);
+    bool verticalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaV);
+
+    if (!horizontalValid && !verticalValid)
+      return;
+
+    Loc jetLoc;
+    Loc triggerLoc;
+    Dir jetDir;
+    if (horizontalValid && verticalValid)
+    {
+      if (rng.NextDouble() < 0.5)
+      {
+        // horizontal
+        jetDir = horizontalDir;
+        jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
+        triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+      }
+      else
+      {
+        // vertical
+        jetDir = verticalDir;
+        jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
+        triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+      }
+    }
+    else if (horizontalValid)
+    {
+      jetDir = horizontalDir;
+      jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
+      triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+    }
+    else
+    {
+      jetDir = verticalDir;
+      jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
+      triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+    }
+
+    Tile fireJet = new FireJetTrap(false, jetDir);
+    map.SetTile(jetLoc.Row, jetLoc.Col, fireJet);
+    Tile trigger = new JetTrigger(jetLoc, false);
+    map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
   }
 
   static void PutSecretsDoorInHallways(Map map, Random rng)

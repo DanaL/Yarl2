@@ -91,5 +91,72 @@ class Traps
         gs.WriteMessages([new Message("Click.", player.Loc, false)], "");
       }
     }
+    else if (tile.Type == TileType.JetTrigger)
+    {
+      TriggerJetTrap((JetTrigger) tile, gs, player);
+    }
+  }
+
+  static void TriggerJetTrap(JetTrigger trigger, GameState gs, Player player)
+  {
+    trigger.Visible = true;
+
+    FireJetTrap jet = (FireJetTrap) gs.TileAt(trigger.JetLoc);
+    jet.Seen = true;
+    (int, int) delta = jet.Dir switch 
+    {
+      Dir.North => (-1, 0),
+      Dir.South => (1, 0),
+      Dir.East => (0, 1),
+      _ => (0, -1)
+    };
+
+    HashSet<Loc> affected = [];
+    Loc start = trigger.JetLoc with { Row = trigger.JetLoc.Row + delta.Item1, Col = trigger.JetLoc.Col + delta.Item2 };
+    affected.Add(start);
+    Loc loc = start;
+    for (int j = 0; j < 5; j++)
+    {
+      loc = loc with { Row = loc.Row + delta.Item1, Col = loc.Col + delta.Item2 };
+      if (!gs.TileAt(loc).PassableByFlight())
+        break;
+      affected.Add(loc);
+    }
+    
+    var explosion = new ExplosionAnimation(gs!)
+    {
+      MainColour = Colours.BRIGHT_RED,
+      AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,
+      Highlight = Colours.WHITE,
+      Centre = start,
+      Sqs = affected
+    };
+
+    gs.WriteMessages([new Message("Whoosh!! A fire trap!", player.Loc)], "");
+    gs.UIRef().PlayAnimation(explosion, gs);
+
+    ActionResult result = new();
+    int total = 0;
+    int damageDice = 2 + player.Loc.Level / 4;
+    for (int j = 0; j < damageDice; j++)
+      total += gs.Rng.Next(6) + 1;
+    List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
+    foreach (var pt in affected)
+    {
+      gs.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      if (gs.ObjDb.Occupant(pt) is Actor victim)
+      {
+        result.Messages.Add(new Message($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!", pt));
+        
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs);
+        if (hpLeft < 1)
+        {
+          gs.ActorKilled(victim, "flames", result);
+        }        
+      }
+    }
+
+    gs.WriteMessages(result.Messages, "");
   }
 }

@@ -67,7 +67,9 @@ enum TileType
   HiddenTeleportTrap,
   TeleportTrap,
   HiddenDartTrap,
-  DartTrap
+  DartTrap,
+  FireJetTrap,
+  JetTrigger
 }
 
 interface ITriggerable
@@ -122,6 +124,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.TeleportTrap => true,
     TileType.HiddenDartTrap => true,
     TileType.DartTrap => true,
+    TileType.JetTrigger => true,
     _ => false
   };
 
@@ -177,6 +180,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.TeleportTrap => "teleport trap",
     TileType.HiddenDartTrap => "stone floor",
     TileType.DartTrap => "dart trap",
+    TileType.JetTrigger => "trigger",
+    TileType.FireJetTrap => "fire jet",
     _ => "unknown"
   };
 
@@ -240,6 +245,31 @@ class Door(TileType type, bool open) : Tile(type)
   public override bool Opaque() => !Open;
 
   public override string ToString() => $"{(int)Type};{Open}";
+}
+
+class FireJetTrap(bool seen, Dir dir) : Tile(TileType.FireJetTrap)
+{
+  public DamageType Damage { get; set; } = DamageType.Fire;
+  public bool Seen { get; set; } = seen;
+  public Dir Dir { get; set; } = dir;
+
+  public override bool Opaque() => true;
+  public override bool Passable() => false;
+  public override bool PassableByFlight() => false;
+
+  public override string ToString() => $"{(int)Type};{Seen};{Dir}";
+}
+
+class JetTrigger(Loc jetLoc, bool visible) : Tile(TileType.JetTrigger)
+{
+  public Loc JetLoc { get; set; } = jetLoc;
+  public bool Visible { get; set; } = visible;
+
+  public override bool Opaque() => false;
+  public override bool Passable() => true;
+  public override bool PassableByFlight() => true;
+
+  public override string ToString() => $"{(int)Type};{JetLoc};{Visible}";
 }
 
 // Portcullis is pretty close to the door, but I didn't want to connect them

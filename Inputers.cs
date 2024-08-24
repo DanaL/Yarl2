@@ -98,6 +98,8 @@ class Examiner : Inputer
             case TileType.Portcullis:
             case TileType.OpenPortcullis:
             case TileType.TeleportTrap:
+            case TileType.JetTrigger:
+            case TileType.FireJetTrap:
               pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));              
               break;
           }

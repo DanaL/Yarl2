@@ -848,6 +848,21 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
           }          
           break;
+        case TileType.JetTrigger:
+          JetTrigger jt = (JetTrigger)tile;
+          if (!jt.Visible)
+          {
+            dc = 15 + gs.CurrLevel + 1;
+            if (rogue)
+              dc -= 2;
+            dc = int.Min(dc, 20);
+            if (gs.Rng.Next(1, 21) <= dc)
+            {
+              jt.Visible = true;
+              result.Messages.Add(new Message("You spot a loose flagstone!", loc, false));
+            }
+          }
+          break;
         case TileType.GateTrigger:
           GateTrigger gt = (GateTrigger)tile;
           if (!gt.Found)
@@ -1887,8 +1902,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       Sqs = affected
     };
     ui.PlayAnimation(explosion, GameState);
-    //ui.RegisterAnimation(explosion);
-
+    
     int total = 0;
     for (int j = 0; j < 4; j++)
       total += GameState.Rng.Next(6) + 1;

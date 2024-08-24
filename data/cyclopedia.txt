@@ -67,3 +67,9 @@ A common dungeon predator. Its screams are known to temporarily scramble the bra
 #
 deep one
 Strange humanoid fish people who worship strange, alien gods in darkness.
+#
+jettrigger|trigger
+A trigger on the floor that will almost certainly set off a trap.
+#
+firejettrap|fire jet
+A spout that will shoot a jet of flames when triggered.

@@ -359,6 +359,15 @@ internal class MapSaver
           Enum.TryParse(pieces[3], out Metals met);
           tile = new VaultDoor(open, met);
           break;
+        case TileType.FireJetTrap:
+          open = Convert.ToBoolean(pieces[2]);
+          Enum.TryParse(pieces[3], out Dir dir);
+          tile = new FireJetTrap(open, dir);
+          break;
+        case TileType.JetTrigger:
+          digits = Util.ToNums(pieces[2]);
+          tile = new JetTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]), Convert.ToBoolean(pieces[3]));
+          break;
       }
 
       if (tile is not null)
