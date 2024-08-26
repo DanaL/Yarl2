@@ -190,6 +190,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ApplyDamageEffectToLoc(loc, DamageType.Fire);
     }
 
+    if (tile.Type == TileType.Pit || tile.Type == TileType.HiddenPit)
+    {
+      item.Traits.Add(new InPitTrait());
+    }
+
     ObjDb.SetToLoc(loc, item);
     Message msg = ThingAddedToLoc(loc);
     msgs.Add(msg);

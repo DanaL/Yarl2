@@ -733,6 +733,12 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       result.Messages.AddRange(msgs);
     }
 
+    // Clear the 'in a pit' flag when an item is picked up
+    if (item.HasTrait<InPitTrait>())
+    {
+      item.Traits = item.Traits.Where(t => t is not InPitTrait).ToList();
+    }
+
     result.Messages.Add(new Message(pickupMsg, Actor.Loc));
 
     return result;
