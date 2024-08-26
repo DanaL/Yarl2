@@ -283,6 +283,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;
     int roll = rng.Next(20) + 1 + statMod;
 
+    if (attr == Attribute.Strength && HasActiveTrait<RageTrait>())
+      roll += rng.Next(1, 7);
+
     return roll >= dc;
   }
 
