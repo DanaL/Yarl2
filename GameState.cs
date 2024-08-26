@@ -1120,6 +1120,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       int lightRadius = obj.LightRadius();
+      
       if (obj.ID == Player.ID)
       {
         if (InWilderness)
@@ -1142,9 +1143,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           lightRadius = int.Max(lightRadius, daylight);
         }
                 
-        if (Player.HasTrait<InPitTrait>() || lightRadius == 0)
+        if (lightRadius == 0)
           lightRadius = 1;
       }
+
+      if (obj.HasTrait<InPitTrait>())
+        lightRadius = int.Min(lightRadius, 1);
 
       if (lightRadius > 0)
       {
