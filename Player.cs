@@ -454,6 +454,66 @@ class Player : Actor, IPerformer, IGameEventListener
     return adj.Count() == 1 ? adj.First() : Loc.Nowhere;
   }
 
+  Action PickupCommand(GameState gs, UserInterface ui)
+  {
+    var allItems = gs.ObjDb.ItemsAt(Loc);
+    if (allItems is null || allItems.Count == 0)
+    {
+      ui.AlertPlayer([new Message("There's nothing there...", gs.Player.Loc)], "", gs);
+      return new NullAction();
+    }
+
+    List<Item> items = [];
+    List<Item> itemsInPit = [];
+    foreach (var item in gs.ObjDb.ItemsAt(Loc))
+    {
+      if (item.HasTrait<InPitTrait>())
+        itemsInPit.Add(item);
+      else
+        items.Add(item);
+    }
+    
+    // Note that in the current state of the game, an item that is on a pit square
+    // will be in the pit. There's (currently) no concept of floating items so I
+    // don't have to the worry about the situation where there are items in the pit
+    // and items floating above the pit and what a player can and cannot reach in
+    // that situation. This will change if/when I add floating items.
+    bool playerInPit = HasTrait<InPitTrait>();
+    if (itemsInPit.Count == 1 && !playerInPit)
+    {
+      string s = $"You cannot reach {itemsInPit[0].FullName.DefArticle()}.";
+      ui.AlertPlayer([new Message(s, gs.Player.Loc)], "", gs);
+      return new NullAction();
+    }
+    else if (itemsInPit.Count > 0 && !playerInPit)
+    {
+      ui.AlertPlayer([new Message("You cannot reach the items in the pit.", gs.Player.Loc)], "", gs);
+      return new NullAction();
+    }
+
+    if (itemsInPit.Count > 0)
+      items = itemsInPit;
+
+    if (items.Count == 1)
+    {
+      var a = new PickupItemAction(gs, this);
+      // A bit kludgy but this sets up the Action as though
+      // the player had selected the first item in a list of one
+      var r = new ObjIdUIResult() { ID = items[0].ID };
+      a.ReceiveUIResult(r);
+
+      return a;
+    }
+    else
+    {
+      var opts = ShowPickupMenu(ui, items);
+      _inputController = new PickUpper(opts);
+      _deferred = new PickupItemAction(gs, this);
+    }
+
+    return new NullAction();
+  }
+
   public override Action TakeTurn(GameState gameState)
   {
     UserInterface ui = gameState.UIRef();
@@ -530,28 +590,7 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == ',')
       {
-        var itemStack = gameState.ObjDb.ItemsAt(Loc);
-
-        if (itemStack is null || itemStack.Count == 0)
-        {
-          ui.AlertPlayer([new Message("There's nothing there...", gameState.Player.Loc)], "", gameState);
-          return new NullAction();
-        }
-        else if (itemStack.Count == 1)
-        {
-          var a = new PickupItemAction(gameState, this);
-          // A bit kludgy but this sets up the Action as though
-          // the player had selected the first item in a list of one
-          var r = new ObjIdUIResult() { ID = itemStack[0].ID };
-          a.ReceiveUIResult(r);
-          return a;
-        }
-        else
-        {
-          var opts = ShowPickupMenu(ui, itemStack);
-          _inputController = new PickUpper(opts);
-          _deferred = new PickupItemAction(gameState, this);
-        }
+        return PickupCommand(gameState, ui);        
       }
       else if (ch == 'a')
       {
