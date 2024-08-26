@@ -26,7 +26,7 @@ enum TileType
   Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
-  FireJetTrap, JetTrigger
+  FireJetTrap, JetTrigger, HiddenPit, Pit
 }
 
 interface ITriggerable
@@ -82,6 +82,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenDartTrap => true,
     TileType.DartTrap => true,
     TileType.JetTrigger => true,
+    TileType.HiddenPit => true,
+    TileType.Pit => true,
     _ => false
   };
 
@@ -139,6 +141,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.DartTrap => "dart trap",
     TileType.JetTrigger => "trigger",
     TileType.FireJetTrap => "fire jet",
+    TileType.HiddenPit => "stone floor",
+    TileType.Pit => "pit",
     _ => "unknown"
   };
 
@@ -360,6 +364,8 @@ class TileFactory
   private static readonly Tile BrokenPortcullis = new BasicTile(TileType.BrokenPortcullis, true, false, true);
   private static readonly Tile HiddenDartTrap = new BasicTile(TileType.HiddenDartTrap, true, false, true);
   private static readonly Tile DartTrap = new BasicTile(TileType.DartTrap, true, false, true);
+  private static readonly Tile HiddenPit = new BasicTile(TileType.HiddenPit, true, false, true);
+  private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -406,6 +412,8 @@ class TileFactory
     TileType.BrokenPortcullis => BrokenPortcullis,
     TileType.DartTrap => DartTrap,
     TileType.HiddenDartTrap => HiddenDartTrap,
+    TileType.HiddenPit => HiddenPit,
+    TileType.Pit => Pit,
     _ => Unknown
   };
 }

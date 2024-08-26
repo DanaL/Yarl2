@@ -73,3 +73,6 @@ A trigger on the floor that will almost certainly set off a trap.
 #
 firejettrap|fire jet
 A spout that will shoot a jet of flames when triggered.
+#
+pit
+A pit trap.

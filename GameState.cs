@@ -1136,7 +1136,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
           lightRadius = int.Max(lightRadius, daylight);
         }
-        if (lightRadius == 0)
+                
+        if (Player.HasTrait<InPitTrait>() || lightRadius == 0)
           lightRadius = 1;
       }
 

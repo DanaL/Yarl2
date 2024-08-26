@@ -721,10 +721,11 @@ class MainDungeonBuilder : DungeonBuilder
 
   static void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
   {    
-    int numOfTraps = rng.Next(1, 4);
+    int numOfTraps = rng.Next(1, 6);
     for (int j = 0 ; j < numOfTraps; j++)
     {
       int roll = rng.Next(5);
+      roll = 3;
       if (roll == 0 && level < depth - 1)
       {
         var sq = map.RandomTile(TileType.DungeonFloor, rng);
@@ -740,6 +741,11 @@ class MainDungeonBuilder : DungeonBuilder
         var corners = FindCorners(map, dungeonID, level);
         var (corner, dir) = corners[0];
         FireJetTrap(map, corner, dir, rng);
+      }
+      else if (roll == 3 || roll == 4)
+      {
+        var sq = map.RandomTile(TileType.DungeonFloor, rng);
+        map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
       }
       else
       {

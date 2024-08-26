@@ -497,6 +497,7 @@ class PreGameHandler(UserInterface ui)
     {
       int seed = DateTime.Now.GetHashCode();
       //seed = -606877151;
+      seed = -2015835845;
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);

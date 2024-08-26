@@ -272,6 +272,11 @@ class ImmunityTrait : BasicTrait
   public override string AsText() => $"Immunity#{Type}#{ExpiresOn}";
 }
 
+class InPitTrait : Trait
+{
+  public override string AsText() => "InPit";
+}
+
 class LightStepTrait : Trait
 {
   public override string AsText() => "LightStep";
@@ -1737,6 +1742,8 @@ class TraitFactory
         {
           DC = int.Parse(pieces[1])
         };
+      case "InPit":
+        return new InPitTrait();
       case "KnockBack":
         return new KnockBackTrait();
       case "Levitation":

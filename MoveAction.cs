@@ -184,6 +184,24 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.EnergyCost = 1.0;        
       }
     }
+    else if (Actor.HasTrait<InPitTrait>())
+    {
+      if (Actor.AbilityCheck(Attribute.Strength, 13, GameState.Rng))
+      {
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crawl")} to the edge of the pit.";
+        result.Messages.Add(new Message(s, Actor.Loc));
+        result.Complete = true;
+        result.EnergyCost = 1.0;
+        Actor.Traits = Actor.Traits.Where(t => t is not InPitTrait).ToList();
+      }
+      else
+      {
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} still stuck in the pit.";
+        result.Messages.Add(new Message(s, Actor.Loc));
+        result.Complete = true;
+        result.EnergyCost = 1.0;
+      }
+    }
     else if (currTile.Type == TileType.FrozenDeepWater || currTile.Type == TileType.FrozenWater)
     {
       // For slippery tiles, the actor needs to succeed on a dex check before moving, unless 

@@ -829,6 +829,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
           }
           break;
+        case TileType.HiddenPit:
         case TileType.HiddenTrapDoor:
         case TileType.HiddenTeleportTrap:
         case TileType.HiddenDartTrap:
@@ -840,6 +841,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           {
             TileType replacementTile = tile.Type switch 
             {
+              TileType.HiddenPit => TileType.Pit,
               TileType.HiddenTeleportTrap => TileType.TeleportTrap,
               TileType.HiddenDartTrap => TileType.DartTrap,
               _ => TileType.TrapDoor
@@ -1302,8 +1304,8 @@ class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
     }
     else
     {
-      // Teleporting removes the grapple trait
-      Actor.Traits = Actor.Traits.Where(t => t is not GrappledTrait).ToList();
+      // Teleporting removes the grapple trait and in-pit traits
+      Actor.Traits = Actor.Traits.Where(t => t is not GrappledTrait && t is not InPitTrait).ToList();
         
       var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
       var mv = new MoveAction(GameState, Actor, landingSpot);

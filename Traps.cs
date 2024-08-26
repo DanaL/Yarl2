@@ -21,20 +21,42 @@ class Traps
     {
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
       loc = gs.FallIntoPit(player, loc);
-      ui.SetPopup(new Popup("A pit opens up underneath you!", "", -1, -1));
-      List<Message> msgs = [new Message("A pit opens up underneath you!", loc, false)];
+      ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
+      List<Message> msgs = [new Message("A trap door opens up underneath you!", loc, false)];
       msgs.Add(gs.ThingAddedToLoc(loc));
-     gs. WriteMessages(msgs, "");
+      gs. WriteMessages(msgs, "");
+
       throw new AbnormalMovement(loc);
     }
     else if (tile.Type == TileType.TrapDoor && !flying)
     {
       loc = gs.FallIntoPit(player, loc);
-      ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));
-      List<Message> msgs = [new Message("You tumble into the pit!", loc, false)];
+      ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));
+      List<Message> msgs = [new Message("You plummet into the trap door!", loc, false)];
       msgs.Add(gs.ThingAddedToLoc(loc));
       gs.WriteMessages(msgs, "");
+
       throw new AbnormalMovement(loc);
+    }
+    else if (!flying && (tile.Type == TileType.HiddenPit || tile.Type == TileType.Pit))
+    {
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
+
+      ActionResult result = new() { Messages = [(new Message("You tumble into a pit!", loc))] };
+      int total = 0;
+      int damageDice = 1 + player.Loc.Level / 5;
+      for (int j = 0; j < damageDice; j++)
+        total += gs.Rng.Next(6) + 1;
+      List<(int, DamageType)> fallDmg = [ (total, DamageType.Blunt) ];
+      var (hpLeft, _) = player.ReceiveDmg(fallDmg, 0, gs);
+      if (hpLeft < 1)
+      {        
+        gs.ActorKilled(player, "a fall", result);
+      }
+
+      player.Traits.Add(new InPitTrait());
+
+      gs.WriteMessages(result.Messages, "");
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
@@ -153,7 +175,7 @@ class Traps
         if (hpLeft < 1)
         {
           gs.ActorKilled(victim, "flames", result);
-        }        
+        }
       }
     }
 
