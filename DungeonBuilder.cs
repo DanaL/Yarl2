@@ -744,7 +744,7 @@ class MainDungeonBuilder : DungeonBuilder
       else
       {
         var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.Pit));
+        map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
       }        
     }
   }

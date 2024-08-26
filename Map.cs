@@ -15,61 +15,18 @@ namespace Yarl2;
 
 enum TileType
 {
-  WorldBorder,
-  Unknown,
-  PermWall,
-  DungeonWall,
-  DungeonFloor,
-  StoneFloor,
-  StoneWall,
-  ClosedDoor,
-  OpenDoor,
-  LockedDoor,
-  BrokenDoor,
-  HWindow,
-  VWindow,
-  DeepWater,
-  Water,
-  FrozenDeepWater,
-  FrozenWater,
-  Sand,
-  Grass,
-  Tree,
-  Mountain,
-  SnowPeak,
-  Portal,
-  Upstairs,
-  Downstairs,
-  Cloud,
-  WoodWall,
-  WoodFloor,
-  Forge,
-  Dirt,
-  StoneRoad,
-  Well,
-  Bridge,
-  WoodBridge,
+  Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor, 
+  StoneWall, ClosedDoor, OpenDoor, LockedDoor, BrokenDoor, HWindow, VWindow,
+  DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Tree, Mountain,
+  SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
+  Dirt, StoneRoad, Well, Bridge, WoodBridge,
   Statue,       // Most statues can be simple tiles so I'm just defining a few different types
   ElfStatue,    // rather than creating a statue subclass where I need to track state during
   DwarfStatue,  // serialization, etc
-  Landmark,
-  Chasm,
-  CharredGrass,
-  CharredStump,
-  Portcullis,
-  OpenPortcullis,
-  BrokenPortcullis,
-  GateTrigger,
-  VaultDoor,
-  Pit,
-  OpenPit,
-  SecretDoor,
-  HiddenTeleportTrap,
-  TeleportTrap,
-  HiddenDartTrap,
-  DartTrap,
-  FireJetTrap,
-  JetTrigger
+  Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
+  BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
+  SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
+  FireJetTrap, JetTrigger
 }
 
 interface ITriggerable
@@ -118,8 +75,8 @@ abstract class Tile(TileType type) : IZLevel
 
   public bool IsTrap() => Type switch
   {
-    TileType.OpenPit => true,
-    TileType.Pit => true,
+    TileType.TrapDoor => true,
+    TileType.HiddenTrapDoor => true,
     TileType.HiddenTeleportTrap => true,
     TileType.TeleportTrap => true,
     TileType.HiddenDartTrap => true,
@@ -173,8 +130,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.BrokenPortcullis => "broken portcullis",
     TileType.GateTrigger => "trigger/pressure plate",
     TileType.VaultDoor => "vault door",
-    TileType.Pit => "stone floor",
-    TileType.OpenPit => "pit",
+    TileType.HiddenTrapDoor => "stone floor",
+    TileType.TrapDoor => "trap door",
     TileType.SecretDoor => "a wall",
     TileType.HiddenTeleportTrap => "stone floor",
     TileType.TeleportTrap => "teleport trap",
@@ -394,8 +351,8 @@ class TileFactory
   private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
   private static readonly Tile FrozenDeepWater = new BasicTile(TileType.FrozenDeepWater, true, false, true);
   private static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
-  private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
-  private static readonly Tile OpenPit = new BasicTile(TileType.OpenPit, true, false, true);
+  private static readonly Tile HiddenTrapDoor = new BasicTile(TileType.HiddenTrapDoor, true, false, true);
+  private static readonly Tile TrapDoor = new BasicTile(TileType.TrapDoor, true, false, true);
   private static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
   private static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
   private static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
@@ -440,8 +397,8 @@ class TileFactory
     TileType.CharredStump => CharredStump,
     TileType.FrozenDeepWater => FrozenDeepWater,
     TileType.FrozenWater => FrozenWater,
-    TileType.Pit => Pit,
-    TileType.OpenPit => OpenPit,
+    TileType.HiddenTrapDoor => HiddenTrapDoor,
+    TileType.TrapDoor => TrapDoor,
     TileType.SecretDoor => SecretDoor,
     TileType.BrokenDoor => BrokenDoor,
     TileType.HiddenTeleportTrap => TeleportTrap,

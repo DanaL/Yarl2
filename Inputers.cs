@@ -94,7 +94,7 @@ class Examiner : Inputer
             case TileType.ElfStatue:
             case TileType.DwarfStatue:
             case TileType.Landmark:
-            case TileType.OpenPit:
+            case TileType.TrapDoor:
             case TileType.Portcullis:
             case TileType.OpenPortcullis:
             case TileType.TeleportTrap:

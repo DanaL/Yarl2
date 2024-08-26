@@ -26,8 +26,8 @@ A staircase leading upwards.
 downstairs|stairs down
 A staircase leading deeper into the depths. Generally, more fearsome monsters await the deeper you venture.
 #
-openpit|pit trap
-An open pit. You'll plummet to the next level of the dungoen!
+trapdoor|trap door
+A trap door. You'll plummet to the next level of the dungoen!
 #
 teleporttrap|teleport trap
 A trap that will teleport you to a random spot on this dungeon level.

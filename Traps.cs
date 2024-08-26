@@ -17,9 +17,9 @@ class Traps
   {
     UserInterface ui = gs.UIRef();
 
-    if (tile.Type == TileType.Pit && !flying)
+    if (tile.Type == TileType.HiddenTrapDoor && !flying)
     {
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.OpenPit));
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
       loc = gs.FallIntoPit(player, loc);
       ui.SetPopup(new Popup("A pit opens up underneath you!", "", -1, -1));
       List<Message> msgs = [new Message("A pit opens up underneath you!", loc, false)];
@@ -27,7 +27,7 @@ class Traps
      gs. WriteMessages(msgs, "");
       throw new AbnormalMovement(loc);
     }
-    else if (tile.Type == TileType.OpenPit && !flying)
+    else if (tile.Type == TileType.TrapDoor && !flying)
     {
       loc = gs.FallIntoPit(player, loc);
       ui.SetPopup(new Popup("You tumble into the pit!", "", -1, -1));

@@ -63,8 +63,8 @@ class Treasure
         switch (level.TileAt(r, c).Type)
         {
           case TileType.DungeonFloor:
-          case TileType.Pit:
-          case TileType.OpenPit:
+          case TileType.HiddenTrapDoor:
+          case TileType.TrapDoor:
           case TileType.TeleportTrap:
           case TileType.HiddenTeleportTrap:
             candidates.Add(new Loc(dungeonID, levelNum, r, c));

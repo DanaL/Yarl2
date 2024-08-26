@@ -829,7 +829,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
           }
           break;
-        case TileType.Pit:
+        case TileType.HiddenTrapDoor:
         case TileType.HiddenTeleportTrap:
         case TileType.HiddenDartTrap:
           dc = 15 + gs.CurrLevel + 1;
@@ -842,7 +842,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             {
               TileType.HiddenTeleportTrap => TileType.TeleportTrap,
               TileType.HiddenDartTrap => TileType.DartTrap,
-              _ => TileType.OpenPit
+              _ => TileType.TrapDoor
             };
             result.Messages.Add(new Message("You spot a trap!", loc, false));
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
