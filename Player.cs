@@ -417,6 +417,12 @@ class Player : Actor, IPerformer, IGameEventListener
           return '\0';
       }
 
+      if (tile.IsVisibleTrap())
+      {
+        Running = false;
+        return '\0';
+      }
+
       if (gs.ObjDb.ItemsAt(loc).Count > 0)
       {
         Running = false;

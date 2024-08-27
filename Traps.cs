@@ -19,6 +19,7 @@ class Traps
 
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
     {
+      player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
       loc = gs.FallIntoPit(player, loc);
       ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
@@ -40,6 +41,7 @@ class Traps
     }
     else if (!flying && (tile.Type == TileType.HiddenPit || tile.Type == TileType.Pit))
     {
+      player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
       ActionResult result = new() { Messages = [(new Message("You tumble into a pit!", loc))] };
@@ -60,6 +62,7 @@ class Traps
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
+      player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TeleportTrap));
 
       // Find candidate locations to teleport to
@@ -85,6 +88,7 @@ class Traps
     }
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
+      player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
       gs.WriteMessages([new Message("A dart flies at you!", player.Loc)], "");
 
@@ -115,6 +119,7 @@ class Traps
     }
     else if (tile.Type == TileType.JetTrigger)
     {
+      player.Running = false;
       TriggerJetTrap((JetTrigger) tile, gs, player);
     }
   }

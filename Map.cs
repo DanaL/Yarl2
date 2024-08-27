@@ -73,6 +73,16 @@ abstract class Tile(TileType type) : IZLevel
     _ => false
   };
 
+  public bool IsVisibleTrap() => Type switch
+  {
+    TileType.TrapDoor => true,
+    TileType.TeleportTrap => true,
+    TileType.DartTrap => true,
+    TileType.JetTrigger => true,
+    TileType.Pit => true,
+    _ => false
+  };
+
   public bool IsTrap() => Type switch
   {
     TileType.TrapDoor => true,
