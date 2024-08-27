@@ -100,6 +100,7 @@ class Examiner : Inputer
             case TileType.TeleportTrap:
             case TileType.JetTrigger:
             case TileType.FireJetTrap:
+            case TileType.Pit:
               pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));              
               break;
           }

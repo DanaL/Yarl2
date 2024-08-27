@@ -725,7 +725,6 @@ class MainDungeonBuilder : DungeonBuilder
     for (int j = 0 ; j < numOfTraps; j++)
     {
       int roll = rng.Next(5);
-      roll = 3;
       if (roll == 0 && level < depth - 1)
       {
         var sq = map.RandomTile(TileType.DungeonFloor, rng);
