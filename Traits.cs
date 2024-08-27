@@ -138,6 +138,8 @@ class SummonTrait : ActionTrait
 
     return false;
   }
+
+  public override string AsText() => $"Summon#{Cooldown}#{Summons}#{Quip}";  
 }
 
 class HealAlliesTrait : ActionTrait
