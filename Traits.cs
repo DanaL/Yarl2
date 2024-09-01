@@ -1629,9 +1629,13 @@ class TraitFactory
       case "Impale":
         return new ImpaleTrait();      
       case "LightSource":
+        if (pieces[1] == "owner")
+          ownerID = container!.ID;
+        else
+          ownerID = ulong.Parse(pieces[1]);
         return new LightSourceTrait()
         {
-          OwnerID = ulong.Parse(pieces[1]),
+          OwnerID = ownerID,
           Radius = int.Parse(pieces[2])
         };
       case "LightStep":
