@@ -28,4 +28,4 @@ screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16| 4|Flying|Con
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12| 5|Door|Melee#8#1#Piercing|
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12| 6|Door|HealAllies#5,Melee#8#1#Piercing|
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|10|Dumb|Melee#8#1#Piercing|Corrosive
-will-o-wisp       |w|yellow       |yelloworange|15|35|3| 1.0|10|10|10|Flying|Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1
+will-o-wisp       |w|yellow       |yelloworange|15|35|3| 1.0|10|10|10|Flying|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1

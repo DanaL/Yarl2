@@ -156,7 +156,6 @@ class MonsterBehaviour : IBehaviour
       mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
       _lastUse[act.Name] = gs.Turn;
 
-      Loc target = CalcRangedTarget(mob, gs);
       var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
       gs.UIRef().RegisterAnimation(arrowAnim);
 
@@ -181,6 +180,10 @@ class MonsterBehaviour : IBehaviour
       }
       else if (act.Name == "MirrorImage")
         return new MirrorImageAction(gs, mob, CalcAdjacentTarget(mob, gs));
+      else if (act.Name == "DrainTorch")
+      {
+        return new DrainTorchAction(gs, mob, CalcRangedTarget(mob, gs));
+      }
     }
     else if (act is ConfusingScreamTrait scream)
     {

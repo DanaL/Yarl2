@@ -1119,6 +1119,50 @@ class FogCloudAction : Action
   }
 }
 
+class DrainTorchAction : Action
+{
+  readonly Loc _target;
+
+  public DrainTorchAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
+  {
+    _target = target;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    bool success = false;
+    if (GameState!.ObjDb.Occupant(_target) is Actor victim)
+    {
+      foreach (var item in victim.Inventory.Items())
+      {
+        if (item.Traits.OfType<TorchTrait>().FirstOrDefault() is TorchTrait torch)
+        {
+          if (torch.Lit && torch.Fuel > 0)
+          {
+            int drain = GameState.Rng.Next(350, 751);
+            torch.Fuel = int.Max(0, torch.Fuel - drain);
+            string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "drain")}";
+            s += $" {item.FullName.Possessive(victim)}!";
+            result.Messages.Add(new Message(s, _target));
+            success = true;
+          }
+        }
+      }
+    }
+    
+    if (!success)
+    {
+      result.Messages.Add(new Message("The spell fizzles.", Actor!.Loc));
+    }
+
+    return result;
+  }
+}
+
 class EntangleAction : Action
 {
   readonly ulong _casterID;
