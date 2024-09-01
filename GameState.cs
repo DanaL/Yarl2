@@ -585,23 +585,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       dmg += Rng.Next(retribution.DmgDie) + 1;
     HashSet<Loc> pts = [src.Loc];
     foreach (Loc adj in Util.Adj8Locs(src.Loc))
-    {
-      if (ObjDb.Occupant(adj) is Actor actor)
-      {
-        result?.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!", adj));
-        var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this);
-        result?.Messages.Add(new Message(msg, actor.Loc));
-        if (hpLeft < 1)
-          ActorKilled(actor, dmgDesc, result);
-      }
-      ApplyDamageEffectToLoc(adj, retribution.Type);
       pts.Add(adj);
-    }
 
+    Animation anim;
     switch (retribution.Type)
-    {
+    {  
       case DamageType.Cold:
-        var anim = new ExplosionAnimation(this)
+        anim = new ExplosionAnimation(this)
         {
           MainColour = Colours.LIGHT_BLUE,
           AltColour1 = Colours.ICE_BLUE,
@@ -612,6 +602,31 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         };
         UI.PlayAnimation(anim, this);
         break;
+      case DamageType.Fire:
+        anim = new ExplosionAnimation(this)
+        {
+          MainColour = Colours.BRIGHT_RED,
+          AltColour1 = Colours.YELLOW,
+          AltColour2 = Colours.YELLOW_ORANGE,
+          Highlight = Colours.WHITE,
+          Centre = src.Loc,
+          Sqs = pts
+        };
+        UI.PlayAnimation(anim, this);
+        break;
+    }
+
+    foreach (Loc adj in Util.Adj8Locs(src.Loc))
+    {
+      if (ObjDb.Occupant(adj) is Actor actor)
+      {
+        result?.Messages.Add(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!", adj));
+        var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this);
+        result?.Messages.Add(new Message(msg, actor.Loc));
+        if (hpLeft < 1)
+          ActorKilled(actor, dmgDesc, result);
+      }
+      ApplyDamageEffectToLoc(adj, retribution.Type);
     }
   }
 
