@@ -1272,6 +1272,28 @@ class RecallTrait : BasicTrait, IGameEventListener
   }
 }
 
+class RegenerationTrait : BasicTrait, IGameEventListener
+{
+  public int Rate { get; set; }
+  public ulong ActorID { get; set; }
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+
+  public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > ExpiresOn)
+    {
+
+    }
+    if (gs.ObjDb.GetObj(ActorID) is Actor actor)
+    {
+      actor.Stats[Attribute.HP].Change(Rate);
+    }
+  }
+}
+
 // Technically I suppose this is a Count Up not a Count Down...
 class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {

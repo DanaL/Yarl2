@@ -272,15 +272,15 @@ class PreGameHandler(UserInterface ui)
 
     int maxDepth = 5;
     var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
-    var dBuilder = new MainDungeonBuilder();
-    var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
+    //var dBuilder = new MainDungeonBuilder();
+    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
     
-    PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
-    PrinceOfRats(mainDungeon, objDb, rng);
+    //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
+    //PrinceOfRats(mainDungeon, objDb, rng);
 
-    //var dBuilder = new ArenaBuilder();
-    //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    //PopulateArena(rng, objDb, mainDungeon);
+    var dBuilder = new ArenaBuilder();
+    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+    PopulateArena(rng, objDb, mainDungeon);
 
     campaign.AddDungeon(mainDungeon);
 
@@ -352,7 +352,7 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Actor mob = MonsterFactory.Get("rust monster", rng);
+    Actor mob = MonsterFactory.Get("troll", rng);
     objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
