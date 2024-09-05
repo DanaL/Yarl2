@@ -22,7 +22,7 @@ skeleton 2
 zombie 2
 jelly 1
 floating eye 1
-will-i-wisp 1
+will-o-wisp 1
 LEVEL 4
 kobold 4
 kobold foreman 2
@@ -38,7 +38,7 @@ cloaker 2
 owlbear 1
 duergar soldier 1
 drow warrior 1
-will-i-wisp 1
+will-o-wisp 1
 LEVEL 5
 kobold 4
 kobold foreman 2
