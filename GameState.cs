@@ -309,7 +309,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredGrass));
       }
-      else if (tile.Type == TileType.Tree)
+      else if (tile.IsTree())
       {
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredStump));
       }

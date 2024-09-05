@@ -132,7 +132,10 @@ abstract class UserInterface
             case TileType.Bridge:
             case TileType.Dirt:
             case TileType.Grass:
-            case TileType.Tree:
+            case TileType.GreenTree:
+            case TileType.RedTree:
+            case TileType.YellowTree:
+            case TileType.OrangeTree:
               locs.Add(loc);
               break;
           }

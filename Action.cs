@@ -243,7 +243,10 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     TileType.PermWall => true,
     TileType.StoneWall => true,
     TileType.DungeonWall => true,
-    TileType.Tree => true,
+    TileType.GreenTree => true,
+    TileType.OrangeTree => true,
+    TileType.YellowTree => true,
+    TileType.RedTree => true,
     _ => false
   };
 

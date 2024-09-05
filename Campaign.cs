@@ -51,7 +51,9 @@ class PreGameHandler(UserInterface ui)
     return map.TileAt(row, col).Type switch
     {
       TileType.Grass or TileType.Sand or 
-      TileType.Tree or TileType.Dirt => true,
+      TileType.GreenTree or TileType.RedTree or
+      TileType.YellowTree or TileType.OrangeTree or
+      TileType.Dirt => true,
       _ => false,
     };
   }
@@ -87,7 +89,10 @@ class PreGameHandler(UserInterface ui)
       {
         case TileType.Grass:
         case TileType.Dirt:
-        case TileType.Tree:
+        case TileType.GreenTree:
+        case TileType.RedTree:
+        case TileType.YellowTree:
+        case TileType.OrangeTree:
         case TileType.Sand:
           candidate = true;
           break;
@@ -116,7 +121,10 @@ class PreGameHandler(UserInterface ui)
     Dictionary<TileType, int> passable = [];
     passable.Add(TileType.Grass, 1);
     passable.Add(TileType.Sand, 1);
-    passable.Add(TileType.Tree, 2);
+    passable.Add(TileType.GreenTree, 2);
+    passable.Add(TileType.RedTree, 2);
+    passable.Add(TileType.YellowTree, 2);
+    passable.Add(TileType.OrangeTree, 2);
     passable.Add(TileType.Dirt, 1);
     passable.Add(TileType.Bridge, 1);
     passable.Add(TileType.Water, 1);

@@ -17,7 +17,8 @@ enum TileType
 {
   Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor, 
   StoneWall, ClosedDoor, OpenDoor, LockedDoor, BrokenDoor, HWindow, VWindow,
-  DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Tree, Mountain,
+  DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Mountain,
+  GreenTree, OrangeTree, RedTree, YellowTree,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
   Dirt, StoneRoad, Well, Bridge, WoodBridge,
   Statue,       // Most statues can be simple tiles so I'm just defining a few different types
@@ -50,6 +51,15 @@ abstract class Tile(TileType type) : IZLevel
   public abstract bool PassableByFlight();
   public abstract bool Opaque();
 
+  public bool IsTree() => Type switch
+  {
+    TileType.GreenTree => true,
+    TileType.RedTree => true,
+    TileType.YellowTree => true,
+    TileType.OrangeTree => true,
+    _ => false
+  };
+  
   public bool SoundProof() => Type switch
   {
     TileType.WorldBorder => true,
@@ -67,7 +77,10 @@ abstract class Tile(TileType type) : IZLevel
 
   public bool Flammable() => Type switch
   {
-    TileType.Tree => true,
+    TileType.GreenTree => true,
+    TileType.RedTree => true,
+    TileType.OrangeTree => true,
+    TileType.YellowTree => true,
     TileType.Grass => true,
     TileType.WoodBridge => true,
     _ => false
@@ -110,7 +123,10 @@ abstract class Tile(TileType type) : IZLevel
     TileType.WoodFloor => "wood floor",
     TileType.Mountain => "a mountain",
     TileType.SnowPeak => "a mountain",
-    TileType.Tree => "trees",
+    TileType.GreenTree => "trees",
+    TileType.YellowTree => "trees",
+    TileType.RedTree => "trees",
+    TileType.OrangeTree => "trees",
     TileType.Grass => "grass",
     TileType.OpenDoor => "a open door",
     TileType.BrokenDoor => "a broken door",
@@ -342,7 +358,10 @@ class TileFactory
   private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false, true);
   private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false, true);
   private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false, true);
-  private static readonly Tile Tree = new BasicTile(TileType.Tree, true, false, true);
+  private static readonly Tile GreenTree = new BasicTile(TileType.GreenTree, true, false, true);
+  private static readonly Tile YellowTree = new BasicTile(TileType.YellowTree, true, false, true);
+  private static readonly Tile RedTree = new BasicTile(TileType.RedTree, true, false, true);
+  private static readonly Tile OrangeTree = new BasicTile(TileType.OrangeTree, true, false, true);
   private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true, false);
   private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true, false);
   private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false, true);
@@ -388,7 +407,10 @@ class TileFactory
     TileType.DeepWater => DeepWater,
     TileType.Sand => Sand,
     TileType.Grass => Grass,
-    TileType.Tree => Tree,
+    TileType.GreenTree => GreenTree,
+    TileType.RedTree => RedTree,
+    TileType.YellowTree => YellowTree,
+    TileType.OrangeTree => OrangeTree,
     TileType.Mountain => Mountain,
     TileType.SnowPeak => SnowPeak,
     TileType.ClosedDoor => new Door(type, false),
@@ -582,7 +604,10 @@ class Map : ICloneable
           TileType.ClosedDoor or TileType.LockedDoor => '+',
           TileType.Mountain or TileType.SnowPeak => '^',
           TileType.Grass => ',',
-          TileType.Tree => 'T',
+          TileType.GreenTree => 'T',
+          TileType.RedTree => 'T',
+          TileType.OrangeTree => 'T',
+          TileType.YellowTree => 'T',
           TileType.DeepWater => '~',
           TileType.WoodBridge => '=',
           _ => ' '

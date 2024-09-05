@@ -324,7 +324,10 @@ class VillagePupBehaviour : IBehaviour
   static bool Passable(TileType type) => type switch
   {
     TileType.Grass => true,
-    TileType.Tree => true,
+    TileType.GreenTree => true,
+    TileType.RedTree => true,
+    TileType.OrangeTree => true,
+    TileType.YellowTree => true,
     TileType.Dirt => true,
     TileType.Sand => true,
     TileType.Bridge => true,
@@ -783,7 +786,10 @@ class MayorBehaviour : IBehaviour, IDialoguer
       costs.Add(TileType.Sand, 1);
       costs.Add(TileType.Dirt, 1);
       costs.Add(TileType.Bridge, 1);
-      costs.Add(TileType.Tree, 1);
+      costs.Add(TileType.GreenTree, 1);
+      costs.Add(TileType.RedTree, 1);
+      costs.Add(TileType.OrangeTree, 1);
+      costs.Add(TileType.YellowTree, 1);
       costs.Add(TileType.StoneFloor, 1);
       costs.Add(TileType.WoodFloor, 1);
       costs.Add(TileType.OpenDoor, 1);

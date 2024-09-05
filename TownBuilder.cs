@@ -130,7 +130,7 @@ class TownBuilder
           '+' => TileType.ClosedDoor,
           '|' => TileType.VWindow,
           '-' => TileType.HWindow,
-          'T' => TileType.Tree,
+          'T' => Wilderness.PickTree(rng),
           '.' => building == BuildingType.Smithy ? TileType.StoneFloor : TileType.WoodFloor,
           _ => throw new Exception("Invalid character in building template!")
         };
@@ -482,7 +482,7 @@ class TownBuilder
     {
       for (int c = townCol; c < townCol + TOWN_WIDTH; c++)
       {
-        if (map.TileAt(r, c).Type == TileType.Tree && rng.NextDouble() < 0.85)
+        if (map.TileAt(r, c).IsTree() && rng.NextDouble() < 0.85)
           map.SetTile(r, c, TileFactory.Get(TileType.Grass));
         else if (map.TileAt(r, c).Type == TileType.Mountain)
           map.SetTile(r, c, TileFactory.Get(TileType.Grass));
@@ -552,7 +552,7 @@ class TownBuilder
           foreach (var adj in Util.Adj4Sqs(r, c))
           {
             var tile = map.TileAt(adj.Item1, adj.Item2);
-            if (tile.Type == TileType.Grass || tile.Type == TileType.Tree)
+            if (tile.Type == TileType.Grass || tile.IsTree())
             {
               map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.Dirt));
               doors.Add((adj.Item1, adj.Item2));
@@ -574,7 +574,10 @@ class TownBuilder
     passable.Add(TileType.Sand, 1);
     passable.Add(TileType.Dirt, 1);
     passable.Add(TileType.Bridge, 1);
-    passable.Add(TileType.Tree, 2);
+    passable.Add(TileType.GreenTree, 2);
+    passable.Add(TileType.RedTree, 2);
+    passable.Add(TileType.YellowTree, 2);
+    passable.Add(TileType.OrangeTree, 2);
     passable.Add(TileType.Water, 3);
     passable.Add(TileType.DeepWater, 3);
 
@@ -590,7 +593,7 @@ class TownBuilder
       foreach (var sq in path)
       {
         var tile = map.TileAt(sq);
-        if (tile.Type == TileType.Grass || tile.Type == TileType.Tree)
+        if (tile.Type == TileType.Grass || tile.IsTree())
           map.SetTile(sq, TileFactory.Get(TileType.Dirt));
         else if (tile.Type == TileType.Water)
         {
@@ -627,7 +630,7 @@ class TownBuilder
       foreach (var adj in Util.Adj4Sqs(sq.Row, sq.Col))
       {
         var tile = map.TileAt(adj.Item1, adj.Item2);
-        if (tile.Type != TileType.Grass && tile.Type != TileType.Dirt && tile.Type != TileType.Tree)
+        if (tile.Type != TileType.Grass && tile.Type != TileType.Dirt && !tile.IsTree())
         {
           okay = false;
           break;
@@ -743,8 +746,8 @@ class TownBuilder
     {
       for (int c = centreCol - 5; c < centreCol + 5; c++)
       {
-        var ttype = map.TileAt(r, c).Type;
-        if (ttype == TileType.Grass || ttype == TileType.Tree || ttype == TileType.Dirt)
+        Tile tile = map.TileAt(r, c);
+        if (tile.Type == TileType.Grass || tile.Type == TileType.Dirt || tile.IsTree())
           Town.TownSquare.Add(new Loc(0, 0, r, c));
       }
     }

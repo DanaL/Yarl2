@@ -28,7 +28,10 @@ class Village
         switch (map.TileAt(r, c).Type)
         {
           case TileType.Grass:
-          case TileType.Tree:
+          case TileType.GreenTree:
+          case TileType.RedTree:
+          case TileType.YellowTree:
+          case TileType.OrangeTree:
           case TileType.Sand:
           case TileType.Dirt:
             sqs.Add((r, c));
