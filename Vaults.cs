@@ -342,7 +342,7 @@ class Vaults
       bool haunted = rng.Next(5) == 0;
       if (haunted)
       {
-        Actor spirit = MonsterFactory.Get("shadow", rng);
+        Actor spirit = MonsterFactory.Get("shadow", objDb, rng);
         objDb.AddNewActor(spirit, locs[rng.Next(locs.Count)]);
       }
     }

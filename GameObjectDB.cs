@@ -140,6 +140,11 @@ class GameObjectDB
   public Dictionary<Loc, ulong> _actorLocs = [];
   public Dictionary<ulong, GameObj> Objs = [];
 
+  // This might (probably will) expand into a hashtable of 
+  // UIEventType mapped to a list of listeners
+  public List<IGameEventListener> EndOfRoundListeners { get; set; } = [];
+  public List<(ulong, IGameEventListener)> DeathWatchListeners { get; set; } = [];
+
   public bool ItemsWithTrait<T>(Loc loc)
   {
     if (_itemLocs.TryGetValue(loc, out var items))

@@ -352,7 +352,7 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Actor mob = MonsterFactory.Get("troll", rng);
+    Actor mob = MonsterFactory.Get("troll", objDb, rng);
     objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
@@ -400,7 +400,7 @@ class PreGameHandler(UserInterface ui)
           Console.WriteLine(m);
 
         // Some monsters are a bit special and take a bit of extra work
-        Actor monster = MonsterFactory.Get(m, rng);
+        Actor monster = MonsterFactory.Get(m, objDb, rng);
         monster.Loc = loc;
         objDb.Add(monster);
         objDb.AddToLoc(loc, monster);

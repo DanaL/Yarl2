@@ -535,7 +535,7 @@ class MainDungeonBuilder : DungeonBuilder
       if (deepOneLocs.Count == 0)
         break;
 
-      Actor d = MonsterFactory.Get("deep one", rng);
+      Actor d = MonsterFactory.Get("deep one", objDb, rng);
       d.Traits.Add(new WorshiperTrait() 
       { 
         Altar = shrineLoc,
@@ -550,7 +550,7 @@ class MainDungeonBuilder : DungeonBuilder
       deepOnes.Add(d);
     }
 
-    Actor shaman = MonsterFactory.Get("deep one shaman", rng);
+    Actor shaman = MonsterFactory.Get("deep one shaman", objDb, rng);
     shaman.Traits.Add(new WorshiperTrait() 
     { 
       Altar = shrineLoc,

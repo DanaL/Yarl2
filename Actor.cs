@@ -259,7 +259,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     if (candidateSqs.Count > 0)
     {
       var spot = candidateSqs[gs.Rng.Next(candidateSqs.Count)];
-      var other = MonsterFactory.Get(Name, gs.Rng);
+      var other = MonsterFactory.Get(Name, gs.ObjDb, gs.Rng);
       var hp = Stats[Attribute.HP].Curr / 2;
       var half = Stats[Attribute.HP].Curr - hp;
       Stats[Attribute.HP].Curr = hp;
@@ -387,7 +387,7 @@ class MonsterFactory
   //       0       1    2      3   4   5           6         7    8    9       10        11       12
   // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Xp val, Movement, Actions, Other Traits 
   // skeleton        |z|white        |darkgrey  |12| 8|2| 1.0| 6|1|12|10|2|Basic|
-  public static Actor Get(string name, Random rng)
+  public static Actor Get(string name, GameObjectDB objDb, Random rng)
   {
     if (_catalog.Count == 0)
       LoadCatalog();
@@ -437,6 +437,11 @@ class MonsterFactory
       {
         var trait = TraitFactory.FromText(traitTxt, m);
         m.Traits.Add(trait);
+
+        if (trait is IGameEventListener listener)
+        {
+          objDb.EndOfRoundListeners.Add(listener);
+        }
       }
     }
 

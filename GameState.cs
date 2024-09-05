@@ -50,11 +50,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public ulong LastTarget { get; set; } = 0;
   public List<Fact> Facts => Campaign.History != null ? Campaign.History.Facts : [];
 
-  // This might (probably will) expand into a hashtable of 
-  // UIEventType mapped to a list of listeners
-  List<IGameEventListener> _endOfRoundListeners { get; set; } = [];
-  List<(ulong, IGameEventListener)> _deathWatchListeners { get; set; } = [];
-
   private UserInterface UI { get; set; } = ui;
 
   private int _currPerformer = 0;
@@ -550,7 +545,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     // Was anything listening for the the victims death?
-    foreach (var (targetID, listener) in _deathWatchListeners)
+    foreach (var (targetID, listener) in ObjDb.DeathWatchListeners)
     {
       if (targetID == victim.ID)
         listener.EventAlert(GameEventType.Death, this);
@@ -633,14 +628,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   void ClearDeathWatch(ulong victimID)
   {
     Stack<int> indexes = [];
-    for (int j = 0; j < _deathWatchListeners.Count; j++)
+    for (int j = 0; j < ObjDb.DeathWatchListeners.Count; j++)
     {
-      if (_deathWatchListeners[j].Item1 == victimID)
+      if (ObjDb.DeathWatchListeners[j].Item1 == victimID)
         indexes.Push(j);
     }
     while (indexes.Count > 0)
     {
-      _deathWatchListeners.RemoveAt(indexes.Pop());
+      ObjDb.DeathWatchListeners.RemoveAt(indexes.Pop());
     }
   }
 
@@ -732,12 +727,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     PlayerCreator.CheckLevelUp(this);
 
-    var listeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
+    var listeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
     {
       listener.EventAlert(GameEventType.EndOfRound, this);
     }
-    _endOfRoundListeners = _endOfRoundListeners.Where(l => !l.Expired).ToList();
+    ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
   }
 
   void SetDMaps(Loc loc)
@@ -1073,9 +1068,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void RegisterForEvent(GameEventType eventType, IGameEventListener listener, ulong targetID = 0)
   {
     if (eventType == GameEventType.EndOfRound)
-      _endOfRoundListeners.Add(listener);
+      ObjDb.EndOfRoundListeners.Add(listener);
     else if (eventType == GameEventType.Death)
-      _deathWatchListeners.Add((targetID, listener));
+      ObjDb.DeathWatchListeners.Add((targetID, listener));
     else
       throw new NotImplementedException("I haven't created any other event listeners yet :o");
   }
@@ -1084,11 +1079,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     if (eventType == GameEventType.EndOfRound)
     {
-      _endOfRoundListeners.Remove(listener);
+      ObjDb.EndOfRoundListeners.Remove(listener);
     }
     else if (eventType == GameEventType.Death)
     {
-      _deathWatchListeners.Remove((targetID, listener));
+      ObjDb.DeathWatchListeners.Remove((targetID, listener));
     }
     else
     {
@@ -1099,17 +1094,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // Remove listener from all events it might be listening for,
   public void RemoveListener(IGameEventListener listener)
   {
-    _endOfRoundListeners.Remove(listener);
+    ObjDb.EndOfRoundListeners.Remove(listener);
 
     Stack<int> indexes = [];
-    for (int j = 0; j < _deathWatchListeners.Count; j++)
+    for (int j = 0; j < ObjDb.DeathWatchListeners.Count; j++)
     {
-      if (_deathWatchListeners[j].Item2 == listener)
+      if (ObjDb.DeathWatchListeners[j].Item2 == listener)
         indexes.Push(j);
     }
 
     while (indexes.Count > 0)
-      _deathWatchListeners.RemoveAt(indexes.Pop());
+      ObjDb.DeathWatchListeners.RemoveAt(indexes.Pop());
   }
 
   public List<Message> OwnedItemPickedUp(List<ulong> ownerIDs, Actor picker, ulong itemID)

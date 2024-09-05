@@ -1282,13 +1282,14 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs)
-  {    
+  {
     if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
       return;
 
     if (gs.Turn > ExpiresOn)
     {
       actor.Traits.Remove(this);
+      Expired = true;
     }
     else
     {
@@ -1840,16 +1841,18 @@ class TraitFactory
           Expired = bool.Parse(pieces[2])
         };
       case "Regeneration":
+        // $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}"
         if (pieces[2] == "owner")
           ownerID = container!.ID;
         else
           ownerID = ulong.Parse(pieces[2]);
+        expiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4]);
         return new RegenerationTrait()
         {
           Rate = int.Parse(pieces[1]),
           ActorID = ownerID,
           Expired = bool.Parse(pieces[3]),
-          ExpiresOn = ulong.Parse(pieces[4])
+          ExpiresOn = expiresOn
         };
       case "ResistBlunt":
         return new ResistBluntTrait();

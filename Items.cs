@@ -319,7 +319,7 @@ class ItemFactory
         item = new Item() { Name = "torch", Type = ItemType.Tool, Value = 2,
           Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
         };
-        item.Traits.Add(new TorchTrait() { OwnerID = item.ID, Fuel = 1500, Lit = false });
+        item.Traits.Add(new TorchTrait() { OwnerID = item.ID, Fuel = 750, Lit = false });
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new StackableTrait());
         break;

@@ -778,7 +778,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
       var loc = SpawnPt();
       if (loc != Loc.Nowhere)
       {
-        var summoned = MonsterFactory.Get(_summons, GameState!.Rng);
+        var summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
         GameState.ObjDb.AddNewActor(summoned, loc);
         GameState.AddPerformer(summoned);
         ++summonCount;
@@ -1183,7 +1183,7 @@ class EntangleAction : Action
       var tile = GameState!.TileAt(loc);
       if (tile.Type != TileType.Unknown && tile.Passable() && !GameState.ObjDb.Occupied(loc))
       {
-        Actor vines = MonsterFactory.Get("vines", GameState.Rng);
+        Actor vines = MonsterFactory.Get("vines", GameState.ObjDb, GameState.Rng);
         vines.Loc = loc;
         GameState.ObjDb.Add(vines);
         GameState.ObjDb.AddToLoc(loc, vines);

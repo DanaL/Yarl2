@@ -54,5 +54,4 @@ cloaker 2
 owlbear 1
 duergar soldier 2
 drow warrior 2
-will-i-wisp 1
-troll 1
+will-o-wisp 1
