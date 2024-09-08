@@ -28,7 +28,7 @@ class DungeonMap(Random rng)
   {
     int height, width;
     RoomShapes shape;
-    List<(int, int)> sqs = new();
+    List<(int, int)> sqs = [];
     var rn = _rng.NextDouble();
 
     if (rn < 0.8)
@@ -107,6 +107,7 @@ class DungeonMap(Random rng)
           break;
         }
       }
+
       if (overlap)
         continue;
 
@@ -118,9 +119,36 @@ class DungeonMap(Random rng)
       {
         map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.DungeonFloor));
       }
+      // Some square rooms will have columns near the corners
+      if (shape == RoomShapes.Rect && _rng.NextDouble() < 0.15)
+        FancierRectRooms(map, sqs);
     }
 
     return rooms;
+  }
+
+  void FancierRectRooms(Map map, List<(int, int)> sqs)
+  {
+    // Room with columns in the corners
+    int loRow = int.MaxValue, loCol = int.MaxValue;
+    int hiRow = 0, hiCol = 0;
+    foreach (var sq in sqs)
+    {
+      if (sq.Item1 < loRow)
+        loRow = sq.Item1;
+      if (sq.Item1 > hiRow)
+        hiRow = sq.Item1;
+      if (sq.Item2 < loCol)
+        loCol = sq.Item2;
+      if (sq.Item2 > hiCol)
+        hiCol = sq.Item2;
+    }
+
+    // Okay, we know where the corners are, all the columns
+    map.SetTile(loRow + 1, loCol + 1, TileFactory.Get(TileType.DungeonWall));
+    map.SetTile(loRow + 1, hiCol - 1, TileFactory.Get(TileType.DungeonWall));
+    map.SetTile(hiRow - 1, loCol + 1, TileFactory.Get(TileType.DungeonWall));
+    map.SetTile(hiRow - 1, hiCol - 1, TileFactory.Get(TileType.DungeonWall));
   }
 
   static List<(int, int)> MazeNeighbours(Map map, int row, int col, TileType type, int d)
@@ -1000,7 +1028,7 @@ class DungeonMap(Random rng)
         var regions = regionFinder.Find(map, true, TileType.DungeonWall);
         if (regions.Count == 2)
         {
-          BruteForceJoinRegions(map, regions[0], regions[1], rng);
+          BruteForceJoinRegions(map, regions[0], regions[1], _rng);
         }
         else if (regions.Count > 2)
         {
