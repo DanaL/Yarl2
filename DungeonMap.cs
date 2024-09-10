@@ -39,8 +39,11 @@ class DungeonMap(Random rng)
       if (height % 2 == 0)
         ++height;
       width = _rng.Next(5, 20);
+
+      // For some rome reason if I make rooms with odd widths there's
+      // an infinite loop??
       if (width % 2 == 0)
-        ++width;
+         ++width;
       for (int r = 0; r < height; r++)
       {
         for (int c = 0; c < width; c++)
@@ -144,7 +147,6 @@ class DungeonMap(Random rng)
         hiCol = sq.Item2;
     }
 
-    // Okay, we know where the corners are, all the columns
     map.SetTile(loRow + 1, loCol + 1, TileFactory.Get(TileType.DungeonWall));
     map.SetTile(loRow + 1, hiCol - 1, TileFactory.Get(TileType.DungeonWall));
     map.SetTile(hiRow - 1, loCol + 1, TileFactory.Get(TileType.DungeonWall));

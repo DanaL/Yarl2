@@ -128,7 +128,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.RedTree => "trees",
     TileType.OrangeTree => "trees",
     TileType.Grass => "grass",
-    TileType.OpenDoor => "a open door",
+    TileType.OpenDoor => "an open door",
     TileType.BrokenDoor => "a broken door",
     TileType.ClosedDoor => "a closed door",
     TileType.LockedDoor => "a locked door",
