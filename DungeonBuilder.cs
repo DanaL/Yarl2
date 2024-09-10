@@ -724,7 +724,7 @@ class MainDungeonBuilder : DungeonBuilder
     int numOfTraps = rng.Next(1, 6);
     for (int j = 0 ; j < numOfTraps; j++)
     {
-      int roll = rng.Next(5);
+      int roll = rng.Next(6);
       if (roll == 0 && level < depth - 1)
       {
         var sq = map.RandomTile(TileType.DungeonFloor, rng);
@@ -745,6 +745,11 @@ class MainDungeonBuilder : DungeonBuilder
       {
         var sq = map.RandomTile(TileType.DungeonFloor, rng);
         map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
+      }
+      else if (roll == 5)
+      {
+        var sq = map.RandomTile(TileType.DungeonFloor, rng);
+        map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
       }
       else
       {

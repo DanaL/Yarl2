@@ -76,3 +76,6 @@ A spout that will shoot a jet of flames when triggered.
 #
 pit
 A pit trap.
+#
+watertrap|water trap
+A spout that will spray you with water, leaving you soaking wet.

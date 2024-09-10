@@ -122,6 +122,16 @@ class Traps
       player.Running = false;
       TriggerJetTrap((JetTrigger) tile, gs, player);
     }
+    else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
+    {
+      player.Running = false;
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.WaterTrap));
+      List<Message> msgs = [new Message("You are soaked by a blast of water!", loc)];      
+      string s = player.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
+      if (s != "")
+        msgs.Add(new Message(s, loc));
+      gs.WriteMessages(msgs, "");
+    }
   }
 
   static void TriggerJetTrap(JetTrigger trigger, GameState gs, Player player)
