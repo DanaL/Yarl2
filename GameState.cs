@@ -532,16 +532,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       --_currPerformer;
     Performers.Remove(victim);
 
-    if (victim.HasTrait<PoorLootTrait>())
+    foreach (var t in victim.Traits)
     {
-      var loot = Treasure.PoorTreasure(1, Rng, ObjDb);
-      if (loot.Count > 0)
-        ItemDropped(loot[0], victim.Loc);
-    }
-
-    foreach (RetributionTrait rt in victim.Traits.OfType<RetributionTrait>())
-    {
-      RetributionDamage(victim, rt, result);
+      if (t is PoorLootTrait)
+      {
+        var loot = Treasure.PoorTreasure(1, Rng, ObjDb);
+        if (loot.Count > 0)
+          ItemDropped(loot[0], victim.Loc);
+      }
+      else if (t is CoinsLootTrait coins)
+      {
+        var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
+        zorkmids.Value = Rng.Next(coins.Min, coins.Max + 1);
+        ItemDropped(zorkmids, victim.Loc);
+      }
+      else if (t is RetributionTrait rt)
+      {
+        RetributionDamage(victim, rt, result);
+      }
     }
 
     // Was anything listening for the the victims death?

@@ -79,3 +79,6 @@ A pit trap.
 #
 watertrap|water trap
 A spout that will spray you with water, leaving you soaking wet.
+#
+creeping coins
+A pile of coins, sitting there to be claimed. Wait. Did it just move?

@@ -48,6 +48,7 @@ duergar soldier 1
 drow warrior 1
 rust monster 1
 will-o-wisp 1
+creeping coins 1
 LEVEL 5
 goblin 2
 hobgoblin 3
@@ -69,3 +70,4 @@ drow warrior 2
 rust monster 1
 will-o-wisp 1
 troll 1
+creeping coins 1

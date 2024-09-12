@@ -291,6 +291,14 @@ class MetalTrait : Trait
   public override string AsText() => $"Metal#{(int)Type}";
 }
 
+class CoinsLootTrait : Trait
+{
+  public int Min { get; set; }
+  public int Max { get; set; }
+
+  public override string AsText() => $"CoinsLoot#{Min}#{Max}";
+}
+
 class PoorLootTrait : Trait
 {
   public override string AsText() => "PoorLoot";
@@ -1557,6 +1565,12 @@ class TraitFactory
         return new BerzerkTrait();
       case "Cleave":
         return new CleaveTrait();
+      case "CoinsLoot":
+        return new CoinsLootTrait()
+        {
+          Min = int.Parse(pieces[1]),
+          Max = int.Parse(pieces[2])
+        };
       case "ConfusingScream":
         return new ConfusingScreamTrait()
         {
