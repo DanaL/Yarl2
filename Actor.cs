@@ -305,8 +305,11 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public bool VisibleTo(Actor other)
   {
+    if (ID == other.ID)
+      return true;
+      
     if (HasTrait<InvisibleTrait>() && !other.HasTrait<SeeInvisibleTrait>())
-    return false;
+      return false;
 
     return true;
   }

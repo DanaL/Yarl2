@@ -154,9 +154,9 @@ class MsgFactory
         Verb.Tear => "teared"
     };
 
-    public static string CalcName(GameObj gobj, int amount = 0)
+    public static string CalcName(GameObj gobj, Player player, int amount = 0)
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
         if (gobj is Item item)
         {
             if (amount > 1)
@@ -170,9 +170,17 @@ class MsgFactory
                 sb.Append(item.FullName.DefArticle());
             }            
         }
+        else if (gobj is Actor actor)
+        {
+          if (actor.VisibleTo(player))
+            sb.Append(gobj.FullName);
+          else
+            sb.Append("something");
+        }
         else
         {
-            sb.Append(gobj.FullName);
+          // I suppose there might eventually be other types of GameObjects and Items and Actors?
+          sb.Append(gobj.FullName);
         }
 
         return sb.ToString();
@@ -186,14 +194,14 @@ class MsgFactory
 
         if (sub is not null)
         {
-            sb.Append(CalcName(sub));
+            sb.Append(CalcName(sub, gs.Player));
             sb.Append(' ');
             sb.Append(CalcVerb(sub, verb));
 
             if (obj != 0 && victim is not null)
             {                
                 sb.Append(' ');
-                sb.Append(CalcName(victim, amt));
+                sb.Append(CalcName(victim, gs.Player, amt));
             }
 
             sb.Append(exciting ? '!' : '.');
@@ -209,7 +217,7 @@ class MsgFactory
 
         if (sub is not null)
         {
-            sb.Append(CalcName(sub));
+            sb.Append(CalcName(sub, gs.Player));
             sb.Append(' ');
             sb.Append(CalcVerb(sub, verb));            
         }
@@ -224,7 +232,7 @@ class MsgFactory
         
         if (sub is not null)
         {
-            sb.Append(CalcName(sub));
+            sb.Append(CalcName(sub, gs.Player));
             sb.Append(' ');
             sb.Append(CalcVerb(sub, verb));
             sb.Append(' ');
@@ -242,7 +250,7 @@ class MsgFactory
 
         if (sub is not null)
         {
-            sb.Append(CalcName(sub));
+            sb.Append(CalcName(sub, gs.Player));
             sb.Append(' ');
             sb.Append(CalcVerb(sub, verb, thirdP));
             sb.Append(' ');
