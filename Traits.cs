@@ -1306,6 +1306,32 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   }
 }
 
+class SeeInvisibleTrait : Trait
+{
+  public override string AsText() => $"SeeInvisible";
+}
+
+class InvisibleTrait : BasicTrait, IGameEventListener
+{
+  public ulong ActorID { get; set; }
+  public bool Expired { get; set; }
+  public bool Listening => true;
+
+  public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
+
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
+      return;
+
+    if (gs.Turn > ExpiresOn)
+    {
+      actor.Traits.Remove(this);
+      Expired = true;
+    }    
+  }
+}
+
 // Technically I suppose this is a Count Up not a Count Down...
 class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {
@@ -1790,6 +1816,18 @@ class TraitFactory
         };
       case "InPit":
         return new InPitTrait();
+      case "Invisible":      
+        if (pieces[1] == "owner")
+          ownerID = container!.ID;
+        else
+          ownerID = ulong.Parse(pieces[1]);
+        expiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3]);
+        return new InvisibleTrait()
+        {
+          ActorID = ownerID,
+          Expired = bool.Parse(pieces[2]),
+          ExpiresOn = expiresOn
+        };
       case "KnockBack":
         return new KnockBackTrait();
       case "Levitation":
@@ -1855,7 +1893,6 @@ class TraitFactory
           Expired = bool.Parse(pieces[2])
         };
       case "Regeneration":
-        // $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}"
         if (pieces[2] == "owner")
           ownerID = container!.ID;
         else

@@ -880,7 +880,11 @@ abstract class UserInterface
       }
       else
       {
-        Glyph glyph = gs.ObjDb.Occupant(loc) is Actor actor ? actor.Glyph : remembered[loc];        
+        Glyph glyph;
+        if (gs.ObjDb.Occupant(loc) is Actor actor && actor.VisibleTo(gs.Player))
+          glyph = actor.Glyph;
+        else 
+          glyph = remembered[loc];
         sqr = new Sqr(glyph.Lit, glyph.BGLit, glyph.Ch);
       }
     }

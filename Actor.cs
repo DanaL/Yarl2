@@ -302,6 +302,14 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
     return NullMessage.Instance;
   }
+
+  public bool VisibleTo(Actor other)
+  {
+    if (HasTrait<InvisibleTrait>() && !other.HasTrait<SeeInvisibleTrait>())
+    return false;
+
+    return true;
+  }
 }
 
 class Mob : Actor
