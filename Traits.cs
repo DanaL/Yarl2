@@ -632,8 +632,9 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}, item), null),
     "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
-    "levitation" => new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                              { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
+    "levitation" => 
+      new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
+                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
     "knock" => new UseResult(true, "", new KnockAction(gs, user, item), null),
     "identify" => new UseResult(true, "", 
         new InventoryChoiceAction(gs, user, 
@@ -643,6 +644,9 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
         new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new ApplyPoisonAction(gs, user, item)), null),
+    "seeinvisible" => 
+        new UseResult(true, "", new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
+            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1306,9 +1310,19 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   }
 }
 
-class SeeInvisibleTrait : Trait
+class SeeInvisibleTrait : TemporaryTrait
 {
-  public override string AsText() => $"SeeInvisible";
+  public override string Desc() => "can see into the beyond!";
+  protected override string ExpiryMsg() => "Your vision returns to normal.";
+
+  public override void Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = target.ID;
+  }
+
+  public override string AsText() => $"SeeInvisible#{OwnerID}#{ExpiresOn}";
 }
 
 class InvisibleTrait : BasicTrait, IGameEventListener
@@ -1918,6 +1932,12 @@ class TraitFactory
         return new RustedTrait()
         {
           Amount = (Rust)int.Parse(pieces[1])
+        };
+      case "SeeInvisible":      
+        return new SeeInvisibleTrait()
+        {
+          OwnerID = ulong.Parse(pieces[1]),
+          ExpiresOn = ulong.Parse(pieces[2])
         };
       case "Stabby":
         return new StabbyTrait();

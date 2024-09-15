@@ -25,6 +25,7 @@ enum ItemType
   Wand,
   Ring,
   Bone,
+  Food,
   Environment // I'm implementing things like mist as 'items'
 }
 
@@ -142,7 +143,8 @@ enum ItemNames
   WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON
+  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON,
+  GHOSTCAP_MUSHROOM
 }
 
 class ItemFactory
@@ -516,6 +518,16 @@ class ItemFactory
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("applypoison"));
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.GHOSTCAP_MUSHROOM:
+        item = new Item()
+        {
+          Name = "ghostcap mushroom", Type = ItemType.Food, Value = 75,
+          Glyph = new Glyph('♣', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new UseSimpleTrait("seeinvisible"));
+        item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         break;
       default:

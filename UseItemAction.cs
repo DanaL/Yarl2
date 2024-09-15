@@ -155,6 +155,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (vaultKey)
       return UseVaultKey(item);
 
+    if (item.Type == ItemType.Food)
+    {
+      
+    }
+
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
     if (useableTraits.Count != 0)
     {
@@ -179,6 +184,12 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
 
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      if (item.Type == ItemType.Food)
+      {
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}";
+        result.Messages.Add(new Message(s, Actor.Loc, false));
+      }
+
       bool success = false;
       foreach (IUSeable trait in useableTraits)
       {

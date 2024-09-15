@@ -280,6 +280,8 @@ class PlayerCreator
     player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb), player.ID);
 
     var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(25, 51);
