@@ -527,6 +527,11 @@ class ItemFactory
           Glyph = new Glyph('♣', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new UseSimpleTrait("seeinvisible"));
+        item.Traits.Add(new SideEffectTrait() 
+        {
+          Odds = 15,
+          Effect = "Confused#0#13#0"
+        });
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         break;

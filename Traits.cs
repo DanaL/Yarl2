@@ -653,6 +653,25 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
   public void Used() {}
 }
 
+class SideEffectTrait : Trait
+{
+  public string Effect { get; set; } = "";
+  public int Odds { get; set; }
+
+  public override string AsText() => $"SideEffect#{Odds}#{Effect}";
+
+  public bool Apply(Actor target, GameState gs)
+  {
+    if (gs.Rng.Next(1, 101) > Odds)
+      return false;
+
+    var trait = (TemporaryTrait) TraitFactory.FromText(Effect, target);
+    trait.Apply(target, gs);
+    
+    return true;
+  }
+}
+
 // Generate a generic arrow but replace its damage with the
 // bow's since different types of bows will do different dmg
 class AmmoTrait : Trait
@@ -1909,6 +1928,12 @@ class TraitFactory
         {
           OwnerID = ulong.Parse(pieces[1]),
           ExpiresOn = ulong.Parse(pieces[2])
+        };
+      case "SideEffect":
+        return new SideEffectTrait()
+        {
+          Odds = int.Parse(pieces[1]),
+          Effect = text[text.IndexOf('#', 11)..]
         };
       case "Stabby":
         return new StabbyTrait();

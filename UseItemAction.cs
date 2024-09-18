@@ -186,7 +186,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
       if (item.Type == ItemType.Food)
       {
-        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}";
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";
         result.Messages.Add(new Message(s, Actor.Loc, false));
       }
 
@@ -204,6 +204,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           result.AltAction = useResult.ReplacementAction;
           result.EnergyCost = 0.0;
         }
+      }
+
+      foreach (SideEffectTrait sideEffect in item.Traits.OfType<SideEffectTrait>())
+      {
+        sideEffect.Apply(Actor, GameState);
       }
 
       return result;
