@@ -776,61 +776,37 @@ class ParalyzingGazeTrait : BasicTrait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
-// Ugh this feels like a dumb hack, but I wanted to keep AoEAction and
-// such fairly generic
-class EffectFactory(string effect, int dc)
+class ConfusedTrait : TemporaryTrait
 {
-  readonly string _effect = effect;
-  readonly int _dc = dc;
-
-  public EffectTrait Get(ulong victimID)
-  {
-    return _effect switch 
-    {
-      "confused" => new ConfusedTrait() { VictimID = victimID, DC = _dc },
-      "paralyzed" => new ParalyzedTrait() { VictimID = victimID, DC = _dc },
-      _ => throw new Exception($"I don't know about the effect '{_effect}'")
-    };
-  }
-}
-
-// EffectTrait subclasses I've implemented are *thiiiiiis* close to being
-// duplicates of each other...
-class ConfusedTrait : EffectTrait, IGameEventListener
-{
-  public ulong VictimID { get; set; }
   public int DC { get; set; }
-  public bool Expired { get; set; } = false;
   
-  public override string AsText() => $"Confused#{VictimID}#{DC}#{ExpiresOn}";
+  public override string AsText() => $"Confused#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public bool Listening => throw new NotImplementedException();
-
-  public override bool IsAffected(Actor victim, GameState gs)
+  public override void Apply(Actor target, GameState gs)
   {
-    foreach (Trait trait in victim.Traits)
+    foreach (Trait trait in target.Traits)
     {
       if (trait is ConfusedTrait)
-        return false;
+        return;
 
       if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Confusion)
-        return false;
+        return;
     }
- 
-    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);
-  }
 
-  public override string Apply(Actor victim, GameState gs)
-  {
-    victim.Traits.Add(this);
+    if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      return;
+
+    OwnerID = target.ID;
+    target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
-    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(10, 21);
-    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} confused!";
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
+    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!";
+    gs.UIRef().AlertPlayer(new Message(s, target.Loc), "", gs);
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs)
   {
-    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
       victim.Traits.Remove(this);
       Expired = true;
@@ -945,37 +921,31 @@ class OwnedTrait : Trait
   public override string AsText() => $"Owned#{string.Join(',', OwnerIDs)}";
 }
 
-class ParalyzedTrait : EffectTrait, IGameEventListener
+class ParalyzedTrait : TemporaryTrait
 {
-  public ulong VictimID { get; set; }
   public int DC { get; set; }
-  public bool Expired { get; set; } = false;
+  
+  public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public bool Listening => throw new NotImplementedException();
-
-  public override string AsText() => $"Paralyzed#{VictimID}#{DC}";
-
-  public override bool IsAffected(Actor victim, GameState gs)
+  public override void Apply(Actor target, GameState gs)
   {
-    // We'll allow only one paralyzed trait at a time. Although perhaps
-    // I should keep which one has the higher DC?
-    if (victim.HasTrait<ParalyzedTrait>())
-      return false;
+    if (target.HasTrait<ParalyzedTrait>())
+      return;
 
-    return !victim.AbilityCheck(Attribute.Will, DC, gs.Rng);
-  }
+    if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      return;
 
-  public override string Apply(Actor victim, GameState gs)
-  {    
-    victim.Traits.Add(this);
+    target.Traits.Add(this);
+    OwnerID = target.ID;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
-
-    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} paralyzed!";
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
+    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} paralyzed!";
+    gs.UIRef().AlertPlayer(new Message(s, target.Loc), "", gs);
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs)
   {
-    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
       if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng))
       {
@@ -1800,7 +1770,7 @@ class TraitFactory
       case "Confused":
         return new ConfusedTrait()
         {
-          VictimID = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[1]),
           DC = int.Parse(pieces[2]),
           ExpiresOn = ulong.Parse(pieces[3])
         };
@@ -1860,8 +1830,9 @@ class TraitFactory
       case "Paralyzed":
         return new ParalyzedTrait()
         {
-          VictimID = ulong.Parse(pieces[1]),
-          DC = int.Parse(pieces[2])
+          OwnerID = ulong.Parse(pieces[1]),
+          DC = int.Parse(pieces[2]),
+          ExpiresOn = ulong.Parse(pieces[3])
         };
       case "ParalyzingGaze":
         return new ParalyzingGazeTrait()

@@ -198,32 +198,27 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? it
   }
 }
 
-class AoEAction(GameState gs, Actor actor, Loc target, EffectFactory ef, int radius, string txt) : Action(gs, actor)
+class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, int radius, string txt) : Action(gs, actor)
 {
-  Loc _target { get; set; } = target;
-  EffectFactory _effectFactory { get; set; } = ef;
+  Loc Target { get; set; } = target;
+  string EffectTemplate { get; set; } = effectTemplate;
   public int Radius { get; set; } = radius;
-  string _effectText { get; set; } = txt;
+  string EffectText { get; set; } = txt;
 
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Messages.Add(new Message(_effectText, Actor!.Loc));
+    result.Messages.Add(new Message(EffectText, Actor!.Loc));
 
-    var affected = GameState!.Flood(_target, Radius);
+    var affected = GameState!.Flood(Target, Radius);
     foreach (var loc in affected)
     {
       // Ugh at the moment I can't handle things like a fireball
       // hitting an area and damaging items via this :/
       if (GameState.ObjDb.Occupant(loc) is Actor occ)
       {
-        var effect = _effectFactory.Get(occ.ID);
-        if (effect.IsAffected(occ, GameState))
-        {
-          string txt = effect.Apply(occ, GameState);
-          if (txt != "")
-            result.Messages.Add(new Message(txt, loc));
-        }
+        var effect = (TemporaryTrait) TraitFactory.FromText(EffectTemplate, occ);
+        effect.Apply(occ, GameState);
       }
     }
 
@@ -235,7 +230,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   Loc Target { get; set; }
 
-  bool CheckForInjury(TileType type) => type switch
+  static bool CheckForInjury(TileType type) => type switch
   {
     TileType.ClosedDoor => true,
     TileType.LockedDoor => true,
@@ -290,13 +285,13 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     if (CheckForInjury(tile.Type) && gs.Rng.Next(4) == 0) {
       var lame = new LameTrait()
       {
-        VictimID = actor.ID,
+        VictimID = Actor!.ID,
         EndsOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)
       };
 
-      string msg = lame.Apply(actor, gs);
+      string msg = lame.Apply(Actor!, gs);
       if (msg.Length > 0)
-        result.Messages.Add(new Message(msg, Actor!.Loc));
+        result.Messages.Add(new Message(msg, Actor.Loc));
       else
       {
         msg = $"You injure your leg kicking {Tile.TileDesc(tile.Type)}!";
@@ -2155,12 +2150,8 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
         var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} a sense of vertigo followed by existential dread.";
         result.Messages.Add(new Message(txt, Actor.Loc));
 
-        var confused = new ConfusedTrait() { VictimID = Actor.ID, DC = 15 };
-        if (confused.IsAffected(Actor, GameState))
-        {
-          confused.Apply(victim, GameState);
-          result.Messages.Add(new Message($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} confused.", Actor.Loc));
-        }
+        var confused = new ConfusedTrait() { DC = 15 };
+        confused.Apply(Actor, GameState);
       }
       else
       {

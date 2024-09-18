@@ -317,17 +317,8 @@ class Battle
     {
       if (target.Traits.OfType<ParalyzingGazeTrait>().FirstOrDefault() is ParalyzingGazeTrait gaze)
       {
-        var paralyzed = new ParalyzedTrait()
-        {
-          VictimID = actor.ID,
-          DC = gaze.DC
-        };
-
-        if (paralyzed.IsAffected(actor, gs))
-        {
-          string txt = paralyzed.Apply(actor, gs);          
-          result.Messages.Add(new Message(txt, actor.Loc));
-        }       
+        var paralyzed = new ParalyzedTrait() { DC = gaze.DC };
+        paralyzed.Apply(actor, gs);
       }
     }
   }

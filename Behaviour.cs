@@ -188,9 +188,8 @@ class MonsterBehaviour : IBehaviour
     else if (act is ConfusingScreamTrait scream)
     {
       _lastUse[act.Name] = gs.Turn;
-      var ef = new EffectFactory("confused", scream.DC);
       var txt = $"{mob.FullName.Capitalize()} screams!";
-      return new AoEAction(gs, mob, mob.Loc, ef, scream.Radius, txt);
+      return new AoEAction(gs, mob, mob.Loc, "Confused#0DC#0", scream.Radius, txt);
     }
     else if (act is SummonTrait summon)
     {
