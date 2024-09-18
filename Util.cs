@@ -781,6 +781,7 @@ class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }
 class InvalidRoomException : Exception { }
+class CouldNotPlaceDungeonEntranceException : Exception { }
 class AbnormalMovement(Loc dest) : Exception
 {
   public Loc Dest { get; set; } = dest; 

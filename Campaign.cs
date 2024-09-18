@@ -108,6 +108,9 @@ class PreGameHandler(UserInterface ui)
     }
     options = [.. options.OrderBy(sq => sq.Item3)];
 
+    if (options.Count == 0)
+      throw new CouldNotPlaceDungeonEntranceException();
+
     var entrance = options[rng.Next(options.Count / 4)];
 
     return (entrance.Item1, entrance.Item2);
@@ -207,6 +210,7 @@ class PreGameHandler(UserInterface ui)
     Dungeon wilderness;
     Map wildernessMap;
     Town town;
+    int startR, startC;
 
     do
     {
@@ -236,6 +240,64 @@ class PreGameHandler(UserInterface ui)
         town.Name = NameGenerator.TownName(rng);
         Console.WriteLine(town.Name);
 
+        wilderness.AddMap(wildernessMap);
+        campaign.AddDungeon(wilderness);
+
+        // find the 'hidden valleys' that may be among the mountains
+        var regionFinder = new RegionFinder(new WildernessPassable());
+        var regions = regionFinder.Find(wildernessMap, false, TileType.Unknown);
+
+        // I'm assuming the largest area is the one we want to place the dungeon entrance in
+        int largest = 0;
+        HashSet<(int, int)> mainRegion = [];
+        foreach (var k in regions.Keys)
+        {
+          if (regions[k].Count > largest)
+          {
+            mainRegion = regions[k];
+            largest = regions[k].Count;
+          }
+        }
+        var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
+
+        DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
+
+        var history = new History(rng);
+        history.CalcDungeonHistory();
+        history.GenerateVillain();
+        campaign.History = history;
+
+        int maxDepth = 5;
+        var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
+        //var dBuilder = new MainDungeonBuilder();
+        //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
+
+        //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
+        //PrinceOfRats(mainDungeon, objDb, rng);
+
+        var dBuilder = new ArenaBuilder();
+        var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+        PopulateArena(rng, objDb, mainDungeon);
+
+        campaign.AddDungeon(mainDungeon);
+
+        var portal = new Portal("You stand before a looming portal.")
+        {
+          Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
+        };
+        wildernessMap.SetTile(entrance, portal);
+        history.Facts.Add(new LocationFact()
+        {
+          Loc = new Loc(0, 0, entrance.Item1, entrance.Item2),
+          Desc = "Dungeon Entrance"
+        });
+
+        Village.Populate(wildernessMap, town, objDb, history, rng);
+        campaign.Town = town;
+
+        //(startR, startC) = PickStartLoc(wildernessMap, town, rng);
+        (startR, startC) = entrance;
+
         break;
       }
       catch (InvalidTownException)
@@ -248,68 +310,14 @@ class PreGameHandler(UserInterface ui)
       {
         Console.WriteLine("Failed to place a building");
       }
+      catch (CouldNotPlaceDungeonEntranceException)
+      {
+        Console.WriteLine("Failed to find spot for Main Dungeon");
+      }
     }
     while (true);
     
-    wilderness.AddMap(wildernessMap);
-    campaign.AddDungeon(wilderness);
-
-    // find the 'hidden valleys' that may be among the mountains
-    var regionFinder = new RegionFinder(new WildernessPassable());
-    var regions = regionFinder.Find(wildernessMap, false, TileType.Unknown);
-
-    // I'm assuming the largest area is the one we want to place the dungeon entrance in
-    int largest = 0;
-    HashSet<(int, int)> mainRegion = [];
-    foreach (var k in regions.Keys)
-    {
-      if (regions[k].Count > largest)
-      {
-        mainRegion = regions[k];
-        largest = regions[k].Count;
-      }
-    }
-    var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
-
-    DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
-    
-    var history = new History(rng);
-    history.CalcDungeonHistory();
-    history.GenerateVillain();
-    campaign.History = history;
-
-    int maxDepth = 5;
-    var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
-    //var dBuilder = new MainDungeonBuilder();
-    //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
-    
-    //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
-    //PrinceOfRats(mainDungeon, objDb, rng);
-
-    var dBuilder = new ArenaBuilder();
-    var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-    PopulateArena(rng, objDb, mainDungeon);
-
-    campaign.AddDungeon(mainDungeon);
-
-    var portal = new Portal("You stand before a looming portal.")
-    {
-      Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
-    };
-    wildernessMap.SetTile(entrance, portal);
-    history.Facts.Add(new LocationFact() 
-    {
-      Loc = new Loc(0, 0, entrance.Item1, entrance.Item2),
-      Desc = "Dungeon Entrance"
-    });
-
-    Village.Populate(wildernessMap, town, objDb, history, rng);
-    campaign.Town = town;
-
-    var (startR, startC) = PickStartLoc(wildernessMap, town, rng);
-
-    //return (campaign, startR, startC);
-    return (campaign, entrance.Item1, entrance.Item2);
+    return (campaign, startR, startC);
   }
 
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
@@ -504,7 +512,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
-      // seed = 928639644 // fails to produce dungeon entrance
+      seed = 928639644; // fails to produce dungeon entrance
       //seed = -606877151;
       //seed = -2015835845;
 
