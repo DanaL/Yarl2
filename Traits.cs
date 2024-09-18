@@ -35,12 +35,16 @@ interface IOwner
   ulong OwnerID { get; set; }
 }
 
+interface IDesc
+{
+  string Desc();
+}
+
 abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
   public abstract string AsText();
-  public virtual string Desc() => "";
-
+  
   public bool Equals(Trait? other)
   {
     if (other is null)
@@ -462,7 +466,6 @@ class TelepathyTrait : TemporaryTrait
 
 class LevitationTrait : TemporaryTrait
 {
-  public override string Desc() => "begin to float in the air!";
   protected override string ExpiryMsg() => "You alight on the ground.";
 
   public override string AsText() => $"Levitation#{OwnerID}#{ExpiresOn}";
@@ -1396,12 +1399,12 @@ class LightSourceTrait : BasicTrait, IOwner
 }
 
 // Who knew torches would be so complicated...
-class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner
+class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 {
   public ulong OwnerID { get; set; }
   public bool Lit { get; set; }
   public int Fuel { get; set; }
-  public override string Desc() => Lit ? "(lit)" : "";
+  public string Desc() => Lit ? "(lit)" : "";
 
   public override bool Active => Lit;
   
@@ -1501,12 +1504,12 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner
   }
 }
 
-class WandTrait : Trait, IUSeable, INeedsID
+class WandTrait : Trait, IUSeable, INeedsID, IDesc
 {
   public int Charges { get; set; }
   public bool IDed { get; set; }
   public string Effect { get; set; } = "";
-  public override string Desc()
+  public string Desc()
   {
     if (!IDed)
       return "";

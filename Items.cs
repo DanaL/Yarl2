@@ -1,3 +1,4 @@
+using System.Linq;
 // Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
@@ -81,9 +82,10 @@ class Item : GameObj, IEquatable<Item>
       fullname += $" {bonus}";
     fullname += " " + name;
     
-    string traitDescs = string.Join(' ', Traits.OfType<Trait>().Select(t => t.Desc()));
-    if (traitDescs.Length > 0)
-      fullname += " " + traitDescs;
+    var traitDescs = Traits.Where(t => t is IDesc id)
+                           .Select(t => ((IDesc) t).Desc());
+    if (traitDescs.Any())
+      fullname += " " + string.Join(' ', traitDescs);
 
     return fullname.Trim();
   }
