@@ -326,11 +326,13 @@ class ResistanceTrait : TemporaryTrait
   protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
+
+    return [];
   }
 }
 
@@ -438,22 +440,23 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     }
   }
 
-  public abstract void Apply(Actor target, GameState gs);
+  public abstract List<Message> Apply(Actor target, GameState gs);
 
   public override string AsText() => $"{ExpiresOn}#{OwnerID}";
 }
 
 class TelepathyTrait : TemporaryTrait
 {  
-  public override string Desc() => "can sense others' minds";
   protected override string ExpiryMsg() => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);    
     OwnerID = target.ID;
+
+    return [ new Message($"{target.FullName.Capitalize()} can sense others' minds!", target.Loc) ];
   }
 }
 
@@ -497,12 +500,16 @@ class LevitationTrait : TemporaryTrait
     }    
   }
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     target.Traits.Add(new FloatingTrait());
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
+
+    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "begin")} to float in the air!";
+    //
+    return [ new Message(s, target.Loc) ];
   }
 }
 
@@ -660,15 +667,13 @@ class SideEffectTrait : Trait
 
   public override string AsText() => $"SideEffect#{Odds}#{Effect}";
 
-  public bool Apply(Actor target, GameState gs)
+  public List<Message> Apply(Actor target, GameState gs)
   {
     if (gs.Rng.Next(1, 101) > Odds)
-      return false;
+      return [];
 
     var trait = (TemporaryTrait) TraitFactory.FromText(Effect, target);
-    trait.Apply(target, gs);
-    
-    return true;
+    return trait.Apply(target, gs);
   }
 }
 
@@ -801,26 +806,27 @@ class ConfusedTrait : TemporaryTrait
   
   public override string AsText() => $"Confused#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     foreach (Trait trait in target.Traits)
     {
       if (trait is ConfusedTrait)
-        return;
+        return [];
 
       if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Confusion)
-        return;
+        return [];
     }
 
     if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
-      return;
+      return [];
 
     OwnerID = target.ID;
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
     string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!";
-    gs.UIRef().AlertPlayer(new Message(s, target.Loc), "", gs);
+
+    return [new Message(s, target.Loc)];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -946,20 +952,21 @@ class ParalyzedTrait : TemporaryTrait
   
   public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     if (target.HasTrait<ParalyzedTrait>())
-      return;
+      return [];
 
     if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
-      return;
+      return [];
 
     target.Traits.Add(this);
     OwnerID = target.ID;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
     string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} paralyzed!";
-    gs.UIRef().AlertPlayer(new Message(s, target.Loc), "", gs);
+
+    return [ new Message(s, target.Loc) ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -1301,14 +1308,15 @@ class RegenerationTrait : BasicTrait, IGameEventListener
 
 class SeeInvisibleTrait : TemporaryTrait
 {
-  public override string Desc() => "can see into the beyond!";
   protected override string ExpiryMsg() => "Your vision returns to normal.";
 
-  public override void Apply(Actor target, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
+
+    return [new Message($"{target.FullName.Capitalize()} can see into the beyond!", target.Loc)];
   }
 
   public override string AsText() => $"SeeInvisible#{OwnerID}#{ExpiresOn}";

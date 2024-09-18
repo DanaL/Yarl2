@@ -182,11 +182,11 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? it
 
     if (Actor is not null)
     {
-      _trait.Apply(Actor, GameState!);
-
-      string desc = _trait.Desc();
-      if (desc.Length > 0)
-        result.Messages.Add(new Message(Actor.FullName.Capitalize() + " " + desc, Actor.Loc));
+      List<Message> msgs = _trait.Apply(Actor, GameState!);
+      if (msgs.Count > 0)
+      {
+        result.Messages.AddRange(msgs);
+      }
 
       if (Item is not null && Item.HasTrait<ConsumableTrait>())
       {

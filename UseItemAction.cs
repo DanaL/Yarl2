@@ -155,11 +155,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (vaultKey)
       return UseVaultKey(item);
 
-    if (item.Type == ItemType.Food)
-    {
-      
-    }
-
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
     if (useableTraits.Count != 0)
     {
@@ -195,7 +190,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         result.Complete = useResult.Successful;
-        result.Messages.Add(new Message(useResult.Message, Actor.Loc));
+        if (useResult.Message != "")
+          result.Messages.Add(new Message(useResult.Message, Actor.Loc));
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
@@ -208,7 +204,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       foreach (SideEffectTrait sideEffect in item.Traits.OfType<SideEffectTrait>())
       {
-        sideEffect.Apply(Actor, GameState);
+        result.Messages.AddRange(sideEffect.Apply(Actor, GameState));
       }
 
       return result;

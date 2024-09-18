@@ -504,6 +504,7 @@ class PreGameHandler(UserInterface ui)
     else
     {
       int seed = DateTime.Now.GetHashCode();
+      // seed = 928639644 // fails to produce dungeon entrance
       //seed = -606877151;
       //seed = -2015835845;
 
