@@ -368,14 +368,9 @@ class PreGameHandler(UserInterface ui)
     // }
 
     sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-    Actor mob = MonsterFactory.Get("centipede", objDb, rng);
+    Actor mob = MonsterFactory.Get("creeping coins", objDb, rng);
     objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
-    mob = MonsterFactory.Get("centipede", objDb, rng);
-    objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
-    mob = MonsterFactory.Get("centipede", objDb, rng);
-    objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
-    mob = MonsterFactory.Get("centipede", objDb, rng);
-    objDb.AddNewActor(mob, new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2));
+   
 
     // sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
     // Mob goblin = (Mob)MonsterFactory.Get("goblin", rng);
