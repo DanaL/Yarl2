@@ -1135,49 +1135,74 @@ class StatBuffTrait : TemporaryTrait
   }
 }
 
-class PoisonedTrait : BasicTrait, IGameEventListener
+class PoisonedTrait : TemporaryTrait
 {
   public int DC { get; set; }
   public int Strength { get; set; }
-  public ulong VictimID { get; set; }
-  public bool Expired { get; set; } = false;
-  public bool Listening => true;
 
-  public override string AsText() => $"Poisoned#{DC}#{Strength}#{VictimID}#{Expired}";
+  public override string AsText() => $"Poisoned#{DC}#{Strength}#{OwnerID}#{ExpiresOn}";
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
-    var victim = (Actor?)gs.ObjDb.GetObj(VictimID);
-    if (victim != null)
+    foreach (Trait t in target.Traits)
     {
-      bool conCheck = victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
-      if (conCheck)
-      {
-        victim.Traits.Remove(this);
-        Expired = true;
-        string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
-        gs.WriteMessages([new Message(msg, victim.Loc)], "");
-      }
-      else
-      {
-        List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs);
-        if (dmgMsg != "")
-        {
-          gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
-        }
+      // We won't apply multiple poison statuses to one victim. Although maybe I
+      // should replace the weaker poison with the stronger one?
+      if (t is PoisonedTrait)
+        return [];
 
-        if (hpLeft < 1)
-        {
-          string msg = $"{victim.FullName.Capitalize()} died from poison!";
-          gs.WriteMessages([new Message(msg, victim.Loc)], "");
-          gs.ActorKilled(victim, "poison", null);
-        }
-        else if (victim is Player)
-        {
-          gs.WriteMessages([new Message("You feel ill.", victim.Loc)], "");
-        }
-      }
+      if (t is ImmunityTrait imm && imm.Type == DamageType.Poison)
+        return [];
+    }
+
+    int duration = gs.Rng.Next(50, 100) - target.Stats[Attribute.Constitution].Curr * 7;
+    bool conCheck = target.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
+    if (duration > 0 && !conCheck)
+    {      
+      target.Traits.Add(this);
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+      OwnerID = target.ID;
+      ExpiresOn = gs.Turn + (ulong) duration;
+      var msg = new Message($"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!", target.Loc);
+      return [msg];
+    }
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
+    if (victim is null)
+      return;
+
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      victim.Traits.Remove(this);
+      gs.RemoveListener(this);
+      Expired = true;
+      string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
+      gs.WriteMessages([new Message(msg, victim.Loc)], "");
+
+      return;
+    }
+
+    List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
+    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs);
+    if (dmgMsg != "")
+    {
+      gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
+    }
+
+    if (hpLeft < 1)
+    {
+      string msg = $"{victim.FullName.Capitalize()} died from poison!";
+      gs.WriteMessages([new Message(msg, victim.Loc)], "");
+      gs.ActorKilled(victim, "poison", null);
+    }
+    else if (victim is Player)
+    {
+      gs.WriteMessages([new Message("You feel ill.", victim.Loc)], "");
     }
   }
 }
@@ -1856,8 +1881,8 @@ class TraitFactory
         {
           DC = int.Parse(pieces[1]),
           Strength = int.Parse(pieces[2]),
-          VictimID = ulong.Parse(pieces[3]),
-          Expired = bool.Parse(pieces[4])
+          OwnerID = ulong.Parse(pieces[3]),
+          ExpiresOn = ulong.Parse(pieces[4])
         };
       case "Poisoner":
         digits = text.Split('#');
