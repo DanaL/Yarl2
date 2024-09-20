@@ -169,17 +169,13 @@ class Battle
         var debuff = new StatBuffTrait()
         {
           DC = weaken.DC,
-          VictimID = target.ID,
+          OwnerID = target.ID,
           Attr = Attribute.Strength,
           Amt = -weaken.Amt,
           ExpiresOn = gs.Turn + 100
         };
 
-        if (debuff.IsAffected(target, gs))
-        {
-          string txt = debuff.Apply(target, gs);
-          result.Messages.Add(new Message(txt, target.Loc));
-        }
+        result.Messages.AddRange(debuff.Apply(target, gs));
       }
 
       if (trait is CorrosiveTrait)

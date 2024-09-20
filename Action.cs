@@ -285,17 +285,17 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     if (CheckForInjury(tile.Type) && gs.Rng.Next(4) == 0) {
       var lame = new LameTrait()
       {
-        VictimID = Actor!.ID,
-        EndsOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)
+        OwnerID = Actor!.ID,
+        ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)
       };
 
-      string msg = lame.Apply(Actor!, gs);
-      if (msg.Length > 0)
-        result.Messages.Add(new Message(msg, Actor.Loc));
+      var msgs = lame.Apply(Actor!, gs);
+      if (msgs.Count > 0)
+        result.Messages.AddRange(msgs);
       else
       {
-        msg = $"You injure your leg kicking {Tile.TileDesc(tile.Type)}!";
-        result.Messages.Add(new Message(msg, Actor!.Loc));
+        string s = $"You injure your leg kicking {Tile.TileDesc(tile.Type)}!";
+        result.Messages.Add(new Message(s, Actor!.Loc));
       }
     }
 

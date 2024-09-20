@@ -70,12 +70,6 @@ abstract class BasicTrait : Trait
   public override string AsText() => $"{ExpiresOn}";
 }
 
-abstract class EffectTrait : BasicTrait
-{
-  public abstract string Apply(Actor target, GameState gs);
-  public abstract bool IsAffected(Actor target, GameState gs);
-}
-
 // To let me classify traits that mobs can take on their turns
 // Not sure if this is the best way to go...
 abstract class ActionTrait : BasicTrait
@@ -845,86 +839,75 @@ class ConfusedTrait : TemporaryTrait
   }
 }
 
-class LameTrait : EffectTrait, IGameEventListener
-{
-  public ulong VictimID { get; set; }
-  public ulong EndsOn { get; set; }
-  public bool Expired { get; set; } = false;
-
-  public override string AsText() => $"Lame#{VictimID}#{EndsOn}";
-  public bool Listening => true;
-
-  public override string Apply(Actor victim, GameState gs)
+class LameTrait : TemporaryTrait
+{  
+  public override string AsText() => $"Lame#{OwnerID}#{ExpiresOn}";
+  
+  public override List<Message> Apply(Actor target, GameState gs)
   {    
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
-    foreach (var t in victim.Traits)
+    foreach (var t in target.Traits)
     {
       if (t is LameTrait trait)
       {
-        trait.EndsOn = ulong.Max(EndsOn, trait.EndsOn);
-        return "You hurt your leg even more.";
+        trait.ExpiresOn = ulong.Max(ExpiresOn, trait.ExpiresOn);
+        return [ new Message("You hurt your leg even more.", target.Loc) ];
       }
     }
 
-    victim.Traits.Add(this);
-    victim.Recovery -= 0.25;
-    victim.Stats[Attribute.Dexterity].Change(-1);
+    target.Traits.Add(this);
+    target.Recovery -= 0.25;
+    target.Stats[Attribute.Dexterity].Change(-1);
 
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return "";
+    return [];
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs)
   {
-    if (gs.Turn > EndsOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
       victim.Recovery += 0.25;
       victim.Stats[Attribute.Dexterity].Change(1);
       victim.Traits.Remove(this);
       Expired = true;
-      gs.UIRef().AlertPlayer(new Message("Your leg feels better.", victim.Loc), "", gs);
       gs.StopListening(GameEventType.EndOfRound, this);
+      gs.UIRef().AlertPlayer(new Message("Your leg feels better.", victim.Loc), "", gs);      
     }      
   }
-
-  public override bool IsAffected(Actor victim, GameState gs) => true;
 }
 
-class ExhaustedTrait : EffectTrait, IGameEventListener
-{
-  public ulong VictimID { get; set; }
-  public ulong EndsOn { get; set; }
-  public bool Expired { get; set; } = false;
+class ExhaustedTrait : TemporaryTrait
+{  
+  public override string AsText() => $"Exhausted#{OwnerID}#{ExpiresOn}";
 
-  public override string AsText() => $"Exhausted#{VictimID}#{EndsOn}";
-
-  public bool Listening => throw new NotImplementedException();
-
-  public override string Apply(Actor victim, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {    
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
-    foreach (var t in victim.Traits)
+    foreach (var t in target.Traits)
     {
       if (t is ExhaustedTrait exhausted)
       {
-        exhausted.EndsOn = ulong.Max(EndsOn, exhausted.EndsOn);
-        return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "become")} more exhausted!";
+        exhausted.ExpiresOn = ulong.Max(ExpiresOn, exhausted.ExpiresOn);
+        string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} more exhausted!";
+        return [ new Message(s, target.Loc) ];
       }
     }
 
-    victim.Traits.Add(this);
-    victim.Recovery -= 0.5;
+    target.Traits.Add(this);
+    target.Recovery -= 0.5;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "become")} exhausted!";
+    string msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} exhausted!";
+    return [ new Message(msg, target.Loc) ];
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs)
   {
-    if (gs.Turn > EndsOn && gs.ObjDb.GetObj(VictimID) is Actor victim)
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
       victim.Recovery += 0.5;
       victim.Traits.Remove(this);
@@ -934,8 +917,6 @@ class ExhaustedTrait : EffectTrait, IGameEventListener
       gs.StopListening(GameEventType.EndOfRound, this);
     }      
   }
-
-  public override bool IsAffected(Actor victim, GameState gs) => true;
 }
 
 // Trait for items who have a specific owner, mainly so I can alert them when,
@@ -1085,15 +1066,12 @@ class WeakenTrait : BasicTrait
 }
 
 // Well, buff or debuff but that's fairly wordy...
-class StatBuffTrait : EffectTrait, IGameEventListener
+class StatBuffTrait : TemporaryTrait
 {
   public int DC { get; set; } = 10;
-  public ulong VictimID { get; set; }
-  public bool Expired { get; set; } = false;
-  public bool Listening => true;
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
-  public override string AsText() => $"StatBuff#{VictimID}#{ExpiresOn}#{Attr}#{Amt}";
+  public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}";
 
   string CalcMessage(Actor victim, int amt)
   {
@@ -1116,26 +1094,24 @@ class StatBuffTrait : EffectTrait, IGameEventListener
     return player ? "You feel different!" : "";
   }
 
-  public override bool IsAffected(Actor victim, GameState gs)
+  public override List<Message> Apply(Actor target, GameState gs)
   {
     // We won't let a staff debuff lower a stat below -5. Let's not get out
     // of hand
-    if (Amt < 0 && victim.Stats[Attr].Curr < -4)
-      return false;
+    if (Amt < 0 && target.Stats[Attr].Curr < -4)
+      return [];
 
-    return !victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
-  }
+    if (target.AbilityCheck(Attribute.Constitution, DC, gs.Rng))
+      return [];
 
-  public override string Apply(Actor victim, GameState gs)
-  {        
-    victim.Stats[Attr].Change(Amt);
-    victim.Traits.Add(this);
+    target.Stats[Attr].Change(Amt);
+    target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return CalcMessage(victim, Amt);
+    string s = CalcMessage(target, Amt);
+    return [ new Message(s, target.Loc) ];
   }
 
-  // This perhaps doesn't need to be public?
   string Remove(Actor victim)
   {    
     victim.Stats[Attr].Change(-Amt);
@@ -1144,13 +1120,13 @@ class StatBuffTrait : EffectTrait, IGameEventListener
     return CalcMessage(victim, -Amt);    
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs)
   {
     if (gs.Turn > ExpiresOn)
     {
       gs.StopListening(GameEventType.EndOfRound, this);
 
-      if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+      if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
       {
         string txt = Remove(victim);
         gs.UIRef().AlertPlayer([new Message(txt, victim.Loc)], "", gs);
@@ -1658,14 +1634,14 @@ class TraitFactory
       case "Exhausted":
         return new ExhaustedTrait()
         {
-          VictimID = ulong.Parse(pieces[1]),
-          EndsOn = ulong.Parse(pieces[2])
+          OwnerID = ulong.Parse(pieces[1]),
+          ExpiresOn = ulong.Parse(pieces[2])
         };
       case "Lame":
         return new LameTrait()
         {
-          VictimID = ulong.Parse(pieces[1]),
-          EndsOn = ulong.Parse(pieces[2])
+          OwnerID = ulong.Parse(pieces[1]),
+          ExpiresOn = ulong.Parse(pieces[2])
         };
       case "HealAllies":
         return new HealAlliesTrait()
@@ -1954,7 +1930,7 @@ class TraitFactory
         Enum.TryParse(pieces[3], out Attribute attr);
         return new StatBuffTrait()
         {
-          VictimID = ulong.Parse(pieces[1]),
+          OwnerID = ulong.Parse(pieces[1]),
           ExpiresOn = ulong.Parse(pieces[2]),
           Attr = attr,
           Amt = int.Parse(pieces[4])
