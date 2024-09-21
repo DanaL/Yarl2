@@ -307,7 +307,7 @@ class ItemFactory
         item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
       case ItemNames.HELMET:
-        item = new Item() { Name = "melmet", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item = new Item() { Name = "helmet", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
         item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
