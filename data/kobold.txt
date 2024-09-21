@@ -2,7 +2,6 @@ LEVEL 1
 kobold 8
 giant rat 3
 dire bat 2
-centipede 1
 skeleton 2
 zombie 2
 floating eye 1
