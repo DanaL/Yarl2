@@ -11,6 +11,7 @@ skeleton 2
 zombie 2
 dire bat 2
 floating eye 1
+centipede 2
 LEVEL 3
 kobold 4
 kobold foreman 2
