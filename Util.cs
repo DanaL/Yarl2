@@ -18,7 +18,7 @@ enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted }
 record struct GameEvent(GameEventType Type, char Value);
 record Sqr(Colour Fg, Colour Bg, char Ch);
 
-enum Dir { North, South, East, West }
+enum Dir { North, South, East, West, None }
 
 // I didn't want to be beholden to someone else's colour class and anyhow
 // Bearlib's didn't have a comparison operator implemented, which was 
@@ -376,7 +376,7 @@ class Util
 
   static Glyph VaultDoorGlyph(VaultDoor door)
   {
-    char ch = door.Open ? '\\' : '+';
+    char ch = door.Open ? '\\' : 'ǁ';
     var (fg, bg) = MetallicColour(door.Material);
 
     return new Glyph(ch, fg, bg, Colours.BLACK, Colours.BLACK);

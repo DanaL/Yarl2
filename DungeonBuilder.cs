@@ -879,6 +879,88 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  (bool, Dir) ValidSpotForGatedStairs(Map map, int r, int c)
+  {
+    int walls = 0;
+    int floors = 0;
+    List<TileType> tiles = [];
+    for (int dr = - 1; dr < 2; dr++)
+    {
+      for (int dc = - 1; dc < 2; dc++)
+      {
+        TileType tile = map.TileAt(r + dr, c + dc).Type;
+        tiles.Add(tile);
+        if (tile == TileType.DungeonWall)
+          ++walls;
+        if (tile == TileType.DungeonFloor)
+          ++floors;
+      }
+    }
+
+    if (walls != 6 || floors != 3)
+      return (false, Dir.None);
+    
+    TileType df = TileType.DungeonFloor;
+    if (tiles[0] == df && tiles[1] == df && tiles[2] == df)
+      return (true, Dir.North);
+
+    if (tiles[0] == df && tiles[3] == df && tiles[6] == df)
+      return (true, Dir.West);
+
+    if (tiles[2] == df && tiles[5] == df && tiles[8] == df)
+      return (true, Dir.East);
+
+    if (tiles[6] == df && tiles[7] == df && tiles[8] == df)
+      return (true, Dir.South);
+
+    return (false, Dir.None);
+  }
+
+  void PlaceLevelFiveGate(Map map, Random rng)
+  {
+    List<(int, int, Dir)> candidates = [];
+
+    // We're looking for a spot to make a gate/portcullis like:
+    //
+    //  ###.
+    //  #>ǁ.
+    //  ###.
+    //
+    for (int r = 1; r < map.Height - 1; r += 2)
+    {
+      for (int c = 1; c < map.Width - 1; c += 2)
+      {
+        var (valid, dir) = ValidSpotForGatedStairs(map, r, c);
+        if (valid)
+          candidates.Add((r, c, dir));          
+      }
+    }
+
+    // Gotta throw an exception if there were no candidates
+    var (sr, sc, sdir) = candidates[rng.Next(candidates.Count)];
+
+    // I guess I should be making sure the stair location actually makes sense
+    // for the next level
+    Tile door = new VaultDoor(false, Metals.Iron);
+    Tile stairs = new Downstairs("");
+    map.SetTile(sr, sc, door);
+    switch (sdir)
+    {
+      case Dir.North:
+        map.SetTile(sr + 1, sc, stairs);
+        break;
+      case Dir.South:
+      map.SetTile(sr - 1, sc, stairs);
+        break;
+      case Dir.East:
+        map.SetTile(sr, sc - 1, stairs);
+        break;
+      case Dir.West:
+        map.SetTile(sr, sc + 1, stairs);
+        break;
+    }
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
   {
     static bool ReplaceChasm(Map map, (int, int) pt)
@@ -960,6 +1042,8 @@ class MainDungeonBuilder : DungeonBuilder
       Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
     }
     
+    PlaceLevelFiveGate(levels[4], rng);
+
     return dungeon;
   }
 }

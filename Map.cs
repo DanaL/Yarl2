@@ -301,7 +301,7 @@ class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)
 
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
-  public override bool Opaque() => !Open;
+  public override bool Opaque() => false;
 
   public override string ToString() => $"{(int)Type};{Open};{Material}";
 }
