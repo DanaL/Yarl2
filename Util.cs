@@ -51,9 +51,9 @@ class Colours
   public static readonly Colour FX_RED = new(128, 00, 00, 175);
   public static readonly Colour FAR_BELOW = new(55, 198, 255, 50);
   public static readonly Colour HILITE = new(255, 255, 53, 128);  
-  public static readonly Colour PURPLE = new(148, 0, 211, 255);
+  public static readonly Colour PURPLE = new(191, 64, 191, 255);
+  public static readonly Colour LIGHT_PURPLE = new(207, 159, 255, 255);
   public static readonly Colour PINK = new(255, 192, 203, 255);
-  public static readonly Colour LIGHT_PURPLE = new(178, 102, 255, 64);  
   public static readonly Colour FAINT_PINK = new(178, 102, 255, 125);
   public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
   public static readonly Colour SEARCH_HIGHLIGHT = new(55, 198, 255, 75);
@@ -435,7 +435,7 @@ class Util
     TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.HiddenTeleportTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.TeleportTrap => new Glyph('^', Colours.PURPLE, Colours.LIGHT_PURPLE, Colours.BLACK, Colours.BLACK),
+    TileType.TeleportTrap => new Glyph('^', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK, Colours.BLACK),
     TileType.BrokenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.HiddenDartTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.DartTrap => new Glyph('^', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
