@@ -92,11 +92,21 @@ class Item : GameObj, IEquatable<Item>
 
   public override string FullName => CalcFullName();
 
-  public Metals IsMetal()
+  public Metals MetalType()
   {
     var t = Traits.OfType<MetalTrait>().FirstOrDefault();
-
+ 
     return t is not null ? t.Type : Metals.NotMetal;
+   }
+
+  public bool CanCorrode()
+  {
+    var m = Traits.OfType<MetalTrait>().FirstOrDefault();
+
+    if (m is null)
+      return false;
+
+    return m.Type.CanCorrode();
   }
 
   public override int GetHashCode() => $"{Type}+{Name}+{HasTrait<StackableTrait>()}".GetHashCode();
@@ -146,7 +156,7 @@ enum ItemNames
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
   LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON,
-  GHOSTCAP_MUSHROOM
+  GHOSTCAP_MUSHROOM, SILVER_LONGSWORD, SILVER_DAGGER
 }
 
 class ItemFactory
@@ -176,6 +186,14 @@ class ItemFactory
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        break;
+      case ItemNames.SILVER_DAGGER:
+        item = new Item() { Name = "dagger", Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new FinesseTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
+        item.Traits.Add(new AdjectiveTrait("silver"));
         break;
       case ItemNames.HAND_AXE:
         item = new Item() { Name = "hand axe", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
@@ -214,6 +232,13 @@ class ItemFactory
         item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
         item.Traits.Add(new SwordTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        break;
+      case ItemNames.SILVER_LONGSWORD:
+        item = new Item() { Name = "longsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new SwordTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
+        item.Traits.Add(new AdjectiveTrait("silver"));
         break;
       case ItemNames.SHORTSHORD:
         item = new Item() { Name = "shortsword", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };

@@ -46,14 +46,10 @@ class EffectApplier
     }
 
     // Let's say 1 in 3 chance that an item becomes Wet that it might Rust
-    if (receiver is Item item && gs.Rng.Next(3) != 0)
-    {        
-      var metal = item.IsMetal();
-      if (metal != Metals.NotMetal && metal != Metals.Mithril)
-      {
-        string s = ApplyRust(gs, item, owner);
-        sb.Append(s);
-      }
+    if (receiver is Item item && item.CanCorrode() && gs.Rng.Next(3) != 0)
+    {
+      string s = ApplyRust(gs, item, owner);
+      sb.Append(s);
     }
 
     return sb.ToString();
@@ -68,9 +64,9 @@ class EffectApplier
       return "";
     }
 
-    Metals metal = item.IsMetal();
-    if (metal == Metals.NotMetal || metal == Metals.Mithril)
+    if (!item.CanCorrode())
       return "";
+    Metals metal = item.MetalType();
 
     RustedTrait? rusted = item.Traits.OfType<RustedTrait>().FirstOrDefault();
 

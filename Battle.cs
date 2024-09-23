@@ -162,13 +162,9 @@ class Battle
       {
         // Or is it more fair to just pick a random inventory item and not
         // specifically target metal ones?
-        List<Item> metalItems = [];
-        foreach (var item in target.Inventory.Items())
-        {
-          Metals metal = item.IsMetal();
-          if (metal != Metals.NotMetal && metal != Metals.Mithril)
-            metalItems.Add(item);
-        }
+        List<Item> metalItems = target.Inventory
+                                      .Items()
+                                      .Where(i => i.CanCorrode()).ToList();
 
         if (metalItems.Count > 0)
         {

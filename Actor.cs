@@ -105,7 +105,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       // It would actually be an error for this to be null
       if (armourTrait is not null && (armourTrait.Part == ArmourParts.Shirt))
       {
-        var metal = piece.IsMetal();
+        var metal = piece.MetalType();
         if (metal != Metals.NotMetal && metal != Metals.Mithril)
         {
           baseNoise += 3;
@@ -307,7 +307,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     if (ID == other.ID)
       return true;
-      
+
     if (HasTrait<InvisibleTrait>() && !other.HasTrait<SeeInvisibleTrait>())
       return false;
 

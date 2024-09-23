@@ -121,7 +121,18 @@ class Colours
   };
 }
 
-enum Metals { NotMetal, Iron, Steel, Bronze, Mithril }
+enum Metals { NotMetal, Iron, Steel, Bronze, Mithril, Silver }
+
+static class MetalsExtensions
+{
+  public static bool CanCorrode(this Metals metal) => metal switch
+  {
+    Metals.Iron => true,
+    Metals.Steel => true,
+    Metals.Bronze => true,
+    _ => false
+  };
+}
 
 enum Rust { Rusted, Corroded }
 
