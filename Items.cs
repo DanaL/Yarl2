@@ -189,7 +189,7 @@ class ItemFactory
         break;
       case ItemNames.SILVER_DAGGER:
         item = new Item() { Name = "dagger", Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
@@ -235,7 +235,7 @@ class ItemFactory
         break;
       case ItemNames.SILVER_LONGSWORD:
         item = new Item() { Name = "longsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new DamageTrait() { DamageDie = 7, NumOfDie = 1, DamageType = DamageType.Slashing });
         item.Traits.Add(new SwordTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
         item.Traits.Add(new AdjectiveTrait("silver"));
