@@ -160,11 +160,10 @@ class Battle
 
       if (trait is CorrosiveTrait)
       {
-        // Or is it more fair to just pick a random inventory item and not
-        // specifically target metal ones?
+        
         List<Item> metalItems = target.Inventory
                                       .Items()
-                                      .Where(i => i.CanCorrode()).ToList();
+                                      .Where(i => i.CanCorrode() && i.Equiped).ToList();
 
         if (metalItems.Count > 0)
         {
