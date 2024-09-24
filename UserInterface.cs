@@ -426,6 +426,7 @@ abstract class UserInterface
         if (piece.Item2.Length + width < SideBarWidth)
         {
           pieces.Add(piece);
+          width += piece.Item2.Length;
         }
         else
         {
