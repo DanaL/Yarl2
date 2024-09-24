@@ -11,18 +11,22 @@
 
 namespace Yarl2;
 
-internal class Wilderness(Random rng)
+internal class Wilderness(Random rng, int length)
 {
-  private Random _rng = rng;
-  private int _length;
+  readonly Random Rng = rng;
+  readonly int Length = length;
+  readonly int ConiferousAmount = rng.NextDouble() < 0.5 ? 20 : 80;
 
-  private int Fuzz() => _rng.Next(-50, 51);
+  private int Fuzz() => Rng.Next(-50, 51);
 
   // Guess I should deal with the southern hemisphere if possible :P
   // And/or randomize the latitude of the dungeon if I want to be silly
   // I don't yet have winter trees
-  public static TileType PickTree(Random rng)
+  public static TileType PickTree(Random rng, int coniferChance)
   {
+    if (rng.Next(100) < coniferChance)
+      return TileType.Conifer;
+
     bool fallColours = false;
     int day = DateTime.Now.DayOfYear;
     if (day > 320) 
@@ -59,8 +63,8 @@ internal class Wilderness(Random rng)
 
     do
     {
-      int d = _rng.Next(2, 5);
-      int columnBoop = _rng.Next(-5, 5);
+      int d = Rng.Next(2, 5);
+      int columnBoop = Rng.Next(-5, 5);
 
       int nextRow = row - d;
       int nextCol = col + columnBoop;
@@ -113,8 +117,8 @@ internal class Wilderness(Random rng)
   List<(int, int)> FindRiverStarts(Map map, int colLo, int colHi)
   {
     List<(int, int)> candidates = [];
-    int x = _length / 3;
-    for (int r = _length - x; r < _length - 2; r++)
+    int x = Length / 3;
+    for (int r = Length - x; r < Length - 2; r++)
     {
       for (int c = colLo; c < colHi; c++)
       {
@@ -131,9 +135,9 @@ internal class Wilderness(Random rng)
   void DrawRivers(Map map)
   {
     var opts = new List<int>() { 0, 1, 2 };
-    opts.Shuffle(_rng);
+    opts.Shuffle(Rng);
 
-    int third = _length / 3;
+    int third = Length / 3;
 
     foreach (int o in opts)
     {
@@ -142,7 +146,7 @@ internal class Wilderness(Random rng)
         var startCandidates = FindRiverStarts(map, 2, third);
         if (startCandidates.Count > 0)
         {
-          var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
           DrawARiver(map, startLoc);
         }
       }
@@ -151,16 +155,16 @@ internal class Wilderness(Random rng)
         var startCandidates = FindRiverStarts(map, third, third * 2);
         if (startCandidates.Count > 0)
         {
-          var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
           DrawARiver(map, startLoc);
         }
       }
       else
       {
-        var startCandidates = FindRiverStarts(map, third * 2, _length - 2);
+        var startCandidates = FindRiverStarts(map, third * 2, Length - 2);
         if (startCandidates.Count > 0)
         {
-          var startLoc = startCandidates[_rng.Next(startCandidates.Count)];
+          var startLoc = startCandidates[Rng.Next(startCandidates.Count)];
           DrawARiver(map, startLoc);
         }
       }
@@ -187,13 +191,13 @@ internal class Wilderness(Random rng)
   Map CAizeTerrain(Map map, Random rng)
   {
     var next = (Map)map.Clone();
-    for (int r = 1; r < _length - 1; r++)
+    for (int r = 1; r < Length - 1; r++)
     {
-      for (int c = 1; c < _length - 1; c++)
+      for (int c = 1; c < Length - 1; c++)
       {
         var (trees, _) = CountAdjTreesAndGrass(map, r, c);
         if (map.TileAt(r, c).Type == TileType.Grass && trees >= 5 && trees <= 8)
-          next.SetTile(r, c, TileFactory.Get(PickTree(rng)));
+          next.SetTile(r, c, TileFactory.Get(PickTree(rng, ConiferousAmount)));
         else if (map.TileAt(r, c).IsTree() && trees < 4)
           next.SetTile(r, c, TileFactory.Get(TileType.Grass));
       }
@@ -216,9 +220,9 @@ internal class Wilderness(Random rng)
   // Average each point with its neighbours to smooth things out
   void SmoothGrid(int[,] grid)
   {
-    for (int r = 0; r < _length; r++)
+    for (int r = 0; r < Length; r++)
     {
-      for (int c = 0; c < _length; c++)
+      for (int c = 0; c < Length; c++)
       {
         int avg = grid[r, +c];
         int count = 1;
@@ -232,7 +236,7 @@ internal class Wilderness(Random rng)
           }
           avg += grid[(r - 1), +c];
           count += 1;
-          if (c + 1 < _length)
+          if (c + 1 < Length)
           {
             avg += grid[(r - 1), +c + 1];
             count += 1;
@@ -245,13 +249,13 @@ internal class Wilderness(Random rng)
           count += 1;
         }
 
-        if (r > 1 && c + 1 < _length)
+        if (r > 1 && c + 1 < Length)
         {
           avg += grid[(r - 1), c + 1];
           count += 1;
         }
 
-        if (r > 1 && r + 1 < _length)
+        if (r > 1 && r + 1 < Length)
         {
           if (c >= 1)
           {
@@ -260,7 +264,7 @@ internal class Wilderness(Random rng)
           }
           avg += grid[(r - 1), c];
           count += 1;
-          if (c + 1 < _length)
+          if (c + 1 < Length)
           {
             avg += grid[(r - 1), c + 1];
             count += 1;
@@ -293,7 +297,7 @@ internal class Wilderness(Random rng)
       avg += grid[r, +c - width];
       count += 1;
     }
-    if (c + width < _length)
+    if (c + width < Length)
     {
       avg += grid[r, c + width];
       count += 1;
@@ -303,7 +307,7 @@ internal class Wilderness(Random rng)
       avg += grid[(r - width), +c];
       count += 1;
     }
-    if (r + width < _length)
+    if (r + width < Length)
     {
       avg += grid[r + width, c];
       count += 1;
@@ -339,11 +343,11 @@ internal class Wilderness(Random rng)
 
   Map ToMap(int[,] grid)
   {
-    var map = new Map(_length, _length);
+    var map = new Map(Length, Length);
 
-    for (int r = 0; r < _length; r++)
+    for (int r = 0; r < Length; r++)
     {
-      for (int c = 0; c < _length; c++)
+      for (int c = 0; c < Length; c++)
       {
         var v = grid[r, c];
         TileType tt;
@@ -357,9 +361,9 @@ internal class Wilderness(Random rng)
         }
         else if (v < 165)
         {
-          tt = v % 2 == 0 ? tt = TileType.Grass : PickTree(rng);
+          tt = v % 2 == 0 ? tt = TileType.Grass : PickTree(Rng, ConiferousAmount);
         }
-        else if (_rng.NextDouble() < 0.9)
+        else if (Rng.NextDouble() < 0.9)
         {
           tt = TileType.Mountain;
         }
@@ -376,33 +380,31 @@ internal class Wilderness(Random rng)
 
   static void Dump(Map map, int length, string filename)
   {
-    using (TextWriter tw = new StreamWriter(filename))
+    using TextWriter tw = new StreamWriter(filename);
+    for (int r = 0; r < length; r++)
     {
-      for (int r = 0; r < length; r++)
+      for (int c = 0; c < length; c++)
       {
-        for (int c = 0; c < length; c++)
+        var t = map.TileAt(r, c);
+        char ch = t.Type switch
         {
-          var t = map.TileAt(r, c);
-          char ch = t.Type switch
-          {
-            TileType.PermWall => '#',
-            TileType.DungeonWall => '#',
-            TileType.DungeonFloor or TileType.Sand => '.',
-            TileType.ClosedDoor => '+',
-            TileType.Mountain or TileType.SnowPeak => '^',
-            TileType.Grass => ',',
-            TileType.OrangeTree => 'T',
-            TileType.GreenTree => 'T',
-            TileType.RedTree => 'T',
-            TileType.YellowTree => 'T',
-            TileType.DeepWater or TileType.Water => '~',
-            _ => '!'
-          };
+          TileType.PermWall => '#',
+          TileType.DungeonWall => '#',
+          TileType.DungeonFloor or TileType.Sand => '.',
+          TileType.ClosedDoor => '+',
+          TileType.Mountain or TileType.SnowPeak => '^',
+          TileType.Grass => ',',
+          TileType.OrangeTree => 'T',
+          TileType.GreenTree => 'T',
+          TileType.RedTree => 'T',
+          TileType.YellowTree => 'T',
+          TileType.DeepWater or TileType.Water => '~',
+          _ => '!'
+        };
 
-          tw.Write(ch);
-        }
-        tw.WriteLine();
+        tw.Write(ch);
       }
+      tw.WriteLine();
     }
   }
 
@@ -421,45 +423,44 @@ internal class Wilderness(Random rng)
     }
   }
 
-  public Map DrawLevel(int length)
+  public Map DrawLevel()
   {
-    _length = length;
-    int[,] grid = new int[length, length];
+    int[,] grid = new int[Length, Length];
 
-    if (_rng.NextDouble() < 0.5)
+    if (Rng.NextDouble() < 0.5)
     {
-      grid[0, 0] = _rng.Next(-10, 25);
-      grid[0, length - 1] = _rng.Next(0, 100);
+      grid[0, 0] = Rng.Next(-10, 25);
+      grid[0, Length - 1] = Rng.Next(0, 100);
     }
     else
     {
-      grid[0, length - 1] = _rng.Next(-10, 25);
-      grid[0, 0] = _rng.Next(0, 100);
+      grid[0, Length - 1] = Rng.Next(-10, 25);
+      grid[0, 0] = Rng.Next(0, 100);
     }
-    grid[length - 1, 0] = _rng.Next(250, 300);
-    grid[length - 1, length - 1] = _rng.Next(200, 350);
+    grid[Length - 1, 0] = Rng.Next(250, 300);
+    grid[Length - 1, Length - 1] = Rng.Next(200, 350);
 
-    MidpointDisplacement(grid, 0, 0, length);
+    MidpointDisplacement(grid, 0, 0, Length);
     SmoothGrid(grid);
 
     var map = ToMap(grid);
-    map = TweakTreesAndGrass(map, _rng);
+    map = TweakTreesAndGrass(map, Rng);
 
     DrawRivers(map);
 
     // I want the outer perimeter to be deep water/ocean
-    SetBorderingWater(map, length);
+    SetBorderingWater(map, Length);
 
     // set the border around the world
-    for (int c = 0; c < length; c++)
+    for (int c = 0; c < Length; c++)
     {
       map.SetTile(0, c, TileFactory.Get(TileType.WorldBorder));
-      map.SetTile(length - 1, c, TileFactory.Get(TileType.WorldBorder));
+      map.SetTile(Length - 1, c, TileFactory.Get(TileType.WorldBorder));
     }
-    for (int r = 1; r < length - 1; r++)
+    for (int r = 1; r < Length - 1; r++)
     {
       map.SetTile(r, 0, TileFactory.Get(TileType.WorldBorder));
-      map.SetTile(r, length - 1, TileFactory.Get(TileType.WorldBorder));
+      map.SetTile(r, Length - 1, TileFactory.Get(TileType.WorldBorder));
     }
 
     return map;

@@ -18,7 +18,7 @@ enum TileType
   Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor, 
   StoneWall, ClosedDoor, OpenDoor, LockedDoor, BrokenDoor, HWindow, VWindow,
   DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Mountain,
-  GreenTree, OrangeTree, RedTree, YellowTree,
+  GreenTree, OrangeTree, RedTree, YellowTree, Conifer,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
   Dirt, StoneRoad, Well, Bridge, WoodBridge,
   Statue,       // Most statues can be simple tiles so I'm just defining a few different types
@@ -57,6 +57,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.RedTree => true,
     TileType.YellowTree => true,
     TileType.OrangeTree => true,
+    TileType.Conifer => true,
     _ => false
   };
   
@@ -81,6 +82,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.RedTree => true,
     TileType.OrangeTree => true,
     TileType.YellowTree => true,
+    TileType.Conifer => true,
     TileType.Grass => true,
     TileType.WoodBridge => true,
     _ => false
@@ -130,6 +132,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.YellowTree => "trees",
     TileType.RedTree => "trees",
     TileType.OrangeTree => "trees",
+    TileType.Conifer => "trees",
     TileType.Grass => "grass",
     TileType.OpenDoor => "an open door",
     TileType.BrokenDoor => "a broken door",
@@ -367,6 +370,7 @@ class TileFactory
   private static readonly Tile YellowTree = new BasicTile(TileType.YellowTree, true, false, true);
   private static readonly Tile RedTree = new BasicTile(TileType.RedTree, true, false, true);
   private static readonly Tile OrangeTree = new BasicTile(TileType.OrangeTree, true, false, true);
+  private static readonly Tile Conifer = new BasicTile(TileType.Conifer, true, false, true);
   private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true, false);
   private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true, false);
   private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false, true);
@@ -418,6 +422,7 @@ class TileFactory
     TileType.RedTree => RedTree,
     TileType.YellowTree => YellowTree,
     TileType.OrangeTree => OrangeTree,
+    TileType.Conifer => Conifer,
     TileType.Mountain => Mountain,
     TileType.SnowPeak => SnowPeak,
     TileType.ClosedDoor => new Door(type, false),

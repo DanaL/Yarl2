@@ -218,8 +218,8 @@ class PreGameHandler(UserInterface ui)
       {
         campaign = new Campaign();
         wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
-        var wildernessGenerator = new Wilderness(rng);
-        wildernessMap = wildernessGenerator.DrawLevel(129);
+        var wildernessGenerator = new Wilderness(rng, 129);
+        wildernessMap = wildernessGenerator.DrawLevel();
 
         // Redraw map if there aren't enough mountains
         int mountains = 0;

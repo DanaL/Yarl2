@@ -130,7 +130,7 @@ class TownBuilder
           '+' => TileType.ClosedDoor,
           '|' => TileType.VWindow,
           '-' => TileType.HWindow,
-          'T' => Wilderness.PickTree(rng),
+          'T' => Wilderness.PickTree(rng, 20),
           '.' => building == BuildingType.Smithy ? TileType.StoneFloor : TileType.WoodFloor,
           _ => throw new Exception("Invalid character in building template!")
         };
