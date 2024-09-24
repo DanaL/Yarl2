@@ -146,7 +146,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     Inventory = new EmptyInventory(ID);
   }
 
-  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs)
+  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src)
   {
     string msg = "";
 
@@ -198,6 +198,13 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         total += d;
     }
     total += bonusDamage;
+
+    if (HasTrait<SilverAllergyTrait>() && src is Item weapon && weapon.MetalType() == Metals.Silver)
+    {
+      total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+      msg += $" {weapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
+    }
+
     Stats[Attribute.HP].Curr -= total;
 
     if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)

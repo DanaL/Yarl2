@@ -573,6 +573,11 @@ class RageTrait(Actor actor) : FeatTrait
   public override string AsText() => "Rage";
 }
 
+class SilverAllergyTrait : Trait
+{
+  public override string AsText() => "SilverAllergy";
+}
+
 // One could argue lots of weapons are stabby but I created this one to 
 // differentiate between a Rapier (which can impale) and a Dagger which
 // cannot
@@ -1018,7 +1023,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       {
         int fireDmg = gs.Rng.Next(8) + 1;
         List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs);
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs, null);
         if (dmgMsg != "")
         {
           gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
@@ -1188,7 +1193,7 @@ class PoisonedTrait : TemporaryTrait
     }
 
     List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs);
+    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null);
     if (dmgMsg != "")
     {
       gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
@@ -1947,6 +1952,8 @@ class TraitFactory
           Odds = int.Parse(pieces[1]),
           Effect = text[text.IndexOf('#', 11)..]
         };
+      case "SilverAllergy":
+        return new SilverAllergyTrait();
       case "Stabby":
         return new StabbyTrait();
       case "Stackable":

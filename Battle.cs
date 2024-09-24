@@ -104,11 +104,11 @@ class Battle
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
     result.Messages.Add(new Message(txt, target.Loc));
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
-    ResolveHit(attacker, target, hpLeft, result, gs);
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo);
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
-
+    ResolveHit(attacker, target, hpLeft, result, gs);
+    
     bool poisoner = false;
     foreach (var trait in ammo.Traits)
     {
@@ -215,17 +215,17 @@ class Battle
     if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
     if (attacker.HasActiveTrait<RageTrait>())
-      bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);    
+      bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+
+    Item? weapon = attacker.Inventory.ReadiedWeapon();
 
     Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
     result.Messages.Add(msg);
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs);
-    ResolveHit(attacker, target, hpLeft, result, gs);
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon);    
     if (dmgMsg != "")
       result.Messages.Add(new Message(dmgMsg, target.Loc));
+    ResolveHit(attacker, target, hpLeft, result, gs);
 
-    Item? weapon = attacker.Inventory.ReadiedWeapon();
-   
     CheckAttackTraits(target, gs, result, attacker);
 
     if (weapon is not null) 
@@ -256,7 +256,7 @@ class Battle
           string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
           result.Messages.Add(new Message(txt, victim.Loc));
           int roll = gs.Rng.Next(4) + 1;
-          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs);   
+          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null);   
           
           HitAnim(victim, gs);
           
