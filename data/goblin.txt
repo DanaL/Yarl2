@@ -15,6 +15,7 @@ zombie 2
 centipede 2
 dire bat 1
 floating eye 1
+chilled jelly 1
 LEVEL 3
 goblin 4
 hobgoblin 3
@@ -29,19 +30,14 @@ jelly 1
 floating eye 1
 will-o-wisp 1
 phantom 1
+chilled jelly 1
 LEVEL 4
-goblin 2
 hobgoblin 3
 goblin archer 2
 goblin boss 2
 goblin firestarter 2
-skeleton 2
-zombie 2
-centipede 2
 giant spider 1
-jelly 1
 screech bat 1
-floating eye 1
 cloaker 1
 owlbear 1
 duergar soldier 1
@@ -50,20 +46,14 @@ rust monster 1
 will-o-wisp 1
 creeping coins 1
 phantom 1
+chilled jelly 1
 LEVEL 5
-goblin 2
-hobgoblin 3
 goblin archer 2
 goblin boss 2
 goblin firestarter 2
 ogre 2
-centipede 2
-skeleton 2
-zombie 2
-jelly 1
 giant spider 1
 screech bat 1
-floating eye 1
 cloaker 1
 owlbear 1
 duergar soldier 2

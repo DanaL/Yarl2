@@ -267,17 +267,17 @@ class PreGameHandler(UserInterface ui)
         history.GenerateVillain();
         campaign.History = history;
 
-        //int maxDepth = 5;
-        //var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
-        //var dBuilder = new MainDungeonBuilder();
-        //var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
+        int maxDepth = 5;
+        var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, history.Villain, rng);
+        var dBuilder = new MainDungeonBuilder();
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, history, objDb, rng, monsterDecks);
 
-        //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
-        //PrinceOfRats(mainDungeon, objDb, rng);
+        PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
+        PrinceOfRats(mainDungeon, objDb, rng);
 
-        var dBuilder = new ArenaBuilder();
-        var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-        PopulateArena(rng, objDb, mainDungeon);
+        //var dBuilder = new ArenaBuilder();
+        //var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
+        //PopulateArena(rng, objDb, mainDungeon);
 
         campaign.AddDungeon(mainDungeon);
 
@@ -406,15 +406,18 @@ class PreGameHandler(UserInterface ui)
     {
       for (int j = 0; j < rng.Next(8, 13); j++)
       {
-        var deck = monsterDecks[lvl];
+        int monsterLvl = lvl;
+        if (lvl > 0 && rng.NextDouble() > 0.8)
+        {
+          monsterLvl = rng.Next(lvl);
+        }
+
+        var deck = monsterDecks[monsterLvl];
         var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
         var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
-
-        if (m == "deep one")
-          Console.WriteLine(m);
 
         // Some monsters are a bit special and take a bit of extra work
         Actor monster = MonsterFactory.Get(m, objDb, rng);
