@@ -15,7 +15,7 @@ internal class Wilderness(Random rng, int length)
 {
   readonly Random Rng = rng;
   readonly int Length = length;
-  readonly int ConiferousAmount = rng.NextDouble() < 0.5 ? 20 : 80;
+  readonly int ConiferousAmount = rng.NextDouble() < 0.5 ? 10 : 30;
 
   private int Fuzz() => Rng.Next(-50, 51);
 
