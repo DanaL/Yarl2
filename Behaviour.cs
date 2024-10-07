@@ -835,15 +835,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
       sb.Append("Here take this: perhaps it will aid you.\"");
       mob.Stats[Attribute.DialogueState] = new Stat(1);
 
-      int roll = gs.Rng.Next(4);
-      Item item = roll switch
-      {
-        0 => ItemFactory.Get(ItemNames.POTION_HEALING, gs.ObjDb),
-        1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, gs.ObjDb),
-        2 => ItemFactory.Get(ItemNames.ANTIDOTE, gs.ObjDb),
-        _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, gs.ObjDb)
-      };
-
+      Item item = Treasure.MinorGift(gs.ObjDb, gs.Rng);
       sb.Append("\n\nThe mayor gives you ");
       sb.Append(item.Name.IndefArticle());
       sb.Append('!');

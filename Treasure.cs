@@ -97,6 +97,15 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
+  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(5) switch
+  {
+    0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
+    1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
+    2 => ItemFactory.Get(ItemNames.ANTIDOTE, objDb),
+    3 => ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb),
+    _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
+  };
+
   static Item GenerateItem(ItemNames name, GameObjectDB objDb, Random rng)
   {
     Item zorkmids;
