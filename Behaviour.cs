@@ -828,7 +828,7 @@ class MayorBehaviour : IBehaviour, IDialoguer
     {
       sb.Append("\"Welcome to ");
       sb.Append(gs.Town.Name);
-      sb.Append("! It's heartwarming to see another adventuerer combing to our aid! ");
+      sb.Append("! It's heartwarming to see another adventurer coming to our aid! ");
       sb.Append("I have every confidence you'll do better than that last fellow! ");
       sb.Append("And before you venture into danger, spend some zorkmids in our shops and tavern!");
       sb.Append("\n\n");
