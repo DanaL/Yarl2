@@ -2,6 +2,13 @@
 
 using Yarl2;
 
+
+var txt = File.ReadAllText(@"data\mayor.txt");
+var scanner = new ScriptScanner(txt);
+var tokens = scanner.ScanTokens();
+
+
+
 var options = Options.LoadOptions();
 
 UserInterface display;
