@@ -3,5 +3,5 @@
 		(give MINOR_GIFT)
 		(set MET_PLAYER)
 	)
-	((say (pick "Text 1", "Text 2", "Text 3"))
+	(say (pick ("Text 1" "Text 2" "Text 3")))
 )

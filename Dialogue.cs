@@ -13,7 +13,7 @@ namespace Yarl2;
 
 enum TokenType
 {
-  LEFT_PAREN, RIGHT_PAREN, COMMA,
+  LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING,
   IF, GIVE, SAY, PICK, SET,
   EOF
@@ -57,9 +57,6 @@ class ScriptScanner(string src)
         break;
       case ')':
         AddToken(TokenType.RIGHT_PAREN, ")");
-        break;
-      case ',':
-        AddToken(TokenType.COMMA, ",");
         break;
       case '"':
         String();
@@ -138,30 +135,27 @@ class ScriptParser(List<ScriptToken> tokens)
   {
     Consume(TokenType.LEFT_PAREN);
 
-    if (Peek().Type == TokenType.IF)
-      return IfExpr();
+    return Peek().Type switch
+    {
+      TokenType.IF => IfExpr(),
+      TokenType.SAY => SayExpr(),
+      TokenType.SET => SetExpr(),
+      TokenType.GIVE => GiveExpr(),
+      TokenType.PICK => PickExpr(),
+      _ => ListExpr(),
+    };
+  }
 
-    ScriptList list = new();
-
+  ScriptList ListExpr()
+  {
+    var list = new ScriptList();
     do
     {
       ScriptExpr expr = Expr();
       list.Items.Add(expr);
-
-      if (Check(TokenType.COMMA)) 
-      {
-        Advance();
-        continue;
-      }
-      if (Check(TokenType.RIGHT_PAREN))
-      {
-        Advance();
-        break;
-      }
-
-      throw new Exception("Unexpected token");
     }
-    while (!IsAtEnd());
+    while (!Check(TokenType.RIGHT_PAREN) && !Check(TokenType.EOF));
+    Consume(TokenType.RIGHT_PAREN);
 
     return list;
   }
@@ -175,30 +169,72 @@ class ScriptParser(List<ScriptToken> tokens)
 
     string invariant = Tokens[Current].Lexeme;
     Advance();
+    ScriptExpr exprTrue = Expr();
+    ScriptExpr exprFalse = Expr();
 
-    return new ScriptIf(invariant, Expr(), Expr());
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptIf(invariant, exprTrue, exprFalse);
+  }
+
+  ScriptSay SayExpr()
+  {
+    Consume(TokenType.SAY);
+    ScriptExpr expr = Expr();
+    Consume(TokenType.RIGHT_PAREN);
+    return new ScriptSay(expr);
+  }
+
+  ScriptPick PickExpr()
+  {
+    Consume(TokenType.PICK);
+    ScriptExpr expr = NonAtomic();
+    Consume(TokenType.RIGHT_PAREN);
+
+    if (expr is ScriptList list)
+      return new ScriptPick(list);
+    
+    throw new Exception("Expected list in Pick expression");    
+  }
+
+  ScriptSet SetExpr()
+  {
+    Consume(TokenType.SET);
+    // At the moment, my variables are just on/off
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in Set expression");
+    ScriptLiteral lit = (ScriptLiteral)Expr();
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptSet(lit.Name);
+  }
+
+  ScriptGive GiveExpr()
+  {
+    Consume(TokenType.GIVE);
+    ScriptExpr expr = Expr();
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptGive(expr);
   }
 
   ScriptExpr Expr()
-  {
-    if (Check(TokenType.LEFT_PAREN))
-      return NonAtomic();
-    if (Check(TokenType.SAY))
+  {    
+    switch (Peek().Type)
     {
-      Consume(TokenType.SAY);
-      ScriptExpr expr = Expr();
-      Consume(TokenType.RIGHT_PAREN);
-      return new ScriptSay(expr);
-    }
-    if (Check(TokenType.STRING))
-    {
-      string val = Tokens[Current].Lexeme;
-      Advance();
-      return new ScriptString(val);
-    }
-
-    throw new Exception("Unexpected token");
-    //if (Check(TokenType.STRING))
+      case TokenType.LEFT_PAREN:
+        return NonAtomic();      
+      case TokenType.STRING:
+        string val = Tokens[Current].Lexeme;
+        Advance();
+        return new ScriptString(val);
+      case TokenType.IDENTIFIER:
+        string name = Tokens[Current].Lexeme;
+        Advance();
+        return new ScriptLiteral(name);
+      default:
+        throw new Exception($"Unexpected token: {Peek().Type}");
+    }   
   }
 
   ScriptToken Advance()
@@ -242,9 +278,24 @@ class ScriptIf(string invariant, ScriptExpr left, ScriptExpr right) : ScriptExpr
   public ScriptExpr Right { get; set; } = right;
 }
 
+class ScriptPick(ScriptList list) : ScriptExpr
+{
+  public ScriptList Items { get; set; } = list;
+}
+
 class ScriptSay(ScriptExpr dialogue) : ScriptExpr
 {
   public ScriptExpr Dialogue { get; set; } = dialogue;
+}
+
+class ScriptGive(ScriptExpr gift) : ScriptExpr
+{
+  public ScriptExpr Gift { get; set; } = gift;
+}
+
+class ScriptSet(string name) : ScriptExpr
+{
+  public string Name { get; set; } = name;
 }
 
 class ScriptLiteral(string name) : ScriptExpr
