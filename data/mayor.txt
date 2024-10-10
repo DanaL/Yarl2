@@ -1,6 +1,6 @@
 ﻿(if MET_PLAYER
-	( (say "Welcome to #TOWN_NAME")
-		(give MINOR_GIFT)
+	( (say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid! I have every confidence you'll do better than that last fellow! And before you venture into danger, spend some zorkmids in our shops and tavern!")
+		(give MINOR_GIFT "Here, take this with you!")
 		(set MET_PLAYER)
 	)
 	(say (pick ("Text 1" "Text 2" "Text 3")))

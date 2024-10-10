@@ -212,10 +212,20 @@ class ScriptParser(List<ScriptToken> tokens)
   ScriptGive GiveExpr()
   {
     Consume(TokenType.GIVE);
-    ScriptExpr expr = Expr();
+
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in gift expression");
+    string gift = Tokens[Current].Lexeme;
+    Advance();
+
+    if (!Check(TokenType.STRING))
+      throw new Exception("Expected blurb in gift expression");
+    string blurb = Tokens[Current].Lexeme;
+    Advance();
+    
     Consume(TokenType.RIGHT_PAREN);
 
-    return new ScriptGive(expr);
+    return new ScriptGive(gift, blurb);
   }
 
   ScriptExpr Expr()
@@ -288,9 +298,10 @@ class ScriptSay(ScriptExpr dialogue) : ScriptExpr
   public ScriptExpr Dialogue { get; set; } = dialogue;
 }
 
-class ScriptGive(ScriptExpr gift) : ScriptExpr
+class ScriptGive(string gift, string blurb) : ScriptExpr
 {
-  public ScriptExpr Gift { get; set; } = gift;
+  public string Gift { get; set; } = gift;
+  public string Blurb { get; set; } = blurb;
 }
 
 class ScriptSet(string name) : ScriptExpr
