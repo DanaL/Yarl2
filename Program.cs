@@ -3,10 +3,11 @@
 using Yarl2;
 
 
-var txt = File.ReadAllText(@"data\mayor.txt");
+var txt = File.ReadAllText("data/villager1.txt");
 var scanner = new ScriptScanner(txt);
 var tokens = scanner.ScanTokens();
-
+var parser = new ScriptParser(tokens);
+var script = parser.Parse();
 
 
 var options = Options.LoadOptions();

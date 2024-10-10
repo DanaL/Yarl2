@@ -127,18 +127,139 @@ class ScriptParser(List<ScriptToken> tokens)
   readonly List<ScriptToken> Tokens = tokens;
   int Current;
 
-  public ScriptExpr Parse()
+  public DialogueScript Parse()
   {
+    ScriptExpr script = NonAtomic();
 
+    return new DialogueScript(script);
+  }
+
+  ScriptExpr NonAtomic()
+  {
+    Consume(TokenType.LEFT_PAREN);
+
+    if (Peek().Type == TokenType.IF)
+      return IfExpr();
+
+    ScriptList list = new();
+
+    do
+    {
+      ScriptExpr expr = Expr();
+      list.Items.Add(expr);
+
+      if (Check(TokenType.COMMA)) 
+      {
+        Advance();
+        continue;
+      }
+      if (Check(TokenType.RIGHT_PAREN))
+      {
+        Advance();
+        break;
+      }
+
+      throw new Exception("Unexpected token");
+    }
+    while (!IsAtEnd());
+
+    return list;
+  }
+
+  ScriptIf IfExpr()
+  {
+    Consume(TokenType.IF);
+
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception($"Expected literal in if expression");
+
+    string invariant = Tokens[Current].Lexeme;
+    Advance();
+
+    return new ScriptIf(invariant, Expr(), Expr());
+  }
+
+  ScriptExpr Expr()
+  {
+    if (Check(TokenType.LEFT_PAREN))
+      return NonAtomic();
+    if (Check(TokenType.SAY))
+    {
+      Consume(TokenType.SAY);
+      ScriptExpr expr = Expr();
+      Consume(TokenType.RIGHT_PAREN);
+      return new ScriptSay(expr);
+    }
+    if (Check(TokenType.STRING))
+    {
+      string val = Tokens[Current].Lexeme;
+      Advance();
+      return new ScriptString(val);
+    }
+
+    throw new Exception("Unexpected token");
+    //if (Check(TokenType.STRING))
+  }
+
+  ScriptToken Advance()
+  {
+    if (!IsAtEnd())
+      ++Current;
+    return Previous();
+  }
+
+  ScriptToken Consume(TokenType type)
+  {
+    if (Check(type))
+      return Advance();
+
+    throw new Exception($"Expected token: {type}");
+  }
+
+  bool Check(TokenType type)
+  {
+    if (IsAtEnd())
+      return false;
+    return Peek().Type == type;
   }
 
   ScriptToken Peek() => Tokens[Current];
   bool IsAtEnd() => Peek().Type == TokenType.EOF;
+  ScriptToken Previous() => Tokens[Current - 1];
 }
 
-class ScriptExpr
-{
+abstract class ScriptExpr { }
 
+class ScriptList : ScriptExpr
+{
+  public List<ScriptExpr> Items = [];
+}
+
+class ScriptIf(string invariant, ScriptExpr left, ScriptExpr right) : ScriptExpr
+{
+  public string Invariant {get; set; } = invariant;
+  public ScriptExpr Left { get; set; } = left;
+  public ScriptExpr Right { get; set; } = right;
+}
+
+class ScriptSay(ScriptExpr dialogue) : ScriptExpr
+{
+  public ScriptExpr Dialogue { get; set; } = dialogue;
+}
+
+class ScriptLiteral(string name) : ScriptExpr
+{
+  public string Name { get; set; } = name;
+}
+
+class ScriptString(string val) : ScriptExpr
+{
+  public string Value { get; set; } = val;
+}
+
+class DialogueScript(ScriptExpr script)
+{
+  public ScriptExpr Script = script;
 }
 
 class DialogueLoader

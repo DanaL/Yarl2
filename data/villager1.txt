@@ -1,0 +1,1 @@
+(say "Another adventurer come to town, eh? Well, you won't be the last!")
