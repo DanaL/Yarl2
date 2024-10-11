@@ -22,7 +22,7 @@ enum Attribute
   Strength,
   Dexterity,
   Constitution,
-  Piety, // What I renamed D&D's Wisdom
+  Piety, // What I renamed D&D's Wisdom to
   Will,
   AttackBonus,
   Level,
@@ -36,7 +36,7 @@ enum Attribute
   MissileDmgBonus,
   Radius,
   HomeID,
-  DialogueState,
+  DialogueState, // I can eliminate this once the new dialogue system is done
   Markup,
   Attitude,
   InDisguise,
@@ -46,7 +46,8 @@ enum Attribute
   SwordUse,
   AxeUse,
   BowUse,
-  FinesseUse
+  FinesseUse,
+  MetPlayer
 }
 
 class Stat

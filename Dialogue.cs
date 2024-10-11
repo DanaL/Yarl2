@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 enum TokenType
@@ -290,7 +292,7 @@ class ScriptIf(string invariant, ScriptExpr left, ScriptExpr right) : ScriptExpr
 
 class ScriptPick(ScriptList list) : ScriptExpr
 {
-  public ScriptList Items { get; set; } = list;
+  public ScriptList List { get; set; } = list;
 }
 
 class ScriptSay(ScriptExpr dialogue) : ScriptExpr
@@ -319,12 +321,130 @@ class ScriptString(string val) : ScriptExpr
   public string Value { get; set; } = val;
 }
 
+class ScriptVoid : ScriptExpr { }
+
 class DialogueScript(ScriptExpr script)
 {
-  public ScriptExpr Script = script;
+  public ScriptExpr Script { get; set; } = script;
 }
 
 class DialogueLoader
 {
+  DialogueScript Script { get; set; }
+  StringBuilder Sb { get; set; }
 
+  public DialogueLoader(string filename)
+  {
+    var txt = File.ReadAllText($"data/{filename}");
+    var scanner = new ScriptScanner(txt);
+    var tokens = scanner.ScanTokens();
+    var parser = new ScriptParser(tokens);
+    Script = parser.Parse();
+
+    Sb = new StringBuilder();
+  }
+
+  int CheckVal(string name, Actor mob, GameState gs)
+  {
+    if (name.Equals("met_player", StringComparison.CurrentCultureIgnoreCase))
+    {
+      if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
+        return stat.Curr;
+      else 
+        return 0;
+    }
+
+    throw new Exception($"Unknonw variable {name}");
+  }
+
+  string DoMadLibs(string s, GameState gs)
+  {
+    if (s.Contains("#TOWN_NAME"))
+    {
+      s = s.Replace("#TOWN_NAME", gs.Town.Name);
+    }
+
+    if (s.Contains("#EARLY_DENIZEN"))
+    {
+      string monsters = "";
+      foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
+      {
+        if (fact.Name == "EarlyDenizen")
+        {
+          monsters = fact.Value;
+          break;
+        }
+      }
+
+      s = s.Replace("#EARLY_DENIZEN", monsters.Pluralize());
+    }
+
+    return s;
+  }
+
+  ScriptExpr Eval(ScriptExpr Expr, Actor mob, GameState gs)
+  {
+    ScriptExpr result = new ScriptVoid();
+
+    if (Expr is ScriptIf ifExpr)
+    {
+      EvalIf(ifExpr, mob, gs);
+    }
+    else if (Expr is ScriptString str)
+    {
+      string s = DoMadLibs(str.Value, gs);
+
+      result = new ScriptString(s);
+    }
+    else if (Expr is ScriptSay say)
+    {
+      ScriptExpr sayResult = Eval(say.Dialogue, mob, gs);
+      if (sayResult is ScriptString s)
+        Sb.Append(s.Value);
+      else
+        throw new Exception("Expected string value");
+    }
+    else if (Expr is ScriptPick pick)
+    {
+      var opts = pick.List.Items;
+      ScriptExpr e = opts[gs.Rng.Next(opts.Count)];
+      return Eval(e, mob, gs);
+    }
+    else if (Expr is ScriptGive give)
+    {
+      Item item = give.Gift switch
+      {
+        "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
+        _ => throw new Exception($"Unknown variable: {give.Gift}"),
+      };
+      
+      Sb.Append("\n\n");
+      Sb.Append(give.Blurb);
+      Sb.Append("\n\n");
+      Sb.Append(mob.FullName.Capitalize());
+      Sb.Append(" gives you ");
+      Sb.Append(item.Name.IndefArticle());
+      Sb.Append('!');
+
+      gs.Player.Inventory.Add(item, gs.Player.ID);
+    }
+
+    return result;
+  }
+
+  void EvalIf(ScriptIf expr, Actor mob, GameState gs)
+  {
+    int val = CheckVal(expr.Invariant, mob, gs);
+    if (val == 1)
+      Eval(expr.Left, mob, gs);
+    else
+      Eval(expr.Right, mob, gs);
+  }
+
+  public string Dialogue(Actor mob, GameState gs)
+  {
+    Eval(Script.Script, mob, gs);
+    
+    return Sb.ToString();
+  }
 }

@@ -822,48 +822,50 @@ class MayorBehaviour : IBehaviour, IDialoguer
 
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
-    var sb = new StringBuilder();
-
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialoguer = new DialogueLoader(scriptFile);
 
-    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
-    {
-      sb.Append("\"Welcome to ");
-      sb.Append(gs.Town.Name);
-      sb.Append("! It's heartwarming to see another adventurer coming to our aid! ");
-      sb.Append("I have every confidence you'll do better than that last fellow! ");
-      sb.Append("And before you venture into danger, spend some zorkmids in our shops and tavern!");
-      sb.Append("\n\n");
-      sb.Append("Here take this: perhaps it will aid you.\"");
-      mob.Stats[Attribute.DialogueState] = new Stat(1);
+    return (dialoguer.Dialogue(mob, gs), []);
 
-      Item item = Treasure.MinorGift(gs.ObjDb, gs.Rng);
-      sb.Append("\n\nThe mayor gives you ");
-      sb.Append(item.Name.IndefArticle());
-      sb.Append('!');
+    // var sb = new StringBuilder();
+    // if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    // {
+    //   sb.Append("\"Welcome to ");
+    //   sb.Append(gs.Town.Name);
+    //   sb.Append("! It's heartwarming to see another adventurer coming to our aid! ");
+    //   sb.Append("I have every confidence you'll do better than that last fellow! ");
+    //   sb.Append("And before you venture into danger, spend some zorkmids in our shops and tavern!");
+    //   sb.Append("\n\n");
+    //   sb.Append("Here take this: perhaps it will aid you.\"");
+    //   mob.Stats[Attribute.DialogueState] = new Stat(1);
 
-      gs.Player.Inventory.Add(item, gs.Player.ID);
-    }
-    else
-    {
-      var roll = gs.Rng.Next(3);
+    //   Item item = Treasure.MinorGift(gs.ObjDb, gs.Rng);
+    //   sb.Append("\n\nThe mayor gives you ");
+    //   sb.Append(item.Name.IndefArticle());
+    //   sb.Append('!');
 
-      if (roll == 0)
-      {
-        sb.Append("\"How are your adventurers going?\"");
-      }
-      else if (roll == 1)
-      {
-        sb.Append("\"Thank goodness it isn't an election year.\"");
-      }
-      else
-      {
-        sb.Append("\"This looming doom is terrible for tourism. ");
-        sb.Append("Adventurers aside, of course.\"");
-      }
-    }
+    //   gs.Player.Inventory.Add(item, gs.Player.ID);
+    // }
+    // else
+    // {
+    //   var roll = gs.Rng.Next(3);
+
+    //   if (roll == 0)
+    //   {
+    //     sb.Append("\"How are your adventurers going?\"");
+    //   }
+    //   else if (roll == 1)
+    //   {
+    //     sb.Append("\"Thank goodness it isn't an election year.\"");
+    //   }
+    //   else
+    //   {
+    //     sb.Append("\"This looming doom is terrible for tourism. ");
+    //     sb.Append("Adventurers aside, of course.\"");
+    //   }
+    // }
     
-    return (sb.ToString(), []);
+    // return (sb.ToString(), []);
   }
 
   public void SelectOption(Mob actor, char opt, GameState gs)
