@@ -1,0 +1,5 @@
+﻿ (say
+	(pick
+		("It is my duty to look after the spiritual well-being of #TOWN_NAME." "Have you heard the good word about Huntokar?")
+	)
+)

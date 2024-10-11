@@ -390,7 +390,7 @@ class VillagePupBehaviour : IBehaviour
   }
 }
 
-class PriestBehaviour : IBehaviour
+class PriestBehaviour : IBehaviour, IDialoguer
 {
   DateTime _lastIntonation = new(1900, 1, 1);
 
@@ -415,14 +415,21 @@ class PriestBehaviour : IBehaviour
 
   public (Action, Inputer) Chat(Mob priest, GameState gs)
   {
-    var sb = new StringBuilder(priest.Appearance.IndefArticle().Capitalize());
-    sb.Append("\n\n\"It is my duty to look after the spiritual well-being of ");
-    sb.Append(gs.Town.Name);
-    sb.Append(".\"\n\n");
+    var acc = new Dialoguer(priest, gs);
+    var action = new CloseMenuAction(gs, 1.0);
 
-    gs.UIRef().SetPopup(new Popup(sb.ToString(), priest.FullName, -1, -1));
-    return (new PassAction(), new PauseForMoreInputer());
+    return (action, acc);
   }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialoguer = new DialogueLoader(scriptFile);
+
+    return (dialoguer.Dialogue(mob, gs), []);
+  }
+
+  public void SelectOption(Mob actor, char opt, GameState gs) { }
 }
 
 class SmithBehaviour : IBehaviour

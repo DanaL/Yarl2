@@ -151,6 +151,7 @@ class Village
     cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
     cleric.Traits.Add(new VillagerTrait());
+    cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "priest.txt" });
 
     cleric.Loc = LocForVillager(map, town.Shrine, rng);
     cleric.SetBehaviour(new PriestBehaviour());
