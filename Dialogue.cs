@@ -346,7 +346,7 @@ class DialogueLoader
 
   int CheckVal(string name, Actor mob, GameState gs)
   {
-    if (name.Equals("met_player", StringComparison.CurrentCultureIgnoreCase))
+    if (name == "MET_PLAYER")
     {
       if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
         return stat.Curr;
@@ -410,16 +410,50 @@ class DialogueLoader
       ScriptExpr e = opts[gs.Rng.Next(opts.Count)];
       return Eval(e, mob, gs);
     }
-    else if (Expr is ScriptGive give)
+    else if (Expr is ScriptGive gift)
     {
-      Item item = give.Gift switch
+      EvalGive(gift, mob, gs);
+    }
+    else if (Expr is ScriptSet set)
+    {
+      EvalSet(set, mob, gs);
+    }
+    else if (Expr is ScriptList list)
+    {
+      foreach (var item in list.Items)
+        Eval(item, mob, gs);
+    }
+    
+    return result;
+  }
+
+  // At the moment, I only have on/off variables 
+  // but I imagine that'll change 
+  static void EvalSet(ScriptSet set, Actor mob, GameState gs)
+  {
+    switch (set.Name)
+    {
+      case "MET_PLAYER":
+        if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
+          stat.ChangeMax(1);
+        else
+          mob.Stats.Add(Attribute.MetPlayer, new Stat(1));
+        break;
+      default:
+        throw new Exception($"Unknown variable: {set.Name}");
+    }
+  }
+
+  void EvalGive(ScriptGive gift, Actor mob, GameState gs)
+  {
+      Item item = gift.Gift switch
       {
         "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
-        _ => throw new Exception($"Unknown variable: {give.Gift}"),
+        _ => throw new Exception($"Unknown variable: {gift.Gift}"),
       };
       
       Sb.Append("\n\n");
-      Sb.Append(give.Blurb);
+      Sb.Append(gift.Blurb);
       Sb.Append("\n\n");
       Sb.Append(mob.FullName.Capitalize());
       Sb.Append(" gives you ");
@@ -427,9 +461,6 @@ class DialogueLoader
       Sb.Append('!');
 
       gs.Player.Inventory.Add(item, gs.Player.ID);
-    }
-
-    return result;
   }
 
   void EvalIf(ScriptIf expr, Actor mob, GameState gs)
