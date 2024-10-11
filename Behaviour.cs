@@ -824,6 +824,8 @@ class MayorBehaviour : IBehaviour, IDialoguer
   {
     var sb = new StringBuilder();
 
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
     {
       sb.Append("\"Welcome to ");

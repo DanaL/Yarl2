@@ -241,6 +241,7 @@ class Village
     mayor.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     mayor.Traits.Add(new NamedTrait());
     mayor.Traits.Add(new VillagerTrait());
+    mayor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "mayor.txt" });
 
     var homeID = PickUnoccuppiedCottage(town, rng);
     mayor.Loc = LocForVillager(map, town.Homes[homeID], rng);

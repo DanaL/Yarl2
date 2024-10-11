@@ -253,11 +253,18 @@ class CorrosiveTrait : Trait
   public override string AsText() => "Corrosive";
 }
 
- class DodgeTrait : FeatTrait
+class DialogueScriptTrait : Trait
 {
-  public int Rate { get; set; }
+  public string ScriptFile { get; set; } = "";
 
-  public override string AsText() => $"Dodge#{Rate}";
+  public override string AsText() => $"DialogueScript#{ScriptFile}";
+}
+
+class DodgeTrait : FeatTrait
+{
+public int Rate { get; set; }
+
+public override string AsText() => $"Dodge#{Rate}";
 }
 
 class FinesseTrait : Trait
@@ -1648,6 +1655,11 @@ class TraitFactory
         return new DeathMessageTrait()
         {
           Message = pieces[1]
+        };
+      case "DialogueScript":
+        return new DialogueScriptTrait()
+        {
+          ScriptFile = pieces[1]
         };
       case "Disguise":
         return new DisguiseTrait()
