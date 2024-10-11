@@ -2,7 +2,7 @@
 	(say (pick ("How are your adventurers going?" "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!")))
   (
 		(say "Another adventurer come to town huh? You aren't the first, and you probably won't be the last...")
-		(set MET_PLAYER)
+		(set MET_PLAYER true)
 	)
 )
 

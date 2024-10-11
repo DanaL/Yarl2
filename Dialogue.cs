@@ -18,6 +18,7 @@ enum TokenType
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING,
   IF, GIVE, SAY, PICK, SET,
+  TRUE, FALSE,
   EOF
 }
 
@@ -90,6 +91,8 @@ class ScriptScanner(string src)
       "pick" => TokenType.PICK,
       "give" => TokenType.GIVE,
       "set" => TokenType.SET,
+      "true" => TokenType.TRUE,
+      "false" => TokenType.FALSE,
       _ => TokenType.IDENTIFIER
     };
 
@@ -205,10 +208,13 @@ class ScriptParser(List<ScriptToken> tokens)
     // At the moment, my variables are just on/off
     if (!Check(TokenType.IDENTIFIER))
       throw new Exception("Expected identifier in Set expression");
-    ScriptLiteral lit = (ScriptLiteral)Expr();
+
+    ScriptLiteral lit = (ScriptLiteral)Expr();    
+    ScriptExpr val = Expr();
+    
     Consume(TokenType.RIGHT_PAREN);
 
-    return new ScriptSet(lit.Name);
+    return new ScriptSet(lit.Name, val);
   }
 
   ScriptGive GiveExpr()
@@ -244,6 +250,12 @@ class ScriptParser(List<ScriptToken> tokens)
         string name = Tokens[Current].Lexeme;
         Advance();
         return new ScriptLiteral(name);
+      case TokenType.TRUE:
+        Advance();
+        return new ScriptBool(true);
+      case TokenType.FALSE:
+        Advance();
+        return new ScriptBool(false);
       default:
         throw new Exception($"Unexpected token: {Peek().Type}");
     }   
@@ -277,6 +289,7 @@ class ScriptParser(List<ScriptToken> tokens)
 }
 
 abstract class ScriptExpr { }
+abstract class ScriptAtomic : ScriptExpr { }
 
 class ScriptList : ScriptExpr
 {
@@ -306,19 +319,25 @@ class ScriptGive(string gift, string blurb) : ScriptExpr
   public string Blurb { get; set; } = blurb;
 }
 
-class ScriptSet(string name) : ScriptExpr
+class ScriptSet(string name, ScriptExpr val) : ScriptExpr
+{
+  public string Name { get; set; } = name;
+  public ScriptExpr Value { get; set; } = val;
+}
+
+class ScriptLiteral(string name) : ScriptAtomic
 {
   public string Name { get; set; } = name;
 }
 
-class ScriptLiteral(string name) : ScriptExpr
-{
-  public string Name { get; set; } = name;
-}
-
-class ScriptString(string val) : ScriptExpr
+class ScriptString(string val) : ScriptAtomic
 {
   public string Value { get; set; } = val;
+}
+
+class ScriptBool(bool val) : ScriptAtomic
+{
+  public bool Value { get; set; } = val;
 }
 
 class ScriptVoid : ScriptExpr { }
@@ -396,6 +415,10 @@ class DialogueLoader
 
       result = new ScriptString(s);
     }
+    else if (Expr is ScriptBool boolean)
+    {
+      return boolean;
+    }
     else if (Expr is ScriptSay say)
     {
       ScriptExpr sayResult = Eval(say.Dialogue, mob, gs);
@@ -429,15 +452,20 @@ class DialogueLoader
 
   // At the moment, I only have on/off variables 
   // but I imagine that'll change 
-  static void EvalSet(ScriptSet set, Actor mob, GameState gs)
+  void EvalSet(ScriptSet set, Actor mob, GameState gs)
   {
     switch (set.Name)
     {
       case "MET_PLAYER":
+        ScriptExpr result = Eval(set.Value, mob, gs);
+        if (result is not ScriptBool boolean)
+          throw new Exception("Expected boolean value for setting MET_PLAYER");
+
+        int val = boolean.Value ? 1 : 0;
         if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
-          stat.ChangeMax(1);
+          stat.SetMax(val);
         else
-          mob.Stats.Add(Attribute.MetPlayer, new Stat(1));
+          mob.Stats.Add(Attribute.MetPlayer, new Stat(val));
         break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");
