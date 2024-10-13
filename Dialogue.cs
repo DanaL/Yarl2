@@ -16,8 +16,9 @@ namespace Yarl2;
 enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, 
-  IDENTIFIER, STRING,
+  IDENTIFIER, STRING, NUMBER,
   IF, GIVE, SAY, PICK, SET,
+  EQ, NEQ, LT, LTE, GT, GTE,
   TRUE, FALSE,
   EOF
 }
@@ -61,6 +62,20 @@ class ScriptScanner(string src)
       case ')':
         AddToken(TokenType.RIGHT_PAREN, ")");
         break;
+      case '=':
+        AddToken(TokenType.EQ, "=");
+        break;
+      case '!':
+        if (!Match('='))
+          throw new Exception("Unknown operator !. Missing an =?");
+        AddToken(TokenType.NEQ, "!=");
+        break;
+      case '<':
+        AddToken(Match('=') ? TokenType.LTE : TokenType.LT, "");
+        break;
+      case '>':
+        AddToken(Match('=') ? TokenType.GTE : TokenType.GT, "");
+        break;
       case '"':
         String();
         break;
@@ -72,6 +87,8 @@ class ScriptScanner(string src)
       default:
         if (IsAlpha(c))
           Identifier();
+        else if (IsDigit(c))
+          Number();
         else
           throw new Exception($"Unexpected character: {c}.");
         break;
@@ -116,12 +133,45 @@ class ScriptScanner(string src)
     AddToken(TokenType.STRING, value);
   }
 
+  private void Number()
+  {
+    while (true)
+    {
+      char ch = Peek();
+      if (IsDigit(ch))
+        Advance();
+      else
+        break;
+    }
+
+    var sb = new StringBuilder();
+    for (int j = Start; j < Current; j++)
+    {      
+      sb.Append(Source[j]);
+    }
+    
+    AddToken(TokenType.NUMBER, sb.ToString());
+  }
+
   void AddToken(TokenType type, string text) => Tokens.Add(new(type, text));
 
   char Peek() => IsAtEnd() ? '\0' : Source[Current];
   char Advance() => Source[Current++];
   bool IsAtEnd() => Current >= Source.Length;
-  static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';  
+  static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';
+  static bool IsDigit(char c) => char.IsAsciiDigit(c);
+
+  private bool Match(char expected)
+  {
+    if (IsAtEnd())
+      return false;
+    if (Source[Current] != expected)
+      return false;
+
+    Current++;
+
+    return true;
+  }
 }
 
 class ScriptParser(List<ScriptToken> tokens)
@@ -147,6 +197,12 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.SET => SetExpr(),
       TokenType.GIVE => GiveExpr(),
       TokenType.PICK => PickExpr(),
+      TokenType.EQ => BooleanExpr(),
+      TokenType.NEQ => BooleanExpr(),
+      TokenType.LT => BooleanExpr(),
+      TokenType.LTE => BooleanExpr(),
+      TokenType.GT => BooleanExpr(),
+      TokenType.GTE => BooleanExpr(),
       _ => ListExpr(),
     };
   }
@@ -202,10 +258,28 @@ class ScriptParser(List<ScriptToken> tokens)
     throw new Exception("Expected list in Pick expression");    
   }
 
+  ScriptBooleanExpr BooleanExpr()
+  {
+    ScriptToken op = Peek();
+    Advance();
+
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in boolean expression");
+    
+    ScriptLiteral lit = (ScriptLiteral)Expr();
+    ScriptExpr val = Expr();
+    if (val is not ScriptAtomic atomic)
+      throw new Exception("Expected value in boolean expression");
+    
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptBooleanExpr(op, lit.Name, atomic);
+  }
+
   ScriptSet SetExpr()
   {
     Consume(TokenType.SET);
-    // At the moment, my variables are just on/off
+    
     if (!Check(TokenType.IDENTIFIER))
       throw new Exception("Expected identifier in Set expression");
 
@@ -256,6 +330,10 @@ class ScriptParser(List<ScriptToken> tokens)
       case TokenType.FALSE:
         Advance();
         return new ScriptBool(false);
+      case TokenType.NUMBER:
+        int number = int.Parse(Tokens[Current].Lexeme);
+        Advance();
+        return new ScriptNumber(number);
       default:
         throw new Exception($"Unexpected token: {Peek().Type}");
     }   
@@ -303,6 +381,13 @@ class ScriptIf(string invariant, ScriptExpr left, ScriptExpr right) : ScriptExpr
   public ScriptExpr Right { get; set; } = right;
 }
 
+class ScriptBooleanExpr(ScriptToken op, string identifier, ScriptAtomic val) : ScriptExpr
+{
+  public ScriptToken Op { get; set; } = op;
+  public string Identifier { get; set; } = identifier;
+  public ScriptAtomic Value { get; set; } = val;
+}
+
 class ScriptPick(ScriptList list) : ScriptExpr
 {
   public ScriptList List { get; set; } = list;
@@ -338,6 +423,11 @@ class ScriptString(string val) : ScriptAtomic
 class ScriptBool(bool val) : ScriptAtomic
 {
   public bool Value { get; set; } = val;
+}
+
+class ScriptNumber(int val) : ScriptAtomic
+{
+  public int Value { get; set; } = val;
 }
 
 class ScriptVoid : ScriptExpr { }
