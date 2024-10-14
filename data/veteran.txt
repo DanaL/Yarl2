@@ -1,0 +1,5 @@
+(cond
+  ((= PLAYER_DEPTH 0) (say "I used to be an adventurer like you! Sure the top floors of the dungeon are all #EARLY_DENIZEN  and rats, but then things get a lot worse."))
+  ((<= PLAYER_DEPTH 2) (say "Some free advice: grind around on the first few floors and save up enough for your retirement!"))
+  (else (say "You've been HOW deep? The horrors that await you..."))
+)

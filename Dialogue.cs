@@ -17,8 +17,8 @@ enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING, NUMBER,
-  IF, GIVE, SAY, PICK, SET,
-  EQ, NEQ, LT, LTE, GT, GTE,
+  IF, COND, GIVE, SAY, PICK, SET,
+  EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   EOF
 }
@@ -110,6 +110,8 @@ class ScriptScanner(string src)
       "set" => TokenType.SET,
       "true" => TokenType.TRUE,
       "false" => TokenType.FALSE,
+      "else" => TokenType.ELSE,
+      "cond" => TokenType.COND,
       _ => TokenType.IDENTIFIER
     };
 
@@ -203,6 +205,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.LTE => BooleanExpr(),
       TokenType.GT => BooleanExpr(),
       TokenType.GTE => BooleanExpr(),
+      TokenType.COND => CondExpr(),      
       _ => ListExpr(),
     };
   }
@@ -219,6 +222,45 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return list;
+  }
+
+  ScriptCond CondExpr()
+  {
+    Consume(TokenType.COND);
+    List<ScriptBranch> branches = [];
+
+    ScriptBranch? elseClause = null;
+    do
+    {
+      if (IsAtEnd())
+        throw new Exception("Unterminated conditional.");
+
+      Consume(TokenType.LEFT_PAREN);
+
+      if (Peek().Type == TokenType.ELSE)
+      {
+        Advance();
+        
+        if (elseClause is not null)
+          throw new Exception("Cannot have multiple else clauses in cond.");
+        
+        elseClause = new ScriptBranch(new ScriptBool(true), Expr());
+        Consume(TokenType.RIGHT_PAREN);
+      }
+      else 
+      {
+        ScriptBranch branch = new(Expr(), Expr());
+        branches.Add(branch);
+        Consume(TokenType.RIGHT_PAREN);
+      }      
+    }
+    while (!Check(TokenType.RIGHT_PAREN));
+    Consume(TokenType.RIGHT_PAREN);
+
+    if (elseClause is not null)
+      branches.Add(elseClause);
+
+    return new ScriptCond(branches);
   }
 
   ScriptIf IfExpr()
@@ -398,6 +440,17 @@ class ScriptSay(ScriptExpr dialogue) : ScriptExpr
   public ScriptExpr Dialogue { get; set; } = dialogue;
 }
 
+class ScriptBranch(ScriptExpr test, ScriptExpr action) : ScriptExpr
+{
+  public ScriptExpr Test { get; set; } = test;
+  public ScriptExpr Action { get; set; } = action;
+}
+
+class ScriptCond(List<ScriptBranch> branches) : ScriptExpr
+{
+  public List<ScriptBranch> Branches { get; set; } = branches;
+}
+
 class ScriptGive(string gift, string blurb) : ScriptExpr
 {
   public string Gift { get; set; } = gift;
@@ -466,7 +519,7 @@ class DialogueLoader
     throw new Exception($"Unknonw variable {name}");
   }
 
-  string DoMadLibs(string s, GameState gs)
+  static string DoMadLibs(string s, GameState gs)
   {
     if (s.Contains("#TOWN_NAME"))
     {
@@ -498,6 +551,10 @@ class DialogueLoader
     if (Expr is ScriptIf ifExpr)
     {
       EvalIf(ifExpr, mob, gs);
+    }
+    else if (Expr is ScriptCond condExpr)
+    {
+      EvalCond(condExpr, mob, gs);
     }
     else if (Expr is ScriptString str)
     {
@@ -579,6 +636,23 @@ class DialogueLoader
       Sb.Append('!');
 
       gs.Player.Inventory.Add(item, gs.Player.ID);
+  }
+
+  void EvalCond(ScriptCond cond, Actor mob, GameState gs)
+  {
+    if (cond.Branches.Count == 0)
+      throw new Exception("cond expressions must have at least one branch.");
+
+      foreach (ScriptBranch branch in cond.Branches)
+      {
+        // if (expr is ScriptElse elseExpr)
+        // {
+        //   Eval(elseExpr.Expr, mob, gs);
+        //   return;
+        // }
+
+        // ScriptExpr result = Eval()
+      }
   }
 
   void EvalIf(ScriptIf expr, Actor mob, GameState gs)
