@@ -17,7 +17,7 @@ enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING, NUMBER,
-  IF, COND, GIVE, SAY, PICK, SET,
+  COND, GIVE, SAY, PICK, SET,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   EOF
@@ -103,7 +103,6 @@ class ScriptScanner(string src)
     string text = Source[Start..Current];
     TokenType type = text.ToLower() switch
     {
-      "if" => TokenType.IF,
       "say" => TokenType.SAY,
       "pick" => TokenType.PICK,
       "give" => TokenType.GIVE,
@@ -194,7 +193,6 @@ class ScriptParser(List<ScriptToken> tokens)
 
     return Peek().Type switch
     {
-      TokenType.IF => IfExpr(),
       TokenType.SAY => SayExpr(),
       TokenType.SET => SetExpr(),
       TokenType.GIVE => GiveExpr(),
@@ -240,7 +238,7 @@ class ScriptParser(List<ScriptToken> tokens)
       if (Peek().Type == TokenType.ELSE)
       {
         Advance();
-        
+
         if (elseClause is not null)
           throw new Exception("Cannot have multiple else clauses in cond.");
         
@@ -261,23 +259,6 @@ class ScriptParser(List<ScriptToken> tokens)
       branches.Add(elseClause);
 
     return new ScriptCond(branches);
-  }
-
-  ScriptIf IfExpr()
-  {
-    Consume(TokenType.IF);
-
-    if (!Check(TokenType.IDENTIFIER))
-      throw new Exception($"Expected literal in if expression");
-
-    string invariant = Tokens[Current].Lexeme;
-    Advance();
-    ScriptExpr exprTrue = Expr();
-    ScriptExpr exprFalse = Expr();
-
-    Consume(TokenType.RIGHT_PAREN);
-
-    return new ScriptIf(invariant, exprTrue, exprFalse);
   }
 
   ScriptSay SayExpr()
@@ -416,13 +397,6 @@ class ScriptList : ScriptExpr
   public List<ScriptExpr> Items = [];
 }
 
-class ScriptIf(string invariant, ScriptExpr left, ScriptExpr right) : ScriptExpr
-{
-  public string Invariant {get; set; } = invariant;
-  public ScriptExpr Left { get; set; } = left;
-  public ScriptExpr Right { get; set; } = right;
-}
-
 class ScriptBooleanExpr(ScriptToken op, string identifier, ScriptAtomic val) : ScriptExpr
 {
   public ScriptToken Op { get; set; } = op;
@@ -506,17 +480,21 @@ class DialogueLoader
     Sb = new StringBuilder();
   }
 
-  int CheckVal(string name, Actor mob, GameState gs)
+  object CheckVal(string name, Actor mob, GameState gs)
   {
     if (name == "MET_PLAYER")
     {
       if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
-        return stat.Curr;
+        return stat.Curr != 0;
       else 
-        return 0;
+        return false;
+    }
+    else if (name == "PLAYER_DEPTH")
+    {
+      return gs.Player.Stats[Attribute.Depth].Max;
     }
 
-    throw new Exception($"Unknonw variable {name}");
+    throw new Exception($"Unknown variable {name}");
   }
 
   static string DoMadLibs(string s, GameState gs)
@@ -548,9 +526,9 @@ class DialogueLoader
   {
     ScriptExpr result = new ScriptVoid();
 
-    if (Expr is ScriptIf ifExpr)
+    if (Expr is ScriptBooleanExpr bExpr)
     {
-      EvalIf(ifExpr, mob, gs);
+      return EvallBooleanExpr(bExpr, mob, gs);
     }
     else if (Expr is ScriptCond condExpr)
     {
@@ -595,6 +573,63 @@ class DialogueLoader
     }
     
     return result;
+  }
+
+  static bool CompareBool(ScriptToken op, bool a, ScriptExpr b)
+  {
+    if (b is not ScriptBool c)
+      throw new Exception("Expected boolean value");
+
+    return op.Type switch
+    {
+      TokenType.EQ => a == c.Value,
+      TokenType.NEQ => a != c.Value,
+      _ => throw new Exception("Invalid comparison")
+    };
+  }
+
+  static bool CompareStr(ScriptToken op, string a, ScriptExpr b)
+  {
+    if (b is not ScriptString s)
+      throw new Exception("Expected string value");
+
+    return op.Type switch
+    {
+      TokenType.EQ => a == s.Value,
+      TokenType.NEQ => a != s.Value,
+      _ => throw new Exception("Invalid comparison")
+    };
+  }
+
+  static bool CompareInt(ScriptToken op, int a, ScriptExpr b)
+  {
+    if (b is not ScriptNumber n)
+      throw new Exception("Expected int value");
+
+    return op.Type switch
+    {
+      TokenType.EQ => a == n.Value,
+      TokenType.NEQ => a != n.Value,
+      TokenType.LT => a < n.Value,
+      TokenType.LTE => a <= n.Value,
+      TokenType.GT => a > n.Value,
+      TokenType.GTE => a >= n.Value,
+      _ => throw new Exception("Invalid comparison")
+    };
+  }
+
+  ScriptBool EvallBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
+  {
+    object val = CheckVal(expr.Identifier, mob, gs);
+
+    if (val is bool boolVal)
+      return new ScriptBool(CompareBool(expr.Op, boolVal, expr.Value));
+    else if (val is int intVal)
+      return new ScriptBool(CompareInt(expr.Op, intVal, expr.Value));
+    else if (val is string strVal)
+      return new ScriptBool(CompareStr(expr.Op, strVal, expr.Value));
+    
+    throw new Exception("Variables must be int, bool, or string");
   }
 
   // At the moment, I only have on/off variables 
@@ -645,23 +680,15 @@ class DialogueLoader
 
       foreach (ScriptBranch branch in cond.Branches)
       {
-        // if (expr is ScriptElse elseExpr)
-        // {
-        //   Eval(elseExpr.Expr, mob, gs);
-        //   return;
-        // }
-
-        // ScriptExpr result = Eval()
+        ScriptExpr expr = Eval(branch.Test, mob, gs);
+        if (expr is not ScriptBool result)
+          throw new Exception("Expected boolean result in cond test.");
+        if (result.Value)
+        {
+          Eval(branch.Action, mob, gs);
+          break;
+        }
       }
-  }
-
-  void EvalIf(ScriptIf expr, Actor mob, GameState gs)
-  {
-    int val = CheckVal(expr.Invariant, mob, gs);
-    if (val == 1)
-      Eval(expr.Left, mob, gs);
-    else
-      Eval(expr.Right, mob, gs);
   }
 
   public string Dialogue(Actor mob, GameState gs)

@@ -13,12 +13,6 @@ using System.Text.Json;
 
 using Yarl2;
 
-var txt = File.ReadAllText("data/veteran.txt");
-var scanner = new ScriptScanner(txt);
-var tokens = scanner.ScanTokens();
-var parser = new ScriptParser(tokens);
-var script = parser.Parse();
-
 var options = Options.LoadOptions();
 
 UserInterface display;
