@@ -44,13 +44,13 @@
     <None Update="data\treasure_tables.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="data\mayor.txt">
+    <None Update="dialogue\mayor.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="data\villager1.txt">
+    <None Update="dialogue\villager1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="data\priest.txt">
+    <None Update="dialogue\priest.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

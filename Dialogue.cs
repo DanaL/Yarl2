@@ -476,7 +476,7 @@ class DialogueLoader
 
   public DialogueLoader(string filename)
   {
-    var txt = File.ReadAllText($"data/{filename}");
+    var txt = File.ReadAllText($"dialogue/{filename}");
     var scanner = new ScriptScanner(txt);
     var tokens = scanner.ScanTokens();
     var parser = new ScriptParser(tokens);
