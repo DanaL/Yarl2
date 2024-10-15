@@ -1,0 +1,13 @@
+﻿(cond
+	(
+		(and (= MET_PLAYER true) (= DUNGEON_DEPTH 0))
+		(say "Foo")
+	)
+
+	(
+		(or (>= PLAYER_DEPTH 2) (= MET_PLAYER false))
+		(say "Blah")
+	)
+
+	(else (say "..."))
+)

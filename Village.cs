@@ -302,6 +302,7 @@ class Village
     widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
     widower.Traits.Add(new VillagerTrait());
+    widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
 
     int homeID = PickUnoccuppiedCottage(town, rng);
     widower.Loc = LocForVillager(map, town.Homes[homeID], rng);

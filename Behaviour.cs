@@ -943,14 +943,6 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
   }
 
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
-  {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
-  }
-
   static Actor? Partner(Mob mob, GameState gs)
   {
     foreach (var fact in gs.Facts)
@@ -964,8 +956,8 @@ class WidowerBehaviour: IBehaviour, IDialoguer
 
     return null;
   }
-  
-  ulong TrinketID(Actor partner, GameState gs) 
+
+  ulong TrinketID(Actor partner, GameState gs)
   {
     foreach (BelongedToFact fact in gs.Facts.OfType<BelongedToFact>())
     {
@@ -978,7 +970,31 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     return 0;
   }
 
+  public (Action, Inputer) Chat(Mob priest, GameState gs)
+  {
+    var acc = new Dialoguer(priest, gs);
+    var action = new CloseMenuAction(gs, 1.0);
+
+    return (action, acc);
+  }
+
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialoguer = new DialogueLoader(scriptFile);
+
+    return (dialoguer.Dialogue(mob, gs), []);
+  }
+
+  public (Action, Inputer?) CChat(Mob actor, GameState gameState)
+  {
+    var acc = new Dialoguer(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CCurrentText(Mob mob, GameState gs)
   {
     var partner = Partner(mob, gs);
     string name = partner.Name.Capitalize();

@@ -18,6 +18,7 @@ enum TokenType
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING, NUMBER,
   COND, GIVE, SAY, PICK, SET,
+  AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   EOF
@@ -116,6 +117,8 @@ class ScriptScanner(string src)
       "false" => TokenType.FALSE,
       "else" => TokenType.ELSE,
       "cond" => TokenType.COND,
+      "and" => TokenType.AND,
+      "or" => TokenType.OR,
       _ => TokenType.IDENTIFIER
     };
 
@@ -208,7 +211,9 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.LTE => BooleanExpr(),
       TokenType.GT => BooleanExpr(),
       TokenType.GTE => BooleanExpr(),
-      TokenType.COND => CondExpr(),      
+      TokenType.COND => CondExpr(),
+      TokenType.AND => AndExpr(),
+      TokenType.OR => OrExpr(),
       _ => ListExpr(),
     };
   }
@@ -225,6 +230,44 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return list;
+  }
+
+  ScriptAnd AndExpr()
+  {
+    Consume(TokenType.AND);
+    List<ScriptExpr> conditions = [];
+
+    do
+    {
+      if (IsAtEnd())
+        throw new Exception("Unterminated and.");
+
+      ScriptExpr expr = Expr();
+      conditions.Add(expr);
+    }
+    while (!Check(TokenType.RIGHT_PAREN));
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptAnd(conditions);
+  }
+
+  ScriptOr OrExpr()
+  {
+    Consume(TokenType.OR);
+    List<ScriptExpr> conditions = [];
+
+    do
+    {
+      if (IsAtEnd())
+        throw new Exception("Unterminated and.");
+
+      ScriptExpr expr = Expr();
+      conditions.Add(expr);
+    }
+    while (!Check(TokenType.RIGHT_PAREN));
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptOr(conditions);
   }
 
   ScriptCond CondExpr()
@@ -425,6 +468,16 @@ class ScriptBranch(ScriptExpr test, ScriptExpr action) : ScriptExpr
   public ScriptExpr Action { get; set; } = action;
 }
 
+class ScriptAnd(List<ScriptExpr> conditions) : ScriptExpr
+{
+  public List<ScriptExpr> Conditions { get; set; } = conditions;
+}
+
+class ScriptOr(List<ScriptExpr> conditions) : ScriptExpr
+{
+  public List<ScriptExpr> Conditions { get; set; } = conditions;
+}
+
 class ScriptCond(List<ScriptBranch> branches) : ScriptExpr
 {
   public List<ScriptBranch> Branches { get; set; } = branches;
@@ -538,6 +591,14 @@ class DialogueLoader
     else if (Expr is ScriptCond condExpr)
     {
       EvalCond(condExpr, mob, gs);
+    }
+    else if (Expr is ScriptAnd andExpr)
+    {
+      return EvalAnd(andExpr, mob, gs);
+    }
+    else if (Expr is ScriptOr orExpr)
+    {
+      return EvalOr(orExpr, mob, gs);
     }
     else if (Expr is ScriptString str)
     {
@@ -676,6 +737,48 @@ class DialogueLoader
       Sb.Append('!');
 
       gs.Player.Inventory.Add(item, gs.Player.ID);
+  }
+
+  ScriptBool EvalAnd(ScriptAnd andExpr, Actor mob, GameState gs)
+  {
+    if (andExpr.Conditions.Count == 0)
+      throw new Exception("And expressions must have at least one condition.");
+
+    foreach (ScriptExpr cond in andExpr.Conditions)
+    {
+      ScriptExpr result = Eval(cond, mob, gs);
+      if (result is ScriptBool boolResult && !boolResult.Value)
+      {
+        return boolResult;
+      }
+      else
+      {
+        throw new Exception("Expected boolean condition in and expression.");
+      }
+    }
+
+    return new ScriptBool(true);
+  }
+
+  ScriptBool EvalOr(ScriptOr orExpr, Actor mob, GameState gs)
+  {
+    if (orExpr.Conditions.Count == 0)
+      throw new Exception("Or expressions must have at least one condition.");
+
+    foreach (ScriptExpr cond in orExpr.Conditions)
+    {
+      ScriptExpr result = Eval(cond, mob, gs);
+      if (result is not ScriptBool boolResult)
+      {
+        throw new Exception("Expected boolean condition in or expression.");
+      }
+      else if (boolResult.Value)
+      {
+        return boolResult;        
+      }
+    }
+
+    return new ScriptBool(false);
   }
 
   void EvalCond(ScriptCond cond, Actor mob, GameState gs)
