@@ -1,10 +1,10 @@
+; Basic villager dialogue
 (cond
-  (
-    (= MET_PLAYER true)
-    (say (pick ("How are your adventurers going?" "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!")))
-  )
-  (
-    else
+  
+  ((= MET_PLAYER true) ; pick from a couple different lines to display if we've met the player
+    (say (pick ("How are your adventurers going?" "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!"))))
+
+  (else 
     (
       (say "Another adventurer come to town huh? You aren't the first, and you probably won't be the last...")
 		  (set MET_PLAYER true)

@@ -79,6 +79,11 @@ class ScriptScanner(string src)
       case '"':
         String();
         break;
+      case ';':
+        // We're at a comment so skip to the end of the line
+        while (Peek() != '\n' && !IsAtEnd())
+          Advance();
+        break;
       case ' ':
       case '\r':
       case '\t':
