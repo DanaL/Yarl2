@@ -540,19 +540,20 @@ class DialogueLoader
 
   object CheckVal(string name, Actor mob, GameState gs)
   {
-    if (name == "MET_PLAYER")
+    switch (name)
     {
-      if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
-        return stat.Curr != 0;
-      else 
-        return false;
-    }
-    else if (name == "PLAYER_DEPTH")
-    {
-      return gs.Player.Stats[Attribute.Depth].Max;
-    }
-
-    throw new Exception($"Unknown variable {name}");
+      case "MET_PLAYER":
+        if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
+          return stat.Curr != 0;
+        else
+          return false;
+      case "PLAYER_DEPTH":
+        return gs.Player.Stats[Attribute.Depth].Max;
+      case "DIALOGUE_STATE":
+        return mob.Stats.TryGetValue(Attribute.DialogueState, out var dialogueState) ? dialogueState.Curr : 0;
+      default:
+        throw new Exception($"Unknown variable {name}");
+    }    
   }
 
   static string DoMadLibs(string s, GameState gs)
@@ -609,6 +610,10 @@ class DialogueLoader
     else if (Expr is ScriptBool boolean)
     {
       return boolean;
+    }
+    else if (Expr is ScriptNumber number)
+    {
+      return number;
     }
     else if (Expr is ScriptSay say)
     {
@@ -702,18 +707,31 @@ class DialogueLoader
   // but I imagine that'll change 
   void EvalSet(ScriptSet set, Actor mob, GameState gs)
   {
+    ScriptExpr result;
+    Stat? stat;
+
     switch (set.Name)
     {
       case "MET_PLAYER":
-        ScriptExpr result = Eval(set.Value, mob, gs);
+        result = Eval(set.Value, mob, gs);
         if (result is not ScriptBool boolean)
           throw new Exception("Expected boolean value for setting MET_PLAYER");
 
         int val = boolean.Value ? 1 : 0;
-        if (mob.Stats.TryGetValue(Attribute.MetPlayer, out var stat))
+        if (mob.Stats.TryGetValue(Attribute.MetPlayer, out stat))
           stat.SetMax(val);
         else
           mob.Stats.Add(Attribute.MetPlayer, new Stat(val));
+        break;
+      case "DIALOGUE_STATE":
+        result = Eval(set.Value, mob, gs);
+        if (result is not ScriptNumber number)
+          throw new Exception("Expected number value for setting DIALOGUE_STATE");
+
+        if (mob.Stats.TryGetValue(Attribute.DialogueState, out stat))
+          stat.SetMax(number.Value);
+        else
+          mob.Stats.Add(Attribute.DialogueState, new Stat(number.Value));
         break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");

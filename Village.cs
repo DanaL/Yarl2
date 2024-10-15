@@ -259,6 +259,7 @@ class Village
     veteran.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     veteran.Traits.Add(new NamedTrait());
     veteran.Traits.Add(new VillagerTrait());
+    veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
     veteran.MoveStrategy = new WallMoveStrategy();
     veteran.SetBehaviour(new VeteranBehaviour());

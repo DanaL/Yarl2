@@ -581,6 +581,22 @@ class VeteranBehaviour : IBehaviour, IDialoguer
 
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialoguer = new DialogueLoader(scriptFile);
+
+    return (dialoguer.Dialogue(mob, gs), []);
+  }
+
+  public (Action, Inputer?) CChat(Mob actor, GameState gameState)
+  {
+    var acc = new Dialoguer(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CCurrentText(Mob mob, GameState gs)
+  {
     var sb = new StringBuilder();
     List<(string, char)> opts = [];
 
