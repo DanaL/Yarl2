@@ -21,6 +21,7 @@ enum TokenType
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
+  OPTION,
   EOF
 }
 
@@ -119,6 +120,7 @@ class ScriptScanner(string src)
       "cond" => TokenType.COND,
       "and" => TokenType.AND,
       "or" => TokenType.OR,
+      "option" => TokenType.OPTION,
       _ => TokenType.IDENTIFIER
     };
 
@@ -214,6 +216,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.COND => CondExpr(),
       TokenType.AND => AndExpr(),
       TokenType.OR => OrExpr(),
+      TokenType.OPTION => OptionExpr(),
       _ => ListExpr(),
     };
   }
@@ -232,6 +235,56 @@ class ScriptParser(List<ScriptToken> tokens)
     return list;
   }
 
+  ScriptOption OptionExpr()
+  {
+    Consume(TokenType.OPTION);
+
+    string str;
+    if (Check(TokenType.STRING))
+    {
+      str = Peek().Lexeme;
+      Advance();
+    }
+    else
+    {
+      throw new Exception("Expected text for option.");
+    }
+
+    string lit;
+    if (Check(TokenType.IDENTIFIER))
+    {
+      lit = Peek().Lexeme;
+      Advance();
+    }
+    else
+    {
+      throw new Exception("Expected identifier for option.");
+    }
+
+    if (IsAtEnd())
+      throw new Exception("Unexpected end of option expression.");
+
+    string amt;
+    TokenType type = Peek().Type;
+    if (type == TokenType.RIGHT_PAREN)
+    {
+      return new ScriptOption(str, lit, "");
+    }
+    else if (type == TokenType.IDENTIFIER || type == TokenType.NUMBER)
+    {
+      amt = Peek().Lexeme;
+      Advance();
+    }    
+    else
+    {
+      throw new Exception("Expected litereal or number in option expression.");
+    }
+
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptOption(str, lit, amt);
+  }
+  
   ScriptAnd AndExpr()
   {
     Consume(TokenType.AND);
@@ -515,15 +568,25 @@ class ScriptNumber(int val) : ScriptAtomic
   public int Value { get; set; } = val;
 }
 
-class ScriptVoid : ScriptExpr { }
+class ScriptVoid : ScriptAtomic { }
+
+class ScriptOption(string text, string type, string amt) : ScriptExpr
+{
+  public string Text { get; set; } = text;
+  public string Type { get; set; } = type;
+  public string Amount { get; set; } = amt;
+}
 
 class DialogueScript(ScriptExpr script)
 {
-  public ScriptExpr Script { get; set; } = script;
+  public ScriptExpr Script { get; set; } = script;  
 }
+
+record DialogueOption(string Text, char Ch, string Type, string Amount);
 
 class DialogueLoader
 {
+  public List<DialogueOption> Options = [];
   DialogueScript Script { get; set; }
   StringBuilder Sb { get; set; }
 
@@ -538,7 +601,7 @@ class DialogueLoader
     Sb = new StringBuilder();
   }
 
-  object CheckVal(string name, Actor mob, GameState gs)
+  static object CheckVal(string name, Actor mob, GameState gs)
   {
     switch (name)
     {
@@ -551,16 +614,23 @@ class DialogueLoader
         return gs.Player.Stats[Attribute.Depth].Max;
       case "DIALOGUE_STATE":
         return mob.Stats.TryGetValue(Attribute.DialogueState, out var dialogueState) ? dialogueState.Curr : 0;
+      case "PLAYER_WALLET":
+        return gs.Player.Inventory.Zorkmids;
       default:
         throw new Exception($"Unknown variable {name}");
     }    
   }
 
-  static string DoMadLibs(string s, GameState gs)
+  static string DoMadLibs(string s, Actor mob, GameState gs)
   {
     if (s.Contains("#TOWN_NAME"))
     {
       s = s.Replace("#TOWN_NAME", gs.Town.Name);
+    }
+
+    if (s.Contains("#NPC_NAME"))
+    {
+      s = s.Replace("#NPC_NAME", mob.FullName);
     }
 
     if (s.Contains("#EARLY_DENIZEN"))
@@ -577,6 +647,8 @@ class DialogueLoader
 
       s = s.Replace("#EARLY_DENIZEN", monsters.Pluralize());
     }
+
+    s = s.Replace(@"\n", Environment.NewLine);
 
     return s;
   }
@@ -603,7 +675,7 @@ class DialogueLoader
     }
     else if (Expr is ScriptString str)
     {
-      string s = DoMadLibs(str.Value, gs);
+      string s = DoMadLibs(str.Value, mob, gs);
 
       result = new ScriptString(s);
     }
@@ -641,6 +713,10 @@ class DialogueLoader
     {
       foreach (var item in list.Items)
         Eval(item, mob, gs);
+    }
+    else if (Expr is ScriptOption opt)
+    {
+      EvalOption(opt, mob, gs);
     }
     
     return result;
@@ -815,6 +891,14 @@ class DialogueLoader
           break;
         }
       }
+  }
+
+  void EvalOption(ScriptOption opt, Actor mob, GameState gs)
+  {
+    char ch = (char) ('a' + Options.Count);    
+    string s = DoMadLibs(opt.Text, mob, gs);
+
+    Options.Add(new DialogueOption(s, ch, opt.Type, opt.Amount));
   }
 
   public string Dialogue(Actor mob, GameState gs)

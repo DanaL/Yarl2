@@ -584,7 +584,10 @@ class VeteranBehaviour : IBehaviour, IDialoguer
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
     var dialoguer = new DialogueLoader(scriptFile);
 
-    return (dialoguer.Dialogue(mob, gs), []);
+    string txt = dialoguer.Dialogue(mob, gs);
+    List<(string, char)> opts = dialoguer.Options.Select(o => (o.Text, o.Ch)).ToList();
+
+    return (txt, opts);
   }
 
   public (Action, Inputer?) CChat(Mob actor, GameState gameState)

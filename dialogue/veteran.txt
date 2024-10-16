@@ -1,16 +1,37 @@
-(cond
-  ( ; basic chat state
-    (= DIALOGUE_STATE 0) 
-    ( 
-      (say "I used to be an adventurer like you! Sure the top floors of the dungeon are all #EARLY_DENIZEN and rats, but then things get a lot worse.")
-      (set DIALOGUE_STATE 1)
+
+(cond 
+  ((> DIALOGUE_STATE 1)  ; the veteran is dispensing advice
+    (say "Never drink water. Fish pee in there."))
+  (else 
+    (
+      ; first, select the blurb
+      (cond
+        ((= MET_PLAYER false) 
+          ( 
+            (say "I used to be an adventurer like you! Sure the top floors of the dungeon are all #EARLY_DENIZEN and rats, but then things get a lot worse.")
+            (set MET_PLAYER true)
+          )
+        )
+        ( 
+        else
+          (say "Foo blah")
+        )
+
+        ;((<= PLAYER_DEPTH 2) (say "Some free advice: grind around on the first few floors and save up enough for your retirement!"))
+        ;(else (say "You've been HOW deep? The horrors that await you..."))
+      )
+
+      ; then check if the player has enough money to buy the veteran a drink
+      (cond
+        ((>= PLAYER_WALLET 2) 
+          (
+            (say "\n\n")
+            (say (pick ("Buy me a drink and I'll repay you with wisdom." "For a taste of your whiskey, I'll give you some advice.")))
+            (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" SPEND 2)
+            (option "Gamble with #NPC_NAME." SPEND)
+          )
+        )
+      )
     )
   )
-  ( 
-    (= DIALOGUE_STATE 1)
-    (say "Foo blah")
-  )
-
-  ;((<= PLAYER_DEPTH 2) (say "Some free advice: grind around on the first few floors and save up enough for your retirement!"))
-  ;(else (say "You've been HOW deep? The horrors that await you..."))
 )
