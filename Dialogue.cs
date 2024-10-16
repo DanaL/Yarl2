@@ -600,6 +600,20 @@ class DialogueInterpreter
     return Sb.ToString();
   }
 
+  static Actor? Partner(Actor mob, GameState gs)
+  {
+    foreach (var fact in gs.Facts)
+    {
+      if (fact is RelationshipFact rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
+      {
+        ulong otherID = rel.Person1 == mob.ID ? rel.Person2 : rel.Person1;
+        return (Actor?)gs.ObjDb.GetObj(otherID);
+      }
+    }
+
+    return null;
+  }
+
   static object CheckVal(string name, Actor mob, GameState gs)
   {
     switch (name)
@@ -615,6 +629,22 @@ class DialogueInterpreter
         return mob.Stats.TryGetValue(Attribute.DialogueState, out var dialogueState) ? dialogueState.Curr : 0;
       case "PLAYER_WALLET":
         return gs.Player.Inventory.Zorkmids;
+      case "PARTNER_NAME":
+        Actor? partner = Partner(mob, gs);
+        string partnerName;
+        if (partner is null)
+          partnerName = "";
+        else
+          partnerName = partner.Name.Capitalize();        
+        return partnerName;
+      case "DUNGEON_DIR":
+        Loc dungoenLoc = Loc.Nowhere;
+        foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
+        {
+          if (fact.Desc == "Dungeon Entrance")
+            dungoenLoc = fact.Loc;
+        }
+        return Util.RelativeDir(mob.Loc, dungoenLoc);
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -645,6 +675,16 @@ class DialogueInterpreter
       }
 
       s = s.Replace("#EARLY_DENIZEN", monsters.Pluralize());
+    }
+
+    if (s.Contains("#PARTNER_NAME"))
+    {
+      s = s.Replace("#PARTNER_NAME", CheckVal("PARTNER_NAME", mob, gs).ToString());
+    }
+
+    if (s.Contains("#DUNGEON_DIR"))
+    {
+      s = s.Replace("#DUNGEON_DIR", CheckVal("DUNGEON_DIR", mob, gs).ToString());
     }
 
     s = s.Replace(@"\n", Environment.NewLine);

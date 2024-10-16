@@ -738,7 +738,7 @@ class MayorBehaviour : NPCBehaviour
   }
 }
 
-class WidowerBehaviour: IBehaviour, IDialoguer
+class WidowerBehaviour: NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
@@ -774,7 +774,7 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
   }
 
-  public Action CalcAction(Mob actor, GameState gs)
+  public override Action CalcAction(Mob actor, GameState gs)
   {
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
     {
@@ -837,30 +837,6 @@ class WidowerBehaviour: IBehaviour, IDialoguer
     }
 
     return 0;
-  }
-
-  public (Action, Inputer) Chat(Mob priest, GameState gs)
-  {
-    var acc = new Dialoguer(priest, gs);
-    var action = new CloseMenuAction(gs, 1.0);
-
-    return (action, acc);
-  }
-
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
-  {
-    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialogue = new DialogueInterpreter();
-
-    return (dialogue.Run(scriptFile, mob, gs), []);
-  }
-
-  public (Action, Inputer?) CChat(Mob actor, GameState gameState)
-  {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
   }
 
   public (string, List<(string, char)>) CCurrentText(Mob mob, GameState gs)

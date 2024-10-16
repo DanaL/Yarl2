@@ -1,13 +1,24 @@
 ﻿(cond
-	(
-		(and (= MET_PLAYER true) (= DUNGEON_DEPTH 0))
-		(say "Foo")
+	((= DIALOGUE_STATE 0) ; meeting the player
+		((say "Oh? Are you also an adventurer? #PARTNER_NAME believed too they could prevail in the ruins.")
+			(option "Who is #PARTNER_NAME?" (set DIALOGUE_STATE 1))
+			(option "Where are these ruins?" (set DIALOGUE_STATE 2))
+		)
 	)
 
-	(
-		(or (>= PLAYER_DEPTH 2) (= MET_PLAYER false))
-		(say "Blah")
+	((= DIALOGUE_STATE 1) ; asked who the partner is
+		((say (pick 
+						("#PARTNER_NAME? They came to #TOWN_NAME seeking fame and glory in adventure. We danced in the tavern and walked together under the stars. #PARTNER_NAME said we would see the sights of Yendor together.\nIf you find them, please help them return to me."
+							"They are the most fearless soul I've known! #PARTNER_NAME arrived in #TOWN_NAME, heard the tales of the ruins and the dangers within. They simply set their jaw and declared that they would drive away the darkness.\n\nHow brave! How dreamy!")
+					))
+			(option "Where are these ruins?" (set DIALOGUE_STATE 2))
+		)
 	)
 
-	(else (say "..."))
+	((= DIALOGUE_STATE 2) ; asked where the ruins are
+		(
+			(say "#PARTNER_NAME strode off to the #DUNGEON_DIR. Oh how resolute, how heroic they looked! The sun glinted on their spear tip, the wind tousled their hair. I hope they return to me soon.")
+			(option "Who is #PARTNER_NAME?" (set DIALOGUE_STATE 1))
+		)
+	)
 )
