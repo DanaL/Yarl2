@@ -21,7 +21,7 @@ enum TokenType
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
-  OPTION,
+  OPTION, SPEND,
   EOF
 }
 
@@ -121,6 +121,7 @@ class ScriptScanner(string src)
       "and" => TokenType.AND,
       "or" => TokenType.OR,
       "option" => TokenType.OPTION,
+      "spend" => TokenType.SPEND,
       _ => TokenType.IDENTIFIER
     };
 
@@ -190,11 +191,9 @@ class ScriptParser(List<ScriptToken> tokens)
   readonly List<ScriptToken> Tokens = tokens;
   int Current;
 
-  public DialogueScript Parse()
-  {
-    ScriptExpr script = NonAtomic();
-
-    return new DialogueScript(script);
+  public ScriptExpr Parse()
+  {    
+    return NonAtomic();
   }
 
   ScriptExpr NonAtomic()
@@ -217,8 +216,38 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.AND => AndExpr(),
       TokenType.OR => OrExpr(),
       TokenType.OPTION => OptionExpr(),
+      TokenType.SPEND => SpendExpr(),
       _ => ListExpr(),
     };
+  }
+
+  ScriptExpr Expr()
+  {
+    switch (Peek().Type)
+    {
+      case TokenType.LEFT_PAREN:
+        return NonAtomic();
+      case TokenType.STRING:
+        string val = Tokens[Current].Lexeme;
+        Advance();
+        return new ScriptString(val);
+      case TokenType.IDENTIFIER:
+        string name = Tokens[Current].Lexeme;
+        Advance();
+        return new ScriptLiteral(name);
+      case TokenType.TRUE:
+        Advance();
+        return new ScriptBool(true);
+      case TokenType.FALSE:
+        Advance();
+        return new ScriptBool(false);
+      case TokenType.NUMBER:
+        int number = int.Parse(Tokens[Current].Lexeme);
+        Advance();
+        return new ScriptNumber(number);
+      default:
+        throw new Exception($"Unexpected token: {Peek().Type}");
+    }
   }
 
   ScriptList ListExpr()
@@ -239,52 +268,42 @@ class ScriptParser(List<ScriptToken> tokens)
   {
     Consume(TokenType.OPTION);
 
-    string str;
-    if (Check(TokenType.STRING))
-    {
-      str = Peek().Lexeme;
-      Advance();
-    }
-    else
-    {
+    if (!Check(TokenType.STRING))
       throw new Exception("Expected text for option.");
-    }
+    
+    string str = Peek().Lexeme;
+    Advance();
+    
+    ScriptExpr expr = Expr();
 
-    string lit;
-    if (Check(TokenType.IDENTIFIER))
+    if (expr is ScriptAtomic)
+      throw new Exception("Cannot have atomic expr as action for option.");
+    
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptOption(str, expr);
+  }
+  
+  ScriptSpend SpendExpr()
+  {
+    Consume(TokenType.SPEND);
+
+    int amount;
+    if (Check(TokenType.NUMBER))
     {
-      lit = Peek().Lexeme;
+      amount = int.Parse(Peek().Lexeme);
       Advance();
     }
     else
     {
-      throw new Exception("Expected identifier for option.");
-    }
-
-    if (IsAtEnd())
-      throw new Exception("Unexpected end of option expression.");
-
-    string amt;
-    TokenType type = Peek().Type;
-    if (type == TokenType.RIGHT_PAREN)
-    {
-      return new ScriptOption(str, lit, "");
-    }
-    else if (type == TokenType.IDENTIFIER || type == TokenType.NUMBER)
-    {
-      amt = Peek().Lexeme;
-      Advance();
-    }    
-    else
-    {
-      throw new Exception("Expected litereal or number in option expression.");
+      throw new Exception("Expected number in spend expression");
     }
 
     Consume(TokenType.RIGHT_PAREN);
 
-    return new ScriptOption(str, lit, amt);
+    return new ScriptSpend(amount);
   }
-  
+
   ScriptAnd AndExpr()
   {
     Consume(TokenType.AND);
@@ -434,35 +453,6 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptGive(gift, blurb);
   }
 
-  ScriptExpr Expr()
-  {    
-    switch (Peek().Type)
-    {
-      case TokenType.LEFT_PAREN:
-        return NonAtomic();      
-      case TokenType.STRING:
-        string val = Tokens[Current].Lexeme;
-        Advance();
-        return new ScriptString(val);
-      case TokenType.IDENTIFIER:
-        string name = Tokens[Current].Lexeme;
-        Advance();
-        return new ScriptLiteral(name);
-      case TokenType.TRUE:
-        Advance();
-        return new ScriptBool(true);
-      case TokenType.FALSE:
-        Advance();
-        return new ScriptBool(false);
-      case TokenType.NUMBER:
-        int number = int.Parse(Tokens[Current].Lexeme);
-        Advance();
-        return new ScriptNumber(number);
-      default:
-        throw new Exception($"Unexpected token: {Peek().Type}");
-    }   
-  }
-
   ScriptToken Advance()
   {
     if (!IsAtEnd())
@@ -570,35 +560,44 @@ class ScriptNumber(int val) : ScriptAtomic
 
 class ScriptVoid : ScriptAtomic { }
 
-class ScriptOption(string text, string type, string amt) : ScriptExpr
+class ScriptOption(string text, ScriptExpr expr) : ScriptExpr
 {
   public string Text { get; set; } = text;
-  public string Type { get; set; } = type;
-  public string Amount { get; set; } = amt;
+  public ScriptExpr Expr { get; set; } = expr;  
 }
 
-class DialogueScript(ScriptExpr script)
+class ScriptSpend(int amount) : ScriptExpr
 {
-  public ScriptExpr Script { get; set; } = script;  
+  public int Amount { get; set; } = amount;
 }
 
-record DialogueOption(string Text, char Ch, string Type, string Amount);
+record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 
-class DialogueLoader
+class DialogueInterpreter
 {
   public List<DialogueOption> Options = [];
-  DialogueScript Script { get; set; }
-  StringBuilder Sb { get; set; }
+  StringBuilder Sb { get; set; } = new StringBuilder();
 
-  public DialogueLoader(string filename)
+  public DialogueInterpreter() { }
+
+  public string Run(string filename, Actor mob, GameState gs)
   {
     var txt = File.ReadAllText($"dialogue/{filename}");
     var scanner = new ScriptScanner(txt);
     var tokens = scanner.ScanTokens();
     var parser = new ScriptParser(tokens);
-    Script = parser.Parse();
 
-    Sb = new StringBuilder();
+    ScriptExpr expr = parser.Parse();
+    Eval(expr, mob, gs);
+
+    return Sb.ToString();
+  }
+
+  public string Run(ScriptExpr expr, Actor mob, GameState gs)
+  {
+    Eval(expr, mob, gs);
+
+    return Sb.ToString();
   }
 
   static object CheckVal(string name, Actor mob, GameState gs)
@@ -718,7 +717,11 @@ class DialogueLoader
     {
       EvalOption(opt, mob, gs);
     }
-    
+    else if (Expr is ScriptSpend spend)
+    {
+      EvalSpend(spend.Amount, gs);
+    }
+
     return result;
   }
 
@@ -895,16 +898,15 @@ class DialogueLoader
 
   void EvalOption(ScriptOption opt, Actor mob, GameState gs)
   {
-    char ch = (char) ('a' + Options.Count);    
+    char ch = (char) ('a' + Options.Count);
     string s = DoMadLibs(opt.Text, mob, gs);
 
-    Options.Add(new DialogueOption(s, ch, opt.Type, opt.Amount));
+    Options.Add(new DialogueOption(s, ch, opt.Expr));
   }
 
-  public string Dialogue(Actor mob, GameState gs)
+  static void EvalSpend(int amount, GameState gs)
   {
-    Eval(Script.Script, mob, gs);
-    
-    return Sb.ToString();
+    int purse = gs.Player.Inventory.Zorkmids;
+    gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
   }
 }

@@ -390,46 +390,21 @@ class VillagePupBehaviour : IBehaviour
   }
 }
 
-class PriestBehaviour : IBehaviour, IDialoguer
+class PriestBehaviour : NPCBehaviour
 {
   DateTime _lastIntonation = new(1900, 1, 1);
 
-  public Action CalcAction(Mob actor, GameState gameState)
+  public override Action CalcAction(Mob actor, GameState gameState)
   {
+    Action action = base.CalcAction(actor, gameState);
     if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
     {
       _lastIntonation = DateTime.Now;
-
-      return new PassAction()
-      {
-        Actor = actor,
-        GameState = gameState,
-        Quip = "Praise be to Huntokar!"
-      };
+      action.Quip = "Praise be to Huntokar!";
     }
-    else
-    {
-      return new PassAction();
-    }
+
+    return action;
   }
-
-  public (Action, Inputer) Chat(Mob priest, GameState gs)
-  {
-    var acc = new Dialoguer(priest, gs);
-    var action = new CloseMenuAction(gs, 1.0);
-
-    return (action, acc);
-  }
-
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
-  {
-    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialogue = new DialogueInterpreter();
-
-    return (dialogue.Run(scriptFile, mob, gs), []);
-  }
-
-  public void SelectOption(Mob actor, char opt, GameState gs) { }
 }
 
 class SmithBehaviour : IBehaviour
@@ -560,7 +535,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
 {
   List<DialogueOption> Options { get; set; } = [];
 
-  public Action CalcAction(Mob actor, GameState gameState)
+  public virtual Action CalcAction(Mob actor, GameState gameState)
   {
     if (gameState.Rng.Next(3) == 0)
     {
@@ -606,12 +581,12 @@ class NPCBehaviour : IBehaviour, IDialoguer
   }
 }
 
-class MayorBehaviour : IBehaviour, IDialoguer
+class MayorBehaviour : NPCBehaviour
 {
   Stack<Loc> _path = [];
   DateTime _lastBark = new(1900, 1, 1);
 
-  public Action CalcAction(Mob actor, GameState gameState)
+  public override Action CalcAction(Mob actor, GameState gameState)
   {
     if (_path.Count > 0)
     {
@@ -761,24 +736,6 @@ class MayorBehaviour : IBehaviour, IDialoguer
     }
     while (true);
   }
-
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
-  {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
-  }
-
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
-  {
-    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialogue = new DialogueInterpreter();
-
-    return (dialogue.Run(scriptFile, mob, gs), []);
-  }
-
-  public void SelectOption(Mob actor, char opt, GameState gs) { }  
 }
 
 class WidowerBehaviour: IBehaviour, IDialoguer

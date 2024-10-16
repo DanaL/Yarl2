@@ -262,7 +262,7 @@ class Village
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
     veteran.MoveStrategy = new WallMoveStrategy();
-    veteran.SetBehaviour(new VeteranBehaviour());
+    veteran.SetBehaviour(new NPCBehaviour());
 
     var tavernSqs = town.Tavern.ToList();
     do
@@ -292,7 +292,7 @@ class Village
     villager.Loc = LocForVillager(map, town.Homes[homeID], rng);
     villager.Stats.Add(Attribute.HomeID, new Stat(homeID));
     villager.MoveStrategy = new WallMoveStrategy();
-    villager.SetBehaviour(new Villager1Behaviour());
+    villager.SetBehaviour(new NPCBehaviour());
 
     return villager;
   }
