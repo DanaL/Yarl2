@@ -424,9 +424,9 @@ class PriestBehaviour : IBehaviour, IDialoguer
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialoguer = new DialogueLoader(scriptFile);
+    var dialogue = new DialogueInterpreter();
 
-    return (dialoguer.Dialogue(mob, gs), []);
+    return (dialogue.Run(scriptFile, mob, gs), []);
   }
 
   public void SelectOption(Mob actor, char opt, GameState gs) { }
@@ -556,8 +556,10 @@ class GrocerBehaviour : IBehaviour
   }
 }
 
-class VeteranBehaviour : IBehaviour, IDialoguer
+class NPCBehaviour : IBehaviour, IDialoguer
 {
+  List<DialogueOption> Options { get; set; } = [];
+
   public Action CalcAction(Mob actor, GameState gameState)
   {
     if (gameState.Rng.Next(3) == 0)
@@ -582,102 +584,24 @@ class VeteranBehaviour : IBehaviour, IDialoguer
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialoguer = new DialogueLoader(scriptFile);
+    var dialogue = new DialogueInterpreter();
 
-    string txt = dialoguer.Dialogue(mob, gs);
-    List<(string, char)> opts = dialoguer.Options.Select(o => (o.Text, o.Ch)).ToList();
-
+    string txt = dialogue.Run(scriptFile, mob, gs);
+    Options = dialogue.Options;
+    List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
+    
     return (txt, opts);
   }
 
-  public (Action, Inputer?) CChat(Mob actor, GameState gameState)
+  public void SelectOption(Mob mob, char choice, GameState gs)
   {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
-  }
-
-  public (string, List<(string, char)>) CCurrentText(Mob mob, GameState gs)
-  {
-    var sb = new StringBuilder();
-    List<(string, char)> opts = [];
-
-    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var state) || state.Curr == 0)
+    foreach (DialogueOption opt in Options)
     {
-      string monsters = "";
-      foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
+      if (opt.Ch == choice)
       {
-        if (fact.Name == "EarlyDenizen")
-        {
-          monsters = fact.Value;
-          break;
-        }
+        var dialogue = new DialogueInterpreter();
+        dialogue.Run(opt.Expr, mob, gs);
       }
-
-      sb.Append("\"I used to be an adventurer like you! Sure the top floors of the dungeon are all ");
-      sb.Append(monsters.Pluralize());
-      sb.Append(" and rats, but then things get a lot worse.");
-
-      if (gs.Player.Inventory.Zorkmids > 2)
-      {
-        sb.Append("\n\n");
-        sb.Append("Buy me a drink and I'll repay you in wisdom.\"");
-
-        opts.Add(($"Buy {mob.FullName} a drink. ([YELLOW $]2)", 'a'));        
-      }
-      else
-      {
-        sb.Append(" My advice is to take up woodcutting. Or have you considered goat farming?\"");
-      }
-    }
-    else if (state.Curr == 1)
-    {
-      int maxDepth = gs.Player.Stats[Attribute.Depth].Max;
-      if (maxDepth == 0)
-        sb.Append("\"Stock up on torches and maybe a flagon of whiskey before you head into the depths!\"");
-      else if (maxDepth <= 2)
-        sb.Append("\"Some free advice: grind around on the first few floors and save up enough for your retirement!\"");
-      else
-        sb.Append("\"You've been HOW deep? The horrors that await you...\"");
-
-      if (gs.Player.Inventory.Zorkmids > 2)
-      {
-        sb.Append("\n\n");
-        sb.Append("Buy me a drink and I'll repay you in wisdom.\"");
-
-        opts.Add(($"Buy {mob.FullName} a drink. ([YELLOW $]2)", 'a'));
-      }
-    }
-    else if (state.Curr == 2)
-    {
-      sb.Append('"');
-      sb.Append(Advice(gs.Rng));
-      sb.Append('"');
-      mob.Stats[Attribute.DialogueState] = new Stat(1);
-    }
-
-    return (sb.ToString(), opts);
-  }
-
-  // When there's more content in the game, I'll create a proper rumours file
-  static string Advice(Random rng) => rng.Next(6) switch
-  {
-    0 => "Swords aren't so great against skeletons.",
-    1 => "Owlbears definitely inherited the bear hug genes.",
-    2 => "Someone once told me cloakers make their own flocks.",
-    3 => "Mind your torch around wooden structures!",
-    4 => "They say swinelings spread plague.",
-    _ => "Never drink water. Fish pee in there!"
-  };
-
-  public void SelectOption(Mob veteran, char opt, GameState gs)
-  {    
-    if (opt == 'a')
-    {
-      // Buy veteran a drink
-      gs.Player.Inventory.Zorkmids -= 2;
-      veteran.Stats[Attribute.DialogueState] = new Stat(2);
     }
   }
 }
@@ -849,43 +773,12 @@ class MayorBehaviour : IBehaviour, IDialoguer
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialoguer = new DialogueLoader(scriptFile);
+    var dialogue = new DialogueInterpreter();
 
-    return (dialoguer.Dialogue(mob, gs), []);
+    return (dialogue.Run(scriptFile, mob, gs), []);
   }
 
   public void SelectOption(Mob actor, char opt, GameState gs) { }  
-}
-
-// A simple villager who can tell the player a few things about the dungeon
-// and area around the town.
-class Villager1Behaviour : IBehaviour, IDialoguer
-{
-  public Action CalcAction(Mob actor, GameState gameState)
-  {
-    return new PassAction();
-  }
-
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
-  {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
-  }
-
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
-  {
-    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialoguer = new DialogueLoader(scriptFile);
-
-    return (dialoguer.Dialogue(mob, gs), []);
-  }
-
-  public void SelectOption(Mob actor, char opt, GameState gs)
-  {
-    
-  }
 }
 
 class WidowerBehaviour: IBehaviour, IDialoguer
@@ -1000,9 +893,9 @@ class WidowerBehaviour: IBehaviour, IDialoguer
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialoguer = new DialogueLoader(scriptFile);
+    var dialogue = new DialogueInterpreter();
 
-    return (dialoguer.Dialogue(mob, gs), []);
+    return (dialogue.Run(scriptFile, mob, gs), []);
   }
 
   public (Action, Inputer?) CChat(Mob actor, GameState gameState)

@@ -1,7 +1,13 @@
 
 (cond 
-  ((> DIALOGUE_STATE 1)  ; the veteran is dispensing advice
-    (say "Never drink water. Fish pee in there."))
+  ((> DIALOGUE_STATE 0)  ; the veteran is dispensing advice
+    ((say (pick 
+            ("Swords aren't so great against skeletons." "Owlbears definitely inherited the bear hug genes." "Someone once told me cloakers make their own flocks."
+              "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there."
+              "Sometimes dead ends aren't the end of the road.")))
+      (set DIALOGUE_STATE 0)
+    )
+  )
   (else 
     (
       ; first, select the blurb
@@ -14,21 +20,21 @@
         )
         ( 
         else
-          (say "Foo blah")
+          (cond
+            ((= PLAYER_DEPTH 0) (say "Stock up on torches and maybe a flagon of whiskey before you head into the depths."))
+            ((<= PLAYER_DEPTH 2) (say "Some free advice: grind around on the first few floors and save up enough for your retirement like I did."))
+            (else (say "You've been HOW deep? The horrors that await you..."))
+          )
         )
-
-        ;((<= PLAYER_DEPTH 2) (say "Some free advice: grind around on the first few floors and save up enough for your retirement!"))
-        ;(else (say "You've been HOW deep? The horrors that await you..."))
       )
 
-      ; then check if the player has enough money to buy the veteran a drink
+      ; Check if the player has enough money to buy the veteran a drink
       (cond
         ((>= PLAYER_WALLET 2) 
           (
             (say "\n\n")
             (say (pick ("Buy me a drink and I'll repay you with wisdom." "For a taste of your whiskey, I'll give you some advice.")))
-            (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" SPEND 2)
-            (option "Gamble with #NPC_NAME." SPEND)
+            (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" ((spend 2) (set DIALOGUE_STATE 1)))
           )
         )
       )
