@@ -17,7 +17,7 @@ enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING, NUMBER,
-  COND, GIVE, SAY, PICK, SET,
+  COND, GIVE, OFFER, SAY, PICK, SET,
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
@@ -123,6 +123,7 @@ class ScriptScanner(string src)
       "option" => TokenType.OPTION,
       "spend" => TokenType.SPEND,
       "end" => TokenType.END,
+      "offer" => TokenType.OFFER,
       _ => TokenType.IDENTIFIER
     };
 
@@ -219,6 +220,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OPTION => OptionExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
+      TokenType.OFFER => OfferExpr(),
       _ => ListExpr(),
     };
   }
@@ -401,6 +403,18 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptEnd(text);
+  }
+
+  ScriptOffer OfferExpr()
+  {
+    Consume(TokenType.OFFER);
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in Offer expression.");
+    string name = Peek().Lexeme;
+    Advance();
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptOffer(new ScriptLiteral(name));
   }
 
   ScriptPick PickExpr()
@@ -590,6 +604,11 @@ class ScriptSpend(int amount) : ScriptExpr
   public int Amount { get; set; } = amount;
 }
 
+class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
+{
+  public ScriptLiteral Identifier { get; set; } = identifier;
+}
+
 record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 
 class DialogueInterpreter
@@ -678,6 +697,12 @@ class DialogueInterpreter
         if (partner is not null)
          trinketId = TrinketID(partner, gs);
         return gs.Player.Inventory.Contains(trinketId);
+      case "TRINKET":
+        trinketId = ulong.MaxValue;
+        partner = MobPartner(mob, gs);
+        if (partner is not null)
+          trinketId = TrinketID(partner, gs);
+        return trinketId;
       case "TRINKET_NAME":
         trinketId = ulong.MaxValue;
         partner = MobPartner(mob, gs);
@@ -819,6 +844,10 @@ class DialogueInterpreter
     {
       EvalEnd(end, mob, gs);
     }
+    else if (Expr is ScriptOffer offer)
+    {
+      EvalOffer(offer, mob, gs);
+    }
 
     return result;
   }
@@ -939,6 +968,22 @@ class DialogueInterpreter
       Sb.Append('!');
 
       gs.Player.Inventory.Add(item, gs.Player.ID);
+  }
+
+  void EvalOffer(ScriptOffer offer, Actor mob, GameState gs)
+  {
+    ulong itemId = (ulong) CheckVal(offer.Identifier.Name, mob, gs);
+    if (itemId == ulong.MaxValue)
+      throw new Exception($"Unknown item in dialogue: {offer.Identifier.Name}.");
+    
+    Item? item = gs.Player.Inventory.RemoveByID(itemId);
+
+    // I think for now the item is just gone? If I actually implement NPC/monster 
+    // inventories we could put it there.
+    if (item is not null)
+    {
+      gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+    }
   }
 
   ScriptBool EvalAnd(ScriptAnd andExpr, Actor mob, GameState gs)
