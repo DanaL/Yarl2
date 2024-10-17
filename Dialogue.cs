@@ -21,7 +21,7 @@ enum TokenType
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
-  OPTION, SPEND,
+  OPTION, SPEND, END,
   EOF
 }
 
@@ -122,6 +122,7 @@ class ScriptScanner(string src)
       "or" => TokenType.OR,
       "option" => TokenType.OPTION,
       "spend" => TokenType.SPEND,
+      "end" => TokenType.END,
       _ => TokenType.IDENTIFIER
     };
 
@@ -217,6 +218,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OR => OrExpr(),
       TokenType.OPTION => OptionExpr(),
       TokenType.SPEND => SpendExpr(),
+      TokenType.END => EndExpr(),
       _ => ListExpr(),
     };
   }
@@ -389,6 +391,18 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptSay(expr);
   }
 
+  ScriptEnd EndExpr()
+  {
+    Consume(TokenType.END);
+    if (!Check(TokenType.STRING))
+      throw new Exception("Expected string in End expression.");
+    string text = Peek().Lexeme;
+    Advance();
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptEnd(text);
+  }
+
   ScriptPick PickExpr()
   {
     Consume(TokenType.PICK);
@@ -505,6 +519,11 @@ class ScriptSay(ScriptExpr dialogue) : ScriptExpr
   public ScriptExpr Dialogue { get; set; } = dialogue;
 }
 
+class ScriptEnd(string text) : ScriptExpr
+{
+  public string Text { get; set; } = text;
+}
+
 class ScriptBranch(ScriptExpr test, ScriptExpr action) : ScriptExpr
 {
   public ScriptExpr Test { get; set; } = test;
@@ -600,7 +619,20 @@ class DialogueInterpreter
     return Sb.ToString();
   }
 
-  static Actor? Partner(Actor mob, GameState gs)
+  static ulong TrinketID(Actor partner, GameState gs)
+  {
+    foreach (BelongedToFact fact in gs.Facts.OfType<BelongedToFact>())
+    {
+      if (fact.OwnerID == partner.ID)
+      {
+        return fact.ItemID;
+      }
+    }
+
+    return 0;
+  }
+
+  static Actor? MobPartner(Actor mob, GameState gs)
   {
     foreach (var fact in gs.Facts)
     {
@@ -613,9 +645,12 @@ class DialogueInterpreter
 
     return null;
   }
-
+  
   static object CheckVal(string name, Actor mob, GameState gs)
   {
+    Actor? partner;
+    ulong trinketId;
+
     switch (name)
     {
       case "MET_PLAYER":
@@ -630,13 +665,27 @@ class DialogueInterpreter
       case "PLAYER_WALLET":
         return gs.Player.Inventory.Zorkmids;
       case "PARTNER_NAME":
-        Actor? partner = Partner(mob, gs);
+        partner = MobPartner(mob, gs);
         string partnerName;
         if (partner is null)
           partnerName = "";
         else
           partnerName = partner.Name.Capitalize();        
         return partnerName;
+      case "HAS_TRINKET":
+        trinketId = ulong.MaxValue;
+        partner = MobPartner(mob, gs);
+        if (partner is not null)
+         trinketId = TrinketID(partner, gs);
+        return gs.Player.Inventory.Contains(trinketId);
+      case "TRINKET_NAME":
+        trinketId = ulong.MaxValue;
+        partner = MobPartner(mob, gs);
+        if (partner is not null)
+          trinketId = TrinketID(partner, gs);
+        if (gs.ObjDb.GetObj(trinketId) is Item item)        
+          return item.Name;        
+        return "";
       case "DUNGEON_DIR":
         Loc dungoenLoc = Loc.Nowhere;
         foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
@@ -644,7 +693,7 @@ class DialogueInterpreter
           if (fact.Desc == "Dungeon Entrance")
             dungoenLoc = fact.Loc;
         }
-        return Util.RelativeDir(mob.Loc, dungoenLoc);
+        return Util.RelativeDir(mob.Loc, dungoenLoc);      
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -685,6 +734,11 @@ class DialogueInterpreter
     if (s.Contains("#DUNGEON_DIR"))
     {
       s = s.Replace("#DUNGEON_DIR", CheckVal("DUNGEON_DIR", mob, gs).ToString());
+    }
+
+    if (s.Contains("#TRINKET_NAME"))
+    {
+      s = s.Replace(("#TRINKET_NAME"), CheckVal("TRINKET_NAME", mob, gs).ToString());
     }
 
     s = s.Replace(@"\n", Environment.NewLine);
@@ -761,6 +815,10 @@ class DialogueInterpreter
     {
       EvalSpend(spend.Amount, gs);
     }
+    else if (Expr is ScriptEnd end)
+    {
+      EvalEnd(end, mob, gs);
+    }
 
     return result;
   }
@@ -806,6 +864,13 @@ class DialogueInterpreter
       TokenType.GTE => a >= n.Value,
       _ => throw new Exception("Invalid comparison")
     };
+  }
+
+  static void EvalEnd(ScriptEnd end, Actor mob, GameState gs)
+  {
+    string msg = DoMadLibs(end.Text, mob, gs);
+
+    throw new ConversationEnded(msg);
   }
 
   ScriptBool EvallBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
@@ -950,3 +1015,7 @@ class DialogueInterpreter
     gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
   }
 }
+
+// Used when the NPC ends the conversation (probably in response
+// to a dialogue option)
+class ConversationEnded(string message) : Exception(message) { }

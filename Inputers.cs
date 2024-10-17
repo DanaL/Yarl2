@@ -560,19 +560,31 @@ class Dialoguer : Inputer
   {
     if (ch == Constants.ESC || ch == _exitOpt)
     {
-      var msg = new Message("Farewell.", _interlocutor.Loc);
-      _gs.UIRef().AlertPlayer([msg], "", _gs);
-
-      Done = true;
-      Success = true;
+      EndConversation("Farewell.");
     }
     else if (_currOptions.Contains(ch))
     {
-      var dialgoue = (IDialoguer)_interlocutor.Behaviour;
-      dialgoue.SelectOption(_interlocutor, ch, _gs);
+      try
+      {
+        var dialgoue = (IDialoguer)_interlocutor.Behaviour;
+        dialgoue.SelectOption(_interlocutor, ch, _gs);
 
-      WritePopup();
+        WritePopup();
+      }
+      catch (ConversationEnded ce)
+      {
+        EndConversation(ce.Message);
+      }
     }
+  }
+
+  void EndConversation(string text)
+  {
+    var msg = new Message(text, _interlocutor.Loc);
+    _gs.UIRef().AlertPlayer([msg], "", _gs);
+
+    Done = true;
+    Success = true;
   }
 
   void WritePopup()
@@ -582,14 +594,21 @@ class Dialoguer : Inputer
     var sb = new StringBuilder(_interlocutor.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
 
-    var (blurb, opts) = dialgoue.CurrentText(_interlocutor, _gs);
+    string blurb;
+    List<(string, char)> opts;
+    try
+    {
+      (blurb, opts) = dialgoue!.CurrentText(_interlocutor, _gs);
+    }
+    catch (ConversationEnded ce)
+    {
+      EndConversation(ce.Message);
+      return;
+    }
 
     if (blurb == "")
     {
-      Done = true;
-      Success = true;
-      var msg = new Message($"{_interlocutor.FullName.Capitalize()} turns away from you.", _interlocutor.Loc);
-      _gs.UIRef().AlertPlayer([msg], "", _gs);
+      EndConversation($"{_interlocutor.FullName.Capitalize()} turns away from you.");
     }
     else
     {

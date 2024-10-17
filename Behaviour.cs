@@ -576,6 +576,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
       {
         var dialogue = new DialogueInterpreter();
         dialogue.Run(opt.Expr, mob, gs);
+        break;
       }
     }
   }
@@ -1000,7 +1001,7 @@ class WidowerBehaviour: NPCBehaviour
     return ("", []);
   }
 
-  public void SelectOption(Mob mob, char opt, GameState gs)
+  public void SSelectOption(Mob mob, char opt, GameState gs)
   {
     int state;
     if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var attr))
