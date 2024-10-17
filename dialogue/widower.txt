@@ -35,10 +35,16 @@
 					(say "Please, will you return the #TRINKET_NAME to me? It may be my last keepsake of #PARTNER_NAME.")
 			)
 
-			((= DIALOGUE_STATE 4) ; player gave the trinket to the widower
-				(say "Thank you, oh thank you!")
-					
+			(
+				(= DIALOGUE_STATE 4) ; player gave the trinket to the widower
+				(
+					(say "Thank you, oh thank you!")
+					(give MINOR_GIFT "Please, take this. It's small but I must repay you.")
+					(set DIALOGUE_STATE 5)
 				)
+			)
+			(else
+				(say "So #PARTNER_NAME fell in the dungeon? What an evil fate, to perish alone in the darkness. Would that I could have been there with them.")
 			)
 		)
 	)
