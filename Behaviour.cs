@@ -189,7 +189,7 @@ class MonsterBehaviour : IBehaviour
     {
       _lastUse[act.Name] = gs.Turn;
       var txt = $"{mob.FullName.Capitalize()} screams!";
-      return new AoEAction(gs, mob, mob.Loc, "Confused#0DC#0", scream.Radius, txt);
+      return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{scream.DC}#0", scream.Radius, txt);
     }
     else if (act is SummonTrait summon)
     {

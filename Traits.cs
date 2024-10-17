@@ -1815,7 +1815,7 @@ class TraitFactory
         };
       case "Sword":
         return new SwordTrait();
-      case "Confused":
+      case "Confused":        
         return new ConfusedTrait()
         {
           OwnerID = ulong.Parse(pieces[1]),
