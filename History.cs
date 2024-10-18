@@ -35,31 +35,12 @@ class Fact
     var pieces = txt.Split('#');
 
     switch (pieces[0])
-    {
-      case "BelongedToFact":
-        return new BelongedToFact()
-        {
-          ItemID = ulong.Parse(pieces[1]),
-          OwnerID = ulong.Parse(pieces[2])
-        };
+    {      
       case "LocationFact":
         return new LocationFact()
         {
           Loc = Loc.FromStr(pieces[1]),
           Desc = pieces[2]
-        };
-      case "FallenAdventurerFact":
-        return new FallenAdventurerFact()
-        {
-          ID = ulong.Parse(pieces[1]),
-          Loc = Loc.FromStr(pieces[2])
-        };
-      case "RelationshipFact":
-        return new RelationshipFact()
-        {
-          Person1 = ulong.Parse(pieces[1]),
-          Person2 = ulong.Parse(pieces[2]),
-          Desc = pieces[3]
         };
       default:
         return new SimpleFact()
@@ -79,37 +60,12 @@ class SimpleFact : Fact
   public override string ToString() => $"SimpleFact#{Name}#{Value}";
 }
 
-class BelongedToFact : Fact
-{
-  public ulong ItemID { get; set; }
-  public ulong OwnerID { get; set; }
-
-  public override string ToString() => $"BelongedToFact#{ItemID}#{OwnerID}";
-}
-
 class LocationFact : Fact
 {
   public Loc Loc { get; set; }
   public string Desc { get; set; } = "";
 
   public override string ToString() => $"LocationFact#{Loc}#{Desc}";
-}
-
-class FallenAdventurerFact : Fact
-{
-  public ulong ID { get; set; }
-  public Loc Loc { get; set; }
-
-  public override string ToString() => $"FallenAdventurerFact#{ID}#{Loc}";
-}
-
-class RelationshipFact : Fact
-{
-  public ulong Person1 { get; set; }
-  public ulong Person2 { get; set; }
-  public string Desc { get; set; } = "";
-
-  public override string ToString() => $"RelationshipFact#{Person1}#{Person2}#{Desc}";
 }
 
 // class to accumulate a list of facts about the world as historical

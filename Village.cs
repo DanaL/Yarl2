@@ -391,16 +391,17 @@ class Village
     objDb.Add(vet);
     objDb.AddToLoc(vet.Loc, vet);
 
-    FallenAdventurerFact? fallen = null;
-    foreach (var fact in history.Facts)
+    ulong fallenAdventurerID = ulong.MaxValue;
+    foreach (GameObj obj in objDb.Objs.Values)
     {
-      if (fact is FallenAdventurerFact fa)
+      if (obj.HasTrait<FallenAdventurerTrait>())
       {
-        fallen = fa;
+        fallenAdventurerID = obj.ID;
+        break;
       }
     }
 
-    if (fallen is not null)
+    if (fallenAdventurerID != ulong.MaxValue)
     {
       // Add a villager who knew the fallen adventurer. (Eventually this will
       // be a random chance of happening since we'll have several fallen 
@@ -409,9 +410,7 @@ class Village
       var widower = GenerateWidower(map, town, ng, rng);
       objDb.Add(widower);
       objDb.AddToLoc(widower.Loc, widower);
-
-      history.Facts.Add(new RelationshipFact() { Person1 = widower.ID, Person2 = fallen.ID, Desc = "romantic" });
-    }
-    
+      widower.Traits.Add(new RelationshipTrait() { Person1ID = widower.ID, Person2ID = fallenAdventurerID, Label = "romantic" });
+    }    
   }
 }

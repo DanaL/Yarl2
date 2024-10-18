@@ -353,6 +353,11 @@ class DividerTrait : Trait
   public override string AsText() => "Divider";
 }
 
+class FallenAdventurerTrait : Trait
+{
+  public override string AsText() => "FallenAdventurer";
+}
+
 class FinalBossTrait : Trait
 {
   public override string AsText() => "FinalBoss";
@@ -386,6 +391,13 @@ class GrantsTrait : Trait
       obj.Traits.Remove(granted);
     }
   }
+}
+
+class OwnsItemTrait : Trait
+{
+  public ulong ItemID { get; set; }
+
+  public override string AsText() => $"OwnsItem#{ItemID}";
 }
 
 class PlantTrait : Trait
@@ -1062,6 +1074,15 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class RelationshipTrait : Trait
+{
+  public ulong Person1ID { get; set; }
+  public ulong Person2ID { get; set; }
+  public string Label { get; set; } = "";
+
+  public override string AsText() => $"Relationship#{Person1ID}#{Person2ID}#{Label}";
+}
+
 class RetributionTrait : Trait
 {
   public DamageType Type {  get; set; }
@@ -1704,6 +1725,8 @@ class TraitFactory
           MinRange = int.Parse(pieces[3]),
           MaxRange = int.Parse(pieces[4])
         };
+      case "FallenAdventurer":
+        return new FallenAdventurerTrait();
       case "Flammable":
         return new FlammableTrait();
       case "Floating":
@@ -1875,6 +1898,11 @@ class TraitFactory
         };
       case "Opaque":
         return new OpaqueTrait();
+      case "OwnsItem":
+        return new OwnsItemTrait()
+        {
+          ItemID = ulong.Parse(pieces[1])
+        };
       case "Paralyzed":
         return new ParalyzedTrait()
         {
@@ -1937,6 +1965,13 @@ class TraitFactory
           ActorID = ownerID,
           Expired = bool.Parse(pieces[3]),
           ExpiresOn = expiresOn
+        };
+      case "Relationship":
+        return new RelationshipTrait()
+        {
+          Person1ID = ulong.Parse(pieces[1]),
+          Person2ID = ulong.Parse(pieces[2]),
+          Label = pieces[3]
         };
       case "ResistBlunt":
         return new ResistBluntTrait();

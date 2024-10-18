@@ -640,12 +640,10 @@ class DialogueInterpreter
 
   static ulong TrinketID(Actor partner, GameState gs)
   {
-    foreach (BelongedToFact fact in gs.Facts.OfType<BelongedToFact>())
+    foreach (Trait trait in partner.Traits)
     {
-      if (fact.OwnerID == partner.ID)
-      {
-        return fact.ItemID;
-      }
+      if (trait is OwnsItemTrait owns)
+        return owns.ItemID;
     }
 
     return 0;
@@ -653,15 +651,14 @@ class DialogueInterpreter
 
   static Actor? MobPartner(Actor mob, GameState gs)
   {
-    foreach (var fact in gs.Facts)
+    foreach (Trait trait  in mob.Traits)
     {
-      if (fact is RelationshipFact rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
+      if (trait is RelationshipTrait relationship)
       {
-        ulong otherID = rel.Person1 == mob.ID ? rel.Person2 : rel.Person1;
-        return (Actor?)gs.ObjDb.GetObj(otherID);
+        return (Actor?)gs.ObjDb.GetObj(relationship.Person2ID);
       }
     }
-
+    
     return null;
   }
   

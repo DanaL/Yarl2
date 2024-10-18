@@ -394,10 +394,9 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = ng.GenerateName(rng.Next(5, 12))
     };
+    adventurer.Traits.Add(new FallenAdventurerTrait());
+    adventurer.Traits.Add(new OwnsItemTrait() { ItemID = trinket.ID });
     objDb.Add(adventurer);
-
-    history.Facts.Add(new FallenAdventurerFact() { ID = adventurer.ID, Loc = loc });
-    history.Facts.Add(new BelongedToFact() { ItemID = trinket.ID, OwnerID = adventurer.ID });
   }
 
   List<(int, int)> FloorsNearWater(Map map, int row, int col, int d)
