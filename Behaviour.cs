@@ -746,308 +746,38 @@ class WidowerBehaviour: NPCBehaviour
   static string PickBark(Mob mob, Random rng)
   {
     int state;
-
     if (mob.Stats.TryGetValue(Attribute.DialogueState, out var stateState))
       state = stateState.Curr;
     else
       state = 0;
 
-    if (state == 7)
+    List<string> barks = [];
+    if (state >= 4)
     {
-      // The player has retrieved the token and the widower is in mourning
-      string txt;
-      if (rng.Next(2) == 0)
-        txt = "I miss you so!";
-      else
-        txt = "Oh why did you have to be an adventurer?";
-
-      return txt;
+      barks.Add("I miss you so!");
+      barks.Add("Oh why did you have to be an adventurer?");
     }
     else
     {
-      int roll = rng.Next(3);
-      if (roll == 0)
-        return "Sigh...";
-      else if (roll == 1)
-        return "Are you safe?";
-      else
-        return "When will you return?";
+      barks.Add("Sigh...");
+      barks.Add("Are you safe?");
+      barks.Add("When will you return?");
     }
+
+    return barks[rng.Next(barks.Count)];
   }
 
   public override Action CalcAction(Mob actor, GameState gs)
   {
+    Action action = base.CalcAction(actor, gs);
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
     {
       _lastBark = DateTime.Now;
-
-      return new PassAction()
-      {
-        Actor = actor,
-        GameState = gs,
-        Quip = PickBark(actor, gs.Rng)
-      };
+      action.Quip = PickBark(actor, gs.Rng);
+      action.Actor = actor;
+      action.GameState = gs;
     }
 
-    // Move to a random adj sq in their home
-    int homeID = actor.Stats[Attribute.HomeID].Curr;
-    var sqs = gs.Town.Homes[homeID];
-    List<Loc> adj = [];
-    foreach (var sq in Util.Adj8Locs(actor.Loc))
-    {
-      var tile = gs.TileAt(sq);
-      if (!gs.ObjDb.Occupied(sq) && (tile.Type == TileType.WoodFloor || tile.Type == TileType.StoneFloor))
-      {
-        adj.Add(sq);
-      }
-    }
-
-    if (adj.Count > 0)
-    {
-      var mv = adj[gs.Rng.Next(adj.Count)];
-      return new MoveAction(gs, actor, mv);
-    }
-    else
-    {
-      return new PassAction();
-    }
-  }
-
-  static Actor? Partner(Mob mob, GameState gs)
-  {
-    foreach (var fact in gs.Facts)
-    {
-      if (fact is RelationshipFact rel && rel.Desc == "romantic" && (rel.Person1 == mob.ID || rel.Person2 == mob.ID))
-      {
-        ulong otherID = rel.Person1 == mob.ID ? rel.Person2 : rel.Person1;
-        return (Actor)gs.ObjDb.GetObj(otherID);
-      }
-    }
-
-    return null;
-  }
-
-  ulong TrinketID(Actor partner, GameState gs)
-  {
-    foreach (BelongedToFact fact in gs.Facts.OfType<BelongedToFact>())
-    {
-      if (fact.OwnerID == partner.ID)
-      {
-        return fact.ItemID;
-      }
-    }
-
-    return 0;
-  }
-
-  public (string, List<(string, char)>) CCurrentText(Mob mob, GameState gs)
-  {
-    var partner = Partner(mob, gs);
-    string name = partner.Name.Capitalize();
-
-    int state;
-    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var stateStat))
-      state = 0;
-    else
-      state = stateStat.Curr;
-
-    ulong trinketID = TrinketID(partner, gs);
-    bool playerHasTrinket = gs.Player.Inventory.Contains(trinketID);
-
-    // Player had the trinket but doesn't seem to have it
-    if ((state == 3 || state == 4) && !playerHasTrinket)
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(6);
-      state = 6;
-    }
-    else if (playerHasTrinket && state == 6)
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(4);
-      state = 4;
-    }
-
-    if (playerHasTrinket && state == 0)
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(3);
-      var item = (Item)gs.ObjDb.GetObj(trinketID);
-      var sb = new StringBuilder();
-      sb.Append("That ");            
-      sb.Append(item.Name);
-      sb.Append("! It belong to my love!\n");
-      sb.Append("Where did you find it?");
-
-      List<(string, char)> options = [];
-      options.Add(("In the ruins.", 'a'));
-      //options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
-
-      return (sb.ToString(), options);
-    }
-    else if (playerHasTrinket && state == 1)
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(3);
-      var item = (Item) gs.ObjDb.GetObj(trinketID);
-      var sb = new StringBuilder();
-      sb.Append("\"You've found ");
-      sb.Append(name);
-      sb.Append("'s ");
-      sb.Append(item.Name);
-      sb.Append("! So...then they fell in the dungeon?\n");
-      sb.Append("Will you give it to me as a keepsake?\"");
-
-      List<(string, char)> options = [];
-      options.Add(($"Hand over the {item.Name.DefArticle()}.", 'a'));
-      options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
-
-      return (sb.ToString(), options);
-    }
-    else if (state == 0)
-    {      
-      var sb = new StringBuilder();
-      sb.Append("\"Oh? Are you also an adventurer? ");
-      sb.Append(name);
-      sb.Append(" believed too they could prevail in the ruins.\"");
-
-      List<(string, char)> options = [];
-      options.Add(($"Who is {name}?", 'a'));
-      options.Add(("Where are these ruins?", 'b'));
-
-      return (sb.ToString(), options);
-    }
-    else if (state == 1)
-    {
-      // Player asked where the ruins were
-      Loc dungoenLoc = Loc.Nowhere;
-      foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
-      {
-        if (fact.Desc == "Dungeon Entrance")
-          dungoenLoc = fact.Loc;
-      }
-      
-      var sb = new StringBuilder();
-      sb.Append('"');
-      sb.Append(name);
-      sb.Append(" strode off to the ");      
-      sb.Append(Util.RelativeDir(mob.Loc, dungoenLoc));
-      sb.Append(". Oh how resolute, heroic, they looked! The sun glinted on their spear tip,");
-      sb.Append(" the wind tousled their hair. I hope they return to me soon.\"");
-
-      List<(string, char)> options = [];
-      options.Add(($"Who is {name}?", 'a'));
-      
-      return (sb.ToString(), options);
-    }
-    else if (state == 2)
-    {
-      // Player asked who the partner was
-      var sb = new StringBuilder();
-
-      if (gs.Rng.NextDouble() < 0.5)
-      {
-        sb.Append('"');
-        sb.Append(name);
-        sb.Append("? They came to ");
-        sb.Append(gs.Town.Name.Capitalize());
-        sb.Append(" seeking fame and glory in adventure. We danced in the tavern and walked together under the stars. ");
-        sb.Append(name);
-        sb.Append(" said would see the sights of Yendor together.\nIf you find them, please help them return to me.\"");
-      }
-      else
-      {
-        sb.Append("\"They are the most fearless soul I've known! ");
-        sb.Append(name);
-        sb.Append(" arrive in ");
-        sb.Append(gs.Town.Name.Capitalize());
-        sb.Append(", heard the tales of the ruins and the dangers within. They simply set their jaw and declared that they would drive away the darkness.\n");
-        sb.Append("\nHow brave! How dreamy!\"");
-      }
-
-      List<(string, char)> options = [];
-      options.Add(("Where are these ruins?", 'a'));
-
-      return (sb.ToString(), options);
-    }
-    else if (state == 4)
-    {
-      var item = (Item)gs.ObjDb.GetObj(trinketID);
-      var sb = new StringBuilder();
-      sb.Append("\"Please give me ");
-      sb.Append(name);
-      sb.Append("'s ");
-      sb.Append(item.Name);
-      sb.Append(" that I may remember them by it!\"");
-
-      List<(string, char)> options = [];
-      options.Add(($"Hand over the {item.Name.DefArticle()}.", 'a'));
-      options.Add(($"Keep the {item.Name.DefArticle()}.", 'b'));
-
-      return (sb.ToString(), options);
-    }
-    else if (state == 5)
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(4);
-      return ("", []);
-    }
-    else if (state == 6)
-    {
-      string txt = "Please retrieve my love's token and bring it to me!";
-      return (txt, []);
-    }
-    else if (state == 7) 
-    {
-      string txt = "Thank you so much, I will treasure it forever!";
-      return (txt, []);
-    }
-
-    return ("", []);
-  }
-
-  public void SSelectOption(Mob mob, char opt, GameState gs)
-  {
-    int state;
-    if (!mob.Stats.TryGetValue(Attribute.DialogueState, out var attr))
-    {
-      mob.Stats.Add(Attribute.DialogueState, new Stat(0));
-      state = 0;
-    }
-    else
-    {
-      state = attr.Curr;
-    }
-
-    if (state == 0 && opt == 'a')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(2);
-    }
-    else if (state == 0 && opt == 'b')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(1);
-    }
-    else if (state == 1 && opt == 'a')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(2);
-    }
-    else if (state == 2 && opt == 'a')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(1);
-    }
-    else if (state == 3 && opt == 'a')
-    {
-      ulong trinketID = TrinketID(Partner(mob, gs), gs);
-      Item trinket = gs.Player.Inventory.RemoveByID(trinketID);
-      mob.Inventory.Add(trinket, mob.ID);
-
-      // TODO: need to give the player a reward!
-
-      // give the trinket to the NPC
-      mob.Stats[Attribute.DialogueState].SetMax(7);
-    }
-    else if (state == 3 && opt == 'b')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(5);
-    }
-    else if (state == 4 && opt == 'b')
-    {
-      mob.Stats[Attribute.DialogueState].SetMax(5);
-    }
+    return action;
   }
 }
