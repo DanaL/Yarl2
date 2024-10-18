@@ -14,7 +14,7 @@
 	; Otherwise
 	(else
 		(
-			(say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid. I have every confidence you'll do better than that last fellow! And before you venture into danger, why not spend some zorkmids in our shops and tavern?")
+			(say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid. I have every confidence you'll do better than that last fellow! Poor sot... And before you venture into danger, why not spend some zorkmids in our shops and tavern?")
 			(give MINOR_GIFT "Here, take this with you!")
 			(set MET_PLAYER true)				
 		)
