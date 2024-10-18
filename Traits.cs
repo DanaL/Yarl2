@@ -1588,498 +1588,174 @@ class WorshiperTrait : Trait
 
 class TraitFactory
 {
-  public static Trait FromText(string text, GameObj? container)
+  private static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
-    var pieces = text.Split('#');
-    var name = pieces[0];
-    string[] digits;
-    ulong expiresOn;
-    ulong ownerID;
-    DamageType dt;
-
-    switch (name)
-    {
-      case "AcidSplash":
-        return new AcidSplashTrait();
-      case "ACMod":
-        return new ACModTrait()
-        {
-          ArmourMod = int.Parse(pieces[1])
-        };
-      case "Adjective":
+    { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
+    { "ACMod", (pieces, gameObj) => new ACModTrait() { ArmourMod = int.Parse(pieces[1]) }},
+    { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
+    { "Allies", (pieces, gameObj) => { var ids = pieces[1].Split(',').Select(ulong.Parse).ToList(); return new AlliesTrait() { IDs = ids }; } },
+    { "Ammo", (pieces, gameObj) =>
       {
-          return new AdjectiveTrait(pieces[1]);
-      }
-      case "Allies":
-        var ids = pieces[1].Split(',').Select(ulong.Parse).ToList();
-        return new AlliesTrait()
-        {
-          IDs = ids
-        };
-      case "Ammo":
         Enum.TryParse(pieces[3], out DamageType ammoDt);
-        return new AmmoTrait()
-        {
-          DamageDie = int.Parse(pieces[1]),
-          NumOfDie = int.Parse(pieces[2]),
-          DamageType = ammoDt,
-          Range = int.Parse(pieces[4])
-        };
-      case "Armour":
-        Enum.TryParse(pieces[1], out ArmourParts part);
-        return new ArmourTrait()
-        {
-          Part = part,
-          ArmourMod = int.Parse(pieces[2]),
-          Bonus = int.Parse(pieces[3])
-        };
-      case "Axe":
-        return new AxeTrait();
-      case "Berzerk":
-        return new BerzerkTrait();
-      case "Cleave":
-        return new CleaveTrait();
-      case "CoinsLoot":
-        return new CoinsLootTrait()
-        {
-          Min = int.Parse(pieces[1]),
-          Max = int.Parse(pieces[2])
-        };
-      case "ConfusingScream":
-        return new ConfusingScreamTrait()
-        {
-          Radius = int.Parse(pieces[1]),
-          DC = int.Parse(pieces[2]),
-          Cooldown = ulong.Parse(pieces[3])
-        };
-      case "Consumable":
-        return new ConsumableTrait();
-      case "Corrosive":
-        return new CorrosiveTrait();
-      case "Countdown":
-        return new CountdownTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          Expired = bool.Parse(pieces[2])
-        };
-      case "Cursed":
-        return new CursedTrait() {};
-      case "Damage":
-        Enum.TryParse(pieces[3], out dt);
-        return new DamageTrait()
-        {
-          DamageDie = int.Parse(pieces[1]),
-          NumOfDie = int.Parse(pieces[2]),
-          DamageType = dt
-        };
-      case "DeathMessage":
-        return new DeathMessageTrait()
-        {
-          Message = pieces[1]
-        };
-      case "DialogueScript":
-        return new DialogueScriptTrait()
-        {
-          ScriptFile = pieces[1]
-        };
-      case "Disguise":
-        return new DisguiseTrait()
-        {
-          Disguise = Glyph.TextToGlyph(pieces[1]),
-          TrueForm = Glyph.TextToGlyph(pieces[2]),
-          DisguiseForm = pieces[3]
-        };
-      case "Dodge":
-        return new DodgeTrait()
-        {
-          Rate = int.Parse(pieces[1])
-        };
-      case "Exhausted":
-        return new ExhaustedTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          ExpiresOn = ulong.Parse(pieces[2])
-        };
-      case "Lame":
-        return new LameTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          ExpiresOn = ulong.Parse(pieces[2])
-        };
-      case "HealAllies":
-        return new HealAlliesTrait()
-        {
-          Cooldown = ulong.Parse(pieces[1])
-        };
-      case "SpellAction":
-        return new SpellActionTrait()
-        {
-          Name = pieces[1],
-          Cooldown = ulong.Parse(pieces[2])
-        };
-      case "RangedSpellAction":      
-        return new RangedSpellActionTrait()
-        {
-          Name = pieces[1],
-          Cooldown = ulong.Parse(pieces[2]),
-          MinRange = int.Parse(pieces[3]),
-          MaxRange = int.Parse(pieces[4])
-        };
-      case "FallenAdventurer":
-        return new FallenAdventurerTrait();
-      case "Flammable":
-        return new FlammableTrait();
-      case "Floating":
-        return new FloatingTrait();
-      case "Flying":
-        return new FlyingTrait();
-      case "Illusion":
-        return new IllusionTrait()
-        {
-          SourceID = ulong.Parse(pieces[1]),
-          ObjID = ulong.Parse(pieces[2])
-        };      
-      case "Immunity":
-        Enum.TryParse(pieces[1], out dt);
-        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
-        return new ImmunityTrait()
-        {
-          Type = dt,
-          ExpiresOn = expiresOn
-        };
-      case "Impale":
-        return new ImpaleTrait();      
-      case "LightSource":
-        if (pieces[1] == "owner")
-          ownerID = container!.ID;
-        else
-          ownerID = ulong.Parse(pieces[1]);
-        return new LightSourceTrait()
-        {
-          OwnerID = ownerID,
-          Radius = int.Parse(pieces[2])
-        };
-      case "LightStep":
-        return new LightStepTrait();
-      case "Melee":
-        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out dt);
-        digits = text.Split('#');
-        return new MobMeleeTrait()
-        {
-          Name = "Melee",
-          DamageDie = int.Parse(digits[1]),
-          DamageDice = int.Parse(digits[2]),
-          MinRange = 1,
-          MaxRange = 1,
-          DamageType = dt
-
-        };      
-      case "Missile":
-        Enum.TryParse(text[(text.LastIndexOf('#') + 1)..], out dt);
-        digits = text.Split('#');
-        return new MobMissileTrait()
-        {
-          Name = "Missile",
-          DamageDie = int.Parse(digits[1]),
-          DamageDice = int.Parse(digits[2]),
-          MinRange = int.Parse(digits[3]),
-          MaxRange = int.Parse(digits[4]),
-          DamageType = dt
-
-        };
-      case "MobMelee":
-        Enum.TryParse(pieces[5], out dt);
-        return new MobMeleeTrait()
-        {
-          MinRange = int.Parse(pieces[1]),
-          MaxRange = int.Parse(pieces[2]),
-          DamageDie = int.Parse(pieces[3]),
-          DamageDice = int.Parse(pieces[4]),
-          DamageType = dt
-        };
-      case "MobMissile":
-        Enum.TryParse(pieces[5], out dt);
-        return new MobMeleeTrait()
-        {
-          MinRange = int.Parse(pieces[1]),
-          MaxRange = int.Parse(pieces[2]),
-          DamageDie = int.Parse(pieces[3]),
-          DamageDice = int.Parse(pieces[4]),
-          DamageType = dt
-        };
-      case "Named":
-        return new NamedTrait();
-      case "OnFire":
-        return new OnFireTrait()
-        {
-          Expired = bool.Parse(pieces[1]),
-          OwnerID = ulong.Parse(pieces[2]),
-          Lifetime = int.Parse(pieces[3])
-        };
-      case "Owned":
-      {
-        return new OwnedTrait()
-        {
-          OwnerIDs = pieces[1].Split(',')
-                              .Select(ulong.Parse).ToList()
-        };
+        return new AmmoTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = ammoDt, Range = int.Parse(pieces[4]) }; 
       }
-      case "Polearm":
-        return new PolearmTrait();
-      case "Resistance":
-        Enum.TryParse(pieces[1], out DamageType rdt);
-        expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
-        ownerID = pieces.Length > 3 ? ulong.Parse(pieces[2]): 0;
-        return new ResistanceTrait()
-        {
-          Type = rdt,
-          ExpiresOn = expiresOn,
-          OwnerID = ownerID
-        };
-      case "Sword":
-        return new SwordTrait();
-      case "Confused":        
-        return new ConfusedTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          DC = int.Parse(pieces[2]),
-          ExpiresOn = ulong.Parse(pieces[3])
-        };
-      case "Divider":
-        return new DividerTrait();
-      case "FinalBoss":
-        return new FinalBossTrait();
-      case "Finesse":
-        return new FinesseTrait();
-      case "Grants":
-        string[] traits = pieces[1].Split(';');
-        return new GrantsTrait()
-        {
-          TraitsGranted = traits
-        };
-      case "Grappled":
-        return new GrappledTrait()
-        {
-          VictimID = ulong.Parse(pieces[1]),
-          GrapplerID = ulong.Parse(pieces[2]),
-          DC = int.Parse(pieces[3])
-        };
-      case "Grappler":
-        return new GrapplerTrait() 
-        {
-          DC = int.Parse(pieces[1])
-        };
-      case "InPit":
-        return new InPitTrait();
-      case "Invisible":      
-        if (pieces[1] == "owner")
-          ownerID = container!.ID;
-        else
-          ownerID = ulong.Parse(pieces[1]);
-        expiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3]);
+    },
+    { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
+      return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
+    },
+    { "Axe", (pieces, gameObj) => new AxeTrait() },
+    { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
+    { "Cleave", (pieces, gameObj) => new CleaveTrait() },
+    { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
+    { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
+    { "ConfusingScream", (pieces, gameObj) => new ConfusingScreamTrait() { Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3]) }},
+    { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
+    { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
+    { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
+    { "Cursed", (pieces, gameObj) => new CursedTrait() },
+    { "Damage", (pieces, gameObj) => {
+      Enum.TryParse(pieces[3], out DamageType dt);
+      return new DamageTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = dt }; }},
+    { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
+    { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
+    { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
+    { "Divider", (pieces, gameObj) => new DividerTrait() },
+    { "Dodge", (pieces, gameObj) => new DodgeTrait() { Rate = int.Parse(pieces[1]) }},
+    { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
+    { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
+    { "Finesse", (pieces, gameObj) => new FinesseTrait() },
+    { "Flammable", (pieces, gameObj) => new FlammableTrait() },
+    { "Floating", (pieces, gameObj) => new FloatingTrait() },
+    { "Flying", (pieces, gameObj) => new FlyingTrait() },
+    { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "Grants", (pieces, gameObj) => new GrantsTrait() { TraitsGranted = pieces[1].Split(';') }},
+    { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
+    { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
+    { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
+    { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjID = ulong.Parse(pieces[2]) } },
+    { "Immunity", (pieces, gameObj) => {
+      Enum.TryParse(pieces[1], out DamageType dt);
+      ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
+      return new ImmunityTrait() { Type = dt, ExpiresOn = expiresOn }; }},
+    { "Impale", (pieces, gameObj) => new ImpaleTrait() },
+    { "InPit", (pieces, gameObj) => new InPitTrait() },
+    { "Invisible", (pieces, gameObj) =>
+      {      
         return new InvisibleTrait()
         {
-          ActorID = ownerID,
+          ActorID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
           Expired = bool.Parse(pieces[2]),
-          ExpiresOn = expiresOn
-        };
-      case "KnockBack":
-        return new KnockBackTrait();
-      case "Levitation":
-        return new LevitationTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          ExpiresOn = ulong.Parse(pieces[2])
-        };
-      case "Metal":
-        return new MetalTrait()
-        {
-          Type = (Metals)int.Parse(pieces[1])
-        };
-      case "Opaque":
-        return new OpaqueTrait();
-      case "OwnsItem":
-        return new OwnsItemTrait()
-        {
-          ItemID = ulong.Parse(pieces[1])
-        };
-      case "Paralyzed":
-        return new ParalyzedTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          DC = int.Parse(pieces[2]),
-          ExpiresOn = ulong.Parse(pieces[3])
-        };
-      case "ParalyzingGaze":
-        return new ParalyzingGazeTrait()
-        {
-          DC = int.Parse(pieces[1])
-        };
-      case "Plant":
-        return new PlantTrait();
-      case "Plural":
-        return new PluralTrait();
-      case "PoisonCoated":
-        return new PoisonCoatedTrait();
-      case "Poisoned":
-        return new PoisonedTrait()
-        {
-          DC = int.Parse(pieces[1]),
-          Strength = int.Parse(pieces[2]),
-          OwnerID = ulong.Parse(pieces[3]),
-          ExpiresOn = ulong.Parse(pieces[4])
-        };
-      case "Poisoner":
-        digits = text.Split('#');
-        return new PoisonerTrait()
-        {
-          DC = int.Parse(digits[1]),
-          Strength = int.Parse(digits[2])
-        };
-      case "PoorLoot":
-        return new PoorLootTrait();
-      case "Rage":
-        return new RageTrait((Actor)container);
-      case "Reach":
-        return new ReachTrait();
-      case "Readable":
-        return new ReadableTrait(pieces[1].Replace("<br/>", "\n"))
-        {
-          OwnerID = ulong.Parse(pieces[2])
-        };
-      case "Recall":
-        return new RecallTrait() 
-        { 
-          ExpiresOn = ulong.Parse(pieces[1]),
-          Expired = bool.Parse(pieces[2])
-        };
-      case "Regeneration":
-        if (pieces[2] == "owner")
-          ownerID = container!.ID;
-        else
-          ownerID = ulong.Parse(pieces[2]);
-        expiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4]);
-        return new RegenerationTrait()
+          ExpiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3])
+      }; }
+    },
+    { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
+    { "LightStep", (pieces, gameObj) => new LightStepTrait() },
+    { "Melee", (pieces, gameObj) => {
+      Enum.TryParse(pieces[3], out DamageType dt);      
+      return new MobMeleeTrait() {
+          Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
+          MinRange = 1, MaxRange = 1, DamageType = dt }; }},
+    { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
+    { "Missile", (pieces, gameObj) => {
+      Enum.TryParse(pieces[5], out DamageType dt);
+      return new MobMissileTrait() {
+          Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
+          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
+    { "MobMelee", (pieces, gameObj) => {
+      Enum.TryParse(pieces[3], out DamageType dt);
+      return new MobMeleeTrait() {
+          Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
+          MinRange = 1, MaxRange = 1, DamageType = dt }; }},
+    { "MobMissile", (pieces, gameObj) => {
+      Enum.TryParse(pieces[5], out DamageType dt);
+      return new MobMissileTrait() {
+          Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
+          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
+    { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
+    { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "Named", (pieces, gameObj) => new NamedTrait() },
+    { "OnFire", (pieces, gameObj) => new OnFireTrait() { Expired = bool.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), Lifetime = int.Parse(pieces[3]) } },
+    { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
+    { "Opaque", (pieces, gameObj) => new OpaqueTrait() },
+    { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
+    { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
+    { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
+    { "Plant", (pieces, gameObj) => new PlantTrait() },
+    { "Plural", (pieces, gameObj) => new PluralTrait() },
+    { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
+    { "Poisoned", (pieces, gameObj) => new PoisonedTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), ExpiresOn = ulong.Parse(pieces[4]) } },
+    { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]) } },
+    { "Polearm", (pieces, gameObj) => new PolearmTrait() },
+    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
+    { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
+    { "RangedSpellAction", (pieces, gameObj) => new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
+        MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
+    { "Reach", (pieces, gameObj) => new ReachTrait() },
+    { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
+    { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
+    { "Regeneration", (pieces, gameObj) => {
+      return new RegenerationTrait()
         {
           Rate = int.Parse(pieces[1]),
-          ActorID = ownerID,
+          ActorID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
           Expired = bool.Parse(pieces[3]),
-          ExpiresOn = expiresOn
+          ExpiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4])
         };
-      case "Relationship":
-        return new RelationshipTrait()
-        {
-          Person1ID = ulong.Parse(pieces[1]),
-          Person2ID = ulong.Parse(pieces[2]),
-          Label = pieces[3]
-        };
-      case "ResistBlunt":
-        return new ResistBluntTrait();
-      case "ResistPiercing":
-        return new ResistPiercingTrait();
-      case "ResistSlashing":
-        return new ResistSlashingTrait();   
-      case "Retribution":
-        Enum.TryParse(pieces[1], out dt);
+    } },
+    { "Relationship", (pieces, gameObj) => new RelationshipTrait() { Person1ID = ulong.Parse(pieces[1]), Person2ID = ulong.Parse(pieces[2]), Label = pieces[3] } },
+    { "Resistance", (pieces, gameObj) => {
+        Enum.TryParse(pieces[1], out DamageType rdt);
+        ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
+        ulong ownerID = pieces.Length > 3 ? ulong.Parse(pieces[2]): 0;
+        return new ResistanceTrait() { Type = rdt, ExpiresOn = expiresOn, OwnerID = ownerID
+        }; }},
+    { "Retribution", (pieces, gameObj) =>
+      {
+        Enum.TryParse(pieces[1], out DamageType dt);
         return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
-      case "Rusted":
-        return new RustedTrait()
-        {
-          Amount = (Rust)int.Parse(pieces[1])
-        };
-      case "SeeInvisible":      
-        return new SeeInvisibleTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          ExpiresOn = ulong.Parse(pieces[2])
-        };
-      case "SideEffect":
-        return new SideEffectTrait()
-        {
-          Odds = int.Parse(pieces[1]),
-          Effect = text[text.IndexOf('#', 11)..]
-        };
-      case "SilverAllergy":
-        return new SilverAllergyTrait();
-      case "Stabby":
-        return new StabbyTrait();
-      case "Stackable":
-        return new StackableTrait();
-      case "StatBuff":
-        Enum.TryParse(pieces[3], out Attribute attr);
-        return new StatBuffTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          ExpiresOn = ulong.Parse(pieces[2]),
-          Attr = attr,
-          Amt = int.Parse(pieces[4])
-        };
-      case "Sticky":
-        return new StickyTrait();
-      case "Summon":
-        return new SummonTrait()
-        {
-          Name = name,
-          Cooldown = ulong.Parse(pieces[1]),
-          Summons = pieces[2],
-          Quip = pieces[3]
-        };
-      case "Teflon":
-        return new TeflonTrait();
-      case "Telepathy":
-        return new TelepathyTrait()
-        {
-          ExpiresOn = ulong.Parse(pieces[1]),
-          OwnerID = ulong.Parse(pieces[2])
-        };
-      case "TwoHanded":
-        return new TwoHandedTrait();
-      case "Torch":
-        return new TorchTrait()
-        {
-          OwnerID = ulong.Parse(pieces[1]),
-          Lit = bool.Parse(pieces[2]),
-          Fuel = int.Parse(pieces[3])
-        };
-      case "UseSimple":
-        return new UseSimpleTrait(pieces[1]);
-      case "VaultKey":
-        return new VaultKeyTrait(Loc.FromStr(pieces[1]));
-      case "Villager":
-        return new VillagerTrait();
-      case "Weaken":
-        return new WeakenTrait()
-        {
-          DC = int.Parse(pieces[1]),
-          Amt = int.Parse(pieces[2])
-        };
-      case "Written":
-        return new WrittenTrait();      
-      case "Wand":
-        return new WandTrait()
-        {
-          Charges = int.Parse(pieces[1]),
-          IDed = bool.Parse(pieces[2]),
-          Effect = pieces[3]
-        };
-      case "WeaponBonus":
-        return new WeaponBonusTrait()
-        {
-          Bonus = int.Parse(pieces[1])
-        };
-      case "Worshiper":
-        return new WorshiperTrait()
-        {
-          Altar = Loc.FromStr(pieces[1]),
-          Chant = pieces[2]
-        };
-      default:
-        ulong cooldown = ulong.Parse(text[(text.IndexOf('#') + 1)..]);
-        return new SpellActionTrait()
-        {
-          Name = name,
-          Cooldown = cooldown
-        };
+      } 
+    },
+    { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },
+    { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
+    { "ResistSlashing", (pieces, gameObj) => new ResistSlashingTrait() },
+    { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
+    { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
+    { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
+    { "SpellAction", (pieces, gameObj) => new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]) }},
+    { "Stabby", (pieces, gameObj) => new StabbyTrait() },
+    { "Stackable", (pieces, gameObj) => new StackableTrait() },
+    { "StatBuff", (pieces, gameObj) =>
+    {
+      Enum.TryParse(pieces[3], out Attribute attr);
+      return new StatBuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, Amt = int.Parse(pieces[4]) };
+    } },
+    { "Sticky", (pieces, gameObj) => new StickyTrait() },
+    { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
+    { "Sword", (pieces, gameObj) => new SwordTrait() },
+    { "Teflon", (pieces, gameObj) => new TeflonTrait() },
+    { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    { "Torch", (pieces, gameObj) => new TorchTrait() { OwnerID = ulong.Parse(pieces[1]), Lit = bool.Parse(pieces[2]), Fuel = int.Parse(pieces[3]) } },
+    { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
+    { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
+    { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
+    { "Villager", (pieces, gameObj) => new VillagerTrait() },
+    { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },    
+    { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
+    { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
+    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
+    { "Written", (pieces, gameObj) => new WrittenTrait() }        
+  };
+
+  public static Trait FromText(string text, GameObj? container)
+  {
+    string[] pieces = text.Split('#');
+    if (traitFactories.TryGetValue(pieces[0], out var factory))
+    {
+      return factory(pieces, container);
     }
+
+    throw new Exception($"Unparseable trait string: {text}");
   }
 }

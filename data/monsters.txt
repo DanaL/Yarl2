@@ -8,7 +8,7 @@ goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14| 4|Door|Missi
 goblin boss       |g|green        |darkgreen   |13|10|3| 1.0|13|10| 4|Door|Melee#8#1#Slashing|
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10| 4|Door|Melee#8#1#Slashing|
 kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10| 3|Door|Melee#6#1#Slashing|PoorLoot
-kobold trickster  |k|lightblue    |blue        |14|20|3| 1.0|10|14| 4|Door|RangedSpellAction#Entangle#15#2#7,SpellAction#FogCloud#15,Blink#5,Melee#6#1#Slashing|
+kobold trickster  |k|lightblue    |blue        |14|20|3| 1.0|10|14| 4|Door|RangedSpellAction#Entangle#15#2#7,SpellAction#FogCloud#15,SpellAction#Blink#5,Melee#6#1#Slashing|
 kobold foreman    |k|yelloworange |dullred     |13|20|3| 1.0|12|10| 4|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|DeathMessage#The foreman says: clocking out!
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10| 0|Wall||Plant,Plural,Immunity#Confusion
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14| 6|Dumb|RangedSpellAction#Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2
@@ -30,5 +30,5 @@ deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12| 6|Door|HealA
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|10|Dumb|Melee#8#1#Piercing|Corrosive
 will-o-wisp       |w|yellow       |yelloworange|15|35|3| 1.0|10|10|10|Flying|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|10|Door|Melee#8#2#Slashing|Regeneration#3#owner#false#max
-creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|10|Dumb|Melee#5#2|Poisoner#14#2,CoinsLoot#10#20
-phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|10|Dumb|Melee#5#2|Invisible#owner#false#max,SilverAllergy
+creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|10|Dumb|Melee#5#2#Piercing|Poisoner#14#2,CoinsLoot#10#20
+phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|10|Dumb|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy
