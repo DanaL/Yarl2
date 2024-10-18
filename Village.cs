@@ -55,7 +55,7 @@ class Village
       2 => (Colours.YELLOW_ORANGE, Colours.TORCH_YELLOW),
       3 => (Colours.BRIGHT_RED, Colours.DULL_RED),
       4 => (Colours.GREEN, Colours.DARK_GREEN),
-      5 => (Colours.BLUE, Colours.DARK_BLUE),
+      5 => (Colours.LIGHT_BLUE, Colours.BLUE),
       6 => (Colours.PINK, Colours.DULL_RED),
       _ => (Colours.LIGHT_BROWN, Colours.BROWN)
     };
