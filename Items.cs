@@ -256,6 +256,7 @@ class ItemFactory
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new StabbyTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        item.Traits.Add(new SwordTrait());
         break;
       case ItemNames.LONGBOW:
         item = new Item()
