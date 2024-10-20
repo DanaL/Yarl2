@@ -1079,6 +1079,13 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class WeaponSpeedTrait : Trait
+{
+  public double Cost { get; set; }
+
+  public override string AsText() => $"WeaponSpeed#{Cost}";
+}
+
 class RelationshipTrait : Trait
 {
   public ulong Person1ID { get; set; }
@@ -1693,7 +1700,7 @@ class TraitFactory
     { "Poisoned", (pieces, gameObj) => new PoisonedTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), ExpiresOn = ulong.Parse(pieces[4]) } },
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
-    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
+    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
     { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
     { "RangedSpellAction", (pieces, gameObj) => new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
@@ -1750,6 +1757,7 @@ class TraitFactory
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },    
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
+    { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
     { "Written", (pieces, gameObj) => new WrittenTrait() }        
   };

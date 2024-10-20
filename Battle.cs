@@ -400,13 +400,23 @@ class Battle
 
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
-    int weaponBonus = 0;    
-    if (weapon is not null && weapon.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait wb)
+    int weaponBonus = 0;
+    if (weapon is not null)
     {
-      weaponBonus = wb.Bonus;
+      foreach (Trait trait in weapon.Traits)
+      {
+        if (trait is WeaponBonusTrait wb)
+          weaponBonus += wb.Bonus;
+        if (trait is WeaponSpeedTrait qw)
+          result.EnergyCost = qw.Cost;
+      }
     }
-
+    
     int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier() + weaponBonus;
+
+    if (attacker is Player)
+      roll = 0;
+      
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
