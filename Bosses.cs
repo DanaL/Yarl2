@@ -77,7 +77,7 @@ class BossFactory
       prince.Traits.Add(new ImmunityTrait() { Type = DamageType.Piercing });
     else
       prince.Traits.Add(new ImmunityTrait() { Type = DamageType.Blunt });
-    prince.Traits.Add(new FinalBossTrait());
+    prince.Traits.Add(new MiniBoss5Trait());
     
     return prince;
   }

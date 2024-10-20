@@ -708,6 +708,27 @@ class DialogueInterpreter
         if (gs.ObjDb.GetObj(trinketId) is Item item)        
           return item.Name;        
         return "";
+      case "LEVEL_FIVE_KEY_GIVEN":
+        foreach (Fact fact in gs.Facts)
+        {
+          if (fact is SimpleFact simple && simple.Name == "Level 5 Key Given" && simple.Value == "true")
+            return true;
+        }
+        return false;
+      case "LEVEL_FIVE_BOSS":
+        foreach (Fact fact in gs.Facts)
+        {
+          if (fact is SimpleFact simple && simple.Name == "Level 5 Boss")
+            return simple.Value;
+        }
+        return "";
+      case "LEVEL_FIVE_BOSS_KILLED":
+        foreach (Fact fact in gs.Facts)
+        {
+          if (fact is SimpleFact simple && simple.Name == "Level 5 Boss Killed")
+            return true;
+        }
+        return false;
       case "DUNGEON_DIR":
         Loc dungoenLoc = Loc.Nowhere;
         foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
@@ -760,7 +781,12 @@ class DialogueInterpreter
 
     if (s.Contains("#TRINKET_NAME"))
     {
-      s = s.Replace(("#TRINKET_NAME"), CheckVal("TRINKET_NAME", mob, gs).ToString());
+      s = s.Replace("#TRINKET_NAME", CheckVal("TRINKET_NAME", mob, gs).ToString());
+    }
+
+    if (s.Contains("#LEVEL_FIVE_BOSS"))
+    {
+      s = s.Replace("#LEVEL_FIVE_BOSS", CheckVal("LEVEL_FIVE_BOSS", mob, gs).ToString());
     }
 
     s = s.Replace(@"\n", Environment.NewLine);
@@ -943,9 +969,49 @@ class DialogueInterpreter
         else
           mob.Stats.Add(Attribute.DialogueState, new Stat(number.Value));
         break;
+      case "LEVEL_FIVE_KEY_GIVEN":
+        result = Eval(set.Value, mob, gs);
+        if (result is not ScriptBool boolVal)
+          throw new Exception("Expected number value for setting LEVEL_FIVE_KEY_GIVEN");
+
+        string setValue =  boolVal.Value ? "true" : "false";
+
+        foreach (Fact fact in gs.Facts)
+        {
+          if (fact is SimpleFact simple && simple.Name == "Level 5 Key Given") 
+          {
+            simple.Value = setValue;
+            return;
+          }
+        }
+
+        gs.Facts.Add(new SimpleFact() { Name = "Level 5 Key Given", Value = setValue });        
+        break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");
     }
+  }
+
+  static Item LevelFiveKey(GameState gs)
+  {
+    var (fg, bg) = Util.MetallicColour(Metals.Iron);
+    Item key = new() { 
+      Name = "key", Type = ItemType.Tool, Value = 1,
+      Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
+    };
+    key.Traits.Add(new MetalTrait() { Type = Metals.Iron });
+
+    foreach (var fact in gs.Facts)
+    {
+      if (fact is SimpleFact simple && simple.Name == "Level 5 Gate Loc")
+      {
+        Loc gateLoc = Loc.FromStr(simple.Value);
+        key.Traits.Add(new VaultKeyTrait(gateLoc));
+      }
+    }
+    gs.ObjDb.Add(key);
+
+    return key;
   }
 
   void EvalGive(ScriptGive gift, Actor mob, GameState gs)
@@ -953,6 +1019,7 @@ class DialogueInterpreter
       Item item = gift.Gift switch
       {
         "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
+        "LEVEL_FIVE_KEY" => LevelFiveKey(gs),
         _ => throw new Exception($"Unknown variable: {gift.Gift}"),
       };
       
@@ -991,14 +1058,11 @@ class DialogueInterpreter
     foreach (ScriptExpr cond in andExpr.Conditions)
     {
       ScriptExpr result = Eval(cond, mob, gs);
-      if (result is ScriptBool boolResult && !boolResult.Value)
-      {
-        return boolResult;
-      }
-      else
-      {
+      if (result is not ScriptBool boolResult)
         throw new Exception("Expected boolean condition in and expression.");
-      }
+      
+      if (!boolResult.Value)
+        return boolResult;
     }
 
     return new ScriptBool(true);
@@ -1012,14 +1076,11 @@ class DialogueInterpreter
     foreach (ScriptExpr cond in orExpr.Conditions)
     {
       ScriptExpr result = Eval(cond, mob, gs);
-      if (result is not ScriptBool boolResult)
-      {
+      if (result is not ScriptBool boolResult)      
         throw new Exception("Expected boolean condition in or expression.");
-      }
-      else if (boolResult.Value)
-      {
-        return boolResult;        
-      }
+
+      if (boolResult.Value)      
+        return boolResult;
     }
 
     return new ScriptBool(false);

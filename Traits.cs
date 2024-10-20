@@ -393,6 +393,11 @@ class GrantsTrait : Trait
   }
 }
 
+class MiniBoss5Trait : Trait
+{
+  public override string AsText() => "MiniBoss5";
+}
+
 class OwnsItemTrait : Trait
 {
   public ulong ItemID { get; set; }
@@ -1657,6 +1662,7 @@ class TraitFactory
           Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
           MinRange = 1, MaxRange = 1, DamageType = dt }; }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
+    { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
     { "Missile", (pieces, gameObj) => {
       Enum.TryParse(pieces[5], out DamageType dt);
       return new MobMissileTrait() {

@@ -1027,8 +1027,15 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           continue;
       }
       
-      string desc = count == 1 ? item.FullName.IndefArticle()
+      string desc = "";
+      try {
+ desc = count == 1 ? item.FullName.IndefArticle()
                               : $"{count} {item.FullName.Pluralize()}";
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.Message);
+      }
 
       if (item.Equiped)
       {

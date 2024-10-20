@@ -915,7 +915,7 @@ class MainDungeonBuilder : DungeonBuilder
     return (false, Dir.None);
   }
 
-  void PlaceLevelFiveGate(Map map, Random rng)
+  void PlaceLevelFiveGate(Map map, Random rng, History history)
   {
     List<(int, int, Dir)> candidates = [];
 
@@ -943,6 +943,8 @@ class MainDungeonBuilder : DungeonBuilder
     Tile door = new VaultDoor(false, Metals.Iron);
     Tile stairs = new Downstairs("");
     map.SetTile(sr, sc, door);
+    Loc doorLoc = new(1, 4, sr, sc);
+    history.Facts.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
     switch (sdir)
     {
       case Dir.North:
@@ -1041,7 +1043,7 @@ class MainDungeonBuilder : DungeonBuilder
       Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
     }
     
-    PlaceLevelFiveGate(levels[4], rng);
+    PlaceLevelFiveGate(levels[4], rng, history);
 
     return dungeon;
   }

@@ -16,14 +16,12 @@ centipede 2
 chilled jelly 1
 LEVEL 3
 kobold foreman 2
-kobold trickster 1
 jelly 1
 floating eye 1
 will-o-wisp 1
 phantom 1
 chilled jelly 1
 LEVEL 4
-kobold trickster 1
 giant spider 1
 screech bat 1
 cloaker 2

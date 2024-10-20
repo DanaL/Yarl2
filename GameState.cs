@@ -505,6 +505,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.VictoryScreen(victim.FullName, this);
       throw new VictoryException();
     }
+    else if (victim.HasTrait<MiniBoss5Trait>())
+    {
+      Facts.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
+    }
     else if (result is not null)
     {
 

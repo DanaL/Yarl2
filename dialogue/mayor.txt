@@ -2,12 +2,28 @@
 	; If we've spoken to the player before
 	(
 		(= MET_PLAYER true)
-		(say (
-			pick ("How are your adventures going?" 
-						"Thank goodness it isn't an election year." 
-						"This looming doom is terrible for tourism. Adventurers aside, of course."
-						"Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
-			))
+		(
+      (cond
+        ((and (> PLAYER_DEPTH 4) (!= LEVEL_FIVE_BOSS_KILLED true) (!= LEVEL_FIVE_KEY_GIVEN true)) 
+            (say "Oh! I see you've reached level 5 of the dungeon! Well done! You may have noticed there's a gate blocking the way deeper. The key was left with me by a previous adventurer, but I feel it would be irresponsible to give it to you until you've proven yourself.\n\nDefeat #LEVEL_FIVE_BOSS and it's yours!"))
+        ((and (> PLAYER_DEPTH 4) (= LEVEL_FIVE_BOSS_KILLED true) (!= LEVEL_FIVE_KEY_GIVEN true)) 
+          ((say "Marvelous, #LEVEL_FIVE_BOSS is dead! They were the bane of many a past adventurer. You've done #TOWN_NAME a great service!") 
+            (set LEVEL_FIVE_KEY_GIVEN true)
+            (give LEVEL_FIVE_KEY "This will unlock the path to go even deeper."))
+        )
+        (
+          (= LEVEL_FIVE_KEY_GIVEN true)
+          (say "You've done wonderfully so far! I feel there could be a key to the city in your future!")
+        )
+        (else
+                  (say (
+                  pick ("How are your adventures going?" 
+                        "Thank goodness it isn't an election year." 
+                        "This looming doom is terrible for tourism. Adventurers aside, of course."
+                        "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
+                  )))
+        )
+      )
 		)
 	)
 
