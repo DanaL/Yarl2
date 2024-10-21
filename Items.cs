@@ -377,6 +377,12 @@ class ItemFactory
         item.Traits.Add(new UseSimpleTrait("minorheal"));
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new SideEffectTrait()
+        {
+          Odds = 20,
+          Effect = "BoostMaxStat#HP#2"
+        });
+
         break;
       case ItemNames.POTION_MIND_READING:
         item = new Item()

@@ -826,6 +826,27 @@ class ParalyzingGazeTrait : BasicTrait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
+class BoostMaxStatTrait : TemporaryTrait
+{
+  public Attribute Stat {  get; set; }
+  public int Amount { get; set; }
+
+  public override List<Message> Apply(Actor target, GameState gs)
+  {
+    if (target.Stats.TryGetValue(Stat, out Stat? stat))
+    {
+      stat.ChangeMax(Amount);
+      stat.Change(Amount);
+    }
+
+    Message msg = new($"{"".Possessive(target).Capitalize()}max {Stat} has changed!", target.Loc);
+
+    return [msg];
+  }
+
+  public override string AsText() => $"BoostMaxStat#{Stat}#{Amount}";
+}
+
 class ConfusedTrait : TemporaryTrait
 {
   public int DC { get; set; }
@@ -1609,7 +1630,7 @@ class TraitFactory
     { "Ammo", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[3], out DamageType ammoDt);
-        return new AmmoTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = ammoDt, Range = int.Parse(pieces[4]) }; 
+        return new AmmoTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = ammoDt, Range = int.Parse(pieces[4]) };
       }
     },
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
@@ -1617,6 +1638,9 @@ class TraitFactory
     },
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
+    { "BoostMaxStat", (pieces, gameObj) => {
+      Enum.TryParse(pieces[1], out Attribute attr);
+      return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
@@ -1653,7 +1677,7 @@ class TraitFactory
     { "Impale", (pieces, gameObj) => new ImpaleTrait() },
     { "InPit", (pieces, gameObj) => new InPitTrait() },
     { "Invisible", (pieces, gameObj) =>
-      {      
+      {
         return new InvisibleTrait()
         {
           ActorID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
@@ -1664,7 +1688,7 @@ class TraitFactory
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Melee", (pieces, gameObj) => {
-      Enum.TryParse(pieces[3], out DamageType dt);      
+      Enum.TryParse(pieces[3], out DamageType dt);
       return new MobMeleeTrait() {
           Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
           MinRange = 1, MaxRange = 1, DamageType = dt }; }},
@@ -1700,7 +1724,7 @@ class TraitFactory
     { "Poisoned", (pieces, gameObj) => new PoisonedTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), ExpiresOn = ulong.Parse(pieces[4]) } },
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
-    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
+    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
     { "RangedSpellAction", (pieces, gameObj) => new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
@@ -1727,7 +1751,7 @@ class TraitFactory
       {
         Enum.TryParse(pieces[1], out DamageType dt);
         return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
-      } 
+      }
     },
     { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },
     { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
@@ -1754,12 +1778,12 @@ class TraitFactory
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
     { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
-    { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },    
+    { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
-    { "Written", (pieces, gameObj) => new WrittenTrait() }        
+    { "Written", (pieces, gameObj) => new WrittenTrait() }
   };
 
   public static Trait FromText(string text, GameObj? container)

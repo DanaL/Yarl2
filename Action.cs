@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using SDL2;
-
 namespace Yarl2;
 
 class ActionResult
@@ -1404,13 +1402,30 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
   {
     ActionResult result = base.Execute();
 
-    var hp = 0;
+    Stat hpStat = Actor!.Stats[Attribute.HP];
+    int hpBefore = hpStat.Curr;
+
+    int hp = 0;
     for (int j = 0; j < _healDice; j++)
       hp += GameState!.Rng.Next(_healDie) + 1;
-    Actor!.Stats[Attribute.HP].Change(hp);
-    var plural = Actor.HasTrait<PluralTrait>();
-    var msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
-    var txt = msg.Text[..^1] + $" for {hp} HP.";
+    hpStat.Change(hp);
+    bool plural = Actor.HasTrait<PluralTrait>();
+    int delta = hpStat.Curr - hpBefore;
+
+    string txt;
+    if (delta > 0)
+    {
+      Message msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
+      txt = msg.Text[..^1] + $" for {hp} HP.";
+    }
+    else if (target is Player)
+    {
+      txt = "It has a medicinal after-taste but otherwise no effect.";
+    }
+    else
+    {
+      txt = "";
+    }
 
     var healAnim = new SqAnimation(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
     GameState!.UIRef().RegisterAnimation(healAnim);
@@ -1423,6 +1438,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
     result.Messages.Add(new Message(txt, Actor.Loc, false));
     result.Complete = true;
     result.EnergyCost = 1.0;
+
     return result;
   }
 }

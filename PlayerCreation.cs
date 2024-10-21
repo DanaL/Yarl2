@@ -226,17 +226,18 @@ class PlayerCreator
     player.Inventory.Add(startWeapon, player.ID);
 
     // Everyone gets 3 to 5 torches to start with
-    player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
-    for (int i = 0; i < rng.Next(3); i++)
+    for (int i = 0; i < rng.Next(3, 6); i++)
     {
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
+    //for (int i = 0; i < 10; i++)
+    //{
+    //  player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
+    //}
     //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
-    
+
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
 
@@ -257,13 +258,13 @@ class PlayerCreator
 
     //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_IDENTIFY, objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb), player.ID);
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb), player.ID);
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb), player.ID);
-    
+    //player.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb), player.ID);
+
     var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
