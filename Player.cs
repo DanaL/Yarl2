@@ -219,20 +219,18 @@ class Player : Actor, IPerformer, IGameEventListener
       _ => "Arms & Armour",
     };
 
-    return $"{Lineage.ToString().ToLower().IndefArticle()} who majored in {major}";
+    return $"{Lineage.ToString().ToLower().IndefArticle()} who majored in {major}.";
   }
 
   List<string> CharacterSheet()
   {
     List<string> lines = [];
 
-    lines.Add($"{Name}, level {Stats[Attribute.Level].Curr}, {CharDesc()}");
+    lines.Add($"{Name}, {CharDesc()}");
     lines.Add("");
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");
-    lines.Add($"You have earned {Stats[Attribute.XP].Max} XP.");
-    lines.Add("");
-
+    
     var feats = string.Join(", ", Traits.OfType<FeatTrait>().Select(f => f.AsText()));
     if (feats.Length > 0)
     {
@@ -720,11 +718,7 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _inputController = new Examiner(gameState, Loc);
         _deferred = new NullAction();
-      }
-      else if (ch == 'X')
-      {
-        Stats[Attribute.XP].ChangeMax(10);
-      }
+      }     
       else if (ch == ' ' || ch == '.')
         return new PassAction();
     }

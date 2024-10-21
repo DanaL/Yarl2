@@ -44,8 +44,7 @@ class BossFactory
     prince.Stats.Add(Attribute.AC, new Stat(15));
     prince.Stats.Add(Attribute.Strength, new Stat(1));
     prince.Stats.Add(Attribute.Dexterity, new Stat(3));
-    prince.Stats.Add(Attribute.XPValue, new Stat(20));
-
+    
     //prince.Actions.Add(new MobMeleeTrait()
     //{
     //  MinRange = 1,

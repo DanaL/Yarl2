@@ -25,13 +25,10 @@ enum Attribute
   Piety, // What I renamed D&D's Wisdom to
   Will,
   AttackBonus,
-  Level,
-  XP,
   Depth,
   AC, // used for monsters who have a simple AC
   DmgDie,
   DmgRolls,
-  XPValue,
   MeleeDmgBonus,
   MissileDmgBonus,
   Radius,

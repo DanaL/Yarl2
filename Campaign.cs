@@ -446,8 +446,7 @@ class PreGameHandler(UserInterface ui)
     gargoyle.Stats.Add(Attribute.AC, new Stat(15));
     gargoyle.Stats.Add(Attribute.Strength, new Stat(1));
     gargoyle.Stats.Add(Attribute.Dexterity, new Stat(1));
-    gargoyle.Stats.Add(Attribute.XPValue, new Stat(6));
-
+    
     gargoyle.Actions.Add(new MobMeleeTrait()
     {
       MinRange = 1,

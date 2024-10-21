@@ -519,12 +519,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       result.Messages.Add(killMsg);
     }
 
-    if (victim.ID != Player.ID && victim is Mob m)
-    {
-      int xpv = m.Stats[Attribute.XPValue].Curr;
-      Player.Stats[Attribute.XP].ChangeMax(xpv);
-    }
-
     ObjDb.RemoveActor(victim);
 
     // Need to remove the victim from the Performer queue but also update 
@@ -735,8 +729,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       Player.Stats[Attribute.HP].Change(1);
     }
-
-    PlayerCreator.CheckLevelUp(this);
 
     var listeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
