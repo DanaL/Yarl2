@@ -296,12 +296,22 @@ class MetalTrait : Trait
   public override string AsText() => $"Metal#{(int)Type}";
 }
 
+class BowTrait : Trait
+{
+  public override string AsText() => "Bow";
+}
+
 class CoinsLootTrait : Trait
 {
   public int Min { get; set; }
   public int Max { get; set; }
 
   public override string AsText() => $"CoinsLoot#{Min}#{Max}";
+}
+
+class CudgelTrait : Trait
+{
+  public override string AsText() => "Cudgel";
 }
 
 class PoorLootTrait : Trait
@@ -1641,6 +1651,7 @@ class TraitFactory
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
+    { "Bow", (pieces, gameObj) => new BowTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
@@ -1648,6 +1659,7 @@ class TraitFactory
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
+    { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },
     { "Damage", (pieces, gameObj) => {
       Enum.TryParse(pieces[3], out DamageType dt);

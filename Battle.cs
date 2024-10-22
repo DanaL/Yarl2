@@ -456,28 +456,33 @@ class Battle
     }
     else
     {
+      // The attacker missed!
       Message msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
       result.Messages.Add(msg);
-    }
 
-    if (attacker is Player player && weapon is not null)
-    {
-      foreach (Trait t in  weapon.Traits) 
+      // if it is the player, exercise their weapon on a miss
+      if (attacker is Player player && weapon is not null)
       {
-        switch (t)
+        foreach (Trait t in weapon.Traits)
         {
-          case PolearmTrait:
-            player.ExerciseStat(Attribute.PolearmsUse);
-            break;
-          case SwordTrait:
-            player.ExerciseStat(Attribute.SwordUse);
-            break;
-          case AxeTrait:
-            player.ExerciseStat(Attribute.AxeUse); 
-            break;
-          case FinesseTrait:
-            player.ExerciseStat(Attribute.FinesseUse);
-            break;
+          switch (t)
+          {            
+            case AxeTrait:
+              player.ExerciseStat(Attribute.AxeUse);
+              break;
+            case CudgelTrait:
+              player.ExerciseStat(Attribute.CudgelUse);
+              break;
+            case FinesseTrait:
+              player.ExerciseStat(Attribute.FinesseUse);
+              break;
+            case PolearmTrait:
+              player.ExerciseStat(Attribute.PolearmsUse);
+              break;
+            case SwordTrait:
+              player.ExerciseStat(Attribute.SwordUse);
+              break;
+          }
         }
       }
     }

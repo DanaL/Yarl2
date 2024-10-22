@@ -39,11 +39,12 @@ enum Attribute
   InDisguise,
   MonsterForm,
   ArcheryBonus,
-  PolearmsUse,
-  SwordUse,
   AxeUse,
   BowUse,
+  CudgelUse,
   FinesseUse,
+  PolearmsUse,
+  SwordUse,  
   MetPlayer
 }
 

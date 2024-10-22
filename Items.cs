@@ -229,6 +229,7 @@ class ItemFactory
         };
         item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
         item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
+        item.Traits.Add(new CudgelTrait());
         break;
       case ItemNames.LONGSWORD:
         item = new Item() { Name = "longsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
@@ -256,7 +257,6 @@ class ItemFactory
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new StabbyTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new SwordTrait());
         break;
       case ItemNames.LONGBOW:
         item = new Item()
@@ -269,6 +269,7 @@ class ItemFactory
         // This is for if the player happens to be wielding the bow for some reason
         item.Traits.Add(new DamageTrait() { DamageDie = 1, NumOfDie = 1, DamageType = DamageType.Blunt });
         item.Traits.Add(new AmmoTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing, Range = 9 });
+        item.Traits.Add(new BowTrait());
         break;
       case ItemNames.ARROW:
         item = new Item()
