@@ -250,9 +250,8 @@ class Player : Actor, IPerformer, IGameEventListener
   {    
     int range;
     Item arrow;
-    if (bow.Traits.OfType<AmmoTrait>().Any())
+    if (bow.Traits.OfType<AmmoTrait>().FirstOrDefault() is AmmoTrait ammoTrait)
     {
-      var ammoTrait = bow.Traits.OfType<AmmoTrait>().First();
       arrow = ammoTrait.Arrow(gs);
       range = ammoTrait.Range;
     }
@@ -265,7 +264,7 @@ class Player : Actor, IPerformer, IGameEventListener
     int archeryBonus = 0;
     if (Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
       archeryBonus = ab.Curr;
-    var missleAction = new ArrowShotAction(gs, this, arrow, archeryBonus);
+    var missleAction = new ArrowShotAction(gs, this, bow, arrow, archeryBonus);
 
     var acc = new Aimer(gs, Loc, range);
     ReplacePendingAction(missleAction, acc);

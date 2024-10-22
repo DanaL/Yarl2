@@ -82,7 +82,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
 // This is a different class from MissileAttackAction because it will take the result the 
 // aim selection. It also handles the animation and following the path of the arrow
-class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : TargetedAction(gs, actor)
+class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attackBonus) : TargetedAction(gs, actor)
 {
   readonly Item _ammo = ammo;
   readonly int _attackBonus = attackBonus;
@@ -90,49 +90,46 @@ class ArrowShotAction(GameState gs, Actor actor, Item ammo, int attackBonus) : T
   public override ActionResult Execute()
   {
     var result = base.Execute();
-
-    if (Target is Loc loc)
+    var trajectory = Trajectory();
+    List<Loc> pts = [];
+    bool creatureTargeted = false;
+    bool targetHit = false;
+    for (int j = 0; j < trajectory.Count; j++)
     {
-      var trajectory = Trajectory();
-      List<Loc> pts = [];
-      for (int j = 0; j < trajectory.Count; j++)
+      var pt = trajectory[j];
+      Tile tile = GameState!.TileAt(pt);
+      if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
-        var pt = trajectory[j];
-        var tile = GameState!.TileAt(pt);
-        if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+        pts.Add(pt);
+        ActionResult attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit));
+        creatureTargeted = true;
+        targetHit = attackResult.Complete;
+
+        result.Messages.AddRange(attackResult.Messages);
+        result.EnergyCost = attackResult.EnergyCost;
+        if (attackResult.Complete)
         {
-          pts.Add(pt);
-          var attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit));
-          result.Messages.AddRange(attackResult.Messages);
-          result.EnergyCost = attackResult.EnergyCost;
-          if (attackResult.Complete)
-          {
-            pts = [];
-            break;
-          }
-        }
-        else if (tile.Passable() || tile.PassableByFlight())
-        {
-          pts.Add(pt);
-        }
-        else
-        {
+          pts = [];
           break;
         }
       }
-
-      if (pts.Count > 0)
+      else if (tile.Passable() || tile.PassableByFlight())
       {
-        var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
-        GameState!.UIRef().PlayAnimation(anim, GameState);
+        pts.Add(pt);
+      }
+      else
+      {
+        break;
       }
     }
-    else
-    {
-      throw new Exception("Null location passed to ArrowShotAction. Why would you do that?");
-    }
 
-    if (Actor is Player player)
+    if (pts.Count > 0)
+    {
+      var anim = new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit);
+      GameState!.UIRef().PlayAnimation(anim, GameState);
+    }
+   
+    if (creatureTargeted && !targetHit && Actor is Player player && bow is Item && bow.HasTrait<BowTrait>())
     {
       player.ExerciseStat(Attribute.BowUse);
     }
