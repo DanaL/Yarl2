@@ -185,6 +185,7 @@ class PlayerCreator
       case PlayerLineage.Orc:
         startWeapon = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
         player.Inventory.Add(leather, player.ID);
+        player.Stats.Add(Attribute.SwordUse, new Stat(100));
         break;
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get(ItemNames.HAND_AXE, objDb);
@@ -196,6 +197,7 @@ class PlayerCreator
         helmet.Equiped = true;
         helmet.Slot = 'c';
         player.Inventory.Add(helmet, player.ID);
+        player.Stats.Add(Attribute.AxeUse, new Stat(100));
         break;
       case PlayerLineage.Elf:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
@@ -204,7 +206,8 @@ class PlayerCreator
         bow.Equiped = true;
         bow.Slot = 'b';
         player.Inventory.Add(bow, player.ID);
-        
+        player.Stats.Add(Attribute.BowUse, new Stat(100));
+
         leather.Slot = 'c';
         player.Inventory.Add(leather, player.ID);        
         break;
@@ -212,6 +215,7 @@ class PlayerCreator
         startWeapon = ItemFactory.Get(ItemNames.SPEAR, objDb);
         startWeapon.Traits.Add(new AdjectiveTrait("old"));        
         player.Inventory.Add(leather, player.ID);
+        player.Stats.Add(Attribute.PolearmsUse, new Stat(100));
         break;
     }
 
@@ -219,6 +223,7 @@ class PlayerCreator
     {
       case PlayerBackground.Skullduggery:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
+        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
         break;
     }
 

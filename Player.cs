@@ -231,6 +231,19 @@ class Player : Actor, IPerformer, IGameEventListener
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");
     
+    Stat? stat;
+    if (Stats.TryGetValue(Attribute.SwordUse, out stat))
+      lines.Add($"Swords bonus: +{stat.Curr / 100}");
+    if (Stats.TryGetValue(Attribute.PolearmsUse, out stat))
+      lines.Add($"Polearms bonus: +{stat.Curr / 100}");
+    if (Stats.TryGetValue(Attribute.AxeUse, out stat))
+      lines.Add($"Axes bonus: +{stat.Curr / 100}");
+    if (Stats.TryGetValue(Attribute.CudgelUse, out stat))
+      lines.Add($"Cudgels bonus: +{stat.Curr / 100}");
+    if (Stats.TryGetValue(Attribute.FinesseUse, out stat))
+      lines.Add($"Finesse bonus: +{stat.Curr / 100}");
+    lines.Add("");
+    
     var feats = string.Join(", ", Traits.OfType<FeatTrait>().Select(f => f.AsText()));
     if (feats.Length > 0)
     {
