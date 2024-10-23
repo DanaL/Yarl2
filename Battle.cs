@@ -410,11 +410,7 @@ class Battle
       }
     }
     
-    int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier() + weaponBonus;
-
-    if (attacker is Player)
-      roll = 0;
-      
+    int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier() + weaponBonus;    
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())

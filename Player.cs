@@ -233,21 +233,29 @@ class Player : Actor, IPerformer, IGameEventListener
     
     Stat? stat;
     if (Stats.TryGetValue(Attribute.SwordUse, out stat))
-      lines.Add($"Swords bonus: +{stat.Curr / 100}");
+      lines.Add($"Swords bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.PolearmsUse, out stat))
-      lines.Add($"Polearms bonus: +{stat.Curr / 100}");
+      lines.Add($"Polearms bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.AxeUse, out stat))
-      lines.Add($"Axes bonus: +{stat.Curr / 100}");
+      lines.Add($"Axes bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.CudgelUse, out stat))
-      lines.Add($"Cudgels bonus: +{stat.Curr / 100}");
+      lines.Add($"Cudgels bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.FinesseUse, out stat))
-      lines.Add($"Finesse bonus: +{stat.Curr / 100}");
+      lines.Add($"Finesse bonus: +{stat.Curr / 100} ({stat.Curr})");
     lines.Add("");
-    
-    var feats = string.Join(", ", Traits.OfType<FeatTrait>().Select(f => f.AsText()));
-    if (feats.Length > 0)
+
+    List<string> traitsToShow = [];
+    foreach (Trait trait in Traits)
     {
-      lines.Add($"You have the following perks/upgrades: {feats}");
+      if (trait is RageTrait)
+        traitsToShow.Add("You have the ability to rage");
+      if (trait is LightStepTrait)
+        traitsToShow.Add("You step lightly");
+    }
+    
+    if (traitsToShow.Count > 0)
+    {
+      lines.Add(string.Join(". ", traitsToShow) + ".");
       lines.Add("");
     }
        
