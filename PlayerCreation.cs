@@ -94,8 +94,7 @@ class PlayerCreator
       { Attribute.Dexterity, new Stat(StatRoll(rng)) },
       { Attribute.Piety, new Stat(StatRoll(rng)) },
       { Attribute.Will, new Stat(StatRoll(rng)) },
-      { Attribute.Depth, new Stat(0) },
-      { Attribute.AttackBonus, new Stat(2) }
+      { Attribute.Depth, new Stat(0) },      
     };
 
     int roll, hp = 0;
@@ -201,13 +200,12 @@ class PlayerCreator
         break;
       case PlayerLineage.Elf:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
-
         var bow = ItemFactory.Get(ItemNames.LONGBOW, objDb);
         bow.Equiped = true;
         bow.Slot = 'b';
         player.Inventory.Add(bow, player.ID);
         player.Stats.Add(Attribute.BowUse, new Stat(100));
-
+        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
         leather.Slot = 'c';
         player.Inventory.Add(leather, player.ID);        
         break;
@@ -223,7 +221,8 @@ class PlayerCreator
     {
       case PlayerBackground.Skullduggery:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
-        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
+        if (!player.Stats.ContainsKey(Attribute.FinesseUse)) 
+          player.Stats.Add(Attribute.FinesseUse, new Stat(100));
         break;
     }
 

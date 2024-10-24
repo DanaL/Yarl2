@@ -82,7 +82,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public override string FullName => HasTrait<NamedTrait>() ? Name.Capitalize() : Name.DefArticle();
 
-  public virtual int TotalMeleeAttackModifier() => 0;
   public virtual int TotalMissileAttackModifier(Item weapon) => 0;
   public virtual int TotalSpellAttackModifier() => 0;
   public virtual int AC => 10;
@@ -351,11 +350,6 @@ class Mob : Actor
       Console.WriteLine($"{Name} wakes up");
       Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
     }
-  }
-
-  public override int TotalMeleeAttackModifier()
-  {
-    return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }
 
   public override int TotalMissileAttackModifier(Item weapon)

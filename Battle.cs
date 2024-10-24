@@ -356,6 +356,85 @@ class Battle
     return new Message(msg, target.Loc);
   }
 
+  static int CalcAttackMod(Actor attacker, Item? weapon)
+  {
+    int totalMod = 0;
+    if (attacker.Stats.TryGetValue(Attribute.AttackBonus, out Stat? ab))
+      totalMod += ab.Curr;
+
+    attacker.Stats.TryGetValue(Attribute.Strength, out Stat? strMod);    
+    attacker.Stats.TryGetValue(Attribute.Dexterity, out Stat? dexMod);
+
+    // If the attacker is wielding a weapon, add the weapon category modifier 
+    // and appropriate stat modifier. We'll default to strength if no weapon
+    // is wielded. 
+    if (weapon is not null)
+    {
+      bool sword = false, axe = false, polearm = false, cudgel = false, bow = false, finesse = false;
+      foreach (Trait trait in weapon.Traits)
+      {
+        if (trait is WeaponBonusTrait wb)
+          totalMod += wb.Bonus;
+        else if (trait is SwordTrait)
+          sword = true;
+        else if (trait is AxeTrait)
+          axe = true;
+        else if (trait is PolearmTrait)
+          polearm = true;
+        else if (trait is CudgelTrait)
+          cudgel = true;
+        else if (trait is BowTrait)
+          bow = true;
+        else if (trait is FinesseTrait)
+          finesse = true;
+      }
+
+      if (sword && attacker.Stats.TryGetValue(Attribute.SwordUse, out Stat? swordUse))
+      {
+        totalMod += swordUse.Curr / Constants.PRACTICE_RATIO;
+        if (strMod is not null) 
+          totalMod += strMod.Curr;
+      }
+      else if (axe && attacker.Stats.TryGetValue(Attribute.AxeUse, out Stat? axeUse))
+      {
+        totalMod += axeUse.Curr / Constants.PRACTICE_RATIO;
+        if (strMod is not null)
+          totalMod += strMod.Curr;
+      }
+      else if (polearm && attacker.Stats.TryGetValue(Attribute.PolearmsUse, out Stat? polearmUse))
+      {
+        totalMod += polearmUse.Curr / Constants.PRACTICE_RATIO;
+        if (strMod is not null)
+          totalMod += strMod.Curr;
+      }
+      else if (cudgel && attacker.Stats.TryGetValue(Attribute.CudgelUse, out Stat? cudgelUse))
+      {
+        totalMod += cudgelUse.Curr / Constants.PRACTICE_RATIO;
+        if (strMod is not null)
+          totalMod += strMod.Curr;
+      }
+      else if (bow && attacker.Stats.TryGetValue(Attribute.BowUse, out Stat? bowUse))
+      {
+        totalMod += bowUse.Curr / Constants.PRACTICE_RATIO;
+        if (dexMod is not null)
+          totalMod += dexMod.Curr;
+      }
+      else if (finesse && attacker.Stats.TryGetValue(Attribute.FinesseUse, out Stat? finesseUse))
+      {
+        totalMod += finesseUse.Curr / Constants.PRACTICE_RATIO;
+        int dex = dexMod is null ? 0 : dexMod.Curr;
+        int str = strMod is null ? 0 : strMod.Curr;
+        totalMod += int.Max(dex, str);
+      }
+    }
+    else if (attacker.Stats.TryGetValue(Attribute.Strength, out Stat? str))
+    {
+      totalMod += str.Curr;
+    }
+
+    return totalMod;
+  }
+
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
   {
     static bool CanCleave(Actor attacker)
@@ -410,7 +489,7 @@ class Battle
       }
     }
     
-    int roll = AttackRoll(gs.Rng) + attacker.TotalMeleeAttackModifier() + weaponBonus;    
+    int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon) + weaponBonus;    
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())

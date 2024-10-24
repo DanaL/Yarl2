@@ -143,6 +143,7 @@ class Constants
   public const int TAB = 9;
   public const int ESC = 27;
   public static readonly Sqr BLANK_SQ = new(Colours.BLACK, Colours.BLACK, ' ');
+  public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
 }
 
 class Util
