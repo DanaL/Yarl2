@@ -218,6 +218,7 @@ class ItemFactory
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         item.Traits.Add(new WeaponSpeedTrait() { Cost = 1.25 });
         item.Traits.Add(new TwoHandedTrait());
+        item.Traits.Add(new CleaveTrait());
         break;
       case ItemNames.MACE:
         item = new Item()

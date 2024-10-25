@@ -436,23 +436,7 @@ class Battle
   }
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
-  {
-    static bool CanCleave(Actor attacker)
-    {
-      if (!attacker.HasTrait<CleaveTrait>())
-        return false;
-
-      if (attacker.Inventory.ReadiedWeapon() is Item weapon)
-      {
-        if (!(weapon.HasTrait<SwordTrait>() || weapon.HasTrait<AxeTrait>()))
-          return false;
-
-        return true;
-      }
-
-      return false;
-    }
-
+  {    
     static bool CanImpale(Actor attacker, Actor target)
     {
       if (!attacker.HasTrait<ImpaleTrait>())
@@ -507,7 +491,7 @@ class Battle
 
       ResolveMeleeHit(attacker, target, gs, result, Verb.Hit, weaponBonus);
 
-      if (CanCleave(attacker))
+      if (weapon is not null && weapon.HasTrait<CleaveTrait>())
         ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
      
       if (CanImpale(attacker, target))
