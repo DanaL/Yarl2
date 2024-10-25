@@ -319,11 +319,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
   bool AttackingWithReach()
   {
-    if (!HasTrait<ReachTrait>())
-      return false;
-
-    // Eventually you'll need a Polearm with Long trait
-    if (Inventory.ReadiedWeapon() is Item item && item.HasTrait<PolearmTrait>() && item.HasTrait<ReachTrait>())
+    if (Inventory.ReadiedWeapon() is Item item && item.HasTrait<ReachTrait>())
       return true;
 
     return false;

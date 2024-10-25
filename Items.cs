@@ -179,6 +179,7 @@ class ItemFactory
         item.Traits.Add(new PolearmTrait());
         item.Traits.Add(new ReachTrait());
         item.Traits.Add(new TwoHandedTrait());
+        item.Traits.Add(new ImpaleTrait());
         break;
       case ItemNames.DAGGER:
         item = new Item() { Name = "dagger", Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
@@ -260,6 +261,7 @@ class ItemFactory
         item.Traits.Add(new FinesseTrait());
         item.Traits.Add(new StabbyTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        item.Traits.Add(new ImpaleTrait());
         break;
       case ItemNames.LONGBOW:
         item = new Item()

@@ -235,7 +235,7 @@ class PlayerCreator
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.GREATSWORD, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.GUISARME, objDb), player.ID);
 
     //for (int i = 0; i < 10; i++)
     //{

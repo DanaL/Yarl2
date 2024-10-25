@@ -436,29 +436,7 @@ class Battle
   }
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
-  {    
-    static bool CanImpale(Actor attacker, Actor target)
-    {
-      if (!attacker.HasTrait<ImpaleTrait>())
-        return false;
-
-      if (attacker.Inventory.ReadiedWeapon() is Item weapon)
-      {
-        if (weapon.HasTrait<PolearmTrait>() || weapon.HasTrait<StabbyTrait>())
-        {
-          // We check the distance because if the player has a weapon with Reach,
-          // we don't want them to attack monsters 3 squares away. Ie.,
-          //      ...@.gh...
-          // When attacking g with reach, the player shouldn't be able to hit
-          // the h via Reach
-          if (Util.Distance(attacker.Loc, target.Loc) == 1)
-            return true;
-        }
-      }
-
-      return false;
-    }
-
+  {
     var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
@@ -494,7 +472,7 @@ class Battle
       if (weapon is not null && weapon.HasTrait<CleaveTrait>())
         ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
      
-      if (CanImpale(attacker, target))
+      if (weapon is not null && weapon.HasTrait<ImpaleTrait>())
         ResolveImpale(attacker, target, roll, gs, result, weaponBonus);
       
       if (attacker.HasActiveTrait<KnockBackTrait>())
