@@ -209,6 +209,8 @@ class ItemFactory
         item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 3, DamageType = DamageType.Slashing });
         item.Traits.Add(new AxeTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        item.Traits.Add(new TwoHandedTrait());
+        item.Traits.Add(new CleaveTrait());
         break;
       case ItemNames.GREATSWORD:
         item = new Item()
