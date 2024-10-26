@@ -60,10 +60,6 @@ abstract class Trait : IEquatable<Trait>
   public override int GetHashCode() => AsText().GetHashCode();
 }
 
-// This lets me easily group traits that are upgrades for the player. Name
-// cribbed from 5e's Feats
-abstract class FeatTrait : Trait { }
-
 abstract class BasicTrait : Trait
 {
   public ulong ExpiresOn { get; set; } = ulong.MaxValue;
@@ -260,7 +256,7 @@ class DialogueScriptTrait : Trait
   public override string AsText() => $"DialogueScript#{ScriptFile}";
 }
 
-class DodgeTrait : FeatTrait
+class DodgeTrait : Trait
 {
 public int Rate { get; set; }
 
@@ -556,22 +552,22 @@ class VaultKeyTrait(Loc loc) : Trait
   public override string AsText() => $"VaultKey#{VaultLoc}";
 }
 
-class CleaveTrait : FeatTrait
+class CleaveTrait : Trait
 {
   public override string AsText() => "Cleave";
 }
 
-class ImpaleTrait : FeatTrait
+class ImpaleTrait : Trait
 {
   public override string AsText() => "Impale";
 }
 
-class KnockBackTrait : FeatTrait
+class KnockBackTrait : Trait
 {
   public override string AsText() => "KnockBack";
 }
 
-class ReachTrait : FeatTrait
+class ReachTrait : Trait
 {
   public override string AsText() => "Reach";
 }
