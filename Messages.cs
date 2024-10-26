@@ -48,7 +48,8 @@ enum Verb
     Tear,
     Feel,
     Summon,
-    Stumble
+    Stagger,
+    Butt
 }
 
 record Message(string Text, Loc Loc, bool Sound=false);
@@ -124,7 +125,8 @@ class MsgFactory
             Verb.Tear => fp ? "tear" : "tears",
             Verb.Feel => fp ? "feel" : "feels",
             Verb.Summon => fp ? "summon" : "summons",
-            Verb.Stumble => fp ? "stumble" : "stubmles"
+            Verb.Stagger => fp ? "stagger" : "staggers",
+            Verb.Butt => fp ? "butt" : "butts"
         };
     }
 

@@ -112,6 +112,13 @@ class AdjectiveTrait(string adj) : Trait
   public override string AsText() => $"Adjective#{Adj}";
 }
 
+class AttackVerbTrait(Verb verb) : Trait
+{
+  public Verb Verb { get; set; } = verb;
+
+  public override string AsText() => $"AttackVerb#{Verb}";
+}
+
 class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
@@ -586,7 +593,7 @@ class BerzerkTrait : Trait
   public override string AsText() => "Berzerk";
 }
 
-class RageTrait(Actor actor) : FeatTrait
+class RageTrait(Actor actor) : Trait
 {
   readonly Actor _actor = actor;
 
@@ -1642,6 +1649,10 @@ class TraitFactory
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
     },
+    { "AttackVerb", (pieces, gameObj) => {
+      Enum.TryParse(pieces[1], out Verb verb);
+      return new AttackVerbTrait(verb);
+    }},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {

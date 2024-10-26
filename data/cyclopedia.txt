@@ -11,6 +11,9 @@ An animated corpse. Mindless and slow-moving.
 wolf
 Normally not a threat, but sometimes wolves are kept by goblins as guard animals.
 #
+dire goat
+At least 15% bigger and 30% surlier than a regular goat.
+#
 giant rat
 Like a normal rat, but much bigger and much meaner.
 #

@@ -320,7 +320,7 @@ class Battle
     {
       Message moveMsg = gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
-      var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stumble)} backward!";
+      var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stagger)} backward!";
       if (moveMsg.Text != "")
         txt += " " + moveMsg.Text;
 
@@ -467,7 +467,10 @@ class Battle
         }        
       }
 
-      ResolveMeleeHit(attacker, target, gs, result, Verb.Hit, weaponBonus);
+      Verb verb = Verb.Hit;
+      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
+        verb = avt.Verb;
+      ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
 
       if (weapon is not null && weapon.HasTrait<CleaveTrait>())
         ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
