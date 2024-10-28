@@ -1100,7 +1100,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           desc += " *cursed";
 
         if (item.Type == ItemType.Weapon)
-          desc += " (in hand)";
+        {
+          if (item.HasTrait<TwoHandedTrait>())
+            desc += " (in hands)";
+          else if (!item.HasTrait<VersatileTrait>())
+            desc += " (in hand)";
+          else if (ShieldEquiped())
+            desc += " (in hand)";
+          else
+            desc += " (in hands)";
+        }
         else if (item.Type == ItemType.Armour)
           desc += " (worn)";
         else if (item.Type == ItemType.Bow)

@@ -464,7 +464,10 @@ abstract class UserInterface
     if (weapon is not null)
     {
       List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
-      weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));
+      if (weapon.HasTrait<TwoHandedTrait>() || (weapon.HasTrait<VersatileTrait>() && !gs.Player.Inventory.ShieldEquiped()))
+        weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hands)"));
+      else
+        weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hand)"));
       row = WriteSideBarLine(weaponLine, row);
     }
     var bow = gs.Player.Inventory.ReadiedBow();
