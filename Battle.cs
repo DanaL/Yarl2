@@ -474,7 +474,15 @@ class Battle
       ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
 
       if (weapon is not null && weapon.HasTrait<CleaveTrait>())
-        ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
+      {
+        // A versatile weapon only cleaves if it is being wielded with two hands
+        // (ie., the attacker doesn't have a shield equiped)
+        bool versatile = weapon.HasTrait<VersatileTrait>();
+        if (!(versatile && attacker.Inventory.ShieldEquiped()))
+        {
+          ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
+        }        
+      }
      
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>())
         ResolveImpale(attacker, target, roll, gs, result, weaponBonus);

@@ -148,16 +148,16 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  SPEAR, GUISARME, DAGGER, HAND_AXE, BATTLE_AXE, MACE, LONGSWORD, SHORTSHORD,  
-  RAPIER, LONGBOW, ARROW, FIREBOLT, LEATHER_ARMOUR, STUDDED_LEATHER_ARMOUR,
-  RINGMAIL, CHAINMAIL, HELMET, SHIELD, TORCH, POTION_HEALING, 
-  POTION_MIND_READING, ANTIDOTE, POTION_FIRE_RES, POTION_COLD_RES,
-  SCROLL_BLINK, SCROLL_MAGIC_MAP, WAND_OF_MAGIC_MISSILES,
-  WAND_SWAP, WAND_HEAL_MONSTER, WAND_FIREBALLS, WAND_FROST, SCROLL_RECALL,
-  ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
-  RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
-  LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON,
-  GHOSTCAP_MUSHROOM, SILVER_LONGSWORD, SILVER_DAGGER, TALISMAN_OF_CIRCUMSPECTION
+  ANTIDOTE, ARROW, BATTLE_AXE, CHAINMAIL, CLAYMORE, DAGGER, DART, FIREBOLT,
+  GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
+  LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_COLD_RES, POTION_FIRE_RES,
+  POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
+  RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
+  SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_RECALL, SHIELD,
+  SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR,
+  STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
+  WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
+  WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
 }
 
 class ItemFactory
@@ -222,6 +222,18 @@ class ItemFactory
         item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
         item.Traits.Add(new WeaponSpeedTrait() { Cost = 1.25 });
         item.Traits.Add(new TwoHandedTrait());
+        item.Traits.Add(new CleaveTrait());
+        break;
+      case ItemNames.CLAYMORE:
+        item = new Item()
+        { Name = "claymore", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new SwordTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
+        item.Traits.Add(new WeaponSpeedTrait() { Cost = 1.0 });
+        item.Traits.Add(new VersatileTrait(
+          new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing },
+          new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Slashing }
+          ));
         item.Traits.Add(new CleaveTrait());
         break;
       case ItemNames.MACE:
@@ -773,6 +785,17 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (item, inSlot.Count);
   }
 
+  public bool ShieldEquiped()
+  {
+    foreach (var item in Items().Where(i => i.Type == ItemType.Armour && i.Equiped))
+    {
+      if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at && at.Part == ArmourParts.Shield)
+        return true;
+    }
+
+    return false;
+  }
+
   public Item? ReadiedWeapon()
   {
     foreach (var item in Items())
@@ -893,18 +916,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   // like armour class has to be done elsewhere because it felt icky to 
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
-  {
-    bool EquipedShield()
-    {
-      foreach (var item in Items().Where(i => i.Type == ItemType.Armour && i.Equiped))
-      {
-        if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at && at.Part == ArmourParts.Shield)
-          return true;
-      }
-
-      return false;
-    }
-
+  {    
     bool EquipedTwoHandedWeapon() => ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
 
     // I suppose at some point I'll have items that can't be equiped
@@ -936,7 +948,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       // Okay we are equiping new gear, which is a little more complicated
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
-        if (item.HasTrait<TwoHandedTrait>() && EquipedShield())
+        if (item.HasTrait<TwoHandedTrait>() && ShieldEquiped())
         {
           return (EquipingResult.ShieldConflict, ArmourParts.Shield);
         }
@@ -1062,6 +1074,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     {      
       var (item, count) = ItemAt(s);
 
+      if (item is null)
+        continue;
+
       if ((options.Options & InvOption.UnidentifiedOnly) == InvOption.UnidentifiedOnly)
       {
         if (!Item.IDInfo.TryGetValue(item.Name, out var idInfo) || idInfo.Known)
@@ -1069,9 +1084,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       }
       
       string desc = "";
-      try {
- desc = count == 1 ? item.FullName.IndefArticle()
-                              : $"{count} {item.FullName.Pluralize()}";
+      try 
+      {
+        desc = count == 1 ? item.FullName.IndefArticle()
+                          : $"{count} {item.FullName.Pluralize()}";
       }
       catch (Exception ex)
       {

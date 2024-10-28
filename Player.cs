@@ -122,6 +122,11 @@ class Player : Actor, IPerformer, IGameEventListener
         {
           dmgs.Add(new Damage(dmg.DamageDie, dmg.NumOfDie, dmg.DamageType));
         }
+        else if (trait is VersatileTrait versatile)
+        {
+          DamageTrait dt = Inventory.ShieldEquiped() ? versatile.OneHanded : versatile.TwoHanded;
+          dmgs.Add(new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType));
+        }
       }
     }
     else

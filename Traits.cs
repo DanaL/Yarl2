@@ -1113,13 +1113,6 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
-class WeaponSpeedTrait : Trait
-{
-  public double Cost { get; set; }
-
-  public override string AsText() => $"WeaponSpeed#{Cost}";
-}
-
 class RelationshipTrait : Trait
 {
   public ulong Person1ID { get; set; }
@@ -1137,11 +1130,26 @@ class RetributionTrait : Trait
   public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}";
 }
 
+class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
+{
+  public DamageTrait OneHanded { get; set; } = oneHanded;
+  public DamageTrait TwoHanded { get; set; } = twoHanded;
+
+  public override string AsText() => $"Versatile#{OneHanded.AsText()}#{TwoHanded.AsText()}";
+}
+
 class WeakenTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Amt { get; set; }
   public override string AsText() => $"Weaken#{DC}#{Amt}";
+}
+
+class WeaponSpeedTrait : Trait
+{
+  public double Cost { get; set; }
+
+  public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
 // Well, buff or debuff but that's fairly wordy...
@@ -1796,6 +1804,14 @@ class TraitFactory
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
     { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
+    { "Versatile", (pieces, GameObject) => 
+    {
+      Enum.TryParse(pieces[4], out DamageType dt);
+      DamageTrait oneHanded = new DamageTrait() { DamageDie = int.Parse(pieces[2]), NumOfDie = int.Parse(pieces[3]), DamageType = dt };
+      Enum.TryParse(pieces[8], out dt);
+      DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[6]), NumOfDie = int.Parse(pieces[7]), DamageType = dt };
+      return new VersatileTrait(oneHanded, twoHanded);
+    } },
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
