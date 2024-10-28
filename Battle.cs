@@ -460,7 +460,8 @@ class Battle
         int dodgeRoll = gs.Rng.Next(100);
         if (dodgeRoll < dodgeChance && HandleDodge(attacker, target, gs))
         {
-          string txt = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "dodge")} out of the way!";
+          string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "attack")}";
+          txt += $" but {target.FullName} {Grammar.Conjugate(target, "dodge")} out of the way!";
           var msg = new Message(txt, target.Loc);
           result.Messages.Add(msg);
           return result;
