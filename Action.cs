@@ -1840,6 +1840,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
       ItemType.Tool => true,
       ItemType.Bow => true,
       ItemType.Ring => true,
+      ItemType.Talisman => true,
       _ => false
     };
 
@@ -1881,6 +1882,10 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         break;
       case EquipingResult.TooManyRings:
         alert = new Message("You are already wearing two rings!", Actor.Loc);
+        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        break;
+      case EquipingResult.TooManyTalismans:
+        alert = new Message("You many only use two talismans!", Actor.Loc);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
         break;
       default:

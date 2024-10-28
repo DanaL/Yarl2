@@ -27,6 +27,7 @@ enum ItemType
   Ring,
   Bone,
   Food,
+  Talisman,
   Environment // I'm implementing things like mist as 'items'
 }
 
@@ -156,7 +157,7 @@ enum ItemNames
   ZORKMIDS, ZORKMIDS_PITTANCE, ZORKMIDS_MEDIOCRE, ZORKMIDS_GOOD,
   RING_OF_PROTECTION, POTION_OF_LEVITATION, GREATSWORD, SCROLL_KNOCK, 
   LOCK_PICK, RING_OF_AGGRESSION, SCROLL_IDENTIFY, SKULL, DART, VIAL_OF_POISON,
-  GHOSTCAP_MUSHROOM, SILVER_LONGSWORD, SILVER_DAGGER
+  GHOSTCAP_MUSHROOM, SILVER_LONGSWORD, SILVER_DAGGER, TALISMAN_OF_CIRCUMSPECTION
 }
 
 class ItemFactory
@@ -579,6 +580,11 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         break;
+      case ItemNames.TALISMAN_OF_CIRCUMSPECTION:
+        item = new Item() { Name = "talisman of circumspection", Type = ItemType.Talisman, Value = 125,
+          Glyph = new Glyph('&', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Dodge#33" ] });        
+        break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
     }
@@ -587,7 +593,7 @@ class ItemFactory
 
     return item;
   }
-
+  
   static Glyph GlyphForRing(string name)
   {
     string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
@@ -603,6 +609,7 @@ class ItemFactory
       _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
     };
   }
+
   static Glyph GlyphForWand(string name)
   {
     string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
@@ -989,6 +996,23 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           return (EquipingResult.Equiped, ArmourParts.None);
         }
       }
+      else if (item.Type == ItemType.Talisman)
+      {
+        if (item.Equiped)
+        {
+          item.Equiped = false;
+        }
+        else
+        {
+          int talismanCount = Items().Where(i => i.Type == ItemType.Talisman && i.Equiped).Count();
+          if (talismanCount == 2)
+            return (EquipingResult.TooManyTalismans, ArmourParts.None);
+          
+          item.Equiped = true;
+          
+          return (EquipingResult.Equiped, ArmourParts.None);
+        }
+      }
     }
 
     return (EquipingResult.Conflict, ArmourParts.Shirt);
@@ -1067,6 +1091,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           desc += " (equiped)";
         else if (item.Type == ItemType.Ring)
           desc += " (wearing)";
+        else if (item.Type == ItemType.Talisman)
+          desc += " (equiped)";
       }
       lines.Add($"{s}) {desc}");
     }
@@ -1137,5 +1163,6 @@ enum EquipingResult
   ShieldConflict,
   TwoHandedConflict,
   TooManyRings,
+  TooManyTalismans,
   Cursed
 }

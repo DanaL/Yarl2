@@ -213,9 +213,8 @@ class Player : Actor, IPerformer, IGameEventListener
     lines.Add("");
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Piety: {PrintStat(Attribute.Piety)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");
-    
-    Stat? stat;
-    if (Stats.TryGetValue(Attribute.SwordUse, out stat))
+
+    if (Stats.TryGetValue(Attribute.SwordUse, out Stat? stat))
       lines.Add($"Swords bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.PolearmsUse, out stat))
       lines.Add($"Polearms bonus: +{stat.Curr / 100} ({stat.Curr})");
@@ -234,6 +233,8 @@ class Player : Actor, IPerformer, IGameEventListener
         traitsToShow.Add("You have the ability to rage");
       if (trait is LightStepTrait)
         traitsToShow.Add("You step lightly");
+      if (trait is DodgeTrait)
+        traitsToShow.Add("You sometimes can dodge attacks");
     }
     
     if (traitsToShow.Count > 0)

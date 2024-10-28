@@ -237,6 +237,7 @@ class PlayerCreator
 
     player.Inventory.Add(ItemFactory.Get(ItemNames.GUISARME, objDb), player.ID);
 
+    player.Inventory.Add(ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb), player.ID);
     //for (int i = 0; i < 10; i++)
     //{
     //  player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
