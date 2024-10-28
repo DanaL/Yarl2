@@ -171,7 +171,10 @@ class ItemFactory
       case ItemNames.SPEAR:
         item = new Item() { Name = "spear", Type = ItemType.Weapon, Value = 10,
           Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
+        item.Traits.Add(new VersatileTrait(
+          new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing },
+          new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing }
+          ));
         item.Traits.Add(new PolearmTrait());        
         break;
       case ItemNames.GUISARME:

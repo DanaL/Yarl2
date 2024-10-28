@@ -235,8 +235,6 @@ class PlayerCreator
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
-    player.Inventory.Add(ItemFactory.Get(ItemNames.CLAYMORE, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.GREATSWORD, objDb), player.ID);
     player.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, objDb), player.ID);
 
     //player.Inventory.Add(ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb), player.ID);

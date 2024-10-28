@@ -525,6 +525,7 @@ class PreGameHandler(UserInterface ui)
       int seed = DateTime.Now.GetHashCode();
       //seed = -606877151;
       //seed = -2015835845;
+      seed = 1108144539; // example of buggy vault placement
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
