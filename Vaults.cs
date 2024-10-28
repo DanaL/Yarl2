@@ -78,6 +78,9 @@ class Vaults
             open = true;
             break;
           default:
+            if (tile.IsTrap())
+              open = true;
+            else
             open = false;
             break;
         }
@@ -93,10 +96,23 @@ class Vaults
     return region;
   }
 
+  static int CountAdjTileType(Map map, int row, int col, TileType type)
+  {
+    int count = 0;
+
+    foreach (var sq in Util.Adj8Sqs(row, col))
+    {
+      if (map.InBounds(row, col) && map.TileAt(sq).Type == type)
+        ++count;
+    }
+
+    return count;
+  }
+
   public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb, History history)
   {
     Dictionary<(int, int), int> areas = [];
-    Dictionary<int, HashSet<(int, int)>> rooms = [];
+    Dictionary<int, HashSet<(int, int)>> regions = [];
 
     int areaID = 0;
     for (int r = 1; r < height - 1; r++)
@@ -108,7 +124,7 @@ class Vaults
         if (map.TileAt(r, c).Type == TileType.DungeonFloor && !areas.ContainsKey((r, c)))
         {
           var region = MarkRegion(map, r, c);
-          rooms.Add(areaID, region);
+          regions.Add(areaID, region);
           foreach (var sq in region)
           {
             areas.Add(sq, areaID);
@@ -118,46 +134,56 @@ class Vaults
       }
     }
 
-    int vaultsPlaced = 0;
-    foreach (int roomID in rooms.Keys)
+    // We want to only consider for vaults areas that have at least 12 sqs that
+    // are floors surrounded by other floors, are smaller than 75 sqs
+    // (if just feels weird to me to have really giant vaults), and have only 
+    // one exit.
+    List<HashSet<(int, int)>> rooms = [];
+    List<(int, int)> doors = [];
+    (int, int) lastDoor = (-1, -1);
+    foreach (int roomID in regions.Keys)
     {
-      if (rooms[roomID].Count > 75)
+      if (regions[roomID].Count > 75)
         continue;
 
-      // A potential vault will have only one door adj to its squares
-      int doorCount = 0;
-      int doorRow = -1, doorCol = -1;
-      foreach (var sq in rooms[roomID])
+      HashSet<(int, int)> region = regions[roomID];
+      HashSet<(int, int)> adjDoors = [];
+      int allFloorNeighbours = 0;
+      foreach (var sq in region)
       {
-        foreach (var adj in Util.Adj4Sqs(sq.Item1, sq.Item2))
+        int adjFloorCount = 0;
+        foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
         {
           if (!map.InBounds(adj))
             continue;
-
-          TileType type = map.TileAt(adj).Type;
-
-          if (type == TileType.ClosedDoor || type == TileType.LockedDoor)
+          TileType adjType = map.TileAt(adj.Item1, adj.Item2).Type;
+          if (adjType == TileType.DungeonFloor)
+            ++adjFloorCount;
+          else if (adjType == TileType.ClosedDoor || adjType == TileType.LockedDoor)
           {
-            (doorRow, doorCol) = adj;
-            ++doorCount;
-          }
-
-          // Reject rooms containing the upstairs. (We don't want the player to
-          // arrive in a locked vault where they can't access the method of 
-          // opening it
-          if (type == TileType.Upstairs)
-          {
-            doorCount = int.MaxValue;
-            break;
+            adjDoors.Add(adj);
+            lastDoor = adj;
           }
         }
-        if (doorCount > 1)
-          break;
+
+        if (adjFloorCount == 8)
+          ++allFloorNeighbours;
       }
 
-      if (doorCount == 1 && rng.NextDouble() < 0.25)
+      if (allFloorNeighbours >= 12 && adjDoors.Count == 1)
       {
-        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[roomID], rng, objDb, history);
+        rooms.Add(region);
+        doors.Add(lastDoor);
+      }
+    }
+
+    int vaultsPlaced = 0;
+    for (int j = 0; j < rooms.Count; j++)
+    {
+      if (rng.NextDouble() < 0.25)
+      {
+        (int doorRow, int doorCol) = doors[j];
+        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[j], rng, objDb, history);
         ++vaultsPlaced;
       }
 
@@ -352,7 +378,6 @@ class Vaults
   {
     if (level == 0)
     {
-
       // A level zero vault has been vandalized or plundered by past
       // adventurers.
       VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
