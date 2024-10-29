@@ -506,6 +506,19 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("BERZERK");
       }
+      else if (!statuses.Contains("PROTECTION") && trait is AuraOfProtectionTrait aura)
+      {
+        Colour colour;
+        if (aura.HP >= 25)
+          colour = Colours.ICE_BLUE;
+        else if (aura.HP > 10)
+          colour = Colours.LIGHT_BLUE;
+        else
+          colour = Colours.BLUE;
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (colour, "PROTECTED")];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+        statuses.Add("PROTECTION");
+      }
       else if (trait is ResistanceTrait resist) 
       {
         List<(Colour, string)> statusLine;

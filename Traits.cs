@@ -119,6 +119,32 @@ class AttackVerbTrait(Verb verb) : Trait
   public override string AsText() => $"AttackVerb#{Verb}";
 }
 
+class AuraOfProtectionTrait : TemporaryTrait
+{
+  public int HP { get; set; }
+
+  public override List<Message> Apply(Actor target, GameState gs)
+  {
+    List<Message> messages = [];
+    if (target.Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault() is AuraOfProtectionTrait aura)
+    {
+      aura.HP += HP;
+      string txt = $"The aura surrounding {target.FullName} brightens.";
+      messages.Add(new Message(txt, target.Loc));
+    }
+    else
+    {
+      target.Traits.Add(this);
+      string txt = $"A shimmering aura surrounds {target.FullName}.";
+      messages.Add(new Message(txt, target.Loc));
+    }
+    
+    return messages;
+  }
+
+  public override string AsText() => $"AuraOfProtection#{HP}";
+}
+
 class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
@@ -693,6 +719,8 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "seeinvisible" => 
         new UseResult(true, "", new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
             { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
+    "protection" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
+                        new AuraOfProtectionTrait() { HP = 25 }, item), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1661,6 +1689,7 @@ class TraitFactory
       Enum.TryParse(pieces[1], out Verb verb);
       return new AttackVerbTrait(verb);
     }},
+    { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {

@@ -236,8 +236,10 @@ class PlayerCreator
     }
 
     player.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb), player.ID);
-
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
+    player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
+    
     //player.Inventory.Add(ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb), player.ID);
 
     //for (int i = 0; i < 10; i++)

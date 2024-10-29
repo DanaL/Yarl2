@@ -153,9 +153,9 @@ enum ItemNames
   LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_COLD_RES, POTION_FIRE_RES,
   POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
   RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
-  SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_RECALL, SHIELD,
-  SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR,
-  STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
+  SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
+  SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
+  SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
   WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
 }
@@ -501,6 +501,18 @@ class ItemFactory
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("magicmap"));
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.SCROLL_PROTECTION:
+        item = new Item()
+        {
+          Name = "scroll of protection", Type = ItemType.Scroll,
+          Value = 125, Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new UseSimpleTrait("protection"));
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new WrittenTrait());
         item.Traits.Add(new StackableTrait());

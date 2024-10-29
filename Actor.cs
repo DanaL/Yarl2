@@ -204,6 +204,23 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       msg += $" {weapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
     }
 
+    AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();
+    if (aura is not null)
+    {
+      aura.HP -= total;
+      if (aura.HP > 0)
+      {
+        msg += "The shimmering aura cracks.";
+        total = 0;
+      }
+      else
+      {
+        msg += "The shimmering aura shatters into glitter and sparks!";
+        total = -1 * aura.HP;
+        Traits.Remove(aura);
+      }
+    }
+
     Stats[Attribute.HP].Curr -= total;
 
     if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)
