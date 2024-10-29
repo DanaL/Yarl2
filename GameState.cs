@@ -64,6 +64,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.BrokenDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
+    { TileType.BrokenPortcullis, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -76,7 +77,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.BrokenDoor, 1 },
     { TileType.ClosedDoor, 1 },
     { TileType.WoodBridge, 1 },
-    { TileType.OpenPortcullis, 1 }
+    { TileType.OpenPortcullis, 1 },
+    { TileType.BrokenPortcullis, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -91,7 +93,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.DeepWater, 1 },
     { TileType.Water, 1 },
     { TileType.Chasm, 1 },
-    { TileType.OpenPortcullis, 1 }
+    { TileType.OpenPortcullis, 1 },
+    { TileType.BrokenPortcullis, 1 }
   };
 
   public void WriteMessages(List<Message> alerts, string ifNotSeen) => UI.AlertPlayer(alerts, ifNotSeen, this);
