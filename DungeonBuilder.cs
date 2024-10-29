@@ -718,43 +718,49 @@ class MainDungeonBuilder : DungeonBuilder
     return corners;
   }
 
-  static void SetTraps(Map map, int dungeonID, int level, int depth, Random rng)
-  {    
+  static void SetTraps(Map map, int dungeonID, int level, int dungeonDepth, Random rng)
+  {
+    int[] trapOpts;
+    if (level == 0)
+      trapOpts = [0, 3, 3, 4, 5];
+    else if (level == dungeonDepth - 1)
+      trapOpts = [0, 1, 2, 3, 4]; // no trap doors on bottom level
+    else
+      trapOpts = [0, 1, 2, 3, 4, 5];
+   
+    (int, int) sq;
     int numOfTraps = rng.Next(1, 6);
     for (int j = 0 ; j < numOfTraps; j++)
     {
-      int roll = rng.Next(6);
-      if (roll == 0 && level < depth - 1)
+      int trap = trapOpts[rng.Next(trapOpts.Length)];
+      switch (trap)
       {
-        var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
+        case 0:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
+          break;
+        case 1:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
+          break;
+        case 2:
+          var corners = FindCorners(map, dungeonID, level);
+          var (corner, dir) = corners[0];
+          FireJetTrap(map, corner, dir, rng);
+          break;
+        case 3:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
+          break;
+        case 4:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
+          break;
+        case 5:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
+          break;
       }
-      else if (roll == 1)
-      {
-        var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
-      }
-      else if (roll == 2)
-      {
-        var corners = FindCorners(map, dungeonID, level);
-        var (corner, dir) = corners[0];
-        FireJetTrap(map, corner, dir, rng);
-      }
-      else if (roll == 3 || roll == 4)
-      {
-        var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
-      }
-      else if (roll == 5)
-      {
-        var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
-      }
-      else
-      {
-        var sq = map.RandomTile(TileType.DungeonFloor, rng);
-        map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
-      }        
     }
   }
 
@@ -849,7 +855,7 @@ class MainDungeonBuilder : DungeonBuilder
     map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
   }
 
-  static void PutSecretsDoorInHallways(Map map, Random rng)
+  static void PutSecretDoorsInHallways(Map map, Random rng)
   {
     List<(int, int)> candidates = [];
     for (int r = 0; r < map.Height; r++)
@@ -989,7 +995,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     // Add rivers/chasms and traps to some of the levels
-    for (int levelNum = 0; levelNum < numOfLevels - 1; levelNum++)
+    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
       if (rng.Next(4) == 0)
       {
@@ -1032,7 +1038,7 @@ class MainDungeonBuilder : DungeonBuilder
 
       // Sometimes add a secret door or two in hallways
       if (rng.Next(2) == 0)
-        PutSecretsDoorInHallways(levels[levelNum], rng);
+        PutSecretDoorsInHallways(levels[levelNum], rng);
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
