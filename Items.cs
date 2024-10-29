@@ -401,7 +401,7 @@ class ItemFactory
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new SideEffectTrait()
         {
-          Odds = 20,
+          Odds = 100,
           Effect = "BoostMaxStat#HP#2"
         });
 

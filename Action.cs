@@ -1415,10 +1415,6 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
       Message msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
       txt = msg.Text[..^1] + $" for {hp} HP.";
     }
-    else if (target is Player)
-    {
-      txt = "It has a medicinal after-taste but otherwise no effect.";
-    }
     else
     {
       txt = "";

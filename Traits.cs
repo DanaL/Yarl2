@@ -874,15 +874,30 @@ class BoostMaxStatTrait : TemporaryTrait
 
   public override List<Message> Apply(Actor target, GameState gs)
   {
-    if (target.Stats.TryGetValue(Stat, out Stat? stat))
+    if (!target.Stats.TryGetValue(Stat, out Stat? stat))
+      return [];
+
+    List<Message> msgs = [];
+
+    // For max HP, we'll only change max if curr == max
+    // Note: not taking into account lowering a stat, if that's a thing that might happen
+    if (Stat == Attribute.HP)
+    {
+      if (target.Stats[Stat].Curr == target.Stats[Stat].Max) 
+      {
+        stat.ChangeMax(Amount);
+        stat.Change(Amount);
+        msgs.Add(new Message($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!", target.Loc));
+      }      
+    }
+    else
     {
       stat.ChangeMax(Amount);
       stat.Change(Amount);
+      msgs.Add(new Message($"{"".Possessive(target).Capitalize()}max {Stat} has changed!", target.Loc));
     }
 
-    Message msg = new($"{"".Possessive(target).Capitalize()}max {Stat} has changed!", target.Loc);
-
-    return [msg];
+    return msgs;
   }
 
   public override string AsText() => $"BoostMaxStat#{Stat}#{Amount}";
