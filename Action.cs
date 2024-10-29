@@ -1413,7 +1413,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
     if (delta > 0)
     {
       Message msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
-      txt = msg.Text[..^1] + $" for {hp} HP.";
+      txt = msg.Text[..^1] + $" for {delta} HP.";
     }
     else
     {
