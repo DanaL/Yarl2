@@ -36,6 +36,7 @@ class Player : Actor, IPerformer, IGameEventListener
   Inputer? _inputController;
   Action? _deferred;
   public bool Running { get; set; } = false;
+  
   char RepeatingCmd { get; set; }
   HashSet<Loc> LocsRan { get; set; } = [];
 
@@ -286,42 +287,25 @@ class Player : Actor, IPerformer, IGameEventListener
     _inputController = inputer;
   }
 
-  static bool IsMoveKey(char ch) => ch switch
+  private static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
   {
-    'h' => true,
-    'j' => true,
-    'k' => true,
-    'l' => true,
-    'y' => true,
-    'u' => true,
-    'b' => true,
-    'n' => true,
-    _ => false
+    ['h'] = (0, -1),   // left
+    ['j'] = (1, 0),    // down
+    ['k'] = (-1, 0),   // up
+    ['l'] = (0, 1),    // right
+    ['y'] = (-1, -1),  // up-left
+    ['u'] = (-1, 1),   // up-right
+    ['b'] = (1, -1),   // down-left
+    ['n'] = (1, 1)     // down-right
   };
 
-  static (int, int) KeyToDir(char ch) => ch switch
-  {
-    'h' => (0, -1),
-    'j' => (1, 0),
-    'k' => (-1, 0),
-    'l' => (0, 1),
-    'y' => (-1, -1),
-    'u' => (-1, 1),
-    'b' => (1, -1),
-    _ => (1, 1)
-  };
+  static bool IsMoveKey(char ch) => MovementDirections.ContainsKey(ch);
 
-  static char DirToKey((int, int) dir) => dir switch
-  {
-    (0, -1) => 'h',
-    (1, 0) => 'j',
-    (-1, 0) => 'k',
-    (0, 1) => 'l',
-    (-1, -1) => 'y',
-    (-1, 1) => 'u',
-    (1, -1) => 'b',
-    _ => 'n'
-  };
+  static (int, int) KeyToDir(char ch) => 
+    MovementDirections.TryGetValue(ch, out var dir) ? dir : (0, 0);
+
+  static char DirToKey((int dr, int dc) dir) => 
+    MovementDirections.FirstOrDefault(x => x.Value == dir).Key;
 
   bool AttackingWithReach()
   {
