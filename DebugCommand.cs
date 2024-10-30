@@ -99,16 +99,16 @@ class DebugCommand(GameState gs)
 
   private string AddMonster(string monsterName)
   {
-    var adjacentSpots = Util.Adj8Locs(_gs.Player.Loc)
-        .Where(loc => !_gs.ObjDb.Occupied(loc))
+    var adjSpots = Util.Adj8Locs(_gs.Player.Loc)
+        .Where(loc => !_gs.ObjDb.Occupied(loc) && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable())
         .ToList();
 
-    if (adjacentSpots.Count == 0)
+    if (adjSpots.Count == 0)
       return "No open spot to add monster";
 
     try
     {
-      var spawnLoc = adjacentSpots[_gs.Rng.Next(adjacentSpots.Count)];
+      var spawnLoc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
       var monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
 
       _gs.ObjDb.AddNewActor(monster, spawnLoc);
