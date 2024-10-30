@@ -35,7 +35,7 @@ class DumbMoveStrategy : IMoveStrategy
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
       
       // We still check if the tile is passable because, say, a door might be
-      // closed after the current djikstra map is calculated and before it is
+      // closed after the current dijkstra map is calculated and before it is
       // refreshed
       if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
@@ -183,7 +183,7 @@ class MonsterBehaviour : IBehaviour
       else if (act.Name == "DrainTorch")
       {
         return new DrainTorchAction(gs, mob, CalcRangedTarget(mob, gs));
-      }
+      }      
     }
     else if (act is ConfusingScreamTrait scream)
     {
@@ -226,6 +226,10 @@ class MonsterBehaviour : IBehaviour
       }
 
       return new PassAction();
+    }
+    else if (act is ShriekTrait shriek)
+    {
+      return new ShriekAction(gs, mob, shriek.ShriekRadius);
     }
 
     return new NullAction();

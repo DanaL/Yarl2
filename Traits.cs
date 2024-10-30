@@ -74,7 +74,7 @@ abstract class ActionTrait : BasicTrait
   // from further away. Ie., gobin archer has one attack from distance 2 to 7
   // and another they use when they are in melee range.
   public int MinRange { get; set; } = 0;
-  public int MaxRange { get; set; } = 0;
+  public virtual int MaxRange { get; set; } = 0;
   public ulong Cooldown { get; set; } = 0;
   public string Name { get; set; } = "";
 
@@ -1183,6 +1183,17 @@ class RetributionTrait : Trait
   public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}";
 }
 
+class ShriekTrait : ActionTrait
+{
+  public override int MaxRange => 1;
+
+  public int ShriekRadius { get; set; }
+
+  public override bool Available(Mob actor, GameState gs) => InRange(actor, gs);
+
+  public override string AsText() => $"Shriek#{Cooldown}#{ShriekRadius}";
+}
+
 class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
 {
   public DamageTrait OneHanded { get; set; } = oneHanded;
@@ -1841,6 +1852,10 @@ class TraitFactory
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
+    { "Shriek", (pieces, gameObj) => 
+      new ShriekTrait() 
+      { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) } 
+    },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
     { "SpellAction", (pieces, gameObj) => new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]) }},

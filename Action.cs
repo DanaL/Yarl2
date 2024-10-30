@@ -193,6 +193,22 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? it
   }
 }
 
+class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
+{
+  int Radius { get; set; } = radius;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Messages.Add(new Message($"{Actor!.FullName.Capitalize()} lets out a piercing shriek!", Actor.Loc));
+
+    GameState!.Noise(Actor!.Loc.Row, Actor!.Loc.Col, Radius, true);
+   
+    return result;
+  }
+} 
+
 class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, int radius, string txt) : Action(gs, actor)
 {
   Loc Target { get; set; } = target;
@@ -272,7 +288,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
         result.Messages.Add(new Message("The door holds firm!", Target));
       }
 
-      gs.Noise(Target.Row, Target.Col, 5);
+      gs.Noise(Target.Row, Target.Col, 5, false);
     }
 
     // I should impose a small chance of penalty/injury so that spamming

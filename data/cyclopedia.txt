@@ -85,3 +85,6 @@ A spout that will spray you with water, leaving you soaking wet.
 #
 creeping coins
 A pile of coins, sitting there to be claimed. Wait. Did it just move?
+#
+shrieker
+A large fungus that shrieks loudly when a creature is nearby. Its ecology is a mystery.

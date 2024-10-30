@@ -6,6 +6,7 @@ skeleton 2
 zombie 2
 floating eye 1
 chilled jelly 1
+shrieker 1
 LEVEL 2
 kobold 4
 skeleton 2
@@ -14,6 +15,7 @@ dire bat 2
 floating eye 1
 centipede 2
 chilled jelly 1
+shrieker 1
 LEVEL 3
 kobold foreman 2
 jelly 1
@@ -21,6 +23,7 @@ floating eye 1
 will-o-wisp 1
 phantom 1
 chilled jelly 1
+shrieker 1
 LEVEL 4
 giant spider 1
 screech bat 1
@@ -32,6 +35,7 @@ creeping coins 1
 will-o-wisp 1
 phantom 1
 chilled jelly 1
+shrieker 1
 LEVEL 5
 giant spider 1
 screech bat 1
@@ -43,3 +47,4 @@ will-o-wisp 1
 troll 1
 creeping coins 1
 phantom 1
+shrieker 1
