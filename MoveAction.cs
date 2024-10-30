@@ -93,8 +93,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     else if (GameState.ObjDb.Occupied(_loc))
     {
       result.Complete = false;
-      var occ = GameState.ObjDb.Occupant(_loc);
-      if (occ.Behaviour is VillagePupBehaviour)
+      Actor? occ = GameState.ObjDb.Occupant(_loc);
+      if (occ is not null && occ.Behaviour is VillagePupBehaviour)
       {
         string msg;
         if (GameState.Rng.NextDouble() < 0.5)
