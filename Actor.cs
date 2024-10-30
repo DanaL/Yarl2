@@ -397,7 +397,7 @@ class MonsterFactory
       LoadCatalog();
 
     if (!_catalog.TryGetValue(name, out string? template))
-      throw new Exception($"{name}s don't seem to exist in this world!");
+      throw new UnknownMonsterException(name);
 
     var fields = template.Split('|').Select(f => f.Trim()).ToArray();
 

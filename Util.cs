@@ -800,3 +800,7 @@ class AbnormalMovement(Loc dest) : Exception
 {
   public Loc Dest { get; set; } = dest; 
 }
+class UnknownMonsterException(string name) : Exception
+{
+  public string Name { get; set; } = name;
+}

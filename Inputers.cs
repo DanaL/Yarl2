@@ -541,6 +541,62 @@ class HelpScreenInputer : Inputer
   }
 }
 
+class WizardCommander : Inputer
+{
+  readonly GameState _gs;
+  string Buffer { get; set; } = "";
+  string ErrorMessage { get; set; } = "";
+
+  public WizardCommander(GameState gs) 
+  {
+    _gs = gs;
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (ch == Constants.BACKSPACE)
+    {
+      if (Buffer.Length > 0)
+        Buffer = Buffer[..^1];
+      ErrorMessage = "";
+    }
+    else if (ch == '\n' || ch == '\r')
+    {    
+      DebugCommand cmd = new(_gs);
+      ErrorMessage = cmd.DoCommand(Buffer);
+
+      Console.WriteLine(ErrorMessage);
+      if (ErrorMessage == "")
+      {
+        Done = true;
+        Success = true;
+      }
+    }
+    else
+    {
+      Buffer += ch;
+      ErrorMessage = "";
+    }
+
+    WritePopup();
+  }
+
+  void WritePopup()
+  {
+    string message = Buffer;
+    if (!string.IsNullOrEmpty(ErrorMessage))
+      message += $"\n\n[BRIGHTRED {ErrorMessage}]";
+    
+    _gs.UIRef().SetPopup(new Popup(message, "Debug Command", -1, -1));
+  }
+}
+
 class Dialoguer : Inputer
 {
   readonly Mob _interlocutor;

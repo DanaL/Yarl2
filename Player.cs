@@ -707,7 +707,12 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _inputController = new Examiner(gameState, Loc);
         _deferred = new NullAction();
-      }     
+      }
+      else if (ch == 'W')
+      {
+        _inputController = new WizardCommander(gameState);
+        _deferred = new NullAction();
+      }
       else if (ch == ' ' || ch == '.')
         return new PassAction();
     }

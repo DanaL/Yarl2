@@ -235,45 +235,6 @@ class PlayerCreator
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), player.ID);
-
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
-    player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb), player.ID);
-
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.RING_OF_AGGRESSION, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get("antidote", objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), player.ID);
-
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_IDENTIFY, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), player.ID);
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb), player.ID);
-
-    //player.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb), player.ID);
-
     var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
