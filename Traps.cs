@@ -9,6 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using Microsoft.VisualBasic;
+using SDL2;
+
 namespace Yarl2;
 
 class Traps
@@ -130,6 +133,42 @@ class Traps
       string s = player.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
       if (s != "")
         msgs.Add(new Message(s, loc));
+      gs.WriteMessages(msgs, "");
+    }
+    else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
+    {
+      player.Running = false;
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
+      
+      string s = gs.Rng.Next(3) switch
+      {
+        0 => "A magic mouth shouts, \"Get a load of this guy!\"",
+        1 => "A magic mouth shouts, \"Hey we got an adventurer over here!\"",
+        _ => "A magic mouth shrieks!"
+      };
+
+      // Wake up nearby monsters within 10 squares
+      List<Message> msgs = [new Message(s, loc)];
+      for (int r = loc.Row - 10; r <= loc.Row + 10; r++)
+      {
+        for (int c = loc.Col - 10; c <= loc.Col + 10; c++)
+        {
+          if (!gs.CurrentMap.InBounds(r, c))
+            continue;
+          
+          var checkLoc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
+          if (gs.ObjDb.Occupant(checkLoc) is Actor monster && monster != player)
+          {
+            var sleeping = monster.Traits.FirstOrDefault(t => t is SleepingTrait);
+            if (sleeping is not null)
+            {
+              monster.Traits.Remove(sleeping);
+              if (gs.LastPlayerFoV.Contains(checkLoc))
+                msgs.Add(new Message($"{monster.FullName.Capitalize()} wakes up!", checkLoc));
+            }
+          }          
+        }
+      }
       gs.WriteMessages(msgs, "");
     }
   }

@@ -27,7 +27,8 @@ enum TileType
   Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
-  FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap
+  FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
+  MagicMouth, HiddenMagicMouth
 }
 
 interface ITriggerable
@@ -112,6 +113,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pit => true,
     TileType.WaterTrap => true,
     TileType.HiddenWaterTrap => true,
+    TileType.MagicMouth => true,
+    TileType.HiddenMagicMouth => true,
     _ => false
   };
 
@@ -177,6 +180,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pit => "pit",
     TileType.HiddenWaterTrap => "stone floor",
     TileType.WaterTrap => "water trap",
+    TileType.MagicMouth => "a magic mouth",
+    TileType.HiddenMagicMouth => "stone floor",
     _ => "unknown"
   };
 
@@ -406,6 +411,8 @@ class TileFactory
   private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
   private static readonly Tile HiddenWaterTrap = new BasicTile(TileType.HiddenWaterTrap, true, false, true);
   private static readonly Tile WaterTrap = new BasicTile(TileType.WaterTrap, true, false, true);
+  private static readonly Tile MagicMouth = new BasicTile(TileType.MagicMouth, true, false, true);
+  private static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -460,6 +467,8 @@ class TileFactory
     TileType.Pit => Pit,
     TileType.HiddenWaterTrap => HiddenWaterTrap,
     TileType.WaterTrap => WaterTrap,
+    TileType.MagicMouth => MagicMouth,
+    TileType.HiddenMagicMouth => HiddenMagicMouth,
     _ => Unknown
   };
 }
