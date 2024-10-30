@@ -36,16 +36,52 @@ namespace Yarl2
         // TODO: replace with something less lame...
         public static string TownName(Random rng)
         {
-            string[] prefixes = [ "Upper ", "Lower ", "North ", "South ", "East ", "West ", "New ", "Old "];
-            string[] main = [ "Stone", "Black", "Green", "Red", "Deer", "Gold", "Silver", "Blue", "Iron", "Last", "Lost"];
-            string[] suffixes = [ "ton", "ville", "ford", " By-the-Sea", " Shore", " Downs", "wood", "moor", "peak", "burg", " Peaks" ," Woods", " Meadow", "road"];
+            string[] prefixes = [
+                "Upper", "Lower", "North", "South", "East", "West",
+                "High", "Low", "Mid", "Far", "Lost"
+            ];
+
+            string[] historicalPrefixes = [
+                "New", "Old", "Great", "Little", "Kings", "Queens", "Grand"
+            ];
+
+            // Main elements that work both as prefixes and standalone
+            string[] main = [
+                "River", "Lake", "Wood", "Forest", "Hill", "Dale",
+                "Green", "White", "Black",
+                "Stone", "Iron", "Silver", "Golden",
+                "Raven", "Deer", "Wolf", "Eagle",
+                "Oak", "Elm", "Rose", "Thorn"
+            ];
+
+            // Suffixes with rules for spacing
+            (string, bool)[] suffixes = [
+                // Settlement suffixes (no space)
+                ("ton", false), ("ford", false), ("burgh", false), ("vale", false),
+                ("dale", false), ("wood", false), ("moor", false), ("field", false),
+                // Descriptive suffixes (with space)
+                ("Valley", true), ("Peak", true), ("Shore", true), ("Heath", true),
+                ("Meadow", true), ("Creek", true), ("Ridge", true)
+            ];
 
             string name = "";
-            if (rng.NextDouble() < 0.5)
-                name = prefixes[rng.Next(prefixes.Length)];
+            
+            if (rng.NextDouble() < 0.6)
+            {
+              Console.WriteLine("flag");
+              var allPrefixes = rng.NextDouble() < 0.6 ? prefixes : historicalPrefixes;
+              name = allPrefixes[rng.Next(allPrefixes.Length)] + " ";
+            }
+
+            // Main name component (always present)
             name += main[rng.Next(main.Length)];
-            if (rng.NextDouble() < 0.75 || name.IndexOf(' ') == -1)
-                name += suffixes[rng.Next(suffixes.Length)];
+
+            // 70% chance of suffix, guaranteed if name has no space yet
+            if (rng.NextDouble() < 0.7 || !name.Contains(' '))
+            {
+                var (suffix, needsSpace) = suffixes[rng.Next(suffixes.Length)];
+                name += needsSpace ? " " + suffix : suffix;
+            }
 
             return name;
         }
