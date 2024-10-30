@@ -241,17 +241,15 @@ class MonsterBehaviour : IBehaviour
 
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
-    if (actor.Status == MobAttitude.Idle)
-    {
+    if (actor.HasTrait<SleepingTrait>())
       return new PassAction();
-    }
 
     // Should prioritize an escape action if the monster is hurt?
     // Maybe mobs can eventually have a bravery stat?
     // Maybe there should be MobAttitude.Scare or Fleeing and then
     // if they are Fleeing try to get away
     
-    if (actor.HasTrait<WorshiperTrait>() && (actor.Status == MobAttitude.Active || actor.Status == MobAttitude.Indifferent))
+    if (actor.HasTrait<WorshiperTrait>() && actor.HasTrait<IndifferentTrait>())
     {
       var wt = actor.Traits.OfType<WorshiperTrait>().First();
       // Worshippers just hang out near their altar until they become hostile.

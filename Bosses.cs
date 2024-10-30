@@ -35,7 +35,6 @@ class BossFactory
       Glyph = glyph
     };
     prince.SetBehaviour(new PrinceOfRatsBehaviour());
-    prince.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Idle);
     
     prince.Stats.Add(Attribute.HP, new Stat(80));
     prince.Stats.Add(Attribute.MonsterForm, new Stat(0));
@@ -140,7 +139,7 @@ class PrinceOfRatsBehaviour : IBehaviour
       return true;
     }
 
-    if (actor.Status == MobAttitude.Idle)
+    if (actor.HasTrait<IndifferentTrait>())
     {
       return new PassAction();
     }

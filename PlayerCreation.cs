@@ -292,7 +292,6 @@ class PlayerCreator
       Energy = 1.0
     };
     player.Stats = RollStats(player.Lineage, player.Background, rng);
-    player.Stats.Add(Attribute.Attitude, new Stat((int)MobAttitude.Active));
 
     player.Inventory = new Inventory(player.ID, objDb);
 

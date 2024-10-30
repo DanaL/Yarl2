@@ -380,6 +380,16 @@ class ResistanceTrait : TemporaryTrait
   }
 }
 
+class SleepingTrait : Trait
+{
+  public override string AsText() => "Sleeping";
+}
+
+class IndifferentTrait : Trait
+{
+  public override string AsText() => "Indifferent";
+}
+
 class StickyTrait : BasicTrait
 {
   public int DC => 13;
@@ -1735,6 +1745,7 @@ class TraitFactory
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
+    { "Indifferent", (pieces, gameObj) => new IndifferentTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Grants", (pieces, gameObj) => new GrantsTrait() { TraitsGranted = pieces[1].Split(';') }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
@@ -1831,6 +1842,7 @@ class TraitFactory
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
+    { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
     { "SpellAction", (pieces, gameObj) => new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]) }},
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },

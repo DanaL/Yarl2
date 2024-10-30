@@ -23,16 +23,6 @@ interface IPerformer
   Action TakeTurn(GameState gameState);
 }
 
-// I wonder if a simple status will be enough
-enum MobAttitude
-{
-  Idle = 0,
-  Active = 1,
-  Indifferent = 2,
-  Friendly = 3,
-  Hostile = 4
-}
-
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
@@ -116,17 +106,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     return baseNoise;
   }
 
-  public MobAttitude Status
-  {
-    get
-    {
-      if (!Stats.TryGetValue(Attribute.Attitude, out Stat? value))
-        return MobAttitude.Idle;
-
-      return (MobAttitude)value.Curr;
-    }    
-  }
-
   public bool AbleToMove() 
   {
     foreach (var t in Traits)
@@ -149,19 +128,16 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     string msg = "";
 
-    if (Status == MobAttitude.Idle || Status == MobAttitude.Active)
-    {
-      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
+    Traits.RemoveAll(t => t is SleepingTrait || t is IndifferentTrait);
 
-      // If we have allies, let them know we've turned hostile
-      if (Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
+    // If we have allies, let them know we've turned hostile
+    if (Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
+    {
+      foreach (ulong id in allies.IDs)
       {
-        foreach (ulong id in allies.IDs)
+        if (gs.ObjDb.GetObj(id) is Mob ally && gs.CanSeeLoc(ally, Loc, 6))
         {
-          if (gs.ObjDb.GetObj(id) is Mob ally && ally.Status != MobAttitude.Hostile && gs.CanSeeLoc(ally, Loc, 6))
-          {
-            ally.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
-          }
+          ally.Traits.RemoveAll(t => t is SleepingTrait || t is IndifferentTrait);
         }
       }
     }
@@ -287,7 +263,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       var half = Stats[Attribute.HP].Curr - hp;
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
-      other.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
       
       var msg = new Message($"{Name.DefArticle()} divides into two!!", Loc, false);
       gs.UIRef().AlertPlayer([msg], "", gs);
@@ -318,7 +293,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     if (gameState.CanSeeLoc(this, other.Loc, 6))
     {
-      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Hostile);
+      Traits.RemoveAll(t => t is IndifferentTrait);
       string txt = $"{FullName.Capitalize()} gets angry!";
       return new Message(txt, Loc);
     }
@@ -362,10 +337,10 @@ class Mob : Actor
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
 
-    if (heard && Status == MobAttitude.Idle)
+    if (heard && HasTrait<SleepingTrait>())
     {
       Console.WriteLine($"{Name} wakes up");
-      Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
+      Traits.RemoveAll(t => t is SleepingTrait);
     }
   }
 
@@ -477,8 +452,6 @@ class MonsterFactory
     if (name == "zombie" && rng.Next(100) == 0)
       m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
     
-    var status = rng.NextDouble() < 0.8 ? MobAttitude.Idle : MobAttitude.Active;
-    m.Stats[Attribute.Attitude] = new Stat((int)status);
     return m;
   }
 }

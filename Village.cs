@@ -148,7 +148,6 @@ class Village
   static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob cleric = BaseVillager(ng, rng);
-    cleric.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     cleric.Traits.Add(new NamedTrait());
     cleric.Traits.Add(new VillagerTrait());
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "priest.txt" });
@@ -163,7 +162,6 @@ class Village
   static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob grocer = BaseVillager(ng, rng);
-    grocer.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     grocer.Traits.Add(new NamedTrait());
     grocer.Traits.Add(new VillagerTrait());
 
@@ -188,7 +186,6 @@ class Village
   static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob smith = BaseVillager(ng, rng);
-    smith.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     smith.Traits.Add(new NamedTrait());
     smith.Traits.Add(new VillagerTrait());
 
@@ -239,7 +236,6 @@ class Village
   static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob mayor = BaseVillager(ng, rng);
-    mayor.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     mayor.Traits.Add(new NamedTrait());
     mayor.Traits.Add(new VillagerTrait());
     mayor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "mayor.txt" });
@@ -256,7 +252,6 @@ class Village
   static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob veteran = BaseVillager(ng, rng);
-    veteran.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     veteran.Traits.Add(new NamedTrait());
     veteran.Traits.Add(new VillagerTrait());
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
@@ -283,7 +278,6 @@ class Village
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob villager = BaseVillager(ng, rng);
-    villager.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     villager.Traits.Add(new NamedTrait());
     villager.Traits.Add(new VillagerTrait());
     villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
@@ -300,7 +294,6 @@ class Village
   static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob widower = BaseVillager(ng, rng);
-    widower.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     widower.Traits.Add(new NamedTrait());
     widower.Traits.Add(new VillagerTrait());
     widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
@@ -352,7 +345,6 @@ class Village
       Glyph = new Glyph('d', colour, colour, Colours.BLACK, Colours.BLACK),
       Loc = RandomOutdoorLoc(map, town, rng)
     };
-    pup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Indifferent);
     pup.SetBehaviour(new VillagePupBehaviour());
     pup.Traits.Add(new VillagerTrait());
 

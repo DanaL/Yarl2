@@ -430,6 +430,8 @@ class PreGameHandler(UserInterface ui)
         // Some monsters are a bit special and take a bit of extra work
         Actor monster = MonsterFactory.Get(m, objDb, rng);
         monster.Loc = loc;
+        if (rng.NextDouble() < 0.8)
+          monster.Traits.Add(new SleepingTrait());
         objDb.Add(monster);
         objDb.AddToLoc(loc, monster);
       }
@@ -463,7 +465,6 @@ class PreGameHandler(UserInterface ui)
       DamageType = DamageType.Blunt
     });
 
-    gargoyle.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
     gargoyle.Stats[Attribute.InDisguise] = new Stat(1);
 
     var disguise = new DisguiseTrait()

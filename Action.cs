@@ -1010,7 +1010,6 @@ class MirrorImageAction : Action
     dup.Stats.Add(Attribute.HP, new Stat(1));
     dup.Stats.Add(Attribute.AC, new Stat(10));
     dup.Traits.Add(new FlyingTrait());
-    dup.Stats[Attribute.Attitude] = new Stat((int)MobAttitude.Active);
 
     var illusion = new IllusionTrait()
     {

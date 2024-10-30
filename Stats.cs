@@ -35,7 +35,6 @@ enum Attribute
   HomeID,
   DialogueState, // I can eliminate this once the new dialogue system is done
   Markup,
-  Attitude,
   InDisguise,
   MonsterForm,
   ArcheryBonus,

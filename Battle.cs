@@ -192,7 +192,7 @@ class Battle
     // If melee attacking an Idle target, deal double damage.
     // Note: I need to make sure immobile monsters like vines 
     // aren't always getting double dmg
-    if (target.Status == MobAttitude.Idle)
+    if (target.HasTrait<SleepingTrait>())
     {
       string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "strike")} {target.FullName} at unawares.";
       result.Messages.Add(new Message(txt, target.Loc));
