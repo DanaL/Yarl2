@@ -537,7 +537,7 @@ class TownBuilder
   // I'll do paths between the buildings later. (If townsfolk eventually are 'friends' with
   // each other, maybe draw a path between their homes)
   //
-  // This can maybe be replaced by a Djikstra Map with a building's door as the start and
+  // This can maybe be replaced by a Dijkstra Map with a building's door as the start and
   // the down square as the goal?
   void DrawPathsInTown(Map map, Random rng, int townRow, int townCol)
   {
@@ -581,7 +581,7 @@ class TownBuilder
     passable.Add(TileType.Water, 3);
     passable.Add(TileType.DeepWater, 3);
 
-    var dmap = new DjikstraMap(map, 129, 129);
+    var dmap = new DijkstraMap(map, 129, 129);
     dmap.Generate(passable, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)

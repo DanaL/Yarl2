@@ -13,12 +13,12 @@ using Yarl2;
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
-class DjikstraMap(Map map, int height, int width)
+class DijkstraMap(Map map, int height, int width)
 {
   Map Map { get; set; } = map;
   int Height { get; set; } = height;
   int Width { get; set; } = width;
-  int[,]? _djikstraMap { get; set; }
+  int[,]? _dijkstraMap { get; set; }
 
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
@@ -27,17 +27,17 @@ class DjikstraMap(Map map, int height, int width)
   // single goal.
   public void Generate(Dictionary<TileType, int> passable, (int Row, int Col) goal, int maxRange)
   {
-    _djikstraMap = new int[Height, Width];
+    _dijkstraMap = new int[Height, Width];
 
     for (int r = 0; r < Height; r++)
     {
       for (int c = 0; c < Width; c++)
       {
-        _djikstraMap[r, c] = int.MaxValue;
+        _dijkstraMap[r, c] = int.MaxValue;
       }
     }
 
-    _djikstraMap[goal.Row, goal.Col] = 0;
+    _dijkstraMap[goal.Row, goal.Col] = 0;
 
     var q = new Queue<(int, int)>();
     foreach (var sq in Util.Adj4Sqs(goal.Row, goal.Col))
@@ -68,12 +68,12 @@ class DjikstraMap(Map map, int height, int width)
       {
         if (n.Item1 < 0 || n.Item2 < 0 || n.Item1 >= Height || n.Item2 >= Width)
           continue;
-        if (_djikstraMap[n.Item1, n.Item2] < cheapestNeighbour)
-          cheapestNeighbour = _djikstraMap[n.Item1, n.Item2];
+        if (_dijkstraMap[n.Item1, n.Item2] < cheapestNeighbour)
+          cheapestNeighbour = _dijkstraMap[n.Item1, n.Item2];
         if (!visited.Contains(n))
           q.Enqueue(n);
       }
-      _djikstraMap[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
+      _dijkstraMap[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
       visited.Add(sq);
     }
   }
@@ -89,7 +89,7 @@ class DjikstraMap(Map map, int height, int width)
       return [];
     }
 
-    int score = _djikstraMap[currRow, currCol];
+    int score = _dijkstraMap[currRow, currCol];
 
     while (score != 0)
     {
@@ -99,10 +99,10 @@ class DjikstraMap(Map map, int height, int width)
       {
         if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= Height || adj.Item2 >= Width)
           continue;
-        if (_djikstraMap[adj.Item1, adj.Item2] < cost)
+        if (_dijkstraMap[adj.Item1, adj.Item2] < cost)
         {
           next = (adj.Item1, adj.Item2);
-          cost = _djikstraMap[adj.Item1, adj.Item2];
+          cost = _dijkstraMap[adj.Item1, adj.Item2];
         }
       }
 
@@ -123,8 +123,8 @@ class DjikstraMap(Map map, int height, int width)
 
     foreach (var (nr, nc) in Util.Adj8Sqs(row, col))
     {
-      if (_djikstraMap[nr, nc] < int.MaxValue)
-        adj.Add((nr, nc, _djikstraMap[nr, nc]));
+      if (_dijkstraMap[nr, nc] < int.MaxValue)
+        adj.Add((nr, nc, _dijkstraMap[nr, nc]));
     }
 
     return [.. adj.OrderBy(v => v.Item3)];

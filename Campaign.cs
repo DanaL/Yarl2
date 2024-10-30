@@ -147,7 +147,7 @@ class PreGameHandler(UserInterface ui)
     int tcRow = town.Row + town.Height / 2;
     int tcCol = town.Col + town.Width / 2;
 
-    var dmap = new DjikstraMap(map, overWorldWidth, overWorldWidth);
+    var dmap = new DijkstraMap(map, overWorldWidth, overWorldWidth);
     var tt = map.TileAt(tcRow, tcCol);
 
     dmap.Generate(passable, (tcRow, tcCol), 257);

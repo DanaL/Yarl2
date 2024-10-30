@@ -31,10 +31,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
-  DjikstraMap? DMap { get; set; }
-  DjikstraMap? DMapDoors { get; set; }
-  DjikstraMap? DMapFlight { get; set; }
-  public DjikstraMap? GetDMap(string map = "")
+  DijkstraMap? DMap { get; set; }
+  DijkstraMap? DMapDoors { get; set; }
+  DijkstraMap? DMapFlight { get; set; }
+  public DijkstraMap? GetDMap(string map = "")
   {
     if (DMap is null || DMapDoors is null || DMapFlight is null)
       SetDMaps(Player.Loc);
@@ -743,14 +743,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void SetDMaps(Loc loc)
   {
-    DMap = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
+    DMap = new DijkstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMap.Generate(_passableBasic, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
+    DMapDoors = new DijkstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMapDoors.Generate(_passableWithDoors, (loc.Row, loc.Col), 25);
 
-    DMapFlight = new DjikstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
+    DMapFlight = new DijkstraMap(CurrentMap, CurrentMap.Height, CurrentMap.Width);
     DMapFlight.Generate(_passableFlying, (loc.Row, loc.Col), 25);
   }
 
@@ -841,7 +841,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     ObjDb.ActorMoved(actor, start, dest);
 
-    // Not making djikstra maps for the otherworld just yet.
+    // Not making dijkstra maps for the otherworld just yet.
     // Eventually I need to take into account whether or not
     // monsters can open doors, fly, etc. Multiple maps??
     if (actor is Player && dest.DungeonID > 0)
