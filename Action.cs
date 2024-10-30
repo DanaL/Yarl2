@@ -203,8 +203,21 @@ class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
     result.EnergyCost = 1.0;
     result.Messages.Add(new Message($"{Actor!.FullName.Capitalize()} lets out a piercing shriek!", Actor.Loc));
 
-    GameState!.Noise(Actor!.Loc.Row, Actor!.Loc.Col, Radius, true);
-   
+    for (int r = Actor.Loc.Row - Radius; r < Actor.Loc.Row + Radius; r++)
+    {
+      for (int c = Actor.Loc.Col - Radius; c < Actor.Loc.Col + Radius; c++)
+      {
+        if (!GameState!.CurrentMap.InBounds(r, c))
+          continue;
+        Loc loc = Actor.Loc with { Row = r, Col = c };
+        if (GameState.ObjDb.Occupant(loc) is Mob mob)
+        {
+          Console.WriteLine($"{mob.FullName.Capitalize()} wakes up");
+          mob.Traits = mob.Traits.Where(t => t is not SleepingTrait).ToList();
+        }
+      }
+    }
+
     return result;
   }
 } 
@@ -288,7 +301,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
         result.Messages.Add(new Message("The door holds firm!", Target));
       }
 
-      gs.Noise(Target.Row, Target.Col, 5, false);
+      gs.Noise(Target.Row, Target.Col, 5);
     }
 
     // I should impose a small chance of penalty/injury so that spamming

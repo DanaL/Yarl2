@@ -888,7 +888,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           trigger.Found = true;
 
         // The noise of the gate opening/closing could wake up nearby monsters
-        Noise(gateLoc.Row, gateLoc.Col, 7, false);
+        Noise(gateLoc.Row, gateLoc.Col, 7);
 
         return new Message("You hear a metallic grinding!", loc, false);
       }
@@ -1025,7 +1025,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // Make a noise in the dungeon, start at the source and flood-fill out 
   // decrementing the volume until we hit 0. We'll alert any Actors found
   // the noise
-  public HashSet<ulong> Noise(int startRow, int startCol, int volume, bool loud)
+  public HashSet<ulong> Noise(int startRow, int startCol, int volume)
   {
     var alerted = new HashSet<ulong>();
     var map = CurrentMap;
@@ -1059,7 +1059,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         var occ = ObjDb.Occupant(new Loc(CurrDungeonID, CurrLevel, n.Item1, n.Item2));
         if (occ is not null)
         {
-          occ.HearNoise(loud ? volume * 2 : volume, startRow, startCol, this);
+          occ.HearNoise(volume, startRow, startCol, this);
           alerted.Add(occ.ID);
         }
 

@@ -111,7 +111,7 @@ interface IDialoguer
 
 class MonsterBehaviour : IBehaviour
 {
-  Dictionary<string, ulong> _lastUse = [];
+  readonly Dictionary<string, ulong> _lastUse = [];
 
   bool Available(ActionTrait act, int distance, ulong turn)
   {
@@ -229,6 +229,7 @@ class MonsterBehaviour : IBehaviour
     }
     else if (act is ShriekTrait shriek)
     {
+      _lastUse[act.Name] = gs.Turn;
       return new ShriekAction(gs, mob, shriek.ShriekRadius);
     }
 
