@@ -576,7 +576,7 @@ abstract class UserInterface
     }
     if (!statuses.Contains("BLIND") && gs.Player.HasTrait<BlindTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "BLIND")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREY, "BLIND")];
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("BLIND");
     }

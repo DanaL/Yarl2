@@ -1181,7 +1181,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     HashSet<Loc> litLocations = LitLocations(CurrDungeonID, CurrLevel);
 
-    var fov = FieldOfView.CalcVisible(Player.MAX_VISION_RADIUS, Player.Loc, CurrentMap, ObjDb)
+    int radius = Player.HasTrait<BlindTrait>() ? 0 : Player.MAX_VISION_RADIUS;
+    var fov = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb)
                          .Intersect(litLocations).ToHashSet();
     LastPlayerFoV = fov;
 
