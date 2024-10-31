@@ -574,6 +574,12 @@ abstract class UserInterface
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("LEVITATING");
     }
+    if (!statuses.Contains("BLIND") && gs.Player.HasTrait<BlindTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "BLIND")];
+      row = WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("BLIND");
+    }
     foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)

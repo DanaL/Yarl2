@@ -1934,11 +1934,11 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (equipResult == EquipingResult.Equiped)
       {
-        grants.Grant(Actor);
+        result.Messages.AddRange(grants.Grant(Actor, GameState));
       }
       else if (equipResult == EquipingResult.Unequiped)
       {
-        grants.Remove(Actor);
+        grants.Remove(Actor, GameState);
       }
     }
 

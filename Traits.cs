@@ -423,21 +423,30 @@ class GrantsTrait : Trait
 
   public override string AsText() => "Grants#" + string.Join(';', TraitsGranted);
 
-  public void Grant(GameObj obj)
+  public List<Message> Grant(GameObj obj, GameState gs)
   {
+    List<Message> msgs = [];
+
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
       obj.Traits.Add(trait);
+
+      if (trait is TemporaryTrait tmp && obj is Actor actor)
+        msgs.AddRange(tmp.Apply(actor, gs));
     }
+
+    return msgs;
   }
 
-  public void Remove(GameObj obj)
+  public void Remove(GameObj obj, GameState gs)
   {
     foreach (string t in TraitsGranted)
     {
       Trait granted = TraitFactory.FromText(t, obj);
       obj.Traits.Remove(granted);
+      if (granted is TemporaryTrait tmp)
+        tmp.Remove(gs);
     }
   }
 }
@@ -493,7 +502,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public ulong OwnerID {  get; set; }
   protected virtual string ExpiryMsg() => "";
 
-  protected virtual void Remove(GameState gs)
+  public virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
     obj?.Traits.Remove(this);
@@ -1286,6 +1295,43 @@ class StatBuffTrait : TemporaryTrait
   }
 }
 
+class BlindTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg() => "You can see again!";
+
+  public override List<Message> Apply(Actor target, GameState gs)
+  {
+    // I imagine there will eventually be an immunity to blindess trait?
+    List<Message> msgs = [];
+
+    OwnerID = target.ID;
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    
+    if (target is Player) 
+    {
+      string s = $"You cannot see a thing!";
+      msgs.Add(new Message(s, target.Loc));
+    }
+
+    return msgs;
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
+    if (victim is null)
+      return;
+
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Expired = true;
+      Remove(gs);
+    }
+  }
+
+  public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}";
+}
+
 class PoisonedTrait : TemporaryTrait
 {
   public int DC { get; set; }
@@ -1728,6 +1774,11 @@ class TraitFactory
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
+    { "Blind", (pieces, gameObj) => new BlindTrait() 
+    {
+      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
+      ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]) } 
+    },
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},

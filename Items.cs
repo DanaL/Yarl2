@@ -148,7 +148,7 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  ANTIDOTE, ARROW, BATTLE_AXE, CHAINMAIL, CLAYMORE, DAGGER, DART, FIREBOLT,
+  ANTIDOTE, ARROW, BATTLE_AXE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, DART, FIREBOLT,
   GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
   LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_COLD_RES, POTION_FIRE_RES,
   POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
@@ -612,6 +612,12 @@ class ItemFactory
           Glyph = new Glyph('&', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Dodge#33" ] });        
         break;
+      case ItemNames.BLINDFOLD:
+        item = new Item() { Name = "blindfold", Type = ItemType.Armour, Value = 5, 
+          Glyph = new Glyph('(', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Mask, ArmourMod = 0, Bonus = 0 });
+        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Blind#owner#max" ] });        
+        break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
     }
@@ -726,7 +732,8 @@ enum ArmourParts
   Boots,
   Cloak,
   Shirt,
-  Shield
+  Shield,
+  Mask
 }
 
 class Armour : Item
@@ -960,7 +967,6 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         return (EquipingResult.Unequiped, ArmourParts.None);
       }
 
-      // Okay we are equiping new gear, which is a little more complicated
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
         if (item.HasTrait<TwoHandedTrait>() && ShieldEquiped())
