@@ -120,11 +120,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       result.Complete = false;
       Tile tile = _map.TileAt(_loc.Row, _loc.Col);
 
-      // If the player is blind, remember what tile they bumped into
-      // so that it displays on screen
-      if (isPlayer && Actor.HasTrait<BlindTrait>())
-        GameState.RememberLoc(_loc, tile);
-      
       if (Actor.HasTrait<ConfusedTrait>())
       {
         result.Complete = true;
@@ -136,11 +131,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         {
           result.Messages.Add(BlockedMessage(tile));          
         }
-
-        return result;
       }
-
-      if (isPlayer)
+      else if (isPlayer)
       {        
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
         {
@@ -151,19 +143,43 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         {
           // If we are in the dungeon, we'll let the player jump into rivers
           // (and/or they can stumble in while confused, etc)
-          GameState.UIRef().SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesOrNoInputer());
+
+          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(_loc))
+          {
+            GameState.UIRef().SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
+            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc, true), new YesOrNoInputer());
+          }
+          else
+          {
+            GameState.RememberLoc(_loc, tile);
+            result.EnergyCost = 0;
+            result.AltAction = new DiveAction(GameState, Actor, _loc, false);
+          }
         }
         else if (tile.Type == TileType.Chasm)
         {
-          GameState.UIRef().SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc), new YesOrNoInputer());
+          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(_loc))
+          {
+            GameState.UIRef().SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
+            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc, true), new YesOrNoInputer());
+          }
+          else
+          {
+            GameState.RememberLoc(_loc, tile);
+            result.EnergyCost = 0;
+            result.AltAction = new DiveAction(GameState, Actor, _loc, false);
+          }
         }
         else
         {
           result.Messages.Add(BlockedMessage(tile));
         }
       }
+
+      // If the player is blind, remember what tile they bumped into
+      // so that it displays on screen
+      if (isPlayer && Actor.HasTrait<BlindTrait>())
+        GameState.RememberLoc(_loc, tile);
     }
     else if (Actor.HasActiveTrait<GrappledTrait>())
     {

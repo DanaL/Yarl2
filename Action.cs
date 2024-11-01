@@ -339,15 +339,23 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 // Action for when an actor jumps into a river or chasm (and eventually lava?)
-class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs, actor)
 {
-  Loc _loc { get; set; } = loc;
+  Loc Loc { get; set; } = loc;
+  bool Voluntary { get; set; } = voluntary;
 
   void PlungeIntoWater(Actor actor, GameState gs, ActionResult result)
-  {    
-    gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!");
+  {
+    if (actor is Player && Voluntary)
+      result.Messages.Add("You plunge into the water!");
+    else if (actor is Player)
+      result.Messages.Add("You stumble and fall into some water!");
+    else if (gs.LastPlayerFoV.Contains(Loc))
+      result.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!");
+    else
+      result.Messages.Add("You hear a splash!");
     
-    string msg = gs.FallIntoWater(actor, _loc);
+    string msg = gs.FallIntoWater(actor, Loc);
     if (msg.Length > 0)
     {
       result.Messages.Add(msg);
@@ -356,8 +364,14 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
   void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
   {
-    gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!");
-    var landingSpot = new Loc(_loc.DungeonID, _loc.Level + 1, _loc.Row, _loc.Col);
+    if (actor is Player && Voluntary)
+      result.Messages.Add("You leap into the darkness!");
+    else if (actor is Player)
+      result.Messages.Add("There's no floor beneath your feet!");
+    else if (gs.LastPlayerFoV.Contains(loc))
+      result.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the darkness!");
+    
+    var landingSpot = new Loc(Loc.DungeonID, Loc.Level + 1, Loc.Row, Loc.Col);
 
     string msg = gs.FallIntoChasm(actor, landingSpot);
     result.Messages.Add(msg);
@@ -369,7 +383,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     var result = base.Execute();
     result.EnergyCost = 1.0;
 
-    var tile = GameState!.TileAt(_loc);
+    var tile = GameState!.TileAt(Loc);
     if (tile.Type == TileType.DeepWater)
     {
       PlungeIntoWater(Actor!, GameState, result);
