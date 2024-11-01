@@ -118,7 +118,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     else if (!CanMoveTo(Actor, _map, _loc))
     {
       result.Complete = false;
+      Tile tile = _map.TileAt(_loc.Row, _loc.Col);
 
+      // If the player is blind, remember what tile they bumped into
+      // so that it displays on screen
+      if (isPlayer && Actor.HasTrait<BlindTrait>())
+        GameState.RememberLoc(_loc, tile);
+      
       if (Actor.HasTrait<ConfusedTrait>())
       {
         result.Complete = true;
@@ -128,16 +134,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
         if (isPlayer)
         {
-          var tile = _map.TileAt(_loc.Row, _loc.Col);
-          result.Messages.Add(BlockedMessage(tile));
+          result.Messages.Add(BlockedMessage(tile));          
         }
 
         return result;
       }
 
       if (isPlayer)
-      {
-        var tile = _map.TileAt(_loc.Row, _loc.Col);
+      {        
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
         {
           var openAction = new OpenDoorAction(GameState, Actor, _map, _loc);

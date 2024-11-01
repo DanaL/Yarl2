@@ -119,6 +119,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public bool InWilderness => CurrDungeonID == 0;
   public Map Wilderness => Campaign.Dungeons[0].LevelMaps[0];
 
+  public void RememberLoc(Loc loc, Tile tile)
+  {
+    Glyph glyph = Util.TileToGlyph(tile);    
+    if (!CurrentDungeon.RememberedLocs.TryAdd(loc, glyph))
+    {
+      CurrentDungeon.RememberedLocs[loc] = glyph;
+    }
+  }
+
   // I made life difficult for myself by deciding that Turn 0 of the game is 
   // 8:00am T_T 1 turn is 10 seconds (setting aside all concerns about 
   // realism and how the amount of stuff one can do in 10 seconds will in no 
