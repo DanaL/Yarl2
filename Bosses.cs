@@ -112,7 +112,7 @@ class PrinceOfRatsBehaviour : IBehaviour
         prince.Stats[Attribute.MonsterForm].SetMax(HUMAN_FORM);
       }
 
-      gs.UIRef().AlertPlayer(new Message("The Prince of Rats shifts forms!", prince.Loc), "", gs);
+      gs.UIRef().AlertPlayer("The Prince of Rats shifts forms!");
     }
   }
 

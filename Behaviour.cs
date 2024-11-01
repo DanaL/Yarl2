@@ -218,10 +218,9 @@ class MonsterBehaviour : IBehaviour
         int i = gs.Rng.Next(candidates.Count);
 
         string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
-        Message msg = new Message(castText, mob.Loc);
         return new HealAction(gs, candidates[i], 4, 4, null)
         {
-          Message = msg
+          Message = castText
         };
       }
 
@@ -302,8 +301,7 @@ class DisguisedMonsterBehaviour : MonsterBehaviour
     {
       var disguise = actor.Traits.OfType<DisguiseTrait>().First();
       string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
-      var msg = new Message(txt, actor.Loc);
-      gs.UIRef().AlertPlayer([msg], "", gs);
+      gs.UIRef().AlertPlayer([txt]);
       actor.Glyph = disguise.TrueForm;
       actor.Stats[Attribute.InDisguise].SetMax(0);
     }

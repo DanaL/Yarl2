@@ -14,7 +14,7 @@ namespace Yarl2;
 class ActionResult
 {
   public bool Complete { get; set; } = false;
-  public List<Message> Messages { get; set; } = [];
+  public List<string> Messages { get; set; } = [];
   public string MessageIfUnseen { get; set; } = "";
   public Action? AltAction { get; set; }
   public double EnergyCost { get; set; } = 0.0;
@@ -27,7 +27,7 @@ abstract class Action
   public Actor? Actor { get; set; }
   public GameState? GameState { get; set; }
   public string Quip { get; set; } = "";
-  public Message? Message { get; set; } = null;
+  public string Message { get; set; } = "";
   public int QuipDuration { get; set; } = 2500;
 
   public Action() { }
@@ -73,7 +73,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
     {
       result.EnergyCost = 1.0;
       var msg = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swing")} wildly!";
-      result.Messages.Add(new Message(msg, Actor.Loc));
+      result.Messages.Add(msg);
     }
 
     return result;
@@ -177,7 +177,7 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? it
 
     if (Actor is not null)
     {
-      List<Message> msgs = _trait.Apply(Actor, GameState!);
+      List<string> msgs = _trait.Apply(Actor, GameState!);
       if (msgs.Count > 0)
       {
         result.Messages.AddRange(msgs);
@@ -201,7 +201,7 @@ class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
   {
     var result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Messages.Add(new Message($"{Actor!.FullName.Capitalize()} lets out a piercing shriek!", Actor.Loc));
+    result.Messages.Add($"{Actor!.FullName.Capitalize()} lets out a piercing shriek!");
 
     for (int r = Actor.Loc.Row - Radius; r < Actor.Loc.Row + Radius; r++)
     {
@@ -232,7 +232,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Messages.Add(new Message(EffectText, Actor!.Loc));
+    result.Messages.Add(EffectText);
 
     var affected = GameState!.Flood(Target, Radius);
     foreach (var loc in affected)
@@ -277,14 +277,14 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     // I'll probably want to do a knock-back kind of thing?
     if (gs.ObjDb.Occupied(Target))
     {
-      result.Messages.Add(new Message("There's someone in your way!", Target));
+      result.Messages.Add("There's someone in your way!");
       return result;
     }
 
     Tile tile = gs.TileAt(Target);
     if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
     {
-      result.Messages.Add(new Message("Bam!", Target));
+      result.Messages.Add("Bam!");
       result.EnergyCost = 1.0;
       result.Complete = false;
 
@@ -293,12 +293,12 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (roll >= dc)
       {
-        result.Messages.Add(new Message("You smash open the door!", Target));
+        result.Messages.Add("You smash open the door!");
         gs.CurrentMap.SetTile(Target.Row, Target.Col, TileFactory.Get(TileType.BrokenDoor));
       }
       else
       {
-        result.Messages.Add(new Message("The door holds firm!", Target));
+        result.Messages.Add("The door holds firm!");
       }
 
       gs.Noise(Target.Row, Target.Col, 5);
@@ -313,13 +313,12 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
         ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)
       };
 
-      var msgs = lame.Apply(Actor!, gs);
+      List<string> msgs = lame.Apply(Actor!, gs);
       if (msgs.Count > 0)
         result.Messages.AddRange(msgs);
       else
-      {
-        string s = $"You injure your leg kicking {Tile.TileDesc(tile.Type)}!";
-        result.Messages.Add(new Message(s, Actor!.Loc));
+      {        
+        result.Messages.Add($"You injure your leg kicking {Tile.TileDesc(tile.Type)}!");
       }
     }
 
@@ -341,23 +340,23 @@ class DiveAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
 
   void PlungeIntoWater(Actor actor, GameState gs, ActionResult result)
   {    
-    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!", actor.Loc), "", gs);
+    gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!");
     
     string msg = gs.FallIntoWater(actor, _loc);
     if (msg.Length > 0)
     {
-      result.Messages.Add(new Message(msg, actor.Loc));
+      result.Messages.Add(msg);
     }
   }
 
   void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
   {
-    gs.UIRef().AlertPlayer(new Message($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!", actor.Loc), "", gs);
+    gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "leap")} into the darkness!");
     var landingSpot = new Loc(_loc.DungeonID, _loc.Level + 1, _loc.Row, _loc.Col);
 
     string msg = gs.FallIntoChasm(actor, landingSpot);
-    result.Messages.Add(new Message(msg, landingSpot));
-    result.Messages.Add(new Message(gs.LocDesc(landingSpot), landingSpot));
+    result.Messages.Add(msg);
+    result.Messages.Add(gs.LocDesc(landingSpot));
   }
 
   public override ActionResult Execute()
@@ -390,14 +389,14 @@ class PortalAction : Action
     
     GameState.EnterLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
-    Message? moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);    
+    string moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);    
     result.Messages.Add(moveMsg);
 
     GameState.RefreshPerformers();
     GameState.UpdateFoV();
 
     if (start.DungeonID != portal.Destination.DungeonID)
-      result.Messages.Add(new Message(GameState.CurrentDungeon.ArrivalMessage, portal.Destination));
+      result.Messages.Add(GameState.CurrentDungeon.ArrivalMessage);
 
     result.Complete = true;
     result.EnergyCost = 1.0;
@@ -416,7 +415,7 @@ class PortalAction : Action
     }
     else
     {
-      result.Messages.Add(new Message("There is nowhere to go here.", GameState.Player.Loc));
+      result.Messages.Add("There is nowhere to go here.");
     }
 
     return result;
@@ -438,7 +437,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(new Message("You cannot go down here.", GameState.Player.Loc));
+      result.Messages.Add("You cannot go down here.");
     }
 
     return result;
@@ -460,7 +459,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     }
     else
     {
-      result.Messages.Add(new Message("You cannot go up here.", GameState.Player.Loc));
+      result.Messages.Add("You cannot go up here.");
     }
 
     return result;
@@ -501,8 +500,7 @@ class ShoppingCompletedAction : Action
       txt += "s";
     txt += " and collect your goods.";
 
-    var msg = new Message(txt, GameState.Player.Loc);
-    result.Messages.Add(msg);
+    result.Messages.Add(txt);
 
     return result;
   }
@@ -536,7 +534,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 
     if (other is null)
     {
-      result.Messages.Add(new Message("There's no one there!", Actor!.Loc));
+      result.Messages.Add("There's no one there!");
     }
     else
     {
@@ -544,7 +542,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 
       if (chatAction is NullAction)
       {
-        result.Messages.Add(new Message("They aren't interested in chatting.", Actor!.Loc));
+        result.Messages.Add("They aren't interested in chatting.");
         result.Complete = true;
         result.EnergyCost = 1.0;
       }
@@ -580,12 +578,12 @@ class CloseDoorAction : DirectionalAction
       var gs = GameState!;
       if (gs.ObjDb.Occupied(Loc))
       {
-        result.Messages.Add(new Message("There is someone in the way.", Loc));
+        result.Messages.Add("There is someone in the way.");
         return result;
       }
       if (gs.ObjDb.ItemsAt(Loc).Count > 0)
       {
-        result.Messages.Add(new Message("There is something in the way.", Loc));
+        result.Messages.Add("There is something in the way.");
         return result;
       }
 
@@ -595,19 +593,19 @@ class CloseDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, Loc, GameState!);
+        string msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, GameState!);
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door close.";
       }
       else if (Actor is Player)
       {
-        result.Messages.Add(new Message("The door is already closed.", GameState!.Player.Loc));
+        result.Messages.Add("The door is already closed.");
       }
     }
     else if (Actor is Player)
     {
       string s = door.Type == TileType.BrokenDoor ? "The door is broken!" : "There's no door there!";
-      result.Messages.Add(new Message(s, GameState!.Player.Loc));
+      result.Messages.Add(s);
     }
 
     return result;
@@ -643,7 +641,7 @@ class OpenDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        result.Messages.Add(new Message("The door is locked!", Loc, false));
+        result.Messages.Add("The door is locked!");
       }
       else if (!d.Open)
       {
@@ -651,23 +649,23 @@ class OpenDoorAction : DirectionalAction
         result.Complete = true;
         result.EnergyCost = 1.0;
 
-        var msg = MsgFactory.Phrase(Actor!.ID, Verb.Open, "door", false, Loc, GameState!);
+        string msg = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "open")} the door.";
         result.Messages.Add(msg);
         result.MessageIfUnseen = "You hear a door open.";
       }
       else if (Actor is Player)
       {
-        result.Messages.Add(new Message("The door is already open.", GameState!.Player.Loc));
+        result.Messages.Add("The door is already open.");
       }
     }
     else if (door is VaultDoor vd)
     {
       string msg = vd.Open ? "The doors stand open." : "You'll need a key!";
-      result.Messages.Add(new Message(msg, GameState!.Player.Loc));
+      result.Messages.Add(msg);
     }
     else if (Actor is Player)
     {
-      result.Messages.Add(new Message("There's no door there!", GameState!.Player.Loc));
+      result.Messages.Add("There's no door there!");
     }
 
     return result;
@@ -692,7 +690,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       return new ActionResult() {
         Complete = false,
-        Messages = [new Message("There's no room in your inventory!", GameState.Player.Loc)]
+        Messages = [ "There's no room in your inventory!" ]
       };
     }
 
@@ -708,13 +706,12 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         if (!strCheck)
         {
           var txt = $"{item.FullName.DefArticle().Capitalize()} {MsgFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
-          var stickyMsg = new Message(txt, Actor.Loc);
-          return new ActionResult() { EnergyCost = 1.0, Complete = false, Messages = [stickyMsg] };
+          return new ActionResult() { EnergyCost = 1.0, Complete = false, Messages = [txt] };
         }
         else
         {
           var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
-          result.Messages.Add(new Message(txt, Actor.Loc));
+          result.Messages.Add(txt);
         }
       }
     }
@@ -751,7 +748,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     
     if (item.Traits.OfType<OwnedTrait>().FirstOrDefault() is OwnedTrait ownedTrait)
     {
-      List<Message> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);
+      List<string> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);
       result.Messages.AddRange(msgs);
     }
 
@@ -761,7 +758,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       item.Traits = item.Traits.Where(t => t is not InPitTrait).ToList();
     }
 
-    result.Messages.Add(new Message(pickupMsg, Actor.Loc));
+    result.Messages.Add(pickupMsg);
 
     return result;
   }
@@ -820,9 +817,8 @@ class SummonAction(Loc target, string summons, int count) : Action()
       else
         txt += $"some {_summons.Pluralize()}!";
     }
-    
-    var msg = new Message(txt, Actor!.Loc);
-    return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+        
+    return new ActionResult() { Complete = true, Messages = [txt], EnergyCost = 1.0 };
   }
 }
 
@@ -853,7 +849,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           dc = int.Min(dc, 20);
           if (gs.Rng.Next(1, 21) <= dc) 
           {
-            result.Messages.Add(new Message("You spot a secret door!", loc, false));
+            result.Messages.Add("You spot a secret door!");
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
           }
           break;
@@ -874,7 +870,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
               TileType.HiddenDartTrap => TileType.DartTrap,
               _ => TileType.TrapDoor
             };
-            result.Messages.Add(new Message("You spot a trap!", loc, false));
+            result.Messages.Add("You spot a trap!");
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
           }          
           break;
@@ -889,7 +885,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             if (gs.Rng.Next(1, 21) <= dc)
             {
               jt.Visible = true;
-              result.Messages.Add(new Message("You spot a loose flagstone!", loc, false));
+              result.Messages.Add("You spot a loose flagstone!");
             }
           }
           break;
@@ -903,7 +899,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             dc = int.Min(dc, 20);
             if (gs.Rng.Next(1, 21) <= dc)
             {
-              result.Messages.Add(new Message("You spot a pressure plate!", loc, false));
+              result.Messages.Add("You spot a pressure plate!");
               gt.Found = true;
             }
           }
@@ -992,11 +988,11 @@ class MagicMapAction(GameState gs, Actor caster, Item? item) : Action(gs, caster
 
       if (GameState!.InWilderness)
       {
-        result.Messages.Add(new Message("The wide world is big for the spell! The magic fizzles!", player.Loc));
+        result.Messages.Add("The wide world is big for the spell! The magic fizzles!");
       }
       else
       {
-        result.Messages.Add(new Message("A vision of your surroundings fills your mind!", player.Loc));
+        result.Messages.Add("A vision of your surroundings fills your mind!");
         FloodFillMap(GameState, player.Loc);
       }
 
@@ -1066,9 +1062,8 @@ class MirrorImageAction : Action
     }
 
     if (options.Count == 0)
-    {
-      var msg = new Message("A spell fizzles...", Actor!.Loc);
-      return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    {      
+      return new ActionResult() { Complete = true, Messages = ["A spell fizzles..."], EnergyCost = 1.0 };
     }
 
     List<Mob> images = [];
@@ -1096,7 +1091,7 @@ class MirrorImageAction : Action
     var result = base.Execute();
     result.Complete = true;
     result.EnergyCost = 1.0;
-    result.Messages.Add(new Message("How puzzling!", _target));
+    result.Messages.Add("How puzzling!");
 
     return result;
   }
@@ -1104,13 +1099,11 @@ class MirrorImageAction : Action
 
 class FogCloudAction : Action
 {
-  readonly ulong _casterID;
   readonly Loc _target;
 
-  public FogCloudAction(GameState gs, Actor caster, Loc target)
+  public FogCloudAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
   {
     GameState = gs;
-    _casterID = caster.ID;
     _target = target;
   }
 
@@ -1132,10 +1125,9 @@ class FogCloudAction : Action
       }
     }
 
-    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, gs).Text;
-    var msg = new Message(txt + " Fog Cloud!", _target, false);
-
-    return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!";
+    
+    return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
   }
 }
 
@@ -1166,8 +1158,7 @@ class DrainTorchAction : Action
             int drain = GameState.Rng.Next(350, 751);
             torch.Fuel = int.Max(0, torch.Fuel - drain);
             string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "drain")}";
-            s += $" {item.FullName.Possessive(victim)}!";
-            result.Messages.Add(new Message(s, _target));
+            result.Messages.Add($" {item.FullName.Possessive(victim)}!");
             success = true;
           }
         }
@@ -1176,7 +1167,7 @@ class DrainTorchAction : Action
     
     if (!success)
     {
-      result.Messages.Add(new Message("The spell fizzles.", Actor!.Loc));
+      result.Messages.Add("The spell fizzles.");
     }
 
     return result;
@@ -1185,13 +1176,10 @@ class DrainTorchAction : Action
 
 class EntangleAction : Action
 {
-  readonly ulong _casterID;
   readonly Loc _target;
 
-  public EntangleAction(GameState gs, Actor caster, Loc target)
+  public EntangleAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
   {
-    GameState = gs;
-    _casterID = caster.ID;
     _target = target;
   }
 
@@ -1210,9 +1198,9 @@ class EntangleAction : Action
       }
     }
 
-    var txt = MsgFactory.Phrase(_casterID, Verb.Cast, _target, GameState!).Text;
-    var msg = new Message(txt + " Entangle!", _target, false);
-    return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Entangle!";
+    
+    return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
   }
 }
 
@@ -1229,9 +1217,8 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
     var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
     var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt, 0);
 
-    var txt = MsgFactory.Phrase(Actor!.ID, Verb.Cast, _target, GameState).Text;
-    var msg = new Message(txt + " Firebolt!", _target, false);
-    return new ActionResult() { Complete = true, Messages = [msg], AltAction = attack, EnergyCost = 0.0 };
+    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Firebolt!";
+    return new ActionResult() { Complete = true, Messages = [ txt ], AltAction = attack, EnergyCost = 0.0 };
   }
 }
 
@@ -1264,9 +1251,8 @@ class WebAction : Action
     var txt = "";
     var victim = GameState.ObjDb.Occupant(_target);
     if (victim is not null)
-      txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
-    var msg = new Message(txt, _target, false);
-    return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+      txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";    
+    return new ActionResult() { Complete = true, Messages = [txt], EnergyCost = 1.0 };
   }
 }
 
@@ -1279,7 +1265,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     var player = GameState!.Player;
     if (player.HasTrait<RecallTrait>() || player.Loc.DungeonID == 0)
     {
-      result.Messages.Add(new Message("You shudder for a moment.", player.Loc));
+      result.Messages.Add("You shudder for a moment.");
       result.Complete = true;
       result.EnergyCost = 1.0;
 
@@ -1295,7 +1281,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     GameState.RegisterForEvent(GameEventType.EndOfRound, recall);
     GameState.Player.Traits.Add(recall);
 
-    result.Messages.Add(new Message("The air crackles around you.", player.Loc));
+    result.Messages.Add("The air crackles around you.");
     result.Complete = true;
     result.EnergyCost = 1.0;
 
@@ -1313,7 +1299,7 @@ class KnockAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
 
     if (Actor is Actor caster)
     {
-      result.Messages.Add(new Message("You hear a spectral knocking.", caster.Loc));
+      result.Messages.Add("You hear a spectral knocking.");
       result.EnergyCost = 1.0;
 
       var sqs = GameState!.Flood(caster.Loc, 4, true);
@@ -1322,7 +1308,7 @@ class KnockAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
         Tile tile = GameState.TileAt(sq);
         if (tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
         {
-          result.Messages.Add(new Message("Click!", caster.Loc));
+          result.Messages.Add("Click!");
           GameState.CurrentMap.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.ClosedDoor));
         }
       }
@@ -1369,8 +1355,7 @@ class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
 
     if (sqs.Count == 0)
     {
-      var msg = new Message("A spell fizzles...", Actor.Loc);
-      return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+      return new ActionResult() { Complete = true, Messages = ["A spell fizzles..."], EnergyCost = 1.0 };
     }
     else
     {
@@ -1381,9 +1366,7 @@ class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
       var mv = new MoveAction(GameState, Actor, landingSpot);
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-      var msg = MsgFactory.Phrase(Actor.ID, Verb.Blink, Actor.Loc, GameState);
-      var txt = $"Bamf! {msg.Text} away!";
-      msg = new Message(txt, Actor.Loc);
+      string msg = $"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!";
 
       return new ActionResult() { Complete = false, Messages = [msg], EnergyCost = 0.0, AltAction = mv };
     }
@@ -1403,7 +1386,7 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
 
     if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
-      return new ActionResult() { Complete = true, Messages = [new Message("That tasted not bad.", Actor.Loc)], EnergyCost = 1.0 };
+      return new ActionResult() { Complete = true, Messages = ["That tasted not bad."], EnergyCost = 1.0 };
     }
 
     foreach (var t in Actor!.Traits.OfType<PoisonedTrait>())
@@ -1411,7 +1394,7 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
       GameState!.StopListening(GameEventType.EndOfRound, t);
     }
     Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
-    var msg = new Message($"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.", Actor.Loc);
+    string msg = $"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.";
 
     return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
   }
@@ -1440,8 +1423,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
     string txt;
     if (delta > 0)
     {
-      Message msg = MsgFactory.Phrase(Actor.ID, Verb.Etre, Verb.Heal, plural, false, Actor.Loc, GameState!);
-      txt = msg.Text[..^1] + $" for {delta} HP.";
+      txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "etre")} healder for {delta} HP.";
     }
     else
     {
@@ -1456,7 +1438,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
       Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
     }
 
-    result.Messages.Add(new Message(txt, Actor.Loc, false));
+    result.Messages.Add(txt);
     result.Complete = true;
     result.EnergyCost = 1.0;
 
@@ -1472,7 +1454,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
   {
     double cost = 1.0;
     bool successful = true;
-    Message alert;
+    string msg;
 
     var inventory = Actor!.Inventory;
     if (_amount > inventory.Zorkmids)
@@ -1484,14 +1466,14 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       cost = 0.0; // we won't make the player spend an action if they drop nothing
       successful = false;
-      alert = new Message("You hold onto your zorkmids.", Actor.Loc);
+      msg = "You hold onto your zorkmids.";
     }
     else
     {
       var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       GameState.ItemDropped(coins, Actor.Loc);
       coins.Value = _amount;
-      string msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";
+      msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";
       if (_amount == 1)
         msg += "a single zorkmid.";
       else if (_amount == inventory.Zorkmids)
@@ -1499,12 +1481,10 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
       else
         msg += $"{_amount} zorkmids.";
 
-      alert = new Message(msg, Actor.Loc);
-
       inventory.Zorkmids -= _amount;
     }
 
-    return new ActionResult() { Complete = successful, Messages = [alert], EnergyCost = cost };
+    return new ActionResult() { Complete = successful, Messages = [msg], EnergyCost = cost };
   }
 
   public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
@@ -1530,7 +1510,7 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
       droppedItem.Equiped = false;
     }
 
-    Message alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, Actor.Loc, GameState);
+    string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, GameState);
 
     return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
   }
@@ -1568,9 +1548,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     var tile = GameState.TileAt(landingPt);
     if (tile.Type == TileType.Chasm)
     {
-      string txt = $"{ammo.FullName.DefArticle().Capitalize()} tumbles into the darkness.";
-      var msg = new Message(txt, landingPt);
-      result.Messages.Add(msg);
+      result.Messages.Add($"{ammo.FullName.DefArticle().Capitalize()} tumbles into the darkness.");
     }
   }
 
@@ -1638,7 +1616,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     var (item, _) = player!.Inventory.ItemAt(Choice);
     if (item is null || item.Type != ItemType.Bow)
     {
-      result.Messages.Add(new Message("That doesn't make any sense!", player.Loc));
+      result.Messages.Add("That doesn't make any sense!");
     }
     else
     {
@@ -1666,16 +1644,14 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var (item, _) = player!.Inventory.ItemAt(Choice);
     if (item is null)
     {
-      var msg = new Message("That doesn't make sense", player.Loc);
       var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
-      result.Messages.Add(msg);
+      result.Messages.Add("That doesn't make sense");
       return result;
     }
     else if (item.Type == ItemType.Armour && item.Equiped)
     {
-      var msg = new Message("You're wearing that!", player.Loc);
       var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
-      result.Messages.Add(msg);
+      result.Messages.Add("You're wearing that!");
       return result;
     }
 
@@ -1706,8 +1682,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var inventory = Actor!.Inventory;
       if (inventory.Zorkmids == 0)
       {
-        var msg = new Message("You have no money!", GameState.Player.Loc);
-        return new ActionResult() { Complete = false, Messages = [msg] };
+        return new ActionResult() { Complete = false, Messages = ["You have no money!"] };
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
       ui.SetPopup(new Popup("How much?", "", -1, -1));
@@ -1725,13 +1700,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
     if (item.Equiped && item.Type == ItemType.Armour)
     {
-      var msg = new Message("You cannot drop something you're wearing.", GameState.Player.Loc);
-      return new ActionResult() { Complete = false, Messages = [msg] };
+      return new ActionResult() { Complete = false, Messages = ["You cannot drop something you're wearing."] };
     }
     if (item.Equiped && item.Type == ItemType.Ring)
     {
-      var msg = new Message("You'll need to take it off first.", GameState.Player.Loc);
-      return new ActionResult() { Complete = false, Messages = [msg] };
+      return new ActionResult() { Complete = false, Messages = ["You'll need to take it off first."] };
     }
     else if (itemCount > 1)
     {
@@ -1754,8 +1727,8 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.ItemDropped(item, Actor.Loc);
       item.Equiped = false;
 
-      var alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, Actor.Loc, GameState);
-      ui.AlertPlayer([alert], "", GameState);
+      string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, GameState);
+      ui.AlertPlayer(alert);
 
       return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }
@@ -1778,17 +1751,17 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
 
     if (item != null)
-    {
+    {      
+      item.Traits.Add(new PoisonCoatedTrait());
+      item.Traits.Add(new AdjectiveTrait("poisoned"));
+      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1 });
+
       string name = Actor.FullName.Capitalize();
       string verb = Grammar.Conjugate(Actor, "smear");
       string objName = item.FullName.DefArticle();
       string s = $"{name} {verb} some poison on {objName}.";
 
-      item.Traits.Add(new PoisonCoatedTrait());
-      item.Traits.Add(new AdjectiveTrait("poisoned"));
-      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1 });
-
-      result.Messages.Add(new Message(s, Actor.Loc));
+      result.Messages.Add(s);
     }
 
     if (SourceItem is not null)
@@ -1828,7 +1801,7 @@ class IdentifyItemAction(GameState gs, Actor actor, Item? sourceItem) : Action(g
     result.EnergyCost = 1.0;
 
     string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
-    result.Messages.Add(new Message(m, Actor.Loc));
+    result.Messages.Add(m);
 
     if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
     {
@@ -1853,8 +1826,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (item is null)
     {
-      var msg = new Message("You cannot equip that!", GameState.Player.Loc);
-      return new ActionResult() { Complete = false, Messages = [msg] };
+      return new ActionResult() { Complete = false, Messages = ["You cannot equip that!"] };
     }
 
     bool equipable = item.Type switch
@@ -1870,47 +1842,42 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (!equipable)
     {
-      var msg = new Message("You cannot equip that!", GameState.Player.Loc);
-      return new ActionResult() { Complete = false, Messages = [msg] };
+      return new ActionResult() { Complete = false, Messages = ["You cannot equip that!"] };
     }
 
     var (equipResult, conflict) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
-    Message alert;
+    string alert;
     switch (equipResult)
     {
       case EquipingResult.Equiped:
-        alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, Actor.Loc, GameState);
+        alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
 
         if (item.HasTrait<CursedTrait>())
         {
           if (item.Type == ItemType.Ring)
-            result.Messages.Add(new Message("The ring tightens around your finger!", Actor.Loc));
+            result.Messages.Add("The ring tightens around your finger!");
         }
         break;
       case EquipingResult.Cursed:
-        alert = new Message("You cannot remove it! It seems to be cursed!", Actor.Loc);
+        alert = "You cannot remove it! It seems to be cursed!";
         result = new ActionResult() { Messages = [alert], Complete = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.Unequiped:
-        alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, Actor.Loc, GameState);
+        alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
         break;
       case EquipingResult.TwoHandedConflict:
-        alert = new Message("You cannot wear a shield with a two-handed weapon!", Actor.Loc);
-        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        result = new ActionResult() { Complete = true, Messages = ["You cannot wear a shield with a two-handed weapon!"], EnergyCost = 0.0 };
         break;
       case EquipingResult.ShieldConflict:
-        alert = new Message("You cannot use a two-handed weapon with a shield!", Actor.Loc);
-        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        result = new ActionResult() { Complete = true, Messages = ["You cannot use a two-handed weapon with a shield!"], EnergyCost = 0.0 };
         break;
       case EquipingResult.TooManyRings:
-        alert = new Message("You are already wearing two rings!", Actor.Loc);
-        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        result = new ActionResult() { Complete = true, Messages = ["You are already wearing two rings!"], EnergyCost = 0.0 };
         break;
       case EquipingResult.TooManyTalismans:
-        alert = new Message("You many only use two talismans!", Actor.Loc);
-        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 0.0 };
+        result = new ActionResult() { Complete = true, Messages = ["You many only use two talismans!"], EnergyCost = 0.0 };
         break;
       default:
         string msg = "You are already wearing ";
@@ -1922,8 +1889,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
           ArmourParts.Cloak => "a cloak.",
           _ => "some armour."
         };
-        alert = new Message(msg, GameState.Player.Loc);
-        result = new ActionResult() { Complete = true, Messages = [alert] };
+        result = new ActionResult() { Complete = true, Messages = [msg] };
         break;
     }
 
@@ -2003,7 +1969,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
-        result.Messages.Add(new Message($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!", pt));
+        result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
 
         var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, GameState, null);
         if (hpLeft < 1)
@@ -2147,7 +2113,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
     var anim = new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
-    result.Messages.Add(new Message("Pew pew pew!", Actor!.Loc));
+    result.Messages.Add("Pew pew pew!");
 
     return result;
   }
@@ -2189,7 +2155,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       if (Actor!.ID == victim.ID)
       {        
         var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} a sense of vertigo followed by existential dread.";
-        result.Messages.Add(new Message(txt, Actor.Loc));
+        result.Messages.Add(txt);
 
         var confused = new ConfusedTrait() { DC = 15 };
         confused.Apply(Actor, GameState);
@@ -2197,14 +2163,14 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       else
       {
         GameState.SwapActors(Actor!, victim);
-        result.Messages.Add(new Message("Bamf!", Actor.Loc));
+        result.Messages.Add("Bamf!");
       }      
     }
     else
     {
       if (_source is IUSeable useable)
         useable.Used();
-      result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+      result.Messages.Add("The magic is realised but nothing happens. The spell fizzles.");
     }
 
     return result;
@@ -2229,7 +2195,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     {
       if (target is Player)
       {
-        result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+        result.Messages.Add("The magic is realised but nothing happens. The spell fizzles.");
       }
       else
       {
@@ -2247,7 +2213,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
     }
     else
     {
-      result.Messages.Add(new Message("The magic is realised but nothing happens. The spell fizzles.", _target));
+      result.Messages.Add("The magic is realised but nothing happens. The spell fizzles.");
     }
 
     if (_source is IUSeable useable)
@@ -2317,7 +2283,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
       case "frost":
         inputer = new Aimer(GameState!, player.Loc, 7);
         player.ReplacePendingAction(new FrostRayAction(GameState!, player, _wand), inputer);
-        result.Messages.Add(new Message("Which way?", player.Loc));
+        result.Messages.Add("Which way?");
         break;
     }
     

@@ -25,19 +25,19 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (tile.Type == TileType.VaultDoor)
     {
-      result.Messages.Add(new Message("That door requires a special key.", loc));
+      result.Messages.Add("That door requires a special key.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
     else if (tile.Type == TileType.OpenDoor)
     {
-      result.Messages.Add(new Message("That door is not closed.", loc));
+      result.Messages.Add("That door is not closed.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
     else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
     {
-      result.Messages.Add(new Message("You find no lock there.", loc));
+      result.Messages.Add("You find no lock there.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
@@ -55,18 +55,18 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         if (tile.Type == TileType.LockedDoor)
         {
-          result.Messages.Add(new Message("The lock releases with a click.", loc));
+          result.Messages.Add("The lock releases with a click.");
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
         }
         else
         {
-          result.Messages.Add(new Message("You lock the door.", loc));
+          result.Messages.Add("You lock the door.");
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.LockedDoor));
         }
       }
       else
       {
-        result.Messages.Add(new Message("You fumble at the lock.", loc));
+        result.Messages.Add("You fumble at the lock.");
       }
     }
 
@@ -104,11 +104,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (!adj)
       {
-        Message msg = new("You see nowhere to use that key.", Actor.Loc, false);
-        return new ActionResult() { Messages = [msg], Complete = true, EnergyCost = 0.0 };
+        return new ActionResult() { Messages = [ "You see nowhere to use that key." ], Complete = true, EnergyCost = 0.0 };
       }
 
-      Message openMsg = new("The metal doors swing open.", Actor.Loc, false);
+      string openMsg = "The metal doors swing open.";
       var door = (VaultDoor) GameState!.CurrentMap.TileAt(doorLoc.Row, doorLoc.Col);
       door.Open = true;
 
@@ -116,7 +115,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.RemoveByID(key.ID);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
-      return new ActionResult() { Messages = [openMsg], Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Messages = [ openMsg ], Complete = true, EnergyCost = 1.0 };
     }
 
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
@@ -164,8 +163,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         if (Actor.HasTrait<ConfusedTrait>())
         {
           string txt = $"{Actor.FullName} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
-          var msg = new Message(txt, Actor.Loc);
-          return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 1.0 };
+          return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
         }
       }
 
@@ -182,7 +180,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (item.Type == ItemType.Food)
       {
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";
-        result.Messages.Add(new Message(s, Actor.Loc, false));
+        result.Messages.Add(s);
       }
 
       bool success = false;
@@ -191,7 +189,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         result.Complete = useResult.Successful;
         if (useResult.Message != "")
-          result.Messages.Add(new Message(useResult.Message, Actor.Loc));
+          result.Messages.Add(useResult.Message);
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
@@ -211,8 +209,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
-      var msg = new Message("You don't know a way to use that!", GameState.Player.Loc);
-      return new ActionResult() { Complete = true, Messages = [msg], EnergyCost = 0.0 };
+      return new ActionResult() 
+      { 
+        Complete = true, 
+        Messages = [ "You don't know a way to use that!" ], 
+        EnergyCost = 0.0 };
     }
   }
 

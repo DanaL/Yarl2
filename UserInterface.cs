@@ -634,47 +634,25 @@ abstract class UserInterface
   }
 
   // TODO: DRY the two versions of AlertPlayer
-  public void AlertPlayer(Message alert, string ifNotSeen, GameState gs)
+  public void AlertPlayer(string alert)
   {            
-    var textToShow = gs.LastPlayerFoV.Contains(alert.Loc) ? alert.Text : ifNotSeen;
-
-    if (textToShow.Trim().Length == 0)
+    if (alert.Trim().Length == 0)
       return;
 
     HistoryUpdated = true;
 
-    if (MessageHistory.Count > 0 && MessageHistory[0].Message == textToShow)
-      MessageHistory[0] = new MsgHistory(textToShow, MessageHistory[0].Count + 1);
+    if (MessageHistory.Count > 0 && MessageHistory[0].Message == alert)
+      MessageHistory[0] = new MsgHistory(alert, MessageHistory[0].Count + 1);
     else
-      MessageHistory.Insert(0, new MsgHistory(textToShow, 1));
+      MessageHistory.Insert(0, new MsgHistory(alert, 1));
 
     if (MessageHistory.Count > MaxHistory)
       MessageHistory.RemoveAt(MaxHistory);
   }
 
-  public void AlertPlayer(List<Message> alerts, string ifNotSeen, GameState gs)
+  public void AlertPlayer(List<string> messages)
   {
-    // TODO: only display messages that are within the player's
-    // current FOV
-    if (alerts.Count == 0 && string.IsNullOrEmpty(ifNotSeen))
-      return;
-
-    // Eventually I need to handle sight vs sound messages better...
-    // In the meantime, we have a few cases.
-    List<string> msgs = [];
-    foreach (var alert in alerts)
-    {
-      if (alert is NullMessage) 
-        continue;
-      if (!gs.LastPlayerFoV.Contains(alert.Loc) && alert.Sound)
-        msgs.Add(alert.Text);
-      else if (gs.LastPlayerFoV.Contains(alert.Loc) && !alert.Sound)
-        msgs.Add(alert.Text);
-      else if (!gs.LastPlayerFoV.Contains(alert.Loc))
-        msgs.Add(ifNotSeen);
-    }
-
-    string msgText = string.Join(' ', msgs).Trim();
+    string msgText = string.Join(' ', messages).Trim();
     if (string.IsNullOrEmpty(msgText))
       return;
 
@@ -724,14 +702,14 @@ abstract class UserInterface
         if (result.AltAction is not null)
         {
           if (result.Messages.Count > 0)
-            AlertPlayer(result.Messages, result.MessageIfUnseen, gs);
+            AlertPlayer(result.Messages);
           result = result.AltAction.Execute();
           performer.Energy -= result.EnergyCost;
           action = result.AltAction;
         }
 
         if (result.Messages.Count > 0)
-          AlertPlayer(result.Messages, result.MessageIfUnseen, gs);
+          AlertPlayer(result.Messages);
 
         gs.UpdateFoV();
       }

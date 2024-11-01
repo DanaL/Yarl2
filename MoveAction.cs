@@ -70,15 +70,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           result.EnergyCost = 1.0;
           result.Complete = true;
           var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
-          var msg = new Message(txt, Actor.Loc);
-          result.Messages.Add(msg);
+          result.Messages.Add(txt);
           return result;
         }
         else
         {
           var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} through {env.Name.DefArticle()}.";
           GameState.ObjDb.RemoveItemFromGame(env.Loc, env);
-          result.Messages.Add(new Message(txt, Actor.Loc));
+          result.Messages.Add(txt);
         }
       }
     }
@@ -88,7 +87,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       // in theory this shouldn't ever happen...
       result.Complete = false;
       if (isPlayer)
-        result.Messages.Add(new Message("You cannot go that way!", GameState.Player.Loc));
+        result.Messages.Add("You cannot go that way!");
     }
     else if (GameState.ObjDb.Occupied(_loc))
     {
@@ -108,7 +107,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
       {
         string msg = $"You don't want to attack {occ.FullName}!";
-        result.Messages.Add(new Message(msg, GameState.Player.Loc));
+        result.Messages.Add(msg);
       }
       else
       {
@@ -125,12 +124,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.Complete = true;
         result.EnergyCost = 1.0;
         string stumbleText = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "stumble")} in confusion!";
-        result.Messages.Add(new Message(stumbleText, Actor.Loc));
+        result.Messages.Add(stumbleText);
 
         if (isPlayer)
         {
           var tile = _map.TileAt(_loc.Row, _loc.Col);
-          result.Messages.Add(new Message(BlockedMessage(tile), Actor.Loc));
+          result.Messages.Add(BlockedMessage(tile));
         }
 
         return result;
@@ -158,7 +157,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         }
         else
         {
-          result.Messages.Add(new Message(BlockedMessage(tile), GameState.Player.Loc));
+          result.Messages.Add(BlockedMessage(tile));
         }
       }
     }
@@ -169,7 +168,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       {
         Actor.Traits.Remove(gt);
         string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Break)} free of the grapple!";        
-        result.Messages.Add(new Message(txt, Actor.Loc));
+        result.Messages.Add(txt);
         return ActuallyDoMove(result);
       }      
       else
@@ -177,9 +176,9 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         string txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Etre)} grappled by ";
         GameObj? grappler = GameState.ObjDb.GetObj(gt.GrapplerID);
         txt += $"{grappler!.FullName}!";
-        result.Messages.Add(new Message(txt, Actor.Loc));
+        result.Messages.Add(txt);
         txt = $"{Actor.FullName.Capitalize()} cannot get away!";
-        result.Messages.Add(new Message(txt, Actor.Loc));
+        result.Messages.Add(txt);
         result.Complete = true;
         result.EnergyCost = 1.0;        
       }
@@ -189,7 +188,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (Actor.AbilityCheck(Attribute.Strength, 13, GameState.Rng))
       {
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crawl")} to the edge of the pit.";
-        result.Messages.Add(new Message(s, Actor.Loc));
+        result.Messages.Add(s);
         result.Complete = true;
         result.EnergyCost = 1.0;
         Actor.Traits = Actor.Traits.Where(t => t is not InPitTrait).ToList();
@@ -197,7 +196,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       else
       {
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} still stuck in the pit.";
-        result.Messages.Add(new Message(s, Actor.Loc));
+        result.Messages.Add(s);
         result.Complete = true;
         result.EnergyCost = 1.0;
       }
@@ -216,7 +215,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
       else
       {
-        Message msg = new($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "slip")} on the ice!", Actor.Loc);
+        string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "slip")} on the ice!";
         result.Complete = true;
         result.EnergyCost = 1.0;
         result.Messages.Add(msg);
@@ -238,7 +237,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
     try 
     {
-      Message moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
+      string moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
       result.Messages.Add(moveMsg);
     }
     catch (AbnormalMovement abMov)
@@ -248,7 +247,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     
     if (Actor is Player)
     {
-      result.Messages.Add(new Message(GameState!.LocDesc(Actor.Loc), Actor.Loc));
+      result.Messages.Add(GameState!.LocDesc(Actor.Loc));
       GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
     }
     else

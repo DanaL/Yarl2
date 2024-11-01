@@ -264,9 +264,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
       
-      var msg = new Message($"{Name.DefArticle()} divides into two!!", Loc, false);
-      gs.UIRef().AlertPlayer([msg], "", gs);
-
+      gs.UIRef().AlertPlayer($"{Name.DefArticle()} divides into two!!");
       gs.ObjDb.AddNewActor(other, spot);
       gs.AddPerformer(other);
     }
@@ -289,16 +287,15 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   // The default is that a monster/NPC will get angry if the player picks up 
   // something which belongs to them
-  public virtual Message PossessionPickedUp(ulong itemID, Actor other, GameState gameState)
+  public virtual string PossessionPickedUp(ulong itemID, Actor other, GameState gameState)
   {
     if (gameState.CanSeeLoc(this, other.Loc, 6))
     {
       Traits.RemoveAll(t => t is IndifferentTrait);
-      string txt = $"{FullName.Capitalize()} gets angry!";
-      return new Message(txt, Loc);
+      return $"{FullName.Capitalize()} gets angry!";
     }
 
-    return NullMessage.Instance;
+    return "";
   }
 
   public bool VisibleTo(Actor other)

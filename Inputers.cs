@@ -636,8 +636,7 @@ class Dialoguer : Inputer
 
   void EndConversation(string text)
   {
-    var msg = new Message(text, _interlocutor.Loc);
-    _gs.UIRef().AlertPlayer([msg], "", _gs);
+    _gs.UIRef().AlertPlayer([text]);
 
     Done = true;
     Success = true;

@@ -26,19 +26,19 @@ class Traps
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
       loc = gs.FallIntoPit(player, loc);
       ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
-      List<Message> msgs = [new Message("A trap door opens up underneath you!", loc, false)];
+      List<string> msgs = [ "A trap door opens up underneath you!" ];
       msgs.Add(gs.ThingAddedToLoc(loc));
-      gs. WriteMessages(msgs, "");
-
+      gs.UIRef().AlertPlayer(msgs);
+      
       throw new AbnormalMovement(loc);
     }
     else if (tile.Type == TileType.TrapDoor && !flying)
     {
       loc = gs.FallIntoPit(player, loc);
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));
-      List<Message> msgs = [new Message("You plummet into the trap door!", loc, false)];
+      List<string> msgs = [ "You plummet into the trap door!" ];
       msgs.Add(gs.ThingAddedToLoc(loc));
-      gs.WriteMessages(msgs, "");
+      gs.UIRef().AlertPlayer(msgs);
 
       throw new AbnormalMovement(loc);
     }
@@ -47,7 +47,7 @@ class Traps
       player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
-      ActionResult result = new() { Messages = [(new Message("You tumble into a pit!", loc))] };
+      ActionResult result = new() { Messages = [ "You tumble into a pit!" ]};
       int total = 0;
       int damageDice = 1 + player.Loc.Level / 5;
       for (int j = 0; j < damageDice; j++)
@@ -61,7 +61,7 @@ class Traps
 
       player.Traits.Add(new InPitTrait());
 
-      gs.WriteMessages(result.Messages, "");
+      gs.UIRef().AlertPlayer(result.Messages);
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
@@ -80,20 +80,20 @@ class Traps
         }
       }
 
-      gs.WriteMessages([new Message("Your stomach lurches!", player.Loc, false)], "");
+      gs.UIRef().AlertPlayer("Your stomach lurches!");
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
-        var msg = gs.ResolveActorMove(player, loc, newDest);
-        if (msg != NullMessage.Instance)
-          gs.WriteMessages([msg], "");
+        string msg = gs.ResolveActorMove(player, loc, newDest);
+        if (msg != "")
+          gs.UIRef().AlertPlayer(msg);
       }
     }
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
       player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
-      gs.WriteMessages([new Message("A dart flies at you!", player.Loc)], "");
+      gs.UIRef().AlertPlayer("A dart flies at you!");
 
       Item dart = ItemFactory.Get(ItemNames.DART, gs.ObjDb);
       dart.Loc = loc;
@@ -106,8 +106,7 @@ class Traps
       {
         ActionResult result = new();
         Battle.ResolveMissileHit(dart, player, dart, gs, result);
-        if (result.Messages.Count > 0)
-          gs.WriteMessages(result.Messages, "");
+        gs.UIRef().AlertPlayer(result.Messages);
       }
 
       gs.ItemDropped(dart, loc);
@@ -117,7 +116,7 @@ class Traps
       if (gs.Rng.Next(20) == 0) 
       {
         gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        gs.WriteMessages([new Message("Click.", player.Loc, false)], "");
+        gs.UIRef().AlertPlayer("Click.");
       }
     }
     else if (tile.Type == TileType.JetTrigger)
@@ -129,11 +128,11 @@ class Traps
     {
       player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.WaterTrap));
-      List<Message> msgs = [new Message("You are soaked by a blast of water!", loc)];      
+      List<string> msgs = [ "You are soaked by a blast of water!" ];      
       string s = player.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
       if (s != "")
-        msgs.Add(new Message(s, loc));
-      gs.WriteMessages(msgs, "");
+        msgs.Add(s);
+      gs.UIRef().AlertPlayer(msgs);
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
     {
@@ -148,7 +147,7 @@ class Traps
       };
 
       // Wake up nearby monsters within 10 squares
-      List<Message> msgs = [new Message(s, loc)];
+      List<string> msgs = [ s ];
       for (int r = loc.Row - 10; r <= loc.Row + 10; r++)
       {
         for (int c = loc.Col - 10; c <= loc.Col + 10; c++)
@@ -164,12 +163,12 @@ class Traps
             {
               monster.Traits.Remove(sleeping);
               if (gs.LastPlayerFoV.Contains(checkLoc))
-                msgs.Add(new Message($"{monster.FullName.Capitalize()} wakes up!", checkLoc));
+                msgs.Add($"{monster.FullName.Capitalize()} wakes up!");
             }
           }          
         }
       }
-      gs.WriteMessages(msgs, "");
+      gs.UIRef().AlertPlayer(msgs);
     }
   }
 
@@ -209,7 +208,7 @@ class Traps
       Sqs = affected
     };
 
-    gs.WriteMessages([new Message("Whoosh!! A fire trap!", player.Loc)], "");
+    gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
     gs.UIRef().PlayAnimation(explosion, gs);
 
     ActionResult result = new();
@@ -223,7 +222,7 @@ class Traps
       gs.ApplyDamageEffectToLoc(pt, DamageType.Fire);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
-        result.Messages.Add(new Message($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!", pt));
+        result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
         
         var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs, null);
         if (hpLeft < 1)
@@ -233,6 +232,6 @@ class Traps
       }
     }
 
-    gs.WriteMessages(result.Messages, "");
+    gs.UIRef().AlertPlayer(result.Messages);
   }
 }

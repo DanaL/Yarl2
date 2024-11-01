@@ -237,8 +237,7 @@ class ThrownMissileAnimation : Animation
       if (tile.Type == TileType.DeepWater)
       {
         var item = _ammo.FullName.DefArticle().Capitalize();
-        var msg = new Message($"{item} disappears with a splash.", _pts.Last());
-        ui.AlertPlayer([msg], "You hear a splash.", _gs);
+
       }
     }
   }

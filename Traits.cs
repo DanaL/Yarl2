@@ -123,20 +123,18 @@ class AuraOfProtectionTrait : TemporaryTrait
 {
   public int HP { get; set; }
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
-    List<Message> messages = [];
+    List<string> messages = [];
     if (target.Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault() is AuraOfProtectionTrait aura)
     {
       aura.HP += HP;
-      string txt = $"The aura surrounding {target.FullName} brightens.";
-      messages.Add(new Message(txt, target.Loc));
+      messages.Add($"The aura surrounding {target.FullName} brightens.");
     }
     else
     {
       target.Traits.Add(this);
-      string txt = $"A shimmering aura surrounds {target.FullName}.";
-      messages.Add(new Message(txt, target.Loc));
+      messages.Add($"A shimmering aura surrounds {target.FullName}.");
     }
     
     return messages;
@@ -370,7 +368,7 @@ class ResistanceTrait : TemporaryTrait
   protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -423,9 +421,9 @@ class GrantsTrait : Trait
 
   public override string AsText() => "Grants#" + string.Join(';', TraitsGranted);
 
-  public List<Message> Grant(GameObj obj, GameState gs)
+  public List<string> Grant(GameObj obj, GameState gs)
   {
-    List<Message> msgs = [];
+    List<string> msgs = [];
 
     foreach (string t in TraitsGranted)
     {
@@ -509,7 +507,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     gs.RemoveListener(this);
 
     if (obj is Player)
-      gs.UIRef().AlertPlayer(new Message(ExpiryMsg(), obj.Loc), "", gs);
+      gs.UIRef().AlertPlayer(ExpiryMsg());
   }
 
   public virtual void EventAlert(GameEventType eventType, GameState gs)
@@ -520,7 +518,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     }
   }
 
-  public abstract List<Message> Apply(Actor target, GameState gs);
+  public abstract List<string> Apply(Actor target, GameState gs);
 
   public override string AsText() => $"{ExpiresOn}#{OwnerID}";
 }
@@ -530,13 +528,13 @@ class TelepathyTrait : TemporaryTrait
   protected override string ExpiryMsg() => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);    
     OwnerID = target.ID;
 
-    return [ new Message($"{target.FullName.Capitalize()} can sense others' minds!", target.Loc) ];
+    return [ $"{target.FullName.Capitalize()} can sense others' minds!" ];
   }
 }
 
@@ -552,8 +550,7 @@ class LevitationTrait : TemporaryTrait
     {
       if (ExpiresOn - gs.Turn == 15)
       {
-        string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wobble")} in the air.";
-        gs.WriteMessages([new Message(s, actor.Loc)], "");
+        gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wobble")} in the air.");
       }
 
       if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
@@ -579,16 +576,14 @@ class LevitationTrait : TemporaryTrait
     }    
   }
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     target.Traits.Add(new FloatingTrait());
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
 
-    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "begin")} to float in the air!";
-    //
-    return [ new Message(s, target.Loc) ];
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "begin")} to float in the air!" ];
   }
 }
 
@@ -753,7 +748,7 @@ class SideEffectTrait : Trait
 
   public override string AsText() => $"SideEffect#{Odds}#{Effect}";
 
-  public List<Message> Apply(Actor target, GameState gs)
+  public List<string> Apply(Actor target, GameState gs)
   {
     if (gs.Rng.Next(1, 101) > Odds)
       return [];
@@ -891,12 +886,12 @@ class BoostMaxStatTrait : TemporaryTrait
   public Attribute Stat {  get; set; }
   public int Amount { get; set; }
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     if (!target.Stats.TryGetValue(Stat, out Stat? stat))
       return [];
 
-    List<Message> msgs = [];
+    List<string> msgs = [];
 
     // For max HP, we'll only change max if curr == max
     // Note: not taking into account lowering a stat, if that's a thing that might happen
@@ -906,14 +901,14 @@ class BoostMaxStatTrait : TemporaryTrait
       {
         stat.ChangeMax(Amount);
         stat.Change(Amount);
-        msgs.Add(new Message($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!", target.Loc));
+        msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!");
       }      
     }
     else
     {
       stat.ChangeMax(Amount);
       stat.Change(Amount);
-      msgs.Add(new Message($"{"".Possessive(target).Capitalize()}max {Stat} has changed!", target.Loc));
+      msgs.Add($"{"".Possessive(target).Capitalize()}max {Stat} has changed!");
     }
 
     return msgs;
@@ -928,7 +923,7 @@ class ConfusedTrait : TemporaryTrait
   
   public override string AsText() => $"Confused#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     foreach (Trait trait in target.Traits)
     {
@@ -946,9 +941,8 @@ class ConfusedTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
-    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!";
-
-    return [new Message(s, target.Loc)];
+    
+    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -958,7 +952,7 @@ class ConfusedTrait : TemporaryTrait
       victim.Traits.Remove(this);
       Expired = true;
       string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "regain")} {Grammar.Possessive(victim)} senses!";
-      gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+      gs.UIRef().AlertPlayer(msg);
       gs.StopListening(GameEventType.EndOfRound, this);
     }    
   }
@@ -968,7 +962,7 @@ class LameTrait : TemporaryTrait
 {  
   public override string AsText() => $"Lame#{OwnerID}#{ExpiresOn}";
   
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {    
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
@@ -977,7 +971,7 @@ class LameTrait : TemporaryTrait
       if (t is LameTrait trait)
       {
         trait.ExpiresOn = ulong.Max(ExpiresOn, trait.ExpiresOn);
-        return [ new Message("You hurt your leg even more.", target.Loc) ];
+        return [ "You hurt your leg even more." ];
       }
     }
 
@@ -999,7 +993,7 @@ class LameTrait : TemporaryTrait
       victim.Traits.Remove(this);
       Expired = true;
       gs.StopListening(GameEventType.EndOfRound, this);
-      gs.UIRef().AlertPlayer(new Message("Your leg feels better.", victim.Loc), "", gs);      
+      gs.UIRef().AlertPlayer("Your leg feels better.");      
     }      
   }
 }
@@ -1008,7 +1002,7 @@ class ExhaustedTrait : TemporaryTrait
 {  
   public override string AsText() => $"Exhausted#{OwnerID}#{ExpiresOn}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {    
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
@@ -1017,8 +1011,7 @@ class ExhaustedTrait : TemporaryTrait
       if (t is ExhaustedTrait exhausted)
       {
         exhausted.ExpiresOn = ulong.Max(ExpiresOn, exhausted.ExpiresOn);
-        string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} more exhausted!";
-        return [ new Message(s, target.Loc) ];
+        return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} more exhausted!" ];
       }
     }
 
@@ -1026,8 +1019,7 @@ class ExhaustedTrait : TemporaryTrait
     target.Recovery -= 0.5;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    string msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} exhausted!";
-    return [ new Message(msg, target.Loc) ];
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} exhausted!" ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -1038,7 +1030,7 @@ class ExhaustedTrait : TemporaryTrait
       victim.Traits.Remove(this);
       Expired = true;
       string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} less exhausted!";
-      gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+      gs.UIRef().AlertPlayer(msg);
       gs.StopListening(GameEventType.EndOfRound, this);
     }      
   }
@@ -1061,7 +1053,7 @@ class ParalyzedTrait : TemporaryTrait
   
   public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     if (target.HasTrait<ParalyzedTrait>())
       return [];
@@ -1073,9 +1065,8 @@ class ParalyzedTrait : TemporaryTrait
     OwnerID = target.ID;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
-    string s = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} paralyzed!";
-
-    return [ new Message(s, target.Loc) ];
+    
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} paralyzed!" ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -1087,7 +1078,7 @@ class ParalyzedTrait : TemporaryTrait
         victim.Traits.Remove(this);
         Expired = true;
         string msg = $"{victim.FullName.Capitalize()} can move again!";
-        gs.UIRef().AlertPlayer(new Message(msg, victim.Loc), "", gs);
+        gs.UIRef().AlertPlayer(msg);
         gs.StopListening(GameEventType.EndOfRound, this);
       }
     }
@@ -1118,7 +1109,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
 
   public void Extinguish(Item fireSrc, GameState gs)
   {
-    gs.WriteMessages([new Message("The fire burns out.", fireSrc.Loc)], "");
+    gs.UIRef().AlertPlayer("The fire burns out.");
     gs.ObjDb.RemoveItemFromGame(fireSrc.Loc, fireSrc);
     gs.ItemDestroyed(fireSrc, fireSrc.Loc);
 
@@ -1146,19 +1137,19 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
         var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs, null);
         if (dmgMsg != "")
         {
-          gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
+          gs.UIRef().AlertPlayer(dmgMsg);
         }
           
         if (hpLeft < 1)
         {
           string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
-          gs.WriteMessages([new Message(msg, victim.Loc)], "");
+          gs.UIRef().AlertPlayer(msg);
           gs.ActorKilled(victim, "fire", null);
         }
         else
         {
           string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
-          gs.WriteMessages([new Message(txt, victim.Loc)], "");
+          gs.UIRef().AlertPlayer(txt);
         }
       }
 
@@ -1254,7 +1245,7 @@ class StatBuffTrait : TemporaryTrait
     return player ? "You feel different!" : "";
   }
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     // We won't let a staff debuff lower a stat below -5. Let's not get out
     // of hand
@@ -1268,8 +1259,7 @@ class StatBuffTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    string s = CalcMessage(target, Amt);
-    return [ new Message(s, target.Loc) ];
+    return [ CalcMessage(target, Amt) ];
   }
 
   string Remove(Actor victim)
@@ -1289,7 +1279,7 @@ class StatBuffTrait : TemporaryTrait
       if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
       {
         string txt = Remove(victim);
-        gs.UIRef().AlertPlayer([new Message(txt, victim.Loc)], "", gs);
+        gs.UIRef().AlertPlayer(txt);
       }
     }
   }
@@ -1299,19 +1289,16 @@ class BlindTrait : TemporaryTrait
 {
   protected override string ExpiryMsg() => "You can see again!";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     // I imagine there will eventually be an immunity to blindess trait?
-    List<Message> msgs = [];
+    List<string> msgs = [];
 
     OwnerID = target.ID;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     
     if (target is Player) 
-    {
-      string s = $"You cannot see a thing!";
-      msgs.Add(new Message(s, target.Loc));
-    }
+      msgs.Add("You cannot see a thing!");
 
     return msgs;
   }
@@ -1339,7 +1326,7 @@ class PoisonedTrait : TemporaryTrait
 
   public override string AsText() => $"Poisoned#{DC}#{Strength}#{OwnerID}#{ExpiresOn}";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     foreach (Trait t in target.Traits)
     {
@@ -1360,8 +1347,7 @@ class PoisonedTrait : TemporaryTrait
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       OwnerID = target.ID;
       ExpiresOn = gs.Turn + (ulong) duration;
-      var msg = new Message($"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!", target.Loc);
-      return [msg];
+      return [ $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!" ];
     }
 
     return [];
@@ -1379,7 +1365,7 @@ class PoisonedTrait : TemporaryTrait
       gs.RemoveListener(this);
       Expired = true;
       string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
-      gs.WriteMessages([new Message(msg, victim.Loc)], "");
+      gs.UIRef().AlertPlayer(msg);
 
       return;
     }
@@ -1387,19 +1373,17 @@ class PoisonedTrait : TemporaryTrait
     List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
     var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null);
     if (dmgMsg != "")
-    {
-      gs.UIRef().AlertPlayer(new Message(dmgMsg, victim.Loc), "", gs);
-    }
-
+      gs.UIRef().AlertPlayer(dmgMsg);
+    
     if (hpLeft < 1)
     {
       string msg = $"{victim.FullName.Capitalize()} died from poison!";
-      gs.WriteMessages([new Message(msg, victim.Loc)], "");
+      gs.UIRef().AlertPlayer(msg);
       gs.ActorKilled(victim, "poison", null);
     }
-    else if (victim is Player)
+    else if (victim is Player) 
     {
-      gs.WriteMessages([new Message("You feel ill.", victim.Loc)], "");
+      gs.UIRef().AlertPlayer("You feel ill.");
     }
   }
 }
@@ -1452,8 +1436,7 @@ class RecallTrait : BasicTrait, IGameEventListener
 
     if (player.Loc.DungeonID == 0)
     {
-      var msg = new Message("You sudenly teleport exactly 1 cm to the left.", player.Loc, false);
-      gs.WriteMessages([msg], "");
+      gs.UIRef().AlertPlayer("You sudenly teleport exactly 1 cm to the left.");
       return;
     }
 
@@ -1472,11 +1455,11 @@ class RecallTrait : BasicTrait, IGameEventListener
       gs.EnterLevel(player, 0, 0);
       var start = player.Loc;
       player.Loc = entrance.Loc;
-      Message moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
+      string moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
       gs.RefreshPerformers();
       gs.UpdateFoV();
-      var msg = new Message("A wave of vertigo...", player.Loc, false);
-      gs.WriteMessages([msg, moveMsg], "");
+      gs.UIRef().AlertPlayer("A wave of vertigo...");
+      gs.UIRef().AlertPlayer(moveMsg);      
     }
   }
 }
@@ -1511,13 +1494,13 @@ class SeeInvisibleTrait : TemporaryTrait
 {
   protected override string ExpiryMsg() => "Your vision returns to normal.";
 
-  public override List<Message> Apply(Actor target, GameState gs)
+  public override List<string> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
 
-    return [new Message($"{target.FullName.Capitalize()} can see into the beyond!", target.Loc)];
+    return [ $"{target.FullName.Capitalize()} can see into the beyond!" ];
   }
 
   public override string AsText() => $"SeeInvisible#{OwnerID}#{ExpiresOn}";
@@ -1581,8 +1564,8 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 
       // This is rather tied to Fog Cloud atm -- I should perhaps provide an
       // expiry message that can be set for each trait
-      var msg = MsgFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, loc, gs);
-      gs.WriteMessages([msg], "");
+      string msg = MsgFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, gs);
+      gs.UIRef().AlertPlayer(msg);
     }
   }
 }
@@ -1695,8 +1678,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
           owner.Inventory.Remove(item.Slot, 1);
         }
 
-        var msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, loc, gs);
-        gs.WriteMessages([msg], "");
+        string msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, gs);
+        gs.UIRef().AlertPlayer(msg);
       }
     }
   }

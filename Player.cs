@@ -319,7 +319,7 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     if (HasTrait<ConfusedTrait>())
     {
-      gs.UIRef().AlertPlayer(new Message("You are confused!", Loc), "", gs);
+      gs.UIRef().AlertPlayer("You are confused!");
       char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
       ch = dirs[gs.Rng.Next(dirs.Length)];
     }
@@ -352,7 +352,7 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     if (HasTrait<ConfusedTrait>())
     {
-      gs.UIRef().AlertPlayer(new Message("You are too confused!", Loc), "", gs);
+      gs.UIRef().AlertPlayer("You are too confused!");
       Running = false;
     }
 
@@ -452,7 +452,7 @@ class Player : Actor, IPerformer, IGameEventListener
     var allItems = gs.ObjDb.ItemsAt(Loc);
     if (allItems is null || allItems.Count == 0)
     {
-      ui.AlertPlayer([new Message("There's nothing there...", gs.Player.Loc)], "", gs);
+      ui.AlertPlayer("There's nothing there...");
       return new NullAction();
     }
 
@@ -474,13 +474,12 @@ class Player : Actor, IPerformer, IGameEventListener
     bool playerInPit = HasTrait<InPitTrait>();
     if (itemsInPit.Count == 1 && !playerInPit)
     {
-      string s = $"You cannot reach {itemsInPit[0].FullName.DefArticle()}.";
-      ui.AlertPlayer([new Message(s, gs.Player.Loc)], "", gs);
+      ui.AlertPlayer($"You cannot reach {itemsInPit[0].FullName.DefArticle()}.");
       return new NullAction();
     }
     else if (itemsInPit.Count > 0 && !playerInPit)
     {
-      ui.AlertPlayer([new Message("You cannot reach the items in the pit.", gs.Player.Loc)], "", gs);
+      ui.AlertPlayer("You cannot reach the items in the pit.");
       return new NullAction();
     }
 
@@ -513,7 +512,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
     if (HasActiveTrait<ParalyzedTrait>())
     {
-      gameState.UIRef().AlertPlayer(new Message("You cannot move!", Loc), "", gameState);
+      ui.AlertPlayer("You cannot move!");
       return new PassAction(gameState, this);
     }
 
@@ -557,7 +556,7 @@ class Player : Actor, IPerformer, IGameEventListener
             _inputController = null;
             ui.CloseMenu();
             ui.ClosePopup();
-            ui.AlertPlayer([new Message("Nevermind.", gameState.Player.Loc)], "", gameState);
+            ui.AlertPlayer("Nevermind.");
             return new NullAction();
           }
         }
@@ -617,7 +616,7 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'F')
       {
-        gameState.WriteMessages([ new Message("Bash in what direction?", Loc)], "");
+        ui.AlertPlayer("Bash in what direction?");
         _inputController = new DirectionalInputer();
         _deferred = new BashAction(gameState, this);
       }
@@ -645,13 +644,13 @@ class Player : Actor, IPerformer, IGameEventListener
 
         _inputController = new DirectionalInputer();
         _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
-        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'C')
       {
         _inputController = new DirectionalInputer();
         _deferred = new ChatAction(gameState, this);
-        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'o')
       {
@@ -661,7 +660,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
         _inputController = new DirectionalInputer();
         _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
-        ui.AlertPlayer([new Message("Which way?", gameState.Player.Loc)], "", gameState);
+        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'Q')
       {
@@ -694,7 +693,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'M')
       {
         if (gameState.CurrDungeonID == 0)
-          ui.AlertPlayer([new Message("Not in the wilderness.", Loc)], "", gameState);
+          ui.AlertPlayer("Not in the wilderness.");
         else
           gameState.UIRef().DisplayMapView(gameState);
       }

@@ -101,10 +101,10 @@ class Battle
       bonusDamage += mdb.Curr;
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
-    result.Messages.Add(new Message(txt, target.Loc));
+    result.Messages.Add(txt);
     var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo);
     if (dmgMsg != "")
-      result.Messages.Add(new Message(dmgMsg, target.Loc));
+      result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
     
     bool poisoner = false;
@@ -169,7 +169,7 @@ class Battle
           string s = EffectApplier.Apply(EffectFlag.Rust, gs, damagedItem, target);
           if (s != "")
           {
-            result.Messages.Add(new Message(s, target.Loc));
+            result.Messages.Add(s);
           }
         }
       }
@@ -195,7 +195,7 @@ class Battle
     if (target.HasTrait<SleepingTrait>())
     {
       string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "strike")} {target.FullName} at unawares.";
-      result.Messages.Add(new Message(txt, target.Loc));
+      result.Messages.Add(txt);
 
       foreach (var d in attacker.MeleeDamage())
       {
@@ -217,11 +217,11 @@ class Battle
 
     Item? weapon = attacker.Inventory.ReadiedWeapon();
 
-    Message msg = MsgFactory.Phrase(attacker.ID, attackVerb, target.ID, 0, true, target.Loc, gs);
+    string msg = MsgFactory.HitMessage(attacker, target, attackVerb, gs);
     result.Messages.Add(msg);
     var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon);    
     if (dmgMsg != "")
-      result.Messages.Add(new Message(dmgMsg, target.Loc));
+      result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
 
     CheckAttackTraits(target, gs, result, attacker);
@@ -252,7 +252,7 @@ class Battle
         if (gs.ObjDb.Occupant(adj) is Actor victim)
         {
           string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
-          result.Messages.Add(new Message(txt, victim.Loc));
+          result.Messages.Add(txt);
           int roll = gs.Rng.Next(4) + 1;
           var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null);   
           
@@ -261,7 +261,7 @@ class Battle
           if (hpLeftAfterAcid < 1)
             gs.ActorKilled(victim, "acid", result);
           if (acidMsg != "")
-            result.Messages.Add(new Message(acidMsg, victim.Loc));
+            result.Messages.Add(acidMsg);
         }
       }      
     }
@@ -276,7 +276,7 @@ class Battle
         string s = EffectApplier.Apply(EffectFlag.Rust, gs, weapon, actor);
         if (s != "" && attacker is Player)
         {
-          result.Messages.Add(new Message(s, attacker.Loc));
+          result.Messages.Add(s);
         }        
       }
     }
@@ -292,7 +292,7 @@ class Battle
     }
   }
 
-  static Message ResolveKnockBack(Actor attacker, Actor target, GameState gs)
+  static string ResolveKnockBack(Actor attacker, Actor target, GameState gs)
   {
     static bool CanPass(Loc loc, GameState gs)
     {
@@ -308,39 +308,39 @@ class Battle
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
-      Message moveMsg = gs.ResolveActorMove(target, target.Loc, second);
+      string moveMsg = gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
-      if (moveMsg.Text != "")
-        txt += " " + moveMsg.Text;
+      if (moveMsg != "")
+        txt += " " + moveMsg;
 
-      return new Message(txt, second);
+      return txt;
     }
     else if (CanPass(first, gs))
     {
-      Message moveMsg = gs.ResolveActorMove(target, target.Loc, first);
+      string moveMsg = gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stagger)} backward!";
-      if (moveMsg.Text != "")
-        txt += " " + moveMsg.Text;
+      if (moveMsg != "")
+        txt += " " + moveMsg;
 
-      return new Message(txt, first);
+      return txt;
     }
 
-    return NullMessage.Instance;
+    return "";
   }
 
-  static Message ResolveGrapple(Actor actor, Actor target, GameState gs)
+  static string ResolveGrapple(Actor actor, Actor target, GameState gs)
   {
     // You can only be grappled by one thing at a time
     if (target.HasTrait<GrappledTrait>())
-      return NullMessage.Instance;
+      return "";
 
     var grapple = actor.Traits
                        .OfType<GrapplerTrait>()
                        .First();
     if (target.AbilityCheck(Attribute.Strength, grapple.DC, gs.Rng))
-      return NullMessage.Instance;
+      return "";
 
     var grappled = new GrappledTrait()
     {
@@ -353,7 +353,7 @@ class Battle
     target.Traits.Add(grappled);
     var msg = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} grappled by "; 
     msg += actor.FullName + "!";
-    return new Message(msg, target.Loc);
+    return msg;
   }
 
   static int CalcAttackMod(Actor attacker, Item? weapon)
@@ -462,8 +462,8 @@ class Battle
         {
           string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "attack")}";
           txt += $" but {target.FullName} {Grammar.Conjugate(target, "dodge")} out of the way!";
-          var msg = new Message(txt, target.Loc);
-          result.Messages.Add(msg);
+          result.Messages.Add(txt);
+
           return result;
         }        
       }
@@ -489,22 +489,22 @@ class Battle
       
       if (attacker.HasActiveTrait<KnockBackTrait>())
       {
-        var msg = ResolveKnockBack(attacker, target, gs);
-        if (msg.Loc != Loc.Nowhere)
+        string msg = ResolveKnockBack(attacker, target, gs);
+        if (msg != "")
           result.Messages.Add(msg);
       }
       
       if (attacker.HasActiveTrait<GrapplerTrait>())
       {
-        var msg = ResolveGrapple(attacker, target, gs);
-        if (msg.Loc != Loc.Nowhere)
+        string msg = ResolveGrapple(attacker, target, gs);
+        if (msg != "")
           result.Messages.Add(msg);
       }
     }
     else
     {
       // The attacker missed!
-      Message msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
+      string msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, gs);
       result.Messages.Add(msg);
 
       // if it is the player, exercise their weapon on a miss
@@ -552,8 +552,8 @@ class Battle
     if (options.Count > 0)
     {
       var sq = options.ToList()[gs.Rng.Next(options.Count)];
-      Message moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
-      gs.WriteMessages([moveMsg], "");      
+      string moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
+      gs.UIRef().AlertPlayer(moveMsg);
       target.Loc = sq;
 
       return true;
@@ -579,8 +579,7 @@ class Battle
     }
     else
     {
-      Message msg = MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, target.Loc, gs);
-      result.Messages.Add(msg);
+      result.Messages.Add(MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, gs));
     }
 
     // Firebolts, ice, should apply their effects to the square they hit
@@ -609,7 +608,7 @@ class Battle
     else
     {
       string txt = $"{spell.FullName.DefArticle().Capitalize()} misses {target.FullName}.";
-      result.Messages.Add(new Message(txt, target.Loc));
+      result.Messages.Add(txt);
     }
 
     // Firebolts, ice, should apply their effects to the square they hit

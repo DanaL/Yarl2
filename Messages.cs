@@ -52,12 +52,6 @@ enum Verb
     Butt
 }
 
-record Message(string Text, Loc Loc, bool Sound=false);
-record NullMessage() : Message("", Loc.Nowhere, false)
-{
-  public static readonly NullMessage Instance = new NullMessage();
-}
-
 // I think my verb enum and CalcVerb(), and maybe the whole MessageFactory
 // class were dumb ideas and I can just replace them with this 
 class Grammar
@@ -188,7 +182,26 @@ class MsgFactory
         return sb.ToString();
     }
 
-    public static Message Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, Loc loc, GameState gs)
+    public static string HitMessage(Actor attacker, Actor target, Verb verb, GameState gs)
+    {      
+      bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
+      bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+
+      if (attacker is Player)
+      {
+        return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit something!";
+      }
+      else if (target is Player)
+      {
+        return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";    
+      }
+      else 
+      {
+        return "You hear the sounds of battle.";
+      }
+    }
+
+    public static string Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, GameState gs)
     {
         var sb = new StringBuilder();
         GameObj? sub = gs.ObjDb.GetObj(subject);
@@ -209,10 +222,10 @@ class MsgFactory
             sb.Append(exciting ? '!' : '.');
         }
 
-        return new Message(sb.ToString().Capitalize(), loc);
+        return sb.ToString().Capitalize();
     }
 
-    public static Message Phrase(ulong subject, Verb verb, Loc loc, GameState gs)
+    public static string Phrase(ulong subject, Verb verb, GameState gs)
     {
         var sb = new StringBuilder();
         GameObj? sub = gs.ObjDb.GetObj(subject);
@@ -224,10 +237,10 @@ class MsgFactory
             sb.Append(CalcVerb(sub, verb));            
         }
 
-        return new Message(sb.ToString().Capitalize(), loc);
+        return sb.ToString().Capitalize();
     }
 
-    public static Message Phrase(ulong subject, Verb verb, string obj, bool exciting, Loc loc, GameState gs)
+    public static string Phrase(ulong subject, Verb verb, string obj, bool exciting, GameState gs)
     {
         var sb = new StringBuilder();
         GameObj? sub = gs.ObjDb.GetObj(subject);
@@ -242,10 +255,10 @@ class MsgFactory
             sb.Append(exciting ? '!' : '.');
         }
 
-        return new Message(sb.ToString().Capitalize(), loc);
+        return sb.ToString().Capitalize();
     }
 
-    public static Message Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, Loc loc, GameState gs)
+    public static string Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, GameState gs)
     {
         var sb = new StringBuilder();
         GameObj? sub = gs.ObjDb.GetObj(subject);
@@ -260,7 +273,7 @@ class MsgFactory
             sb.Append(exciting ? '!' : '.');
         }
 
-        return new Message(sb.ToString().Capitalize(), loc);
+        return sb.ToString().Capitalize();
     }
 }
 
