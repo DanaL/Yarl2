@@ -201,6 +201,19 @@ class MsgFactory
       }
     }
 
+    public static string MissMessage(Actor attacker, Actor target, GameState gs)
+    {
+      bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
+      bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+
+      if (target is Player)
+        return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
+      else if (attacker is Player)
+        return canSeeTargetLoc ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
+      else
+        return "You hear the sounds of battle.";
+    }
+
     public static string Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, GameState gs)
     {
         var sb = new StringBuilder();

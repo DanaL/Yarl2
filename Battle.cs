@@ -504,8 +504,7 @@ class Battle
     else
     {
       // The attacker missed!
-      string msg = MsgFactory.Phrase(attacker.ID, Verb.Miss, target.ID, 0, true, gs);
-      result.Messages.Add(msg);
+      result.Messages.Add(MsgFactory.MissMessage(attacker, target, gs));
 
       // if it is the player, exercise their weapon on a miss
       if (attacker is Player player && weapon is not null)
