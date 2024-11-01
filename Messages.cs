@@ -193,11 +193,19 @@ class MsgFactory
       return "You hear a clatter!";
   }
 
+  static bool AwareOfActor(Actor actor, GameState gs)
+  {
+    if (gs.LastPlayerFoV.Contains(actor.Loc))
+      return true;
+    else if (gs.Player.HasActiveTrait<TelepathyTrait>() && Util.Distance(gs.Player.Loc, actor.Loc) <= Constants.TELEPATHY_RANGE)
+      return true;
+
+    return false;
+  }
   public static string DoorMessage(Actor actor, Loc loc, Verb verb, GameState gs)
   {
     string v = verb.ToString().ToLower();
-    bool canSeeLoc = gs.LastPlayerFoV.Contains(loc);
-    if (canSeeLoc)    
+    if (AwareOfActor(actor, gs))    
       return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, v)} the door.";    
     else if (actor is Player)
       return $"You fumble with a door handle and {v} a door.";
@@ -207,16 +215,16 @@ class MsgFactory
 
   public static string HitMessage(Actor attacker, Actor target, Verb verb, GameState gs)
   {
-    bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
-    bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+    bool canSeeTarget = AwareOfActor(target, gs);
+    bool canSeeAttacker = AwareOfActor(attacker, gs);
 
     if (attacker is Player)
     {
-      return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
+      return canSeeTarget ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
     }
     else if (target is Player)
     {
-      return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
+      return canSeeAttacker ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
     }
     else
     {
@@ -226,13 +234,13 @@ class MsgFactory
 
   public static string MissMessage(Actor attacker, Actor target, GameState gs)
   {
-    bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
-    bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+    bool canSeeTarget = AwareOfActor(target, gs);
+    bool canSeeAttacker = AwareOfActor(attacker, gs);
 
     if (target is Player)
-      return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
+      return canSeeAttacker ? $"{attacker.FullName.Capitalize()} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
     else if (attacker is Player)
-      return canSeeTargetLoc ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
+      return canSeeTarget ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
     else
       return "You hear the sounds of battle.";
   }
@@ -242,8 +250,7 @@ class MsgFactory
     var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
     var plural = victim.HasTrait<PluralTrait>();
 
-    bool canSeeVictimLoc = gs.LastPlayerFoV.Contains(victim.Loc);
-    if (canSeeVictimLoc)
+    if (AwareOfActor(victim, gs))
       return Phrase(victim.ID, Verb.Etre, verb, plural, true, gs);
     else if (attacker is Player)
       return "You kill something!";
