@@ -15,7 +15,6 @@ class ActionResult
 {
   public bool Complete { get; set; } = false;
   public List<string> Messages { get; set; } = [];
-  public string MessageIfUnseen { get; set; } = "";
   public Action? AltAction { get; set; }
   public double EnergyCost { get; set; } = 0.0;
   
@@ -598,10 +597,7 @@ class CloseDoorAction : DirectionalAction
         d.Open = false;
         result.Complete = true;
         result.EnergyCost = 1.0;
-
-        string msg = MsgFactory.Phrase(Actor!.ID, Verb.Close, "the door", false, GameState!);
-        result.Messages.Add(msg);
-        result.MessageIfUnseen = "You hear a door close.";
+        result.Messages.Add(MsgFactory.DoorMessage(Actor!, Loc, Verb.Close, GameState!));
       }
       else if (Actor is Player)
       {
@@ -654,10 +650,7 @@ class OpenDoorAction : DirectionalAction
         d.Open = true;
         result.Complete = true;
         result.EnergyCost = 1.0;
-
-        string msg = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "open")} the door.";
-        result.Messages.Add(msg);
-        result.MessageIfUnseen = "You hear a door open.";
+        result.Messages.Add(MsgFactory.DoorMessage(Actor!, Loc, Verb.Open, GameState!));
       }
       else if (Actor is Player)
       {

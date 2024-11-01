@@ -22,34 +22,34 @@ namespace Yarl2;
 // Is this dumb? should I just store a string in the Messages?
 enum Verb
 {
-    Break,
-    Close,
-    Drop,
-    Hit,
-    Miss,
-    Pickup,    
-    Open,    
-    Use,
-    Ready,
-    Unready,
-    BurnsOut,
-    Kill,
-    Die,
-    Etre,
-    Hear,
-    Cleave,
-    Impale,
-    Drink,
-    Heal,
-    Dissipate,
-    Blink,
-    Cast,
-    Destroy,
-    Tear,
-    Feel,
-    Summon,
-    Stagger,
-    Butt
+  Break,
+  Close,
+  Drop,
+  Hit,
+  Miss,
+  Pickup,
+  Open,
+  Use,
+  Ready,
+  Unready,
+  BurnsOut,
+  Kill,
+  Die,
+  Etre,
+  Hear,
+  Cleave,
+  Impale,
+  Drink,
+  Heal,
+  Dissipate,
+  Blink,
+  Cast,
+  Destroy,
+  Tear,
+  Feel,
+  Summon,
+  Stagger,
+  Butt
 }
 
 // I think my verb enum and CalcVerb(), and maybe the whole MessageFactory
@@ -88,219 +88,242 @@ class Grammar
 
 class MsgFactory
 {
-    public static string CalcVerb(GameObj subject, Verb verb, bool thirdP = false)
+  public static string CalcVerb(GameObj subject, Verb verb, bool thirdP = false)
+  {
+    bool fp = subject is Player;
+    return verb switch
     {
-        bool fp = subject is Player;
-        return verb switch 
-        {
-            Verb.Break => fp ? "break" : "breaks",
-            Verb.Close => fp ? "close" : "closes",
-            Verb.Drop => fp ? "drop" : "drops",
-            Verb.Hit => fp ? "hit" : "hits",
-            Verb.Miss => fp ? "miss" : "misses",
-            Verb.Pickup => fp ? "pick up" : "picks up",
-            Verb.Open => fp ? "open" : "opens",            
-            Verb.Use => fp ? "use" : "uses",
-            Verb.Ready => fp ? "ready" : "readies",
-            Verb.Unready => fp ? "unequip" : "unequips",
-            Verb.BurnsOut => fp ? "burnt out" : "burns out",
-            Verb.Kill => fp ? "kill" : thirdP ? "killed" : "kills",
-            Verb.Die => fp ? "die" : thirdP ? "died" : "dies",
-            Verb.Etre => fp ? "are" : thirdP ? "are" : "is",
-            Verb.Hear => fp ? "hear" : "hears",
-            Verb.Cleave => fp ? "cleave" : "cleaves",
-            Verb.Impale => fp ? "impale" : "impales",
-            Verb.Drink => fp ? "drink" : "drinks",
-            Verb.Heal => fp ? "heal" : "heals",
-            Verb.Dissipate => fp ? "dissipate" : "dissipates",
-            Verb.Blink => fp ? "blink" : "blinks",
-            Verb.Cast => fp ? "cast" : "casts",
-            Verb.Destroy => fp ? "destroy" : "destroys",
-            Verb.Tear => fp ? "tear" : "tears",
-            Verb.Feel => fp ? "feel" : "feels",
-            Verb.Summon => fp ? "summon" : "summons",
-            Verb.Stagger => fp ? "stagger" : "staggers",
-            Verb.Butt => fp ? "butt" : "butts"
-        };
-    }
-
-    static string PastParticiple(Verb verb) => verb switch
-    {
-        Verb.Hit => "hit",
-        Verb.Miss => "missed",
-        Verb.Pickup => "picked up",
-        Verb.Drop => "dropped",
-        Verb.Open => "opened",
-        Verb.Close => "closed",
-        Verb.Use => "used",
-        Verb.Ready => "readied",
-        Verb.Unready => "unequiped",
-        Verb.BurnsOut => "burnt out",
-        Verb.Kill => "killed",
-        Verb.Etre => "been",
-        Verb.Hear => "heard",
-        Verb.Cleave => "cleaved",
-        Verb.Impale => "impaled",
-        Verb.Drink => "drunk",
-        Verb.Heal => "healed",
-        Verb.Dissipate => "dissipated",
-        Verb.Blink => "blinked",
-        Verb.Cast => "cast",
-        Verb.Destroy => "destroyed",
-        Verb.Tear => "teared"
+      Verb.Break => fp ? "break" : "breaks",
+      Verb.Close => fp ? "close" : "closes",
+      Verb.Drop => fp ? "drop" : "drops",
+      Verb.Hit => fp ? "hit" : "hits",
+      Verb.Miss => fp ? "miss" : "misses",
+      Verb.Pickup => fp ? "pick up" : "picks up",
+      Verb.Open => fp ? "open" : "opens",
+      Verb.Use => fp ? "use" : "uses",
+      Verb.Ready => fp ? "ready" : "readies",
+      Verb.Unready => fp ? "unequip" : "unequips",
+      Verb.BurnsOut => fp ? "burnt out" : "burns out",
+      Verb.Kill => fp ? "kill" : thirdP ? "killed" : "kills",
+      Verb.Die => fp ? "die" : thirdP ? "died" : "dies",
+      Verb.Etre => fp ? "are" : thirdP ? "are" : "is",
+      Verb.Hear => fp ? "hear" : "hears",
+      Verb.Cleave => fp ? "cleave" : "cleaves",
+      Verb.Impale => fp ? "impale" : "impales",
+      Verb.Drink => fp ? "drink" : "drinks",
+      Verb.Heal => fp ? "heal" : "heals",
+      Verb.Dissipate => fp ? "dissipate" : "dissipates",
+      Verb.Blink => fp ? "blink" : "blinks",
+      Verb.Cast => fp ? "cast" : "casts",
+      Verb.Destroy => fp ? "destroy" : "destroys",
+      Verb.Tear => fp ? "tear" : "tears",
+      Verb.Feel => fp ? "feel" : "feels",
+      Verb.Summon => fp ? "summon" : "summons",
+      Verb.Stagger => fp ? "stagger" : "staggers",
+      Verb.Butt => fp ? "butt" : "butts"
     };
+  }
 
-    public static string CalcName(GameObj gobj, Player player, int amount = 0)
+  static string PastParticiple(Verb verb) => verb switch
+  {
+    Verb.Hit => "hit",
+    Verb.Miss => "missed",
+    Verb.Pickup => "picked up",
+    Verb.Drop => "dropped",
+    Verb.Open => "opened",
+    Verb.Close => "closed",
+    Verb.Use => "used",
+    Verb.Ready => "readied",
+    Verb.Unready => "unequiped",
+    Verb.BurnsOut => "burnt out",
+    Verb.Kill => "killed",
+    Verb.Etre => "been",
+    Verb.Hear => "heard",
+    Verb.Cleave => "cleaved",
+    Verb.Impale => "impaled",
+    Verb.Drink => "drunk",
+    Verb.Heal => "healed",
+    Verb.Dissipate => "dissipated",
+    Verb.Blink => "blinked",
+    Verb.Cast => "cast",
+    Verb.Destroy => "destroyed",
+    Verb.Tear => "teared"
+  };
+
+  public static string CalcName(GameObj gobj, Player player, int amount = 0)
+  {
+    StringBuilder sb = new();
+    if (gobj is Item item)
     {
-        StringBuilder sb = new();
-        if (gobj is Item item)
-        {
-            if (amount > 1)
-            {
-                sb.Append(amount);
-                sb.Append(' ');
-                sb.Append(item.FullName.Pluralize());
-            }
-            else
-            {
-                sb.Append(item.FullName.DefArticle());
-            }            
-        }
-        else if (gobj is Actor actor)
-        {
-          if (actor.VisibleTo(player))
-            sb.Append(gobj.FullName);
-          else
-            sb.Append("something");
-        }
-        else
-        {
-          // I suppose there might eventually be other types of GameObjects and Items and Actors?
-          sb.Append(gobj.FullName);
-        }
-
-        return sb.ToString();
-    }
-
-    public static string HitMessage(Actor attacker, Actor target, Verb verb, GameState gs)
-    {      
-      bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
-      bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
-
-      if (attacker is Player)
+      if (amount > 1)
       {
-        return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
+        sb.Append(amount);
+        sb.Append(' ');
+        sb.Append(item.FullName.Pluralize());
       }
-      else if (target is Player)
-      {
-        return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";    
-      }
-      else 
-      {
-        return "You hear the sounds of battle.";
-      }
-    }
-
-    public static string MissMessage(Actor attacker, Actor target, GameState gs)
-    {
-      bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
-      bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
-
-      if (target is Player)
-        return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
-      else if (attacker is Player)
-        return canSeeTargetLoc ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
       else
-        return "You hear the sounds of battle.";
+      {
+        sb.Append(item.FullName.DefArticle());
+      }
     }
-
-    public static string MobKilledMessage(Actor victim, GameObj? attacker, GameState gs)
+    else if (gobj is Actor actor)
     {
-      var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
-      var plural = victim.HasTrait<PluralTrait>();
-      
-      bool canSeeVictimLoc = gs.LastPlayerFoV.Contains(victim.Loc);      
-      if (canSeeVictimLoc)
-        return Phrase(victim.ID, Verb.Etre, verb, plural, true, gs);
-      else if (attacker is Player)
-        return "You kill something!";
+      if (actor.VisibleTo(player))
+        sb.Append(gobj.FullName);
       else
-        return "Something makes a death-rattle!";
+        sb.Append("something");
     }
-
-    public static string Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, GameState gs)
+    else
     {
-        var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDb.GetObj(subject);
-        GameObj? victim = gs.ObjDb.GetObj(obj);
-
-        if (sub is not null)
-        {
-            sb.Append(CalcName(sub, gs.Player));
-            sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb));
-
-            if (obj != 0 && victim is not null)
-            {                
-                sb.Append(' ');
-                sb.Append(CalcName(victim, gs.Player, amt));
-            }
-
-            sb.Append(exciting ? '!' : '.');
-        }
-
-        return sb.ToString().Capitalize();
+      // I suppose there might eventually be other types of GameObjects and Items and Actors?
+      sb.Append(gobj.FullName);
     }
 
-    public static string Phrase(ulong subject, Verb verb, GameState gs)
+    return sb.ToString();
+  }
+
+  public static string SlipOnIceMessage(Actor actor, Loc loc, GameState gs)
+  {
+    bool canSeeLoc = gs.LastPlayerFoV.Contains(loc);
+    if (canSeeLoc)
+      return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "slip")} on the ice!";
+    else if (actor is Player)
+      return "You slip on some ice!";
+    else
+      return "You hear a clatter!";
+  }
+
+  public static string DoorMessage(Actor actor, Loc loc, Verb verb, GameState gs)
+  {
+    string v = verb.ToString().ToLower();
+    bool canSeeLoc = gs.LastPlayerFoV.Contains(loc);
+    if (canSeeLoc)    
+      return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, v)} the door.";    
+    else if (actor is Player)
+      return $"You fumble with a door handle and {v} a door.";
+    else
+      return $"You hear a door {v}.";
+  }
+
+  public static string HitMessage(Actor attacker, Actor target, Verb verb, GameState gs)
+  {
+    bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
+    bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+
+    if (attacker is Player)
     {
-        var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDb.GetObj(subject);
-
-        if (sub is not null)
-        {
-            sb.Append(CalcName(sub, gs.Player));
-            sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb));            
-        }
-
-        return sb.ToString().Capitalize();
+      return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
     }
-
-    public static string Phrase(ulong subject, Verb verb, string obj, bool exciting, GameState gs)
+    else if (target is Player)
     {
-        var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDb.GetObj(subject);
-        
-        if (sub is not null)
-        {
-            sb.Append(CalcName(sub, gs.Player));
-            sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb));
-            sb.Append(' ');
-            sb.Append(obj.DefArticle());
-            sb.Append(exciting ? '!' : '.');
-        }
-
-        return sb.ToString().Capitalize();
+      return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
     }
-
-    public static string Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, GameState gs)
+    else
     {
-        var sb = new StringBuilder();
-        GameObj? sub = gs.ObjDb.GetObj(subject);
-
-        if (sub is not null)
-        {
-            sb.Append(CalcName(sub, gs.Player));
-            sb.Append(' ');
-            sb.Append(CalcVerb(sub, verb, thirdP));
-            sb.Append(' ');
-            sb.Append(PastParticiple(pastParticiple));
-            sb.Append(exciting ? '!' : '.');
-        }
-
-        return sb.ToString().Capitalize();
+      return "You hear the sounds of battle.";
     }
+  }
+
+  public static string MissMessage(Actor attacker, Actor target, GameState gs)
+  {
+    bool canSeeTargetLoc = gs.LastPlayerFoV.Contains(target.Loc);
+    bool canSeeAttackerLoc = gs.LastPlayerFoV.Contains(attacker.Loc);
+
+    if (target is Player)
+      return canSeeAttackerLoc ? $"{attacker.FullName} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
+    else if (attacker is Player)
+      return canSeeTargetLoc ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
+    else
+      return "You hear the sounds of battle.";
+  }
+
+  public static string MobKilledMessage(Actor victim, GameObj? attacker, GameState gs)
+  {
+    var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
+    var plural = victim.HasTrait<PluralTrait>();
+
+    bool canSeeVictimLoc = gs.LastPlayerFoV.Contains(victim.Loc);
+    if (canSeeVictimLoc)
+      return Phrase(victim.ID, Verb.Etre, verb, plural, true, gs);
+    else if (attacker is Player)
+      return "You kill something!";
+    else
+      return "Something makes a death-rattle!";
+  }
+
+  public static string Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, GameState gs)
+  {
+    var sb = new StringBuilder();
+    GameObj? sub = gs.ObjDb.GetObj(subject);
+    GameObj? victim = gs.ObjDb.GetObj(obj);
+
+    if (sub is not null)
+    {
+      sb.Append(CalcName(sub, gs.Player));
+      sb.Append(' ');
+      sb.Append(CalcVerb(sub, verb));
+
+      if (obj != 0 && victim is not null)
+      {
+        sb.Append(' ');
+        sb.Append(CalcName(victim, gs.Player, amt));
+      }
+
+      sb.Append(exciting ? '!' : '.');
+    }
+
+    return sb.ToString().Capitalize();
+  }
+
+  public static string Phrase(ulong subject, Verb verb, GameState gs)
+  {
+    var sb = new StringBuilder();
+    GameObj? sub = gs.ObjDb.GetObj(subject);
+
+    if (sub is not null)
+    {
+      sb.Append(CalcName(sub, gs.Player));
+      sb.Append(' ');
+      sb.Append(CalcVerb(sub, verb));
+    }
+
+    return sb.ToString().Capitalize();
+  }
+
+  public static string Phrase(ulong subject, Verb verb, string obj, bool exciting, GameState gs)
+  {
+    var sb = new StringBuilder();
+    GameObj? sub = gs.ObjDb.GetObj(subject);
+
+    if (sub is not null)
+    {
+      sb.Append(CalcName(sub, gs.Player));
+      sb.Append(' ');
+      sb.Append(CalcVerb(sub, verb));
+      sb.Append(' ');
+      sb.Append(obj.DefArticle());
+      sb.Append(exciting ? '!' : '.');
+    }
+
+    return sb.ToString().Capitalize();
+  }
+
+  public static string Phrase(ulong subject, Verb verb, Verb pastParticiple, bool thirdP, bool exciting, GameState gs)
+  {
+    var sb = new StringBuilder();
+    GameObj? sub = gs.ObjDb.GetObj(subject);
+
+    if (sub is not null)
+    {
+      sb.Append(CalcName(sub, gs.Player));
+      sb.Append(' ');
+      sb.Append(CalcVerb(sub, verb, thirdP));
+      sb.Append(' ');
+      sb.Append(PastParticiple(pastParticiple));
+      sb.Append(exciting ? '!' : '.');
+    }
+
+    return sb.ToString().Capitalize();
+  }
 }
 

@@ -218,12 +218,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         return ActuallyDoMove(result);
       }
       else
-      {
-        string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "slip")} on the ice!";
+      {       
         result.Complete = true;
         result.EnergyCost = 1.0;
-        result.Messages.Add(msg);
-        result.MessageIfUnseen = Actor is Player ? "" : "You hear a clatter!";
+        result.Messages.Add(MsgFactory.SlipOnIceMessage(Actor, _loc, GameState));       
       }
     }
     else
