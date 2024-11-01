@@ -478,13 +478,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null);
     if (hpLeft < 1)
     {
-      ActorKilled(actor, "a fall", null);
+      ActorKilled(actor, "a fall", null, null);
     }
 
     return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
   }
 
-  public void ActorKilled(Actor victim, string killedBy, ActionResult? result)
+  public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
   {
     if (victim is Player)
     {
@@ -510,14 +510,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       Facts.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
     }
-    else if (result is not null)
+    else
     {
-
-      var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
-      var plural = victim.HasTrait<PluralTrait>();
-
-      string killMsg = MsgFactory.Phrase(victim.ID, Verb.Etre, verb, plural, true,this);
-      result.Messages.Add(killMsg);
+      result?.Messages.Add(MsgFactory.MobKilledMessage(victim, attacker, this));
     }
 
     ObjDb.RemoveActor(victim);
@@ -624,7 +619,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null);
         result?.Messages.Add(msg);
         if (hpLeft < 1)
-          ActorKilled(actor, dmgDesc, result);
+          ActorKilled(actor, dmgDesc, result, null);
       }
       ApplyDamageEffectToLoc(adj, retribution.Type);
     }
@@ -818,7 +813,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null);
       if (hpLeft < 1)
       {
-        ActorKilled(actor, "a fall", null);
+        ActorKilled(actor, "a fall", null, null);
       }
 
       var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";

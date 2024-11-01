@@ -9,9 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using Microsoft.VisualBasic;
-using SDL2;
-
 namespace Yarl2;
 
 class Traps
@@ -56,7 +53,7 @@ class Traps
       var (hpLeft, _) = player.ReceiveDmg(fallDmg, 0, gs, null);
       if (hpLeft < 1)
       {        
-        gs.ActorKilled(player, "a fall", result);
+        gs.ActorKilled(player, "a fall", result, null);
       }
 
       player.Traits.Add(new InPitTrait());
@@ -227,7 +224,7 @@ class Traps
         var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs, null);
         if (hpLeft < 1)
         {
-          gs.ActorKilled(victim, "flames", result);
+          gs.ActorKilled(victim, "flames", result, null);
         }
       }
     }

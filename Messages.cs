@@ -189,7 +189,7 @@ class MsgFactory
 
       if (attacker is Player)
       {
-        return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit something!";
+        return canSeeTargetLoc ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
       }
       else if (target is Player)
       {
@@ -212,6 +212,20 @@ class MsgFactory
         return canSeeTargetLoc ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
       else
         return "You hear the sounds of battle.";
+    }
+
+    public static string MobKilledMessage(Actor victim, GameObj? attacker, GameState gs)
+    {
+      var verb = victim.HasTrait<PlantTrait>() ? Verb.Destroy : Verb.Kill;
+      var plural = victim.HasTrait<PluralTrait>();
+      
+      bool canSeeVictimLoc = gs.LastPlayerFoV.Contains(victim.Loc);      
+      if (canSeeVictimLoc)
+        return Phrase(victim.ID, Verb.Etre, verb, plural, true, gs);
+      else if (attacker is Player)
+        return "You kill something!";
+      else
+        return "Something makes a death-rattle!";
     }
 
     public static string Phrase(ulong subject, Verb verb, ulong obj, int amt, bool exciting, GameState gs)

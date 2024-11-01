@@ -241,7 +241,7 @@ class Battle
     }
 
     if (hpLeft < 1)
-      gs.ActorKilled(target, attacker.Name.IndefArticle(), result);
+      gs.ActorKilled(target, attacker.Name.IndefArticle(), result, attacker);
     
     HitAnim(target, gs);
 
@@ -259,7 +259,7 @@ class Battle
           HitAnim(victim, gs);
           
           if (hpLeftAfterAcid < 1)
-            gs.ActorKilled(victim, "acid", result);
+            gs.ActorKilled(victim, "acid", result, null);
           if (acidMsg != "")
             result.Messages.Add(acidMsg);
         }

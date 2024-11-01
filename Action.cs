@@ -1974,7 +1974,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
         var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, GameState, null);
         if (hpLeft < 1)
         {
-          GameState.ActorKilled(victim, "a fireball", result);
+          GameState.ActorKilled(victim, "a fireball", result, null);
         }        
       }
     }

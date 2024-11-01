@@ -843,7 +843,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
     var obj = gs.ObjDb.GetObj(ObjID);
     if (obj is not null and Actor actor)
     {
-      gs.ActorKilled(actor, "", null);
+      gs.ActorKilled(actor, "", null, null);
     }    
   }
 
@@ -1144,7 +1144,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
         {
           string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
           gs.UIRef().AlertPlayer(msg);
-          gs.ActorKilled(victim, "fire", null);
+          gs.ActorKilled(victim, "fire", null, null);
         }
         else
         {
@@ -1379,7 +1379,7 @@ class PoisonedTrait : TemporaryTrait
     {
       string msg = $"{victim.FullName.Capitalize()} died from poison!";
       gs.UIRef().AlertPlayer(msg);
-      gs.ActorKilled(victim, "poison", null);
+      gs.ActorKilled(victim, "poison", null, null);
     }
     else if (victim is Player) 
     {
