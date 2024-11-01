@@ -199,15 +199,21 @@ class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
 
   public override ActionResult Execute()
   {
-    var result = base.Execute();
+    ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Messages.Add($"{Actor!.FullName.Capitalize()} lets out a piercing shriek!");
+
+    string msg;
+    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+      msg = $"{Actor.FullName.Capitalize()} lets out a piercing shriek!";
+    else
+      msg = "You hear a piercing shriek!";
+    result.Messages.Add(msg);
 
     for (int r = Actor.Loc.Row - Radius; r < Actor.Loc.Row + Radius; r++)
     {
       for (int c = Actor.Loc.Col - Radius; c < Actor.Loc.Col + Radius; c++)
       {
-        if (!GameState!.CurrentMap.InBounds(r, c))
+        if (!GameState.CurrentMap.InBounds(r, c))
           continue;
         Loc loc = Actor.Loc with { Row = r, Col = c };
         if (GameState.ObjDb.Occupant(loc) is Mob mob)
