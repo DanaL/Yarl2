@@ -150,8 +150,8 @@ enum ItemNames
 {
   ANTIDOTE, ARROW, BATTLE_AXE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, DART, FIREBOLT,
   GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
-  LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_COLD_RES, POTION_FIRE_RES,
-  POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
+  LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_BLINDNESS, POTION_COLD_RES, 
+  POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
   RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
   SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
   SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
@@ -575,6 +575,16 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         break;
+      case ItemNames.POTION_BLINDNESS:
+        item = new Item()
+        {
+          Name = "potion of blindness", Type = ItemType.Potion, Value = 15,
+          Glyph = new Glyph('!', Colours.PINK, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new UseSimpleTrait("blindness"));
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        break;
       case ItemNames.SKULL:
         item = new Item() 
         {
@@ -602,7 +612,7 @@ class ItemFactory
         item.Traits.Add(new SideEffectTrait() 
         {
           Odds = 15,
-          Effect = "Confused#0#13#0"
+          Effect = "Confused#0#13#0"          
         });
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());

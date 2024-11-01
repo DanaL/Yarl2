@@ -62,7 +62,8 @@ class DebugCommand(GameState gs)
     {"vial of poison", ItemNames.VIAL_OF_POISON},
     {"ghostcap mushroom", ItemNames.GHOSTCAP_MUSHROOM},
     {"talisman of circumspection", ItemNames.TALISMAN_OF_CIRCUMSPECTION},
-    {"blindfold", ItemNames.BLINDFOLD}
+    {"blindfold", ItemNames.BLINDFOLD},
+    {"potion of blindness", ItemNames.POTION_BLINDNESS}
   };    
 
   public string DoCommand(string txt)

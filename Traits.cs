@@ -710,6 +710,19 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public override string AsText() => $"UseSimple#{Spell}";
 
+  TemporaryTrait BuildBlindTrait(Actor victim, GameState gs)
+  {
+    int duration = gs.Rng.Next(150, 251);
+    if (victim.Stats.TryGetValue(Attribute.Constitution, out var con))
+      duration -= 10 * con.Curr;
+
+    return new BlindTrait()
+    {
+      OwnerID = victim.ID,
+      ExpiresOn = gs.Turn + (ulong) duration
+    };
+  }
+
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user, item), null),
@@ -739,6 +752,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
             { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
     "protection" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new AuraOfProtectionTrait() { HP = 25 }, item), null),
+    "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs), item), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1301,6 +1315,9 @@ class BlindTrait : TemporaryTrait
     OwnerID = target.ID;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     
+    if (!target.Traits.Contains(this)) 
+      target.Traits.Add(this);
+
     if (target is Player) 
       msgs.Add("You cannot see a thing!");
 
