@@ -286,8 +286,11 @@ class Battle
     {
       if (target.Traits.OfType<ParalyzingGazeTrait>().FirstOrDefault() is ParalyzingGazeTrait gaze)
       {
-        var paralyzed = new ParalyzedTrait() { DC = gaze.DC };
-        paralyzed.Apply(actor, gs);
+        if (!actor.HasTrait<BlindTrait>())
+        {
+          var paralyzed = new ParalyzedTrait() { DC = gaze.DC };
+          paralyzed.Apply(actor, gs);
+        }        
       }
     }
   }
