@@ -948,7 +948,7 @@ abstract class UserInterface
               if (g == GameObjectDB.EMPTY)
                 g = Util.TileToGlyph(gs.TileAt(loc));
 
-              var sqr = new Sqr(Colours.LIGHT_GREY, Colours.LIGHT_PURPLE, g.Ch);
+              var sqr = new Sqr(Colours.LIGHT_GREY, Colours.FADED_PURPLE, g.Ch);
               SqsOnScreen[screenRow, screenCol] = sqr;
             }
           }

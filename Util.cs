@@ -53,6 +53,7 @@ class Colours
   public static readonly Colour HILITE = new(255, 255, 53, 128);  
   public static readonly Colour PURPLE = new(191, 64, 191, 255);
   public static readonly Colour LIGHT_PURPLE = new(207, 159, 255, 255);
+  public static readonly Colour FADED_PURPLE = new(207, 159, 255, 125);
   public static readonly Colour PINK = new(255, 192, 203, 255);
   public static readonly Colour FAINT_PINK = new(178, 102, 255, 125);
   public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
@@ -82,6 +83,7 @@ class Colours
     else if (colour == TORCH_YELLOW) return "torchyellow";
     else if (colour == FAR_BELOW) return "farbelow";
     else if (colour == LIGHT_PURPLE) return "lightpurple";
+    else if (colour == FADED_PURPLE) return "fadedpurple";
     else if (colour == PURPLE) return "purple";
     else if (colour == PINK) return "pink";
     else if (colour == ICE_BLUE) return "iceblue";
@@ -113,6 +115,7 @@ class Colours
     "torchyellow" => TORCH_YELLOW,
     "farbelow" => FAR_BELOW,
     "lightpurple" => LIGHT_PURPLE,
+    "fadedpurple" => FADED_PURPLE,
     "purple" => PURPLE,
     "pink" => PINK,
     "iceblue" => ICE_BLUE,

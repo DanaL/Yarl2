@@ -1757,10 +1757,10 @@ class TraitFactory
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
-    { "Blind", (pieces, gameObj) => new BlindTrait() 
+    { "Blind", (pieces, gameObj) => new BlindTrait()
     {
-      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
-      ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]) } 
+      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+      ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]) }
     },
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
@@ -1792,7 +1792,10 @@ class TraitFactory
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
     { "Indifferent", (pieces, gameObj) => new IndifferentTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
-    { "Grants", (pieces, gameObj) => new GrantsTrait() { TraitsGranted = pieces[1].Split(';') }},
+    { "Grants", (pieces, gameObj) => {
+      var gt = new GrantsTrait() { TraitsGranted = pieces[1].Split(';') };
+      return gt;
+     }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
@@ -1886,9 +1889,9 @@ class TraitFactory
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
-    { "Shriek", (pieces, gameObj) => 
-      new ShriekTrait() 
-      { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) } 
+    { "Shriek", (pieces, gameObj) =>
+      new ShriekTrait()
+      { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
     },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
@@ -1909,7 +1912,7 @@ class TraitFactory
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
     { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
-    { "Versatile", (pieces, GameObject) => 
+    { "Versatile", (pieces, GameObject) =>
     {
       Enum.TryParse(pieces[4], out DamageType dt);
       DamageTrait oneHanded = new DamageTrait() { DamageDie = int.Parse(pieces[2]), NumOfDie = int.Parse(pieces[3]), DamageType = dt };
