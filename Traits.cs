@@ -419,7 +419,11 @@ class GrantsTrait : Trait
 {
   public string[] TraitsGranted = [];
 
-  public override string AsText() => "Grants#" + string.Join(';', TraitsGranted);
+  public override string AsText()
+  {
+    string grantedTraits = string.Join(';', TraitsGranted).Replace('#', '&');
+    return "Grants#" + grantedTraits;
+  }
 
   public List<string> Grant(GameObj obj, GameState gs)
   {
@@ -800,7 +804,7 @@ class DamageTrait : Trait
 class ACModTrait : BasicTrait
 {
   public int ArmourMod { get; set; }
-  public override string AsText() => $"ACMode#{ArmourMod}";
+  public override string AsText() => $"ACMod#{ArmourMod}";
 }
 
 class ArmourTrait : ACModTrait
@@ -1793,8 +1797,8 @@ class TraitFactory
     { "Indifferent", (pieces, gameObj) => new IndifferentTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Grants", (pieces, gameObj) => {
-      var gt = new GrantsTrait() { TraitsGranted = pieces[1].Split(';') };
-      return gt;
+      string[] grantedTraits = pieces[1].Split(';').Select(s => s.Replace('&', '#')).ToArray();
+      return new GrantsTrait() { TraitsGranted = grantedTraits };
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
