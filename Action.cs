@@ -887,6 +887,17 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
             gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(replacementTile));
           }          
           break;
+        case TileType.HiddenMagicMouth:
+          dc = 10 + gs.CurrLevel + 1;
+          if (rogue)
+            dc -= 2;
+          dc = int.Min(dc, 20);
+          if (gs.Rng.Next(1, 21) <= dc)
+          {
+            result.Messages.Add("You spot a magic mouth!");
+            gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
+          }
+          break;
         case TileType.JetTrigger:
           JetTrigger jt = (JetTrigger)tile;
           if (!jt.Visible)
