@@ -91,7 +91,7 @@ class IdolAltarMaker
   public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, Random rng, int level)
   {
     Map altarLevel = levels[level];
-
+    Tile sacredSq;
     var closets = PotentialClosets(altarLevel);    
     if (closets.Count > 0)
     {
@@ -107,6 +107,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.YELLOW, Colours.YELLOW, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("golden"));
           idol.Traits.Add(new AdjectiveTrait("crescent-shaped"));
+          sacredSq = TileFactory.Get(TileType.DungeonFloor);
           altarDesc = "An altar carved with arcane depictions of the moon.";
           break;
         case 1:
@@ -115,6 +116,7 @@ class IdolAltarMaker
           idol.Traits.Add(new AdjectiveTrait("strange"));
           idol.Traits.Add(new AdjectiveTrait("rune-carved"));
           idol.Traits.Add(new FlammableTrait());
+          sacredSq = TileFactory.Get(TileType.OrangeTree);
           altarDesc = "An engraving of the World Tree.";
           break;
         default:
@@ -122,6 +124,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("soapstone"));
           altarDesc = "An altar venerating the leviathan.";
+          sacredSq = TileFactory.Get(TileType.Water);
           break;
       }
 
@@ -132,14 +135,14 @@ class IdolAltarMaker
       Item prize = Artifacts.GenArtifact(objDb, rng);
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
       objDb.SetToLoc(prizeLoc, prize);
-      
+
       Tile altar = new IdolAltar(altarDesc)
       {
         IdolID = idol.ID,
         Wall = new Loc(dungeonID, level, wallR, wallC)
       };
       levels[level].SetTile(altarR, altarC, altar);
-      levels[level].SetTile(closetR, closetC, TileFactory.Get(TileType.GreenTree));
+      levels[level].SetTile(closetR, closetC, sacredSq);
     }
   }
 }
