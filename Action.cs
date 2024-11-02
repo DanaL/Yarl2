@@ -1736,12 +1736,12 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
+      string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, GameState);
+      ui.AlertPlayer(alert);
+
       Actor.Inventory.Remove(Choice, 1);
       GameState.ItemDropped(item, Actor.Loc);
       item.Equiped = false;
-
-      string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, GameState);
-      ui.AlertPlayer(alert);
 
       return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }

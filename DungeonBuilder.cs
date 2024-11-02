@@ -1049,6 +1049,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
+
     DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
@@ -1056,6 +1057,8 @@ class MainDungeonBuilder : DungeonBuilder
       Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
     }
     
+    IdolAltarMaker.MakeAltar(id, levels, objDb, rng, 1);
+
     PlaceLevelFiveGate(levels[4], rng, history);
 
     return dungeon;

@@ -205,6 +205,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     string msg = ThingAddedToLoc(loc);
     msgs.Add(msg);
 
+    if (tile is IdolAltar idolAltar && item.ID == idolAltar.IdolID)
+    {      
+      Loc wallLoc = idolAltar.Wall;
+      if (CurrentMap.TileAt(wallLoc.Row, wallLoc.Col).Type == TileType.DungeonWall)
+      {
+        CurrentMap.SetTile(wallLoc.Row, wallLoc.Col, TileFactory.Get(TileType.DungeonFloor));
+        if (LastPlayerFoV.Contains(wallLoc))
+          msgs.Add("As the idol touches the altar, a wall slides aside with a rumble.");
+        else
+          msgs.Add("You hear grinding stone.");
+      }
+    }
+
     if (msgs.Count > 0)
       UI.AlertPlayer(msgs);
   }

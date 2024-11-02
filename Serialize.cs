@@ -354,6 +354,13 @@ internal class MapSaver
           string msg = pieces[2];
           tile = new Landmark(msg);
           break;
+        case TileType.IdolAltar:
+          tile = new IdolAltar(pieces[2]) 
+          { 
+            IdolID = ulong.Parse(pieces[3]),
+            Wall = Loc.FromStr(pieces[4])
+          };        
+          break;
         case TileType.VaultDoor:
           open = Convert.ToBoolean(pieces[2]);
           Enum.TryParse(pieces[3], out Metals met);

@@ -28,7 +28,7 @@ enum TileType
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
-  MagicMouth, HiddenMagicMouth
+  MagicMouth, HiddenMagicMouth, IdolAltar
 }
 
 interface ITriggerable
@@ -357,6 +357,15 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
   {
     return $"{(int)Type};{_stepMessage}";
   }
+}
+
+class IdolAltar : Landmark
+{
+  public ulong IdolID { get; set; }
+  public IdolAltar(string stepMessage) : base(stepMessage) => Type = TileType.IdolAltar;
+  public Loc Wall { get; set; }
+
+  public override string ToString() => $"{(int)Type};{StepMessage};{IdolID};{Wall}";
 }
 
 class TileFactory
