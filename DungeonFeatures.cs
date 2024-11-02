@@ -129,6 +129,10 @@ class IdolAltarMaker
       Loc idolLoc = new(dungeonID, level, altarR, altarC);
       objDb.SetToLoc(idolLoc, idol);
 
+      Item prize = Artifacts.GenArtifact(objDb, rng);
+      Loc prizeLoc = new(dungeonID, level, closetR, closetC);
+      objDb.SetToLoc(prizeLoc, prize);
+      
       Tile altar = new IdolAltar(altarDesc)
       {
         IdolID = idol.ID,
