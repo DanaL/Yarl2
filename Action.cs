@@ -1436,7 +1436,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
     string txt;
     if (delta > 0)
     {
-      txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "etre")} healder for {delta} HP.";
+      txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "etre")} healed for {delta} HP.";
     }
     else
     {
