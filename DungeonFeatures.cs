@@ -124,7 +124,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("soapstone"));
           altarDesc = "An altar venerating the leviathan.";
-          sacredSq = TileFactory.Get(TileType.Water);
+          sacredSq = TileFactory.Get(TileType.Pool);
           break;
       }
 

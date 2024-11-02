@@ -20,7 +20,7 @@ enum TileType
   DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Mountain,
   GreenTree, OrangeTree, RedTree, YellowTree, Conifer,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
-  Dirt, StoneRoad, Well, Bridge, WoodBridge,
+  Dirt, StoneRoad, Well, Bridge, WoodBridge, Pool, FrozenPool,
   Statue,       // Most statues can be simple tiles so I'm just defining a few different types
   ElfStatue,    // rather than creating a statue subclass where I need to track state during
   DwarfStatue,  // serialization, etc
@@ -182,6 +182,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.WaterTrap => "water trap",
     TileType.MagicMouth => "a magic mouth",
     TileType.HiddenMagicMouth => "stone floor",
+    TileType.Pool => "a pool",
+    TileType.FrozenPool => "ice",
     _ => "unknown"
   };
 
@@ -422,7 +424,8 @@ class TileFactory
   private static readonly Tile WaterTrap = new BasicTile(TileType.WaterTrap, true, false, true);
   private static readonly Tile MagicMouth = new BasicTile(TileType.MagicMouth, true, false, true);
   private static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
-
+  private static readonly Tile Pool = new BasicTile(TileType.Pool, true, false, true);
+  private static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
   public static Tile Get(TileType type) => type switch
   {
     TileType.WorldBorder => WorldBorder,
@@ -478,6 +481,7 @@ class TileFactory
     TileType.WaterTrap => WaterTrap,
     TileType.MagicMouth => MagicMouth,
     TileType.HiddenMagicMouth => HiddenMagicMouth,
+    TileType.Pool => Pool,
     _ => Unknown
   };
 }

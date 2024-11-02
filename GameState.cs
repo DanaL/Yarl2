@@ -293,6 +293,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           UI.AlertPlayer("The ice melts!");
           BridgeDestroyedOverWater(loc);
         }
+        else if (tile.Type == TileType.FrozenPool)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pool));
+          UI.AlertPlayer("The ice melts!");
+        }
 
         foreach (var item in items)
         {
@@ -318,6 +324,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
           UI.AlertPlayer("The water freezes!");
+        }
+        else if (tile.Type == TileType.Pool)
+        {
+          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenPool));
+          UI.AlertPlayer("The pool freezes!");
         }
         break;
       default:
