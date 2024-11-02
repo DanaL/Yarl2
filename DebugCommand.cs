@@ -68,6 +68,12 @@ class DebugCommand(GameState gs)
 
   public string DoCommand(string txt)
   {
+    if (txt == "loc")
+    {
+      _gs.UIRef().AlertPlayer($"Loc: {_gs.Player.Loc}");
+      return "";
+    }
+
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
       return "Debug commands are formated: add/give/drop <obj name>";
@@ -78,7 +84,7 @@ class DebugCommand(GameState gs)
         return AddMonster(parts[1]);
       case "give":
       case "drop":
-        return AddItem(parts[0].ToLower(), parts[1]);
+        return AddItem(parts[0].ToLower(), parts[1]);      
       default:
         return "Unknown debug command";
     }
