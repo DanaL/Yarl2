@@ -107,6 +107,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.YELLOW, Colours.YELLOW, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("golden"));
           idol.Traits.Add(new AdjectiveTrait("crescent-shaped"));
+          idol.Traits.Add(new DescriptionTrait("A gold, carved crescent moon, decorated with arcane symbols."));
           sacredSq = TileFactory.Get(TileType.DungeonFloor);
           altarDesc = "An altar carved with arcane depictions of the moon.";
           break;
@@ -115,6 +116,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("strange"));
           idol.Traits.Add(new AdjectiveTrait("rune-carved"));
+          idol.Traits.Add(new DescriptionTrait("A branch carved with druidic runes and pictograms."));
           idol.Traits.Add(new FlammableTrait());
           sacredSq = TileFactory.Get(TileType.OrangeTree);
           altarDesc = "An engraving of the World Tree.";
@@ -124,6 +126,7 @@ class IdolAltarMaker
           idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK);
           idol.Traits.Add(new AdjectiveTrait("soapstone"));
           altarDesc = "An altar venerating the leviathan.";
+          idol.Traits.Add(new DescriptionTrait("A worn soapstone statue of a sea creature."));
           sacredSq = TileFactory.Get(TileType.Pool);
           break;
       }

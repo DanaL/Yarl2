@@ -88,3 +88,15 @@ A pile of coins, sitting there to be claimed. Wait. Did it just move?
 #
 shrieker
 A large fungus that shrieks loudly when a creature is nearby. Its ecology is a mystery.
+#
+shortsword
+A great choice for a warrior on a budget, and popular with new adventurer college graduates.
+#
+greatsword
+An imposing, heavy sword for a fighter all in on offense.
+#
+spear
+A pokey stick: a true classic.
+#
+torch
+Essential gear for staving off the darkness.

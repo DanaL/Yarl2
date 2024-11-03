@@ -577,7 +577,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'i')
       {
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "You are carrying:", Options = InvOption.MentionMoney });
-        _inputController = new PauseForMoreInputer();
+        _inputController = new InventoryDetails(gameState);
         _deferred = new CloseMenuAction(gameState);
       }
       else if (ch == ',')

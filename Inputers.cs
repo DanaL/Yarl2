@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using SDL2;
 using static Yarl2.Util;
 
 namespace Yarl2;
@@ -121,7 +122,6 @@ class Examiner : Inputer
       Done = true;
       Success = true;
       ClearHighlight();
-      return;
     }
     else if (ch == Constants.TAB)
     {
@@ -869,6 +869,85 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
   {
     ID = _choice
   };
+}
+
+class InventoryDetails : Inputer
+{
+  GameState GameState { get; set; }
+  HashSet<char> Options { get; set; }
+  readonly Dictionary<string, CyclopediaEntry> Cyclopedia;
+
+  public InventoryDetails(GameState gs) 
+  {
+    GameState = gs;
+    Options = new(GameState.Player.Inventory.UsedSlots());
+    Cyclopedia = LoadCyclopedia();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = true;
+    }
+    else if (ch == ' ')
+    {
+      GameState.UIRef().ClosePopup();
+    }
+    else if (Options.Contains(ch))
+    {
+      var (item, _) = GameState.Player.Inventory.ItemAt(ch);
+      string title = item.FullName.Capitalize();
+      string desc = "";
+      if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
+        desc = text;
+      else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
+        desc = entry.Text;
+      string extraDesc = ExtraDetails(item);
+      if (extraDesc != "")
+      {
+        desc += "\n\n" + extraDesc;
+      }
+
+      GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1));
+    }
+  }
+
+  static string ExtraDetails(Item item)
+  {
+    List<string> items = [];
+    foreach (var trait in item.Traits)
+    {
+      if (trait is WeaponSpeedTrait spd)
+      {
+        if (spd.Cost < 1.0)
+          items.Add("it is a [GREEN quick] weapon");
+        else if (spd.Cost > 1.0)
+          items.Add("it is a [YELLOW slow] weapon");
+      }
+      if (trait is MetalTrait mt)
+      {
+        if (mt.Type == Metals.Silver)
+          items.Add("it is made of silver");
+        else if (mt.Type == Metals.Bronze)
+          items.Add("it is made of bronze");
+        else if (mt.Type == Metals.Mithril)
+          items.Add("it is made of mithril");
+      }
+      if (trait is CleaveTrait)
+        items.Add("it can cleave enemies");
+      if (trait is TwoHandedTrait)
+        items.Add("it must be wielded with two hands");
+      if (trait is VersatileTrait)
+        items.Add("it may be wielded in both hands or with a shield");
+    }
+
+    if (items.Count == 0)
+      return "";
+
+    return string.Join(", ", items).Capitalize() + ".";
+  }
 }
 
 class Inventorier(HashSet<char> options) : Inputer
