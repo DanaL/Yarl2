@@ -280,6 +280,13 @@ class CorrosiveTrait : Trait
   public override string AsText() => "Corrosive";
 }
 
+class DescriptionTrait(string text) : Trait
+{
+  public string Text { get; set; } = text;
+
+  public override string AsText() => $"Description#{Text}";
+}
+
 class DialogueScriptTrait : Trait
 {
   public string ScriptFile { get; set; } = "";
@@ -1799,6 +1806,7 @@ class TraitFactory
     { "Damage", (pieces, gameObj) => {
       Enum.TryParse(pieces[3], out DamageType dt);
       return new DamageTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = dt }; }},
+    { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
