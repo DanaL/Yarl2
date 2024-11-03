@@ -214,6 +214,11 @@ class Popup
       ui.WriteLine(border, row++, col, _width, DefaultTextColour);
     }
 
+    if (_pieces.Count == 1)
+    {
+      _pieces = [ [(Colours.WHITE, "")], _pieces[0],  [(Colours.WHITE, "")]];
+    }
+
     foreach (var line in _pieces)
     {
       List<(Colour, string)> lt = [(DefaultTextColour, "| ")];
