@@ -100,3 +100,9 @@ A pokey stick: a true classic.
 #
 torch
 Essential gear for staving off the darkness.
+#
+potion of healing
+Heals 4-16 hp.
+#
+antidote
+Cures poison.
