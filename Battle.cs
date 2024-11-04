@@ -102,7 +102,7 @@ class Battle
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
     result.Messages.Add(txt);
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo);
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
       result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
@@ -219,7 +219,12 @@ class Battle
 
     string msg = MsgFactory.HitMessage(attacker, target, attackVerb, gs);
     result.Messages.Add(msg);
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon);    
+
+    double dmgScale = 1.0;
+    if (weapon is not null && weapon.Traits.OfType<ViciousTrait>().FirstOrDefault() is ViciousTrait vt)
+      dmgScale = vt.Scale;
+
+    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
     if (dmgMsg != "")
       result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
@@ -254,7 +259,7 @@ class Battle
           string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
           result.Messages.Add(txt);
           int roll = gs.Rng.Next(4) + 1;
-          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null);   
+          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);   
           
           HitAnim(victim, gs);
           

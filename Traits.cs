@@ -610,6 +610,13 @@ class VaultKeyTrait(Loc loc) : Trait
   public override string AsText() => $"VaultKey#{VaultLoc}";
 }
 
+class ViciousTrait : Trait
+{
+  public double Scale { get; set; }
+
+  public override string AsText() => $"Vicious#{Scale}";
+}
+
 class CleaveTrait : Trait
 {
   public override string AsText() => "Cleave";
@@ -1159,7 +1166,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       {
         int fireDmg = gs.Rng.Next(8) + 1;
         List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs, null);
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs, null, 1.0);
         if (dmgMsg != "")
         {
           gs.UIRef().AlertPlayer(dmgMsg);
@@ -1399,7 +1406,7 @@ class PoisonedTrait : TemporaryTrait
     }
 
     List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null);
+    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null, 1.0);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
     
@@ -1949,6 +1956,7 @@ class TraitFactory
       DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[6]), NumOfDie = int.Parse(pieces[7]), DamageType = dt };
       return new VersatileTrait(oneHanded, twoHanded);
     } },
+    { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = double.Parse(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },

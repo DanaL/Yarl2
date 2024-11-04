@@ -124,7 +124,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     Inventory = new EmptyInventory(ID);
   }
 
-  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src)
+  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src, double scale)
   {
     string msg = "";
 
@@ -171,8 +171,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       
       if (d > 0)
         total += d;
-    }
+    }    
     total += bonusDamage;
+    total = (int)(total * scale);
 
     if (HasTrait<SilverAllergyTrait>() && src is Item weapon && weapon.MetalType() == Metals.Silver)
     {

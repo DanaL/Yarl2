@@ -29,7 +29,7 @@ class Artifacts
           lo = 2;
       } 
         
-      int roll = rng.Next(lo, 5);
+      int roll = rng.Next(lo, 6);
       switch (roll)
       {
         case 0:
@@ -39,6 +39,10 @@ class Artifacts
         case 1:
           sword.Traits = sword.Traits.Where(t => t is not MetalTrait).ToList();
           sword.Traits.Add(new MetalTrait() { Type = Metals.Mithril });
+          break;
+        case 2:
+          sword.Traits.Add(new ViciousTrait() { Scale = 1.333 });
+          Console.WriteLine("Vicious");
           break;
         default:
           if (sword.Traits.OfType<WeaponBonusTrait>().FirstOrDefault() is WeaponBonusTrait wb)

@@ -50,7 +50,7 @@ class Traps
       for (int j = 0; j < damageDice; j++)
         total += gs.Rng.Next(6) + 1;
       List<(int, DamageType)> fallDmg = [ (total, DamageType.Blunt) ];
-      var (hpLeft, _) = player.ReceiveDmg(fallDmg, 0, gs, null);
+      var (hpLeft, _) = player.ReceiveDmg(fallDmg, 0, gs, null, 1.0);
       if (hpLeft < 1)
       {        
         gs.ActorKilled(player, "a fall", result, null);
@@ -221,7 +221,7 @@ class Traps
       {
         result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
         
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs, null);
+        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
         {
           gs.ActorKilled(victim, "flames", result, null);

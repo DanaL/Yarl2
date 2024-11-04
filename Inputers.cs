@@ -941,6 +941,8 @@ class InventoryDetails : Inputer
         items.Add("it must be wielded with two hands");
       if (trait is VersatileTrait)
         items.Add("it may be wielded in both hands or with a shield");
+      if (trait is ViciousTrait vt)
+        items.Add($"this vicious weapon deals [BRIGHTRED extra damage]");
     }
 
     if (items.Count == 0)
