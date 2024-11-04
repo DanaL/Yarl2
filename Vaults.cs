@@ -276,6 +276,8 @@ class Vaults
   static Landmark GetTombMarker(NameGenerator ng, Random rng, History history)
   {
     string name = ng.GenerateName(rng.Next(6, 12));
+    HistoricalFigure hf = new(name);
+    
     string relation = rng.Next(10) switch
     {
       0 => "Consort",
@@ -313,6 +315,8 @@ class Vaults
     sb.Append(causeOfDeath);
     sb.Append('.');
 
+    hf.Title = $"{relation.Capitalize()} of {history.RulerName}";
+    history.Facts.Add(hf);
     return new Landmark(sb.ToString());
   } 
 

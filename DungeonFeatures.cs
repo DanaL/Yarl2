@@ -88,7 +88,7 @@ class IdolAltarMaker
     return floorCount >= 5;
   }
 
-  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, Random rng, int level)
+  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, History history, Random rng, int level)
   {
     Map altarLevel = levels[level];
     Tile sacredSq;
@@ -135,7 +135,7 @@ class IdolAltarMaker
       Loc idolLoc = new(dungeonID, level, altarR, altarC);
       objDb.SetToLoc(idolLoc, idol);
 
-      Item prize = Artifacts.GenArtifact(objDb, rng);
+      Item prize = Artifacts.GenArtifact(objDb, history, rng);
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
       objDb.SetToLoc(prizeLoc, prize);
 

@@ -42,6 +42,11 @@ class Fact
           Loc = Loc.FromStr(pieces[1]),
           Desc = pieces[2]
         };
+      case "HistoricalFigure":
+        return new HistoricalFigure(pieces[1])
+        {
+          Title = pieces[2]
+        };
       default:
         return new SimpleFact()
         {
@@ -66,6 +71,14 @@ class LocationFact : Fact
   public string Desc { get; set; } = "";
 
   public override string ToString() => $"LocationFact#{Loc}#{Desc}";
+}
+
+class HistoricalFigure(string name) : Fact
+{
+  public string Name { get; set; } = name;
+  public string Title { get; set; } = "";
+
+  public override string ToString() => $"HistoricalFigure#{Name}#{Title}";
 }
 
 // class to accumulate a list of facts about the world as historical

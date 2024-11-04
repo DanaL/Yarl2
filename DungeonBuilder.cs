@@ -1057,7 +1057,7 @@ class MainDungeonBuilder : DungeonBuilder
       Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
     }
     
-    IdolAltarMaker.MakeAltar(id, levels, objDb, rng, 1);
+    IdolAltarMaker.MakeAltar(id, levels, objDb, history, rng, 1);
 
     PlaceLevelFiveGate(levels[4], rng, history);
 

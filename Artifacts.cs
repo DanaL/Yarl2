@@ -17,7 +17,7 @@ class Artifacts
     return ItemFactory.Get(ItemNames.LONGSWORD, objDb);
   }
 
-  static Item ArtifactSword(Item sword, GameObjectDB objDb, Random rng)
+  static Item ArtifactSword(Item sword, History history, Random rng)
   {
     // add three nice features
     for (int i = 0; i < 3; i++)
@@ -49,15 +49,20 @@ class Artifacts
       }
     }
 
+    foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
+    {
+      Console.WriteLine($"{hf.Name}, {hf.Title}");
+    }
+
     return sword;
   }
 
-  public static Item GenArtifact(GameObjectDB objDb, Random rng)
+  public static Item GenArtifact(GameObjectDB objDb, History history, Random rng)
   {
     Item item = BaseItem(objDb);
 
     if (item.HasTrait<SwordTrait>())
-      item = ArtifactSword(item, objDb, rng);
+      item = ArtifactSword(item, history, rng);
       
     return item;
   }
