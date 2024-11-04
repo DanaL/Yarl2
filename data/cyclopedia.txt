@@ -93,7 +93,7 @@ shortsword
 A great choice for a warrior on a budget, and popular with new adventurer college graduates.
 #
 greatsword
-An imposing, heavy sword for a fighter all in on offense.
+An imposing, heavy sword for a fighter all-in on offense.
 #
 spear
 A pokey stick: a true classic.

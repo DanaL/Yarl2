@@ -806,8 +806,7 @@ abstract class UserInterface
     {
       _confirm = new Popup(txt, "", ViewHeight / 2 - 2,  ScreenWidth / 2);
       _popup?.SetDefaultTextColour(Colours.DARK_GREY);
-      _popup?.ParseMessage();
-
+      
       UpdateDisplay(gs);
 
       e = PollForEvent();
@@ -828,8 +827,7 @@ abstract class UserInterface
     while (!(ch == 'y' || ch == 'n'));
 
     _popup?.SetDefaultTextColour(Colours.WHITE);
-    _popup?.ParseMessage();
-
+    
     return ch == 'y';
   }
 
@@ -840,7 +838,8 @@ abstract class UserInterface
 
     do
     {
-      SetPopup(new Popup($"{prompt}\n{result}", "", -1, -1));
+      int width = int.Max(prompt.Length + 4, result.Length + 2);    
+      SetPopup(new Popup($"{prompt}\n{result}", "", -1, -1, width));
       UpdateDisplay(null);
       e = PollForEvent();
 

@@ -13,222 +13,178 @@ using System.Text;
 
 namespace Yarl2;
 
+class LineScanner(string line)
+{
+  readonly string Source = line;
+  readonly List<(Colour, string)> Words = [];
+  int Start;
+  int Current;
+  Colour CurrentColour = Colours.WHITE;
+  
+  public List<(Colour, string)> Scan()
+  {
+    while (!IsAtEnd())
+    {
+      Start = Current;
+      Tokenize();
+    }
+
+    return Words;
+  }
+
+  void Tokenize()
+  {
+    char c = Advance();
+    switch (c)
+    {
+      case '[':
+        ScanColour();
+        break;
+      case ' ':
+        break;
+      case '\n':
+        Words.Add((CurrentColour, "\n"));
+        break;
+      case '\\':
+        if (Peek() == 'n')
+        {
+          Words.Add((CurrentColour, "\n"));
+          Advance();
+        }
+        else
+        {
+          Words.Add((CurrentColour, c.ToString()));
+        }
+        break;        
+      case ']':
+        CurrentColour = Colours.WHITE;
+        break;
+      default:
+        ScanWord();
+        break;
+      
+    }
+  }
+
+  void ScanColour()
+  {
+    Start = Current;
+    while (char.IsLetterOrDigit(Peek()))
+      Advance();
+    CurrentColour = Colours.TextToColour(Source[Start..Current].ToLower());
+  }
+
+  void ScanWord()
+  {
+    while (!IsAtEnd() && Peek() != ']' && !char.IsWhiteSpace(Peek()))
+      Advance();
+    Words.Add((CurrentColour, Source[Start..Current]));
+  }
+
+  char Peek() => IsAtEnd() ? '\0' : Source[Current];
+  char Advance() => Source[Current++];
+  bool IsAtEnd() => Current >= Source.Length;
+}
+
 class Popup
 {
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
-  readonly string _title;
-  List<List<(Colour, string)>> _pieces = [];
-  int _width;
-  readonly int _preferredRow;
-  readonly int _preferredCol;
-  readonly string _originalText;
-  readonly int _originalWidth;
-
+  readonly string Title;
+  List<(Colour, string)> Words;
+  int Width;
+  readonly int PreferredRow;
+  readonly int PreferredCol;
+    
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
-    _title = title;
-    _originalText = message;
-    _originalWidth = width;
+    Title = title;
+    Width = width != -1 ? width + 4 : UserInterface.ViewWidth - 4;
 
-    ParseMessage();
-
+    LineScanner scanner = new(message);
+    Words = scanner.Scan();
+        
     // preferredRow is the ideal row for the bottom of the box
     // and the preferredCol is the ideal col for the centre of it
-    _preferredRow = preferredRow;
-    _preferredCol = preferredCol;
-  }
-
-  public void ParseMessage()
-  {
-    _pieces = _originalText.Split('\n').Select(Parse).ToList();
-
-    int maxWidth = UserInterface.ViewWidth - 4;
-    if (_originalWidth > maxWidth)
-      maxWidth = _originalWidth;
-
-    int widest = WidestPopupLine(_pieces);
-    if (widest >= maxWidth)
-      _pieces = ResizePopupLines(_pieces, maxWidth - 4);
-    _width = WidestPopupLine(_pieces);
-  }
-
-  public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
-
-  List<(Colour, string)> SplitPopupPiece((Colour, string) piece, int maxWidth)
-  {
-    List<(Colour, string)> split = [];
-
-    var sb = new StringBuilder();
-    foreach (var word in piece.Item2.Split(' '))
-    {
-      if (sb.Length + word.Length < maxWidth)
-      {
-        sb.Append(word);
-        sb.Append(' ');
-      }
-      else
-      {
-        split.Add((piece.Item1, sb.ToString()));
-        sb = new StringBuilder(word);
-        sb.Append(' ');
-      }
-    }
-    if (sb.Length > 0)
-      split.Add((piece.Item1, sb.ToString()));
-
-    return split;
-  }
-
-  // This is going to look ugly if a message contains a long line
-  // followed by a line break then short line but I don't know
-  // if I'm ever going to need to worry about that in my game.
-  List<List<(Colour, string)>> ResizePopupLines(List<List<(Colour, string)>> lines, int maxWidth)
-  {
-    List<List<(Colour, string)>> resized = [];
-    foreach (var line in lines)
-    {
-      if (PopupLineWidth(line) < maxWidth)
-      {
-        resized.Add(line);
-      }
-      else
-      {
-        Queue<(Colour, string)> q = [];
-        foreach (var p in line)
-        {
-          if (p.Item2.Length < maxWidth)
-          {
-            q.Enqueue(p);
-          }
-          else
-          {
-            foreach (var split in SplitPopupPiece(p, maxWidth))
-              q.Enqueue(split);
-          }
-        }
-
-        List<(Colour, string)> resizedLine = [];
-        while (q.Count > 0)
-        {
-          var curr = q.Dequeue();
-          if (PopupLineWidth(resizedLine) + curr.Item2.Length < maxWidth)
-          {
-            resizedLine.Add(curr);
-          }
-          else
-          {
-            resized.Add(resizedLine);
-            resizedLine = [curr];
-          }
-        }
-        if (resizedLine.Count > 0)
-          resized.Add(resizedLine);
-      }
-    }
-
-    return resized;
-  }
-
-  // I'm sure there is a much cleaner version of this using a stack, but I
-  // just want to add some colour to the shopkeeper pop-up menu right now T_T
-  List<(Colour, string)> Parse(string line)
-  {
-    List<(Colour, string)> pieces = [];
-    int a = 0, s = 0;
-    string txt;
-    while (a < line.Length)
-    {
-      if (line[a] == '[')
-      {
-        txt = line[s..a];
-        if (txt.Length > 0)
-          pieces.Add((DefaultTextColour, txt));
-
-        s = a;
-        while (line[a] != ' ')
-          ++a;
-        string colourText = line.Substring(s + 1, a - s - 1).ToLower();
-        Colour colour = Colours.TextToColour(colourText);
-        s = ++a;
-        while (line[a] != ']')
-          a++;
-        txt = line[s..a];
-        pieces.Add((colour, txt));
-        s = a + 1;
-      }
-      ++a;
-
-    }
-
-    txt = line[s..a];
-    if (txt.Length > 0)
-      pieces.Add((DefaultTextColour, txt));
-
-    return pieces;
-  }
-
-  static int PopupLineWidth(List<(Colour, string)> line) => line.Select(p => p.Item2.Length).Sum();
-
-  static int WidestPopupLine(List<List<(Colour, string)>> lines)
-  {
-    int bufferWidth = 0;
-    foreach (var line in lines)
-    {
-      int length = PopupLineWidth(line);
-      if (length > bufferWidth)
-        bufferWidth = length;
-    }
-
-    return (bufferWidth > 20 ? bufferWidth : 20) + 4;
+    PreferredRow = preferredRow;
+    PreferredCol = preferredCol;
   }
 
   public void Draw(UserInterface ui)
   {
     int col, row;
-    if (_preferredCol == -1)
-      col = (UserInterface.ViewWidth - _width) / 2;
+    if (PreferredCol == -1)
+      col = (UserInterface.ViewWidth - Width) / 2;
     else
-      col = _preferredCol - (_width / 2);
-    if (_preferredRow == -1)
+      col = PreferredCol - (Width / 2);
+    if (PreferredRow == -1)
       row = 5;
     else
-      row = _preferredRow - _pieces.Count;
-
+      row = PreferredRow + 3;
+    
     if (row < 0)
-      row = _preferredRow + 3;
+      row = PreferredRow + 3;
     if (col < 0)
       col = 0;
 
-    string border = "+".PadRight(_width - 1, '-') + "+";
+    string border = "+".PadRight(Width - 1, '-') + "+";
 
-    if (_title.Length > 0)
+    if (Title.Length > 0)
     {
-      int left = (_width - _title.Length) / 2 - 2;
+      int left = (Width - Title.Length) / 2 - 2;
       string title = "+".PadRight(left, '-') + ' ';
-      title += _title + ' ';
-      title = title.PadRight(_width - 1, '-') + "+";
-      ui.WriteLine(title, row++, col, _width, DefaultTextColour);
+      title += Title + ' ';
+      title = title.PadRight(Width - 1, '-') + "+";
+      ui.WriteLine(title, row++, col, Width, DefaultTextColour);
     }
     else
     {
-      ui.WriteLine(border, row++, col, _width, DefaultTextColour);
+      ui.WriteLine(border, row++, col, Width, DefaultTextColour);
     }
 
-    if (_pieces.Count == 1)
+    int currWidth = 0;
+    int w = 0;
+    List<(Colour, string)> line = [(DefaultTextColour, "| ")];
+
+    void WritePaddedLine()
     {
-      _pieces = [ [(Colours.WHITE, "")], _pieces[0],  [(Colours.WHITE, "")]];
+      // Pad out so that the right border lines up        
+      int padding = Width - currWidth - 2;
+      if (padding > 0)
+        line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
+      ui.WriteText(line, row++, col, Width);
+      line = [(DefaultTextColour, "| ")];
+      currWidth = 0;
     }
 
-    foreach (var line in _pieces)
+    while (w < Words.Count)
     {
-      List<(Colour, string)> lt = [(DefaultTextColour, "| ")];
-      lt.AddRange(line);
-      var padding = (DefaultTextColour, "".PadRight(_width - PopupLineWidth(line) - 4));
-      lt.Add(padding);
-      lt.Add((DefaultTextColour, " |"));
-      ui.WriteText(lt, row++, col, _width - 4);
+      var (colour, word) = Words[w++];
+
+      if (word == "\n")
+      {
+        WritePaddedLine();
+      }
+      else if (word.Length <= Width - currWidth - 4)
+      {
+        currWidth += word.Length;
+        if (line.Count > 1 && word[0] != ',')
+        {
+          word = ' ' + word;
+          ++currWidth;
+        }
+        line.Add((colour, word));
+      }
+      else
+      {
+        --w;
+        WritePaddedLine();
+      }
     }
 
-    ui.WriteLine(border, row, col, _width, DefaultTextColour);
+    WritePaddedLine();
+
+    ui.WriteLine(border, row, col, Width, DefaultTextColour);
   }
+
+  public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }

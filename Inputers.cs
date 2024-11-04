@@ -569,7 +569,7 @@ class WizardCommander : Inputer
     else if (ch == '\n' || ch == '\r')
     {    
       DebugCommand cmd = new(_gs);
-      ErrorMessage = cmd.DoCommand(Buffer);
+      ErrorMessage = cmd.DoCommand(Buffer.Trim());
 
       Console.WriteLine(ErrorMessage);
       if (ErrorMessage == "")
@@ -592,8 +592,9 @@ class WizardCommander : Inputer
     string message = Buffer;
     if (!string.IsNullOrEmpty(ErrorMessage))
       message += $"\n\n[BRIGHTRED {ErrorMessage}]";
-    
-    _gs.UIRef().SetPopup(new Popup(message, "Debug Command", -1, -1));
+
+    int width = int.Max(message.Length + 2, 25);
+    _gs.UIRef().SetPopup(new Popup(message, "Debug Command", -1, -1, width));
   }
 }
 
@@ -936,19 +937,19 @@ class InventoryDetails : Inputer
           items.Add("it is made of mithril");
       }
       if (trait is CleaveTrait)
-        items.Add("it can cleave enemies");
+        items.Add("it can [BRIGHTRED cleave] enemies");
       if (trait is TwoHandedTrait)
         items.Add("it must be wielded with two hands");
       if (trait is VersatileTrait)
         items.Add("it may be wielded in both hands or with a shield");
-      if (trait is ViciousTrait vt)
+      if (trait is ViciousTrait)
         items.Add($"this vicious weapon deals [BRIGHTRED extra damage]");
     }
 
     if (items.Count == 0)
       return "";
 
-    return string.Join(", ", items).Capitalize() + ".";
+    return string.Join("; ", items).Capitalize() + ".";
   }
 }
 

@@ -543,13 +543,13 @@ class PreGameHandler(UserInterface ui)
         Turn = 1
       };
 
-      string welcomeText = "An adventure begins! Having recently graduated from one of the top fourteen Adventurer Colleges in ";
+      string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
       welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
       welcomeText += "\n\n";
-      welcomeText += "You may wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
-      welcomeText += "\n";
-      welcomeText += "Press ? for help, and x will allow you to examine interesting features on screen.";
+      welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
+      welcomeText += "\n\n";
+      welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
       
       _ui.SetPopup(new Popup(welcomeText, "", -1, -1));
     }
