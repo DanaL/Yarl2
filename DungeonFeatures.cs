@@ -49,6 +49,7 @@ class Decorations
       decorations.Add(StatueForEvent(fact, rulerInfo, rng));
       decorations.Add(FrescoeForEvent(fact, rulerInfo, rng));
       decorations.Add(MosaicForEvent(fact, rulerInfo, rng));
+      decorations.Add(JournalForEvent(fact, history, rng));
       // decorations.Add(Journal1(fact));
       // decorations.Add(Journal2(fact));
       // decorations.Add(Journal3(fact));
@@ -66,6 +67,16 @@ class Decorations
     else if (fact is Disaster disaster)
     {
 
+    }
+
+    return Decoration.Null;
+  }
+
+  static Decoration JournalForEvent(Fact fact, History history, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionJournal(invasion, history, rng);
     }
 
     return Decoration.Null;
@@ -97,6 +108,18 @@ class Decorations
     }
 
     return Decoration.Null;
+  }
+
+  static Decoration InvasionJournal(Invasion invasion, History history, Random rng)
+  {
+    if (history.FactDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
+      history.FactDb.Add(History.GenNation(rng));
+
+    string nation = history.FactDb.Nations[rng.Next(history.FactDb.Nations.Count)].Name;
+    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
+    string text = $@"My dear {ng.GenerateName(rng.Next(8, 12)).Capitalize()}, I am here in this dank place researching the invasion by {invasion.Invader}, having been lead here after discovering an old codex in a library in {nation} I will...";
+
+    return new Decoration(DecorationType.ScholarJournal, text);
   }
 
   static string InvasionScene(Invasion invasion, RulerInfo rulerInfo)

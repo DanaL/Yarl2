@@ -277,7 +277,7 @@ class Vaults
 
   static Landmark GetTombMarker(NameGenerator ng, Random rng, History history)
   {
-    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    RulerInfo rulerInfo = history.FactDb.Ruler;
     string rulerName = $"{rulerInfo.Title} {rulerInfo.Name}";
     string name = ng.GenerateName(rng.Next(6, 12));
     HistoricalFigure hf = new(name);

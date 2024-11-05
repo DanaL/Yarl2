@@ -258,14 +258,6 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     Title = $"invasion by {_invader.Item2}";
   }
 
-  string ScholarJournal1(Random rng)
-  {
-    if (FactDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
-      FactDb.Add(History.GenNation(rng));
-    string nation = FactDb.Nations[rng.Next(FactDb.Nations.Count)].Name;
-    return $@"My dear {NameGen.GenerateName(10)}, I am here in this dank place researching the {Title}, having been lead here after discovering an old codex in a library in the {nation} I will...";
-  }
-
   string ScholarJounral2(RulerInfo rulerInfo)
   {
     if (_succesful)
@@ -289,11 +281,10 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   public override List<Decoration> GenerateDecorations(RulerInfo rulerInfo, Random rng)
   {
     var decorations = new List<Decoration>
-        {
-            new(DecorationType.ScholarJournal, ScholarJournal1(rng)),
-            new(DecorationType.ScholarJournal, ScholarJounral2(rulerInfo)),
-            new(DecorationType.ScholarJournal, ScholarJounral3(rulerInfo))
-        };
+    {
+      new(DecorationType.ScholarJournal, ScholarJounral2(rulerInfo)),
+      new(DecorationType.ScholarJournal, ScholarJounral3(rulerInfo))
+    };
 
     return decorations;
   }
@@ -308,7 +299,7 @@ class History
   public FactDb FactDb { get; init; }
   public List<Fact> Facts { get; set; } = [];
   public VillainType Villain { get; set; }
-  NameGenerator _nameGen;
+  readonly NameGenerator _nameGen;
 
   static readonly string[] _adjectives = [
     "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
@@ -457,6 +448,10 @@ class History
   {
     // Villain should be turned into a Fact eventually
     Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
+
+    FactDb.Add(GenNation(rng));
+    FactDb.Add(GenNation(rng));
+    FactDb.Add(GenNation(rng));
 
     FactDb.Add(GenDisaster(rng));
     FactDb.Add(GenInvasion(rng));
