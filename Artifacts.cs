@@ -22,6 +22,8 @@ class Artifacts
 
   static string History(History history, Random rng)
   {
+    List<string> deities = [ "the Moon Daughters", "Huntokar", "the Crimson King" ];
+
     RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
 
     // "Wielded by so-and-so in the battle of such-and-such"
@@ -36,7 +38,8 @@ class Artifacts
     sb.Append(' ');
     sb.Append(rulerInfo.Name);
     sb.Append(" and sacred to ");
-    sb.Append(" the Moon Daughters.");
+
+    sb.Append(deities[rng.Next(deities.Count)]);
 
     return sb.ToString();
   }
@@ -78,7 +81,7 @@ class Artifacts
     }
 
     sword.Traits.Add(new DescriptionTrait(History(history, rng)));
-    
+
     foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
     {
       Console.WriteLine($"{hf.Name}, {hf.Title}");
