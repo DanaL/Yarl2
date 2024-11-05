@@ -9,12 +9,36 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 using Yarl2;
+
 class Artifacts 
 {
   static Item BaseItem(GameObjectDB objDb)
   {
     return ItemFactory.Get(ItemNames.LONGSWORD, objDb);
+  }
+
+  static string History(History history, Random rng)
+  {
+    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+
+    // "Wielded by so-and-so in the battle of such-and-such"
+    // "Wielded by so-and-so in the war of such-and-such"
+    // "Forged for so-and-so and sacred to Huntokar/the Moon Daughter"
+    // "Forged to slay the [monster type] [monster name]"
+    // "Gifted to so-and-so on the occasiona of their [life event]"
+
+    StringBuilder sb = new();
+    sb.Append("Forged for ");
+    sb.Append(rulerInfo.Title);
+    sb.Append(' ');
+    sb.Append(rulerInfo.Name);
+    sb.Append(" and sacred to ");
+    sb.Append(" the Moon Daughters.");
+
+    return sb.ToString();
   }
 
   static Item ArtifactSword(Item sword, History history, Random rng)
@@ -53,6 +77,8 @@ class Artifacts
       }
     }
 
+    sword.Traits.Add(new DescriptionTrait(History(history, rng)));
+    
     foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
     {
       Console.WriteLine($"{hf.Name}, {hf.Title}");
