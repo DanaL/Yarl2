@@ -306,7 +306,8 @@ class MainDungeonBuilder : DungeonBuilder
 
   void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, GameObjectDB objDb, Random rng)
   {
-    var decorations = history.GetDecorations();
+    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    var decorations = history.GetDecorations(rulerInfo);
 
     // I eventually probably won't include every decoration from every fact
     foreach (var decoration in decorations)

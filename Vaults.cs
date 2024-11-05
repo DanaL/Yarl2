@@ -195,6 +195,7 @@ class Vaults
   static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
+    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
 
     double roll = rng.NextDouble();
     TileType statueType;
@@ -208,7 +209,7 @@ class Vaults
     }
     else
     {
-      switch (history.RulerType)
+      switch (rulerInfo.Type)
       {
         case OGRulerType.ElfLord:
           statueDesc = "A graffitied, defaced statue of an elf.";
@@ -252,7 +253,8 @@ class Vaults
 
   static Landmark GetTombDecoration(Random rng, History history)
   {
-    string s = history.RulerType switch
+    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    string s = rulerInfo.Type switch
     {
       OGRulerType.ElfLord => rng.Next(4) switch
       {
@@ -275,6 +277,8 @@ class Vaults
 
   static Landmark GetTombMarker(NameGenerator ng, Random rng, History history)
   {
+    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    string rulerName = $"{rulerInfo.Title} {rulerInfo.Name}";
     string name = ng.GenerateName(rng.Next(6, 12));
     HistoricalFigure hf = new(name);
     
@@ -310,12 +314,12 @@ class Vaults
     sb.Append(", ");
     sb.Append(relation);
     sb.Append(" of ");
-    sb.Append(history.RulerName);
+    sb.Append(rulerName);
     sb.Append(", who ");
     sb.Append(causeOfDeath);
     sb.Append('.');
 
-    hf.Title = $"{relation.Capitalize()} of {history.RulerName}";
+    hf.Title = $"{relation.Capitalize()} of {rulerName}";
     history.Facts.Add(hf);
     return new Landmark(sb.ToString());
   } 

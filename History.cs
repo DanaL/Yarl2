@@ -81,6 +81,18 @@ class HistoricalFigure(string name) : Fact
   public override string ToString() => $"HistoricalFigure#{Name}#{Title}";
 }
 
+class RulerInfo : Fact
+{
+  public OGRulerType Type { get; set; }
+  public string Name { get; set; } = "";
+  public string Title { get; set; } = "";
+  public string Epithet { get; set; } = "";
+  public bool Beloved { get; set; } // Maybe I could classify the epithets they receive?
+
+  public string FullName => $"{Title} {Name} {Epithet}".Trim();
+  public override string ToString() => $"RulerInfo#{Name}#{Title}#{Epithet}#{Beloved}";
+}
+
 // class to accumulate a list of facts about the world as historical
 // events are generated so that they can be reused.
 class WorldFacts
@@ -146,7 +158,7 @@ class WorldFacts
 
 abstract class RulerHistoricalEvent(Random rng)
 {
-  public abstract List<Decoration> GenerateDecorations();
+  public abstract List<Decoration> GenerateDecorations(RulerInfo rulerInfo);
 
   protected Random Rng { get; set; } = rng;
 
@@ -171,14 +183,12 @@ record Decoration(DecorationType Type, string Desc);
 class InvasionHistoricalEvent : RulerHistoricalEvent
 {
   public string Title { get; set; }
-  private RulerInfo _rulerInfo;
-  private (InvaderType, string) _invader;
-  private bool _succesful;
-  private WorldFacts _facts;
+  (InvaderType, string) _invader;
+  bool _succesful;
+  WorldFacts _facts;
 
-  public InvasionHistoricalEvent(RulerInfo rulerInfo, WorldFacts facts, Random rng) : base(rng)
+  public InvasionHistoricalEvent(WorldFacts facts, Random rng) : base(rng)
   {
-    _rulerInfo = rulerInfo;
     _succesful = Rng.NextDouble() < 0.5;
     _facts = facts;
 
@@ -198,26 +208,26 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     Title = $"invasion by {_invader.Item2}";
   }
 
-  private string AnonymousStatue()
+  string AnonymousStatue(RulerInfo rulerInfo)
   {
     // Variables: successful/not successful, beloved/unloved, ruler type
-    switch (_rulerInfo.Type)
+    switch (rulerInfo.Type)
     {
       case OGRulerType.ElfLord:
-        if (_succesful && _rulerInfo.Beloved)
+        if (_succesful && rulerInfo.Beloved)
           return "a statue depicting a mighty elf, their sword held aloft.";
-        else if (_succesful && !_rulerInfo.Beloved)
+        else if (_succesful && !rulerInfo.Beloved)
           return "a statue depicting a glaring elf, their boot on the neck of a foe.";
-        else if (!_succesful && _rulerInfo.Beloved)
+        else if (!_succesful && rulerInfo.Beloved)
           return "a statue of an elf, staring defiantly ahead.";
         else
           return "a statue of a cowering elf.";
       case OGRulerType.DwarfLord:
-        if (_succesful && _rulerInfo.Beloved)
+        if (_succesful && rulerInfo.Beloved)
           return "a statue of a fearsome dwarf, who leans on their axe.";
-        else if (_succesful && !_rulerInfo.Beloved)
+        else if (_succesful && !rulerInfo.Beloved)
           return "a statue of a dwarf, their cloak covering their face.";
-        else if (!_succesful && _rulerInfo.Beloved)
+        else if (!_succesful && rulerInfo.Beloved)
           return "a statue of a dwarf who stands protecting their people.";
         else
           return "a statue of a dwarf, kneeling and weeping.";
@@ -226,19 +236,19 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     throw new Exception("Hmm we don't know about this kind of statue");
   }
 
-  private string KnownStatue()
+  string KnownStatue(RulerInfo rulerInfo)
   {
     if (_succesful)
-      return $"a statue depicting {_rulerInfo.FullName}, victorious in battle.";
-    else if (_rulerInfo.Beloved)
-      return $"a statue depicting {_rulerInfo.FullName}, grim in face.";
+      return $"a statue depicting {rulerInfo.FullName}, victorious in battle.";
+    else if (rulerInfo.Beloved)
+      return $"a statue depicting {rulerInfo.FullName}, grim in face.";
     else
-      return $"a statue depicting {_rulerInfo.FullName}, kneeling, their gaze to the ground.";
+      return $"a statue depicting {rulerInfo.FullName}, kneeling, their gaze to the ground.";
   }
 
-  private string VisualDesc()
+  string VisualDesc(RulerInfo rulerInfo)
   {
-    string defenders = _rulerInfo.Type switch
+    string defenders = rulerInfo.Type switch
     {
       OGRulerType.ElfLord => "an elven army",
       OGRulerType.DwarfLord => "dwarven forces"
@@ -270,78 +280,68 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
     }
   }
 
-  private string FrescoDesc()
+  string FrescoDesc(RulerInfo rulerInfo)
   {
     var roll = Rng.NextDouble();
     if (roll < 0.5)
-      return $"A faded fresco shows {VisualDesc()}";
+      return $"A faded fresco shows {VisualDesc(rulerInfo)}";
     else if (roll < 0.75)
-      return $"On the dusty walls you can make out a scene of {VisualDesc()}";
+      return $"On the dusty walls you can make out a scene of {VisualDesc(rulerInfo)}";
     else
-      return $"A partially destroyed fresco depicts {VisualDesc()}";
+      return $"A partially destroyed fresco depicts {VisualDesc(rulerInfo)}";
   }
 
-  private string MosaicDesc()
+  string MosaicDesc(RulerInfo rulerInfo)
   {
     var roll = Rng.NextDouble();
     if (roll < 0.5)
-      return $"On broken mosaic tiles you can make out {VisualDesc()}";
+      return $"On broken mosaic tiles you can make out {VisualDesc(rulerInfo)}";
     else
-      return $"A faded mosaic scene of {VisualDesc()}";
+      return $"A faded mosaic scene of {VisualDesc(rulerInfo)}";
   }
 
-  private string StatueDesc() => Rng.NextDouble() < 0.75 ? AnonymousStatue() : KnownStatue();
+  string StatueDesc(RulerInfo rulerInfo) => 
+    Rng.NextDouble() < 0.75 ? AnonymousStatue(rulerInfo) : KnownStatue(rulerInfo);
 
-  private string ScholarJournal1()
+  string ScholarJournal1()
   {
     return $@"My dear {_facts.RulerName()}, I am here in this dank place researching the {Title}, having been lead here after discovering an old codex in a library in the {_facts.GetNation()} I will...";
   }
 
-  private string ScholarJounral2()
+  string ScholarJounral2(RulerInfo rulerInfo)
   {
     if (_succesful)
-      return $"...have found a scroll extolling the virtues of {_rulerInfo.Name} and their victory over {_invader.Item2}...";
+      return $"...have found a scroll extolling the virtues of {rulerInfo.Name} and their victory over {_invader.Item2}...";
     else
       return $"...describes the lamentations of the people after the ravaging {_invader.Item2} and how...";
   }
 
-  private string ScholarJounral3()
+  string ScholarJounral3(RulerInfo rulerInfo)
   {
-    if (_succesful && _rulerInfo.Beloved)
-      return $"...the inscription read: {_rulerInfo.Name}, victorious over {_invader.Item2} was greeted with laurels upon their return...";
-    else if (_succesful && !_rulerInfo.Beloved)
-      return $"...their victory seems to have cemenented their power over the people, who dwelt in fear of {_rulerInfo.Name}...";
+    if (_succesful && rulerInfo.Beloved)
+      return $"...the inscription read: {rulerInfo.Name}, victorious over {_invader.Item2} was greeted with laurels upon their return...";
+    else if (_succesful && !rulerInfo.Beloved)
+      return $"...their victory seems to have cemenented their power over the people, who dwelt in fear of {rulerInfo.Name}...";
     else
-      return $"...I wish to learn what became of {_rulerInfo.FullName} after their devastating defeat in the battle of...";
+      return $"...I wish to learn what became of {rulerInfo.FullName} after their devastating defeat in the battle of...";
   }
 
   // Generate a list of decorations that might be strewn throughout
   // the dungeon
-  public override List<Decoration> GenerateDecorations()
+  public override List<Decoration> GenerateDecorations(RulerInfo rulerInfo)
   {
     var decorations = new List<Decoration>
         {
-            new(DecorationType.Statue, StatueDesc()),
-            new(DecorationType.Fresco, FrescoDesc()),
-            new(DecorationType.Mosaic, MosaicDesc()),
+            new(DecorationType.Statue, StatueDesc(rulerInfo)),
+            new(DecorationType.Fresco, FrescoDesc(rulerInfo)),
+            new(DecorationType.Mosaic, MosaicDesc(rulerInfo)),
             new(DecorationType.ScholarJournal, ScholarJournal1()),
-            new(DecorationType.ScholarJournal, ScholarJounral2()),
-            new(DecorationType.ScholarJournal, ScholarJounral3())
+            new(DecorationType.ScholarJournal, ScholarJounral2(rulerInfo)),
+            new(DecorationType.ScholarJournal, ScholarJounral3(rulerInfo))
         };
 
     return decorations;
   }
-}
-
-class RulerInfo
-{
-  public OGRulerType Type { get; set; }
-  public string Name { get; set; }
-  public string PrefixTitle { get; set; }
-  public string Epithet { get; set; }
-  public bool Beloved { get; set; } // Maybe I could classify the epithets they receive?
-
-  public string FullName => $"{PrefixTitle} {Name} {Epithet}".Trim();
 }
 
 class History(Random rng)
@@ -352,18 +352,14 @@ class History(Random rng)
   // suffice in the end.
   public List<Fact> Facts { get; set; } = [];
   WorldFacts _facts;
-  RulerInfo _ruler;
   public VillainType Villain { get; set; }
 
-  private Random _rng = rng;
+  Random _rng = rng;
 
-  public OGRulerType RulerType => _ruler.Type;
-  public string RulerName => _ruler.FullName;
-
-  public List<Decoration> GetDecorations()
+  public List<Decoration> GetDecorations(RulerInfo rulerInfo)
   {
-    var historicalEvent = new InvasionHistoricalEvent(_ruler, _facts, _rng);
-    var decs = historicalEvent.GenerateDecorations();
+    var historicalEvent = new InvasionHistoricalEvent(_facts, _rng);
+    var decs = historicalEvent.GenerateDecorations(rulerInfo);
 
     return decs;
   }
@@ -387,14 +383,15 @@ class History(Random rng)
     var nameGen = new NameGenerator(_rng, "data/names.txt");
     var name = _facts.RulerName();
 
-    _ruler = new RulerInfo()
+    RulerInfo ruler = new()
     {
       Type = type,
       Name = name,
-      PrefixTitle = nameGen.PickTitle(),
+      Title = nameGen.PickTitle(),
       Epithet = nameGen.PickEpithet(),
       Beloved = _rng.NextDouble() < 0.5
     };
+    Facts.Add(ruler);
   }
 
   // This will have to be vastly expanded of course.
