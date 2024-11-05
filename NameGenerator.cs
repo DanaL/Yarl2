@@ -31,7 +31,7 @@ namespace Yarl2
             "the provinces", "the faithful", "autmun rains", "the fearful" ];
         private string[] _titles = [ "strong", "mighty", "unbowed", "forgotten", "cursed", "twice cursed", 
             "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen", 
-            "faithful", "beaufiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
+            "faithful", "beautiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
 
         // TODO: replace with something less lame...
         public static string TownName(Random rng)

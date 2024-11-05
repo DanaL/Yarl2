@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
+
 namespace Yarl2;
 
 // Herein is where I generate the history of the dungeon and the town
@@ -26,6 +28,55 @@ enum VillainType
 {
   FieryDemon,
   Necromancer
+}
+
+enum InvaderType
+{
+  Nation, Barbarians, Dragon, Demon, DarkLord
+}
+
+enum DisasterType
+{
+  Plague, Earthquake, Comet
+}
+
+class FactDb
+{
+  readonly List<Nation> _nations = [];
+  public IReadOnlyList<Nation> Nations => _nations;
+  readonly List<Fact> _historicalEvents = [];
+  public IReadOnlyList<Fact> HistoricalEvents => _historicalEvents;
+  public RulerInfo Ruler { get; init; }
+
+  public FactDb(Random rng)
+  {
+    var type = rng.Next(2) switch
+    {
+      0 => OGRulerType.ElfLord,
+      1 => OGRulerType.DwarfLord,
+      //_ => OGRulerType.MadWizard
+    };
+
+    var nameGen = new NameGenerator(rng, "data/names.txt");
+    var name = nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
+    RulerInfo ruler = new()
+    {
+      Type = type,
+      Name = name,
+      Title = nameGen.PickTitle(),
+      Epithet = nameGen.PickEpithet(),
+      Beloved = rng.NextDouble() < 0.5
+    };
+    Ruler = ruler;
+  }
+
+  public void Add(Fact fact)
+  {
+    if (fact is Nation nation)
+      _nations.Add(nation);
+    else if (fact is Invasion || fact is Disaster)
+      _historicalEvents.Add(fact);
+  }
 }
 
 class Fact
@@ -46,6 +97,33 @@ class Fact
         return new HistoricalFigure(pieces[1])
         {
           Title = pieces[2]
+        };
+      case "RulerInfo":
+        return new RulerInfo()
+        {
+          Name = pieces[1],
+          Title = pieces[2],
+          Epithet = pieces[3],
+          Beloved = pieces[4] == "true"
+        };
+      case "Nation":
+        return new Nation()
+        {
+          Name = pieces[1],
+          Desc = pieces[2]
+        };
+      case "Invasion":
+        return new Invasion()
+        {
+          Invader = pieces[1],
+          Type = (InvaderType)Enum.Parse(typeof(InvaderType), pieces[2]),
+          Successful = pieces[3] == "true"
+        };
+      case "Disaster":
+        return new Disaster()
+        {
+          Desc = pieces[1],
+          Type = (DisasterType)Enum.Parse(typeof(DisasterType), pieces[2])
         };
       default:
         return new SimpleFact()
@@ -73,12 +151,38 @@ class LocationFact : Fact
   public override string ToString() => $"LocationFact#{Loc}#{Desc}";
 }
 
+class Nation : Fact
+{  
+  public string Name { get; set; } = "";
+  public string Desc { get; set; } = "";
+
+  public string FullName => $"{Desc} {Name}";
+  public override string ToString() => $"Nation#{Name}#{Desc}";
+}
+
 class HistoricalFigure(string name) : Fact
 {
   public string Name { get; set; } = name;
   public string Title { get; set; } = "";
 
   public override string ToString() => $"HistoricalFigure#{Name}#{Title}";
+}
+
+class Disaster : Fact
+{
+  public string Desc { get; set; } = "";
+  public DisasterType Type { get; set; }
+
+  public override string ToString() => $"Disaster#{Desc}#{Type}";
+}
+
+class Invasion : Fact
+{
+  public string Invader { get; set; } = "";
+  public InvaderType Type { get; set; }
+  public bool Successful { get; set; }
+
+  public override string ToString() => $"Invasion#{Invader}#{Type}#{Successful}";
 }
 
 class RulerInfo : Fact
@@ -89,7 +193,7 @@ class RulerInfo : Fact
   public string Epithet { get; set; } = "";
   public bool Beloved { get; set; } // Maybe I could classify the epithets they receive?
 
-  public string FullName => $"{Title} {Name} {Epithet}".Trim();
+  public string FullName => $"{Title} {Name} {Epithet.CapitalizeWords()}".Trim();
   public override string ToString() => $"RulerInfo#{Name}#{Title}#{Epithet}#{Beloved}";
 }
 
@@ -97,12 +201,12 @@ class RulerInfo : Fact
 // events are generated so that they can be reused.
 class WorldFacts
 {
-  NameGenerator _nationNames;
+  
   NameGenerator _peopleNames;
   Random _rng;
   List<string> _nations = [];
   static string[] _nationModifiers = [
-      "Kingdom of",
+    "Kingdom of",
     "Duchy of",
     "Sovereignty of",
     "Islands of",
@@ -117,6 +221,7 @@ class WorldFacts
     "Province of",
     "Upper",
     "Lower"];
+  NameGenerator _nationNames;
 
   public WorldFacts(Random rng)
   {
@@ -158,7 +263,7 @@ class WorldFacts
 
 abstract class RulerHistoricalEvent(Random rng)
 {
-  public abstract List<Decoration> GenerateDecorations(RulerInfo rulerInfo);
+  public abstract List<Decoration> GenerateDecorations(RulerInfo rulerInfo, Random rng);
 
   protected Random Rng { get; set; } = rng;
 
@@ -166,11 +271,6 @@ abstract class RulerHistoricalEvent(Random rng)
   {
     return "";
   }
-}
-
-enum InvaderType
-{
-  Nation, Barbarians, Dragon, Demon, DarkLord
 }
 
 enum DecorationType
@@ -185,25 +285,40 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   public string Title { get; set; }
   (InvaderType, string) _invader;
   bool _succesful;
-  WorldFacts _facts;
+  FactDb FactDb;
+  NameGenerator NameGen;
 
-  public InvasionHistoricalEvent(WorldFacts facts, Random rng) : base(rng)
+  public InvasionHistoricalEvent(FactDb factDb, Random rng) : base(rng)
   {
     _succesful = Rng.NextDouble() < 0.5;
-    _facts = facts;
-
+    FactDb = factDb
+    NameGen = new NameGenerator(rng, "data/names.txt");
+    
     // Invader can be a monster, or another nation
     var roll = Rng.NextDouble();
     if (roll < 0.5)
-      _invader = (InvaderType.Nation, $"the {facts.GetNation()}");
+    {
+      if (factDb.Nations.Count == 0)
+        factDb.Add(new Nation());
+
+      _invader = (InvaderType.Nation, $"the {History.GenNation(rng)}");
+    }
     else if (roll < 0.75)
+    {
       _invader = (InvaderType.Barbarians, "a barbarian horde");
+    }
     else if (roll < 0.85)
-      _invader = (InvaderType.Dragon, $"the Great Wyrm {_facts.RulerName()}");
+    {
+      _invader = (InvaderType.Dragon, $"the Great Wyrm {NameGen.GenerateName(rng.Next(5, 10)).Capitalize()}");
+    }
     else if (roll < 0.9)
-      _invader = (InvaderType.Demon, $"the Demon Prince {_facts.RulerName()}");
+    {
+      _invader = (InvaderType.Demon, $"the Demon Prince {NameGen.GenerateName(rng.Next(5, 10)).Capitalize()}");
+    }
     else
-      _invader = (InvaderType.DarkLord, $"the Dark Lord {_facts.RulerName()}");
+    {
+      _invader = (InvaderType.DarkLord, $"the Dark Lord {NameGen.GenerateName(rng.Next(5, 10)).Capitalize()}");
+    }
 
     Title = $"invasion by {_invader.Item2}";
   }
@@ -303,9 +418,12 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   string StatueDesc(RulerInfo rulerInfo) => 
     Rng.NextDouble() < 0.75 ? AnonymousStatue(rulerInfo) : KnownStatue(rulerInfo);
 
-  string ScholarJournal1()
+  string ScholarJournal1(Random rng)
   {
-    return $@"My dear {_facts.RulerName()}, I am here in this dank place researching the {Title}, having been lead here after discovering an old codex in a library in the {_facts.GetNation()} I will...";
+    if (FactDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
+      FactDb.Add(History.GenNation(rng));
+    string nation = FactDb.Nations[rng.Next(FactDb.Nations.Count)].Name;
+    return $@"My dear {NameGen.GenerateName(10)}, I am here in this dank place researching the {Title}, having been lead here after discovering an old codex in a library in the {nation} I will...";
   }
 
   string ScholarJounral2(RulerInfo rulerInfo)
@@ -328,14 +446,14 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
 
   // Generate a list of decorations that might be strewn throughout
   // the dungeon
-  public override List<Decoration> GenerateDecorations(RulerInfo rulerInfo)
+  public override List<Decoration> GenerateDecorations(RulerInfo rulerInfo, Random rng)
   {
     var decorations = new List<Decoration>
         {
             new(DecorationType.Statue, StatueDesc(rulerInfo)),
             new(DecorationType.Fresco, FrescoDesc(rulerInfo)),
             new(DecorationType.Mosaic, MosaicDesc(rulerInfo)),
-            new(DecorationType.ScholarJournal, ScholarJournal1()),
+            new(DecorationType.ScholarJournal, ScholarJournal1(rng)),
             new(DecorationType.ScholarJournal, ScholarJounral2(rulerInfo)),
             new(DecorationType.ScholarJournal, ScholarJounral3(rulerInfo))
         };
@@ -344,59 +462,166 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   }
 }
 
-class History(Random rng)
+class History
 {
   // Storing a plain list of facts and iterating through them might eventually
   // get goofy, but I don't have a sense of how many facts will end up being 
   // generated in a given playthrough. Dozens? Hundreds? A simple list may well
   // suffice in the end.
+  public FactDb FactDb { get; init; }
   public List<Fact> Facts { get; set; } = [];
-  WorldFacts _facts;
   public VillainType Villain { get; set; }
+  NameGenerator _nameGen;
 
-  Random _rng = rng;
+  static readonly string[] _adjectives = [
+    "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
+    "glowing", "wet", "moist", "dry", "silent", "yellow", "second", "third" ];
+  static readonly string[] _adjectives2 = [ "blue", "red", "crawling", "winter", "burning", "summer", 
+    "silent", "second", "third" ];
+    
 
-  public List<Decoration> GetDecorations(RulerInfo rulerInfo)
-  {
-    var historicalEvent = new InvasionHistoricalEvent(_facts, _rng);
-    var decs = historicalEvent.GenerateDecorations(rulerInfo);
+  static readonly string[] _nationModifiers = [
+    "the Kingdom of",
+    "the Duchy of",
+    "the Sovereignty of",
+    "the Islands of",
+    "the Barony of",
+    "North",
+    "South",
+    "East",
+    "West",
+    "Greater",
+    "Lesser",
+    "the Nation of",
+    "the Province of",
+    "Upper",
+    "Lower" ];
+  
+  public History(Random rng)
+  {    
+    _nameGen = new NameGenerator(rng, "data/names.txt");
 
-    return decs;
+    FactDb = new FactDb(rng);
   }
 
-  public void CalcDungeonHistory()
+  string CometDesc(Random rng)
   {
-    _facts = new WorldFacts(_rng);
-
-    // Okay, we need to know:
-    //  1) Who the ruler was/who founded the dungeon
-    //  2) Generate a few events in their life
-    //  3) How did the dungeon originally falll to ruin
-
-    var type = _rng.Next(2) switch
+    switch (rng.Next(3))
     {
-      0 => OGRulerType.ElfLord,
-      1 => OGRulerType.DwarfLord,
-      //_ => OGRulerType.MadWizard
+      case 0:
+        return $"the {_adjectives2[rng.Next(_adjectives.Length)]} starfall";
+      case 1:
+        string name = _nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
+        return name.Last() == 's' ? $"{name}' comet" : $"{name}'s comet";
+      default:
+        return $"the {_adjectives2[rng.Next(_adjectives.Length)]} impact";
+    }
+  }
+
+  public static Nation GenNation(Random rng)
+  {
+    NameGenerator ng = new(rng, "data/countries.txt");
+    string name = ng.GenerateName(rng.Next(5, 12)).Capitalize();
+    double roll = rng.NextDouble();
+    if (roll < 0.1)
+      name = $"Old {name}";
+    else if (roll < 0.2)
+      name = $"New {name}";
+
+    return new Nation()
+    {
+      Name = name,      
+      Desc = _nationModifiers[rng.Next(_nationModifiers.Length)]
+    };
+  }
+
+  Fact GenDisaster(Random rng)
+  {
+    int roll = rng.Next(3);
+    DisasterType type = roll switch
+    {
+      0 => DisasterType.Plague,
+      1 => DisasterType.Earthquake,
+      _ => DisasterType.Comet
     };
 
-    var nameGen = new NameGenerator(_rng, "data/names.txt");
-    var name = _facts.RulerName();
-
-    RulerInfo ruler = new()
+    string desc = "";    
+    switch (type)
     {
+      case DisasterType.Plague:
+        desc = "the " + _adjectives[rng.Next(_adjectives.Length)] + " ";
+        desc += rng.Next(5) switch
+        {
+          0 => "plague",
+          1 => "illness",
+          2 => "sickness",
+          3 => "rot",
+          _ => "fever"
+        };
+        break;
+      case DisasterType.Earthquake:
+        desc = "earthquake";
+        break;
+      case DisasterType.Comet:
+        desc = CometDesc(rng);
+        break;
+    }
+
+    return new Disaster()
+    {
+      Desc = desc,
+      Type = type
+    };
+  }
+
+  Fact GenInvasion(Random rng)
+  {
+    InvaderType type;
+    string invader;
+    double roll = rng.NextDouble();
+    if (roll < 0.5)
+    {
+      if (FactDb.Nations.Count == 0)
+        FactDb.Add(GenNation(rng));
+
+      type = InvaderType.Nation;
+      invader = FactDb.Nations[rng.Next(FactDb.Nations.Count)].FullName;
+    }
+    else if (roll < 0.75)
+    {
+      type = InvaderType.Barbarians;
+      invader = "a barbarian horde";
+    }
+    else if (roll < 0.85)
+    {
+      type = InvaderType.Dragon;
+      invader = $"the Great Wyrm {_nameGen.GenerateName(rng.Next(5, 10)).Capitalize()}";
+    }
+    else if (roll < 0.9)
+    {
+      type = InvaderType.Demon;
+      invader = $"the Demon Prince {_nameGen.GenerateName(rng.Next(5, 10)).Capitalize()}";
+    }
+    else
+    {
+      type = InvaderType.DarkLord;
+      invader = $"the Dark Lord {_nameGen.GenerateName(rng.Next(5, 10)).Capitalize()}";
+    }
+
+    return new Invasion()
+    {
+      Invader = invader,
       Type = type,
-      Name = name,
-      Title = nameGen.PickTitle(),
-      Epithet = nameGen.PickEpithet(),
-      Beloved = _rng.NextDouble() < 0.5
+      Successful = rng.NextDouble() < 0.5
     };
-    Facts.Add(ruler);
   }
 
-  // This will have to be vastly expanded of course.
-  public void GenerateVillain()
+  public void GenerateHistory(Random rng)
   {
-    Villain = _rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
+    // Villain should be turned into a Fact eventually
+    Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
+
+    FactDb.Add(GenDisaster(rng));
+    FactDb.Add(GenInvasion(rng));
   }
 }

@@ -572,6 +572,13 @@ static class StringUtils
       return s;
   }
 
+  static HashSet<string> _minorWords = [ "of", "the", "and", "a", "an" ];
+  public static string CapitalizeWords(this string s) 
+  {
+    var words = s.ToLower().Split(' ').Select(w => _minorWords.Contains(w) ? w : w.Capitalize());
+    return string.Join(' ', words);
+  }
+
   public static string Possessive(this string s, Actor owner)
   {
     if (owner is Player)

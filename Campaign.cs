@@ -268,8 +268,7 @@ class PreGameHandler(UserInterface ui)
         DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
 
         var history = new History(rng);
-        history.CalcDungeonHistory();
-        history.GenerateVillain();
+        history.GenerateVillain(rng);
         campaign.History = history;
 
         int maxDepth = 5;
