@@ -11,6 +11,198 @@
 
 namespace Yarl2;
 
+enum DecorationType
+{
+  Statue, Fresco, Mosaic, ScholarJournal
+}
+
+class Decoration
+{
+  public static readonly Decoration Null = new NullDecoration();
+  public virtual DecorationType Type { get; }
+  public virtual string Desc { get; }
+
+  public Decoration(DecorationType type, string desc)
+  {
+    Type = type;
+    Desc = desc;
+  }
+}
+
+class NullDecoration : Decoration
+{
+  public override DecorationType Type => DecorationType.Statue;
+  public override string Desc => "";
+
+  public NullDecoration() : base(DecorationType.Statue, "") { }
+}
+
+class Decorations
+{  
+  public static List<Decoration> GenDecorations(History history, Random rng)
+  {
+    List<Decoration> decorations = [];
+    RulerInfo rulerInfo = history.FactDb.Ruler;
+
+    foreach (Fact fact in history.FactDb.HistoricalEvents)
+    {
+      decorations.Add(StatueForEvent(fact, rulerInfo, rng));
+      decorations.Add(FrescoeForEvent(fact, rulerInfo, rng));
+      decorations.Add(MosaicForEvent(fact, rulerInfo, rng));
+      // decorations.Add(Journal1(fact));
+      // decorations.Add(Journal2(fact));
+      // decorations.Add(Journal3(fact));
+    }
+
+    return decorations.Where(d => d is not NullDecoration).ToList();
+  }
+
+  static Decoration StatueForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionStatue(invasion, rulerInfo, rng);
+    }
+    else if (fact is Disaster disaster)
+    {
+
+    }
+
+    return Decoration.Null;
+  }
+
+  static Decoration MosaicForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionMosaic(invasion, rulerInfo, rng);
+    }
+    else if (fact is Disaster disaster)
+    {
+
+    }
+
+    return Decoration.Null;
+  }
+
+  static Decoration FrescoeForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionFrescoe(invasion, rulerInfo, rng);
+    }
+    else if (fact is Disaster disaster)
+    {
+
+    }
+
+    return Decoration.Null;
+  }
+
+  static string InvasionScene(Invasion invasion, RulerInfo rulerInfo)
+  {
+    string defenders = rulerInfo.Type switch
+    {
+      OGRulerType.ElfLord => "an elven army",
+      OGRulerType.DwarfLord => "dwarven forces"
+    };
+
+    if (invasion.Successful)
+    {
+      return invasion.Type switch
+      {
+        InvaderType.Nation => $"{defenders} driving back an invading army.",
+        InvaderType.Dragon => $"{defenders} facing a mighty dragon.",
+        InvaderType.Barbarians => $"{defenders} clashing with a barbarian horde.",
+        InvaderType.Demon => $"{defenders} facing a terrible demon.",
+        InvaderType.DarkLord => $"{defenders} in victory over an army of goblins and kobolds.",
+        _ => throw new Exception("Hmm I don't know about that invader type")
+      };
+    }
+    else
+    {
+      return invasion.Type switch
+      {
+        InvaderType.Nation => $"{defenders} fleeing an invading army.",
+        InvaderType.Dragon => $"a terrible dragon devouring {defenders}.",
+        InvaderType.Barbarians => $"{defenders} fleeing a barbarian horde.",
+        InvaderType.Demon => $"a horrific demon destroying {defenders}.",
+        InvaderType.DarkLord => $"{defenders} falling before army of goblins and kobolds.",
+        _ => throw new Exception("Hmm I don't know about that invader type")
+      };
+    }    
+  }
+
+  static Decoration InvasionMosaic(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  {
+    var roll = rng.NextDouble();
+    string desc;
+    if (roll < 0.5)
+      desc = $"On broken mosaic tiles you can make out {InvasionScene(invasion, rulerInfo)}";
+    else
+      desc = $"A faded mosaic scene of {InvasionScene(invasion, rulerInfo)}";
+
+    return new Decoration(DecorationType.Mosaic, desc);
+  }
+
+  static Decoration InvasionFrescoe(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  {
+    string desc;
+    double roll = rng.NextDouble();
+    if (roll < 0.5)
+      desc = $"A faded fresco shows {InvasionScene(invasion, rulerInfo)}";
+    else if (roll < 0.75)
+      desc = $"On the dusty walls you can make out a scene of {InvasionScene(invasion, rulerInfo)}";
+    else
+      desc = $"A partially destroyed fresco depicts {InvasionScene(invasion, rulerInfo)}";
+
+    return new Decoration(DecorationType.Fresco, desc);
+  }
+
+  static Decoration InvasionStatue(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  {
+    string desc = "";
+
+    if (rng.NextDouble() < 0.75)
+    {
+      switch (rulerInfo.Type)
+      {
+        case OGRulerType.ElfLord:
+          if (invasion.Successful && rulerInfo.Beloved)
+            desc = "a statue depicting a mighty elf, their sword held aloft.";
+          else if (invasion.Successful && !rulerInfo.Beloved)
+            desc = "a statue depicting a glaring elf, their boot on the neck of a foe.";
+          else if (!invasion.Successful && rulerInfo.Beloved)
+            desc = "a statue of an elf, staring defiantly ahead.";
+          else
+            desc = "a statue of a cowering elf.";
+          break;
+        case OGRulerType.DwarfLord:
+          if (invasion.Successful && rulerInfo.Beloved)
+            desc = "a statue of a fearsome dwarf, who leans on their axe.";
+          else if (invasion.Successful && !rulerInfo.Beloved)
+            desc = "a statue of a dwarf, their cloak covering their face.";
+          else if (!invasion.Successful && rulerInfo.Beloved)
+            desc = "a statue of a dwarf who stands protecting their people.";
+          else
+            desc = "a statue of a dwarf, kneeling and weeping.";
+          break;
+      }
+    }
+    else
+    {
+      if (invasion.Successful)
+        desc = $"a statue depicting {rulerInfo.FullName}, victorious in battle.";
+      else if (rulerInfo.Beloved)
+        desc = $"a statue depicting {rulerInfo.FullName}, grim in face.";
+      else
+        desc = $"a statue depicting {rulerInfo.FullName}, kneeling, their gaze to the ground.";
+    }
+
+    return new Decoration(DecorationType.Statue, desc);
+  }
+}
+
 // Holds dungeon features/room code because DungeonBuilder was getting too big.
 // There's probably code that can be moved over from DungeonBuilder but I'm not
 // sure how to orgainize it yet.

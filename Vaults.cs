@@ -195,7 +195,7 @@ class Vaults
   static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
-    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    RulerInfo rulerInfo = history.FactDb.Ruler;
 
     double roll = rng.NextDouble();
     TileType statueType;

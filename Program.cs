@@ -20,7 +20,7 @@ var db = new FactDb(r);
 var h = new History(r);
 for (int i = 0; i < 10; i++)
 {
-  var n = h.GenerateNation();
+  var n = History.GenNation(r);
   db.Add(n);
 }
 

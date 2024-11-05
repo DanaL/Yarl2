@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
-
 namespace Yarl2;
 
 // Herein is where I generate the history of the dungeon and the town
@@ -197,62 +195,6 @@ class RulerInfo : Fact
   public override string ToString() => $"RulerInfo#{Name}#{Title}#{Epithet}#{Beloved}";
 }
 
-// class to accumulate a list of facts about the world as historical
-// events are generated so that they can be reused.
-class WorldFacts
-{
-  
-  NameGenerator _peopleNames;
-  Random _rng;
-  List<string> _nations = [];
-  static string[] _nationModifiers = [
-    "Kingdom of",
-    "Duchy of",
-    "Sovereignty of",
-    "Islands of",
-    "Barony of",
-    "North",
-    "South",
-    "East",
-    "West",
-    "Greater",
-    "Lesser",
-    "Nation of",
-    "Province of",
-    "Upper",
-    "Lower"];
-  NameGenerator _nationNames;
-
-  public WorldFacts(Random rng)
-  {
-    _rng = rng;
-    _nationNames = new NameGenerator(_rng, "data/countries.txt");
-    _peopleNames = new NameGenerator(_rng, "data/names.txt");
-  }
-
-  public string RulerName() => _peopleNames.GenerateName(_rng.Next(5, 10)).Capitalize();
-
-  private string Modifier() => _nationModifiers[_rng.Next(_nationModifiers.Length)];
-
-  public string GetNation()
-  {
-    if (_nations.Count == 0 || _rng.NextDouble() < 0.25)
-    {
-      // name a new nation, add it to the list of nations and
-      // return it
-      var nation = _nationNames.GenerateName(_rng.Next(5, 12)).Capitalize();
-      nation = $"{Modifier()} {nation}";
-
-      _nations.Add(nation);
-
-      return nation;
-    }
-
-    // otherwise pick an existing nation
-    return _nations[_rng.Next(_nations.Count)];
-  }
-}
-
 // I want to generate a few history events for rulers from a pool customized a
 // bit for each ruler type. Some history events can others. Like, Have A Child 
 // adds Usurption and Dynasty or Tragedy to the pool?
@@ -273,13 +215,6 @@ abstract class RulerHistoricalEvent(Random rng)
   }
 }
 
-enum DecorationType
-{
-  Statue, Fresco, Mosaic, ScholarJournal
-}
-
-record Decoration(DecorationType Type, string Desc);
-
 class InvasionHistoricalEvent : RulerHistoricalEvent
 {
   public string Title { get; set; }
@@ -291,7 +226,7 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   public InvasionHistoricalEvent(FactDb factDb, Random rng) : base(rng)
   {
     _succesful = Rng.NextDouble() < 0.5;
-    FactDb = factDb
+    
     NameGen = new NameGenerator(rng, "data/names.txt");
     
     // Invader can be a monster, or another nation
@@ -322,101 +257,6 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
 
     Title = $"invasion by {_invader.Item2}";
   }
-
-  string AnonymousStatue(RulerInfo rulerInfo)
-  {
-    // Variables: successful/not successful, beloved/unloved, ruler type
-    switch (rulerInfo.Type)
-    {
-      case OGRulerType.ElfLord:
-        if (_succesful && rulerInfo.Beloved)
-          return "a statue depicting a mighty elf, their sword held aloft.";
-        else if (_succesful && !rulerInfo.Beloved)
-          return "a statue depicting a glaring elf, their boot on the neck of a foe.";
-        else if (!_succesful && rulerInfo.Beloved)
-          return "a statue of an elf, staring defiantly ahead.";
-        else
-          return "a statue of a cowering elf.";
-      case OGRulerType.DwarfLord:
-        if (_succesful && rulerInfo.Beloved)
-          return "a statue of a fearsome dwarf, who leans on their axe.";
-        else if (_succesful && !rulerInfo.Beloved)
-          return "a statue of a dwarf, their cloak covering their face.";
-        else if (!_succesful && rulerInfo.Beloved)
-          return "a statue of a dwarf who stands protecting their people.";
-        else
-          return "a statue of a dwarf, kneeling and weeping.";
-    }
-
-    throw new Exception("Hmm we don't know about this kind of statue");
-  }
-
-  string KnownStatue(RulerInfo rulerInfo)
-  {
-    if (_succesful)
-      return $"a statue depicting {rulerInfo.FullName}, victorious in battle.";
-    else if (rulerInfo.Beloved)
-      return $"a statue depicting {rulerInfo.FullName}, grim in face.";
-    else
-      return $"a statue depicting {rulerInfo.FullName}, kneeling, their gaze to the ground.";
-  }
-
-  string VisualDesc(RulerInfo rulerInfo)
-  {
-    string defenders = rulerInfo.Type switch
-    {
-      OGRulerType.ElfLord => "an elven army",
-      OGRulerType.DwarfLord => "dwarven forces"
-    };
-
-    if (_succesful)
-    {
-      return _invader.Item1 switch
-      {
-        InvaderType.Nation => $"{defenders} driving back an invading army.",
-        InvaderType.Dragon => $"{defenders} facing a mighty dragon.",
-        InvaderType.Barbarians => $"{defenders} clashing with a barbarian horde.",
-        InvaderType.Demon => $"{defenders} facing a terrible demon.",
-        InvaderType.DarkLord => $"{defenders} in victory over an army of goblins and kobolds.",
-        _ => throw new Exception("Hmm I don't know about that invader type")
-      };
-    }
-    else
-    {
-      return _invader.Item1 switch
-      {
-        InvaderType.Nation => $"{defenders} fleeing an invading army.",
-        InvaderType.Dragon => $"a terrible dragon devouring {defenders}.",
-        InvaderType.Barbarians => $"{defenders} fleeing a barbarian horde.",
-        InvaderType.Demon => $"a horrific demon destroying {defenders}.",
-        InvaderType.DarkLord => $"{defenders} falling before army of goblins and kobolds.",
-        _ => throw new Exception("Hmm I don't know about that invader type")
-      };
-    }
-  }
-
-  string FrescoDesc(RulerInfo rulerInfo)
-  {
-    var roll = Rng.NextDouble();
-    if (roll < 0.5)
-      return $"A faded fresco shows {VisualDesc(rulerInfo)}";
-    else if (roll < 0.75)
-      return $"On the dusty walls you can make out a scene of {VisualDesc(rulerInfo)}";
-    else
-      return $"A partially destroyed fresco depicts {VisualDesc(rulerInfo)}";
-  }
-
-  string MosaicDesc(RulerInfo rulerInfo)
-  {
-    var roll = Rng.NextDouble();
-    if (roll < 0.5)
-      return $"On broken mosaic tiles you can make out {VisualDesc(rulerInfo)}";
-    else
-      return $"A faded mosaic scene of {VisualDesc(rulerInfo)}";
-  }
-
-  string StatueDesc(RulerInfo rulerInfo) => 
-    Rng.NextDouble() < 0.75 ? AnonymousStatue(rulerInfo) : KnownStatue(rulerInfo);
 
   string ScholarJournal1(Random rng)
   {
@@ -450,9 +290,6 @@ class InvasionHistoricalEvent : RulerHistoricalEvent
   {
     var decorations = new List<Decoration>
         {
-            new(DecorationType.Statue, StatueDesc(rulerInfo)),
-            new(DecorationType.Fresco, FrescoDesc(rulerInfo)),
-            new(DecorationType.Mosaic, MosaicDesc(rulerInfo)),
             new(DecorationType.ScholarJournal, ScholarJournal1(rng)),
             new(DecorationType.ScholarJournal, ScholarJounral2(rulerInfo)),
             new(DecorationType.ScholarJournal, ScholarJounral3(rulerInfo))
@@ -509,12 +346,12 @@ class History
     switch (rng.Next(3))
     {
       case 0:
-        return $"the {_adjectives2[rng.Next(_adjectives.Length)]} starfall";
+        return $"the {_adjectives2[rng.Next(_adjectives2.Length)]} starfall";
       case 1:
         string name = _nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
         return name.Last() == 's' ? $"{name}' comet" : $"{name}'s comet";
       default:
-        return $"the {_adjectives2[rng.Next(_adjectives.Length)]} impact";
+        return $"the {_adjectives2[rng.Next(_adjectives2.Length)]} impact";
     }
   }
 

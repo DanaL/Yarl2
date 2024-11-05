@@ -24,7 +24,7 @@ class Artifacts
   {
     List<string> deities = [ "the Moon Daughters", "Huntokar", "the Crimson King" ];
 
-    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    RulerInfo rulerInfo = history.FactDb.Ruler;
 
     // "Wielded by so-and-so in the battle of such-and-such"
     // "Wielded by so-and-so in the war of such-and-such"
