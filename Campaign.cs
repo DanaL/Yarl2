@@ -276,7 +276,6 @@ class PreGameHandler(UserInterface ui)
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, factDb, objDb, rng, monsterDecks);
 
-        //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
         PrinceOfRats(mainDungeon, objDb, rng);
         factDb.Add(new SimpleFact() { Name="Level 5 Boss", Value="the Prince of Rats"});
         

@@ -995,6 +995,8 @@ class MainDungeonBuilder : DungeonBuilder
         message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, mourned by few.";
       else if (roll == 3)
         message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, beloved and betrayed.";
+      else if (roll == 4)
+        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}: My love for you shall live forever. You, however, did not.";
       else
         message = "A grave too worn to be read.";
 
