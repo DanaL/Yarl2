@@ -294,7 +294,7 @@ abstract class UserInterface
 
   public void KillScreen(string message, GameState gs)
   {
-    SetPopup(new Popup(message, "", -1, -1));
+    SetPopup(new Popup(message, "", -1, -1, message.Length));
     SetSqsOnScreen(gs);
     UpdateDisplay(gs);
     BlockForInput();

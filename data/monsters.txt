@@ -34,4 +34,4 @@ creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|Dumb|Melee#5#
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Dumb|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy,Undead
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|Dumb|Melee#5#2#Blunt|KnockBack,AttackVerb#Butt
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Wall|Shriek#3#10|Plant,Immunity#Confusion
-ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Door|Melee#4#2#Slashing|NauseousAura#owner#10,Undead
+ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Door|Melee#6#1#Slashing|NauseousAura#owner#10,Undead
