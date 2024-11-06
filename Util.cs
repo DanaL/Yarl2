@@ -470,6 +470,7 @@ class Util
                                  : new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.MagicMouth => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.HiddenMagicMouth => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.Gravestone => new Glyph('\u25AE', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 

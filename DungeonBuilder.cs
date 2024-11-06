@@ -975,6 +975,48 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static void MarkGraves(Map map, string epitaph, Random rng)
+  {
+    NameGenerator ng = new(rng, "data/names.txt");
+    List<List<(int, int)>> rooms = map.FindRooms();
+    List<(int r, int c)> room = rooms[rng.Next(rooms.Count)];
+
+    int numOfGraves = room.Count / 4;
+    for (int j = 0; j < numOfGraves; j++)
+    {
+      var (r, c) = room[rng.Next(room.Count)];
+      int roll = rng.Next(10);
+      string message;
+      if (roll == 0)
+        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, claimed by {epitaph}.";
+      else if (roll == 1)
+        message = $"Here lies {ng.GenerateName(rng.Next(6, 11)).Capitalize()}, missed except not by that troll.";
+      else if (roll == 2)
+        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, mourned by few.";
+      else if (roll == 3)
+        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, beloved and betrayed.";
+      else
+        message = "A grave too worn to be read.";
+
+      map.SetTile(r, c, new Gravestone(message));
+    }
+  }
+
+  void AddRooms(int id, Map[] levels, GameObjectDB objDb, History history, Random rng)
+  {  
+    foreach (var fact in history.FactDb.HistoricalEvents)
+    {
+      if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
+      {
+        // There's a guaranteed graveyard if there was a plague
+        int level = rng.Next(1, levels.Length);
+        Console.WriteLine($"Graveyard on level {level}");
+        var map = levels[level];
+        MarkGraves(map, disaster.Desc.Capitalize(), rng);
+      }
+    }
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
   {
     static bool ReplaceChasm(Map map, (int, int) pt)
@@ -1050,6 +1092,8 @@ class MainDungeonBuilder : DungeonBuilder
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
+    AddRooms(_dungeonID, levels, objDb, history, rng);
+    
     DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    

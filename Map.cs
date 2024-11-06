@@ -15,7 +15,7 @@ namespace Yarl2;
 
 enum TileType
 {
-  Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor, 
+  Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor,
   StoneWall, ClosedDoor, OpenDoor, LockedDoor, BrokenDoor, HWindow, VWindow,
   DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Mountain,
   GreenTree, OrangeTree, RedTree, YellowTree, Conifer,
@@ -28,7 +28,7 @@ enum TileType
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
-  MagicMouth, HiddenMagicMouth, IdolAltar
+  MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone
 }
 
 interface ITriggerable
@@ -61,7 +61,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Conifer => true,
     _ => false
   };
-  
+
   public bool SoundProof() => Type switch
   {
     TileType.WorldBorder => true,
@@ -184,6 +184,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenMagicMouth => "stone floor",
     TileType.Pool => "a pool",
     TileType.FrozenPool => "ice",
+    TileType.Gravestone => "a gravestone",
     _ => "unknown"
   };
 
@@ -238,10 +239,10 @@ class BasicTile : Tile
 class Door(TileType type, bool open) : Tile(type)
 {
   public bool Open { get; set; } = open;
-  
+
   // Not sure if this is a good way to handle this for places like 
   // the pathfinding code or if it's a gross hack
-  public override TileType Type => Open ? TileType.OpenDoor : base.Type;  
+  public override TileType Type => Open ? TileType.OpenDoor : base.Type;
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
   public override bool Opaque() => !Open;
@@ -300,13 +301,13 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
   public override bool Opaque() => false;
-  
+
   public override string ToString() => $"{(int)Type};{Gate};{Found}";
 }
 
 class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)
 {
-  public Metals Material { get;set; } = material;
+  public Metals Material { get; set; } = material;
   public bool Open { get; set; } = open;
 
   public override bool Passable() => Open;
@@ -359,6 +360,11 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
   {
     return $"{(int)Type};{_stepMessage}";
   }
+}
+
+class Gravestone : Landmark
+{
+  public Gravestone(string stepMessage) : base(stepMessage) => Type = TileType.Gravestone;
 }
 
 class IdolAltar : Landmark
@@ -426,6 +432,7 @@ class TileFactory
   private static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
   private static readonly Tile Pool = new BasicTile(TileType.Pool, true, false, true);
   private static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
+
   public static Tile Get(TileType type) => type switch
   {
     TileType.WorldBorder => WorldBorder,
@@ -527,6 +534,66 @@ class Map : ICloneable
         return (r, c);
     }
     while (true);
+  }
+
+  // Find rooms -- flood fill to find areas on map that are rooms,
+  // ie contiguous floor squares at least 9x9
+  public List<List<(int, int)>> FindRooms()
+  {
+    List<List<(int, int)>> rooms = [];
+    var visited = new bool[Height, Width];
+
+    // Scan through map looking for unvisited floor tiles
+    for (int r = 1; r < Height - 1; r++)
+    {
+      for (int c = 1; c < Width - 1; c++)
+      {
+        if (!visited[r, c] && TileAt(r, c).Type == TileType.DungeonFloor && IsRoomTile(r, c))
+        {
+          // Found a new potential room tile (has 8 adjacent floors), flood fill from this point
+          List<(int r, int c)> floors = [];
+          RoomFloodFill(r, c, visited, floors);
+
+          if (floors.Count > 9)
+          {
+            // I'm not actually checking/rejecting long, narrow rooms (like
+            // say a 2x6 room) but the dungeon generator doesn't generally
+            // make rooms of that shape.
+            rooms.Add(floors);
+          }
+        }
+      }
+    }
+
+    return rooms;
+  }
+
+  bool IsRoomTile(int r, int c)
+  {
+    int adjFloors = Util.Adj8Sqs(r, c).Count(sq => TileAt(sq).Type == TileType.DungeonFloor);
+    return adjFloors >= 4; // Should it be 3 because of corners? But that doesn't really matter
+                           // for my purposes, I don't think.
+  }
+
+  void RoomFloodFill(int r, int c, bool[,] visited, List<(int r, int c)> floors)
+  {
+    if (!InBounds(r, c)) 
+      return;
+    if (visited[r, c]) 
+      return;
+    if (TileAt(r, c).Type != TileType.DungeonFloor)
+      return;
+    if (!IsRoomTile(r, c))
+      return;
+
+    // Mark as visited and add to room
+    visited[r, c] = true;
+    floors.Add((r, c));
+
+    RoomFloodFill(r - 1, c, visited, floors);
+    RoomFloodFill(r + 1, c, visited, floors);
+    RoomFloodFill(r, c - 1, visited, floors);
+    RoomFloodFill(r, c + 1, visited, floors);
   }
 
   public static Map TestMap()

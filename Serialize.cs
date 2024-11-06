@@ -351,8 +351,10 @@ internal class MapSaver
           tile = gt;
           break;
         case TileType.Landmark:
-          string msg = pieces[2];
-          tile = new Landmark(msg);
+          tile = new Landmark(pieces[2]);
+          break;
+        case TileType.Gravestone:
+          tile = new Gravestone(pieces[2]);
           break;
         case TileType.IdolAltar:
           tile = new IdolAltar(pieces[2]) 
