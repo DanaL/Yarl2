@@ -232,7 +232,7 @@ class CampaignSaver
       factDb.Add(Fact.FromStr(n));
     }
     campaign.FactDb = factDb;
-    
+
     return campaign;
   }
 }
@@ -305,7 +305,9 @@ internal class MapSaver
   int[]? Tiles { get; set; }
   [JsonInclude]
   List<string>? SpecialTiles { get; set; }
-  
+  [JsonInclude]
+  public List<string> Alerts { get; set; } = [];
+
   public static MapSaver Shrink(Map map)
   {  
     MapSaver sm = new()
@@ -325,6 +327,8 @@ internal class MapSaver
         sm.SpecialTiles.Add($"{j};{t}");
       }
     }
+
+    sm.Alerts = map.Alerts;
 
     return sm;
   }
@@ -422,6 +426,7 @@ internal class MapSaver
     if (sm.Tiles is null || sm.SpecialTiles is null)
       throw new Exception("Invalid save game data!");
 
+    map.Alerts = sm.Alerts;
     try
     {
       var specialTiles = InflateSpecialTiles(sm.SpecialTiles);

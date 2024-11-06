@@ -1002,6 +1002,8 @@ class MainDungeonBuilder : DungeonBuilder
 
       map.SetTile(r, c, new Gravestone(message));
     }
+
+    map.Alerts.Add("A shiver runs up your spine.");
   }
 
   void AddRooms(int id, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)

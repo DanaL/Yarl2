@@ -111,6 +111,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (level + 1 > maxDepth)
         Player.Stats[Attribute.Depth].SetMax(level + 1);
     }
+
+    if (CurrentDungeon.LevelMaps[CurrLevel].Alerts.Count > 0)
+    {
+      string alerts = string.Join(' ', CurrentDungeon.LevelMaps[CurrLevel].Alerts).Trim();
+      UIRef().SetPopup(new Popup(alerts, "", 6, -1, alerts.Length));
+      UIRef().AlertPlayer(alerts);
+      CurrentDungeon.LevelMaps[CurrLevel].Alerts = [];
+    }
   }
 
   public Town Town => Campaign!.Town!;

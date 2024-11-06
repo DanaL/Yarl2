@@ -499,6 +499,7 @@ class Map : ICloneable
   public readonly int Height;
 
   public Tile[] Tiles;
+  public List<string> Alerts = [];
 
   public Map(int width, int height)
   {
