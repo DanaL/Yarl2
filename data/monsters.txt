@@ -1,5 +1,5 @@
-skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|Dumb|Melee#6#1#Slashing|Immunity#Confusion,Immunity#Poison,ResistPiercing
-zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|Dumb|Melee#6#1#Blunt|Immunity#Confusion
+skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|Dumb|Melee#6#1#Slashing|Immunity#Confusion,Immunity#Poison,ResistPiercing,Undead
+zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|Dumb|Melee#6#1#Blunt|Immunity#Confusion,Undead
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|Dumb|Melee#6#1#Piercing|
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|Dumb|Melee#4#1#Piercing|
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|Flying|Melee#5#1#Piercing|Flying
@@ -22,7 +22,7 @@ duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Door|Melee#10
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|
 owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|Dumb|Melee#1#1#Piercing|Grappler#14
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|Flying|RangedSpellAction#MirrorImage#7#1#3,Melee#8#1#Piercing|Flying
-shadow            | |black        |black       |13|20|3| 1.0|10|14|Dumb|Melee#4#1#Necrotic|Weaken#13#1,SilverAllergy
+shadow            | |black        |black       |13|20|3| 1.0|10|14|Dumb|Melee#4#1#Necrotic|Weaken#13#1,SilverAllergy,Undead
 floating eye      |e|lightblue    |blue        |13|20|0|0.25|10|10|Floating||ParalyzingGaze#18,Floating
 screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|Flying|ConfusingScream#3#14#7,Melee#6#1#Piercing|Flying,Immunity#Confusion
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|Door|Melee#8#1#Piercing|
@@ -31,7 +31,7 @@ rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|Dumb|Melee#8#
 will-o-wisp       |w|yellow       |yelloworange|15|35|3| 1.0|10|10|Flying|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|Door|Melee#8#2#Slashing|Regeneration#3#owner#false#max
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|Dumb|Melee#5#2#Piercing|Poisoner#14#2,CoinsLoot#10#20
-phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Dumb|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy
+phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Dumb|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy,Undead
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|Dumb|Melee#5#2#Blunt|KnockBack,AttackVerb#Butt
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Wall|Shriek#3#10|Plant,Immunity#Confusion
-ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Door|Melee#4#2#Slashing|NauseousAura#owner#10
+ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Door|Melee#4#2#Slashing|NauseousAura#owner#10,Undead

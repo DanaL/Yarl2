@@ -1114,9 +1114,11 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
 
     foreach (Loc loc in Util.Adj8Locs(owner.Loc))
     {
-      // TODO: undead should not be affected by nausea
       if (gs.ObjDb.Occupant(loc) is Actor victim)
       {
+        if (victim.HasTrait<UndeadTrait>())
+          continue;
+
         if (victim.Traits.OfType<NauseaTrait>().FirstOrDefault() is NauseaTrait nausea)
         {
           nausea.ExpiresOn += (ulong) duration;
@@ -1788,6 +1790,11 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
   }
 }
 
+class UndeadTrait : Trait
+{
+  public override string AsText() => $"Undead";
+}
+
 class WandTrait : Trait, IUSeable, INeedsID, IDesc
 {
   public int Charges { get; set; }
@@ -2020,6 +2027,7 @@ class TraitFactory
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "Torch", (pieces, gameObj) => new TorchTrait() { OwnerID = ulong.Parse(pieces[1]), Lit = bool.Parse(pieces[2]), Fuel = int.Parse(pieces[3]) } },
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
+    { "Undead", (pieces, gameObj) => new UndeadTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
     { "VaultKey", (pieces, GameObj) => new VaultKeyTrait(Loc.FromStr(pieces[1])) },
     { "Versatile", (pieces, GameObject) =>
