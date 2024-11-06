@@ -44,6 +44,8 @@ class FactDb
   public IReadOnlyList<Nation> Nations => _nations;
   readonly List<Fact> _historicalEvents = [];
   public IReadOnlyList<Fact> HistoricalEvents => _historicalEvents;
+  readonly List<Fact> _facts = [];
+  public IReadOnlyList<Fact> Facts => _facts;
   public RulerInfo Ruler { get; init; }
 
   public FactDb(Random rng)
@@ -74,6 +76,21 @@ class FactDb
       _nations.Add(nation);
     else if (fact is Invasion || fact is Disaster)
       _historicalEvents.Add(fact);
+    else
+      _facts.Add(fact);
+  }
+
+  public Fact? FactCheck(string name)
+  {
+    foreach (var fact in _facts)
+    {
+      if (fact is SimpleFact sf && sf.Name == name)
+        return fact;
+      else if (fact is LocationFact lf && lf.Desc == name)
+        return fact;
+    }
+
+    return null;
   }
 }
 
@@ -215,18 +232,17 @@ abstract class RulerHistoricalEvent(Random rng)
   }
 }
 
-class History
+class History(Random rng)
 {
   // Storing a plain list of facts and iterating through them might eventually
   // get goofy, but I don't have a sense of how many facts will end up being 
   // generated in a given playthrough. Dozens? Hundreds? A simple list may well
   // suffice in the end.
-  public FactDb FactDb { get; init; }
-  public List<Fact> Facts { get; set; } = [];
+  public FactDb FactDb { get; init; } = new FactDb(rng);
   public VillainType Villain { get; set; }
-  public string VillainName { get; private set; }
+  public string VillainName { get; private set; } = "";
 
-  readonly NameGenerator _nameGen;
+  readonly NameGenerator _nameGen = new NameGenerator(rng, "data/names.txt");
 
   static readonly string[] _adjectives = [
     "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
@@ -251,13 +267,6 @@ class History
     "the Province of",
     "Upper",
     "Lower" ];
-  
-  public History(Random rng)
-  {    
-    _nameGen = new NameGenerator(rng, "data/names.txt");
-
-    FactDb = new FactDb(rng);
-  }
 
   string CometDesc(Random rng)
   {

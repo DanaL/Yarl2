@@ -34,13 +34,13 @@ class Artifacts
 
     StringBuilder sb = new();
     sb.Append("Forged for ");
-    sb.Append(rulerInfo.Title);
+    sb.Append(rulerInfo.Title.CapitalizeWords());
     sb.Append(' ');
     sb.Append(rulerInfo.Name);
     sb.Append(" and sacred to ");
-
     sb.Append(deities[rng.Next(deities.Count)]);
-
+    sb.Append('.');
+    
     return sb.ToString();
   }
 
@@ -82,10 +82,10 @@ class Artifacts
 
     sword.Traits.Add(new DescriptionTrait(History(history, rng)));
 
-    foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
-    {
-      Console.WriteLine($"{hf.Name}, {hf.Title}");
-    }
+    // foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
+    // {
+    //   Console.WriteLine($"{hf.Name}, {hf.Title}");
+    // }
 
     return sword;
   }

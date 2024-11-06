@@ -548,7 +548,7 @@ class Map : ICloneable
     {
       for (int c = 1; c < Width - 1; c++)
       {
-        if (!visited[r, c] && TileAt(r, c).Type == TileType.DungeonFloor && IsRoomTile(r, c))
+        if (!visited[r, c] && TileAt(r, c).Type == TileType.DungeonFloor && IsRoomSq(r, c))
         {
           // Found a new potential room tile (has 8 adjacent floors), flood fill from this point
           List<(int r, int c)> floors = [];
@@ -568,7 +568,7 @@ class Map : ICloneable
     return rooms;
   }
 
-  bool IsRoomTile(int r, int c)
+  bool IsRoomSq(int r, int c)
   {
     int adjFloors = Util.Adj8Sqs(r, c).Count(sq => TileAt(sq).Type == TileType.DungeonFloor);
     return adjFloors >= 4; // Should it be 3 because of corners? But that doesn't really matter
@@ -583,7 +583,7 @@ class Map : ICloneable
       return;
     if (TileAt(r, c).Type != TileType.DungeonFloor)
       return;
-    if (!IsRoomTile(r, c))
+    if (!IsRoomSq(r, c))
       return;
 
     // Mark as visited and add to room

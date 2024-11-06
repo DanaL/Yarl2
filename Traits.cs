@@ -1545,16 +1545,7 @@ class RecallTrait : BasicTrait, IGameEventListener
       return;
     }
 
-    LocationFact? entrance = null;
-    foreach (var fact in gs.Campaign.History.Facts) 
-    {
-      if (fact is LocationFact loc && loc.Desc == "Dungeon Entrance")
-      {
-        entrance = loc;
-        break;
-      }
-    }
-
+    LocationFact? entrance = (LocationFact?)gs.Campaign.History.FactDb.FactCheck("Dungeon Entrance");
     if (entrance is not null)
     {
       gs.EnterLevel(player, 0, 0);

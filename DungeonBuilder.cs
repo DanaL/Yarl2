@@ -957,7 +957,7 @@ class MainDungeonBuilder : DungeonBuilder
     Tile stairs = new Downstairs("");
     map.SetTile(sr, sc, door);
     Loc doorLoc = new(1, 4, sr, sc);
-    history.Facts.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
+    history.FactDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
     switch (sdir)
     {
       case Dir.North:
@@ -1012,7 +1012,7 @@ class MainDungeonBuilder : DungeonBuilder
         int level = rng.Next(1, levels.Length);
         Console.WriteLine($"Graveyard on level {level}");
         var map = levels[level];
-        MarkGraves(map, disaster.Desc.Capitalize(), rng);
+        MarkGraves(map, disaster.Desc.CapitalizeWords(), rng);
       }
     }
   }

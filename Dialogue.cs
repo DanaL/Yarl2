@@ -709,33 +709,21 @@ class DialogueInterpreter
           return item.Name;        
         return "";
       case "LEVEL_FIVE_KEY_GIVEN":
-        foreach (Fact fact in gs.Facts)
-        {
-          if (fact is SimpleFact simple && simple.Name == "Level 5 Key Given" && simple.Value == "true")
-            return true;
-        }
+        if (gs.FactDb.FactCheck("Level 5 Key Given") is SimpleFact f && f.Value == "true")
+          return true;
         return false;
       case "LEVEL_FIVE_BOSS":
-        foreach (Fact fact in gs.Facts)
-        {
-          if (fact is SimpleFact simple && simple.Name == "Level 5 Boss")
-            return simple.Value;
-        }
+        if (gs.FactDb.FactCheck("Level 5 Boss") is SimpleFact f2)
+          return f2.Value;
         return "";
       case "LEVEL_FIVE_BOSS_KILLED":
-        foreach (Fact fact in gs.Facts)
-        {
-          if (fact is SimpleFact simple && simple.Name == "Level 5 Boss Killed")
-            return true;
-        }
+        if (gs.FactDb.FactCheck("Level 5 Boss") is SimpleFact)
+          return true;
         return false;
       case "DUNGEON_DIR":
         Loc dungoenLoc = Loc.Nowhere;
-        foreach (LocationFact fact in gs.Facts.OfType<LocationFact>())
-        {
-          if (fact.Desc == "Dungeon Entrance")
-            dungoenLoc = fact.Loc;
-        }
+        if (gs.FactDb.FactCheck("Dungeon Entrance") is LocationFact loc)
+          dungoenLoc = loc.Loc;
         return Util.RelativeDir(mob.Loc, dungoenLoc);      
       default:
         throw new Exception($"Unknown variable {name}");
@@ -757,14 +745,8 @@ class DialogueInterpreter
     if (s.Contains("#EARLY_DENIZEN"))
     {
       string monsters = "";
-      foreach (SimpleFact fact in gs.Facts.OfType<SimpleFact>())
-      {
-        if (fact.Name == "EarlyDenizen")
-        {
-          monsters = fact.Value;
-          break;
-        }
-      }
+      if (gs.FactDb!.FactCheck("EarlyDenizen") is SimpleFact ed)
+        monsters = ed.Value;
 
       s = s.Replace("#EARLY_DENIZEN", monsters.Pluralize());
     }
@@ -976,16 +958,10 @@ class DialogueInterpreter
 
         string setValue =  boolVal.Value ? "true" : "false";
 
-        foreach (Fact fact in gs.Facts)
-        {
-          if (fact is SimpleFact simple && simple.Name == "Level 5 Key Given") 
-          {
-            simple.Value = setValue;
-            return;
-          }
-        }
+        if (gs.FactDb.FactCheck("Level 5 Key Given") is SimpleFact key5)
+          key5.Value = setValue;
 
-        gs.Facts.Add(new SimpleFact() { Name = "Level 5 Key Given", Value = setValue });        
+        gs.FactDb.Add(new SimpleFact() { Name = "Level 5 Key Given", Value = setValue });        
         break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");
@@ -1001,13 +977,9 @@ class DialogueInterpreter
     };
     key.Traits.Add(new MetalTrait() { Type = Metals.Iron });
 
-    foreach (var fact in gs.Facts)
+    if (gs.FactDb.FactCheck("Level 5 Gate Loc") is LocationFact loc)
     {
-      if (fact is SimpleFact simple && simple.Name == "Level 5 Gate Loc")
-      {
-        Loc gateLoc = Loc.FromStr(simple.Value);
-        key.Traits.Add(new VaultKeyTrait(gateLoc));
-      }
+      key.Traits.Add(new VaultKeyTrait(loc.Loc));
     }
     gs.ObjDb.Add(key);
 

@@ -278,7 +278,7 @@ class PreGameHandler(UserInterface ui)
 
         //PopulateDungeon(rng, objDb, history, mainDungeon, maxDepth, monsterDecks);
         PrinceOfRats(mainDungeon, objDb, rng);
-        history.Facts.Add(new SimpleFact() { Name="Level 5 Boss", Value="the Prince of Rats"});
+        history.FactDb.Add(new SimpleFact() { Name="Level 5 Boss", Value="the Prince of Rats"});
         
         // var dBuilder = new ArenaBuilder();
         // var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
@@ -291,7 +291,7 @@ class PreGameHandler(UserInterface ui)
           Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
         };
         wildernessMap.SetTile(entrance, portal);
-        history.Facts.Add(new LocationFact()
+        history.FactDb.Add(new LocationFact()
         {
           Loc = new Loc(0, 0, entrance.Item1, entrance.Item2),
           Desc = "Dungeon Entrance"
@@ -403,7 +403,7 @@ class PreGameHandler(UserInterface ui)
   // sort) because monsters will spawn as the player explores
   private static void PopulateDungeon(Random rng, GameObjectDB objDb, History history, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
   {
-    history.Facts.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
+    history.FactDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
 
     // Temp: generate monster decks and populate the first two levels of the dungeon.
     // I'll actually want to save the decks for reuse as random monsters are added

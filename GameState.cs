@@ -48,7 +48,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   public ulong LastTarget { get; set; } = 0;
-  public List<Fact> Facts => Campaign.History != null ? Campaign.History.Facts : [];
+  public FactDb? FactDb => Campaign.History?.FactDb;
 
   private UserInterface UI { get; set; } = ui;
 
@@ -542,7 +542,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     else if (victim.HasTrait<MiniBoss5Trait>())
     {
-      Facts.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
+      FactDb!.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
     }
     else
     {

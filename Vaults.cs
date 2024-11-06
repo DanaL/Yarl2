@@ -320,7 +320,8 @@ class Vaults
     sb.Append('.');
 
     hf.Title = $"{relation.Capitalize()} of {rulerName}";
-    history.Facts.Add(hf);
+    history.FactDb.Add(hf);
+    
     return new Landmark(sb.ToString());
   } 
 
