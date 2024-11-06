@@ -304,9 +304,9 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.SetToLoc(loc, doc);
   }
 
-  void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, History history, GameObjectDB objDb, Random rng)
+  void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Random rng)
   {    
-    var decorations = Decorations.GenDecorations(history, rng);
+    var decorations = Decorations.GenDecorations(factDb, rng);
 
     // I eventually probably won't include every decoration from every fact
     foreach (var decoration in decorations)
@@ -337,7 +337,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     int fallenAdventurer = rng.Next(1, numOfLevels);
-    AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, history, rng);
+    AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
@@ -345,7 +345,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, History history, Random rng)
+  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Random rng)
   {
     var sq = level.RandomTile(TileType.DungeonFloor, rng);
     var loc = new Loc(_dungeonID, levelNum, sq.Item1, sq.Item2);
@@ -928,7 +928,7 @@ class MainDungeonBuilder : DungeonBuilder
     return (false, Dir.None);
   }
 
-  void PlaceLevelFiveGate(Map map, Random rng, History history)
+  void PlaceLevelFiveGate(Map map, Random rng, FactDb factDb)
   {
     List<(int, int, Dir)> candidates = [];
 
@@ -957,7 +957,7 @@ class MainDungeonBuilder : DungeonBuilder
     Tile stairs = new Downstairs("");
     map.SetTile(sr, sc, door);
     Loc doorLoc = new(1, 4, sr, sc);
-    history.FactDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
+    factDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
     switch (sdir)
     {
       case Dir.North:
@@ -1002,9 +1002,9 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void AddRooms(int id, Map[] levels, GameObjectDB objDb, History history, Random rng)
+  void AddRooms(int id, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
   {  
-    foreach (var fact in history.FactDb.HistoricalEvents)
+    foreach (var fact in factDb.HistoricalEvents)
     {
       if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
       {
@@ -1017,7 +1017,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, History history, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
+  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
   {
     static bool ReplaceChasm(Map map, (int, int) pt)
     {
@@ -1092,18 +1092,18 @@ class MainDungeonBuilder : DungeonBuilder
 
     SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
-    AddRooms(_dungeonID, levels, objDb, history, rng);
+    AddRooms(_dungeonID, levels, objDb, factDb, rng);
     
-    DecorateDungeon(levels, h, w, numOfLevels, history, objDb, rng);
+    DecorateDungeon(levels, h, w, numOfLevels, factDb, objDb, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
     {
-      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, history);
+      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, factDb);
     }
     
-    IdolAltarMaker.MakeAltar(id, levels, objDb, history, rng, 1);
+    IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, 1);
 
-    PlaceLevelFiveGate(levels[4], rng, history);
+    PlaceLevelFiveGate(levels[4], rng, factDb);
 
     return dungeon;
   }

@@ -47,6 +47,8 @@ class FactDb
   readonly List<Fact> _facts = [];
   public IReadOnlyList<Fact> Facts => _facts;
   public RulerInfo Ruler { get; init; }
+  public VillainType Villain { get; set; }
+  public string VillainName { get; set; } = "";
 
   public FactDb(Random rng)
   {
@@ -220,28 +222,8 @@ class RulerInfo : Fact
 // based on them. Text is different for villager knowledge or historical artifact
 // and whether or not the ruler was loved
 
-abstract class RulerHistoricalEvent(Random rng)
-{
-  public abstract List<Decoration> GenerateDecorations(RulerInfo rulerInfo, Random rng);
-
-  protected Random Rng { get; set; } = rng;
-
-  public string GenerateInvader()
-  {
-    return "";
-  }
-}
-
 class History(Random rng)
-{
-  // Storing a plain list of facts and iterating through them might eventually
-  // get goofy, but I don't have a sense of how many facts will end up being 
-  // generated in a given playthrough. Dozens? Hundreds? A simple list may well
-  // suffice in the end.
-  public FactDb FactDb { get; init; } = new FactDb(rng);
-  public VillainType Villain { get; set; }
-  public string VillainName { get; private set; } = "";
-
+{    
   readonly NameGenerator _nameGen = new NameGenerator(rng, "data/names.txt");
 
   static readonly string[] _adjectives = [
@@ -338,18 +320,18 @@ class History(Random rng)
     };
   }
 
-  Fact GenInvasion(Random rng)
+  Fact GenInvasion(FactDb factDb, Random rng)
   {
     InvaderType type;
     string invader;
     double roll = rng.NextDouble();
     if (roll < 0.5)
     {
-      if (FactDb.Nations.Count == 0)
-        FactDb.Add(GenNation(rng));
+      if (factDb.Nations.Count == 0)
+        factDb.Add(GenNation(rng));
 
       type = InvaderType.Nation;
-      invader = FactDb.Nations[rng.Next(FactDb.Nations.Count)].FullName;
+      invader = factDb.Nations[rng.Next(factDb.Nations.Count)].FullName;
     }
     else if (roll < 0.75)
     {
@@ -380,18 +362,20 @@ class History(Random rng)
     };
   }
 
-  public void GenerateHistory(Random rng)
+  public FactDb GenerateHistory(Random rng)
   {
-    // Villain should be turned into a Fact eventually
-    Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
-    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
-    VillainName = ng.GenerateName(rng.Next(8, 13));
+    FactDb factDb = new(rng);
+    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
+    NameGenerator ng = new(rng, "data/names.txt");
+    factDb.VillainName = ng.GenerateName(rng.Next(8, 13));
 
-    FactDb.Add(GenNation(rng));
-    FactDb.Add(GenNation(rng));
-    FactDb.Add(GenNation(rng));
+    factDb.Add(GenNation(rng));
+    factDb.Add(GenNation(rng));
+    factDb.Add(GenNation(rng));
 
-    FactDb.Add(GenDisaster(rng));
-    FactDb.Add(GenInvasion(rng));
+    factDb.Add(GenDisaster(rng));
+    factDb.Add(GenInvasion(factDb, rng));
+
+    return factDb;
   }
 }

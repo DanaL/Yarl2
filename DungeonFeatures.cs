@@ -41,19 +41,19 @@ class NullDecoration : Decoration
 
 class Decorations
 {  
-  public static List<Decoration> GenDecorations(History history, Random rng)
+  public static List<Decoration> GenDecorations(FactDb factDb, Random rng)
   {
     List<Decoration> decorations = [];
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
 
-    foreach (Fact fact in history.FactDb.HistoricalEvents)
+    foreach (Fact fact in factDb.HistoricalEvents)
     {
       decorations.Add(StatueForEvent(fact, rulerInfo, rng));
       decorations.Add(FrescoeForEvent(fact, rulerInfo, rng));
       decorations.Add(MosaicForEvent(fact, rulerInfo, rng));
-      decorations.Add(JournalForEvent1(fact, history, rng));
-      decorations.Add(JournalForEvent2(fact, history, rng));
-      decorations.Add(JournalForEvent3(fact, history, rng));      
+      decorations.Add(JournalForEvent1(fact, factDb, rng));
+      decorations.Add(JournalForEvent2(fact, factDb, rng));
+      decorations.Add(JournalForEvent3(fact, factDb, rng));      
     }
 
     return decorations.Where(d => d is not NullDecoration).ToList();
@@ -73,21 +73,21 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration JournalForEvent1(Fact fact, History history, Random rng)
+  static Decoration JournalForEvent1(Fact fact, FactDb factDb, Random rng)
   {
     if (fact is Invasion invasion)
     {
-      return InvasionJournal(invasion, history, rng);
+      return InvasionJournal(invasion, factDb, rng);
     }
     else if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
     {
-      return JournalForPlague(disaster, history, rng);
+      return JournalForPlague(disaster, factDb, rng);
     }
 
     return Decoration.Null;
   }
 
-  static Decoration JournalForPlague(Disaster plague, History history, Random rng)
+  static Decoration JournalForPlague(Disaster plague, FactDb factDb, Random rng)
   {
     StringBuilder sb = new();
     NameGenerator ng = new NameGenerator(rng, "data/names.txt");
@@ -102,7 +102,7 @@ class Decorations
     {
       case 0:
         sb.Append(" due to ");
-        sb.Append(history.FactDb.Ruler.Name);
+        sb.Append(factDb.Ruler.Name);
         sb.Append(" turning away from the teachings of ");
         int roll = rng.Next(3);
         if (roll == 0)
@@ -119,7 +119,7 @@ class Decorations
         break;
       default:
         sb.Append(" brought to the land by the machinations of ");
-        sb.Append(history.VillainName);
+        sb.Append(factDb.VillainName);
         sb.Append('.');
         break;
     }
@@ -130,21 +130,21 @@ class Decorations
     return new Decoration(DecorationType.ScholarJournal, sb.ToString());
   }
 
-  static Decoration JournalForEvent2(Fact fact, History history, Random rng)
+  static Decoration JournalForEvent2(Fact fact, FactDb factDb, Random rng)
   {
     if (fact is Invasion invasion)
     {
-      return InvasionJournal2(invasion, history, rng);
+      return InvasionJournal2(invasion, factDb, rng);
     }
 
     return Decoration.Null;
   }
 
-  static Decoration JournalForEvent3(Fact fact, History history, Random rng)
+  static Decoration JournalForEvent3(Fact fact, FactDb factDb, Random rng)
   {
     if (fact is Invasion invasion)
     {
-      return InvasionJournal3(invasion, history, rng);
+      return InvasionJournal3(invasion, factDb, rng);
     }
 
     return Decoration.Null;
@@ -178,32 +178,32 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration InvasionJournal(Invasion invasion, History history, Random rng)
+  static Decoration InvasionJournal(Invasion invasion, FactDb factDb, Random rng)
   {
-    if (history.FactDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
-      history.FactDb.Add(History.GenNation(rng));
+    if (factDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
+      factDb.Add(History.GenNation(rng));
 
-    string nation = history.FactDb.Nations[rng.Next(history.FactDb.Nations.Count)].Name;
+    string nation = factDb.Nations[rng.Next(factDb.Nations.Count)].Name;
     NameGenerator ng = new NameGenerator(rng, "data/names.txt");
     string text = $@"My dear {ng.GenerateName(rng.Next(8, 12)).Capitalize()}, I am here in this dank place researching the invasion by {invasion.Invader}, having been lead here after discovering an old codex in a library in {nation} I will...";
 
     return new Decoration(DecorationType.ScholarJournal, text);
   }
 
-  static Decoration InvasionJournal2(Invasion invasion, History history, Random rng)
+  static Decoration InvasionJournal2(Invasion invasion, FactDb factDb, Random rng)
   {
     string desc;
     if (invasion.Successful)
-      desc = $"...have found a scroll extolling the virtues of {history.FactDb.Ruler.Name} and their victory over {invasion.Invader}...";
+      desc = $"...have found a scroll extolling the virtues of {factDb.Ruler.Name} and their victory over {invasion.Invader}...";
     else
       desc = $"...describes the lamentations of the people after the ravaging {invasion.Invader} and how...";
 
     return new Decoration(DecorationType.ScholarJournal, desc);
   }
 
-  static Decoration InvasionJournal3(Invasion invasion, History history, Random rng)
+  static Decoration InvasionJournal3(Invasion invasion, FactDb factDb, Random rng)
   {
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
     string desc;
     if (invasion.Successful && rulerInfo.Beloved)
       desc = $"...the inscription read: {rulerInfo.Name}, victorious over {invasion.Invader} was greeted with laurels upon their return...";
@@ -375,28 +375,7 @@ class IdolAltarMaker
                .Count(t => map.TileAt(t).Type == TileType.DungeonFloor) == 5;
   }
 
-  static bool CheckFloorPattern(Map map, int r, int c, int dr, int dc)
-  {
-    int checkC = c + dc;
-    int checkR = r + dr;
-
-    if (map.TileAt(checkC, checkR).Type != TileType.DungeonFloor)
-      return false;
-
-    int floorCount = 0;
-    for (int cr = -1; cr <= 1; cr++)
-    {
-      for (int cc = -1; cc <= 1; cc++)
-      {
-        if (map.TileAt(checkC + cc, checkR + cr).Type == TileType.DungeonFloor)
-          floorCount++;
-      }
-    }
-
-    return floorCount >= 5;
-  }
-
-  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, History history, Random rng, int level)
+  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng, int level)
   {
     Map altarLevel = levels[level];
     Tile sacredSq;
@@ -443,7 +422,7 @@ class IdolAltarMaker
       Loc idolLoc = new(dungeonID, level, altarR, altarC);
       objDb.SetToLoc(idolLoc, idol);
 
-      Item prize = Artifacts.GenArtifact(objDb, history, rng);
+      Item prize = Artifacts.GenArtifact(objDb, factDb, rng);
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
       objDb.SetToLoc(prizeLoc, prize);
 

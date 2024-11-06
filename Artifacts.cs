@@ -20,11 +20,11 @@ class Artifacts
     return ItemFactory.Get(ItemNames.LONGSWORD, objDb);
   }
 
-  static string History(History history, Random rng)
+  static string History(FactDb factDb, Random rng)
   {
     List<string> deities = [ "the Moon Daughters", "Huntokar", "the Crimson King" ];
 
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
 
     // "Wielded by so-and-so in the battle of such-and-such"
     // "Wielded by so-and-so in the war of such-and-such"
@@ -44,7 +44,7 @@ class Artifacts
     return sb.ToString();
   }
 
-  static Item ArtifactSword(Item sword, History history, Random rng)
+  static Item ArtifactSword(Item sword, FactDb factDb, Random rng)
   {
     // add three nice features
     for (int i = 0; i < 3; i++)
@@ -80,7 +80,7 @@ class Artifacts
       }
     }
 
-    sword.Traits.Add(new DescriptionTrait(History(history, rng)));
+    sword.Traits.Add(new DescriptionTrait(History(factDb, rng)));
 
     // foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
     // {
@@ -90,12 +90,12 @@ class Artifacts
     return sword;
   }
 
-  public static Item GenArtifact(GameObjectDB objDb, History history, Random rng)
+  public static Item GenArtifact(GameObjectDB objDb, FactDb factDb, Random rng)
   {
     Item item = BaseItem(objDb);
 
     if (item.HasTrait<SwordTrait>())
-      item = ArtifactSword(item, history, rng);
+      item = ArtifactSword(item, factDb, rng);
       
     return item;
   }

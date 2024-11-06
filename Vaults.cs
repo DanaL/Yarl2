@@ -109,7 +109,7 @@ class Vaults
     return count;
   }
 
-  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb, History history)
+  public static void FindPotentialVaults(Map map, int height, int width, Random rng, int dungeonID, int levelNum, GameObjectDB objDb, FactDb factDb)
   {
     Dictionary<(int, int), int> areas = [];
     Dictionary<int, HashSet<(int, int)>> regions = [];
@@ -183,7 +183,7 @@ class Vaults
       if (rng.NextDouble() < 0.25)
       {
         (int doorRow, int doorCol) = doors[j];
-        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[j], rng, objDb, history);
+        CreateVault(map, dungeonID, levelNum, doorRow, doorCol, rooms[j], rng, objDb, factDb);
         ++vaultsPlaced;
       }
 
@@ -192,10 +192,10 @@ class Vaults
     }
   }
 
-  static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
+  static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
 
     double roll = rng.NextDouble();
     TileType statueType;
@@ -251,9 +251,9 @@ class Vaults
     }
   }
 
-  static Landmark GetTombDecoration(Random rng, History history)
+  static Landmark GetTombDecoration(Random rng, FactDb factDb)
   {
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
     string s = rulerInfo.Type switch
     {
       OGRulerType.ElfLord => rng.Next(4) switch
@@ -275,9 +275,9 @@ class Vaults
     return landmark;
   }
 
-  static Landmark GetTombMarker(NameGenerator ng, Random rng, History history)
+  static Landmark GetTombMarker(NameGenerator ng, Random rng, FactDb factDb)
   {
-    RulerInfo rulerInfo = history.FactDb.Ruler;
+    RulerInfo rulerInfo = factDb.Ruler;
     string rulerName = $"{rulerInfo.Title} {rulerInfo.Name}";
     string name = ng.GenerateName(rng.Next(6, 12));
     HistoricalFigure hf = new(name);
@@ -320,12 +320,12 @@ class Vaults
     sb.Append('.');
 
     hf.Title = $"{relation.Capitalize()} of {rulerName}";
-    history.FactDb.Add(hf);
+    factDb.Add(hf);
     
     return new Landmark(sb.ToString());
   } 
 
-  static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
+  static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
     List<Loc> locs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
@@ -354,7 +354,7 @@ class Vaults
       var adj = Util.Adj4Sqs(doorRow, doorCol).Where(sq => vault.Contains(sq)).ToList();
       if (adj.Count > 0)
       {
-        Tile marker = GetTombMarker(ng, rng, history);
+        Tile marker = GetTombMarker(ng, rng, factDb);
         map.SetTile(adj[0], marker);
       }
 
@@ -369,7 +369,7 @@ class Vaults
       }
       if (decorationLocs.Count > 0)
       {
-        Landmark landmark = GetTombDecoration(rng, history);
+        Landmark landmark = GetTombDecoration(rng, factDb);
         Loc loc = decorationLocs[rng.Next(decorationLocs.Count)];
         map.SetTile(loc.Row, loc.Col, landmark);
       }
@@ -383,22 +383,22 @@ class Vaults
     }
   }
 
-  static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, History history)
+  static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
   {
     if (level == 0)
     {
       // A level zero vault has been vandalized or plundered by past
       // adventurers.
-      VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
+      VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
       return;
     }
 
     if (level == 1 )
     {
       if (rng.Next(3) == 0)
-        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
+        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
       else
-        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
+        HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
         //VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
       
       return;

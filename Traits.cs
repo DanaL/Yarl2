@@ -1536,7 +1536,7 @@ class RecallTrait : BasicTrait, IGameEventListener
     // object in Campaign. (I'd like to eventually have side quest
     // dungeons, though, where Recall will also need to be handled
     // but I'm not going to bother with that yet)
-    if (gs.Campaign is null || gs.Campaign.History is null)
+    if (gs.Campaign is null || gs.Campaign.FactDb is null)
       throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
 
     if (player.Loc.DungeonID == 0)
@@ -1545,7 +1545,7 @@ class RecallTrait : BasicTrait, IGameEventListener
       return;
     }
 
-    LocationFact? entrance = (LocationFact?)gs.Campaign.History.FactDb.FactCheck("Dungeon Entrance");
+    LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb.FactCheck("Dungeon Entrance");
     if (entrance is not null)
     {
       gs.EnterLevel(player, 0, 0);

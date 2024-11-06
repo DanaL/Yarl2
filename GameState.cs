@@ -48,7 +48,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   public ulong LastTarget { get; set; } = 0;
-  public FactDb? FactDb => Campaign.History?.FactDb;
+  public FactDb? FactDb => Campaign.FactDb;
 
   private UserInterface UI { get; set; } = ui;
 
