@@ -71,6 +71,9 @@ A common dungeon predator. Its screams are known to temporarily scramble the bra
 deep one
 Strange humanoid fish people who worship strange, alien gods in darkness.
 #
+ghoul
+An noxious undead creature with a taste for bones.
+#
 jettrigger|trigger
 A trigger on the floor that will almost certainly set off a trap.
 #
