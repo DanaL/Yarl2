@@ -49,10 +49,9 @@ class Decorations
       decorations.Add(StatueForEvent(fact, rulerInfo, rng));
       decorations.Add(FrescoeForEvent(fact, rulerInfo, rng));
       decorations.Add(MosaicForEvent(fact, rulerInfo, rng));
-      decorations.Add(JournalForEvent(fact, history, rng));
-      // decorations.Add(Journal1(fact));
-      // decorations.Add(Journal2(fact));
-      // decorations.Add(Journal3(fact));
+      decorations.Add(JournalForEvent1(fact, history, rng));
+      decorations.Add(JournalForEvent2(fact, history, rng));
+      decorations.Add(JournalForEvent3(fact, history, rng));      
     }
 
     return decorations.Where(d => d is not NullDecoration).ToList();
@@ -72,11 +71,31 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration JournalForEvent(Fact fact, History history, Random rng)
+  static Decoration JournalForEvent1(Fact fact, History history, Random rng)
   {
     if (fact is Invasion invasion)
     {
       return InvasionJournal(invasion, history, rng);
+    }
+
+    return Decoration.Null;
+  }
+
+  static Decoration JournalForEvent2(Fact fact, History history, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionJournal2(invasion, history, rng);
+    }
+
+    return Decoration.Null;
+  }
+
+  static Decoration JournalForEvent3(Fact fact, History history, Random rng)
+  {
+    if (fact is Invasion invasion)
+    {
+      return InvasionJournal3(invasion, history, rng);
     }
 
     return Decoration.Null;
@@ -120,6 +139,31 @@ class Decorations
     string text = $@"My dear {ng.GenerateName(rng.Next(8, 12)).Capitalize()}, I am here in this dank place researching the invasion by {invasion.Invader}, having been lead here after discovering an old codex in a library in {nation} I will...";
 
     return new Decoration(DecorationType.ScholarJournal, text);
+  }
+
+  static Decoration InvasionJournal2(Invasion invasion, History history, Random rng)
+  {
+    string desc;
+    if (invasion.Successful)
+      desc = $"...have found a scroll extolling the virtues of {history.FactDb.Ruler.Name} and their victory over {invasion.Invader}...";
+    else
+      desc = $"...describes the lamentations of the people after the ravaging {invasion.Invader} and how...";
+
+    return new Decoration(DecorationType.ScholarJournal, desc);
+  }
+
+  static Decoration InvasionJournal3(Invasion invasion, History history, Random rng)
+  {
+    RulerInfo rulerInfo = history.FactDb.Ruler;
+    string desc;
+    if (invasion.Successful && rulerInfo.Beloved)
+      desc = $"...the inscription read: {rulerInfo.Name}, victorious over {invasion.Invader} was greeted with laurels upon their return...";
+    else if (invasion.Successful && !rulerInfo.Beloved)
+      desc = $"...their victory seems to have cemenented their power over the people, who dwelt in fear of {rulerInfo.Name}...";
+    else
+      desc = $"...I wish to learn what became of {rulerInfo.FullName} after their devastating defeat in the battle of...";
+
+    return new Decoration(DecorationType.ScholarJournal, desc);
   }
 
   static string InvasionScene(Invasion invasion, RulerInfo rulerInfo)
