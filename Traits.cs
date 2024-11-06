@@ -1068,6 +1068,74 @@ class ExhaustedTrait : TemporaryTrait
   }
 }
 
+class NauseaTrait : TemporaryTrait
+{
+  public override string AsText() => $"Nausea#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    if (target.HasTrait<NauseaTrait>())
+      return [];
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} nauseous!" ];    
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is GameObj victim)
+    {
+      victim.Traits.Remove(this);
+      Expired = true;
+      gs.StopListening(GameEventType.EndOfRound, this);
+      gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} better.");
+    }
+  }
+}
+
+class NauseousAuraTrait : Trait, IGameEventListener, IOwner
+{
+  public ulong OwnerID { get; set; }
+  public bool Listening => true;
+  public bool Expired { get => false; set {} }
+  public int Strength { get; set; }
+  public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
+  
+  public void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
+      return;
+     
+    int duration = gs.Rng.Next(Strength - 20, Strength + 21);
+    if (duration <= 0)
+      return;
+
+    foreach (Loc loc in Util.Adj8Locs(owner.Loc))
+    {
+      // TODO: undead should not be affected by nausea
+      if (gs.ObjDb.Occupant(loc) is Actor victim)
+      {
+        if (victim.Traits.OfType<NauseaTrait>().FirstOrDefault() is NauseaTrait nausea)
+        {
+          nausea.ExpiresOn += (ulong) duration;
+        }
+        else
+        {
+          NauseaTrait nt = new NauseaTrait()
+          {
+            OwnerID = victim.ID,
+            ExpiresOn = gs.Turn + (ulong) duration
+          };
+          List<string> msgs = nt.Apply(victim, gs);
+          gs.UIRef().AlertPlayer(msgs);
+        }
+      }      
+    }    
+  }
+}
+
 // Trait for items who have a specific owner, mainly so I can alert them when,
 // say, the player picks them up, etc
 class OwnedTrait : Trait
@@ -1878,6 +1946,12 @@ class TraitFactory
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Named", (pieces, gameObj) => new NamedTrait() },
+    { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait() 
+    { 
+      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+      Strength = int.Parse(pieces[2])
+    } 
+    },
     { "OnFire", (pieces, gameObj) => new OnFireTrait() { Expired = bool.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), Lifetime = int.Parse(pieces[3]) } },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() },

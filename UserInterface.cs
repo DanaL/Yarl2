@@ -494,6 +494,12 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("POISONED");
       }
+      else if (!statuses.Contains("NAUSEOUS") && gs.Player.HasTrait<NauseaTrait>())
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "NAUSEOUS")];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+        statuses.Add("NAUSEOUS");
+      }
       else if (!statuses.Contains("RAGE") && trait is RageTrait rage && rage.Active) 
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];

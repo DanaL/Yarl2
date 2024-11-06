@@ -86,6 +86,7 @@ class Colours
     else if (colour == FADED_PURPLE) return "fadedpurple";
     else if (colour == PURPLE) return "purple";
     else if (colour == PINK) return "pink";
+    else if (colour == FAINT_PINK) return "faintpink";
     else if (colour == ICE_BLUE) return "iceblue";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
@@ -118,6 +119,7 @@ class Colours
     "fadedpurple" => FADED_PURPLE,
     "purple" => PURPLE,
     "pink" => PINK,
+    "faintpink" => FAINT_PINK,
     "iceblue" => ICE_BLUE,
     "null" => NULL,
     _ => throw new Exception("Hmm I don't know that colour")

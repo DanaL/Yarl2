@@ -224,7 +224,7 @@ class MsgFactory
     }
     else if (target is Player)
     {
-      return canSeeAttacker ? $"{attacker.FullName} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
+      return canSeeAttacker ? $"{attacker.FullName.Capitalize()} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
     }
     else
     {

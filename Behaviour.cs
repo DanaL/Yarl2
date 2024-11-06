@@ -145,10 +145,11 @@ class MonsterBehaviour : IBehaviour
   Action FromTrait(Mob mob, ActionTrait act, GameState gs)
   {
     if (act is MobMeleeTrait meleeAttack)
-    {
+    {      
       var p = gs.Player;
       mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
       _lastUse[act.Name] = gs.Turn;
+      
       return new MeleeAttackAction(gs, mob, CalcAdjacentTarget(mob, gs));
     }
     else if (act is MobMissileTrait missileAttack)

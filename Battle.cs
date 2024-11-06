@@ -440,6 +440,11 @@ class Battle
       totalMod += str.Curr;
     }
 
+    if (attacker.HasTrait<NauseaTrait>())
+    {
+      totalMod -= 3;
+    }
+
     return totalMod;
   }
 
@@ -459,7 +464,7 @@ class Battle
       }
     }
     
-    int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon) + weaponBonus;    
+    int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon);    
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
