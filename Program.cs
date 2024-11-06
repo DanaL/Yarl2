@@ -15,22 +15,6 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
-var r = new Random();
-var db = new FactDb(r);
-var h = new History(r);
-for (int i = 0; i < 10; i++)
-{
-  var n = History.GenNation(r);
-  db.Add(n);
-}
-
-for (int i = 0; i < 3; i++)
-{
-  var n = db.Nations[r.Next(db.Nations.Count)];
-  Console.WriteLine(n.FullName);
-}
-Console.WriteLine(db.Ruler.FullName);
-
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface("Dana's Delve 0.0.1 + Bearlib", options);

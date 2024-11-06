@@ -136,8 +136,12 @@ class CampaignSaver
   [JsonInclude]
   public Dictionary<int, DungeonSaver> Dungeons = [];
   public TownSave? Town { get; set; }
-  //[JsonInclude]
-  
+  public List<string> Facts { get; set; } = [];
+  public List<string> HistoricalEvents { get; set; } = [];
+  public List<string> Nations { get; set; } = [];
+  public string RulerInfo { get; set; } = "";
+  public VillainType Villain { get; set; }
+  public string VillainName { get; set; } = "";
 
   public static CampaignSaver Shrink(Campaign c)
   {
@@ -157,11 +161,22 @@ class CampaignSaver
       Name = c.Town.Name
     };
 
-    //var facts =  c.History!.Facts.Select(f => f.ToString()).ToList();
+    if (c.FactDb is null)
+    {
+      throw new Exception("FactDb is null!");
+    }
+
+    var wtf = c.FactDb!.Facts.Select(f => f.ToString()).ToList();
+
     CampaignSaver sc = new()
     {
       Town = town,
-      //Facts = facts
+      Facts = c.FactDb!.Facts.Select(f => f.ToString()!).ToList(),
+      HistoricalEvents = c.FactDb!.HistoricalEvents.Select(he => he.ToString()!).ToList(), 
+      Nations = c.FactDb!.Nations.Select(n => n.ToString()).ToList(),  
+      RulerInfo = c.FactDb!.Ruler.ToString(),
+      Villain = c.FactDb!.Villain,
+      VillainName = c.FactDb!.VillainName
     };
 
     foreach (var k in c.Dungeons.Keys)
@@ -200,12 +215,24 @@ class CampaignSaver
       campaign.Dungeons.Add(k, DungeonSaver.Inflate(sc.Dungeons[k]));
     }
 
-    // List<Fact> facts = sc.Facts.Select(Fact.FromStr).ToList();
-    // campaign.History = new History(new Random())
-    // {
-    //   Facts = facts
-    // };
-
+    RulerInfo ruler = (RulerInfo)Fact.FromStr(sc.RulerInfo);
+    FactDb factDb = new(ruler);
+    factDb.Villain = sc.Villain;
+    factDb.VillainName = sc.VillainName;
+    foreach (var f in sc.Facts)
+    {
+      factDb.Add(Fact.FromStr(f));
+    }
+    foreach (var he in sc.HistoricalEvents)
+    {
+      factDb.Add(Fact.FromStr(he));
+    }
+    foreach (var n in sc.Nations)
+    {
+      factDb.Add(Fact.FromStr(n));
+    }
+    campaign.FactDb = factDb;
+    
     return campaign;
   }
 }

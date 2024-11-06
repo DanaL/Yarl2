@@ -38,7 +38,7 @@ enum DisasterType
   Plague, Earthquake, Comet
 }
 
-class FactDb
+class FactDb(RulerInfo ruler)
 {
   readonly List<Nation> _nations = [];
   public IReadOnlyList<Nation> Nations => _nations;
@@ -46,33 +46,11 @@ class FactDb
   public IReadOnlyList<Fact> HistoricalEvents => _historicalEvents;
   readonly List<Fact> _facts = [];
   public IReadOnlyList<Fact> Facts => _facts;
-  public RulerInfo Ruler { get; init; }
+  public RulerInfo Ruler { get; init; } = ruler;
   public VillainType Villain { get; set; }
   public string VillainName { get; set; } = "";
 
-  public FactDb(Random rng)
-  {
-    var type = rng.Next(2) switch
-    {
-      0 => OGRulerType.ElfLord,
-      1 => OGRulerType.DwarfLord,
-      //_ => OGRulerType.MadWizard
-    };
-
-    var nameGen = new NameGenerator(rng, "data/names.txt");
-    var name = nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
-    RulerInfo ruler = new()
-    {
-      Type = type,
-      Name = name,
-      Title = nameGen.PickTitle(),
-      Epithet = nameGen.PickEpithet(),
-      Beloved = rng.NextDouble() < 0.5
-    };
-    Ruler = ruler;
-  }
-
-  public void Add(Fact fact)
+    public void Add(Fact fact)
   {
     if (fact is Nation nation)
       _nations.Add(nation);
@@ -364,10 +342,28 @@ class History(Random rng)
 
   public FactDb GenerateHistory(Random rng)
   {
-    FactDb factDb = new(rng);
-    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
-    NameGenerator ng = new(rng, "data/names.txt");
-    factDb.VillainName = ng.GenerateName(rng.Next(8, 13));
+    NameGenerator nameGen = new(rng, "data/names.txt");
+
+    var type = rng.Next(2) switch
+    {
+      0 => OGRulerType.ElfLord,
+      1 => OGRulerType.DwarfLord,
+      //_ => OGRulerType.MadWizard
+    };
+    var name = nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
+    RulerInfo ruler = new()
+    {
+      Type = type,
+      Name = name,
+      Title = nameGen.PickTitle(),
+      Epithet = nameGen.PickEpithet(),
+      Beloved = rng.NextDouble() < 0.5
+    };
+
+    FactDb factDb = new(ruler);
+    
+    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;    
+    factDb.VillainName = nameGen.GenerateName(rng.Next(8, 13));
 
     factDb.Add(GenNation(rng));
     factDb.Add(GenNation(rng));
