@@ -253,7 +253,7 @@ class Vaults
 
   static Landmark GetTombDecoration(Random rng, History history)
   {
-    RulerInfo rulerInfo = (RulerInfo)history.Facts.Where(f => f is RulerInfo).First();
+    RulerInfo rulerInfo = history.FactDb.Ruler;
     string s = rulerInfo.Type switch
     {
       OGRulerType.ElfLord => rng.Next(4) switch

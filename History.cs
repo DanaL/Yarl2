@@ -224,6 +224,8 @@ class History
   public FactDb FactDb { get; init; }
   public List<Fact> Facts { get; set; } = [];
   public VillainType Villain { get; set; }
+  public string VillainName { get; private set; }
+
   readonly NameGenerator _nameGen;
 
   static readonly string[] _adjectives = [
@@ -373,6 +375,8 @@ class History
   {
     // Villain should be turned into a Fact eventually
     Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
+    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
+    VillainName = ng.GenerateName(rng.Next(8, 13));
 
     FactDb.Add(GenNation(rng));
     FactDb.Add(GenNation(rng));

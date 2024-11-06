@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 enum DecorationType
@@ -77,8 +79,55 @@ class Decorations
     {
       return InvasionJournal(invasion, history, rng);
     }
+    else if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
+    {
+      return JournalForPlague(disaster, history, rng);
+    }
 
     return Decoration.Null;
+  }
+
+  static Decoration JournalForPlague(Disaster plague, History history, Random rng)
+  {
+    StringBuilder sb = new();
+    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
+    // When more historical facts and such are generated I can have the text
+    // be like "After the Battle of Blah Blah, there was a brief respite of
+    // prosperity before they were struck by the plague of..."
+    sb.Append("An old codex speaks of a contagion that spread across the land called ");
+    sb.Append(plague.Desc.CapitalizeWords());
+    sb.Append(". The academics debate if this was due to natural causes or");
+
+    switch (rng.Next(3))
+    {
+      case 0:
+        sb.Append(" due to ");
+        sb.Append(history.FactDb.Ruler.Name);
+        sb.Append(" turning away from the teachings of ");
+        int roll = rng.Next(3);
+        if (roll == 0)
+          sb.Append("Huntokar.");
+        else if (roll == 1)
+          sb.Append("the Moon Daughters.");
+        else
+          sb.Append("the Crimson King.");
+        break;
+      case 1:
+        sb.Append(" wrought by the mad experiments of ");
+        sb.Append(ng.GenerateName(rng.Next(6, 10)));
+        sb.Append('.');
+        break;
+      default:
+        sb.Append(" brought to the land by the machinations of ");
+        sb.Append(history.VillainName);
+        sb.Append('.');
+        break;
+    }
+
+    sb.Append(" It is to investigate this matter I have come to this place. Surely any remnants of the illness have long since faded to nothing?");
+
+    Console.WriteLine(sb.ToString());
+    return new Decoration(DecorationType.ScholarJournal, sb.ToString());
   }
 
   static Decoration JournalForEvent2(Fact fact, History history, Random rng)
