@@ -975,7 +975,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void MarkGraves(Map map, string epitaph, Random rng)
+  static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, GameObjectDB objDb)
   {
     NameGenerator ng = new(rng, "data/names.txt");
     List<List<(int, int)>> rooms = map.FindRooms();
@@ -1003,6 +1003,11 @@ class MainDungeonBuilder : DungeonBuilder
       map.SetTile(r, c, new Gravestone(message));
     }
 
+    var (cr, cc) = room[rng.Next(room.Count)];
+    Loc cryptLoc = new(dungeonID, level, cr, cc);
+    Actor crypt = MonsterFactory.Get("haunted crypt", objDb, rng);
+    objDb.AddNewActor(crypt, cryptLoc);
+    
     map.Alerts.Add("A shiver runs up your spine.");
   }
 
@@ -1016,7 +1021,7 @@ class MainDungeonBuilder : DungeonBuilder
         int level = rng.Next(1, levels.Length);
         Console.WriteLine($"Graveyard on level {level}");
         var map = levels[level];
-        MarkGraves(map, disaster.Desc.CapitalizeWords(), rng);
+        MarkGraves(map, disaster.Desc.CapitalizeWords(), rng, id, level, objDb);
       }
     }
   }

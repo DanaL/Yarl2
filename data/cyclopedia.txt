@@ -109,3 +109,6 @@ Heals 4-16 hp.
 #
 antidote
 Cures poison.
+#
+haunted crypt
+A sepulcher glowing with an eerie light and radiating necromantic energy. It draws in monsters from the Valley of the Dead.

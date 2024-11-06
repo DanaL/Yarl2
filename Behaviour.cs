@@ -202,6 +202,11 @@ class MonsterBehaviour : IBehaviour
         Quip = summon.Quip
       };
     }
+    else if (act is SummonUndeadTrait summonUndead)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      return new SummonAction(mob.Loc, summonUndead.Summons(gs, mob), 1) { GameState = gs, Actor = mob };
+    }
     else if (act is HealAlliesTrait heal && mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait alliesTrait)
     {
       _lastUse[act.Name] = gs.Turn;

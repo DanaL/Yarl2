@@ -167,6 +167,43 @@ class SummonTrait : ActionTrait
   public override string AsText() => $"Summon#{Cooldown}#{Summons}#{Quip}";  
 }
 
+class SummonUndeadTrait : ActionTrait
+{
+  // I'm not sure what a good limit is, but let's start with 100 and see 
+  // if that's too many or causes performance issues
+  public override bool Available(Mob mob, GameState gs) 
+  {
+    int levelPop = gs.ObjDb.LevelCensus(mob.Loc.DungeonID, mob.Loc.Level);
+
+    return levelPop < 100;
+  }
+
+  public string Summons(GameState gs, Mob mob)
+  {
+    List<string> undead = [ "skeleton", "zombie" ];
+
+    if (mob.Loc.Level >= 2)
+    {
+      undead.Add("ghoul");
+      undead.Add("phantom");
+    }
+    if (mob.Loc.Level >= 1)
+      undead.Add("shadow");
+    
+    if (mob.Loc.Level == 1)
+    {
+      undead.Add("skeleton");
+      undead.Add("skeleton");
+      undead.Add("zombie");
+      undead.Add("zombie");
+    }
+
+    return undead[gs.Rng.Next(undead.Count)];
+  }
+
+  public override string AsText() => $"SummonUndead#{Cooldown}";
+}
+
 class HealAlliesTrait : ActionTrait
 {
   // Bsaically, if there is an ally the trait owner can see nearby who needs healing, indicate 
@@ -268,6 +305,11 @@ class AlliesTrait : Trait
 class AxeTrait : Trait
 {
   public override string AsText() => "Axe";
+}
+
+class ConstructTrait : Trait
+{
+  public override string AsText() => "Construct";
 }
 
 class ConsumableTrait : Trait
@@ -1871,6 +1913,7 @@ class TraitFactory
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "ConfusingScream", (pieces, gameObj) => new ConfusingScreamTrait() { Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3]) }},
+    { "Construct", (pieces, gameObj) => new ConstructTrait() },
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
@@ -2013,6 +2056,7 @@ class TraitFactory
     } },
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
+    { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
