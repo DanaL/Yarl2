@@ -90,8 +90,8 @@ class Popup
 {
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   readonly string Title;
-  List<(Colour, string)> Words;
-  int Width;
+  readonly List<(Colour, string)> Words;
+  readonly int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
     
@@ -145,17 +145,6 @@ class Popup
     int w = 0;
     List<(Colour, string)> line = [(DefaultTextColour, "| ")];
 
-    void WritePaddedLine()
-    {
-      // Pad out so that the right border lines up        
-      int padding = Width - currWidth - 2;
-      if (padding > 0)
-        line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
-      ui.WriteText(line, row++, col, Width);
-      line = [(DefaultTextColour, "| ")];
-      currWidth = 0;
-    }
-
     while (w < Words.Count)
     {
       var (colour, word) = Words[w++];
@@ -164,7 +153,7 @@ class Popup
       {
         WritePaddedLine();
       }
-      else if (word.Length <= Width - currWidth - 4)
+      else if (word.Length <= Width - currWidth - 5)
       {
         currWidth += word.Length;
         if (line.Count > 1 && !(word[0] == ',' || word[0] == ';'))
@@ -184,6 +173,17 @@ class Popup
     WritePaddedLine();
 
     ui.WriteLine(border, row, col, Width, DefaultTextColour);
+
+    void WritePaddedLine()
+    {
+      // Pad out so that the right border lines up        
+      int padding = Width - currWidth - 2;
+      if (padding > 0)
+        line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
+      ui.WriteText(line, row++, col, Width);
+      line = [(DefaultTextColour, "| ")];
+      currWidth = 0;
+    }
   }
 
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
