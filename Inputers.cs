@@ -943,6 +943,8 @@ class InventoryDetails : Inputer
         items.Add("it may be wielded in both hands or with a shield");
       if (trait is ViciousTrait)
         items.Add($"this vicious weapon deals [BRIGHTRED extra damage]");
+      if (trait is RustedTrait)
+        items.Add("it is [DULLRED rusty], but can be repaired");
     }
 
     if (items.Count == 0)
