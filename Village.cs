@@ -191,6 +191,7 @@ class Village
 
     smith.Loc = LocForVillager(map, town.Smithy, rng);
     smith.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
+    smith.Stats[Attribute.ShopMenu] = new Stat(0);
     smith.SetBehaviour(new SmithBehaviour());
     smith.MoveStrategy = new WallMoveStrategy();
 

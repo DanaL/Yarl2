@@ -499,7 +499,7 @@ class SmithBehaviour : IBehaviour
 
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
-    var acc = new ShopMenuInputer(actor, Blurb(actor, gs), gs);
+    var acc = new SmithyInputer(actor, Blurb(actor, gs), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);

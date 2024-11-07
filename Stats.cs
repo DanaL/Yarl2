@@ -33,7 +33,7 @@ enum Attribute
   MissileDmgBonus,
   Radius,
   HomeID,
-  DialogueState, // I can eliminate this once the new dialogue system is done
+  DialogueState, 
   Markup,
   InDisguise,
   MonsterForm,
@@ -44,7 +44,8 @@ enum Attribute
   FinesseUse,
   PolearmsUse,
   SwordUse,  
-  MetPlayer
+  MetPlayer,
+  ShopMenu
 }
 
 class Stat

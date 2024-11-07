@@ -111,6 +111,35 @@ class EffectApplier
     return s;
   }
 
+  public static void RemoveRust(GameObj thing)
+  {
+    if (thing is null)
+      return;
+
+    Rust rust;
+    if (thing.Traits.OfType<RustedTrait>().FirstOrDefault() is RustedTrait rt)
+      rust = rt.Amount;
+    else
+      rust = Rust.Rusted;
+
+    List<Trait> keepers = [];
+    foreach (Trait trait in thing.Traits)
+    {
+      if (trait is RustedTrait)
+        continue;
+      if (trait is AdjectiveTrait adj && (adj.Adj == "Rusted" || adj.Adj == "Corroded"))
+        continue;
+      if (trait is WeaponBonusTrait wbt)
+        wbt.Bonus += rust == Rust.Rusted ? 1 : 2;
+      if (trait is ArmourTrait at)
+        at.Bonus += rust == Rust.Rusted ? 1 : 2;
+
+      keepers.Add(trait);
+    }
+
+    thing.Traits = keepers;
+  }
+
   public static string Apply(EffectFlag flag, GameState gs, GameObj receiver, Actor? owner)
   {    
     switch (flag)

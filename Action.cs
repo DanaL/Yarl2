@@ -485,6 +485,57 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
   }
 }
 
+// This is the action for paying an NPC to repair an item
+class RepairItemAction : Action
+{
+  readonly Mob _shopkeeper;
+  int Total { get; set; }
+  List<(char, int)> _selections = [];
+
+  public RepairItemAction(GameState gs, Mob shopkeeper)
+  {
+    GameState = gs;
+    _shopkeeper = shopkeeper;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = Total > 0;
+    result.EnergyCost = 1.0;
+
+    GameState!.Player.Inventory.Zorkmids -= Total;
+
+    List<Item> items = [];
+    foreach (var (slot, _) in _selections)
+    {
+      var (item, _) = GameState.Player.Inventory.ItemAt(slot);
+      if (item is not null)
+      {
+        items.Add(item);
+        EffectApplier.RemoveRust(item);
+      }      
+    }
+   
+    string txt = $"{_shopkeeper.FullName.Capitalize()} gets to work and soon your ";
+    if (items.Count > 1)
+      txt += "items look almost as good as new!";
+    else
+      txt += items[0].Name + " looks almost as good as new!";
+
+    result.Messages.Add(txt);
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var shopResult = (ShoppingUIResult)result;
+    Total = shopResult.Zorkminds;
+    _selections = shopResult.Selections;
+  }
+}
+
 class ShoppingCompletedAction : Action
 {
   readonly Mob _shopkeeper;
@@ -526,7 +577,7 @@ class ShoppingCompletedAction : Action
 
   public override void ReceiveUIResult(UIResult result)
   {
-    var shopResult = (ShoppingUIResuilt) result;
+    var shopResult = (ShoppingUIResult) result;
     _invoice = shopResult.Zorkminds;
     _selections = shopResult.Selections;
   }
