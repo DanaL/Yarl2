@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using SDL2;
 using static Yarl2.Util;
 
 namespace Yarl2;
@@ -81,7 +80,7 @@ class Examiner : Inputer
         }
         else if (_gs.ObjDb.ItemsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));          
+          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));          
         }
         else
         {

@@ -469,15 +469,29 @@ class SmithBehaviour : IBehaviour
     }
   }
 
-  string Blurb(Mob mob)
+  string Blurb(Mob mob, GameState gs)
   {
     double markup = mob.Stats[Attribute.Markup].Curr / 100.0;
     var sb = new StringBuilder();
     sb.Append('"');
-    if (markup > 1.75)
-      sb.Append("If you're looking for arms or armour, I'm the only game in town!");
-    else
-      sb.Append("You'll want some weapons or better armour before venturing futher!");
+
+    int roll = gs.Rng.Next(3);
+    switch (roll)
+    {
+      case 0:
+        if (markup > 1.75)
+          sb.Append("If you're looking for arms or armour, I'm the only game in town!");
+        else
+          sb.Append("You'll want some weapons or better armour before venturing futher!");
+        break;
+      case 1:
+        sb.Append("Weapons or armour showing signs of wear and tear? I can help with that!");
+        break;
+      case 2:
+        sb.Append("If you find weird gems or monster parts, I may be able to use them to spruce up your gear!");
+        break;
+    }  
+    
     sb.Append('"');
 
     return sb.ToString();
@@ -485,7 +499,7 @@ class SmithBehaviour : IBehaviour
 
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
-    var acc = new ShopMenuInputer(actor, Blurb(actor), gs);
+    var acc = new ShopMenuInputer(actor, Blurb(actor, gs), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
