@@ -575,6 +575,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (loot.Count > 0)
           ItemDropped(loot[0], victim.Loc);
       }
+      else if (t is DropTrait drop)
+      {
+        if (Rng.Next(100) < drop.Chance  && Enum.TryParse(drop.ItemName.ToUpper(), out ItemNames itemName)) 
+        {
+          ItemDropped(ItemFactory.Get(itemName, ObjDb), victim.Loc);
+        }
+      }
       else if (t is CoinsLootTrait coins)
       {
         var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);

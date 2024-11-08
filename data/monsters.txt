@@ -36,3 +36,4 @@ dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|Dumb|Melee#5#
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Wall|Shriek#3#10|Plant,Immunity#Confusion
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Door|Melee#6#1#Slashing|NauseousAura#owner#10,Undead
 haunted crypt     |▮|iceblue     |lightblue   |14|50|0| 1.0|10|10|Wall|SummonUndead#10|Undead,Immunity#Confusion,Construct
+giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|Dumb|Melee#8#1#Piercing|Drop#beetle_carapace#33

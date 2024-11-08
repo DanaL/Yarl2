@@ -74,6 +74,9 @@ Strange humanoid fish people who worship strange, alien gods in darkness.
 ghoul
 An noxious undead creature with a taste for bones.
 #
+giant beetle
+An enormous, hard-shelled, sharp-pincer-ed version of a regular beetle.
+#
 jettrigger|trigger
 A trigger on the floor that will almost certainly set off a trap.
 #
@@ -112,3 +115,6 @@ Cures poison.
 #
 haunted crypt
 A sepulcher glowing with an eerie light and radiating necromantic energy. It draws in monsters from the Valley of the Dead.
+#
+beetle carapace
+A fragment of irridescent shell. Sometimes used in warding and protection magic.

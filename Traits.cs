@@ -1032,6 +1032,14 @@ class ConfusedTrait : TemporaryTrait
   }
 }
 
+class DropTrait : Trait
+{
+  public string ItemName { get; set; } = "";
+  public int Chance { get; set; }
+
+  public override string AsText() => $"Drop#{ItemName}#{Chance}";
+}
+
 class LameTrait : TemporaryTrait
 {  
   public override string AsText() => $"Lame#{OwnerID}#{ExpiresOn}";
@@ -1928,6 +1936,7 @@ class TraitFactory
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Divider", (pieces, gameObj) => new DividerTrait() },
     { "Dodge", (pieces, gameObj) => new DodgeTrait() { Rate = int.Parse(pieces[1]) }},
+    { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },

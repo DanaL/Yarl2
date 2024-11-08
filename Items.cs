@@ -28,6 +28,7 @@ enum ItemType
   Bone,
   Food,
   Talisman,
+  Reagent,
   Environment // I'm implementing things like mist as 'items'
 }
 
@@ -157,7 +158,8 @@ enum ItemNames
   SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
   SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
   WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
-  WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
+  WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
+  BEETLE_CARAPACE
 }
 
 class ItemFactory
@@ -627,6 +629,11 @@ class ItemFactory
           Glyph = new Glyph('(', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Mask, ArmourMod = 0, Bonus = 0 });
         item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Blind#owner#max" ] });        
+        break;
+      case ItemNames.BEETLE_CARAPACE:
+        item = new Item() { Name = "beetle carapace", Type = ItemType.Reagent, Value = 25,
+          Glyph = new Glyph('%', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new StackableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
