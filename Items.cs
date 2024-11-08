@@ -159,7 +159,7 @@ enum ItemNames
   SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
   WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
-  BEETLE_CARAPACE
+  BEETLE_CARAPACE, OGRE_LIVER
 }
 
 class ItemFactory
@@ -633,6 +633,11 @@ class ItemFactory
       case ItemNames.BEETLE_CARAPACE:
         item = new Item() { Name = "beetle carapace", Type = ItemType.Reagent, Value = 25,
           Glyph = new Glyph('%', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.OGRE_LIVER:
+        item = new Item() { Name = "ogre liver", Type = ItemType.Reagent, Value = 25,
+          Glyph = new Glyph('%', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new StackableTrait());
         break;
       default:

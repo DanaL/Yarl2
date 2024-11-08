@@ -118,3 +118,6 @@ A sepulcher glowing with an eerie light and radiating necromantic energy. It dra
 #
 beetle carapace
 A fragment of irridescent shell. Sometimes used in warding and protection magic.
+#
+ogre liver
+How can you tell it apart from other creatures' livers? Your keen adventuring nose!
