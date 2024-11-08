@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -293,13 +294,15 @@ class SmithyInputer : ShopMenuInputer
   {
     Dictionary<char, ShopMenuItem> menuItems = [];
 
+    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
     var reagents = Gs.Player.Inventory.Items()
                             .Where(i => i.Type == ItemType.Reagent)
                             .OrderBy(i => i.Slot);
     foreach (Item item in reagents)
     {
+      int price = (int)(50 * markup);
       if (!menuItems.ContainsKey(item.Slot))
-        menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 50));
+        menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
     }
 
     return menuItems;
