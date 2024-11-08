@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Yarl2;
 
 class ActionResult
@@ -504,7 +506,29 @@ class UpgradeItemAction : Action
     result.Complete = Total > 0;
     result.EnergyCost = 1.0;
 
-    GameState!.UIRef().AlertPlayer("Ala-kazam!");
+    var (item, _) = GameState!.Player.Inventory.ItemAt(ItemSlot);
+    var (reagent, _) = GameState.Player.Inventory.ItemAt(ReagentSlot);
+
+    if (item is null || reagent is null)
+      throw new Exception("Hmm this shouldn't happen when upgrading an item!");
+
+    bool canUpgrade = Alchemy.Compatible(item, reagent);
+    if (canUpgrade)
+    {
+      GameState.Player.Inventory.Zorkmids -= Total;
+
+      var (success, msg) = Alchemy.UpgradeItem(item, reagent);
+
+      GameState.Player.Inventory.RemoveByID(reagent.ID);
+
+      GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+      result.Messages.Add(msg);
+    }
+    else
+    {
+      string txt = $"Hmm I can't figure out a way to enchant your {item!.Name} with {reagent!.Name.IndefArticle()}.";
+      GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
+    }
 
     return result;
   }
@@ -556,6 +580,7 @@ class RepairItemAction : Action
     else
       txt += items[0].Name + " looks almost as good as new!";
 
+    GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
     result.Messages.Add(txt);
 
     return result;
