@@ -66,7 +66,7 @@ class DebugCommand(GameState gs)
     {"potion of blindness", ItemNames.POTION_BLINDNESS},
     {"beetle carapace", ItemNames.BEETLE_CARAPACE},
     {"ogre liver", ItemNames.OGRE_LIVER}
-  };    
+  };
 
   public string DoCommand(string txt)
   {
@@ -86,10 +86,28 @@ class DebugCommand(GameState gs)
         return AddMonster(parts[1]);
       case "give":
       case "drop":
-        return AddItem(parts[0].ToLower(), parts[1]);      
+        return AddItem(parts[0].ToLower(), parts[1]);
+      case "zorkmids":
+      case "$":
+        return GiveZorkminds(parts[1]);
       default:
         return "Unknown debug command";
     }
+  }
+
+  private string GiveZorkminds(string amount)
+  {
+    if (uint.TryParse(amount, out uint total))
+    {
+      
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, _gs.ObjDb);
+      zorkmids.Value = (int)total;
+      _gs.Player.Inventory.Add(zorkmids, _gs.Player.ID);
+
+      return "";
+    }
+
+    return $"Need a valid amount!";
   }
 
   private string AddItem(string action, string name)
