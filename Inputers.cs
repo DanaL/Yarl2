@@ -973,9 +973,3 @@ class NumericUIResult : UIResult
 {
   public int Amount { get; set; }
 }
-
-class ShoppingUIResult : UIResult
-{
-  public List<(char, int)> Selections { get; set; } = [];
-  public int Zorkminds { get; set; } = 0;
-}

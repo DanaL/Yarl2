@@ -28,6 +28,7 @@ class ShopMenuInputer : Inputer
   protected GameState Gs { get; set; }
   protected Dictionary<char, ShopMenuItem> MenuItems { get; set; } = [];
   protected string Blurb { get; set; }
+  protected bool SingleSelection { get; set; } = false;
 
   public ShopMenuInputer(Actor shopkeeper, string blurb, GameState gs)
   {
@@ -35,6 +36,11 @@ class ShopMenuInputer : Inputer
     Blurb = blurb;
     Shopkeeper = (Mob)shopkeeper;
     MenuItems = MenuFromInventory(Shopkeeper);
+
+    if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out Stat? menu))
+      Shopkeeper.Stats[Attribute.ShopMenu] = new Stat(0);
+    else
+      Shopkeeper.Stats.Add(Attribute.ShopMenu, new Stat(0));
 
     WritePopup(blurb);
   }
@@ -70,6 +76,15 @@ class ShopMenuInputer : Inputer
     }
     else if (MenuItems.ContainsKey(ch))
     {
+      if (SingleSelection)
+      {
+        foreach (char slot in MenuItems.Keys)
+        {
+          if (slot != ch)
+            MenuItems[slot].SelectedCount = 0;
+        }
+      }
+
       if (MenuItems[ch].StockCount == 1 && MenuItems[ch].SelectedCount == 0)
         MenuItems[ch].SelectedCount = 1;
       else if (MenuItems[ch].StockCount == 1)
@@ -120,10 +135,13 @@ class ShopMenuInputer : Inputer
         line.Append(')');
       }
 
-      int price = (int)(MenuItems[key].Price);
-      line.Append(" - [YELLOW $]");
-      line.Append(price);
-
+      if (MenuItems[key].Price > 0)
+      {
+        int price = MenuItems[key].Price;
+        line.Append(" - [YELLOW $]");
+        line.Append(price);
+      }
+      
       if (MenuItems[key].StockCount > 1)
         line.Append(" apiece");
       lines.Add(line.ToString());
@@ -166,7 +184,11 @@ class ShopMenuInputer : Inputer
 
     if (invoice > Gs.Player.Inventory.Zorkmids)
     {
-      sb.Append("[brightred You don't have enough money for all that!]");
+      sb.Append("\n[brightred You don't have enough money for all that!]");
+    }
+    else
+    {
+      sb.Append("\n(Enter to accept)");
     }
 
     return sb.ToString();
@@ -182,27 +204,27 @@ class ShopMenuInputer : Inputer
 
 class SmithyInputer : ShopMenuInputer
 {
-  public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
-  {
-    if (!Shopkeeper.Stats.ContainsKey(Attribute.ShopMenu))
-    {
-      Shopkeeper.Stats.Add(Attribute.ShopMenu, new Stat(0));
-    }
+  bool _offerRepair;
+  bool _offerUpgrade;
+  char _itemToEnchant;
 
-    bool hasRustyItem = false;
+  public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
+  {    
+    _offerRepair = false;
+    _offerUpgrade = false;
     foreach (Item item in Gs.Player.Inventory.Items())
     {
       if (item.HasTrait<RustedTrait>())
-      {
-        hasRustyItem = true;
-        break;
-      }
+        _offerRepair = true;
+
+      if (item.Type == ItemType.Reagent)
+        _offerUpgrade = true;
     }
 
     // Menu state:
     // 0 - Offer choice of shop/repair/upgrade
     // 1 - Shopping
-    if (hasRustyItem) 
+    if (_offerRepair || _offerUpgrade) 
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(0);
     else
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(1);
@@ -238,6 +260,7 @@ class SmithyInputer : ShopMenuInputer
     else if (menuState == 0 && ch == 'c')
     {
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(3);
+      MenuItems = UpgradeMenu();
     }
     else if (menuState == 1)
     {
@@ -250,8 +273,54 @@ class SmithyInputer : ShopMenuInputer
       blurb = "What would you like repaired?";
       base.Input(ch);
     }
+    else if (menuState == 3 && MenuItems.ContainsKey(ch))
+    {
+      Gs.Player.ReplacePendingAction(new UpgradeItemAction(Gs, Shopkeeper), this);
+      _itemToEnchant = ch;
+      Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
+      MenuItems = ReagentMenu();      
+    }
+    else if (menuState == 4)
+    {
+      SingleSelection = true;
+      base.Input(ch);
+    }
 
     WritePopup(blurb);
+  }
+
+  Dictionary<char, ShopMenuItem> ReagentMenu()
+  {
+    Dictionary<char, ShopMenuItem> menuItems = [];
+
+    var reagents = Gs.Player.Inventory.Items()
+                            .Where(i => i.Type == ItemType.Reagent)
+                            .OrderBy(i => i.Slot);
+    foreach (Item item in reagents)
+    {
+      if (!menuItems.ContainsKey(item.Slot))
+        menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 50));
+    }
+
+    return menuItems;
+  }
+
+  Dictionary<char, ShopMenuItem> UpgradeMenu()
+  {
+    Dictionary<char, ShopMenuItem> menuItems = [];
+    foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
+    {
+      if (menuItems.ContainsKey(item.Slot))
+        continue;
+      if (item.Type == ItemType.Reagent)
+        continue;
+      if (item.HasTrait<RustedTrait>())
+        continue;
+      
+      menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 0));
+    }
+
+    return menuItems;
   }
 
   Dictionary<char, ShopMenuItem> RepairMenu()
@@ -271,30 +340,6 @@ class SmithyInputer : ShopMenuInputer
     }
 
     return menuItems;
-  }
-
-  string RepairScreen()
-  {
-    StringBuilder sb = new();
-    sb.Append("Would would you like repaired?\n\n");
-
-    foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
-    {
-      if (item.Traits.OfType<RustedTrait>().FirstOrDefault() is not RustedTrait rust)
-        continue;
-
-      sb.Append(item.Slot);
-      sb.Append(") ");
-      sb.Append(item.FullName);
-      sb.Append(" - [YELLOW $]");
-      if (rust.Amount == Rust.Rusted)
-        sb.Append("25");
-      else
-        sb.Append("50");
-      sb.Append('\n');
-    }
-
-    return sb.ToString();
   }
 
   protected override void WritePopup(string blurb)
@@ -319,20 +364,76 @@ class SmithyInputer : ShopMenuInputer
       sb.Append("\n\n");
 
       sb.Append("a) Do some shopping.\n");
-      sb.Append("b) Repair gear.\n");
+      if (_offerRepair)
+        sb.Append("b) Repair gear.\n");
+      if (_offerUpgrade)
+        sb.Append("c) Try to enchant an item.\n");
 
       dialogueText = sb.ToString();
-    }    
+    }
+    else if (menuState == 1)
+    {
+      dialogueText = MenuScreen(Blurb);
+    }
     else if (menuState == 2)
     {
       dialogueText = MenuScreen("What would you like repaired?");
     }
-    else
+    else if (menuState == 3)
     {
       //Shopkeeper.Stats[Attribute.ShopMenu].SetMax(1);
-      dialogueText = MenuScreen(Blurb);
+      dialogueText = MenuScreen("What shall we try to upgrade?");
+    }
+    else if (menuState == 4)
+    {
+      var (item, _) = Gs.Player.Inventory.ItemAt(_itemToEnchant);
+      string txt = $"Try to enchant your [ICEBLUE {item!.FullName}] with what?";
+      dialogueText = MenuScreen(txt);
+    }
+    else
+    {
+      dialogueText = "Hmm this shouldn't happen?";
     }
 
     Gs.UIRef().SetPopup(new Popup(dialogueText, Shopkeeper.FullName, -1, -1));
-  }  
+  }
+
+  public override UIResult GetResult()
+  {
+    if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out var menuState) && menuState.Curr == 4)
+    {
+      char reagent = MenuItems.Values.Where(i => i.SelectedCount > 0)
+                              .Select(i => i.Slot)
+                              .First();
+
+      return new UpgradeItemUIResult()
+      {
+        Zorkminds = TotalInvoice(),
+        ItemSlot = _itemToEnchant,
+        ReagentSLot = reagent
+      };
+    }
+    else
+    {
+      return new ShoppingUIResult()
+      {
+        Zorkminds = TotalInvoice(),
+        Selections = MenuItems.Values.Where(i => i.SelectedCount > 0)
+                                    .Select(i => (i.Slot, i.SelectedCount))
+                                    .ToList()
+      };
+    }    
+  }
+}
+
+class ShoppingUIResult : UIResult
+{
+  public List<(char, int)> Selections { get; set; } = [];
+  public int Zorkminds { get; set; } = 0;
+}
+class UpgradeItemUIResult : UIResult
+{
+  public char ItemSlot {  get; set; }
+  public char ReagentSLot { get; set; }
+  public int Zorkminds { get; set; } = 0;
 }

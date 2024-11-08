@@ -485,6 +485,39 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
   }
 }
 
+class UpgradeItemAction : Action
+{
+  char ItemSlot {  get; set; }
+  char ReagentSlot { get; set; }
+  readonly Mob _shopkeeper;
+  int Total { get; set; }
+
+  public UpgradeItemAction(GameState gs, Mob shopkeeper)
+  {
+    GameState = gs;
+    _shopkeeper = shopkeeper;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = Total > 0;
+    result.EnergyCost = 1.0;
+
+    GameState!.UIRef().AlertPlayer("Ala-kazam!");
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var upgradeResult = (UpgradeItemUIResult)result;
+    Total = upgradeResult.Zorkminds;
+    ItemSlot = upgradeResult.ItemSlot;
+    ReagentSlot = upgradeResult.ReagentSLot;
+  }
+}
+
 // This is the action for paying an NPC to repair an item
 class RepairItemAction : Action
 {
