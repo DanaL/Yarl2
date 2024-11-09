@@ -365,6 +365,11 @@ class LightStepTrait : Trait
   public override string AsText() => "LightStep";
 }
 
+class LikeableTrait : Trait
+{
+  public override string AsText() => "Likeable";
+}
+
 class MetalTrait : Trait
 {
   public Metals Type {  get; set; }
@@ -2037,16 +2042,18 @@ class TraitFactory
     { "Impale", (pieces, gameObj) => new ImpaleTrait() },
     { "InPit", (pieces, gameObj) => new InPitTrait() },
     { "Invisible", (pieces, gameObj) =>
+      new InvisibleTrait()
       {
-        return new InvisibleTrait()
-        {
-          ActorID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
-          Expired = bool.Parse(pieces[2]),
-          ExpiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3])
-      }; }
+        ActorID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        Expired = bool.Parse(pieces[2]),
+        ExpiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3])
+      }
     },
+    { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
+    { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },    
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
+    { "Likeable", (pieces, gameObj) => new LikeableTrait() },
     { "Melee", (pieces, gameObj) => {
       Enum.TryParse(pieces[3], out DamageType dt);
       return new MobMeleeTrait() {
@@ -2068,9 +2075,7 @@ class TraitFactory
       Enum.TryParse(pieces[5], out DamageType dt);
       return new MobMissileTrait() {
           Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
-          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
-    { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
-    { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},    
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait() 
     { 

@@ -194,13 +194,17 @@ class PreGameHandler(UserInterface ui)
     j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of frost", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
 
-    List<string> ringMaterials = [ "silver", "iron", "ruby", "diamond", "gold", "jade" ];
+    List<string> ringMaterials = [ "silver", "iron", "ruby", "diamond", "gold", "jade", "wood" ];
     j = rng.Next(ringMaterials.Count);
     Item.IDInfo.Add("ring of protection", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
     ringMaterials.RemoveAt(j);
 
     j = rng.Next(ringMaterials.Count);
     Item.IDInfo.Add("ring of aggression", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
+    ringMaterials.RemoveAt(j);
+
+    j = rng.Next(ringMaterials.Count);
+    Item.IDInfo.Add("ring of adornment", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
     ringMaterials.RemoveAt(j);
 
     List<string> talismanDesc = [ "jeweled scarab", "bone amulet", "clay fetish", "mummified finger" ];

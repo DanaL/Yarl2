@@ -149,17 +149,16 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  ANTIDOTE, ARROW, BATTLE_AXE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, DART, FIREBOLT,
-  GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
-  LOCK_PICK, LONGBOW, LONGSWORD, MACE, POTION_BLINDNESS, POTION_COLD_RES, 
+  ANTIDOTE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
+  DART, FIREBOLT, GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
+  LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, POTION_BLINDNESS, POTION_COLD_RES, 
   POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
-  RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
+  RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
   SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
   SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
   SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
   WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
   WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
-  BEETLE_CARAPACE, OGRE_LIVER
 }
 
 class ItemFactory
@@ -558,6 +557,10 @@ class ItemFactory
         item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, Glyph = GlyphForRing("ring of protection") };
         item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ACMod#1" ] });        
         break;
+      case ItemNames.RING_OF_ADORNMENT:
+        item = new Item() { Name = "ring of adornment", Type = ItemType.Ring, Value = 20, Glyph = GlyphForRing("ring of adornment") };
+        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Likeable" ] });        
+        break;
       case ItemNames.RING_OF_AGGRESSION:
         item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, Glyph = GlyphForRing("ring of aggression") };
         GrantsTrait grants = new()
@@ -665,6 +668,7 @@ class ItemFactory
       "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
       "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
       "jade ring" => new Glyph('o', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
+      "wood ring" => new Glyph('o', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
       _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
     };
   }

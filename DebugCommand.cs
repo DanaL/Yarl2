@@ -59,6 +59,7 @@ class DebugCommand(GameState gs)
     {"wand of frost", ItemNames.WAND_FROST},
     {"ring of protection", ItemNames.RING_OF_PROTECTION},
     {"ring of aggression", ItemNames.RING_OF_AGGRESSION},
+    {"ring of adornment", ItemNames.RING_OF_ADORNMENT},
     {"vial of poison", ItemNames.VIAL_OF_POISON},
     {"ghostcap mushroom", ItemNames.GHOSTCAP_MUSHROOM},
     {"talisman of circumspection", ItemNames.TALISMAN_OF_CIRCUMSPECTION},

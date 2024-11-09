@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -46,6 +45,15 @@ class ShopMenuInputer : Inputer
     WritePopup(blurb);
   }
 
+  protected double CalcMarkup()
+  {
+    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
+    if (Gs.Player.HasTrait<LikeableTrait>())
+      markup -= 0.33;
+    
+    return markup;
+  }
+
   protected virtual Dictionary<char, ShopMenuItem> MenuFromInventory(Mob shopkeeper)
   {
     var items = shopkeeper.Inventory.UsedSlots()
@@ -53,7 +61,7 @@ class ShopMenuInputer : Inputer
 
     Dictionary<char, ShopMenuItem> menuItems = [];
     char ch = 'a';
-    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
+    double markup = CalcMarkup();
     foreach (var (item, count) in items)
     {
       int price = (int) (item!.Value * markup);
@@ -294,7 +302,7 @@ class SmithyInputer : ShopMenuInputer
   {
     Dictionary<char, ShopMenuItem> menuItems = [];
 
-    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
+    double markup = CalcMarkup();
     var reagents = Gs.Player.Inventory.Items()
                             .Where(i => i.Type == ItemType.Reagent)
                             .OrderBy(i => i.Slot);
@@ -331,7 +339,7 @@ class SmithyInputer : ShopMenuInputer
     var items = Shopkeeper.Inventory.UsedSlots()
                           .Select(Shopkeeper.Inventory.ItemAt);
 
-    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
+    double markup = CalcMarkup();
     Dictionary<char, ShopMenuItem> menuItems = [];
     foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
