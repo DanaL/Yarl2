@@ -50,6 +50,10 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       ChopTree(targetLoc, tile, result);
     }
+    else if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
+    {
+      ChopDoor(targetLoc, result);
+    }
 
     result.Complete = true;
     result.EnergyCost = 1.0;
@@ -57,9 +61,29 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     return result;
   }
 
+  void ChopDoor(Loc loc, ActionResult result)
+  {
+    int dc = 13 + GameState!.CurrLevel / 4;
+    if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
+      dc -= 2;
+
+    if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";
+      result.Messages.Add(s);
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+      GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.BrokenDoor));
+    }
+    else
+    {
+      result.Messages.Add("Splinters fly but the door remains intact.");
+      GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
+    }   
+  }
+
   void ChopTree(Loc loc, Tile tile, ActionResult result)
   {
-    GameState!.UIRef().SetPopup(new Popup("You chop away at the tree...", "", -1, -1, 20));
+    GameState!.UIRef().SetPopup(new Popup("You chop down the tree...", "", -1, -1, 20));
     TileType t = GameState.Rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Grass;
     GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(t));
 
