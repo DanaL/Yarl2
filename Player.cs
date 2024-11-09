@@ -616,8 +616,7 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'F')
       {
-        ui.AlertPlayer("Bash in what direction?");
-        _inputController = new DirectionalInputer();
+        _inputController = new DirectionalInputer(gameState);
         _deferred = new BashAction(gameState, this);
       }
       else if (ch == 't')
@@ -642,15 +641,13 @@ class Player : Actor, IPerformer, IGameEventListener
         if (singleDoor != Loc.Nowhere)
           return new CloseDoorAction(gameState, this, gameState.CurrentMap) {  Loc = singleDoor };
 
-        _inputController = new DirectionalInputer();
+        _inputController = new DirectionalInputer(gameState);
         _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
-        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'C')
       {
-        _inputController = new DirectionalInputer();
+        _inputController = new DirectionalInputer(gameState);
         _deferred = new ChatAction(gameState, this);
-        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'o')
       {
@@ -658,9 +655,8 @@ class Player : Actor, IPerformer, IGameEventListener
         if (singleDoor != Loc.Nowhere)
           return new OpenDoorAction(gameState, this, gameState.CurrentMap) { Loc = singleDoor };
 
-        _inputController = new DirectionalInputer();
+        _inputController = new DirectionalInputer(gameState);
         _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
-        ui.AlertPlayer("Which way?");
       }
       else if (ch == 'Q')
       {

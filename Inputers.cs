@@ -922,7 +922,22 @@ class YesOrNoInputer : Inputer
 class DirectionalInputer : Inputer
 {
   (int, int) _result;
-  public DirectionalInputer() => Done = false;
+  bool TargetSelf { get; set; }
+
+  public DirectionalInputer(GameState gs, bool targetSelf = false)
+  {
+    TargetSelf = targetSelf;
+    Done = false;
+
+    string prompt = "Which direction?";
+    int width = prompt.Length;
+    if (targetSelf) 
+    {
+      prompt += "\n(hit '.' to target your location.)";
+      width = 35;
+    }
+    gs.UIRef().SetPopup(new Popup(prompt, "", gs.UIRef().PlayerScreenRow - 8, -1, width));
+  }
 
   public override void Input(char ch)
   {
@@ -933,10 +948,16 @@ class DirectionalInputer : Inputer
     }
     else
     {
-      var dir = Util.KeyToDir(ch);
+      var dir = KeyToDir(ch);
       if (dir != (0, 0))
       {
         _result = dir;
+        Done = true;
+        Success = true;
+      }
+      else if (TargetSelf && ch == '.')
+      {
+        _result = (0, 0);
         Done = true;
         Success = true;
       }

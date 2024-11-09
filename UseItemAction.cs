@@ -38,14 +38,14 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
 
     Loc targetLoc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
-    if (GameState!.ObjDb.Occupied(targetLoc))
+    if (targetLoc != Actor.Loc && GameState!.ObjDb.Occupied(targetLoc))
     {
       // handle case where someone is in the way
 
       return result;
     }
 
-    Tile tile = GameState.TileAt(targetLoc);
+    Tile tile = GameState!.TileAt(targetLoc);
     if (tile.IsTree())
     {
       ChopTree(targetLoc, tile, result);
@@ -94,14 +94,30 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       result.Messages.Add("An apple tumbles to the ground.");
     }
 
-    if (GameState.Rng.NextDouble() < 0.05)
+    if (GameState.Rng.NextDouble() < 0.5)
     {
-      Actor bees = MonsterFactory.Get("swarm of bees", GameState.ObjDb, GameState.Rng);
-      GameState.ObjDb.AddNewActor(bees, loc);
-      GameState.AddPerformer(bees);
-      GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
-      result.Messages.Add("Uh-oh, you've angered a swarm of bees!");
+      Loc swarmLoc = loc == Actor!.Loc ? PickAdjLoc(loc, GameState) : loc;
+
+      if (swarmLoc != Loc.Nowhere)
+      {
+        Actor bees = MonsterFactory.Get("swarm of bees", GameState.ObjDb, GameState.Rng);
+        GameState.ObjDb.AddNewActor(bees, swarmLoc);
+        GameState.AddPerformer(bees);
+        GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
+        result.Messages.Add("Uh-oh, you've angered a swarm of bees!");
+      }
     }
+  }
+
+  static Loc PickAdjLoc(Loc loc, GameState gs)
+  {
+    var opts = Util.Adj8Locs(loc)
+                   .Where(l => gs.TileAt(l).PassableByFlight() && !gs.ObjDb.Occupied(l));
+    
+    if (opts.Any())
+      return opts.ElementAt(gs.Rng.Next(opts.Count()));
+
+    return Loc.Nowhere;
   }
 
   public override void ReceiveUIResult(UIResult result) 
@@ -248,13 +264,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (IsUseableTool(item))
     {
       GameState!.ClearMenu();
-      UserInterface ui = GameState.UIRef();
-      ui.SetPopup(new Popup("Which direction?", "", ui.PlayerScreenRow - 6, -1, 18));
-
+      
       if (item.Name == "pickaxe")
-        ((Player)Actor).ReplacePendingAction(new DigAction(GameState, Actor, item), new DirectionalInputer());
+        ((Player)Actor).ReplacePendingAction(new DigAction(GameState, Actor, item), new DirectionalInputer(GameState, true));
       else
-        ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer());
+        ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer(GameState));
 
       return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
