@@ -144,7 +144,7 @@ class Battle
 
       if (trait is WeakenTrait weaken)
       {
-        var debuff = new StatBuffTrait()
+        var debuff = new StatDebuffTrait()
         {
           DC = weaken.DC,
           OwnerID = target.ID,

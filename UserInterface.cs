@@ -586,9 +586,9 @@ abstract class UserInterface
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("BLIND");
     }
-    foreach (StatBuffTrait statBuff in gs.Player.Traits.OfType<StatBuffTrait>())
+    foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
-      if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength && statBuff.Amt < 0)
+      if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "WEAKENED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);

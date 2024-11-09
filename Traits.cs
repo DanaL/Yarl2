@@ -390,6 +390,11 @@ class CudgelTrait : Trait
   public override string AsText() => "Cudgel";
 }
 
+class EdibleTrait : Trait
+{
+  public override string AsText() => "Edible";
+}
+
 class PoorLootTrait : Trait
 {
   public override string AsText() => "PoorLoot";
@@ -809,6 +814,9 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "protection" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new AuraOfProtectionTrait() { HP = 25 }, item), null),
     "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs), item), null),
+    "buffstrength" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
+                        new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
+                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, Source = item!.Name }, item), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1368,25 +1376,87 @@ class WeaponSpeedTrait : Trait
   public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
-// Well, buff or debuff but that's fairly wordy...
-class StatBuffTrait : TemporaryTrait
+class StatBuffTrait : TemporaryTrait 
 {
-  public int DC { get; set; } = 10;
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
-  public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}";
+  public string Source { get; set; } = "";
 
-  string CalcMessage(Actor victim, int amt)
+  public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}#{Source}";
+
+  string CalcMessage(Actor target)
   {
-    bool player = victim is Player;
-    if (Attr == Attribute.Strength && amt > 0)
+    bool player = target is Player;
+    if (Attr == Attribute.Strength)
     {
       if (player)
         return "You feel stronger!";
       else
-        return $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "look")} stronger!";
+        return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} stronger!";
     }
-    else if (Attr == Attribute.Strength && amt < 0)
+
+    return player ? "You feel different!" : "";
+  }
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    // If the buffs share the same source, just increase the expires on rather
+    // than letting the player spam stat buffs
+    StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().Where(t => t.Source == Source).FirstOrDefault();
+    if (other is not null)
+    {
+      other.ExpiresOn = ulong.Max(other.ExpiresOn, ExpiresOn);
+      return [];
+    }
+      
+    target.Stats[Attr].ChangeMax(Amt);
+    target.Stats[Attr].Change(Amt);
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [ CalcMessage(target) ];
+  }
+
+  string Remove(Actor target)
+  {    
+    target.Stats[Attr].ChangeMax(-Amt);
+    target.Stats[Attr].Change(-Amt);
+    target.Traits.Remove(this);
+    
+    if (target is Player)
+    {
+      return $"Your {Attr} returns to normal.";
+    }
+
+    return "";    
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    if (gs.Turn > ExpiresOn)
+    {
+      gs.StopListening(GameEventType.EndOfRound, this);
+
+      if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
+      {
+        string txt = Remove(victim);
+        gs.UIRef().AlertPlayer(txt);
+      }
+    }
+  }
+}
+
+class StatDebuffTrait : TemporaryTrait
+{
+  public int DC { get; set; } = 10;
+  public Attribute Attr { get; set; }
+  public int Amt { get; set; }
+  public override string AsText() => $"StatDebuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}";
+
+  string CalcMessage(Actor victim)
+  {
+    bool player = victim is Player;
+    if (Attr == Attribute.Strength)
     {
       if (player)
         return "You feel weaker!";
@@ -1399,9 +1469,9 @@ class StatBuffTrait : TemporaryTrait
 
   public override List<string> Apply(Actor target, GameState gs)
   {
-    // We won't let a staff debuff lower a stat below -5. Let's not get out
+    // We won't let a debuff lower a stat below -5. Let's not get out
     // of hand
-    if (Amt < 0 && target.Stats[Attr].Curr < -4)
+    if (target.Stats[Attr].Curr < -4)
       return [];
 
     if (target.AbilityCheck(Attribute.Constitution, DC, gs.Rng))
@@ -1411,7 +1481,7 @@ class StatBuffTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return [ CalcMessage(target, Amt) ];
+    return [ CalcMessage(target) ];
   }
 
   string Remove(Actor victim)
@@ -1419,7 +1489,12 @@ class StatBuffTrait : TemporaryTrait
     victim.Stats[Attr].Change(-Amt);
     victim.Traits.Remove(this);
     
-    return CalcMessage(victim, -Amt);    
+    if (victim is Player)
+    {
+      return $"Your {Attr} returns to normal.";
+    }
+
+    return "";
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs)
@@ -1937,6 +2012,7 @@ class TraitFactory
     { "Divider", (pieces, gameObj) => new DividerTrait() },
     { "Dodge", (pieces, gameObj) => new DodgeTrait() { Rate = int.Parse(pieces[1]) }},
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
+    { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
@@ -2061,8 +2137,17 @@ class TraitFactory
     { "StatBuff", (pieces, gameObj) =>
     {
       Enum.TryParse(pieces[3], out Attribute attr);
-      return new StatBuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, Amt = int.Parse(pieces[4]) };
+      return new StatBuffTrait() 
+      { 
+        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, 
+        Amt = int.Parse(pieces[4]), Source = pieces[5]
+      };
     } },
+    { "StatDebuff", (pieces, gameObj) =>
+    {
+      Enum.TryParse(pieces[3], out Attribute attr);
+      return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, Amt = int.Parse(pieces[4]) };
+    }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
     { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]) }},

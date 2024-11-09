@@ -610,6 +610,7 @@ class ItemFactory
           Name = "ghostcap mushroom", Type = ItemType.Food, Value = 75,
           Glyph = new Glyph('♣', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
         };
+        item.Traits.Add(new EdibleTrait());
         item.Traits.Add(new UseSimpleTrait("seeinvisible"));
         item.Traits.Add(new SideEffectTrait() 
         {
@@ -639,6 +640,9 @@ class ItemFactory
         item = new Item() { Name = "ogre liver", Type = ItemType.Reagent, Value = 25,
           Glyph = new Glyph('%', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new EdibleTrait());
+        item.Traits.Add(new UseSimpleTrait("buffstrength"));
+        item.Traits.Add(new ConsumableTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

@@ -177,9 +177,15 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
 
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
-      if (item.Type == ItemType.Food)
+      if (item.HasTrait<EdibleTrait>())
       {
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";
+
+        if (Actor == GameState.Player && item.Name == "ogre liver")
+        {
+          GameState.UIRef().SetPopup(new Popup("Gross!!\n\nYou feel [BRIGHTRED strong]!", "", -1, -1, 20));
+        }
+
         result.Messages.Add(s);
       }
 
