@@ -764,6 +764,8 @@ class InventoryDetails : Inputer
         desc += "\n\n" + extraDesc;
       }
       width = Math.Max(width, extraDesc.Length);
+      if (width > UserInterface.ScreenWidth - 10)
+        width = -1;
       GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1, width));
     }
   }
