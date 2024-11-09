@@ -751,15 +751,20 @@ class InventoryDetails : Inputer
       string desc = "";
       if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
         desc = text;
+      else if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? info) && !info.Known)
+        desc = "An item of unknown utility.";
       else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
         desc = entry.Text;
+
+      int width = desc.Length;
+      
       string extraDesc = ExtraDetails(item);
       if (extraDesc != "")
       {
         desc += "\n\n" + extraDesc;
       }
-
-      GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1));
+      width = Math.Max(width, extraDesc.Length);
+      GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1, width));
     }
   }
 

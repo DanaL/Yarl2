@@ -121,3 +121,9 @@ A fragment of irridescent shell. Sometimes used in warding and protection magic.
 #
 ogre liver
 How can you tell it apart from the liver of some other creature? Your keen adventuring nose!
+#
+ring of adornment
+This ring just gives you a little something, something.
+#
+ring of protection
+Provides a boost to your AC.
