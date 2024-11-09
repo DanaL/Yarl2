@@ -127,3 +127,12 @@ This ring just gives you a little something, something.
 #
 ring of protection
 Provides a boost to your AC.
+#
+pickaxe
+For mining, tunneling, and other dirt-related activities. Dwarves are especially good at this sort of thing.
+#
+lock pick
+A tool for picking locks.
+#
+apple
+Delicious fruit. And good for pies, although baking isn't implemented in Delve.

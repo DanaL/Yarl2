@@ -11,6 +11,83 @@
 
 namespace Yarl2;
 
+class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
+{
+  Item Tool { get; set; } = tool;
+  int Row;
+  int Col;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+
+    if (!Tool.Equiped)
+    {
+      var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
+      if (equipResult != EquipingResult.Equiped)
+      {
+        GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
+        result.Complete = false;
+        result.EnergyCost = 0.0;
+        return result;
+      }
+      else
+      {
+        result.Messages.Add($"You ready {Tool.Name.DefArticle()}.");
+      }
+    }
+
+    Loc targetLoc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+    if (GameState!.ObjDb.Occupied(targetLoc))
+    {
+      // handle case where someone is in the way
+
+      return result;
+    }
+
+    Tile tile = GameState.TileAt(targetLoc);
+    if (tile.IsTree())
+    {
+      ChopTree(targetLoc, tile, result);
+    }
+
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    return result;
+  }
+
+  void ChopTree(Loc loc, Tile tile, ActionResult result)
+  {
+    GameState!.UIRef().SetPopup(new Popup("You chop away at the tree...", "", -1, -1, 20));
+    TileType t = GameState.Rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Grass;
+    GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(t));
+
+    if (tile.Type != TileType.Conifer && GameState.Rng.NextDouble() < 0.1)
+    {
+      Item apple = ItemFactory.Get(ItemNames.APPLE, GameState.ObjDb);
+      GameState.ItemDropped(apple, loc);
+      result.Messages.Add("An apple tumbles to the ground.");
+    }
+
+    if (GameState.Rng.NextDouble() < 0.05)
+    {
+      Actor bees = MonsterFactory.Get("swarm of bees", GameState.ObjDb, GameState.Rng);
+      GameState.ObjDb.AddNewActor(bees, loc);
+      GameState.AddPerformer(bees);
+      GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
+      result.Messages.Add("Uh-oh, you've angered a swarm of bees!");
+    }
+  }
+
+  public override void ReceiveUIResult(UIResult result) 
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
 class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   int Row;
@@ -121,6 +198,16 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
   }
 
+  static bool IsUseableTool(Item item)
+  {
+    if (item.Type != ItemType.Tool)
+      return false;
+    if (item.Name == "lock pick" || item.Name == "pickaxe")
+      return true;
+
+    return false;
+  }
+
   public override ActionResult Execute()
   {
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
@@ -134,13 +221,17 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
 
-    if (item.Type == ItemType.Tool && item.Name == "lock pick")
+    if (IsUseableTool(item))
     {
       GameState!.ClearMenu();
       UserInterface ui = GameState.UIRef();
-      ui.SetPopup(new Popup("Which direction?", "", ui.PlayerScreenRow - 3, -1));
+      ui.SetPopup(new Popup("Which direction?", "", ui.PlayerScreenRow - 6, -1, 18));
 
-      ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer());
+      if (item.Name == "pickaxe")
+        ((Player)Actor).ReplacePendingAction(new DigAction(GameState, Actor, item), new DirectionalInputer());
+      else
+        ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer());
+
       return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
 
@@ -179,7 +270,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
       if (item.HasTrait<EdibleTrait>())
       {
-        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";
+        string s;
+        if (item.Name == "apple" && Actor is Player)
+          s = "Delicious!";
+        else
+          s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";
 
         if (Actor == GameState.Player && item.Name == "ogre liver")
         {
