@@ -149,7 +149,7 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  ANTIDOTE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
+  ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
   DART, FIREBOLT, GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
   LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, 
   POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
@@ -628,6 +628,14 @@ class ItemFactory
         });
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
+        break;
+      case ItemNames.APPLE:
+        item = new Item() { Name = "apple", Type = ItemType.Food, Value = 1,
+          Glyph = new Glyph('%', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new EdibleTrait());
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new UseSimpleTrait("trivialheal"));
         break;
       case ItemNames.TALISMAN_OF_CIRCUMSPECTION:
         item = new Item() { Name = "talisman of circumspection", Type = ItemType.Talisman, Value = 125,

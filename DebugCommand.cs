@@ -66,7 +66,9 @@ class DebugCommand(GameState gs)
     {"blindfold", ItemNames.BLINDFOLD},
     {"potion of blindness", ItemNames.POTION_BLINDNESS},
     {"beetle carapace", ItemNames.BEETLE_CARAPACE},
-    {"ogre liver", ItemNames.OGRE_LIVER}
+    {"ogre liver", ItemNames.OGRE_LIVER},
+    {"pickaxe", ItemNames.PICKAXE},
+    {"apple", ItemNames.APPLE}
   };
 
   public string DoCommand(string txt)

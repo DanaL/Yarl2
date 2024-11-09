@@ -794,6 +794,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user, item), null),
     "blink" => new UseResult(true, "", new BlinkAction(gs, user, item), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4, item), null),
+    "trivialheal" => new UseResult(true, "", new HealAction(gs, user, 1, 1, item), null),
     "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }, item), null),
     "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user, item), null),
     "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
