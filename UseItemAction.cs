@@ -54,11 +54,28 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       ChopDoor(targetLoc, result);
     }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.DungeonFloor)
+    {
+      DigDungeonFloor(targetLoc, result, GameState, Actor);
+    }
 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
     return result;
+  }
+
+  static void DigDungeonFloor(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
+    string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} a pit.";
+    result.Messages.Add(s);
+    if (digger == gs.Player)
+      gs.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+
+    bool flying = digger.HasActiveTrait<FlyingTrait>() || digger.HasActiveTrait<FloatingTrait>();
+    if (!flying)
+      digger.Traits.Add(new InPitTrait());
   }
 
   void ChopDoor(Loc loc, ActionResult result)
@@ -71,7 +88,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";
       result.Messages.Add(s);
-      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+      if (Actor == GameState.Player)
+        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
       GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.BrokenDoor));
     }
     else
@@ -103,6 +121,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         Actor bees = MonsterFactory.Get("swarm of bees", GameState.ObjDb, GameState.Rng);
         GameState.ObjDb.AddNewActor(bees, swarmLoc);
         GameState.AddPerformer(bees);
+        if (Actor == GameState.Player)
         GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
         result.Messages.Add("Uh-oh, you've angered a swarm of bees!");
       }

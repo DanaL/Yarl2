@@ -13,15 +13,16 @@ namespace Yarl2;
 
 class Traps
 {
-  public static void TriggerTrap(GameState gs, Player player, Loc loc, Tile tile, bool flying)
+  public static void TriggerTrap(GameState gs, Actor actor, Loc loc, Tile tile, bool flying)
   {
     UserInterface ui = gs.UIRef();
 
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
-      loc = gs.FallIntoPit(player, loc);
+      loc = gs.FallIntoPit(actor, loc);
       ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
       List<string> msgs = [ "A trap door opens up underneath you!" ];
       msgs.Add(gs.ThingAddedToLoc(loc));
@@ -31,7 +32,7 @@ class Traps
     }
     else if (tile.Type == TileType.TrapDoor && !flying)
     {
-      loc = gs.FallIntoPit(player, loc);
+      loc = gs.FallIntoPit(actor, loc);
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));
       List<string> msgs = [ "You plummet into the trap door!" ];
       msgs.Add(gs.ThingAddedToLoc(loc));
@@ -41,28 +42,30 @@ class Traps
     }
     else if (!flying && (tile.Type == TileType.HiddenPit || tile.Type == TileType.Pit))
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
       ActionResult result = new() { Messages = [ "You tumble into a pit!" ]};
       int total = 0;
-      int damageDice = 1 + player.Loc.Level / 5;
+      int damageDice = 1 + actor.Loc.Level / 5;
       for (int j = 0; j < damageDice; j++)
         total += gs.Rng.Next(6) + 1;
       List<(int, DamageType)> fallDmg = [ (total, DamageType.Blunt) ];
-      var (hpLeft, _) = player.ReceiveDmg(fallDmg, 0, gs, null, 1.0);
+      var (hpLeft, _) = actor.ReceiveDmg(fallDmg, 0, gs, null, 1.0);
       if (hpLeft < 1)
       {        
-        gs.ActorKilled(player, "a fall", result, null);
+        gs.ActorKilled(actor, "a fall", result, null);
       }
 
-      player.Traits.Add(new InPitTrait());
+      actor.Traits.Add(new InPitTrait());
 
       gs.UIRef().AlertPlayer(result.Messages);
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TeleportTrap));
 
       // Find candidate locations to teleport to
@@ -77,18 +80,21 @@ class Traps
         }
       }
 
-      gs.UIRef().AlertPlayer("Your stomach lurches!");
+      if (actor is Player)
+        gs.UIRef().AlertPlayer("Your stomach lurches!");
+
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
-        string msg = gs.ResolveActorMove(player, loc, newDest);
+        string msg = gs.ResolveActorMove(actor, loc, newDest);
         if (msg != "")
           gs.UIRef().AlertPlayer(msg);
       }
     }
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
       gs.UIRef().AlertPlayer("A dart flies at you!");
 
@@ -99,10 +105,10 @@ class Traps
       dart.Traits.Add(new PoisonerTrait() { DC = 11 + gs.CurrLevel, Strength = int.Max(1, gs.CurrLevel / 4) });
 
       int attackRoll = gs.Rng.Next(1, 21) + loc.Level / 3;
-      if (attackRoll > player.AC)
+      if (attackRoll > actor.AC)
       {
         ActionResult result = new();
-        Battle.ResolveMissileHit(dart, player, dart, gs, result);
+        Battle.ResolveMissileHit(dart, actor, dart, gs, result);
         gs.UIRef().AlertPlayer(result.Messages);
       }
 
@@ -118,22 +124,25 @@ class Traps
     }
     else if (tile.Type == TileType.JetTrigger)
     {
-      player.Running = false;
-      TriggerJetTrap((JetTrigger) tile, gs, player);
+      if (actor is Player player)
+        player.Running = false;
+      TriggerJetTrap((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.WaterTrap));
       List<string> msgs = [ "You are soaked by a blast of water!" ];      
-      string s = player.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
+      string s = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
       if (s != "")
         msgs.Add(s);
       gs.UIRef().AlertPlayer(msgs);
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
     {
-      player.Running = false;
+      if (actor is Player player)
+        player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
       
       string s = gs.Rng.Next(3) switch
@@ -153,7 +162,7 @@ class Traps
             continue;
           
           var checkLoc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
-          if (gs.ObjDb.Occupant(checkLoc) is Actor monster && monster != player)
+          if (gs.ObjDb.Occupant(checkLoc) is Actor monster && monster != actor)
           {
             var sleeping = monster.Traits.FirstOrDefault(t => t is SleepingTrait);
             if (sleeping is not null)
@@ -169,7 +178,7 @@ class Traps
     }
   }
 
-  static void TriggerJetTrap(JetTrigger trigger, GameState gs, Player player)
+  static void TriggerJetTrap(JetTrigger trigger, GameState gs, Actor actor)
   {
     trigger.Visible = true;
 
@@ -210,7 +219,7 @@ class Traps
 
     ActionResult result = new();
     int total = 0;
-    int damageDice = 2 + player.Loc.Level / 4;
+    int damageDice = 2 + actor.Loc.Level / 4;
     for (int j = 0; j < damageDice; j++)
       total += gs.Rng.Next(6) + 1;
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
@@ -221,7 +230,7 @@ class Traps
       {
         result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
         
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
+        var (hpLeft, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
         {
           gs.ActorKilled(victim, "flames", result, null);
