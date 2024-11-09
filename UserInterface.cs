@@ -632,11 +632,12 @@ abstract class UserInterface
     int col = ViewWidth - width;
     int row = 0;
 
+    Colour colour = _popup is null ? Colours.WHITE : Colours.GREY;
     foreach (var line in MenuRows!)
     {
-      WriteLine(" " + line, row++, col, width, Colours.WHITE);
+      WriteLine(" " + line, row++, col, width, colour);
     }
-    WriteLine("", row, col, width, Colours.WHITE);
+    WriteLine("", row, col, width, colour);
   }
 
   // TODO: DRY the two versions of AlertPlayer
