@@ -151,7 +151,7 @@ enum ItemNames
 {
   ANTIDOTE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
   DART, FIREBOLT, GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
-  LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, POTION_BLINDNESS, POTION_COLD_RES, 
+  LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, 
   POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
   RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
   SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
@@ -206,6 +206,12 @@ class ItemFactory
       case ItemNames.HAND_AXE:
         item = new Item() { Name = "hand axe", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
+        item.Traits.Add(new AxeTrait());
+        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
+        break;
+      case ItemNames.PICKAXE:
+        item = new Item() { Name = "pickaxe", Type = ItemType.Tool, Value = 15, Glyph = new Glyph(')', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
         item.Traits.Add(new AxeTrait());
         item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
         break;
@@ -1007,7 +1013,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         // If there is a weapon already equiped, unequip it
         foreach (Item other in Items())
         {
-          if (other.Type == ItemType.Weapon && other.Equiped)
+          if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equiped)
             other.Equiped = false;
         }
 
@@ -1150,7 +1156,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (item.HasTrait<CursedTrait>())
           desc += " *cursed";
 
-        if (item.Type == ItemType.Weapon)
+        if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
         {
           if (item.HasTrait<TwoHandedTrait>())
             desc += " (in hands)";
