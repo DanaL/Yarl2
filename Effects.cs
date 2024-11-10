@@ -96,7 +96,7 @@ class EffectApplier
       armourTrait.Bonus -= 1;
     }
 
-    if (item.Type == ItemType.Weapon)
+    if (item.Type == ItemType.Weapon || (item.Type == ItemType.Tool && item.Name == "pickaxe"))
     {
       var wb = item.Traits.OfType<WeaponBonusTrait>().FirstOrDefault();
       if (wb is null)
