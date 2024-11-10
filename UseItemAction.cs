@@ -58,6 +58,10 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       DigDungeonFloor(targetLoc, result, GameState, Actor);
     }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.WoodBridge)
+    {
+      DigBridge(targetLoc, result, GameState, Actor);
+    }
 
     result.Complete = true;
     result.EnergyCost = 1.0;
@@ -65,10 +69,63 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     return result;
   }
 
+  static void DigBridge(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    // digging a bridge tile destroys it and any adjacent bridge tiles
+    List<Loc> toDestroy = [ loc ];
+    foreach (var adj in Util.Adj4Locs(loc))
+    {
+      if (gs.TileAt(adj).Type == TileType.WoodBridge)
+        toDestroy.Add(adj);
+    }
+
+    string msg = "The bridge collapses!";
+    if (toDestroy.Count > 1)
+      msg += " Neighbouring bridge segments are washed away!";
+
+    result.Messages.Add(msg);
+    if (digger == gs.Player)
+      gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+
+    foreach (Loc bridge in toDestroy)
+      gs.BridgeDestroyed(bridge);
+  }
+
   static void DigDungeonFloor(Loc loc, ActionResult result, GameState gs, Actor digger)
   {
+    string s;
+
+    // If any adjacent tiles are deep water, the tile being dug on is flooded
+    bool flooded = false;
+    foreach (var adj in Util.Adj4Locs(loc))
+    {
+      if (gs.TileAt(adj).Type == TileType.DeepWater) 
+      {
+        flooded = true;
+        break;
+      }
+    }
+    if (flooded)
+    {
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
+      s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} but water rushes in!";
+      result.Messages.Add(s);
+      
+      string msg = gs.ResolveActorMove(digger, loc, loc);
+      if (msg != "") 
+      {
+        result.Messages.Add(msg);
+        s += "\n\n" + msg;
+      }
+        
+      if (digger == gs.Player)
+        gs.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+
+      return;
+    }
+
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
-    string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} a pit.";
+    s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} a pit.";
     result.Messages.Add(s);
     if (digger == gs.Player)
       gs.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));

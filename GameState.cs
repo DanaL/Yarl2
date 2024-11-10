@@ -271,6 +271,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return TileType.DeepWater;
   }
 
+  public void BridgeDestroyed(Loc loc)
+  {
+    TileType tile = SquareBelowBridge(CurrentMap, loc);
+    CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(tile));
+
+    if (tile == TileType.Chasm)
+        BridgeCollapseOverChasm(loc);
+    else if (tile == TileType.DeepWater)
+        BridgeDestroyedOverWater(loc);
+  }
+
   public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
   {
     List<Item> items = [];
@@ -360,13 +371,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
       else if (tile.Type == TileType.WoodBridge)
       {
-        var type = SquareBelowBridge(map, loc);
-        map.SetTile(loc.Row, loc.Col, TileFactory.Get(type));
-
-        if (type == TileType.Chasm)
-          BridgeCollapseOverChasm(loc);
-        else if (type == TileType.DeepWater)
-          BridgeDestroyedOverWater(loc);
+        BridgeDestroyed(loc);
       }
     }
 
