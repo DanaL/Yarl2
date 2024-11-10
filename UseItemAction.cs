@@ -62,6 +62,21 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       DigBridge(targetLoc, result, GameState, Actor);
     }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.FrozenDeepWater)
+    {
+      GameState.CurrentMap.SetTile(targetLoc.Row, targetLoc.Col, TileFactory.Get(TileType.DeepWater));
+      string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crack")} through the ice!";
+      msg += GameState.ResolveActorMove(Actor, targetLoc, targetLoc);
+      if (msg != "")
+        result.Messages.Add(msg);
+      if (Actor == GameState.Player) 
+      {
+        bool flying = Actor.HasActiveTrait<FlyingTrait>() || Actor.HasActiveTrait<FloatingTrait>();
+        if (!flying)
+          msg += "\n\nYou plunge into the icy water below!";
+        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+      }
+    }
 
     result.Complete = true;
     result.EnergyCost = 1.0;
