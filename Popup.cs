@@ -98,7 +98,12 @@ class Popup
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     Title = title;
-    Width = width != -1 ? width + 4 : UserInterface.ViewWidth - 4;
+    if (width != -1)
+      Width = width + 4;
+    else if (message.Length < UserInterface.ViewWidth - 4)
+      Width = message.Length + 4;
+    else
+      Width = UserInterface.ViewWidth - 4;
 
     LineScanner scanner = new(message);
     Words = scanner.Scan();
