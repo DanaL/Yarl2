@@ -37,10 +37,26 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
     }
 
+    // Assuming here if I implement NPC AI such that they might dig, the behaviour
+    // code will ensure they don't try to dig an occupied tile, so I am assuming 
+    // here the Actor is the player.
     Loc targetLoc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
-    if (targetLoc != Actor.Loc && GameState!.ObjDb.Occupied(targetLoc))
+    if (targetLoc != Actor.Loc && GameState!.ObjDb.Occupant(targetLoc) is Actor occ)
     {
-      // handle case where someone is in the way
+      if (Battle.PlayerWillAttack(occ))
+      {
+        var attackAction = new MeleeAttackAction(GameState, Actor, targetLoc);
+        result.Messages.Add($"When you have an axe, every {occ.Name} looks like a tree.");
+        result.AltAction = attackAction;
+        result.Complete = false;
+        return result;
+      }
+      else
+      {
+        string msg = $"{occ.FullName.Capitalize()} is neither tree, nor rock.";
+        result.Messages.Add(msg);
+        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+      }
 
       return result;
     }
