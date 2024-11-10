@@ -97,11 +97,12 @@ class Popup
     
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
+    int widthGuess = GuessWidth(message);
     Title = title;
     if (width != -1)
       Width = width + 4;
-    else if (message.Length < UserInterface.ViewWidth - 4)
-      Width = message.Length + 4;
+    else if (widthGuess < UserInterface.ViewWidth - 4)
+      Width = widthGuess + 4;
     else
       Width = UserInterface.ViewWidth - 4;
 
@@ -113,6 +114,8 @@ class Popup
     PreferredRow = preferredRow;
     PreferredCol = preferredCol;
   }
+
+  static int GuessWidth(string message) => message.Split('\n').Select(line => line.Length).Max();
 
   public void Draw(UserInterface ui)
   {
