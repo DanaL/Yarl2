@@ -277,7 +277,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(tile));
 
     if (tile == TileType.Chasm)
-        BridgeCollapseOverChasm(loc);
+        ChasmCreated(loc);
     else if (tile == TileType.DeepWater)
         BridgeDestroyedOverWater(loc);
   }
@@ -412,7 +412,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(msg);
   }
 
-  void BridgeCollapseOverChasm(Loc loc)
+  public void ChasmCreated(Loc loc)
   {
     var landingSpot = loc with { Level = loc.Level + 1 };
 

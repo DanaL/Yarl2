@@ -28,7 +28,7 @@ enum TileType
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
-  MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone
+  MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave
 }
 
 interface ITriggerable
@@ -185,6 +185,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pool => "a pool",
     TileType.FrozenPool => "ice",
     TileType.Gravestone => "a gravestone",
+    TileType.DisturbedGrave => "a disturbed grave",
     _ => "unknown"
   };
 
@@ -432,6 +433,7 @@ class TileFactory
   private static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
   private static readonly Tile Pool = new BasicTile(TileType.Pool, true, false, true);
   private static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
+  private static readonly Tile DisturbedGrave = new BasicTile(TileType.DisturbedGrave, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -489,6 +491,7 @@ class TileFactory
     TileType.MagicMouth => MagicMouth,
     TileType.HiddenMagicMouth => HiddenMagicMouth,
     TileType.Pool => Pool,
+    TileType.DisturbedGrave => DisturbedGrave,
     _ => Unknown
   };
 }

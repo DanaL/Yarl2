@@ -80,24 +80,83 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.FrozenDeepWater)
     {
-      GameState.CurrentMap.SetTile(targetLoc.Row, targetLoc.Col, TileFactory.Get(TileType.DeepWater));
-      string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crack")} through the ice!";
-      msg += GameState.ResolveActorMove(Actor, targetLoc, targetLoc);
-      if (msg != "")
-        result.Messages.Add(msg);
-      if (Actor == GameState.Player) 
-      {
-        bool flying = Actor.HasActiveTrait<FlyingTrait>() || Actor.HasActiveTrait<FloatingTrait>();
-        if (!flying)
-          msg += "\n\nYou plunge into the icy water below!";
-        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
-      }
+      DigFrozenWater(targetLoc, result, GameState, Actor);
+    }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.Gravestone)
+    {
+      GraveRob(targetLoc, result, GameState, Actor);
+    }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.Downstairs)
+    {
+      DigStairs(targetLoc, tile.Type, result, GameState, Actor);
+    }
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.Upstairs)
+    {
+      DigStairs(targetLoc, tile.Type, result, GameState, Actor);
     }
 
     result.Complete = true;
     result.EnergyCost = 1.0;
 
     return result;
+  }
+
+  static void GraveRob(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DisturbedGrave));
+  }
+
+  static void DigStairs(Loc loc, TileType tile, ActionResult result, GameState gs, Actor digger)
+  {
+    string s = "You destroy the stairs! This probably won't be a problem...";
+
+    // Again, assuming digger is the player
+    if (tile == TileType.Downstairs)
+    {
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Chasm));
+      // also destroy the upstairs on the level below
+      var nextStairsLoc = loc with { Level = loc.Level + 1 };
+      var nextLvl = loc.Level + 1;
+      // add rubble to level below if/when I implement rubble
+      gs.CurrentDungeon.LevelMaps[nextLvl].SetTile(nextStairsLoc.Row, nextStairsLoc.Col, TileFactory.Get(TileType.DungeonFloor));
+      gs.ChasmCreated(loc);
+
+      s += "\n\nYou plummet into the hole you create.";
+    }
+    else if (tile == TileType.Upstairs)
+    {
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+      if (loc.Level > 0)
+      {
+        var stairsAboveLoc = loc with { Level = loc.Level - 1 };
+        var lvlAbove = stairsAboveLoc.Level;
+        gs.CurrentDungeon.LevelMaps[lvlAbove].SetTile(stairsAboveLoc.Row, stairsAboveLoc.Col, TileFactory.Get(TileType.Chasm));
+        gs.ChasmCreated(stairsAboveLoc);
+      }
+      else
+      {
+        s += "\n\nYou're really committing to this adventure!";
+      }
+    }
+
+    result.Messages.Add("You destroy some stairs.");
+    gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+  }
+
+  static void DigFrozenWater(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
+    string msg = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "crack")} through the ice!";
+    msg += gs.ResolveActorMove(digger, loc, loc);
+    if (msg != "")
+    result.Messages.Add(msg);
+    if (digger == gs.Player) 
+    {
+      bool flying = digger.HasActiveTrait<FlyingTrait>() || digger.HasActiveTrait<FloatingTrait>();
+      if (!flying)
+        msg += "\n\nYou plunge into the icy water below!";
+      gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+    }
   }
 
   static void DigBridge(Loc loc, ActionResult result, GameState gs, Actor digger)
