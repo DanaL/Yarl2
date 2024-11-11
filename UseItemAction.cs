@@ -537,7 +537,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return new ActionResult() { Complete = false, EnergyCost = 0.0 };
     }
 
-    bool consumable = item.HasTrait<ConsumableTrait>();
     bool torch = item.HasTrait<TorchTrait>();
     bool written = item.HasTrait<WrittenTrait>();
     bool vaultKey = item.HasTrait<VaultKeyTrait>();
@@ -607,6 +606,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         result.Messages.AddRange(sideEffect.Apply(Actor, GameState));
       }
+
+      if (item.HasTrait<ConsumableTrait>())
+        Actor.Inventory.ConsumeItem(item, Actor, GameState.Rng);
 
       return result;
     }

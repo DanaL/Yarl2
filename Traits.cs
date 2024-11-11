@@ -810,38 +810,37 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
-    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user, item), null),
-    "blink" => new UseResult(true, "", new BlinkAction(gs, user, item), null),
-    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4, item), null),
-    "trivialheal" => new UseResult(true, "", new HealAction(gs, user, 1, 1, item), null),
-    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }, item), null),
-    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user, item), null),
+    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
+    "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
+    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
+    "trivialheal" => new UseResult(true, "", new HealAction(gs, user, 1, 1), null),
+    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
+    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
     "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}, item), null),
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
     "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}, item), null),
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
     "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
     "levitation" => 
       new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
-    "knock" => new UseResult(true, "", new KnockAction(gs, user, item), null),
+                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
+    "knock" => new UseResult(true, "", new KnockAction(gs, user), null),
     "identify" => new UseResult(true, "", 
         new InventoryChoiceAction(gs, user, 
           new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
-          new IdentifyItemAction(gs, user, item)), null),
+          new IdentifyItemAction(gs, user)), null),
     "applypoison" => new UseResult(true, "",
         new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
-          new ApplyPoisonAction(gs, user, item)), null),
-    "seeinvisible" => 
-        new UseResult(true, "", new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
-            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }, item), null),
+          new ApplyPoisonAction(gs, user)), null),
+    "seeinvisible" => new UseResult(true, "", new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
+            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
     "protection" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new AuraOfProtectionTrait() { HP = 25 }, item), null),
-    "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs), item), null),
+                        new AuraOfProtectionTrait() { HP = 25 }), null),
+    "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs)), null),
     "buffstrength" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
-                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, Source = item!.Name }, item), null),
+                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, Source = item!.Name }), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 

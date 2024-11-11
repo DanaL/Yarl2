@@ -166,9 +166,8 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
   public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
 }
 
-class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? item) : Action(gs, actor)
+class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : Action(gs, actor)
 {
-  Item? Item { get; set; } = item;
   readonly TemporaryTrait _trait = trait;
 
   public override ActionResult Execute()
@@ -182,11 +181,6 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait, Item? it
       if (msgs.Count > 0)
       {
         result.Messages.AddRange(msgs);
-      }
-
-      if (Item is not null && Item.HasTrait<ConsumableTrait>())
-      {
-        Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
       }
     }
     
@@ -1100,10 +1094,8 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
   }
 }
 
-class MagicMapAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
+class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
 {
-  Item? Item { get; set; } = item;
-
   // Essentially we want to flood fill out and mark all reachable squares as 
   // remembered, ignoreable Passable() or not but stopping a walls. This will
   // currently not fully map a level with disjoint spaces but I'm not sure if
@@ -1172,12 +1164,7 @@ class MagicMapAction(GameState gs, Actor caster, Item? item) : Action(gs, caster
       {
         result.Messages.Add("A vision of your surroundings fills your mind!");
         FloodFillMap(GameState, player.Loc);
-      }
-
-      if (Item is not null && Item.HasTrait<ConsumableTrait>())
-      {
-        Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
-      }
+      }      
     }
 
     return result;
@@ -1467,10 +1454,8 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
   }
 };
 
-class KnockAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
-{
-  Item? Item { get; set; } = item;
-
+class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
+{  
   public override ActionResult Execute()
   {
     var result = base.Execute();
@@ -1491,11 +1476,6 @@ class KnockAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
         }
       }
 
-      if (Item is not null && Item.HasTrait<ConsumableTrait>())
-      {
-        Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
-      }
-
       var anim = new MagicMapAnimation(GameState, GameState.CurrentDungeon, [.. sqs]);
       GameState.UIRef().RegisterAnimation(anim);
     }
@@ -1504,10 +1484,8 @@ class KnockAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
   }
 }
 
-class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
+class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 {
-  Item? Item { get; set; } = item;
-
   public override ActionResult Execute()
   {
     List<Loc> sqs = [];
@@ -1524,11 +1502,6 @@ class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
           sqs.Add(loc);
         }
       }
-    }
-
-    if (Item is not null && Item.HasTrait<ConsumableTrait>())
-    {
-      Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
     }
 
     if (sqs.Count == 0)
@@ -1551,17 +1524,10 @@ class BlinkAction(GameState gs, Actor caster, Item? item) : Action(gs, caster)
   }
 }
 
-class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target)
+class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
 {
-  Item? Item { get; set; } = item;
-
   public override ActionResult Execute()
   {
-    if (Item is not null && Item.HasTrait<ConsumableTrait>())
-    {
-      Actor!.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
-    }
-
     if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
       return new ActionResult() { Complete = true, Messages = ["That tasted not bad."], EnergyCost = 1.0 };
@@ -1578,9 +1544,8 @@ class AntidoteAction(GameState gs, Actor target, Item? item) : Action(gs, target
   }
 }
 
-class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? item) : Action(gs, target)
+class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action(gs, target)
 {
-  Item? Item { get; set; } = item;
   readonly int _healDie = healDie;
   readonly int _healDice = healDice;
 
@@ -1609,11 +1574,6 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
 
     var healAnim = new SqAnimation(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
     GameState!.UIRef().RegisterAnimation(healAnim);
-
-    if (Item is not null && Item.HasTrait<ConsumableTrait>())
-    {
-      Actor.Inventory.ConsumeItem(Item, Actor, GameState!.Rng);
-    }
 
     result.Messages.Add(txt);
     result.Complete = true;
@@ -1914,9 +1874,8 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class ApplyPoisonAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs, actor)
+class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  Item? SourceItem { get; set; } = sourceItem;
   public char Choice { get; set; }
 
   public override ActionResult Execute()
@@ -1941,9 +1900,6 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs
       result.Messages.Add(s);
     }
 
-    if (SourceItem is not null)
-      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState!.Rng);
-
     result.Complete = true;
     result.EnergyCost = 1.0;
 
@@ -1953,9 +1909,8 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class IdentifyItemAction(GameState gs, Actor actor, Item? sourceItem) : Action(gs, actor)
+class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  Item? SourceItem {  get; set; } = sourceItem;
   public char Choice { get; set; }
 
   public override ActionResult Execute()
@@ -1979,11 +1934,6 @@ class IdentifyItemAction(GameState gs, Actor actor, Item? sourceItem) : Action(g
 
     string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
     result.Messages.Add(m);
-
-    if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
-    {
-      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState!.Rng);
-    }
 
     return result;
   }
@@ -2376,7 +2326,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
       }
       else
       {
-        var healAction = new HealAction(GameState, target, 6, 2, null);
+        var healAction = new HealAction(GameState, target, 6, 2);
         result.AltAction = healAction;
         result.EnergyCost = 0.0;
         result.Complete = false;

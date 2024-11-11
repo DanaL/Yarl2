@@ -167,7 +167,7 @@ class MonsterBehaviour : IBehaviour
     {
       _lastUse[act.Name] = gs.Turn;
       if (act.Name == "Blink")
-        return new BlinkAction(gs, mob, null);
+        return new BlinkAction(gs, mob);
       else if (act.Name == "FogCloud")
         return new FogCloudAction(gs, mob, CalcRangedTarget(mob, gs));
       else if (act.Name == "Entangle")
@@ -224,7 +224,7 @@ class MonsterBehaviour : IBehaviour
         int i = gs.Rng.Next(candidates.Count);
 
         string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
-        return new HealAction(gs, candidates[i], 4, 4, null)
+        return new HealAction(gs, candidates[i], 4, 4)
         {
           Message = castText
         };
