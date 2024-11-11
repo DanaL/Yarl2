@@ -441,9 +441,16 @@ class ResistanceTrait : TemporaryTrait
 
   public override List<string> Apply(Actor target, GameState gs)
   {
-    target.Traits.Add(this);
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
-    OwnerID = target.ID;
+    if (target.Traits.OfType<ResistanceTrait>().FirstOrDefault(t => t.Type == Type) is ResistanceTrait existing)
+    {
+      existing.ExpiresOn = ulong.Max(existing.ExpiresOn, ExpiresOn);
+    }
+    else
+    {
+      target.Traits.Add(this);
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+      OwnerID = target.ID;
+    }
 
     return [];
   }
