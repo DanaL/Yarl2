@@ -69,7 +69,10 @@ class DebugCommand(GameState gs)
     {"ogre liver", ItemNames.OGRE_LIVER},
     {"pickaxe", ItemNames.PICKAXE},
     {"apple", ItemNames.APPLE},
-    {"rubble", ItemNames.RUBBLE}
+    {"rubble", ItemNames.RUBBLE},
+    {"hill giant essence", ItemNames.HILL_GIANT_ESSENCE},
+    {"fire giant essence", ItemNames.FIRE_GIANT_ESSENCE},
+    {"frost giant essence", ItemNames.FROST_GIANT_ESSENCE}
   };
 
   public string DoCommand(string txt)
@@ -144,7 +147,9 @@ class DebugCommand(GameState gs)
   List<Loc> AdjSpots(Loc loc)
   {
     return Util.Adj8Locs(loc)
-        .Where(loc => !_gs.ObjDb.Occupied(loc) && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable())
+        .Where(loc => !_gs.ObjDb.Occupied(loc) 
+                          && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable()
+                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()) .Any())
         .ToList();
   }
 

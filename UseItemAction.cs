@@ -427,8 +427,8 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
       result.Complete = true;
       result.EnergyCost = 1.0;
 
-      bool rogue = gs.Player.Background == PlayerBackground.Skullduggery;
-      int dc = 12 + gs.CurrLevel + 1;
+      bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
+      int dc = 12 + GameState.CurrLevel + 1;
       if (rogue)
         dc -= 5;
       int roll = GameState.Rng.Next(1, 21);
@@ -548,7 +548,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return UseVaultKey(item);
 
     var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
-    if (useableTraits.Count != 0)
+    if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {
       if (written)
       {

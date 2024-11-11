@@ -151,15 +151,16 @@ class Item : GameObj, IEquatable<Item>
 enum ItemNames
 {
   ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
-  DART, FIREBOLT, GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
-  LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, 
-  POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
-  RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK,
-  SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
-  SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
-  SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
-  WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES,
-  WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
+  DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD, 
+  GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, LEATHER_ARMOUR, LOCK_PICK, LONGBOW, 
+  LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, POTION_FIRE_RES, 
+  POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER, RING_OF_ADORNMENT, 
+  RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_IDENTIFY, 
+  SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SHIELD, SHORTSHORD, 
+  SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR, STUDDED_LEATHER_ARMOUR, 
+  TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST,
+  WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, 
+  ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
 }
 
 class ItemFactory
@@ -668,6 +669,39 @@ class ItemFactory
         item.Traits.Add(new BlockTrait());
         item.Traits.Add(new PluralTrait());
         item.Traits.Add(new OpaqueTrait());
+        break;
+      case ItemNames.HILL_GIANT_ESSENCE:
+        item = new Item()
+        {
+          Name = "vial of hill giant essence", Type = ItemType.Potion, Value = 150,
+          Glyph = new Glyph('!', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Constitution#1" });
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new CanApplyTrait());
+        break;
+      case ItemNames.FIRE_GIANT_ESSENCE:
+        item = new Item()
+        {
+          Name = "vial of fire giant essence", Type = ItemType.Potion, Value = 150,
+          Glyph = new Glyph('!', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Strength#1" });
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new UseSimpleTrait("resistfire"));
+        break;
+      case ItemNames.FROST_GIANT_ESSENCE:
+        item = new Item()
+        {
+          Name = "vial of frost giant essence", Type = ItemType.Potion, Value = 150,
+          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Strength#1" });
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new UseSimpleTrait("resistcold"));
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

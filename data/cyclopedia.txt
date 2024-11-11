@@ -136,3 +136,12 @@ A tool for picking locks.
 #
 apple
 Delicious fruit. And good for pies, although baking isn't implemented in Delve.
+#
+vial of hill giant essence
+What exactly is hill giant essence? Probably best not to think about it too much. But you can drink it!
+#
+vial of fire giant essence
+A vial of smouldering viscera. It seems safe enough to drink though.
+#
+vial of frost giant essence
+It smells minty and refreshing!

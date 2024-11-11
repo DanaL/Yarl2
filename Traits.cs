@@ -143,6 +143,13 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
+// For items that can be used by the Apply command but don't need to
+// implement IUseable
+class CanApplyTrait : Trait
+{
+  public override string AsText() => $"CanApply";
+}
+
 class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
@@ -1001,7 +1008,14 @@ class BoostMaxStatTrait : TemporaryTrait
     {
       stat.ChangeMax(Amount);
       stat.Change(Amount);
-      msgs.Add($"{"".Possessive(target).Capitalize()}max {Stat} has changed!");
+      string s = Stat switch
+      {
+        Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
+        Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",
+        Attribute.Constitution => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} healthier!",
+        _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
+      };
+      msgs.Add(s);
     }
 
     return msgs;
@@ -2009,6 +2023,7 @@ class TraitFactory
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
     { "Bow", (pieces, gameObj) => new BowTrait() },
+    { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
