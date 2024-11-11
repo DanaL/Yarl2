@@ -1011,6 +1011,13 @@ class BoostMaxStatTrait : TemporaryTrait
         msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!");
       }      
     }
+    else if (Stat == Attribute.Constitution)
+    {
+      stat.ChangeMax(Amount);
+      stat.Change(Amount);
+      target.Stats[Attribute.HP].ChangeMax(Amount * 5);
+      msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} healthier!");
+    }
     else
     {
       stat.ChangeMax(Amount);
@@ -1019,7 +1026,6 @@ class BoostMaxStatTrait : TemporaryTrait
       {
         Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
         Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",
-        Attribute.Constitution => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} healthier!",
         _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
       };
       msgs.Add(s);
