@@ -104,6 +104,41 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   static void GraveRob(Loc loc, ActionResult result, GameState gs, Actor digger)
   {
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DisturbedGrave));
+
+    string s = "You desecrate the grave.";
+    result.Messages.Add(s);
+    
+    if (gs.Rng.NextDouble() < 0.20)
+    {
+      foreach (Item item in Treasure.GraveContents(gs, gs.CurrLevel, gs.Rng))
+      {
+        gs.ItemDropped(item, loc);
+      }
+
+      List<Loc> locOpts = Util.Adj8Locs(loc)
+                              .Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))
+                              .ToList();
+      if (locOpts.Count > 0)
+      {
+        Loc spookLoc = locOpts[gs.Rng.Next(locOpts.Count)];
+        Actor spook = gs.Rng.Next(3) switch 
+        {
+        0 => MonsterFactory.Get("skeleton", gs.ObjDb, gs.Rng),
+          1 => MonsterFactory.Get("zombie", gs.ObjDb, gs.Rng),
+          _ => MonsterFactory.Get("ghoul", gs.ObjDb, gs.Rng),
+        };
+        gs.ObjDb.AddNewActor(spook, spookLoc);
+        gs.AddPerformer(spook);
+      }
+
+      result.Messages.Add("The grave's occuptant was still at home!");
+      s += "\n\nYou feel unclean.";
+
+      if (!digger.HasActiveTrait<ShunnedTrait>())
+        digger.Traits.Add(new ShunnedTrait());
+    }
+
+    gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
   }
 
   static void DigStairs(Loc loc, TileType tile, ActionResult result, GameState gs, Actor digger)

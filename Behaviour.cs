@@ -412,6 +412,18 @@ class PriestBehaviour : NPCBehaviour
 
     return action;
   }
+
+  public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  {
+    if (gameState.Player.HasTrait<ShunnedTrait>())
+    {
+      var acc = new PriestInputer(actor, "Oh my child, what you have done?\n\nAn offering to Huntokar is needed to wash clean the stain on you.", gameState);
+      var action = new PriestServiceAction(gameState, actor);
+      return (action, acc);
+    }
+
+    return base.Chat(actor, gameState);
+  }
 }
 
 class SmithBehaviour : IBehaviour
@@ -499,6 +511,11 @@ class SmithBehaviour : IBehaviour
 
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
+    if (gs.Player.HasTrait<ShunnedTrait>())
+    {
+      return (new NullAction(), new PauseForMoreInputer());
+    }
+
     var acc = new SmithyInputer(actor, Blurb(actor, gs), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
@@ -540,6 +557,10 @@ class GrocerBehaviour : IBehaviour
 
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
+    if (gs.Player.HasTrait<ShunnedTrait>())
+    {
+      return (new NullAction(), new PauseForMoreInputer());
+    }
     var sb = new StringBuilder();
     sb.Append("\"Welcome to the ");
     sb.Append(gs.Town.Name);
@@ -569,8 +590,13 @@ class NPCBehaviour : IBehaviour, IDialoguer
     return new PassAction();    
   }
 
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  public virtual (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
+    if (gameState.Player.HasTrait<ShunnedTrait>())
+    {
+      return (new NullAction(), new PauseForMoreInputer());
+    }
+
     var acc = new Dialoguer(actor, gameState);
     var action = new CloseMenuAction(gameState, 1.0);
 

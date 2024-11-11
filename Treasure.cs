@@ -129,6 +129,66 @@ class Treasure
     } 
   }
 
+  public static List<Item> GraveContents(GameState gs, int level, Random rng) 
+  {
+    GameObjectDB objDb = gs.ObjDb;
+    List<Item> items = [];
+
+    Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    zorkmids.Value = rng.Next(25, 51);
+    items.Add(zorkmids);
+
+    switch (rng.Next(30))
+    {
+      case 0:
+        items.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb));
+        break;
+      case 1:
+        Item axe = ItemFactory.Get(ItemNames.HAND_AXE, objDb);
+        if (rng.NextDouble() < 0.5)
+          axe.Traits.Add(new WeaponBonusTrait() { Bonus = 1 });
+        else 
+        {
+          axe.Traits.OfType<MetalTrait>().First().Type = Metals.Silver;
+          axe.Traits.Add(new AdjectiveTrait("silver"));
+        }
+        items.Add(axe);
+        break;
+      case 2:
+        items.Add(ItemFactory.Get(ItemNames.LONGBOW, objDb));
+        break;
+      case 3:
+        Item helm = ItemFactory.Get(ItemNames.HELMET, objDb);
+        EffectApplier.Apply(EffectFlag.Rust, gs, helm, null);
+        items.Add(helm);
+        break;
+      case 4:
+       Item sword = ItemFactory.Get(ItemNames.LONGSWORD, objDb);
+        if (rng.NextDouble() < 0.5)
+          sword.Traits.Add(new WeaponBonusTrait() { Bonus = 1 });
+        else 
+        {
+          sword.Traits.OfType<MetalTrait>().First().Type = Metals.Silver;
+          sword.Traits.Add(new AdjectiveTrait("silver"));
+        }
+        items.Add(sword);
+        break;
+      case 5:
+        items.Add(ItemFactory.Get(ItemNames.RING_OF_PROTECTION, objDb));
+        break;
+      case 6:
+        items.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb));
+        break;
+      default:
+        break;
+    }
+
+    if (rng.NextDouble() < 0.5)
+      items.Add(ItemFactory.Get(ItemNames.SKULL, objDb));
+
+    return items;
+  }
+
   public static void AddTreasureToDungeonLevel(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
   {
     if (levelNum == 0) 

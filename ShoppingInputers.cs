@@ -437,14 +437,86 @@ class SmithyInputer : ShopMenuInputer
   }
 }
 
+class PriestInputer : Inputer
+{
+  readonly Actor Priest;
+  readonly string Blurb;
+  readonly GameState Gs;
+  string Service { get; set; } = "";
+  List<char> Options { get; set; } = [];
+
+  public PriestInputer(Actor priest, string blurb, GameState gs)
+  {
+    Priest = priest;
+    Blurb = blurb;
+    Gs = gs;
+
+    WritePopup(blurb);
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (Options.Contains(ch) && ch == 'a')
+    {
+      Done = true;
+      Success = true;
+      Service = "Absolution";
+    }
+    
+    WritePopup(Blurb);
+  }
+
+  protected void WritePopup(string blurb)
+  {
+    var sb = new StringBuilder(Priest.Appearance.IndefArticle().Capitalize());
+    sb.Append(".\n\n");
+    sb.Append(Blurb);
+    sb.Append("\n\n");
+
+    Options = [];
+    if (Gs.Player.Inventory.Zorkmids >= 50)
+    {
+      sb.Append("a) Absolution. [YELLOW $]50\n");
+      Options.Add('a');
+    }
+    else 
+    {
+      sb.Append("Ah child, Huntokar would expect a donation of at least 50 zorkmids for this service.\n");
+    }
+
+    Gs.UIRef().SetPopup(new Popup(sb.ToString(), Priest.FullName, -1, -1));
+  }
+
+  public override UIResult GetResult()
+  {
+    return new PriestServiceUIResult()
+    {
+      Zorkminds = 50,
+      Service = Service
+    };
+  }
+}
+
 class ShoppingUIResult : UIResult
 {
   public List<(char, int)> Selections { get; set; } = [];
   public int Zorkminds { get; set; } = 0;
 }
+
 class UpgradeItemUIResult : UIResult
 {
   public char ItemSlot {  get; set; }
   public char ReagentSLot { get; set; }
   public int Zorkminds { get; set; } = 0;
+}
+
+class PriestServiceUIResult : UIResult
+{
+  public int Zorkminds { get; set; } = 0;
+  public string Service { get; set; } = "";
 }

@@ -594,6 +594,48 @@ class RepairItemAction : Action
   }
 }
 
+class PriestServiceAction : Action
+{
+  readonly Mob _priest;
+  int Invoice { get; set; } = 0;
+  string Service { get; set; } = "";
+
+  public PriestServiceAction(GameState gs, Mob priest)
+  {
+    GameState = gs;
+    _priest = priest;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (Service == "Absolution")
+    {
+      GameState!.Player.Inventory.Zorkmids -= Invoice;
+
+      string s = $"{_priest.FullName.Capitalize()} accepts your donation, chants a prayer while splashing you with holy water.";
+      s += "\n\nYou feel cleansed.";
+
+      result.Messages.Add("You feel cleansed.");
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+      GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not ShunnedTrait).ToList();
+    }
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var serviceResult = (PriestServiceUIResult) result;
+    Invoice = serviceResult.Zorkminds;
+    Service = serviceResult.Service;
+  }
+}
+
 class ShoppingCompletedAction : Action
 {
   readonly Mob _shopkeeper;
@@ -670,9 +712,12 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 
       if (chatAction is NullAction)
       {
-        result.Messages.Add("They aren't interested in chatting.");
+        string s = $"{other.FullName.Capitalize()} turns away from you.";
+        result.Messages.Add(s);
         result.Complete = true;
         result.EnergyCost = 1.0;
+        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+        return result;
       }
       else
       {
