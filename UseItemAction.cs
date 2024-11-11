@@ -61,6 +61,9 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       return result;
     }
 
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
     Tile tile = GameState!.TileAt(targetLoc);
     if (tile.IsTree())
     {
@@ -94,11 +97,39 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       DigStairs(targetLoc, tile.Type, result, GameState, Actor);
     }
-
-    result.Complete = true;
-    result.EnergyCost = 1.0;
+    else if (targetLoc == Actor.Loc && tile.Type == TileType.Pit)
+    {
+      DigInPit(targetLoc, result, GameState, Actor);
+    }
+    else
+    {
+      result.Messages.Add("You swing your pickaxe through the air.");
+      GameState.UIRef().SetPopup(new Popup("You swing your pickaxe through the air.", "", -1, -1));
+    }
 
     return result;
+  }
+
+  static void DigInPit(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    if (loc.Level == gs.CurrentDungeon.LevelMaps.Count - 1) {      
+      result.Messages.Add("The floor is too hard to dig here.");
+      gs.UIRef().SetPopup(new Popup("The floor is too hard to dig here.", "", -1, -1));
+    }
+    else
+    {
+      result.Messages.Add("You break through the floor!");
+      gs.UIRef().SetPopup(new Popup("You break through the floor!", "", -1, -1));
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
+
+      // Need to do this so that when we are resovling the move, the actor 
+      // isn't still technically stuck in the pit and unable to leave the square
+      digger.Traits = digger.Traits.Where(t => t is not InPitTrait).ToList();
+
+      result.AltAction = new MoveAction(gs, digger, loc);
+      result.Complete = false;
+      result.EnergyCost = 0.0;
+    }
   }
 
   static void GraveRob(Loc loc, ActionResult result, GameState gs, Actor digger)

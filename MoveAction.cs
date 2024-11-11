@@ -89,7 +89,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (isPlayer)
         result.Messages.Add("You cannot go that way!");
     }
-    else if (GameState.ObjDb.Occupied(_loc))
+    // There are corner cases when I want to move the actor onto the sq they're already
+    // on (like digging while in a pit and turning it into a trapdoor) to re-resolve
+    // the effects of moving onto the sq
+    else if (GameState.ObjDb.Occupied(_loc) && GameState.ObjDb.Occupant(_loc)!.ID != Actor.ID)
     {
       result.Complete = false;
       Actor? occ = GameState.ObjDb.Occupant(_loc);
