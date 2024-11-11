@@ -1360,6 +1360,11 @@ class ShriekTrait : ActionTrait
   public override string AsText() => $"Shriek#{Cooldown}#{ShriekRadius}";
 }
 
+class ShunnedTrait : Trait
+{
+  public override string AsText() => "Shunned";
+}
+
 class VersatileTrait(DamageTrait oneHanded, DamageTrait twoHanded) : Trait
 {
   public DamageTrait OneHanded { get; set; } = oneHanded;
@@ -2078,6 +2083,7 @@ class TraitFactory
           Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
           MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},    
     { "Named", (pieces, gameObj) => new NamedTrait() },
+    { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait() 
     { 
       OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
@@ -2135,6 +2141,7 @@ class TraitFactory
       new ShriekTrait()
       { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
     },
+    { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
     { "SpellAction", (pieces, gameObj) => new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]) }},
