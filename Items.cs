@@ -29,7 +29,8 @@ enum ItemType
   Food,
   Talisman,
   Reagent,
-  Environment // I'm implementing things like mist as 'items'
+  Environment, // I'm implementing things like mist as 'items'
+  Landscape
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -153,7 +154,7 @@ enum ItemNames
   DART, FIREBOLT, GHOSTCAP_MUSHROOM, GREATSWORD, GUISARME, HAND_AXE, HELMET, LEATHER_ARMOUR,
   LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, 
   POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER,
-  RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, SCROLL_BLINK,
+  RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK,
   SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
   SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
   SPEAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON,
@@ -631,7 +632,7 @@ class ItemFactory
         break;
       case ItemNames.APPLE:
         item = new Item() { Name = "apple", Type = ItemType.Food, Value = 1,
-          Glyph = new Glyph('%', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
+          Glyph = new Glyph(',', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new EdibleTrait());
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
@@ -650,16 +651,23 @@ class ItemFactory
         break;
       case ItemNames.BEETLE_CARAPACE:
         item = new Item() { Name = "beetle carapace", Type = ItemType.Reagent, Value = 25,
-          Glyph = new Glyph('%', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+          Glyph = new Glyph(',', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.OGRE_LIVER:
         item = new Item() { Name = "ogre liver", Type = ItemType.Reagent, Value = 25,
-          Glyph = new Glyph('%', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
+          Glyph = new Glyph(',', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new EdibleTrait());
         item.Traits.Add(new UseSimpleTrait("buffstrength"));
         item.Traits.Add(new ConsumableTrait());
+        break;
+      case ItemNames.RUBBLE:
+        item = new Item() { Name = "rubble", Type = ItemType.Landscape, Value = 0,
+          Glyph = new Glyph('%', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new BlockTrait());
+        item.Traits.Add(new PluralTrait());
+        item.Traits.Add(new OpaqueTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");

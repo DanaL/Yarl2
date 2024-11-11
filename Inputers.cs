@@ -708,7 +708,7 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
     }
     else
     {
-      Msg = "That doesn't seem ot exist.";
+      Msg = "That doesn't seem to exist.";
       Done = false;
       Success = false;
     }

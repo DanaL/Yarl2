@@ -199,6 +199,9 @@ class GameObjectDB
     {
       foreach (var item in items)
       {
+        if (item.HasTrait<BlockTrait>())
+          return (item.Glyph, item.Z());
+          
         if (item.Z() > z)
         {
           glyph = item.Glyph;
@@ -227,7 +230,16 @@ class GameObjectDB
     if (_itemLocs.TryGetValue(loc, out var items))
     {
       if (items is not null && items.Count > 0 && items[0].Z() >= 0)
+      {
+        // Always display rubble, boulders, etc on top of the other items
+        foreach (Item item in items)
+        {
+          if (item.HasTrait<BlockTrait>())
+            return item.Glyph;
+        }
+
         return items[0].Glyph;
+      }      
     }
 
     return EMPTY;

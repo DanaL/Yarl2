@@ -295,7 +295,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
       result.EnergyCost = 1.0;
       result.Complete = false;
 
-      int dc = 13 + gs.CurrLevel + 1;
+      int dc = 14 + gs.CurrLevel/4;
       int roll = gs.Rng.Next(1, 21) + Actor!.Stats[Attribute.Strength].Curr;
 
       if (roll >= dc)
@@ -1595,7 +1595,6 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice, Item? it
     for (int j = 0; j < _healDice; j++)
       hp += GameState!.Rng.Next(_healDie) + 1;
     hpStat.Change(hp);
-    bool plural = Actor.HasTrait<PluralTrait>();
     int delta = hpStat.Curr - hpBefore;
 
     string txt;

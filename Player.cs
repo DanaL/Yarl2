@@ -460,6 +460,9 @@ class Player : Actor, IPerformer, IGameEventListener
     List<Item> itemsInPit = [];
     foreach (var item in gs.ObjDb.ItemsAt(Loc))
     {
+      if (item.HasTrait<BlockTrait>())
+        continue;
+
       if (item.HasTrait<InPitTrait>())
         itemsInPit.Add(item);
       else

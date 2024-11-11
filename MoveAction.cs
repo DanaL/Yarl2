@@ -117,7 +117,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         var attackAction = new MeleeAttackAction(GameState, Actor, _loc);
         result.AltAction = attackAction;
       }
-    }
+    }    
     else if (!CanMoveTo(Actor, _map, _loc))
     {
       result.Complete = false;
@@ -223,6 +223,18 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.Complete = true;
         result.EnergyCost = 1.0;
       }
+    }
+    else if (GameState.ObjDb.ItemsAt(_loc).Any(item => item.HasTrait<BlockTrait>()))
+    {
+      Item blockage = GameState.ObjDb.ItemsAt(_loc).Where(item => item.HasTrait<BlockTrait>()).First();
+      string msg = $"{Grammar.Possessive(Actor).Capitalize()} way is blocked by ";
+      if (blockage.HasTrait<PluralTrait>())
+        msg += $"some {blockage.Name}!";
+      else
+        msg += $"{blockage.Name.IndefArticle()}!";
+      result.Messages.Add(msg);
+      result.Complete = true;
+      result.EnergyCost = 0.0;
     }
     else if (currTile.Type == TileType.FrozenDeepWater || currTile.Type == TileType.FrozenWater)
     {

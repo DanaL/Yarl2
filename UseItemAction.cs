@@ -101,6 +101,10 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       DigInPit(targetLoc, result, GameState, Actor);
     }
+    else if (GameState.ObjDb.ItemsAt(targetLoc).Any(i => i.HasTrait<BlockTrait>()))
+    {
+      DigLandscape(targetLoc, result, GameState, Actor);
+    }
     else
     {
       result.Messages.Add("You swing your pickaxe through the air.");
@@ -108,6 +112,34 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
 
     return result;
+  }
+
+  static void DigLandscape(Loc loc, ActionResult result, GameState gs, Actor digger)
+  {
+    int dc = 13 + gs.CurrLevel / 4;
+    if (digger is Player && gs.Player.Lineage == PlayerLineage.Dwarf)
+      dc -= 2;
+
+    // For now we clear the blockage. For something like a boulder it might
+    // break up into rocks. But I'll only do that if rocks have some use in
+    // the game.
+    Item blockage = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>())
+                                         .First();
+    if (digger.AbilityCheck(Attribute.Strength, dc, gs.Rng))
+    {
+      gs.ObjDb.RemoveItemFromGame(loc,blockage);
+      string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "clear")} {blockage.Name.DefArticle()}.";
+      result.Messages.Add(s);
+      if (digger == gs.Player)
+        gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    }
+    else
+    {
+      string s = $"{digger.FullName.Capitalize()} chip away at the {blockage.Name.DefArticle()}.";
+      result.Messages.Add(s);
+      if (digger == gs.Player)
+        gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    }
   }
 
   static void DigInPit(Loc loc, ActionResult result, GameState gs, Actor digger)
@@ -293,7 +325,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
   void ChopDoor(Loc loc, ActionResult result)
   {
-    int dc = 13 + GameState!.CurrLevel / 4;
+    int dc = 11 + GameState!.CurrLevel / 4;
     if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
       dc -= 2;
 

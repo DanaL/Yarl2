@@ -307,6 +307,11 @@ class AxeTrait : Trait
   public override string AsText() => "Axe";
 }
 
+class BlockTrait : Trait
+{
+  public override string AsText() => "Block";
+}
+
 class ConstructTrait : Trait
 {
   public override string AsText() => "Construct";
@@ -1999,6 +2004,7 @@ class TraitFactory
       OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
       ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]) }
     },
+    { "Block", (pieces, gameObj) => new BlockTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},

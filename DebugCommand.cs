@@ -68,7 +68,8 @@ class DebugCommand(GameState gs)
     {"beetle carapace", ItemNames.BEETLE_CARAPACE},
     {"ogre liver", ItemNames.OGRE_LIVER},
     {"pickaxe", ItemNames.PICKAXE},
-    {"apple", ItemNames.APPLE}
+    {"apple", ItemNames.APPLE},
+    {"rubble", ItemNames.RUBBLE}
   };
 
   public string DoCommand(string txt)
@@ -117,22 +118,39 @@ class DebugCommand(GameState gs)
   {
     if (ItemMap.TryGetValue(name, out var itemEnum))
     {
-      Item item = ItemFactory.Get(itemEnum, _gs.ObjDb);    
-      if (action == "give")
+      Item item = ItemFactory.Get(itemEnum, _gs.ObjDb);  
+
+      if (name == "rubble" || name == "boulder")
+      {
+        var adjSpots = AdjSpots(_gs.Player.Loc);
+        if (adjSpots.Count == 0)
+          return "No open spot to add item";
+
+        Loc loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
+        _gs.ObjDb.SetToLoc(loc, item);
+        _gs.UpdateFoV();
+      }        
+      else if (action == "give")
         _gs.Player.Inventory.Add(item, _gs.Player.ID);
       else       
-        _gs.ObjDb.SetToLoc(_gs.Player.Loc, item);   
+        _gs.ObjDb.SetToLoc(_gs.Player.Loc, item);  
+
       return "";   
     }
 
     return $"Unknown item: {name}";
   }
 
-  private string AddMonster(string monsterName)
+  List<Loc> AdjSpots(Loc loc)
   {
-    var adjSpots = Util.Adj8Locs(_gs.Player.Loc)
+    return Util.Adj8Locs(loc)
         .Where(loc => !_gs.ObjDb.Occupied(loc) && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable())
         .ToList();
+  }
+
+  private string AddMonster(string monsterName)
+  {
+    var adjSpots = AdjSpots(_gs.Player.Loc);
 
     if (adjSpots.Count == 0)
       return "No open spot to add monster";
