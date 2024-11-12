@@ -145,3 +145,6 @@ A vial of smouldering viscera. It seems safe enough to drink though.
 #
 vial of frost giant essence
 It smells minty and refreshing!
+#
+talisman of circumspection
+An amulet depicting a warrior in a defensive stance.

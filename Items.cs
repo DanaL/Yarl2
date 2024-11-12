@@ -641,7 +641,7 @@ class ItemFactory
         break;
       case ItemNames.TALISMAN_OF_CIRCUMSPECTION:
         item = new Item() { Name = "talisman of circumspection", Type = ItemType.Talisman, Value = 125,
-          Glyph = new Glyph('&', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
+          Glyph = new Glyph('☥', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
         item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Dodge#33" ] });        
         break;
       case ItemNames.BLINDFOLD:
