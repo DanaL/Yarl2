@@ -1108,8 +1108,11 @@ class MainDungeonBuilder : DungeonBuilder
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
     {
       Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, factDb);
+
+      if (rng.Next(4) == 0)
+        TunnelCarver.MakeCollapsedTunnel(id, levelNum, levels[levelNum], objDb, rng);
     }
-    
+
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, 1);
 
     PlaceLevelFiveGate(levels[4], rng, factDb);

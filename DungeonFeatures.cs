@@ -10,8 +10,15 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using SDL2;
 
 namespace Yarl2;
+
+// Holds dungeon features/room code because DungeonBuilder was getting too big.
+// There's probably code that can be moved over from DungeonBuilder but I'm not
+// sure how to orgainize it yet.
+
+// Maybe also a good place to centralize code for finding rooms in the map.
 
 enum DecorationType
 {
@@ -319,12 +326,6 @@ class Decorations
   }
 }
 
-// Holds dungeon features/room code because DungeonBuilder was getting too big.
-// There's probably code that can be moved over from DungeonBuilder but I'm not
-// sure how to orgainize it yet.
-
-// Maybe also a good place to centralize code for finding rooms in the map.
-
 class IdolAltarMaker
 {
   static List<(int, int, int, int, int, int)> PotentialClosets(Map map)
@@ -434,5 +435,193 @@ class IdolAltarMaker
       levels[level].SetTile(altarR, altarC, altar);
       levels[level].SetTile(closetR, closetC, sacredSq);
     }
+  }
+}
+
+class TunnelCarver
+{
+  static List<(int, int)> FindStartCandidates(Map map)
+  {
+    var candidates = new List<(int, int)>();
+
+    for (int r = 5; r < map.Height - 5; r++) 
+    {
+      for (int c = 5; c < map.Width - 5; c++)
+      {
+        Tile tile = map.TileAt(r, c);
+        if (tile.Type != TileType.DungeonWall)
+          continue;
+
+        bool adjFloor = false;
+        foreach (var sq in Util.Adj4Sqs(r, c))
+        {
+          if (map.TileAt(sq).Type == TileType.DungeonFloor) 
+          {
+            adjFloor = true;
+            break;
+          }
+        }
+        if (!adjFloor)
+          continue;
+
+        int wallCount = 0;
+        foreach (var sq in Util.Adj8Sqs(r, c))
+        {
+          if (map.TileAt(sq).Type == TileType.DungeonWall)
+            wallCount++;
+        }        
+        if (wallCount >= 5)
+          candidates.Add((r, c));
+      }      
+    }
+
+    return candidates;
+  }
+
+  static int TryDirection(Map map, int r, int c, int dr, int dc, (int r, int c) n1, (int r, int c) n2)
+  {
+    int length = 0;
+
+    while (length < 5)
+    {
+      if (!map.InBounds(r, c))
+        break;
+      if (map.TileAt(r, c).Type != TileType.DungeonWall)
+        break;
+      if (map.TileAt(r + n1.r, c + n1.c).Type != TileType.DungeonWall)
+        break;
+      if (map.TileAt(r + n2.r, c + n2.c).Type != TileType.DungeonWall)
+        break;
+
+      r += dr;
+      c += dc;
+      ++length;
+    }
+
+    return length;
+  }
+
+  static List<(int, int)> CarveTunnel(Map map, int r, int c, int dr, int dc, int length)
+  {
+    var tunnel = new List<(int, int)>();
+
+    for (int i = 0; i < length; i++)
+    {
+      map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+      tunnel.Add((r, c));
+      r += dr;
+      c += dc;
+    }
+
+    return tunnel;
+  }
+
+  static List<(int, int)> TryToDrawTunnel(Map map, int r, int c, Random rng)
+  {    
+    // Try upwards
+    int dr = -1;
+    int dc = 0;
+    int len = TryDirection(map, r, c, dr, dc, n1: (0, -1), n2: (0, 1));
+    if (len > 2)
+    {      
+      int tunnelLength = rng.Next(3, len + 1);
+      return CarveTunnel(map, r, c, dr, dc, tunnelLength);
+    }
+
+    // Try downwards
+    dr = 1;
+    dc = 0;
+    len = TryDirection(map, r, c, dr, dc, n1: (0, -1), n2: (0, 1));
+    if (len > 2)
+    {
+      int tunnelLength = rng.Next(3, len + 1);
+      return CarveTunnel(map, r, c, dr, dc, tunnelLength);
+    }
+
+    // Try left
+    dr = 0;
+    dc = -1;  
+    len = TryDirection(map, r, c, dr, dc, n1: (-1, 0), n2: (1, 0));
+    if (len > 2)
+    {
+      int tunnelLength = rng.Next(3, len + 1);
+      return CarveTunnel(map, r, c, dr, dc, tunnelLength);
+    }
+
+    // Try right
+    dr = 0;
+    dc = 1;
+    len = TryDirection(map, r, c, dr, dc, n1: (-1, 0), n2: (1, 0));
+    if (len > 2)
+    {
+      int tunnelLength = rng.Next(3, len + 1);
+      return CarveTunnel(map, r, c, dr, dc, tunnelLength);
+    }
+
+    return [];
+  }
+
+  static void DecorateTunnel(int dungeonID, int level, List<(int, int)> tunnel, GameObjectDB objDb, Random rng)
+  {
+    // We want to have at least one rubble-blocked square
+    int i = rng.Next(tunnel.Count);
+    Loc loc = new(dungeonID, level, tunnel[i].Item1, tunnel[i].Item2);
+    Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
+    objDb.SetToLoc(loc, rubble);
+    tunnel.RemoveAt(i);
+
+    // Add some treasure to first location
+    int numTreasure = rng.Next(2, 6);
+    for (int j = 0; j < numTreasure; j++)
+    {
+      Item treasure = rng.Next(3) switch
+      {
+        0 => Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng),  
+        1 => Treasure.ItemByQuality(TreasureQuality.Uncommon, objDb, rng),
+        _ => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng)
+      };      
+      objDb.SetToLoc(loc, treasure);
+    }
+
+    // Maybe a skull (or eventually other remains?)
+    if (rng.Next(3) == 0)
+    {
+      Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);
+      objDb.SetToLoc(loc, skull);
+    }
+
+    for (i = 0; i < tunnel.Count; i++)
+    {
+      if (rng.Next(5) == 0)
+      {
+        loc = new(dungeonID, level, tunnel[0].Item1, tunnel[0].Item2);
+        rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
+        objDb.SetToLoc(loc, rubble);
+      }
+      tunnel.RemoveAt(0);
+    }
+  }
+
+  public static void MakeCollapsedTunnel(int dungeonID, int level, Map map, GameObjectDB objDb, Random rng)
+  {
+     List<(int, int)> candidates = FindStartCandidates(map);
+    
+    // Try up to, I don't know, 50? times
+    int tryCount = 0;
+    do
+    {
+      int i = rng.Next(candidates.Count);
+      List<(int, int)> tunnel = TryToDrawTunnel(map, candidates[i].Item1, candidates[i].Item2, rng);
+      if (tunnel.Count > 0)
+      {
+        DecorateTunnel(dungeonID, level, tunnel, objDb, rng);
+        break;
+      }
+
+      candidates.RemoveAt(i);
+
+      ++tryCount;
+    }
+    while (tryCount < 50);
   }
 }
