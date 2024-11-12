@@ -151,15 +151,15 @@ class Item : GameObj, IEquatable<Item>
 enum ItemNames
 {
   ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
-  DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD, 
-  GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, LEATHER_ARMOUR, LOCK_PICK, LONGBOW, 
-  LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, POTION_FIRE_RES, 
-  POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER, RING_OF_ADORNMENT, 
-  RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_IDENTIFY, 
-  SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SHIELD, SHORTSHORD, 
-  SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR, STUDDED_LEATHER_ARMOUR, 
-  TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST,
-  WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, 
+  DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD,
+  GUIDE_STABBY, GUIDE_AXES, GUIDE_SWORDS, GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, 
+  LEATHER_ARMOUR, LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, 
+  POTION_COLD_RES, POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, 
+  RAPIER, RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, 
+  SCROLL_BLINK, SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
+  SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR, 
+  STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON, WAND_FIREBALLS, 
+  WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, 
   ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
 }
 
@@ -474,7 +474,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("blink"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.SCROLL_IDENTIFY:
@@ -483,7 +483,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("identify"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.SCROLL_KNOCK:
@@ -497,7 +497,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("knock"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.SCROLL_MAGIC_MAP:
@@ -511,7 +511,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("magicmap"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.SCROLL_PROTECTION:
@@ -523,7 +523,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("protection"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;
       case ItemNames.SCROLL_RECALL:
@@ -532,7 +532,7 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new UseSimpleTrait("recall"));
         item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new WrittenTrait());
+        item.Traits.Add(new ScrollTrait());
         item.Traits.Add(new StackableTrait());
         break;      
       // Probably later I'll randomize how many charges wands have?
@@ -702,6 +702,29 @@ class ItemFactory
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new UseSimpleTrait("resistcold"));
+        break;
+      case ItemNames.GUIDE_STABBY:
+        item = new Item() { Name = "Gray Mouser's Guide to Stabbing", Type = ItemType.Scroll, Value = 100,
+          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#FinesseUse#100" });
+        item.Traits.Add(new CanApplyTrait());
+        break;
+      case ItemNames.GUIDE_SWORDS:
+        item = new Item()
+        {
+          Name = "Groo: the Early Years",
+          Type = ItemType.Scroll,
+          Value = 100,
+          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#SwordUse#100" });
+        item.Traits.Add(new CanApplyTrait());
         break;
       default:
         throw new Exception($"{name} doesn't seem exist in yarl2 :(");
@@ -1156,7 +1179,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     // A character with the Scholar background has a chance of not actually consuming a scroll
     // when they read it.
-    if (item.HasTrait<WrittenTrait>())
+    if (item.HasTrait<ScrollTrait>())
     {
       double roll = rng.NextDouble();
       if (actor is Player player && player.Background == PlayerBackground.Scholar && roll < 0.2)

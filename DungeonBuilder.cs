@@ -290,7 +290,7 @@ class MainDungeonBuilder : DungeonBuilder
       Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
     };
     doc.Traits.Add(new FlammableTrait());
-    doc.Traits.Add(new WrittenTrait());
+    doc.Traits.Add(new ScrollTrait());
     doc.Traits.Add(new AdjectiveTrait(adjective));
 
     var rt = new ReadableTrait(documentText)

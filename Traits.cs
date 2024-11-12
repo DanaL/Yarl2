@@ -762,7 +762,7 @@ class VillagerTrait : Trait
   public override string AsText() => "Villager";
 }
 
-class WrittenTrait : Trait
+class ScrollTrait : Trait
 {
   public override string AsText() => "Written";
 }
@@ -994,8 +994,11 @@ class BoostMaxStatTrait : TemporaryTrait
 
   public override List<string> Apply(Actor target, GameState gs)
   {
-    if (!target.Stats.TryGetValue(Stat, out Stat? stat))
-      return [];
+    if (!target.Stats.TryGetValue(Stat, out Stat? statValue))
+    {
+      statValue = new Stat(0);
+      target.Stats.Add(Stat, statValue);
+    }
 
     List<string> msgs = [];
 
@@ -1005,26 +1008,29 @@ class BoostMaxStatTrait : TemporaryTrait
     {
       if (target.Stats[Stat].Curr == target.Stats[Stat].Max) 
       {
-        stat.ChangeMax(Amount);
-        stat.Change(Amount);
+        statValue.ChangeMax(Amount);
+        statValue.Change(Amount);
         msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!");
       }      
     }
     else if (Stat == Attribute.Constitution)
     {
-      stat.ChangeMax(Amount);
-      stat.Change(Amount);
+      statValue.ChangeMax(Amount);
+      statValue.Change(Amount);
       target.Stats[Attribute.HP].ChangeMax(Amount * 5);
       msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} healthier!");
     }
     else
     {
-      stat.ChangeMax(Amount);
-      stat.Change(Amount);
+      statValue.ChangeMax(Amount);
+      statValue.Change(Amount);
       string s = Stat switch
       {
         Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
         Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",
+        Attribute.FinesseUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept with light weapons!",
+        Attribute.SwordUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at swordplay!",
+        Attribute.AxeUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at axe-work!",
         _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
       };
       msgs.Add(s);
@@ -2220,7 +2226,7 @@ class TraitFactory
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
-    { "Written", (pieces, gameObj) => new WrittenTrait() }
+    { "Written", (pieces, gameObj) => new ScrollTrait() }
   };
 
   public static Trait FromText(string text, GameObj? container)
