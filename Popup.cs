@@ -99,8 +99,10 @@ class Popup
   {
     int widthGuess = GuessWidth(message);
     Title = title;
-    if (width != -1)
+    if (width > 0)
       Width = width + 4;
+    else if (widthGuess == 0)
+      Width = title.Length + 5;
     else if (widthGuess < UserInterface.ViewWidth - 4)
       Width = widthGuess + 4;
     else
@@ -138,7 +140,7 @@ class Popup
 
     if (Title.Length > 0)
     {
-      int left = (Width - Title.Length) / 2 - 2;
+      int left = int.Max(2, (Width - Title.Length) / 2 - 2);
       string title = "+".PadRight(left, '-') + ' ';
       title += Title + ' ';
       title = title.PadRight(Width - 1, '-') + "+";
