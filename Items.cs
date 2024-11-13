@@ -715,15 +715,25 @@ class ItemFactory
       case ItemNames.GUIDE_SWORDS:
         item = new Item()
         {
-          Name = "Groo: the Early Years",
-          Type = ItemType.Scroll,
-          Value = 100,
+          Name = "Groo: the Early Years", Type = ItemType.Scroll, Value = 100,
           Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
         };
         item.Traits.Add(new ConsumableTrait());
         item.Traits.Add(new FlammableTrait());
         item.Traits.Add(new StackableTrait());
         item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#SwordUse#100" });
+        item.Traits.Add(new CanApplyTrait());
+        break;
+      case ItemNames.GUIDE_AXES:
+        item = new Item()
+        {
+          Name = "Asking About Axing Vol. 2", Type = ItemType.Scroll, Value = 100,
+          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+        };
+        item.Traits.Add(new ConsumableTrait());
+        item.Traits.Add(new FlammableTrait());
+        item.Traits.Add(new StackableTrait());
+        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#AxeUse#100" });
         item.Traits.Add(new CanApplyTrait());
         break;
       default:

@@ -74,7 +74,8 @@ class DebugCommand(GameState gs)
     {"fire giant essence", ItemNames.FIRE_GIANT_ESSENCE},
     {"frost giant essence", ItemNames.FROST_GIANT_ESSENCE},
     {"stabby guide", ItemNames.GUIDE_STABBY},
-    {"sword guide", ItemNames.GUIDE_SWORDS }
+    {"sword guide", ItemNames.GUIDE_SWORDS },
+    {"axe guide", ItemNames.GUIDE_AXES }
   };
 
   public string DoCommand(string txt)
