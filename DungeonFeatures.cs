@@ -419,8 +419,13 @@ class IdolAltarMaker
           break;
       }
 
+      // The idol will be found +/- 2 levels of the altar's level
+      int lvlLo = int.Max(level - 3, 0);
+      int lvlHi = int.Max(level, level + 2) - 1;
+      int idolLevel = rng.Next(lvlLo, lvlHi);
+      var (idolR, idolC) = levels[idolLevel].RandomTile(TileType.DungeonFloor, rng);
+      Loc idolLoc = new(dungeonID, idolLevel, idolR, idolC);
       objDb.Add(idol);
-      Loc idolLoc = new(dungeonID, level, altarR, altarC);
       objDb.SetToLoc(idolLoc, idol);
 
       Item prize = Artifacts.GenArtifact(objDb, factDb, rng);

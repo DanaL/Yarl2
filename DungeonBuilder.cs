@@ -1113,7 +1113,8 @@ class MainDungeonBuilder : DungeonBuilder
         TunnelCarver.MakeCollapsedTunnel(id, levelNum, levels[levelNum], objDb, rng);
     }
 
-    IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, 1);
+    int altarLevel = rng.Next(0, numOfLevels);
+    IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
     PlaceLevelFiveGate(levels[4], rng, factDb);
 
