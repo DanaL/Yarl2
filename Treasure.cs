@@ -38,7 +38,10 @@ class Treasure
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK,
-      ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION ];
+      ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
+      ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
+      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE
+  ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {
@@ -202,7 +205,7 @@ class Treasure
     }
     else if (levelNum == 1)
     {
-      int numItems = rng.Next(1, 5);
+      int numItems = rng.Next(3, 8);
       for (int j = 0; j < numItems; j++)
       {
         double roll = rng.NextDouble();
@@ -210,10 +213,13 @@ class Treasure
         Item item = ItemByQuality(quality, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
+
+      Item goodItem = ItemByQuality(TreasureQuality.Good, objDb, rng);
+      AddObjectToLevel(goodItem, objDb, level, dungeonID, levelNum, rng);
     }
     else if (levelNum == 2 || levelNum == 3)
     {
-      int numItems = rng.Next(1, 5);
+      int numItems = rng.Next(3, 8);
       for (int j = 0; j < numItems; j++)
       {
         TreasureQuality quality;
@@ -228,9 +234,9 @@ class Treasure
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
     }
-    else if (levelNum == 5)
+    else if (levelNum == 4)
     {
-      int numItems = rng.Next(1, 5);
+      int numItems = rng.Next(3, 8);
       for (int j = 0; j < numItems; j++)
       {
         TreasureQuality quality;
