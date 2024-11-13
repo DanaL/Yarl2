@@ -47,8 +47,14 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BGLit, Colour BGUn
 
   public static Glyph TextToGlyph(string text)
   {
+    // I wnated to use , for food as in angband (vs % in nethack), which made
+    // storing Glyphs as comma-separated strings a bit gross
+    char ch = text[0];
+    if (text[0] == ',')
+      text = text[1..];
     var p = text.Split(',');
-    return new Glyph(p[0][0], Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]), Colours.TextToColour(p[4]));
+
+    return new Glyph(ch, Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]), Colours.TextToColour(p[4]));
   }
 }
 

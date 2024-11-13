@@ -10,6 +10,8 @@ using System.Linq;
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text.Json;
+
 namespace Yarl2;
 
 enum ItemType
@@ -159,590 +161,95 @@ enum ItemNames
   SCROLL_BLINK, SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, 
   SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SPEAR, 
   STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, VIAL_OF_POISON, WAND_FIREBALLS, 
-  WAND_FROST, WAND_HEAL_MONSTER, WAND_OF_MAGIC_MISSILES, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, 
+  WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, 
   ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
+}
+
+class JsonItem
+{
+  public string Name { get; set; }
+  public string DescriptiveName { get; set; }
+  public string Type { get; set; }
+  public int Value { get; set; }
+  public string Glyph { get; set; }
+  public List<string> Traits { get; set; }
+}
+
+class ItemTemplate
+{
+  public string Name { get; set; }
+  public ItemType Type { get; set; }
+  public int Value { get; set; }
+  public Glyph Glyph { get; set; }
+  public List<string> TraitTemplates { get; set; } = [];  
 }
 
 class ItemFactory
 {
+  static Dictionary<ItemNames, ItemTemplate> Items { get; } = LoadItemDefs();
+
+  static Dictionary<ItemNames, ItemTemplate> LoadItemDefs()
+  {
+    Dictionary<ItemNames, ItemTemplate> templates = [];
+    string json = File.ReadAllText("data/items.json");
+    var items = JsonSerializer.Deserialize<List<JsonItem>>(json);
+
+    foreach (JsonItem item in items)
+    {
+      Enum.TryParse(item.Name, out ItemNames name);
+      Enum.TryParse(item.Type, out ItemType type);
+      Glyph glyph = Glyph.TextToGlyph(item.Glyph);
+      ItemTemplate template = new ItemTemplate()
+      {
+        Name = item.DescriptiveName,
+        Type = type,
+        Value = item.Value,
+        Glyph = glyph,
+        TraitTemplates = item.Traits
+      };
+
+      templates.Add(name, template);
+    }
+
+    return templates;
+  }
+
+  static Item FromTemplate(ItemTemplate template)
+  {
+    Item item = new Item()
+    {
+      Name = template.Name,
+      Type = template.Type,
+      Value = template.Value,
+      Glyph = template.Glyph
+    };
+
+    foreach (string trait in template.TraitTemplates)
+    {
+      item.Traits.Add(TraitFactory.FromText(trait, item));
+    }
+
+    return item;
+  }
+
   public static Item Get(ItemNames name, GameObjectDB objDB)
   {
     Item item;
 
-    switch (name)
+    if (Items.TryGetValue(name, out var template)) 
     {
-      case ItemNames.SPEAR:
-        item = new Item() { Name = "spear", Type = ItemType.Weapon, Value = 10,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new VersatileTrait(
-          new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing },
-          new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing }
-          ));
-        item.Traits.Add(new PolearmTrait());        
-        break;
-      case ItemNames.GUISARME:
-        item = new Item() { Name = "guisarme", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new PolearmTrait());
-        item.Traits.Add(new ReachTrait());
-        item.Traits.Add(new TwoHandedTrait());
-        item.Traits.Add(new ImpaleTrait());
-        break;
-      case ItemNames.DAGGER:
-        item = new Item() { Name = "dagger", Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new FinesseTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new WeaponSpeedTrait() { Cost = 0.5 });
-        break;
-      case ItemNames.SILVER_DAGGER:
-        item = new Item() { Name = "dagger", Type = ItemType.Weapon, Value = 10, Glyph = new Glyph(')', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new FinesseTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
-        item.Traits.Add(new AdjectiveTrait("silver"));
-        item.Traits.Add(new WeaponSpeedTrait() { Cost = 0.5 });
-        break;
-      case ItemNames.HAND_AXE:
-        item = new Item() { Name = "hand axe", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
-        item.Traits.Add(new AxeTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        break;
-      case ItemNames.PICKAXE:
-        item = new Item() { Name = "pickaxe", Type = ItemType.Tool, Value = 15, Glyph = new Glyph(')', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new AxeTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        break;
-      case ItemNames.BATTLE_AXE:
-        item = new Item()
-        { Name = "battle axe", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 3, DamageType = DamageType.Slashing });
-        item.Traits.Add(new AxeTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new TwoHandedTrait());
-        item.Traits.Add(new CleaveTrait());
-        break;
-      case ItemNames.GREATSWORD:
-        item = new Item()
-        { Name = "greatsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Slashing });
-        item.Traits.Add(new SwordTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new WeaponSpeedTrait() { Cost = 1.25 });
-        item.Traits.Add(new TwoHandedTrait());
-        item.Traits.Add(new CleaveTrait());
-        break;
-      case ItemNames.CLAYMORE:
-        item = new Item()
-        { Name = "claymore", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new SwordTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new WeaponSpeedTrait() { Cost = 1.0 });
-        item.Traits.Add(new VersatileTrait(
-          new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing },
-          new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Slashing }
-          ));
-        item.Traits.Add(new CleaveTrait());
-        break;
-      case ItemNames.MACE:
-        item = new Item()
-        {
-          Name = "mace",
-          Type = ItemType.Weapon,
-          Value = 25,
-          Glyph = new Glyph(')', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 2, DamageType = DamageType.Blunt });
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        item.Traits.Add(new CudgelTrait());
-        break;
-      case ItemNames.LONGSWORD:
-        item = new Item() { Name = "longsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Slashing });
-        item.Traits.Add(new SwordTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        break;
-      case ItemNames.SILVER_LONGSWORD:
-        item = new Item() { Name = "longsword", Type = ItemType.Weapon, Value = 25, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 7, NumOfDie = 1, DamageType = DamageType.Slashing });
-        item.Traits.Add(new SwordTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Silver });
-        item.Traits.Add(new AdjectiveTrait("silver"));
-        break;
-      case ItemNames.SHORTSHORD:
-        item = new Item() { Name = "shortsword", Type = ItemType.Weapon, Value = 15, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Slashing });
-        item.Traits.Add(new SwordTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new WeaponSpeedTrait() { Cost = 0.66 });
-        break;
-      case ItemNames.RAPIER:
-        item = new Item() { Name = "rapier", Type = ItemType.Weapon, Value = 20, Glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new FinesseTrait());
-        item.Traits.Add(new StabbyTrait());
-        item.Traits.Add(new MetalTrait() { Type = Metals.Steel });
-        item.Traits.Add(new ImpaleTrait());
-        break;
-      case ItemNames.LONGBOW:
-        item = new Item()
-        {
-          Name = "longbow",
-          Type = ItemType.Bow,
-          Value = 30,
-          Glyph = new Glyph(')', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
-        // This is for if the player happens to be wielding the bow for some reason
-        item.Traits.Add(new DamageTrait() { DamageDie = 1, NumOfDie = 1, DamageType = DamageType.Blunt });
-        item.Traits.Add(new AmmoTrait() { DamageDie = 4, NumOfDie = 1, DamageType = DamageType.Piercing, Range = 9 });
-        item.Traits.Add(new BowTrait());
-        break;
-      case ItemNames.ARROW:
-        item = new Item()
-        {
-          Name = "arrow",
-          Type = ItemType.Weapon,
-          Value = 2,
-          Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.DART:
-        item = new Item()
-        {
-          Name = "dart", Type = ItemType.Weapon, Value = 1,
-          Glyph = new Glyph('-', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new DamageTrait() { DamageDie = 3, NumOfDie = 1, DamageType = DamageType.Piercing });
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.FIREBOLT:
-        item = new Item()
-        {
-          Name = "firebolt",
-          Type = ItemType.Weapon,
-          Value = 0,
-          Glyph = new Glyph('-', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new DamageTrait() { DamageDie = 5, NumOfDie = 2, DamageType = DamageType.Fire });
-        break;
-      case ItemNames.LEATHER_ARMOUR:
-        item = new Item() { Name = "leather armour", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 1, Bonus = 0 });
-        break;
-      case ItemNames.STUDDED_LEATHER_ARMOUR:
-        item = new Item()
-        {
-          Name = "studded leather armour",
-          Type = ItemType.Armour,
-          Value = 25,
-          Glyph = new Glyph('[', Colours.BROWN, Colours.LIGHT_BROWN, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 2, Bonus = 0 });
-        break;
-      case ItemNames.RINGMAIL:
-        item = new Item()
-        {
-          Name = "ringmail",
-          Type = ItemType.Armour,
-          Value = 45,
-          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 3, Bonus = 0 });
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        break;
-      case ItemNames.CHAINMAIL:
-        item = new Item()
-        {
-          Name = "chainmail",
-          Type = ItemType.Armour,
-          Value = 75,
-          Glyph = new Glyph('[', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shirt, ArmourMod = 4, Bonus = 0 });
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        break;
-      case ItemNames.HELMET:
-        item = new Item() { Name = "helmet", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Hat, ArmourMod = 1, Bonus = 0 });
-        item.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-        break;
-      case ItemNames.SHIELD:
-        item = new Item() { Name = "shield", Type = ItemType.Armour, Value = 20, Glyph = new Glyph('[', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Shield, ArmourMod = 1, Bonus = 0 });
-        break;
-      case ItemNames.LOCK_PICK:
-        item = new Item() { Name = "lock pick", Type = ItemType.Tool, Value = 20,
-          Glyph = new Glyph('(', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        break;
-      case ItemNames.TORCH:
-        item = new Item() { Name = "torch", Type = ItemType.Tool, Value = 2,
-          Glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new TorchTrait() { OwnerID = item.ID, Fuel = 750, Lit = false });
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.ZORKMIDS:
-        item = new Item()
-        {
-          Name = "zorkmid",
-          Type = ItemType.Zorkmid,
-          Glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new StackableTrait());
-        break;        
-      case ItemNames.POTION_HEALING:
-        item = new Item()
-        {
-          Name = "potion of healing",
-          Type = ItemType.Potion,
-          Value = 75,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)        
-        };
-        item.Traits.Add(new UseSimpleTrait("minorheal"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new SideEffectTrait()
-        {
-          Odds = 100,
-          Effect = "BoostMaxStat#HP#2"
-        });
+      item = FromTemplate(template);
+      objDB.Add(item);
 
-        break;
-      case ItemNames.POTION_MIND_READING:
-        item = new Item()
-        {
-          Name = "potion of mind reading",
-          Type = ItemType.Potion,
-          Value = 125,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("telepathy"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.POTION_FIRE_RES:
-        item = new Item()
-        {
-          Name = "potion of fire resistance",
-          Type = ItemType.Potion,
-          Value = 100,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("resistfire"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.POTION_COLD_RES:
-        item = new Item()
-        {
-          Name = "potion of cold resistance",
-          Type = ItemType.Potion,
-          Value = 100,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("resistcold"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.ANTIDOTE:
-        item = new Item()
-        {
-          Name = "antidote",
-          Type = ItemType.Potion,
-          Value = 50,
-          Glyph = new Glyph('!', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("antidote"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_BLINK:
-        item = new Item()
-        {
-          Name = "scroll of blink",
-          Type = ItemType.Scroll,
-          Value = 125,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("blink"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_IDENTIFY:
-        item = new Item { Name = "scroll of identify", Type = ItemType.Scroll, Value = 75, 
-            Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("identify"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_KNOCK:
-        item = new Item()
-        {
-          Name = "scroll of knock",
-          Type = ItemType.Scroll,
-          Value = 100,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("knock"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_MAGIC_MAP:
-        item = new Item()
-        {
-          Name = "scroll of magic mapping",
-          Type = ItemType.Scroll,
-          Value = 100,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("magicmap"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_PROTECTION:
-        item = new Item()
-        {
-          Name = "scroll of protection", Type = ItemType.Scroll,
-          Value = 125, Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("protection"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SCROLL_RECALL:
-        item = new Item() { Name = "scroll of word of recall", Type = ItemType.Scroll, Value = 100,
-          Glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("recall"));
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new ScrollTrait());
-        item.Traits.Add(new StackableTrait());
-        break;      
-      // Probably later I'll randomize how many charges wands have?
-      case ItemNames.WAND_OF_MAGIC_MISSILES:
-        item = new Item() { Name = "wand of magic missiles", Type = ItemType.Wand, Value = 150, Glyph = new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new WandTrait() 
-        {
-          Charges = 20, 
-          Effect = "magicmissile",
-          IDed = false
-        });
-        break;
-      case ItemNames.WAND_SWAP:
-        item = new Item() { Name = "wand of swap", Type = ItemType.Wand, Value = 175, Glyph = GlyphForWand("wand of swap") };
-        item.Traits.Add(new WandTrait() { Charges = 15, Effect = "swap", IDed = false });
-        break;
-      case ItemNames.WAND_HEAL_MONSTER:
-        item = new Item() { Name = "wand of heal monster", Type = ItemType.Wand, Value = 25, Glyph = GlyphForWand("wand of heal monster") };
-        item.Traits.Add(new WandTrait() { Charges = 35, Effect = "healmonster", IDed = false });
-        break;
-      case ItemNames.WAND_FIREBALLS:
-        item = new Item() { Name = "wand of fireballs", Type = ItemType.Wand, Value = 125, Glyph = GlyphForWand("wand of fireballs") };
-        item.Traits.Add(new WandTrait() { Charges = 10, Effect = "fireball", IDed = false });
-        break;
-      case ItemNames.WAND_FROST:
-        item = new Item() { Name = "wand of frost", Type = ItemType.Wand, Value = 125, Glyph = GlyphForWand("wand of frost") };
-        item.Traits.Add(new WandTrait() { Charges = 10, Effect = "frost", IDed = false });
-        break;
-      case ItemNames.RING_OF_PROTECTION:
-        item = new Item() { Name = "ring of protection", Type = ItemType.Ring, Value = 125, Glyph = GlyphForRing("ring of protection") };
-        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "ACMod#1" ] });        
-        break;
-      case ItemNames.RING_OF_ADORNMENT:
-        item = new Item() { Name = "ring of adornment", Type = ItemType.Ring, Value = 20, Glyph = GlyphForRing("ring of adornment") };
-        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Likeable" ] });        
-        break;
-      case ItemNames.RING_OF_AGGRESSION:
-        item = new Item() { Name = "ring of aggression", Type = ItemType.Ring, Value = 75, Glyph = GlyphForRing("ring of aggression") };
-        GrantsTrait grants = new()
-        {
-          TraitsGranted = [ "ACMod#-3", "Berzerk" ]
-        };
-        item.Traits.Add(grants);
-        item.Traits.Add(new CursedTrait() {});
-        break;
-      case ItemNames.POTION_OF_LEVITATION:
-        item = new Item()
-        {
-          Name = "potion of levitation", Type = ItemType.Potion, Value = 100,
-          Glyph = new Glyph('!', Colours.PINK, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("levitation"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.POTION_BLINDNESS:
-        item = new Item()
-        {
-          Name = "potion of blindness", Type = ItemType.Potion, Value = 15,
-          Glyph = new Glyph('!', Colours.PINK, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new UseSimpleTrait("blindness"));
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.SKULL:
-        item = new Item() 
-        {
-          Name = "skull", Type = ItemType.Bone, Value = 0, 
-          Glyph = new Glyph('(', Colours.WHITE, Colours.YELLOW, Colours.BLACK, Colours.BLACK)
-        };
-        break;
-      case ItemNames.VIAL_OF_POISON:
-        item = new Item
-        {
-          Name = "vial of poison", Type = ItemType.Potion, Value = 100,
-          Glyph = new Glyph('!', Colours.LIME_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new UseSimpleTrait("applypoison"));
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.GHOSTCAP_MUSHROOM:
-        item = new Item()
-        {
-          Name = "ghostcap mushroom", Type = ItemType.Food, Value = 75,
-          Glyph = new Glyph('♣', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new EdibleTrait());
-        item.Traits.Add(new UseSimpleTrait("seeinvisible"));
-        item.Traits.Add(new SideEffectTrait() 
-        {
-          Odds = 15,
-          Effect = "Confused#0#13#0"          
-        });
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.APPLE:
-        item = new Item() { Name = "apple", Type = ItemType.Food, Value = 1,
-          Glyph = new Glyph(',', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new EdibleTrait());
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new UseSimpleTrait("trivialheal"));
-        break;
-      case ItemNames.TALISMAN_OF_CIRCUMSPECTION:
-        item = new Item() { Name = "talisman of circumspection", Type = ItemType.Talisman, Value = 125,
-          Glyph = new Glyph('☥', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Dodge#33" ] });        
-        break;
-      case ItemNames.BLINDFOLD:
-        item = new Item() { Name = "blindfold", Type = ItemType.Armour, Value = 5, 
-          Glyph = new Glyph('(', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ArmourTrait() { Part = ArmourParts.Mask, ArmourMod = 0, Bonus = 0 });
-        item.Traits.Add(new GrantsTrait() { TraitsGranted = [ "Blind#owner#max" ] });        
-        break;
-      case ItemNames.BEETLE_CARAPACE:
-        item = new Item() { Name = "beetle carapace", Type = ItemType.Reagent, Value = 25,
-          Glyph = new Glyph(',', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new StackableTrait());
-        break;
-      case ItemNames.OGRE_LIVER:
-        item = new Item() { Name = "ogre liver", Type = ItemType.Reagent, Value = 25,
-          Glyph = new Glyph(',', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new EdibleTrait());
-        item.Traits.Add(new UseSimpleTrait("buffstrength"));
-        item.Traits.Add(new ConsumableTrait());
-        break;
-      case ItemNames.RUBBLE:
-        item = new Item() { Name = "rubble", Type = ItemType.Landscape, Value = 0,
-          Glyph = new Glyph('%', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new BlockTrait());
-        item.Traits.Add(new PluralTrait());
-        item.Traits.Add(new OpaqueTrait());
-        break;
-      case ItemNames.HILL_GIANT_ESSENCE:
-        item = new Item()
-        {
-          Name = "vial of hill giant essence", Type = ItemType.Potion, Value = 150,
-          Glyph = new Glyph('!', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Constitution#1" });
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new CanApplyTrait());
-        break;
-      case ItemNames.FIRE_GIANT_ESSENCE:
-        item = new Item()
-        {
-          Name = "vial of fire giant essence", Type = ItemType.Potion, Value = 150,
-          Glyph = new Glyph('!', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Strength#1" });
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new UseSimpleTrait("resistfire"));
-        break;
-      case ItemNames.FROST_GIANT_ESSENCE:
-        item = new Item()
-        {
-          Name = "vial of frost giant essence", Type = ItemType.Potion, Value = 150,
-          Glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#Strength#1" });
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new UseSimpleTrait("resistcold"));
-        break;
-      case ItemNames.GUIDE_STABBY:
-        item = new Item() { Name = "Gray Mouser's Guide to Stabbing", Type = ItemType.Scroll, Value = 100,
-          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK) };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#FinesseUse#100" });
-        item.Traits.Add(new CanApplyTrait());
-        break;
-      case ItemNames.GUIDE_SWORDS:
-        item = new Item()
-        {
-          Name = "Groo: the Early Years", Type = ItemType.Scroll, Value = 100,
-          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#SwordUse#100" });
-        item.Traits.Add(new CanApplyTrait());
-        break;
-      case ItemNames.GUIDE_AXES:
-        item = new Item()
-        {
-          Name = "Asking About Axing Vol. 2", Type = ItemType.Scroll, Value = 100,
-          Glyph = new Glyph('♪', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
-        };
-        item.Traits.Add(new ConsumableTrait());
-        item.Traits.Add(new FlammableTrait());
-        item.Traits.Add(new StackableTrait());
-        item.Traits.Add(new SideEffectTrait() { Odds = 100, Effect = "BoostMaxStat#AxeUse#100" });
-        item.Traits.Add(new CanApplyTrait());
-        break;
-      default:
-        throw new Exception($"{name} doesn't seem exist in yarl2 :(");
+      if (item.Type == ItemType.Wand)
+        item.Glyph = GlyphForWand(item.Name);
+      if (item.Type == ItemType.Ring)
+        item.Glyph = GlyphForRing(item.Name);
+      
+      return item;
     }
 
-    objDB.Add(item);
-
-    return item;
+    throw new Exception($"Item {name} is not defined!");
   }
   
   static Glyph GlyphForRing(string name)

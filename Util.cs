@@ -122,7 +122,7 @@ class Colours
     "faintpink" => FAINT_PINK,
     "iceblue" => ICE_BLUE,
     "null" => NULL,
-    _ => throw new Exception("Hmm I don't know that colour")
+    _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 }
 

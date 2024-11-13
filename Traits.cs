@@ -764,7 +764,7 @@ class VillagerTrait : Trait
 
 class ScrollTrait : Trait
 {
-  public override string AsText() => "Written";
+  public override string AsText() => "Scroll";
 }
 
 // A bit dumb to have floating and flying and maybe I'll merge them
@@ -2206,7 +2206,13 @@ class TraitFactory
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
-    { "Torch", (pieces, gameObj) => new TorchTrait() { OwnerID = ulong.Parse(pieces[1]), Lit = bool.Parse(pieces[2]), Fuel = int.Parse(pieces[3]) } },
+    { "Torch", (pieces, gameObj) => new TorchTrait() 
+      { 
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
+        Lit = bool.Parse(pieces[2]), 
+        Fuel = int.Parse(pieces[3]) 
+      } 
+    },
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "Undead", (pieces, gameObj) => new UndeadTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
@@ -2226,7 +2232,7 @@ class TraitFactory
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
-    { "Written", (pieces, gameObj) => new ScrollTrait() }
+    { "Scroll", (pieces, gameObj) => new ScrollTrait() }
   };
 
   public static Trait FromText(string text, GameObj? container)

@@ -1,0 +1,748 @@
+[
+  {
+    "Name": "SPEAR",
+    "DescriptiveName": "spear",
+    "Type": "Weapon",
+    "Value": 10,
+    "Glyph": "),lightbrown,brown,black,black",
+    "Traits": [
+      "Versatile#Damage#6#1#Piercing#Damage#8#1#Piercing",
+      "Polearm"
+    ]
+  },
+  {
+    "Name": "GUISARME",
+    "DescriptiveName": "guisarme",
+    "Type": "Weapon",
+    "Value": 15,
+    "Glyph": "),grey,darkgrey,black,black",    
+    "Traits": [
+      "Damage#8#1#Piercing",
+      "Polearm",
+      "Reach",
+      "TwoHanded",
+      "Impale"
+    ]
+  },
+  {
+    "Name": "DAGGER",
+    "DescriptiveName": "dagger",
+    "Type": "Weapon",
+    "Value": 10,
+    "Glyph": "),white,grey,black,black",
+    "Traits": [
+      "Damage#4#1#Piercing",
+      "Stackable",
+      "Finesse",
+      "Metal#2",
+      "WeaponSpeed#0.5"
+    ]
+  },
+  {
+    "Name": "SILVER_DAGGER",
+    "DescriptiveName": "dagger",
+    "Type": "Weapon",
+    "Value": 15,
+    "Glyph": "),white,grey,black,black",
+    "Traits": [
+      "Damage#3#1#Piercing",
+      "Stackable",
+      "Finesse",
+      "Metal#5",
+      "WeaponSpeed#0.5",
+      "Adjective#silver"
+    ]
+  },
+  {
+    "Name": "HAND_AXE",
+    "DescriptiveName": "hand axe",
+    "Type": "Weapon",
+    "Value": 15,
+    "Glyph": "),lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#6#1#Slashing",
+      "Axe",
+      "Metal#1"
+    ]
+  },
+  {
+    "Name": "PICKAXE",
+    "DescriptiveName": "pickaxe",
+    "Type": "Tool",
+    "Value": 15,
+    "Glyph": "),grey,darkgrey,black,black",
+    "Traits": [
+      "Damage#6#1#Piercing",
+      "Axe",
+      "Metal#1"
+    ]
+  },
+  {
+    "Name": "BATTLE_AXE",
+    "DescriptiveName": "battle axe",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#3#3#Slashing",
+      "Axe",
+      "Metal#2",
+      "TwoHanded",
+      "Cleave"
+    ]
+  },
+  {
+    "Name": "GREATSWORD",
+    "DescriptiveName": "greatsword",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Damage#6#2#Slashing",
+      "Sword",
+      "Metal#2",
+      "WeaponSpeed#1.25",
+      "TwoHanded",
+      "Cleave"
+    ]
+  },
+  {
+    "Name": "CLAYMORE",
+    "DescriptiveName": "claymore",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Sword",
+      "Metal#2",
+      "WeaponSpeed#1.0",
+      "Versatile#Damage#8#1#Slashing#Damage#5#2#Slashing",
+      "Cleave"
+    ]
+  },
+  {
+    "Name": "MACE",
+    "DescriptiveName": "mace",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),lightgrey,grey,black,black",
+    "Traits": [
+      "Damage#4#2#Blunt",
+      "Metal#1",
+      "Cudgel"
+    ]
+  },
+  {
+    "Name": "LONGSWORD",
+    "DescriptiveName": "longsword",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Damage#8#1#Slashing",
+      "Sword",
+      "Metal#2"
+    ]
+  },
+  {
+    "Name": "SILVER_LONGSWORD",
+    "DescriptiveName": "longsword",
+    "Type": "Weapon",
+    "Value": 25,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Damage#7#1#Slashing",
+      "Sword",
+      "Metal#5",
+      "Adjective#silver"
+    ]
+  },
+  {
+    "Name": "SHORTSHORD",
+    "DescriptiveName": "shortsword",
+    "Type": "Weapon",
+    "Value": 15,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Damage#6#1#Slashing",
+      "Sword",
+      "Metal#2",
+      "WeaponSpeed#0.66"
+    ]
+  },
+  {
+    "Name": "RAPIER",
+    "DescriptiveName": "rapier",
+    "Type": "Weapon",
+    "Value": 20,
+    "Glyph": "),white,lightgrey,black,black",
+    "Traits": [
+      "Damage#8#1#Piercing",
+      "Finesse",
+      "Stabby",
+      "Metal#2",
+      "Impale"
+    ]
+  },
+  {
+    "Name": "LONGBOW",
+    "DescriptiveName": "longbow",
+    "Type": "Bow",
+    "Value": 30,
+    "Glyph": "),lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#1#1#Blunt",
+      "Ammo#4#1#Piercing#9",
+      "Bow"
+    ]
+  },
+  {
+    "Name": "ARROW",
+    "DescriptiveName": "arrow",
+    "Type": "Weapon",
+    "Value": 2,
+    "Glyph": "-,lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#6#1#Piercing",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "DART",
+    "DescriptiveName": "dart",
+    "Type": "Weapon",
+    "Value": 1,
+    "Glyph": "-,lightgrey,grey,black,black",
+    "Traits": [
+      "Damage#3#1#Piercing",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "FIREBOLT",
+    "DescriptiveName": "firebolt",
+    "Type": "Weapon",
+    "Value": 0,
+    "Glyph": "-,yellow,yelloworange,black,black",
+    "Traits": [
+      "Damage#5#2#Fire"
+    ]
+  },
+  {
+    "Name": "LEATHER_ARMOUR",
+    "DescriptiveName": "leather armour",
+    "Type": "Armour",
+    "Value": 20,
+    "Glyph": "[,brown,lightbrown,black,black",
+    "Traits": [
+      "Armour#Shirt#1#0"
+    ]
+  },
+  {
+    "Name": "STUDDED_LEATHER_ARMOUR",
+    "DescriptiveName": "studded leather armour",
+    "Type": "Armour",
+    "Value": 25,
+    "Glyph": "[,brown,lightbrown,black,black",
+    "Traits": [
+      "Armour#Shirt#2#0"
+    ]
+  },
+  {
+    "Name": "RINGMAIL",
+    "DescriptiveName": "ringmail",
+    "Type": "Armour",
+    "Value": 45,
+    "Glyph": "[,lightgrey,grey,black,black",
+    "Traits": [
+      "Armour#Shirt#3#0",
+      "Metal#1"
+    ]
+  },
+  {
+    "Name": "CHAINMAIL",
+    "DescriptiveName": "chainmail",
+    "Type": "Armour",
+    "Value": 75,
+    "Glyph": "[,lightgrey,grey,black,black",
+    "Traits": [
+      "Armour#Shirt#4#0",
+      "Metal#1"
+    ]
+  },
+  {
+    "Name": "HELMET",
+    "DescriptiveName": "helmet",
+    "Type": "Armour",
+    "Value": 20,
+    "Glyph": "[,white,grey,black,black",
+    "Traits": [
+      "Armour#Hat#1#0",
+      "Metal#1"
+    ]
+  },
+  {
+    "Name": "SHIELD",
+    "DescriptiveName": "shield",
+    "Type": "Armour",
+    "Value": 20,
+    "Glyph": "[,grey,darkgrey,black,black",
+    "Traits": [
+      "Armour#Shield#1#0"
+    ]
+  },
+  {
+    "Name": "LOCK_PICK",
+    "DescriptiveName": "lock pick",
+    "Type": "Tool",
+    "Value": 20,
+    "Glyph": "(,grey,lightgrey,black,black",
+    "Traits": []
+  },
+  {
+    "Name": "ZORKMIDS",
+    "DescriptiveName": "zorkmid",
+    "Type": "Zorkmid",
+    "Value": 0,
+    "Glyph": "$,yellow,yelloworange,black,black",
+    "Traits": [
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "POTION_HEALING",
+    "DescriptiveName": "potion of healing",
+    "Type": "Potion",
+    "Value": 75,
+    "Glyph": "!,lightblue,blue,black,black",
+    "Traits": [
+      "UseSimple#minorheal",
+      "Consumable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#HP#2"
+    ]
+  },
+  {
+    "Name": "POTION_MIND_READING",
+    "DescriptiveName": "potion of mind reading",
+    "Type": "Potion",
+    "Value": 125,
+    "Glyph": "!,lightblue,blue,black,black",
+    "Traits": [
+      "UseSimple#telepathy",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "POTION_FIRE_RES",
+    "DescriptiveName": "potion of fire resistance",
+    "Type": "Potion",
+    "Value": 100,
+    "Glyph": "!,lightblue,blue,black,black",
+    "Traits": [
+      "UseSimple#resistfire",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "POTION_COLD_RES",
+    "DescriptiveName": "potion of cold resistance",
+    "Type": "Potion",
+    "Value": 100,
+    "Glyph": "!,lightblue,blue,black,black",
+    "Traits": [
+      "UseSimple#resistcold",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "ANTIDOTE",
+    "DescriptiveName": "antidote",
+    "Type": "Potion",
+    "Value": 50,
+    "Glyph": "!,yellow,yelloworange,black,black",
+    "Traits": [
+      "UseSimple#antidote",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_BLINK",
+    "DescriptiveName": "scroll of blink",
+    "Type": "Scroll",
+    "Value": 125,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#blink",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_IDENTIFY",
+    "DescriptiveName": "scroll of identify",
+    "Type": "Scroll",
+    "Value": 75,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#identify",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_KNOCK",
+    "DescriptiveName": "scroll of knock",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#knock",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_PROTECTION",
+    "DescriptiveName": "scroll of protection",
+    "Type": "Scroll",
+    "Value": 125,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#protection",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_MAGIC_MAP",
+    "DescriptiveName": "scroll of magic mapping",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#magicmap",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SCROLL_RECALL",
+    "DescriptiveName": "scroll of word of recall",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#recall",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "WAND_MAGIC_MISSILES",
+    "DescriptiveName": "wand of magic missiles",
+    "Type": "Wand",
+    "Value": 150,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#20#false#magicmissile"
+    ]
+  },
+  {
+    "Name": "WAND_SWAP",
+    "DescriptiveName": "wand of swap",
+    "Type": "Wand",
+    "Value": 175,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#15#false#swap"
+    ]
+  },
+  {
+    "Name": "WAND_HEAL_MONSTER",
+    "DescriptiveName": "wand of heal monster",
+    "Type": "Wand",
+    "Value": 25,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#35#false#healmonster"
+    ]
+  },
+  {
+    "Name": "WAND_FIREBALLS",
+    "DescriptiveName": "wand of fireballs",
+    "Type": "Wand",
+    "Value": 125,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#10#false#fireball"
+    ]
+  },
+  {
+    "Name": "WAND_FROST",
+    "DescriptiveName": "wand of frost",
+    "Type": "Wand",
+    "Value": 125,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#10#false#frost"
+    ]
+  },
+  {
+    "Name": "RING_OF_PROTECTION",
+    "DescriptiveName": "ring of protection",
+    "Type": "Ring",
+    "Value": 125,
+    "Glyph": "o,white,grey,black,black",
+    "Traits": [
+      "Grants#ACMod&1"
+    ]
+  },
+  {
+    "Name": "RING_OF_AGGRESSION",
+    "DescriptiveName": "ring of aggression",
+    "Type": "Ring",
+    "Value": 75,
+    "Glyph": "o,white,grey,black,black",
+    "Traits": [
+      "Grants#ACMod&-3;Berzerk",
+      "Cursed"
+    ]
+  },
+  {
+    "Name": "POTION_OF_LEVITATION",
+    "DescriptiveName": "potion of levitation",
+    "Type": "Potion",
+    "Value": 100,
+    "Glyph": "!,pink,dullred,black,black",
+    "Traits": [
+      "UseSimple#levitation",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "POTION_BLINDNESS",
+    "DescriptiveName": "potion of blindness",
+    "Type": "Potion",
+    "Value": 15,
+    "Glyph": "!,pink,dullred,black,black",
+    "Traits": [
+      "UseSimple#blindness",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "SKULL",
+    "DescriptiveName": "skull",
+    "Type": "Bone",
+    "Value": 0,
+    "Glyph": "(,white,yellow,black,black",
+    "Traits": []
+  },
+  {
+    "Name": "VIAL_OF_POISON",
+    "DescriptiveName": "vial of poison",
+    "Type": "Potion",
+    "Value": 100,
+    "Glyph": "!,limegreen,darkgreen,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#applypoison",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "GHOSTCAP_MUSHROOM",
+    "DescriptiveName": "ghostcap mushroom",
+    "Type": "Food",
+    "Value": 75,
+    "Glyph": "♣,lightgrey,grey,black,black",
+    "Traits": [
+      "Edible",
+      "UseSimple#seeinvisible",
+      "SideEffect#15#Confused#0#13#0",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "APPLE",
+    "DescriptiveName": "apple",
+    "Type": "Food",
+    "Value": 1,
+    "Glyph": ",,brightred,dullred,black,black",
+    "Traits": [
+      "Edible",
+      "Consumable",
+      "Stackable",
+      "UseSimple#trivialheal"
+    ]
+  },
+  {
+    "Name": "TALISMAN_OF_CIRCUMSPECTION",
+    "DescriptiveName": "talisman of circumspection",
+    "Type": "Talisman",
+    "Value": 125,
+    "Glyph": "☥,white,grey,black,black",
+    "Traits": [
+      "Grants#Dodge&33"
+    ]
+  },
+  {
+    "Name": "BLINDFOLD",
+    "DescriptiveName": "blindfold",
+    "Type": "Armour",
+    "Value": 5,
+    "Glyph": "(,grey,darkgrey,black,black",
+    "Traits": [
+      "Armour#Mask#0#0",
+      "Grants#Blind&owner&max"
+    ]
+  },
+  {
+    "Name": "BEETLE_CARAPACE",
+    "DescriptiveName": "beetle carapace",
+    "Type": "Reagent",
+    "Value": 25,
+    "Glyph": ",,lightgrey,grey,black,black",
+    "Traits": [
+      "Stackable"
+    ]
+  },
+  {
+    "Name": "OGRE_LIVER",
+    "DescriptiveName": "ogre liver",
+    "Type": "Reagent",
+    "Value": 25,
+    "Glyph": ",,brightred,dullred,black,black",
+    "Traits": [
+      "Stackable",
+      "Edible",
+      "UseSimple#buffstrength",
+      "Consumable"
+    ]
+  },
+  {
+    "Name": "RUBBLE",
+    "DescriptiveName": "rubble",
+    "Type": "Landscape",
+    "Value": 0,
+    "Glyph": "%,grey,darkgrey,black,black",
+    "Traits": [
+      "Block",
+      "Plural",
+      "Opaque"
+    ]
+  },
+  {
+    "Name": "HILL_GIANT_ESSENCE",
+    "DescriptiveName": "vial of hill giant essence",
+    "Type": "Potion",
+    "Value": 150,
+    "Glyph": "!,lightbrown,brown,black,black",
+    "Traits": [
+      "SideEffect#100#BoostMaxStat#Constitution#1",
+      "Consumable",
+      "Stackable",
+      "CanApply"
+    ]
+  },
+  {
+    "Name": "FIRE_GIANT_ESSENCE",
+    "DescriptiveName": "vial of fire giant essence",
+    "Type": "Potion",
+    "Value": 150,
+    "Glyph": "!,brightred,dullred,black,black",
+    "Traits": [
+      "SideEffect#100#BoostMaxStat#Strength#1",
+      "Consumable",
+      "Stackable",
+      "UseSimple#resistfire"
+    ]
+  },
+  {
+    "Name": "FROST_GIANT_ESSENCE",
+    "DescriptiveName": "vial of frost giant essence",
+    "Type": "Potion",
+    "Value": 150,
+    "Glyph": "!,lightblue,blue,black,black",
+    "Traits": [
+      "SideEffect#100#BoostMaxStat#Strength#1",
+      "Consumable",
+      "Stackable",
+      "UseSimple#resistcold"
+    ]
+  },
+  {
+    "Name": "GUIDE_STABBY",
+    "DescriptiveName": "Gray Mouser's Guide to Stabbing",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "♪,white,lightgrey,black,black",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#FinesseUse#100",
+      "CanApply"
+    ]
+  },
+  {
+    "Name": "GUIDE_SWORDS",
+    "DescriptiveName": "Groo: the Early Years",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "♪,white,lightgrey,black,black",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#SwordUse#100",
+      "CanApply"
+    ]
+  },
+  {
+    "Name": "GUIDE_AXES",
+    "DescriptiveName": "Asking About Axing Vol. 2",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "♪,white,lightgrey,black,black",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#AxeUse#100",
+      "CanApply"
+    ]
+  },
+  {
+    "Name": "TORCH",
+    "DescriptiveName": "torch",
+    "Type": "Tool",
+    "Value": 2,
+    "Glyph": "(,lightbrown,brown,black,black",
+    "Traits": [
+      "Flammable",
+      "Stackable",
+      "Torch#owner#false#750"
+    ]
+  }
+]
