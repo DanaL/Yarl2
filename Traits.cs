@@ -909,9 +909,10 @@ class ACModTrait : BasicTrait
   public override string AsText() => $"ACMod#{ArmourMod}";
 }
 
-class ArmourTrait : ACModTrait
+class ArmourTrait : Trait
 {
   public ArmourParts Part { get; set; }
+  public int ArmourMod { get; set; }
   public int Bonus { set; get; }
 
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
