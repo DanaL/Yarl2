@@ -49,14 +49,19 @@ class Artifacts
     // add three nice features
     for (int i = 0; i < 3; i++)
     {
-      int lo = 0;
+      List<int> opts = [3, 3, 3];
       if (sword.Traits.OfType<MetalTrait>().FirstOrDefault() is MetalTrait mt)
       {
-        if (mt.Type == Metals.Silver || mt.Type == Metals.Mithril)
-          lo = 2;
+        if (!(mt.Type == Metals.Silver || mt.Type == Metals.Mithril))
+        {
+          opts.Add(0);
+          opts.Add(1);
+        }          
       } 
-        
-      int roll = rng.Next(lo, 6);
+      if (!sword.HasTrait<ViciousTrait>())
+        opts.Add(3);
+
+      int roll = opts[rng.Next(opts.Count)];
       switch (roll)
       {
         case 0:
