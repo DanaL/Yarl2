@@ -747,7 +747,7 @@ class DungeonMap(Random rng)
       }
     }
 
-    var djmap = new DijkstraMap(map, height, width);
+    var djmap = new DijkstraMap(map, [], height, width);
     var passable = new Dictionary<TileType, int>
         {
             { TileType.DungeonFloor, 1 },

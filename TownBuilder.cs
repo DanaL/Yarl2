@@ -581,7 +581,7 @@ class TownBuilder
     passable.Add(TileType.Water, 3);
     passable.Add(TileType.DeepWater, 3);
 
-    var dmap = new DijkstraMap(map, 129, 129);
+    var dmap = new DijkstraMap(map, [], 129, 129);
     dmap.Generate(passable, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)

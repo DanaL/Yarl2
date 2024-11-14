@@ -13,12 +13,13 @@ using Yarl2;
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
-class DijkstraMap(Map map, int height, int width)
+class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
 {
   Map Map { get; set; } = map;
   int Height { get; set; } = height;
   int Width { get; set; } = width;
   int[,]? _dijkstraMap { get; set; }
+  HashSet<(int, int)> Blocked { get; set; } = blocked;
 
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
@@ -60,7 +61,7 @@ class DijkstraMap(Map map, int height, int width)
         continue;
       var tile = Map.TileAt(sq.Item1, sq.Item2);
 
-      if (!passable.TryGetValue(tile.Type, out int cost))
+      if (!passable.TryGetValue(tile.Type, out int cost) || Blocked.Contains(sq))
         continue;
 
       int cheapestNeighbour = int.MaxValue;
