@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text;
-
 namespace Yarl2;
 
 class LineScanner(string line)
@@ -76,7 +74,7 @@ class LineScanner(string line)
 
   void ScanWord()
   {
-    while (!IsAtEnd() && Peek() != ']' && !char.IsWhiteSpace(Peek()))
+    while (!IsAtEnd() && Peek() != '[' && Peek() != ']' && !char.IsWhiteSpace(Peek()))
       Advance();
     Words.Add((CurrentColour, Source[Start..Current]));
   }
