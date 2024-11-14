@@ -51,7 +51,7 @@ dire bat
 A large bat, with glowing red eyes and glistening fangs.
 #
 centipede
-A large, skittering bug. Something unpleasant seems to be oozing from its pincers.
+A large, skittering bug. Something unpleasant seems to be oozing from its pincers. It's likely venemous. Or possibly poisonous. No one can say which.
 #
 floating eye
 A bloodshot eye drifting through the dungeon. Something about it draws your gaze...

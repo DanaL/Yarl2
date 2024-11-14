@@ -1294,12 +1294,80 @@ class PoisonCoatedTrait : Trait
   public override string AsText() => "PoisonCoated";
 }
 
+class PoisonedTrait : TemporaryTrait
+{
+  public int DC { get; set; }
+  public int Strength { get; set; }
+  public int Duration { get; set; }
+  public override string AsText() => $"Poisoned#{DC}#{Strength}#{OwnerID}#{ExpiresOn}#{Duration}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    foreach (Trait t in target.Traits)
+    {
+      // We won't apply multiple poison statuses to one victim. Although maybe I
+      // should replace the weaker poison with the stronger one?
+      if (t is PoisonedTrait)
+        return [];
+
+      if (t is ImmunityTrait imm && imm.Type == DamageType.Poison)
+        return [];
+    }
+
+    bool conCheck = target.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
+    if (!conCheck)
+    {
+      target.Traits.Add(this);
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
+      OwnerID = target.ID;
+      ExpiresOn = gs.Turn + (ulong)Duration;
+      return [$"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!"];
+    }
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs)
+  {
+    var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
+    if (victim is null)
+      return;
+
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      victim.Traits.Remove(this);
+      gs.RemoveListener(this);
+      Expired = true;
+      string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
+      gs.UIRef().AlertPlayer(msg);
+
+      return;
+    }
+
+    List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
+    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null, 1.0);
+    if (dmgMsg != "")
+      gs.UIRef().AlertPlayer(dmgMsg);
+
+    if (hpLeft < 1)
+    {
+      string msg = $"{victim.FullName.Capitalize()} died from poison!";
+      gs.UIRef().AlertPlayer(msg);
+      gs.ActorKilled(victim, "poison", null, null);
+    }
+    else if (victim is Player)
+    {
+      gs.UIRef().AlertPlayer("You feel ill.");
+    }
+  }
+}
+
 class PoisonerTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Strength { get; set; }
-
-  public override string AsText() => $"Poisoner#{DC}#{Strength}";
+  public int Duration { get; set; }
+  public override string AsText() => $"Poisoner#{DC}#{Strength}#{Duration}";
 }
 
 class OnFireTrait : BasicTrait, IGameEventListener, IOwner
@@ -1596,75 +1664,6 @@ class BlindTrait : TemporaryTrait
   }
 
   public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}";
-}
-
-class PoisonedTrait : TemporaryTrait
-{
-  public int DC { get; set; }
-  public int Strength { get; set; }
-
-  public override string AsText() => $"Poisoned#{DC}#{Strength}#{OwnerID}#{ExpiresOn}";
-
-  public override List<string> Apply(Actor target, GameState gs)
-  {
-    foreach (Trait t in target.Traits)
-    {
-      // We won't apply multiple poison statuses to one victim. Although maybe I
-      // should replace the weaker poison with the stronger one?
-      if (t is PoisonedTrait)
-        return [];
-
-      if (t is ImmunityTrait imm && imm.Type == DamageType.Poison)
-        return [];
-    }
-
-    int duration = gs.Rng.Next(50, 100) - target.Stats[Attribute.Constitution].Curr * 7;
-    bool conCheck = target.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
-    if (duration > 0 && !conCheck)
-    {      
-      target.Traits.Add(this);
-      gs.RegisterForEvent(GameEventType.EndOfRound, this);
-      OwnerID = target.ID;
-      ExpiresOn = gs.Turn + (ulong) duration;
-      return [ $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!" ];
-    }
-
-    return [];
-  }
-
-  public override void EventAlert(GameEventType eventType, GameState gs)
-  {
-    var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
-    if (victim is null)
-      return;
-
-    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
-    {
-      victim.Traits.Remove(this);
-      gs.RemoveListener(this);
-      Expired = true;
-      string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
-      gs.UIRef().AlertPlayer(msg);
-
-      return;
-    }
-
-    List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null, 1.0);
-    if (dmgMsg != "")
-      gs.UIRef().AlertPlayer(dmgMsg);
-    
-    if (hpLeft < 1)
-    {
-      string msg = $"{victim.FullName.Capitalize()} died from poison!";
-      gs.UIRef().AlertPlayer(msg);
-      gs.ActorKilled(victim, "poison", null, null);
-    }
-    else if (victim is Player) 
-    {
-      gs.UIRef().AlertPlayer("You feel ill.");
-    }
-  }
 }
 
 class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
@@ -2125,10 +2124,10 @@ class TraitFactory
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait() 
-    { 
-      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
-      Strength = int.Parse(pieces[2])
-    } 
+      { 
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        Strength = int.Parse(pieces[2])
+      } 
     },
     { "OnFire", (pieces, gameObj) => new OnFireTrait() { Expired = bool.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), Lifetime = int.Parse(pieces[3]) } },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
@@ -2139,8 +2138,12 @@ class TraitFactory
     { "Plant", (pieces, gameObj) => new PlantTrait() },
     { "Plural", (pieces, gameObj) => new PluralTrait() },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
-    { "Poisoned", (pieces, gameObj) => new PoisonedTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), ExpiresOn = ulong.Parse(pieces[4]) } },
-    { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]) } },
+    { "Poisoned", (pieces, gameObj) => new PoisonedTrait() 
+      { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), 
+        ExpiresOn = ulong.Parse(pieces[4]), Duration = int.Parse(pieces[5])
+      } 
+    },
+    { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },

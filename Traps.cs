@@ -102,7 +102,7 @@ class Traps
       dart.Loc = loc;
       dart.Traits.Add(new PoisonCoatedTrait());
       dart.Traits.Add(new AdjectiveTrait("poisoned"));
-      dart.Traits.Add(new PoisonerTrait() { DC = 11 + gs.CurrLevel, Strength = int.Max(1, gs.CurrLevel / 4) });
+      dart.Traits.Add(new PoisonerTrait() { DC = 11 + gs.CurrLevel, Strength = int.Max(1, gs.CurrLevel / 4), Duration = 10 });
 
       int attackRoll = gs.Rng.Next(1, 21) + loc.Level / 3;
       if (attackRoll > actor.AC)

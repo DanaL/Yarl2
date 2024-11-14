@@ -978,7 +978,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
       else
         txt += $"some {_summons.Pluralize()}!";
     }
-        
+
     return new ActionResult() { Complete = true, Messages = [txt], EnergyCost = 1.0 };
   }
 }
@@ -1890,7 +1890,7 @@ class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
     {      
       item.Traits.Add(new PoisonCoatedTrait());
       item.Traits.Add(new AdjectiveTrait("poisoned"));
-      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1 });
+      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1, Duration = 10 });
 
       string name = Actor.FullName.Capitalize();
       string verb = Grammar.Conjugate(Actor, "smear");

@@ -123,10 +123,14 @@ class Battle
 
   static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
   {
+    int duration = source.Duration + gs.Rng.Next(-5, 6);
+    if (duration < 0)
+      duration = 1;
     var poison = new PoisonedTrait()
     {
       DC = source.DC,
-      Strength = source.Strength      
+      Strength = source.Strength,
+      Duration = duration
     };
     result.Messages.AddRange(poison.Apply(victim, gs));
   }
