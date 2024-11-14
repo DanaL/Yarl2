@@ -964,22 +964,28 @@ class SummonAction(Loc target, string summons, int count) : Action()
         ++summonCount;
       }
     }
-    
-    string txt;
-    if (summonCount == 0) 
+
+    List<string> msgs = [];
+    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
     {
-      txt = "A spell fizzles.";
-    }
-    else
-    {
-      txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} ";
-      if (_count == 1)
-        txt += _summons.IndefArticle() + "!";
+      string txt;
+      if (summonCount == 0)
+      {
+        txt = "A spell fizzles.";
+      }
       else
-        txt += $"some {_summons.Pluralize()}!";
+      {
+        txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} ";
+        if (_count == 1)
+          txt += _summons.IndefArticle() + "!";
+        else
+          txt += $"some {_summons.Pluralize()}!";
+      }
+
+      msgs.Add(txt);
     }
 
-    return new ActionResult() { Complete = true, Messages = [txt], EnergyCost = 1.0 };
+    return new ActionResult() { Complete = true, Messages = msgs, EnergyCost = 1.0 };
   }
 }
 
