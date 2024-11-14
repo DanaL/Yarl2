@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using SDL2;
 
 namespace Yarl2;
 
@@ -121,7 +120,7 @@ class Decorations
         break;
       case 1:
         sb.Append(" wrought by the mad experiments of ");
-        sb.Append(ng.GenerateName(rng.Next(6, 10)));
+        sb.Append(ng.GenerateName(rng.Next(6, 10)).Capitalize());
         sb.Append('.');
         break;
       default:
