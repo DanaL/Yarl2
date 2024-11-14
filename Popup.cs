@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata.Ecma335;
+
 namespace Yarl2;
 
 class LineScanner(string line)
@@ -164,7 +166,7 @@ class Popup
       else if (word.Length <= Width - currWidth - 5)
       {
         currWidth += word.Length;
-        if (line.Count > 1 && !(word[0] == ',' || word[0] == ';'))
+        if (PrependSpace(line))
         {
           word = ' ' + word;
           ++currWidth;
@@ -182,6 +184,21 @@ class Popup
 
     ui.WriteLine(border, row, col, Width, DefaultTextColour);
 
+    bool PrependSpace(List<(Colour, string)> line)
+    {
+      if (line.Count > 0)
+      {
+        char preceding = line.Last().Item2.Last();
+        return preceding switch
+        {
+          '$' => false,
+          '(' => false,
+          _ => true
+        };
+    }
+
+      return true;
+    }
     void WritePaddedLine()
     {
       // Pad out so that the right border lines up        
