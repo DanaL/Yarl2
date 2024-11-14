@@ -313,7 +313,7 @@
     "Name": "POTION_HEALING",
     "DescriptiveName": "potion of healing",
     "Type": "Potion",
-    "Value": 75,
+    "Value": 25,
     "Glyph": "!,lightblue,blue,black,black",
     "Traits": [
       "UseSimple#minorheal",
@@ -362,7 +362,7 @@
     "Name": "ANTIDOTE",
     "DescriptiveName": "antidote",
     "Type": "Potion",
-    "Value": 50,
+    "Value": 20,
     "Glyph": "!,yellow,yelloworange,black,black",
     "Traits": [
       "UseSimple#antidote",

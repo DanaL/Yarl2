@@ -64,7 +64,7 @@ class Village
   static string VillagerAppearance(Random rng)
   {
     string[] species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
-    string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded"];
+    string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded", "watery"];
     string[] hair = ["bald",
       "long",
       "short",
@@ -72,6 +72,7 @@ class Village
       "stylish",
       "unkempt",
       "messy",
+      "fashionable",
       "perfurmed",
       "unwashed",
       "tousled",
@@ -179,7 +180,13 @@ class Village
       grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
     for (int j = 0; j < rng.Next(1, 4); j++)
       grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), grocer.ID);
-
+    if (rng.NextDouble() < 0.2)
+      grocer.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), grocer.ID);
+    if (rng.NextDouble() < 0.5)
+    {
+      for (int j = 0; j < rng.Next(1, 4); j++)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), grocer.ID);
+    }
     return grocer;
   }
 
@@ -211,6 +218,8 @@ class Village
       smith.Inventory.Add(ItemFactory.Get(ItemNames.LONGSWORD, objDb), smith.ID);
     if (rng.NextDouble() < 0.33)
       smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
+    if (rng.NextDouble() < 0.2)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
 
     return smith;
   }
