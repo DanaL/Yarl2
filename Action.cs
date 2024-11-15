@@ -1598,6 +1598,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     double cost = 1.0;
     bool successful = true;
     string msg;
+    List<string> msgs = [];
 
     var inventory = Actor!.Inventory;
     if (_amount > inventory.Zorkmids)
@@ -1609,10 +1610,10 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       cost = 0.0; // we won't make the player spend an action if they drop nothing
       successful = false;
-      msg = "You hold onto your zorkmids.";
+      msgs.Add("You hold onto your zorkmids.");
     }
     else
-    {
+    {      
       var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       GameState.ItemDropped(coins, Actor.Loc);
       coins.Value = _amount;
@@ -1623,13 +1624,26 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
         msg += "all your money!";
       else
         msg += $"{_amount} zorkmids.";
+      msgs.Add(msg);
+
+      if (Actor is Player && GameState.TileAt(Actor.Loc).Type == TileType.Well && coins.Value == 1)
+      {
+        msgs.Add("The coin disappears into the well and you hear a faint plop.");
+        GameState.ObjDb.RemoveItemFromGame(Actor.Loc, coins);
+
+        if (GameState.Rng.Next(100) < 5 && !Actor.HasTrait<AuraOfProtectionTrait>())
+        {
+          msgs.Add("A warm glow surrounds you!");
+          Actor.Traits.Add(new AuraOfProtectionTrait());
+        }
+      }
 
       inventory.Zorkmids -= _amount;
     }
 
-    return new ActionResult() { Complete = successful, Messages = [msg], EnergyCost = cost };
+    return new ActionResult() { Complete = successful, Messages = msgs, EnergyCost = cost };
   }
-
+  
   public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
 }
 
