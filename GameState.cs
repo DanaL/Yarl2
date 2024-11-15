@@ -398,7 +398,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var item in itemsToFall)
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} sinks!");
-      ObjDb.RemoveItem(loc, item);
+      ObjDb.RemoveItemFromLoc(loc, item);
       ItemDropped(item, loc);
     }
   }
@@ -425,7 +425,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var item in itemsToFall)
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!");
-      ObjDb.RemoveItem(loc, item);
+      ObjDb.RemoveItemFromLoc(loc, item);
       ItemDropped(item, landingSpot);
     }
     UpdateFoV();

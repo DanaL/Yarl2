@@ -385,7 +385,7 @@ class GameObjectDB
                           .Count();
   }
 
-  public void RemoveItem(Loc loc, Item item)
+  public void RemoveItemFromLoc(Loc loc, Item item)
   {
     _itemLocs[loc].Remove(item);
     item.Loc = Loc.Nowhere;

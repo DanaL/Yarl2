@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 class ActionResult
@@ -541,7 +539,7 @@ class RepairItemAction : Action
 {
   readonly Mob _shopkeeper;
   int Total { get; set; }
-  List<(char, int)> _selections = [];
+  HashSet<ulong> ToRepair { get; set; } = [];
 
   public RepairItemAction(GameState gs, Mob shopkeeper)
   {
@@ -558,16 +556,15 @@ class RepairItemAction : Action
     GameState!.Player.Inventory.Zorkmids -= Total;
 
     List<Item> items = [];
-    foreach (var (slot, _) in _selections)
+    foreach (Item item in GameState.Player.Inventory.Items())
     {
-      var (item, _) = GameState.Player.Inventory.ItemAt(slot);
-      if (item is not null)
+      if (ToRepair.Contains(item.ID))
       {
         items.Add(item);
         EffectApplier.RemoveRust(item);
-      }      
+      }
     }
-   
+    
     string txt = $"{_shopkeeper.FullName.Capitalize()} gets to work and soon your ";
     if (items.Count > 1)
       txt += "items look almost as good as new!";
@@ -582,9 +579,9 @@ class RepairItemAction : Action
 
   public override void ReceiveUIResult(UIResult result)
   {
-    var shopResult = (ShoppingUIResult)result;
-    Total = shopResult.Zorkminds;
-    _selections = shopResult.Selections;
+    var repairResult = (RepairItemUIResult)result;
+    Total = repairResult.Zorkminds;
+    ToRepair = new HashSet<ulong>(repairResult.ItemIds);
   }
 }
 
@@ -883,14 +880,14 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       foreach (var pickedUp in itemStack.Where(i => i == item))
       {
-        GameState.ObjDb.RemoveItem(Actor.Loc, item);
-        slot = inv.Add(item, Actor.ID);
+        GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, pickedUp);
+        slot = inv.Add(pickedUp, Actor.ID);
         ++count;
       }
     }
     else
     {
-      GameState.ObjDb.RemoveItem(Actor.Loc, item);
+      GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, item);
       slot = inv.Add(item, Actor.ID);
     }
 
