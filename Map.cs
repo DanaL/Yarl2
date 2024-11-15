@@ -21,9 +21,6 @@ enum TileType
   GreenTree, OrangeTree, RedTree, YellowTree, Conifer,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
   Dirt, StoneRoad, Well, Bridge, WoodBridge, Pool, FrozenPool,
-  Statue,       // Most statues can be simple tiles so I'm just defining a few different types
-  ElfStatue,    // rather than creating a statue subclass where I need to track state during
-  DwarfStatue,  // serialization, etc
   Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
@@ -152,9 +149,6 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Chasm => "a chasm",
     TileType.Landmark => "a landmark",
     TileType.Forge => "a forge",
-    TileType.Statue => "a statue",
-    TileType.ElfStatue => "a statue",
-    TileType.DwarfStatue => "a statue",
     TileType.Upstairs => "some stairs up",
     TileType.Downstairs => "some stairs down",
     TileType.Portal => "a dungeon entrance",
@@ -408,9 +402,6 @@ class TileFactory
   private static readonly Tile Well = new BasicTile(TileType.Well, true, false, true);
   private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
   private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
-  private static readonly Tile Statue = new BasicTile(TileType.Statue, false, true, false);
-  private static readonly Tile ElfStatue = new BasicTile(TileType.ElfStatue, false, true, false);
-  private static readonly Tile DwarfStatue = new BasicTile(TileType.DwarfStatue, false, true, false);
   private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
   private static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
   private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
@@ -466,9 +457,6 @@ class TileFactory
     TileType.Well => Well,
     TileType.Bridge => Bridge,
     TileType.WoodBridge => WoodBridge,
-    TileType.Statue => Statue,
-    TileType.ElfStatue => ElfStatue,
-    TileType.DwarfStatue => DwarfStatue,
     TileType.Chasm => Chasm,
     TileType.StoneRoad => StoneRoad,
     TileType.CharredGrass => CharredGrass,
@@ -526,7 +514,8 @@ class Map : ICloneable
 
   // I'll need to search out a bunch of dungeon floors (the main use for this function) so I 
   // should build up a list of random floors and pick from among them instead of randomly
-  // trying squares. (And remove from list when I SetTile()...
+  // trying squares. (And remove from list when I SetTile())...
+  // Potential infinite loop alert D:
   public (int, int) RandomTile(TileType type, Random rng)
   {
     do

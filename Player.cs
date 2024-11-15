@@ -397,7 +397,6 @@ class Player : Actor, IPerformer, IGameEventListener
         case TileType.LockedDoor:
         case TileType.BrokenDoor:
         case TileType.Landmark:
-        case TileType.Statue:
         case TileType.Upstairs:
         case TileType.Downstairs:
           Running = false;

@@ -183,45 +183,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void PlaceStatue(Map map, int height, int width, string statueDesc, Random rng)
-  {
-    List<(int, int)> candidateSqs = [];
-    // Find all the candidate squares where the statue(s) might go
-    for (int r = 1; r < height - 1; r++)
-    {
-      for (int c = 1; c < width - 1; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
-        {
-          bool viable = true;
-          foreach (var t in Util.Adj4Sqs(r, c))
-          {
-            if (map.TileAt(t).Type != TileType.DungeonFloor)
-            {
-              viable = false;
-              break;
-            }
-          }
-
-          if (viable)
-            candidateSqs.Add((r, c));
-        }
-      }
-    }
-
-    if (candidateSqs.Count > 0)
-    {
-      var sq = candidateSqs[rng.Next(candidateSqs.Count)];
-
-      var statueSqs = Util.Adj4Sqs(sq.Item1, sq.Item2).ToList();
-      var statueSq = statueSqs[rng.Next(statueSqs.Count)];
-      map.SetTile(statueSq, TileFactory.Get(TileType.Statue));
-      
-      var tile = new Landmark(statueDesc.Capitalize());
-      map.SetTile(sq, tile);
-    }
-  }
-
   void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
   {
     List<(int, int)> candidateSqs = [];
@@ -304,7 +265,7 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.SetToLoc(loc, doc);
   }
 
-  void DecorateDungeon(Map[] levels, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Random rng)
+  void DecorateDungeon(Map[] levels, int dungeonId, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Random rng)
   {    
     var decorations = Decorations.GenDecorations(factDb, rng);
 
@@ -318,7 +279,11 @@ class MainDungeonBuilder : DungeonBuilder
 
       if (decoration.Type == DecorationType.Statue)
       {
-        PlaceStatue(levels[level], height, width, decoration.Desc, rng);
+        var (r, c) = levels[level].RandomTile(TileType.DungeonFloor, rng);
+        Loc statueLoc = new(dungeonId, level, r, c);
+        Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+        statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
+        objDb.SetToLoc(statueLoc, statue);
       }
       else if (decoration.Type == DecorationType.Mosaic)
       {
@@ -1103,7 +1068,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     AddRooms(_dungeonID, levels, objDb, factDb, rng);
     
-    DecorateDungeon(levels, h, w, numOfLevels, factDb, objDb, rng);
+    DecorateDungeon(levels, _dungeonID, h, w, numOfLevels, factDb, objDb, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
     {

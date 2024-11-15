@@ -196,15 +196,16 @@ class Vaults
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
     RulerInfo rulerInfo = factDb.Ruler;
-
-    double roll = rng.NextDouble();
-    TileType statueType;
+        
+    char ch;
     string statueDesc;
     string skullType;
+
+    double roll = rng.NextDouble();
     if (roll < 0.5)
     {
       statueDesc = "Broken remains of a statue.";
-      statueType = TileType.Statue;
+      ch = '&';
       skullType = "";
     }
     else
@@ -213,12 +214,12 @@ class Vaults
       {
         case OGRulerType.ElfLord:
           statueDesc = "A graffitied, defaced statue of an elf.";
-          statueType = TileType.ElfStatue;
+          ch = '@';
           skullType = "elf";
           break;
         default:
           statueDesc = "A graffitied, defaced statue of a dwarf.";
-          statueType = TileType.DwarfStatue;
+          ch = 'h';
           skullType = "dwarf";
           break;
       }
@@ -227,19 +228,24 @@ class Vaults
     List<(int, int)> sqs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).ToList();
     if (sqs.Count == 0)
       return; // I can't imagine this actually ever happening
+        
     int i = rng.Next(sqs.Count);
     (int, int) loc = sqs[i];
     sqs.RemoveAt(i);
-    map.SetTile(loc, TileFactory.Get(statueType));
+    Loc statueLoc = new(dungeonID, level, loc.Item1, loc.Item2);
+
+    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+    statue.Traits.Add(new DescriptionTrait(statueDesc));
+    statue.Glyph = statue.Glyph with { Ch = ch };
+    objDb.SetToLoc(statueLoc, statue);
+
     List<(int, int)> adj = Util.Adj4Sqs(loc.Item1, loc.Item2)
                                .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
                                .ToList();
     if (adj.Count == 0) 
       return; // I also can't imagine this actually happing
     (int, int) landmarkSq = adj[rng.Next(adj.Count)];
-    Tile landmark = new Landmark(statueDesc.Capitalize());
-    map.SetTile(landmarkSq, landmark);
-
+    
     if (rng.NextDouble() < 0.15)
     {
       Item skull = ItemFactory.Get(ItemNames.SKULL, objDb);

@@ -28,9 +28,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     TileType.Portcullis => "The portcullis is closed.",
     TileType.VaultDoor => "Metal doors bar your path!",
     TileType.LockedDoor => "The door is locked!",
-    TileType.Statue => "A statue is in your way!",
-    TileType.DwarfStatue => "A stone dwarf blocks your way!",
-    TileType.ElfStatue => "The statue of an elf is in your way!",
     _ => "You cannot go that way!"
   };
 
@@ -227,12 +224,26 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     else if (GameState.ObjDb.ItemsAt(_loc).Any(item => item.HasTrait<BlockTrait>()))
     {
       Item blockage = GameState.ObjDb.ItemsAt(_loc).Where(item => item.HasTrait<BlockTrait>()).First();
-      string msg = $"{Grammar.Possessive(Actor).Capitalize()} way is blocked by ";
-      if (blockage.HasTrait<PluralTrait>())
-        msg += $"some {blockage.Name}!";
+      if (blockage.Type == ItemType.Statue)
+      {
+        string msg;
+        if (blockage.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait desc)
+          msg = desc.Text;
+        else
+          msg = $"{Grammar.Possessive(Actor).Capitalize()} way is blocked by a statue.";
+        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+        result.Messages.Add(msg);
+      }
       else
-        msg += $"{blockage.Name.IndefArticle()}!";
-      result.Messages.Add(msg);
+      {
+        string msg = $"{Grammar.Possessive(Actor).Capitalize()} way is blocked by ";
+        if (blockage.HasTrait<PluralTrait>())
+          msg += $"some {blockage.Name}!";
+        else
+          msg += $"{blockage.Name.IndefArticle()}!";
+        result.Messages.Add(msg);
+      }
+      
       result.Complete = true;
       result.EnergyCost = 0.0;
     }

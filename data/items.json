@@ -15,7 +15,7 @@
     "DescriptiveName": "guisarme",
     "Type": "Weapon",
     "Value": 15,
-    "Glyph": "),grey,darkgrey,black,black",    
+    "Glyph": "),grey,darkgrey,black,black",
     "Traits": [
       "Damage#8#1#Piercing",
       "Polearm",
@@ -646,6 +646,18 @@
     "Type": "Landscape",
     "Value": 0,
     "Glyph": "%,grey,darkgrey,black,black",
+    "Traits": [
+      "Block",
+      "Plural",
+      "Opaque"
+    ]
+  },
+  {
+    "Name": "STATUE",
+    "DescriptiveName": "statue",
+    "Type": "Statue",
+    "Value": 0,
+    "Glyph": "&,grey,darkgrey,black,black",
     "Traits": [
       "Block",
       "Plural",

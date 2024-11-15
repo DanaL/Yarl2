@@ -67,7 +67,7 @@ class Examiner : Inputer
 
         if (_gs.ObjDb.Occupied(loc) && _gs.LastPlayerFoV.Contains(loc))
         {
-          int distance = Util.Distance(_gs.Player.Loc, loc);          
+          int distance = Distance(_gs.Player.Loc, loc);          
           if (loc == _gs.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
@@ -90,9 +90,6 @@ class Examiner : Inputer
             case TileType.Upstairs:
             case TileType.Downstairs:
             case TileType.Portal:
-            case TileType.Statue:
-            case TileType.ElfStatue:
-            case TileType.DwarfStatue:
             case TileType.Landmark:
             case TileType.TrapDoor:
             case TileType.Portcullis:
@@ -153,7 +150,7 @@ class Examiner : Inputer
       {
         name = actor.FullName.Capitalize();
         desc = "A villager.";
-      }
+      }      
       else
       {
         name = actor.Name.IndefArticle().Capitalize();
@@ -167,8 +164,15 @@ class Examiner : Inputer
     var items = _gs.ObjDb.ItemsAt(loc);
     if (items.Count > 0)
     {
-      var item = items[0];
-      return new LocDetails(item.Name.IndefArticle().Capitalize(), "", item.Glyph.Ch);
+      Item item = items[0];
+      string title = "";
+      string details = "";
+      if (item.Type == ItemType.Statue && item.HasTrait<DescriptionTrait>())
+        details = item.Traits.OfType<DescriptionTrait>().First().Text;
+      else
+        title = item.Name.IndefArticle().Capitalize();
+      
+      return new LocDetails(title, details, item.Glyph.Ch);
     }
 
     Tile tile = _gs.TileAt(loc);
