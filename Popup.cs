@@ -163,7 +163,7 @@ class Popup
       {
         WritePaddedLine();
       }
-      else if (word.Length <= Width - currWidth - 5)
+      else if (word.Length < Width - currWidth - 4)
       {
         currWidth += word.Length;
         if (PrependSpace(line))
@@ -186,19 +186,18 @@ class Popup
 
     bool PrependSpace(List<(Colour, string)> line)
     {
-      if (line.Count > 0)
+      if (line.Count <= 1)
+        return false;
+
+      char preceding = line.Last().Item2.Last();
+      return preceding switch
       {
-        char preceding = line.Last().Item2.Last();
-        return preceding switch
-        {
-          '$' => false,
-          '(' => false,
-          _ => true
-        };
+        '$' => false,
+        '(' => false,
+        _ => true
+      };
     }
 
-      return true;
-    }
     void WritePaddedLine()
     {
       // Pad out so that the right border lines up        
