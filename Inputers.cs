@@ -930,7 +930,7 @@ class DirectionalInputer : Inputer
     Done = false;
 
     string prompt = "Which direction?";
-    int width = prompt.Length;
+    int width = prompt.Length + 2;
     if (targetSelf) 
     {
       prompt += "\n(hit '.' to target your location.)";
