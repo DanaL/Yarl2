@@ -103,7 +103,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else if (GameState.ObjDb.ItemsAt(targetLoc).Any(i => i.HasTrait<BlockTrait>()))
     {
-      DigLandscape(targetLoc, result, GameState, Actor);
+      DigBlock(targetLoc, result, GameState, Actor);
     }
     else
     {
@@ -114,7 +114,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     return result;
   }
 
-  static void DigLandscape(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigBlock(Loc loc, ActionResult result, GameState gs, Actor digger)
   {
     int dc = 13 + gs.CurrLevel / 4;
     if (digger is Player && gs.Player.Lineage == PlayerLineage.Dwarf)
@@ -125,10 +125,11 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     // the game.
     Item blockage = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>())
                                          .First();
+    string verb = blockage.Type == ItemType.Statue ? "destroy" : "clear";
     if (digger.AbilityCheck(Attribute.Strength, dc, gs.Rng))
     {
       gs.ObjDb.RemoveItemFromGame(loc,blockage);
-      string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "clear")} {blockage.Name.DefArticle()}.";
+      string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, verb)} {blockage.Name.DefArticle()}.";
       result.Messages.Add(s);
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
