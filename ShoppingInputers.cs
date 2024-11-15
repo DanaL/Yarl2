@@ -335,13 +335,11 @@ class SmithyInputer : ShopMenuInputer
   }
 
   Dictionary<char, ShopMenuItem> RepairMenu()
-  {
-    var items = Shopkeeper.Inventory.UsedSlots()
-                          .Select(Shopkeeper.Inventory.ItemAt);
-
+  {    
     double markup = CalcMarkup();
     Dictionary<char, ShopMenuItem> menuItems = [];
     int slot = 0;
+    
     foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
       if (item.Traits.OfType<RustedTrait>().FirstOrDefault() is not RustedTrait rust)
@@ -393,7 +391,6 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 3)
     {
-      //Shopkeeper.Stats[Attribute.ShopMenu].SetMax(1);
       dialogueText = MenuScreen("What shall we try to upgrade?");
     }
     else if (menuState == 4)
@@ -423,6 +420,17 @@ class SmithyInputer : ShopMenuInputer
         Zorkminds = TotalInvoice(),
         ItemSlot = _itemToEnchant,
         ReagentSLot = reagent
+      };
+    }
+    else if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out menuState) && menuState.Curr == 2)
+    {
+      List<ulong> itemIds = MenuItems.Values.Where(i => i.SelectedCount > 0)
+                                            .Select(i => i.Item.ID)
+                                            .ToList();
+      return new RepairItemUIResult()
+      {
+        Zorkminds = TotalInvoice(),
+        ItemIds = itemIds
       };
     }
     else
@@ -506,6 +514,12 @@ class PriestInputer : Inputer
 class ShoppingUIResult : UIResult
 {
   public List<(char, int)> Selections { get; set; } = [];
+  public int Zorkminds { get; set; } = 0;
+}
+
+class RepairItemUIResult : UIResult
+{
+  public List<ulong> ItemIds { get; set; } = [];
   public int Zorkminds { get; set; } = 0;
 }
 

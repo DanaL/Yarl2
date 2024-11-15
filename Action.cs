@@ -560,8 +560,16 @@ class RepairItemAction : Action
     {
       if (ToRepair.Contains(item.ID))
       {
-        items.Add(item);
         EffectApplier.RemoveRust(item);
+        items.Add(item);
+
+        // Removing it and adding it back in will unstack an item where needed.
+        // Ie., you have a stack of rusted daggers but only reapir one.
+        if (item.HasTrait<StackableTrait>())
+        {
+          GameState.Player.Inventory.RemoveByID(item.ID);
+          GameState.Player.Inventory.Add(item, GameState.Player.ID);
+        }        
       }
     }
     
