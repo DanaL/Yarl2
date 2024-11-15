@@ -341,13 +341,14 @@ class SmithyInputer : ShopMenuInputer
 
     double markup = CalcMarkup();
     Dictionary<char, ShopMenuItem> menuItems = [];
+    int slot = 0;
     foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
       if (item.Traits.OfType<RustedTrait>().FirstOrDefault() is not RustedTrait rust)
         continue;
-      int price = rust.Amount == Rust.Rusted ? 25 : 50;
-      price = (int)(price * markup);
-      menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
+      int labour = rust.Amount == Rust.Rusted ? 5 : 10;
+      int price = (int)((item.Value / 4 + labour) * markup);
+      menuItems.Add((char)('a' + slot++), new ShopMenuItem(item.Slot, item, 1, price));
     }
 
     return menuItems;
