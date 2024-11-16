@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Linq.Expressions;
-
 namespace Yarl2;
 
 enum TileType
@@ -279,16 +277,19 @@ class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
   public bool Open { get; set; } = open;
 
   public override TileType Type => Open ? TileType.OpenPortcullis : TileType.Portcullis;
+
+ 
+
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
   public override bool Opaque() => false;
 
   public override string ToString() => $"{(int)Type};{Open}";
 
-  public void Trigger() => Open = !Open;
+  public void Trigger() => Open = !Open;  
 }
 
-class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
+class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
 {
   public Loc Gate { get; set; } = gate;
   public bool Found { get; set; } = false;
@@ -298,6 +299,21 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger)
   public override bool Opaque() => false;
 
   public override string ToString() => $"{(int)Type};{Gate};{Found}";
+
+  public bool Expired { get; set; }
+  public bool Listening => true;
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.TileAt(Gate) is Portcullis portcullis)
+    {
+      portcullis.Trigger();  
+      if (gs.LastPlayerFoV.Contains(loc))
+        Found = true;
+      gs.Noise(Gate.Row, Gate.Col, 7);
+      gs.UIRef().AlertPlayer("You hear a metallic grinding!");
+    }
+  }
 }
 
 class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)

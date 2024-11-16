@@ -603,7 +603,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var (targetID, listener) in ObjDb.DeathWatchListeners)
     {
       if (targetID == victim.ID)
-        listener.EventAlert(GameEventType.Death, this);
+        listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
     }
     ClearDeathWatch(victim.ID);
 
@@ -782,7 +782,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var listeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
     {
-      listener.EventAlert(GameEventType.EndOfRound, this);
+      listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);
     }
     ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
   }
@@ -929,22 +929,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public string ThingAddedToLoc(Loc loc)
   {
-    Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-
-    if (tile is GateTrigger trigger)
+    if (ObjDb.LocListeners.Contains(loc) && CurrentMap.TileAt(loc.Row, loc.Col) is IGameEventListener trigger)
     {
-      Loc gateLoc = trigger.Gate;
-      if (CurrentMap.TileAt(gateLoc.Row, gateLoc.Col) is Portcullis portcullis)
-      {
-        portcullis.Trigger();
-        if (LastPlayerFoV.Contains(loc))
-          trigger.Found = true;
-
-        // The noise of the gate opening/closing could wake up nearby monsters
-        Noise(gateLoc.Row, gateLoc.Col, 7);
-
-        return "You hear a metallic grinding!";
-      }
+      trigger.EventAlert(GameEventType.LocChanged, this, loc);
     }
 
     return "";
@@ -1251,7 +1238,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (RecentlySeenMonsters.Except(prevSeenMonsters).Any())
     {
-      Player.EventAlert(GameEventType.MobSpotted, this);
+      Player.EventAlert(GameEventType.MobSpotted, this, Loc.Nowhere);
     }
     RecentlySeenMonsters = prevSeenMonsters;
 

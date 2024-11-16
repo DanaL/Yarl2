@@ -395,7 +395,8 @@ class Vaults
     {
       // A level zero vault has been vandalized or plundered by past
       // adventurers.
-      VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
+      //VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
+      SetPortcullis(map, dungeonID, level, vault, doorRow, doorCol, objDb, rng);
       return;
     }
 
@@ -405,8 +406,7 @@ class Vaults
         HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
       else
         HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
-        //VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, history);
-      
+       
       return;
     }
 
@@ -423,7 +423,7 @@ class Vaults
         SetVaultDoorKey(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb);
         break;
       case VaultDoorType.Trigger:
-        SetPortcullis(map, dungeonID, level, vault, doorRow, doorCol, rng);
+        SetPortcullis(map, dungeonID, level, vault, doorRow, doorCol, objDb, rng);
         break;
       case VaultDoorType.SecretDoor:
         map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
@@ -471,15 +471,16 @@ class Vaults
     objDb.SetToLoc(keyLoc, key);
   }
 
-  static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, Random rng)
+  static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, GameObjectDB objDb, Random rng)
   {
     int triggerRow, triggerCol;
     (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, map.Height, map.Width, room, rng);
     if (triggerRow != -1 && triggerCol != -1)
     {
-      Console.WriteLine($"Vault!!");
+      Console.WriteLine($"Vault!! {level}");
       
       map.SetTile(doorRow, doorCol, new Portcullis(false));
+      objDb.LocListeners.Add(new(dungeonID, level, triggerRow, triggerCol));
       map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, level, doorRow, doorCol)));
     }
   }

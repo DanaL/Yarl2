@@ -717,7 +717,7 @@ class Player : Actor, IPerformer, IGameEventListener
     return new NullAction();
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (eventType == GameEventType.MobSpotted)
       Running = false;

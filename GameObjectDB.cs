@@ -83,7 +83,7 @@ interface IGameEventListener
   public bool Expired { get; set; }
   public bool Listening { get; }
   
-  void EventAlert(GameEventType eventType, GameState gs);
+  void EventAlert(GameEventType eventType, GameState gs, Loc loc);
 }
 
 abstract class GameObj : IZLevel
@@ -150,6 +150,7 @@ class GameObjectDB
   // UIEventType mapped to a list of listeners
   public List<IGameEventListener> EndOfRoundListeners { get; set; } = [];
   public List<(ulong, IGameEventListener)> DeathWatchListeners { get; set; } = [];
+  public HashSet<Loc> LocListeners { get; set; } = [];
 
   public bool ItemsWithTrait<T>(Loc loc)
   {

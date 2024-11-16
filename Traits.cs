@@ -592,7 +592,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
       gs.UIRef().AlertPlayer(ExpiryMsg());
   }
 
-  public virtual void EventAlert(GameEventType eventType, GameState gs)
+  public virtual void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
     {
@@ -626,7 +626,7 @@ class LevitationTrait : TemporaryTrait
 
   public override string AsText() => $"Levitation#{OwnerID}#{ExpiresOn}";
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
     {
@@ -945,7 +945,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set { } }
   public bool Listening => true;
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var obj = gs.ObjDb.GetObj(ObjID);
     if (obj is not null and Actor actor)
@@ -965,7 +965,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set {} }
   public bool Listening => true;
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var victim = gs.ObjDb.GetObj(VictimID);
     victim?.Traits.Remove(this);    
@@ -1071,7 +1071,7 @@ class ConfusedTrait : TemporaryTrait
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"];
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
@@ -1118,7 +1118,7 @@ class LameTrait : TemporaryTrait
     return [];
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
@@ -1156,7 +1156,7 @@ class ExhaustedTrait : TemporaryTrait
     return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} exhausted!" ];
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
@@ -1185,7 +1185,7 @@ class NauseaTrait : TemporaryTrait
     return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} nauseous!" ];    
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is GameObj victim)
     {
@@ -1205,7 +1205,7 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
   public int Strength { get; set; }
   public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
   
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc _)
   {
     if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
       return;
@@ -1273,7 +1273,7 @@ class ParalyzedTrait : TemporaryTrait
     return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} paralyzed!" ];
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
@@ -1327,7 +1327,7 @@ class PoisonedTrait : TemporaryTrait
     return [];
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
     if (victim is null)
@@ -1388,7 +1388,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
     Expired = true;
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     ++Lifetime;
     if (gs.ObjDb.GetObj(OwnerID) is Item fireSrc)
@@ -1548,7 +1548,7 @@ class StatBuffTrait : TemporaryTrait
     return "";    
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn)
     {
@@ -1614,7 +1614,7 @@ class StatDebuffTrait : TemporaryTrait
     return "";
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn)
     {
@@ -1650,7 +1650,7 @@ class BlindTrait : TemporaryTrait
     return msgs;
   }
 
-  public override void EventAlert(GameEventType eventType, GameState gs)
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var victim = (Actor?)gs.ObjDb.GetObj(OwnerID);
     if (victim is null)
@@ -1695,7 +1695,7 @@ class RecallTrait : BasicTrait, IGameEventListener
 
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn < ExpiresOn)
       return;
@@ -1742,7 +1742,7 @@ class RegenerationTrait : BasicTrait, IGameEventListener
 
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
       return;
@@ -1783,7 +1783,7 @@ class InvisibleTrait : BasicTrait, IGameEventListener
 
   public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
       return;
@@ -1805,7 +1805,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 
   public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn < ExpiresOn)
       return;
@@ -1813,9 +1813,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
     Expired = true;
 
     if (gs.ObjDb.GetObj(OwnerID) is Item item)
-    {
-      Loc loc = item.Loc;
-
+    {      
       // Alert! Alert! This is cut-and-pasted from ExtinguishAction()
       if (item.ContainedBy > 0)
       {
@@ -1824,7 +1822,6 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
         {
           // I don't think owner should ever be null, barring a bug
           // but this placates the warning in VS/VS Code
-          loc = owner.Loc;
           ((Actor)owner).Inventory.Remove(item.Slot, 1);
         }
       }
@@ -1925,7 +1922,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
     }
   }
 
-  public void EventAlert(GameEventType eventType, GameState gs)
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     // Although if it's not Lit, it shouldn't be listening for events
     if (!Lit)
@@ -1938,12 +1935,10 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 
       if (gs.ObjDb.GetObj(OwnerID) is Item item)
       {
-        Loc loc = item.Loc;
         if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
         {
           // I don't think owner should ever be null, barring a bug
           // but this placates the warning in VS/VS Code
-          loc = owner.Loc;
           owner.Inventory.Remove(item.Slot, 1);
         }
 

@@ -460,6 +460,8 @@ class GameObjDBSave
 {
   [JsonInclude]
   List<string> Objects { get; set; } = [];
+  [JsonInclude]
+  public HashSet<Loc> LocListeners { get; set; } = [];
 
   static string StatsToText(Dictionary<Attribute, Stat> stats)
   {
@@ -639,6 +641,8 @@ class GameObjDBSave
   {
     var sidb = new GameObjDBSave();
 
+    sidb.LocListeners = objDb.LocListeners;
+
     foreach (var kvp in objDb.Objs)
     {
       var obj = kvp.Value;
@@ -737,6 +741,9 @@ class GameObjDBSave
           objDb.AddToLoc(obj.Loc, (Actor)obj);
       }
     }
+
+    objDb.LocListeners = sidb.LocListeners;
+
     GameObj.SetSeed(maxID + 1);
 
     return objDb;
