@@ -24,7 +24,7 @@ enum TileType
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
-  BridgeTrigger
+  BridgeTrigger, HiddenBridgeCollapseTrap
 }
 
 interface ITriggerable
@@ -111,6 +111,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenWaterTrap => true,
     TileType.MagicMouth => true,
     TileType.HiddenMagicMouth => true,
+    TileType.HiddenBridgeCollapseTrap => true,
     _ => false
   };
 
@@ -180,6 +181,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Gravestone => "a gravestone",
     TileType.DisturbedGrave => "a disturbed grave",
     TileType.BridgeTrigger => "pressure plate",
+    TileType.HiddenBridgeCollapseTrap => "stone floor",
     _ => "unknown"
   };
 
@@ -279,8 +281,6 @@ class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
   public bool Open { get; set; } = open;
 
   public override TileType Type => Open ? TileType.OpenPortcullis : TileType.Portcullis;
-
- 
 
   public override bool Passable() => Open;
   public override bool PassableByFlight() => Open;
@@ -389,19 +389,54 @@ class IdolAltar : Landmark
   public override string ToString() => $"{(int)Type};{StepMessage};{IdolID};{Wall}";
 }
 
+class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEventListener
+{
+  public override bool Passable() => true;
+  public override bool PassableByFlight() => true;
+  public override bool Opaque() => false;
+  public bool Triggered { get; set; } = false;
+  public bool Expired { get; set; }
+  public bool Listening => true;
+  public HashSet<Loc> BridgeTiles { get; set; } = [];
+
+  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (!Triggered)
+    {
+      Triggered = true;
+
+      foreach (Loc bridgeLoc in BridgeTiles)
+      {
+        gs.BridgeDestroyed(bridgeLoc);
+      }
+
+      if (gs.LastPlayerFoV.Contains(loc))
+      {        
+        string s = "The bridge collapses into the chasm!";
+        gs.UIRef().AlertPlayer(s);
+        gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      }
+      else
+      {
+        gs.UIRef().AlertPlayer("You hear a distant crashing sound!");
+      }
+    }    
+  }
+}
+
 class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
 {
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
   public override bool Opaque() => false;
-
-  public HashSet<Loc> BridgeTiles { get; set; } = [];
-  
-  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
-
   public bool Triggered { get; set; } = false;
   public bool Expired { get; set; }
   public bool Listening => true;
+  public HashSet<Loc> BridgeTiles { get; set; } = [];
+  
+  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {

@@ -12,15 +12,20 @@
 
 namespace Yarl2;
 
+class ChasmRoomInfo
+{
+  public List<(int, int)> ChasmSqs { get; set; } = [];
+  public HashSet<(int, int)> Exits { get; set; } = [];
+  public List<(int, int)> IslandSqs { get; set; } = [];
+}
+
 class Rooms
 {
-  public static void ChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  static ChasmRoomInfo ChasmRoomInfo(Map map, List<(int, int)> room)
   {
     HashSet<(int, int)> exits = [];
-    HashSet<(int, int)> chasmSqs = [];
-    Map map = levels[level];
-    Map mapBelow = levels[level + 1];
-
+    List<(int, int)> chasmSqs = [];
+    
     foreach (var (r, c) in room)
     {    
       List<(int, int)> adjSqs = Util.Adj4Sqs(r, c).ToList();
@@ -38,7 +43,20 @@ class Rooms
       }
     }
 
-    foreach (var (r, c) in chasmSqs)
+    List<(int, int)> islandSqs = room.Where(sq => !chasmSqs.Contains(sq))
+                                     .ToList();
+
+    return new ChasmRoomInfo()
+    {
+      ChasmSqs = chasmSqs,
+      Exits = exits,
+      IslandSqs = islandSqs
+    };
+  }
+
+  static void MakeChasm(Map map, Map mapBelow, List<(int, int)> chasmSqs)
+  {
+  foreach (var (r, c) in chasmSqs)
     {
       if (map.TileAt(r, c).Type == TileType.DungeonFloor)
       {
@@ -47,21 +65,22 @@ class Rooms
           mapBelow.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
       }
     }
+  }
 
-    List<(int, int)> islandSqs = room.Where(sq => map.TileAt(sq).Type != TileType.Chasm)
-                                     .ToList();
+  static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, Random rng)
+  {
+    HashSet<Loc> bridges = [];
+    (int, int) goalSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
+
     Dictionary<TileType, int> passable = new()
     {
       [TileType.DungeonFloor] = 1,
       [TileType.Chasm] = 1
     };
 
-    // Find the bridges (I suppose I don't need to have every exit have a bridge)
-    HashSet<Loc> bridges = [];
-    foreach (var (r, c) in exits)
+    foreach (var (r, c) in info.Exits)
     {
-      Loc startLoc = new(dungeonID, level, r, c);
-      (int, int) goalSq = islandSqs[rng.Next(islandSqs.Count)];
+      Loc startLoc = new(dungeonID, level, r, c);      
       Loc goalLoc = new(dungeonID, level, goalSq.Item1, goalSq.Item2);
       Stack<Loc> path = AStar.FindPath(map, startLoc, goalLoc, passable, false);
       if (path.Count > 0)
@@ -75,9 +94,41 @@ class Rooms
       }
     }
 
-    List<(int, int)> floors = room.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
-                                  .ToList();
-    (int, int) triggerSq = floors[rng.Next(floors.Count)];
+    return bridges;
+  }
+
+  public static void ChasmTrapRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  {
+    Map map = levels[level];
+    Map mapBelow = levels[level + 1];
+
+    ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    MakeChasm(map, mapBelow, info.ChasmSqs);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+    foreach (Loc bridge in bridges)
+    {
+      map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));
+    }
+
+    (int, int) trapSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
+    BridgeCollapseTrap trap = new()
+    {
+      BridgeTiles = bridges
+    };
+    map.SetTile(trapSq.Item1, trapSq.Item2, trap);
+    objDb.LocListeners.Add(new Loc(dungeonID, level, trapSq.Item1, trapSq.Item2));
+  }
+
+  public static void ChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  {
+    Map map = levels[level];
+    Map mapBelow = levels[level + 1];
+
+    ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    MakeChasm(map, mapBelow, info.ChasmSqs);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+
+    (int, int) triggerSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
     BridgeTrigger trigger = new()
     {
       BridgeTiles = bridges

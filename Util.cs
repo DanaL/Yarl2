@@ -470,6 +470,7 @@ class Util
     TileType.Gravestone => new Glyph('\u25AE', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.DisturbedGrave => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.BridgeTrigger => new Glyph('•', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 

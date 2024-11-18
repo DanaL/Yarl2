@@ -963,7 +963,7 @@ class MainDungeonBuilder : DungeonBuilder
       if (level == 0 && rooms.Count > 0)
       {
         int roomNum = rng.Next(rooms.Count);
-        Rooms.ChasmRoom(levels, rng, id, level, rooms[roomNum], objDb);
+        Rooms.ChasmTrapRoom(levels, rng, id, level, rooms[roomNum], objDb);
         rooms.RemoveAt(roomNum);
       }
 
