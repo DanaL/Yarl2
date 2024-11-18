@@ -402,22 +402,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  void ActorFallsIntoChasm(Actor actor, Loc landingSpot)
-  {
-    UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
-
-    string msg = FallIntoChasm(actor, landingSpot);
-    if (msg.Length > 0)
-      UI.AlertPlayer(msg);
-  }
-
   public void ChasmCreated(Loc loc)
   {
     var landingSpot = loc with { Level = loc.Level + 1 };
 
     if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {
-      ActorFallsIntoChasm(actor, landingSpot);
+      FallIntoChasm(actor, landingSpot);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -508,11 +499,40 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return string.Join(' ', messages).Trim();
   }
 
-  public string FallIntoChasm(Actor actor, Loc landingSpot)
+  Loc NearestUnoccupied(Loc loc)
   {
+    HashSet<Loc> visited = [];
+    Queue<Loc> spots = [];
+    spots.Enqueue(loc);
+
+    while (spots.Count > 0)
+    {
+      Loc spot = spots.Dequeue();
+      visited.Add(spot);
+      if (!ObjDb.Occupied(spot))
+        return spot;
+
+      foreach (Loc adj in Util.Adj8Locs(spot))
+      {
+        if (TileAt(adj).Passable() && !visited.Contains(adj))
+          spots.Enqueue(adj);
+      }
+    }
+
+    return Loc.Nowhere;
+  }
+
+  public void FallIntoChasm(Actor actor, Loc landingSpot)
+  {
+    UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
     if (actor is Player)
       PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
-      
+
+    if (ObjDb.Occupied(landingSpot))
+    {
+      landingSpot = NearestUnoccupied(landingSpot);
+    }
+
     string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
     UI.AlertPlayer(moveMsg);
     actor.Loc = landingSpot;
@@ -530,7 +550,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ActorKilled(actor, "a fall", null, null);
     }
 
-    return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+    UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!");
   }
 
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
@@ -918,7 +938,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       else if (tile.Type == TileType.Chasm && !flying)
       {
         Loc landingSpot = dest with { Level = dest.Level + 1 };
-        ActorFallsIntoChasm(actor, landingSpot);
+        FallIntoChasm(actor, landingSpot);
       }
       else if (tile.Type == TileType.DeepWater && !flying)
       {
