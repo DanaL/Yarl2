@@ -37,7 +37,7 @@ class Rooms
         {
           if (room.Contains(adj))
             chasmSqs.Add(adj);
-          else if (map.TileAt(adj).Type != TileType.DungeonWall)
+          else if (map.TileAt(adj).Type == TileType.ClosedDoor || map.TileAt(adj).Type == TileType.LockedDoor)
             exits.Add(adj);
         }
       }
@@ -145,6 +145,12 @@ class Rooms
     };
     map.SetTile(triggerSq.Item1, triggerSq.Item2, trigger);
     objDb.LocListeners.Add(new Loc(dungeonID, level, triggerSq.Item1, triggerSq.Item2));
+
+    (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
+    Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
+    TreasureQuality quality = level < 2 ? TreasureQuality.Uncommon : TreasureQuality.Good;
+    Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
+    objDb.SetToLoc(treasureLoc, treasure);
   }
 
   public static void BasicChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
@@ -158,6 +164,15 @@ class Rooms
     foreach (Loc bridge in bridges)
     {
       map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));
+    }
+
+    if (rng.NextDouble() < 0.5)
+    {
+      (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
+      Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
+      TreasureQuality quality = rng.NextDouble() < 05 ? TreasureQuality.Uncommon : TreasureQuality.Good;
+      Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
+      objDb.SetToLoc(treasureLoc, treasure);
     }
   }
 

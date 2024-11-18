@@ -963,9 +963,29 @@ class MainDungeonBuilder : DungeonBuilder
 
       if (level < levels.Length - 1 && rng.NextDouble() < 0.2 && rooms.Count > 0)
       {
-        int roomNum = rng.Next(rooms.Count);
-        Rooms.ChasmTrapRoom(levels, rng, id, level, rooms[roomNum], objDb);
-        rooms.RemoveAt(roomNum);
+        // We don't want to turn really ginat rooms into chasm rooms
+        var smallRooms = rooms.Select((room, index) => (room, index))
+                             .Where(x => x.room.Count < 225)
+                             .Select(x => x.index)
+                             .ToList();
+        if (smallRooms.Count == 0)
+          continue;
+        int roomId = smallRooms[rng.Next(smallRooms.Count)];
+
+        switch (rng.Next(4))
+        {
+          case 0:
+            Rooms.ChasmTrapRoom(levels, rng, id, level, rooms[roomId], objDb);
+            break;
+          case 1:
+            Rooms.TriggerChasmRoom(levels, rng, id, level, rooms[roomId], objDb);
+            break;
+          default:
+            Rooms.BasicChasmRoom(levels, rng, id, level, rooms[roomId], objDb);
+            break;
+        }
+        
+        rooms.RemoveAt(roomId);
       }
 
       if (level == graveyardOnLevel)
