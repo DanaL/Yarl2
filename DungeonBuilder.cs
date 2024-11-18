@@ -307,6 +307,7 @@ class MainDungeonBuilder : DungeonBuilder
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
       Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], _dungeonID, levelNum, rng);
+      SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
     }
   }
 
@@ -943,7 +944,7 @@ class MainDungeonBuilder : DungeonBuilder
   // I should move the add vaults code here
   void AddRooms(int id, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
   {    
-    int graveYardOnLevel = -1;
+    int graveyardOnLevel = -1;
     string plagueDesc = "";
     foreach (var fact in factDb.HistoricalEvents)
     {      
@@ -951,7 +952,7 @@ class MainDungeonBuilder : DungeonBuilder
       {
         int level = rng.Next(1, levels.Length);
         Console.WriteLine($"Graveyard on level {level}");
-        graveYardOnLevel = rng.Next(1, levels.Length);
+        graveyardOnLevel = rng.Next(1, levels.Length);
         plagueDesc = disaster.Desc.CapitalizeWords();
       }
     }
@@ -960,14 +961,14 @@ class MainDungeonBuilder : DungeonBuilder
     {
       List<List<(int, int)>> rooms = levels[level].FindRooms();
 
-      if (level == 0 && rooms.Count > 0)
+      if (level < levels.Length - 1 && rng.NextDouble() < 0.2 && rooms.Count > 0)
       {
         int roomNum = rng.Next(rooms.Count);
         Rooms.ChasmTrapRoom(levels, rng, id, level, rooms[roomNum], objDb);
         rooms.RemoveAt(roomNum);
       }
 
-      if (level == graveYardOnLevel)
+      if (level == graveyardOnLevel)
       {
         var map = levels[level];
         Rooms.MarkGraves(map, plagueDesc, rng, id, level, rooms, objDb);
@@ -1040,8 +1041,6 @@ class MainDungeonBuilder : DungeonBuilder
           DeepOneShrine(levels[levelNum], _dungeonID, levelNum, objDb, rng);
         }
       }
-
-      //SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
 
       // Sometimes add a secret door or two in hallways
       if (rng.Next(2) == 0)

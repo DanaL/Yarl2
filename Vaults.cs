@@ -395,8 +395,7 @@ class Vaults
     {
       // A level zero vault has been vandalized or plundered by past
       // adventurers.
-      //VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
-      SetPortcullis(map, dungeonID, level, vault, doorRow, doorCol, objDb, rng);
+      VandalizedVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
       return;
     }
 

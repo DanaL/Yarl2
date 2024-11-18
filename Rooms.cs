@@ -111,12 +111,22 @@ class Rooms
     }
 
     (int, int) trapSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
+    Loc triggerLoc = new Loc(dungeonID, level, trapSq.Item1, trapSq.Item2);
     BridgeCollapseTrap trap = new()
     {
       BridgeTiles = bridges
     };
     map.SetTile(trapSq.Item1, trapSq.Item2, trap);
-    objDb.LocListeners.Add(new Loc(dungeonID, level, trapSq.Item1, trapSq.Item2));
+    objDb.LocListeners.Add(triggerLoc);
+
+    Item bait = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+    objDb.SetToLoc(triggerLoc, bait);
+    if (bait.Type != ItemType.Zorkmid)
+    {
+      bait = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      bait.Value = rng.Next(20, 51);
+      objDb.SetToLoc(triggerLoc, bait);
+    }
   }
 
   public static void ChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
