@@ -100,7 +100,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 
-  public void EnterLevel(Actor actor, int dungeon, int level)
+  public void PlayerEntersLevel(Actor actor, int dungeon, int level)
   {
     CurrLevel = level;
     CurrDungeonID = dungeon;
@@ -244,7 +244,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // I don't have a way to track what square is below a bridge, so I have to do 
   // something kludgy. Maybe in the future I should turn bridges into Items
   // that can be walked on?
-  static TileType SquareBelowBridge(Map map, Loc start)
+  TileType SquareBelowBridge(Loc start)
   {
     var q = new Queue<Loc>();
     q.Enqueue(start);
@@ -257,8 +257,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       foreach (var adj in Util.Adj4Locs(curr))
       {
-        var tileType = map.TileAt(adj.Row, adj.Col).Type;
-
+        var tileType = TileAt(adj).Type;
         if (tileType == TileType.Chasm || tileType == TileType.DeepWater)
           return tileType;
         else if (tileType == TileType.WoodBridge && !visited.Contains(adj))
@@ -273,7 +272,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void BridgeDestroyed(Loc loc)
   {
-    TileType tile = SquareBelowBridge(CurrentMap, loc);
+    TileType tile = SquareBelowBridge(loc);
     CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(tile));
 
     if (tile == TileType.Chasm)
@@ -428,6 +427,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ObjDb.RemoveItemFromLoc(loc, item);
       ItemDropped(item, landingSpot);
     }
+
     UpdateFoV();
   }
 
@@ -510,7 +510,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public string FallIntoChasm(Actor actor, Loc landingSpot)
   {
-    EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+    if (actor is Player)
+      PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+      
     string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
     UI.AlertPlayer(moveMsg);
     actor.Loc = landingSpot;
@@ -859,7 +861,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       // NB, this code is basically the same as in FaillIntoChasm
       Loc landingSpot = candidateSpots[Rng.Next(candidateSpots.Count)];
-      EnterLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+      PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       List<string> messages = [];
       string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
       messages.Add(moveMsg);

@@ -400,7 +400,7 @@ class PortalAction : Action
     var start = GameState!.Player!.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
-    GameState.EnterLevel(GameState.Player!, dungeon, level);
+    GameState.PlayerEntersLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     string moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);    
     result.Messages.Add(moveMsg);

@@ -1721,7 +1721,7 @@ class RecallTrait : BasicTrait, IGameEventListener
     LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb.FactCheck("Dungeon Entrance");
     if (entrance is not null)
     {
-      gs.EnterLevel(player, 0, 0);
+      gs.PlayerEntersLevel(player, 0, 0);
       var start = player.Loc;
       player.Loc = entrance.Loc;
       string moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
