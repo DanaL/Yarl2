@@ -169,6 +169,8 @@ class Examiner : Inputer
       string details = "";
       if (item.Type == ItemType.Statue && item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;
+      else if (_cyclopedia.TryGetValue(item.Name, out var v))
+        details = v.Text;
       else
         title = item.Name.IndefArticle().Capitalize();
       
