@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Runtime.InteropServices.Marshalling;
-
 namespace Yarl2;
 
 class ChasmRoomInfo
@@ -205,17 +203,26 @@ class Rooms
       boss.Name = ng.BossName();
       boss.Traits.Add(new NamedTrait());      
     }
-    else
-    {
-      // goblins
+    else // goblins
+    {      
       boss = MonsterFactory.Get("goblin boss", objDb, rng);
       boss.Name = ng.BossName();
-      boss.Traits.Add(new NamedTrait());      
+      boss.Traits.Add(new NamedTrait());
     }
 
     int i = rng.Next(spotsNearFire.Count);
+    boss.Traits.Add(new HomebodyTrait() { Loc = fireLoc, Range = 3 });
     objDb.AddNewActor(boss, spotsNearFire[i]);
     spotsNearFire.RemoveAt(i);
+
+    for (int j = 0; j < rng.Next(2, 5); j++)
+    {
+      Actor minion = MonsterFactory.Get(ed.Value, objDb, rng);
+      minion.Traits.Add(new HomebodyTrait() { Loc = fireLoc, Range = 3 });
+      i = rng.Next(spotsNearFire.Count);
+      objDb.AddNewActor(minion, spotsNearFire[i]);
+      spotsNearFire.RemoveAt(i);
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<List<(int, int)>> rooms, GameObjectDB objDb)

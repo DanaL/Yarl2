@@ -16,7 +16,7 @@ namespace Yarl2;
 
 class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
 {
-  readonly Loc _loc = loc;
+  public Loc Loc { get; init; } = loc;
   readonly Map _map = gameState.CurrMap!;
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
 
@@ -79,7 +79,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
     }
 
-    if (!_map.InBounds(_loc.Row, _loc.Col))
+    if (!_map.InBounds(Loc.Row, Loc.Col))
     {
       // in theory this shouldn't ever happen...
       result.Complete = false;
@@ -89,10 +89,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     // There are corner cases when I want to move the actor onto the sq they're already
     // on (like digging while in a pit and turning it into a trapdoor) to re-resolve
     // the effects of moving onto the sq
-    else if (GameState.ObjDb.Occupied(_loc) && GameState.ObjDb.Occupant(_loc)!.ID != Actor.ID)
+    else if (GameState.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor.ID)
     {
       result.Complete = false;
-      Actor? occ = GameState.ObjDb.Occupant(_loc);
+      Actor? occ = GameState.ObjDb.Occupant(Loc);
       if (occ is not null && occ.Behaviour is VillagePupBehaviour)
       {
         string msg;
@@ -111,14 +111,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
       else
       {
-        var attackAction = new MeleeAttackAction(GameState, Actor, _loc);
+        var attackAction = new MeleeAttackAction(GameState, Actor, Loc);
         result.AltAction = attackAction;
       }
     }    
-    else if (!CanMoveTo(Actor, _map, _loc))
+    else if (!CanMoveTo(Actor, _map, Loc))
     {
       result.Complete = false;
-      Tile tile = _map.TileAt(_loc.Row, _loc.Col);
+      Tile tile = _map.TileAt(Loc.Row, Loc.Col);
 
       if (Actor.HasTrait<ConfusedTrait>())
       {
@@ -136,7 +136,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       {        
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
         {
-          var openAction = new OpenDoorAction(GameState, Actor, _map, _loc);
+          var openAction = new OpenDoorAction(GameState, Actor, _map, Loc);
           result.AltAction = openAction;
         }
         else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
@@ -144,30 +144,30 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           // If we are in the dungeon, we'll let the player jump into rivers
           // (and/or they can stumble in while confused, etc)
 
-          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(_loc))
+          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
           {
             GameState.UIRef().SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc, true), new YesOrNoInputer());
+            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, Loc, true), new YesOrNoInputer());
           }
           else
           {
-            GameState.RememberLoc(_loc, tile);
+            GameState.RememberLoc(Loc, tile);
             result.EnergyCost = 0;
-            result.AltAction = new DiveAction(GameState, Actor, _loc, false);
+            result.AltAction = new DiveAction(GameState, Actor, Loc, false);
           }
         }
         else if (tile.Type == TileType.Chasm)
         {
-          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(_loc))
+          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
           {
             GameState.UIRef().SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
-            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, _loc, true), new YesOrNoInputer());
+            GameState.Player.ReplacePendingAction(new DiveAction(GameState, Actor, Loc, true), new YesOrNoInputer());
           }
           else
           {
-            GameState.RememberLoc(_loc, tile);
+            GameState.RememberLoc(Loc, tile);
             result.EnergyCost = 0;
-            result.AltAction = new DiveAction(GameState, Actor, _loc, false);
+            result.AltAction = new DiveAction(GameState, Actor, Loc, false);
           }
         }
         else
@@ -179,7 +179,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       // If the player is blind, remember what tile they bumped into
       // so that it displays on screen
       if (isPlayer && Actor.HasTrait<BlindTrait>())
-        GameState.RememberLoc(_loc, tile);
+        GameState.RememberLoc(Loc, tile);
     }
     else if (Actor.HasActiveTrait<GrappledTrait>())
     {
@@ -221,9 +221,9 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.EnergyCost = 1.0;
       }
     }
-    else if (GameState.ObjDb.ItemsAt(_loc).Any(item => item.HasTrait<BlockTrait>()))
+    else if (GameState.ObjDb.ItemsAt(Loc).Any(item => item.HasTrait<BlockTrait>()))
     {
-      Item blockage = GameState.ObjDb.ItemsAt(_loc).Where(item => item.HasTrait<BlockTrait>()).First();
+      Item blockage = GameState.ObjDb.ItemsAt(Loc).Where(item => item.HasTrait<BlockTrait>()).First();
       if (blockage.Type == ItemType.Statue)
       {
         string msg;
@@ -263,7 +263,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       {       
         result.Complete = true;
         result.EnergyCost = 1.0;
-        result.Messages.Add(MsgFactory.SlipOnIceMessage(Actor, _loc, GameState));       
+        result.Messages.Add(MsgFactory.SlipOnIceMessage(Actor, Loc, GameState));       
       }
     }
     else
@@ -281,7 +281,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
     try 
     {
-      string moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, _loc);
+      string moveMsg = GameState!.ResolveActorMove(Actor!, Actor!.Loc, Loc);
       result.Messages.Add(moveMsg);
     }
     catch (AbnormalMovement abMov)

@@ -245,8 +245,21 @@ class MonsterBehaviour : IBehaviour
   {    
     if (mob.HasTrait<ConfusedTrait>()) 
       return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
-    else
-      return mob.MoveStrategy.MoveAction(mob, gs);
+    else 
+    {
+      Action acc = mob.MoveStrategy.MoveAction(mob, gs);
+
+      // When I spruce up behaviour code and attitude, I'll change it so that they 
+      // stick close to home until the Player angers them
+      // Maybe they should move randomly? Or back toward 'home'?
+      if (acc is MoveAction move && mob.Traits.OfType<HomebodyTrait>().FirstOrDefault() is HomebodyTrait homebody)
+      {
+        if (Util.Distance(move.Loc, homebody.Loc) > homebody.Range)
+          return new PassAction();
+      }
+
+      return acc;
+    }      
   }
 
   public virtual Action CalcAction(Mob actor, GameState gs)

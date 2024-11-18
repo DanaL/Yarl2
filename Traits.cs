@@ -243,6 +243,16 @@ class HealAlliesTrait : ActionTrait
   public override string AsText() => $"HealAllies#{Cooldown}";
 }
 
+// Trait for mobs who won't wander too far (normally) from
+// a particular location
+class HomebodyTrait : Trait
+{
+  public Loc Loc { get; set; }
+  public int Range { get; set; }
+
+  public override string AsText() => $"Homebody#{Loc}#{Range}";
+}
+
 class ConfusingScreamTrait : ActionTrait
 {
   public int DC { get; set; }
@@ -2081,6 +2091,7 @@ class TraitFactory
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
+    { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjID = ulong.Parse(pieces[2]) } },
     { "Immunity", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out DamageType dt);
