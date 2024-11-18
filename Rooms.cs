@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.InteropServices.Marshalling;
+
 namespace Yarl2;
 
 class ChasmRoomInfo
@@ -184,18 +186,36 @@ class Rooms
       // exception if no early denizen had been set
       return;
 
+    NameGenerator ng = new(rng, "data/names.txt");
+
     (int, int) fireSq = room[rng.Next(room.Count)];
     Loc fireLoc = new(dungeonID, level, fireSq.Item1, fireSq.Item2);
     Item fire = ItemFactory.Get(ItemNames.CAMPFIRE, objDb);
     objDb.SetToLoc(fireLoc, fire);
+
+    var spotsNearFire = room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
+                            .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
+                            .Where(loc => loc != fireLoc && !objDb.Occupied(loc))
+                            .ToList();
+
+    Actor boss;
     if (ed.Value == "kobold")
     {
-
+      boss = MonsterFactory.Get("kobold foreman", objDb, rng);
+      boss.Name = ng.BossName();
+      boss.Traits.Add(new NamedTrait());      
     }
     else
     {
       // goblins
+      boss = MonsterFactory.Get("goblin boss", objDb, rng);
+      boss.Name = ng.BossName();
+      boss.Traits.Add(new NamedTrait());      
     }
+
+    int i = rng.Next(spotsNearFire.Count);
+    objDb.AddNewActor(boss, spotsNearFire[i]);
+    spotsNearFire.RemoveAt(i);
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<List<(int, int)>> rooms, GameObjectDB objDb)
