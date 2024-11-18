@@ -85,6 +85,11 @@ class DebugCommand(GameState gs)
       _gs.UIRef().AlertPlayer($"Loc: {_gs.Player.Loc}");
       return "";
     }
+    else if (txt == "heal")
+    {
+      _gs.Player.Stats[Attribute.HP].Reset();
+      return "";
+    }
 
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
