@@ -399,7 +399,7 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
 
-  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
+  public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -436,7 +436,7 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
   
-  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
+  public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {

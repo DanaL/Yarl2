@@ -408,6 +408,20 @@ internal class MapSaver
           digits = Util.ToNums(pieces[2]);
           tile = new JetTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]), Convert.ToBoolean(pieces[3]));
           break;
+        case TileType.BridgeTrigger:
+          tile = new BridgeTrigger()
+          {
+            Triggered = bool.Parse(pieces[2]),
+            BridgeTiles = pieces[3].Split('|').Select(Loc.FromStr).ToHashSet()
+          };
+          break;
+        case TileType.HiddenBridgeCollapseTrap:
+          tile = new BridgeCollapseTrap()
+          {
+            Triggered = bool.Parse(pieces[2]),
+            BridgeTiles = pieces[3].Split('|').Select(Loc.FromStr).ToHashSet()
+          };
+          break;
       }
 
       if (tile is not null)
