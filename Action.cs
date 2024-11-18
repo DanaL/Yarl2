@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Yarl2;
 
 class ActionResult
@@ -856,6 +858,11 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         Complete = false,
         Messages = [ "There's no room in your inventory!" ]
       };
+    }
+
+    if (item.HasTrait<AffixedTrait>())
+    {
+      return new ActionResult() { EnergyCost = 0.0, Complete = false, Messages = ["You cannot pick that up!"] };
     }
 
     // First, is there anything preventing the actor from picking items up

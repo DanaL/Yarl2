@@ -942,7 +942,7 @@ class MainDungeonBuilder : DungeonBuilder
   }
 
   // I should move the add vaults code here
-  void AddRooms(int id, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
+  void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
   {    
     int graveyardOnLevel = -1;
     string plagueDesc = "";
@@ -975,23 +975,30 @@ class MainDungeonBuilder : DungeonBuilder
         switch (rng.Next(4))
         {
           case 0:
-            Rooms.ChasmTrapRoom(levels, rng, id, level, rooms[roomId], objDb);
+            Rooms.ChasmTrapRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
             break;
           case 1:
-            Rooms.TriggerChasmRoom(levels, rng, id, level, rooms[roomId], objDb);
+            Rooms.TriggerChasmRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
             break;
           default:
-            Rooms.BasicChasmRoom(levels, rng, id, level, rooms[roomId], objDb);
+            Rooms.BasicChasmRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
             break;
         }
         
         rooms.RemoveAt(roomId);
       }
 
+      if (true)
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.CampRoom(rooms[roomId], dungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(roomId);
+      }
+
       if (level == graveyardOnLevel)
       {
         var map = levels[level];
-        Rooms.MarkGraves(map, plagueDesc, rng, id, level, rooms, objDb);
+        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms, objDb);
       }
     }
   }

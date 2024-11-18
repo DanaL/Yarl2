@@ -272,11 +272,12 @@ class PreGameHandler(UserInterface ui)
         DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
 
         var history = new History(rng);
-        FactDb factDb = history.GenerateHistory(rng);
+        FactDb factDb = history.GenerateHistory(rng);        
         campaign.FactDb = factDb;
 
         int maxDepth = 5;
         var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, factDb.Villain, rng);
+        factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, entrance, factDb, objDb, rng, monsterDecks);
         PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
@@ -406,9 +407,7 @@ class PreGameHandler(UserInterface ui)
   // know how to populate themselves (or receive a populator class of some 
   // sort) because monsters will spawn as the player explores
   private static void PopulateDungeon(Random rng, GameObjectDB objDb, FactDb factDb, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
-  {
-    factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
-
+  {    
     // Temp: generate monster decks and populate the first two levels of the dungeon.
     // I'll actually want to save the decks for reuse as random monsters are added
     // in, but I'm not sure where they should live. I guess maybe in the Map structure,

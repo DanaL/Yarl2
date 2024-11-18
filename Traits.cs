@@ -112,6 +112,11 @@ class AdjectiveTrait(string adj) : Trait
   public override string AsText() => $"Adjective#{Adj}";
 }
 
+class AffixedTrait : Trait
+{
+  public override string AsText() => $"Affixed";
+}
+
 class AttackVerbTrait(Verb verb) : Trait
 {
   public Verb Verb { get; set; } = verb;
@@ -1376,8 +1381,9 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public bool Expired { get; set; } = false;
   public int Lifetime { get; set; } = 0;
   public bool Listening => true;
+  public bool Spreads { get; set; }
 
-  public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}";
+  public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}#{Spreads}";
 
   public void Extinguish(Item fireSrc, GameState gs)
   {
@@ -1426,7 +1432,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       }
 
       // The fire might spread!
-      if (Lifetime > 1)
+      if (Spreads && Lifetime > 1)
       {
         foreach (var sq in Util.Adj4Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
         {
@@ -2009,6 +2015,7 @@ class TraitFactory
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
     { "ACMod", (pieces, gameObj) => new ACModTrait() { ArmourMod = int.Parse(pieces[1]) }},
     { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
+    { "Affixed", (pieces, gameObj) => new AffixedTrait() },
     { "Allies", (pieces, gameObj) => { var ids = pieces[1].Split(',').Select(ulong.Parse).ToList(); return new AlliesTrait() { IDs = ids }; } },
     { "Ammo", (pieces, gameObj) =>
       {
@@ -2124,7 +2131,11 @@ class TraitFactory
         Strength = int.Parse(pieces[2])
       } 
     },
-    { "OnFire", (pieces, gameObj) => new OnFireTrait() { Expired = bool.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), Lifetime = int.Parse(pieces[3]) } },
+    { "OnFire", (pieces, gameObj) => new OnFireTrait() 
+    { 
+      Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]), 
+      Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) } 
+    },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() },
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },

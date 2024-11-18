@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 // Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
@@ -153,8 +154,8 @@ class Item : GameObj, IEquatable<Item>
 
 enum ItemNames
 {
-  ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CHAINMAIL, CLAYMORE, DAGGER, 
-  DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD,
+  ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CAMPFIRE, CHAINMAIL, CLAYMORE, 
+  DAGGER, DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD,
   GUIDE_STABBY, GUIDE_AXES, GUIDE_SWORDS, GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, 
   LEATHER_ARMOUR, LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, 
   POTION_COLD_RES, POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, 
@@ -247,6 +248,14 @@ class ItemFactory
       if (item.Type == ItemType.Ring)
         item.Glyph = GlyphForRing(item.Name);
       
+      foreach (Trait t in item.Traits)
+      {
+        if (t is IGameEventListener listener && t.Active)
+        {
+           objDB.EndOfRoundListeners.Add(listener);
+        }
+      }
+
       return item;
     }
 
@@ -325,11 +334,11 @@ class ItemFactory
       Name = "fire",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = glyph
+      Glyph = glyph,      
     };
     fire.SetZ(7);
     gs.ObjDb.Add(fire);
-    var onFire = new OnFireTrait() { Expired = false, OwnerID = fire.ID };
+    var onFire = new OnFireTrait() { Expired = false, OwnerID = fire.ID, Spreads = true };
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
     fire.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = fire.ID });

@@ -756,5 +756,17 @@
       "Stackable",
       "Torch#owner#false#750"
     ]
+  },
+  {
+    "Name": "CAMPFIRE",
+    "DescriptiveName": "campfire",
+    "Type": "Tool",
+    "Value": 0,
+    "Glyph": "^,brightred,dullred,torchorange,black",
+    "Traits": [
+      "LightSource#owner#1",
+      "OnFire#false#owner#max#false",
+      "Affixed"
+    ]
   }
 ]

@@ -157,3 +157,6 @@ An autobiography written by a famous barbarian. It contains many tales of mayhem
 #
 Asking About Axing Vol. 2
 From vikings to dwarves to some of the top executioners in the land, we've asked them all about axing. This compendium is sure to stoke your axe strokes!
+#
+campfire
+A cozy spot to warm up and recover from the stress of dungeon delving.

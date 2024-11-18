@@ -176,6 +176,28 @@ class Rooms
     }
   }
 
+  public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  {
+    if (factDb.FactCheck("EarlyDenizen") is not SimpleFact ed)
+      // This is an error condition but I don't think worth calling an expection over
+      // because by this point in the process something else would have thrown an
+      // exception if no early denizen had been set
+      return;
+
+    (int, int) fireSq = room[rng.Next(room.Count)];
+    Loc fireLoc = new(dungeonID, level, fireSq.Item1, fireSq.Item2);
+    Item fire = ItemFactory.Get(ItemNames.CAMPFIRE, objDb);
+    objDb.SetToLoc(fireLoc, fire);
+    if (ed.Value == "kobold")
+    {
+
+    }
+    else
+    {
+      // goblins
+    }
+  }
+
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<List<(int, int)>> rooms, GameObjectDB objDb)
   {
     NameGenerator ng = new(rng, "data/names.txt");
