@@ -304,8 +304,8 @@ class PreGameHandler(UserInterface ui)
         Village.Populate(wildernessMap, town, objDb, history, rng);
         campaign.Town = town;
 
-        (startR, startC) = PickStartLoc(wildernessMap, town, rng);
-       // (startR, startC) = entrance;
+        //(startR, startC) = PickStartLoc(wildernessMap, town, rng);
+       (startR, startC) = entrance;
 
         break;
       }
@@ -528,8 +528,8 @@ class PreGameHandler(UserInterface ui)
     {
       int seed = DateTime.Now.GetHashCode();
       //seed = -1304472701;
-     seed = 1619918519;
-     
+      seed = 1687284549;
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();

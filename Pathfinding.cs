@@ -136,7 +136,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 class AStar
 {
-  static public Stack<Loc> FindPath(Map map, Loc start, Loc goal, Dictionary<TileType, int> travelCost)
+  static public Stack<Loc> FindPath(Map map, Loc start, Loc goal, Dictionary<TileType, int> travelCost, bool allowDiagonal = true)
   {
     var q = new PriorityQueue<Loc, int>();
     q.Enqueue(start, 0);
@@ -152,7 +152,8 @@ class AStar
       if (curr == goal)
         break;
 
-      foreach (var adj in Util.Adj8Locs(curr))
+      var adjSqs = allowDiagonal ? Util.Adj8Locs(curr) : Util.Adj4Locs(curr);
+      foreach (var adj in adjSqs)
       {
         var tileType = map.TileAt(adj.Row, adj.Col).Type;
         if (!travelCost.TryGetValue(tileType, out int travel))          

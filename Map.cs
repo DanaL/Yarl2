@@ -23,7 +23,8 @@ enum TileType
   BrokenPortcullis, GateTrigger, VaultDoor, HiddenTrapDoor, TrapDoor,
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
-  MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave
+  MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
+  BridgeTrigger
 }
 
 interface ITriggerable
@@ -157,7 +158,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Portcullis => "portcullis",
     TileType.OpenPortcullis => "open portcullis",
     TileType.BrokenPortcullis => "broken portcullis",
-    TileType.GateTrigger => "trigger/pressure plate",
+    TileType.GateTrigger => "pressure plate",
     TileType.VaultDoor => "vault door",
     TileType.HiddenTrapDoor => "stone floor",
     TileType.TrapDoor => "trap door",
@@ -178,6 +179,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.FrozenPool => "ice",
     TileType.Gravestone => "a gravestone",
     TileType.DisturbedGrave => "a disturbed grave",
+    TileType.BridgeTrigger => "pressure plate",
     _ => "unknown"
   };
 
@@ -387,6 +389,45 @@ class IdolAltar : Landmark
   public override string ToString() => $"{(int)Type};{StepMessage};{IdolID};{Wall}";
 }
 
+class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
+{
+  public override bool Passable() => true;
+  public override bool PassableByFlight() => true;
+  public override bool Opaque() => false;
+
+  public HashSet<Loc> BridgeTiles { get; set; } = [];
+  
+  public override string ToString() => $"{(int)Type};{Triggered};{string.Join(',', BridgeTiles)}";
+
+  public bool Triggered { get; set; } = false;
+  public bool Expired { get; set; }
+  public bool Listening => true;
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (!Triggered)
+    {
+      Map map = gs.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+      foreach (Loc bridgeLoc in BridgeTiles)
+      {
+        map.SetTile(bridgeLoc.Row, bridgeLoc.Col, TileFactory.Get(TileType.WoodBridge));
+      }
+      Triggered = true;
+
+      if (gs.LastPlayerFoV.Contains(loc))
+      {
+        string s = "You hear the sound of machinery as a bridge rises!";
+        gs.UIRef().AlertPlayer(s);
+        gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      }
+      else
+      {
+        gs.UIRef().AlertPlayer("You hear a faint sound of machinery.");
+      }
+    }    
+  }
+}
+
 class TileFactory
 {
   private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true, false);
@@ -580,7 +621,7 @@ class Map : ICloneable
   bool IsRoomSq(int r, int c)
   {
     int adjFloors = Util.Adj8Sqs(r, c).Count(sq => TileAt(sq).Type == TileType.DungeonFloor);
-    return adjFloors >= 4; // Should it be 3 because of corners? But that doesn't really matter
+    return adjFloors >= 3; // Should it be 3 because of corners? But that doesn't really matter
                            // for my purposes, I don't think.
   }
 

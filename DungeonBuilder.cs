@@ -940,53 +940,37 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, GameObjectDB objDb)
-  {
-    NameGenerator ng = new(rng, "data/names.txt");
-    List<List<(int, int)>> rooms = map.FindRooms();
-    List<(int r, int c)> room = rooms[rng.Next(rooms.Count)];
-
-    int numOfGraves = room.Count / 4;
-    for (int j = 0; j < numOfGraves; j++)
-    {
-      var (r, c) = room[rng.Next(room.Count)];
-      int roll = rng.Next(10);
-      string message;
-      if (roll == 0)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, claimed by {epitaph}.";
-      else if (roll == 1)
-        message = $"Here lies {ng.GenerateName(rng.Next(6, 11)).Capitalize()}, missed except not by that troll.";
-      else if (roll == 2)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, mourned by few.";
-      else if (roll == 3)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, beloved and betrayed.";
-      else if (roll == 4)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}: My love for you shall live forever. You, however, did not.";
-      else
-        message = "A grave too worn to be read.";
-
-      map.SetTile(r, c, new Gravestone(message));
-    }
-
-    var (cr, cc) = room[rng.Next(room.Count)];
-    Loc cryptLoc = new(dungeonID, level, cr, cc);
-    Actor crypt = MonsterFactory.Get("haunted crypt", objDb, rng);
-    objDb.AddNewActor(crypt, cryptLoc);
-    
-    map.Alerts.Add("A shiver runs up your spine.");
-  }
-
+  // I should move the add vaults code here
   void AddRooms(int id, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
-  {  
+  {    
+    int graveYardOnLevel = -1;
+    string plagueDesc = "";
     foreach (var fact in factDb.HistoricalEvents)
-    {
+    {      
       if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
       {
-        // There's a guaranteed graveyard if there was a plague
         int level = rng.Next(1, levels.Length);
         Console.WriteLine($"Graveyard on level {level}");
+        graveYardOnLevel = rng.Next(1, levels.Length);
+        plagueDesc = disaster.Desc.CapitalizeWords();
+      }
+    }
+
+    for (int level = 0; level < levels.Length; level++)
+    {
+      List<List<(int, int)>> rooms = levels[level].FindRooms();
+
+      if (level == 0 && rooms.Count > 0)
+      {
+        int roomNum = rng.Next(rooms.Count);
+        Rooms.ChasmRoom(levels, rng, id, level, rooms[roomNum], objDb);
+        rooms.RemoveAt(roomNum);
+      }
+
+      if (level == graveYardOnLevel)
+      {
         var map = levels[level];
-        MarkGraves(map, disaster.Desc.CapitalizeWords(), rng, id, level, objDb);
+        Rooms.MarkGraves(map, plagueDesc, rng, id, level, rooms, objDb);
       }
     }
   }
@@ -1057,7 +1041,7 @@ class MainDungeonBuilder : DungeonBuilder
         }
       }
 
-      SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
+      //SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
 
       // Sometimes add a secret door or two in hallways
       if (rng.Next(2) == 0)
