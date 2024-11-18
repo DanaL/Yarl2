@@ -129,7 +129,7 @@ class Rooms
     }
   }
 
-  public static void ChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  public static void TriggerChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
     Map mapBelow = levels[level + 1];
@@ -145,6 +145,20 @@ class Rooms
     };
     map.SetTile(triggerSq.Item1, triggerSq.Item2, trigger);
     objDb.LocListeners.Add(new Loc(dungeonID, level, triggerSq.Item1, triggerSq.Item2));
+  }
+
+  public static void BasicChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  {
+    Map map = levels[level];
+    Map mapBelow = levels[level + 1];
+
+    ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    MakeChasm(map, mapBelow, info.ChasmSqs);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+    foreach (Loc bridge in bridges)
+    {
+      map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<List<(int, int)>> rooms, GameObjectDB objDb)
