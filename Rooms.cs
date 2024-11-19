@@ -191,10 +191,24 @@ class Rooms
     Item fire = ItemFactory.Get(ItemNames.CAMPFIRE, objDb);
     objDb.SetToLoc(fireLoc, fire);
 
-    var spotsNearFire = room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
-                            .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
-                            .Where(loc => loc != fireLoc && !objDb.Occupied(loc))
-                            .ToList();
+    List<Loc> spotsNearFire = room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
+                                  .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
+                                .Where(loc => loc != fireLoc && !objDb.Occupied(loc))
+                                .ToList();
+
+    for (int j = 0; j < rng.Next(2, 5); j++)
+    {
+      TreasureQuality quality = rng.Next(4) switch
+      {
+        0 => TreasureQuality.Common,
+        1 or 2 => TreasureQuality.Uncommon,
+        _ => TreasureQuality.Good
+      };
+
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      Loc itemSq = spotsNearFire[rng.Next(spotsNearFire.Count)];
+      objDb.SetToLoc(itemSq, item);
+    }
 
     Actor boss;
     if (ed.Value == "kobold")

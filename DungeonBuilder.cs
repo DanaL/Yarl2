@@ -960,8 +960,10 @@ class MainDungeonBuilder : DungeonBuilder
     for (int level = 0; level < levels.Length; level++)
     {
       List<List<(int, int)>> rooms = levels[level].FindRooms();
+      if (rooms.Count == 0)
+        continue;
 
-      if (level < levels.Length - 1 && rng.NextDouble() < 0.2 && rooms.Count > 0)
+      if (level < levels.Length - 1 && rng.NextDouble() < 0.2)
       {
         // We don't want to turn really ginat rooms into chasm rooms
         var smallRooms = rooms.Select((room, index) => (room, index))
@@ -988,7 +990,7 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
 
-      if (true)
+      if (level > 0 && rng.NextDouble() < 0.20)
       {
         int roomId = rng.Next(rooms.Count);
         Rooms.CampRoom(rooms[roomId], dungeonId, level, factDb, objDb, rng);
