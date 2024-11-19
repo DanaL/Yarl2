@@ -485,6 +485,18 @@ class Battle
         }        
       }
 
+      if (target.HasTrait<DisplacementTrait>() && target.AbleToMove())
+      {        
+        int displaceRoll = gs.Rng.Next(100);
+        if (displaceRoll <= 33 && HandleDisplacement(attacker, target, gs))
+        {
+          string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "attack")}";
+          txt += $" but {target.FullName} {Grammar.Conjugate(target, "shimmer")} away before reappearing!";
+          result.Messages.Add(txt);
+          return result;
+        }        
+      }
+
       Verb verb = Verb.Hit;
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
@@ -551,6 +563,22 @@ class Battle
     }
 
     return result;
+  }
+
+  public static bool HandleDisplacement(Actor attacker, Actor target, GameState gs)
+  {
+    HashSet<Loc> options = Util.Adj8Locs(attacker.Loc)
+                               .Where(sq => !gs.ObjDb.Occupied(sq) && gs.TileAt(sq).Passable())
+                               .ToHashSet();
+    if (options.Count > 0)
+    {
+      Loc sq = options.ToList()[gs.Rng.Next(options.Count)];
+      string moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
+      gs.UIRef().AlertPlayer(moveMsg);
+      return true;
+    }
+
+    return false;
   }
 
   public static bool HandleDodge(Actor attacker, Actor target, GameState gs)

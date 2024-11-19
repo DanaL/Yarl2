@@ -953,6 +953,11 @@ class DisguiseTrait : BasicTrait
   public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}";
 }
 
+class DisplacementTrait : Trait
+{
+  public override string AsText() => $"Displacement";
+}
+
 class IllusionTrait : BasicTrait, IGameEventListener
 {
   public ulong SourceID {  get; set; }
@@ -2071,6 +2076,7 @@ class TraitFactory
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
+    { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
     { "Dodge", (pieces, gameObj) => new DodgeTrait() { Rate = int.Parse(pieces[1]) }},
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
