@@ -239,13 +239,47 @@ class Rooms
     }
   }
 
-  public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<List<(int, int)>> rooms, GameObjectDB objDb)
+  public static void Orchard(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  {
+    int minRow = int.MaxValue, maxRow = 0;
+    int minCol = int.MaxValue, maxCol = 0;
+
+    foreach ((int r, int c) in room)
+    {
+      TileType type = rng.NextDouble() < 0.35 ? TileType.Dirt : TileType.GreenTree;
+      if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        map.SetTile(r, c, TileFactory.Get(type));
+
+      // find the rough centre
+      if (r < minRow)
+        minRow = r;
+      if (r > maxRow)
+        maxRow = r;
+      if (c < minCol)
+        minCol = c;
+      if (c > maxCol)
+        maxCol = c;
+    }
+
+    int statueR = (minRow + maxRow) / 2;
+    int statueC = (minCol + maxCol) / 2;
+    Loc statueLoc = new(dungeonId, level, statueR, statueC);
+    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+    statue.Traits.Add(new DescriptionTrait("An elf holding their hands up to the sky."));
+    int rowRange = maxRow - minRow;
+    int colRange = maxCol - minCol;
+    statue.Traits.Add(new LightSourceTrait()
+    {
+      ExpiresOn = ulong.MaxValue, OwnerID = statue.ID, 
+      Radius = rowRange > colRange ? rowRange : colRange
+    });
+    objDb.SetToLoc(statueLoc, statue);
+  }
+
+  public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     NameGenerator ng = new(rng, "data/names.txt");
-    int roomNum = rng.Next(rooms.Count);
-    List<(int r, int c)> room = rooms[roomNum];
-    rooms.RemoveAt(roomNum);
-
+   
     int numOfGraves = room.Count / 4;
     for (int j = 0; j < numOfGraves; j++)
     {

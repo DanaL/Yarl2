@@ -622,7 +622,7 @@ class Map : ICloneable
   }
 
   // Find rooms -- flood fill to find areas on map that are rooms,
-  // ie contiguous floor squares at least 9x9
+  // ie contiguous floor squares at least 9x9 and no longer than 16x16
   public List<List<(int, int)>> FindRooms()
   {
     List<List<(int, int)>> rooms = [];
@@ -639,7 +639,7 @@ class Map : ICloneable
           List<(int r, int c)> floors = [];
           RoomFloodFill(r, c, visited, floors);
 
-          if (floors.Count > 9)
+          if (floors.Count > 9 && floors.Count <= 256)
           {
             // I'm not actually checking/rejecting long, narrow rooms (like
             // say a 2x6 room) but the dungeon generator doesn't generally

@@ -965,14 +965,7 @@ class MainDungeonBuilder : DungeonBuilder
 
       if (level < levels.Length - 1 && rng.NextDouble() < 0.2)
       {
-        // We don't want to turn really ginat rooms into chasm rooms
-        var smallRooms = rooms.Select((room, index) => (room, index))
-                             .Where(x => x.room.Count < 225)
-                             .Select(x => x.index)
-                             .ToList();
-        if (smallRooms.Count == 0)
-          continue;
-        int roomId = smallRooms[rng.Next(smallRooms.Count)];
+        int roomId = rng.Next(rooms.Count);
 
         switch (rng.Next(4))
         {
@@ -990,7 +983,7 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
 
-      if (level > 0 && rng.NextDouble() < 0.20)
+      if (level > 1 && rng.NextDouble() < 0.2)
       {
         int roomId = rng.Next(rooms.Count);
         Rooms.CampRoom(rooms[roomId], dungeonId, level, factDb, objDb, rng);
@@ -999,8 +992,17 @@ class MainDungeonBuilder : DungeonBuilder
 
       if (level == graveyardOnLevel)
       {
+        int roomId = rng.Next(rooms.Count);
         var map = levels[level];
-        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms, objDb);
+        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms[roomId], objDb);
+        rooms.RemoveAt(roomId);
+      }
+
+      if (factDb.Ruler.Type == OGRulerType.ElfLord)
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.Orchard(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(roomId);
       }
     }
   }

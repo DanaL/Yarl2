@@ -64,7 +64,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.BrokenDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.Dirt, 1 },
+    { TileType.GreenTree, 1 },
+    { TileType.Gravestone, 1 },
+    { TileType.DisturbedGrave, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -78,7 +82,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.ClosedDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.Dirt, 1 },
+    { TileType.GreenTree, 1 },
+    { TileType.Gravestone, 1 },
+    { TileType.DisturbedGrave, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -94,7 +102,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Water, 1 },
     { TileType.Chasm, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.Dirt, 1 },
+    { TileType.GreenTree, 1 },
+    { TileType.Gravestone, 1 },
+    { TileType.DisturbedGrave, 1 }
   };
 
   public void ClearMenu() => UI.CloseMenu();
