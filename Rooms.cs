@@ -448,6 +448,10 @@ class Rooms
   static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, Random rng)
   {
     HashSet<Loc> bridges = [];
+
+    if (info.IslandSqs.Count == 0)
+      return [];
+
     (int, int) goalSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
 
     Dictionary<TileType, int> passable = new()
@@ -481,6 +485,9 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    if (info.ChasmSqs.Count == 0)
+      return;
+
     MakeChasm(map, mapBelow, info.ChasmSqs);
     HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
     foreach (Loc bridge in bridges)
@@ -513,6 +520,9 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    if (info.ChasmSqs.Count == 0)
+      return;
+
     MakeChasm(map, mapBelow, info.ChasmSqs);
     HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
 
@@ -537,6 +547,9 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
+    if (info.ChasmSqs.Count == 0)
+      return;
+      
     MakeChasm(map, mapBelow, info.ChasmSqs);
     HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
     foreach (Loc bridge in bridges)
