@@ -98,7 +98,7 @@ class Examiner : Inputer
             case TileType.JetTrigger:
             case TileType.FireJetTrap:
             case TileType.Pit:
-              pq.Enqueue(loc, Util.Distance(_gs.Player.Loc, loc));              
+              pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
               break;
           }
         }
@@ -165,14 +165,12 @@ class Examiner : Inputer
     if (items.Count > 0)
     {
       Item item = items[0];
-      string title = "";
+      string title = item.Name.IndefArticle().Capitalize();
       string details = "";
       if (item.Type == ItemType.Statue && item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;
       else if (_cyclopedia.TryGetValue(item.Name, out var v))
         details = v.Text;
-      else
-        title = item.Name.IndefArticle().Capitalize();
       
       return new LocDetails(title, details, item.Glyph.Ch);
     }

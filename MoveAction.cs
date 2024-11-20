@@ -231,7 +231,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
           msg = desc.Text;
         else
           msg = $"{Grammar.Possessive(Actor).Capitalize()} way is blocked by a statue.";
-        GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+        GameState.UIRef().SetPopup(new Popup(msg, "a statue", -1, -1));
         result.Messages.Add(msg);
       }
       else

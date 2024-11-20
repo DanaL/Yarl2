@@ -657,7 +657,7 @@
     "DescriptiveName": "statue",
     "Type": "Statue",
     "Value": 0,
-    "Glyph": "&,grey,darkgrey,black,black",
+    "Glyph": "&,white,grey,black,black",
     "Traits": [
       "Block",
       "Plural",
