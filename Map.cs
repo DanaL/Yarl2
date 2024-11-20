@@ -678,6 +678,23 @@ class Map : ICloneable
       return;
     if (!IsRoomSq(r, c))
       return;
+    
+    // Is the tile an an exit, which I'm defining as door or passable tile with 
+    // walls to the left and right and open spaces up and down. So
+    //
+    //  .....       ..#..
+    //  ##.##  or   .....
+    //  .....       ..#..
+    if (TileAt(r-1, c).Type == TileType.DungeonWall && TileAt(r+1, c).Type == TileType.DungeonWall
+      && IsRoomFloorTile(TileAt(r, c-1).Type) && IsRoomFloorTile(TileAt(r, c+1).Type))
+    {
+      return;
+    }
+    if (TileAt(r, c-1).Type == TileType.DungeonWall && TileAt(r, c+1).Type == TileType.DungeonWall
+      && IsRoomFloorTile(TileAt(r-1, c).Type) && IsRoomFloorTile(TileAt(r+1, c).Type))
+    {
+      return;
+    }
 
     // Mark as visited and add to room
     visited[r, c] = true;

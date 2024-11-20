@@ -961,7 +961,7 @@ class MainDungeonBuilder : DungeonBuilder
       List<List<(int, int)>> rooms = levels[level].FindRooms();
       if (rooms.Count == 0)
         continue;
-
+      
       List<int> potentialVaults = [];
       for (var i = 0; i < rooms.Count; i++)
       {
@@ -975,7 +975,6 @@ class MainDungeonBuilder : DungeonBuilder
         HashSet<(int, int)> vault = [.. rooms[roomId]];
         var (doorR, doorC) = Vaults.FindExit(levels[level], vault);
         Vaults.CreateVault(levels[level], dungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
-        Console.WriteLine($"Vault exit: {doorR}, {doorC}");
         rooms.RemoveAt(roomId);
       }
 
@@ -998,7 +997,7 @@ class MainDungeonBuilder : DungeonBuilder
         
         rooms.RemoveAt(roomId);
       }
-
+      
       if (level > 1 && rng.NextDouble() < 0.2)
       {
         int roomId = rng.Next(rooms.Count);
