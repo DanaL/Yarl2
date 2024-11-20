@@ -530,7 +530,7 @@ class PreGameHandler(UserInterface ui)
       //seed = 1687284549;
       //seed = 119994544;
       //seed = 1207463617;
-      seed = -921663908;
+      //seed = -921663908;
       
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);

@@ -202,6 +202,9 @@ class Treasure
         Item item = ItemByQuality(TreasureQuality.Common, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
       }
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(10,21);
+      AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
     }
     else if (levelNum == 1)
     {
@@ -216,6 +219,13 @@ class Treasure
 
       Item goodItem = ItemByQuality(TreasureQuality.Good, objDb, rng);
       AddObjectToLevel(goodItem, objDb, level, dungeonID, levelNum, rng);
+
+      for (int j = 0; j < rng.Next(1, 3); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(10,21);
+        AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+      }
     }
     else if (levelNum == 2 || levelNum == 3)
     {
@@ -231,7 +241,14 @@ class Treasure
         else
           quality = TreasureQuality.Good;
         Item item = ItemByQuality(quality, objDb, rng);
-        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);      
+      }
+
+      for (int j = 0; j < rng.Next(1, 4); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(15,26);
+        AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
       }
     }
     else if (levelNum == 4)
@@ -249,6 +266,13 @@ class Treasure
           quality = TreasureQuality.Good;          
         Item item = ItemByQuality(quality, objDb, rng);
         AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+
+      for (int j = 0; j < rng.Next(1, 4); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(15,26);
+        AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
       }
     }
   }
