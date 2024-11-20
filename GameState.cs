@@ -64,11 +64,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.BrokenDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.Dirt, 1 },
-    { TileType.GreenTree, 1 },
-    { TileType.Gravestone, 1 },
-    { TileType.DisturbedGrave, 1 }
+    { TileType.BrokenPortcullis, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -82,11 +78,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.ClosedDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.Dirt, 1 },
-    { TileType.GreenTree, 1 },
-    { TileType.Gravestone, 1 },
-    { TileType.DisturbedGrave, 1 }
+    { TileType.BrokenPortcullis, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -102,11 +94,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Water, 1 },
     { TileType.Chasm, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.Dirt, 1 },
-    { TileType.GreenTree, 1 },
-    { TileType.Gravestone, 1 },
-    { TileType.DisturbedGrave, 1 }
+    { TileType.BrokenPortcullis, 1 }
   };
 
   public void ClearMenu() => UI.CloseMenu();
@@ -177,7 +165,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     var fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
 
-    return fov.Contains(loc);
+    return fov.ContainsKey(loc) && fov[loc] != Illumination.None;
   }
 
   public bool LOSBetween(Loc a, Loc b)
@@ -1202,9 +1190,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
-  HashSet<Loc> LitLocations(int dungeonID, int level)
+  Dictionary<Loc, Illumination> LitLocations(int dungeonID, int level)
   {
-    HashSet<Loc> lit = [];
+    Dictionary<Loc, Illumination> lit = [];
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
@@ -1241,7 +1229,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (lightRadius > 0)
       {
-        lit.UnionWith(FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb));
+        var fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
+        foreach (var sq in fov)
+        {
+          if (!lit.TryAdd(sq.Key, sq.Value))
+            lit[sq.Key] |= sq.Value;
+        }
       }
     }
 
@@ -1251,12 +1244,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void UpdateFoV()
   {
     CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
-
-    HashSet<Loc> litLocations = LitLocations(CurrDungeonID, CurrLevel);
-
+    Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
     int radius = Player.HasTrait<BlindTrait>() ? 0 : Player.MAX_VISION_RADIUS;
-    var fov = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb)
-                         .Intersect(litLocations).ToHashSet();
+    var playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
+    HashSet<Loc> fov = [];
+    foreach (var sq in playerFoV)
+    {
+      Illumination playerIllum = sq.Value;
+      if (litLocations.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
+        fov.Add(sq.Key);
+    }
     LastPlayerFoV = fov;
 
     // Calculate which squares are newly viewed and check if there are

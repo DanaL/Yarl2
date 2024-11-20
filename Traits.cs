@@ -231,7 +231,7 @@ class HealAlliesTrait : ActionTrait
         if (gs.ObjDb.GetObj(id) is Actor ally)
         {
           Stat hp = ally.Stats[Attribute.HP];
-          if (fov.Contains(ally.Loc) && hp.Curr < hp.Max)
+          if (fov.ContainsKey(ally.Loc) && hp.Curr < hp.Max)
             return true;
         }        
       }

@@ -14,6 +14,20 @@
 
 namespace Yarl2;
 
+enum Illumination
+{
+  None = 0,
+  North = 0b1000,
+  South = 0b0100,
+  East = 0b0010,
+  West = 0b0001,
+  NE = 0b00010000,
+  NW = 0b00100000,
+  SE = 0b01000000,
+  SW = 0b10000000,
+  Full = 0b11111111,
+}
+
 class Shadow(float start, float end)
 {
   public float Start { get; set; } = start;
@@ -91,9 +105,9 @@ class FieldOfView
     };
   }
 
-  static HashSet<Loc> CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb)
+  static Dictionary<Loc, Illumination> CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
-    HashSet<Loc> visibleSqs = [];
+    Dictionary<Loc, Illumination> visibleSqs = [];
     bool fullShadow = false;
     var line = new ShadowLine();
 
@@ -113,13 +127,22 @@ class FieldOfView
         var projection = ProjectTile(row, col);
         if (!line.IsInShadow(projection))
         {
-          visibleSqs.Add(origin with { Row = r, Col = c });
-
+          Illumination illum = Illumination.None;
           var loc = origin with { Row = r, Col = c};
-          if (map.TileAt(r, c).Opaque() || objDb.ItemsWithTrait<OpaqueTrait>(loc))
+          if (IsOpaque(loc, map, objDb, opaqueLocs))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();
+            illum = CalcIllumination(loc, origin, map, objDb, opaqueLocs);            
+          }
+          else
+          {
+            illum = Illumination.Full;
+          }
+          
+          if (!visibleSqs.TryAdd(loc, illum))
+          {
+            visibleSqs[loc] |= illum;
           }
         }
 
@@ -131,12 +154,102 @@ class FieldOfView
     return visibleSqs;
   }
 
-  public static HashSet<Loc> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
+  // Calculate which sides of a square are illuminated. The complicated ones are opaque squares.
+  // The extra complicated cases are the corners of a room
+  //
+  // ....#
+  // ..@.#
+  // #####
+  // 
+  // In this case, the @ can see the NW corner of the corner tile. If there is a light source
+  // on the other side of the wall, it would be illuminating the SW corner of the corner tile.
+  // (And the player wouldn't see it as lit, assuming their own light source is radius 1)
+  static Illumination CalcIllumination(Loc pt, Loc origin, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
-    HashSet<Loc> visible = [ loc ];
+    Illumination illum = Illumination.None;
+    if (pt.Row > origin.Row) 
+    {
+      Loc sqAbove = pt with { Row = pt.Row - 1};
+      bool opaqueAbove = IsOpaque(sqAbove, map, objDb, opaqueLocs);
+      if (!opaqueAbove)
+        illum |= Illumination.North;
+          
+      if (opaqueAbove && pt.Col > origin.Col)
+      {
+        Loc sqLeft = pt with { Col = pt.Col - 1};
+        Loc sqNW = pt with { Row = pt.Row - 1, Col = pt.Col - 1};
+        if (IsOpaque(sqLeft, map, objDb, opaqueLocs) && !IsOpaque(sqNW, map, objDb, opaqueLocs))
+          illum |= Illumination.NW;
+      }
+      else if (opaqueAbove && pt.Col < origin.Col)
+      {
+        Loc sqRight = pt with { Col = pt.Col + 1};
+        Loc sqNE = pt with { Row = pt.Row - 1, Col = pt.Col + 1};
+        if (IsOpaque(sqRight, map, objDb, opaqueLocs) && !IsOpaque(sqNE, map, objDb, opaqueLocs))
+          illum |= Illumination.NE;
+      }
+    }
+          
+    if (pt.Row < origin.Row)
+    {
+      Loc locBelow = pt with { Row = pt.Row + 1};
+      bool opaqueBelow = IsOpaque(locBelow, map, objDb, opaqueLocs);
+      if (!opaqueBelow)
+        illum |= Illumination.South;
+
+      if (opaqueBelow && pt.Col > origin.Col)
+      {
+        Loc sqLeft = pt with { Col = pt.Col - 1};
+        Loc sqSW = pt with { Row = pt.Row + 1, Col = pt.Col - 1};
+        if (IsOpaque(sqLeft, map, objDb, opaqueLocs) && !IsOpaque(sqSW, map, objDb, opaqueLocs))
+          illum |= Illumination.SW;
+      }
+      else if (opaqueBelow && pt.Col < origin.Col)
+      {
+        Loc sqRight = pt with { Col = pt.Col + 1};
+        Loc sqSE = pt with { Row = pt.Row + 1, Col = pt.Col + 1};
+        if (IsOpaque(sqRight, map, objDb, opaqueLocs) && !IsOpaque(sqSE, map, objDb, opaqueLocs))
+           illum |= Illumination.SE;
+      }
+    }
+
+    // We don't have to check for corners here because they should be covered by the above checks
+    
+    if (pt.Col > origin.Col && !IsOpaque(pt with { Col = pt.Col - 1}, map, objDb, opaqueLocs))
+      illum |= Illumination.West;
+    else if (pt.Col < origin.Col && !IsOpaque(pt with { Col = pt.Col + 1}, map, objDb, opaqueLocs))
+      illum |= Illumination.East;
+ 
+    return illum;
+  }
+
+  static bool IsOpaque(Loc loc, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
+  {
+    if (opaqueLocs.TryGetValue(loc, out bool opacity))
+      return opacity;
+
+    opacity = map.TileAt(loc.Row, loc.Col).Opaque() || objDb.ItemsWithTrait<OpaqueTrait>(loc);
+    opaqueLocs.Add(loc, opacity);
+
+    return opacity;
+  }
+
+  public static Dictionary<Loc, Illumination> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
+  {
+    Dictionary<Loc, bool> opqueLocs = [];
+    Dictionary<Loc, Illumination> visible = [];
+    visible.Add(loc, Illumination.Full);
+
     for (int j = 0; j < 8; j++)
     {
-      visible.UnionWith(CalcOctant(radius, loc, map, j, objDb));
+      var octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
+      foreach (var sq in octant)
+      {
+        if (!visible.TryAdd(sq.Key, sq.Value))
+        {
+          visible[sq.Key] |= sq.Value;
+        }
+      }
     }
 
     return visible;
