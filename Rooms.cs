@@ -374,7 +374,14 @@ class Rooms
     // Vaults only have one exit
     HashSet<(int, int)> exits = [];
     foreach (var (r, c) in room)
-    {      
+    {
+      // Don't allow a room with the upstairs to be a vault because it's
+      // likely the key will be on the other side of its door, preventing
+      // the player from progress. (Maybe when the dungeon is deeper and the
+      // PC presumably more powerful this will be okay)
+      if (map.TileAt(r, c).Type == TileType.Upstairs)
+        return false;
+
       foreach (var adj in Util.Adj8Sqs(r, c))
       {
         Tile adjTile = map.TileAt(adj);
