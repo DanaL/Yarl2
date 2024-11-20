@@ -145,42 +145,48 @@ class MainDungeonBuilder : DungeonBuilder
       Destination = new Loc(0, 0, entrance.Item1, entrance.Item2)
     };
     levels[0].SetTile(ExitLoc, exitStairs);
-
-    // I want the dungeon levels to be, geographically, neatly stacked so
-    // the stairs between floors will be at the same location. (Ie., if 
-    // the down stairs on level 3 is at 34,60 then the stairs up from 
-    // level 4 should be at 34,60 too)
-    for (int l = 0; l < numOfLevels - 1; l++)
+    
+    for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
-      var lvl = levels[l];
-      var nlvl = levels[l + 1];
-      // find the pairs of floor squares shared between the two levels
-      List<(int, int)> shared = [];
-      for (int r = 1; r < height - 1; r++)
+      CreateStairway(levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+
+      if (rng.NextDouble() < 0.1)
+         CreateStairway(levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+    }
+  }
+
+  // I want the dungeon levels to be, geographically, neatly stacked so
+  // the stairs between floors will be at the same location. (Ie., if 
+  // the down stairs on level 3 is at 34,60 then the stairs up from 
+  // level 4 should be at 34,60 too)
+  private void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Random rng)
+  {
+    // find the pairs of floor squares shared between the two levels
+    List<(int, int)> shared = [];
+    for (int r = 1; r < height - 1; r++)
+    {
+      for (int c = 1; c < width - 1; c++)
       {
-        for (int c = 1; c < width - 1; c++)
+        if (currentLevel.TileAt(r, c).Type == TileType.DungeonFloor && nextLevel.TileAt(r, c).Type == TileType.DungeonFloor)
         {
-          if (lvl.TileAt(r, c).Type == TileType.DungeonFloor && nlvl.TileAt(r, c).Type == TileType.DungeonFloor)
-          {
-            shared.Add((r, c));
-          }
+          shared.Add((r, c));
         }
       }
-
-      var pick = shared[rng.Next(shared.Count)];
-
-      var down = new Downstairs("")
-      {
-        Destination = new Loc(_dungeonID, l + 1, pick.Item1, pick.Item2)
-      };
-      levels[l].SetTile(pick.Item1, pick.Item2, down);
-
-      var up = new Upstairs("")
-      {
-        Destination = new Loc(_dungeonID, l, pick.Item1, pick.Item2)
-      };
-      levels[l + 1].SetTile(pick.Item1, pick.Item2, up);
     }
+
+    var pick = shared[rng.Next(shared.Count)];
+
+    var down = new Downstairs("")
+    {
+      Destination = new Loc(_dungeonID, currentLevelNum + 1, pick.Item1, pick.Item2)
+    };
+    currentLevel.SetTile(pick.Item1, pick.Item2, down);
+
+    var up = new Upstairs("")
+    {
+      Destination = new Loc(_dungeonID, currentLevelNum, pick.Item1, pick.Item2)
+    };
+    nextLevel.SetTile(pick.Item1, pick.Item2, up);
   }
 
   void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
