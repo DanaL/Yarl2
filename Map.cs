@@ -621,6 +621,14 @@ class Map : ICloneable
     while (true);
   }
 
+  static bool IsRoomFloorTile(TileType type) => type switch
+  {
+    TileType.DungeonFloor => true,
+    TileType.Upstairs => true,
+    TileType.Downstairs => true,
+    _ => false
+  };
+
   // Find rooms -- flood fill to find areas on map that are rooms,
   // ie contiguous floor squares at least 9x9 and no longer than 16x16
   public List<List<(int, int)>> FindRooms()
@@ -633,7 +641,7 @@ class Map : ICloneable
     {
       for (int c = 1; c < Width - 1; c++)
       {
-        if (!visited[r, c] && TileAt(r, c).Type == TileType.DungeonFloor && IsRoomSq(r, c))
+        if (!visited[r, c] && IsRoomFloorTile(TileAt(r, c).Type) && IsRoomSq(r, c))
         {
           // Found a new potential room tile (has 8 adjacent floors), flood fill from this point
           List<(int r, int c)> floors = [];
@@ -655,7 +663,7 @@ class Map : ICloneable
 
   bool IsRoomSq(int r, int c)
   {
-    int adjFloors = Util.Adj8Sqs(r, c).Count(sq => TileAt(sq).Type == TileType.DungeonFloor);
+    int adjFloors = Util.Adj8Sqs(r, c).Count(sq => IsRoomFloorTile(TileAt(sq).Type));
     return adjFloors >= 3; // Should it be 3 because of corners? But that doesn't really matter
                            // for my purposes, I don't think.
   }
@@ -666,7 +674,7 @@ class Map : ICloneable
       return;
     if (visited[r, c]) 
       return;
-    if (TileAt(r, c).Type != TileType.DungeonFloor)
+    if (!IsRoomFloorTile(TileAt(r, c).Type))
       return;
     if (!IsRoomSq(r, c))
       return;

@@ -941,7 +941,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  // I should move the add vaults code here
   void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
   {    
     int graveyardOnLevel = -1;
@@ -962,6 +961,23 @@ class MainDungeonBuilder : DungeonBuilder
       List<List<(int, int)>> rooms = levels[level].FindRooms();
       if (rooms.Count == 0)
         continue;
+
+      List<int> potentialVaults = [];
+      for (var i = 0; i < rooms.Count; i++)
+      {
+        if (Rooms.PotentialVault(levels[level], rooms[i]))
+          potentialVaults.Add(i);
+      }
+      
+      if (potentialVaults.Count > 0 && rng.NextDouble() < 1.2)
+      {
+        int roomId = potentialVaults[rng.Next(potentialVaults.Count)];
+        HashSet<(int, int)> vault = [.. rooms[roomId]];
+        var (doorR, doorC) = Vaults.FindExit(levels[level], vault);
+        Vaults.CreateVault(levels[level], dungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
+        Console.WriteLine($"Vault exit: {doorR}, {doorC}");
+        rooms.RemoveAt(roomId);
+      }
 
       if (level < levels.Length - 1 && rng.NextDouble() < 0.2)
       {
@@ -1085,9 +1101,7 @@ class MainDungeonBuilder : DungeonBuilder
     DecorateDungeon(levels, _dungeonID, h, w, numOfLevels, factDb, objDb, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
-    {
-      Vaults.FindPotentialVaults(levels[levelNum], h, w, rng, id, levelNum, objDb, factDb);
-
+    {    
       if (rng.Next(4) == 0)
         TunnelCarver.MakeCollapsedTunnel(id, levelNum, levels[levelNum], objDb, rng);
     }
