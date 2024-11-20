@@ -17,15 +17,11 @@ namespace Yarl2;
 enum Illumination
 {
   None = 0,
-  North = 0b1000,
-  South = 0b0100,
-  East = 0b0010,
-  West = 0b0001,
-  NE = 0b00010000,
-  NW = 0b00100000,
-  SE = 0b01000000,
-  SW = 0b10000000,
-  Full = 0b11111111,
+  NE = 0b0001,
+  NW = 0b0010,
+  SE = 0b0100,
+  SW = 0b1000,
+  Full = 0b1111,
 }
 
 class Shadow(float start, float end)
@@ -154,7 +150,8 @@ class FieldOfView
     return visibleSqs;
   }
 
-  // Calculate which sides of a square are illuminated. The complicated ones are opaque squares.
+  // Calculate which corneres of a tile are illuminated. Opaque squares are only lit on their
+  // corner relative to the light source.
   // The extra complicated cases are the corners of a room
   //
   // ....#
@@ -172,7 +169,7 @@ class FieldOfView
       Loc sqAbove = pt with { Row = pt.Row - 1};
       bool opaqueAbove = IsOpaque(sqAbove, map, objDb, opaqueLocs);
       if (!opaqueAbove)
-        illum |= Illumination.North;
+        illum |= Illumination.NE | Illumination.NW;
           
       if (opaqueAbove && pt.Col > origin.Col)
       {
@@ -195,7 +192,7 @@ class FieldOfView
       Loc locBelow = pt with { Row = pt.Row + 1};
       bool opaqueBelow = IsOpaque(locBelow, map, objDb, opaqueLocs);
       if (!opaqueBelow)
-        illum |= Illumination.South;
+        illum |= Illumination.SE | Illumination.SW;
 
       if (opaqueBelow && pt.Col > origin.Col)
       {
@@ -216,9 +213,9 @@ class FieldOfView
     // We don't have to check for corners here because they should be covered by the above checks
     
     if (pt.Col > origin.Col && !IsOpaque(pt with { Col = pt.Col - 1}, map, objDb, opaqueLocs))
-      illum |= Illumination.West;
+      illum |= Illumination.NW | Illumination.SW;
     else if (pt.Col < origin.Col && !IsOpaque(pt with { Col = pt.Col + 1}, map, objDb, opaqueLocs))
-      illum |= Illumination.East;
+      illum |= Illumination.NE | Illumination.SE;
  
     return illum;
   }
