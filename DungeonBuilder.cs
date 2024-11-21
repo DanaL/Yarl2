@@ -272,9 +272,21 @@ class MainDungeonBuilder : DungeonBuilder
   }
 
   void DecorateDungeon(Map[] levels, int dungeonId, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Random rng)
-  {    
-    var decorations = Decorations.GenDecorations(factDb, rng);
+  {
+    bool ValidStatueSq(Map map, int r, int c)
+    {
+      int adjFloorCount = 0;
+      foreach (var t in Util.Adj8Sqs(r, c))
+      {
+        if (map.TileAt(t).Type == TileType.DungeonFloor)
+          adjFloorCount++;
+      }
 
+      return adjFloorCount> 3;
+    }
+
+    var decorations = Decorations.GenDecorations(factDb, rng);
+    
     // I eventually probably won't include every decoration from every fact
     foreach (var decoration in decorations)
     {
@@ -282,20 +294,43 @@ class MainDungeonBuilder : DungeonBuilder
         continue;
         
       int level = rng.Next(numOfLevels);
+      List<(int, int)> floorTiles = [];
+      for (int r = 1; r < height - 1; r++)
+      {
+        for (int c = 1; c < width - 1; c++)
+        {
+          if (levels[level].TileAt(r, c).Type == TileType.DungeonFloor)
+            floorTiles.Add((r, c));
+        }
+      }
 
       if (decoration.Type == DecorationType.Statue)
       {
-        var (r, c) = levels[level].RandomTile(TileType.DungeonFloor, rng);
+        // Prevent a statue from blocking a hallway
+        var candidates = Enumerable.Range(0, floorTiles.Count)
+                          .Where(i => ValidStatueSq(levels[level], floorTiles[i].Item1, floorTiles[i].Item2))
+                          .ToList();
+        if (candidates.Count == 0)
+          continue;
+
+        int i = candidates[rng.Next(candidates.Count)];
+        var (r, c) = floorTiles[i];
         Loc statueLoc = new(dungeonId, level, r, c);
         Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
         statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
         objDb.SetToLoc(statueLoc, statue);
+        floorTiles.RemoveAt(i);
       }
       else if (decoration.Type == DecorationType.Mosaic)
       {
-        var sq = levels[level].RandomTile(TileType.DungeonFloor, rng);
+        if (floorTiles.Count == 0)
+          continue;
+[]
+        int i = rng.Next(floorTiles.Count);
+        var (r, c) = floorTiles[i];
         var mosaic = new Landmark(decoration.Desc.Capitalize());
-        levels[level].SetTile(sq, mosaic);
+        levels[level].SetTile(r, c, mosaic);
+        floorTiles.RemoveAt(i);
       }
       else if (decoration.Type == DecorationType.Fresco)
       {
