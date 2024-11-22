@@ -768,5 +768,16 @@
       "OnFire#false#owner#max#false",
       "Affixed"
     ]
+  },
+  {
+    "Name": "GASTON_BADGE",
+    "DescriptiveName": "Gaston's Badge",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,brightred,dullred,black,black",
+    "Traits": [
+      "Grants#StatBuff&0&max&HP&20&item",
+      "Named"
+    ]
   }
 ]

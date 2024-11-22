@@ -325,7 +325,7 @@ class MainDungeonBuilder : DungeonBuilder
       {
         if (floorTiles.Count == 0)
           continue;
-[]
+
         int i = rng.Next(floorTiles.Count);
         var (r, c) = floorTiles[i];
         var mosaic = new Landmark(decoration.Desc.Capitalize());

@@ -160,3 +160,6 @@ From vikings to dwarves to some of the top executioners in the land, we've asked
 #
 campfire
 A cozy spot to warm up and recover from the stress of dungeon delving.
+#
+Gaston's Badge
+A charm that grants you robust health, as though you at five dozen eggs a day!

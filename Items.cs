@@ -155,8 +155,8 @@ class Item : GameObj, IEquatable<Item>
 enum ItemNames
 {
   ANTIDOTE, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, CAMPFIRE, CHAINMAIL, CLAYMORE, 
-  DAGGER, DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GHOSTCAP_MUSHROOM, GREATSWORD,
-  GUIDE_STABBY, GUIDE_AXES, GUIDE_SWORDS, GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, 
+  DAGGER, DART, FIRE_GIANT_ESSENCE, FIREBOLT, FROST_GIANT_ESSENCE, GASTON_BADGE, GHOSTCAP_MUSHROOM, 
+  GREATSWORD, GUIDE_STABBY, GUIDE_AXES, GUIDE_SWORDS, GUISARME, HAND_AXE, HELMET, HILL_GIANT_ESSENCE, 
   LEATHER_ARMOUR, LOCK_PICK, LONGBOW, LONGSWORD, MACE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, 
   POTION_COLD_RES, POTION_FIRE_RES, POTION_HEALING, POTION_MIND_READING, POTION_OF_LEVITATION, 
   RAPIER, RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_PROTECTION, RINGMAIL, RUBBLE, 
@@ -743,8 +743,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       string desc = "";
       try 
       {
-        desc = count == 1 ? item.FullName.IndefArticle()
-                          : $"{count} {item.FullName.Pluralize()}";
+        if (count > 1)
+          desc = $"{count} {item.FullName.Pluralize()}";
+        else if (item.HasTrait<NamedTrait>())
+          desc = item.FullName;
+        else
+          desc = item.FullName.IndefArticle();
       }
       catch (Exception ex)
       {

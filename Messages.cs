@@ -161,6 +161,10 @@ class MsgFactory
         sb.Append(' ');
         sb.Append(item.FullName.Pluralize());
       }
+      else if (item.HasTrait<NamedTrait>())
+      {
+        sb.Append(item.FullName);
+      }
       else
       {
         sb.Append(item.FullName.DefArticle());

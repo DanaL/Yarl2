@@ -911,6 +911,8 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       pickupMsg += $"{item.Value} zorkmids.";
     else if (count > 1)
       pickupMsg += $"{count} {item.FullName.Pluralize()}.";
+    else if (item.HasTrait<NamedTrait>())
+      pickupMsg += item.FullName;
     else
       pickupMsg += item.FullName.DefArticle() + ".";
 
@@ -2057,11 +2059,11 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (equipResult == EquipingResult.Equiped)
       {
-        result.Messages.AddRange(grants.Grant(Actor, GameState));
+        result.Messages.AddRange(grants.Grant(Actor, GameState, item));
       }
       else if (equipResult == EquipingResult.Unequiped)
       {
-        grants.Remove(Actor, GameState);
+        grants.Remove(Actor, GameState, item);
       }
     }
 

@@ -40,6 +40,11 @@ interface IDesc
   string Desc();
 }
 
+interface IHasSource
+{
+  string Source { get; set; }
+}
+
 abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
@@ -518,30 +523,40 @@ class GrantsTrait : Trait
     return "Grants#" + grantedTraits;
   }
 
-  public List<string> Grant(GameObj obj, GameState gs)
+  public List<string> Grant(GameObj obj, GameState gs, GameObj srcItem)
   {
     List<string> msgs = [];
 
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
-      obj.Traits.Add(trait);
-
       if (trait is TemporaryTrait tmp && obj is Actor actor)
         msgs.AddRange(tmp.Apply(actor, gs));
+      if (srcItem is not null && trait is IHasSource hs)
+        hs.Source = srcItem.ID.ToString();
     }
 
     return msgs;
   }
 
-  public void Remove(GameObj obj, GameState gs)
+  public void Remove(GameObj obj, GameState gs, GameObj src)
   {
     foreach (string t in TraitsGranted)
     {
-      Trait granted = TraitFactory.FromText(t, obj);
-      obj.Traits.Remove(granted);
-      if (granted is TemporaryTrait tmp)
+      Trait granted = TraitFactory.FromText(t, obj);    
+      if (granted is TemporaryTrait tmp) 
+      {
+        // StatBuffTraits  (and eventually others I'm sure) need a little more 
+        // info in order to be properly removed.
+        if (tmp is IHasSource hs) 
+        {
+          tmp.OwnerID = obj.ID;
+          hs.Source = src.ID.ToString();
+        }
         tmp.Remove(gs);
+      }
+
+      obj.Traits.Remove(granted);
     }
   }
 }
@@ -1514,7 +1529,7 @@ class WeaponSpeedTrait : Trait
   public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
-class StatBuffTrait : TemporaryTrait 
+class StatBuffTrait : TemporaryTrait, IHasSource 
 {
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
@@ -1532,6 +1547,10 @@ class StatBuffTrait : TemporaryTrait
       else
         return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} stronger!";
     }
+    else if (Attr == Attribute.HP && player)
+    {
+      return "You feel more robust!";
+    }
 
     return player ? "You feel different!" : "";
   }
@@ -1546,7 +1565,8 @@ class StatBuffTrait : TemporaryTrait
       other.ExpiresOn = ulong.Max(other.ExpiresOn, ExpiresOn);
       return [];
     }
-      
+    
+    OwnerID = target.ID;
     target.Stats[Attr].ChangeMax(Amt);
     target.Stats[Attr].Change(Amt);
     target.Traits.Add(this);
@@ -1555,15 +1575,48 @@ class StatBuffTrait : TemporaryTrait
     return [ CalcMessage(target) ];
   }
 
-  string Remove(Actor target)
+  public override void Remove(GameState gs)
+  {  
+    if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
+    {
+      var statBuffs = actor.Traits.OfType<StatBuffTrait>()
+                                  .Where(t => t.Source == Source)
+                                  .ToList();
+      foreach (StatBuffTrait buff in statBuffs)
+      {
+        string s = RemoveBuff(actor, buff);
+        if (s != "")
+          gs.UIRef().AlertPlayer(s);
+      }
+    }
+
+    base.Remove(gs);
+  }
+
+  string RemoveBuff(Actor target, Trait trait)
   {    
     target.Stats[Attr].ChangeMax(-Amt);
-    target.Stats[Attr].Change(-Amt);
-    target.Traits.Remove(this);
+    if (Attr != Attribute.HP)
+    {
+      // If the player had buffed HP and the source of the buff is removed and that would
+      // kill the player, we won't be mean about it.
+      int currHp = target.Stats[Attribute.HP].Curr;
+      if (currHp > target.Stats[Attribute.HP].Max)
+        target.Stats[Attribute.HP].Change(currHp - target.Stats[Attribute.HP].Max);
+    }
+    else
+    {
+      target.Stats[Attr].Change(-Amt);
+    }
+    
+    target.Traits.Remove(trait);
     
     if (target is Player)
     {
-      return $"Your {Attr} returns to normal.";
+      if (Attr == Attribute.HP)
+        return "You feel more frail.";
+      else
+        return $"Your {Attr} returns to normal.";
     }
 
     return "";    
@@ -1577,7 +1630,7 @@ class StatBuffTrait : TemporaryTrait
 
       if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
       {
-        string txt = Remove(victim);
+        string txt = RemoveBuff(victim, this);
         gs.UIRef().AlertPlayer(txt);
       }
     }
@@ -2216,10 +2269,12 @@ class TraitFactory
     { "StatBuff", (pieces, gameObj) =>
     {
       Enum.TryParse(pieces[3], out Attribute attr);
+      ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
+      string s = pieces[5] == "item" ? gameObj.ID.ToString() : pieces[5];
       return new StatBuffTrait() 
-      { 
-        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, 
-        Amt = int.Parse(pieces[4]), Source = pieces[5]
+      {
+        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, 
+        Amt = int.Parse(pieces[4]), Source = s
       };
     } },
     { "StatDebuff", (pieces, gameObj) =>
