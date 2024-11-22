@@ -100,18 +100,15 @@ class Player : Actor, IPerformer, IGameEventListener
     foreach (var t in Traits)
     {
       if (t is StatBuffTrait sbt && sbt.Attr == Attribute.HP)
-      {
         baseHP += sbt.Amt;
-      }
-      if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)
-      {
-        // We won't allow an HP debuff to kill a character, just make
-        // them very very weak
-        baseHP += sdt.Amt;
-        if (baseHP < 1)
-          baseHP = 1;
-      }
+      if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)        
+        baseHP += sdt.Amt;              
     }
+
+    // We won't allow an HP buffs and debuffs to kill a character, just make
+    // them very very weak
+    if (baseHP < 1)
+      baseHP = 1;
 
     Stats[Attribute.HP].SetMax(baseHP);
   }

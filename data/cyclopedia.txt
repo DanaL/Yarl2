@@ -169,3 +169,6 @@ A charm emblazoned with a kettle bell.
 #
 lesser health charm
 A charm emblazoned with a heart.
+#
+ring of fraility
+The ring draws away your life and vigour while you wear it. But where does that energy go?

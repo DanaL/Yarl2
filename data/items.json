@@ -799,5 +799,16 @@
     "Traits": [
       "Grants#StatBuff&0&max&Constitution&3&item"
     ]
+  },
+  {
+    "Name": "RING_OF_FRAILITY",
+    "DescriptiveName": "ring of fraility",
+    "Type": "Ring",
+    "Value": 1,
+    "Glyph": "o,white,grey,black,black",
+    "Traits": [
+      "Grants#StatBuff&0&max&HP&-25&item",
+      "Cursed"
+    ]
   }
 ]

@@ -207,6 +207,10 @@ class PreGameHandler(UserInterface ui)
     Item.IDInfo.Add("ring of adornment", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
     ringMaterials.RemoveAt(j);
 
+    j = rng.Next(ringMaterials.Count);
+    Item.IDInfo.Add("ring of fraility", new ItemIDInfo(false, $"{ringMaterials[j]} ring"));
+    ringMaterials.RemoveAt(j);
+
     List<string> talismanDesc = [ "jeweled scarab", "bone amulet", "clay fetish", "mummified finger" ];
     j = rng.Next(talismanDesc.Count);
     Item.IDInfo.Add("talisman of circumspection", new ItemIDInfo(false, talismanDesc[j]));

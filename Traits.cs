@@ -1542,14 +1542,15 @@ class StatBuffTrait : TemporaryTrait, IHasSource
     bool player = target is Player;
     if (Attr == Attribute.Strength)
     {
+      string adj = Amt >= 0 ? "stronger" : "weaker";
       if (player)
-        return "You feel stronger!";
+        return $"You feel {adj}!";
       else
-        return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} stronger!";
+        return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} {adj}!";
     }
     else if (Attr == Attribute.HP && player)
     {
-      return "You feel more robust!";
+      return Amt >= 0 ? "You feel more robust!" : "You feel frail!";
     }
 
     return player ? "You feel different!" : "";
@@ -1573,7 +1574,7 @@ class StatBuffTrait : TemporaryTrait, IHasSource
     target.Traits.Add(this);
     if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
       player.CalcHP();
-      
+
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
     return [ CalcMessage(target) ];
@@ -1666,6 +1667,12 @@ class StatDebuffTrait : TemporaryTrait
 
     target.Stats[Attr].Change(Amt);
     target.Traits.Add(this);
+
+    if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
+    {
+      player.CalcHP();
+    }
+
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
     return [ CalcMessage(target) ];
@@ -1679,6 +1686,11 @@ class StatDebuffTrait : TemporaryTrait
     if (victim is Player)
     {
       return $"Your {Attr} returns to normal.";
+    }
+
+     if (victim is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
+    {
+      player.CalcHP();
     }
 
     return "";
@@ -2276,7 +2288,8 @@ class TraitFactory
     { "StatDebuff", (pieces, gameObj) =>
     {
       Enum.TryParse(pieces[3], out Attribute attr);
-      return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), Attr = attr, Amt = int.Parse(pieces[4]) };
+      ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
+      return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
