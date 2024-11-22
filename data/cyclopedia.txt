@@ -162,4 +162,10 @@ campfire
 A cozy spot to warm up and recover from the stress of dungeon delving.
 #
 Gaston's Badge
-A charm that grants you robust health, as though you at five dozen eggs a day!
+A charm that grants you robust health, as though you ate five dozen eggs a day!
+#
+lesser burly charm
+A charm emblazoned with a kettle bell.
+#
+lesser health charm
+A charm emblazoned with a heart.

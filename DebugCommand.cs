@@ -77,6 +77,8 @@ class DebugCommand(GameState gs)
     {"sword guide", ItemNames.GUIDE_SWORDS },
     {"axe guide", ItemNames.GUIDE_AXES },
     {"gaston badge", ItemNames.GASTON_BADGE},
+    {"lesser burly charm", ItemNames.LESSER_BURLY_CHARM},
+    {"lesser health charm", ItemNames.LESSER_HEALTH_CHARM},
   };
 
   public string DoCommand(string txt)

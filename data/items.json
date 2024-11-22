@@ -779,5 +779,25 @@
       "Grants#StatBuff&0&max&HP&20&item",
       "Named"
     ]
+  },
+  {
+    "Name": "LESSER_BURLY_CHARM",
+    "DescriptiveName": "lesser burly charm",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,brightred,dullred,black,black",
+    "Traits": [
+      "Grants#StatBuff&0&max&Strength&3&item"
+    ]
+  },
+  {
+    "Name": "LESSER_HEALTH_CHARM",
+    "DescriptiveName": "lesser health charm",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,lightblue,blue,black,black",
+    "Traits": [
+      "Grants#StatBuff&0&max&Constitution&3&item"
+    ]
   }
 ]
