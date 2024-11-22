@@ -1096,8 +1096,11 @@ abstract class UserInterface
       {
         // Update step! This is where all the current performers gets a chance
         // to take their turn!
-        if (currPerformer.Energy < 1.0)
+        if (currPerformer.Energy < 1.0) 
+        {
           currPerformer = gameState.NextPerformer();
+        }
+        
         TakeTurn(currPerformer, gameState);        
       }
       catch (GameQuitException)

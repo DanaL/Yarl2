@@ -277,8 +277,8 @@ class Player : Actor, IPerformer, IGameEventListener
     
     if (alacrity < 0)
       traitsToShow.Add("You are quicker than normal");
-    else if (alacrity > 1)
-      traitsToShow.Add("You are somewhat slowed.");
+    else if (alacrity > 0)
+      traitsToShow.Add("You are somewhat slowed");
 
     if (traitsToShow.Count > 0)
     {

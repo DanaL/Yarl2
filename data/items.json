@@ -822,5 +822,17 @@
       "Grants#Alacrity&0.35",
       "Plural"
     ]
+  },
+  {
+    "Name": "HEAVY_BOOTS",
+    "DescriptiveName": "heavy boots",
+    "Type": "Armour",
+    "Value": 65,
+    "Glyph": "[,grey,darkgrey,black,black",
+    "Traits": [
+      "Armour#Boots#2#0",
+      "Grants#Alacrity&-0.2",
+      "Plural"
+    ]
   }
 ]
