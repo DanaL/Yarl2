@@ -79,7 +79,8 @@ class DebugCommand(GameState gs)
     {"gaston badge", ItemNames.GASTON_BADGE},
     {"lesser burly charm", ItemNames.LESSER_BURLY_CHARM},
     {"lesser health charm", ItemNames.LESSER_HEALTH_CHARM},
-    {"ring of fraility", ItemNames.RING_OF_FRAILITY}
+    {"ring of fraility", ItemNames.RING_OF_FRAILITY},
+    {"anti-snail sandals", ItemNames.ANTISNAIL_SANDALS}
   };
 
   public string DoCommand(string txt)

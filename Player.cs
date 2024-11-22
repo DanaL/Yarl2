@@ -262,6 +262,7 @@ class Player : Actor, IPerformer, IGameEventListener
     lines.Add("");
 
     List<string> traitsToShow = [];
+    double alacrity = 0;
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -270,8 +271,15 @@ class Player : Actor, IPerformer, IGameEventListener
         traitsToShow.Add("You step lightly");
       if (trait is DodgeTrait)
         traitsToShow.Add("You sometimes can dodge attacks");
+      if (trait is AlacrityTrait alacrityTrait)
+        alacrity -= alacrityTrait.Amt;
     }
     
+    if (alacrity < 0)
+      traitsToShow.Add("You are quicker than normal");
+    else if (alacrity > 1)
+      traitsToShow.Add("You are somewhat slowed.");
+
     if (traitsToShow.Count > 0)
     {
       lines.Add(string.Join(". ", traitsToShow) + ".");

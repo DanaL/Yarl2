@@ -172,3 +172,6 @@ A charm emblazoned with a heart.
 #
 ring of fraility
 The ring draws away your life and vigour while you wear it. But where does that energy go?
+#
+anti-snail sandals
+Contrary to popular misconception, these sandals don't protect you from snails but instead make you somewhat the opposite of a snail.

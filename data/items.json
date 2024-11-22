@@ -810,5 +810,17 @@
       "Grants#StatBuff&0&max&HP&-25&item",
       "Cursed"
     ]
+  },
+  {
+    "Name": "ANTISNAIL_SANDALS",
+    "DescriptiveName": "anti-snail sandals",
+    "Type": "Armour",
+    "Value": 65,
+    "Glyph": "[,brown,lightbrown,black,black",
+    "Traits": [
+      "Armour#Boots#0#0",
+      "Grants#Alacrity&0.35",
+      "Plural"
+    ]
   }
 ]

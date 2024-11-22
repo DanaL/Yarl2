@@ -680,6 +680,30 @@ abstract class UserInterface
 
   void TakeTurn(IPerformer performer, GameState gs)
   {
+    static double CalcEnergyUsed(double baseCost, IPerformer performer)
+    {
+      if (performer is not Actor actor)
+        return baseCost;
+
+      // Maybe I should come up with a formal/better way to differentiate 
+      // between real in-game actions and things like opening inventory or
+      // looking athelp, etc?
+      if (baseCost == 0)
+        return 0;
+
+      // Note also there are some actions like Chatting, etc that
+      // shouldn't be made faster or slower by alacrity, but I'll
+      // worry about that later
+
+      foreach (var t in actor.Traits.OfType<AlacrityTrait>())
+      {
+        baseCost -= t.Amt;
+      }
+
+      // I think boosts to speed should get you only so far
+      return Math.Max(0.35, baseCost);
+    }
+
     var action = performer.TakeTurn(gs);
 
     if (action is NullAction)
@@ -695,7 +719,6 @@ abstract class UserInterface
     }
     else if (action is SaveGameAction)
     {
-      //Serialize.WriteSaveGame(Player.Name, Player, GameState.Campaign, GameState, MessageHistory);
       Serialize.WriteSaveGame(gs);
       throw new GameQuitException();
     }    
@@ -705,13 +728,17 @@ abstract class UserInterface
       do
       {
         result = action!.Execute();
-        performer.Energy -= result.EnergyCost;
+
+        // I don't think I need to look over IPerformer anymore? The concept of 
+        // items as performs is gone. I think?
+        double energyUsed = CalcEnergyUsed(result.EnergyCost, performer);
+        performer.Energy -= energyUsed;
         if (result.AltAction is not null)
         {
           if (result.Messages.Count > 0)
             AlertPlayer(result.Messages);
           result = result.AltAction.Execute();
-          performer.Energy -= result.EnergyCost;
+          performer.Energy -= CalcEnergyUsed(result.EnergyCost, performer);
           action = result.AltAction;
         }
 

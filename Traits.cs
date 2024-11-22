@@ -322,6 +322,13 @@ class AcidSplashTrait : Trait
   public override string AsText() => "AcidSplash";
 }
 
+class AlacrityTrait : Trait
+{
+  public double Amt { get; set; }
+  
+  public override string AsText() => $"Alacrity#{Amt}";
+}
+
 class AlliesTrait : Trait
 {
   public List<ulong> IDs = [];
@@ -532,6 +539,9 @@ class GrantsTrait : Trait
       Trait trait = TraitFactory.FromText(t, obj);
       if (trait is TemporaryTrait tmp && obj is Actor actor)
         msgs.AddRange(tmp.Apply(actor, gs));
+      else 
+        obj.Traits.Add(trait);
+
       if (srcItem is not null && trait is IHasSource hs)
         hs.Source = srcItem.ID.ToString();
     }
@@ -2092,6 +2102,7 @@ class TraitFactory
     { "ACMod", (pieces, gameObj) => new ACModTrait() { ArmourMod = int.Parse(pieces[1]) }},
     { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
     { "Affixed", (pieces, gameObj) => new AffixedTrait() },
+    { "Alacrity", (pieces, gameObj) => new AlacrityTrait() { Amt = double.Parse(pieces[1]) }},
     { "Allies", (pieces, gameObj) => { var ids = pieces[1].Split(',').Select(ulong.Parse).ToList(); return new AlliesTrait() { IDs = ids }; } },
     { "Ammo", (pieces, gameObj) =>
       {
