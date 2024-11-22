@@ -1569,7 +1569,11 @@ class StatBuffTrait : TemporaryTrait, IHasSource
     OwnerID = target.ID;
     target.Stats[Attr].ChangeMax(Amt);
     target.Stats[Attr].Change(Amt);
+
     target.Traits.Add(this);
+    if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
+      player.CalcHP();
+      
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
     return [ CalcMessage(target) ];
@@ -1596,21 +1600,13 @@ class StatBuffTrait : TemporaryTrait, IHasSource
   string RemoveBuff(Actor target, Trait trait)
   {    
     target.Stats[Attr].ChangeMax(-Amt);
-    if (Attr != Attribute.HP)
-    {
-      // If the player had buffed HP and the source of the buff is removed and that would
-      // kill the player, we won't be mean about it.
-      int currHp = target.Stats[Attribute.HP].Curr;
-      if (currHp > target.Stats[Attribute.HP].Max)
-        target.Stats[Attribute.HP].Change(currHp - target.Stats[Attribute.HP].Max);
-    }
-    else
-    {
-      target.Stats[Attr].Change(-Amt);
-    }
+    target.Stats[Attr].Change(-Amt);
     
     target.Traits.Remove(trait);
     
+    if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
+      player.CalcHP();
+
     if (target is Player)
     {
       if (Attr == Attribute.HP)
