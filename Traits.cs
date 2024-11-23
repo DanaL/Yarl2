@@ -421,6 +421,11 @@ class BowTrait : Trait
   public override string AsText() => "Bow";
 }
 
+class BrainlessTrait : Trait
+{
+  public override string AsText() => "Brainless";
+}
+
 class CoinsLootTrait : Trait
 {
   public int Min { get; set; }
@@ -1108,6 +1113,9 @@ class ConfusedTrait : TemporaryTrait
         return [];
 
       if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Confusion)
+        return [];
+
+      if (trait is BrainlessTrait)
         return [];
     }
 
@@ -2141,6 +2149,7 @@ class TraitFactory
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
     { "Bow", (pieces, gameObj) => new BowTrait() },
+    { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
