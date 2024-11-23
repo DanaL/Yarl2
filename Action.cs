@@ -391,7 +391,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
   }
 }
 
-class PortalAction : Action
+abstract class PortalAction : Action
 {  
   public PortalAction(GameState gameState) => GameState = gameState;
 
@@ -414,25 +414,6 @@ class PortalAction : Action
     result.Complete = true;
     result.EnergyCost = 1.0;
   }
-
-  public override ActionResult Execute()
-  {
-    var result = new ActionResult() { Complete = false };
-
-    var p = GameState!.Player!;
-    var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
-
-    if (t.Type == TileType.Portal)
-    {
-      UsePortal((Portal)t, result);
-    }
-    else
-    {
-      result.Messages.Add("There is nowhere to go here.");
-    }
-
-    return result;
-  }
 }
 
 class DownstairsAction(GameState gameState) : PortalAction(gameState)
@@ -444,7 +425,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
-    if (t.Type == TileType.Downstairs)
+    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal)
     {
       UsePortal((Portal)t, result);
     }

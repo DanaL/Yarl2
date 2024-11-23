@@ -390,7 +390,6 @@ class Rooms
           exits.Add(adj);
       }
     }
-    Console.WriteLine($"    exits: {exits.Count}");
 
     return exits.Count == 1;
   }

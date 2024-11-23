@@ -607,8 +607,6 @@ class Player : Actor, IPerformer, IGameEventListener
         return CalcMovementAction(gameState, ch);
       else if (IsMoveKey(char.ToLower(ch)))
         return StartRunning(gameState, ch);
-      else if (ch == 'E')
-        return new PortalAction(gameState);
       else if (ch == '>')
         return new DownstairsAction(gameState);
       else if (ch == '<')
