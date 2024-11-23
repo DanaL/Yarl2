@@ -1063,20 +1063,130 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks)
+  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Random rng, FactDb factDb)
   {
-    static bool ReplaceChasm(Map map, (int, int) pt)
+    Dictionary<TileType, int> passable = [];
+    passable.Add(TileType.Grass, 1);
+    passable.Add(TileType.Dirt, 1);
+    passable.Add(TileType.Sand, 1);
+    passable.Add(TileType.RedTree, 1);
+    passable.Add(TileType.GreenTree, 1);
+    passable.Add(TileType.YellowTree, 1);
+    passable.Add(TileType.OrangeTree, 1);
+    passable.Add(TileType.Conifer, 1);
+    passable.Add(TileType.Water, 1);
+    passable.Add(TileType.StoneRoad, 1);
+    passable.Add(TileType.ClosedDoor, 1);
+
+    HashSet<(int, int)> candidates = [];
+    for (int r = -6; r <= 6; r++)
     {
-      switch (map.TileAt(pt).Type)
-      {
-        case TileType.Chasm:
-        case TileType.Bridge:
-        case TileType.WoodBridge:
-          return true;
-        default:
-          return false;
-      }      
+      for (int c = -6; c <= 6; c++)
+      {        
+        if (r >= -2 && r <= 2 && c >= -2 && c <= 2)
+          continue;
+        int row = entrance.Item1 + r;
+        int col = entrance.Item2 + c;
+        TileType type = wildernessMap.TileAt(row, col).Type;
+        if (type != TileType.Mountain && type != TileType.SnowPeak)
+          continue;
+
+        bool adjToOpen = false;
+        int mountains = 0;
+        foreach (var adj in Util.Adj8Sqs(row, col))
+        {
+          Tile adjTile = wildernessMap.TileAt(adj);
+          if (adjTile.Passable())
+          {
+            adjToOpen = true;
+          }
+          else if (adjTile.Type == TileType.Mountain) 
+          {
+            ++mountains;
+          }
+        }
+        if (adjToOpen && mountains > 2)
+          candidates.Add((row, col));
+      }
     }
+
+    // I want to make sure there's a path from the portal to the town, so just 
+    // any door as the goal for pathfinding
+    Loc goal = Loc.Nowhere;   
+    bool found = false;
+    for (int r = 25; r < wildernessMap.Height - 25 && !found; r++)
+    {
+      for (int c = 25; c < wildernessMap.Width - 25 && !found; c++)
+      {
+        if (wildernessMap.TileAt(r,c ).Type == TileType.ClosedDoor) 
+        {
+          goal = new(0, 0, r, c);
+          found = true;
+        }
+      }
+    }
+    
+    List<(int, int)> opts = [.. candidates];
+    while (opts.Count > 0)
+    {
+      int i = rng.Next(opts.Count);      
+      (int, int) sq = opts[rng.Next(opts.Count)];
+      Loc loc = new(0, 0, sq.Item1, sq.Item2);
+      var path = AStar.FindPath(wildernessMap, loc, goal, passable, false);
+      if (path.Count > 0)
+      {
+        Tile p = new Portcullis(false);
+        wildernessMap.SetTile(sq, p);
+        FindShortcutLoc(levelMap, loc, rng);
+        break;
+      }
+    
+      opts.RemoveAt(i);      
+    }
+  }
+
+  static void FindShortcutLoc(Map map, Loc exit, Random rng)
+  {
+    List<(int, int)> opts = [];
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        TileType type = map.TileAt(r, c).Type;
+        if (type != TileType.DungeonWall)
+          continue;
+        int walls = 0;
+        int floors = 0;
+        foreach (var sq in Util.Adj8Sqs(r, c))
+        {
+          if (map.TileAt(sq).Type == TileType.DungeonFloor)
+            ++floors;
+          if (map.TileAt(sq).Type == TileType.DungeonWall)
+            ++walls;
+        }
+
+        if (walls == 5 && floors == 3)
+          opts.Add((r, c));
+      }
+    }
+
+    if (opts.Count > 0)
+    {
+      (int, int) sq = opts[rng.Next(opts.Count)];
+      Tile shortcut = new Shortcut() { Destination = exit };
+      map.SetTile(sq, shortcut);
+    }
+  }
+
+  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
+        FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks,
+        Map wildernessMap)
+  {
+    static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
+    {
+      TileType.Chasm or TileType.Bridge or TileType.WoodBridge => true,
+      _ => false,
+    };
 
     _dungeonID = id;
     var dungeon = new Dungeon(id, arrivalMessage);
@@ -1150,6 +1260,7 @@ class MainDungeonBuilder : DungeonBuilder
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
     PlaceLevelFiveGate(levels[4], rng, factDb);
+    PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
 
     return dungeon;
   }

@@ -156,9 +156,11 @@ class AStar
       foreach (var adj in adjSqs)
       {
         var tileType = map.TileAt(adj.Row, adj.Col).Type;
-        if (!travelCost.TryGetValue(tileType, out int travel))          
+        if (!travelCost.TryGetValue(tileType, out int travel)) 
+        {
           continue;
-        
+        }
+
         int newCost = costs[curr] + travel;
         if (!costs.TryGetValue(adj, out int value) || newCost < value)
         {
@@ -169,6 +171,9 @@ class AStar
         }
       }
     }
+
+    if (!cameFrom.ContainsKey(goal))
+      return [];
 
     Stack<Loc> path = [];
     Loc loc = goal;

@@ -425,7 +425,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
-    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal)
+    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal || t.Type == TileType.ShortcutDown)
     {
       UsePortal((Portal)t, result);
     }
@@ -450,6 +450,21 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     if (t.Type == TileType.Upstairs)
     {
       UsePortal((Portal)t, result);
+    }
+    else if (t is Shortcut shortcut)
+    {
+      // We want to turn the square on the surface into a portal back down.
+      // (The idea is that by using the shortcut the player opens the
+      // portcullis on the surface)
+      ShortcutDown portal = new()
+      {
+        Destination = p.Loc
+      };
+      GameState.Campaign.Dungeons[0].LevelMaps[0].SetTile(shortcut.Destination.Row, shortcut.Destination.Col, portal);
+
+      UsePortal((Portal)t, result);
+      result.Messages.Add("You climb a long stairway out of the dungeon.");
+      GameState.UIRef().SetPopup(new Popup("You climb a long stairway out of the dungeon.", "", -1, -1));
     }
     else
     {

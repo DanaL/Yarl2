@@ -363,6 +363,16 @@ internal class MapSaver
           digits = Util.ToNums(pieces[2]);
           ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
           break;
+        case TileType.Shortcut:
+          tile = new Shortcut();
+          digits = Util.ToNums(pieces[2]);
+          ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+          break;
+        case TileType.ShortcutDown:
+          tile = new ShortcutDown();
+          digits = Util.ToNums(pieces[2]);
+          ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+          break;
         case TileType.OpenDoor:
         case TileType.ClosedDoor:
           open = Convert.ToBoolean(pieces[2]);
