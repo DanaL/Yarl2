@@ -387,10 +387,21 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   void BridgeDestroyedOverWater(Loc loc)
-  {
-    if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
-    {
-      ActorFallsIntoWater(actor, loc);
+  {    
+    if (ObjDb.Occupant(loc) is Actor actor)
+    {// && !(actoractor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>())
+      bool fallsIn = true;
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is FlyingTrait || t is FloatingTrait || t is WaterWalkingTrait)
+        {
+          fallsIn = false;
+          break;
+        }
+      }
+
+      if (fallsIn)
+        ActorFallsIntoWater(actor, loc);
     }
 
     var itemsToFall = ObjDb.ItemsAt(loc);
@@ -930,6 +941,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
       bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
+      bool waterWalking = Player.HasActiveTrait<WaterWalkingTrait>();
 
       if (tile.IsTrap())
       {
@@ -940,7 +952,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         Loc landingSpot = dest with { Level = dest.Level + 1 };
         FallIntoChasm(actor, landingSpot);
       }
-      else if (tile.Type == TileType.DeepWater && !flying)
+      else if (tile.Type == TileType.DeepWater && !(flying || waterWalking))
       {
         ActorFallsIntoWater(actor, dest);
       }
@@ -984,7 +996,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var sb = new StringBuilder();
     sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
 
-    Dictionary<Item, int> items = new Dictionary<Item, int>();
+    Dictionary<Item, int> items = [];
     foreach (var item in ObjDb.ItemsAt(loc))
     {
       if (items.ContainsKey(item))

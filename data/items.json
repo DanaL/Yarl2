@@ -834,5 +834,17 @@
       "Grants#Alacrity&-0.2",
       "Plural"
     ]
+  },
+  {
+    "Name": "BOOTS_OF_WATER_WALKING",
+    "DescriptiveName": "boots of water walking",
+    "Type": "Armour",
+    "Value": 40,
+    "Glyph": "[,lightblue,iceblue,black,black",
+    "Traits": [
+      "Armour#Boots#0#0",
+      "Grants#WaterWalking",
+      "Plural"
+    ]
   }
 ]

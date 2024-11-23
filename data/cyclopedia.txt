@@ -178,3 +178,6 @@ Contrary to popular misconception, these sandals don't protect you from snails b
 #
 heavy boots
 These boots are sturdy and will surely protect you from foot injuries, but are rather heavy.
+#
+boots of water walking
+Invented by a wizard outraged at the prices the local ferryman charged.

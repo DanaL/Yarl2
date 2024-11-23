@@ -81,7 +81,8 @@ class DebugCommand(GameState gs)
     {"lesser health charm", ItemNames.LESSER_HEALTH_CHARM},
     {"ring of fraility", ItemNames.RING_OF_FRAILITY},
     {"anti-snail sandals", ItemNames.ANTISNAIL_SANDALS},
-    {"heavy boots", ItemNames.HEAVY_BOOTS }
+    {"heavy boots", ItemNames.HEAVY_BOOTS },
+    {"boots of water walking", ItemNames.BOOTS_OF_WATER_WALKING }
   };
 
   public string DoCommand(string txt)

@@ -546,6 +546,9 @@ class GrantsTrait : Trait
         hs.Source = srcItem.ID.ToString();
     }
 
+    if (obj is Actor actor2)
+      gs.ResolveActorMove(actor2, actor2.Loc, actor2.Loc);
+
     return msgs;
   }
 
@@ -568,6 +571,9 @@ class GrantsTrait : Trait
 
       obj.Traits.Remove(granted);
     }
+
+    if (obj is Actor actor)
+      gs.ResolveActorMove(actor, actor.Loc, actor.Loc);
   }
 }
 
@@ -2077,6 +2083,11 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc
   public void Used() => --Charges;
 }
 
+class WaterWalkingTrait : Trait
+{
+  public override string AsText() => "WaterWalking";
+}
+
 // ArmourTrait also has a bonus field but I don't think I want to merge them
 // into a single BonusTrait because perhaps there will be something like a
 // Defender Sword which provides separate att/dmg and AC bonuses
@@ -2330,6 +2341,7 @@ class TraitFactory
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = double.Parse(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
+    { "WaterWalking", (pieces, gameObj) => new WaterWalkingTrait() },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },

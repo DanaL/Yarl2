@@ -44,6 +44,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (CanFly(actor) && tile.PassableByFlight())
       return true;
+    else if ((tile.Type == TileType.Water || tile.Type == TileType.DeepWater) && actor.HasTrait<WaterWalkingTrait>())
+      return true;
 
     return false;
   }
