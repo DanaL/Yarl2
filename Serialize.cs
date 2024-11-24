@@ -574,7 +574,7 @@ class GameObjDBSave
     };
 
     string mvStrategyStr = fields[0];
-    mob.MoveStrategy = (IMoveStrategy) Activator.CreateInstance(Type.GetType($"Yarl2.{mvStrategyStr}"));
+    mob.MoveStrategy = (MoveStrategy) Activator.CreateInstance(Type.GetType($"Yarl2.{mvStrategyStr}"));
     string behaviourStr = fields[1];
     mob.SetBehaviour((IBehaviour)Activator.CreateInstance(Type.GetType($"Yarl2.{behaviourStr}")));
 

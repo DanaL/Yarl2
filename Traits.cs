@@ -11,6 +11,14 @@
 
 namespace Yarl2;
 
+enum ActionType
+{
+  Attack = 0b0001,
+  Movement = 0b0010,
+  Buff = 0b0100,
+  Passive = 0b1000
+}
+
 record UseResult(bool Successful, string Message, Action? ReplacementAction, Inputer? Accumulator);
 
 interface INeedsID
@@ -82,6 +90,8 @@ abstract class ActionTrait : BasicTrait
   public virtual int MaxRange { get; set; } = 0;
   public ulong Cooldown { get; set; } = 0;
   public string Name { get; set; } = "";
+
+  public abstract ActionType ActionType { get; }
 
   public abstract bool Available(Mob mob, GameState gs);
   protected bool InRange(Mob mob, GameState gs)
@@ -164,6 +174,7 @@ class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
   public string Quip { get; set; } = "";
+  public override ActionType ActionType => ActionType.Passive;
 
   public override bool Available(Mob mob, GameState gs)
   {
@@ -186,6 +197,8 @@ class SummonTrait : ActionTrait
 
 class SummonUndeadTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Passive;
+
   // I'm not sure what a good limit is, but let's start with 100 and see 
   // if that's too many or causes performance issues
   public override bool Available(Mob mob, GameState gs) 
@@ -223,6 +236,8 @@ class SummonUndeadTrait : ActionTrait
 
 class HealAlliesTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Buff;
+
   // Bsaically, if there is an ally the trait owner can see nearby who needs healing, indicate 
   // that the action is available
   public override bool Available(Mob mob, GameState gs)
@@ -260,6 +275,8 @@ class HomebodyTrait : Trait
 
 class ConfusingScreamTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
+
   public int DC { get; set; }
   public int Radius { get; set; }
 
@@ -273,6 +290,7 @@ class ConfusingScreamTrait : ActionTrait
 
 class MobMeleeTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"MobMelee#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
   public int DamageDie { get; set; }
   public int DamageDice { get; set; }
@@ -283,6 +301,7 @@ class MobMeleeTrait : ActionTrait
 
 class MobMissileTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"MobMissile#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
   public int DamageDie { get; set; }
   public int DamageDice { get; set; }
@@ -300,6 +319,7 @@ class MobMissileTrait : ActionTrait
 
 class RangedSpellActionTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"RangedSpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
   public override bool Available(Mob mob, GameState gs)
   {
@@ -313,6 +333,7 @@ class RangedSpellActionTrait : ActionTrait
 
 class SpellActionTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
   public override bool Available(Mob mob, GameState gs) => true;
 }
@@ -491,11 +512,6 @@ class ResistanceTrait : TemporaryTrait
 class SleepingTrait : Trait
 {
   public override string AsText() => "Sleeping";
-}
-
-class IndifferentTrait : Trait
-{
-  public override string AsText() => "Indifferent";
 }
 
 class StickyTrait : BasicTrait
@@ -1517,6 +1533,7 @@ class RetributionTrait : Trait
 
 class ShriekTrait : ActionTrait
 {
+  public override ActionType ActionType => ActionType.Attack;
   public override int MaxRange => 1;
 
   public int ShriekRadius { get; set; }
@@ -2180,7 +2197,6 @@ class TraitFactory
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
-    { "Indifferent", (pieces, gameObj) => new IndifferentTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Grants", (pieces, gameObj) => {
       string[] grantedTraits = pieces[1].Split(';').Select(s => s.Replace('&', '#')).ToArray();

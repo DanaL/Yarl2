@@ -562,8 +562,8 @@ class MainDungeonBuilder : DungeonBuilder
       Altar = shrineLoc,
       Chant = CalcChant(rng)
     });
-    shaman.Traits.Add(new IndifferentTrait());
-
+    shaman.Stats[Attribute.MobAttitude].SetMax(Mob.INDIFFERENT);
+    
     if (deepOneLocs.Count > 0)
     {
       Loc shamanLoc = deepOneLocs[rng.Next(deepOneLocs.Count)];
@@ -577,7 +577,7 @@ class MainDungeonBuilder : DungeonBuilder
                                    .Where(id => id != deepOne.ID)
                                    .ToList();
       deepOne.Traits.Add(new AlliesTrait() { IDs = allies });
-      deepOne.Traits.Add(new IndifferentTrait());
+      deepOne.Stats[Attribute.MobAttitude].SetMax(Mob.INDIFFERENT);
     }
 
     // Add a few items nearby

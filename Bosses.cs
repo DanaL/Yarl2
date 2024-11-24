@@ -139,7 +139,7 @@ class PrinceOfRatsBehaviour : IBehaviour
       return true;
     }
 
-    if (actor.HasTrait<IndifferentTrait>())
+    if (actor.Stats[Attribute.MobAttitude].Curr == Mob.INDIFFERENT)
     {
       return new PassAction();
     }

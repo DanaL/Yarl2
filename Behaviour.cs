@@ -13,21 +13,22 @@ using System.Text;
 
 namespace Yarl2;
 
-interface IMoveStrategy
+abstract class MoveStrategy
 {
-  Action MoveAction(Mob actor, GameState gs);
+  
+  public abstract Action MoveAction(Mob actor, GameState gs);
 }
 
-class WallMoveStrategy : IMoveStrategy
+class WallMoveStrategy : MoveStrategy
 {
-  public Action MoveAction(Mob actor, GameState gs) =>
-      new PassAction();
+  public override Action MoveAction(Mob actor, GameState gs) => new PassAction();
 }
 
 // For creatures that don't know how to open doors
-class DumbMoveStrategy : IMoveStrategy
+class DumbMoveStrategy : MoveStrategy
 {
-  public Action MoveAction(Mob actor, GameState gs)
+
+  public override Action MoveAction(Mob actor, GameState gs)
   {
     var adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
@@ -39,7 +40,6 @@ class DumbMoveStrategy : IMoveStrategy
       // refreshed
       if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
-        // the square is free so move there!
         return new MoveAction(gs, actor, loc);
       }
     }
@@ -51,9 +51,9 @@ class DumbMoveStrategy : IMoveStrategy
 
 // I don't know what to call this class, but it's movement for creatures who
 // can open doors. OpposableThumbMoveStrategy? :P
-class DoorOpeningMoveStrategy : IMoveStrategy
+class DoorOpeningMoveStrategy : MoveStrategy
 {
-  public Action MoveAction(Mob actor, GameState gs)
+  public override Action MoveAction(Mob actor, GameState gs)
   {
     var adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
@@ -76,9 +76,9 @@ class DoorOpeningMoveStrategy : IMoveStrategy
   }
 }
 
-class SimpleFlightMoveStrategy : IMoveStrategy
+class SimpleFlightMoveStrategy : MoveStrategy
 {
-  public Action MoveAction(Mob actor, GameState gs)
+  public override Action MoveAction(Mob actor, GameState gs)
   {
     var adj = gs.GetDMap("flying").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
@@ -242,17 +242,23 @@ class MonsterBehaviour : IBehaviour
   }
 
   static Action CalcMoveAction(Mob mob, GameState gs)
-  {    
+  {
+    // eventually add fleeing. Or maybe there will be a 
+    // CalcRetreat() method since some monsters can teleport, etc
+
     if (mob.HasTrait<ConfusedTrait>()) 
-      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
+      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));    
     else 
     {
-      Action acc = mob.MoveStrategy.MoveAction(mob, gs);
+      Action acc;
 
-      // When I spruce up behaviour code and attitude, I'll change it so that they 
-      // stick close to home until the Player angers them
-      // Maybe they should move randomly? Or back toward 'home'?
-      if (acc is MoveAction move && mob.Traits.OfType<HomebodyTrait>().FirstOrDefault() is HomebodyTrait homebody)
+      bool indifferent = mob.Stats[Attribute.MobAttitude].Curr == Mob.INDIFFERENT;      
+      if (indifferent)
+        acc = new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
+      else 
+        acc = mob.MoveStrategy.MoveAction(mob, gs);
+
+      if (indifferent && acc is MoveAction move && mob.Traits.OfType<HomebodyTrait>().FirstOrDefault() is HomebodyTrait homebody)
       {
         if (Util.Distance(move.Loc, homebody.Loc) > homebody.Range)
           return new PassAction();
@@ -264,43 +270,60 @@ class MonsterBehaviour : IBehaviour
 
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
+    if (actor.HasActiveTrait<ParalyzedTrait>())
+      return new PassAction();
     if (actor.HasTrait<SleepingTrait>())
       return new PassAction();
 
+    Console.WriteLine($"monster attitude: {actor.Stats[Attribute.MobAttitude].Curr}");
+
+    switch (actor.Stats[Attribute.MobAttitude].Curr)
+    {
+      case Mob.INACTIVE:
+        return new PassAction();
+      case Mob.INDIFFERENT:
+        if (gs.Rng.NextDouble() < 0.5)
+          return new PassAction();
+        else
+          return CalcMoveAction(actor, gs);
+      case Mob.AFRAID:
+        Console.WriteLine($"{actor.FullName} is afraid!");
+        return new PassAction();
+      case Mob.AGGRESSIVE:
+        foreach (var act in actor.Actions)
+        {
+          // Actions should be in the list in order of prerfence
+          if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
+            continue;
+
+          if (act.Available(actor, gs))
+            return FromTrait(actor, act, gs);
+        }
+        return CalcMoveAction(actor, gs);
+    }
+
+    return new PassAction();
     // Should prioritize an escape action if the monster is hurt?
     // Maybe mobs can eventually have a bravery stat?
     // Maybe there should be MobAttitude.Scare or Fleeing and then
     // if they are Fleeing try to get away
     
-    if (actor.HasTrait<WorshiperTrait>() && actor.HasTrait<IndifferentTrait>())
-    {
-      var wt = actor.Traits.OfType<WorshiperTrait>().First();
-      // Worshippers just hang out near their altar until they become hostile.
-      Loc loc = Util.RandomAdjLoc(actor.Loc, gs);
+    // if (actor.HasTrait<WorshiperTrait>() && actor.HasTrait<IndifferentTrait>())
+    // {
+    //   var wt = actor.Traits.OfType<WorshiperTrait>().First();
+    //   // Worshippers just hang out near their altar until they become hostile.
+    //   Loc loc = Util.RandomAdjLoc(actor.Loc, gs);
 
-      Action act;
-      if (!gs.ObjDb.Occupied(loc) && Util.Distance(wt.Altar, loc) < 4)
-        act = new MoveAction(gs, actor, loc);
-      else
-        act = new PassAction(gs, actor);
-      if (wt.Chant != "" && gs.Rng.Next(13) == 0)
-        act.Quip = wt.Chant;
+    //   Action act;
+    //   if (!gs.ObjDb.Occupied(loc) && Util.Distance(wt.Altar, loc) < 4)
+    //     act = new MoveAction(gs, actor, loc);
+    //   else
+    //     act = new PassAction(gs, actor);
+    //   if (wt.Chant != "" && gs.Rng.Next(13) == 0)
+    //     act.Quip = wt.Chant;
 
-      return act;
-    }
-
-    // Actions should be in the list in order of prerfence
-    foreach (var act in actor.Actions)
-    {
-      if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
-        continue;
-
-      if (act.Available(actor, gs))
-        return FromTrait(actor, act, gs);
-    }
-
-
-    return CalcMoveAction(actor, gs);
+    //   return act;
+    // }
   }
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);

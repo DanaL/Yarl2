@@ -45,7 +45,8 @@ enum Attribute
   PolearmsUse,
   SwordUse,  
   MetPlayer,
-  ShopMenu
+  ShopMenu,
+  MobAttitude
 }
 
 class Stat

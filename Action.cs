@@ -213,6 +213,9 @@ class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
         Loc loc = Actor.Loc with { Row = r, Col = c };
         if (GameState.ObjDb.Occupant(loc) is Mob mob)
         {
+          Stat attittude = mob.Stats[Attribute.MobAttitude];
+          if (attittude.Curr != Mob.AFRAID)
+            mob.Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
           Console.WriteLine($"{mob.FullName.Capitalize()} wakes up");
           mob.Traits = mob.Traits.Where(t => t is not SleepingTrait).ToList();
         }

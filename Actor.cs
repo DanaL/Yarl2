@@ -128,7 +128,16 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     string msg = "";
 
-    Traits.RemoveAll(t => t is SleepingTrait || t is IndifferentTrait);
+    Traits.RemoveAll(t => t is SleepingTrait);
+    if (Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
+    {
+      // Soource is the weapon/actual source of damage, not the moral agent
+      // responsible for causing the damage. Perhaps I should include a ref
+      // to the attacker, because the monster maybe shouldn't become aggressitve
+      // if the attack doesn't come from the player?
+      if (attitude.Curr != Mob.AFRAID)
+        attitude.SetMax(Mob.AGGRESSIVE);
+    }
 
     // If we have allies, let them know we've turned hostile
     if (Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
@@ -137,7 +146,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       {
         if (gs.ObjDb.GetObj(id) is Mob ally && gs.CanSeeLoc(ally, Loc, 6))
         {
-          ally.Traits.RemoveAll(t => t is SleepingTrait || t is IndifferentTrait);
+          ally.Traits.RemoveAll(t => t is SleepingTrait);
         }
       }
     }
@@ -292,7 +301,8 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   {
     if (gameState.CanSeeLoc(this, other.Loc, 6))
     {
-      Traits.RemoveAll(t => t is IndifferentTrait);
+      Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
+      
       return $"{FullName.Capitalize()} gets angry!";
     }
 
@@ -313,8 +323,13 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
 class Mob : Actor
 {
-  public IMoveStrategy MoveStrategy { get; set; }
+  public MoveStrategy MoveStrategy { get; set; }
   public List<ActionTrait> Actions { get; set; } = [];
+
+  public const int  INACTIVE = 0;
+  public const int INDIFFERENT = 1;
+  public const int AGGRESSIVE = 2;
+  public const int AFRAID = 4;
 
   public Mob()
   {
@@ -335,6 +350,13 @@ class Mob : Actor
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
 
+    int attitude = Stats[Attribute.MobAttitude].Curr;
+    if (!(attitude == AFRAID || attitude == AGGRESSIVE)) 
+    {
+      Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
+      Console.WriteLine($"{FullName} becomes aggressive");
+    }
+    
     if (heard && HasTrait<SleepingTrait>())
     {
       Console.WriteLine($"{Name} wakes up");
@@ -354,13 +376,7 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public override Action TakeTurn(GameState gameState)
-  {
-    if (HasActiveTrait<ParalyzedTrait>())
-      return new PassAction(gameState, this);
-    
-    return _behaviour.CalcAction(this, gameState);
-  }
+  public override Action TakeTurn(GameState gameState) => _behaviour.CalcAction(this, gameState);
 }
 
 class MonsterFactory
@@ -378,7 +394,7 @@ class MonsterFactory
     }
   }
 
-  static IMoveStrategy TextToMove(string txt) => txt.ToLower() switch
+  static MoveStrategy TextToMove(string txt) => txt.ToLower() switch
   {
     "door" => new DoorOpeningMoveStrategy(),
     "flying" or "floating" => new SimpleFlightMoveStrategy(),
@@ -422,7 +438,9 @@ class MonsterFactory
     m.Stats.Add(Attribute.Strength, new Stat(str));
     int dex = Util.StatRollToMod(int.Parse(fields[8]));
     m.Stats.Add(Attribute.Dexterity, new Stat(dex));
-    
+    int attitude = rng.NextDouble() <= 0.8 ? Mob.INDIFFERENT : Mob.AGGRESSIVE;
+    m.Stats.Add(Attribute.MobAttitude, new Stat(attitude));
+
     if (fields[10] != "")
     {
       foreach (var actionTxt in fields[10].Split(','))
