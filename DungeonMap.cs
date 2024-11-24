@@ -748,16 +748,6 @@ class DungeonMap(Random rng)
     }
 
     var djmap = new DijkstraMap(map, [], height, width);
-    var passable = new Dictionary<TileType, int>
-        {
-            { TileType.DungeonFloor, 1 },
-            { TileType.ClosedDoor, 1 },
-            { TileType.LockedDoor, 1 },
-            { TileType.OpenDoor, 1 },
-            { TileType.WoodBridge, 1 },
-            { riverTile, 1 }
-        };
-
     foreach (var k in regions.Keys)
     {
       if (k != largest && regions[k].Count >= 5)
@@ -765,7 +755,7 @@ class DungeonMap(Random rng)
         // find the closest points between this region and the main/largest region
         var nearby = ClosestPts(regions[largest], regions[k]);
         var pair = nearby[rng.Next(nearby.Count)];
-        djmap.Generate(passable, pair.Item2, 70);
+        djmap.Generate(TravelType.Doors, pair.Item2, 70);
 
         var start = pair.Item1;
         var path = djmap.ShortestPath(start.Item1, start.Item2);

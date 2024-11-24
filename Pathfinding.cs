@@ -11,6 +11,13 @@
 
 using Yarl2;
 
+enum TravelType
+{
+  Basic,
+  Doors,
+  Flight
+}
+
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
 class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
@@ -21,12 +28,57 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   int[,]? _dijkstraMap { get; set; }
   HashSet<(int, int)> Blocked { get; set; } = blocked;
 
+  static int Cost(Tile tile) 
+  {
+    if (!tile.Passable())
+      return int.MaxValue;
+
+    if (tile.IsVisibleTrap())
+      return int.MaxValue;
+
+    if (tile is JetTrigger trigger && trigger.Visible)
+      return int.MaxValue;
+
+    return 1;
+  }
+
+  static int CostByFlight(Tile tile)
+  {
+    if (!tile.PassableByFlight())
+      return int.MaxValue;
+
+    if (tile.IsVisibleTrap())
+      return int.MaxValue;
+
+    if (tile is JetTrigger trigger && trigger.Visible)
+      return int.MaxValue;
+
+    return 1;
+  }
+
+  static int CostWithDoors(Tile tile) 
+  {
+    if (tile.Type == TileType.ClosedDoor)
+      return 2;
+
+    if (!tile.Passable())
+      return int.MaxValue;
+
+    if (tile.IsVisibleTrap())
+      return int.MaxValue;
+
+    if (tile is JetTrigger trigger && trigger.Visible)
+      return int.MaxValue;
+
+    return 1;
+  }
+
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
   // slightly more expensive)
   // I'm going to make life easy on myself for now and just work with a 
   // single goal.
-  public void Generate(Dictionary<TileType, int> passable, (int Row, int Col) goal, int maxRange)
+  public void Generate(TravelType travelType, (int Row, int Col) goal, int maxRange)
   {
     _dijkstraMap = new int[Height, Width];
 
@@ -61,7 +113,13 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
         continue;
       var tile = Map.TileAt(sq.Item1, sq.Item2);
 
-      if (!passable.TryGetValue(tile.Type, out int cost) || Blocked.Contains(sq))
+      int cost = travelType switch
+      {        
+        TravelType.Doors => CostWithDoors(tile),
+        TravelType.Flight => CostByFlight(tile),
+        _ => Cost(tile)
+      };
+      if (cost == int.MaxValue || Blocked.Contains(sq))
         continue;
 
       int cheapestNeighbour = int.MaxValue;

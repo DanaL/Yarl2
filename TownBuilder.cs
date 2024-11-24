@@ -568,21 +568,8 @@ class TownBuilder
       return;
 
     var centre = Town.TownSquare.ToList()[j];
-
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.Grass, 1);
-    passable.Add(TileType.Sand, 1);
-    passable.Add(TileType.Dirt, 1);
-    passable.Add(TileType.Bridge, 1);
-    passable.Add(TileType.GreenTree, 2);
-    passable.Add(TileType.RedTree, 2);
-    passable.Add(TileType.YellowTree, 2);
-    passable.Add(TileType.OrangeTree, 2);
-    passable.Add(TileType.Water, 3);
-    passable.Add(TileType.DeepWater, 3);
-
     var dmap = new DijkstraMap(map, [], 129, 129);
-    dmap.Generate(passable, (centre.Row, centre.Col), TOWN_WIDTH);
+    dmap.Generate(TravelType.Basic, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)
     {

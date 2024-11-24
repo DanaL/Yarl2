@@ -847,7 +847,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
   }
 
-  void SetDMaps(Loc loc)
+  public void SetDMaps(Loc loc)
   {
     HashSet<(int, int)> blocked = [];
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
@@ -859,14 +859,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMap.Generate(_passableBasic, (loc.Row, loc.Col), 25);
+    DMap.Generate(TravelType.Basic, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
     DMapDoors = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMapDoors.Generate(_passableWithDoors, (loc.Row, loc.Col), 25);
+    DMapDoors.Generate(TravelType.Doors, (loc.Row, loc.Col), 25);
 
     DMapFlight = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMapFlight.Generate(_passableFlying, (loc.Row, loc.Col), 25);
+    DMapFlight.Generate(TravelType.Flight, (loc.Row, loc.Col), 25);
   }
 
   // At the moment I can't use ResolveActorMove because it calls

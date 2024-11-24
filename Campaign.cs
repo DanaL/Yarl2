@@ -150,25 +150,25 @@ class PreGameHandler(UserInterface ui)
     var dmap = new DijkstraMap(map, [], overWorldWidth, overWorldWidth);
     var tt = map.TileAt(tcRow, tcCol);
 
-    dmap.Generate(passable, (tcRow, tcCol), 257);
-    var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
+    // dmap.Generate(passable, (tcRow, tcCol), 257);
+    // var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
 
-    double draw = 1.0;
-    double delta = 2.0 / road.Count;
+    // double draw = 1.0;
+    // double delta = 2.0 / road.Count;
 
-    foreach (var sq in road.Skip(1))
-    {
-      if (InTown(sq.Item1, sq.Item2, town))
-        break;
+    // foreach (var sq in road.Skip(1))
+    // {
+    //   if (InTown(sq.Item1, sq.Item2, town))
+    //     break;
 
-      if (map.TileAt(sq).Type == TileType.Water)
-        map.SetTile(sq, TileFactory.Get(TileType.Bridge));
-      else if (rng.NextDouble() < draw)
-        map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
-      draw -= delta;
-      if (draw < 0.03)
-        draw = 0.03;
-    }
+    //   if (map.TileAt(sq).Type == TileType.Water)
+    //     map.SetTile(sq, TileFactory.Get(TileType.Bridge));
+    //   else if (rng.NextDouble() < draw)
+    //     map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
+    //   draw -= delta;
+    //   if (draw < 0.03)
+    //     draw = 0.03;
+    // }
   }
 
   static void SetItemIDInfo(Random rng)
@@ -285,7 +285,7 @@ class PreGameHandler(UserInterface ui)
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5, 
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
         PrinceOfRats(mainDungeon, objDb, rng);
         factDb.Add(new SimpleFact() { Name="Level 5 Boss", Value="the Prince of Rats"});

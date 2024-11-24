@@ -90,7 +90,6 @@ abstract class Tile(TileType type) : IZLevel
     TileType.TrapDoor => true,
     TileType.TeleportTrap => true,
     TileType.DartTrap => true,
-    TileType.JetTrigger => true,
     TileType.Pit => true,
     TileType.WaterTrap => true,
     _ => false

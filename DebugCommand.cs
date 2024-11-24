@@ -97,6 +97,17 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.HP].Reset();
       return "";
     }
+    else if (txt == "dmap")
+    {
+      var start = DateTime.Now;
+      for (int i = 0; i < 1000; i++)
+      {
+        _gs.SetDMaps(_gs.Player.Loc);
+      }
+      var elapsed = DateTime.Now - start;
+      _gs.UIRef().AlertPlayer($"{elapsed.TotalMilliseconds}ms");
+      return "";
+    }
 
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
