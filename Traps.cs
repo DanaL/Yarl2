@@ -16,6 +16,7 @@ class Traps
   public static void TriggerTrap(GameState gs, Actor actor, Loc loc, Tile tile, bool flying)
   {
     UserInterface ui = gs.UIRef();
+    bool trapSqVisible = gs.LastPlayerFoV.Contains(actor.Loc);
 
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
     {
@@ -61,11 +62,8 @@ class Traps
 
       actor.Traits.Add(new InPitTrait());
 
-      if (gs.LastPlayerFoV.Contains(actor.Loc))
-      {
+      if (trapSqVisible)
         gs.UIRef().AlertPlayer(result.Messages);
-      }
-      
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
@@ -87,7 +85,7 @@ class Traps
 
       if (actor is Player)
         gs.UIRef().AlertPlayer("Your stomach lurches!");
-      else if (gs.LastPlayerFoV.Contains(actor.Loc))
+      else if (trapSqVisible)
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} disappears!");
 
       if (candidates.Count > 0)
@@ -103,7 +101,8 @@ class Traps
       if (actor is Player player)
         player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
-      gs.UIRef().AlertPlayer("A dart flies at you!");
+      if (trapSqVisible)
+        gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!");
 
       Item dart = ItemFactory.Get(ItemNames.DART, gs.ObjDb);
       dart.Loc = loc;
@@ -116,7 +115,8 @@ class Traps
       {
         ActionResult result = new();
         Battle.ResolveMissileHit(dart, actor, dart, gs, result);
-        gs.UIRef().AlertPlayer(result.Messages);
+        if (trapSqVisible)
+          gs.UIRef().AlertPlayer(result.Messages);
       }
 
       gs.ItemDropped(dart, loc);
@@ -125,8 +125,9 @@ class Traps
       // trap is triggered there's a 5% chane of switching it to a dungeon floor
       if (gs.Rng.Next(20) == 0) 
       {
-        gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
-        gs.UIRef().AlertPlayer("Click.");
+        gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));        
+        if (trapSqVisible)
+          gs.UIRef().AlertPlayer("Click.");
       }
     }
     else if (tile.Type == TileType.JetTrigger)
