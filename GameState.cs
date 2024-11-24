@@ -69,7 +69,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.HiddenMagicMouth, 1 },
     { TileType.HiddenPit, 1},
     { TileType.GreenTree, 1},
-    { TileType.Dirt, 1}
+    { TileType.Dirt, 1},
+    { TileType.HiddenTeleportTrap, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -88,7 +89,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.HiddenMagicMouth, 1 },
     { TileType.HiddenPit, 1},
     { TileType.GreenTree, 1},
-    { TileType.Dirt, 1}
+    { TileType.Dirt, 1},
+    { TileType.HiddenTeleportTrap, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -109,7 +111,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.HiddenMagicMouth, 1 },
     { TileType.HiddenPit, 1},
     { TileType.GreenTree, 1},
-    { TileType.Dirt, 1}
+    { TileType.Dirt, 1},
+    { TileType.HiddenTeleportTrap, 1 }
   };
 
   public void ClearMenu() => UI.CloseMenu();

@@ -87,7 +87,9 @@ class Traps
 
       if (actor is Player)
         gs.UIRef().AlertPlayer("Your stomach lurches!");
-
+      else if (gs.LastPlayerFoV.Contains(actor.Loc))
+        gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} disappears!");
+        
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
