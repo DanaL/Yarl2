@@ -46,7 +46,8 @@ class Traps
         player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
-      ActionResult result = new() { Messages = [ "You tumble into a pit!" ]};
+      string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!";
+      ActionResult result = new() { Messages = [ s ]};
       int total = 0;
       int damageDice = 1 + actor.Loc.Level / 5;
       for (int j = 0; j < damageDice; j++)
@@ -60,7 +61,11 @@ class Traps
 
       actor.Traits.Add(new InPitTrait());
 
-      gs.UIRef().AlertPlayer(result.Messages);
+      if (gs.LastPlayerFoV.Contains(actor.Loc))
+      {
+        gs.UIRef().AlertPlayer(result.Messages);
+      }
+      
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {

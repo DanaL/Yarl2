@@ -217,10 +217,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
       else
       {
-        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} still stuck in the pit.";
-        result.Messages.Add(s);
         result.Complete = true;
         result.EnergyCost = 1.0;
+        if (Actor is Player)
+          result.Messages.Add("You are still stuck in the pit.");        
       }
     }
     else if (GameState.ObjDb.ItemsAt(Loc).Any(item => item.HasTrait<BlockTrait>()))

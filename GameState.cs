@@ -66,7 +66,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.OpenPortcullis, 1 },
     { TileType.BrokenPortcullis, 1 },
     { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 }
+    { TileType.HiddenMagicMouth, 1 },
+    { TileType.HiddenPit, 1},
+    { TileType.GreenTree, 1},
+    { TileType.Dirt, 1}
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -82,7 +85,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.OpenPortcullis, 1 },
     { TileType.BrokenPortcullis, 1 },
     { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 }
+    { TileType.HiddenMagicMouth, 1 },
+    { TileType.HiddenPit, 1},
+    { TileType.GreenTree, 1},
+    { TileType.Dirt, 1}
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -100,7 +106,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.OpenPortcullis, 1 },
     { TileType.BrokenPortcullis, 1 },
     { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 }
+    { TileType.HiddenMagicMouth, 1 },
+    { TileType.HiddenPit, 1},
+    { TileType.GreenTree, 1},
+    { TileType.Dirt, 1}
   };
 
   public void ClearMenu() => UI.CloseMenu();
@@ -942,12 +951,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
-    bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
-    bool waterWalking = Player.HasActiveTrait<WaterWalkingTrait>();
+    bool flying = actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>();
+    bool waterWalking = actor.HasActiveTrait<WaterWalkingTrait>();
 
     if (tile.IsTrap())
     {
-      Traps.TriggerTrap(this, Player, dest, tile, flying);
+      Traps.TriggerTrap(this, actor, dest, tile, flying);
     }      
     else if (tile.Type == TileType.Chasm && !flying)
     {
