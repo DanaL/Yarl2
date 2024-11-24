@@ -15,19 +15,19 @@ namespace Yarl2;
 
 abstract class MoveStrategy
 {
-  
   public abstract Action MoveAction(Mob actor, GameState gs);
+  public abstract Action RandomMoveAction(Mob actor, GameState gs);
 }
 
 class WallMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs) => new PassAction();
+  public override Action RandomMoveAction(Mob actor, GameState gs) => new PassAction();
 }
 
 // For creatures that don't know how to open doors
 class DumbMoveStrategy : MoveStrategy
 {
-
   public override Action MoveAction(Mob actor, GameState gs)
   {
     var adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
@@ -46,6 +46,17 @@ class DumbMoveStrategy : MoveStrategy
 
     // If we can't find a move to do, pass
     return new PassAction();
+  }
+
+  public override Action RandomMoveAction(Mob actor, GameState gs)
+  {
+    List<Loc> opts = Util.Adj8Locs(actor.Loc)
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable())
+                         .ToList();
+    if (opts.Count == 0)
+      return new PassAction();
+    else
+      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
   }
 }
 
@@ -74,6 +85,17 @@ class DoorOpeningMoveStrategy : MoveStrategy
     // Otherwise do nothing!
     return new PassAction();
   }
+
+  public override Action RandomMoveAction(Mob actor, GameState gs)
+  {
+    List<Loc> opts = Util.Adj8Locs(actor.Loc)
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable())
+                         .ToList();
+    if (opts.Count == 0)
+      return new PassAction();
+    else
+      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
+  }
 }
 
 class SimpleFlightMoveStrategy : MoveStrategy
@@ -93,6 +115,17 @@ class SimpleFlightMoveStrategy : MoveStrategy
 
     // Otherwise do nothing!
     return new PassAction();
+  }
+
+  public override Action RandomMoveAction(Mob actor, GameState gs)
+  {
+    List<Loc> opts = Util.Adj8Locs(actor.Loc)
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).PassableByFlight())
+                         .ToList();
+    if (opts.Count == 0)
+      return new PassAction();
+    else
+      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
   }
 }
 
@@ -254,10 +287,12 @@ class MonsterBehaviour : IBehaviour
 
       bool indifferent = mob.Stats[Attribute.MobAttitude].Curr == Mob.INDIFFERENT;      
       if (indifferent)
-        acc = new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
+        acc = mob.MoveStrategy.RandomMoveAction(mob, gs);
       else 
         acc = mob.MoveStrategy.MoveAction(mob, gs);
 
+      // Note: maybe HomebodyTrait should prevent a mob from becomming
+      // aggressive for reasons other than taking damage?
       if (indifferent && acc is MoveAction move && mob.Traits.OfType<HomebodyTrait>().FirstOrDefault() is HomebodyTrait homebody)
       {
         if (Util.Distance(move.Loc, homebody.Loc) > homebody.Range)
@@ -274,8 +309,6 @@ class MonsterBehaviour : IBehaviour
       return new PassAction();
     if (actor.HasTrait<SleepingTrait>())
       return new PassAction();
-
-    Console.WriteLine($"monster attitude: {actor.Stats[Attribute.MobAttitude].Curr}");
 
     switch (actor.Stats[Attribute.MobAttitude].Curr)
     {
@@ -309,6 +342,7 @@ class MonsterBehaviour : IBehaviour
           if (act.Available(actor, gs))
             return FromTrait(actor, act, gs);
         }
+
         return CalcMoveAction(actor, gs);
     }
 
