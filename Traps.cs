@@ -19,21 +19,28 @@ class Traps
     bool trapSqVisible = gs.LastPlayerFoV.Contains(actor.Loc);
 
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
-    {
-      if (actor is Player player)
-        player.Running = false;
+    {      
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
-      loc = gs.FallIntoPit(actor, loc);
-      ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
-      List<string> msgs = [ "A trap door opens up underneath you!" ];
+      loc = gs.FallIntoTrapdoor(actor, loc);
+      string msg = $"A trap door opens up underneath {actor.FullName}!";
+      
+      if (actor is Player player)
+      {
+        player.Running = false;
+        ui.SetPopup(new Popup(msg, "", -1, -1));
+      }
+      
+      List<string> msgs = [ msg ];
       msgs.Add(gs.ThingAddedToLoc(loc));
-      gs.UIRef().AlertPlayer(msgs);
+
+      if (trapSqVisible)
+        gs.UIRef().AlertPlayer(msgs);
       
       throw new AbnormalMovement(loc);
     }
     else if (tile.Type == TileType.TrapDoor && !flying)
     {
-      loc = gs.FallIntoPit(actor, loc);
+      loc = gs.FallIntoTrapdoor(actor, loc);
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));
       List<string> msgs = [ "You plummet into the trap door!" ];
       msgs.Add(gs.ThingAddedToLoc(loc));

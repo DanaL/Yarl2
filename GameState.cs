@@ -72,7 +72,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Dirt, 1},
     { TileType.HiddenTeleportTrap, 1 },
     { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 }
+    { TileType.HiddenDartTrap, 1 },
+    { TileType.HiddenTrapDoor, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -94,7 +95,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Dirt, 1},
     { TileType.HiddenTeleportTrap, 1 },
     { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 }
+    { TileType.HiddenDartTrap, 1 },
+    { TileType.HiddenTrapDoor, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -118,7 +120,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Dirt, 1},
     { TileType.HiddenTeleportTrap, 1 },
     { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 }
+    { TileType.HiddenDartTrap, 1 },
+    { TileType.HiddenTrapDoor, 1 }
   };
 
   public void ClearMenu() => UI.CloseMenu();
@@ -895,16 +898,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public Loc FallIntoPit(Actor actor, Loc pitLoc)
+  public Loc FallIntoTrapdoor(Actor actor, Loc trapdoorLoc)
   {
     // find a clear, random landing spot on the level below
-    Map lowerLevel = CurrentDungeon.LevelMaps[pitLoc.Level + 1];
+    Map lowerLevel = CurrentDungeon.LevelMaps[trapdoorLoc.Level + 1];
     List<Loc> candidateSpots = [];
     for (int r = 0; r < lowerLevel.Height; r++)
     {
       for (int c = 0; c < lowerLevel.Width; c++)
       {
-        var loc = new Loc(CurrDungeonID, pitLoc.Level + 1, r, c);
+        var loc = new Loc(CurrDungeonID, trapdoorLoc.Level + 1, r, c);
         if (lowerLevel.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
         {
           candidateSpots.Add(loc);
@@ -916,19 +919,21 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       // NB, this code is basically the same as in FaillIntoChasm
       Loc landingSpot = candidateSpots[Rng.Next(candidateSpots.Count)];
-      PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+
       List<string> messages = [];
-      string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-      messages.Add(moveMsg);
-
-      ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
-
       if (actor is Player)
       {
-        RefreshPerformers();
-        UpdateFoV();
+        PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       }
+      
+      string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
+      messages.Add(moveMsg);
+      
+      ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
 
+      RefreshPerformers();
+      UpdateFoV();
+      
       int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
       var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
       if (hpLeft < 1)
@@ -936,8 +941,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ActorKilled(actor, "a fall", null, null);
       }
 
-      var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
-      UI.AlertPlayer(s);
+      if (LastPlayerFoV.Contains(actor.Loc))
+      {
+        UI.AlertPlayer(messages);
+        var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+        UI.AlertPlayer(s);        
+      }
     }
     else
     {
