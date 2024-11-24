@@ -89,7 +89,7 @@ class Traps
         gs.UIRef().AlertPlayer("Your stomach lurches!");
       else if (gs.LastPlayerFoV.Contains(actor.Loc))
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} disappears!");
-        
+
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
@@ -136,15 +136,25 @@ class Traps
       TriggerJetTrap((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
-    {
-      if (actor is Player player)
-        player.Running = false;
+    {      
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.WaterTrap));
-      List<string> msgs = [ "You are soaked by a blast of water!" ];      
-      string s = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
+
+      string s;
+      if (actor is Player player) 
+      {
+        player.Running = false;
+        s = "You are soaked by a blast of water!";
+      }
+      else{
+        s = $"{actor.FullName.Capitalize()} is soaked by a blast of water";
+      }
+      List<string> msgs = [ s ];      
+      s = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
       if (s != "")
         msgs.Add(s);
-      gs.UIRef().AlertPlayer(msgs);
+
+      if (gs.LastPlayerFoV.Contains(actor.Loc))
+        gs.UIRef().AlertPlayer(msgs);
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
     {
