@@ -64,7 +64,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.BrokenDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.MagicMouth, 1 },
+    { TileType.HiddenMagicMouth, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableWithDoors = new()
@@ -78,7 +80,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.ClosedDoor, 1 },
     { TileType.WoodBridge, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.MagicMouth, 1 },
+    { TileType.HiddenMagicMouth, 1 }
   };
 
   static readonly Dictionary<TileType, int> _passableFlying = new()
@@ -94,7 +98,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     { TileType.Water, 1 },
     { TileType.Chasm, 1 },
     { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 }
+    { TileType.BrokenPortcullis, 1 },
+    { TileType.MagicMouth, 1 },
+    { TileType.HiddenMagicMouth, 1 }
   };
 
   public void ClearMenu() => UI.CloseMenu();
@@ -935,27 +941,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       SetDMaps(dest);
     }
 
-    // I think just for now, I'll have only the player trigger traps/pits
-    // mainly because I don't want to complicate my pathfinding code
-    if (actor is Player)
-    {
-      Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
-      bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
-      bool waterWalking = Player.HasActiveTrait<WaterWalkingTrait>();
+    Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
+    bool flying = Player.HasActiveTrait<FlyingTrait>() || Player.HasActiveTrait<FloatingTrait>();
+    bool waterWalking = Player.HasActiveTrait<WaterWalkingTrait>();
 
-      if (tile.IsTrap())
-      {
-        Traps.TriggerTrap(this, Player, dest, tile, flying);
-      }      
-      else if (tile.Type == TileType.Chasm && !flying)
-      {
-        Loc landingSpot = dest with { Level = dest.Level + 1 };
-        FallIntoChasm(actor, landingSpot);
-      }
-      else if (tile.Type == TileType.DeepWater && !(flying || waterWalking))
-      {
-        ActorFallsIntoWater(actor, dest);
-      }
+    if (tile.IsTrap())
+    {
+      Traps.TriggerTrap(this, Player, dest, tile, flying);
+    }      
+    else if (tile.Type == TileType.Chasm && !flying)
+    {
+      Loc landingSpot = dest with { Level = dest.Level + 1 };
+      FallIntoChasm(actor, landingSpot);
+    }
+    else if (tile.Type == TileType.DeepWater && !(flying || waterWalking))
+    {
+      ActorFallsIntoWater(actor, dest);
     }
 
     return ThingAddedToLoc(dest);

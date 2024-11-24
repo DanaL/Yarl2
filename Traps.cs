@@ -145,15 +145,27 @@ class Traps
         player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
       
-      string s = gs.Rng.Next(3) switch
+      List<string> msgs = [];
+      if (gs.LastPlayerFoV.Contains(loc))
       {
-        0 => "A magic mouth shouts, \"Get a load of this guy!\"",
-        1 => "A magic mouth shouts, \"Hey we got an adventurer over here!\"",
-        _ => "A magic mouth shrieks!"
-      };
-
-      // Wake up nearby monsters within 10 squares
-      List<string> msgs = [ s ];
+       msgs.Add(gs.Rng.Next(3) switch
+        {
+          0 => "A magic mouth shouts, \"Get a load of this guy!\"",
+          1 => "A magic mouth shouts, \"Hey we got an adventurer over here!\"",
+          _ => "A magic mouth shrieks!"
+        }); 
+      }
+      else
+      {        
+        msgs.Add(gs.Rng.Next(3) switch
+        {
+          0 => "Something shouts, \"Get a load of this guy!\"",
+          1 => "Something shouts, \"Hey we got an adventurer over here!\"",
+          _ => "You hear a shriek!"
+        });
+      }
+      
+      // Wake up nearby monsters within 10 squares      
       for (int r = loc.Row - 10; r <= loc.Row + 10; r++)
       {
         for (int c = loc.Col - 10; c <= loc.Col + 10; c++)
