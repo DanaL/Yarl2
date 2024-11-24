@@ -100,7 +100,7 @@ class DebugCommand(GameState gs)
     else if (txt == "dmap")
     {
       var start = DateTime.Now;
-      for (int i = 0; i < 1; i++)
+      for (int i = 0; i < 1000; i++)
       {
         _gs.SetDMaps(_gs.Player.Loc);
       }

@@ -410,8 +410,17 @@ class Rooms
         {
           if (room.Contains(adj))
             chasmSqs.Add(adj);
-          else if (map.TileAt(adj).Type == TileType.ClosedDoor || map.TileAt(adj).Type == TileType.LockedDoor)
-            exits.Add(adj);
+          else
+          {
+            switch (map.TileAt(adj).Type)
+            {
+              case TileType.ClosedDoor:
+              case TileType.LockedDoor:
+              case TileType.DungeonFloor:
+                exits.Add(adj);
+                break;
+            }
+          }
         }
       }
     }
