@@ -251,7 +251,15 @@ class MsgFactory
 
   public static string MobKilledMessage(Actor victim, GameObj? attacker, GameState gs)
   {
-    var verb = victim.HasTrait<PlantTrait>() || victim.HasTrait<ConstructTrait>() ? Verb.Destroy : Verb.Kill;
+    Verb verb = Verb.Kill;
+    foreach (Trait t in victim.Traits)
+    {
+      if (t is PlantTrait || t is ConstructTrait || t is UndeadTrait)
+      {
+        verb = Verb.Destroy;
+        break;
+      }
+    }
     var plural = victim.HasTrait<PluralTrait>();
 
     if (AwareOfActor(victim, gs))
