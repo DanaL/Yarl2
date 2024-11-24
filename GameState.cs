@@ -859,14 +859,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMap.Generate(TravelType.Basic, (loc.Row, loc.Col), 25);
+    DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
     DMapDoors = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMapDoors.Generate(TravelType.Doors, (loc.Row, loc.Col), 25);
+    DMapDoors.Generate(DijkstraMap.CostWithDoors, (loc.Row, loc.Col), 25);
 
     DMapFlight = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
-    DMapFlight.Generate(TravelType.Flight, (loc.Row, loc.Col), 25);
+    DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
   }
 
   // At the moment I can't use ResolveActorMove because it calls

@@ -119,56 +119,39 @@ class PreGameHandler(UserInterface ui)
   static bool InTown(int row, int col, Town town) =>
       row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width;
 
+  static int CostForRoadBuilding(Tile tile) => tile.Type switch
+  {
+      TileType.HWindow or TileType.VWindow or TileType.StoneWall or TileType.WoodWall => 1,
+      _ => tile.Passable() ? 1 : int.MaxValue
+  };
+
   static void DrawOldRoad(Map map, HashSet<(int, int)> region, int overWorldWidth, (int, int) entrance, Town town, Random rng)
-  {    
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.Grass, 1);
-    passable.Add(TileType.Sand, 1);
-    passable.Add(TileType.GreenTree, 2);
-    passable.Add(TileType.RedTree, 2);
-    passable.Add(TileType.YellowTree, 2);
-    passable.Add(TileType.OrangeTree, 2);
-    passable.Add(TileType.Dirt, 1);
-    passable.Add(TileType.Bridge, 1);
-    passable.Add(TileType.Water, 1);
-    passable.Add(TileType.WoodFloor, 1);
-
-    // These aren't passable in a game sense, but we're only drawing the 
-    // ancient road to the outskits of town (but I still need to calculate
-    // the path all the way to the centre square, which may end up inside
-    // a building)        
-    passable.Add(TileType.HWindow, 1);
-    passable.Add(TileType.VWindow, 1);
-    passable.Add(TileType.ClosedDoor, 1);
-    passable.Add(TileType.StoneFloor, 1);
-    passable.Add(TileType.StoneWall, 1);
-    passable.Add(TileType.WoodWall, 1);
-
+  {
     int tcRow = town.Row + town.Height / 2;
     int tcCol = town.Col + town.Width / 2;
 
     var dmap = new DijkstraMap(map, [], overWorldWidth, overWorldWidth);
     var tt = map.TileAt(tcRow, tcCol);
 
-    // dmap.Generate(passable, (tcRow, tcCol), 257);
-    // var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
+    dmap.Generate(CostForRoadBuilding, (tcRow, tcCol), 257);
+    var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
 
-    // double draw = 1.0;
-    // double delta = 2.0 / road.Count;
+    double draw = 1.0;
+    double delta = 2.0 / road.Count;
 
-    // foreach (var sq in road.Skip(1))
-    // {
-    //   if (InTown(sq.Item1, sq.Item2, town))
-    //     break;
+    foreach (var sq in road.Skip(1))
+    {
+      if (InTown(sq.Item1, sq.Item2, town))
+        break;
 
-    //   if (map.TileAt(sq).Type == TileType.Water)
-    //     map.SetTile(sq, TileFactory.Get(TileType.Bridge));
-    //   else if (rng.NextDouble() < draw)
-    //     map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
-    //   draw -= delta;
-    //   if (draw < 0.03)
-    //     draw = 0.03;
-    // }
+      if (map.TileAt(sq).Type == TileType.Water)
+        map.SetTile(sq, TileFactory.Get(TileType.Bridge));
+      else if (rng.NextDouble() < draw)
+        map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
+      draw -= delta;
+      if (draw < 0.03)
+        draw = 0.03;
+    }
   }
 
   static void SetItemIDInfo(Random rng)

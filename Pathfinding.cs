@@ -15,8 +15,12 @@ enum TravelType
 {
   Basic,
   Doors,
-  Flight
+  Flight,
+  RoadBuilder, // hopefully I can drop this one later,
+  ChasmBridgeDrawing
 }
+
+delegate int CostFunction(Tile tile);
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
@@ -28,7 +32,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   int[,]? _dijkstraMap { get; set; }
   HashSet<(int, int)> Blocked { get; set; } = blocked;
 
-  static int Cost(Tile tile) 
+  public static int Cost(Tile tile) 
   {
     if (!tile.Passable())
       return int.MaxValue;
@@ -42,7 +46,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     return 1;
   }
 
-  static int CostByFlight(Tile tile)
+  public static int CostByFlight(Tile tile)
   {
     if (!tile.PassableByFlight())
       return int.MaxValue;
@@ -56,7 +60,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     return 1;
   }
 
-  static int CostWithDoors(Tile tile) 
+  public static int CostWithDoors(Tile tile) 
   {
     if (tile.Type == TileType.ClosedDoor)
       return 2;
@@ -78,7 +82,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   // slightly more expensive)
   // I'm going to make life easy on myself for now and just work with a 
   // single goal.
-  public void Generate(TravelType travelType, (int Row, int Col) goal, int maxRange)
+  public void Generate(CostFunction calcCost, (int Row, int Col) goal, int maxRange)
   {
     _dijkstraMap = new int[Height, Width];
 
@@ -113,12 +117,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
         continue;
       var tile = Map.TileAt(sq.Item1, sq.Item2);
 
-      int cost = travelType switch
-      {        
-        TravelType.Doors => CostWithDoors(tile),
-        TravelType.Flight => CostByFlight(tile),
-        _ => Cost(tile)
-      };
+      int cost = calcCost(tile);
       if (cost == int.MaxValue || Blocked.Contains(sq))
         continue;
 

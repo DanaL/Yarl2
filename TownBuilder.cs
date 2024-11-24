@@ -569,7 +569,7 @@ class TownBuilder
 
     var centre = Town.TownSquare.ToList()[j];
     var dmap = new DijkstraMap(map, [], 129, 129);
-    dmap.Generate(TravelType.Basic, (centre.Row, centre.Col), TOWN_WIDTH);
+    dmap.Generate(DijkstraMap.CostWithDoors, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)
     {
