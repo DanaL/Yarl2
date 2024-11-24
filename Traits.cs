@@ -174,7 +174,7 @@ class SummonTrait : ActionTrait
 {
   public string Summons { get; set; } = "";
   public string Quip { get; set; } = "";
-  public override ActionType ActionType => ActionType.Passive;
+  public override ActionType ActionType => ActionType.Attack;
 
   public override bool Available(Mob mob, GameState gs)
   {
@@ -1533,12 +1533,21 @@ class RetributionTrait : Trait
 
 class ShriekTrait : ActionTrait
 {
-  public override ActionType ActionType => ActionType.Attack;
+  public override ActionType ActionType => ActionType.Passive;
   public override int MaxRange => 1;
 
   public int ShriekRadius { get; set; }
 
-  public override bool Available(Mob actor, GameState gs) => InRange(actor, gs);
+  public override bool Available(Mob actor, GameState gs) 
+  {
+    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
+    {
+      if (gs.ObjDb.Occupied(adj))
+        return true;
+    }
+
+    return false;
+  }
 
   public override string AsText() => $"Shriek#{Cooldown}#{ShriekRadius}";
 }

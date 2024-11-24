@@ -282,10 +282,20 @@ class MonsterBehaviour : IBehaviour
       case Mob.INACTIVE:
         return new PassAction();
       case Mob.INDIFFERENT:
-        if (gs.Rng.NextDouble() < 0.5)
+        var passive = actor.Actions.Where(a => a.ActionType == ActionType.Passive && a.Available(actor, gs))
+                                   .ToList();
+        if (passive.Count > 0)
+        {
+          return FromTrait(actor, passive[gs.Rng.Next(passive.Count)], gs);
+        }
+        else if (gs.Rng.NextDouble() < 0.5) 
+        {
           return new PassAction();
+        }
         else
+        {
           return CalcMoveAction(actor, gs);
+        }
       case Mob.AFRAID:
         Console.WriteLine($"{actor.FullName} is afraid!");
         return new PassAction();
