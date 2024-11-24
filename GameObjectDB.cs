@@ -252,6 +252,20 @@ class GameObjectDB
     return EMPTY;
   }
 
+  public bool BlockersAtLoc(Loc loc)
+  {
+    if (_itemLocs.TryGetValue(loc, out var items))
+    {
+      foreach (Item item in items)
+      {
+        if (item.HasTrait<BlockTrait>())
+          return true;
+      }
+    }
+    
+    return false;
+  }
+
   public void RemoveActor(Actor actor)
   {
     Objs.Remove(actor.ID);

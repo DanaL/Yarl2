@@ -51,7 +51,7 @@ class DumbMoveStrategy : MoveStrategy
   public override Action RandomMoveAction(Mob actor, GameState gs)
   {
     List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable())
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
                          .ToList();
     if (opts.Count == 0)
       return new PassAction();
@@ -89,7 +89,7 @@ class DoorOpeningMoveStrategy : MoveStrategy
   public override Action RandomMoveAction(Mob actor, GameState gs)
   {
     List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable())
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
                          .ToList();
     if (opts.Count == 0)
       return new PassAction();
@@ -120,7 +120,7 @@ class SimpleFlightMoveStrategy : MoveStrategy
   public override Action RandomMoveAction(Mob actor, GameState gs)
   {
     List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).PassableByFlight())
+                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).PassableByFlight() && !gs.ObjDb.BlockersAtLoc(l))
                          .ToList();
     if (opts.Count == 0)
       return new PassAction();
