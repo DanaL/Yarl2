@@ -366,13 +366,12 @@ class Mob : Actor
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
 
-    int attitude = Stats[Attribute.MobAttitude].Curr;
-    if (!(attitude == AFRAID || attitude == AGGRESSIVE)) 
+    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) 
+          && !(attitude.Curr == AFRAID || attitude.Curr == AGGRESSIVE))
     {
-      Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
-      Console.WriteLine($"{FullName} becomes aggressive");
+        Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);        
     }
-    
+        
     if (heard && HasTrait<SleepingTrait>())
     {
       Console.WriteLine($"{Name} wakes up");
