@@ -127,53 +127,6 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     }
   }
 
-  public List<(int, int)> EscapeRoute(int startRow, int startCol, int maxLength)
-  {    
-    List<(int, int)> bestPath = [];
-    List<(int, int)> currentPath = [ (startRow, startCol) ];
-    int bestScore = 0;
-
-    void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
-    {
-      if (currentScore > bestScore && currentPath.Count > 1)
-      {
-        bestScore = currentScore;
-        bestPath = [.. currentPath];
-      }
-
-      if (currentPath.Count == maxLength)
-        return;
-
-      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(row, col))
-      {
-        // bounds check (I don't think this is strictly necessary because the maps
-        // should all have a perimeter of walls)
-        if (adjRow < 0 || adjCol < 0 || adjRow >= Height || adjCol >= Width)
-          continue;
-
-        var adj = (adjRow, adjCol);
-        int cost = _dijkstraMap[adjRow, adjCol];
-        // The goal square is marked 0 in the map, which is the player's
-        // location and thus impassable
-        if (visited.Contains(adj) || cost == int.MaxValue || cost == 0)
-          continue;
-
-        visited.Add(adj);
-        currentPath.Add(adj);
-
-        FindPath(adjRow, adjCol, currentScore + _dijkstraMap[adjRow, adjCol], visited);
-
-        visited.Remove(adj);
-        currentPath.RemoveAt(currentPath.Count - 1);
-      }
-    }
-
-    FindPath(startRow, startCol, _dijkstraMap[startRow, startCol],
-            new HashSet<(int Row, int Col)> { (startRow, startCol) });
-
-    return bestPath;
-  }
-
   public List<(int, int)> ShortestPath(int row, int col)
   {
     List<(int, int)> path = [(row, col)];
@@ -224,6 +177,68 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     }
 
     return [.. adj.OrderBy(v => v.Item3)];
+  }
+
+  // Use the dijkstra map to flee from the player. Do a depth-first search 
+  // looking for the most expensive path in maxLength moves, which should
+  // lead away from the player.
+  //
+  // One thing I can't decide if it's a bug or good behaviour: because I'm
+  // counting occupied sqs as blocked, if there's no clear path to the player
+  // the monster won't find an escape route at all. Ie.,
+  //
+  //    ##########
+  //    #..@k....+
+  //    ##########
+  //
+  // Assuming the kobold couldn't use doors, the DMap calculation would 
+  // effectively not find a path between the door and the kobold so there
+  // would be no path to flee down. But maybe the kobold knows its stuck
+  // and wil turn to fight?
+  public List<(int, int)> EscapeRoute(int startRow, int startCol, int maxLength)
+  {    
+    List<(int, int)> bestPath = [];
+    List<(int, int)> currentPath = [ (startRow, startCol) ];
+    int bestScore = 0;
+
+    void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
+    {
+      if (currentScore > bestScore && currentPath.Count > 1)
+      {
+        bestScore = currentScore;
+        bestPath = [.. currentPath];
+      }
+
+      if (currentPath.Count == maxLength)
+        return;
+
+      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(row, col))
+      {
+        // bounds check (I don't think this is strictly necessary because the maps
+        // should all have a perimeter of walls)
+        if (adjRow < 0 || adjCol < 0 || adjRow >= Height || adjCol >= Width)
+          continue;
+
+        var adj = (adjRow, adjCol);
+        int cost = _dijkstraMap[adjRow, adjCol];
+        // The goal square is marked 0 in the map, which is the player's
+        // location and thus impassable
+        if (visited.Contains(adj) || cost == int.MaxValue || cost == 0)
+          continue;
+
+        visited.Add(adj);
+        currentPath.Add(adj);
+
+        FindPath(adjRow, adjCol, currentScore + _dijkstraMap[adjRow, adjCol], visited);
+
+        visited.Remove(adj);
+        currentPath.RemoveAt(currentPath.Count - 1);
+      }
+    }
+
+    FindPath(startRow, startCol, _dijkstraMap[startRow, startCol],[ (startRow, startCol) ]);
+
+    return bestPath;
   }
 }
 
