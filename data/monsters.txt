@@ -3,23 +3,23 @@ zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|Dumb|Melee#6#
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|Dumb|Melee#6#1#Piercing|
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|Dumb|Melee#4#1#Piercing|
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|Flying|Melee#5#1#Piercing|Flying
-goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|Door|Melee#6#1#Slashing|PoorLoot
-goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14|Door|Missile#6#1#2#7#Piercing,Melee#4#1#Slashing|
-goblin boss       |g|green        |darkgreen   |13|10|3| 1.0|13|10|Door|Melee#8#1#Slashing|
-hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|Door|Melee#8#1#Slashing|
-kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|Door|Melee#6#1#Slashing|PoorLoot
-kobold trickster  |k|lightblue    |blue        |14|20|3| 1.0|10|14|Door|RangedSpellAction#Entangle#15#2#7,SpellAction#FogCloud#15,SpellAction#Blink#5,Melee#6#1#Slashing|
-kobold foreman    |k|yelloworange |dullred     |13|20|3| 1.0|12|10|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|DeathMessage#The foreman says: clocking out!
+goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|Door|Melee#6#1#Slashing|PoorLoot,Intelligent
+goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14|Door|Missile#6#1#2#7#Piercing,Melee#4#1#Slashing|Intelligent
+goblin boss       |g|green        |darkgreen   |13|10|3| 1.0|13|10|Door|Melee#8#1#Slashing|Intelligent
+hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|Door|Melee#8#1#Slashing|Intelligent
+kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|Door|Melee#6#1#Slashing|PoorLoot,Intelligent
+kobold trickster  |k|lightblue    |blue        |14|20|3| 1.0|10|14|Door|RangedSpellAction#Entangle#15#2#7,SpellAction#FogCloud#15,SpellAction#Blink#5,Melee#6#1#Slashing|Intelligent
+kobold foreman    |k|yelloworange |dullred     |13|20|3| 1.0|12|10|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|DeathMessage#The foreman says: clocking out!,Intelligent
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10|Wall||Plant,Plural,Immunity#Confusion,Brainless
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Dumb|RangedSpellAction#Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2#20
-goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|Door|RangedSpellAction#FireboltAction#2#2#4,Melee#4#1#Slashing|
+goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|Door|RangedSpellAction#FireboltAction#2#2#4,Melee#4#1#Slashing|Intelligent
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|Dumb|Melee#6#1#Acid|Divider,ResistBlunt,Immunity#Confusion,Brainless
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|Dumb|Melee#6#1#Acid|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|Dumb|Melee#6#1#Cold|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
-ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|Door|Melee#6#2#Blunt|KnockBack
+ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|Door|Melee#6#2#Blunt|KnockBack,Intelligent
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|Dumb|Melee#4#1#Piercing|Poisoner#13#1#10
-duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Door|Melee#10#1#Blunt|
-drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|
+duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Door|Melee#10#1#Blunt|Intelligent
+drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|Door|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|Intelligent
 owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|Dumb|Melee#1#1#Slashing|Grappler#14
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|Flying|RangedSpellAction#MirrorImage#7#1#3,Melee#8#1#Piercing|Flying
 shadow            | |black        |black       |13|20|3| 1.0|10|14|Dumb|Melee#4#1#Necrotic|Weaken#13#1,SilverAllergy,Undead
@@ -29,7 +29,7 @@ deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|Door|Melee#8#
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12|Door|HealAllies#5,Melee#8#1#Piercing|
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|Dumb|Melee#8#1#Piercing|Corrosive
 will-o-wisp       |w|yellow       |yelloworange|15|35|3| 1.0|10|10|Flying|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1
-troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|Door|Melee#8#2#Slashing|Regeneration#3#owner#false#max
+troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|Door|Melee#8#2#Slashing|Regeneration#3#owner#false#max,Intelligent
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|Dumb|Melee#5#2#Piercing|Poisoner#14#2#15,CoinsLoot#10#20,Brainless
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Dumb|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy,Undead
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|Dumb|Melee#5#2#Blunt|KnockBack,AttackVerb#Butt

@@ -420,6 +420,14 @@ class InPitTrait : Trait
   public override string AsText() => "InPit";
 }
 
+// For monsters who are smart enough to do things like jump into
+// teleport traps when fleeing. (Maybe I can replace the Door Move
+// strategy with this trait?)
+class IntelligentTrait : Trait
+{
+  public override string AsText() => "Intelligent";
+}
+
 class LightStepTrait : Trait
 {
   public override string AsText() => "LightStep";
@@ -2222,6 +2230,7 @@ class TraitFactory
       return new ImmunityTrait() { Type = dt, ExpiresOn = expiresOn }; }},
     { "Impale", (pieces, gameObj) => new ImpaleTrait() },
     { "InPit", (pieces, gameObj) => new InPitTrait() },
+    { "Intelligent", (pieces, gameObj) => new IntelligentTrait() },
     { "Invisible", (pieces, gameObj) =>
       new InvisibleTrait()
       {

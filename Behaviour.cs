@@ -362,6 +362,36 @@ class MonsterBehaviour : IBehaviour
     return new NullAction();
   }
 
+  Action CalculateEscape(Mob actor, GameState gs)
+  {
+    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
+    {
+      if (gs.TileAt(adj).Type == TileType.TeleportTrap && !gs.ObjDb.Occupied(adj) && actor.HasTrait<IntelligentTrait>())
+      {
+        if (gs.LastPlayerFoV.Contains(adj))
+          gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} jumps into the teleport trap!");
+        return new MoveAction(gs, actor, adj);
+      }
+    }
+
+    Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
+    // If we ge a PassAction back, there was no viable MoveAction for
+    // the mob to take.
+    if (escapeAction is PassAction)
+    {
+      // If a monster is cornered, they might freeze and if not
+      // do a regular action (such as attack the player)
+      if (gs.Rng.NextDouble() < 0.2)
+        return escapeAction;
+
+      escapeAction = SelectAction(actor, gs);
+      if (escapeAction is NullAction)
+        escapeAction = new PassAction();
+    }
+
+    return escapeAction;
+  }
+
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
     if (actor.HasActiveTrait<ParalyzedTrait>())
@@ -388,24 +418,8 @@ class MonsterBehaviour : IBehaviour
         {
           return CalcMoveAction(actor, gs);
         }
-      case Mob.AFRAID:        
-        Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
-
-        // If we ge a PassAction back, there was no viable MoveAction for
-        // the mob to take.
-        if (escapeAction is PassAction)
-        {
-          // If a monster is cornered, they might freeze and if not
-          // do a regular action (such as attack the player)
-          if (gs.Rng.NextDouble() < 0.2)
-            return escapeAction;
-
-          escapeAction = SelectAction(actor, gs);
-          if (escapeAction is NullAction)
-            escapeAction = new PassAction();
-        }
-
-        return escapeAction;
+      case Mob.AFRAID:
+        return CalculateEscape(actor, gs);
       case Mob.AGGRESSIVE:
         Action action = SelectAction(actor, gs);
         return action is NullAction ? CalcMoveAction(actor, gs) : action;

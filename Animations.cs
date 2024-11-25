@@ -459,8 +459,11 @@ class HitAnimation : Animation
       var ui = _gs.UIRef();
       var (scrR, scrC) = ui.LocToScrLoc(victim.Loc.Row, victim.Loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-      Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
-      ui.SqsOnScreen[scrR, scrC] = sq;
+      if (scrR >= 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC >= 0 && scrC < ui.SqsOnScreen.GetLength(1))
+      {
+        Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
+        ui.SqsOnScreen[scrR, scrC] = sq;
+      }
     }
   }
 }
