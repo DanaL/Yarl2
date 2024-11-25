@@ -11,16 +11,7 @@
 
 using Yarl2;
 
-enum TravelType
-{
-  Basic,
-  Doors,
-  Flight,
-  RoadBuilder, // hopefully I can drop this one later,
-  ChasmBridgeDrawing
-}
-
-delegate int CostFunction(Tile tile);
+delegate int TravelCostFunction(Tile tile);
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
@@ -82,7 +73,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   // slightly more expensive)
   // I'm going to make life easy on myself for now and just work with a 
   // single goal.
-  public void Generate(CostFunction calcCost, (int Row, int Col) goal, int maxRange)
+  public void Generate(TravelCostFunction calcCost, (int Row, int Col) goal, int maxRange)
   {
     _dijkstraMap = new int[Height, Width];
 

@@ -137,7 +137,7 @@ class Traps
           gs.UIRef().AlertPlayer("Click.");
       }
     }
-    else if (tile.Type == TileType.JetTrigger)
+    else if (!flying && tile.Type == TileType.JetTrigger)
     {
       if (actor is Player player)
         player.Running = false;
@@ -256,7 +256,8 @@ class Traps
       Sqs = affected
     };
 
-    gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
+    if (gs.LastPlayerFoV.Contains(loc))
+      gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
     gs.UIRef().PlayAnimation(explosion, gs);
 
     ActionResult result = new();
@@ -280,6 +281,7 @@ class Traps
       }
     }
 
-    gs.UIRef().AlertPlayer(result.Messages);
+    if (gs.LastPlayerFoV.Contains(loc))
+      gs.UIRef().AlertPlayer(result.Messages);
   }
 }
