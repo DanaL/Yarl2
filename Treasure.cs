@@ -16,8 +16,8 @@ enum TreasureQuality { Common, Uncommon, Good }
 class Treasure
 {  
   static readonly List<ItemNames> CommonItems = 
-    [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH, ItemNames.TORCH,
-      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
+    [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
+      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ];
   static readonly List<ItemNames> UncommonItems = [
       ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,

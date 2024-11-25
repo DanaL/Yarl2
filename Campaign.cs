@@ -293,8 +293,8 @@ class PreGameHandler(UserInterface ui)
         Village.Populate(wildernessMap, town, objDb, history, rng);
         campaign.Town = town;
 
-        //(startR, startC) = PickStartLoc(wildernessMap, town, rng);
-       (startR, startC) = entrance;
+        (startR, startC) = PickStartLoc(wildernessMap, town, rng);
+        //(startR, startC) = entrance;
 
         break;
       }
