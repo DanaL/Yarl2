@@ -227,6 +227,15 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     }
     done_dividing:
 
+    // Is the monster now afraid?
+    int currHP = Stats[Attribute.HP].Curr;
+    int maxHP = Stats[Attribute.HP].Max;
+    if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2)
+    {
+      float odds = (float)currHP / maxHP;
+      if (gs.Rng.NextDouble() < odds)
+        Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
+    }
     return (Stats[Attribute.HP].Curr, msg);
   }
 
