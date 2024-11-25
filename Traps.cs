@@ -257,8 +257,10 @@ class Traps
     };
 
     if (gs.LastPlayerFoV.Contains(loc))
+    {
       gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
-    gs.UIRef().PlayAnimation(explosion, gs);
+      gs.UIRef().PlayAnimation(explosion, gs);
+    }
 
     ActionResult result = new();
     int total = 0;
