@@ -12,16 +12,21 @@
 using Yarl2;
 
 delegate int TravelCostFunction(Tile tile);
+delegate IEnumerable<(int, int)> AdjSqs(int r, int c);
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
-class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
+class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, bool cardinalMovesOnly)
 {
   Map Map { get; set; } = map;
   int Height { get; set; } = height;
   int Width { get; set; } = width;
   int[,]? _dijkstraMap { get; set; }
   HashSet<(int, int)> Blocked { get; set; } = blocked;
+
+  // For monster pathfinding we do 8-dir movement but in places where we're 
+  // drawing roads or bridges we want to use 4-dir movement
+  bool CardinalMovesOnly { get; set; } = cardinalMovesOnly;
 
   public static int Cost(Tile tile)
   {
@@ -76,7 +81,8 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   public void Generate(TravelCostFunction calcCost, (int Row, int Col) goal, int maxRange)
   {
     _dijkstraMap = new int[Height, Width];
-
+    AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
+    
     for (int r = 0; r < Height; r++)
     {
       for (int c = 0; c < Width; c++)
@@ -88,7 +94,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     _dijkstraMap[goal.Row, goal.Col] = 0;
 
     var q = new Queue<(int, int)>();
-    foreach (var sq in Util.Adj4Sqs(goal.Row, goal.Col))
+    foreach (var sq in calcAdjSqs(goal.Row, goal.Col))
     {
       if (sq.Item1 >= 0 && sq.Item2 >= 0 && sq.Item1 < Height && sq.Item2 < Width)
         q.Enqueue(sq);
@@ -113,7 +119,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
         continue;
 
       int cheapestNeighbour = int.MaxValue;
-      foreach (var n in Util.Adj4Sqs(sq.Item1, sq.Item2))
+      foreach (var n in calcAdjSqs(sq.Item1, sq.Item2))
       {
         if (n.Item1 < 0 || n.Item2 < 0 || n.Item1 >= Height || n.Item2 >= Width)
           continue;
@@ -129,6 +135,8 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
 
   public List<(int, int)> ShortestPath(int row, int col)
   {
+    AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
+
     List<(int, int)> path = [(row, col)];
     int currRow = row;
     int currCol = col;
@@ -144,7 +152,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     {
       int cost = int.MaxValue;
       (int, int) next = (-1, -1);
-      foreach (var adj in Util.Adj4Sqs(currRow, currCol))
+      foreach (var adj in calcAdjSqs(currRow, currCol))
       {
         if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= Height || adj.Item2 >= Width)
           continue;

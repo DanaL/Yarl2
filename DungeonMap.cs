@@ -747,7 +747,7 @@ class DungeonMap(Random rng)
       }
     }
 
-    var djmap = new DijkstraMap(map, [], height, width);
+    var djmap = new DijkstraMap(map, [], height, width, true);
     foreach (var k in regions.Keys)
     {
       if (k != largest && regions[k].Count >= 5)

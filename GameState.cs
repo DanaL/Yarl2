@@ -861,14 +861,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
       blocked.Add((occ.Row, occ.Col));
 
-    DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
+    DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
+    DMapDoors = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
     DMapDoors.Generate(DijkstraMap.CostWithDoors, (loc.Row, loc.Col), 25);
 
-    DMapFlight = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
+    DMapFlight = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
     DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
   }
 
