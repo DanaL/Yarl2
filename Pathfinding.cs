@@ -236,9 +236,9 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
       }
     }
 
-    FindPath(startRow, startCol, _dijkstraMap[startRow, startCol],[ (startRow, startCol) ]);
+    FindPath(startRow, startCol, 0, [ (startRow, startCol) ]);
 
-    return bestPath;
+    return bestPath.Skip(1).ToList();
   }
 }
 

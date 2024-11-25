@@ -17,12 +17,14 @@ abstract class MoveStrategy
 {
   public abstract Action MoveAction(Mob actor, GameState gs);
   public abstract Action RandomMoveAction(Mob actor, GameState gs);
+  public abstract Action EscapeRoute(Mob mob, GameState gs);
 }
 
 class WallMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs) => new PassAction();
   public override Action RandomMoveAction(Mob actor, GameState gs) => new PassAction();
+  public override Action EscapeRoute(Mob actor, GameState gs) => new PassAction();
 }
 
 // For creatures that don't know how to open doors
@@ -57,6 +59,18 @@ class DumbMoveStrategy : MoveStrategy
       return new PassAction();
     else
       return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
+  }
+
+  public override Action EscapeRoute(Mob actor, GameState gs)
+  {
+    List<(int, int)> route = gs.GetDMap().EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    if (route.Count > 0)
+    {
+      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
+      return new MoveAction(gs, actor, loc);
+    }
+
+    return new PassAction();
   }
 }
 
@@ -96,6 +110,24 @@ class DoorOpeningMoveStrategy : MoveStrategy
     else
       return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
   }
+
+  public override Action EscapeRoute(Mob actor, GameState gs)
+  {
+    List<(int, int)> route = gs.GetDMap("doors").EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    if (route.Count > 0)
+    {      
+      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
+      if (gs.TileAt(loc).Type == TileType.ClosedDoor) 
+      {
+        Map map = gs.CurrentDungeon.LevelMaps[loc.Level];
+        return new OpenDoorAction(gs, actor, map, loc);
+      }
+
+      return new MoveAction(gs, actor, loc);
+    }
+
+    return new PassAction();
+  }
 }
 
 class SimpleFlightMoveStrategy : MoveStrategy
@@ -126,6 +158,18 @@ class SimpleFlightMoveStrategy : MoveStrategy
       return new PassAction();
     else
       return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
+  }
+
+  public override Action EscapeRoute(Mob actor, GameState gs)
+  {
+    List<(int, int)> route = gs.GetDMap("flying").EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    if (route.Count > 0)
+    {
+      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
+      return new MoveAction(gs, actor, loc);
+    }
+
+    return new PassAction();
   }
 }
 
@@ -303,6 +347,21 @@ class MonsterBehaviour : IBehaviour
     }      
   }
 
+  Action SelectAction(Mob actor, GameState gs)
+  {
+    foreach (var act in actor.Actions)
+    {
+      // Actions should be in the list in order of prerfence
+      if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
+        continue;
+
+      if (act.Available(actor, gs))
+        return FromTrait(actor, act, gs);
+    }
+
+    return new NullAction();
+  }
+
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
     if (actor.HasActiveTrait<ParalyzedTrait>())
@@ -329,31 +388,31 @@ class MonsterBehaviour : IBehaviour
         {
           return CalcMoveAction(actor, gs);
         }
-      case Mob.AFRAID:
-        Console.WriteLine($"{actor.FullName} is afraid!");
-        var escapeRoute = gs.GetDMap().EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+      case Mob.AFRAID:        
+        Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
 
-        return new PassAction();
-      case Mob.AGGRESSIVE:
-        foreach (var act in actor.Actions)
+        // If we ge a PassAction back, there was no viable MoveAction for
+        // the mob to take.
+        if (escapeAction is PassAction)
         {
-          // Actions should be in the list in order of prerfence
-          if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
-            continue;
+          // If a monster is cornered, they might freeze and if not
+          // do a regular action (such as attack the player)
+          if (gs.Rng.NextDouble() < 0.2)
+            return escapeAction;
 
-          if (act.Available(actor, gs))
-            return FromTrait(actor, act, gs);
+          escapeAction = SelectAction(actor, gs);
+          if (escapeAction is NullAction)
+            escapeAction = new PassAction();
         }
 
-        return CalcMoveAction(actor, gs);
+        return escapeAction;
+      case Mob.AGGRESSIVE:
+        Action action = SelectAction(actor, gs);
+        return action is NullAction ? CalcMoveAction(actor, gs) : action;
     }
 
     return new PassAction();
-    // Should prioritize an escape action if the monster is hurt?
-    // Maybe mobs can eventually have a bravery stat?
-    // Maybe there should be MobAttitude.Scare or Fleeing and then
-    // if they are Fleeing try to get away
-    
+  
     // if (actor.HasTrait<WorshiperTrait>() && actor.HasTrait<IndifferentTrait>())
     // {
     //   var wt = actor.Traits.OfType<WorshiperTrait>().First();

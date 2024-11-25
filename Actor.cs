@@ -228,18 +228,25 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     done_dividing:
 
     // Is the monster now afraid?
-    int currHP = Stats[Attribute.HP].Curr;
-    int maxHP = Stats[Attribute.HP].Max;
-    if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2)
+    if (Stats.TryGetValue(Attribute.MobAttitude, out attitude) && attitude.Curr != Mob.AFRAID)
     {
-      float odds = (float)currHP / maxHP;
-      if (gs.Rng.NextDouble() < odds)
+      int currHP = Stats[Attribute.HP].Curr;
+      int maxHP = Stats[Attribute.HP].Max;
+      if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2)
+      {
+        float odds = (float)currHP / maxHP;
+        if (gs.Rng.NextDouble() < odds)
+        {
+          Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
+          msg += $" {FullName.Capitalize()} turns to flee!";
+        }
+      }
+
+      if (this is not Player)
         Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
     }
-
-    if (this is not Player)
-    Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
-    return (Stats[Attribute.HP].Curr, msg);
+    
+    return (Stats[Attribute.HP].Curr, msg.Trim());
   }
 
   // Candidate spots will be spots adjacent to the contiguous group of the 
