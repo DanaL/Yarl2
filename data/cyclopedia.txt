@@ -89,6 +89,9 @@ A pit trap.
 watertrap|water trap
 A spout that will spray you with water, leaving you soaking wet.
 #
+darttrap|dart trap
+A dungeon classic! Stepping on the pressure plate will shoot a poison dart at you.
+#
 creeping coins
 A pile of coins, sitting there to be claimed. Wait. Did it just move?
 #

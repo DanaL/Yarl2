@@ -731,8 +731,7 @@ class MainDungeonBuilder : DungeonBuilder
   {
     int[] trapOpts;
     if (level == 0)
-      //trapOpts = [3, 6];
-      trapOpts = [0];
+      trapOpts = [3, 6];      
     else if (level == dungeonDepth - 1)
       trapOpts = [0, 1, 2, 3, 4]; // no trap doors on bottom level
     else

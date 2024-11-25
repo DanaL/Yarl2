@@ -241,9 +241,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
           msg += $" {FullName.Capitalize()} turns to flee!";
         }
       }
-
-      if (this is not Player)
-        Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
     }
     
     return (Stats[Attribute.HP].Curr, msg.Trim());

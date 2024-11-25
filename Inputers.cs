@@ -97,7 +97,10 @@ class Examiner : Inputer
             case TileType.TeleportTrap:
             case TileType.JetTrigger:
             case TileType.FireJetTrap:
+            case TileType.WaterTrap:
+            case TileType.MagicMouth:
             case TileType.Pit:
+            case TileType.DartTrap:
               pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
               break;
           }
@@ -183,7 +186,7 @@ class Examiner : Inputer
       desc = v2.Text;
     }
 
-    return new LocDetails(name.Capitalize(), desc, Util.TileToGlyph(tile).Ch);
+    return new LocDetails(name.Capitalize(), desc, TileToGlyph(tile).Ch);
   }
 
   void ClearHighlight()
