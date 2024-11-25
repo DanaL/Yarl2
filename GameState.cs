@@ -850,6 +850,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void SetDMaps(Loc loc)
   {
     HashSet<(int, int)> blocked = [];
+
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
     {
       if (obj.HasTrait<BlockTrait>())
@@ -857,6 +858,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         blocked.Add((obj.Loc.Row, obj.Loc.Col));
       }
     }
+    foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
+      blocked.Add((occ.Row, occ.Col));
 
     DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
