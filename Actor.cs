@@ -236,6 +236,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       if (gs.Rng.NextDouble() < odds)
         Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
     }
+
+    if (this is not Player)
+    Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
     return (Stats[Attribute.HP].Curr, msg);
   }
 

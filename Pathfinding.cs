@@ -23,7 +23,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
   int[,]? _dijkstraMap { get; set; }
   HashSet<(int, int)> Blocked { get; set; } = blocked;
 
-  public static int Cost(Tile tile) 
+  public static int Cost(Tile tile)
   {
     if (!tile.Passable())
       return int.MaxValue;
@@ -51,7 +51,7 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
     return 1;
   }
 
-  public static int CostWithDoors(Tile tile) 
+  public static int CostWithDoors(Tile tile)
   {
     if (tile.Type == TileType.ClosedDoor)
       return 2;
@@ -125,6 +125,53 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width)
       _dijkstraMap[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
       visited.Add(sq);
     }
+  }
+
+  public List<(int, int)> EscapeRoute(int startRow, int startCol, int maxLength)
+  {    
+    List<(int, int)> bestPath = [];
+    List<(int, int)> currentPath = [ (startRow, startCol) ];
+    int bestScore = 0;
+
+    void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
+    {
+      if (currentScore > bestScore && currentPath.Count > 1)
+      {
+        bestScore = currentScore;
+        bestPath = [.. currentPath];
+      }
+
+      if (currentPath.Count == maxLength)
+        return;
+
+      foreach (var (adjRow, adjCol) in Util.Adj8Sqs(row, col))
+      {
+        // bounds check (I don't think this is strictly necessary because the maps
+        // should all have a perimeter of walls)
+        if (adjRow < 0 || adjCol < 0 || adjRow >= Height || adjCol >= Width)
+          continue;
+
+        var adj = (adjRow, adjCol);
+        int cost = _dijkstraMap[adjRow, adjCol];
+        // The goal square is marked 0 in the map, which is the player's
+        // location and thus impassable
+        if (visited.Contains(adj) || cost == int.MaxValue || cost == 0)
+          continue;
+
+        visited.Add(adj);
+        currentPath.Add(adj);
+
+        FindPath(adjRow, adjCol, currentScore + _dijkstraMap[adjRow, adjCol], visited);
+
+        visited.Remove(adj);
+        currentPath.RemoveAt(currentPath.Count - 1);
+      }
+    }
+
+    FindPath(startRow, startCol, _dijkstraMap[startRow, startCol],
+            new HashSet<(int Row, int Col)> { (startRow, startCol) });
+
+    return bestPath;
   }
 
   public List<(int, int)> ShortestPath(int row, int col)
@@ -204,7 +251,7 @@ class AStar
       foreach (var adj in adjSqs)
       {
         var tileType = map.TileAt(adj.Row, adj.Col).Type;
-        if (!travelCost.TryGetValue(tileType, out int travel)) 
+        if (!travelCost.TryGetValue(tileType, out int travel))
         {
           continue;
         }

@@ -30,7 +30,7 @@ class DumbMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    var adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
+    List<(int, int, int)> adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -66,7 +66,7 @@ class DoorOpeningMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    var adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
+    List<(int, int, int)> adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -102,7 +102,7 @@ class SimpleFlightMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    var adj = gs.GetDMap("flying").Neighbours(actor.Loc.Row, actor.Loc.Col);
+    List<(int, int, int)> adj = gs.GetDMap("flying").Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -331,6 +331,8 @@ class MonsterBehaviour : IBehaviour
         }
       case Mob.AFRAID:
         Console.WriteLine($"{actor.FullName} is afraid!");
+        var escapeRoute = gs.GetDMap().EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+
         return new PassAction();
       case Mob.AGGRESSIVE:
         foreach (var act in actor.Actions)

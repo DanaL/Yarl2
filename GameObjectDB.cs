@@ -394,11 +394,13 @@ class GameObjectDB
                   .ToList();
   }
 
-  public int LevelCensus(int dungeonID, int level)
-  {
-    return _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)
-                          .Count();
-  }
+  public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level) => 
+    _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)
+                   .ToHashSet();
+
+  public int LevelCensus(int dungeonID, int level) =>
+    _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)
+                   .Count();
 
   public void RemoveItemFromLoc(Loc loc, Item item)
   {
