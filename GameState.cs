@@ -839,12 +839,63 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Player.Stats[Attribute.HP].Change(1);
     }
 
+    // I'm not sure yet what a good monster gen rate is, and what in-game
+    // conditions should affect it
+    if (!InWilderness && Rng.Next(60) == 0)
+    {
+      SpawnMonster();
+    }
+
     var listeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
     foreach (var listener in listeners)
     {
       listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);
     }
     ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
+  }
+
+  void SpawnMonster()
+  {
+    List<Loc> openLoc = [];
+    Map map = CurrentMap;
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        Loc loc = new(CurrDungeonID, CurrLevel, r, c);
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
+          openLoc.Add(loc);
+      }
+    }
+
+    if (openLoc.Count == 0)
+      return;
+
+    // prefer spawning the monster where the player can't see it
+    List<Loc> outOfSight = openLoc.Where(l => !LastPlayerFoV.Contains(l)).ToList();
+    if (outOfSight.Count > 0)
+      openLoc = outOfSight;
+        
+    int monsterLevel = CurrLevel;
+    double roll = Rng.NextDouble();
+    if (roll > 0.95)
+      monsterLevel += 2;
+    else if (roll > 0.8)
+      monsterLevel += 1;
+    if (monsterLevel > CurrentDungeon.LevelMaps.Count)
+      monsterLevel = CurrentDungeon.LevelMaps.Count;
+
+    MonsterDeck deck = Campaign.MonsterDecks[monsterLevel];
+    if (deck.Indexes.Count == 0)
+      deck.Reshuffle(rng);
+    string m = deck.Monsters[deck.Indexes.Dequeue()];
+    Console.WriteLine($"Spawning {m.IndefArticle()}");
+    
+    Actor monster = MonsterFactory.Get(m, ObjDb, Rng);
+    Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
+    monster.Loc = spawnPoint;
+    ObjDb.Add(monster);
+    ObjDb.AddToLoc(spawnPoint, monster);
   }
 
   public void SetDMaps(Loc loc)
