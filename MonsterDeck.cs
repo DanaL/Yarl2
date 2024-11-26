@@ -38,6 +38,21 @@ class MonsterDeck
     indexes.Shuffle(rng);
     Indexes = new Queue<int>(indexes);
   }
+
+  public override string ToString()
+  {
+    return $"{string.Join(',', Monsters)}|{string.Join(',', Indexes)}";
+  }
+
+  public static MonsterDeck FromString(string str)
+  {
+    var parts = str.Split('|');
+    return new MonsterDeck 
+    { 
+      Monsters = [.. parts[0].Split(',')], 
+      Indexes = new Queue<int>(parts[1].Split(',').Select(int.Parse)) 
+    };
+  }
 }
 
 class DeckBulder

@@ -1017,6 +1017,17 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
     int dc;
     foreach (Loc loc in sqsToSearch)
     {
+      // I'm not going to roll to find secret items. I'm not sure I should
+      // even bother for traps/secret doors
+      foreach (Item item in gs.ObjDb.ItemsAt(loc))
+      {
+        if (item.HasTrait<HiddenTrait>())
+        {
+          item.Traits = item.Traits.Where(t => t is not HiddenTrait).ToList();
+          result.Messages.Add($"You find {item.FullName.IndefArticle()}!");
+        }        
+      }
+
       Tile tile = gs.TileAt(loc);
       switch (tile.Type)
       {
