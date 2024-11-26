@@ -34,7 +34,8 @@ class Campaign
   public Town? Town { get; set; }
   public FactDb? FactDb { get; set; }
   public Dictionary<int, Dungeon> Dungeons = [];
-
+  public List<MonsterDeck> MonsterDecks { get; set; } = [];
+  
   public void AddDungeon(Dungeon dungeon)
   {
     int id = Dungeons.Count == 0 ? 0 : Dungeons.Keys.Max() + 1;
@@ -277,6 +278,7 @@ class PreGameHandler(UserInterface ui)
         // var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
         // PopulateArena(rng, objDb, mainDungeon);
 
+        campaign.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
 
         var portal = new Portal("You stand before a looming portal.")
@@ -519,7 +521,7 @@ class PreGameHandler(UserInterface ui)
       //seed = 119994544;
       //seed = 1207463617;
       //seed = -921663908;
-      
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();

@@ -139,11 +139,6 @@ class PrinceOfRatsBehaviour : IBehaviour
       return true;
     }
 
-    if (actor.Stats[Attribute.MobAttitude].Curr == Mob.INDIFFERENT)
-    {
-      return new PassAction();
-    }
-
     Action action;
     int currForm = actor.Stats[Attribute.MonsterForm].Curr;
     int distFromPlayer = Util.Distance(actor.Loc, gameState.Player.Loc);
