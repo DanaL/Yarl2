@@ -1221,7 +1221,7 @@ class MirrorImageAction : Action
     var illusion = new IllusionTrait()
     {
       SourceID = src.ID,
-      ObjID = dup.ID
+      ObjId = dup.ID
     };
     dup.Traits.Add(illusion);   
     gs.RegisterForEvent(GameEventType.Death, illusion, src.ID);

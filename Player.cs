@@ -83,6 +83,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
   public bool Expired { get; set; } = false;
   public bool Listening => true;
+  public ulong ObjId => ID;
 
   public void CalcHP()
   {

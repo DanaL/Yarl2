@@ -295,6 +295,8 @@ class Portcullis(bool open) : Tile(TileType.Portcullis), ITriggerable
 class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
 {
   public Loc Gate { get; set; } = gate;
+  public ulong ObjId => 0;
+
   public bool Found { get; set; } = false;
 
   public override bool Passable() => true;
@@ -414,6 +416,8 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
 
+  public ulong ObjId => 0;
+
   public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -450,7 +454,9 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
   public bool Expired { get; set; }
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
-  
+
+  public ulong ObjId => 0;
+
   public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)

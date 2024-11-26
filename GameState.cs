@@ -840,6 +840,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // TODO: gotta eventually add monster respawns
   void EndOfTurn()
   {
+    bool IsActiveListener(GameObj obj)
+    {
+      if (obj.Loc == Loc.Nowhere)
+        return true;
+      if (obj.Loc.DungeonID == CurrDungeonID && obj.Loc.Level == CurrLevel)
+        return true;
+
+      return false;
+    }
+
     if (Turn % 11 == 0)
     {
       Player.Stats[Attribute.HP].Change(1);
@@ -852,7 +862,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       SpawnMonster();
     }
 
-    var listeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
+    List<IGameEventListener> listeners = [];
+    foreach (var listener in ObjDb.EndOfRoundListeners.Where(l => !l.Expired))
+    {
+      if (ObjDb.GetObj(listener.ObjId) is GameObj obj && IsActiveListener(obj))
+      {
+        listeners.Add(listener);
+      }
+    }
+    
     foreach (var listener in listeners)
     {
       listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);

@@ -502,6 +502,7 @@ class ResistSlashingTrait : Trait
 class ResistanceTrait : TemporaryTrait
 {
   public DamageType Type { get; set; }
+
   protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
 
@@ -661,7 +662,8 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public bool Listening => true;
   public ulong OwnerID {  get; set; }
   protected virtual string ExpiryMsg() => "";
-
+  public virtual ulong ObjId => OwnerID;
+ 
   public virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
@@ -701,7 +703,7 @@ class TelepathyTrait : TemporaryTrait
 }
 
 class LevitationTrait : TemporaryTrait
-{
+{  
   protected override string ExpiryMsg() => "You alight on the ground.";
 
   public override string AsText() => $"Levitation#{OwnerID}#{ExpiresOn}";
@@ -1026,20 +1028,20 @@ class DisplacementTrait : Trait
 class IllusionTrait : BasicTrait, IGameEventListener
 {
   public ulong SourceID {  get; set; }
-  public ulong ObjID { get; set; } // the GameObj the illusion trait is attached to
+  public ulong ObjId { get; set; } // the GameObj the illusion trait is attached to
   public bool Expired { get => false; set { } }
   public bool Listening => true;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
-    var obj = gs.ObjDb.GetObj(ObjID);
+    var obj = gs.ObjDb.GetObj(ObjId);
     if (obj is not null and Actor actor)
     {
       gs.ActorKilled(actor, "", null, null);
     }    
   }
 
-  public override string AsText() => $"Illusion#{SourceID}#{ObjID}";
+  public override string AsText() => $"Illusion#{SourceID}#{ObjId}";
 }
 
 class GrappledTrait : BasicTrait, IGameEventListener
@@ -1049,6 +1051,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public int DC { get; set; }
   public bool Expired { get => false; set {} }
   public bool Listening => true;
+  public ulong ObjId => VictimID;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -1292,7 +1295,8 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
   public bool Expired { get => false; set {} }
   public int Strength { get; set; }
   public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
-  
+  public ulong ObjId => OwnerID;
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc _)
   {
     if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
@@ -1465,6 +1469,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public int Lifetime { get; set; } = 0;
   public bool Listening => true;
   public bool Spreads { get; set; }
+  public ulong ObjId => OwnerID;
 
   public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}#{Spreads}";
 
@@ -1837,6 +1842,7 @@ class RecallTrait : BasicTrait, IGameEventListener
 {
   public bool Expired { get; set; } = false;
   public bool Listening => true;
+  public ulong ObjId => 0; // This trait will always/only be applied to the player (I think...)
 
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
 
@@ -1882,9 +1888,10 @@ class RegenerationTrait : BasicTrait, IGameEventListener
 {
   public int Rate { get; set; }
   public ulong ActorID { get; set; }
+  public ulong ObjId => ActorID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-
+  
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -1923,6 +1930,7 @@ class SeeInvisibleTrait : TemporaryTrait
 class InvisibleTrait : BasicTrait, IGameEventListener
 {
   public ulong ActorID { get; set; }
+  public ulong ObjId => ActorID;
   public bool Expired { get; set; }
   public bool Listening => true;
 
@@ -1945,6 +1953,7 @@ class InvisibleTrait : BasicTrait, IGameEventListener
 class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 {
   public ulong OwnerID { get; set; }
+  public ulong ObjId => OwnerID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
 
@@ -1994,6 +2003,7 @@ class LightSourceTrait : BasicTrait, IOwner
 class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 {
   public ulong OwnerID { get; set; }
+  public ulong ObjId => OwnerID;
   public bool Lit { get; set; }
   public int Fuel { get; set; }
   public string Desc() => Lit ? "(lit)" : "";
@@ -2229,7 +2239,7 @@ class TraitFactory
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
-    { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjID = ulong.Parse(pieces[2]) } },
+    { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
     { "Immunity", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out DamageType dt);
       ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
