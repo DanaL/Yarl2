@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Linq;
 // Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //

@@ -893,8 +893,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       for (int c = 0; c < map.Width; c++)
       {
         Loc loc = new(CurrDungeonID, CurrLevel, r, c);
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
-          openLoc.Add(loc);
+
+        if (map.TileAt(r, c).Type != TileType.DungeonFloor)
+          continue;
+        if (ObjDb.Occupied(loc) || ObjDb.BlockersAtLoc(loc))
+          continue;
+
+        // This prevents a monster from being spawned on top of a campfire, lol
+        var items = ObjDb.ItemsAt(loc);
+        if (items.Count > 0 && items.Any(i => i.HasTrait<AffixedTrait>()))
+          continue;
+
+        openLoc.Add(loc);
       }
     }
 
