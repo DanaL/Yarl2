@@ -900,7 +900,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
         
-    int monsterLevel = CurrLevel;
+    int monsterLevel = CurrLevel;    
     double roll = Rng.NextDouble();
     if (roll > 0.95)
       monsterLevel += 2;
@@ -920,6 +920,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     monster.Loc = spawnPoint;
     ObjDb.Add(monster);
     ObjDb.AddToLoc(spawnPoint, monster);
+    AddPerformer(monster);
   }
 
   public void SetDMaps(Loc loc)
