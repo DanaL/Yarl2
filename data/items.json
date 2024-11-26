@@ -319,7 +319,7 @@
       "UseSimple#minorheal",
       "Consumable",
       "Stackable",
-      "SideEffect#100#BoostMaxStat#HP#2"
+      "SideEffect#100#BoostMaxStat#HP#5"
     ]
   },
   {
