@@ -485,7 +485,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
   Action PickupCommand(GameState gs, UserInterface ui)
   {
-    var allItems = gs.ObjDb.ItemsAt(Loc);
+    var allItems = gs.ObjDb.VisibleItemsAt(Loc);
     if (allItems is null || allItems.Count == 0)
     {
       ui.AlertPlayer("There's nothing there...");
@@ -494,7 +494,7 @@ class Player : Actor, IPerformer, IGameEventListener
 
     List<Item> items = [];
     List<Item> itemsInPit = [];
-    foreach (var item in gs.ObjDb.ItemsAt(Loc))
+    foreach (var item in gs.ObjDb.VisibleItemsAt(Loc))
     {
       if (item.HasTrait<BlockTrait>())
         continue;

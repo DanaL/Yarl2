@@ -846,5 +846,19 @@
       "Grants#WaterWalking",
       "Plural"
     ]
+  },
+  {
+    "Name": "GOLDEN_APPLE",
+    "DescriptiveName": "golden apple",
+    "Type": "Food",
+    "Value": 1,
+    "Glyph": ",,yellow,yelloworange,black,black",
+    "Traits": [
+      "Edible",
+      "Consumable",
+      "Stackable",
+      "UseSimple#trivialheal",
+      "Hidden"
+    ]
   }
 ]

@@ -206,6 +206,9 @@ class GameObjectDB
     {
       foreach (var item in items)
       {
+        if (item.HasTrait<HiddenTrait>())
+          continue;
+
         if (item.HasTrait<BlockTrait>())
           return (item.Glyph, item.Z());
           
@@ -382,6 +385,15 @@ class GameObjectDB
       return [];
     else
       return stack.Where(i => i.Type != ItemType.Environment)
+                  .ToList();
+  }
+
+  public List<Item> VisibleItemsAt(Loc loc)
+  {
+    if (!_itemLocs.TryGetValue(loc, out var stack))
+      return [];
+    else
+      return stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())
                   .ToList();
   }
 

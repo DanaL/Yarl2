@@ -263,6 +263,11 @@ class HealAlliesTrait : ActionTrait
   public override string AsText() => $"HealAllies#{Cooldown}";
 }
 
+class HiddenTrait : Trait
+{
+  public override string AsText() => $"Hidden";
+}
+
 // Trait for mobs who won't wander too far (normally) from
 // a particular location
 class HomebodyTrait : Trait
@@ -2222,6 +2227,7 @@ class TraitFactory
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
+    { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjID = ulong.Parse(pieces[2]) } },
     { "Immunity", (pieces, gameObj) => {

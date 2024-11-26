@@ -893,7 +893,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     MonsterDeck deck = Campaign.MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
-      deck.Reshuffle(rng);
+      deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
     Console.WriteLine($"Spawning {m.IndefArticle()}");
     
@@ -1085,7 +1085,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
 
     Dictionary<Item, int> items = [];
-    foreach (var item in ObjDb.ItemsAt(loc))
+    foreach (var item in ObjDb.VisibleItemsAt(loc))
     {
       if (items.ContainsKey(item))
         items[item] += 1;
