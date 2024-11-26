@@ -184,3 +184,6 @@ These boots are sturdy and will surely protect you from foot injuries, but are r
 #
 boots of water walking
 Invented by a wizard outraged at the prices the local ferryman charged.
+#
+magicmouth|magic mouth
+An irritating magic alarm whose screams can awaken and anger nearby monsters.
