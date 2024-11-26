@@ -900,14 +900,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
         
-    int monsterLevel = CurrLevel;    
-    double roll = Rng.NextDouble();
-    if (roll > 0.95)
-      monsterLevel += 2;
-    else if (roll > 0.8)
-      monsterLevel += 1;
-    if (monsterLevel > CurrentDungeon.LevelMaps.Count)
-      monsterLevel = CurrentDungeon.LevelMaps.Count;
+    int monsterLevel = CurrLevel;
+    if (monsterLevel > 0)
+    {
+      double roll = Rng.NextDouble();
+      if (roll > 0.95)
+        monsterLevel += 2;
+      else if (roll > 0.8)
+        monsterLevel += 1;
+      if (monsterLevel > CurrentDungeon.LevelMaps.Count)
+        monsterLevel = CurrentDungeon.LevelMaps.Count;
+    }
 
     MonsterDeck deck = Campaign.MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
