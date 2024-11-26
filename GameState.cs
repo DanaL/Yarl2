@@ -50,9 +50,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public ulong LastTarget { get; set; } = 0;
   public FactDb? FactDb => Campaign.FactDb;
 
-  private UserInterface UI { get; set; } = ui;
+  UserInterface UI { get; set; } = ui;
 
-  private int _currPerformer = 0;
+  int _currPerformer = 0;
 
   static readonly Dictionary<TileType, int> _passableBasic = new()
   {
@@ -802,6 +802,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     do
     {
+      // There are situations (likely bugs) where we get here
+      // with _currPerformer > count but this will keep the game
+      // from crashing until I find them
+      if (_currPerformer >= Performers.Count)
+        RefreshPerformers();
+
       nextPerformer = Performers[_currPerformer];
 
       if (nextPerformer.Energy < 1.0)
@@ -985,9 +991,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       
       ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
 
-      RefreshPerformers();
-      UpdateFoV();
-      
       int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
       var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
       if (hpLeft < 1)
@@ -995,6 +998,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ActorKilled(actor, "a fall", null, null);
       }
 
+      RefreshPerformers();
+      UpdateFoV();
+      
       if (LastPlayerFoV.Contains(actor.Loc))
       {
         UI.AlertPlayer(messages);
