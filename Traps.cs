@@ -18,6 +18,9 @@ class Traps
     UserInterface ui = gs.UIRef();
     bool trapSqVisible = gs.LastPlayerFoV.Contains(actor.Loc);
 
+    if (actor.HasTrait<IllusionTrait>())
+      return;
+
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
     {      
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));

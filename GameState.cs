@@ -406,6 +406,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void ActorFallsIntoWater(Actor actor, Loc loc)
   {
+    if (actor.HasTrait<IllusionTrait>())
+      return;
+
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the water!");
 
     string msg = FallIntoWater(actor, loc);
@@ -562,6 +565,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void FallIntoChasm(Actor actor, Loc landingSpot)
   {
+    if (actor.HasTrait<IllusionTrait>())
+      return;
+
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
     if (actor is Player)
       PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
