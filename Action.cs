@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 class ActionResult
@@ -1227,6 +1225,8 @@ class MirrorImageAction : Action
 
     dup.Stats.Add(Attribute.HP, new Stat(1));
     dup.Stats.Add(Attribute.AC, new Stat(10));
+    dup.Stats.Add(Attribute.MobAttitude, new Stat(Mob.AGGRESSIVE));
+
     dup.Traits.Add(new FlyingTrait());
 
     var illusion = new IllusionTrait()
