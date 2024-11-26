@@ -78,7 +78,7 @@ class Examiner : Inputer
 
           pq.Enqueue(loc, distance);
         }
-        else if (_gs.ObjDb.ItemsAt(loc).Count > 0)
+        else if (_gs.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
           pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));          
         }
