@@ -3,7 +3,7 @@
   ((> DIALOGUE_STATE 0)  ; the veteran is dispensing advice
     ((say (pick 
             ("Swords aren't so great against skeletons." "Owlbears definitely inherited the bear hug genes." "Someone once told me cloakers make their own flocks."
-              "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there."
+              "Mind your torch around wooden structures!" "They say swinelings spread plague." "Never drink water. Fish pee in there." "It can be helpful to drink a potion of healing even when you're full."
               "Sometimes dead ends aren't the end of the road.")))
       (set DIALOGUE_STATE 0)
     )
