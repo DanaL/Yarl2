@@ -621,6 +621,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
             anim = new SqAnimation(GameState, animLoc, Colours.WHITE, Colours.FAINT_PINK, '!');
             GameState.UIRef().RegisterAnimation(anim);
             break;
+          case ItemType.Scroll:
+            anim = new SqAnimation(GameState, animLoc, Colours.WHITE, Colours.FAINT_PINK, '?');
+            GameState.UIRef().RegisterAnimation(anim);
+            break;
         }
       }
 
