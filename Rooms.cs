@@ -662,6 +662,11 @@ class Rooms
 
     int statueR = (minRow + maxRow) / 2;
     int statueC = (minCol + maxCol) / 2;
+
+    // This stops a tree from being underneath the statue, which would
+    // seemweird to me
+    map.SetTile(statueR, statueC, TileFactory.Get(TileType.Dirt));
+
     Loc statueLoc = new(dungeonId, level, statueR, statueC);
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     statue.Traits.Add(new DescriptionTrait("An elf holding their hands up to the sky."));
