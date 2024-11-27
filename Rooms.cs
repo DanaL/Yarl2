@@ -665,6 +665,10 @@ class Rooms
     Loc statueLoc = new(dungeonId, level, statueR, statueC);
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     statue.Traits.Add(new DescriptionTrait("An elf holding their hands up to the sky."));
+    AppleProducerTrait pt = new() { OwnerID = statue.ID };
+    statue.Traits.Add(pt);
+    objDb.EndOfRoundListeners.Add(pt);
+
     int rowRange = maxRow - minRow;
     int colRange = maxCol - minCol;
     statue.Traits.Add(new LightSourceTrait()

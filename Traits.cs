@@ -483,6 +483,45 @@ class PoorLootTrait : Trait
   public override string AsText() => "PoorLoot";
 }
 
+class AppleProducerTrait : Trait, IGameEventListener, IOwner
+{
+  public ulong OwnerID { get; set; }
+  public bool Expired {  get; set;  }
+  public bool Listening => true;
+  public ulong ObjId => OwnerID;
+  
+  public override string AsText() => $"AppleProducer#{OwnerID}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Item statue)
+      return;
+
+    if (gs.Rng.Next(250) != 0)
+      return;
+
+    // So we don't end up with giant piles of apples, if there is a nearby
+    // golden apple, we won't spawn a new one
+    HashSet<Loc> locs = Util.LocsInRadius(statue.Loc, 5, gs.CurrentMap.Height, gs.CurrentMap.Width);
+    foreach (Loc sq in locs)
+    {
+      if (gs.ObjDb.ItemsAt(sq).Any(i => i.Name == "golden apple"))
+      {
+        return;
+      }
+    }
+
+    List<Loc> trees = locs.Where(l => gs.TileAt(l).IsTree())
+                          .ToList();
+    if (trees.Count == 0)
+      return;
+
+    Loc spot = trees[gs.Rng.Next(trees.Count)];
+    Item apple = ItemFactory.Get(ItemNames.GOLDEN_APPLE, gs.ObjDb);
+    gs.ItemDropped(apple, spot);
+  }
+}
+
 class ResistBluntTrait : Trait
 {
   public override string AsText() => "ResistBlunt";
@@ -2179,6 +2218,7 @@ class TraitFactory
         return new AmmoTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = ammoDt, Range = int.Parse(pieces[4]) };
       }
     },
+    { "AppleProducer", (pieces, gameObj) => new AppleProducerTrait() { OwnerID = ulong.Parse(pieces[1]) } },
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
     },
@@ -2311,7 +2351,7 @@ class TraitFactory
     },
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
-    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
+    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
     { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
     { "RangedSpellAction", (pieces, gameObj) => new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
