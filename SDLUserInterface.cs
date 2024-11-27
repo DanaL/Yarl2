@@ -179,6 +179,8 @@ class SDLUserInterface : UserInterface
       {
         WriteLine(_longMessage[j], j, 0, ScreenWidth, Colours.WHITE);
       }
+
+      WritePopUp();
     }
     else
     {

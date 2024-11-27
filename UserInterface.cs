@@ -82,15 +82,39 @@ abstract class UserInterface
   {
     _longMessage =
     [
-        "",
+      "",
+      " welcome to             ",
+      "  ▗▄▄▄  ▗▞▀▜▌▄▄▄▄  ▗▞▀▜▌▐ ▄▄▄      ▗▄▄▄  ▗▞▀▚▖█ ▗▞▀▚▖▄   ▄ ▗▞▀▚▖",
+      "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ ▐▛▀▀▘█   █ ▐▛▀▀▘",
+      "  ▐▌  █      █   █        ▄▄▄▀     ▐▌  █ ▝▚▄▄▖█ ▝▚▄▄▖ ▀▄▀  ▝▚▄▄▖",
+      "  ▐▙▄▄▀                            ▐▙▄▄▀      █       0.2.0     ",
+      "",
             "",
-            "",
-            "",
-            "     Welcome to Dana's Delve",
             "       (yet another attempt to make a roguelike,",
-            "           this time in C#...)"
+            "           this time in C#...)",
+      "",
+      "",
+      " a) load game",
+      " b) begin new adventure",
+      " c) options"
     ];
 
+    string frameText = @"
+                        
+                         
+        #########        
+        #..$....#        
+        #.......#        
+        #..@g...#        
+        #.......#       
+        ####.####        
+           #.#           
+           #.#           
+           #.#          
+";
+    Popup frame = new (frameText, "", 10, 40, 26);
+    SetPopup(frame);
+    ResetSqsOnScreen();
     UpdateDisplay(null);
     BlockForInput();
     ClearLongMessage();
@@ -99,6 +123,17 @@ abstract class UserInterface
   public void ClearLongMessage()
   {
     _longMessage = null;
+  }
+
+  void ResetSqsOnScreen()
+  {
+    for (int r = 0; r < ViewHeight; r++)
+      {
+        for (int c = 0; c < ViewWidth; c++)
+        {
+          SqsOnScreen[r, c] = Constants.BLANK_SQ;
+        }
+      }
   }
 
   public void VictoryScreen(string bossName, GameState gs)
@@ -200,13 +235,7 @@ abstract class UserInterface
     do
     {
       ClearScreen(); 
-      for (int r = 0; r < ViewHeight; r++)
-      {
-        for (int c = 0; c < ScreenWidth / 2; c++)
-        {
-          SqsOnScreen[r, c] = Constants.BLANK_SQ;
-        }
-      }
+      ResetSqsOnScreen();
 
       int screenR = 6;
       int screenC = 7;
