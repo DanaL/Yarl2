@@ -79,10 +79,9 @@ abstract class UserInterface
   }
 
   public virtual void TitleScreen()
-  {
-    _longMessage =
+  {    
+    string[] text =
     [
-      "",
       " welcome to             ",
       "  ▗▄▄▄  ▗▞▀▜▌▄▄▄▄  ▗▞▀▜▌▐ ▄▄▄      ▗▄▄▄  ▗▞▀▚▖█ ▗▞▀▚▖▄   ▄ ▗▞▀▚▖",
       "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ ▐▛▀▀▘█   █ ▐▛▀▀▘",
@@ -99,25 +98,23 @@ abstract class UserInterface
       " c) options"
     ];
 
-    string frameText = @"
-                        
-                         
-        #########        
-        #..$....#        
-        #.......#        
-        #..@g...#        
-        #.......#       
-        ####.####        
-           #.#           
-           #.#           
-           #.#          
-";
-    Popup frame = new (frameText, "", 10, 40, 26);
-    SetPopup(frame);
+    SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
     ResetSqsOnScreen();
+    for (int r = 0; r < text.Length; r++)
+    {
+      string row = text[r];
+      for (int c = 0; c < row.Length; c++)
+      {
+        Sqr s = new(Colours.WHITE, Colours.BLACK, row[c]);
+        SqsOnScreen[r + 1, c + 1] = s;
+      }
+    }
+    
     UpdateDisplay(null);
     BlockForInput();
     ClearLongMessage();
+
+    SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
   }
 
   public void ClearLongMessage()
@@ -127,9 +124,9 @@ abstract class UserInterface
 
   void ResetSqsOnScreen()
   {
-    for (int r = 0; r < ViewHeight; r++)
+    for (int r = 0; r < SqsOnScreen.GetLength(0); r++)
       {
-        for (int c = 0; c < ViewWidth; c++)
+        for (int c = 0; c < SqsOnScreen.GetLength(1); c++)
         {
           SqsOnScreen[r, c] = Constants.BLANK_SQ;
         }
