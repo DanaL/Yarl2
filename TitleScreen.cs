@@ -22,6 +22,7 @@ class TitleScreen
   bool InDungeon { get; set; }
   HashSet<Loc> SeenBefore = [];
   GameObjectDB ObjDb { get; set; } = new();
+  int FightRound = 0;
 
   public TitleScreen(UserInterface ui)
   {
@@ -46,11 +47,11 @@ class TitleScreen
   {
     string[] text =
     [
-      " welcome to             ",
-      "  ▗▄▄▄  ▗▞▀▜▌▄▄▄▄  ▗▞▀▜▌▐ ▄▄▄      ▗▄▄▄  ▗▞▀▚▖█ ▗▞▀▚▖▄   ▄ ▗▞▀▚▖",
-      "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ ▐▛▀▀▘█   █ ▐▛▀▀▘",
-      "  ▐▌  █      █   █        ▄▄▄▀     ▐▌  █ ▝▚▄▄▖█ ▝▚▄▄▖ ▀▄▀  ▝▚▄▄▖",
-      "  ▐▙▄▄▀                            ▐▙▄▄▀      █       0.2.0     ",
+     " welcome to             ",
+      "  ▗▄▄▄  ▗▞▀▜▌▄▄▄▄  ▗▞▀▜▌▐ ▄▄▄      ▗▄▄▄  ▗▞▀▚▖█ ▄   ▄ ▗▞▀▚▖",
+      "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ █   █ ▐▛▀▀▘",
+      "  ▐▌  █      █   █        ▄▄▄▀     ▐▌  █ ▝▚▄▄▖█  ▀▄▀  ▝▚▄▄▖",
+      "  ▐▙▄▄▀                            ▐▙▄▄▀      █   0.2.0     ",
       "",
             "       a roguelike adventure game",
       "",
@@ -128,7 +129,12 @@ class TitleScreen
   void PlayerTurn()
   {
     Loc next = PlayerPath.Peek();
-    if (Map!.TileAt(next.Row, next.Col).Type == TileType.ClosedDoor)
+
+    if (ObjDb.Occupied(next))
+    {
+
+    }
+    else if (Map!.TileAt(next.Row, next.Col).Type == TileType.ClosedDoor)
     {
       ((Door)Map!.TileAt(next.Row, next.Col)).Open = true;
     }
@@ -136,6 +142,20 @@ class TitleScreen
     {
       Player = PlayerPath.Pop();
     }    
+  }
+
+  void Fight(Loc loc)
+  {
+    if (FightRound > 0)
+    {
+      // animation
+      --FightRound;
+
+      if (FightRound == 0 && ObjDb.Occupant(loc) is Actor opponent)
+      {
+        ObjDb.RemoveActor(opponent);
+      }
+    }
   }
 
   bool DrawWildernessMap()
