@@ -303,6 +303,37 @@ class Util
     return pts;
   }
 
+  public static HashSet<Loc> LocsInRadius(Loc origin, int radius, int height, int width)
+  {
+    HashSet<Loc> locs = [];
+    Queue<Loc> q = [];
+    q.Enqueue(origin);
+    HashSet<Loc> visited = [ origin ];
+
+    while (q.Count > 0)
+    {
+      Loc loc = q.Dequeue();
+      locs.Add(loc);
+
+      foreach (var adj in Adj8Locs(loc))
+      {
+        if (adj.Row < 0 || adj.Col < 0 || adj.Row >= height || adj.Col >= width)
+          continue;
+        if (visited.Contains(adj))
+          continue;
+        
+        int d = Distance(origin, adj);
+        if (d <= radius)
+        {
+          visited.Add(adj);
+          q.Enqueue(adj);
+        }
+      }
+    }
+
+    return locs;
+  }
+
   public static List<(int, int)> BresenhamCircle(int row, int col, int radius)
   {
     List<(int, int)> sqs = [];

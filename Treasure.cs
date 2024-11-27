@@ -27,7 +27,9 @@ class Treasure
       ItemNames.SCROLL_MAGIC_MAP, ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES,
       ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
-      ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION ]; 
+      ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
+      ItemNames.SCROLL_DISARM 
+  ]; 
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
       ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
@@ -40,7 +42,8 @@ class Treasure
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK,
       ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
-      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE
+      ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
+      ItemNames.SCROLL_DISARM
   ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
@@ -100,13 +103,14 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
-  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(6) switch
+  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(7) switch
   {
     0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
     1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
     2 => ItemFactory.Get(ItemNames.ANTIDOTE, objDb),
     3 => ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb),
     4 => ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb),
+    5 => ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb),
     _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
   };
 

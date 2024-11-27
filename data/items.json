@@ -860,5 +860,19 @@
       "UseSimple#trivialheal",
       "Hidden"
     ]
+  },
+  {
+    "Name": "SCROLL_DISARM",
+    "DescriptiveName": "scroll of disarming",
+    "Type": "Scroll",
+    "Value": 25,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#disarm",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
   }
 ]

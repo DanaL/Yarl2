@@ -187,6 +187,11 @@ class Village
       for (int j = 0; j < rng.Next(1, 4); j++)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), grocer.ID);
     }
+    if (rng.NextDouble() < 0.5)
+    {
+      for (int j = 0; j < rng.Next(1, 4); j++)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb), grocer.ID);
+    }
     return grocer;
   }
 

@@ -335,6 +335,46 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
                             Col = actorLoc.Col + dirResult.Col };
   }
 }
+
+class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+{
+  Loc Origin { get; set; } = loc;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    Map map = GameState!.CurrentMap;
+    int trapCount = 0;
+    foreach (Loc loc in Util.LocsInRadius(Origin, 3, map.Height, map.Width))
+    {
+      Tile tile = GameState.TileAt(loc);
+      if (tile.IsTrap())
+      {
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        ++trapCount;
+        if (GameState.LastPlayerFoV.Contains(loc))
+        {
+          SqAnimation anim = new(GameState, loc, Colours.WHITE, Colours.FADED_PURPLE, '^');
+          GameState.UIRef().RegisterAnimation(anim);
+          result.Messages.Add("A trap is destroyed!");
+        }
+        else
+        {
+          result.Messages.Add("You hear crunching and tinkling of machinery being destroyed.");
+        }
+      }
+    }
+
+    if (trapCount == 0)
+      result.Messages.Add("The spell doesn't seem to do anything at all.");
+
+    return result;
+  }
+}
+
 // Action for when an actor jumps into a river or chasm (and eventually lava?)
 class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs, actor)
 {

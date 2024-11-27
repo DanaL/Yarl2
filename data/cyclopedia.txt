@@ -187,3 +187,6 @@ Invented by a wizard outraged at the prices the local ferryman charged.
 #
 magicmouth|magic mouth
 An irritating magic alarm whose screams can awaken and anger nearby monsters.
+#
+scroll of disarming
+Issued by the Greater Yendorian Tourism Bureau, these scrolls help clean up annoying traps that make dungeons dangerous for sightseers.
