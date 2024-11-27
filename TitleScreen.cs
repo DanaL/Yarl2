@@ -132,7 +132,7 @@ class TitleScreen
 
     if (ObjDb.Occupied(next))
     {
-
+      Fight(next);
     }
     else if (Map!.TileAt(next.Row, next.Col).Type == TileType.ClosedDoor)
     {
@@ -146,6 +146,8 @@ class TitleScreen
 
   void Fight(Loc loc)
   {
+    Random rng = new();
+
     if (FightRound > 0)
     {
       // animation
@@ -155,6 +157,10 @@ class TitleScreen
       {
         ObjDb.RemoveActor(opponent);
       }
+    }
+    else
+    {
+      FightRound = rng.Next(2, 4);
     }
   }
 
