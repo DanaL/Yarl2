@@ -78,51 +78,12 @@ abstract class UserInterface
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
   }
 
-  public virtual void TitleScreen()
-  {    
-    string[] text =
-    [
-      " welcome to             ",
-      "  ▗▄▄▄  ▗▞▀▜▌▄▄▄▄  ▗▞▀▜▌▐ ▄▄▄      ▗▄▄▄  ▗▞▀▚▖█ ▗▞▀▚▖▄   ▄ ▗▞▀▚▖",
-      "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ ▐▛▀▀▘█   █ ▐▛▀▀▘",
-      "  ▐▌  █      █   █        ▄▄▄▀     ▐▌  █ ▝▚▄▄▖█ ▝▚▄▄▖ ▀▄▀  ▝▚▄▄▖",
-      "  ▐▙▄▄▀                            ▐▙▄▄▀      █       0.2.0     ",
-      "",            
-            "       a roguelike adventure game",
-      "",            
-      "",
-      "",
-      " a) load game",
-      " b) begin new adventure",
-      " c) options"
-    ];
-
-    SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
-    ResetSqsOnScreen();
-    for (int r = 0; r < text.Length; r++)
-    {
-      string row = text[r];
-      for (int c = 0; c < row.Length; c++)
-      {
-        Sqr s = new(Colours.WHITE, Colours.BLACK, row[c]);
-        SqsOnScreen[r + 1, c + 1] = s;
-      }
-    }
-    
-    UpdateDisplay(null);
-    BlockForInput();
-    ClearLongMessage();
-
-    SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
-    ResetSqsOnScreen();
-  }
-
   public void ClearLongMessage()
   {
     _longMessage = null;
   }
 
-  void ResetSqsOnScreen()
+  public void ClearSqsOnScreen()
   {
     for (int r = 0; r < SqsOnScreen.GetLength(0); r++)
     {
@@ -232,7 +193,7 @@ abstract class UserInterface
     do
     {
       ClearScreen(); 
-      ResetSqsOnScreen();
+      ClearSqsOnScreen();
 
       int screenR = 6;
       int screenC = 7;
@@ -785,6 +746,20 @@ abstract class UserInterface
   }
 
   static void Delay(int ms = 10) => Thread.Sleep(ms);
+
+  // I am using this in input menus outside of the main game. Primarily
+  // the start menu
+  public char GetKeyInput()
+  {
+    var e = PollForEvent();
+    if (e.Type == GameEventType.Quiting)
+      throw new GameQuitException();
+
+    if (e.Type == GameEventType.KeyInput)
+      return e.Value;
+
+    return '\0';
+  }
 
   public void BlockForInput()
   {

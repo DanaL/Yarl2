@@ -484,9 +484,12 @@ class PreGameHandler(UserInterface ui)
   }
 
   public GameState? StartUp(Options options)
-  {
+  {    
     try
     {
+      TitleScreen ts = new(_ui);
+      ts.Display();
+
       string playerName;
       do 
       {

@@ -769,6 +769,8 @@ class MapUtils
         switch (map.TileAt(r, c).Type)
         {
           case TileType.PermWall:
+            sqs[r, c] = '#';
+            break;
           case TileType.DungeonWall:
           case TileType.StoneWall:
             sqs[r, c] = ' ';

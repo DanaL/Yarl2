@@ -17,11 +17,9 @@ var options = Options.LoadOptions();
 
 UserInterface display;
 if (options.Display == "Bearlib")
-  display = new BLUserInferface("Dana's Delve 0.0.1 + Bearlib", options);
+  display = new BLUserInferface("Dana's Delve 0.2.0 + Bearlib", options);
 else
-  display = new SDLUserInterface("Dana's Delve 0.0.1 + SDL", options);
-
-display.TitleScreen();
+  display = new SDLUserInterface("Dana's Delve 0.2.0 + SDL", options);
 
 var pgh = new PreGameHandler(display);
 var gameState = pgh.StartUp(options);
