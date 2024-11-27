@@ -225,11 +225,10 @@ class TitleScreen
     const int halfWidth = viewWidth / 2;
 
     Dictionary<Loc, Illumination> visible = [];
-    if (InDungeon)
-    {
-      visible = FieldOfView.CalcVisible(5, Player, Map!, ObjDb);
-    }
-
+    int fov = InDungeon ? 5 : 25;
+    
+    visible = FieldOfView.CalcVisible(fov, Player, Map!, ObjDb);
+    
     for (int viewR = 0; viewR < viewHeight; viewR++)
     {
       for (int viewC = 0; viewC < viewWidth; viewC++)
@@ -243,31 +242,22 @@ class TitleScreen
         }
         else if (mapR >= 0 && mapR < Map!.Height && mapC >= 0 && mapC < Map.Width)
         {
-          Sqr sqr = new(Colours.BLACK, Colours.BLACK, ' ');
-         
-          if (InDungeon)
-          {
-            Loc loc = new(0, 0, mapR, mapC);
+          Sqr sqr = new(Colours.BLACK, Colours.BLACK, ' ');         
+          Loc loc = new(0, 0, mapR, mapC);
 
-            Glyph objGlyph = ObjDb.GlyphAt(loc);
-            if (visible.ContainsKey(loc))
-            {
-              Glyph g = objGlyph != GameObjectDB.EMPTY ? objGlyph : Util.TileToGlyph(Map.TileAt(mapR, mapC));
-              sqr = new Sqr(g.Lit, g.BGLit, g.Ch);
-              SeenBefore.Add(loc);
-            }
-            else if (SeenBefore.Contains(loc))
-            {
-              Glyph g = Util.TileToGlyph(Map.TileAt(mapR, mapC));
-              sqr = new Sqr(g.Unlit, g.BGUnlit, g.Ch);
-            }            
+          Glyph objGlyph = ObjDb.GlyphAt(loc);
+          if (visible.ContainsKey(loc))
+          {
+            Glyph g = objGlyph != GameObjectDB.EMPTY ? objGlyph : Util.TileToGlyph(Map.TileAt(mapR, mapC));
+            sqr = new Sqr(g.Lit, g.BGLit, g.Ch);
+            SeenBefore.Add(loc);
           }
-          else
+          else if (SeenBefore.Contains(loc))
           {
             Glyph g = Util.TileToGlyph(Map.TileAt(mapR, mapC));
-            sqr = new Sqr(g.Lit, g.BGLit, g.Ch);            
-          }
-
+            sqr = new Sqr(g.Unlit, g.BGUnlit, g.Ch);
+          }            
+    
           UI.SqsOnScreen[viewR + 11, viewC + 30] = sqr;
         }
         else
