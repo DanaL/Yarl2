@@ -87,10 +87,9 @@ abstract class UserInterface
       "  ▐▌  █ ▝▚▄▟▌█   █ ▝▚▄▟▌  ▀▄▄      ▐▌  █ ▐▛▀▀▘█ ▐▛▀▀▘█   █ ▐▛▀▀▘",
       "  ▐▌  █      █   █        ▄▄▄▀     ▐▌  █ ▝▚▄▄▖█ ▝▚▄▄▖ ▀▄▀  ▝▚▄▄▖",
       "  ▐▙▄▄▀                            ▐▙▄▄▀      █       0.2.0     ",
-      "",
-            "",
-            "       (yet another attempt to make a roguelike,",
-            "           this time in C#...)",
+      "",            
+            "       a roguelike adventure game",
+      "",            
       "",
       "",
       " a) load game",
@@ -115,6 +114,7 @@ abstract class UserInterface
     ClearLongMessage();
 
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
+    ResetSqsOnScreen();
   }
 
   public void ClearLongMessage()
@@ -125,12 +125,12 @@ abstract class UserInterface
   void ResetSqsOnScreen()
   {
     for (int r = 0; r < SqsOnScreen.GetLength(0); r++)
+    {
+      for (int c = 0; c < SqsOnScreen.GetLength(1); c++)
       {
-        for (int c = 0; c < SqsOnScreen.GetLength(1); c++)
-        {
-          SqsOnScreen[r, c] = Constants.BLANK_SQ;
-        }
+        SqsOnScreen[r, c] = Constants.BLANK_SQ;
       }
+    }
   }
 
   public void VictoryScreen(string bossName, GameState gs)

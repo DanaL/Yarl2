@@ -137,9 +137,9 @@ class SDLUserInterface : UserInterface
 
     SDL_SetRenderTarget(_renderer, targetTexture);
 
-    for (int row = 0; row < ViewHeight; row++)
+    for (int row = 0; row < SqsOnScreen.GetLength(0); row++)
     {
-      for (int col = 0; col < ViewWidth; col++)
+      for (int col = 0; col < SqsOnScreen.GetLength(1); col++)
       {
         WriteSq(row, col, SqsOnScreen[row, col]);
       }
@@ -186,11 +186,12 @@ class SDLUserInterface : UserInterface
     {
       if (gs is not null && gs.Player is not null)
       {
-        WriteSideBar(gs);
-        var texture = CreateMainTexture();
-        SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
-        SDL_DestroyTexture(texture);
+        WriteSideBar(gs);        
       }
+
+      var texture = CreateMainTexture();
+      SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
+      SDL_DestroyTexture(texture);
 
       if (MessageHistory.Count > 0)
         WriteMessagesSection();
