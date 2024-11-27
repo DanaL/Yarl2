@@ -61,6 +61,8 @@ abstract class UserInterface
 
   List<Animation> _animations = [];
 
+  Glyph PlayerGlyph { get; set; }
+
   public UserInterface(Options opts)
   {
     _options = opts;
@@ -69,6 +71,11 @@ abstract class UserInterface
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
     ZLayer = new Sqr[ViewHeight, ViewWidth];
     ClearZLayer();
+
+    if (opts.HighlightPlayer)
+      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, Colours.HILITE);
+    else
+      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
   }
 
   public virtual void TitleScreen()
@@ -210,7 +217,7 @@ abstract class UserInterface
           Glyph glyph;
           if (r == playerRow && c == playerCol)
           {
-            glyph = new Glyph('@', Colours.WHITE, Colours.BLACK, Colours.BLACK, Colours.BLACK);
+            glyph = PlayerGlyph;
             PlayerScreenRow = screenR;
             PlayerScreenCol = screenC;
           }
@@ -990,7 +997,9 @@ abstract class UserInterface
     }
 
     if (ZLayer[PlayerScreenRow, PlayerScreenCol] == Constants.BLANK_SQ)
-      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+    {
+      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BGLit, PlayerGlyph.Ch);
+    }
   }
   
   public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)

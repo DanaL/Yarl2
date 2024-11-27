@@ -45,6 +45,7 @@ namespace Yarl2
     public string? Display { get; set; }
     public int FontSize { get; set; }
     public bool BumpToOpen { get; set; }
+    public bool HighlightPlayer { get; set; }
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
@@ -58,7 +59,8 @@ namespace Yarl2
       {
         Display = "Bearlib",
         FontSize = 12,
-        BumpToOpen = true
+        BumpToOpen = true,
+        HighlightPlayer = false
       };
 
       var userDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
