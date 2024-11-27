@@ -611,6 +611,19 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (item.HasTrait<ConsumableTrait>())
         Actor.Inventory.ConsumeItem(item, Actor, GameState.Rng);
 
+      if (Actor is Player)
+      {
+        Animation anim;
+        Loc animLoc = Actor.Loc with { Row = Actor.Loc.Row - 1 };
+        switch (item.Type)
+        {
+          case ItemType.Potion:
+            anim = new SqAnimation(GameState, animLoc, Colours.WHITE, Colours.FAINT_PINK, '!');
+            GameState.UIRef().RegisterAnimation(anim);
+            break;
+        }
+      }
+
       return result;
     }
     else
