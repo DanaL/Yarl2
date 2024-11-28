@@ -22,10 +22,9 @@ class SDLUserInterface : UserInterface
   readonly IntPtr _renderer, _font;
   readonly int _fontWidth;
   readonly int _fontHeight;
-  SDL_Rect _mainFrameLoc;
   Dictionary<Sqr, IntPtr> _cachedGlyphs = [];
   Dictionary<Colour, SDL_Color> _colours;
-  
+
   public SDLUserInterface(string windowTitle, Options opt) : base(opt)
   {
     FontSize = opt.FontSize;
@@ -123,15 +122,17 @@ class SDLUserInterface : UserInterface
 
   IntPtr CreateMainTexture()
   {
-    var th = SqsOnScreen.GetLength(0) * _fontHeight;
-    var tw = SqsOnScreen.GetLength(1) * _fontWidth;
+    int displayHeight = SqsOnScreen.GetLength(0);
+    int displayWidth = SqsOnScreen.GetLength(1);
+    var tw = displayWidth * _fontWidth;
+    var th = displayHeight * _fontHeight;
     var targetTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBX8888, (int)SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, tw, th);
 
     SDL_SetRenderTarget(_renderer, targetTexture);
 
-    for (int row = 0; row < SqsOnScreen.GetLength(0); row++)
+    for (int row = 0; row < displayHeight; row++)
     {
-      for (int col = 0; col < SqsOnScreen.GetLength(1); col++)
+      for (int col = 0; col < displayWidth; col++)
       {
         WriteSq(row, col, SqsOnScreen[row, col]);
       }
@@ -181,13 +182,14 @@ class SDLUserInterface : UserInterface
         WriteSideBar(gs);        
       }
 
-        var mainFrameLoc = new SDL_Rect
-        {
+      var mainFrameLoc = new SDL_Rect
+      {
         x = 0,
         y = 0,
         h = SqsOnScreen.GetLength(0) * _fontHeight,
         w = SqsOnScreen.GetLength(1) * _fontWidth
       };
+
       var texture = CreateMainTexture();
       SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref mainFrameLoc);
       SDL_DestroyTexture(texture);

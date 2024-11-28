@@ -60,7 +60,8 @@ class TitleScreen
       "",
       " a) load game",
       " b) begin new adventure",
-      " c) options"
+      " c) options",
+      " q) quit delve"
     ];
 
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
@@ -97,7 +98,9 @@ class TitleScreen
 
       if (c == 'a')
         break;
-
+      else if (c == 'q')
+        throw new GameQuitException();
+        
       if ((DateTime.Now - lastRedraw).TotalMilliseconds >= 250)
       {
         UpdatePlayer();
@@ -295,7 +298,7 @@ class TitleScreen
             loc = new(1, 0, mapR, mapC);
           else
             loc = new(0, 0, mapR, mapC);
-            
+
           Glyph objGlyph = ObjDb.GlyphAt(loc);
           if (SpecialSqs.TryGetValue(loc, out var frame))
           {
