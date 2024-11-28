@@ -927,6 +927,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (monsterLevel > CurrentDungeon.LevelMaps.Count)
         monsterLevel = CurrentDungeon.LevelMaps.Count;
     }
+    monsterLevel = int.Max(monsterLevel, Campaign.MonsterDecks.Count - 1);
 
     MonsterDeck deck = Campaign.MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
