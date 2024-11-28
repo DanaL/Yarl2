@@ -154,6 +154,9 @@ class Constants
 
 class Util
 {
+  public static DirectoryInfo UserDir => new(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+  public static string SavePath => Path.Combine(UserDir.FullName, "ddsaves");
+
   public static List<int> ToNums(string txt)
   {
     List<int> nums = [];

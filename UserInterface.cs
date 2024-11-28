@@ -713,8 +713,20 @@ abstract class UserInterface
     }
     else if (action is SaveGameAction)
     {
-      Serialize.WriteSaveGame(gs);
-      throw new GameQuitException();
+      bool success;
+      try
+      {
+        Serialize.WriteSaveGame(gs);
+        success = true;
+      }
+      catch (Exception ex)
+      {
+        SetPopup(new Popup(ex.Message, "", -1, -1));
+        success = false;
+      }
+
+      if (success)
+        throw new GameQuitException();
     }    
     else
     {

@@ -91,7 +91,7 @@ namespace Yarl2
         HighlightPlayer = false
       };
 
-      var userDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+      var userDir = Util.UserDir;
       if (userDir.Exists)
       {
         string optionsPath = "ddoptions.json";

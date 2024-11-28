@@ -39,10 +39,32 @@ internal class Serialize
 
     var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                     new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
-    // In the future, when this is a real game, I'm going to have check player names for invalid characters or build a 
-    // little database of players vs saved games
-    string filename = $"{gameState.Player.Name}.dat";
-    File.WriteAllBytes(filename, bytes);
+    
+    DirectoryInfo saveDir = new(Util.SavePath);
+    try
+    {
+      if (!saveDir.Exists)
+      {
+        saveDir.Create();
+      }
+    }
+    catch (Exception)
+    {
+      throw new Exception("Unable to create or access the Save Game folder. Your game was not saved successfully!");
+    }
+
+    try
+    {
+      // In the future, when this is a real game, I'm going to have check player names for invalid characters or build a 
+      // little database of players vs saved games
+      string filename = $"{gameState.Player.Name}.dat";
+      string fullpath = Path.Combine(saveDir.FullName, filename);
+      File.WriteAllBytes(fullpath, bytes);
+    }
+    catch (Exception)
+    {
+      throw new Exception("Save failed! Your game was not saved successfully!");
+    }    
   }
 
   //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
