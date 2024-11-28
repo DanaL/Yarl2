@@ -289,9 +289,13 @@ class TitleScreen
         }
         else if (mapR >= 0 && mapR < Map!.Height && mapC >= 0 && mapC < Map.Width)
         {
-          Sqr sqr = new(Colours.BLACK, Colours.BLACK, ' ');         
-          Loc loc = new(0, 0, mapR, mapC);
-
+          Sqr sqr = new(Colours.BLACK, Colours.BLACK, ' ');
+          Loc loc;
+          if (InDungeon)
+            loc = new(1, 0, mapR, mapC);
+          else
+            loc = new(0, 0, mapR, mapC);
+            
           Glyph objGlyph = ObjDb.GlyphAt(loc);
           if (SpecialSqs.TryGetValue(loc, out var frame))
           {
@@ -349,7 +353,7 @@ class TitleScreen
     var (stairsR, stairsC) = floors[i];
     floors.RemoveAt(i);
     Map.SetTile(stairsR, stairsC, new Upstairs(""));
-    Stairs = new(0, 0, stairsR, stairsC);
+    Stairs = new(1, 0, stairsR, stairsC);
     Player = Stairs;
 
     for (int j = 0; j < 5; j++)
@@ -360,7 +364,7 @@ class TitleScreen
       i = rng.Next(floors.Count);
       var (r,  c) = floors[i];
       Item z = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
-      ObjDb.SetToLoc(new Loc(0, 0, r, c), z);
+      ObjDb.SetToLoc(new Loc(1, 0, r, c), z);
       floors.RemoveAt(i);
     }
 
@@ -379,7 +383,7 @@ class TitleScreen
 
       i = rng.Next(floors.Count);
       var (r, c) = floors[i];
-      ObjDb.AddNewActor(a, new Loc(0, 0, r, c));
+      ObjDb.AddNewActor(a, new Loc(1, 0, r, c));
       floors.RemoveAt(i);
       monster = a;
     }
