@@ -167,6 +167,8 @@ class CampaignCreator(UserInterface ui)
   {
     List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "tin", "glass", "iron", "silver", "balsa"];
 
+    Item.IDInfo = [];
+
     int j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of magic missiles", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
     wandMaterials.RemoveAt(j);
@@ -566,7 +568,7 @@ class CampaignCreator(UserInterface ui)
       
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
-      var objDb = new GameObjectDB();
+      var objDb = new GameObjectDB();      
       SetItemIDInfo(rng);
 
       Player player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, UI, rng);

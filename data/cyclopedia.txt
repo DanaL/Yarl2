@@ -193,3 +193,6 @@ An irritating magic alarm whose screams can awaken and anger nearby monsters.
 #
 scroll of disarming
 Issued by the Greater Yendorian Tourism Bureau, these scrolls help clean up annoying traps that make dungeons dangerous for sightseers.
+#
+zorkmid
+Cash money, the currency of the realm.
