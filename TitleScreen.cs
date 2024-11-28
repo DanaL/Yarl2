@@ -23,6 +23,7 @@ class TitleScreen
   HashSet<Loc> SeenBefore = [];
   GameObjectDB ObjDb { get; set; } = new();
   int FightRound = 0;
+  Dictionary<Loc, (Sqr, DateTime)> SpecialSqs = [];
 
   public TitleScreen(UserInterface ui)
   {
@@ -153,7 +154,17 @@ class TitleScreen
       // animation
       --FightRound;
 
-      if (FightRound == 0 && ObjDb.Occupant(loc) is Actor opponent)
+      if (ObjDb.Occupant(loc) is not Actor opponent)
+        return;
+
+      Sqr hit = new(Colours.WHITE, Colours.FX_RED, opponent.Glyph.Ch);
+      var frame = (hit, DateTime.Now.AddMilliseconds(200));
+
+      Loc hitLoc = rng.NextDouble() < 0.65 ? loc : Player;
+      if (!SpecialSqs.TryAdd(hitLoc, frame))
+        SpecialSqs[hitLoc] = frame;
+
+      if (FightRound == 0)
       {
         ObjDb.RemoveActor(opponent);
       }
@@ -250,11 +261,10 @@ class TitleScreen
     const int halfHeight = viewHeight / 2;
     const int halfWidth = viewWidth / 2;
 
-    Dictionary<Loc, Illumination> visible = [];
     int fov = InDungeon ? 5 : 25;
-    
-    visible = FieldOfView.CalcVisible(fov, Player, Map!, ObjDb);
-    
+
+    Dictionary<Loc, Illumination> visible = FieldOfView.CalcVisible(fov, Player, Map!, ObjDb);
+
     for (int viewR = 0; viewR < viewHeight; viewR++)
     {
       for (int viewC = 0; viewC < viewWidth; viewC++)
@@ -264,6 +274,17 @@ class TitleScreen
 
         if (mapR == Player.Row && mapC == Player.Col)
         {
+          if (SpecialSqs.TryGetValue(Player, out var frame))
+          {
+            if (frame.Item2 > DateTime.Now)
+            {
+              UI.SqsOnScreen[viewR + 11, viewC + 30] = new Sqr(Colours.WHITE, Colours.FX_RED, '@');
+              continue;
+            }
+
+            SpecialSqs.Remove(Player);
+          }
+         
           UI.SqsOnScreen[viewR + 11, viewC + 30] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
         }
         else if (mapR >= 0 && mapR < Map!.Height && mapC >= 0 && mapC < Map.Width)
@@ -272,6 +293,19 @@ class TitleScreen
           Loc loc = new(0, 0, mapR, mapC);
 
           Glyph objGlyph = ObjDb.GlyphAt(loc);
+          if (SpecialSqs.TryGetValue(loc, out var frame))
+          {
+            if (frame.Item2 > DateTime.Now) 
+            {
+              UI.SqsOnScreen[viewR + 11, viewC + 30] = frame.Item1;
+              continue;
+            }
+            else
+            {
+              SpecialSqs.Remove(loc);
+            }
+          }
+          
           if (visible.ContainsKey(loc))
           {
             Glyph g = objGlyph != GameObjectDB.EMPTY ? objGlyph : Util.TileToGlyph(Map.TileAt(mapR, mapC));
