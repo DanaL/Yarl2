@@ -885,7 +885,7 @@ abstract class UserInterface
     return ch == 'y';
   }
 
-  public string BlockingGetResponse(string prompt, IInputChecker? validator = null)
+  public string BlockingGetResponse(string prompt, int maxLength, IInputChecker? validator = null)
   {
     string result = "";
     GameEvent e;
@@ -916,6 +916,8 @@ abstract class UserInterface
       else if (e.Value == Constants.BACKSPACE)
         result = result.Length > 0 ? result[..^1] : "";
       else if (validator is not null && !validator.Valid(result + e.Value))
+        continue;
+      else if (result.Length == maxLength)
         continue;
       else
         result += e.Value;
