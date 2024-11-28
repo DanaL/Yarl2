@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.ComponentModel.Design;
 using System.Text;
 
 namespace Yarl2;
@@ -717,7 +716,7 @@ abstract class UserInterface
       bool success;
       try
       {
-        Serialize.WriteSaveGame(gs);
+        Serialize.WriteSaveGame(gs, this);
         success = true;
       }
       catch (Exception ex)

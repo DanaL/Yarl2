@@ -15,7 +15,8 @@ using System.Text.Json.Serialization;
 
 namespace Yarl2;
 
-record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo);
+record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo, List<SqrSave> Preview);
+record SqrSave(string Fg, string Bg, char Ch);
 
 // When I started working on saving the game, I had a bunch of problems with
 // Json serialize. It particularly seemed to hate that Tile was an abstract
@@ -31,11 +32,12 @@ record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObj
 // actually a concern for my game's save files)
 internal class Serialize
 {
-  public static void WriteSaveGame(GameState gameState)
+  public static void WriteSaveGame(GameState gameState, UserInterface ui)
   {
     var objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
 
-    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo);
+    var preview = GenPreview(ui);
+    var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo, preview);
 
     var bytes = JsonSerializer.SerializeToUtf8Bytes(sgi,
                     new JsonSerializerOptions { WriteIndented = false, IncludeFields = true });
@@ -68,7 +70,7 @@ internal class Serialize
   }
 
   //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
-  public static GameState LoadSaveGame(string playerName, Options options, UserInterface ui)
+  public static (GameState, List<Sqr>) LoadSaveGame(string playerName, Options options, UserInterface ui)
   {
     string filename = $"{playerName}.dat";
     var bytes = File.ReadAllBytes(filename);
@@ -90,7 +92,32 @@ internal class Serialize
 
     Item.IDInfo = sgi.IDInfo;
 
-    return gs;
+    List<Sqr> preview = [];
+    foreach (var s in sgi.Preview)
+    {
+      preview.Add(new Sqr(Colours.TextToColour(s.Fg), Colours.TextToColour(s.Bg), s.Ch));
+    }
+
+    return (gs, preview);
+  }
+
+  static List<SqrSave> GenPreview(UserInterface ui)
+  {
+    List<SqrSave> sqs = [];
+    int midR = ui.PlayerScreenRow;
+    int midC = ui.PlayerScreenCol;
+
+    for (int r = midR - 5; r < midR + 6; r++)
+    {
+      for (int c=  midC - 5; c < midC + 6; c++)
+      {
+        Sqr sqr = ui.SqsOnScreen[r, c];
+        SqrSave s = new(Colours.ColourToText(sqr.Fg), Colours.ColourToText(sqr.Bg), sqr.Ch);
+        sqs.Add(s);
+      }
+    } 
+
+    return sqs;
   }
 
   public static bool SaveFileExists(string playerName) => File.Exists($"{playerName}.dat");

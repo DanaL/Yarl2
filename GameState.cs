@@ -28,7 +28,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
-
+  
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
   DijkstraMap? DMap { get; set; }
