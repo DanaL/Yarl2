@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel.Design;
 using System.Text;
 
 namespace Yarl2;
@@ -902,7 +903,11 @@ abstract class UserInterface
         Delay();
         continue;
       }
-      else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
+      else if (e.Value == Constants.ESC)
+      {
+        throw new GameNotLoadedException();
+      }
+      else if (e.Type == GameEventType.Quiting)
       {
         throw new GameQuitException();
       }

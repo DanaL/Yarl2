@@ -21,43 +21,58 @@ if (options.Display == "Bearlib")
 else
   display = new SDLUserInterface("Dana's Delve 0.2.0 + SDL", options);
 
-RunningState state;
+RunningState state = RunningState.Pregame;
 do
 {
+  display.ClosePopup();
   TitleScreen ts = new(display);
   SetupType gameSetup = ts.Display();
 
-  GameState? gameState;
+  GameState? gameState = null;
   switch (gameSetup)
   {
     case SetupType.Quit:
-      gameState = null;
       state = RunningState.Quitting;
       break;
     case SetupType.NewGame:
-      gameState = new CampaignCreator(display).Create(options);
-      if (gameState is null)
-        state = RunningState.Quitting;
+      try
+      {
+        gameState = new CampaignCreator(display).Create(options);
+        if (gameState is null)
+          state = RunningState.Quitting;        
+      }
+      catch (GameNotLoadedException)
+      {
+        state = RunningState.Pregame;
+      }
       break;
     default:
-      gameState = new GameLoader(display).Load(options);
-      if (gameState is null)
-        state = RunningState.Quitting;
+      try
+      {
+        gameState = new GameLoader(display).Load(options);
+        if (gameState is null)
+          state = RunningState.Quitting;
+      }
+      catch (GameNotLoadedException)
+      {
+        state = RunningState.Pregame;
+      }
       break;
   }
 
-  if (gameSetup == SetupType.Quit || gameState is null)
+  if (gameSetup == SetupType.Quit)
     break;
 
-  state = display.GameLoop(gameState);
+  if (gameState is not null)
+    state = display.GameLoop(gameState);
 }
-while (state == RunningState.Playing);
+while (state != RunningState.Quitting);
 
 namespace Yarl2
 {
   enum RunningState
   {
-    Playing, Quitting, GameOver
+    Playing, Quitting, GameOver, Pregame
   }
 
   public class Configuration

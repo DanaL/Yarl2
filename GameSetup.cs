@@ -16,33 +16,82 @@ enum SetupType
   NewGame, LoadGame, Quit // eventually Tutorial?
 }
 
+record SaveFileInfo(string CharName, string path);
+
 class GameLoader(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  string QueryPlayerName()
+  List<SaveFileInfo> GetSavedGames()
   {
-    string playerName;
+    List<SaveFileInfo> files = [];
+
+    DirectoryInfo dir = new(Util.SavePath);
+    if (!dir.Exists)
+      throw new Exception("Unable to find or access saved game folder!");
+
+    foreach (FileInfo file in dir.GetFiles())
+    {
+      
+    }
+
+    return files;
+  }
+
+  void LoadGameScreen()
+  {
+    UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
+    UI.ClearSqsOnScreen();
+
+    string s = "Please choose a saved game to load:";
+    for (int i = 0; i < s.Length; i++)
+    {
+      UI.SqsOnScreen[1, 1 + i] = new Sqr(Colours.WHITE, Colours.BLACK, s[i]);
+    }
+    
     do
     {
-      playerName = UI.BlockingGetResponse("Who are you?", new PlayerNameInputChecker()).Trim();
-    }
-    while (playerName.Length == 0);
+      List<SaveFileInfo> files = GetSavedGames();
+      if (files.Count == 0)
+      {
+        s = "Uh-oh, you don't seem to have any saved games!";
+        for (int i = 0; i < s.Length; i++)
+          UI.SqsOnScreen[3, 1 + i] = new Sqr(Colours.WHITE, Colours.BLACK, s[i]);
+      }
+      else
+      {
 
-    return playerName;
+      }
+
+      
+
+      Thread.Sleep(30);
+      char c = UI.GetKeyInput();
+
+      if (c == Constants.ESC)
+        throw new GameNotLoadedException();
+
+      UI.UpdateDisplay(null);
+    }
+    while (true);
+
+    UI.SqsOnScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
+    UI.ClearSqsOnScreen();
   }
 
   public GameState? Load(Options options)
   {
     try
     {
-      GameState? gameState = Serialize.LoadSaveGame(QueryPlayerName(), options, UI);
-      gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
-      gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
-      gameState.UpdateFoV();
-      gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+      LoadGameScreen();
+      return null;
+      //GameState? gameState = Serialize.LoadSaveGame(QueryPlayerName(), options, UI);
+      //gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+      //gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
+      //gameState.UpdateFoV();
+      //gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-      return gameState;
+      //return gameState;
     }
     catch (GameQuitException)
     {
@@ -62,7 +111,7 @@ class CampaignCreator(UserInterface ui)
     string playerName;
     do
     {
-      playerName = UI.BlockingGetResponse("Who are you?", new PlayerNameInputChecker()).Trim();
+      playerName = UI.BlockingGetResponse("Who are you?", new PlayerNameInputChecker()).Trim();      
     }
     while (playerName.Length == 0);
 

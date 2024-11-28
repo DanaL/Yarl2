@@ -840,6 +840,7 @@ class MapUtils
 }
 
 class GameQuitException : Exception { }
+class GameNotLoadedException : Exception { }
 class PlayerKilledException : Exception { }
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
