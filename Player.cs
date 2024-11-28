@@ -260,6 +260,9 @@ class Player : Actor, IPerformer, IGameEventListener
       lines.Add($"Cudgels bonus: +{stat.Curr / 100} ({stat.Curr})");
     if (Stats.TryGetValue(Attribute.FinesseUse, out stat))
       lines.Add($"Finesse bonus: +{stat.Curr / 100} ({stat.Curr})");
+    if (Stats.TryGetValue(Attribute.BowUse, out stat))
+      lines.Add($"Bow bonus: +{stat.Curr / 100} ({stat.Curr})");
+
     lines.Add("");
 
     List<string> traitsToShow = [];
