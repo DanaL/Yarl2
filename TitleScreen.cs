@@ -44,7 +44,7 @@ class TitleScreen
     TravelCost.Add(TileType.Upstairs, 1);
   }
 
-  public void Display()
+  public SetupType Display()
   {
     string[] text =
     [
@@ -78,13 +78,15 @@ class TitleScreen
 
     BuildLittleWilderness();
 
-    Update();
+    SetupType setup = Update();
 
     UI.SqsOnScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
     UI.ClearSqsOnScreen();
+
+    return setup;
   }
 
-  void Update()
+  SetupType Update()
   {
     DrawDungeonMiniScreen();
     UI.UpdateDisplay(null);
@@ -97,9 +99,11 @@ class TitleScreen
       c = UI.GetKeyInput();
 
       if (c == 'a')
-        break;
+        return SetupType.LoadGame;
+      else if (c == 'b')
+        return SetupType.NewGame;
       else if (c == 'q')
-        throw new GameQuitException();
+        return SetupType.Quit;
         
       if ((DateTime.Now - lastRedraw).TotalMilliseconds >= 250)
       {

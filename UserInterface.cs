@@ -1079,7 +1079,7 @@ abstract class UserInterface
     Blit();
   }
 
-  public void GameLoop(GameState gameState)
+  public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
     gameState.BuildPerformersList();
@@ -1115,15 +1115,15 @@ abstract class UserInterface
       }
       catch (GameQuitException)
       {
-        break;
+        return RunningState.Quitting;
       }
       catch (PlayerKilledException)
       {
-        break;
+        return RunningState.GameOver;
       }
       catch (VictoryException) 
       {
-        break;
+        return RunningState.GameOver;
       }
 
       TimeSpan elapsed = DateTime.Now - refresh;
@@ -1145,14 +1145,7 @@ abstract class UserInterface
       }      
     }
 
-    var msg = new List<string>()
-        {
-            "",
-            " Be seeing you..."
-        };
-    WriteLongMessage(msg);
-    UpdateDisplay(gameState);
-    BlockForInput();
+    return RunningState.Quitting;
   }
 }
 

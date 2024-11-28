@@ -21,15 +21,45 @@ if (options.Display == "Bearlib")
 else
   display = new SDLUserInterface("Dana's Delve 0.2.0 + SDL", options);
 
-var pgh = new PreGameHandler(display);
-var gameState = pgh.StartUp(options);
-if (gameState is not null)
+RunningState state;
+do
 {
-  display.GameLoop(gameState);
+  TitleScreen ts = new(display);
+  SetupType gameSetup = ts.Display();
+
+  GameState? gameState;
+  switch (gameSetup)
+  {
+    case SetupType.Quit:
+      gameState = null;
+      state = RunningState.Quitting;
+      break;
+    case SetupType.NewGame:
+      gameState = new CampaignCreator(display).Create(options);
+      if (gameState is null)
+        state = RunningState.Quitting;
+      break;
+    default:
+      gameState = new GameLoader(display).Load(options);
+      if (gameState is null)
+        state = RunningState.Quitting;
+      break;
+  }
+
+  if (gameSetup == SetupType.Quit || gameState is null)
+    break;
+
+  state = display.GameLoop(gameState);
 }
+while (state == RunningState.Playing);
 
 namespace Yarl2
 {
+  enum RunningState
+  {
+    Playing, Quitting, GameOver
+  }
+
   public class Configuration
   {
     public string? Display { get; set; }
