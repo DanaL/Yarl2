@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
 using SDL2;
@@ -72,6 +73,19 @@ class SDLUserInterface : UserInterface
             SDL_Keycode.SDLK_RETURN => new GameEvent(GameEventType.KeyInput, ch),
             SDL_Keycode.SDLK_BACKSPACE => new GameEvent(GameEventType.KeyInput, ch),
             SDL_Keycode.SDLK_TAB => new GameEvent(GameEventType.KeyInput, ch),
+            SDL_Keycode.SDLK_LEFT => new GameEvent(GameEventType.KeyInput, 'h'),
+            SDL_Keycode.SDLK_RIGHT => new GameEvent(GameEventType.KeyInput, 'l'),
+            SDL_Keycode.SDLK_UP => new GameEvent(GameEventType.KeyInput, 'k'),
+            SDL_Keycode.SDLK_DOWN => new GameEvent(GameEventType.KeyInput, 'j'),
+            SDL_Keycode.SDLK_KP_1 => new GameEvent(GameEventType.KeyInput, 'b'),
+            SDL_Keycode.SDLK_KP_2 => new GameEvent(GameEventType.KeyInput, 'j'),
+            SDL_Keycode.SDLK_KP_3 => new GameEvent(GameEventType.KeyInput, 'n'),
+            SDL_Keycode.SDLK_KP_4 => new GameEvent(GameEventType.KeyInput, 'h'),
+            SDL_Keycode.SDLK_KP_5 => new GameEvent(GameEventType.KeyInput, '.'),
+            SDL_Keycode.SDLK_KP_6 => new GameEvent(GameEventType.KeyInput, 'l'),
+            SDL_Keycode.SDLK_KP_7 => new GameEvent(GameEventType.KeyInput, 'y'),
+            SDL_Keycode.SDLK_KP_8 => new GameEvent(GameEventType.KeyInput, 'k'),
+            SDL_Keycode.SDLK_KP_9 => new GameEvent(GameEventType.KeyInput, 'u'),
             _ => new GameEvent(GameEventType.NoEvent, '\0')
           };
         default:
