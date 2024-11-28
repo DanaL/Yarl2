@@ -67,6 +67,19 @@ internal class BLUserInferface : UserInterface, IDisposable
     KeyToChar.Add((int)TKCodes.InputEvents.TK_ESCAPE, (char)Constants.ESC);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_TAB, (char)Constants.TAB);
     KeyToChar.Add((int)TKCodes.InputEvents.TK_SLASH, '/');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_UP, 'k');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_DOWN, 'j');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_LEFT, 'h');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_RIGHT, 'l');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_1, 'b');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_2, 'j');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_3, 'n');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_4, 'h');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_5, '.');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_6, 'l');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_7, 'y');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_8, 'k');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_9, 'u');
   }
 
   protected override GameEvent PollForEvent()
