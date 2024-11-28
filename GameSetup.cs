@@ -38,7 +38,10 @@ class GameLoader(UserInterface ui)
     {
       GameState? gameState = Serialize.LoadSaveGame(QueryPlayerName(), options, UI);
       gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
-      
+      gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
+      gameState.UpdateFoV();
+      gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+
       return gameState;
     }
     catch (GameQuitException)
