@@ -69,11 +69,26 @@ internal class Serialize
     }    
   }
 
-  //public static (Player?, Campaign, GameObjectDB, ulong, List<MsgHistory>) LoadSaveGame(string playerName)
-  public static (GameState, List<Sqr>) LoadSaveGame(string playerName, Options options, UserInterface ui)
+  public static List<Sqr> FetchSavePreview(string path)
+  {    
+    var bytes = File.ReadAllBytes(path);
+    var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
+
+    if (sgi is null)
+      return [];
+
+    List<Sqr> sqrs = [];
+    foreach (var s in sgi.Preview)
+    {
+      sqrs.Add(new Sqr(Colours.TextToColour(s.Fg), Colours.TextToColour(s.Bg), s.Ch));
+    }
+
+    return sqrs;
+  }
+
+  public static GameState LoadSaveGame(string path, Options options, UserInterface ui)
   {
-    string filename = $"{playerName}.dat";
-    var bytes = File.ReadAllBytes(filename);
+    var bytes = File.ReadAllBytes(path);
     var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
 
     var campaign = CampaignSaver.Inflate(sgi.Campaign);
@@ -92,13 +107,7 @@ internal class Serialize
 
     Item.IDInfo = sgi.IDInfo;
 
-    List<Sqr> preview = [];
-    foreach (var s in sgi.Preview)
-    {
-      preview.Add(new Sqr(Colours.TextToColour(s.Fg), Colours.TextToColour(s.Bg), s.Ch));
-    }
-
-    return (gs, preview);
+    return gs;
   }
 
   static List<SqrSave> GenPreview(UserInterface ui)

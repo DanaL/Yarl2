@@ -16,7 +16,7 @@ enum SetupType
   NewGame, LoadGame, Quit // eventually Tutorial?
 }
 
-record SaveFileInfo(string CharName, string path);
+record SaveFileInfo(string CharName, string Path);
 
 class GameLoader(UserInterface ui)
 {
@@ -30,15 +30,18 @@ class GameLoader(UserInterface ui)
     if (!dir.Exists)
       throw new Exception("Unable to find or access saved game folder!");
 
-    foreach (FileInfo file in dir.GetFiles())
+    foreach (FileInfo file in dir.GetFiles().OrderByDescending(f => f.LastWriteTime))
     {
-      
+      if (file.Extension.Equals(".dat", StringComparison.OrdinalIgnoreCase))
+      {
+        files.Add(new SaveFileInfo(file.Name[..^4], file.FullName));
+      }
     }
 
     return files;
   }
 
-  void LoadGameScreen()
+  string LoadGameScreen()
   {
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     UI.ClearSqsOnScreen();
@@ -48,7 +51,9 @@ class GameLoader(UserInterface ui)
     {
       UI.SqsOnScreen[1, 1 + i] = new Sqr(Colours.WHITE, Colours.BLACK, s[i]);
     }
-    
+
+    string savePath = "";
+    int selected = 0;
     do
     {
       List<SaveFileInfo> files = GetSavedGames();
@@ -60,16 +65,52 @@ class GameLoader(UserInterface ui)
       }
       else
       {
-
+        int width = files.Select(f => f.CharName.Length).Max() + 1;        
+        for (int i = 0; i < files.Count; i++)
+        {
+          string charName = files[i].CharName.PadRight(width);
+          Colour bg = i == selected ? Colours.HILITE : Colours.BLACK;
+          for (int j = 0; j < charName.Length; j++)
+            UI.SqsOnScreen[3 + i, 1 + j] = new Sqr(Colours.WHITE, bg, charName[j]);
+        }
       }
 
-      
-
       Thread.Sleep(30);
-      char c = UI.GetKeyInput();
-
-      if (c == Constants.ESC)
+      char ch = UI.GetKeyInput();
+      if (files.Count > 0 && ch == 'j')
+      {
+        selected = (++selected) % files.Count;
+      }
+      else if (files.Count > 0 && ch == 'k')
+      {
+        selected = selected > 0 ? selected - 1 : files.Count - 1;        
+      }
+      else if (files.Count > 0 && ch == '\n')
+      {
+        savePath = files[selected].Path;
+        break;
+      }
+      else if (ch == Constants.ESC)
+      {
         throw new GameNotLoadedException();
+      }
+      else if (ch != '\0')
+      {
+        Console.WriteLine("hmm");
+      }
+
+      if (files.Count > 0)
+      {
+        List<Sqr> preview = Serialize.FetchSavePreview(files[selected].Path);
+        int j = 0;
+        for (int r = 0; r < 11; r++)
+        {
+          for (int c = 0; c < 11; c++)
+          {
+            UI.SqsOnScreen[3 + r, 31 + c] = preview[j++];
+          }
+        }
+      }
 
       UI.UpdateDisplay(null);
     }
@@ -77,21 +118,25 @@ class GameLoader(UserInterface ui)
 
     UI.SqsOnScreen = new Sqr[UserInterface.ViewHeight, UserInterface.ViewWidth];
     UI.ClearSqsOnScreen();
+
+    return savePath;
   }
 
   public GameState? Load(Options options)
   {
     try
     {
-      LoadGameScreen();
-      return null;
-      //GameState? gameState = Serialize.LoadSaveGame(QueryPlayerName(), options, UI);
-      //gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
-      //gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
-      //gameState.UpdateFoV();
-      //gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+      string path = LoadGameScreen();
+      if (path == "")
+        throw new GameNotLoadedException();
 
-      //return gameState;
+      GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
+      gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+      gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
+      gameState.UpdateFoV();
+      gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
+
+      return gameState;
     }
     catch (GameQuitException)
     {
@@ -111,7 +156,7 @@ class CampaignCreator(UserInterface ui)
     string playerName;
     do
     {
-      playerName = UI.BlockingGetResponse("Who are you?", new PlayerNameInputChecker()).Trim();      
+      playerName = UI.BlockingGetResponse("Who are you?", 30, new PlayerNameInputChecker()).Trim();      
     }
     while (playerName.Length == 0);
 
@@ -518,8 +563,7 @@ class CampaignCreator(UserInterface ui)
       //seed = 119994544;
       //seed = 1207463617;
       //seed = -921663908;
-      seed = 1716220884;
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
