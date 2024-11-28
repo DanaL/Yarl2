@@ -43,7 +43,7 @@ class Treasure
       ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
-      ItemNames.SCROLL_DISARM
+      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS
   ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)

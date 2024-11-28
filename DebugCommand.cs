@@ -84,7 +84,8 @@ class DebugCommand(GameState gs)
     {"heavy boots", ItemNames.HEAVY_BOOTS },
     {"boots of water walking", ItemNames.BOOTS_OF_WATER_WALKING },
     {"golden apple", ItemNames.GOLDEN_APPLE },
-    {"scroll disarm", ItemNames.SCROLL_DISARM }
+    {"scroll disarm", ItemNames.SCROLL_DISARM },
+    {"bow guide", ItemNames.GUIDE_BOWS }
   };
 
   public string DoCommand(string txt)

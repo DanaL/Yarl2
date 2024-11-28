@@ -746,6 +746,20 @@
     ]
   },
   {
+    "Name": "GUIDE_BOWS",
+    "DescriptiveName": "Hit That Bullseye!",
+    "Type": "Scroll",
+    "Value": 100,
+    "Glyph": "♪,white,lightgrey,black,black",
+    "Traits": [
+      "Consumable",
+      "Flammable",
+      "Stackable",
+      "SideEffect#100#BoostMaxStat#BowUse#100",
+      "CanApply"
+    ]
+  },
+  {
     "Name": "TORCH",
     "DescriptiveName": "torch",
     "Type": "Tool",
