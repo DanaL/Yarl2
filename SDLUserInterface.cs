@@ -25,7 +25,7 @@ class SDLUserInterface : UserInterface
   SDL_Rect _mainFrameLoc;
   Dictionary<Sqr, IntPtr> _cachedGlyphs = [];
   Dictionary<Colour, SDL_Color> _colours;
-
+  
   public SDLUserInterface(string windowTitle, Options opt) : base(opt)
   {
     FontSize = opt.FontSize;
@@ -40,14 +40,6 @@ class SDLUserInterface : UserInterface
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 
     _colours = [];
-
-    _mainFrameLoc = new SDL_Rect
-    {
-      x = 0,
-      y = 0,
-      h = ViewHeight * _fontHeight,
-      w = ViewWidth * _fontWidth
-    };
   }
 
   protected override GameEvent PollForEvent()
@@ -131,8 +123,8 @@ class SDLUserInterface : UserInterface
 
   IntPtr CreateMainTexture()
   {
-    var tw = ViewWidth * _fontWidth;
-    var th = ViewHeight * _fontHeight;
+    var th = SqsOnScreen.GetLength(0) * _fontHeight;
+    var tw = SqsOnScreen.GetLength(1) * _fontWidth;
     var targetTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBX8888, (int)SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, tw, th);
 
     SDL_SetRenderTarget(_renderer, targetTexture);
@@ -189,8 +181,15 @@ class SDLUserInterface : UserInterface
         WriteSideBar(gs);        
       }
 
+        var mainFrameLoc = new SDL_Rect
+        {
+        x = 0,
+        y = 0,
+        h = SqsOnScreen.GetLength(0) * _fontHeight,
+        w = SqsOnScreen.GetLength(1) * _fontWidth
+      };
       var texture = CreateMainTexture();
-      SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref _mainFrameLoc);
+      SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref mainFrameLoc);
       SDL_DestroyTexture(texture);
 
       if (MessageHistory.Count > 0)
