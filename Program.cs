@@ -23,7 +23,7 @@ else
 
 RunningState state = RunningState.Pregame;
 do
-{
+{  
   display.ClosePopup();
   TitleScreen ts = new(display);
   SetupType gameSetup = ts.Display();

@@ -1137,10 +1137,12 @@ abstract class UserInterface
       }
       catch (PlayerKilledException)
       {
+        MessageHistory = [];
         return RunningState.GameOver;
       }
       catch (VictoryException) 
       {
+        MessageHistory = [];
         return RunningState.GameOver;
       }
 
