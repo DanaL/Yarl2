@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 
 namespace Yarl2;
 
+record SaveFileInfo(string CharName, string Path);
 record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo, List<SqrSave> Preview);
 record SqrSave(string Fg, string Bg, char Ch);
 
@@ -108,6 +109,25 @@ internal class Serialize
     Item.IDInfo = sgi.IDInfo;
 
     return gs;
+  }
+
+  public static List<SaveFileInfo> GetSavedGames()
+  {
+    List<SaveFileInfo> files = [];
+
+    DirectoryInfo dir = new(Util.SavePath);
+    if (!dir.Exists)
+      throw new Exception("Unable to find or access saved game folder!");
+
+    foreach (FileInfo file in dir.GetFiles().OrderByDescending(f => f.LastWriteTime))
+    {
+      if (file.Extension.Equals(".dat", StringComparison.OrdinalIgnoreCase))
+      {
+        files.Add(new SaveFileInfo(file.Name[..^4], file.FullName));
+      }
+    }
+
+    return files;
   }
 
   static List<SqrSave> GenPreview(UserInterface ui)

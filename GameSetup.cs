@@ -16,30 +16,9 @@ enum SetupType
   NewGame, LoadGame, Quit // eventually Tutorial?
 }
 
-record SaveFileInfo(string CharName, string Path);
-
 class GameLoader(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
-
-  List<SaveFileInfo> GetSavedGames()
-  {
-    List<SaveFileInfo> files = [];
-
-    DirectoryInfo dir = new(Util.SavePath);
-    if (!dir.Exists)
-      throw new Exception("Unable to find or access saved game folder!");
-
-    foreach (FileInfo file in dir.GetFiles().OrderByDescending(f => f.LastWriteTime))
-    {
-      if (file.Extension.Equals(".dat", StringComparison.OrdinalIgnoreCase))
-      {
-        files.Add(new SaveFileInfo(file.Name[..^4], file.FullName));
-      }
-    }
-
-    return files;
-  }
 
   string LoadGameScreen()
   {
@@ -56,7 +35,7 @@ class GameLoader(UserInterface ui)
     int selected = 0;
     do
     {
-      List<SaveFileInfo> files = GetSavedGames();
+      List<SaveFileInfo> files = Serialize.GetSavedGames();
       if (files.Count == 0)
       {
         s = "Uh-oh, you don't seem to have any saved games!";
@@ -549,12 +528,55 @@ class CampaignCreator(UserInterface ui)
     return (campaign, startR, startC);
   }
 
+  public void SavedGameExists(string playerName, string existingSavePath)
+  {
+    string s = $"Hmm! A saved game for [LIGHTBLUE {playerName}] already exists!";
+    s += "\n\na) go back";
+    s += "\nb) [BRIGHTRED ERASE] existing save and continue";
+    UI.SetPopup(new Popup(s, "", -1, -1));
+    UI.UpdateDisplay(null);
+
+    char c;    
+    do
+    {
+      Thread.Sleep(30);
+      c = UI.GetKeyInput();
+
+      if (c == Constants.ESC || c == 'a')
+      {
+        throw new GameNotLoadedException();
+      }
+      else if (c == 'b')
+      {
+        try
+        {
+          File.Delete(existingSavePath);
+          return;
+        }
+        catch (Exception)
+        {
+          throw new GameNotLoadedException();
+        }
+      }      
+    }
+    while (true);
+  }
+
   public GameState? Create(Options options)
   {
     try
     {
       string playerName = QueryPlayerName();
 
+      foreach (var existingSave in Serialize.GetSavedGames())
+      {
+        if (existingSave.CharName.Equals(playerName, StringComparison.InvariantCultureIgnoreCase))
+        {
+          SavedGameExists(playerName, existingSave.Path);
+          break;
+        }
+      }
+      
       int seed = DateTime.Now.GetHashCode();
       //seed = -1304472701;
       //seed = 1687284549;
