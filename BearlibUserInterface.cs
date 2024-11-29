@@ -164,8 +164,7 @@ internal class BLUserInferface : UserInterface, IDisposable
         WriteSideBar(gs);
       }
 
-      if (MessageHistory.Count > 0)
-        WriteMessagesSection();
+      WriteMessagesSection();
 
       if (MenuRows.Count > 0)
       {

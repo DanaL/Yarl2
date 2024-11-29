@@ -51,7 +51,7 @@ abstract class UserInterface
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
   public bool CheatSheetMode { get; set; } = false;
-  
+
   protected List<string> MenuRows { get; set; } = [];
 
   Popup? _popup = null;
@@ -335,8 +335,44 @@ abstract class UserInterface
   protected void WritePopUp() =>  _popup?.Draw(this);
   protected void WriteConfirmation() => _confirm?.Draw(this);
 
+  void WriteCheatSheet()
+  {
+    List<(Colour, string)> w;
+    WriteLine("Commands:", ScreenHeight - 5, 0, ScreenWidth, Colours.WHITE);
+    w = [(Colours.LIGHT_BLUE, " a"), (Colours.LIGHT_GREY, ": use item  "), (Colours.LIGHT_BLUE, "c"), (Colours.LIGHT_GREY, ": close door  "),
+      (Colours.LIGHT_BLUE, "C"), (Colours.LIGHT_GREY, ": chat  "), (Colours.LIGHT_BLUE, "d"), (Colours.LIGHT_GREY, ": drop item  "),
+      (Colours.LIGHT_BLUE, "e"), (Colours.LIGHT_GREY, ": equip/unequip item")];
+    //s = "a - Use item  c - close door  C - chat  d - drop item  e - equip/unequip item"; 
+    WriteText(w, ScreenHeight - 4, 0, ScreenWidth);
+
+    w = [(Colours.LIGHT_BLUE, " f"), (Colours.LIGHT_GREY, ": fire bow  "), (Colours.LIGHT_BLUE, "F"), (Colours.LIGHT_GREY, ": bash door  "),
+      (Colours.LIGHT_BLUE, "i"), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, "M"), (Colours.LIGHT_GREY, ": view map  "),
+      (Colours.LIGHT_BLUE, "o"), (Colours.LIGHT_GREY, ": open door  ")
+    ];
+    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+
+    w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit  "),
+      (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item  "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine item  "),
+      (Colours.LIGHT_BLUE, ","), (Colours.LIGHT_GREY, ": pickup item")
+    ];
+    WriteText(w, ScreenHeight - 2, 0, ScreenWidth);
+
+    w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
+      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs")];   
+    WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
+  } 
+
   protected void WriteMessagesSection()
   {
+    if (CheatSheetMode)
+    {
+      WriteCheatSheet();
+      return;
+    }
+
+    if (MessageHistory.Count == 0)
+      return;
+
     var msgs = MessageHistory.Take(5)
                              .Select(msg => msg.Fmt);
 

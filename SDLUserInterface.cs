@@ -208,8 +208,7 @@ class SDLUserInterface : UserInterface
       SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref mainFrameLoc);
       SDL_DestroyTexture(texture);
 
-      if (MessageHistory.Count > 0)
-        WriteMessagesSection();
+      WriteMessagesSection();
 
       if (MenuRows.Count > 0)
       {
