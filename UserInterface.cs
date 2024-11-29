@@ -50,6 +50,8 @@ abstract class UserInterface
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
+  public bool CheatSheetMode { get; set; } = false;
+  
   protected List<string> MenuRows { get; set; } = [];
 
   Popup? _popup = null;

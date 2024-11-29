@@ -727,6 +727,11 @@ class Player : Actor, IPerformer, IGameEventListener
         _inputController = new LongMessagerInputer(ui, lines);
         _deferred = new NullAction();
       }
+      else if (ch == '/')
+      {
+        ui.CheatSheetMode = !ui.CheatSheetMode;
+        _deferred = new NullAction();
+      }
       else if (ch == 'M')
       {
         if (gameState.CurrDungeonID == 0)

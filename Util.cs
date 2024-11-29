@@ -88,6 +88,7 @@ class Colours
     else if (colour == PINK) return "pink";
     else if (colour == FAINT_PINK) return "faintpink";
     else if (colour == ICE_BLUE) return "iceblue";
+    else if (colour == HILITE) return "hilite";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -121,6 +122,7 @@ class Colours
     "pink" => PINK,
     "faintpink" => FAINT_PINK,
     "iceblue" => ICE_BLUE,
+    "hilite" => HILITE,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
