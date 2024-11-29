@@ -561,7 +561,7 @@ class CampaignCreator(UserInterface ui)
       //seed = 119994544;
       //seed = 1207463617;
       //seed = -921663908;
-
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();      
