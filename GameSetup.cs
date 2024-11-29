@@ -561,7 +561,8 @@ class CampaignCreator(UserInterface ui)
       //seed = 119994544;
       //seed = 1207463617;
       //seed = -921663908;
-      
+      // seed = 1899873111;
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();      
@@ -586,8 +587,9 @@ class CampaignCreator(UserInterface ui)
       welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
       welcomeText += "\n\n";
       welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
-
-      UI.SetPopup(new Popup(welcomeText, "", -1, -1));
+      welcomeText += "\n\n";
+      welcomeText += "Press [ICEBLUE /] to toggle between recent messages and command/movement key cheat sheets.";
+      UI.SetPopup(new Popup(welcomeText, "", -2, -1));
     
       gameState.ObjDb.AddToLoc(player.Loc, player);
       gameState.UpdateFoV();

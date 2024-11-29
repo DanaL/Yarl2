@@ -13,6 +13,13 @@ using System.Text;
 
 namespace Yarl2;
 
+enum CheatSheetMode
+{
+  Messages = 0,
+  Commands = 1,
+  Movement = 2
+}
+
 record struct MsgHistory(string Message, int Count)
 {
   public readonly string Fmt => Count > 1 ? $"{Message} x{Count}" : Message;
@@ -50,7 +57,7 @@ abstract class UserInterface
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
-  public bool CheatSheetMode { get; set; } = false;
+  public CheatSheetMode CheatSheetMode { get; set; } = CheatSheetMode.Messages;
 
   protected List<string> MenuRows { get; set; } = [];
 
@@ -335,7 +342,7 @@ abstract class UserInterface
   protected void WritePopUp() =>  _popup?.Draw(this);
   protected void WriteConfirmation() => _confirm?.Draw(this);
 
-  void WriteCheatSheet()
+  void WriteCommandCheatSheet()
   {
     List<(Colour, string)> w;
     WriteLine("Commands:", ScreenHeight - 5, 0, ScreenWidth, Colours.WHITE);
@@ -358,15 +365,37 @@ abstract class UserInterface
     WriteText(w, ScreenHeight - 2, 0, ScreenWidth);
 
     w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
-      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs")];   
+      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs  "),
+      (Colours.LIGHT_BLUE, "*"), (Colours.LIGHT_GREY, ": message history")];   
     WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
   } 
 
+  protected void WriteMovementCheatSheet()
+  {
+    string s = "Movement keys:   North      Northwest Northeast";
+    WriteLine(s, ScreenHeight - 5, 0, ScreenWidth, Colours.WHITE);
+    s = @"                  |                \   /";
+    WriteLine(s, ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
+    List<(Colour, string)> w = [
+      (Colours.WHITE, "          West--"), (Colours.LIGHT_BLUE, "hjkl"),
+      (Colours.WHITE, "--East"), (Colours.LIGHT_BLUE, "          y u          b  n") ];
+    WriteText(w, ScreenHeight -3, 0, ScreenWidth);
+    s = @"                 |                              /    \";
+    WriteLine(s, ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
+    s = "                South                     Southwest  Southeast";
+    WriteLine(s, ScreenHeight - 1, 0, ScreenWidth, Colours.WHITE);
+  }
+
   protected void WriteMessagesSection()
   {
-    if (CheatSheetMode)
+    if (CheatSheetMode == CheatSheetMode.Commands)
     {
-      WriteCheatSheet();
+      WriteCommandCheatSheet();
+      return;
+    }
+    else if (CheatSheetMode == CheatSheetMode.Movement)
+    {
+      WriteMovementCheatSheet();
       return;
     }
 

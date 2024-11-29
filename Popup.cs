@@ -111,7 +111,7 @@ class Popup
     LineScanner scanner = new(message);
     Words = scanner.Scan();
         
-    // preferredRow is the ideal row for the bottom of the box
+    // preferredRow is the ideal row for the bottom of the box <-- this is dumb!
     // and the preferredCol is the ideal col for the centre of it
     PreferredRow = preferredRow;
     PreferredCol = preferredCol;
