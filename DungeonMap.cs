@@ -734,7 +734,13 @@ class DungeonMap(Random rng)
 
   static void AddBridges(Map map, int height, int width, TileType riverTile, Random rng)
   {
-    var regionFinder = new RegionFinder(new DungeonPassable());
+    // Look at me using a ~closure~!!
+    int Passable(Tile tile)
+    {
+      return tile.Type == riverTile ? 1 : DijkstraMap.CostWithDoors(tile);
+    }
+
+     var regionFinder = new RegionFinder(new DungeonPassable());
     var regions = regionFinder.Find(map, false, TileType.Unknown);
     int largest = 0;
     int count = 0;
@@ -755,7 +761,7 @@ class DungeonMap(Random rng)
         // find the closest points between this region and the main/largest region
         var nearby = ClosestPts(regions[largest], regions[k]);
         var pair = nearby[rng.Next(nearby.Count)];
-        djmap.Generate(DijkstraMap.CostWithDoors, pair.Item2, 70);
+        djmap.Generate(Passable, pair.Item2, 70);
 
         var start = pair.Item1;
         var path = djmap.ShortestPath(start.Item1, start.Item2);
