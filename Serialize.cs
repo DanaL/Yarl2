@@ -495,6 +495,9 @@ internal class MapSaver
             BridgeTiles = pieces[3].Split('|').Select(Loc.FromStr).ToHashSet()
           };
           break;
+        case TileType.BusinessSign:
+          tile = new BusinessSign(pieces[2]);
+          break;
       }
 
       if (tile is not null)

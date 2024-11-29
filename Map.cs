@@ -388,10 +388,7 @@ class Landmark(string stepMessage) : Tile(TileType.Landmark)
 
   public override string StepMessage => _stepMessage;
 
-  public override string ToString()
-  {
-    return $"{(int)Type};{_stepMessage}";
-  }
+  public override string ToString() => $"{(int)Type};{_stepMessage}";
 }
 
 class Gravestone : Landmark
@@ -494,6 +491,8 @@ class BusinessSign(string stepMessage) : Tile(TileType.BusinessSign)
 
   readonly string _stepMessage = stepMessage;
   public override string StepMessage => _stepMessage;
+
+  public override string ToString() => $"{(int)Type};{_stepMessage}";
 }
 
 class TileFactory
