@@ -49,8 +49,8 @@ class MonsterDeck
     var parts = str.Split('|');
     return new MonsterDeck 
     { 
-      Monsters = [.. parts[0].Split(',')], 
-      Indexes = new Queue<int>(parts[1].Split(',').Select(int.Parse)) 
+      Monsters = [.. parts[0].Split(',')],
+      Indexes = parts[1] == "" ? [] : new Queue<int>(parts[1].Split(',').Select(int.Parse)) 
     };
   }
 }
