@@ -275,37 +275,42 @@ class Vaults
       SetItem(TreasureQuality.Uncommon);
       SetItem(TreasureQuality.Uncommon);
       SetItem(TreasureQuality.Good);
+    }
+    else
+    {
+      for (int i = 0; i < rng.Next(2, 3); i++)
+        SetItem(TreasureQuality.Good);
+    }
 
-      // place the marker on the other side of the door
-      var adj = Util.Adj4Sqs(doorRow, doorCol).Where(sq => vault.Contains(sq)).ToList();
-      if (adj.Count > 0)
-      {
-        Tile marker = GetTombMarker(ng, rng, factDb);
-        map.SetTile(adj[0], marker);
-      }
+    // place the marker on the other side of the door
+    var adj = Util.Adj4Sqs(doorRow, doorCol).Where(sq => vault.Contains(sq)).ToList();
+    if (adj.Count > 0)
+    {
+      Tile marker = GetTombMarker(ng, rng, factDb);
+      map.SetTile(adj[0], marker);
+    }
 
-      List<Loc> decorationLocs = [];
-      foreach (Loc loc in locs)
-      {
-        var adjWall = Util.Adj4Sqs(loc.Row, loc.Col)
-                          .Where(sq => map.TileAt(sq).Type == TileType.DungeonWall)
-                          .Any();
-        if (adjWall)
-          decorationLocs.Add(loc);
-      }
-      if (decorationLocs.Count > 0)
-      {
-        Landmark landmark = GetTombDecoration(rng, factDb);
-        Loc loc = decorationLocs[rng.Next(decorationLocs.Count)];
-        map.SetTile(loc.Row, loc.Col, landmark);
-      }
+    List<Loc> decorationLocs = [];
+    foreach (Loc loc in locs)
+    {
+      var adjWall = Util.Adj4Sqs(loc.Row, loc.Col)
+                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonWall)
+                        .Any();
+      if (adjWall)
+        decorationLocs.Add(loc);
+    }
+    if (decorationLocs.Count > 0)
+    {
+      Landmark landmark = GetTombDecoration(rng, factDb);
+      Loc loc = decorationLocs[rng.Next(decorationLocs.Count)];
+      map.SetTile(loc.Row, loc.Col, landmark);
+    }
 
-      bool haunted = rng.Next(5) == 0;
-      if (haunted)
-      {
-        Actor spirit = MonsterFactory.Get("shadow", objDb, rng);
-        objDb.AddNewActor(spirit, locs[rng.Next(locs.Count)]);
-      }
+    bool haunted = rng.Next(5) == 0;
+    if (haunted)
+    {
+      Actor spirit = MonsterFactory.Get("shadow", objDb, rng);
+      objDb.AddNewActor(spirit, locs[rng.Next(locs.Count)]);
     }
   }
 
