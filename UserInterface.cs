@@ -372,18 +372,16 @@ abstract class UserInterface
 
   protected void WriteMovementCheatSheet()
   {
-    string s = "Movement keys:   North      Northwest Northeast";
-    WriteLine(s, ScreenHeight - 5, 0, ScreenWidth, Colours.WHITE);
-    s = @"                  |                \   /";
-    WriteLine(s, ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
-    List<(Colour, string)> w = [
-      (Colours.WHITE, "          West--"), (Colours.LIGHT_BLUE, "hjkl"),
-      (Colours.WHITE, "--East"), (Colours.LIGHT_BLUE, "          y u          b  n") ];
-    WriteText(w, ScreenHeight -3, 0, ScreenWidth);
-    s = @"                 |                              /    \";
-    WriteLine(s, ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
-    s = "                South                     Southwest  Southeast";
-    WriteLine(s, ScreenHeight - 1, 0, ScreenWidth, Colours.WHITE);
+    List<(Colour, string)> w;
+
+    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
+    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
+    WriteLine(@"                  \ | /      SHIFT-mv key will move you in", ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
+    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l"),
+      (Colours.WHITE, "      that direction until interrupted")];
+    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+    WriteLine(@"                  / | \", ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
+    WriteLine(@"                 b  j  n", ScreenHeight - 1, 0, ScreenWidth, Colours.LIGHT_BLUE);
   }
 
   protected void WriteMessagesSection()
