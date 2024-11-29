@@ -24,7 +24,8 @@ enum TileType
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
-  BridgeTrigger, HiddenBridgeCollapseTrap, Shortcut, ShortcutDown
+  BridgeTrigger, HiddenBridgeCollapseTrap, Shortcut, ShortcutDown,
+  BusinessSign
 }
 
 interface ITriggerable
@@ -183,6 +184,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.DisturbedGrave => "a disturbed grave",
     TileType.BridgeTrigger => "pressure plate",
     TileType.HiddenBridgeCollapseTrap => "stone floor",
+    TileType.BusinessSign => "a sign",
     _ => "unknown"
   };
 
@@ -482,6 +484,16 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
       }
     }    
   }
+}
+
+class BusinessSign(string stepMessage) : Tile(TileType.BusinessSign)
+{
+  public override bool Opaque() => false;
+  public override bool Passable() => true;
+  public override bool PassableByFlight() => true;
+
+  readonly string _stepMessage = stepMessage;
+  public override string StepMessage => _stepMessage;
 }
 
 class TileFactory
