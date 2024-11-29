@@ -1244,6 +1244,25 @@ class MainDungeonBuilder : DungeonBuilder
     {    
       if (rng.Next(4) == 0)
         TunnelCarver.MakeCollapsedTunnel(id, levelNum, levels[levelNum], objDb, rng);
+
+      // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
+      //
+      //  #....
+      //  #..+.
+      //  ###..
+      for (int r = 0; r < levels[levelNum].Height; r++)
+      {
+        for (int c = 0;  c < levels[levelNum].Width; c++)
+        {
+          Map map = levels[levelNum];
+          if (map.TileAt(r, c).Type == TileType.ClosedDoor)
+          {
+            int adjFloors = Util.Adj4Sqs(r, c).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Count();
+            if (adjFloors >= 4)
+              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+          }
+        }
+      }  
     }
 
     int altarLevel = rng.Next(0, numOfLevels);
@@ -1251,7 +1270,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     PlaceLevelFiveGate(levels[4], rng, factDb);
     PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
-
+    
     return dungeon;
   }
 }
