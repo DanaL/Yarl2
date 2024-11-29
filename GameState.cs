@@ -933,8 +933,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (deck.Indexes.Count == 0)
       deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
-    Console.WriteLine($"Spawning {m.IndefArticle()}");
-    
+        
     Actor monster = MonsterFactory.Get(m, ObjDb, Rng);
     Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
     monster.Loc = spawnPoint;

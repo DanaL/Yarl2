@@ -21,7 +21,7 @@ goblin
 Green-skinned humanoids who love nothing more than chaos and harassing adventurers.
 #
 portal
-An entrance leading from the surface into a dungeon. Use the (E)nter command to enter!
+An entrance leading from the surface into a dungeon. Use the '>' command to enter!
 #
 upstairs|stairs up
 A staircase leading upwards.
