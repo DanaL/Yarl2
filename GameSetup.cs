@@ -85,7 +85,7 @@ class GameLoader(UserInterface ui)
       {
         selected = selected > 0 ? selected - 1 : files.Count - 1;        
       }
-      else if (files.Count > 0 && ch == '\n')
+      else if (files.Count > 0 && (ch == '\n' || ch == '\r'))
       {
         savePath = files[selected].Path;
         break;
@@ -94,11 +94,7 @@ class GameLoader(UserInterface ui)
       {
         throw new GameNotLoadedException();
       }
-      else if (ch != '\0')
-      {
-        Console.WriteLine("hmm");
-      }
-
+      
       if (files.Count > 0)
       {
         List<Sqr> preview = Serialize.FetchSavePreview(files[selected].Path);
