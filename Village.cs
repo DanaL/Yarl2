@@ -146,7 +146,7 @@ class Village
     return locs[rng.Next(locs.Count)];
   }
 
-  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, Random rng)
+  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob cleric = BaseVillager(ng, rng);
     cleric.Traits.Add(new NamedTrait());
@@ -157,6 +157,23 @@ class Village
     cleric.SetBehaviour(new PriestBehaviour());
     cleric.MoveStrategy = new WallMoveStrategy();
 
+    int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
+    foreach (Loc loc in town.Shrine)
+    {
+      if (loc.Row < minR) minR = loc.Row;
+      if (loc.Row > maxR) maxR = loc.Row;
+      if (loc.Col < minC) minC = loc.Col;
+      if (loc.Col > maxC) maxC = loc.Col;
+    }
+
+    int statueR = (minR + maxR) / 2;
+    int statueC = (minC + maxC) / 2;
+
+    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+    Loc statueLoc = new(0, 0, statueR, statueC);
+    statue.Traits.Add(new DescriptionTrait($"A myserious figure gazes warmly out at {town.Name}"));
+    objDb.SetToLoc(statueLoc, statue);
+    
     return cleric;
   }
 
@@ -370,7 +387,7 @@ class Village
   {
     var ng = new NameGenerator(rng, "data/names.txt");
 
-    var cleric = GeneratePriest(map, town, ng, rng);
+    var cleric = GeneratePriest(map, town, ng, objDb, rng);
     objDb.Add(cleric);
     objDb.AddToLoc(cleric.Loc, cleric);
 

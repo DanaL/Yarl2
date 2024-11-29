@@ -143,7 +143,7 @@ class TownBuilder
     switch (building)
     {
       case BuildingType.Shrine:
-        Town.Shrine = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
+        Town.Shrine = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();        
         break;
       case BuildingType.Tavern:
         Town.Tavern = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
