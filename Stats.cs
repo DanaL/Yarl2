@@ -72,13 +72,21 @@ class Stat
 
   public int ChangeMax(int delta)
   {
-    Max += delta;
+    if (delta > 0 && Max > int.MaxValue - delta)
+      Max = int.MaxValue;
+    else
+      Max += delta;
+
     return Max;
   }
 
   public int Change(int delta)
   {
-    Curr += delta;
+    if (delta > 0 && Curr > int.MaxValue - delta)
+      Curr = int.MaxValue;
+    else
+      Curr += delta;
+    
     if (Curr > Max)
       Curr = Max;
 

@@ -682,6 +682,11 @@ class Rooms
       Radius = rowRange > colRange ? rowRange : colRange
     });
     objDb.SetToLoc(statueLoc, statue);
+
+    if (factDb.FactCheck("OrchardExists") is not SimpleFact orchardExists)
+    {
+      factDb.Add(new SimpleFact() { Name = "OrchardExists", Value = "true" });
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)

@@ -935,6 +935,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
     "disarm" => new UseResult(true, "", new DisarmAction(gs, user, user.Loc), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
+    "maxheal" => new UseResult(true, "", new HealAction(gs, user, int.MaxValue, -1), null),
     "trivialheal" => new UseResult(true, "", new HealAction(gs, user, 1, 1), null),
     "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
     "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),

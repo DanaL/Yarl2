@@ -1625,8 +1625,14 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     int hpBefore = hpStat.Curr;
 
     int hp = 0;
-    for (int j = 0; j < _healDice; j++)
-      hp += GameState!.Rng.Next(_healDie) + 1;
+
+    if (_healDice == -1)
+      hp = _healDie;
+    else
+    {
+      for (int j = 0; j < _healDice; j++)
+        hp += GameState!.Rng.Next(_healDie) + 1;
+    }
     hpStat.Change(hp);
     int delta = hpStat.Curr - hpBefore;
 

@@ -50,7 +50,7 @@ class FactDb(RulerInfo ruler)
   public VillainType Villain { get; set; }
   public string VillainName { get; set; } = "";
 
-    public void Add(Fact fact)
+  public void Add(Fact fact)
   {
     if (fact is Nation nation)
       _nations.Add(nation);

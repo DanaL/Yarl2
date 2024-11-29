@@ -724,7 +724,9 @@ class DialogueInterpreter
         Loc dungoenLoc = Loc.Nowhere;
         if (gs.FactDb.FactCheck("Dungeon Entrance") is LocationFact loc)
           dungoenLoc = loc.Loc;
-        return Util.RelativeDir(mob.Loc, dungoenLoc);      
+        return Util.RelativeDir(mob.Loc, dungoenLoc);
+      case "ORCHARD_EXISTS":
+        return gs.FactDb.FactCheck("OrchardExists") is SimpleFact ? true : false;
       default:
         throw new Exception($"Unknown variable {name}");
     }    

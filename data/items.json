@@ -871,7 +871,10 @@
       "Edible",
       "Consumable",
       "Stackable",
-      "UseSimple#trivialheal",
+      "UseSimple#maxheal",
+      "SideEffect#5#BoostMaxStat#Dexterity#1",
+      "SideEffect#5#BoostMaxStat#Constitution#1",
+      "SideEffect#5#BoostMaxStat#Strength#1",
       "Hidden"
     ]
   },
