@@ -247,6 +247,8 @@ class MonsterBehaviour : IBehaviour
         return new BlinkAction(gs, mob);
       else if (act.Name == "FogCloud")
         return new FogCloudAction(gs, mob, CalcRangedTarget(mob, gs));
+      else if (act.Name == "Nudity")
+        return new InduceNudityAction(gs, mob, CalcRangedTarget(mob, gs));
       else if (act.Name == "Entangle")
         return new EntangleAction(gs, mob, CalcRangedTarget(mob, gs));
       else if (act.Name == "Web")

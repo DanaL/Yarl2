@@ -34,6 +34,7 @@ will-o-wisp 1
 phantom 1
 chilled jelly 1
 shrieker 1
+nilbog 1
 LEVEL 4
 hobgoblin 3
 goblin archer 2
@@ -51,6 +52,7 @@ creeping coins 1
 phantom 1
 chilled jelly 1
 shrieker 1
+nilbog 1
 LEVEL 5
 goblin archer 2
 goblin boss 2
@@ -60,6 +62,7 @@ giant spider 1
 screech bat 1
 cloaker 1
 owlbear 1
+nilbog 1
 duergar soldier 2
 drow warrior 2
 rust monster 1

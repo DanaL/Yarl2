@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace Yarl2;
 
 class ActionResult
@@ -1361,6 +1363,51 @@ class FogCloudAction : Action
     string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!";
     
     return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
+  }
+}
+
+class InduceNudityAction : Action
+{
+  readonly Loc _target;
+
+  public InduceNudityAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
+  {
+    GameState = gs;
+    _target = target;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (GameState!.LastPlayerFoV.Contains(GameState!.Player.Loc))
+    {
+      string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "dance")} a peculiar jig.";
+      result.Messages.Add(s);
+
+      if (GameState.ObjDb.Occupant(_target) is Actor victim)
+      {
+        var clothes = victim.Inventory.Items()
+                                      .Where(i => i.Type == ItemType.Armour && i.Equiped).ToList();
+        if (clothes.Count == 0)
+          return result;
+
+        Item item = clothes[GameState.Rng.Next(clothes.Count)];
+        victim.Inventory.RemoveByID(item.ID);
+        item.Equiped = false;
+        GameState.ItemDropped(item, victim.Loc);
+        s = $"{item.FullName.Possessive(victim).Capitalize()} falls off!";
+
+        if (GameState.LastPlayerFoV.Contains(victim.Loc))
+          result.Messages.Add(s);
+        if (victim is Player)
+          GameState.UIRef().SetPopup(new Popup(s, "", -1, 1));
+      }
+    }
+
+    return result;
   }
 }
 

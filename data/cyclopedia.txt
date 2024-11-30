@@ -20,6 +20,9 @@ Like a normal rat, but much bigger and much meaner.
 goblin
 Green-skinned humanoids who love nothing more than chaos and harassing adventurers.
 #
+nilbog
+A goblin trickster who has learned several rather irritating spells.
+#
 portal
 An entrance leading from the surface into a dungeon. Use the '>' command to enter!
 #
