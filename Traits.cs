@@ -91,7 +91,7 @@ abstract class ActionTrait : BasicTrait
   public ulong Cooldown { get; set; } = 0;
   public string Name { get; set; } = "";
 
-  public abstract ActionType ActionType { get; }
+  public virtual ActionType ActionType { get; set; }
 
   public abstract bool Available(Mob mob, GameState gs);
   protected bool InRange(Mob mob, GameState gs)
@@ -307,7 +307,7 @@ class MobMeleeTrait : ActionTrait
 class MobMissileTrait : ActionTrait
 {
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"MobMissile#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
+  public override string AsText() => $"MobMissile#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}";
   public int DamageDie { get; set; }
   public int DamageDice { get; set; }
   public DamageType DamageType { get; set; }
@@ -325,7 +325,7 @@ class MobMissileTrait : ActionTrait
 class RangedSpellActionTrait : ActionTrait
 {
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"RangedSpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
+  public override string AsText() => $"RangedSpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}";
   public override bool Available(Mob mob, GameState gs)
   {
     if (!InRange(mob, gs))
@@ -338,8 +338,8 @@ class RangedSpellActionTrait : ActionTrait
 
 class SpellActionTrait : ActionTrait
 {
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"SpellAction#{Name}#{MinRange}#{MaxRange}#{Cooldown}#";
+  public override ActionType ActionType { get; set; }
+  public override string AsText() => $"SpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}#{ActionType}";
   public override bool Available(Mob mob, GameState gs) => true;
 }
 
@@ -2354,7 +2354,8 @@ class TraitFactory
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
     { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
-    { "RangedSpellAction", (pieces, gameObj) => new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
+    { "RangedSpellAction", (pieces, gameObj) => 
+    new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
@@ -2387,14 +2388,17 @@ class TraitFactory
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
-    { "Shriek", (pieces, gameObj) =>
-      new ShriekTrait()
-      { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
+    { "Shriek", (pieces, gameObj) => new ShriekTrait() { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
     },
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
-    { "SpellAction", (pieces, gameObj) => new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]) }},
+    { "SpellAction", (pieces, gameObj) => 
+      {
+        Enum.TryParse(pieces[3], out ActionType at);
+        return new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2], ActionType = at) };
+      }  
+    },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>

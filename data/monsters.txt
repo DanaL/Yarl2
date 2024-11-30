@@ -8,7 +8,7 @@ goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14|Door|Missile#
 goblin boss       |g|green        |darkgreen   |13|10|3| 1.0|13|10|Door|Melee#8#1#Slashing|Intelligent
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|Door|Melee#8#1#Slashing|Intelligent
 kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|Door|Melee#6#1#Slashing|PoorLoot,Intelligent
-nilbog            |k|lightblue    |blue        |14|20|3| 1.0|10|14|Door|RangedSpellAction#Nudity#15#2#7,SpellAction#FogCloud#25,SpellAction#Blink#5,Melee#6#1#Slashing|Intelligent
+nilbog            |k|lightblue    |blue        |14|20|3| 1.0|10|14|Door|RangedSpellAction#Nudity#15#2#7,SpellAction#FogCloud#25,SpellAction#Blink#5#Movement,Melee#6#1#Slashing|Intelligent
 kobold foreman    |k|yelloworange |dullred     |13|20|3| 1.0|12|10|Door|Summon#15#kobold#Break's over!,Melee#5#2#Slashing|DeathMessage#The foreman says: clocking out!,Intelligent
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10|Wall||Plant,Plural,Immunity#Confusion,Brainless
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Dumb|RangedSpellAction#Web#7#2#7,Melee#9#1#Piercing|Teflon,Poisoner#13#2#20
