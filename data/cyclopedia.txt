@@ -197,5 +197,8 @@ Issued by the Greater Yendorian Tourism Bureau, these scrolls help clean up anno
 scroll of protection
 Creates a shimmering aura that will shield you from damage for a time.
 #
+scroll of identify
+Learn what an unidentified item does.
+#
 zorkmid
 Cash money, the currency of the realm.

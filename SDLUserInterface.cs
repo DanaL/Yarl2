@@ -25,6 +25,7 @@ class SDLUserInterface : UserInterface
   readonly int _fontHeight;
   Dictionary<Sqr, IntPtr> _cachedGlyphs = [];
   Dictionary<Colour, SDL_Color> _colours;
+  IntPtr _mainTexture;
 
   public SDLUserInterface(string windowTitle, Options opt) : base(opt)
   {
@@ -37,7 +38,8 @@ class SDLUserInterface : UserInterface
     int width = ScreenWidth * _fontWidth;
     int height = ScreenHeight * _fontHeight;
     _window = SDL_CreateWindow(windowTitle, 100, 100, width, height, SDL_WindowFlags.SDL_WINDOW_SHOWN | SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS);
-    _renderer = SDL_CreateRenderer(_window, -1, SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+    _renderer = SDL_CreateRenderer(_window, -1, 
+      SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
 
     _colours = [];
   }
@@ -134,15 +136,12 @@ class SDLUserInterface : UserInterface
     SDL_DestroyTexture(texture);
   }
 
-  IntPtr CreateMainTexture()
+  void UpdateMainTexture()
   {
+    SDL_SetRenderTarget(_renderer, _mainTexture);
+    
     int displayHeight = SqsOnScreen.GetLength(0);
     int displayWidth = SqsOnScreen.GetLength(1);
-    var tw = displayWidth * _fontWidth;
-    var th = displayHeight * _fontHeight;
-    var targetTexture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBX8888, (int)SDL_TextureAccess.SDL_TEXTUREACCESS_TARGET, tw, th);
-
-    SDL_SetRenderTarget(_renderer, targetTexture);
 
     for (int row = 0; row < displayHeight; row++)
     {
@@ -153,8 +152,6 @@ class SDLUserInterface : UserInterface
     }
 
     SDL_SetRenderTarget(_renderer, IntPtr.Zero);
-
-    return targetTexture;
   }
 
   protected override void WriteSq(int row, int col, Sqr sq)
@@ -204,9 +201,8 @@ class SDLUserInterface : UserInterface
         w = SqsOnScreen.GetLength(1) * _fontWidth
       };
 
-      var texture = CreateMainTexture();
-      SDL_RenderCopy(_renderer, texture, IntPtr.Zero, ref mainFrameLoc);
-      SDL_DestroyTexture(texture);
+      UpdateMainTexture();
+      SDL_RenderCopy(_renderer, _mainTexture, IntPtr.Zero, ref mainFrameLoc);
 
       WriteMessagesSection();
 
@@ -221,4 +217,13 @@ class SDLUserInterface : UserInterface
     
     SDL_RenderPresent(_renderer);
   }
+
+  // protected override void Dispose(bool disposing)
+  // {
+  //   if (disposing)
+  //   {
+  //     SDL_DestroyTexture(_mainTexture);
+  //     // ... other cleanup ...
+  //   }
+  // }
 }
