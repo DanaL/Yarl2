@@ -11,6 +11,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using Microsoft.VisualBasic;
 
 namespace Yarl2;
 
@@ -1383,9 +1384,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
     Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
-    int radius = Player.HasTrait<BlindTrait>() ? 0 : Player.MAX_VISION_RADIUS;
+    bool blind = Player.HasTrait<BlindTrait>();
+    int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
     var playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
-    HashSet<Loc> fov = [];
+    
+    // if the player is not blind, let them see adj sqs regardless of 
+    // illumination status. (If the player is surrounded by a fog cloud or such
+    // they could come back as not illumination)
+    HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
+         
     foreach (var sq in playerFoV)
     {
       Illumination playerIllum = sq.Value;

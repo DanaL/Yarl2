@@ -123,7 +123,7 @@ class FieldOfView
         var projection = ProjectTile(row, col);
         if (!line.IsInShadow(projection))
         {
-          Illumination illum = Illumination.None;
+          Illumination illum;
           var loc = origin with { Row = r, Col = c};
           if (IsOpaque(loc, map, objDb, opaqueLocs))
           {
