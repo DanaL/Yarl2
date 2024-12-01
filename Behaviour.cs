@@ -376,6 +376,12 @@ class MonsterBehaviour : IBehaviour
       }
     }
 
+    foreach (var act in actor.Actions)
+    {
+      if (act.ActionType == ActionType.Movement && _lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
+        return FromTrait(actor, act, gs);
+    }
+
     Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
     // If we ge a PassAction back, there was no viable MoveAction for
     // the mob to take.
