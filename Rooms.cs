@@ -623,7 +623,7 @@ class Rooms
     }
     else // goblins
     {      
-      boss = MonsterFactory.Get("goblin boss", objDb, rng);
+      boss = MonsterFactory.Get("hobgoblin", objDb, rng);
       boss.Name = ng.BossName();
       boss.Traits.Add(new NamedTrait());
     }

@@ -237,7 +237,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         float odds = (float)currHP / maxHP;
         if (gs.Rng.NextDouble() < odds)
         {
-          Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);
+          Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
           msg += $" {FullName.Capitalize()} turns to flee!";
         }
       }

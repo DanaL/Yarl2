@@ -9,8 +9,6 @@ shrieker 1
 LEVEL 2
 goblin 4
 hobgoblin 2
-goblin archer 2
-goblin boss 1
 skeleton 2
 zombie 2
 centipede 2
@@ -22,7 +20,6 @@ LEVEL 3
 goblin 4
 hobgoblin 3
 goblin archer 2
-goblin boss 2
 goblin firestarter
 skeleton 2
 zombie 2
@@ -38,7 +35,6 @@ nilbog 1
 LEVEL 4
 hobgoblin 3
 goblin archer 2
-goblin boss 2
 goblin firestarter 2
 giant spider 1
 screech bat 1
@@ -55,7 +51,6 @@ shrieker 1
 nilbog 1
 LEVEL 5
 goblin archer 2
-goblin boss 2
 goblin firestarter 2
 ogre 2
 giant spider 1

@@ -385,7 +385,7 @@ class TitleScreen
       {
         0 => MonsterFactory.Get("kobold", ObjDb, rng),
         1 => MonsterFactory.Get("skeleton", ObjDb, rng),
-        _ => MonsterFactory.Get("goblin boss", ObjDb, rng)
+        _ => MonsterFactory.Get("goblin", ObjDb, rng)
       };
 
       i = rng.Next(floors.Count);
