@@ -1344,25 +1344,25 @@ class FogCloudAction : Action
 
   public override ActionResult Execute()
   {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
     var gs = GameState!;
-    for (int r = _target.Row - 2; r < _target.Row + 3; r++)
+    
+    if (gs.LastPlayerFoV.Contains(_target))
+      result.Messages.Add($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!");
+
+    foreach (Loc loc in Util.LocsInRadius(_target, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
     {
-      for (int c = _target.Col - 2; c < _target.Col + 3; c++)
-      {
-        if (!gs.CurrentMap.InBounds(r, c))
-          continue;
-        var mist = ItemFactory.Mist(gs);
-        var mistLoc = _target with { Row = r, Col = c };
-        var timer = mist.Traits.OfType<CountdownTrait>().First();
-        gs.RegisterForEvent(GameEventType.EndOfRound, timer);
-        gs.ObjDb.Add(mist);
-        gs.ItemDropped(mist, mistLoc);
-      }
+      var mist = ItemFactory.Mist(gs);
+      var timer = mist.Traits.OfType<CountdownTrait>().First();
+      gs.RegisterForEvent(GameEventType.EndOfRound, timer);
+      gs.ObjDb.Add(mist);
+      gs.ItemDropped(mist, loc);
     }
 
-    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!";
-    
-    return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
+    return result;
   }
 }
 
@@ -1403,7 +1403,7 @@ class InduceNudityAction : Action
         if (GameState.LastPlayerFoV.Contains(victim.Loc))
           result.Messages.Add(s);
         if (victim is Player)
-          GameState.UIRef().SetPopup(new Popup(s, "", -1, 1));
+          GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
       }
     }
 

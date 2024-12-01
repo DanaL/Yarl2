@@ -2396,7 +2396,7 @@ class TraitFactory
     { "SpellAction", (pieces, gameObj) => 
       {
         Enum.TryParse(pieces[3], out ActionType at);
-        return new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2], ActionType = at) };
+        return new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]), ActionType = at };
       }  
     },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },

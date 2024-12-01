@@ -427,6 +427,9 @@ class GameObjectDB
       value.Remove(item);
     Objs.Remove(item.ID);
 
+    if (_itemLocs.TryGetValue(item.Loc, out var items))
+      items.Remove(item);
+    
     foreach (Trait t in item.Traits.Where(t => t is IGameEventListener))
     {
       EndOfRoundListeners.Remove((IGameEventListener)t);  

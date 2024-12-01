@@ -396,8 +396,6 @@ class MonsterBehaviour : IBehaviour
 
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
-    if (actor.Name == "nilbog")
-      Console.WriteLine();
     if (actor.HasActiveTrait<ParalyzedTrait>())
       return new PassAction();
     if (actor.HasTrait<SleepingTrait>())
