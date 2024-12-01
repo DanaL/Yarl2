@@ -1,0 +1,5 @@
+Delve is a dungeon-crawling, traditional roguelike where you take the role of a novice adventurer come to an isolated village after hearing rumours of a looming evil threatening to overwhelm it.
+
+This version of game should be considered pre-alpha, an early release to get feedback on the game system and direction so far. It has a derth of content and the Dungeon only extends to level 5.
+
+Delve is licensed under the Creative Commons CC0 license and to the greatest extent possible is released to the public domain. You can find its source code here on GitHub: https://github.com/DanaL/Yarl2

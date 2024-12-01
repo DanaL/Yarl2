@@ -60,7 +60,7 @@ class TitleScreen
       "",
       " a) load game",
       " b) begin new adventure",
-      " c) options",
+      " c) about delve",
       " q) quit delve"
     ];
 
@@ -98,10 +98,15 @@ class TitleScreen
       Thread.Sleep(30);
       c = UI.GetKeyInput();
 
+      if (c != '\0')
+        UI.ClosePopup();
+
       if (c == 'a')
         return SetupType.LoadGame;
       else if (c == 'b')
         return SetupType.NewGame;
+      else if (c == 'c')
+        AboutPopup();
       else if (c == 'q')
         return SetupType.Quit;
         
@@ -115,6 +120,12 @@ class TitleScreen
       UI.UpdateDisplay(null);
     }
     while (true);
+  }
+
+  void AboutPopup()
+  {
+    string text = File.ReadAllText("data/about.txt");
+    UI.SetPopup(new Popup(text, "", -1, -1, UserInterface.ScreenWidth - 20), true);
   }
 
   void UpdatePlayer()

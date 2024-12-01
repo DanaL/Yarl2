@@ -94,7 +94,8 @@ class Popup
   readonly int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
-    
+  public bool FullWidth { get; set; }
+
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     int widthGuess = GuessWidth(message);
@@ -122,7 +123,9 @@ class Popup
   public void Draw(UserInterface ui)
   {
     int col, row;
-    if (PreferredCol == -1)
+    if (PreferredCol == -1 && FullWidth)
+      col = (UserInterface.ScreenWidth - Width) / 2;
+    else if (PreferredCol == -1)
       col = (UserInterface.ViewWidth - Width) / 2;
     else
       col = PreferredCol - (Width / 2);
