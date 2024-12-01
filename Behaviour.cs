@@ -746,8 +746,15 @@ class NPCBehaviour : IBehaviour, IDialoguer
     {
       Loc loc = Util.RandomAdjLoc(actor.Loc, gameState);
       TileType tile = gameState.TileAt(loc).Type;
-      if (!gameState.ObjDb.Occupied(loc) && (tile == TileType.WoodFloor || tile == TileType.StoneFloor))
-        return new MoveAction(gameState, actor, loc);      
+      
+      if (gameState.ObjDb.Occupied(loc))
+        return new PassAction();
+      if (gameState.ObjDb.BlockersAtLoc(loc))
+        return new PassAction();
+      if (!(tile == TileType.WoodFloor || tile == TileType.StoneFloor))
+        return new PassAction();
+      
+      return new MoveAction(gameState, actor, loc);      
     }
     
     return new PassAction();    
