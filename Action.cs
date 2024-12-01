@@ -1632,9 +1632,15 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
       var mv = new MoveAction(GameState, Actor, landingSpot);
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
-      string msg = $"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!";
 
-      return new ActionResult() { Complete = false, Messages = [msg], EnergyCost = 0.0, AltAction = mv };
+      ActionResult result = base.Execute();
+      result.Complete = false;
+      result.EnergyCost = 0.0;
+      result.AltAction = mv;
+      if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+        result.Messages.Add($"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!");
+
+      return result;
     }
   }
 }
