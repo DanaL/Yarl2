@@ -416,6 +416,7 @@ class CampaignCreator(UserInterface ui)
     Map wildernessMap;
     Town town;
     int startR, startC;
+    int wildernessWidth = 129;
 
     do
     {
@@ -423,7 +424,7 @@ class CampaignCreator(UserInterface ui)
       {
         campaign = new Campaign();
         wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
-        var wildernessGenerator = new Wilderness(rng, 129);
+        var wildernessGenerator = new Wilderness(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
 
         // Redraw map if there aren't enough mountains
@@ -465,7 +466,37 @@ class CampaignCreator(UserInterface ui)
         }
         var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
 
-        DrawOldRoad(wildernessMap, mainRegion, 129, entrance, town, rng);
+        DrawOldRoad(wildernessMap, mainRegion, wildernessWidth, entrance, town, rng);
+
+        // Add a dash of devestation around the dungeon entrance
+        foreach (var loc in Util.LocsInRadius(new(0, 0, entrance.Item1, entrance.Item2), 5, wildernessWidth, wildernessWidth))
+        {
+          Tile tile = wildernessMap.TileAt(loc.Row, loc.Col);
+          if (tile.Type == TileType.Grass) 
+          {
+            Tile replacement = TileFactory.Get(rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.CharredGrass);
+            wildernessMap.SetTile(loc.Row, loc.Col, replacement);
+          }
+          else if (tile.IsTree()) 
+          {
+            Tile replacement = TileFactory.Get(rng.NextDouble() < 0.3 ? TileType.Dirt : TileType.CharredStump);
+            wildernessMap.SetTile(loc.Row, loc.Col, replacement);
+          }
+        }
+        foreach (var (r, c) in Util.BresenhamCircle(entrance.Item1, entrance.Item2, 6))
+        {
+          Tile tile = wildernessMap.TileAt(r, c);
+          if (tile.Type == TileType.Grass) 
+          {
+            Tile replacement = TileFactory.Get(rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.CharredGrass);
+            wildernessMap.SetTile(r, c, replacement);
+          }
+          else if (tile.IsTree()) 
+          {
+            Tile replacement = TileFactory.Get(rng.NextDouble() < 0.3 ? TileType.Dirt : TileType.CharredStump);
+            wildernessMap.SetTile(r, c, replacement);
+          }
+        }
 
         var history = new History(rng);
         FactDb factDb = history.GenerateHistory(rng);
@@ -481,10 +512,6 @@ class CampaignCreator(UserInterface ui)
 
         PrinceOfRats(mainDungeon, objDb, rng);
         factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Prince of Rats" });
-
-        // var dBuilder = new ArenaBuilder();
-        // var mainDungeon = dBuilder.Generate(1, entrance, objDb, rng);
-        // PopulateArena(rng, objDb, mainDungeon);
 
         campaign.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
@@ -583,7 +610,7 @@ class CampaignCreator(UserInterface ui)
       //seed = 119994544;
       //seed = 1207463617;
       //seed = -921663908;
-      
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();      
