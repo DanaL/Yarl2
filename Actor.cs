@@ -409,17 +409,6 @@ class MonsterFactory
     }
   }
 
-  static MoveStrategy TextToMove(string txt) => txt.ToLower() switch
-  {
-    "door" => new DoorOpeningMoveStrategy(),
-    "flying" or "floating" => new SimpleFlightMoveStrategy(),
-    "wall" => new WallMoveStrategy(),
-    _ => new DumbMoveStrategy()
-  };
-
-  //       0       1    2      3   4   5           6         7    8    9       10        11       
-  // name, symbol, lit, unlit, AC, HP, Attack Mod, Recovery, Str, Dex, Movement, Actions, Other Traits 
-  // skeleton        |z|white        |darkgrey    |12| 8|2| 1.0|12|10|Dumb|Melee#6#1#Slashing|Immunity#Confusion,Immunity#Poison,ResistPiercing
   public static Actor Get(string name, GameObjectDB objDb, Random rng)
   {
     if (_catalog.Count == 0)
@@ -434,13 +423,11 @@ class MonsterFactory
     var glyph = new Glyph(ch, Colours.TextToColour(fields[1]),
                                 Colours.TextToColour(fields[2]), Colours.BLACK, Colours.BLACK);
 
-    var mv = TextToMove(fields[9]);
     var m = new Mob()
     {
       Name = name,
       Glyph = glyph,
-      Recovery = double.Parse(fields[6]),
-      MoveStrategy = mv
+      Recovery = double.Parse(fields[6])
     };
 
     int hp = int.Parse(fields[4]);
@@ -456,27 +443,46 @@ class MonsterFactory
     int attitude = rng.NextDouble() <= 0.8 ? Mob.INDIFFERENT : Mob.AGGRESSIVE;
     m.Stats.Add(Attribute.MobAttitude, new Stat(attitude));
 
-    if (fields[10] != "")
+    if (fields[9] != "")
     {
-      foreach (var actionTxt in fields[10].Split(','))
+      foreach (var actionTxt in fields[9].Split(','))
       {
         m.Actions.Add((ActionTrait)TraitFactory.FromText(actionTxt, m));
       }
     }
 
-    if (!string.IsNullOrEmpty(fields[11]))
+    bool flying = false;
+    bool immobile = false;
+    bool intelligent = false;
+    if (!string.IsNullOrEmpty(fields[10]))
     {
-      foreach (var traitTxt in fields[11].Split(','))
+      foreach (var traitTxt in fields[10].Split(','))
       {
         var trait = TraitFactory.FromText(traitTxt, m);
         m.Traits.Add(trait);
 
         if (trait is IGameEventListener listener)
         {
-          objDb.EndOfRoundListeners.Add(listener);
+          objDb.EndOfRoundListeners.Add(listener);                     
         }
+
+        if (trait is FlyingTrait || trait is FloatingTrait)
+            flying = true;
+        else if (trait is IntelligentTrait)
+          intelligent = true;
+        else if (trait is ImmobileTrait)
+          immobile = true; 
       }
     }
+
+   if (flying)
+      m.MoveStrategy = new SimpleFlightMoveStrategy();
+    else if (intelligent)
+      m.MoveStrategy = new DoorOpeningMoveStrategy();
+    else if (immobile)
+      m.MoveStrategy = new WallMoveStrategy();
+    else
+      m.MoveStrategy = new DumbMoveStrategy();
 
     // Yes, I will write code just to insert a joke/Simpsons reference
     // into the game

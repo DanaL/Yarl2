@@ -1066,6 +1066,12 @@ class DisplacementTrait : Trait
   public override string AsText() => $"Displacement";
 }
 
+// For monsters who don't move (plants, etc)
+class ImmobileTrait : Trait
+{
+  public override string AsText() => $"Immobile";
+}
+
 class IllusionTrait : BasicTrait, IGameEventListener
 {
   public ulong SourceID {  get; set; }
@@ -2282,6 +2288,7 @@ class TraitFactory
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
+    { "Immobile", (pieces, gameObj) => new ImmobileTrait() },
     { "Immunity", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out DamageType dt);
       ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
