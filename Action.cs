@@ -211,7 +211,7 @@ class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
         if (!GameState.CurrentMap.InBounds(r, c))
           continue;
         Loc loc = Actor.Loc with { Row = r, Col = c };
-        if (GameState.ObjDb.Occupant(loc) is Mob mob)
+        if (GameState.ObjDb.Occupant(loc) is Mob mob && mob.Stats.ContainsKey(Attribute.MobAttitude))
         {
           Stat attittude = mob.Stats[Attribute.MobAttitude];
           if (attittude.Curr != Mob.AFRAID)
