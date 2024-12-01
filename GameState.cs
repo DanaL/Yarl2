@@ -1382,6 +1382,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void UpdateFoV()
   {
+    //var stackTrace = new System.Diagnostics.StackTrace();
+    //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
+    //Console.WriteLine($"UpdateFoV called by: {callingMethod}");
     CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
     Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
     bool blind = Player.HasTrait<BlindTrait>();
@@ -1392,7 +1395,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // illumination status. (If the player is surrounded by a fog cloud or such
     // they could come back as not illumination)
     HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
-         
+
     foreach (var sq in playerFoV)
     {
       Illumination playerIllum = sq.Value;

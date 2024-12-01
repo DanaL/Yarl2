@@ -798,6 +798,9 @@ abstract class UserInterface
       ActionResult result;
       do
       {
+        if (performer is Player)
+          gs.UpdateFoV();
+
         result = action!.Execute();
 
         // I don't think I need to look over IPerformer anymore? The concept of 
@@ -816,7 +819,8 @@ abstract class UserInterface
         if (result.Messages.Count > 0)
           AlertPlayer(result.Messages);
 
-        gs.UpdateFoV();
+        if (performer is Player)
+          gs.UpdateFoV();
       }
       while (result.AltAction is not null);
     }
