@@ -283,7 +283,7 @@ class Aimer : Inputer
       _targeted = next;
     }
 
-    else if (ch == '\n' || ch == '\r')
+    else if (ch == '\n' || ch == '\r' || ch == 'f')
     {
       Done = true;
       Success = true;

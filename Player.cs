@@ -649,7 +649,7 @@ class Player : Actor, IPerformer, IGameEventListener
         }
         else
         {          
-          string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
+          string instructions = "* Use move keys or TAB through targets;\n  Enter or f to select target\n  (ESC to abort) *";
           Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Fire what?", Instructions = instructions });
           _inputController = new Inventorier([.. Inventory.UsedSlots()]);
           _deferred = new FireSelectedBowAction(gameState, this);
@@ -665,7 +665,7 @@ class Player : Actor, IPerformer, IGameEventListener
         // Eventually I'll want to remember the last item thrown
         // so the player doesn't need to always select an item if
         // they're throwing draggers several turns in a row
-        string instructions = "* Use move keys to move to target\n  or TAB through targets;\n  Enter to select or ESC to abort *";
+        string instructions = "* Use move keys or TAB through targets;\n  Enter or f to select target\n  (ESC to abort) *";
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?", Instructions = instructions });
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
