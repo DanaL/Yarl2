@@ -374,6 +374,54 @@ class Village
     return pup;
   }
 
+  public static void RefreshGrocerInventory(Mob grocer, GameObjectDB objDb, Random rng)
+  {
+    List<Item> currStock = grocer.Inventory.Items();
+
+    foreach (Item item in currStock)
+    {
+      if (rng.NextDouble() < 0.2)
+      {
+        grocer.Inventory.RemoveByID(item.ID);
+        objDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = rng.Next(1, 4);
+    for (int j = 0; j < newStock; j++)
+    {
+      int roll = rng.Next(13);
+      if (roll < 3)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
+      else if (roll < 5)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), grocer.ID);
+      else if (roll == 6)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), grocer.ID);
+      else if (roll == 7)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb), grocer.ID);
+      else if (roll == 8)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), grocer.ID);
+      else if (roll == 9)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), grocer.ID);
+      else if (roll == 10)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), grocer.ID);
+      else if (roll == 11)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), grocer.ID);
+      else if (roll == 12)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), grocer.ID);
+    }
+
+    // Grocer always keeps a few torches in stock
+    bool torchesInStock = grocer.Inventory.Items().Any(i => i.Name == "torch");
+    if (!torchesInStock)
+    {
+      for (int j = 0; j < rng.Next(2, 5); j++)
+      {
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
+      }
+    }
+  }
+
   public static void RefreshSmithInventory(Mob smith, GameObjectDB objDb, Random rng)
   {
      List<Item> currStock = smith.Inventory.Items();

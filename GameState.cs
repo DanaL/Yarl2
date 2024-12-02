@@ -161,6 +161,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           smith.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
         }
       }
+
+      fact = FactDb.FactCheck("GrocerId") as SimpleFact ?? throw new Exception("GrocerId should never be null!");
+      ulong grocerId = ulong.Parse(fact.Value);
+      if (ObjDb.GetObj(grocerId) is Mob grocer)
+      {
+        int lastRefresh = grocer.Stats[Attribute.InventoryRefresh].Curr;
+        if (Turn > (ulong)lastRefresh + 750) 
+        { 
+          Village.RefreshGrocerInventory(grocer, ObjDb, Rng);
+          grocer.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
+        }
+      }
     }
   }
 
