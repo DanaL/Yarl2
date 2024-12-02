@@ -11,7 +11,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using Microsoft.VisualBasic;
 
 namespace Yarl2;
 
@@ -49,7 +48,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   public ulong LastTarget { get; set; } = 0;
-  public FactDb? FactDb => Campaign.FactDb;
+  public FactDb FactDb => Campaign.FactDb ?? throw new Exception("FactDb should never be null!");
 
   UserInterface UI { get; set; } = ui;
 
@@ -146,6 +145,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UIRef().SetPopup(new Popup(alerts, "", 6, -1, alerts.Length));
       UIRef().AlertPlayer(alerts);
       CurrentDungeon.LevelMaps[CurrLevel].Alerts = [];
+    }
+
+    // If the player is returning to the overworld, is there any maintenance we need to do?
+    if (dungeon == 0)
+    {
+      SimpleFact fact = FactDb.FactCheck("SmithId") as SimpleFact ?? throw new Exception("SmithId should never be null!");
+      ulong smithId = ulong.Parse(fact.Value);
+      if (ObjDb.GetObj(smithId) is Mob smith)
+      {
+        int lastRefresh = smith.Stats[Attribute.InventoryRefresh].Curr;
+        if (Turn > (ulong)lastRefresh + 750)
+          Village.RefreshSmithInventory(smith, ObjDb, Rng);        
+      }
     }
   }
 

@@ -46,7 +46,8 @@ enum Attribute
   SwordUse,  
   MetPlayer,
   ShopMenu,
-  MobAttitude
+  MobAttitude,
+  InventoryRefresh
 }
 
 class Stat

@@ -64,20 +64,9 @@ class Village
   static string VillagerAppearance(Random rng)
   {
     string[] species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
-    string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded", "watery"];
-    string[] hair = ["bald",
-      "long",
-      "short",
-      "frizzy",
-      "stylish",
-      "unkempt",
-      "messy",
-      "fashionable",
-      "perfurmed",
-      "unwashed",
-      "tousled",
-      "curly",
-      "wavy"];
+    string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded", "watery", "cold", "twinkling"];
+    string[] hair = ["bald", "long", "short", "frizzy", "stylish", "unkempt", "messy", "fashionable",
+      "perfurmed", "unwashed", "tousled", "curly", "wavy"];
 
     int r = rng.Next(3);
     var appearance = new StringBuilder();
@@ -182,10 +171,11 @@ class Village
     Mob grocer = BaseVillager(ng, rng);
     grocer.Traits.Add(new NamedTrait());
     grocer.Traits.Add(new VillagerTrait());
-
+    
     grocer.Loc = LocForVillager(map, town.Market, rng);
     grocer.MoveStrategy = new WallMoveStrategy();
     grocer.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
+    grocer.Stats[Attribute.InventoryRefresh] = new Stat(1);
     grocer.SetBehaviour(new GrocerBehaviour());
 
     grocer.Inventory = new Inventory(grocer.ID, objDb);
@@ -217,10 +207,11 @@ class Village
     Mob smith = BaseVillager(ng, rng);
     smith.Traits.Add(new NamedTrait());
     smith.Traits.Add(new VillagerTrait());
-
+    
     smith.Loc = LocForVillager(map, town.Smithy, rng);
     smith.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
     smith.Stats[Attribute.ShopMenu] = new Stat(0);
+    smith.Stats[Attribute.InventoryRefresh] = new Stat(1);
     smith.SetBehaviour(new SmithBehaviour());
     smith.MoveStrategy = new WallMoveStrategy();
 
@@ -383,7 +374,45 @@ class Village
     return pup;
   }
 
-  public static void Populate(Map map, Town town, GameObjectDB objDb, History history, Random rng)
+  public static void RefreshSmithInventory(Mob smith, GameObjectDB objDb, Random rng)
+  {
+     List<Item> currStock = smith.Inventory.Items();
+
+    foreach (Item item in currStock)
+    {
+      if (rng.NextDouble() < 0.2)
+      {
+        smith.Inventory.RemoveByID(item.ID);
+        objDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = rng.Next(1, 5);
+    for (int j = 0; j < newStock; j++)
+    {
+      int roll = rng.Next(10);
+      if (roll == 0)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, objDb), smith.ID);
+      else if (roll == 1)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, objDb), smith.ID);
+      else if (roll == 3)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.BATTLE_AXE, objDb), smith.ID);
+      else if (roll == 4)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
+      else if (roll == 5)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_DAGGER, objDb), smith.ID);
+      else if (roll == 6)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.GUISARME, objDb), smith.ID);
+      else if (roll == 7)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
+      else if (roll == 8)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
+      else if (roll == 9)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
+    }
+  }
+
+  public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
   {
     var ng = new NameGenerator(rng, "data/names.txt");
 
@@ -394,10 +423,12 @@ class Village
     var smith = GenerateSmith(map, town, ng, objDb, rng);
     objDb.Add(smith);
     objDb.AddToLoc(smith.Loc, smith);
+    factDb.Add(new SimpleFact() { Name = "SmithId", Value = smith.ID.ToString() });
 
     var grocer = GenerateGrocer(map, town, ng, objDb, rng);
     objDb.Add(grocer);
     objDb.AddToLoc(grocer.Loc, grocer);
+    factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
 
     var pup = GeneratePuppy(map, town, objDb, rng);
     objDb.Add(pup);

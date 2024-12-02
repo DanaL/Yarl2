@@ -1259,7 +1259,7 @@ class MainDungeonBuilder : DungeonBuilder
           {
             int adjFloors = Util.Adj4Sqs(r, c).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Count();
             if (adjFloors >= 4)
-              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+               map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
           }
         }
       }  

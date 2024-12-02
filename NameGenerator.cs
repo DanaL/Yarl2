@@ -74,7 +74,6 @@ namespace Yarl2
 
       if (rng.NextDouble() < 0.6)
       {
-        Console.WriteLine("flag");
         var allPrefixes = rng.NextDouble() < 0.6 ? prefixes : historicalPrefixes;
         name = allPrefixes[rng.Next(allPrefixes.Length)] + " ";
       }
@@ -116,12 +115,8 @@ namespace Yarl2
         }
       }
 
-      _starts = starts.Select(kvp => (kvp.Key, kvp.Value))
-                      .OrderByDescending(p => p.Value)
-                      .ToList();
-      _pairs = pairFrequencies.Select(kvp => (kvp.Key, kvp.Value))
-                               .OrderByDescending(p => p.Value)
-                               .ToList();
+      _starts = [.. starts.Select(kvp => (kvp.Key, kvp.Value)).OrderByDescending(p => p.Value)];
+      _pairs = [.. pairFrequencies.Select(kvp => (kvp.Key, kvp.Value)).OrderByDescending(p => p.Value)];
     }
 
     private string RandomSyllable(char startsWith)
