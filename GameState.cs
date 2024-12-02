@@ -156,7 +156,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         int lastRefresh = smith.Stats[Attribute.InventoryRefresh].Curr;
         if (Turn > (ulong)lastRefresh + 750)
-          Village.RefreshSmithInventory(smith, ObjDb, Rng);        
+        {
+          Village.RefreshSmithInventory(smith, ObjDb, Rng);
+          smith.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
+        }
       }
     }
   }

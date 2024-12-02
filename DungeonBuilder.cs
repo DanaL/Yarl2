@@ -11,6 +11,7 @@
 
 // Herein is the code for building the main dungeon of the game
 
+using System.Reflection.Emit;
 using System.Text;
 
 namespace Yarl2;
@@ -894,7 +895,6 @@ class MainDungeonBuilder : DungeonBuilder
       if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
       {
         int level = rng.Next(1, levels.Length);
-        Console.WriteLine($"Graveyard on level {level}");
         graveyardOnLevel = rng.Next(1, levels.Length);
         plagueDesc = disaster.Desc.CapitalizeWords();
       }
@@ -932,6 +932,11 @@ class MainDungeonBuilder : DungeonBuilder
       {
         int roomId = rng.Next(rooms.Count);
 
+        if (level == 0 && IsEntranceHall(levels[level], rooms[roomId]))
+        {
+          continue;
+        }
+        
         switch (rng.Next(4))
         {
           case 0:
@@ -970,6 +975,17 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
     }
+  }
+
+  static bool IsEntranceHall(Map map, List<(int, int)> sqs)
+  {
+    foreach (var sq in sqs)
+    {
+      if (map.TileAt(sq).Type == TileType.Upstairs)      
+        return true;      
+    }
+
+    return false;
   }
 
   static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Random rng, FactDb factDb)
