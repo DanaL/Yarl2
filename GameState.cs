@@ -1136,7 +1136,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     var sb = new StringBuilder();
-    sb.Append(map.TileAt(loc.Row, loc.Col).StepMessage);
+    Tile tile = map.TileAt(loc.Row, loc.Col);
+    sb.Append(tile.StepMessage);
+    if (tile.Type == TileType.BusinessSign)
+      UIRef().SetPopup(new Popup(tile.StepMessage, "", 6, -1));
+
 
     Dictionary<Item, int> items = [];
     foreach (var item in ObjDb.VisibleItemsAt(loc))
