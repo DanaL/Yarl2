@@ -560,6 +560,17 @@ class VillagePupBehaviour : IBehaviour
   }
 }
 
+class InnkeeperBehaviour : NPCBehaviour
+{
+  public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  {
+    var acc = new InnkeeperInputer(actor, gameState);
+    var action = new ShoppingCompletedAction(gameState, actor);
+
+    return (action, acc);    
+  }
+}
+
 class PriestBehaviour : NPCBehaviour
 {
   DateTime _lastIntonation = new(1900, 1, 1);

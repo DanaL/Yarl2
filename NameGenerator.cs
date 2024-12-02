@@ -91,6 +91,40 @@ namespace Yarl2
       return name;
     }
 
+    public static string GenerateTavernName(Random rng)
+  {
+    string[] adjectives = 
+      [
+        "Rusty", "Golden", "Silver", "Bronze", "Iron", "Wooden", "Broken",
+        "Sleeping", "Dancing", "Laughing", "Drunken", "Thirsty", "Hungry",
+        "Wandering", "Pickled", "Jolly", "Merry", "Lucky", "Brave", "Wild",
+        "Soggy", "Rusty", "Black"
+      ];
+
+      string[] nouns = 
+      [
+        "Dragon", "Knight", "Sword", "Shield", "Barrel", "Duck", "Wizard", "Tortoise",
+        "Dwarf", "Elf", "Ranger", "Warrior", "Rogue", "Bear", "Lion", "Pike",
+        "Horse", "Stag", "Wolf", "Boar", "Eagle", "Hippo", "Rabbit", "Woodchuck"
+      ];
+
+      string[] endings = 
+      [
+        "Inn", "Tavern", "Home", "Lodge", "House", "Pub", "Arms",
+        "& Flagon", "& Barrel", "& Tankard", "& Cup", "& Fork", "& Quill"
+      ];
+
+      // Different name patterns
+      int pattern = rng.Next(4);
+      return pattern switch
+      {
+          0 => $"the {adjectives[rng.Next(adjectives.Length)]} {nouns[rng.Next(nouns.Length)]}",
+          1 => $"the {nouns[rng.Next(nouns.Length)]} {endings[rng.Next(endings.Length)]}",
+          2 => $"the {adjectives[rng.Next(adjectives.Length)]} {endings[rng.Next(endings.Length)]}",
+          _ => $"the {nouns[rng.Next(nouns.Length)]} & {nouns[rng.Next(nouns.Length)]}"
+      };
+    }
+
     public NameGenerator(Random rng, string sourceFile)
     {
       _rng = rng;

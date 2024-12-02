@@ -65,7 +65,7 @@ class Village
   {
     string[] species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
     string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded", "watery", "cold", "twinkling"];
-    string[] hair = ["bald", "long", "short", "frizzy", "stylish", "unkempt", "messy", "fashionable",
+    string[] hair = ["bald", "long", "short", "frizzy", "stylish", "unkempt", "messy", "fashionable", "thinning",
       "perfurmed", "unwashed", "tousled", "curly", "wavy"];
 
     int r = rng.Next(3);
@@ -97,12 +97,16 @@ class Village
   static Mob BaseVillager(NameGenerator ng, Random rng)
   {
     var (lit, unlit) = VillagerColour(rng);
-    return new Mob()
+    Mob mob = new()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
       Glyph = new Glyph('@', lit, unlit, Colours.BLACK, Colours.BLACK)
     };
+    mob.Traits.Add(new VillagerTrait());
+    mob.Traits.Add(new NamedTrait());
+
+    return mob;
   }
 
   // Pick a location inside a building (based on it being a floor screen) 
@@ -135,11 +139,31 @@ class Village
     return locs[rng.Next(locs.Count)];
   }
 
+  static Mob GenerateInnkeeper(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  {
+    Mob innkeeper = BaseVillager(ng, rng);
+    innkeeper.MoveStrategy = new WallMoveStrategy();
+    innkeeper.SetBehaviour(new InnkeeperBehaviour());
+    
+    var tavernSqs = town.Tavern.ToList();
+    do
+    {
+      Loc loc = tavernSqs[rng.Next(tavernSqs.Count)];
+      var tile = map.TileAt(loc.Row, loc.Col).Type;
+      if ((tile == TileType.WoodFloor || tile == TileType.StoneFloor) && !objDb.Occupied(loc))
+      {
+        innkeeper.Loc = loc;
+        break;
+      }
+    }
+    while (true);
+
+    return innkeeper;
+  }
+
   static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob cleric = BaseVillager(ng, rng);
-    cleric.Traits.Add(new NamedTrait());
-    cleric.Traits.Add(new VillagerTrait());
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "priest.txt" });
 
     cleric.Loc = LocForVillager(map, town.Shrine, rng);
@@ -169,8 +193,6 @@ class Village
   static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob grocer = BaseVillager(ng, rng);
-    grocer.Traits.Add(new NamedTrait());
-    grocer.Traits.Add(new VillagerTrait());
     
     grocer.Loc = LocForVillager(map, town.Market, rng);
     grocer.MoveStrategy = new WallMoveStrategy();
@@ -259,8 +281,6 @@ class Village
   static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob mayor = BaseVillager(ng, rng);
-    mayor.Traits.Add(new NamedTrait());
-    mayor.Traits.Add(new VillagerTrait());
     mayor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "mayor.txt" });
 
     var homeID = PickUnoccuppiedCottage(town, rng);
@@ -275,8 +295,6 @@ class Village
   static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob veteran = BaseVillager(ng, rng);
-    veteran.Traits.Add(new NamedTrait());
-    veteran.Traits.Add(new VillagerTrait());
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
     veteran.MoveStrategy = new WallMoveStrategy();
@@ -301,8 +319,6 @@ class Village
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob villager = BaseVillager(ng, rng);
-    villager.Traits.Add(new NamedTrait());
-    villager.Traits.Add(new VillagerTrait());
     villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
 
     int homeID  = PickUnoccuppiedCottage(town, rng);
@@ -317,8 +333,6 @@ class Village
   static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Random rng)
   {
     Mob widower = BaseVillager(ng, rng);
-    widower.Traits.Add(new NamedTrait());
-    widower.Traits.Add(new VillagerTrait());
     widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
 
     int homeID = PickUnoccuppiedCottage(town, rng);
@@ -477,6 +491,11 @@ class Village
     objDb.Add(grocer);
     objDb.AddToLoc(grocer.Loc, grocer);
     factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
+
+    var innkeeper = GenerateInnkeeper(map, town, ng, objDb, rng);
+    objDb.Add(innkeeper);
+    objDb.AddToLoc(innkeeper.Loc, innkeeper);
+    factDb.Add(new SimpleFact() { Name = "TavernName", Value = NameGenerator.GenerateTavernName(rng) });
 
     var pup = GeneratePuppy(map, town, objDb, rng);
     objDb.Add(pup);

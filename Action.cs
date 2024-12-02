@@ -632,6 +632,35 @@ class RepairItemAction : Action
   }
 }
 
+class InnkeeperServiceAction : Action
+{
+  readonly Mob _innkeeper;
+  int Invoice { get; set; } = 0;
+  string Service { get; set; } = "";
+
+  public InnkeeperServiceAction(GameState gs, Mob innkeeper)
+  {
+    GameState = gs;
+    _innkeeper = innkeeper;
+  }
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var serviceResult = (ServiceResult)result;
+    Invoice = serviceResult.Zorkminds;
+    Service = serviceResult.Service;
+  }
+}
+
 class PriestServiceAction : Action
 {
   readonly Mob _priest;
@@ -668,7 +697,7 @@ class PriestServiceAction : Action
 
   public override void ReceiveUIResult(UIResult result)
   {
-    var serviceResult = (PriestServiceUIResult) result;
+    var serviceResult = (ServiceResult) result;
     Invoice = serviceResult.Zorkminds;
     Service = serviceResult.Service;
   }

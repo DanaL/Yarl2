@@ -211,6 +211,57 @@ class ShopMenuInputer : Inputer
   }
 }
 
+class InnkeeperInputer : Inputer
+{
+  GameState GameState { get; set; } 
+  Actor Shopkeeper { get; set; }
+  
+  public InnkeeperInputer(Actor shopkeeper, GameState gs) { 
+    Shopkeeper = shopkeeper;
+    GameState = gs;
+
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+      return;
+    }
+  }
+
+  string Blurb()
+  {
+    return GameState.Rng.Next(4) switch
+    {
+      0 => "Come to sooth your dusty throat? We've got just your poison!",
+      1 => "What'll it be?",
+      2 => "They say good tips lead to good karma!",
+      _ => "Ah! A brave adventurer come to rest their weary feet!"
+    };
+
+  }
+
+  protected void WritePopup()
+  {
+    SimpleFact tavernName = GameState.FactDb.FactCheck("TavernName") as SimpleFact 
+                                      ?? throw new Exception("Should never not be a tavern name");
+     var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
+    sb.Append(".\n\nWelcome to [LIGHTBLUE ");
+    sb.Append(tavernName.Value);
+    sb.Append("]!\n\n");
+    sb.Append(Blurb());
+    sb.Append("\n\n");
+    sb.Append("a) Purchase a flagon of booze. [YELLOW $]2\n");
+    sb.Append("b) Rent a bed and rest. [YELLOW $]5\n");
+
+    GameState.UIRef().SetPopup(new Popup(sb.ToString(), Shopkeeper.FullName, -1, -1));
+  }
+}
+
 class SmithyInputer : ShopMenuInputer
 {
   bool _offerRepair;
@@ -503,7 +554,7 @@ class PriestInputer : Inputer
 
   public override UIResult GetResult()
   {
-    return new PriestServiceUIResult()
+    return new ServiceResult()
     {
       Zorkminds = 50,
       Service = Service
@@ -530,7 +581,7 @@ class UpgradeItemUIResult : UIResult
   public int Zorkminds { get; set; } = 0;
 }
 
-class PriestServiceUIResult : UIResult
+class ServiceResult : UIResult
 {
   public int Zorkminds { get; set; } = 0;
   public string Service { get; set; } = "";
