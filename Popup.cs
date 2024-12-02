@@ -169,7 +169,7 @@ class Popup
       else if (word.Length < Width - currWidth - 4)
       {
         currWidth += word.Length;
-        if (PrependSpace(line))
+        if (PrependSpace(line) && word != "!" && word != "." && word != "?")
         {
           word = ' ' + word;
           ++currWidth;
