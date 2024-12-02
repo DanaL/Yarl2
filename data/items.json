@@ -891,5 +891,17 @@
       "Scroll",
       "Stackable"
     ]
+  },
+  {
+    "Name": "FLASK_OF_BOOZE",
+    "DescriptiveName": "flask of booze",
+    "Type": "Potion",
+    "Value": 1,
+    "Glyph": "!,lightbrown,brown,black,black",
+    "Traits": [
+      "Consumable",
+      "Stackable",
+      "UseSimple#booze"
+    ]
   }
 ]

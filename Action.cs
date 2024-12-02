@@ -1694,6 +1694,23 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
+class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    if (Actor is Player)
+      result.Messages.Add("Glug! Glug! Glug!");
+    else
+      result.Messages.Add($"{Actor!.FullName.Capitalize()} drinks some booze!");
+
+    return result;
+  }
+}
+
 class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action(gs, target)
 {
   readonly int _healDie = healDie;

@@ -741,6 +741,27 @@ class TelepathyTrait : TemporaryTrait
   }
 }
 
+class TipsyTrait : TemporaryTrait
+{
+  public override string AsText() => $"Tipsy#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    throw new NotImplementedException();
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
+    {
+      if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+      {
+        Remove(gs);
+      }
+    }
+  }
+}
+
 class LevitationTrait : TemporaryTrait
 {  
   protected override string ExpiryMsg() => "You alight on the ground.";
@@ -933,6 +954,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
   {
     "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
     "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
+    "booze" => new UseResult(true, "", new DrinkBoozeAction(gs, user), null),
     "disarm" => new UseResult(true, "", new DisarmAction(gs, user, user.Loc), null),
     "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
     "maxheal" => new UseResult(true, "", new HealAction(gs, user, int.MaxValue, -1), null),
