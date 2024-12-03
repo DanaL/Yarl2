@@ -226,7 +226,8 @@ class Decorations
     string defenders = rulerInfo.Type switch
     {
       OGRulerType.ElfLord => "an elven army",
-      OGRulerType.DwarfLord => "dwarven forces"
+      OGRulerType.DwarfLord => "dwarven forces",
+      _ => ""
     };
 
     if (invasion.Successful)

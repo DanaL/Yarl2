@@ -383,7 +383,7 @@ class MainDungeonBuilder : DungeonBuilder
       0 => " It is strewn with shells and glass bleads.",
       1 => " It is streaked with blood.",
       2 => " It is adorned with teeth and driftwood.",
-      3 => " It is decorated with rotting meat and worthless baubles."
+      _ => " It is decorated with rotting meat and worthless baubles."
     };
     sb.Append(decoration);
 

@@ -32,7 +32,8 @@ class DumbMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    List<(int, int, int)> adj = gs.GetDMap().Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
+    List<(int, int, int)> adj = map.Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -63,7 +64,10 @@ class DumbMoveStrategy : MoveStrategy
 
   public override Action EscapeRoute(Mob actor, GameState gs)
   {
-    List<(int, int)> route = gs.GetDMap().EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    var map = gs.GetDMap();
+    if (map is null)
+      throw new Exception("No map found");
+    List<(int, int)> route = map.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
     if (route.Count > 0)
     {
       Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
@@ -80,7 +84,10 @@ class DoorOpeningMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    List<(int, int, int)> adj = gs.GetDMap("doors").Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var mapWithDoors = gs.GetDMap("doors");
+    if (mapWithDoors is null)
+      throw new Exception("No doors map found");
+    List<(int, int, int)> adj = mapWithDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -113,7 +120,10 @@ class DoorOpeningMoveStrategy : MoveStrategy
 
   public override Action EscapeRoute(Mob actor, GameState gs)
   {
-    List<(int, int)> route = gs.GetDMap("doors").EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    var mapWithDoorts = gs.GetDMap("doors");
+    if (mapWithDoorts is null)
+      throw new Exception("No doors map found");
+    List<(int, int)> route = mapWithDoorts.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
     if (route.Count > 0)
     {      
       Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
@@ -134,7 +144,10 @@ class SimpleFlightMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    List<(int, int, int)> adj = gs.GetDMap("flying").Neighbours(actor.Loc.Row, actor.Loc.Col);
+    var flyingMap = gs.GetDMap("flying");
+    if (flyingMap is null)
+      throw new Exception("No flying map found");
+    List<(int, int, int)> adj = flyingMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
@@ -162,7 +175,8 @@ class SimpleFlightMoveStrategy : MoveStrategy
 
   public override Action EscapeRoute(Mob actor, GameState gs)
   {
-    List<(int, int)> route = gs.GetDMap("flying").EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
+    var map = gs.GetDMap("flying") ?? throw new Exception("Hmm this shouldn't have happened");      
+    List<(int, int)> route = map.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
     if (route.Count > 0)
     {
       Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
@@ -179,6 +193,15 @@ interface IBehaviour
   (Action, Inputer?) Chat(Mob actor, GameState gameState);
 }
 
+class NullBehaviour : IBehaviour
+{
+  private static readonly NullBehaviour instance = new NullBehaviour();
+  public static NullBehaviour Instance() => instance;
+
+  public Action CalcAction(Mob actor, GameState gameState) => throw new NotImplementedException();  
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => throw new NotImplementedException();
+}
+
 // I think I'll likely eventually merge this into IBehaviour
 interface IDialoguer
 {
@@ -189,19 +212,6 @@ interface IDialoguer
 class MonsterBehaviour : IBehaviour
 {
   readonly Dictionary<string, ulong> _lastUse = [];
-
-  bool Available(ActionTrait act, int distance, ulong turn)
-  {
-    if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > turn)
-    {
-      return false;
-    }
-
-    if (act.MinRange <= distance && act.MaxRange >= distance)
-      return true;
-
-    return false;
-  }
 
   static Loc CalcRangedTarget(Mob mob, GameState gs)
   {
@@ -292,10 +302,12 @@ class MonsterBehaviour : IBehaviour
       List<Mob> candidates = [];
       foreach (ulong id in alliesTrait.IDs)
       {
-        var m = gs.ObjDb.GetObj(id) as Mob;
-        var hp = m.Stats[Attribute.HP];
-        if (hp.Curr < hp.Max)
-          candidates.Add(m);
+        if (gs.ObjDb.GetObj(id) is Mob m)
+        {
+          var hp = m.Stats[Attribute.HP];
+          if (hp.Curr < hp.Max)
+            candidates.Add(m);
+        }          
       }
 
       if (candidates.Count > 0)

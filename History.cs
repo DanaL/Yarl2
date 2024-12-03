@@ -347,8 +347,7 @@ class History(Random rng)
     var type = rng.Next(2) switch
     {
       0 => OGRulerType.ElfLord,
-      1 => OGRulerType.DwarfLord,
-      //_ => OGRulerType.MadWizard
+      _ => OGRulerType.DwarfLord,     
     };
     var name = nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
     RulerInfo ruler = new()

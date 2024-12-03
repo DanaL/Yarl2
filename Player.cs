@@ -614,8 +614,8 @@ class Player : Actor, IPerformer, IGameEventListener
         }
         else
         {
-          if (_inputController.Success)
-          {
+          if (_inputController.Success && _deferred is not null)
+          {            
             _deferred.ReceiveUIResult(_inputController.GetResult());
             _inputController = null;
             ui.ClosePopup();

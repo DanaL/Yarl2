@@ -91,7 +91,7 @@ namespace SDL2
 		}
 
 		/* This is public because SDL_DropEvent needs it! */
-		public static unsafe string UTF8_ToManaged(IntPtr s, bool freePtr = false)
+		public static unsafe string? UTF8_ToManaged(IntPtr s, bool freePtr = false)
 		{
 			if (s == IntPtr.Zero)
 			{
@@ -1096,7 +1096,7 @@ namespace SDL2
 			out IntPtr userdata
 		);
 		public static void SDL_LogGetOutputFunction(
-			out SDL_LogOutputFunction callback,
+			out SDL_LogOutputFunction? callback,
 			out IntPtr userdata
 		) {
 			IntPtr result = IntPtr.Zero;

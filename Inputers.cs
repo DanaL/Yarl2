@@ -754,7 +754,10 @@ class InventoryDetails : Inputer
     else if (Options.Contains(ch))
     {
       var (item, _) = GameState.Player.Inventory.ItemAt(ch);
-      string title = item.FullName.Capitalize();
+      if (item is null)
+        return;
+
+      string title = item.FullName.Capitalize();      
       string desc = "";
       if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
         desc = text;

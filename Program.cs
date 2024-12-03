@@ -21,59 +21,59 @@ if (options.Display == "Bearlib")
 else
   display = new SDLUserInterface("Dana's Delve 0.2.0 + SDL", options);
 
-RunningState state = RunningState.Pregame;
-do
-{  
-  display.ClosePopup();
-  TitleScreen ts = new(display);
-  SetupType gameSetup = ts.Display();
+try
+{
+  RunningState state = RunningState.Pregame;
 
-  GameState? gameState = null;
-  switch (gameSetup)
+  do
   {
-    case SetupType.Quit:
-      state = RunningState.Quitting;
-      break;
-    case SetupType.NewGame:
-      try
-      {
-        gameState = new CampaignCreator(display).Create(options);
-        if (gameState is null)
-          state = RunningState.Quitting;        
-      }
-      catch (GameNotLoadedException)
-      {
-        state = RunningState.Pregame;
-      }
-      break;
-    default:
-      try
-      {
-        gameState = new GameLoader(display).Load(options);
-        if (gameState is null)
-          state = RunningState.Quitting;
-      }
-      catch (GameNotLoadedException)
-      {
-        state = RunningState.Pregame;
-      }
-      break;
-  }
+    display.ClosePopup();
+    TitleScreen ts = new(display);
+    SetupType gameSetup = ts.Display();
 
-  if (gameSetup == SetupType.Quit)
-    break;
+    GameState? gameState = null;
+    switch (gameSetup)
+    {
+      case SetupType.Quit:
+        state = RunningState.Quitting;
+        break;
+      case SetupType.NewGame:
+        try
+        {
+          gameState = new CampaignCreator(display).Create(options);
+          if (gameState is null)
+            state = RunningState.Quitting;
+        }
+        catch (GameNotLoadedException)
+        {
+          state = RunningState.Pregame;
+        }
+        break;
+      default:
+        try
+        {
+          gameState = new GameLoader(display).Load(options);
+          if (gameState is null)
+            state = RunningState.Quitting;
+        }
+        catch (GameNotLoadedException)
+        {
+          state = RunningState.Pregame;
+        }
+        break;
+    }
 
-  try
-  {
+    if (gameSetup == SetupType.Quit)
+      break;
+
     if (gameState is not null)
       state = display.GameLoop(gameState);
   }
-  catch (GameQuitException)
-  {
-    state = RunningState.Quitting;
-  }
+  while (state != RunningState.Quitting);
 }
-while (state != RunningState.Quitting);
+catch (GameQuitException)
+{
+}
 
 namespace Yarl2
 {

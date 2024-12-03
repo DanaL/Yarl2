@@ -135,6 +135,9 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, b
 
   public List<(int, int)> ShortestPath(int row, int col)
   {
+    if (_dijkstraMap is null)
+      throw new Exception("No dijkstra map found");
+
     AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
 
     List<(int, int)> path = [(row, col)];
@@ -176,6 +179,9 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, b
 
   public List<(int, int, int)> Neighbours(int row, int col)
   {
+    if (_dijkstraMap is null)
+      throw new Exception("No dijkstra map found");
+
     List<(int, int, int)> adj = [];
 
     foreach (var (nr, nc) in Util.Adj8Sqs(row, col))
@@ -211,6 +217,9 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, b
 
     void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
     {
+      if (_dijkstraMap is null)
+        throw new Exception("Map should never be null");
+
       if (currentScore > bestScore && currentPath.Count > 1)
       {
         bestScore = currentScore;

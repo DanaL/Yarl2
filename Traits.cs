@@ -2414,7 +2414,8 @@ class TraitFactory
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
-    { "Rage", (pieces, gameObj) => new RageTrait((Actor)gameObj) },
+    { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor 
+        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "RangedSpellAction", (pieces, gameObj) => 
     new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},

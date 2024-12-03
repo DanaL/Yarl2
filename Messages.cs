@@ -120,7 +120,8 @@ class MsgFactory
       Verb.Feel => fp ? "feel" : "feels",
       Verb.Summon => fp ? "summon" : "summons",
       Verb.Stagger => fp ? "stagger" : "staggers",
-      Verb.Butt => fp ? "butt" : "butts"
+      Verb.Butt => fp ? "butt" : "butts",
+      _ => throw new Exception("Unknown verb!")
     };
   }
 
@@ -147,7 +148,8 @@ class MsgFactory
     Verb.Blink => "blinked",
     Verb.Cast => "cast",
     Verb.Destroy => "destroyed",
-    Verb.Tear => "teared"
+    Verb.Tear => "teared",
+    _ => throw new Exception("Unknown verb!")
   };
 
   public static string CalcName(GameObj gobj, Player player, int amount = 0)

@@ -90,8 +90,7 @@ internal class Serialize
   public static GameState LoadSaveGame(string path, Options options, UserInterface ui)
   {
     var bytes = File.ReadAllBytes(path);
-    var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
-
+    var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes) ?? throw new Exception("Failure to deserialize save file :(");
     var campaign = CampaignSaver.Inflate(sgi.Campaign);
     var gs = GameStateSave.Inflate(campaign, sgi.GameStateSave, options, ui);
     

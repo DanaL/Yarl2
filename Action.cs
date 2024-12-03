@@ -1871,8 +1871,11 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
   public override ActionResult Execute()
   {
-    var (item, itemCount) = Actor!.Inventory.ItemAt(_slot);
     GameState!.UIRef().ClosePopup();
+    ActionResult result = new() { Complete = true, Messages = [], EnergyCost = 1.0 };
+    var (item, itemCount) = Actor!.Inventory.ItemAt(_slot);
+    if (item is null)
+      return result; // This should never nhappen
 
     if (_amount == 0 || _amount > itemCount)
       _amount = itemCount;
@@ -1885,8 +1888,9 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     }
 
     string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, GameState);
+    result.Messages.Add(alert);
 
-    return new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
+    return result;
   }
 
   public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
@@ -2072,6 +2076,9 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
+    if (item is null)
+      throw new Exception("Hmm this shouldn't happen!");
+
     if (item.Equiped && item.Type == ItemType.Armour)
     {
       return new ActionResult() { Complete = false, Messages = ["You cannot drop something you're wearing."] };
@@ -2153,21 +2160,20 @@ class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
 
     GameState!.ClearMenu();
         
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
+    if (item is null)
+      return result; // I think this should be impossible?
 
     if (Item.IDInfo.TryGetValue(item.Name, out var idInfo))
-    {
       Item.IDInfo[item.Name] = idInfo with { Known = true };
-    }
-
+    
     string s = $"\n It's {item.FullName.IndefArticle()}! \n";
     GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
-
-    result.Complete = true;
-    result.EnergyCost = 1.0;
 
     string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
     result.Messages.Add(m);

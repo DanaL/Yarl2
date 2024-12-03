@@ -169,17 +169,17 @@ enum ItemNames
 
 class JsonItem
 {
-  public string Name { get; set; }
-  public string DescriptiveName { get; set; }
-  public string Type { get; set; }
+  public string Name { get; set; } = "";
+  public string DescriptiveName { get; set; } = "";
+  public string Type { get; set; } = "";
   public int Value { get; set; }
-  public string Glyph { get; set; }
-  public List<string> Traits { get; set; }
+  public string Glyph { get; set; } = "";
+  public List<string> Traits { get; set; } = [];
 }
 
 class ItemTemplate
 {
-  public string Name { get; set; }
+  public string Name { get; set; } = "";
   public ItemType Type { get; set; }
   public int Value { get; set; }
   public Glyph Glyph { get; set; }
@@ -195,6 +195,8 @@ class ItemFactory
     Dictionary<ItemNames, ItemTemplate> templates = [];
     string json = File.ReadAllText("data/items.json");
     var items = JsonSerializer.Deserialize<List<JsonItem>>(json);
+    if (items is null)
+      throw new Exception("Missing or corrupt items definition file!");
 
     foreach (JsonItem item in items)
     {
