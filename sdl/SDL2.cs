@@ -42,7 +42,7 @@ namespace SDL2
 #elif __MACOS__ || MACOS
 	private const string nativeLibName = "SDL2.dylib";
 #else
-    private const string nativeLibName = "SDL2.dll";
+    private const string nativeLibName = "SDL2.dylib";
 #endif
     #endregion
 

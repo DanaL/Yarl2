@@ -50,7 +50,7 @@ namespace SDL2
 #elif __MACOS__ || MACOS
 	private const string nativeLibName = "SDL2_ttf";
 #else
-    private const string nativeLibName = "SDL2_ttf.dll";
+    private const string nativeLibName = "SDL2_ttf";
 #endif
 
     #endregion

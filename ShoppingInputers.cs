@@ -230,7 +230,7 @@ class InnkeeperInputer : Inputer
   {
     InsufficentFunds = false;
 
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == 'c')
     {
       Done = true;
       Success = false;
@@ -285,7 +285,8 @@ class InnkeeperInputer : Inputer
     sb.Append("\n\n");
     sb.Append("a) Purchase a flagon of booze. [YELLOW $]2\n");
     sb.Append("b) Rent a bed and rest. [YELLOW $]5\n");
-
+    sb.Append("c) Farewell.");
+    
     if (InsufficentFunds)
       sb.Append("\n[BRIGHTRED You don't have enough money!]");
 
