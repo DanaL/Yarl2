@@ -163,7 +163,7 @@ class TownBuilder
     }
   }
 
-  void InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Random rng)
+  static void InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Random rng)
   {
     foreach (var (r, c) in sqs)
     {

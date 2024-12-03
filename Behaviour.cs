@@ -565,7 +565,7 @@ class InnkeeperBehaviour : NPCBehaviour
   public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     var acc = new InnkeeperInputer(actor, gameState);
-    var action = new ShoppingCompletedAction(gameState, actor);
+    var action = new InnkeeperServiceAction(gameState, actor);
 
     return (action, acc);    
   }
