@@ -581,6 +581,11 @@ class Player : Actor, IPerformer, IGameEventListener
       return new PassAction(gameState, this);
     }
 
+    if (HasActiveTrait<RestingTrait>())
+    {
+      return new PassAction(gameState, this);
+    }
+
     char ch = '\0';
 
     if (ui.InputBuffer.Count > 0 && ui.InputBuffer.Peek() == ' ')

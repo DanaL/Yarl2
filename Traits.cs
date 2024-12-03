@@ -562,6 +562,37 @@ class ResistanceTrait : TemporaryTrait
   }
 }
 
+class RestingTrait : TemporaryTrait
+{
+  public override string AsText() => $"Resting#{OwnerID}#{ExpiresOn}";
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.UIRef().SetPopup(new Popup("You awake, rested and refreshed.", "", -1, -1));
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Player player)
+    {
+      Remove(gs);
+      player.Traits = player.Traits.Where(t => t is not RestingTrait).ToList();
+    }
+  }
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    target.Traits.Add(new FloatingTrait());
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = target.ID;
+
+    return [];
+  }
+}
+
 class SleepingTrait : Trait
 {
   public override string AsText() => "Sleeping";
@@ -798,7 +829,7 @@ class LevitationTrait : TemporaryTrait
 
         gs.ResolveActorMove(actor, actor.Loc, actor.Loc);
       }
-    }    
+    }
   }
 
   public override List<string> Apply(Actor target, GameState gs)
@@ -2406,6 +2437,7 @@ class TraitFactory
         ulong ownerID = pieces.Length > 3 ? ulong.Parse(pieces[2]): 0;
         return new ResistanceTrait() { Type = rdt, ExpiresOn = expiresOn, OwnerID = ownerID
         }; }},
+    { "Resting", (pieces, gameObj) => new RestingTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Retribution", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out DamageType dt);
