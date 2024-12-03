@@ -613,6 +613,9 @@ class Battle
     var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
+    if (attacker.HasTrait<TipsyTrait>())
+      roll -= gs.Rng.Next(1, 6);
+      
     if (roll >= target.AC)
     {      
       if (anim is not null)

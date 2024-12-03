@@ -743,6 +743,7 @@ class TelepathyTrait : TemporaryTrait
 
 class TipsyTrait : TemporaryTrait
 {
+  protected override string ExpiryMsg() => "A fog lifts.";
   public override string AsText() => $"Tipsy#{OwnerID}#{ExpiresOn}";
 
   public override List<string> Apply(Actor target, GameState gs)

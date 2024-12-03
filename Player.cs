@@ -356,6 +356,22 @@ class Player : Actor, IPerformer, IGameEventListener
     return false;
   }
 
+  static char CalcStagger(GameState gs, char ch)
+  {
+    double roll = gs.Rng.NextDouble();
+    return ch switch
+    {
+      'k' => roll < 0.5 ? 'y' : 'u',
+      'u' => roll < 0.5 ? 'k' : 'l',
+      'l' => roll < 0.5 ? 'u' : 'n',
+      'n' => roll < 0.5 ? 'l' : 'j',
+      'j' => roll < 0.5 ? 'n' : 'b',
+      'b' => roll < 0.5 ? 'j' : 'h',
+      'h' => roll < 0.5 ? 'b' : 'y',
+      _ => roll < 0.5 ? 'h' : 'k'
+    };   
+  }
+
   Action CalcMovementAction(GameState gs, char ch)
   {
     if (HasTrait<ConfusedTrait>())
@@ -363,6 +379,12 @@ class Player : Actor, IPerformer, IGameEventListener
       gs.UIRef().AlertPlayer("You are confused!");
       char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
       ch = dirs[gs.Rng.Next(dirs.Length)];
+    }
+
+    if (HasTrait<TipsyTrait>() && gs.Rng.NextDouble() < 0.15)
+    {
+      gs.UIRef().AlertPlayer("You stagger!");
+      ch = CalcStagger(gs, ch);
     }
 
     (int dr, int dc) = KeyToDir(ch);

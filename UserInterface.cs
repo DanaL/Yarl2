@@ -649,6 +649,12 @@ abstract class UserInterface
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("BLIND");
     }
+    if (!statuses.Contains("TIPSY") && gs.Player.HasTrait<TipsyTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "TIPSY")];
+      row = WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("TIPSY");
+    }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)

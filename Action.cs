@@ -1702,10 +1702,36 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
     result.EnergyCost = 1.0;
     result.Complete = true;
 
+    bool canSeeLoc = GameState!.LastPlayerFoV.Contains(Actor!.Loc);
+
     if (Actor is Player)
       result.Messages.Add("Glug! Glug! Glug!");
+    else if (canSeeLoc)
+      result.Messages.Add($"{Actor.FullName.Capitalize()} drinks some booze!");
+
+    bool alreadyTipsy = Actor.HasTrait<TipsyTrait>();
+    int dc = alreadyTipsy ? 15 : 12;
+    if (Actor.AbilityCheck(Attribute.Constitution, dc, GameState.Rng))
+      return result;
+
+    if (Actor.Traits.OfType<TipsyTrait>().FirstOrDefault() is TipsyTrait tipsy)
+    {
+      tipsy.ExpiresOn += (ulong) GameState.Rng.Next(50, 76);
+      if (canSeeLoc)
+        result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "get")} tipsier.");
+    }
     else
-      result.Messages.Add($"{Actor!.FullName.Capitalize()} drinks some booze!");
+    {
+      tipsy = new TipsyTrait()
+      {
+        ExpiresOn = GameState.Turn + (ulong) GameState.Rng.Next(50, 76),
+        OwnerID = Actor.ID
+      };
+      Actor.Traits.Add(tipsy);
+      GameState.RegisterForEvent(GameEventType.EndOfRound, tipsy, Actor.ID);
+      
+      result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "become")} tipsy!");
+    }
 
     return result;
   }
