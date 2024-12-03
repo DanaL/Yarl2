@@ -850,3 +850,12 @@ enum EquipingResult
   TooManyTalismans,
   Cursed
 }
+
+class EmptyInventory : Inventory 
+{
+    public EmptyInventory() : base(0, null!) { }
+
+    public override List<Item> Items() => [];
+    public override string ToText() => "";
+    public override void RestoreFromText(string txt) { }
+}

@@ -31,6 +31,12 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   static readonly int FLYING_Z = 10;
   static readonly int DEFAULT_Z = 4;
 
+  public Actor()
+  {
+    Inventory = new EmptyInventory();
+    _behaviour = NullBehaviour.Instance();
+  }
+
   public Dictionary<Attribute, Stat> Stats { get; set; } = [];
 
   public Inventory Inventory { get; set; }

@@ -193,7 +193,7 @@ interface IBehaviour
 
 class NullBehaviour : IBehaviour
 {
-  private static readonly NullBehaviour instance = new NullBehaviour();
+  private static readonly NullBehaviour instance = new();
   public static NullBehaviour Instance() => instance;
 
   public Action CalcAction(Mob actor, GameState gameState) => throw new NotImplementedException();  
