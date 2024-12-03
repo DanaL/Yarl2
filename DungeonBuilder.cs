@@ -1012,6 +1012,8 @@ class MainDungeonBuilder : DungeonBuilder
           continue;
         int row = entrance.Item1 + r;
         int col = entrance.Item2 + c;
+        if (!wildernessMap.InBounds(row, col))
+          continue;
         TileType type = wildernessMap.TileAt(row, col).Type;
         if (type != TileType.Mountain && type != TileType.SnowPeak)
           continue;

@@ -471,6 +471,8 @@ class CampaignCreator(UserInterface ui)
         // Add a dash of devestation around the dungeon entrance
         foreach (var loc in Util.LocsInRadius(new(0, 0, entrance.Item1, entrance.Item2), 5, wildernessWidth, wildernessWidth))
         {
+          if (!wildernessMap.InBounds(loc.Row, loc.Col))
+            continue;
           Tile tile = wildernessMap.TileAt(loc.Row, loc.Col);
           if (tile.Type == TileType.Grass) 
           {
@@ -485,6 +487,8 @@ class CampaignCreator(UserInterface ui)
         }
         foreach (var (r, c) in Util.BresenhamCircle(entrance.Item1, entrance.Item2, 6))
         {
+          if (!wildernessMap.InBounds(r, c))
+            continue;
           Tile tile = wildernessMap.TileAt(r, c);
           if (tile.Type == TileType.Grass) 
           {
@@ -605,7 +609,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.Now.GetHashCode();
-     
+      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();      
