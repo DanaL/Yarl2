@@ -63,8 +63,15 @@ do
   if (gameSetup == SetupType.Quit)
     break;
 
-  if (gameState is not null)
-    state = display.GameLoop(gameState);
+  try
+  {
+    if (gameState is not null)
+      state = display.GameLoop(gameState);
+  }
+  catch (GameQuitException)
+  {
+    state = RunningState.Quitting;
+  }
 }
 while (state != RunningState.Quitting);
 
