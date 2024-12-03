@@ -146,8 +146,6 @@ class SDLUserInterface : UserInterface
         WriteSq(row, col, SqsOnScreen[row, col]);
       }
     }
-
-    SDL_SetRenderTarget(_renderer, IntPtr.Zero);
   }
 
   protected override void WriteSq(int row, int col, Sqr sq)
@@ -188,14 +186,6 @@ class SDLUserInterface : UserInterface
       {
         WriteSideBar(gs);        
       }
-
-      //var mainFrameLoc = new SDL_Rect
-      //{
-      //  x = 0,
-      //  y = 0,
-      //  h = SqsOnScreen.GetLength(0) * _fontHeight,
-      //  w = SqsOnScreen.GetLength(1) * _fontWidth
-      //};
 
       UpdateMainTexture();
 
