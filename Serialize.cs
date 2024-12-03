@@ -174,7 +174,7 @@ class GameStateSave
   public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
   {
     var rng = new Random(gss.Seed);
-    var gs = new GameState(null, camp, opt, ui, rng, gss.Seed)
+    var gs = new GameState(null!, camp, opt, ui, rng, gss.Seed)
     {
       CurrDungeonID = gss.CurrDungeonID,
       CurrLevel = gss.CurrLevel,

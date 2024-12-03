@@ -27,8 +27,6 @@
 #endregion
 
 #region Using Statements
-using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 #endregion
@@ -37,19 +35,21 @@ namespace SDL2
 {
 	public static class SDL
 	{
-		#region SDL2# Variables
+    #region SDL2# Variables
 
-#if WINDOWS
-	private const string nativeLibName = "SDL2.dll";		
-#else
+#if _WINDOWS || WINDOWS_BUILD || WINDOWS
+	private const string nativeLibName = "SDL2.dll";
+#elif __MACOS__ || MACOS
 	private const string nativeLibName = "SDL2.dylib";
+#else
+    private const string nativeLibName = "SDL2.dll";
 #endif
-        #endregion
+    #endregion
 
-        #region UTF8 Marshaling
+    #region UTF8 Marshaling
 
-        /* Used for stack allocated string marshaling. */
-        internal static int Utf8Size(string str)
+    /* Used for stack allocated string marshaling. */
+    internal static int Utf8Size(string str)
 		{
 			if (str == null)
 			{

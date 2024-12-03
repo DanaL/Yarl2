@@ -24,14 +24,13 @@ class SDLUserInterface : UserInterface
   readonly int _fontHeight;
   Dictionary<Sqr, IntPtr> _cachedGlyphs = [];
   Dictionary<Colour, SDL_Color> _colours;
-  IntPtr _mainTexture;
-
+  
   public SDLUserInterface(string windowTitle, Options opt) : base(opt)
   {
     FontSize = opt.FontSize;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ttf.TTF_Init();
-    _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", opt.FontSize);
+    _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", opt.FontSize * 2);
     SDL_ttf.TTF_SizeUTF8(_font, " ", out _fontWidth, out _fontHeight);
 
     int width = ScreenWidth * _fontWidth;
@@ -136,9 +135,7 @@ class SDLUserInterface : UserInterface
   }
 
   void UpdateMainTexture()
-  {
-    SDL_SetRenderTarget(_renderer, _mainTexture);
-    
+  {    
     int displayHeight = SqsOnScreen.GetLength(0);
     int displayWidth = SqsOnScreen.GetLength(1);
 
@@ -192,16 +189,15 @@ class SDLUserInterface : UserInterface
         WriteSideBar(gs);        
       }
 
-      var mainFrameLoc = new SDL_Rect
-      {
-        x = 0,
-        y = 0,
-        h = SqsOnScreen.GetLength(0) * _fontHeight,
-        w = SqsOnScreen.GetLength(1) * _fontWidth
-      };
+      //var mainFrameLoc = new SDL_Rect
+      //{
+      //  x = 0,
+      //  y = 0,
+      //  h = SqsOnScreen.GetLength(0) * _fontHeight,
+      //  w = SqsOnScreen.GetLength(1) * _fontWidth
+      //};
 
       UpdateMainTexture();
-      SDL_RenderCopy(_renderer, _mainTexture, IntPtr.Zero, ref mainFrameLoc);
 
       WriteMessagesSection();
 
@@ -216,13 +212,4 @@ class SDLUserInterface : UserInterface
     
     SDL_RenderPresent(_renderer);
   }
-
-  // protected override void Dispose(bool disposing)
-  // {
-  //   if (disposing)
-  //   {
-  //     SDL_DestroyTexture(_mainTexture);
-  //     // ... other cleanup ...
-  //   }
-  // }
 }

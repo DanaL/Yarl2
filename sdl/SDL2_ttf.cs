@@ -39,20 +39,29 @@ namespace SDL2
 
         /* Used by DllImport to load the native library. */
 
-#if WINDOWS
-	private const string nativeLibName = "SDL2_ttf.dll";		
+//#if WINDOWS
+//	private const string nativeLibName = "SDL2_ttf.dll";		
+//#else
+//    private const string nativeLibName = "SDL2_ttf";
+//#endif
+
+#if _WINDOWS || WINDOWS_BUILD || WINDOWS
+	private const string nativeLibName = "SDL2_ttf.dll";
+#elif __MACOS__ || MACOS
+	private const string nativeLibName = "SDL2_ttf";
 #else
-    private const string nativeLibName = "SDL2_ttf";
+    private const string nativeLibName = "SDL2_ttf.dll";
 #endif
-        #endregion
 
-        #region SDL_ttf.h
+    #endregion
 
-        /* Similar to the headers, this is the version we're expecting to be
-		 * running with. You will likely want to check this somewhere in your
-		 * program!
-		 */
-        public const int SDL_TTF_MAJOR_VERSION =	2;
+    #region SDL_ttf.h
+
+    /* Similar to the headers, this is the version we're expecting to be
+ * running with. You will likely want to check this somewhere in your
+ * program!
+ */
+    public const int SDL_TTF_MAJOR_VERSION =	2;
 		public const int SDL_TTF_MINOR_VERSION =	0;
 		public const int SDL_TTF_PATCHLEVEL =		16;
 
