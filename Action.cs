@@ -650,6 +650,14 @@ class InnkeeperServiceAction : Action
     result.Complete = true;
     result.EnergyCost = 1.0;
 
+    if (Service == "Booze")
+    {
+      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      Item booze = ItemFactory.Get(ItemNames.FLASK_OF_BOOZE, GameState.ObjDb);
+      GameState.Player.Inventory.Add(booze, GameState.Player.ID);
+      result.Messages.Add($"You purchase a flask of booze from {_innkeeper.FullName}.");
+    }
+
     return result;
   }
 
@@ -1729,7 +1737,7 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
       };
       Actor.Traits.Add(tipsy);
       GameState.RegisterForEvent(GameEventType.EndOfRound, tipsy, Actor.ID);
-      
+
       result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "become")} tipsy!");
     }
 

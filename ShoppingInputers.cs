@@ -215,7 +215,10 @@ class InnkeeperInputer : Inputer
 {
   GameState GameState { get; set; } 
   Actor Shopkeeper { get; set; }
-  
+  bool InsufficentFunds { get; set; }
+  string Selection { get; set; } = "";
+  int Zorkmids { get; set; }
+
   public InnkeeperInputer(Actor shopkeeper, GameState gs) { 
     Shopkeeper = shopkeeper;
     GameState = gs;
@@ -225,12 +228,27 @@ class InnkeeperInputer : Inputer
 
   public override void Input(char ch)
   {
+    InsufficentFunds = false;
+
     if (ch == Constants.ESC)
     {
       Done = true;
       Success = false;
       return;
     }
+    else if (ch == 'a' && GameState.Player.Inventory.Zorkmids < 2)
+    {
+      InsufficentFunds = true;
+    }
+    else if (ch == 'a')
+    {
+      Selection = "Booze";
+      Zorkmids = 2;
+      Done = true;
+      Success = true;
+    }
+
+    WritePopup();
   }
 
   string Blurb()
@@ -242,7 +260,6 @@ class InnkeeperInputer : Inputer
       2 => "They say good tips lead to good karma!",
       _ => "Ah! A brave adventurer come to rest their weary feet!"
     };
-
   }
 
   protected void WritePopup()
@@ -258,8 +275,17 @@ class InnkeeperInputer : Inputer
     sb.Append("a) Purchase a flagon of booze. [YELLOW $]2\n");
     sb.Append("b) Rent a bed and rest. [YELLOW $]5\n");
 
+    if (InsufficentFunds)
+      sb.Append("\n[BRIGHTRED You don't have enough money!]");
+
     GameState.UIRef().SetPopup(new Popup(sb.ToString(), Shopkeeper.FullName, -1, -1));
   }
+
+  public override UIResult GetResult() => new ServiceResult()
+  {
+    Service = Selection,
+    Zorkminds = Zorkmids
+  };
 }
 
 class SmithyInputer : ShopMenuInputer
