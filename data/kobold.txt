@@ -44,7 +44,6 @@ owlbear 1
 duergar soldier 2
 drow warrior 2
 will-o-wisp 1
-troll 1
 creeping coins 1
 phantom 1
 shrieker 1

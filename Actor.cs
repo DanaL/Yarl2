@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
+
 namespace Yarl2;
 
 // Interface for anything that will get a turn in the game. I'm not sure this
@@ -393,6 +395,31 @@ class Mob : Actor
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
   public override Action TakeTurn(GameState gameState) => _behaviour.CalcAction(this, gameState);
+
+  public void CalcMoveStrategy()
+  {
+    bool flying = false;
+    bool immobile = false;
+    bool intelligent = false;
+    foreach (var t in Traits)
+    {
+      if (t is FlyingTrait || t is FloatingTrait)
+        flying = true;
+      else if (t is IntelligentTrait)
+        intelligent = true;
+      else if (t is ImmobileTrait)
+        immobile = true;
+    }
+
+    if (flying)
+      MoveStrategy = new SimpleFlightMoveStrategy();
+    else if (intelligent)
+      MoveStrategy = new DoorOpeningMoveStrategy();
+    else if (immobile)
+      MoveStrategy = new WallMoveStrategy();
+    else
+      MoveStrategy = new DumbMoveStrategy();
+  }
 }
 
 class MonsterFactory
@@ -452,9 +479,6 @@ class MonsterFactory
       }
     }
 
-    bool flying = false;
-    bool immobile = false;
-    bool intelligent = false;
     if (!string.IsNullOrEmpty(fields[10]))
     {
       foreach (var traitTxt in fields[10].Split(','))
@@ -466,24 +490,10 @@ class MonsterFactory
         {
           objDb.EndOfRoundListeners.Add(listener);                     
         }
-
-        if (trait is FlyingTrait || trait is FloatingTrait)
-            flying = true;
-        else if (trait is IntelligentTrait)
-          intelligent = true;
-        else if (trait is ImmobileTrait)
-          immobile = true; 
       }
     }
 
-   if (flying)
-      m.MoveStrategy = new SimpleFlightMoveStrategy();
-    else if (intelligent)
-      m.MoveStrategy = new DoorOpeningMoveStrategy();
-    else if (immobile)
-      m.MoveStrategy = new WallMoveStrategy();
-    else
-      m.MoveStrategy = new DumbMoveStrategy();
+    m.CalcMoveStrategy();
 
     // Yes, I will write code just to insert a joke/Simpsons reference
     // into the game

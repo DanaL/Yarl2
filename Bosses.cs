@@ -24,6 +24,30 @@ class BossFactory
     throw new Exception($"Uhoh -- unknown boss {name}!");
   }
 
+  static Mob GreatGoblin(Random rng)
+  {
+    var glyph = new Glyph('@', Colours.GREY, Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK);
+    var g = new Mob()
+    {
+      Name = "the Great Goblin",
+      Recovery = 1.0,
+      Glyph = glyph
+    };
+    g.SetBehaviour(new MonsterBehaviour());
+    g.Stats.Add(Attribute.HP, new Stat(50));
+    g.Stats.Add(Attribute.AttackBonus, new Stat(5));
+    g.Stats.Add(Attribute.AC, new Stat(16));
+    g.Stats.Add(Attribute.Strength, new Stat(2));
+    g.Stats.Add(Attribute.Dexterity, new Stat(3));
+    g.Stats.Add(Attribute.MobAttitude, new Stat(Mob.INDIFFERENT));
+
+    g.Traits.Add(new IntelligentTrait());
+
+    g.CalcMoveStrategy();
+
+    return g;
+  }
+
   static Mob PrintOfRats(Random rng)
   {
     var glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK);
