@@ -82,13 +82,8 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_TTF_LinkedVersion();
 		public static SDL.SDL_version TTF_LinkedVersion()
 		{
-			SDL.SDL_version result;
 			IntPtr result_ptr = INTERNAL_TTF_LinkedVersion();
-			result = (SDL.SDL_version) Marshal.PtrToStructure(
-				result_ptr,
-				typeof(SDL.SDL_version)
-			);
-			return result;
+			return Marshal.PtrToStructure<SDL.SDL_version>(result_ptr);
 		}
 
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -221,30 +216,6 @@ namespace SDL2
 		/* font refers to a TTF_Font* */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int TTF_FontFaceIsFixedWidth(IntPtr font);
-
-		/* font refers to a TTF_Font* */
-		[DllImport(nativeLibName, EntryPoint = "TTF_FontFaceFamilyName", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_TTF_FontFaceFamilyName(
-			IntPtr font
-		);
-		public static string TTF_FontFaceFamilyName(IntPtr font)
-		{
-			return SDL.UTF8_ToManaged(
-				INTERNAL_TTF_FontFaceFamilyName(font)
-			);
-		}
-
-		/* font refers to a TTF_Font* */
-		[DllImport(nativeLibName, EntryPoint = "TTF_FontFaceStyleName", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_TTF_FontFaceStyleName(
-			IntPtr font
-		);
-		public static string TTF_FontFaceStyleName(IntPtr font)
-		{
-			return SDL.UTF8_ToManaged(
-				INTERNAL_TTF_FontFaceStyleName(font)
-			);
-		}
 
 		/* font refers to a TTF_Font* */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -758,7 +729,7 @@ namespace SDL2
 			ushort ch
 		);
 
-		public static string TTF_GetError()
+		public static string? TTF_GetError()
 		{
 			return SDL.SDL_GetError();
 		}

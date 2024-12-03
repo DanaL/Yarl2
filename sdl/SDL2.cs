@@ -453,17 +453,6 @@ namespace SDL2
 
 		#endregion
 
-		#region SDL_platform.h
-
-		[DllImport(nativeLibName, EntryPoint = "SDL_GetPlatform", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GetPlatform();
-		public static string SDL_GetPlatform()
-		{
-			return UTF8_ToManaged(INTERNAL_SDL_GetPlatform());
-		}
-
-		#endregion
-
 		#region SDL_hints.h
 
 		public const string SDL_HINT_FRAMEBUFFER_ACCELERATION =
@@ -743,19 +732,6 @@ namespace SDL2
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void SDL_ClearHints();
 
-		[DllImport(nativeLibName, EntryPoint = "SDL_GetHint", CallingConvention = CallingConvention.Cdecl)]
-		private static extern unsafe IntPtr INTERNAL_SDL_GetHint(byte* name);
-		public static unsafe string SDL_GetHint(string name)
-		{
-			int utf8NameBufSize = Utf8Size(name);
-			byte* utf8Name = stackalloc byte[utf8NameBufSize];
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GetHint(
-					Utf8Encode(name, utf8Name, utf8NameBufSize)
-				)
-			);
-		}
-
 		[DllImport(nativeLibName, EntryPoint = "SDL_SetHint", CallingConvention = CallingConvention.Cdecl)]
 		private static extern unsafe SDL_bool INTERNAL_SDL_SetHint(
 			byte* name,
@@ -826,7 +802,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetError", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetError();
-		public static string SDL_GetError()
+		public static string? SDL_GetError()
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetError());
 		}
@@ -1342,13 +1318,6 @@ namespace SDL2
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void SDL_GetVersion(out SDL_version ver);
 
-		[DllImport(nativeLibName, EntryPoint = "SDL_GetRevision", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GetRevision();
-		public static string SDL_GetRevision()
-		{
-			return UTF8_ToManaged(INTERNAL_SDL_GetRevision());
-		}
-
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int SDL_GetRevisionNumber();
 
@@ -1609,7 +1578,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetCurrentVideoDriver", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetCurrentVideoDriver();
-		public static string SDL_GetCurrentVideoDriver()
+		public static string? SDL_GetCurrentVideoDriver()
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetCurrentVideoDriver());
 		}
@@ -1622,7 +1591,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetDisplayName", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetDisplayName(int index);
-		public static string SDL_GetDisplayName(int index)
+		public static string? SDL_GetDisplayName(int index)
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetDisplayName(index));
 		}
@@ -1677,7 +1646,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_GetVideoDriver(
 			int index
 		);
-		public static string SDL_GetVideoDriver(int index)
+		public static string? SDL_GetVideoDriver(int index)
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetVideoDriver(index));
 		}
@@ -1850,7 +1819,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_GetWindowTitle(
 			IntPtr window
 		);
-		public static string SDL_GetWindowTitle(IntPtr window)
+		public static string? SDL_GetWindowTitle(IntPtr window)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_GetWindowTitle(window)
@@ -4022,7 +3991,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_GetPixelFormatName(
 			uint format
 		);
-		public static string SDL_GetPixelFormatName(uint format)
+		public static string? SDL_GetPixelFormatName(uint format)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_GetPixelFormatName(format)
@@ -4239,10 +4208,7 @@ namespace SDL2
 		public static bool SDL_MUSTLOCK(IntPtr surface)
 		{
 			SDL_Surface sur;
-			sur = (SDL_Surface) Marshal.PtrToStructure(
-				surface,
-				typeof(SDL_Surface)
-			);
+			sur = Marshal.PtrToStructure<SDL_Surface>(surface);
 			return (sur.flags & SDL_RLEACCEL) != 0;
 		}
 
@@ -4681,7 +4647,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetClipboardText", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetClipboardText();
-		public static string SDL_GetClipboardText()
+		public static string? SDL_GetClipboardText()
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetClipboardText(), true);
 		}
@@ -6064,7 +6030,7 @@ namespace SDL2
 		/* Wrapper for SDL_GetScancodeName */
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetScancodeName", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetScancodeName(SDL_Scancode scancode);
-		public static string SDL_GetScancodeName(SDL_Scancode scancode)
+		public static string? SDL_GetScancodeName(SDL_Scancode scancode)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_GetScancodeName(scancode)
@@ -6088,7 +6054,7 @@ namespace SDL2
 		/* Wrapper for SDL_GetKeyName */
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetKeyName", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetKeyName(SDL_Keycode key);
-		public static string SDL_GetKeyName(SDL_Keycode key)
+		public static string? SDL_GetKeyName(SDL_Keycode key)
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetKeyName(key));
 		}
@@ -6474,7 +6440,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_JoystickName(
 			IntPtr joystick
 		);
-		public static string SDL_JoystickName(IntPtr joystick)
+		public static string? SDL_JoystickName(IntPtr joystick)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_JoystickName(joystick)
@@ -6485,7 +6451,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_JoystickNameForIndex(
 			int device_index
 		);
-		public static string SDL_JoystickNameForIndex(int device_index)
+		public static string? SDL_JoystickNameForIndex(int device_index)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_JoystickNameForIndex(device_index)
@@ -6590,21 +6556,6 @@ namespace SDL2
 		 */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern ushort SDL_JoystickGetProductVersion(IntPtr joystick);
-
-		/* joystick refers to an SDL_Joystick*.
-		 * Only available in 2.0.14 or higher.
-		 */
-		[DllImport(nativeLibName, EntryPoint = "SDL_JoystickGetSerial", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_JoystickGetSerial(
-			IntPtr joystick
-		);
-		public static string SDL_JoystickGetSerial(
-			IntPtr joystick
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_JoystickGetSerial(joystick)
-			);
-		}
 
 		/* joystick refers to an SDL_Joystick*.
 		 * Only available in 2.0.6 or higher.
@@ -6867,19 +6818,6 @@ namespace SDL2
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern int SDL_GameControllerNumMappings();
 
-		/* Only available in 2.0.6 or higher. */
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerMappingForIndex", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerMappingForIndex(int mapping_index);
-		public static string SDL_GameControllerMappingForIndex(int mapping_index)
-		{
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerMappingForIndex(
-					mapping_index
-				),
-				true
-			);
-		}
-
 		/* THIS IS AN RWops FUNCTION! */
 		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerAddMappingsFromRW", CallingConvention = CallingConvention.Cdecl)]
 		private static extern int INTERNAL_SDL_GameControllerAddMappingsFromRW(
@@ -6892,79 +6830,8 @@ namespace SDL2
 			return INTERNAL_SDL_GameControllerAddMappingsFromRW(rwops, 1);
 		}
 
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerMappingForGUID", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerMappingForGUID(
-			Guid guid
-		);
-		public static string SDL_GameControllerMappingForGUID(Guid guid)
-		{
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerMappingForGUID(guid),
-				true
-			);
-		}
-
-		/* gamecontroller refers to an SDL_GameController* */
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerMapping", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerMapping(
-			IntPtr gamecontroller
-		);
-		public static string SDL_GameControllerMapping(
-			IntPtr gamecontroller
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerMapping(
-					gamecontroller
-				),
-				true
-			);
-		}
-
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern SDL_bool SDL_IsGameController(int joystick_index);
-
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerNameForIndex", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerNameForIndex(
-			int joystick_index
-		);
-		public static string SDL_GameControllerNameForIndex(
-			int joystick_index
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerNameForIndex(joystick_index)
-			);
-		}
-
-		/* Only available in 2.0.9 or higher. */
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerMappingForDeviceIndex", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerMappingForDeviceIndex(
-			int joystick_index
-		);
-		public static string SDL_GameControllerMappingForDeviceIndex(
-			int joystick_index
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerMappingForDeviceIndex(joystick_index),
-				true
-			);
-		}
-
-		/* IntPtr refers to an SDL_GameController* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_GameControllerOpen(int joystick_index);
-
-		/* gamecontroller refers to an SDL_GameController* */
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerName", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerName(
-			IntPtr gamecontroller
-		);
-		public static string SDL_GameControllerName(
-			IntPtr gamecontroller
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerName(gamecontroller)
-			);
-		}
 
 		/* gamecontroller refers to an SDL_GameController*.
 		 * Only available in 2.0.6 or higher.
@@ -6989,21 +6856,6 @@ namespace SDL2
 		public static extern ushort SDL_GameControllerGetProductVersion(
 			IntPtr gamecontroller
 		);
-
-		/* gamecontroller refers to an SDL_GameController*.
-		 * Only available in 2.0.14 or higher.
-		 */
-		[DllImport(nativeLibName, EntryPoint = "SDL_GameControllerGetSerial", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_GameControllerGetSerial(
-			IntPtr gamecontroller
-		);
-		public static string SDL_GameControllerGetSerial(
-			IntPtr gamecontroller
-		) {
-			return UTF8_ToManaged(
-				INTERNAL_SDL_GameControllerGetSerial(gamecontroller)
-			);
-		}
 
 		/* gamecontroller refers to an SDL_GameController* */
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
@@ -7043,7 +6895,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_GameControllerGetStringForAxis(
 			SDL_GameControllerAxis axis
 		);
-		public static string SDL_GameControllerGetStringForAxis(
+		public static string? SDL_GameControllerGetStringForAxis(
 			SDL_GameControllerAxis axis
 		) {
 			return UTF8_ToManaged(
@@ -7100,7 +6952,7 @@ namespace SDL2
 		private static extern IntPtr INTERNAL_SDL_GameControllerGetStringForButton(
 			SDL_GameControllerButton button
 		);
-		public static string SDL_GameControllerGetStringForButton(
+		public static string? SDL_GameControllerGetStringForButton(
 			SDL_GameControllerButton button
 		) {
 			return UTF8_ToManaged(
@@ -7173,7 +7025,7 @@ namespace SDL2
 			IntPtr gamecontroller,
 			SDL_GameControllerButton button
 		);
-		public static string SDL_GameControllerGetAppleSFSymbolsNameForButton(
+		public static string? SDL_GameControllerGetAppleSFSymbolsNameForButton(
 			IntPtr gamecontroller,
 			SDL_GameControllerButton button
 		) {
@@ -7190,7 +7042,7 @@ namespace SDL2
 			IntPtr gamecontroller,
 			SDL_GameControllerAxis axis
 		);
-		public static string SDL_GameControllerGetAppleSFSymbolsNameForAxis(
+		public static string? SDL_GameControllerGetAppleSFSymbolsNameForAxis(
 			IntPtr gamecontroller,
 			SDL_GameControllerAxis axis
 		) {
@@ -7585,136 +7437,9 @@ namespace SDL2
 			int effect
 		);
 
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticIndex(IntPtr haptic);
+		
 
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, EntryPoint = "SDL_HapticName", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_HapticName(int device_index);
-		public static string SDL_HapticName(int device_index)
-		{
-			return UTF8_ToManaged(INTERNAL_SDL_HapticName(device_index));
-		}
 
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticNewEffect(
-			IntPtr haptic,
-			ref SDL_HapticEffect effect
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticNumAxes(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticNumEffects(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticNumEffectsPlaying(IntPtr haptic);
-
-		/* IntPtr refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_HapticOpen(int device_index);
-
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticOpened(int device_index);
-
-		/* IntPtr refers to an SDL_Haptic*, joystick to an SDL_Joystick* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_HapticOpenFromJoystick(
-			IntPtr joystick
-		);
-
-		/* IntPtr refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr SDL_HapticOpenFromMouse();
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticPause(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern uint SDL_HapticQuery(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticRumbleInit(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticRumblePlay(
-			IntPtr haptic,
-			float strength,
-			uint length
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticRumbleStop(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticRumbleSupported(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticRunEffect(
-			IntPtr haptic,
-			int effect,
-			uint iterations
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticSetAutocenter(
-			IntPtr haptic,
-			int autocenter
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticSetGain(
-			IntPtr haptic,
-			int gain
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticStopAll(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticStopEffect(
-			IntPtr haptic,
-			int effect
-		);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticUnpause(IntPtr haptic);
-
-		/* haptic refers to an SDL_Haptic* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_HapticUpdateEffect(
-			IntPtr haptic,
-			int effect,
-			ref SDL_HapticEffect data
-		);
-
-		/* joystick refers to an SDL_Joystick* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_JoystickIsHaptic(IntPtr joystick);
-
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_MouseIsHaptic();
-
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_NumHaptics();
 
 		#endregion
 
@@ -7737,7 +7462,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_SensorGetDeviceName", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_SensorGetDeviceName(int device_index);
-		public static string SDL_SensorGetDeviceName(int device_index)
+		public static string? SDL_SensorGetDeviceName(int device_index)
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_SensorGetDeviceName(device_index));
 		}
@@ -7759,34 +7484,6 @@ namespace SDL2
 		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern IntPtr SDL_SensorFromInstanceID(
 			Int32 instance_id
-		);
-
-		/* sensor refers to an SDL_Sensor* */
-		[DllImport(nativeLibName, EntryPoint = "SDL_SensorGetName", CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr INTERNAL_SDL_SensorGetName(IntPtr sensor);
-		public static string SDL_SensorGetName(IntPtr sensor)
-		{
-			return UTF8_ToManaged(INTERNAL_SDL_SensorGetName(sensor));
-		}
-
-		/* sensor refers to an SDL_Sensor* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern SDL_SensorType SDL_SensorGetType(IntPtr sensor);
-
-		/* sensor refers to an SDL_Sensor* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_SensorGetNonPortableType(IntPtr sensor);
-
-		/* sensor refers to an SDL_Sensor* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern Int32 SDL_SensorGetInstanceID(IntPtr sensor);
-
-		/* sensor refers to an SDL_Sensor* */
-		[DllImport(nativeLibName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int SDL_SensorGetData(
-			IntPtr sensor,
-			float[] data,
-			int num_values
 		);
 
 		/* sensor refers to an SDL_Sensor* */
@@ -7945,7 +7642,7 @@ namespace SDL2
 			int index,
 			int iscapture
 		);
-		public static string SDL_GetAudioDeviceName(
+		public static string? SDL_GetAudioDeviceName(
 			int index,
 			int iscapture
 		) {
@@ -7962,7 +7659,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetAudioDriver", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetAudioDriver(int index);
-		public static string SDL_GetAudioDriver(int index)
+		public static string? SDL_GetAudioDriver(int index)
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_GetAudioDriver(index)
@@ -7974,7 +7671,7 @@ namespace SDL2
 
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetCurrentAudioDriver", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetCurrentAudioDriver();
-		public static string SDL_GetCurrentAudioDriver()
+		public static string? SDL_GetCurrentAudioDriver()
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetCurrentAudioDriver());
 		}
@@ -8343,7 +8040,7 @@ namespace SDL2
 		[DllImport(nativeLibName, EntryPoint = "SDL_AndroidGetInternalStoragePath", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_AndroidGetInternalStoragePath();
 
-		public static string SDL_AndroidGetInternalStoragePath()
+		public static string? SDL_AndroidGetInternalStoragePath()
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_AndroidGetInternalStoragePath()
@@ -8356,7 +8053,7 @@ namespace SDL2
 		[DllImport(nativeLibName, EntryPoint = "SDL_AndroidGetExternalStoragePath", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_AndroidGetExternalStoragePath();
 
-		public static string SDL_AndroidGetExternalStoragePath()
+		public static string? SDL_AndroidGetExternalStoragePath()
 		{
 			return UTF8_ToManaged(
 				INTERNAL_SDL_AndroidGetExternalStoragePath()
@@ -8594,7 +8291,7 @@ namespace SDL2
 		/* Only available in 2.0.1 or higher. */
 		[DllImport(nativeLibName, EntryPoint = "SDL_GetBasePath", CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr INTERNAL_SDL_GetBasePath();
-		public static string SDL_GetBasePath()
+		public static string? SDL_GetBasePath()
 		{
 			return UTF8_ToManaged(INTERNAL_SDL_GetBasePath(), true);
 		}
@@ -8605,7 +8302,7 @@ namespace SDL2
 			byte* org,
 			byte* app
 		);
-		public static unsafe string SDL_GetPrefPath(string org, string app)
+		public static unsafe string? SDL_GetPrefPath(string org, string app)
 		{
 			int utf8OrgBufSize = Utf8Size(org);
 			byte* utf8Org = stackalloc byte[utf8OrgBufSize];
