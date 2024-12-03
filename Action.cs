@@ -822,20 +822,12 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
   }
 }
 
-class CloseDoorAction : DirectionalAction
-{
-  readonly Map _map;
-
-  public CloseDoorAction(GameState gs, Actor actor, Map map) : base(gs, actor)
-  {
-    GameState = gs;
-    _map = map;
-  }
-
+class CloseDoorAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
+{  
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
-    var door = _map.TileAt(Loc.Row, Loc.Col);
+    var door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
     if (door is Door d)
     {
@@ -875,17 +867,9 @@ class CloseDoorAction : DirectionalAction
 
 class OpenDoorAction : DirectionalAction
 {
-  readonly Map _map;
-
-  public OpenDoorAction(GameState gs, Actor actor, Map map) : base(gs, actor)
+  public OpenDoorAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
+  public OpenDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
   {
-    _map = map;
-    GameState = gs;
-  }
-
-  public OpenDoorAction(GameState gs, Actor actor, Map map, Loc loc) : base(gs, actor)
-  {
-    _map = map;
     Loc = loc;
     GameState = gs;
   }
@@ -893,7 +877,7 @@ class OpenDoorAction : DirectionalAction
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Complete = false };
-    var door = _map.TileAt(Loc.Row, Loc.Col);
+    var door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
     if (door is Door d)
     {

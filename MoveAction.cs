@@ -17,7 +17,6 @@ namespace Yarl2;
 class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, actor)
 {
   public Loc Loc { get; init; } = loc;
-  readonly Map _map = gameState.CurrMap!;
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
 
   static string BlockedMessage(Tile tile) => tile.Type switch
@@ -81,7 +80,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
     }
 
-    if (!_map.InBounds(Loc.Row, Loc.Col))
+    if (!GameState.CurrentMap.InBounds(Loc.Row, Loc.Col))
     {
       // in theory this shouldn't ever happen...
       result.Complete = false;
@@ -117,10 +116,10 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         result.AltAction = attackAction;
       }
     }    
-    else if (!CanMoveTo(Actor, _map, Loc))
+    else if (!CanMoveTo(Actor, GameState.CurrentMap, Loc))
     {
       result.Complete = false;
-      Tile tile = _map.TileAt(Loc.Row, Loc.Col);
+      Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
       if (Actor.HasTrait<ConfusedTrait>())
       {
@@ -138,7 +137,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       {        
         if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
         {
-          var openAction = new OpenDoorAction(GameState, Actor, _map, Loc);
+          var openAction = new OpenDoorAction(GameState, Actor, Loc);
           result.AltAction = openAction;
         }
         else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)

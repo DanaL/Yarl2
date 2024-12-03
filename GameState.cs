@@ -19,7 +19,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 {
   public int Seed { get; init; } = seed;
   public Random Rng { get; set; } = rng;
-  public Map? CurrMap { get; set; }
   public Options Options { get; set; } = opts;
   public Player Player { get; set; } = p;
   public int CurrLevel { get; set; }
@@ -1416,7 +1415,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
     //Console.WriteLine($"UpdateFoV called by: {callingMethod}");
-    CurrMap = CurrentDungeon.LevelMaps[CurrLevel];
     Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
@@ -1454,7 +1452,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     foreach (var loc in fov)
     {
-      Tile tile = CurrMap.TileAt(loc.Row, loc.Col);
+      Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (glyph, z) = ObjDb.ItemGlyph(loc);
       if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {

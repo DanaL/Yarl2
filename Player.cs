@@ -707,10 +707,10 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.OpenDoor);
         if (singleDoor != Loc.Nowhere)
-          return new CloseDoorAction(gameState, this, gameState.CurrentMap) {  Loc = singleDoor };
+          return new CloseDoorAction(gameState, this) {  Loc = singleDoor };
 
         _inputController = new DirectionalInputer(gameState);
-        _deferred = new CloseDoorAction(gameState, this, gameState.CurrMap);
+        _deferred = new CloseDoorAction(gameState, this);
       }
       else if (ch == 'C')
       {
@@ -721,10 +721,10 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.ClosedDoor);
         if (singleDoor != Loc.Nowhere)
-          return new OpenDoorAction(gameState, this, gameState.CurrentMap) { Loc = singleDoor };
+          return new OpenDoorAction(gameState, this) { Loc = singleDoor };
 
         _inputController = new DirectionalInputer(gameState);
-        _deferred = new OpenDoorAction(gameState, this, gameState.CurrMap);
+        _deferred = new OpenDoorAction(gameState, this);
       }
       else if (ch == 'Q')
       {

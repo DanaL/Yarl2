@@ -84,9 +84,7 @@ class DoorOpeningMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
   {
-    var mapWithDoors = gs.GetDMap("doors");
-    if (mapWithDoors is null)
-      throw new Exception("No doors map found");
+    var mapWithDoors = gs.GetDMap("doors") ?? throw new Exception("No doors map found");
     List<(int, int, int)> adj = mapWithDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
@@ -94,7 +92,7 @@ class DoorOpeningMoveStrategy : MoveStrategy
 
       if (gs.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
       {
-        return new OpenDoorAction(gs, actor, gs.CurrentMap, loc);
+        return new OpenDoorAction(gs, actor, loc);
       }
       else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
@@ -130,7 +128,7 @@ class DoorOpeningMoveStrategy : MoveStrategy
       if (gs.TileAt(loc).Type == TileType.ClosedDoor) 
       {
         Map map = gs.CurrentDungeon.LevelMaps[loc.Level];
-        return new OpenDoorAction(gs, actor, map, loc);
+        return new OpenDoorAction(gs, actor, loc);
       }
 
       return new MoveAction(gs, actor, loc);
@@ -848,7 +846,7 @@ class MayorBehaviour : NPCBehaviour
       {
         // Should I implement code to make them polite and close the door after?
         _path.Push(mv);
-        return new OpenDoorAction(gameState, actor, gameState.Wilderness, mv);
+        return new OpenDoorAction(gameState, actor, mv);
       }
       else
       {
