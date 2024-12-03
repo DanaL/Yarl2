@@ -407,7 +407,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
       result.Messages.Add("You leap into the darkness!");
     else if (actor is Player)
       result.Messages.Add("There's no floor beneath your feet!");
-    else if (gs.LastPlayerFoV.Contains(loc))
+    else if (gs.LastPlayerFoV.Contains(Loc))
       result.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the darkness!");
     
     var landingSpot = new Loc(Loc.DungeonID, Loc.Level + 1, Loc.Row, Loc.Col);

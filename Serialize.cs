@@ -659,19 +659,41 @@ class GameObjDBSave
       Appearance = fields[13]
     };
 
-    string mvStrategyStr = fields[0];
-    mob.MoveStrategy = (MoveStrategy) Activator.CreateInstance(Type.GetType($"Yarl2.{mvStrategyStr}"));
     string behaviourStr = fields[1];
-    mob.SetBehaviour((IBehaviour)Activator.CreateInstance(Type.GetType($"Yarl2.{behaviourStr}")));
+    if (Type.GetType($"Yarl2.{behaviourStr}") is Type type)
+    {
+      IBehaviour behaviour = (IBehaviour)(Activator.CreateInstance(type) ?? throw new Exception("Unable deserialize behaviour"));
+      mob.SetBehaviour(behaviour);
+    }
 
     // Parse the traits
     if (fields[6] != "")
     {
+      bool flying = false;
+      bool immobile = false;
+      bool intelligent = false;
+
       foreach (var t in fields[6].Split('`'))
       {
         var trait = TraitFactory.FromText(t, mob);
         mob.Traits.Add(trait);
+
+        if (trait is FlyingTrait || trait is FloatingTrait)
+          flying = true;
+        if (trait is ImmobileTrait)
+          immobile = true;
+        if (trait is IntelligentTrait) 
+          intelligent = true;
       }
+
+      if (flying)
+        mob.MoveStrategy = new SimpleFlightMoveStrategy();
+      else if (intelligent)
+        mob.MoveStrategy = new DoorOpeningMoveStrategy();
+      else if (immobile)
+        mob.MoveStrategy = new WallMoveStrategy();
+      else
+        mob.MoveStrategy = new DumbMoveStrategy();
     }
 
     mob.Stats = StatsFromText(fields[7]);
