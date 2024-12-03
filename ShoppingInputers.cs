@@ -247,6 +247,17 @@ class InnkeeperInputer : Inputer
       Done = true;
       Success = true;
     }
+    else if (ch == 'b' && GameState.Player.Inventory.Zorkmids < 5)
+    {
+      InsufficentFunds = true;
+    }
+    else if (ch == 'b')
+    {
+      Selection = "Rest";
+      Zorkmids = 5;
+      Done = true;
+      Success = true;
+    }
 
     WritePopup();
   }

@@ -657,6 +657,12 @@ class InnkeeperServiceAction : Action
       GameState.Player.Inventory.Add(booze, GameState.Player.ID);
       result.Messages.Add($"You purchase a flask of booze from {_innkeeper.FullName}.");
     }
+    else if (Service == "Rest")
+    {
+      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      GameState.Player.Stats[Attribute.HP].Reset();
+      GameState.UIRef().SetPopup(new Popup("Zzz...", "", -1, -1));
+    }
 
     return result;
   }
