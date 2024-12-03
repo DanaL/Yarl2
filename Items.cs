@@ -839,13 +839,6 @@ class InventoryOptions
   public InventoryOptions(string title) => Title = title;  
 }
 
-class EmptyInventory(ulong ownerID) : Inventory(ownerID, null)
-{
-  public override List<Item> Items() => [];
-  public override string ToText() => "";
-  public override void RestoreFromText(string txt) { }
-}
-
 enum EquipingResult
 {
   Equiped,

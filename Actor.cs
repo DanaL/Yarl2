@@ -119,12 +119,6 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     return true;
   }
 
-  public Actor()
-  {
-    Inventory = new EmptyInventory(ID);
-    _behaviour = NullBehaviour.Instance();
-  }
-
   public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src, double scale)
   {
     string msg = "";
