@@ -551,9 +551,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     List<int> indexes = [];
     for (int j = _items.Count - 1; j >= 0; j--)
     {
-      var item = _objDb.GetObj(_items[j].Item2) as Item;
-      if (item.Slot == slot)
+      if (_objDb.GetObj(_items[j].Item2) is Item item && item.Slot == slot)
+      {
         indexes.Add(j);
+      }        
     }
 
     List<Item> removed = [];

@@ -2468,7 +2468,7 @@ class TraitFactory
     {
       Enum.TryParse(pieces[3], out Attribute attr);
       ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
-      string s = pieces[5] == "item" ? gameObj.ID.ToString() : pieces[5];
+      string s = pieces[5] == "item" ? gameObj?.ID.ToString() ?? "0" : pieces[5];
       return new StatBuffTrait() 
       {
         OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, 
