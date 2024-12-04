@@ -1741,6 +1741,11 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
       result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "become")} tipsy!");
     }
 
+    if (Actor.Traits.OfType<FrightenedTrait>().FirstOrDefault() is FrightenedTrait frightened)
+    {
+      frightened.Remove(Actor, GameState);
+    }
+
     return result;
   }
 }

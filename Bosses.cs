@@ -20,7 +20,9 @@ class BossFactory
   {    
     if (name == "Prince of Rats")
       return PrintOfRats(rng);
-
+    else if (name == "the Great Goblin")
+      return GreatGoblin(rng);
+      
     throw new Exception($"Uhoh -- unknown boss {name}!");
   }
 
@@ -41,8 +43,23 @@ class BossFactory
     g.Stats.Add(Attribute.Dexterity, new Stat(3));
     g.Stats.Add(Attribute.MobAttitude, new Stat(Mob.INDIFFERENT));
 
+    // {MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}
     g.Traits.Add(new IntelligentTrait());
-
+    g.Traits.Add(new MobMeleeTrait()
+    {
+      MinRange = 1,
+      MaxRange = 1,
+      DamageDie = 10,
+      DamageDice = 1, 
+      DamageType = DamageType.Blunt
+    });
+    g.Traits.Add(new KnockBackTrait());
+    g.Traits.Add(new FearsomeBellowTrait()
+    {
+      Radius = 2,
+      DC = 15,
+      Cooldown = 20
+    });
     g.CalcMoveStrategy();
 
     return g;

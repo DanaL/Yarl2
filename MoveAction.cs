@@ -110,6 +110,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         string msg = $"You don't want to attack {occ.FullName}!";
         result.Messages.Add(msg);
       }
+      else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
+      {
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} too frightened to attack!";
+        result.Messages.Add(s);
+      }
       else
       {
         var attackAction = new MeleeAttackAction(GameState, Actor, Loc);

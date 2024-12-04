@@ -348,6 +348,14 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
+  static void GreatGoblin(Dungeon dungeon, GameObjectDB objDb, Random rng)
+  {
+    Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
+    var sq = dungeon.LevelMaps[4].RandomTile(TileType.DungeonFloor, rng);
+    var loc = new Loc(dungeon.ID, 4, sq.Item1, sq.Item2);
+    objDb.AddNewActor(gg, loc);
+  }
+
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
   {
     var prince = BossFactory.Get("Prince of Rats", rng);
@@ -512,10 +520,11 @@ class CampaignCreator(UserInterface ui)
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
-        PrinceOfRats(mainDungeon, objDb, rng);
-        factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Prince of Rats" });
+        GreatGoblin(mainDungeon, objDb, rng);
+        //PrinceOfRats(mainDungeon, objDb, rng);
+        //factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Prince of Rats" });
 
         campaign.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
@@ -582,6 +591,7 @@ class CampaignCreator(UserInterface ui)
         try
         {
           File.Delete(existingSavePath);
+          UI.ClosePopup();
           return;
         }
         catch (Exception)

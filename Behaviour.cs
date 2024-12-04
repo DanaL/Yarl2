@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using Microsoft.VisualBasic;
 
 namespace Yarl2;
 
@@ -279,6 +280,12 @@ class MonsterBehaviour : IBehaviour
       var txt = $"{mob.FullName.Capitalize()} screams!";
       return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{scream.DC}#0", scream.Radius, txt);
     }
+    else if (act is FearsomeBellowTrait bellow)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      var txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
+      return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{bellow.DC}#0", bellow.Radius, txt);
+    }
     else if (act is SummonTrait summon)
     {
       _lastUse[act.Name] = gs.Turn;
@@ -294,7 +301,7 @@ class MonsterBehaviour : IBehaviour
       _lastUse[act.Name] = gs.Turn;
       return new SummonAction(mob.Loc, summonUndead.Summons(gs, mob), 1) { GameState = gs, Actor = mob };
     }
-    else if (act is HealAlliesTrait heal && mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait alliesTrait)
+    else if (act is HealAlliesTrait && mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait alliesTrait)
     {
       _lastUse[act.Name] = gs.Turn;
       List<Mob> candidates = [];

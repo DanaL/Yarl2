@@ -38,3 +38,4 @@ haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndea
 giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|Melee#8#1#Piercing|Drop#beetle_carapace#33
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|Melee#2#1#Piercing|Flying
 displacer beast   |f|grey         |darkgrey    |14|30|4| 1.0|12|12|Melee#8#1#Piercing|Displacement
+the Great Goblin  |g|lightpurple  |purple      |16|50|6| 1.0|14|14|FearsomeBellow#2#15#12,Melee#10#1#Blunt|KnockBack,Intelligent,MiniBoss5

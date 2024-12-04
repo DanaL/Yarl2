@@ -655,6 +655,12 @@ abstract class UserInterface
       row = WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TIPSY");
     }
+    if (!statuses.Contains("AFRAID") && gs.Player.HasTrait<FrightenedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "AFRAID")];
+      row = WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("AFRAID");
+    }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)

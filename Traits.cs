@@ -290,13 +290,13 @@ class ConfusingScreamTrait : ActionTrait
     return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
   }
 
-  public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}#";
+  public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}";
 }
 
 class MobMeleeTrait : ActionTrait
 {
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"MobMelee#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}#";
+  public override string AsText() => $"MobMelee#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}";
   public int DamageDie { get; set; }
   public int DamageDice { get; set; }
   public DamageType DamageType { get; set; }
@@ -613,6 +613,21 @@ class DividerTrait : Trait
 class FallenAdventurerTrait : Trait
 {
   public override string AsText() => "FallenAdventurer";
+}
+
+class FearsomeBellowTrait : ActionTrait
+{
+  public override ActionType ActionType => ActionType.Attack;
+
+  public int DC { get; set; }
+  public int Radius { get; set; }
+
+  public override bool Available(Mob mob, GameState gs)
+  {
+    return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
+  }
+
+  public override string AsText() => $"FearsomeBellow#{Radius}#{DC}#{Cooldown}";
 }
 
 class FinalBossTrait : Trait
@@ -955,6 +970,64 @@ class FlyingTrait : BasicTrait
   public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
   public override string AsText() => $"Flying#{ExpiresOn}";
+}
+
+// Later, when I implement the stress mechanics, becoming frightened
+// should icnrease the player's stress
+class FrightenedTrait : TemporaryTrait
+{
+  public int DC { get; set; }
+  
+  public override string AsText() => $"Frightened#{OwnerID}#{DC}#{ExpiresOn}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    foreach (Trait trait in target.Traits)
+    {
+      if (trait is TipsyTrait)
+        return [];
+
+      if (trait is BrainlessTrait)
+        return [];
+
+      if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Fear)
+        return [];
+
+      if (trait is FrightenedTrait frightened)
+      {
+        ExpiresOn += (ulong)gs.Rng.Next(15, 26);
+        return [];
+      }
+    }
+
+    if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      return [];
+
+    OwnerID = target.ID;
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
+    
+    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} frightened!"];
+  }
+
+  public void Remove(Actor victim, GameState gs)
+  {
+    victim.Traits.Remove(this);
+    Expired = true;
+    string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "shake")} off {Grammar.Possessive(victim)} fear!";
+    if (gs.LastPlayerFoV.Contains(victim.Loc))
+      gs.UIRef().AlertPlayer(msg);
+    gs.StopListening(GameEventType.EndOfRound, this);
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
+    {
+      Remove(victim, gs);
+    }    
+  }
 }
 
 class OpaqueTrait : Trait
@@ -2326,11 +2399,19 @@ class TraitFactory
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
+    { "FearsomeBellow", (pieces, gameObj) => new FearsomeBellowTrait()
+      { 
+        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3])
+      }
+    },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
+    { "Frightened", (pieces, gameObj) => new FrightenedTrait() 
+      { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } 
+    },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Grants", (pieces, gameObj) => {
       string[] grantedTraits = pieces[1].Split(';').Select(s => s.Replace('&', '#')).ToArray();
