@@ -25,6 +25,7 @@ class GameLoader(UserInterface ui)
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     UI.ClearSqsOnScreen();
 
+    bool noGame = false;
     string s = "Please choose a saved game to load:";
     for (int i = 0; i < s.Length; i++)
     {
@@ -41,6 +42,7 @@ class GameLoader(UserInterface ui)
         s = "Uh-oh, you don't seem to have any saved games!";
         for (int i = 0; i < s.Length; i++)
           UI.SqsOnScreen[3, 1 + i] = new Sqr(Colours.WHITE, Colours.BLACK, s[i]);
+        noGame = true;
       }
       else
       {
@@ -69,7 +71,7 @@ class GameLoader(UserInterface ui)
         savePath = files[selected].Path;
         break;
       }
-      else if (ch == Constants.ESC)
+      else if (ch == Constants.ESC || (noGame && ch == ' '))
       {
         throw new GameNotLoadedException();
       }
