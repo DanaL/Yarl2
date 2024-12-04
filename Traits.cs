@@ -1008,6 +1008,11 @@ class FrightenedTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
     
+    if (target.Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
+    {
+      attitude.SetMax(Mob.AFRAID);
+    }
+
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} frightened!"];
   }
 
@@ -1019,6 +1024,11 @@ class FrightenedTrait : TemporaryTrait
     if (gs.LastPlayerFoV.Contains(victim.Loc))
       gs.UIRef().AlertPlayer(msg);
     gs.StopListening(GameEventType.EndOfRound, this);
+
+    if (victim.Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
+    {
+      attitude.SetMax(Mob.AGGRESSIVE);
+    }
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
