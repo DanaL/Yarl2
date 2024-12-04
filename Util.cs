@@ -46,11 +46,11 @@ class Colours
   public static readonly Colour BRIGHT_RED = new(208, 28, 31, 255);
   public static readonly Colour DULL_RED = new(129, 12, 12, 255);
   public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
-  public static readonly Colour TORCH_RED = new(208, 28, 31, 25);  
+  public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
   public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 15);
   public static readonly Colour FX_RED = new(128, 00, 00, 175);
   public static readonly Colour FAR_BELOW = new(55, 198, 255, 50);
-  public static readonly Colour HILITE = new(255, 255, 53, 128);  
+  public static readonly Colour HILITE = new(255, 255, 53, 128);
   public static readonly Colour PURPLE = new(191, 64, 191, 255);
   public static readonly Colour LIGHT_PURPLE = new(207, 159, 255, 255);
   public static readonly Colour FADED_PURPLE = new(207, 159, 255, 125);
@@ -313,7 +313,7 @@ class Util
     HashSet<Loc> locs = [];
     Queue<Loc> q = [];
     q.Enqueue(origin);
-    HashSet<Loc> visited = [ origin ];
+    HashSet<Loc> visited = [origin];
 
     while (q.Count > 0)
     {
@@ -326,7 +326,7 @@ class Util
           continue;
         if (visited.Contains(adj))
           continue;
-        
+
         int d = Distance(origin, adj);
         if (d <= radius)
         {
@@ -370,6 +370,111 @@ class Util
     }
 
     return sqs;
+  }
+
+  static (int, int) Rotate(int originR, int originC, int targetR, int targetC, double angle)
+  {
+    double translatedR = targetR - originR;
+    double translatedC = targetC - originC;
+
+    double rotatedR = translatedC * Math.Sin(angle) + translatedR * Math.Cos(angle);
+    double rotatedC = translatedC * Math.Cos(angle) - translatedR * Math.Sin(angle);
+
+    return ((int)rotatedR + originR, (int)rotatedC + originC);
+  }
+
+  public static (int, int) ExtendLine(int r0, int c0, int r1, int c1, int dist)
+  {
+    double length = Distance(r0, c0, r1, c1);
+
+    // calculate the unit direction of the vector    
+    double unitX = (c1 - c0) / length;
+    double unitY = (r1 - r0) / length;
+
+    int newR = (int) (r1 + unitY * dist);
+    int newC = (int) (c1 + unitX * dist);
+
+    return (newR, newC);
+  }
+
+  public static List<Loc> ConeAoE2(Map map, Loc origin, Loc target, int range)
+  {
+    var delta = Math.PI / 2 - AngleBetweenLocs(origin, target);
+
+    var rotatedTarget = Rotate(origin.Row, origin.Col, target.Row, target.Col, -delta);
+    int d = Distance(origin, target);
+    if (d < range)
+      rotatedTarget = ExtendLine(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, range - d);
+
+    var (lbRow, lbrCol) = Rotate(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, -0.524);
+    var leftBeam = Bresenham(origin.Row, origin.Col, lbRow - 1, lbrCol - 1);    
+    var (rbRow, rbrCol) = Rotate(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, 0.524);
+    var rightBeam = Bresenham(origin.Row, origin.Col, rbRow - 1, rbrCol + 1);
+
+    // A lot of this is unncessary rearrangment of data, I think, but it's how 
+    // I can imagine what is going on in my dumb brain.
+    int leftBeamTop = leftBeam.Select(sq => sq.Item1).Min();
+    int rightBeamTop = rightBeam.Select(sq => sq.Item1 ).Min();
+    int topRow = int.Min(leftBeamTop, rightBeamTop);
+    if (topRow < 0)
+      topRow = 0;
+
+    int row = origin.Row - 1;
+    while (row >= topRow)
+    {
+      int startCol = leftBeam.Where(sq => sq.Item1 == row).Select(sq => sq.Item2).Min();
+      int endCol = rightBeam.Where(sq => sq.Item1 == row).Select(sq => sq.Item2).Max();
+      Console.WriteLine($"{startCol} {endCol}");
+
+      for (int c = startCol; c <= endCol; c++)
+      {
+        var (actualRow, actualCol) = Rotate(origin.Row, origin.Col, row, c, delta);
+        Console.WriteLine($"{actualRow}, {actualCol}, {map.TileAt(actualRow, actualCol).Type}");
+      }
+
+      --row;
+    }
+
+    // We've rotated target so that it is directly north of origin, so the 
+    // left beam is alway to the west, and the right beam to the east.
+    int minCol = leftBeam.Select(sq => sq.Item2).Min();
+    int maxCol = rightBeam.Select(sq => sq.Item2).Max();
+
+    return [];
+  }
+
+  public static List<Loc> ConeAoE(Map map, Loc origin, Loc target, int range)
+  {
+    HashSet<Loc> affected = [origin];
+    
+    // Okay, there is probably a better way do this but I'm going to find the outer 
+    // points of the triangle formed, then do breshenham lines from origin to each
+    // point along the lines from the outer points to the target. Ie.:
+    //
+    //         *--@       
+    //             \
+    //              *
+    //         D  
+    
+    // 0.523 is ~30'
+    var (ar, ac) = Rotate(origin.Row, origin.Col, target.Row, target.Col, -0.523);
+    var (br, bc) = Rotate(origin.Row, origin.Col, target.Row, target.Col, 0.523);
+
+    List<(int, int)> targetSqs = new(Bresenham(ar, ac, target.Row, target.Col));
+    targetSqs = targetSqs.Union(Bresenham(br, bc, target.Row, target.Col)).ToList();
+    
+    foreach (var tsq in targetSqs.Distinct())
+    {
+      foreach (var sq in Bresenham(origin.Row, origin.Col, tsq.Item1, tsq.Item2))
+      {
+        if (!map.TileAt(sq).PassableByFlight())
+          break;
+        affected.Add(origin with { Row = sq.Item1, Col = sq.Item2 });
+      }      
+    }
+
+    return [.. affected];
+    //return [.. affected.OrderBy(loc => Distance(origin.Row, origin.Col, loc.Row, loc.Col))];
   }
 
   // I am very bravely breaking from D&D traidtion and I'm just going to 
@@ -448,7 +553,7 @@ class Util
     TileType.Pool => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK),
     TileType.FrozenPool => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.Sand => new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
-    TileType.Grass => new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),    
+    TileType.Grass => new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
     TileType.GreenTree => new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
     TileType.YellowTree => new Glyph('ϙ', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
     TileType.RedTree => new Glyph('ϙ', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
@@ -492,10 +597,10 @@ class Util
     TileType.DartTrap => new Glyph('^', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
     TileType.HiddenWaterTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.WaterTrap => new Glyph('^', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
-    TileType.FireJetTrap => 
+    TileType.FireJetTrap =>
       ((FireJetTrap)tile).Seen ? new Glyph('#', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, Colours.BLACK)
                                : new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.JetTrigger => 
+    TileType.JetTrigger =>
       ((JetTrigger)tile).Visible ? new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK)
                                  : new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.MagicMouth => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
@@ -514,7 +619,7 @@ class Util
     Dictionary<string, CyclopediaEntry> cyclopedia = [];
 
     var lines = File.ReadAllLines("data/cyclopedia.txt");
-    
+
     for (int j = 0; j < lines.Length; j += 3)
     {
       string s = lines[j + 1];
@@ -524,7 +629,7 @@ class Util
       if (k > -1)
       {
         key = s[..k];
-        title = s[(k+1)..];
+        title = s[(k + 1)..];
         entry = new CyclopediaEntry(title, lines[j + 2]);
       }
       else
@@ -533,7 +638,7 @@ class Util
         title = s;
         entry = new CyclopediaEntry(s, lines[j + 2]);
       }
-      
+
       cyclopedia.Add(key, entry);
     }
 
@@ -609,8 +714,8 @@ static class StringUtils
       return s;
   }
 
-  static HashSet<string> _minorWords = [ "of", "the", "and", "a", "an" ];
-  public static string CapitalizeWords(this string s) 
+  static HashSet<string> _minorWords = ["of", "the", "and", "a", "an"];
+  public static string CapitalizeWords(this string s)
   {
     var words = s.ToLower().Split(' ').Select(w => _minorWords.Contains(w) ? w : w.Capitalize());
     return string.Join(' ', words);
@@ -763,7 +868,7 @@ class MapUtils
       if (num < 10)
         return (char)('0' + num);
 
-      return (char) ('A' + (10 - num));
+      return (char)('A' + (10 - num));
     }
 
     char[,] sqs = new char[map.Height, map.Width];
@@ -852,9 +957,65 @@ class InvalidRoomException : Exception { }
 class CouldNotPlaceDungeonEntranceException : Exception { }
 class AbnormalMovement(Loc dest) : Exception
 {
-  public Loc Dest { get; set; } = dest; 
+  public Loc Dest { get; set; } = dest;
 }
 class UnknownMonsterException(string name) : Exception
 {
   public string Name { get; set; } = name;
+}
+
+class TestCone
+{
+  static void Dump(Map map)
+  {
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c <  map.Width; c++)
+      {
+        switch (map.TileAt(r, c).Type)
+        {
+          case TileType.DungeonFloor:
+            Console.Write('.');
+            break;
+          case TileType.DungeonWall:
+            Console.Write('#');
+            break;
+        }
+      }
+      Console.WriteLine();
+    }
+  }
+
+  public static void Test()
+  {
+    Map map = new(15, 10);
+    
+    for (int c = 0; c < map.Width ; c++)
+    {
+      map.SetTile(0, c, TileFactory.Get(TileType.DungeonWall));
+      map.SetTile(map.Height - 1, c, TileFactory.Get(TileType.DungeonWall));
+    }
+
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      map.SetTile(r, 0, TileFactory.Get(TileType.DungeonWall));
+      map.SetTile(r, map.Width - 1, TileFactory.Get(TileType.DungeonWall));
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+      }
+    }
+
+    map.SetTile(2, 6, TileFactory.Get(TileType.DungeonWall));
+    map.SetTile(3, 6, TileFactory.Get(TileType.DungeonWall));
+
+    map.SetTile(6, 8, TileFactory.Get(TileType.DungeonWall));
+    map.SetTile(7, 8, TileFactory.Get(TileType.DungeonWall));
+
+    Loc o = new(0, 0, 5, 3);
+    Loc t = new(0, 0, 4, 8);
+    Util.ConeAoE2(map, o, t, 6);
+
+    Dump(map);
+  }
 }

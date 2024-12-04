@@ -13,6 +13,8 @@ using System.Text.Json;
 
 using Yarl2;
 
+TestCone.Test();
+
 var options = Options.LoadOptions();
 
 UserInterface display;
@@ -108,7 +110,7 @@ namespace Yarl2
       Options options = new()
       {
         Display = "Bearlib",
-        FontSize = 12,
+        FontSize = 14,
         BumpToOpen = true,
         HighlightPlayer = false
       };
