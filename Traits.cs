@@ -413,6 +413,23 @@ class FinesseTrait : Trait
   public override string AsText() => "Finesse";
 }
 
+class FireBreathTrait : ActionTrait
+{
+  public override ActionType ActionType => ActionType.Attack;
+
+  public int DC { get; set; }
+  public int Range { get; set; }
+  public int DmgDie { get; set; }
+  public int DmgDice { get; set; }
+
+  public override bool Available(Mob mob, GameState gs)
+  {
+    return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
+  }
+
+  public override string AsText() => $"FireBreathTrait#{DmgDie}#{DmgDice}#{Range}#{Cooldown}";
+}
+
 class ImmunityTrait : BasicTrait
 {
   public DamageType Type {  get; set; }
@@ -2410,17 +2427,25 @@ class TraitFactory
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FearsomeBellow", (pieces, gameObj) => new FearsomeBellowTrait()
-      { 
+      {
         Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3])
       }
     },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
+    { "FireBreath", (pieces, gameObj) => new FireBreathTrait()
+      {
+        DmgDie = int.Parse(pieces[1]),
+        DmgDice = int.Parse(pieces[2]),
+        Range = int.Parse(pieces[3]),
+        Cooldown = ulong.Parse(pieces[4])
+      }
+    },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
-    { "Frightened", (pieces, gameObj) => new FrightenedTrait() 
-      { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } 
+    { "Frightened", (pieces, gameObj) => new FrightenedTrait()
+      { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Grants", (pieces, gameObj) => {
@@ -2450,7 +2475,7 @@ class TraitFactory
       }
     },
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
-    { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },    
+    { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Likeable", (pieces, gameObj) => new LikeableTrait() },
@@ -2475,19 +2500,19 @@ class TraitFactory
       Enum.TryParse(pieces[5], out DamageType dt);
       return new MobMissileTrait() {
           Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
-          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},    
+          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
-    { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait() 
-      { 
+    { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait()
+      {
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Strength = int.Parse(pieces[2])
-      } 
+      }
     },
-    { "OnFire", (pieces, gameObj) => new OnFireTrait() 
-    { 
-      Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]), 
-      Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) } 
+    { "OnFire", (pieces, gameObj) => new OnFireTrait()
+    {
+      Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
+      Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) }
     },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() },
@@ -2497,17 +2522,17 @@ class TraitFactory
     { "Plant", (pieces, gameObj) => new PlantTrait() },
     { "Plural", (pieces, gameObj) => new PluralTrait() },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
-    { "Poisoned", (pieces, gameObj) => new PoisonedTrait() 
-      { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]), 
+    { "Poisoned", (pieces, gameObj) => new PoisonedTrait()
+      { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]),
         ExpiresOn = ulong.Parse(pieces[4]), Duration = int.Parse(pieces[5])
-      } 
+      }
     },
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
-    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },    
-    { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor 
+    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
+    { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
-    { "RangedSpellAction", (pieces, gameObj) => 
+    { "RangedSpellAction", (pieces, gameObj) =>
     new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
     { "Reach", (pieces, gameObj) => new ReachTrait() },
@@ -2547,11 +2572,11 @@ class TraitFactory
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
-    { "SpellAction", (pieces, gameObj) => 
+    { "SpellAction", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[3], out ActionType at);
         return new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]), ActionType = at };
-      }  
+      }
     },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
@@ -2560,9 +2585,9 @@ class TraitFactory
       Enum.TryParse(pieces[3], out Attribute attr);
       ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
       string s = pieces[5] == "item" ? gameObj?.ID.ToString() ?? "0" : pieces[5];
-      return new StatBuffTrait() 
+      return new StatBuffTrait()
       {
-        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, 
+        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr,
         Amt = int.Parse(pieces[4]), Source = s
       };
     } },
@@ -2578,12 +2603,12 @@ class TraitFactory
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
-    { "Torch", (pieces, gameObj) => new TorchTrait() 
-      { 
-        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
-        Lit = bool.Parse(pieces[2]), 
-        Fuel = int.Parse(pieces[3]) 
-      } 
+    { "Torch", (pieces, gameObj) => new TorchTrait()
+      {
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        Lit = bool.Parse(pieces[2]),
+        Fuel = int.Parse(pieces[3])
+      }
     },
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "Undead", (pieces, gameObj) => new UndeadTrait() },

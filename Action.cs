@@ -254,6 +254,47 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
   }
 }
 
+// I'm sure as I add more breath weapons I'll make this more generic, or extract
+// a subclass
+class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmgDie, int dmgDice) : Action(gs, actor)
+{
+  Loc Target { get; set; } = target;
+  int Range { get; set; } = range;
+  int DmgDie { get; set; } = dmgDie;
+  int DmgDice { get; set; } = dmgDice;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "breath")} a gout of flame!";
+      GameState!.UIRef().AlertPlayer(s);
+    }
+
+    // Actor targets a specific loc, but the cone of the breath weapon extends
+    // its full range.
+    var (fullR, fullC) = Util.ExtendLine(Actor.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col, Range);
+    Loc actualTarget = Target with { Row = fullR, Col = fullC };
+    List<Loc> affected = Util.ConeAoE(GameState.CurrentMap, Actor.Loc, actualTarget, Range);
+    var explosion = new ExplosionAnimation(GameState!)
+    {
+      MainColour = Colours.BRIGHT_RED,
+      AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,
+      Highlight = Colours.WHITE,
+      Centre = Actor.Loc,
+      Sqs = affected.ToHashSet()
+    };
+    GameState.UIRef().PlayAnimation(explosion, GameState);
+
+    return result;
+  }
+}
+
 class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   Loc Target { get; set; }

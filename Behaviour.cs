@@ -286,6 +286,10 @@ class MonsterBehaviour : IBehaviour
       var txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
       return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{bellow.DC}#0", bellow.Radius, txt);
     }
+    else if (act is FireBreathTrait fireBreath)
+    {
+      return new FireBreathAction(gs, mob, gs.Player.Loc, fireBreath.Range, fireBreath.DmgDie, fireBreath.DmgDice);
+    }
     else if (act is SummonTrait summon)
     {
       _lastUse[act.Name] = gs.Turn;

@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel.Design;
+
 namespace Yarl2;
 
 enum SetupType
@@ -350,12 +352,28 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
-  static void GreatGoblin(Dungeon dungeon, GameObjectDB objDb, Random rng)
+  static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Random rng)
   {
-    Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
-    var sq = dungeon.LevelMaps[4].RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(dungeon.ID, 4, sq.Item1, sq.Item2);
-    objDb.AddNewActor(gg, loc);
+    int bossLevel = 0;
+
+    if (earlyDenizen == "kobold")
+    {
+      Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
+      ks.Name = "the Kobold Regional Manager";
+      ks.Traits.Add(new NamedTrait());
+      var sq = dungeon.LevelMaps[bossLevel].RandomTile(TileType.DungeonFloor, rng);
+      var loc = new Loc(dungeon.ID, bossLevel, sq.Item1, sq.Item2);
+      objDb.AddNewActor(ks, loc);
+      factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Kobold Regional Manager" });
+    }
+    else if (earlyDenizen == "goblin")
+    {
+      Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
+      var sq = dungeon.LevelMaps[bossLevel].RandomTile(TileType.DungeonFloor, rng);
+      var loc = new Loc(dungeon.ID, bossLevel, sq.Item1, sq.Item2);
+      objDb.AddNewActor(gg, loc);
+      factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Great Goblin" });
+    }   
   }
 
   static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
@@ -524,9 +542,7 @@ class CampaignCreator(UserInterface ui)
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
         //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
-        GreatGoblin(mainDungeon, objDb, rng);
-        //PrinceOfRats(mainDungeon, objDb, rng);
-        //factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Prince of Rats" });
+        SetLevel5MiniBoss(mainDungeon, objDb, factDb, DeckBulder.EarlyMainOccupant, rng);
 
         campaign.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
