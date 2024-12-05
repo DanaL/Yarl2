@@ -279,7 +279,8 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     // its full range.
     var (fullR, fullC) = Util.ExtendLine(Actor.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col, Range);
     Loc actualTarget = Target with { Row = fullR, Col = fullC };
-    List<Loc> affected = Util.ConeAoE(GameState.CurrentMap, Actor.Loc, actualTarget, Range);
+    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb);
+    affected.Insert(0, Actor.Loc);
     var explosion = new ExplosionAnimation(GameState!)
     {
       MainColour = Colours.BRIGHT_RED,
@@ -287,7 +288,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
       AltColour2 = Colours.YELLOW_ORANGE,
       Highlight = Colours.WHITE,
       Centre = Actor.Loc,
-      Sqs = affected.ToHashSet()
+      Sqs = [ ..affected ]
     };
     GameState.UIRef().PlayAnimation(explosion, GameState);
 

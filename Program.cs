@@ -13,8 +13,6 @@ using System.Text.Json;
 
 using Yarl2;
 
-TestCone.Test();
-
 var options = Options.LoadOptions();
 
 UserInterface display;

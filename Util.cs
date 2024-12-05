@@ -372,7 +372,7 @@ class Util
     return sqs;
   }
 
-  static (int, int) Rotate(int originR, int originC, int targetR, int targetC, double angle)
+  public static (int, int) Rotate(int originR, int originC, int targetR, int targetC, double angle)
   {
     double translatedR = targetR - originR;
     double translatedC = targetC - originC;
@@ -395,86 +395,6 @@ class Util
     int newC = (int) (c1 + unitX * dist);
 
     return (newR, newC);
-  }
-
-  public static List<Loc> ConeAoE2(Map map, Loc origin, Loc target, int range)
-  {
-    var delta = Math.PI / 2 - AngleBetweenLocs(origin, target);
-
-    var rotatedTarget = Rotate(origin.Row, origin.Col, target.Row, target.Col, -delta);
-    int d = Distance(origin, target);
-    if (d < range)
-      rotatedTarget = ExtendLine(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, range - d);
-
-    var (lbRow, lbrCol) = Rotate(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, -0.524);
-    var leftBeam = Bresenham(origin.Row, origin.Col, lbRow - 1, lbrCol - 1);    
-    var (rbRow, rbrCol) = Rotate(origin.Row, origin.Col, rotatedTarget.Item1, rotatedTarget.Item2, 0.524);
-    var rightBeam = Bresenham(origin.Row, origin.Col, rbRow - 1, rbrCol + 1);
-
-    // A lot of this is unncessary rearrangment of data, I think, but it's how 
-    // I can imagine what is going on in my dumb brain.
-    int leftBeamTop = leftBeam.Select(sq => sq.Item1).Min();
-    int rightBeamTop = rightBeam.Select(sq => sq.Item1 ).Min();
-    int topRow = int.Min(leftBeamTop, rightBeamTop);
-    if (topRow < 0)
-      topRow = 0;
-
-    int row = origin.Row - 1;
-    while (row >= topRow)
-    {
-      int startCol = leftBeam.Where(sq => sq.Item1 == row).Select(sq => sq.Item2).Min();
-      int endCol = rightBeam.Where(sq => sq.Item1 == row).Select(sq => sq.Item2).Max();
-      Console.WriteLine($"{startCol} {endCol}");
-
-      for (int c = startCol; c <= endCol; c++)
-      {
-        var (actualRow, actualCol) = Rotate(origin.Row, origin.Col, row, c, delta);
-        Console.WriteLine($"{actualRow}, {actualCol}, {map.TileAt(actualRow, actualCol).Type}");
-      }
-
-      --row;
-    }
-
-    // We've rotated target so that it is directly north of origin, so the 
-    // left beam is alway to the west, and the right beam to the east.
-    int minCol = leftBeam.Select(sq => sq.Item2).Min();
-    int maxCol = rightBeam.Select(sq => sq.Item2).Max();
-
-    return [];
-  }
-
-  public static List<Loc> ConeAoE(Map map, Loc origin, Loc target, int range)
-  {
-    HashSet<Loc> affected = [origin];
-    
-    // Okay, there is probably a better way do this but I'm going to find the outer 
-    // points of the triangle formed, then do breshenham lines from origin to each
-    // point along the lines from the outer points to the target. Ie.:
-    //
-    //         *--@       
-    //             \
-    //              *
-    //         D  
-    
-    // 0.523 is ~30'
-    var (ar, ac) = Rotate(origin.Row, origin.Col, target.Row, target.Col, -0.523);
-    var (br, bc) = Rotate(origin.Row, origin.Col, target.Row, target.Col, 0.523);
-
-    List<(int, int)> targetSqs = new(Bresenham(ar, ac, target.Row, target.Col));
-    targetSqs = targetSqs.Union(Bresenham(br, bc, target.Row, target.Col)).ToList();
-    
-    foreach (var tsq in targetSqs.Distinct())
-    {
-      foreach (var sq in Bresenham(origin.Row, origin.Col, tsq.Item1, tsq.Item2))
-      {
-        if (!map.TileAt(sq).PassableByFlight())
-          break;
-        affected.Add(origin with { Row = sq.Item1, Col = sq.Item2 });
-      }      
-    }
-
-    return [.. affected];
-    //return [.. affected.OrderBy(loc => Distance(origin.Row, origin.Col, loc.Row, loc.Col))];
   }
 
   // I am very bravely breaking from D&D traidtion and I'm just going to 
@@ -964,58 +884,137 @@ class UnknownMonsterException(string name) : Exception
   public string Name { get; set; } = name;
 }
 
-class TestCone
+// Really, a hacked up version of the Shadowcast routine in FoV, but it's
+// different enough to (I think) to justify a separate version. Mingling the
+// differences would really stink up FOV.cs
+class ConeCalculator
 {
-  static void Dump(Map map)
+  public static List<Loc> Affected(int range, Loc origin, Loc target, Map map, GameObjectDB objDb)
   {
-    for (int r = 0; r < map.Height; r++)
+    HashSet<Loc> affected = [];
+    
+    // even if the target is closer, the cone always covers the full range
+    if (Util.Distance(origin, target) < range)
     {
-      for (int c = 0; c <  map.Width; c++)
-      {
-        switch (map.TileAt(r, c).Type)
-        {
-          case TileType.DungeonFloor:
-            Console.Write('.');
-            break;
-          case TileType.DungeonWall:
-            Console.Write('#');
-            break;
-        }
-      }
-      Console.WriteLine();
+      var (newR, newC) = Util.ExtendLine(origin.Row, origin.Col, target.Row, target.Col, range);
+      target = target with { Row = newR, Col = newC };
     }
+
+    var (ar, ac) = Util.Rotate(origin.Row, origin.Col, target.Row, target.Col, -0.523);
+    var (br, bc) = Util.Rotate(origin.Row, origin.Col, target.Row, target.Col, 0.523);
+    Loc beamA = origin with { Row = ar, Col = ac };
+    Loc beamB = origin with { Row = br, Col = bc };
+    int octantA = OctantForBeam(origin, beamA);
+    int octantB = OctantForBeam(origin, beamB);
+    int loOctant = int.Min(octantA, octantB);
+    int hiOctant = int.Max(octantA, octantB);
+    
+    for (int j = loOctant; j <= hiOctant; j++)
+    {
+      affected = affected.Union(CalcOctant(range, origin, map, j, objDb))
+                         .ToHashSet();
+    }
+
+    double angleA = Util.AngleBetweenLocs(origin, beamA);
+    double angleB = Util.AngleBetweenLocs(origin, beamB);
+    double minAngle = double.Min(angleA, angleB);
+    double maxAngle = double.Max(angleA, angleB);
+
+    // So the shadowcasting covers 2 or 3 octants (90 to 135 degrees) so we
+    // want to trim it to the actual cone/triangle, which I want to be about
+    // 60 degrees.
+    return affected.Where(l => 
+    {
+      double angle = Util.AngleBetweenLocs(origin, l);
+      return angle >= minAngle && angle <= maxAngle;
+    }).ToList();
   }
 
-  public static void Test()
+  public static int OctantForBeam(Loc origin, Loc beam)
   {
-    Map map = new(15, 10);
-    
-    for (int c = 0; c < map.Width ; c++)
-    {
-      map.SetTile(0, c, TileFactory.Get(TileType.DungeonWall));
-      map.SetTile(map.Height - 1, c, TileFactory.Get(TileType.DungeonWall));
-    }
+    double angle = Util.AngleBetweenLocs(origin, beam);
 
-    for (int r = 1; r < map.Height - 1; r++)
+    if (angle >= 0 && angle < Math.PI / 4)
+      return 4;
+    else if (angle >= Math.PI / 4 && angle < Math.PI / 2)
+      return 5;
+    else if (angle >= Math.PI / 2 && angle < 3 * Math.PI / 4)
+      return 6;
+    else if (angle >= 3 * Math.PI / 4 && angle < Math.PI)
+      return 7;
+    else if (angle >= -Math.PI && angle < -3 * Math.PI / 4)
+      return 0;
+    else if (angle >= -3 * Math.PI / 4 && angle < -Math.PI / 2)
+      return 1;
+    else if (angle >= -Math.PI / 2 && angle < -Math.PI / 4)
+      return 2;
+    
+    return 3;
+    
+  }
+
+  static Shadow ProjectTile(int row, int col)
+  {
+    float topLeft = col / (row + 2.0f);
+    float bottomRight = (col + 1.0f) / (row + 1.0f);
+
+    return new Shadow(topLeft, bottomRight);
+  }
+  
+  static (int, int) RotateOctant(int row, int col, int octant)
+  {
+    return octant switch
     {
-      map.SetTile(r, 0, TileFactory.Get(TileType.DungeonWall));
-      map.SetTile(r, map.Width - 1, TileFactory.Get(TileType.DungeonWall));
-      for (int c = 1; c < map.Width - 1; c++)
+      0 => (col, -row),
+      1 => (row, -col),
+      2 => (row, col),
+      3 => (col, row),
+      4 => (-col, row),
+      5 => (-row, col),
+      6 => (-row, -col),
+      _ => (-col, -row),
+    };
+  }
+
+  static HashSet<Loc> CalcOctant(int range, Loc origin, Map map, int octant, GameObjectDB objDb)
+  {
+    HashSet<Loc> affected = [];
+    bool fullShadow = false;
+    var line = new ShadowLine();
+
+    for (int row = 1; row <= range; row++)
+    {
+      for (int col = 0; col <= row; col++)
       {
-        map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+        var (dr, dc) = RotateOctant(row, col, octant);
+        int r = origin.Row + dr;
+        int c = origin.Col + dc;
+
+        // The distance check trims the view area to be more round
+        int d = (int)Math.Sqrt(dr * dr + dc * dc);
+        if (!map.InBounds(r, c) || d > range)
+          break;
+
+        Shadow projection = ProjectTile(row, col);
+        if (!line.IsInShadow(projection))
+        {
+          Loc loc = origin with { Row = r, Col = c };
+          if (!map.TileAt(r, c).Passable() || objDb.BlockersAtLoc(loc))
+          {
+            line.Add(projection);
+            fullShadow = line.IsFullShadow();
+          }
+          else
+          {
+            affected.Add(loc);
+          }         
+        }
+
+        if (fullShadow)
+          return affected;
       }
     }
 
-    map.SetTile(2, 6, TileFactory.Get(TileType.DungeonWall));
-    map.SetTile(3, 6, TileFactory.Get(TileType.DungeonWall));
-
-    map.SetTile(6, 8, TileFactory.Get(TileType.DungeonWall));
-    map.SetTile(7, 8, TileFactory.Get(TileType.DungeonWall));
-
-    Loc o = new(0, 0, 5, 3);
-    Loc t = new(0, 0, 4, 8);
-    Util.ConeAoE2(map, o, t, 6);
-
-    Dump(map);
+    return affected;
   }
 }
