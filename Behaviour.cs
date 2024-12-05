@@ -10,7 +10,6 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using Microsoft.VisualBasic;
 
 namespace Yarl2;
 
@@ -288,6 +287,7 @@ class MonsterBehaviour : IBehaviour
     }
     else if (act is FireBreathTrait fireBreath)
     {
+      _lastUse[act.Name] = gs.Turn;
       return new FireBreathAction(gs, mob, gs.Player.Loc, fireBreath.Range, fireBreath.DmgDie, fireBreath.DmgDice);
     }
     else if (act is SummonTrait summon)

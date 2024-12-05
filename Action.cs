@@ -292,6 +292,13 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     };
     GameState.UIRef().PlayAnimation(explosion, GameState);
 
+    affected.Remove(Actor.Loc);
+
+    foreach (var pt in affected)
+    {
+      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+    }
+
     return result;
   }
 }

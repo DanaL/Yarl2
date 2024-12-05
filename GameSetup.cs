@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.ComponentModel.Design;
-
 namespace Yarl2;
 
 enum SetupType
@@ -354,23 +352,45 @@ class CampaignCreator(UserInterface ui)
 
   static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Random rng)
   {
-    int bossLevel = 0;
+    int bossLevelNum = 0;
+    Map bossLevel = dungeon.LevelMaps[bossLevelNum];
 
     if (earlyDenizen == "kobold")
     {
       Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
       ks.Name = "the Kobold Regional Manager";
       ks.Traits.Add(new NamedTrait());
-      var sq = dungeon.LevelMaps[bossLevel].RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevel, sq.Item1, sq.Item2);
+      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
+      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);
       factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Kobold Regional Manager" });
+
+      List<Loc> options = [];
+      // Where shall we put the pet dragon?
+      for (int r = -2; r <= 2; r++)
+      {
+        for (int  c = -2; c <= 2; c++)
+        {
+          if (!bossLevel.InBounds(loc.Row + r, loc.Col + c))
+            continue;
+          Loc opt = loc with { Row = loc.Row + r, Col = loc.Col + c };
+          if (bossLevel.TileAt(opt.Row, opt.Col).Passable() && !objDb.Occupied(opt))
+            options.Add(opt);
+        }
+      }
+      if (options.Count > 0)
+      {
+        // I guess if there's no spot for the dragon then the supervisor doesn't have a pet :O
+        Loc wyrmLoc = options[rng.Next(options.Count)];
+        Actor wyrm = MonsterFactory.Get("wyrmling", objDb, rng);
+        objDb.AddNewActor(wyrm, wyrmLoc);
+      }
     }
     else if (earlyDenizen == "goblin")
     {
       Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
-      var sq = dungeon.LevelMaps[bossLevel].RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevel, sq.Item1, sq.Item2);
+      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
+      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(gg, loc);
       factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Great Goblin" });
     }   

@@ -427,7 +427,7 @@ class FireBreathTrait : ActionTrait
     return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
   }
 
-  public override string AsText() => $"FireBreathTrait#{DmgDie}#{DmgDice}#{Range}#{Cooldown}";
+  public override string AsText() => $"FireBreath#{DmgDie}#{DmgDice}#{Range}#{Cooldown}";
 }
 
 class ImmunityTrait : BasicTrait
