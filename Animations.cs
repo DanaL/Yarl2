@@ -154,7 +154,7 @@ class ExplosionAnimation(GameState gs) : Animation
   {
     var ui = _gs.UIRef();
 
-    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 25)
+    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 5)
     {      
       var newSqs = Sqs.Where(s => Util.Distance(s, Centre) == _radius).ToList();
       if (newSqs.Count == 0 && !_finalFrame)

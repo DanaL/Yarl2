@@ -906,17 +906,31 @@ class ConeCalculator
     Loc beamB = origin with { Row = br, Col = bc };
     int octantA = OctantForBeam(origin, beamA);
     int octantB = OctantForBeam(origin, beamB);
-    int loOctant = int.Min(octantA, octantB);
-    int hiOctant = int.Max(octantA, octantB);
     
-    for (int j = loOctant; j <= hiOctant; j++)
+    while (octantA != octantB)
     {
-      affected = affected.Union(CalcOctant(range, origin, map, j, objDb))
-                         .ToHashSet();
+      affected = affected.Union(CalcOctant(range, origin, map, octantA, objDb))
+                        .ToHashSet();
+      --octantA;
+      if (octantA < 0)
+        octantA = 7;
     }
+    affected = affected.Union(CalcOctant(range, origin, map, octantB, objDb))
+                      .ToHashSet();
 
     double angleA = Util.AngleBetweenLocs(origin, beamA);
     double angleB = Util.AngleBetweenLocs(origin, beamB);
+    
+    // Normalize angles to handle if we're crossing from quadant 7 to 0
+    if (Math.Abs(angleA - angleB) > Math.PI)
+    {
+        // Adjust the negative angle
+        if (angleA < 0) 
+          angleA += 2 * Math.PI;
+        if (angleB < 0) 
+          angleB += 2 * Math.PI;
+    }
+    
     double minAngle = double.Min(angleA, angleB);
     double maxAngle = double.Max(angleA, angleB);
 
@@ -925,8 +939,13 @@ class ConeCalculator
     // 60 degrees.
     return affected.Where(l => 
     {
-      double angle = Util.AngleBetweenLocs(origin, l);
-      return angle >= minAngle && angle <= maxAngle;
+        double angle = Util.AngleBetweenLocs(origin, l);
+
+        // Normalize the test angle if necessary
+        if (angle < 0 && minAngle > Math.PI / 2)
+          angle += 2 * Math.PI;
+
+        return angle >= minAngle && angle <= maxAngle;
     }).ToList();
   }
 
@@ -940,7 +959,7 @@ class ConeCalculator
       return 5;
     else if (angle >= Math.PI / 2 && angle < 3 * Math.PI / 4)
       return 6;
-    else if (angle >= 3 * Math.PI / 4 && angle < Math.PI)
+    else if (angle >= 3 * Math.PI / 4 && angle <= Math.PI)
       return 7;
     else if (angle >= -Math.PI && angle < -3 * Math.PI / 4)
       return 0;
