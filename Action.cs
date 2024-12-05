@@ -288,7 +288,8 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
       AltColour2 = Colours.YELLOW_ORANGE,
       Highlight = Colours.WHITE,
       Centre = Actor.Loc,
-      Sqs = [ ..affected ]
+      Sqs = [ ..affected ],
+      Ch = '\u22CF'
     };
     GameState.UIRef().PlayAnimation(explosion, GameState);
 

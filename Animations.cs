@@ -143,6 +143,7 @@ class ExplosionAnimation(GameState gs) : Animation
   public Colour AltColour2 {  get; set; }
   public Colour Highlight { get; set; }
   public Loc Centre {  get; set; }
+  public Char Ch { get; set; } = '*';
   public HashSet<Loc> Sqs { get; set; } = [];
   readonly Dictionary<Loc, Sqr> _toDraw = [];
   int _radius = 0;
@@ -175,7 +176,7 @@ class ExplosionAnimation(GameState gs) : Animation
             colour = AltColour1;
           else
             colour = AltColour2;
-          _toDraw.Add(loc, new Sqr(Highlight, colour, '*'));
+          _toDraw.Add(loc, new Sqr(Highlight, colour, Ch));
         }
 
         ++_radius;
