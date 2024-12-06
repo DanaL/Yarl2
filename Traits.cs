@@ -1821,6 +1821,10 @@ class StatBuffTrait : TemporaryTrait, IHasSource
     {
       return Amt >= 0 ? "You feel more robust!" : "You feel frail!";
     }
+    else if (Attr == Attribute.Dexterity && player)
+    {
+      return Amt >= 0 ? "You feel more agile!" : "You feel klutzy!";
+    }
 
     return player ? "You feel different!" : "";
   }

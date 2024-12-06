@@ -815,6 +815,16 @@
     ]
   },
   {
+    "Name": "LESSER_GRACE_CHARM",
+    "DescriptiveName": "lesser grace charm",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,green,darkgreen,black,black",
+    "Traits": [
+      "Grants#StatBuff&0&max&Dexterity&3&item"
+    ]
+  },
+  {
     "Name": "RING_OF_FRAILITY",
     "DescriptiveName": "ring of fraility",
     "Type": "Ring",
