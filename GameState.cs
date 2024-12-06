@@ -486,8 +486,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ObjDb.RemoveItemFromLoc(loc, item);
       ItemDropped(item, landingSpot);
     }
-
-    UpdateFoV();
   }
 
   public string FallIntoWater(Actor actor, Loc loc)
@@ -537,8 +535,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         messages.Add(invMsgs);
       }
-
-      UpdateFoV();
 
       int conMod;
       if (actor.Stats.TryGetValue(Attribute.Constitution, out var stat))
@@ -610,8 +606,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (actor is Player)
     {
-      RefreshPerformers();
-      UpdateFoV();
+      RefreshPerformers();     
     }
 
     int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
@@ -858,6 +853,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ++Turn;
         _currPerformer = 0;
         EndOfTurn();
+        UpdateFoV();
       }
     }
     while (true);
@@ -1064,7 +1060,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
 
       RefreshPerformers();
-      UpdateFoV();
       
       if (LastPlayerFoV.Contains(actor.Loc))
       {
