@@ -195,7 +195,7 @@ class CampaignCreator(UserInterface ui)
       TileType.Grass or TileType.Sand or
       TileType.GreenTree or TileType.RedTree or
       TileType.YellowTree or TileType.OrangeTree or
-      TileType.Dirt => true,
+      TileType.Conifer or TileType.Dirt => true,
       _ => false,
     };
   }
@@ -213,7 +213,49 @@ class CampaignCreator(UserInterface ui)
       }
     }
 
-    return opts[rng.Next(opts.Count)];
+    // We'll pick the well as the goal for checking if there's a valid path
+    // from the start location
+    Loc goal = Loc.Nowhere;
+    for (int r = town.Row; r < town.Row + town.Height && goal == Loc.Nowhere; r++)
+    {
+      for (int c = town.Col; c < town.Col + town.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.Well)
+        {
+          goal = new Loc(0, 0, r, c);
+          break;
+        }        
+      }
+    }
+
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.Grass, 1);
+    costs.Add(TileType.Sand, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.RedTree, 1);
+    costs.Add(TileType.OrangeTree, 1);
+    costs.Add(TileType.YellowTree, 1);
+    costs.Add(TileType.Conifer, 1);
+    costs.Add(TileType.StoneFloor, 1);
+    costs.Add(TileType.WoodFloor, 1);
+    costs.Add(TileType.Well, 1);
+    
+    while (opts.Count > 0)
+    {
+      int i = rng.Next(opts.Count);
+      var (r, c) = opts[i];
+
+      Loc loc = new(0, 0, r, c);
+      var path = AStar.FindPath(map, loc, goal, costs);
+      if (path.Count > 0)
+        return (r, c);
+
+      opts.RemoveAt(i);
+    }
+
+    return (-1, -1);
   }
 
   static bool InTown(int row, int col, Town town) =>
@@ -560,7 +602,7 @@ class CampaignCreator(UserInterface ui)
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
         SetLevel5MiniBoss(mainDungeon, objDb, factDb, DeckBulder.EarlyMainOccupant, rng);
 
@@ -582,6 +624,12 @@ class CampaignCreator(UserInterface ui)
         campaign.Town = town;
 
         (startR, startC) = PickStartLoc(wildernessMap, town, rng);
+        if (startR == -1 || startC == -1)
+        {
+          // If there was somehow no valid path for any start location, 
+          // start over and generate a new wilderness map
+          continue;
+        }
         //(startR, startC) = entrance;
 
         break;
@@ -657,7 +705,8 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.Now.GetHashCode();
-      
+      seed = -1725742868;
+
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();      

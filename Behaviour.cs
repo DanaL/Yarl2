@@ -965,6 +965,7 @@ class MayorBehaviour : NPCBehaviour
       costs.Add(TileType.RedTree, 1);
       costs.Add(TileType.OrangeTree, 1);
       costs.Add(TileType.YellowTree, 1);
+      costs.Add(TileType.Conifer, 1);
       costs.Add(TileType.StoneFloor, 1);
       costs.Add(TileType.WoodFloor, 1);
       costs.Add(TileType.OpenDoor, 1);
