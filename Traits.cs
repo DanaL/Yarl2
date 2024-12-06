@@ -48,11 +48,6 @@ interface IDesc
   string Desc();
 }
 
-interface IHasSource
-{
-  string Source { get; set; }
-}
-
 abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
@@ -506,7 +501,8 @@ class AppleProducerTrait : Trait, IGameEventListener, IOwner
   public bool Expired {  get; set;  }
   public bool Listening => true;
   public ulong ObjId => OwnerID;
-  
+  public ulong SourceId { get; set; }
+
   public override string AsText() => $"AppleProducer#{OwnerID}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -674,13 +670,24 @@ class GrantsTrait : Trait
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
-      if (trait is TemporaryTrait tmp && obj is Actor actor)
-        msgs.AddRange(tmp.Apply(actor, gs));
-      else 
+      if (trait is TemporaryTrait tmp)
+      {
+        if (obj is Actor actor)
+          msgs.AddRange(tmp.Apply(actor, gs));
+        if (srcItem is not null)
+          tmp.SourceId = srcItem.ID;
+      }
+      else
+      {
         obj.Traits.Add(trait);
-
-      if (srcItem is not null && trait is IHasSource hs)
-        hs.Source = srcItem.ID.ToString();
+      }
+     
+      if (trait is IGameEventListener listener)
+      {
+        if (srcItem is not null)
+          listener.SourceId = srcItem.ID;
+        gs.RegisterForEvent(GameEventType.EndOfRound, listener);
+      }
     }
 
     if (obj is Actor actor2)
@@ -691,23 +698,25 @@ class GrantsTrait : Trait
 
   public void Remove(GameObj obj, GameState gs, GameObj src)
   {
+    bool listeners = false;
     foreach (string t in TraitsGranted)
     {
       Trait granted = TraitFactory.FromText(t, obj);    
       if (granted is TemporaryTrait tmp) 
       {
-        // StatBuffTraits  (and eventually others I'm sure) need a little more 
-        // info in order to be properly removed.
-        if (tmp is IHasSource hs) 
-        {
-          tmp.OwnerID = obj.ID;
-          hs.Source = src.ID.ToString();
-        }
+        tmp.OwnerID = obj.ID;
+        tmp.SourceId = src.ID;       
         tmp.Remove(gs);
       }
 
       obj.Traits.Remove(granted);
+
+      if (granted is IGameEventListener listener)
+        listeners = true;
     }
+
+    if (listeners)
+      gs.RemoveListenersBySourceId(src.ID);
 
     if (obj is Actor actor)
       gs.ResolveActorMove(actor, actor.Loc, actor.Loc);
@@ -765,7 +774,8 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public ulong OwnerID {  get; set; }
   protected virtual string ExpiryMsg() => "";
   public virtual ulong ObjId => OwnerID;
- 
+  public ulong SourceId { get; set; }
+
   public virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
@@ -1117,7 +1127,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs)), null),
     "buffstrength" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
-                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, Source = item!.Name }), null),
+                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID }), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1232,6 +1242,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
   public ulong ObjId { get; set; } // the GameObj the illusion trait is attached to
   public bool Expired { get => false; set { } }
   public bool Listening => true;
+  public ulong SourceId { get; set; }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -1253,6 +1264,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set {} }
   public bool Listening => true;
   public ulong ObjId => VictimID;
+  public ulong SourceId { get; set; }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -1497,6 +1509,7 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
   public int Strength { get; set; }
   public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
   public ulong ObjId => OwnerID;
+  public ulong SourceId { get; set; }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc _)
   {
@@ -1671,6 +1684,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public bool Listening => true;
   public bool Spreads { get; set; }
   public ulong ObjId => OwnerID;
+  public ulong SourceId { get; set; }
 
   public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}#{Spreads}";
 
@@ -1798,13 +1812,12 @@ class WeaponSpeedTrait : Trait
   public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
-class StatBuffTrait : TemporaryTrait, IHasSource 
+class StatBuffTrait : TemporaryTrait 
 {
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
-  public string Source { get; set; } = "";
 
-  public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}#{Source}";
+  public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}#{SourceId}";
 
   string CalcMessage(Actor target)
   {
@@ -1833,7 +1846,7 @@ class StatBuffTrait : TemporaryTrait, IHasSource
   {
     // If the buffs share the same source, just increase the expires on rather
     // than letting the player spam stat buffs
-    StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().Where(t => t.Source == Source).FirstOrDefault();
+    StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().Where(t => t.SourceId == SourceId).FirstOrDefault();
     if (other is not null)
     {
       other.ExpiresOn = ulong.Max(other.ExpiresOn, ExpiresOn);
@@ -1858,7 +1871,7 @@ class StatBuffTrait : TemporaryTrait, IHasSource
     if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
     {
       var statBuffs = actor.Traits.OfType<StatBuffTrait>()
-                                  .Where(t => t.Source == Source)
+                                  .Where(t => t.SourceId == SourceId)
                                   .ToList();
       foreach (StatBuffTrait buff in statBuffs)
       {
@@ -2048,6 +2061,7 @@ class RecallTrait : BasicTrait, IGameEventListener
   public bool Expired { get; set; } = false;
   public bool Listening => true;
   public ulong ObjId => 0; // This trait will always/only be applied to the player (I think...)
+  public ulong SourceId { get; set; }
 
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
 
@@ -2096,7 +2110,8 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  
+  public ulong SourceId { get; set; }
+
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2138,6 +2153,7 @@ class InvisibleTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; }
   public bool Listening => true;
+  public ulong SourceId { get; set; }
 
   public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
 
@@ -2161,6 +2177,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   public ulong ObjId => OwnerID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
+  public ulong SourceId { get; set; }
 
   public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
 
@@ -2212,6 +2229,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
   public bool Lit { get; set; }
   public int Fuel { get; set; }
   public string Desc() => Lit ? "(lit)" : "";
+  public ulong SourceId { get; set; }
 
   public override bool Active => Lit;
   
@@ -2588,11 +2606,15 @@ class TraitFactory
     {
       Enum.TryParse(pieces[3], out Attribute attr);
       ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
-      string s = pieces[5] == "item" ? gameObj?.ID.ToString() ?? "0" : pieces[5];
+      ulong s;
+      if (pieces[5] == "item" && gameObj is not null)
+        s = gameObj.ID;
+      else
+        s = ulong.Parse(pieces[5]);
       return new StatBuffTrait()
       {
         OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr,
-        Amt = int.Parse(pieces[4]), Source = s
+        Amt = int.Parse(pieces[4]), SourceId = s
       };
     } },
     { "StatDebuff", (pieces, gameObj) =>

@@ -768,7 +768,7 @@
     "Traits": [
       "Flammable",
       "Stackable",
-      "Torch#owner#false#750"
+      "Torch#owner#false#10"
     ]
   },
   {
@@ -912,6 +912,16 @@
       "Consumable",
       "Stackable",
       "UseSimple#booze"
+    ]
+  },
+  {
+    "Name": "TROLL_BROOCH",
+    "DescriptiveName": "troll's brooch",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,dullred,brown,black,black",
+    "Traits": [
+      "Grants#Regeneration&1&owner&false&max"
     ]
   }
 ]

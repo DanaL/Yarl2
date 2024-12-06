@@ -83,6 +83,7 @@ interface IGameEventListener
   public bool Expired { get; set; }
   public bool Listening { get; }
   public ulong ObjId { get; }
+  public ulong SourceId { get; set; }
 
   void EventAlert(GameEventType eventType, GameState gs, Loc loc);
 }

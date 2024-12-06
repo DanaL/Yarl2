@@ -1328,6 +1328,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
+  public void RemoveListenersBySourceId(ulong srcId)
+  {
+    ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => l.SourceId != srcId).ToList();
+  }
+
   // Remove listener from all events it might be listening for,
   public void RemoveListener(IGameEventListener listener)
   {

@@ -32,6 +32,7 @@ class Player : Actor, IPerformer, IGameEventListener
   public const int MAX_VISION_RADIUS = 25;
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
+  public ulong SourceId { get; set; }
 
   Inputer? _inputController;
   Action? _deferred;
