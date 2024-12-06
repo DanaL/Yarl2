@@ -944,7 +944,8 @@ class MayorBehaviour : NPCBehaviour
 
     if (!home.Contains(mayor.Loc))
     {
-      Loc goal = PickDestination(gs.Wilderness, [.. home], TravelCosts, gs.Rng);
+      var homeSqs = home.Where(sq => gs.TileAt(sq).Type == TileType.WoodFloor);
+      Loc goal = PickDestination(gs.Wilderness, [.. homeSqs], TravelCosts, gs.Rng);
       _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
     }
 
