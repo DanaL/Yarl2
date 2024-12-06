@@ -717,7 +717,7 @@ class DialogueInterpreter
           return f2.Value;
         return "";
       case "LEVEL_FIVE_BOSS_KILLED":
-        if (gs.FactDb.FactCheck("Level 5 Boss") is SimpleFact)
+        if (gs.FactDb.FactCheck("Level 5 Boss Killed") is SimpleFact)
           return true;
         return false;
       case "DUNGEON_DIR":

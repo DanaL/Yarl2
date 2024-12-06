@@ -352,7 +352,7 @@ class CampaignCreator(UserInterface ui)
 
   static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Random rng)
   {
-    int bossLevelNum = 0;
+    int bossLevelNum = 4;
     Map bossLevel = dungeon.LevelMaps[bossLevelNum];
 
     if (earlyDenizen == "kobold")
