@@ -205,3 +205,6 @@ Learn what an unidentified item does.
 #
 zorkmid
 Cash money, the currency of the realm.
+#
+troll's brooch
+A badge identifying you as a member of the troll club, with all the rights and responsibilities entailed. 

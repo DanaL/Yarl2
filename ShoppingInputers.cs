@@ -50,7 +50,9 @@ class ShopMenuInputer : Inputer
     double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
     if (Gs.Player.HasTrait<LikeableTrait>())
       markup -= 0.33;
-    
+    if (Gs.Player.HasTrait<RepugnantTrait>())
+      markup += 2.0;
+      
     return markup;
   }
 

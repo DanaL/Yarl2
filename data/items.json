@@ -921,7 +921,7 @@
     "Value": 100,
     "Glyph": "☥,dullred,brown,black,black",
     "Traits": [
-      "Grants#Regeneration&1&owner&false&max"
+      "Grants#Regeneration&1&owner&false&max;Repugnant"
     ]
   }
 ]

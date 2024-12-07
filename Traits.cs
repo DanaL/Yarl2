@@ -1735,6 +1735,11 @@ class RelationshipTrait : Trait
   public override string AsText() => $"Relationship#{Person1ID}#{Person2ID}#{Label}";
 }
 
+class RepugnantTrait : Trait
+{
+  public override string AsText() => $"Repugnant#{SourceId}";
+}
+
 class RetributionTrait : Trait
 {
   public DamageType Type {  get; set; }
@@ -2568,6 +2573,12 @@ class TraitFactory
         };
     } },
     { "Relationship", (pieces, gameObj) => new RelationshipTrait() { Person1ID = ulong.Parse(pieces[1]), Person2ID = ulong.Parse(pieces[2]), Label = pieces[3] } },
+    { "Repugnant", (pieces, gameObj) =>
+      {
+        ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;
+        return new RepugnantTrait() { SourceId = sourceId };
+      }
+    },
     { "Resistance", (pieces, gameObj) => {
         Enum.TryParse(pieces[1], out DamageType rdt);
         ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
