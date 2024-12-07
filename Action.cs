@@ -1360,7 +1360,7 @@ class MirrorImageAction : Action
 
     var illusion = new IllusionTrait()
     {
-      SourceID = src.ID,
+      SourceId = src.ID,
       ObjId = dup.ID
     };
     dup.Traits.Add(illusion);   

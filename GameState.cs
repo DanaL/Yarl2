@@ -891,6 +891,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       SpawnMonster();
     }
 
+    // Note to self: you build the list like this because as part of their
+    // EventAlert() call, a listener might remove itself from the list of
+    // listeners
     List<IGameEventListener> listeners = [];
     foreach (var listener in ObjDb.EndOfRoundListeners.Where(l => !l.Expired))
     {

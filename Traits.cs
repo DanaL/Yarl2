@@ -52,7 +52,8 @@ abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
   public abstract string AsText();
-  
+  public ulong SourceId { get; set;}
+
   public bool Equals(Trait? other)
   {
     if (other is null)
@@ -347,7 +348,7 @@ class AlacrityTrait : Trait
 {
   public double Amt { get; set; }
   
-  public override string AsText() => $"Alacrity#{Amt}";
+  public override string AsText() => $"Alacrity#{Amt}#{SourceId}";
 }
 
 class AlliesTrait : Trait
@@ -400,7 +401,7 @@ class DodgeTrait : Trait
 {
 public int Rate { get; set; }
 
-public override string AsText() => $"Dodge#{Rate}";
+public override string AsText() => $"Dodge#{Rate}#{SourceId}";
 }
 
 class FinesseTrait : Trait
@@ -501,8 +502,7 @@ class AppleProducerTrait : Trait, IGameEventListener, IOwner
   public bool Expired {  get; set;  }
   public bool Listening => true;
   public ulong ObjId => OwnerID;
-  public ulong SourceId { get; set; }
-
+  
   public override string AsText() => $"AppleProducer#{OwnerID}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -653,6 +653,9 @@ class FlammableTrait : Trait
   public override string AsText() => "Flammable";
 }
 
+// I think I want to make it so that traits which can be granted much have a
+// sourceId, but I'm not quite sure how to implement it. Maybe a grantable
+// interface?
 class GrantsTrait : Trait
 {
   public string[] TraitsGranted = [];
@@ -670,12 +673,13 @@ class GrantsTrait : Trait
     foreach (string t in TraitsGranted)
     {
       Trait trait = TraitFactory.FromText(t, obj);
+      if (srcItem is not null)
+        trait.SourceId = srcItem.ID;
+
       if (trait is TemporaryTrait tmp)
       {
         if (obj is Actor actor)
           msgs.AddRange(tmp.Apply(actor, gs));
-        if (srcItem is not null)
-          tmp.SourceId = srcItem.ID;
       }
       else
       {
@@ -683,9 +687,7 @@ class GrantsTrait : Trait
       }
      
       if (trait is IGameEventListener listener)
-      {
-        if (srcItem is not null)
-          listener.SourceId = srcItem.ID;
+      {       
         gs.RegisterForEvent(GameEventType.EndOfRound, listener);
       }
     }
@@ -698,25 +700,8 @@ class GrantsTrait : Trait
 
   public void Remove(GameObj obj, GameState gs, GameObj src)
   {
-    bool listeners = false;
-    foreach (string t in TraitsGranted)
-    {
-      Trait granted = TraitFactory.FromText(t, obj);    
-      if (granted is TemporaryTrait tmp) 
-      {
-        tmp.OwnerID = obj.ID;
-        tmp.SourceId = src.ID;       
-        tmp.Remove(gs);
-      }
-
-      obj.Traits.Remove(granted);
-
-      if (granted is IGameEventListener listener)
-        listeners = true;
-    }
-
-    if (listeners)
-      gs.RemoveListenersBySourceId(src.ID);
+    obj.Traits = obj.Traits.Where(t => t.SourceId != src.ID).ToList();
+    gs.RemoveListenersBySourceId(src.ID);
 
     if (obj is Actor actor)
       gs.ResolveActorMove(actor, actor.Loc, actor.Loc);
@@ -774,8 +759,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public ulong OwnerID {  get; set; }
   protected virtual string ExpiryMsg() => "";
   public virtual ulong ObjId => OwnerID;
-  public ulong SourceId { get; set; }
-
+  
   public virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
@@ -935,7 +919,7 @@ class NamedTrait : Trait
 // rest of the traits
 class BerzerkTrait : Trait
 {
-  public override string AsText() => "Berzerk";
+  public override string AsText() => $"Berzerk#{SourceId}";
 }
 
 class RageTrait(Actor actor) : Trait
@@ -1193,7 +1177,7 @@ class DamageTrait : Trait
 class ACModTrait : BasicTrait
 {
   public int ArmourMod { get; set; }
-  public override string AsText() => $"ACMod#{ArmourMod}";
+  public override string AsText() => $"ACMod#{ArmourMod}#{SourceId}";
 }
 
 class ArmourTrait : Trait
@@ -1238,12 +1222,10 @@ class ImmobileTrait : Trait
 
 class IllusionTrait : BasicTrait, IGameEventListener
 {
-  public ulong SourceID {  get; set; }
   public ulong ObjId { get; set; } // the GameObj the illusion trait is attached to
   public bool Expired { get => false; set { } }
   public bool Listening => true;
-  public ulong SourceId { get; set; }
-
+  
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var obj = gs.ObjDb.GetObj(ObjId);
@@ -1253,7 +1235,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
     }    
   }
 
-  public override string AsText() => $"Illusion#{SourceID}#{ObjId}";
+  public override string AsText() => $"Illusion#{SourceId}#{ObjId}";
 }
 
 class GrappledTrait : BasicTrait, IGameEventListener
@@ -1264,8 +1246,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set {} }
   public bool Listening => true;
   public ulong ObjId => VictimID;
-  public ulong SourceId { get; set; }
-
+  
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var victim = gs.ObjDb.GetObj(VictimID);
@@ -1509,8 +1490,7 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
   public int Strength { get; set; }
   public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
   public ulong ObjId => OwnerID;
-  public ulong SourceId { get; set; }
-
+  
   public void EventAlert(GameEventType eventType, GameState gs, Loc _)
   {
     if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
@@ -1684,8 +1664,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public bool Listening => true;
   public bool Spreads { get; set; }
   public ulong ObjId => OwnerID;
-  public ulong SourceId { get; set; }
-
+  
   public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}#{Spreads}";
 
   public void Extinguish(Item fireSrc, GameState gs)
@@ -2031,7 +2010,7 @@ class BlindTrait : TemporaryTrait
     }
   }
 
-  public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}";
+  public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}#{SourceId}";
 }
 
 class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
@@ -2061,8 +2040,7 @@ class RecallTrait : BasicTrait, IGameEventListener
   public bool Expired { get; set; } = false;
   public bool Listening => true;
   public ulong ObjId => 0; // This trait will always/only be applied to the player (I think...)
-  public ulong SourceId { get; set; }
-
+  
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2110,9 +2088,8 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  public ulong SourceId { get; set; }
-
-  public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}";
+  
+  public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}#{SourceId}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -2153,8 +2130,7 @@ class InvisibleTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; }
   public bool Listening => true;
-  public ulong SourceId { get; set; }
-
+  
   public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2177,8 +2153,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   public ulong ObjId => OwnerID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  public ulong SourceId { get; set; }
-
+  
   public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2229,8 +2204,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
   public bool Lit { get; set; }
   public int Fuel { get; set; }
   public string Desc() => Lit ? "(lit)" : "";
-  public ulong SourceId { get; set; }
-
+  
   public override bool Active => Lit;
   
   public bool Expired { get; set; } = false;
@@ -2365,7 +2339,7 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc
 
 class WaterWalkingTrait : Trait
 {
-  public override string AsText() => "WaterWalking";
+  public override string AsText() => $"WaterWalking#{SourceId}";
 }
 
 // ArmourTrait also has a bonus field but I don't think I want to merge them
@@ -2390,10 +2364,21 @@ class TraitFactory
   private static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
-    { "ACMod", (pieces, gameObj) => new ACModTrait() { ArmourMod = int.Parse(pieces[1]) }},
+    { "ACMod", (pieces, gameObj) => 
+      { 
+        ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
+        return new ACModTrait() { ArmourMod = int.Parse(pieces[1]), SourceId = sourceId };
+      }
+    },
     { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
     { "Affixed", (pieces, gameObj) => new AffixedTrait() },
-    { "Alacrity", (pieces, gameObj) => new AlacrityTrait() { Amt = double.Parse(pieces[1]) }},
+    { "Alacrity", (pieces, gameObj) =>  
+      new AlacrityTrait() 
+      { 
+        Amt = double.Parse(pieces[1]),
+        SourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0
+      }
+    },
     { "Allies", (pieces, gameObj) => { var ids = pieces[1].Split(',').Select(ulong.Parse).ToList(); return new AlliesTrait() { IDs = ids }; } },
     { "Ammo", (pieces, gameObj) =>
       {
@@ -2411,11 +2396,16 @@ class TraitFactory
     }},
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
-    { "Berzerk", (pieces, gameObj) => new BerzerkTrait() },
-    { "Blind", (pieces, gameObj) => new BlindTrait()
-    {
-      OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
-      ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]) }
+    { 
+      "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])} 
+    },
+    { "Blind", (pieces, gameObj) => 
+      new BlindTrait()
+      {
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        ExpiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]),
+        SourceId = pieces.Length > 3 ? ulong.Parse(pieces[3]) : 0
+      }
     },
     { "Block", (pieces, gameObj) => new BlockTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {
@@ -2443,7 +2433,13 @@ class TraitFactory
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
-    { "Dodge", (pieces, gameObj) => new DodgeTrait() { Rate = int.Parse(pieces[1]) }},
+    { "Dodge", (pieces, gameObj) => 
+      { 
+        int rate = int.Parse(pieces[1]);
+        ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
+          return new DodgeTrait() { Rate = int.Parse(pieces[1]), SourceId = sourceId };
+      }
+    },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
@@ -2479,7 +2475,7 @@ class TraitFactory
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
-    { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceID = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
+    { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceId = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
     { "Immobile", (pieces, gameObj) => new ImmobileTrait() },
     { "Immunity", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out DamageType dt);
@@ -2561,12 +2557,14 @@ class TraitFactory
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
     { "Regeneration", (pieces, gameObj) => {
+      ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
       return new RegenerationTrait()
         {
           Rate = int.Parse(pieces[1]),
           ActorID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
           Expired = bool.Parse(pieces[3]),
-          ExpiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4])
+          ExpiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4]),
+          SourceId = sourceId
         };
     } },
     { "Relationship", (pieces, gameObj) => new RelationshipTrait() { Person1ID = ulong.Parse(pieces[1]), Person2ID = ulong.Parse(pieces[2]), Label = pieces[3] } },
@@ -2651,7 +2649,9 @@ class TraitFactory
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = double.Parse(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
-    { "WaterWalking", (pieces, gameObj) => new WaterWalkingTrait() },
+    { "WaterWalking", (pieces, gameObj) => 
+      pieces.Length > 1 ? new WaterWalkingTrait() { SourceId = ulong.Parse(pieces[1])} : new WaterWalkingTrait()
+    },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
