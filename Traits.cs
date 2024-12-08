@@ -556,7 +556,7 @@ class ResistanceTrait : TemporaryTrait
   public DamageType Type { get; set; }
 
   protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
-  public override string AsText() => $"Resistance#{Type}#{base.AsText()}";
+  public override string AsText() => $"Resistance#{Type}#{base.AsText()}#{SourceId}";
 
   public override List<string> Apply(Actor target, GameState gs)
   {
@@ -1171,7 +1171,7 @@ class DamageTrait : Trait
   public int NumOfDie { get; set; }
   public DamageType DamageType { get; set; }
 
-  public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}";  
+  public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}#{SourceId}";  
 }
 
 class ACModTrait : BasicTrait
@@ -2429,9 +2429,19 @@ class TraitFactory
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },
-    { "Damage", (pieces, gameObj) => {
-      Enum.TryParse(pieces[3], out DamageType dt);
-      return new DamageTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = dt }; }},
+    { "Damage", (pieces, gameObj) => 
+      {
+        Enum.TryParse(pieces[3], out DamageType dt);
+        ulong sourceId = pieces.Length >= 5 ? ulong.Parse(pieces[4]) : 0;
+        return new DamageTrait() 
+        { 
+          DamageDie = int.Parse(pieces[1]), 
+          NumOfDie = int.Parse(pieces[2]), 
+          DamageType = dt,
+          SourceId = sourceId
+        }; 
+      }
+    },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
@@ -2579,12 +2589,16 @@ class TraitFactory
         return new RepugnantTrait() { SourceId = sourceId };
       }
     },
-    { "Resistance", (pieces, gameObj) => {
+    { "Resistance", (pieces, gameObj) => 
+      {
         Enum.TryParse(pieces[1], out DamageType rdt);
-        ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[1]) : ulong.MaxValue;
-        ulong ownerID = pieces.Length > 3 ? ulong.Parse(pieces[2]): 0;
-        return new ResistanceTrait() { Type = rdt, ExpiresOn = expiresOn, OwnerID = ownerID
-        }; }},
+        ulong expiresOn = pieces.Length >= 3 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
+        ulong ownerID = pieces.Length >= 4 ? ulong.Parse(pieces[3]) : 0;
+        ulong sourceId = pieces.Length >= 5 ? ulong.Parse(pieces[4] ): 0;
+        return new ResistanceTrait() { Type = rdt, ExpiresOn = expiresOn, OwnerID = ownerID, SourceId = sourceId
+        }; 
+      }
+    },
     { "Resting", (pieces, gameObj) => new RestingTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Retribution", (pieces, gameObj) =>
       {

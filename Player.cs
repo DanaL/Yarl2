@@ -168,11 +168,20 @@ class Player : Actor, IPerformer, IGameEventListener
       dmgs.Add(new Damage(1, 1, DamageType.Blunt));
     }
 
-    if (HasTrait<BerzerkTrait>())
+    foreach (Trait t in Traits)
     {
-      dmgs.Add(new Damage(10, 1, DamageType.Force));
-    }
+      if (t is BerzerkTrait)
+      {
+        dmgs.Add(new Damage(10, 1, DamageType.Force));
+      }
 
+      // A player might have general damage sources from items and such
+      if (t is DamageTrait dt)
+      {
+        dmgs.Add(new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType));
+      }
+    }    
+    
     return dmgs;
   }
 

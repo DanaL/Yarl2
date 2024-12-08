@@ -88,7 +88,8 @@ class DebugCommand(GameState gs)
     {"scroll disarm", ItemNames.SCROLL_DISARM },
     {"bow guide", ItemNames.GUIDE_BOWS },
     {"booze", ItemNames.FLASK_OF_BOOZE },
-    {"troll brooch", ItemNames.TROLL_BROOCH }
+    {"troll brooch", ItemNames.TROLL_BROOCH },
+    {"smouldering charm", ItemNames.SMOULDERING_CHARM }
   };
 
   public string DoCommand(string txt)

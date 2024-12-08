@@ -208,3 +208,6 @@ Cash money, the currency of the realm.
 #
 troll's brooch
 A badge identifying you as a member of the troll club, with all the rights and responsibilities entailed. 
+#
+smouldering charm
+Warm to the touch, smoke rises from this charm. Wearing it provides you some protection against fire and causes your melee attacks to deal extra fire damage.

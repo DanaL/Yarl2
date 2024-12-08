@@ -923,5 +923,15 @@
     "Traits": [
       "Grants#Regeneration&1&owner&false&max;Repugnant"
     ]
+  },
+  {
+    "Name": "SMOULDERING_CHARM",
+    "DescriptiveName": "smouldering charm",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,brightred,dullred,black,black",
+    "Traits": [
+      "Grants#Resistance&Fire;Damage&6&1&Fire"
+    ]
   }
 ]
