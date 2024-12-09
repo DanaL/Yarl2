@@ -19,6 +19,24 @@ abstract class ConditionalEvent
   public abstract void Fire();
 }
 
+class CanSeeLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
+{
+  GameState GS { get; set; } = gs;
+  UserInterface UI { get; set; } = ui;
+  Loc Loc { get; set; } = loc;
+  string Msg { get; set; } = msg;
+
+  public override bool CondtionMet()
+  {
+    return GS.LastPlayerFoV.Contains(Loc);
+  }
+
+  public override void Fire()
+  {
+    UI.SetPopup(new Popup(Msg, "", -1, -1));
+  }
+}
+
 class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
 {
   GameState GS { get; set; } = gs;

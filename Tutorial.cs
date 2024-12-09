@@ -159,13 +159,19 @@ class Tutorial(UserInterface ui)
     [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.]
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
-    
-    var ce = new FullyEquiped(gameState, UI, new Loc(1, 0, 5, 10));
+
+    FullyEquiped fe = new(gameState, UI, new Loc(1, 0, 5, 10));
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 1, 8)))    
-      ce.IDs.Add(item.ID);
+      fe.IDs.Add(item.ID);
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 2, 8)))
-      ce.IDs.Add(item.ID);
-    objDb.ConditionalEvents.Add(ce);
+      fe.IDs.Add(item.ID);
+    objDb.ConditionalEvents.Add(fe);
+
+    txt = @"A [LIGHTBROWN +] represents a closed door. You can open a door simply by moving onto its tile, or you can use the 'o' command.
+
+    Some doors you find will be locked and you must either use the force command ('F') to it down, or try a lockpick if you have one.";
+    CanSeeLoc csl  = new(gameState, UI, new Loc(1, 0, 11, 10), txt);
+    objDb.ConditionalEvents.Add(csl);
 
     UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;
