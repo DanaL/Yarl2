@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text;
-
 namespace Yarl2;
 
 class Tutorial(UserInterface ui)
@@ -59,6 +57,11 @@ class Tutorial(UserInterface ui)
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     player.CalcHP();
 
+    Item item = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
+    objDb.SetToLoc(new Loc(1, 0, 1, 8), item);    
+    item = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
+    objDb.SetToLoc(new Loc(1, 0, 2, 8), item);
+  
     return player;
   }
 
@@ -125,6 +128,19 @@ class Tutorial(UserInterface ui)
     gameState.UpdateFoV();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
+    gameState.ObjDb.ConditionalEvents.Add(new PlayerHasLitTorch(gameState, UI));
+
+    string txt = @"This is a short sword, handy for defending yourself!
+
+    You can pick it up with the ',' pickup command and equip it with the 'e' command.
+    ";
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 1, 8), txt));
+    txt = @"Here is some armour, which will help keep you safe from harm.
+
+    You can pick it up with the ',' pickup command and equip it with the 'e' command.
+    ";
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 2, 8), txt));
+
     string welcomeText = @"Delve is a dungeon crawling adventure game and your main activity will be exploring dark dungeons full of monsters (and loot!). This tutorial will provide you some basic information and teach you the core commands.
     
     Delve uses letters and symbols for its display. Let's start with a quick breakdown of what you'll see on the screen:
@@ -140,7 +156,7 @@ class Tutorial(UserInterface ui)
     (i) inventory shows you what are you currently carrying
     (a) uses or applies an item. (Including such things as drinking a potion, zapping a wand, reading a scroll, ...)
 
-    Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.
+    [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.]
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
 

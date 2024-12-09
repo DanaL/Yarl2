@@ -909,6 +909,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);
     }
     ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
+
+    foreach (var ce in ObjDb.ConditionalEvents)
+    {
+      if (ce.CondtionMet())
+      {
+        ce.Fire();
+        ce.Complete = true;
+      }
+    }
+    ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
   }
 
   void SpawnMonster()
