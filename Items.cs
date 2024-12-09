@@ -723,13 +723,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     var slots = UsedSlots().Order().ToArray();
 
-    if (slots.Length == 0)
-    {
-      //ui.AlertPlayer("You are empty handed!");
-      return;
-    }
-
-    List<string> lines = [options.Title];
+    List<string> lines = [slots.Length == 0 ? "You are empty handed." : options.Title];
     foreach (var s in slots)
     {      
       var (item, count) = ItemAt(s);
