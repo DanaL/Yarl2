@@ -602,6 +602,7 @@ static class StringUtils
 
   public static string IndefArticle(this string s) => s[0] switch
   {
+    'A' or 'E' or 'I' or 'O' or 'U' or 'Y' or
     'a' or 'e' or 'i' or 'o' or 'u' or 'y' => $"an {s}",
     >= '0' and <= '9' => s,
     _ => $"a {s}"
