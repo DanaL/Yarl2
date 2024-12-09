@@ -736,13 +736,13 @@ class InventoryDetails : Inputer
   public InventoryDetails(GameState gs) 
   {
     GameState = gs;
-    Options = new(GameState.Player.Inventory.UsedSlots());
+    Options = [.. GameState.Player.Inventory.UsedSlots()];
     Cyclopedia = LoadCyclopedia();
   }
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || Options.Count == 0)
     {
       Done = true;
       Success = true;
