@@ -34,6 +34,7 @@ class Tutorial(UserInterface ui)
       Background = PlayerBackground.Warrior,
       Stats = stats
     };
+    player.Traits.Add(new InvincibleTrait());
 
     player.Inventory = new Inventory(player.ID, objDb);
 
@@ -83,7 +84,7 @@ class Tutorial(UserInterface ui)
     tutorialMap.SetTile(10, 10, TileFactory.Get(TileType.DungeonFloor));
     tutorialMap.SetTile(11, 10, TileFactory.Get(TileType.ClosedDoor));
 
-    for (int c = 3; c < 15; c++)
+    for (int c = 3; c < 20; c++)
     {
       tutorialMap.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
     }
@@ -92,7 +93,7 @@ class Tutorial(UserInterface ui)
     
     for (int r = 10; r < 16; r++)
     {
-      for (int c = 14; c < 20; c++)
+      for (int c = 19; c < 24; c++)
       {
         tutorialMap.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
       }
@@ -174,6 +175,19 @@ class Tutorial(UserInterface ui)
     objDb.ConditionalEvents.Add(csl);
 
     objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 12, 10), "Hmm why not explore to the East first?"));
+
+    Actor mob = MonsterFactory.Get("evil villain", objDb, rng);
+    objDb.AddNewActor(mob, new Loc(1, 0, 12, 17));
+
+    txt = @"Oh! There's a monster blocking your path! This is a good time to learn about combat in Delve.
+
+    To attack an enemy, simply attempt to walk onto its square (aka: bump-to-attack). You will make a melee attack with your equiped weapon and then the monster will get a turn.
+
+    It's not necessarily wise to attack every monster you see in the game, but sometimes you may not be able to avoid fighting.
+    ";
+
+    csl = new(gameState, UI, new Loc(1, 0, 12, 17), txt);
+    objDb.ConditionalEvents.Add(csl);
 
     UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;

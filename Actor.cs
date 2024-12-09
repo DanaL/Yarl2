@@ -212,6 +212,11 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
     Stats[Attribute.HP].Curr -= total;
 
+    if (Stats[Attribute.HP].Curr < 1 && HasTrait<InvincibleTrait>())
+    {
+      Stats[Attribute.HP].SetCurr(1);
+    }
+
     if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)
     {
       foreach (var dmg in damages)

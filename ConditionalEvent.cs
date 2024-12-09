@@ -14,7 +14,7 @@ namespace Yarl2;
 abstract class ConditionalEvent
 {
   public bool Complete { get; set; }
-
+  
   public abstract bool CondtionMet();
   public abstract void Fire();
 }

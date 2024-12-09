@@ -446,6 +446,13 @@ class IntelligentTrait : Trait
   public override string AsText() => "Intelligent";
 }
 
+// Created this for the tutorial, but maybe there can be a potion
+// of invincibility or such at some point?
+class InvincibleTrait : Trait
+{
+  public override string AsText() => "Invincible";
+}
+
 class LightStepTrait : Trait
 {
   public override string AsText() => "LightStep";
@@ -2499,6 +2506,7 @@ class TraitFactory
     { "Impale", (pieces, gameObj) => new ImpaleTrait() },
     { "InPit", (pieces, gameObj) => new InPitTrait() },
     { "Intelligent", (pieces, gameObj) => new IntelligentTrait() },
+    { "Invincible", (pieces, gameObj) => new InvincibleTrait() },
     { "Invisible", (pieces, gameObj) =>
       new InvisibleTrait()
       {

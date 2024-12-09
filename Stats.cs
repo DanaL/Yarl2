@@ -94,6 +94,8 @@ class Stat
     return Curr;
   }
 
+  public void SetCurr(int val) => Curr = val;
+
   public void Reset() => Curr = Max;
 }
 
