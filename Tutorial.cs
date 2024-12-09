@@ -38,6 +38,23 @@ class Tutorial(UserInterface ui)
     };
 
     player.Inventory = new Inventory(player.ID, objDb);
+
+    var doc = new Item()
+    {
+      Name = "Encouraging Note",
+      Type = ItemType.Document,
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+    };
+    doc.Traits.Add(new ScrollTrait());
+    
+    var rt = new ReadableTrait("Dungeon delving can be tough, and it may take you many tries to beat the game so don't get discouraged and have fun!")
+    {
+      OwnerID = doc.ID
+    };
+    doc.Traits.Add(rt);
+    objDb.Add(doc);
+    player.Inventory.Add(doc, player.ID);
+
     for (int i = 0; i < 3; i++)
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     player.CalcHP();
