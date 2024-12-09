@@ -49,6 +49,9 @@ try
           state = RunningState.Pregame;
         }
         break;
+      case SetupType.Tutorial:
+        gameState = new Tutorial(display).Setup(options);
+        break;
       default:
         try
         {

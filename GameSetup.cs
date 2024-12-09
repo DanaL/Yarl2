@@ -13,7 +13,7 @@ namespace Yarl2;
 
 enum SetupType
 {
-  NewGame, LoadGame, Quit // eventually Tutorial?
+  NewGame, LoadGame, Quit, Tutorial
 }
 
 class GameLoader(UserInterface ui)
@@ -709,7 +709,7 @@ class CampaignCreator(UserInterface ui)
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
-      var objDb = new GameObjectDB();      
+      var objDb = new GameObjectDB();
       SetItemIDInfo(rng);
 
       Player player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, UI, rng);

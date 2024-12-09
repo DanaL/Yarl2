@@ -61,7 +61,8 @@ class TitleScreen
       " a) load game",
       " b) begin new adventure",
       " c) about delve",
-      " q) quit delve"
+      " q) quit delve",
+      " t) tutorial"
     ];
 
     UI.SqsOnScreen = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
@@ -109,6 +110,8 @@ class TitleScreen
         AboutPopup();
       else if (c == 'q')
         return SetupType.Quit;
+      else if (c == 't')
+        return SetupType.Tutorial;
         
       if ((DateTime.Now - lastRedraw).TotalMilliseconds >= 250)
       {

@@ -27,7 +27,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public List<IPerformer> Performers { get; set; } = [];
   public ulong Turn { get; set; }
-  
+  public bool Tutorial { get; set; }
+
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
   DijkstraMap? DMap { get; set; }
@@ -886,7 +887,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
-    if (!InWilderness && Rng.Next(60) == 0)
+    if (!Tutorial && !InWilderness && Rng.Next(60) == 0)
     {
       SpawnMonster();
     }
