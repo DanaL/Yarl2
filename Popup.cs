@@ -166,7 +166,7 @@ class Popup
       {
         WritePaddedLine();
       }
-      else if (word.Length <= Width - currWidth - 4)
+      else if (word.Length <= Width - currWidth - 5)
       {
         currWidth += word.Length;
         if (PrependSpace(line) && word != "!" && word != "." && word != "?")

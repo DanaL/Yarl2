@@ -9,13 +9,15 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 class Tutorial(UserInterface ui)
 {
   UserInterface UI { get; set; } = ui;
 
-  Player TutorialPlayer(GameObjectDB objDb)
+  static Player TutorialPlayer(GameObjectDB objDb)
   {
     Dictionary<Attribute, Stat> stats = new()
     {
@@ -36,6 +38,8 @@ class Tutorial(UserInterface ui)
     };
 
     player.Inventory = new Inventory(player.ID, objDb);
+    for (int i = 0; i < 3; i++)
+      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     player.CalcHP();
 
     return player;
@@ -104,7 +108,26 @@ class Tutorial(UserInterface ui)
     gameState.UpdateFoV();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-    UI.CheatSheetMode = CheatSheetMode.Movement;
+    string welcomeText = @"Delve is a dungeon crawling adventure game and your main activity will be exploring dark dungeons full of monsters (and loot!). This tutorial will provide you some basic information and teach you the core commands.
+    
+    Delve uses letters and symbols for its display. Let's start with a quick breakdown of what you'll see on the screen:
+
+        @ - this symbol represents you, the adventurer, townsfolk and other NPCs
+        [LIGHTGREY #] - walls
+        [LIGHTGREY .] - floors, the ground, grass, etc
+        [BRIGHTRED g],[BRIGHTRED h], etc - letters are generally monsters
+        [LIGHTBROWN (],[LIGHTBROWN )], etc] - other symbols are often loot and equipment that you might find in your travels
+
+    You'll interact with Delve's world through several commands (listed at the bottom of your screen). Let's focus on two for the moment: (i)nventory and (a)pply/use equipment.
+
+    (i) inventory shows you what are you currently carrying
+    (a) uses or applies an item. (Including such things as drinking a potion, zapping a wand, reading a scroll, ...)
+
+    Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.
+    ";
+    UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
+
+    UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;
   }
 }
