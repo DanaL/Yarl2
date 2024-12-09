@@ -57,17 +57,17 @@ class Tutorial(UserInterface ui)
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     player.CalcHP();
 
-    Item item = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
-    objDb.SetToLoc(new Loc(1, 0, 1, 8), item);    
-    item = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
-    objDb.SetToLoc(new Loc(1, 0, 2, 8), item);
+    Item sword = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
+    objDb.SetToLoc(new Loc(1, 0, 1, 8), sword);    
+    Item armour = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
+    objDb.SetToLoc(new Loc(1, 0, 2, 8), armour);
   
     return player;
   }
 
   static Campaign Campaign()
   {
-    Map tutorialMap = new(20, 30, TileType.DungeonWall);
+    Map tutorialMap = new(25, 25, TileType.DungeonWall);
     for (int r = 1; r < 5; r++)
     {
       for (int c = 6; c < 15; c++)
@@ -80,18 +80,19 @@ class Tutorial(UserInterface ui)
     tutorialMap.SetTile(7, 10, TileFactory.Get(TileType.DungeonFloor));
     tutorialMap.SetTile(8, 10, TileFactory.Get(TileType.DungeonFloor));
     tutorialMap.SetTile(9, 10, TileFactory.Get(TileType.DungeonFloor));
-    tutorialMap.SetTile(10, 10, TileFactory.Get(TileType.ClosedDoor));
+    tutorialMap.SetTile(10, 10, TileFactory.Get(TileType.DungeonFloor));
+    tutorialMap.SetTile(11, 10, TileFactory.Get(TileType.ClosedDoor));
 
     for (int c = 3; c < 15; c++)
     {
-      tutorialMap.SetTile(11, c, TileFactory.Get(TileType.DungeonFloor));
+      tutorialMap.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
     }
-    tutorialMap.SetTile(11, 2, TileFactory.Get(TileType.SecretDoor));
-    tutorialMap.SetTile(11, 1, TileFactory.Get(TileType.Downstairs));
+    tutorialMap.SetTile(12, 2, TileFactory.Get(TileType.SecretDoor));
+    tutorialMap.SetTile(12, 1, TileFactory.Get(TileType.Downstairs));
     
-    for (int r = 9; r < 16; r++)
+    for (int r = 10; r < 16; r++)
     {
-      for (int c = 13; c < 20; c++)
+      for (int c = 14; c < 20; c++)
       {
         tutorialMap.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
       }
@@ -141,8 +142,7 @@ class Tutorial(UserInterface ui)
     ";
     objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 2, 8), txt));
 
-    string welcomeText = @"Delve is a dungeon crawling adventure game and your main activity will be exploring dark dungeons full of monsters (and loot!). This tutorial will provide you some basic information and teach you the core commands.
-    
+    string welcomeText = @"Delve is a dungeon crawling adventure game and your main activity will be exploring dark dungeons full of monsters (and loot!). This tutorial will provide you some basic information and teach you the core commands.    
     Delve uses letters and symbols for its display. Let's start with a quick breakdown of what you'll see on the screen:
 
         @ - this symbol represents you, the adventurer, townsfolk and other NPCs
@@ -159,6 +159,13 @@ class Tutorial(UserInterface ui)
     [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.]
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
+    
+    var ce = new FullyEquiped(gameState, UI, new Loc(1, 0, 5, 10));
+    foreach (var item in objDb.ItemsAt(new Loc(1, 0, 1, 8)))    
+      ce.IDs.Add(item.ID);
+    foreach (var item in objDb.ItemsAt(new Loc(1, 0, 2, 8)))
+      ce.IDs.Add(item.ID);
+    objDb.ConditionalEvents.Add(ce);
 
     UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;

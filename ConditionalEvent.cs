@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 abstract class ConditionalEvent
@@ -19,6 +17,24 @@ abstract class ConditionalEvent
 
   public abstract bool CondtionMet();
   public abstract void Fire();
+}
+
+class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
+{
+  GameState GS { get; set; } = gs;
+  UserInterface UI { get; set; } = ui;
+  Loc Loc { get; set; } = loc;
+  string Msg { get; set; } = msg;
+
+  public override bool CondtionMet()
+  {
+    return GS.Player.Loc == Loc;
+  }
+
+  public override void Fire()
+  {
+    UI.SetPopup(new Popup(Msg, "", -1, -1));
+  }
 }
 
 // Used in the tutorial
@@ -56,20 +72,34 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
   }  
 }
 
-class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
+class FullyEquiped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
 {
   GameState GS { get; set; } = gs;
   UserInterface UI { get; set; } = ui;
   Loc Loc { get; set; } = loc;
-  string Msg { get; set; } = msg;
+  public HashSet<ulong> IDs { get; set; } = [];
 
   public override bool CondtionMet()
   {
-    return GS.Player.Loc == Loc;
+    if (GS.Player.Loc == Loc)
+    {
+      HashSet<ulong> equipedItems = GS.Player.Inventory.Items()
+                                    .Where(i => i.Equiped)
+                                    .Select(i => i.ID)
+                                    .ToHashSet();
+      foreach (var id in IDs)
+      {
+        if (!equipedItems.Contains(id))
+          return true;
+      }
+    }
+      
+    return false;
   }
 
   public override void Fire()
   {
-    UI.SetPopup(new Popup(Msg, "", -1, -1));
+    string txt = @"Make sure both your armour and weapon are equiped before venturing further!";
+    UI.SetPopup(new Popup(txt, "", -1, -1));
   }
 }
