@@ -173,6 +173,8 @@ class Tutorial(UserInterface ui)
     CanSeeLoc csl  = new(gameState, UI, new Loc(1, 0, 11, 10), txt);
     objDb.ConditionalEvents.Add(csl);
 
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 12, 10), "Hmm why not explore to the East first?"));
+
     UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;
   }
