@@ -300,18 +300,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     if (Actor is Player)
     {
       result.Messages.Add(GameState!.LocDesc(Actor.Loc));
-      GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
-
-      var items = GameState.ObjDb.ItemsAt(Actor.Loc).Where(i => i.Type == ItemType.GameMessage);
-      foreach (var message in items)
-      {
-        if (message.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait desc)
-        {
-          GameState.UIRef().SetPopup(new Popup(desc.Text, "", -1, -1));
-          if (message.Value == 0)
-            GameState.ObjDb.RemoveItemFromGame(Actor.Loc, message);
-        }
-      }
+      GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());      
     }
     else
     {

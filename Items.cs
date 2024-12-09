@@ -32,9 +32,7 @@ enum ItemType
   Reagent,
   Environment, // I'm implementing things like mist as 'items'
   Landscape,
-  Statue,
-  GameMessage // bit of a kludge, but 'items' which popup a message when 
-              // the player steps on their location
+  Statue
 }
 
 record ItemIDInfo(bool Known, string Desc);

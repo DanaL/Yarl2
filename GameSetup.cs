@@ -724,16 +724,6 @@ class CampaignCreator(UserInterface ui)
         Turn = 1
       };
 
-      Item msg = new()
-      {
-        Name = "message",
-        Type = ItemType.GameMessage,
-        Value = 0
-      };
-      msg.Traits.Add(new DescriptionTrait("Seek adventure! Seek the dungeon!"));
-      Loc msgLoc = player.Loc with { Row = player.Loc.Row + 1};
-      gameState.ItemDropped(msg, msgLoc);
-
       string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
       welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";

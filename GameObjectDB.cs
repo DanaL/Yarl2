@@ -208,9 +208,6 @@ class GameObjectDB
     {
       foreach (var item in items)
       {
-        if (item.Type == ItemType.GameMessage)
-          continue;
-          
         if (item.HasTrait<HiddenTrait>())
           continue;
 
@@ -398,7 +395,7 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
     else
-      return stack.Where(i => i.Type != ItemType.Environment && i.Type != ItemType.GameMessage && !i.HasTrait<HiddenTrait>())
+      return stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())
                   .ToList();
   }
 
