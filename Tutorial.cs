@@ -19,8 +19,8 @@ class Tutorial(UserInterface ui)
   {
     Dictionary<Attribute, Stat> stats = new()
     {
-      { Attribute.Strength, new Stat(1) },
-      { Attribute.Constitution, new Stat(3) },
+      { Attribute.Strength, new Stat(3) },
+      { Attribute.Constitution, new Stat(1) },
       { Attribute.Dexterity, new Stat(1) },
       { Attribute.Piety, new Stat(0) },
       { Attribute.Will, new Stat(0) },
@@ -170,7 +170,7 @@ class Tutorial(UserInterface ui)
 
     txt = @"A [LIGHTBROWN +] represents a closed door. You can open a door simply by moving onto its tile, or you can use the 'o' command.
 
-    Some doors you find will be locked and you must either use the force command ('F') to it down, or try a lockpick if you have one.";
+    Some doors you find will be locked and you must either use the force command ('F') to it bash it open, or try a lockpick if you have one.";
     CanSeeLoc csl  = new(gameState, UI, new Loc(1, 0, 11, 10), txt);
     objDb.ConditionalEvents.Add(csl);
 

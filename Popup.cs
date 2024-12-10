@@ -166,15 +166,15 @@ class Popup
       {
         WritePaddedLine();
       }
-      else if (word.Length <= Width - currWidth - 5)
+      else if (word.Length <= Width - currWidth - 2)
       {
-        currWidth += word.Length;
         if (PrependSpace(line) && word != "!" && word != "." && word != "?")
         {
           word = ' ' + word;
           ++currWidth;
         }
         line.Add((colour, word));
+        currWidth += word.Length;
       }
       else
       {
@@ -203,8 +203,11 @@ class Popup
 
     void WritePaddedLine()
     {
+      // Calculate total width of all existing content
+      int actualWidth = line.Sum(tuple => tuple.Item2.Length);
+      
       // Pad out so that the right border lines up        
-      int padding = Width - currWidth - 2;
+      int padding = Width - actualWidth;
       if (padding > 0)
         line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
       ui.WriteText(line, row++, col, Width);

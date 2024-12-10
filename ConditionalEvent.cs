@@ -78,7 +78,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
 
     Nearby is some equipment that will be useful. Let's walk over, collect the items, and equip them.
 
-    Movement in Delve can be done via the numpad or the arrow keys, but if you are a touch-typist you might prefer the movement keys based on the home row. See the map at the bottom of the screen. 
+    Movement in Delve can be done via the numpad or the arrow keys, but if you are a touch-typist or playing on a laptop, you may prefer the movement keys based on the home row. See the map at the bottom of the screen. 
 
     Tapping 'l' twice will move your character on top of the first piece of gear.
 
@@ -86,7 +86,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
     ";
 
     UI.CheatSheetMode = CheatSheetMode.MvMixed;
-    UI.SetPopup(new Popup(txt, "", -1, -1));
+    UI.SetPopup(new Popup(txt, "", -2, -1));
   }  
 }
 
