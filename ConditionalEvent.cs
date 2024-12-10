@@ -85,7 +85,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
     
     ";
 
-    UI.CheatSheetMode = CheatSheetMode.Movement;
+    UI.CheatSheetMode = CheatSheetMode.MvMixed;
     UI.SetPopup(new Popup(txt, "", -1, -1));
   }  
 }
