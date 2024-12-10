@@ -73,6 +73,8 @@ abstract class UserInterface
 
   Glyph PlayerGlyph { get; set; }
 
+  public bool InTutorial { get; set; } = false;
+
   public UserInterface(Options opts)
   {
     _options = opts;
@@ -814,7 +816,11 @@ abstract class UserInterface
     if (action is QuitAction)
     {
       // It feels maybe like overkill to use an exception here?
-      throw new GameQuitException();
+      if (InTutorial)
+        // this returns us to the title screen instead of exiting the program
+        throw new PlayerKilledException();
+      else
+        throw new GameQuitException();
     }
     else if (action is SaveGameAction)
     {

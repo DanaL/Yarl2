@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Metadata.Ecma335;
-
 namespace Yarl2;
 
 class LineScanner(string line)

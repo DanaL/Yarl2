@@ -41,6 +41,7 @@ try
         try
         {
           gameState = new CampaignCreator(display).Create(options);
+          display.InTutorial = false;
           if (gameState is null)
             state = RunningState.Quitting;
         }
@@ -50,11 +51,13 @@ try
         }
         break;
       case SetupType.Tutorial:
+        display.InTutorial = true;
         gameState = new Tutorial(display).Setup(options);
         break;
       default:
         try
         {
+          display.InTutorial = false;
           gameState = new GameLoader(display).Load(options);
           if (gameState is null)
             state = RunningState.Quitting;
@@ -71,6 +74,9 @@ try
 
     if (gameState is not null)
       state = display.GameLoop(gameState);
+    
+    display.CheatSheetMode = CheatSheetMode.Messages;
+    display.MessageHistory = [];
   }
   while (state != RunningState.Quitting);
 }
