@@ -160,6 +160,9 @@ class Popup
     {
       var (colour, word) = Words[w++];
 
+      if (word == "\r")
+        continue;
+
       if (word == "\n")
       {
         WritePaddedLine();
@@ -218,7 +221,7 @@ class Popup
       // Calculate total width of all existing content
       int actualWidth = line.Sum(tuple => tuple.Item2.Length);
       
-      // Pad out so that the right border lines up        
+      // Pad out so that the right border lines up
       int padding = Width - actualWidth;
       if (padding > 0)
         line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
