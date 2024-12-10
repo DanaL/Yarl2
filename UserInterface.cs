@@ -37,7 +37,7 @@ abstract class UserInterface
   public const int ScreenHeight = 32;
   public const int SideBarWidth = 30;
   public const int ViewWidth = ScreenWidth - SideBarWidth;
-  public const int ViewHeight = ScreenHeight - 5;
+  public const int ViewHeight = ScreenHeight - 6;
 
   public abstract void UpdateDisplay(GameState? gs);
   public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
