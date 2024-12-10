@@ -767,7 +767,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == '/')
       {    
         int x = (int)ui.CheatSheetMode + 1;
-        ui.CheatSheetMode = (CheatSheetMode)(x % 3);
+        ui.CheatSheetMode = (CheatSheetMode)(x % 4);
         _deferred = new NullAction();
       }
       else if (ch == 'M')

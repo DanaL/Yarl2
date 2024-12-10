@@ -17,7 +17,8 @@ enum CheatSheetMode
 {
   Messages = 0,
   Commands = 1,
-  Movement = 2
+  Movement = 2,
+  MvMixed = 3
 }
 
 record struct MsgHistory(string Message, int Count)
@@ -374,36 +375,8 @@ abstract class UserInterface
     WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
   } 
 
-  protected void WriteMovementCheatSheet()
+  void WriteMessages()
   {
-    List<(Colour, string)> w;
-
-    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
-    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
-    WriteLine(@"                  \ | /      SHIFT-mv key will move you in", ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
-    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l"),
-      (Colours.WHITE, "      that direction until interrupted")];
-    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
-    WriteLine(@"                  / | \", ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
-    WriteLine(@"                 b  j  n", ScreenHeight - 1, 0, ScreenWidth, Colours.LIGHT_BLUE);
-  }
-
-  protected void WriteMessagesSection()
-  {
-    if (CheatSheetMode == CheatSheetMode.Commands)
-    {
-      WriteCommandCheatSheet();
-      return;
-    }
-    else if (CheatSheetMode == CheatSheetMode.Movement)
-    {
-      WriteMovementCheatSheet();
-      return;
-    }
-
-    if (MessageHistory.Count == 0)
-      return;
-
     var msgs = MessageHistory.Take(5)
                              .Select(msg => msg.Fmt);
 
@@ -442,6 +415,57 @@ abstract class UserInterface
         colour = Colours.GREY;
       else if (colour == Colours.GREY)
         colour = Colours.DARK_GREY;
+    }
+  }
+
+  protected void WriteMovementCheatSheet()
+  {
+    List<(Colour, string)> w;
+
+    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
+    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
+    WriteLine(@"                  \ | /      SHIFT-mv key will move you in", ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
+    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l"),
+      (Colours.WHITE, "      that direction until interrupted")];
+    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+    WriteLine(@"                  / | \", ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
+    WriteLine(@"                 b  j  n", ScreenHeight - 1, 0, ScreenWidth, Colours.LIGHT_BLUE);
+  }
+
+  protected void WriteMovementCheatSheetOverlay()
+  {
+    List<(Colour, string)> w;
+
+    w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
+    WriteText(w, ScreenHeight - 5, ScreenWidth - 26, ScreenWidth);
+    WriteLine(@"                  \ | /      ", ScreenHeight - 4, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
+    w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l")];
+    WriteText(w, ScreenHeight - 3, ScreenWidth - 26, ScreenWidth);
+    WriteLine(@"                  / | \", ScreenHeight - 2, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
+    WriteLine(@"                 b  j  n", ScreenHeight - 1, ScreenWidth - 26, ScreenWidth, Colours.LIGHT_BLUE);
+  }
+
+  protected void WriteMessagesSection()
+  {
+    if (CheatSheetMode == CheatSheetMode.Commands)
+    {
+      WriteCommandCheatSheet();
+      return;
+    }
+    else if (CheatSheetMode == CheatSheetMode.Movement) 
+    {
+      WriteMovementCheatSheet();
+      return;
+    }
+
+    if (MessageHistory.Count > 0) 
+    {
+      WriteMessages();
+    }
+
+    if (CheatSheetMode == CheatSheetMode.MvMixed)
+    {
+      WriteMovementCheatSheetOverlay();
     }
   }
 
