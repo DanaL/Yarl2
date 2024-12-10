@@ -166,11 +166,17 @@ class Popup
       }
       else if (word.Length <= Width - currWidth - 2)
       {
-        if (PrependSpace(line) && word != "!" && word != "." && word != "?")
+        if (word == ",")
+        {
+          word += ' ';
+          ++currWidth;
+        }
+        else if (!SwitchingColours(Words, w) && PrependSpace(line) && word != "!" && word != "." && word != "?")
         {
           word = ' ' + word;
           ++currWidth;
         }
+
         line.Add((colour, word));
         currWidth += word.Length;
       }
@@ -195,8 +201,16 @@ class Popup
       {
         '$' => false,
         '(' => false,
+        ' ' => false,
         _ => true
       };
+    }
+
+    bool SwitchingColours(List<(Colour, string)> words, int wordNum)
+    {
+      if (wordNum > 0 && wordNum < words.Count && words[wordNum].Item1 != words[wordNum - 1].Item1)
+        return true;
+      return false;
     }
 
     void WritePaddedLine()
