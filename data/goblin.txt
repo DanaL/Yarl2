@@ -6,6 +6,7 @@ skeleton 2
 zombie 2
 floating eye 1
 shrieker 1
+rot grub 1
 LEVEL 2
 goblin 4
 hobgoblin 2
@@ -16,6 +17,7 @@ dire bat 1
 floating eye 1
 chilled jelly 1
 shrieker 1
+rot grub 1
 LEVEL 3
 goblin 4
 hobgoblin 3
@@ -32,6 +34,7 @@ phantom 1
 chilled jelly 1
 shrieker 1
 nilbog 1
+rot grub 1
 LEVEL 4
 hobgoblin 3
 goblin archer 2
@@ -49,6 +52,7 @@ phantom 1
 chilled jelly 1
 shrieker 1
 nilbog 1
+rot grub 1
 LEVEL 5
 goblin archer 2
 goblin firestarter 2
@@ -65,3 +69,4 @@ will-o-wisp 1
 creeping coins 1
 phantom 1
 shrieker 1
+rot grub 1

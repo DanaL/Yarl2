@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
-
 namespace Yarl2;
 
 // Interface for anything that will get a turn in the game. I'm not sure this
@@ -127,7 +125,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     return true;
   }
 
-  public virtual (int, string) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src, double scale)
+  public virtual (int, string, int) ReceiveDmg(IEnumerable<(int, DamageType)> damages, int bonusDamage, GameState gs, GameObj? src, double scale)
   {
     string msg = "";
 
@@ -251,7 +249,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       }
     }
     
-    return (Stats[Attribute.HP].Curr, msg.Trim());
+    return (Stats[Attribute.HP].Curr, msg.Trim(), total);
   }
 
   // Candidate spots will be spots adjacent to the contiguous group of the 

@@ -348,6 +348,7 @@ class GameObjectDB
     Add(actor);
     AddToLoc(loc, actor);
   }
+
   public void Add(GameObj obj)
   {
     Objs[obj.ID] = obj;

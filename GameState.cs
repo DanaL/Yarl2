@@ -611,7 +611,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
-    var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
+    var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
     if (hpLeft < 1)
     {
       ActorKilled(actor, "a fall", null, null);
@@ -759,7 +759,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (ObjDb.Occupant(adj) is Actor actor)
       {
         result?.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");
-        var (hpLeft, msg) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null, 1.0);
+        var (hpLeft, msg, _) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null, 1.0);
         result?.Messages.Add(msg);
         if (hpLeft < 1)
           ActorKilled(actor, dmgDesc, result, null);
@@ -1067,7 +1067,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
 
       int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
-      var (hpLeft, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
+      var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
       if (hpLeft < 1)
       {
         ActorKilled(actor, "a fall", null, null);

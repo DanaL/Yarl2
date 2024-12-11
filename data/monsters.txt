@@ -27,7 +27,7 @@ screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|ConfusingScre
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|Melee#8#1#Piercing|Intelligent
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#5,Melee#8#1#Piercing|Intelligent
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|Melee#8#1#Piercing|Corrosive
-will-o-wisp       |w|yellow       |yelloworange|15|25|3| 1.0|10|10|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1,Flying
+will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|RangedSpellAction#DrainTorch#3#2#6,Melee#8#1#Fire|LightSource#owner#2,Retribution#Fire#8#1,Flying
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|Melee#8#2#Slashing|Regeneration#3#owner#false#max,Intelligent
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|Melee#5#2#Piercing|Poisoner#14#2#15,CoinsLoot#10#20,Brainless
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy,Undead
@@ -43,3 +43,4 @@ wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#10
 kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|Melee#8#1#Piercing|Intelligent,MiniBoss5,Named
 test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#1#6#15|Immobile
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|Melee#4#1#Slashing|Immobile
+rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|Melee#4#1#Piercing|Mosquito

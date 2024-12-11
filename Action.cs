@@ -2378,7 +2378,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       {
         result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
 
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
         if (hpLeft < 1)
         {
           GameState.ActorKilled(victim, "a fireball", result, null);

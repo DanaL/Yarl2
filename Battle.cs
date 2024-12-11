@@ -103,7 +103,7 @@ class Battle
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
     result.Messages.Add(txt);
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
+    var (hpLeft, dmgMsg, _) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
       result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
@@ -136,7 +136,7 @@ class Battle
     result.Messages.AddRange(poison.Apply(victim, gs));
   }
 
-  static void CheckAttackTraits(Actor target, GameState gs, ActionResult result, GameObj obj)
+  static void CheckAttackTraits(Actor target, GameState gs, ActionResult result, GameObj obj, int dmgDone)
   {
     bool poisoner = false;
     foreach (Trait trait in obj.Traits)
@@ -161,6 +161,11 @@ class Battle
         result.Messages.AddRange(debuff.Apply(target, gs));
       }
 
+      if (dmgDone > 0 && obj is Actor actor && trait is MosquitoTrait && gs.Rng.NextDouble() < 0.6)
+      {
+        Spawn(actor, gs, result);
+      }
+
       if (trait is CorrosiveTrait)
       {
         
@@ -182,6 +187,23 @@ class Battle
 
     if (poisoner)
       CheckCoatedPoison(obj, gs.Rng);
+  }
+
+  static void Spawn(Actor actor, GameState gs, ActionResult result)
+  {
+    List<Loc> options = Util.Adj8Locs(actor.Loc)
+                            .Where(loc => gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))
+                            .ToList();
+    if (options.Count > 0)
+    {
+      Loc loc = options[gs.Rng.Next(options.Count)];
+      Actor spawnling = MonsterFactory.Get(actor.Name, gs.ObjDb, gs.Rng);
+      spawnling.Stats[Attribute.HP].SetCurr(actor.Stats[Attribute.HP].Curr);
+      gs.ObjDb.AddNewActor(spawnling, loc);
+      gs.AddPerformer(spawnling);
+      if (gs.LastPlayerFoV.Contains(loc))
+        result.Messages.Add($"{actor.FullName.Capitalize()} spawns!");
+    }
   }
 
   static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, int weaponBonus)
@@ -229,16 +251,16 @@ class Battle
     if (weapon is not null && weapon.Traits.OfType<ViciousTrait>().FirstOrDefault() is ViciousTrait vt)
       dmgScale = vt.Scale;
 
-    var (hpLeft, dmgMsg) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
+    var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
     if (dmgMsg != "")
       result.Messages.Add(dmgMsg);
     ResolveHit(attacker, target, hpLeft, result, gs);
 
-    CheckAttackTraits(target, gs, result, attacker);
+    CheckAttackTraits(target, gs, result, attacker, dmgDone);
 
     if (weapon is not null) 
     { 
-      CheckAttackTraits(target, gs, result, weapon);      
+      CheckAttackTraits(target, gs, result, weapon, dmgDone);
     }      
   }
 
@@ -264,7 +286,7 @@ class Battle
           string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
           result.Messages.Add(txt);
           int roll = gs.Rng.Next(4) + 1;
-          var (hpLeftAfterAcid, acidMsg) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);   
+          var (hpLeftAfterAcid, acidMsg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);   
           
           HitAnim(victim, gs);
           

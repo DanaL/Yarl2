@@ -318,6 +318,11 @@ class MobMissileTrait : ActionTrait
   }
 }
 
+class MosquitoTrait : Trait
+{
+  public override string AsText() => "Mosquito";
+}
+
 class RangedSpellActionTrait : ActionTrait
 {
   public override ActionType ActionType => ActionType.Attack;
@@ -1638,7 +1643,7 @@ class PoisonedTrait : TemporaryTrait
     }
 
     List<(int, DamageType)> p = [(Strength, DamageType.Poison)];
-    var (hpLeft, dmgMsg) = victim.ReceiveDmg(p, 0, gs, null, 1.0);
+    var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(p, 0, gs, null, 1.0);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
 
@@ -1701,7 +1706,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       {
         int fireDmg = gs.Rng.Next(8) + 1;
         List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
-        var (hpLeft, dmgMsg) = victim.ReceiveDmg(fire, 0, gs, null, 1.0);
+        var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(fire, 0, gs, null, 1.0);
         if (dmgMsg != "")
         {
           gs.UIRef().AlertPlayer(dmgMsg);
@@ -2542,6 +2547,7 @@ class TraitFactory
       return new MobMissileTrait() {
           Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
           MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
+    { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "NauseousAura", (pieces, gameObj) => new NauseousAuraTrait()

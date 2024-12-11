@@ -232,3 +232,9 @@ Stout protection for an adventurer's noggin.
 #
 shield
 Extra protection in battle, although with a shield equiped you won't be able to use some wepaons.
+#
+evil villain
+Definitely a baddie. You don't need to feel any guilty about attacking them.
+#
+rot grub
+A worm with a toothy maw ready to burrow into your flesh.
