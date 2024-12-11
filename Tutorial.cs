@@ -149,8 +149,8 @@ class Tutorial(UserInterface ui)
         @ - this symbol represents you, the adventurer, townsfolk and other NPCs
         [LIGHTGREY #] - walls
         [LIGHTGREY .] - floors, the ground, grass, etc
-        [BRIGHTRED g],[BRIGHTRED h] etc - letters are generally monsters
-        [LIGHTBROWN (],[LIGHTBROWN )] etc] - other symbols are often loot and equipment that you might find in your travels
+        [BRIGHTRED g], [BRIGHTRED h] etc - letters are generally monsters
+        [LIGHTBROWN (], [LIGHTBROWN )] etc] - other symbols are often loot and equipment that you might find in your travels
 
     You'll interact with Delve's world through several commands (listed at the bottom of your screen). Let's focus on two for the moment: (i)nventory and (a)pply/use equipment.
 

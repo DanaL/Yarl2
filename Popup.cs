@@ -75,11 +75,33 @@ class LineScanner(string line)
   void ScanWord()
   {
     while (!IsAtEnd() && Peek() != '[' && Peek() != ']' && !char.IsWhiteSpace(Peek()))
+    {
       Advance();
-    Words.Add((CurrentColour, Source[Start..Current]));
+    }
+
+    string word = Source[Start..Current];
+    if (Peek() == ' ') 
+    {
+      word += ' ';
+      Advance();
+    }
+    else if (Peek() == ']' && Peeek() == ' ')
+    {
+      word += ' ';
+    }
+
+    Words.Add((CurrentColour, word));
   }
 
   char Peek() => IsAtEnd() ? '\0' : Source[Current];
+  char Peeek()
+  {
+    if (Current + 1 >= Source.Length)
+      return '\0';
+
+    return Source[Current + 1];
+  }
+
   char Advance() => Source[Current++];
   bool IsAtEnd() => Current >= Source.Length;
 }
@@ -167,18 +189,18 @@ class Popup
       {
         WritePaddedLine();
       }
-      else if (word.Length <= Width - currWidth - 2)
+      else if (word.Length < Width - currWidth - 2)
       {
-        if (word == ",")
-        {
-          word += ' ';
-          ++currWidth;
-        }
-        else if (!SwitchingColours(Words, w) && PrependSpace(line) && word != "!" && word != "." && word != "?")
-        {
-          word = ' ' + word;
-          ++currWidth;
-        }
+        // if (word == ",")
+        // {
+        //   word += ' ';
+        //   ++currWidth;
+        // }
+        // else if (!SwitchingColours(Words, w) && PrependSpace(line) && word != "!" && word != "." && word != "?")
+        // {
+        //   word = ' ' + word;
+        //   ++currWidth;
+        // }
 
         line.Add((colour, word));
         currWidth += word.Length;
