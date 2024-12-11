@@ -742,11 +742,15 @@ class Player : Actor, IPerformer, IGameEventListener
         _deferred = new QuitAction();
         ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
       }
-      else if (ch == 'S')
+      else if (ch == 'S' && !ui.InTutorial)
       {
         _inputController = new YesOrNoInputer();
         _deferred = new SaveGameAction();
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
+      }
+      else if (ch == 'S' && ui.InTutorial)
+      {
+        ui.SetPopup(new Popup("Saving is disabled in the tutorial.", "", -1, -1));
       }
       else if (ch == 's')
       {
