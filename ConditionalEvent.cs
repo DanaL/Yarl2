@@ -33,7 +33,7 @@ class CanSeeLoc(GameState gs, UserInterface ui, Loc loc, string msg) : Condition
 
   public override void Fire()
   {
-    UI.SetPopup(new Popup(Msg, "", -1, -1));
+    UI.SetPopup(new Popup(Msg, "", -2, -1));
   }
 }
 

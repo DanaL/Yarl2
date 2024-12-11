@@ -189,6 +189,14 @@ class Tutorial(UserInterface ui)
     csl = new(gameState, UI, new Loc(1, 0, 12, 17), txt);
     objDb.ConditionalEvents.Add(csl);
 
+    Loc zloc = new(1, 0, 12, 22);
+    Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    coins.Value = 25;
+    objDb.SetToLoc(zloc, coins);
+    txt = @"Treasure! Zorkmids are the coinage of the land. They aren't much use in the Tutorial but will come in rather handy in the game itself!";
+    var pal = new PlayerAtLoc(gameState, UI, zloc, txt);
+    objDb.ConditionalEvents.Add(pal);
+
     UI.CheatSheetMode = CheatSheetMode.Commands;
     return gameState;
   }
