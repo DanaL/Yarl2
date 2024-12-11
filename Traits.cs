@@ -2204,6 +2204,36 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class CrusherTrait : ActionTrait
+{
+  public int DmgDie { get; set; }
+  public int DmgDice { get; set; }
+
+  public ulong Victim(Mob mob, GameState gs)
+  {
+    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    {
+      if (gs.ObjDb.Occupant(adj) is not Actor actor)
+        continue;
+
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is GrappledTrait grappled && grappled.GrapplerID == mob.ID)
+          return actor.ID;
+      }
+    }
+
+    return 0;
+  }
+
+  public override bool Available(Mob mob, GameState gs)
+  {
+    return Victim(mob, gs) != 0;
+  }
+
+  public override string AsText() => $"Crusher#{DmgDie}#{DmgDice}";
+}
+
 // A light source that doesn't have fuel/burn out on its own.
 class LightSourceTrait : BasicTrait, IOwner
 {
@@ -2439,6 +2469,7 @@ class TraitFactory
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
+    { "Crusher", (pieces, gameObj) => new CrusherTrait() { DmgDie = int.Parse(pieces[1]), DmgDice = int.Parse(pieces[2]) } },
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },
     { "Damage", (pieces, gameObj) => 

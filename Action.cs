@@ -962,6 +962,41 @@ class OpenDoorAction : DirectionalAction
   }
 }
 
+// Some monsters, when grappling, automatically deal damage to their victim
+class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmgDice) : Action(gs, actor)
+{
+  public int DmgDie { get; set; } = dmgDie;
+  public int DmgDice { get; set; } = dmgDice;
+  public ulong VictimId { get; set; } = victimId;
+
+  public override ActionResult Execute()
+  {
+    var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+
+    if (GameState!.ObjDb.GetObj(VictimId) is Actor victim)
+    {
+      if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+      {
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crush")} {victim.FullName}.";
+        result.Messages.Add(s);
+      }
+
+      List<(int, DamageType)> damageRolls = [];
+      for (int i = 0; i < DmgDice; i++)
+      {
+        damageRolls.Add((GameState.Rng.Next(DmgDie) + 1, DamageType.Blunt));        
+      }
+      var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(damageRolls, 0, GameState, null, 1.0);
+      if (hpLeft < 1)
+      {
+        GameState.ActorKilled(victim, "being crushed", result, null);
+      }
+    }
+    
+    return result;
+  }
+}
+
 class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public ulong ItemID { get; set; }

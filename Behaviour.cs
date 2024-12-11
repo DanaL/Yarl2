@@ -273,6 +273,12 @@ class MonsterBehaviour : IBehaviour
         return new DrainTorchAction(gs, mob, CalcRangedTarget(mob, gs));
       }      
     }
+    else if (act is CrusherTrait crusher)
+    {
+      ulong victimId = crusher.Victim(mob, gs);
+
+      return new CrushAction(gs, mob, victimId, crusher.DmgDie, crusher.DmgDice);
+    }
     else if (act is ConfusingScreamTrait scream)
     {
       _lastUse[act.Name] = gs.Turn;

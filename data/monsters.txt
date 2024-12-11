@@ -19,7 +19,7 @@ ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|Melee#6#2#Blu
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|Melee#4#1#Piercing|Poisoner#13#1#10
 duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Melee#10#1#Blunt|Intelligent
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|Intelligent
-owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|Melee#1#1#Slashing|Grappler#14
+owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|Melee#6#1#Slashing|Grappler#14
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|RangedSpellAction#MirrorImage#7#1#3,Melee#8#1#Piercing|Flying
 shadow            | |black        |black       |13|20|3| 1.0|10|14|Melee#4#1#Necrotic|Weaken#13#1,SilverAllergy,Undead
 floating eye      |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless
@@ -44,3 +44,4 @@ kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|Melee#8#1#Pie
 test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#1#6#15|Immobile
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|Melee#4#1#Slashing|Immobile
 rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|Melee#4#1#Piercing|Mosquito
+python            |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crusher#4#1,Melee#4#1#Blunt|Grappler#15
