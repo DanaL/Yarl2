@@ -51,7 +51,7 @@ class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : Conditi
 
   public override void Fire()
   {
-    UI.SetPopup(new Popup(Msg, "", -1, -1));
+    UI.SetPopup(new Popup(Msg, "", -2, -1));
   }
 }
 

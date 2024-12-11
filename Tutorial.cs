@@ -89,7 +89,7 @@ class Tutorial(UserInterface ui)
       tutorialMap.SetTile(12, c, TileFactory.Get(TileType.DungeonFloor));
     }
     tutorialMap.SetTile(12, 2, TileFactory.Get(TileType.SecretDoor));
-    tutorialMap.SetTile(12, 1, TileFactory.Get(TileType.Downstairs));
+    tutorialMap.SetTile(12, 1, TileFactory.Get(TileType.FakeStairs));
     
     for (int r = 10; r < 16; r++)
     {
@@ -195,6 +195,18 @@ class Tutorial(UserInterface ui)
     objDb.SetToLoc(zloc, coins);
     txt = @"Treasure! Zorkmids are the coinage of the land. They aren't much use in the Tutorial but will come in rather handy in the game itself!";
     var pal = new PlayerAtLoc(gameState, UI, zloc, txt);
+    objDb.ConditionalEvents.Add(pal);
+
+    txt = @"Sometimes not everything is as it seems in Delve! Walk closer to the dead end to the west and then hit the search ([LIGHTBLUE 's']) command a few times!";
+    csl = new(gameState, UI, new Loc(1, 0, 12, 2), txt);
+    objDb.ConditionalEvents.Add(csl);
+
+    txt = @"A-ha! Stairs to the next level down, and perhaps a gateway to more danger and adventure! You've reached the end of the tutorial, so use the quit ([LIGHTBLUE 'Q']) command to quit, return to the main screen and begin a game of Delve!
+
+    Your character will begin near a town which has NPCs who can give you advice and sell you useful gear. Talk to the them via the chat ([LIGHTBLUE 'C']) command.
+
+    Good luck and happy Delving!";
+    pal = new PlayerAtLoc(gameState, UI, new Loc(1, 0, 12, 1), txt);
     objDb.ConditionalEvents.Add(pal);
 
     UI.CheatSheetMode = CheatSheetMode.Commands;
