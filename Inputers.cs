@@ -101,6 +101,7 @@ class Examiner : Inputer
             case TileType.MagicMouth:
             case TileType.Pit:
             case TileType.DartTrap:
+            case TileType.Well:
               pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
               break;
           }

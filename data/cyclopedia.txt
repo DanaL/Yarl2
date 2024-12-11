@@ -38,6 +38,9 @@ A trap door. You'll plummet to the next level of the dungoen!
 teleporttrap|teleport trap
 A trap that will teleport you to a random spot on this dungeon level.
 #
+well
+A well. Maybe a wishing well? Can't hurt to try!
+#
 statue
 A monument of historical interest.
 #
