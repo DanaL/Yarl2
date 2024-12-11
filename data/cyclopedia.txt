@@ -214,3 +214,21 @@ A badge identifying you as a member of the troll club, with all the rights and r
 #
 smouldering charm
 Warm to the touch, smoke rises from this charm. Wearing it provides you some protection against fire and causes your melee attacks to deal extra fire damage.
+#
+leather armour
+Weak armour, but better than nothing.
+#
+ringmail
+Metal rings sewn onto leather. It technically might not exist but we are willing to indulge a bit of fantasy in our fantasy RPG!
+#
+studded leather armour
+Leather armour reinforced with studs bolted on. It also looks more badass.
+#
+chainmail
+Armour made of small metal rings linked into a mesh.
+#
+helmet
+Stout protection for an adventurer's noggin.
+#
+shield
+Extra protection in battle, although with a shield equiped you won't be able to use some wepaons.
