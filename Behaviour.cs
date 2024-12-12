@@ -454,6 +454,8 @@ class MonsterBehaviour : IBehaviour
           return CalcMoveAction(actor, gs);
         }
       case Mob.AFRAID:
+        if (gs.Rng.Next(10) == 0)
+          actor.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
         return CalculateEscape(actor, gs);
       case Mob.AGGRESSIVE:
         Action action = SelectAction(actor, gs);
