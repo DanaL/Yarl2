@@ -18,7 +18,7 @@ class Treasure
   static readonly List<ItemNames> CommonItems = 
     [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ];
+      ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ItemNames.FLASK_OF_BOOZE ];
   static readonly List<ItemNames> UncommonItems = [
       ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
@@ -43,7 +43,7 @@ class Treasure
       ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
-      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS
+      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM
   ];
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
