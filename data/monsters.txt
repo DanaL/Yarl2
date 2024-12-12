@@ -32,7 +32,7 @@ troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|Melee#8#2#Sla
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|Melee#5#2#Piercing|Poisoner#14#2#15,CoinsLoot#10#20,Brainless
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|Melee#5#2#Necrotic|Invisible#owner#false#max,SilverAllergy,Undead
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|Melee#5#2#Blunt|KnockBack,AttackVerb#Butt
-shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#3#10|Plant,Immunity#Confusion,Immobile
+shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#3#10|Plant,Immunity#Confusion,Immobile,Brainless
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|Melee#6#1#Slashing|NauseousAura#owner#10,Undead
 haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#25|Undead,Immunity#Confusion,Construct,Immobile
 giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|Melee#8#1#Piercing|Drop#beetle_carapace#33
