@@ -585,17 +585,28 @@ class Player : Actor, IPerformer, IGameEventListener
   {
     UserInterface ui = gameState.UIRef();
 
-    if (HasActiveTrait<ParalyzedTrait>())
+    foreach (Trait t in Traits)
     {
-      ui.AlertPlayer("You cannot move!");
-      return new PassAction(gameState, this);
-    }
+      if (t is ParalyzedTrait paralyzed)
+      {
+        ++paralyzed.TurnsParalyzed;
+        ui.AlertPlayer("You cannot move!");
 
-    if (HasActiveTrait<RestingTrait>())
-    {
-      return new PassAction(gameState, this);
-    }
+        if (paralyzed.TurnsParalyzed % 5 == 0)
+        {
+          ui.SetPopup(new Popup("You are paralyzed", "", -1, -1));
+          ui.UpdateDisplay(gameState);
+          ui.BlockForInput();
+          ui.ClosePopup();
+        }
+         
+        return new PassAction(gameState, this);
+      }
 
+      if (t is RestingTrait)
+        return new PassAction(gameState, this);
+    }
+    
     char ch = '\0';
 
     if (ui.InputBuffer.Count > 0 && ui.InputBuffer.Peek() == ' ')

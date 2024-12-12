@@ -1552,6 +1552,7 @@ class OwnedTrait : Trait
 class ParalyzedTrait : TemporaryTrait
 {
   public int DC { get; set; }
+  public int TurnsParalyzed { get; set; } = 0;
   
   public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
 
