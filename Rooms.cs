@@ -697,7 +697,7 @@ class Rooms
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
     NameGenerator ng = new(rng, "data/names.txt");
-        
+
     int numOfGraves = room.Count / 4;
     for (int j = 0; j < numOfGraves; j++)
     {
@@ -732,11 +732,14 @@ class Rooms
       map.SetTile(r, c, new Gravestone(message));
     }
 
-    var (cr, cc) = room[rng.Next(room.Count)];
-    Loc cryptLoc = new(dungeonID, level, cr, cc);
-    Actor crypt = MonsterFactory.Get("haunted crypt", objDb, rng);
-    objDb.AddNewActor(crypt, cryptLoc);
-    
-    map.Alerts.Add("A shiver runs up your spine.");
+    // We won't generate every graveyard with a haunted crypt
+    if (rng.NextDouble() <= 0.33)
+    {
+      var (cr, cc) = room[rng.Next(room.Count)];
+      Loc cryptLoc = new(dungeonID, level, cr, cc);
+      Actor crypt = MonsterFactory.Get("haunted crypt", objDb, rng);
+      objDb.AddNewActor(crypt, cryptLoc);
+      map.Alerts.Add("A shiver runs up your spine.");
+    }    
   }
 }
