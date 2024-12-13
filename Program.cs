@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Metadata;
 using System.Text.Json;
 
 using Yarl2;
@@ -48,7 +47,6 @@ try
         }
         catch (GameNotLoadedException)
         {
-          Console.WriteLine("flag?");
           state = RunningState.Pregame;
         }
         break;
@@ -124,6 +122,17 @@ namespace Yarl2
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
+
+    public void SaveOptions()
+    {
+      var userDir = Util.UserDir;
+      if (!userDir.Exists)
+        userDir.Create();
+
+      string optionsPath = Path.Combine(userDir.FullName, "ddoptions.json");
+      var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+      File.WriteAllText(optionsPath, json);
+    }
 
     public static Options LoadOptions()
     {

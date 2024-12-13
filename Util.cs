@@ -156,8 +156,53 @@ class Constants
 
 class Util
 {
-  public static DirectoryInfo UserDir => new(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-  public static string SavePath => Path.Combine(UserDir.FullName, "ddsaves");
+  public static DirectoryInfo UserDir
+  {
+    get
+    {
+      string basePath;
+      if (OperatingSystem.IsMacOS())
+      {
+        basePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Library",
+            "Application Support",
+            "ddelve"
+        );
+      }
+      else // Windows and others
+      {
+        basePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "ddelve"
+        );
+      }
+
+      return new DirectoryInfo(basePath);
+    }
+  }
+
+  public static string SavePath
+  {
+    get
+    {
+      try
+      {
+        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string gamePath = Path.Combine(basePath, "ddelve", "Saves");
+
+        // CreateDirectory is safe to call even if directory exists
+        Directory.CreateDirectory(gamePath);
+
+        return gamePath;
+      }
+      catch (Exception ex)
+      {
+        throw new Exception($"Failed to initialize save directory: {ex.Message}", ex);
+      }
+    }
+  }
+
 
   public static List<int> ToNums(string txt)
   {
@@ -391,8 +436,8 @@ class Util
     double unitX = (c1 - c0) / length;
     double unitY = (r1 - r0) / length;
 
-    int newR = (int) (r1 + unitY * dist);
-    int newC = (int) (c1 + unitX * dist);
+    int newR = (int)(r1 + unitY * dist);
+    int newC = (int)(c1 + unitX * dist);
 
     return (newR, newC);
   }
@@ -894,7 +939,7 @@ class ConeCalculator
   public static List<Loc> Affected(int range, Loc origin, Loc target, Map map, GameObjectDB objDb)
   {
     HashSet<Loc> affected = [];
-    
+
     // even if the target is closer, the cone always covers the full range
     if (Util.Distance(origin, target) < range)
     {
@@ -908,7 +953,7 @@ class ConeCalculator
     Loc beamB = origin with { Row = br, Col = bc };
     int octantA = OctantForBeam(origin, beamA);
     int octantB = OctantForBeam(origin, beamB);
-    
+
     while (octantA != octantB)
     {
       affected = affected.Union(CalcOctant(range, origin, map, octantA, objDb))
@@ -922,32 +967,32 @@ class ConeCalculator
 
     double angleA = Util.AngleBetweenLocs(origin, beamA);
     double angleB = Util.AngleBetweenLocs(origin, beamB);
-    
+
     // Normalize angles to handle if we're crossing from quadant 7 to 0
     if (Math.Abs(angleA - angleB) > Math.PI)
     {
-        // Adjust the negative angle
-        if (angleA < 0) 
-          angleA += 2 * Math.PI;
-        if (angleB < 0) 
-          angleB += 2 * Math.PI;
+      // Adjust the negative angle
+      if (angleA < 0)
+        angleA += 2 * Math.PI;
+      if (angleB < 0)
+        angleB += 2 * Math.PI;
     }
-    
+
     double minAngle = double.Min(angleA, angleB);
     double maxAngle = double.Max(angleA, angleB);
 
     // So the shadowcasting covers 2 or 3 octants (90 to 135 degrees) so we
     // want to trim it to the actual cone/triangle, which I want to be about
     // 60 degrees.
-    return affected.Where(l => 
+    return affected.Where(l =>
     {
-        double angle = Util.AngleBetweenLocs(origin, l);
+      double angle = Util.AngleBetweenLocs(origin, l);
 
-        // Normalize the test angle if necessary
-        if (angle < 0 && minAngle > Math.PI / 2)
-          angle += 2 * Math.PI;
+      // Normalize the test angle if necessary
+      if (angle < 0 && minAngle > Math.PI / 2)
+        angle += 2 * Math.PI;
 
-        return angle >= minAngle && angle <= maxAngle;
+      return angle >= minAngle && angle <= maxAngle;
     }).ToList();
   }
 
@@ -969,9 +1014,9 @@ class ConeCalculator
       return 1;
     else if (angle >= -Math.PI / 2 && angle < -Math.PI / 4)
       return 2;
-    
+
     return 3;
-    
+
   }
 
   static Shadow ProjectTile(int row, int col)
@@ -981,7 +1026,7 @@ class ConeCalculator
 
     return new Shadow(topLeft, bottomRight);
   }
-  
+
   static (int, int) RotateOctant(int row, int col, int octant)
   {
     return octant switch
@@ -1028,7 +1073,7 @@ class ConeCalculator
           else
           {
             affected.Add(loc);
-          }         
+          }
         }
 
         if (fullShadow)

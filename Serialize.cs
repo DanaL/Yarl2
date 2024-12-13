@@ -115,8 +115,17 @@ internal class Serialize
     List<SaveFileInfo> files = [];
 
     DirectoryInfo dir = new(Util.SavePath);
-    if (!dir.Exists)
-      throw new Exception("Unable to find or access saved game folder!");
+    try
+    {
+      if (!dir.Exists)
+      {
+        dir.Create();
+      }
+    }
+    catch (Exception)
+    {
+      throw new Exception("Unable to create or access saved game folder!");
+    }
 
     foreach (FileInfo file in dir.GetFiles().OrderByDescending(f => f.LastWriteTime))
     {
