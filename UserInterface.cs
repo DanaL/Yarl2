@@ -46,7 +46,7 @@ abstract class UserInterface
   protected abstract void WriteSq(int row, int col, Sqr sq);
   protected abstract void ClearScreen();
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
-
+  
   protected int FontSize;
   public int PlayerScreenRow { get; protected set; }
   public int PlayerScreenCol { get; protected set; }
@@ -74,6 +74,7 @@ abstract class UserInterface
   Glyph PlayerGlyph { get; set; }
 
   public bool InTutorial { get; set; } = false;
+  public bool PauseForResponse { get; set; } = false;
 
   public UserInterface(Options opts)
   {
@@ -836,8 +837,9 @@ abstract class UserInterface
       do
       {
         if (performer is Player)
-          gs.UpdateFoV();
-
+        {
+          gs.PrepareFieldOfView();
+        }
         result = action!.Execute();
 
         // I don't think I need to look over IPerformer anymore? The concept of 
@@ -857,7 +859,9 @@ abstract class UserInterface
           AlertPlayer(result.Messages);
 
         if (performer is Player)
-          gs.UpdateFoV();
+        {
+          gs.PrepareFieldOfView();
+        }
       }
       while (result.AltAction is not null);
     }
@@ -885,9 +889,26 @@ abstract class UserInterface
     do
     {
       e = PollForEvent();
+
       Delay();
     }
     while (e.Type == GameEventType.NoEvent);
+  }
+
+  // Block until the character hits ESC, space, or enter. (To prevent a user
+  // from dismissing popups and such while typing fast)
+  public void BlockFoResponse(GameState gs)
+  {    
+    while (true)
+    {
+      char ch = GetKeyInput();
+      if (ch == '\n' || ch == ' ')
+        break;
+      gs.PrepareFieldOfView();
+      SetSqsOnScreen(gs);
+      UpdateDisplay(gs);
+      Delay();
+    }    
   }
 
   public void BlockingPopup(GameState gs)

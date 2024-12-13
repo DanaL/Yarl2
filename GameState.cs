@@ -858,7 +858,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ++Turn;
         _currPerformer = 0;
         EndOfTurn();
-        UpdateFoV();
+        PrepareFieldOfView();
       }
     }
     while (true);
@@ -922,7 +922,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ce.Complete = true;
       }
     }
+    
     ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
+
+    if (UI.PauseForResponse)
+    {      
+      UI.BlockFoResponse(this);
+      UI.PauseForResponse = false;
+      UI.ClosePopup();
+    }
   }
 
   void SpawnMonster()
@@ -1428,7 +1436,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return lit;
   }
 
-  public void UpdateFoV()
+  public void PrepareFieldOfView()
   {
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;

@@ -127,7 +127,7 @@ class Tutorial(UserInterface ui)
     };
 
     gameState.ObjDb.AddNewActor(player, new Loc(1, 0, 1, 6));
-    gameState.UpdateFoV();
+    gameState.PrepareFieldOfView();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
     gameState.ObjDb.ConditionalEvents.Add(new PlayerHasLitTorch(gameState, UI));

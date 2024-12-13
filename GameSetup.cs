@@ -110,7 +110,7 @@ class GameLoader(UserInterface ui)
       GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
       gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
       gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
-      gameState.UpdateFoV();
+      gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
       return gameState;
@@ -735,7 +735,7 @@ class CampaignCreator(UserInterface ui)
       UI.SetPopup(new Popup(welcomeText, "", -2, -1));
     
       gameState.ObjDb.AddToLoc(player.Loc, player);
-      gameState.UpdateFoV();
+      gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
       return gameState;

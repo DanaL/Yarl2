@@ -497,7 +497,7 @@ abstract class PortalAction : Action
     result.Messages.Add(moveMsg);
 
     GameState.RefreshPerformers();
-    GameState.UpdateFoV();
+    GameState.PrepareFieldOfView();
 
     if (start.DungeonID != portal.Destination.DungeonID)
       result.Messages.Add(GameState.CurrentDungeon.ArrivalMessage);

@@ -164,7 +164,7 @@ class DebugCommand(GameState gs)
 
         Loc loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
         _gs.ObjDb.SetToLoc(loc, item);
-        _gs.UpdateFoV();
+        _gs.PrepareFieldOfView();
       }        
       else if (action == "give")
         _gs.Player.Inventory.Add(item, _gs.Player.ID);

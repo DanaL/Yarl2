@@ -34,6 +34,7 @@ class CanSeeLoc(GameState gs, UserInterface ui, Loc loc, string msg) : Condition
   public override void Fire()
   {
     UI.SetPopup(new Popup(Msg, "", -2, -1));
+    UI.PauseForResponse = true;
   }
 }
 
@@ -52,6 +53,7 @@ class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : Conditi
   public override void Fire()
   {
     UI.SetPopup(new Popup(Msg, "", -2, -1));
+    UI.PauseForResponse = true;
   }
 }
 
@@ -87,6 +89,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
 
     UI.CheatSheetMode = CheatSheetMode.MvMixed;
     UI.SetPopup(new Popup(txt, "", -2, -1));
+    UI.PauseForResponse = true;
   }  
 }
 
@@ -119,5 +122,6 @@ class FullyEquipped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
   {
     string txt = @"Make sure both your armour and weapon are equipped before venturing further!";
     UI.SetPopup(new Popup(txt, "", -1, -1));
+    UI.PauseForResponse = true;
   }
 }

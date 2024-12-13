@@ -2097,7 +2097,7 @@ class RecallTrait : BasicTrait, IGameEventListener
       player.Loc = entrance.Loc;
       string moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
       gs.RefreshPerformers();
-      gs.UpdateFoV();
+      gs.PrepareFieldOfView();
       gs.UIRef().AlertPlayer("A wave of vertigo...");
       gs.UIRef().AlertPlayer(moveMsg);      
     }
