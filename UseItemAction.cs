@@ -21,10 +21,10 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   {
     ActionResult result = base.Execute();
 
-    if (!Tool.Equiped)
+    if (!Tool.Equipped)
     {
       var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
-      if (equipResult != EquipingResult.Equiped)
+      if (equipResult != EquipingResult.Equipped)
       {
         GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
         result.Complete = false;

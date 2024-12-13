@@ -167,7 +167,7 @@ class PlayerCreator
   {
     var leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
     leather.Traits.Add(new AdjectiveTrait("battered"));
-    leather.Equiped = true;
+    leather.Equipped = true;
     leather.Slot = 'b';
 
     Item startWeapon;
@@ -182,11 +182,11 @@ class PlayerCreator
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get(ItemNames.HAND_AXE, objDb);
         var studded = ItemFactory.Get(ItemNames.RINGMAIL, objDb);
-        studded.Equiped = true;
+        studded.Equipped = true;
         studded.Slot = 'b';
         player.Inventory.Add(studded, player.ID);
         var helmet = ItemFactory.Get(ItemNames.HELMET, objDb);
-        helmet.Equiped = true;
+        helmet.Equipped = true;
         helmet.Slot = 'c';
         player.Inventory.Add(helmet, player.ID);
         player.Stats.Add(Attribute.AxeUse, new Stat(100));
@@ -194,7 +194,7 @@ class PlayerCreator
       case PlayerLineage.Elf:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
         var bow = ItemFactory.Get(ItemNames.LONGBOW, objDb);
-        bow.Equiped = true;
+        bow.Equipped = true;
         bow.Slot = 'b';
         player.Inventory.Add(bow, player.ID);
         player.Stats.Add(Attribute.BowUse, new Stat(100));
@@ -219,7 +219,7 @@ class PlayerCreator
         break;
     }
 
-    startWeapon.Equiped = true;
+    startWeapon.Equipped = true;
     player.Inventory.Add(startWeapon, player.ID);
 
     // Everyone gets 3 to 5 torches to start with

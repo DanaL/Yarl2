@@ -135,7 +135,7 @@ class MsgFactory
     Verb.Close => "closed",
     Verb.Use => "used",
     Verb.Ready => "readied",
-    Verb.Unready => "unequiped",
+    Verb.Unready => "unequipped",
     Verb.BurnsOut => "burnt out",
     Verb.Kill => "killed",
     Verb.Etre => "been",

@@ -42,7 +42,7 @@ class Item : GameObj, IEquatable<Item>
   public static readonly int DEFAULT_Z = 2;
   public ItemType Type { get; set; }
   public char Slot { get; set; }
-  public bool Equiped { get; set; } = false;
+  public bool Equipped { get; set; } = false;
   public ulong ContainedBy { get; set; } = 0;
   public int Value { get; set; }
   int _z = DEFAULT_Z;
@@ -443,9 +443,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (item, inSlot.Count);
   }
 
-  public bool ShieldEquiped()
+  public bool ShieldEquipped()
   {
-    foreach (var item in Items().Where(i => i.Type == ItemType.Armour && i.Equiped))
+    foreach (var item in Items().Where(i => i.Type == ItemType.Armour && i.Equipped))
     {
       if (item.Traits.OfType<ArmourTrait>().FirstOrDefault() is ArmourTrait at && at.Part == ArmourParts.Shield)
         return true;
@@ -458,7 +458,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     foreach (var item in Items())
     {
-      if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equiped)
+      if ((item.Type == ItemType.Weapon || item.Type == ItemType.Tool) && item.Equipped)
         return item;
     }
 
@@ -467,7 +467,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public Item? ReadiedBow() 
   {
-    foreach (var bow in Items().Where(i => i.Type == ItemType.Bow && i.Equiped))
+    foreach (var bow in Items().Where(i => i.Type == ItemType.Bow && i.Equipped))
       return bow;
 
     return null;
@@ -576,9 +576,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
   {    
-    bool EquipedTwoHandedWeapon() => ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
+    bool EquippedTwoHandedWeapon() => ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
 
-    // I suppose at some point I'll have items that can't be equiped
+    // I suppose at some point I'll have items that can't be equipped
     // (or like it doesn't make sense for them to be) and I'll have
     // to check for that
     Item? item = null;
@@ -593,33 +593,33 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     if (item is not null)
     {
-      if (item.Equiped)
+      if (item.Equipped)
       {
         if (item.HasTrait<CursedTrait>())
         {
           return (EquipingResult.Cursed, ArmourParts.None);
         }
         
-        item.Equiped = false;
-        return (EquipingResult.Unequiped, ArmourParts.None);
+        item.Equipped = false;
+        return (EquipingResult.Unequipped, ArmourParts.None);
       }
 
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
-        if (item.HasTrait<TwoHandedTrait>() && ShieldEquiped())
+        if (item.HasTrait<TwoHandedTrait>() && ShieldEquipped())
         {
           return (EquipingResult.ShieldConflict, ArmourParts.Shield);
         }
 
-        // If there is a weapon already equiped, unequip it
+        // If there is a weapon already equipped, unequip it
         foreach (Item other in Items())
         {
-          if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equiped)
-            other.Equiped = false;
+          if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equipped)
+            other.Equipped = false;
         }
 
-        item.Equiped = true;
-        return (EquipingResult.Equiped, ArmourParts.Shirt);
+        item.Equipped = true;
+        return (EquipingResult.Equipped, ArmourParts.Shirt);
       }
       else if (item.Type == ItemType.Armour)
       {
@@ -631,7 +631,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
 
         // check to see if there's another piece in that slot
-        foreach (var other in Items().Where(a => a.Type == ItemType.Armour && a.Equiped))
+        foreach (var other in Items().Where(a => a.Type == ItemType.Armour && a.Equipped))
         {
           foreach (var t in other.Traits.OfType<ArmourTrait>())
           {
@@ -640,47 +640,47 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           }
         }
 
-        if (part is ArmourParts.Shield && EquipedTwoHandedWeapon())
+        if (part is ArmourParts.Shield && EquippedTwoHandedWeapon())
         {
           return (EquipingResult.TwoHandedConflict, part);
         }
 
-        item.Equiped = !item.Equiped;
+        item.Equipped = !item.Equipped;
 
-        return (EquipingResult.Equiped, ArmourParts.Shirt);
+        return (EquipingResult.Equipped, ArmourParts.Shirt);
       }
       else if (item.Type == ItemType.Ring)
       {
-        if (item.Equiped)
+        if (item.Equipped)
         {
-          item.Equiped = false;
+          item.Equipped = false;
         }
         else
         {
-          int ringCount = Items().Where(i => i.Type == ItemType.Ring && i.Equiped).Count();
+          int ringCount = Items().Where(i => i.Type == ItemType.Ring && i.Equipped).Count();
           if (ringCount == 2)
             return (EquipingResult.TooManyRings, ArmourParts.None);
           
-          item.Equiped = true;
+          item.Equipped = true;
           
-          return (EquipingResult.Equiped, ArmourParts.None);
+          return (EquipingResult.Equipped, ArmourParts.None);
         }
       }
       else if (item.Type == ItemType.Talisman)
       {
-        if (item.Equiped)
+        if (item.Equipped)
         {
-          item.Equiped = false;
+          item.Equipped = false;
         }
         else
         {
-          int talismanCount = Items().Where(i => i.Type == ItemType.Talisman && i.Equiped).Count();
+          int talismanCount = Items().Where(i => i.Type == ItemType.Talisman && i.Equipped).Count();
           if (talismanCount == 2)
             return (EquipingResult.TooManyTalismans, ArmourParts.None);
           
-          item.Equiped = true;
+          item.Equipped = true;
           
-          return (EquipingResult.Equiped, ArmourParts.None);
+          return (EquipingResult.Equipped, ArmourParts.None);
         }
       }
     }
@@ -752,7 +752,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         Console.WriteLine(ex.Message);
       }
 
-      if (item.Equiped)
+      if (item.Equipped)
       {
         if (item.HasTrait<CursedTrait>())
           desc += " *cursed";
@@ -763,7 +763,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
             desc += " (in hands)";
           else if (!item.HasTrait<VersatileTrait>())
             desc += " (in hand)";
-          else if (ShieldEquiped())
+          else if (ShieldEquipped())
             desc += " (in hand)";
           else
             desc += " (in hands)";
@@ -771,11 +771,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         else if (item.Type == ItemType.Armour)
           desc += " (worn)";
         else if (item.Type == ItemType.Bow)
-          desc += " (equiped)";
+          desc += " (equipped)";
         else if (item.Type == ItemType.Ring)
           desc += " (wearing)";
         else if (item.Type == ItemType.Talisman)
-          desc += " (equiped)";
+          desc += " (equipped)";
       }
       lines.Add($"{s}) {desc}");
     }
@@ -833,8 +833,8 @@ class InventoryOptions
 
 enum EquipingResult
 {
-  Equiped,
-  Unequiped,
+  Equipped,
+  Unequipped,
   Conflict,
   ShieldConflict,
   TwoHandedConflict,

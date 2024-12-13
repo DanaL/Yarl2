@@ -33,7 +33,7 @@ E   Enter a dungeon, which are indicated on the world map
 f   Fire a bow. You can select a target via the movement
     keys or by tabbing through visible targets. The game  
     will remember the last monster you targetted. If you 
-    have a bow equiped, it will be automatically selected. 
+    have a bow equipped, it will be automatically selected. 
     Note that you have unlimited ammunition but may also 
     find magical or special consumable arrows.
 F   Bash open a locked or closed door.

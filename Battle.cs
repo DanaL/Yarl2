@@ -171,7 +171,7 @@ class Battle
         
         List<Item> metalItems = target.Inventory
                                       .Items()
-                                      .Where(i => i.CanCorrode() && i.Equiped).ToList();
+                                      .Where(i => i.CanCorrode() && i.Equipped).ToList();
 
         if (metalItems.Count > 0)
         {
@@ -528,9 +528,9 @@ class Battle
       if (weapon is not null && weapon.HasTrait<CleaveTrait>())
       {
         // A versatile weapon only cleaves if it is being wielded with two hands
-        // (ie., the attacker doesn't have a shield equiped)
+        // (ie., the attacker doesn't have a shield equipped)
         bool versatile = weapon.HasTrait<VersatileTrait>();
-        if (!(versatile && attacker.Inventory.ShieldEquiped()))
+        if (!(versatile && attacker.Inventory.ShieldEquipped()))
         {
           ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
         }        

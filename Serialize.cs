@@ -714,7 +714,7 @@ class GameObjDBSave
       Glyph = Glyph.TextToGlyph(fields[3]),
       Loc = Loc.FromStr(fields[4]),
       Slot = fields[6][0],
-      Equiped = bool.Parse(fields[7].ToLower()),
+      Equipped = bool.Parse(fields[7].ToLower()),
       ContainedBy = ulong.Parse(fields[8]),
       Value = int.Parse(fields[9]),
     };
@@ -820,7 +820,7 @@ class GameObjDBSave
         sb.Append('|');
         sb.Append(item.Slot);
         sb.Append('|');
-        sb.Append(item.Equiped);
+        sb.Append(item.Equipped);
         sb.Append('|');
         sb.Append(item.ContainedBy);
         sb.Append('|');

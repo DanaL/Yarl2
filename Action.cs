@@ -1510,13 +1510,13 @@ class InduceNudityAction : Action
       if (GameState.ObjDb.Occupant(_target) is Actor victim)
       {
         var clothes = victim.Inventory.Items()
-                                      .Where(i => i.Type == ItemType.Armour && i.Equiped).ToList();
+                                      .Where(i => i.Type == ItemType.Armour && i.Equipped).ToList();
         if (clothes.Count == 0)
           return result;
 
         Item item = clothes[GameState.Rng.Next(clothes.Count)];
         victim.Inventory.RemoveByID(item.ID);
-        item.Equiped = false;
+        item.Equipped = false;
         GameState.ItemDropped(item, victim.Loc);
         s = $"{item.FullName.Possessive(victim).Capitalize()} falls off!";
 
@@ -1956,7 +1956,7 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     foreach (var droppedItem in droppedItems)
     {
       GameState.ItemDropped(droppedItem, Actor.Loc);
-      droppedItem.Equiped = false;
+      droppedItem.Equipped = false;
     }
 
     string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, GameState);
@@ -1993,7 +1993,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
     var landingPt = FinalLandingSpot(pts.Last());
     GameState.ItemDropped(ammo, landingPt);
-    ammo.Equiped = false;
+    ammo.Equipped = false;
     
     var tile = GameState.TileAt(landingPt);
     if (tile.Type == TileType.Chasm)
@@ -2098,7 +2098,7 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
       result.Messages.Add("That doesn't make sense");
       return result;
     }
-    else if (item.Type == ItemType.Armour && item.Equiped)
+    else if (item.Type == ItemType.Armour && item.Equipped)
     {
       var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
       result.Messages.Add("You're wearing that!");
@@ -2151,11 +2151,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item is null)
       throw new Exception("Hmm this shouldn't happen!");
 
-    if (item.Equiped && item.Type == ItemType.Armour)
+    if (item.Equipped && item.Type == ItemType.Armour)
     {
       return new ActionResult() { Complete = false, Messages = ["You cannot drop something you're wearing."] };
     }
-    if (item.Equiped && item.Type == ItemType.Ring)
+    if (item.Equipped && item.Type == ItemType.Ring)
     {
       return new ActionResult() { Complete = false, Messages = ["You'll need to take it off first."] };
     }
@@ -2181,7 +2181,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       Actor.Inventory.Remove(Choice, 1);
       GameState.ItemDropped(item, Actor.Loc);
-      item.Equiped = false;
+      item.Equipped = false;
 
       return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }
@@ -2256,7 +2256,7 @@ class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
+class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
   
@@ -2291,7 +2291,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
     string alert;
     switch (equipResult)
     {
-      case EquipingResult.Equiped:
+      case EquipingResult.Equipped:
         alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
 
@@ -2305,7 +2305,7 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
         alert = "You cannot remove it! It seems to be cursed!";
         result = new ActionResult() { Messages = [alert], Complete = true, EnergyCost = 1.0 };
         break;
-      case EquipingResult.Unequiped:
+      case EquipingResult.Unequipped:
         alert = MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, GameState);
         result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
         break;
@@ -2340,11 +2340,11 @@ class ToggleEquipedAction(GameState gs, Actor actor) : Action(gs, actor)
       if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? value))
         Item.IDInfo[item.Name] = value with { Known = true };
 
-      if (equipResult == EquipingResult.Equiped)
+      if (equipResult == EquipingResult.Equipped)
       {
         result.Messages.AddRange(grants.Grant(Actor, GameState, item));
       }
-      else if (equipResult == EquipingResult.Unequiped)
+      else if (equipResult == EquipingResult.Unequipped)
       {
         grants.Remove(Actor, GameState, item);
       }

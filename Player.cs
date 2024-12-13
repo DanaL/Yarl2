@@ -63,7 +63,7 @@ class Player : Actor, IPerformer, IGameEventListener
       foreach (var slot in Inventory.UsedSlots())
       {
         var (item, _) = Inventory.ItemAt(slot);
-        if (item is not null && item.Equiped)
+        if (item is not null && item.Equipped)
         {
           armour += item.Traits.OfType<ArmourTrait>()
                                .Select(t => t.ArmourMod + t.Bonus)
@@ -156,7 +156,7 @@ class Player : Actor, IPerformer, IGameEventListener
         }
         else if (trait is VersatileTrait versatile)
         {
-          DamageTrait dt = Inventory.ShieldEquiped() ? versatile.OneHanded : versatile.TwoHanded;
+          DamageTrait dt = Inventory.ShieldEquipped() ? versatile.OneHanded : versatile.TwoHanded;
           dmgs.Add(new Damage(dt.DamageDie, dt.NumOfDie, dt.DamageType));
         }
       }
@@ -689,7 +689,7 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'f')
       {
-        // If the player has an equiped bow, automatically select that, otherwise
+        // If the player has an equipped bow, automatically select that, otherwise
         // have them pick a bow (and then equip it)
         if (Inventory.ReadiedBow() is Item bow)
         {
@@ -721,7 +721,7 @@ class Player : Actor, IPerformer, IGameEventListener
       else if (ch == 'e')
       {
         _inputController = new Inventorier([.. Inventory.UsedSlots()]);
-        _deferred = new ToggleEquipedAction(gameState, this);
+        _deferred = new ToggleEquippedAction(gameState, this);
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?" });
       }
       else if (ch == 'c')

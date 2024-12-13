@@ -90,7 +90,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
   }  
 }
 
-class FullyEquiped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
+class FullyEquipped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
 {
   GameState GS { get; set; } = gs;
   UserInterface UI { get; set; } = ui;
@@ -101,13 +101,13 @@ class FullyEquiped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
   {
     if (GS.Player.Loc == Loc)
     {
-      HashSet<ulong> equipedItems = GS.Player.Inventory.Items()
-                                    .Where(i => i.Equiped)
-                                    .Select(i => i.ID)
-                                    .ToHashSet();
+      HashSet<ulong> equippedItems = GS.Player.Inventory.Items()
+                                       .Where(i => i.Equipped)
+                                       .Select(i => i.ID)
+                                       .ToHashSet();
       foreach (var id in IDs)
       {
-        if (!equipedItems.Contains(id))
+        if (!equippedItems.Contains(id))
           return true;
       }
     }
@@ -117,7 +117,7 @@ class FullyEquiped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
 
   public override void Fire()
   {
-    string txt = @"Make sure both your armour and weapon are equiped before venturing further!";
+    string txt = @"Make sure both your armour and weapon are equipped before venturing further!";
     UI.SetPopup(new Popup(txt, "", -1, -1));
   }
 }

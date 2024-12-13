@@ -93,7 +93,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     // If the actor is wearing a shirt that's made of non-mithril metal, it will add
     // to the noisiness. (Only shirts because I feel like a metal helmet wouldn't 
     // be especially loud)
-    var armour = Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equiped);
+    var armour = Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equipped);
     foreach (var piece in armour)
     {      
       ArmourTrait? armourTrait = piece.Traits.OfType<ArmourTrait>().FirstOrDefault();

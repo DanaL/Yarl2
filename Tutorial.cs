@@ -161,7 +161,7 @@ class Tutorial(UserInterface ui)
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
 
-    FullyEquiped fe = new(gameState, UI, new Loc(1, 0, 5, 10));
+    FullyEquipped fe = new(gameState, UI, new Loc(1, 0, 5, 10));
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 1, 8)))    
       fe.IDs.Add(item.ID);
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 2, 8)))
@@ -181,7 +181,7 @@ class Tutorial(UserInterface ui)
 
     txt = @"Oh! There's a monster blocking your path! This is a good time to learn about combat in Delve.
 
-    To attack an enemy, simply attempt to walk onto its square (aka: bump-to-attack). You will make a melee attack with your equiped weapon and then the monster will get a turn.
+    To attack an enemy, simply attempt to walk onto its square (aka: bump-to-attack). You will make a melee attack with your equipped weapon and then the monster will get a turn.
 
     It's not necessarily wise to attack every monster you see in the game, but sometimes you may not be able to avoid fighting.
     ";

@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata;
 using System.Text.Json;
 
 using Yarl2;
@@ -47,6 +48,7 @@ try
         }
         catch (GameNotLoadedException)
         {
+          Console.WriteLine("flag?");
           state = RunningState.Pregame;
         }
         break;
@@ -74,7 +76,7 @@ try
 
     if (gameState is not null)
       state = display.GameLoop(gameState);
-    
+
     display.CheatSheetMode = CheatSheetMode.Messages;
     display.MessageHistory = [];
   }
@@ -82,6 +84,18 @@ try
 }
 catch (GameQuitException)
 {
+}
+catch (Exception ex)
+{
+  List<string> lines = [];
+  lines.Add("");
+  lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
+  lines.Add(" The execption throw was: ");
+  lines.Add(" " + ex.Message);
+  lines.Add("");
+  lines.Add(" Delve will now need to exit.");
+  display.WriteLongMessage(lines);
+  display.BlockForInput();
 }
 
 namespace Yarl2
