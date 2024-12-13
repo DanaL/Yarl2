@@ -22,7 +22,7 @@ class PlayerCreator
       " (1) Human                           (2) Orc",
       "",
       " Your standard homo sapien. Thanks   Naturally strong, orcs receive ",
-      " to progressive tax policy in this   bonus hit points. Due do participating",
+      " to progressive tax policy in this   bonus hit points. Due to participating",
       " world of fantastical beings,        in orc hockey as a child, you start",
       " humans begin with more gold.        with the ability to Rage.",
       "                              ",
