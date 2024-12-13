@@ -1210,22 +1210,24 @@ abstract class UserInterface
         "       ",
            "         __________________",
           @"        /                  \",
-          @"       /        RIP         \",
-          @"      /                      \",
-          @"     /        killed by       \",
-           "    |                          |",
-           "    |                          |",
-           "    |                          |",
-           "    |                          |",
-           "    |                          |",
-           "    |                          |",
-           "    |                          |",
-           "    *       *         *        |*   *",
+          @"       /        RIP         \   ___",
+          @"      /                      \ /   \",
+          @"     /                        \|    |       __",
+          @"    |       killed by:         |___|       /  \",
+          @"    |                          |         |     |",
+          @"    |                          |         |_____|",   
+          @"    |                          |      ___",
+          @"    |                          |     /   \",
+          @"    |                          |    |     |",
+          @"    |                          |    |     |",
+          @"    *       *         *        |*  _*__)__|_",
           @"____)/\_____(\__/____\(/_______\)/_|(/____"   
         ];
 
-    text[4] = $@"      /{gameState.Player.Name.PadLeft((20 + gameState.Player.Name.Length) / 2).PadRight(22)}\";
-    text[6] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|";
+    string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
+    text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
+    text[7] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|          |    |";
+    text[8] = $@"    |       on level: {depth}       |          |____|";
     ClosePopup();
     SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
     ClearSqsOnScreen();
