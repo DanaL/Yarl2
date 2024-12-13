@@ -675,6 +675,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           ItemDropped(ItemFactory.Get(itemName, ObjDb), victim.Loc);
         }
       }
+      else if (t is GoodMagicLootTrait)
+      {
+        var loot = Treasure.GoodMagicItem(Rng, ObjDb);
+        ItemDropped(loot, victim.Loc);
+      }
       else if (t is CoinsLootTrait coins)
       {
         var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);

@@ -1429,6 +1429,11 @@ class LameTrait : TemporaryTrait
   }
 }
 
+class GoodMagicLootTrait : Trait
+{
+  public override string AsText() => "GoodMagicLoot";
+}
+
 class ExhaustedTrait : TemporaryTrait
 {  
   public override string AsText() => $"Exhausted#{OwnerID}#{ExpiresOn}";
@@ -2527,6 +2532,7 @@ class TraitFactory
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
       string[] grantedTraits = pieces[1].Split(';').Select(s => s.Replace('&', '#')).ToArray();
       return new GrantsTrait() { TraitsGranted = grantedTraits };

@@ -36,7 +36,7 @@ class Treasure
       ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK,
       ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL,
       ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD,
-      ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL,
+      ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK,
@@ -45,6 +45,33 @@ class Treasure
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM
   ];
+
+  public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
+  {
+    int roll = rng.Next(20);
+    return roll switch
+    {
+      0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
+      1 => ItemFactory.Get(ItemNames.WAND_FROST, objDb),
+      2 => ItemFactory.Get(ItemNames.WAND_SWAP, objDb),
+      3 => ItemFactory.Get(ItemNames.WAND_MAGIC_MISSILES, objDb),
+      4 => ItemFactory.Get(ItemNames.SMOULDERING_CHARM, objDb),
+      5 => ItemFactory.Get(ItemNames.TROLL_BROOCH, objDb),
+      6 => ItemFactory.Get(ItemNames.HILL_GIANT_ESSENCE, objDb),
+      7 => ItemFactory.Get(ItemNames.FROST_GIANT_ESSENCE, objDb),
+      8 => ItemFactory.Get(ItemNames.FIRE_GIANT_ESSENCE, objDb),
+      9 => ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb),
+      10 => ItemFactory.Get(ItemNames.ANTISNAIL_SANDALS, objDb),
+      11 => ItemFactory.Get(ItemNames.BOOTS_OF_WATER_WALKING, objDb),
+      12 => ItemFactory.Get(ItemNames.GASTON_BADGE, objDb),
+      13 => ItemFactory.Get(ItemNames.LESSER_BURLY_CHARM, objDb),
+      14 => ItemFactory.Get(ItemNames.LESSER_GRACE_CHARM, objDb),
+      15 => ItemFactory.Get(ItemNames.LESSER_HEALTH_CHARM, objDb),
+      16 => ItemFactory.Get(ItemNames.RING_OF_PROTECTION, objDb),
+      18 => ItemFactory.Get(ItemNames.RING_OF_ADORNMENT, objDb),
+      _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
+    };
+  }
 
   public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
   {
