@@ -797,7 +797,7 @@ abstract class UserInterface
     }
 
     var action = performer.TakeTurn(gs);
-
+    
     if (action is NullAction)
     {
       // Player is idling

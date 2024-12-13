@@ -964,7 +964,7 @@ class MainDungeonBuilder : DungeonBuilder
       {
         int roomId = rng.Next(rooms.Count);
         var map = levels[level];
-        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms[roomId], objDb);
+        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms[roomId], objDb, factDb);
         rooms.RemoveAt(roomId);
       }
 

@@ -2505,7 +2505,8 @@ class TraitFactory
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FearsomeBellow", (pieces, gameObj) => new FearsomeBellowTrait()
       {
-        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3])
+        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), 
+        Cooldown = ulong.Parse(pieces[3]), Name=pieces[0]
       }
     },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
@@ -2515,7 +2516,8 @@ class TraitFactory
         DmgDie = int.Parse(pieces[1]),
         DmgDice = int.Parse(pieces[2]),
         Range = int.Parse(pieces[3]),
-        Cooldown = ulong.Parse(pieces[4])
+        Cooldown = ulong.Parse(pieces[4]),
+        Name=pieces[0]
       }
     },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
@@ -2694,7 +2696,7 @@ class TraitFactory
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
-    { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]) }},
+    { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]), Name=pieces[0] }},
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },

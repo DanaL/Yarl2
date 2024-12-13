@@ -694,26 +694,38 @@ class Rooms
     }
   }
 
-  public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
     NameGenerator ng = new(rng, "data/names.txt");
-   
+        
     int numOfGraves = room.Count / 4;
     for (int j = 0; j < numOfGraves; j++)
     {
       var (r, c) = room[rng.Next(room.Count)];
       int roll = rng.Next(10);
       string message;
+      string name;
+
+      if (factDb.FactCheck("KylieGrave") is not SimpleFact && rng.Next(20) == 0)
+      {
+        name = "Kylie";
+        factDb.Add(new SimpleFact() { Name = "KylieGrave", Value = "KylieGrave" });
+      }
+      else
+      {
+        name = ng.GenerateName(rng.Next(6, 11)).Capitalize();
+      }
+
       if (roll == 0)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, claimed by {epitaph}.";
+        message = $"{name}, claimed by {epitaph}.";
       else if (roll == 1)
-        message = $"Here lies {ng.GenerateName(rng.Next(6, 11)).Capitalize()}, missed except not by that troll.";
+        message = $"Here lies {name}, missed except not by that troll.";
       else if (roll == 2)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, mourned by few.";
+        message = $"{name}, mourned by few.";
       else if (roll == 3)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}, beloved and betrayed.";
+        message = $"{name}, beloved and betrayed.";
       else if (roll == 4)
-        message = $"{ng.GenerateName(rng.Next(6, 11)).Capitalize()}: My love for you shall live forever. You, however, did not.";
+        message = $"{name}: My love for you shall live forever. You, however, did not.";
       else
         message = "A grave too worn to be read.";
 

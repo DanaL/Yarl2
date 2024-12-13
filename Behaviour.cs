@@ -426,9 +426,22 @@ class MonsterBehaviour : IBehaviour
 
     return escapeAction;
   }
-
+  
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
+    bool PassiveAvailable(ActionTrait action)
+    {
+      if (action.ActionType != ActionType.Passive || !action.Available(actor, gs))
+        return false;
+
+      if (!_lastUse.TryGetValue(action.Name, out var last))
+        return true;
+      else if (last + action.Cooldown <= gs.Turn)
+        return true;
+
+      return false;
+    }
+
     if (actor.HasActiveTrait<ParalyzedTrait>())
       return new PassAction();
     if (actor.HasTrait<SleepingTrait>())
@@ -439,8 +452,8 @@ class MonsterBehaviour : IBehaviour
       case Mob.INACTIVE:
         return new PassAction();
       case Mob.INDIFFERENT:
-        var passive = actor.Actions.Where(a => a.ActionType == ActionType.Passive && a.Available(actor, gs))
-                                   .ToList();
+        var passive = actor.Actions.Where(a => PassiveAvailable(a)).ToList();
+
         if (passive.Count > 0)
         {
           return FromTrait(actor, passive[gs.Rng.Next(passive.Count)], gs);
