@@ -871,7 +871,7 @@ class MapUtils
 
 class GameQuitException : Exception { }
 class GameNotLoadedException : Exception { }
-class PlayerKilledException : Exception { }
+class PlayerKilledException(string message) : Exception(message) { }
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }

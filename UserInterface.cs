@@ -298,15 +298,6 @@ abstract class UserInterface
     while (e.Type == GameEventType.NoEvent);
   }
 
-  public void KillScreen(string message, GameState gs)
-  {
-    SetPopup(new Popup(message, "", -1, -1, message.Length));
-    SetSqsOnScreen(gs);
-    UpdateDisplay(gs);
-    BlockForInput();
-    ClearLongMessage();
-  }
-
   public void ClosePopup()
   {
     _popup = null;
@@ -818,7 +809,7 @@ abstract class UserInterface
       // It feels maybe like overkill to use an exception here?
       if (InTutorial)
         // this returns us to the title screen instead of exiting the program
-        throw new PlayerKilledException();
+        throw new PlayerKilledException("");
       else
         throw new GameQuitException();
     }
@@ -1212,6 +1203,45 @@ abstract class UserInterface
     Blit();
   }
 
+  void DrawGravestone(GameState gameState, string message)
+  {
+    string[] text =
+      [
+        "       ",
+           "         __________________",
+          @"        /                  \",
+          @"       /        RIP         \",
+          @"      /                      \",
+          @"     /        killed by       \",
+           "    |                          |",
+           "    |                          |",
+           "    |                          |",
+           "    |                          |",
+           "    |                          |",
+           "    |                          |",
+           "    |                          |",
+           "    *       *         *        |*   *",
+          @"____)/\_____(\__/____\(/_______\)/_|(/____"   
+        ];
+
+    text[4] = $@"      /{gameState.Player.Name.PadLeft((20 + gameState.Player.Name.Length) / 2).PadRight(22)}\";
+    text[6] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|";
+    ClosePopup();
+    SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
+    ClearSqsOnScreen();
+    for (int r = 0; r < text.Length; r++)
+    {
+      string row = text[r];
+      for (int c = 0; c < row.Length; c++)
+      {
+        Sqr s = new(Colours.WHITE, Colours.BLACK, row[c]);
+        SqsOnScreen[r + 1, c + 1] = s;
+      }
+    }
+    UpdateDisplay(gameState);
+    BlockForInput();
+  }
+
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
@@ -1250,9 +1280,13 @@ abstract class UserInterface
       {
         return RunningState.Quitting;
       }
-      catch (PlayerKilledException)
+      catch (PlayerKilledException pke)
       {
         MessageHistory = [];
+        if (!InTutorial)
+        {
+          DrawGravestone(gameState, pke.Message);
+        }
         return RunningState.GameOver;
       }
       catch (VictoryException) 
