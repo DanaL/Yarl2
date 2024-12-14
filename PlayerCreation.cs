@@ -61,6 +61,8 @@ class PlayerCreator
       " and tough.                          frugality, when you read scrolls there's",
       "                                     a small chance they won't be consumed.",
       "",
+      "                                     (not recommended in Delve 0.2.0)",
+      "",
       " (3) Skullduggery                    ",
       "",
       " Most of your time in school was     ",
