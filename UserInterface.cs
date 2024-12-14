@@ -1261,6 +1261,7 @@ abstract class UserInterface
     text[7] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|          |    |";
     text[8] = $@"    |       on level: {depth}       |          |____|";
     ClosePopup();
+    CheatSheetMode = CheatSheetMode.Messages;
     SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
     ClearSqsOnScreen();
     for (int r = 0; r < text.Length; r++)
@@ -1315,12 +1316,12 @@ abstract class UserInterface
         return RunningState.Quitting;
       }
       catch (PlayerKilledException pke)
-      {
-        MessageHistory = [];
+      {        
         if (!InTutorial)
         {
           DrawGravestone(gameState, pke.Message);
         }
+        MessageHistory = [];
         return RunningState.GameOver;
       }
       catch (VictoryException) 
