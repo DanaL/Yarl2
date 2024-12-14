@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text.Json;
+using System.Runtime.InteropServices;
 
 using Yarl2;
 
@@ -141,8 +142,8 @@ namespace Yarl2
 
       Options options = new()
       {
-        Display = "Bearlib",
-        FontSize = 14,
+        Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "SDL",
+        FontSize = 20,
         BumpToOpen = true,
         HighlightPlayer = false
       };
