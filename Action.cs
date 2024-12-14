@@ -361,7 +361,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
           result.Messages.Add(dmgMsg);
         if (hpLeft < 1)
         {
-          GameState.ActorKilled(victim, "a fireball", result, null);
+          GameState.ActorKilled(victim, "fiery breath", result, null);
         }        
       }
     }
