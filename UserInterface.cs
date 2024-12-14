@@ -80,12 +80,17 @@ abstract class UserInterface
   public UserInterface(Options opts)
   {
     _options = opts;
+    SetOptions(opts);
     PlayerScreenRow = ViewHeight / 2;
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
     ZLayer = new Sqr[ViewHeight, ViewWidth];
     ClearZLayer();
+  }
 
+  public void SetOptions(Options opts)
+  {
+    _options = opts;
     if (opts.HighlightPlayer)
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, Colours.HILITE);
     else

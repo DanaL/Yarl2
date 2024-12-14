@@ -583,6 +583,7 @@ class OptionsScreen : Inputer
         GS.Options.BumpToOpen = !GS.Options.BumpToOpen;
       else if (row == 1)
         GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
+      GS.UIRef().SetOptions(GS.Options);
     }
 
     WritePopup();
