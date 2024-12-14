@@ -828,6 +828,10 @@ abstract class UserInterface
       {
         Serialize.WriteSaveGame(gs, this);
         success = true;
+
+        WriteLongMessage([" Be seeing you..."]);
+        UpdateDisplay(gs);
+        BlockForInput();
       }
       catch (Exception ex)
       {
