@@ -252,6 +252,53 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
   }
 }
 
+class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action(gs, actor)
+{
+  Loc Target { get; set; } = target;
+  int Range { get; set; } = range;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "spew")} a gout of alcohol!";
+      GameState!.UIRef().AlertPlayer(s);
+    }
+
+    // Actor targets a specific loc, but the cone of the breath weapon extends
+    // its full range.
+    var (fullR, fullC) = Util.ExtendLine(Actor.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col, Range);
+    Loc actualTarget = Target with { Row = fullR, Col = fullC };
+    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb);
+    affected.Insert(0, Actor.Loc);
+    var explosion = new ExplosionAnimation(GameState!)
+    {
+      MainColour = Colours.LIGHT_BROWN,
+      AltColour1 = Colours.BROWN,
+      AltColour2 = Colours.YELLOW_ORANGE,
+      Highlight = Colours.WHITE,
+      Centre = Actor.Loc,
+      Sqs = [ ..affected ],
+      Ch = '#'
+    };
+    GameState.UIRef().PlayAnimation(explosion, GameState);
+
+    affected.Remove(Actor.Loc);
+
+    foreach (var pt in affected)
+    {
+      if (GameState.ObjDb.Occupant(pt) is Actor victim)
+        result.Messages.AddRange(Battle.HandleTipsy(victim, GameState));
+    }
+
+    return result;
+  }
+}
+
 // I'm sure as I add more breath weapons I'll make this more generic, or extract
 // a subclass
 class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmgDie, int dmgDice) : Action(gs, actor)
@@ -1800,34 +1847,7 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
     else if (canSeeLoc)
       result.Messages.Add($"{Actor.FullName.Capitalize()} drinks some booze!");
 
-    bool alreadyTipsy = Actor.HasTrait<TipsyTrait>();
-    int dc = alreadyTipsy ? 15 : 12;
-    if (Actor.AbilityCheck(Attribute.Constitution, dc, GameState.Rng))
-      return result;
-
-    if (Actor.Traits.OfType<TipsyTrait>().FirstOrDefault() is TipsyTrait tipsy)
-    {
-      tipsy.ExpiresOn += (ulong) GameState.Rng.Next(50, 76);
-      if (canSeeLoc)
-        result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "get")} tipsier.");
-    }
-    else
-    {
-      tipsy = new TipsyTrait()
-      {
-        ExpiresOn = GameState.Turn + (ulong) GameState.Rng.Next(50, 76),
-        OwnerID = Actor.ID
-      };
-      Actor.Traits.Add(tipsy);
-      GameState.RegisterForEvent(GameEventType.EndOfRound, tipsy, Actor.ID);
-
-      result.Messages.Add($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "become")} tipsy!");
-    }
-
-    if (Actor.Traits.OfType<FrightenedTrait>().FirstOrDefault() is FrightenedTrait frightened)
-    {
-      frightened.Remove(Actor, GameState);
-    }
+    result.Messages.AddRange(Battle.HandleTipsy(Actor, GameState));
 
     return result;
   }

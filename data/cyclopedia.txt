@@ -238,3 +238,6 @@ Definitely a baddie. You don't need to feel any guilty about attacking them.
 #
 rot grub
 A worm with a toothy maw ready to burrow into your flesh.
+#
+rum gremlin
+Irritating imps who often lurk in the cellars of inns and taverns. They spew alcoholic breath, which is good or bad depending on your perspective.

@@ -709,6 +709,42 @@ class Battle
     }
   }
 
+  public static List<string> HandleTipsy(Actor imbiber, GameState gs)
+  {
+    List<string> messages = [];
+
+    bool alreadyTipsy = imbiber.HasTrait<TipsyTrait>();
+    int dc = alreadyTipsy ? 15 : 12;
+    if (imbiber.AbilityCheck(Attribute.Constitution, dc, gs.Rng))
+      return messages;
+
+    if (imbiber.Traits.OfType<TipsyTrait>().FirstOrDefault() is TipsyTrait tipsy)
+    {
+      tipsy.ExpiresOn += (ulong) gs.Rng.Next(50, 76);
+      if (gs!.LastPlayerFoV.Contains(imbiber!.Loc))
+        messages.Add($"{imbiber.FullName.Capitalize()} {Grammar.Conjugate(imbiber, "get")} tipsier.");
+    }
+    else
+    {
+      tipsy = new TipsyTrait()
+      {
+        ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(50, 76),
+        OwnerID = imbiber.ID
+      };
+      imbiber.Traits.Add(tipsy);
+      gs.RegisterForEvent(GameEventType.EndOfRound, tipsy, imbiber.ID);
+
+      messages.Add($"{imbiber.FullName.Capitalize()} {Grammar.Conjugate(imbiber, "become")} tipsy!");
+    }
+
+    if (imbiber.Traits.OfType<FrightenedTrait>().FirstOrDefault() is FrightenedTrait frightened)
+    {
+      frightened.Remove(imbiber, gs);
+    }
+
+    return messages;
+  }
+
   // At the moment I won't have the player attack villagers because I don't 
   // want to make decisions about consequences, etc at the moment.
   public static bool PlayerWillAttack(Actor target) => !target.HasTrait<VillagerTrait>();

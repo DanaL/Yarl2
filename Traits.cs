@@ -618,6 +618,21 @@ class RestingTrait : TemporaryTrait
   }
 }
 
+class RumBreathTrait : ActionTrait
+{
+  public override ActionType ActionType => ActionType.Attack;
+
+  public int DC { get; set; }
+  public int Range { get; set; }
+
+  public override bool Available(Mob mob, GameState gs)
+  {
+    return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
+  }
+
+  public override string AsText() => $"RumBreath#{Range}#{Cooldown}";
+}
+
 class SleepingTrait : Trait
 {
   public override string AsText() => "Sleeping";
@@ -2663,6 +2678,7 @@ class TraitFactory
     { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },
     { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
     { "ResistSlashing", (pieces, gameObj) => new ResistSlashingTrait() },
+    { "RumBreath", (pieces, gameObj) => new RumBreathTrait() { Range=int.Parse(pieces[1]), Cooldown=ulong.Parse(pieces[2]), Name="RumBreath" } },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },

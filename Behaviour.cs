@@ -296,6 +296,11 @@ class MonsterBehaviour : IBehaviour
       _lastUse[act.Name] = gs.Turn;
       return new FireBreathAction(gs, mob, gs.Player.Loc, fireBreath.Range, fireBreath.DmgDie, fireBreath.DmgDice);
     }
+    else if (act is RumBreathTrait rumBreath)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      return new RumBreathAction(gs, mob, gs.Player.Loc, rumBreath.Range);
+    }
     else if (act is SummonTrait summon)
     {
       _lastUse[act.Name] = gs.Turn;
