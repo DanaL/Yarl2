@@ -115,8 +115,13 @@ class SDLUserInterface : UserInterface
 
   public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour)
   {
+    WriteLine(message, lineNum, col, width, textColour, Colours.BLACK);
+  }
+
+  public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour, Colour bgColour)
+  {
     message = message.PadRight(width);
-    var surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(Colours.BLACK));
+    var surface = SDL_ttf.TTF_RenderUNICODE_Shaded(_font, message, ToSDLColour(textColour), ToSDLColour(bgColour));
     var s = (SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL_Surface))!;
 
     var texture = SDL_CreateTextureFromSurface(_renderer, surface);

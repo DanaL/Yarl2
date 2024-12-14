@@ -41,6 +41,7 @@ abstract class UserInterface
 
   public abstract void UpdateDisplay(GameState? gs);
   public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
+  public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour, Colour bgColour);
 
   protected abstract GameEvent PollForEvent();
   protected abstract void WriteSq(int row, int col, Sqr sq);
@@ -62,8 +63,8 @@ abstract class UserInterface
 
   protected List<string> MenuRows { get; set; } = [];
 
-  Popup? _popup = null;
-  Popup? _confirm = null;
+  IPopup? _popup = null;
+  IPopup? _confirm = null;
 
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
@@ -307,7 +308,7 @@ abstract class UserInterface
 
   public void CloseConfirmation() => _confirm = null;
 
-  public void SetPopup(Popup popup, bool fullWidth = false) 
+  public void SetPopup(IPopup popup, bool fullWidth = false) 
   {
     popup.FullWidth = fullWidth;
     _popup = popup;
@@ -365,7 +366,8 @@ abstract class UserInterface
 
     w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
       (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs  "),
-      (Colours.LIGHT_BLUE, "*"), (Colours.LIGHT_GREY, ": message history")];   
+      (Colours.LIGHT_BLUE, "*"), (Colours.LIGHT_GREY, ": message history  "),
+      (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];   
     WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
   } 
 

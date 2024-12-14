@@ -106,7 +106,14 @@ class LineScanner(string line)
   bool IsAtEnd() => Current >= Source.Length;
 }
 
-class Popup
+interface IPopup
+{
+  void Draw(UserInterface ui);
+  bool FullWidth { get; set; }
+  void SetDefaultTextColour(Colour colour);
+}
+
+class Popup : IPopup
 {
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   readonly string Title;
@@ -218,6 +225,59 @@ class Popup
       line = [(DefaultTextColour, "| ")];
       currWidth = 0;
     }
+  }
+
+  public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
+}
+
+class PopupMenu(string title, List<string> menuItems) : IPopup
+{
+  public int SelectedRow { get; set; } = 0;
+  public bool FullWidth { get; set; }
+  Colour DefaultTextColour { get; set; } = Colours.WHITE;
+  string Title { get; set; } = title;
+  List<string> MenuItems { get; set; } = menuItems;
+  
+
+  void IPopup.Draw(UserInterface ui)
+  {
+    int width = MenuItems.Select(i => i.Length).Max() + 4;  
+    int col = (UserInterface.ViewWidth - width) / 2;
+    int row = 2;
+    
+    string border = "+".PadRight(width - 1, '-') + "+";
+
+    if (Title.Length > 0)
+    {
+      int left = int.Max(2, (width - Title.Length) / 2 - 2);
+      string title = "+".PadRight(left, '-') + ' ';
+      title += Title + ' ';
+      title = title.PadRight(width - 1, '-') + "+";
+      ui.WriteLine(title, row++, col, width, DefaultTextColour);
+    }
+    else
+    {
+      ui.WriteLine(border, row++, col, width, DefaultTextColour);
+    }
+
+    for (int i = 0; i < MenuItems.Count; i++)
+    {
+      string item = MenuItems[i];
+      if (i == SelectedRow)
+      {
+        // Mild kludge: HILITE makes the tile transparent, so write a black background
+        // before we draw highlighted line
+        ui.WriteLine($"| {" ".PadRight(width - 4)} |", row, col, width, DefaultTextColour);
+        ui.WriteLine($"{item.PadRight(width - 8)}", row++, col + 2, width - 4, DefaultTextColour, Colours.HILITE);
+      }
+      else
+      {
+        ui.WriteLine($"| {item.PadRight(width - 4)} |", row++, col, width, DefaultTextColour);
+      }
+    }
+    
+
+    ui.WriteLine(border, row, col, width, DefaultTextColour);
   }
 
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;

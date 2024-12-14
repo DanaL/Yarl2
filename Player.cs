@@ -797,6 +797,11 @@ class Player : Actor, IPerformer, IGameEventListener
         _inputController = new HelpScreenInputer(gameState.UIRef());
         _deferred = new NullAction();
       }
+      else if (ch == '=')
+      {
+        _inputController = new OptionsScreen(gameState);
+        _deferred = new NullAction();
+      }
       else if (ch == 'x')
       {
         _inputController = new Examiner(gameState, Loc);

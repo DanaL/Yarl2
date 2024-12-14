@@ -548,6 +548,59 @@ class HelpScreenInputer : Inputer
   }
 }
 
+class OptionsScreen : Inputer
+{
+  readonly GameState GS;
+  int row = 0;
+  const int numOfOptions = 2;
+
+  public OptionsScreen(GameState gs)
+  {
+    GS = gs;
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (ch == 'j')
+    {
+      row = (row + 1 ) % numOfOptions;
+    }
+    else if (ch == 'k')
+    {
+      --row;
+      if (row < 0)
+        row = numOfOptions - 1;
+    }
+    else if (ch == '\n' || ch == '\r')
+    {
+      if (row == 0) 
+        GS.Options.BumpToOpen = !GS.Options.BumpToOpen;
+      else if (row == 1)
+        GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
+    }
+
+    WritePopup();
+  }
+
+  void WritePopup()
+  {
+    string bumpToOpen = GS.Options.BumpToOpen ? "On" : "Off";
+    string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
+    List<string> menuItems = [
+      $"Bump to open doors: {bumpToOpen}",
+      $"Highlight player: {hilitePlayer}"
+    ];
+   
+    GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });
+  }
+}
+
 class WizardCommander : Inputer
 {
   readonly GameState _gs;
