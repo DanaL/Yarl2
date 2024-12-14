@@ -345,6 +345,27 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
       GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
     }
 
+    int total = 0;
+    for (int j = 0; j < 4; j++)
+      total += GameState.Rng.Next(6) + 1;
+    List<(int, DamageType)> dmg = [(total, DamageType.Fire)];
+    foreach (var pt in affected)
+    {
+      GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
+      if (GameState.ObjDb.Occupant(pt) is Actor victim)
+      {
+        result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
+
+        var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        if (dmgMsg != "")
+          result.Messages.Add(dmgMsg);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(victim, "a fireball", result, null);
+        }        
+      }
+    }
+
     return result;
   }
 }
