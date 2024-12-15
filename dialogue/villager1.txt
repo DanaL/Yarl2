@@ -2,7 +2,13 @@
 (cond
   
   ((= MET_PLAYER true) ; pick from a couple different lines to display if we've met the player
-    (say (pick ("How are your adventurers going?" "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!"))))
+    (say 
+      (pick 
+        (
+          "How are your adventurers going?" 
+          "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!"
+          "They say a sketchy, uncertified necromancer entered the dungeon and unleashed something terrible. Dark rituals and all that."
+        ))))
 
   (else 
     (
