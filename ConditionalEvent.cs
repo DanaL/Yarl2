@@ -15,57 +15,50 @@ abstract class ConditionalEvent
 {
   public bool Complete { get; set; }
   
-  public abstract bool CondtionMet();
-  public abstract void Fire();
+  public abstract bool CondtionMet(GameState gs);
+  public abstract void Fire(UserInterface ui);
 }
 
-class CanSeeLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
+class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
 {
-  GameState GS { get; set; } = gs;
-  UserInterface UI { get; set; } = ui;
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet()
+  public override bool CondtionMet(GameState gs)
   {
-    return GS.LastPlayerFoV.Contains(Loc);
+    return gs.LastPlayerFoV.Contains(Loc);
   }
 
-  public override void Fire()
+  public override void Fire(UserInterface ui)
   {
-    UI.SetPopup(new Popup(Msg, "", -2, -1));
-    UI.PauseForResponse = true;
+    ui.SetPopup(new Popup(Msg, "", -2, -1));
+    ui.PauseForResponse = true;
   }
 }
 
-class PlayerAtLoc(GameState gs, UserInterface ui, Loc loc, string msg) : ConditionalEvent
+class PlayerAtLoc(Loc loc, string msg) : ConditionalEvent
 {
-  GameState GS { get; set; } = gs;
-  UserInterface UI { get; set; } = ui;
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet()
+  public override bool CondtionMet(GameState gs)
   {
-    return GS.Player.Loc == Loc;
+    return gs.Player.Loc == Loc;
   }
 
-  public override void Fire()
+  public override void Fire(UserInterface ui)
   {
-    UI.SetPopup(new Popup(Msg, "", -2, -1));
-    UI.PauseForResponse = true;
+    ui.SetPopup(new Popup(Msg, "", -2, -1));
+    ui.PauseForResponse = true;
   }
 }
 
 // Used in the tutorial
-class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
+class PlayerHasLitTorch : ConditionalEvent
 {
-  GameState GS { get; set; } = gs;
-  UserInterface UI { get; set; } = ui;
-
-  public override bool CondtionMet()
+  public override bool CondtionMet(GameState gs)
   {
-    foreach (var item in GS.Player.Inventory.Items())
+    foreach (var item in gs.Player.Inventory.Items())
     {
       if (item.Traits.OfType<TorchTrait>().FirstOrDefault() is TorchTrait torch && torch.Lit)
         return true;
@@ -74,7 +67,7 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
     return false;
   }
 
-  public override void Fire()
+  public override void Fire(UserInterface ui)
   {
     string txt = @"Great! Now you have some light and can see a little more of your surroundings.
 
@@ -87,24 +80,22 @@ class PlayerHasLitTorch(GameState gs, UserInterface ui) : ConditionalEvent
     
     ";
 
-    UI.CheatSheetMode = CheatSheetMode.MvMixed;
-    UI.SetPopup(new Popup(txt, "", -2, -1));
-    UI.PauseForResponse = true;
+    ui.CheatSheetMode = CheatSheetMode.MvMixed;
+    ui.SetPopup(new Popup(txt, "", -2, -1));
+    ui.PauseForResponse = true;
   }  
 }
 
-class FullyEquipped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
+class FullyEquipped(Loc loc) : ConditionalEvent
 {
-  GameState GS { get; set; } = gs;
-  UserInterface UI { get; set; } = ui;
   Loc Loc { get; set; } = loc;
   public HashSet<ulong> IDs { get; set; } = [];
 
-  public override bool CondtionMet()
+  public override bool CondtionMet(GameState gs)
   {
-    if (GS.Player.Loc == Loc)
+    if (gs.Player.Loc == Loc)
     {
-      HashSet<ulong> equippedItems = GS.Player.Inventory.Items()
+      HashSet<ulong> equippedItems = gs.Player.Inventory.Items()
                                        .Where(i => i.Equipped)
                                        .Select(i => i.ID)
                                        .ToHashSet();
@@ -118,10 +109,10 @@ class FullyEquipped(GameState gs, UserInterface ui, Loc loc) : ConditionalEvent
     return false;
   }
 
-  public override void Fire()
+  public override void Fire(UserInterface ui)
   {
     string txt = @"Make sure both your armour and weapon are equipped before venturing further!";
-    UI.SetPopup(new Popup(txt, "", -1, -1));
-    UI.PauseForResponse = true;
+    ui.SetPopup(new Popup(txt, "", -1, -1));
+    ui.PauseForResponse = true;
   }
 }

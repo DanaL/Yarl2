@@ -130,18 +130,18 @@ class Tutorial(UserInterface ui)
     gameState.PrepareFieldOfView();
     gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-    gameState.ObjDb.ConditionalEvents.Add(new PlayerHasLitTorch(gameState, UI));
+    gameState.ObjDb.ConditionalEvents.Add(new PlayerHasLitTorch());
 
     string txt = @"This is a short sword, handy for defending yourself!
 
     You can pick it up with the ',' pickup command and equip it with the 'e' command.
     ";
-    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 1, 8), txt));
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(new Loc(1, 0, 1, 8), txt));
     txt = @"Here is some armour, which will help keep you safe from harm.
 
     You can pick it up with the ',' pickup command and equip it with the 'e' command.
     ";
-    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 2, 8), txt));
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(new Loc(1, 0, 2, 8), txt));
 
     string welcomeText = @"Delve is a dungeon crawling adventure game and your main activity will be exploring dark dungeons full of monsters (and loot!). This tutorial will provide you some basic information and teach you the core commands.    
     Delve uses letters and symbols for its display. Let's start with a quick breakdown of what you'll see on the screen:
@@ -161,7 +161,7 @@ class Tutorial(UserInterface ui)
     ";
     UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
 
-    FullyEquipped fe = new(gameState, UI, new Loc(1, 0, 5, 10));
+    FullyEquipped fe = new(new Loc(1, 0, 5, 10));
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 1, 8)))    
       fe.IDs.Add(item.ID);
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 2, 8)))
@@ -171,10 +171,10 @@ class Tutorial(UserInterface ui)
     txt = @"A [LIGHTBROWN +] represents a closed door. You can open a door simply by moving onto its tile, or you can use the 'o' command.
 
     Some doors you find will be locked and you must either use the force command ('F') to it bash it open, or try a lockpick if you have one.";
-    CanSeeLoc csl  = new(gameState, UI, new Loc(1, 0, 11, 10), txt);
+    CanSeeLoc csl  = new(new Loc(1, 0, 11, 10), txt);
     objDb.ConditionalEvents.Add(csl);
 
-    objDb.ConditionalEvents.Add(new PlayerAtLoc(gameState, UI, new Loc(1, 0, 12, 10), "Hmm why not explore to the East first?"));
+    objDb.ConditionalEvents.Add(new PlayerAtLoc(new Loc(1, 0, 12, 10), "Hmm why not explore to the East first?"));
 
     Actor mob = MonsterFactory.Get("evil villain", objDb, rng);
     objDb.AddNewActor(mob, new Loc(1, 0, 12, 17));
@@ -186,7 +186,7 @@ class Tutorial(UserInterface ui)
     It's not necessarily wise to attack every monster you see in the game, but sometimes you may not be able to avoid fighting.
     ";
 
-    csl = new(gameState, UI, new Loc(1, 0, 12, 17), txt);
+    csl = new(new Loc(1, 0, 12, 17), txt);
     objDb.ConditionalEvents.Add(csl);
 
     Loc zloc = new(1, 0, 12, 22);
@@ -194,11 +194,11 @@ class Tutorial(UserInterface ui)
     coins.Value = 25;
     objDb.SetToLoc(zloc, coins);
     txt = @"Treasure! Zorkmids are the coinage of the land. They aren't much use in the Tutorial but will come in rather handy in the game itself!";
-    var pal = new PlayerAtLoc(gameState, UI, zloc, txt);
+    var pal = new PlayerAtLoc(zloc, txt);
     objDb.ConditionalEvents.Add(pal);
 
     txt = @"Sometimes not everything is as it seems in Delve! Walk closer to the dead end to the west and then hit the search ([LIGHTBLUE 's']) command a few times!";
-    csl = new(gameState, UI, new Loc(1, 0, 12, 2), txt);
+    csl = new(new Loc(1, 0, 12, 2), txt);
     objDb.ConditionalEvents.Add(csl);
 
     txt = @"A-ha! Stairs to the next level down, and perhaps a gateway to more danger and adventure! You've reached the end of the tutorial, so use the quit ([LIGHTBLUE 'Q']) command to quit, return to the main screen and begin a game of Delve!
@@ -206,7 +206,7 @@ class Tutorial(UserInterface ui)
     Your character will begin near a town which has NPCs who can give you advice and sell you useful gear. Talk to the them via the chat ([LIGHTBLUE 'C']) command.
 
     Good luck and happy Delving!";
-    pal = new PlayerAtLoc(gameState, UI, new Loc(1, 0, 12, 1), txt);
+    pal = new PlayerAtLoc(new Loc(1, 0, 12, 1), txt);
     objDb.ConditionalEvents.Add(pal);
 
     UI.CheatSheetMode = CheatSheetMode.Commands;

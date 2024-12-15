@@ -839,7 +839,7 @@ class MainDungeonBuilder : DungeonBuilder
     return (false, Dir.None);
   }
 
-  void PlaceLevelFiveGate(Map map, Random rng, FactDb factDb)
+  void PlaceLevelFiveGate(int dungeonId, Map map, Random rng, FactDb factDb, GameObjectDB objDb)
   {
     List<(int, int, Dir)> candidates = [];
 
@@ -865,25 +865,37 @@ class MainDungeonBuilder : DungeonBuilder
     // I guess I should be making sure the stair location actually makes sense
     // for the next level
     Tile door = new VaultDoor(false, Metals.Iron);
-    Tile stairs = new Downstairs("");
+    Tile stairs = TileFactory.Get(TileType.FakeStairs);
+    
     map.SetTile(sr, sc, door);
-    Loc doorLoc = new(1, 4, sr, sc);
+    Loc doorLoc = new(dungeonId, 4, sr, sc);
     factDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
+    Loc stairsLoc;
     switch (sdir)
     {
       case Dir.North:
+        stairsLoc = new(dungeonId, 4, sr + 1, sc);
         map.SetTile(sr + 1, sc, stairs);
         break;
       case Dir.South:
       map.SetTile(sr - 1, sc, stairs);
+        stairsLoc = new(dungeonId, 4, sr - 1, sc);
         break;
       case Dir.East:
+        stairsLoc = new(dungeonId, 4, sr, sc - 1);
         map.SetTile(sr, sc - 1, stairs);
         break;
-      case Dir.West:
+      default: // West
+        stairsLoc = new(dungeonId, 4, sr, sc + 1);
         map.SetTile(sr, sc + 1, stairs);
         break;
     }
+
+    string txt = @"Congratulations! You've effectively achieved victory in this early Delve demo!
+    
+    Look for Delve 0.3 soon, which will feature an even deeper dungeon and more dangers, treasure, and adventure!";
+    PlayerAtLoc pal = new(stairsLoc, txt);
+    objDb.ConditionalEvents.Add(pal);
   }
 
   void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
@@ -1306,7 +1318,7 @@ class MainDungeonBuilder : DungeonBuilder
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
-    PlaceLevelFiveGate(levels[4], rng, factDb);
+    PlaceLevelFiveGate(id, levels[4], rng, factDb, objDb);
     PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
     
     // Add a couple of guaranteed good items to dungeon

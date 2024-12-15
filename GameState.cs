@@ -916,9 +916,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     foreach (var ce in ObjDb.ConditionalEvents)
     {
-      if (ce.CondtionMet())
+      if (ce.CondtionMet(this))
       {
-        ce.Fire();
+        ce.Fire(UI);
         ce.Complete = true;
       }
     }
