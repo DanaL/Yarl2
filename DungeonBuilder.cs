@@ -1180,6 +1180,26 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static void AddGoodItemToLevel(Map map, int dungeonId, int level, Random rng, GameObjectDB objDb)
+  {
+    List<Loc> opts = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Passable())
+          opts.Add(new Loc(dungeonId, level, r, c));
+      }
+    }
+
+    if (opts.Count > 0)
+    {
+      Loc loc = opts[rng.Next(opts.Count)];
+      Item item = Treasure.GetTalisam(rng, objDb);
+      objDb.SetToLoc(loc, item);
+    }
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks,
         Map wildernessMap)
@@ -1289,6 +1309,10 @@ class MainDungeonBuilder : DungeonBuilder
     PlaceLevelFiveGate(levels[4], rng, factDb);
     PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
     
+    // Add a couple of guaranteed good items to dungeon
+    AddGoodItemToLevel(levels[1], id, 1, rng, objDb);
+    AddGoodItemToLevel(levels[3], id, 3, rng, objDb);
+
     return dungeon;
   }
 }

@@ -46,6 +46,21 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM
   ];
 
+  public static Item GetTalisam(Random rng, GameObjectDB objDb)
+  {
+    int roll = rng.Next(7);
+    return roll switch
+    {
+      0 => ItemFactory.Get(ItemNames.SMOULDERING_CHARM, objDb),
+      1 => ItemFactory.Get(ItemNames.TROLL_BROOCH, objDb),
+      2 => ItemFactory.Get(ItemNames.TALISMAN_OF_CIRCUMSPECTION, objDb),
+      3 => ItemFactory.Get(ItemNames.GASTON_BADGE, objDb),
+      4 => ItemFactory.Get(ItemNames.LESSER_BURLY_CHARM, objDb),
+      5 => ItemFactory.Get(ItemNames.LESSER_GRACE_CHARM, objDb),
+      _ => ItemFactory.Get(ItemNames.LESSER_HEALTH_CHARM, objDb),
+    };
+  }
+
   public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
   {
     int roll = rng.Next(20);
