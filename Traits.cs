@@ -2737,8 +2737,8 @@ class TraitFactory
     {
       Enum.TryParse(pieces[4], out DamageType dt);
       DamageTrait oneHanded = new DamageTrait() { DamageDie = int.Parse(pieces[2]), NumOfDie = int.Parse(pieces[3]), DamageType = dt };
-      Enum.TryParse(pieces[8], out dt);
-      DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[6]), NumOfDie = int.Parse(pieces[7]), DamageType = dt };
+      Enum.TryParse(pieces[9], out dt);
+      DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[7]), NumOfDie = int.Parse(pieces[8]), DamageType = dt };
       return new VersatileTrait(oneHanded, twoHanded);
     } },
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = double.Parse(pieces[1]) }},
