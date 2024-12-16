@@ -1089,6 +1089,11 @@ class ConeCalculator
 
 public static class ResourcePath
 {
+  public static string GetBaseFilePath(string filename)
+  {
+    return FindResourcePath("", filename);
+  }
+
   public static string GetDataFilePath(string filename)
   {
     return FindResourcePath("data", filename);
