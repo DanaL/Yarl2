@@ -801,14 +801,19 @@ class InventoryDetails : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || Options.Count == 0)
+    if (ch == Constants.ESC || Options.Count == 0 || ch == '\n' || ch == '\r')
     {
       Done = true;
       Success = true;
     }
-    else if (ch == ' ')
+    else if (GameState.UIRef().ActivePopup && ch == ' ')
     {
       GameState.UIRef().ClosePopup();
+    }
+    else if (!GameState.UIRef().ActivePopup && ch == ' ')
+    {
+      Done = true;
+      Success = true;
     }
     else if (Options.Contains(ch))
     {
@@ -886,7 +891,7 @@ class Inventorier(HashSet<char> options) : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == ' ' || ch == '\n' || ch == '\r')
     {
       Done = true;
       Success = false;

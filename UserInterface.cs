@@ -65,6 +65,7 @@ abstract class UserInterface
 
   IPopup? _popup = null;
   IPopup? _confirm = null;
+  public bool ActivePopup => _popup != null;
 
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
