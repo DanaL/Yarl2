@@ -77,7 +77,7 @@ class PlayerHasLitTorch : ConditionalEvent
 
     Tapping 'l' twice will move your character on top of the first piece of gear.
 
-    
+    [LIGHTBLUE Within the tutorial, tap ENTER or SPACE to dismiss pop-ups.]    
     ";
 
     ui.CheatSheetMode = CheatSheetMode.MvMixed;
