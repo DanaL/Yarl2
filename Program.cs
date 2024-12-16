@@ -145,7 +145,7 @@ namespace Yarl2
       Options options = new()
       {
         Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "SDL",
-        FontSize = 20,
+        FontSize = 14,
         BumpToOpen = true,
         HighlightPlayer = false,
         TorchLightAnimation = true

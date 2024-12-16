@@ -17,6 +17,13 @@
       <Folder Include="sdl" />
     </ItemGroup>
 
+    <!-- Windows-specific settings -->
+<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+</PropertyGroup>
+
   <ItemGroup>
     <None Update="data\buildings.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
