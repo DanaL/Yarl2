@@ -552,7 +552,7 @@ class OptionsScreen : Inputer
 {
   readonly GameState GS;
   int row = 0;
-  const int numOfOptions = 2;
+  const int numOfOptions = 3;
 
   public OptionsScreen(GameState gs)
   {
@@ -583,7 +583,9 @@ class OptionsScreen : Inputer
         GS.Options.BumpToOpen = !GS.Options.BumpToOpen;
       else if (row == 1)
         GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
-      GS.UIRef().SetOptions(GS.Options);
+      else if (row == 2)
+        GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
+      GS.UIRef().SetOptions(GS.Options, GS);
     }
 
     WritePopup();
@@ -593,9 +595,11 @@ class OptionsScreen : Inputer
   {
     string bumpToOpen = GS.Options.BumpToOpen ? "On" : "Off";
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
+    string torchAnim = GS.Options.TorchLightAnimation ? "On" : "Off";
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
-      $"Highlight player: {hilitePlayer}"
+      $"Highlight player: {hilitePlayer}",
+      $"Torchlight animation: {torchAnim}"
     ];
    
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });

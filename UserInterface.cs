@@ -80,7 +80,7 @@ abstract class UserInterface
   public UserInterface(Options opts)
   {
     _options = opts;
-    SetOptions(opts);
+    SetOptions(opts, null);
     PlayerScreenRow = ViewHeight / 2;
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
@@ -88,13 +88,21 @@ abstract class UserInterface
     ClearZLayer();
   }
 
-  public void SetOptions(Options opts)
+  public void SetOptions(Options opts, GameState? gs)
   {
     _options = opts;
     if (opts.HighlightPlayer)
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, Colours.HILITE);
     else
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+    
+    if (gs is not null)
+    {
+      if (opts.TorchLightAnimation && !_animations.OfType<TorchLightAnimationListener>().Any())
+        _animations.Add(new TorchLightAnimationListener(this, gs));
+      else if (!opts.TorchLightAnimation && _animations.OfType<TorchLightAnimationListener>().Any())
+        _animations = _animations.Where(a => a is not TorchLightAnimationListener).ToList();
+    }
   }
 
   public void ClearLongMessage()
@@ -1282,7 +1290,9 @@ abstract class UserInterface
     Options opts = gameState.Options;
     gameState.BuildPerformersList();
     _animations.Add(new CloudAnimationListener(this, gameState));
-    _animations.Add(new TorchLightAnimationListener(this, gameState));
+
+    if (opts.TorchLightAnimation) 
+      _animations.Add(new TorchLightAnimationListener(this, gameState));
 
     DateTime refresh = DateTime.Now;
     IPerformer currPerformer = gameState.Player;

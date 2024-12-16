@@ -121,6 +121,7 @@ namespace Yarl2
     public int FontSize { get; set; }
     public bool BumpToOpen { get; set; }
     public bool HighlightPlayer { get; set; }
+    public bool TorchLightAnimation { get; set; }
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
@@ -146,7 +147,8 @@ namespace Yarl2
         Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "SDL",
         FontSize = 20,
         BumpToOpen = true,
-        HighlightPlayer = false
+        HighlightPlayer = false,
+        TorchLightAnimation = true
       };
 
       var userDir = Util.UserDir;
