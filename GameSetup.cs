@@ -615,12 +615,16 @@ class CampaignCreator(UserInterface ui)
         {
           Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
         };
+        Loc entranceLoc = new Loc(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);
         factDb.Add(new LocationFact()
         {
-          Loc = new Loc(0, 0, entrance.Item1, entrance.Item2),
+          Loc = entranceLoc,
           Desc = "Dungeon Entrance"
         });
+
+        PlayerAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
+        objDb.ConditionalEvents.Add(pal);
 
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
         campaign.Town = town;
@@ -729,7 +733,7 @@ class CampaignCreator(UserInterface ui)
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
       welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
       welcomeText += "\n\n";
-      welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon. They may have advice for you, and supplies to help you survive.";
+      welcomeText += "You might wish to speak with the townsfolk before your first delve into the nearby dungeon (marked with a [LIGHTBLUE Ո] symbol). They may have advice for you, and supplies to help you survive.";
       welcomeText += "\n\n";
       welcomeText += "Press [ICEBLUE ? for help], and [ICEBLUE x] will allow you to examine interesting features on screen.";
       welcomeText += "\n\n";
