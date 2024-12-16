@@ -6,7 +6,7 @@
     "Value": 10,
     "Glyph": "),lightbrown,brown,black,black",
     "Traits": [
-      "Versatile#Damage#6#1#Piercing#Damage#8#1#Piercing",
+      "Versatile#Damage#6#1#Piercing#0#Damage#8#1#Piercing#0",
       "Polearm"
     ]
   },
@@ -116,7 +116,7 @@
       "Sword",
       "Metal#2",
       "WeaponSpeed#1.0",
-      "Versatile#Damage#8#1#Slashing#Damage#5#2#Slashing",
+      "Versatile#Damage#8#1#Slashing#0#Damage#5#2#Slashing#0",
       "Cleave"
     ]
   },
