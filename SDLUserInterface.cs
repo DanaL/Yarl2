@@ -30,7 +30,10 @@ class SDLUserInterface : UserInterface
     FontSize = opt.FontSize;
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ttf.TTF_Init();
-    _font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", opt.FontSize);
+    
+    string fontPath = Path.Combine(AppContext.BaseDirectory, "DejaVuSansMono.ttf");
+    _font = SDL_ttf.TTF_OpenFont(fontPath, opt.FontSize);
+    //_font = SDL_ttf.TTF_OpenFont("DejaVuSansMono.ttf", opt.FontSize);
     SDL_ttf.TTF_SizeUTF8(_font, " ", out _fontWidth, out _fontHeight);
 
     int width = ScreenWidth * _fontWidth;

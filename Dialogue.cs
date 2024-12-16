@@ -620,7 +620,8 @@ class DialogueInterpreter
 
   public string Run(string filename, Actor mob, GameState gs)
   {
-    var txt = File.ReadAllText($"dialogue/{filename}");
+    string path = ResourcePath.GetDialogueFilePath(filename);
+    var txt = File.ReadAllText(path);
     var scanner = new ScriptScanner(txt);
     var tokens = scanner.ScanTokens();
     var parser = new ScriptParser(tokens);

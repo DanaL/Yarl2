@@ -269,7 +269,7 @@ class Vaults
       objDb.SetToLoc(loc, item);
     }
 
-    NameGenerator ng = new(rng, "data/names.txt");
+    NameGenerator ng = new(rng, Util.NamesFile);
     if (level <= 2)
     {
       SetItem(TreasureQuality.Uncommon);
@@ -588,7 +588,7 @@ class Rooms
       // exception if no early denizen had been set
       return;
 
-    NameGenerator ng = new(rng, "data/names.txt");
+    NameGenerator ng = new(rng, Util.NamesFile);
 
     (int, int) fireSq = room[rng.Next(room.Count)];
     Loc fireLoc = new(dungeonID, level, fireSq.Item1, fireSq.Item2);
@@ -696,7 +696,7 @@ class Rooms
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
-    NameGenerator ng = new(rng, "data/names.txt");
+    NameGenerator ng = new(rng, Util.NamesFile);
 
     int numOfGraves = room.Count / 4;
     for (int j = 0; j < numOfGraves; j++)

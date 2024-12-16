@@ -72,7 +72,7 @@ class DeckBulder
     }
 
     // Someday in the future I'll need to check for invalid data files...
-    var lines = File.ReadAllLines($"data/{EarlyMainOccupant}.txt");
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{EarlyMainOccupant}.txt"));
     int j = 0;
     while (j < lines.Length && !lines[j].Equals($"LEVEL {level}", StringComparison.CurrentCultureIgnoreCase))
     {

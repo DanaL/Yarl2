@@ -190,12 +190,11 @@ class ItemFactory
 
   static Dictionary<ItemNames, ItemTemplate> LoadItemDefs()
   {
+    string jsonPath = ResourcePath.GetDataFilePath("items.json");
+    string json = File.ReadAllText(jsonPath);
+    var items = JsonSerializer.Deserialize<List<JsonItem>>(json) 
+      ?? throw new Exception("Missing or corrupt items definition file!");
     Dictionary<ItemNames, ItemTemplate> templates = [];
-    string json = File.ReadAllText("data/items.json");
-    var items = JsonSerializer.Deserialize<List<JsonItem>>(json);
-    if (items is null)
-      throw new Exception("Missing or corrupt items definition file!");
-
     foreach (JsonItem item in items)
     {
       Enum.TryParse(item.Name, out ItemNames name);

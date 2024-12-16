@@ -201,8 +201,8 @@ class RulerInfo : Fact
 // and whether or not the ruler was loved
 
 class History(Random rng)
-{    
-  readonly NameGenerator _nameGen = new NameGenerator(rng, "data/names.txt");
+{
+  readonly NameGenerator _nameGen = new NameGenerator(rng, Util.NamesFile);
 
   static readonly string[] _adjectives = [
     "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
@@ -244,7 +244,7 @@ class History(Random rng)
 
   public static Nation GenNation(Random rng)
   {
-    NameGenerator ng = new(rng, "data/countries.txt");
+    NameGenerator ng = new(rng, ResourcePath.GetDataFilePath("countries.txt"));
     string name = ng.GenerateName(rng.Next(5, 12)).Capitalize();
     double roll = rng.NextDouble();
     if (roll < 0.1)
@@ -342,7 +342,7 @@ class History(Random rng)
 
   public FactDb GenerateHistory(Random rng)
   {
-    NameGenerator nameGen = new(rng, "data/names.txt");
+    NameGenerator nameGen = new(rng, Util.NamesFile);
 
     var type = rng.Next(2) switch
     {

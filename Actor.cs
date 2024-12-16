@@ -431,7 +431,8 @@ class MonsterFactory
 
   static void LoadCatalog()
   {
-    foreach (var line in File.ReadAllLines("data/monsters.txt"))
+    string path = ResourcePath.GetDataFilePath("monsters.txt");
+    foreach (var line in File.ReadAllLines(path))
     {
       int i = line.IndexOf('|');
       string name = line[..i].Trim();

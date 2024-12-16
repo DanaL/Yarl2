@@ -156,6 +156,8 @@ class Constants
 
 class Util
 {
+  public static string NamesFile => ResourcePath.GetDataFilePath("names.txt");
+
   public static DirectoryInfo UserDir
   {
     get
@@ -584,7 +586,7 @@ class Util
   {
     Dictionary<string, CyclopediaEntry> cyclopedia = [];
 
-    var lines = File.ReadAllLines("data/cyclopedia.txt");
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("cyclopedia.txt"));
 
     for (int j = 0; j < lines.Length; j += 3)
     {
@@ -1082,5 +1084,47 @@ class ConeCalculator
     }
 
     return affected;
+  }
+}
+
+public static class ResourcePath
+{
+  public static string GetDataFilePath(string filename)
+  {
+    return FindResourcePath("data", filename);
+  }
+
+  public static string GetDialogueFilePath(string filename)
+  {
+    return FindResourcePath("dialogue", filename);
+  }
+
+  private static string FindResourcePath(string folder, string filename)
+  {
+    string path = Path.Combine(folder, filename);
+    if (File.Exists(path))
+    {
+      return path;
+    }
+
+    // If that doesn't exist and we're on macOS, try the bundle Resources path
+    if (OperatingSystem.IsMacOS())
+    {
+      string? bundlePath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+      if (bundlePath != null)
+      {
+        string resourcePath = Path.Combine(bundlePath, folder, filename);
+        if (File.Exists(resourcePath))
+        {
+          return resourcePath;
+        }
+      }
+    }
+
+    throw new FileNotFoundException(
+        $"Could not find {filename} in {folder} directory. " +
+        $"Tried: {path} and bundle resources path. " +
+        $"Current directory: {Directory.GetCurrentDirectory()}"
+    );
   }
 }

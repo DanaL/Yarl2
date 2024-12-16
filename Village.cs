@@ -476,7 +476,7 @@ class Village
 
   public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
   {
-    var ng = new NameGenerator(rng, "data/names.txt");
+    var ng = new NameGenerator(rng, Util.NamesFile);
 
     var cleric = GeneratePriest(map, town, ng, objDb, rng);
     objDb.Add(cleric);

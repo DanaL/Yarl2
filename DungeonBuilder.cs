@@ -11,7 +11,6 @@
 
 // Herein is the code for building the main dungeon of the game
 
-using System.Reflection.Emit;
 using System.Text;
 
 namespace Yarl2;
@@ -301,7 +300,7 @@ class MainDungeonBuilder : DungeonBuilder
     // Generate an actor for the fallen adventurer so I can store their 
     // name and such in the objDb. Maybe sometimes they'll be an actual
     // ghost?
-    var ng = new NameGenerator(rng, "data/names.txt");
+    var ng = new NameGenerator(rng, Util.NamesFile);
     var adventurer = new Mob()
     {
       Name = ng.GenerateName(rng.Next(5, 12))

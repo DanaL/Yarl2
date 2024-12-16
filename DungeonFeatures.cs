@@ -96,7 +96,7 @@ class Decorations
   static Decoration JournalForPlague(Disaster plague, FactDb factDb, Random rng)
   {
     StringBuilder sb = new();
-    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
+    NameGenerator ng = new NameGenerator(rng, Util.NamesFile);
     // When more historical facts and such are generated I can have the text
     // be like "After the Battle of Blah Blah, there was a brief respite of
     // prosperity before they were struck by the plague of..."
@@ -190,7 +190,7 @@ class Decorations
       factDb.Add(History.GenNation(rng));
 
     string nation = factDb.Nations[rng.Next(factDb.Nations.Count)].Name;
-    NameGenerator ng = new NameGenerator(rng, "data/names.txt");
+    NameGenerator ng = new NameGenerator(rng, Util.NamesFile);
     string text = $@"My dear {ng.GenerateName(rng.Next(8, 12)).Capitalize()}, I am here in this dank place researching the invasion by {invasion.Invader}, having been lead here after discovering an old codex in a library in {nation} I will...";
 
     return new Decoration(DecorationType.ScholarJournal, text);

@@ -386,7 +386,7 @@ class HelpScreenInputer : Inputer
     _ui = ui;
     _entries = [];
 
-    var lines = File.ReadAllLines("data/help.txt")
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
                     .Select(line => line.TrimEnd()).ToArray();
     int l = 0;
     char ch = 'a';
