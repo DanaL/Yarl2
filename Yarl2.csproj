@@ -19,9 +19,10 @@
 
     <!-- Windows-specific settings -->
 <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <PublishReadyToRun>true</PublishReadyToRun>
+  <SelfContained>true</SelfContained>
+    <!--<PublishSingleFile>true</PublishSingleFile>-->
+    <!--<SelfContained>true</SelfContained>-->
+    <!--<PublishReadyToRun>true</PublishReadyToRun>-->
 </PropertyGroup>
 
   <ItemGroup>
