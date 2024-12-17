@@ -679,6 +679,11 @@ class Map : ICloneable
     {
       for (int c = 1; c < Width - 1; c++)
       {
+        if (r == 24 && (c == 3 || c == 4))
+        {
+          Console.WriteLine();
+        }
+
         if (!visited[r, c] && IsRoomFloorTile(TileAt(r, c).Type) && IsRoomSq(r, c))
         {
           // Found a new potential room tile (has 8 adjacent floors), flood fill from this point

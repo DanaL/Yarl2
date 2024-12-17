@@ -916,7 +916,18 @@ class MainDungeonBuilder : DungeonBuilder
       List<List<(int, int)>> rooms = levels[level].FindRooms();
       if (rooms.Count == 0)
         continue;
-      
+
+      if (level == 0)
+      //if (factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)
+      {
+        foreach (var room in rooms)
+        {
+           int roomId = rng.Next(rooms.Count);
+          Rooms.MakeMinedChamber(levels[level], room, dungeonId, level, factDb, objDb, rng);
+          //rooms.RemoveAt(roomId);
+        }
+      }
+
       List<int> potentialVaults = [];
       for (var i = 0; i < rooms.Count; i++)
       {
@@ -985,6 +996,14 @@ class MainDungeonBuilder : DungeonBuilder
         Rooms.Orchard(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
       }
+
+      //if (level == 0)
+      ////if (factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)
+      //{
+      //  int roomId = rng.Next(rooms.Count);
+      //  Rooms.MakeMinedChamber(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
+      //  rooms.RemoveAt(roomId);
+      //}
     }
   }
 

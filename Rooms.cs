@@ -694,6 +694,70 @@ class Rooms
     }
   }
 
+  static int AdjWalls(Map map, int row, int col)
+  {
+    int walls = 0;
+    foreach (var adj in Util.Adj8Sqs(row, col))
+    {
+      if (map.TileAt(adj).Type == TileType.DungeonWall)
+        ++walls;
+    }
+
+    return walls;
+  }
+
+  public static void MakeMinedChamber(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  {
+    // Find good squares to be mined.
+    HashSet<(int, int)> outerWalls = [];
+    foreach (var sq in room)
+    {      
+      HashSet<(int, int)> adjWalls = [];
+      foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
+      {
+        TileType adjTile = map.TileAt(adj).Type;
+        if (adjTile == TileType.DungeonWall)
+          adjWalls.Add(adj);
+
+        if (adjTile == TileType.DungeonFloor && rng.NextDouble() < 0.01)
+        {
+          Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
+          objDb.SetToLoc(new Loc(dungeonId, level, adj.Item1, adj.Item2), rubble);
+        }
+
+        // Mine rooms won't have doors
+        if (adjTile == TileType.ClosedDoor)
+          map.SetTile(adj, TileFactory.Get(TileType.DungeonFloor));
+      }
+
+      if (adjWalls.Count >= 3)
+        outerWalls = outerWalls.Union(adjWalls).ToHashSet();      
+    }
+
+    List<(int, int)> opts = [];
+    foreach (var sq in outerWalls)
+    {
+      if (AdjWalls(map, sq.Item1, sq.Item2) >= 5)
+        opts.Add(sq);
+    }
+
+    foreach (var sq in opts)
+    {
+      if (rng.NextDouble() <= 0.4)
+      {
+        map.SetTile(sq, TileFactory.Get(TileType.DungeonFloor));
+        foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
+        {
+          TileType adjTile = map.TileAt(adj).Type;
+          if (adjTile == TileType.DungeonWall && rng.NextDouble() <= 0.2 && AdjWalls(map, adj.Item1, adj.Item2) >= 6)
+            map.SetTile(adj, TileFactory.Get(TileType.DungeonFloor));
+          else if (adjTile == TileType.DungeonFloor && rng.NextDouble() <= 0.1)
+             map.SetTile(adj, TileFactory.Get(TileType.DungeonWall));
+        }        
+      }
+    }
+  }
+
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
     NameGenerator ng = new(rng, Util.NamesFile);
