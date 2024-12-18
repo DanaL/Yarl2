@@ -2360,7 +2360,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         result = new ActionResult() { Complete = true, Messages = ["You are already wearing two rings!"], EnergyCost = 0.0 };
         break;
       case EquipingResult.TooManyTalismans:
-        result = new ActionResult() { Complete = true, Messages = ["You many only use two talismans!"], EnergyCost = 0.0 };
+        result = new ActionResult() { Complete = true, Messages = ["You may only use two talismans at a time!"], EnergyCost = 0.0 };
         break;
       default:
         string msg = "You are already wearing ";

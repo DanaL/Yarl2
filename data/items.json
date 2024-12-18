@@ -944,5 +944,15 @@
     "Traits": [
       "Stackable"
     ]
+  },
+  {
+    "Name": "CUTPURSE_CREST",
+    "DescriptiveName": "cutpurse crest",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,darkgrey,darkgrey,black,black",
+    "Traits": [
+      "Grants#Cutpurse"
+    ]
   }
 ]

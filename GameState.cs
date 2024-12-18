@@ -662,30 +662,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     foreach (var t in victim.Traits)
     {
-      if (t is PoorLootTrait)
+      if (t is LootTrait lt)
       {
-        var loot = Treasure.PoorTreasure(1, Rng, ObjDb);
-        if (loot.Count > 0)
-          ItemDropped(loot[0], victim.Loc);
-      }
-      else if (t is DropTrait drop)
-      {
-        if (Rng.Next(100) < drop.Chance  && Enum.TryParse(drop.ItemName.ToUpper(), out ItemNames itemName)) 
-        {
-          ItemDropped(ItemFactory.Get(itemName, ObjDb), victim.Loc);
-        }
-      }
-      else if (t is GoodMagicLootTrait)
-      {
-        var loot = Treasure.GoodMagicItem(Rng, ObjDb);
-        ItemDropped(loot, victim.Loc);
-      }
-      else if (t is CoinsLootTrait coins)
-      {
-        var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
-        zorkmids.Value = Rng.Next(coins.Min, coins.Max + 1);
-        ItemDropped(zorkmids, victim.Loc);
-      }
+        var loot = Treasure.LootFromTrait(lt, rng, ObjDb);
+        if (loot is not null)
+          ItemDropped(loot, victim.Loc);
+      }      
       else if (t is RetributionTrait rt)
       {
         RetributionDamage(victim, rt, result);

@@ -75,6 +75,8 @@ abstract class BasicTrait : Trait
   public override string AsText() => $"{ExpiresOn}";
 }
 
+abstract class LootTrait : Trait { }
+
 // To let me classify traits that mobs can take on their turns
 // Not sure if this is the best way to go...
 abstract class ActionTrait : BasicTrait
@@ -485,7 +487,7 @@ class BrainlessTrait : Trait
   public override string AsText() => "Brainless";
 }
 
-class CoinsLootTrait : Trait
+class CoinsLootTrait : LootTrait
 {
   public int Min { get; set; }
   public int Max { get; set; }
@@ -503,7 +505,7 @@ class EdibleTrait : Trait
   public override string AsText() => "Edible";
 }
 
-class PoorLootTrait : Trait
+class PoorLootTrait : LootTrait
 {
   public override string AsText() => "PoorLoot";
 }
@@ -616,6 +618,11 @@ class RestingTrait : TemporaryTrait
 
     return [];
   }
+}
+
+class RobbedTrait : Trait
+{
+  public override string AsText() => "Robbed";
 }
 
 class RumBreathTrait : ActionTrait
@@ -1221,6 +1228,11 @@ class CursedTrait : Trait
   public override string AsText() => $"Cursed";
 }
 
+class CutpurseTrait : Trait
+{
+  public override string AsText() => $"Cutpurse#{SourceId}";
+}
+
 class DeathMessageTrait : BasicTrait
 {
   public string Message { get; set; } = "";
@@ -1396,7 +1408,7 @@ class ConfusedTrait : TemporaryTrait
   }
 }
 
-class DropTrait : Trait
+class DropTrait : LootTrait
 {
   public string ItemName { get; set; } = "";
   public int Chance { get; set; }
@@ -1444,7 +1456,7 @@ class LameTrait : TemporaryTrait
   }
 }
 
-class GoodMagicLootTrait : Trait
+class GoodMagicLootTrait : LootTrait
 {
   public override string AsText() => "GoodMagicLoot";
 }
@@ -2493,6 +2505,12 @@ class TraitFactory
     { "Crusher", (pieces, gameObj) => new CrusherTrait() { DmgDie = int.Parse(pieces[1]), DmgDice = int.Parse(pieces[2]) } },
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },
+    { "Cutpurse", (pieces, gameObj) =>
+      {
+        ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;
+        return new CutpurseTrait() { SourceId = sourceId };
+      } 
+    },
     { "Damage", (pieces, gameObj) => 
       {
         Enum.TryParse(pieces[3], out DamageType dt);
@@ -2678,6 +2696,7 @@ class TraitFactory
     { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },
     { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
     { "ResistSlashing", (pieces, gameObj) => new ResistSlashingTrait() },
+    { "Robbed", (pieces, gameObj) => new RobbedTrait() },
     { "RumBreath", (pieces, gameObj) => new RumBreathTrait() { Range=int.Parse(pieces[1]), Cooldown=ulong.Parse(pieces[2]), Name="RumBreath" } },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },

@@ -90,7 +90,8 @@ class DebugCommand(GameState gs)
     {"booze", ItemNames.FLASK_OF_BOOZE },
     {"troll brooch", ItemNames.TROLL_BROOCH },
     {"smouldering charm", ItemNames.SMOULDERING_CHARM },
-    {"mithril ore", ItemNames.MITHRIL_ORE }
+    {"mithril ore", ItemNames.MITHRIL_ORE },
+    {"cutpurse crest", ItemNames.CUTPURSE_CREST }
   };
 
   public string DoCommand(string txt)

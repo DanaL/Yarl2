@@ -46,6 +46,34 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM
   ];
 
+  public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
+  {
+    if (trait is PoorLootTrait)
+    {
+      var loot = PoorTreasure(1, rng, objDb);
+      return loot[0];
+    }
+    else if (trait is DropTrait drop)
+    {
+      if (rng.Next(100) < drop.Chance && Enum.TryParse(drop.ItemName.ToUpper(), out ItemNames itemName))
+      {
+        return ItemFactory.Get(itemName, objDb);
+      }
+    }
+    else if (trait is GoodMagicLootTrait)
+    {
+      return GoodMagicItem(rng, objDb);
+    }
+    else if (trait is CoinsLootTrait coins)
+    {
+      var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(coins.Min, coins.Max + 1);
+      return zorkmids;
+    }
+
+    return null;
+  }
+
   public static Item GetTalisam(Random rng, GameObjectDB objDb)
   {
     int roll = rng.Next(7);

@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
+
 namespace Yarl2;
 
 enum DamageType
@@ -552,6 +554,11 @@ class Battle
         if (msg != "")
           result.Messages.Add(msg);
       }
+
+      if (attacker.HasTrait<CutpurseTrait>())
+      {
+        HandleCutpurse(attacker, target, gs, result);
+      }
     }
     else
     {
@@ -602,6 +609,64 @@ class Battle
     }
 
     return false;
+  }
+
+  static void HandleCutpurse(Actor attacker, Actor target, GameState gs, ActionResult result)
+  {
+    // If you are attacking with reach, like with a polearm, you don't get 
+    // to be a cutpurse
+    if (Util.Distance(attacker.Loc, target.Loc) > 1)
+      return;
+
+    if (gs.Rng.NextDouble() > 0.2)
+      return;
+
+    Item? loot;
+    bool intelligent = false;
+    foreach (Trait t in target.Traits)
+    {
+      if (t is RobbedTrait)
+        return;
+      else if (t is IntelligentTrait)
+        intelligent = true;
+      else if (t is LootTrait lt)
+      {
+        loot = Treasure.LootFromTrait(lt, gs.Rng, gs.ObjDb);
+        if (loot is not null)
+        {
+          result.Messages.Add($"You lift {ItemDesc(loot)} from {target.FullName}!");
+          target.Traits.Add(new RobbedTrait());
+          attacker.Inventory.Add(loot, attacker.ID);
+          return;
+        }
+      }
+    }
+
+    if (!intelligent)
+      return;
+
+    if (gs.Rng.NextDouble() < 0.5)
+    {
+      loot = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+      loot.Value = gs.Rng.Next(10, 21);
+    }
+    else
+    {
+      loot = Treasure.PoorTreasure(1, gs.Rng, gs.ObjDb)[0];
+    }
+    result.Messages.Add($"You lift {ItemDesc(loot)} from {target.FullName}!");
+    target.Traits.Add(new RobbedTrait());
+    attacker.Inventory.Add(loot, attacker.ID);
+
+    static string ItemDesc(Item item)
+    {
+      if (item.Type != ItemType.Zorkmid)
+        return item.FullName.IndefArticle();
+      else if (item.Value == 1)
+        return "a zorkmid";
+      else
+        return $"{item.Value} zorkmids";
+    }
   }
 
   public static bool HandleDodge(Actor attacker, Actor target, GameState gs)

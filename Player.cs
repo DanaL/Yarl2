@@ -285,6 +285,8 @@ class Player : Actor, IPerformer, IGameEventListener
         traitsToShow.Add("You step lightly");
       if (trait is DodgeTrait)
         traitsToShow.Add("You sometimes can dodge attacks");
+      if (trait is CutpurseTrait)
+        traitsToShow.Add("You have sticky fingers");
       if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
     }
