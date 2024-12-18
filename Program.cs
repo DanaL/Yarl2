@@ -85,20 +85,20 @@ try
 catch (GameQuitException)
 {
 }
-catch (Exception ex)
-{
-  List<string> lines = [];
-  lines.Add("");
-  lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
-  lines.Add(" The execption thrown was: ");
-  lines.Add(" " + ex.Message);
-  lines.Add("");
-  lines.Add(" Delve will now need to exit.");
-  display.ClosePopup();
-  display.WriteLongMessage(lines);
-  display.UpdateDisplay(null);
-  display.BlockForInput();
-}
+//catch (Exception ex)
+//{
+//  List<string> lines = [];
+//  lines.Add("");
+//  lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
+//  lines.Add(" The execption thrown was: ");
+//  lines.Add(" " + ex.Message);
+//  lines.Add("");
+//  lines.Add(" Delve will now need to exit.");
+//  display.ClosePopup();
+//  display.WriteLongMessage(lines);
+//  display.UpdateDisplay(null);
+//  display.BlockForInput();
+//}
 
 namespace Yarl2
 {

@@ -100,6 +100,7 @@
     "Traits": [
       "Damage#6#2#Slashing",
       "Sword",
+      "Sword",
       "Metal#2",
       "WeaponSpeed#1.25",
       "TwoHanded",
@@ -932,6 +933,16 @@
     "Glyph": "☥,brightred,dullred,black,black",
     "Traits": [
       "Grants#Resistance&Fire;Damage&6&1&Fire"
+    ]
+  },
+  {
+    "Name": "MITHRIL_ORE",
+    "DescriptiveName": "mithril ore",
+    "Type": "Reagent",
+    "Value": 25,
+    "Glyph": "*,lightblue,grey,black,black",
+    "Traits": [
+      "Stackable"
     ]
   }
 ]
