@@ -17,7 +17,7 @@ acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|Melee#6#1#Aci
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|Melee#6#1#Cold|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
 ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|Melee#6#2#Blunt|KnockBack,Intelligent,Drop#ogre_liver#33
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|Melee#4#1#Piercing|Poisoner#13#1#10
-duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Melee#10#1#Blunt|Intelligent
+duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|Melee#10#1#Blunt|Intelligent,Drop#mithril_ore#25
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|Missile#6#1#2#5#Piercing,Melee#8#1#Piercing|Intelligent
 owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|Melee#6#1#Slashing|Grappler#14
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|RangedSpellAction#MirrorImage#7#1#3,Melee#8#1#Piercing|Flying
