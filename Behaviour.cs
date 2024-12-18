@@ -708,23 +708,23 @@ class SmithBehaviour : IBehaviour
     var sb = new StringBuilder();
     sb.Append('"');
 
-    int roll = gs.Rng.Next(3);
-    switch (roll)
+    string blurb;
+
+    if (gs.FactDb.FactCheck("DwarfMine") is not null && gs.Rng.NextDouble() < 0.25)
     {
-      case 0:
-        if (markup > 1.75)
-          sb.Append("If you're looking for arms or armour, I'm the only game in town!");
-        else
-          sb.Append("You'll want some weapons or better armour before venturing futher!");
-        break;
-      case 1:
-        sb.Append("Weapons or armour showing signs of wear and tear? I can help with that!");
-        break;
-      case 2:
-        sb.Append("If you find weird gems or monster parts, I may be able to use them to spruce up your gear!");
-        break;
-    }  
-    
+      blurb = "The ancient dwarves used to mine mithril in their tunnels. I could do some keen work with mithril!";
+    }
+    else
+    {
+      blurb = gs.Rng.Next(3) switch
+      {
+        0 => "If you're looking for arms or armour, I'm the only game in town!",
+        1 => "Weapons or armour showing signs of wear and tear? I can help with that!",
+        _ => "If you find weird gems or monster parts, I may be able to use them to spruce up your gear!"
+      };
+    }
+
+    sb.Append(blurb);
     sb.Append('"');
 
     return sb.ToString();

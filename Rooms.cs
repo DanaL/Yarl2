@@ -816,6 +816,11 @@ class Rooms
       objDb.AddNewActor(d, itemSpots[i]);
       itemSpots.RemoveAt(i);
     }
+
+    if (factDb.FactCheck("DwarfMine") is null)
+    {
+      factDb.Add(new SimpleFact() { Name = "DwarfMine", Value = "DwarfMine" });
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
