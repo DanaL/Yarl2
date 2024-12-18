@@ -794,6 +794,28 @@ class Rooms
       Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
       objDb.SetToLoc(loc, mithril);
     }
+
+    // Add some monsters
+    itemSpots = itemSpots.Where(loc => !objDb.BlockersAtLoc(loc) && !objDb.Occupied(loc)).ToList();
+    
+    for (int j = 0; j < 3; j++)
+    {
+      if (itemSpots.Count > 0 && rng.NextDouble() < 0.2)
+      {
+        int i = rng.Next(itemSpots.Count);
+        Actor d = MonsterFactory.Get("duergar soldier", objDb, rng);
+        objDb.AddNewActor(d, itemSpots[i]);
+        itemSpots.RemoveAt(i);
+      }
+    }
+    
+    if (itemSpots.Count > 0 && rng.NextDouble() < 0.2)
+    {
+      int i = rng.Next(itemSpots.Count);
+      Actor d = MonsterFactory.Get("rust monster", objDb, rng);
+      objDb.AddNewActor(d, itemSpots[i]);
+      itemSpots.RemoveAt(i);
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
