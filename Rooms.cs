@@ -756,6 +756,44 @@ class Rooms
         }        
       }
     }
+
+    // Add a few items to the room
+    List<Loc> itemSpots = [];
+    foreach (var sq in room)
+    {
+      Loc loc = new Loc(dungeonId, level, sq.Item1, sq.Item2);
+      if (map.TileAt(sq).Passable())
+        itemSpots.Add(loc);
+    }
+
+    for (int i = 0; i < rng.Next(1, 3); i++)
+    {
+      Loc loc = itemSpots[rng.Next(itemSpots.Count)];
+      Item gold = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      gold.Value = rng.Next(20, 51);
+      objDb.SetToLoc(loc, gold);
+    }
+
+    if (rng.NextDouble() <= 0.2)
+    {
+      Loc loc = itemSpots[rng.Next(itemSpots.Count)];
+      Item pickAxe = ItemFactory.Get(ItemNames.PICKAXE, objDb);
+      objDb.SetToLoc(loc, pickAxe);
+    }
+
+    if (rng.NextDouble() <= 0.2)
+    {
+      Loc loc = itemSpots[rng.Next(itemSpots.Count)];
+      Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
+      objDb.SetToLoc(loc, mithril);
+    }
+
+    if (level > 4 && rng.NextDouble() <= 0.2)
+    {
+      Loc loc = itemSpots[rng.Next(itemSpots.Count)];
+      Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
+      objDb.SetToLoc(loc, mithril);
+    }
   }
 
   public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
