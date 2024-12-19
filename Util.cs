@@ -800,7 +800,7 @@ class RegionFinder(IPassable pc)
   public Dictionary<int, HashSet<(int, int)>> Find(Map map, bool fillSmallRegions, TileType fillTile)
   {
     int regionID = 0;
-    var regions = new Dictionary<int, HashSet<(int, int)>>();
+    Dictionary<int, HashSet<(int, int)>> regions = [];
 
     do
     {
@@ -814,7 +814,7 @@ class RegionFinder(IPassable pc)
     // Check for any regions that have very than three squares and just delete them
     if (fillSmallRegions)
     {
-      foreach (var k in regions.Keys)
+      foreach (int k in regions.Keys)
       {
         if (regions[k].Count <= 3)
         {
@@ -824,7 +824,14 @@ class RegionFinder(IPassable pc)
         }
       }
     }
-    return regions;
+
+    // I want to make sure the index IDs are in order
+    Dictionary<int, HashSet<(int, int)>> tweaked = [];
+    int j = 0;
+    foreach (var region in regions.Values)
+      tweaked.Add(j++, region);
+
+    return tweaked;
   }
 }
 
