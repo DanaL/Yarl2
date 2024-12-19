@@ -1077,7 +1077,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       RefreshPerformers();
       
-      if (LastPlayerFoV.Contains(actor.Loc))
+      if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
       {
         UI.AlertPlayer(messages);
         var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
@@ -1108,6 +1108,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     bool flying = actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>();
     bool waterWalking = actor.HasActiveTrait<WaterWalkingTrait>();
 
+    string s = ThingAddedToLoc(dest);
+    if (s != "")
+      UI.AlertPlayer(s);
+
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);
@@ -1122,17 +1126,33 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ActorFallsIntoWater(actor, dest);
     }
 
-    return ThingAddedToLoc(dest);
+    return s;
   }
 
   public string ThingAddedToLoc(Loc loc)
   {
+    List<string> messages = [];
+
     if (ObjDb.LocListeners.Contains(loc) && CurrentMap.TileAt(loc.Row, loc.Col) is IGameEventListener trigger)
     {
       trigger.EventAlert(GameEventType.LocChanged, this, loc);
     }
 
-    return "";
+    if (LastPlayerFoV.Contains(loc))
+    {
+      // If there are illusory objects and the player can see the square, the
+      // illusion will fade. I'm assuming the player can see the 'interaction' 
+      // with the mirage and realize there's an illusion. I'm not doing a 
+      // perception check or intelligence check here. (I want the player to be 
+      // able to check for illusions by, like, tossing a rock onto a square.      
+      foreach (var item in ObjDb.ItemsAt(loc).Where(i => i.Type == ItemType.Illusion))
+      {
+        ObjDb.RemoveItemFromGame(loc, item);
+        messages.Add($"An illusion! {item.FullName.DefArticle().Capitalize()} disappears!");
+      }
+    }
+
+    return messages.Count > 0 ? string.Join(" ", messages) : "";
   }
 
   public string LocDesc(Loc loc)

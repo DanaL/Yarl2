@@ -198,15 +198,7 @@ class MainDungeonBuilder : DungeonBuilder
         continue;
         
       int level = rng.Next(numOfLevels);
-      List<(int, int)> floorTiles = [];
-      for (int r = 1; r < height - 1; r++)
-      {
-        for (int c = 1; c < width - 1; c++)
-        {
-          if (levels[level].TileAt(r, c).Type == TileType.DungeonFloor)
-            floorTiles.Add((r, c));
-        }
-      }
+      List<(int, int)> floorTiles = levels[level].SqsOfType(TileType.DungeonFloor);
 
       if (decoration.Type == DecorationType.Statue)
       {
@@ -250,10 +242,50 @@ class MainDungeonBuilder : DungeonBuilder
     AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
-    {
+    {      
       Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], _dungeonID, levelNum, rng);
       SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
+
+      // Maybe add an illusion/trap
+      if (levelNum < numOfLevels - 1)
+      {
+        // We don't want to make these tooooooo common
+        if (rng.NextDouble() > 0.1)
+          continue;
+
+        AddBaitIllusion(levels[levelNum], dungeonId, levelNum, objDb, rng);
+      }
     }
+  }
+
+  void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Random rng)
+  {
+    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
+    List<Loc> openFloors = sqs.Where(l => !objDb.BlockersAtLoc(l)).ToList();
+    if (openFloors.Count == 0)
+      return;
+    Loc loc = openFloors[rng.Next(openFloors.Count)];
+    Tile trap = rng.Next(3) switch
+    {
+      0 => TileFactory.Get(TileType.HiddenDartTrap),
+      1 => TileFactory.Get(TileType.HiddenTrapDoor),
+      _ => TileFactory.Get(TileType.HiddenWaterTrap)
+    };
+    map.SetTile(loc.Row, loc.Col, trap);
+
+    ItemNames itemName = rng.Next(7) switch
+    {
+      0 => ItemNames.ZORKMIDS,
+      1 => ItemNames.POTION_HEALING,
+      2 => ItemNames.SCROLL_BLINK,
+      3 => ItemNames.LONGSWORD,
+      4 => ItemNames.FLASK_OF_BOOZE,
+      5 => ItemNames.WAND_MAGIC_MISSILES,
+      _ => ItemNames.SCROLL_PROTECTION
+    };
+    Item bait = ItemFactory.Illusion(itemName, objDb);
+    objDb.SetToLoc(loc, bait);
+    Console.WriteLine($"Illusion at {loc}");
   }
 
   void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Random rng)

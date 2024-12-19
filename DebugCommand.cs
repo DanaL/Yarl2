@@ -170,7 +170,7 @@ class DebugCommand(GameState gs)
       {
         var adjSpots = AdjSpots(_gs.Player.Loc);
         loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-        item = ItemFactory.Illusion(itemEnum, loc, _gs.ObjDb);
+        item = ItemFactory.Illusion(itemEnum, _gs.ObjDb);
       }
       else
       {

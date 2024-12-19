@@ -262,7 +262,7 @@ class ItemFactory
     throw new Exception($"Item {name} is not defined!");
   }
 
-  public static Item Illusion(ItemNames name, Loc loc, GameObjectDB objDB)
+  public static Item Illusion(ItemNames name, GameObjectDB objDB)
   {
     Item item = Get(name, objDB);
     item.Traits = [];
