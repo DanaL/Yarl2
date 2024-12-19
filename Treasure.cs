@@ -53,9 +53,9 @@ class Treasure
       var loot = PoorTreasure(1, rng, objDb);
       return loot[0];
     }
-    else if (trait is DropTrait drop)
+    else if (trait is CarriesTrait carries)
     {
-      if (rng.Next(100) < drop.Chance && Enum.TryParse(drop.ItemName.ToUpper(), out ItemNames itemName))
+      if (rng.Next(100) < carries.Chance && Enum.TryParse(carries.ItemName.ToUpper(), out ItemNames itemName))
       {
         return ItemFactory.Get(itemName, objDb);
       }
