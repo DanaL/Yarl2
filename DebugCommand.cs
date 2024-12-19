@@ -154,9 +154,28 @@ class DebugCommand(GameState gs)
 
   private string AddItem(string action, string name)
   {
+    bool illusion = false;
+    if (name.EndsWith("illusion"))
+    {
+      illusion = true;
+      name = name.Substring(0, name.LastIndexOf(' '));
+    }
+
     if (ItemMap.TryGetValue(name, out var itemEnum))
     {
-      Item item = ItemFactory.Get(itemEnum, _gs.ObjDb);  
+      Loc loc = _gs.Player.Loc;
+
+      Item item;
+      if (illusion)
+      {
+        var adjSpots = AdjSpots(_gs.Player.Loc);
+        loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
+        item = ItemFactory.Illusion(itemEnum, loc, _gs.ObjDb);
+      }
+      else
+      {
+        item = ItemFactory.Get(itemEnum, _gs.ObjDb);
+      }
 
       if (name == "rubble" || name == "boulder")
       {
@@ -164,14 +183,15 @@ class DebugCommand(GameState gs)
         if (adjSpots.Count == 0)
           return "No open spot to add item";
 
-        Loc loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-        _gs.ObjDb.SetToLoc(loc, item);
-        _gs.PrepareFieldOfView();
+        loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
+        _gs.ObjDb.SetToLoc(loc, item);        
       }        
-      else if (action == "give")
+      else if (action == "give" && !illusion)
         _gs.Player.Inventory.Add(item, _gs.Player.ID);
       else       
-        _gs.ObjDb.SetToLoc(_gs.Player.Loc, item);  
+        _gs.ObjDb.SetToLoc(loc, item);
+
+      _gs.PrepareFieldOfView();
 
       return "";   
     }

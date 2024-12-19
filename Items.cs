@@ -32,7 +32,8 @@ enum ItemType
   Reagent,
   Environment, // I'm implementing things like mist as 'items'
   Landscape,
-  Statue
+  Statue,
+  Illusion
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -260,7 +261,16 @@ class ItemFactory
 
     throw new Exception($"Item {name} is not defined!");
   }
-  
+
+  public static Item Illusion(ItemNames name, Loc loc, GameObjectDB objDB)
+  {
+    Item item = Get(name, objDB);
+    item.Traits = [];
+    item.Type = ItemType.Illusion;
+
+    return item;    
+  }
+
   static Glyph GlyphForRing(string name)
   {
     string material = Item.IDInfo.TryGetValue(name, out var itemIDInfo) ? itemIDInfo.Desc : "";
