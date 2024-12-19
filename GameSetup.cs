@@ -599,14 +599,14 @@ class CampaignCreator(UserInterface ui)
         campaign.FactDb = factDb;
 
         int maxDepth = 5;
-        var monsterDecks = DeckBulder.MakeDecks(1, maxDepth, factDb.Villain, rng);
-        factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBulder.EarlyMainOccupant });
+        var monsterDecks = DeckBuilder.MakeDecks(1, maxDepth, factDb.Villain, rng);
+        factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = DeckBuilder.EarlyMainOccupant });
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
         PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
-        SetLevel5MiniBoss(mainDungeon, objDb, factDb, DeckBulder.EarlyMainOccupant, rng);
+        SetLevel5MiniBoss(mainDungeon, objDb, factDb, DeckBuilder.EarlyMainOccupant, rng);
 
         campaign.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);

@@ -55,14 +55,13 @@ class MonsterDeck
   }
 }
 
-class DeckBulder
+class DeckBuilder
 {
   public static string EarlyMainOccupant { get; set; } = "";
 
   // The upper levels won't really follow theme, but we will choose a preference 
   // for goblin dominated or kobold dominated
 
-  // I wonder if it would make more sense to have these in a text file and read them in?
   static MonsterDeck EarlyLevelDeck(int level, Random rng)
   {
     MonsterDeck deck = new();
@@ -80,17 +79,17 @@ class DeckBulder
     }
     ++j;
 
-    while (j < lines.Length && !lines[j].StartsWith("level", StringComparison.CurrentCultureIgnoreCase))
+    string[] monsters = lines[j].Split(',');
+    foreach (string m in monsters)
     {
-      int k = lines[j].LastIndexOf(' ');
-      string monster = lines[j][..k];
-      if (!int.TryParse(lines[j][k..], out int count))
+      int k = m.Trim().LastIndexOf(' ');
+      string monster = m[..k];
+      if (!int.TryParse(m[k..], out int count))
         count = 1;
-      for (int i = 0; i < count; i++)
+      for (int i = 0; i < monsters.Length; ++i)
         deck.Monsters.Add(monster);
-      ++j;
     }
-
+    
     return deck;
   }
 
