@@ -667,7 +667,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         var loot = Treasure.LootFromTrait(lt, rng, ObjDb);
         if (loot is not null)
           ItemDropped(loot, victim.Loc);
-      }      
+      }
+      else if (t is DropTrait d)
+      {
+        if (rng.Next(100) < d.Chance && Enum.TryParse(d.ItemName.ToUpper(), out ItemNames itemName))
+        {
+          Item item = ItemFactory.Get(itemName, ObjDb);
+          ItemDropped(item, victim.Loc);
+        }
+      }
       else if (t is RetributionTrait rt)
       {
         RetributionDamage(victim, rt, result);
