@@ -129,7 +129,7 @@ class Popup : IPopup
     Title = title;
     if (width > 0)
       Width = width + 4;
-    else if (widthGuess == 0)
+    else if (widthGuess == 0 || title.Length > widthGuess)
       Width = title.Length + 5;
     else if (widthGuess < UserInterface.ViewWidth - 4)
       Width = widthGuess + 4;
