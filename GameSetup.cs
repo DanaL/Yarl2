@@ -144,7 +144,7 @@ class CampaignCreator(UserInterface ui)
 
   static void SetItemIDInfo(Random rng)
   {
-    List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "tin", "glass", "iron", "silver", "balsa"];
+    List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "cherrywood", "tin", "glass", "iron", "silver", "balsa"];
 
     Item.IDInfo = [];
 
@@ -166,6 +166,10 @@ class CampaignCreator(UserInterface ui)
 
     j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of frost", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
+
+    j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of slow monster", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
 
     List<string> ringMaterials = ["silver", "iron", "ruby", "diamond", "gold", "jade", "wood"];
     j = rng.Next(ringMaterials.Count);

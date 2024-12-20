@@ -954,5 +954,26 @@
     "Traits": [
       "Grants#Cutpurse"
     ]
+  },
+  {
+    "Name": "WAND_SLOW_MONSTER",
+    "DescriptiveName": "wand of slow monster",
+    "Type": "Wand",
+    "Value": 150,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#10#false#slowmonster"
+    ]
+  },
+  {
+    "Name": "LEATHER_GLOVES",
+    "DescriptiveName": "leather gloves",
+    "Type": "Armour",
+    "Value": 10,
+    "Glyph": "[,lightbrown,brown,black,black",
+    "Traits": [
+      "Armour#Gloves#1#0",
+      "Plural"
+    ]
   }
 ]

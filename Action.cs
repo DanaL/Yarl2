@@ -89,7 +89,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    var trajectory = Trajectory();
+    var trajectory = Trajectory(false);
     List<Loc> pts = [];
     bool creatureTargeted = false;
     bool targetHit = false;
@@ -2370,6 +2370,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
           ArmourParts.Shield => "a shield.",
           ArmourParts.Boots => "boots.",
           ArmourParts.Cloak => "a cloak.",
+          ArmourParts.Gloves => "some gloves",
           _ => "some armour."
         };
         result = new ActionResult() { Complete = true, Messages = [msg] };
@@ -2411,16 +2412,12 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     // may be interrupted
     List<Loc> pts = [];
     Loc actualLoc = Target;
-    foreach (var pt in Trajectory())
-    {      
-      var tile = GameState!.TileAt(pt);
-      if (!(tile.Passable() || tile.PassableByFlight()))
-        break;
-
+    foreach (var pt in Trajectory(true))
+    {            
       actualLoc = pt;
       pts.Add(pt);
 
-      if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+      if (GameState!.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
         break;      
     }
 
@@ -2476,6 +2473,63 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   }
 }
 
+class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) : TargetedAction(gs, actor)
+{
+  readonly Trait _source = src;
+  readonly ulong SourceId = sourceId;
+
+    public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    Item ray = new()
+    {
+      Name = "ray of slowness",
+      Type = ItemType.Weapon,
+      Glyph = new Glyph('*', Colours.FADED_PURPLE, Colours.FADED_PURPLE, Colours.BLACK, Colours.BLACK)
+    };
+    GameState!.ObjDb.Add(ray);
+
+    List<Loc> pts = Trajectory(true).Skip(1).ToList();
+    var anim = new BeamAnimation(GameState!, pts, Colours.FADED_PURPLE, Colours.BLACK);
+    GameState!.UIRef().PlayAnimation(anim, GameState);
+
+    foreach (Loc loc in pts)
+    {
+      if (GameState.ObjDb.Occupant(loc) is Actor victim)
+      {
+        bool alreadyAffected = false;
+        foreach (Trait t in victim.Traits)
+        {
+          // They can only be affected once by the same wand
+          if (t is AlacrityTrait at && at.SourceId == SourceId)
+          {
+            alreadyAffected = true;
+            break;
+          }
+        }
+
+        if (!alreadyAffected)
+          victim.Traits.Add(new AlacrityTrait() { Amt = -0.5, SourceId = SourceId });
+      }
+    }
+
+    if (_source is WandTrait wand)
+    {
+      Item.IDInfo["wand of slow monster"] = Item.IDInfo["wand of slow monster"] with { Known = true };
+      wand.Used();
+    }
+    else if (_source is IUSeable useable)
+    {
+      useable.Used();
+    }
+
+    return result;
+  }
+}
+
 class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
@@ -2497,14 +2551,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
     // Ray of frost is a beam so unlike things like magic missle, it doesn't stop 
     // when it hits an occupant.
-    List<Loc> pts = [];
-    foreach (var pt in Trajectory())
-    {
-      var tile = GameState!.TileAt(pt);
-      if (!(tile.Passable() || tile.PassableByFlight()))
-        break;
-      pts.Add(pt);
-    }
+    List<Loc> pts = Trajectory(true);
 
     var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
@@ -2555,7 +2602,8 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
     GameState!.ObjDb.Add(missile);
 
     List<Loc> pts = [];
-    foreach (var pt in Trajectory())
+    // I think I can probably clean this crap up
+    foreach (var pt in Trajectory(false))
     {
       var tile = GameState!.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
@@ -2606,11 +2654,29 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   protected Loc Target { get; set; }
 
-  protected List<Loc> Trajectory()
+  // As in, clear of obstacles, not opacity
+  bool ClearTileAt(Loc loc)
   {
-    return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
+    Tile tile = GameState!.TileAt(loc);
+    if (!(tile.Passable() || tile.PassableByFlight()))
+      return false;
+    if (GameState.ObjDb.BlockersAtLoc(loc))
+      return false;
+
+    return true;
+  }
+
+  protected List<Loc> Trajectory(bool filterBlockers)
+  {
+    if (filterBlockers)
+      return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
                .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+               .Where(l => ClearTileAt(l))
                .ToList();
+    else
+      return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
+                 .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
+                 .ToList();
   }
 
   public override void ReceiveUIResult(UIResult result) => Target = ((LocUIResult)result).Loc;
@@ -2729,7 +2795,7 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
   }
 }
 
-class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, actor)
+class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : Action(gs, actor)
 {
   readonly WandTrait _wand = wand;
 
@@ -2766,6 +2832,11 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand) : Action(gs, acto
       case "frost":
         inputer = new Aimer(GameState!, player.Loc, 7);
         player.ReplacePendingAction(new FrostRayAction(GameState!, player, _wand), inputer);
+        result.Messages.Add("Which way?");
+        break;
+      case "slowmonster":
+        inputer = new Aimer(GameState!, player.Loc, 9);
+        player.ReplacePendingAction(new RayOfSlownessAction(GameState!, player, _wand, wandId), inputer);
         result.Messages.Add("Which way?");
         break;
     }

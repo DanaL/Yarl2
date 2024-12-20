@@ -255,6 +255,8 @@ class Village
       smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
     if (rng.NextDouble() < 0.2)
       smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
+    if (rng.NextDouble() < 0.2)
+      smith.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), smith.ID);
 
     return smith;
   }
@@ -452,7 +454,7 @@ class Village
     int newStock = rng.Next(1, 5);
     for (int j = 0; j < newStock; j++)
     {
-      int roll = rng.Next(10);
+      int roll = rng.Next(11);
       if (roll == 0)
         smith.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, objDb), smith.ID);
       else if (roll == 1)
@@ -471,6 +473,8 @@ class Village
         smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
       else if (roll == 9)
         smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
+      else if (roll == 10)
+        smith.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), smith.ID);
     }
   }
 

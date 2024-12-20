@@ -2419,7 +2419,8 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc
       return new UseResult(true, "Nothing happens", new PassAction(), null);
     }
 
-    return new UseResult(true, "", new UseWandAction(gs, user, this), null);  
+    ulong itemId = item is not null ? item.ID : 0;
+    return new UseResult(true, "", new UseWandAction(gs, user, this, itemId), null);  
   }
 
   public void Used() => --Charges;

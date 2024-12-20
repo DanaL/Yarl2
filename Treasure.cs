@@ -28,7 +28,7 @@ class Treasure
       ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
       ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
       ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
-      ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE
+      ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES
   ]; 
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
@@ -37,9 +37,9 @@ class Treasure
       ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL,
       ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD,
       ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
-      ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
-      ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION,
-      ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK,
+      ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
+      ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
+      ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
       ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
@@ -91,7 +91,7 @@ class Treasure
 
   public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(20);
+    int roll = rng.Next(21);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -112,6 +112,7 @@ class Treasure
       15 => ItemFactory.Get(ItemNames.LESSER_HEALTH_CHARM, objDb),
       16 => ItemFactory.Get(ItemNames.RING_OF_PROTECTION, objDb),
       18 => ItemFactory.Get(ItemNames.RING_OF_ADORNMENT, objDb),
+      19 => ItemFactory.Get(ItemNames.WAND_SLOW_MONSTER, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }

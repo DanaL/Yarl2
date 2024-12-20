@@ -91,7 +91,9 @@ class DebugCommand(GameState gs)
     {"troll brooch", ItemNames.TROLL_BROOCH },
     {"smouldering charm", ItemNames.SMOULDERING_CHARM },
     {"mithril ore", ItemNames.MITHRIL_ORE },
-    {"cutpurse crest", ItemNames.CUTPURSE_CREST }
+    {"cutpurse crest", ItemNames.CUTPURSE_CREST },
+    {"wand of slow monster", ItemNames.WAND_SLOW_MONSTER },
+    {"leather gloves", ItemNames.LEATHER_GLOVES }
   };
 
   public string DoCommand(string txt)

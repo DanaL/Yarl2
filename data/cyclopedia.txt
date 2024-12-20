@@ -247,3 +247,6 @@ A shimmering metal much valued by craftspeople.
 #
 cutpurse crest
 A small pin with a raven symbol, crafted in homage to a famous thief. This talisman grants you a chance to rifle through your opponent's pockets when you attack.
+#
+leather gloves
+Stout protection for your hands.
