@@ -60,13 +60,12 @@ class DeckBuilder
   // The upper levels won't really follow theme, but we will choose a preference 
   // for goblin dominated or kobold dominated
 
-  static MonsterDeck EarlyLevelDeck(string earlyMainOccupant, int level, Random rng)
+  static MonsterDeck ReadDeck(string deckname, int level, Random rng)
   {
     MonsterDeck deck = new();
    
-
     // Someday in the future I'll need to check for invalid data files...
-    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{earlyMainOccupant}.txt"));
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{deckname}.txt"));
     int j = 0;
     while (j < lines.Length && !lines[j].Equals($"LEVEL {level}", StringComparison.CurrentCultureIgnoreCase))
     {
@@ -95,7 +94,14 @@ class DeckBuilder
     // Sorry, I just think of dungeon levels as 1-indexed instead of 0-indexed
     for (int lvl = 1; lvl <= 5; lvl++)
     {
-      var deck = EarlyLevelDeck(earlyMainOccupant, lvl, rng);
+      var deck = ReadDeck(earlyMainOccupant, lvl, rng);
+      deck.Reshuffle(rng);
+      decks.Add(deck);
+    }
+
+    for (int lvl = 6; lvl <= 10; lvl++)
+    {
+      var deck = ReadDeck("midlevel", lvl, rng);
       deck.Reshuffle(rng);
       decks.Add(deck);
     }

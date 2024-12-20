@@ -603,7 +603,7 @@ class CampaignCreator(UserInterface ui)
         var monsterDecks = DeckBuilder.MakeDecks(earlyMainOccupant, factDb.Villain, rng);
         
         var dBuilder = new MainDungeonBuilder();
-        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 5,
+        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 10,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
         PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
