@@ -43,7 +43,8 @@ class Treasure
       ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
-      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM
+      ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
+      ItemNames.CLOAK_OF_PROTECTION
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)

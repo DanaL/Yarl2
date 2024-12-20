@@ -975,5 +975,15 @@
       "Armour#Gloves#1#0",
       "Plural"
     ]
+  },
+  {
+    "Name": "CLOAK_OF_PROTECTION",
+    "DescriptiveName": "cloak of protection",
+    "Type": "Armour",
+    "Value": 10,
+    "Glyph": "[,grey,darkgrey,black,black",
+    "Traits": [
+      "Armour#Cloak#2#0"      
+    ]
   }
 ]

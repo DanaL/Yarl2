@@ -250,3 +250,6 @@ A small pin with a raven symbol, crafted in homage to a famous thief. This talis
 #
 leather gloves
 Stout protection for your hands.
+#
+cloak of protection
+A cloak with magical protection runes woven into its fibers, providing a nice AC boost.
