@@ -86,7 +86,7 @@ class DeckBuilder
       string monster = m[..k];
       if (!int.TryParse(m[k..], out int count))
         count = 1;
-      for (int i = 0; i < monsters.Length; ++i)
+      for (int i = 0; i < count; ++i)
         deck.Monsters.Add(monster);
     }
     

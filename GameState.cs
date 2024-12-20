@@ -664,13 +664,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       if (t is LootTrait lt)
       {
-        var loot = Treasure.LootFromTrait(lt, rng, ObjDb);
+        var loot = Treasure.LootFromTrait(lt, Rng, ObjDb);
         if (loot is not null)
           ItemDropped(loot, victim.Loc);
       }
       else if (t is DropTrait d)
       {
-        if (rng.Next(100) < d.Chance && Enum.TryParse(d.ItemName.ToUpper(), out ItemNames itemName))
+        if (Rng.Next(100) < d.Chance && Enum.TryParse(d.ItemName.ToUpper(), out ItemNames itemName))
         {
           Item item = ItemFactory.Get(itemName, ObjDb);
           ItemDropped(item, victim.Loc);
