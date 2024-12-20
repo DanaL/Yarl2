@@ -152,6 +152,7 @@ class Constants
   public static readonly Sqr BLANK_SQ = new(Colours.BLACK, Colours.BLACK, ' ');
   public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
   public const int TELEPATHY_RANGE = 40; // I don't really have a better spot for this right now
+  public static readonly string VERSION = "0.3.0";
 }
 
 class Util

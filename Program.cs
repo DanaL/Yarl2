@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-
 using System.Text.Json;
 using System.Runtime.InteropServices;
 
@@ -19,9 +18,9 @@ var options = Options.LoadOptions();
 
 UserInterface display;
 if (options.Display == "Bearlib")
-  display = new BLUserInferface("Dana's Delve 0.2.0 + Bearlib", options);
+  display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);
 else
-  display = new SDLUserInterface("Dana's Delve 0.2.0 + SDL", options);
+  display = new SDLUserInterface($"Dana's Delve {Constants.VERSION} + SDL", options);
 
 try
 {
