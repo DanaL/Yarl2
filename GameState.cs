@@ -1222,6 +1222,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         else
           sb.Append($" There are {item.Value} zorkmids here!");
       }
+      else if (item.HasTrait<PluralTrait>())
+      {
+        sb.Append($" There are some {item.FullName} here.");
+      }
       else if (count == 1)
       {
         sb.Append($" There is {item.FullName.IndefArticle()} here.");
