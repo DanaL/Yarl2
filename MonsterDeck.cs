@@ -56,22 +56,17 @@ class MonsterDeck
 }
 
 class DeckBuilder
-{
-  public static string EarlyMainOccupant { get; set; } = "";
-
+{  
   // The upper levels won't really follow theme, but we will choose a preference 
   // for goblin dominated or kobold dominated
 
-  static MonsterDeck EarlyLevelDeck(int level, Random rng)
+  static MonsterDeck EarlyLevelDeck(string earlyMainOccupant, int level, Random rng)
   {
     MonsterDeck deck = new();
-    if (EarlyMainOccupant == "")
-    {
-      EarlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
-    }
+   
 
     // Someday in the future I'll need to check for invalid data files...
-    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{EarlyMainOccupant}.txt"));
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{earlyMainOccupant}.txt"));
     int j = 0;
     while (j < lines.Length && !lines[j].Equals($"LEVEL {level}", StringComparison.CurrentCultureIgnoreCase))
     {
@@ -93,18 +88,16 @@ class DeckBuilder
     return deck;
   }
 
-  public static List<MonsterDeck> MakeDecks(int startLevel, int depth, VillainType villain, Random rng)
-  {
+  public static List<MonsterDeck> MakeDecks(string earlyMainOccupant, VillainType villain, Random rng)
+  {    
     List<MonsterDeck> decks = [];
 
-    int lvl = startLevel;
-    while (lvl < startLevel + depth)
+    // Sorry, I just think of dungeon levels as 1-indexed instead of 0-indexed
+    for (int lvl = 1; lvl <= 5; lvl++)
     {
-      var deck = EarlyLevelDeck(lvl, rng);
+      var deck = EarlyLevelDeck(earlyMainOccupant, lvl, rng);
       deck.Reshuffle(rng);
       decks.Add(deck);
-
-      ++lvl;
     }
 
     return decks;
