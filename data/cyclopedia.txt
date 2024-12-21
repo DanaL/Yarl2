@@ -253,3 +253,6 @@ Stout protection for your hands.
 #
 cloak of protection
 A cloak with magical protection runes woven into its fibers, providing a nice AC boost.
+#
+gauntlets of power
+Metal gloves infused with runes in the language of giants, granting their strength.

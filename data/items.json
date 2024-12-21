@@ -985,5 +985,17 @@
     "Traits": [
       "Armour#Cloak#2#0"      
     ]
+  },
+  {
+    "Name": "GAUNTLETS_OF_POWER",
+    "DescriptiveName": "gauntlets of power",
+    "Type": "Armour",
+    "Value": 50,
+    "Glyph": "[,grey,darkgrey,black,black",
+    "Traits": [
+      "Armour#Gloves#1#0",
+      "Plural",
+      "Grants#StatBuff&0&max&Strength&2&item"
+    ]
   }
 ]
