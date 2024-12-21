@@ -742,7 +742,14 @@ class GrantsTrait : Trait
 
   public void Remove(GameObj obj, GameState gs, GameObj src)
   {
-    obj.Traits = obj.Traits.Where(t => t.SourceId != src.ID).ToList();
+    List<TemporaryTrait> toRemove = obj.Traits.Where(t => t.SourceId == src.ID && t is TemporaryTrait)
+                    .Cast<TemporaryTrait>()
+                    .ToList();
+    foreach (TemporaryTrait t in toRemove)
+    {
+      t.Remove(gs);
+    }
+   
     gs.RemoveListenersBySourceId(src.ID);
 
     if (obj is Actor actor)
