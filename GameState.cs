@@ -244,9 +244,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     var tile = TileAt(loc);
     List<string> msgs = [];
-    foreach (var flag in tile.TerrainFlags().Where(t => t != EffectFlag.None))
+    foreach (DamageType effect in tile.TerrainEffects())
     {
-      string s = EffectApplier.Apply(flag, this, item, null);
+      var (s, _) = EffectApplier.Apply(effect, this, item, null);
       if (s != "")
       {
         msgs.Add(s);
@@ -531,7 +531,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       messages.Add(moveMsg);
       actor.Loc = destination;
 
-      string invMsgs = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, this, actor.Loc);
+      string invMsgs = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
       if (invMsgs.Length > 0)
       {
         messages.Add(invMsgs);

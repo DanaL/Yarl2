@@ -256,3 +256,6 @@ A cloak with magical protection runes woven into its fibers, providing a nice AC
 #
 gauntlets of power
 Metal gloves infused with runes in the language of giants, granting their strength.
+#
+flame beetle
+A dog-sized beetle whose carapace glows with fiery heat.

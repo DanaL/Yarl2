@@ -25,7 +25,9 @@ enum DamageType
   Necrotic,
   Force,
   Confusion,
-  Fear
+  Fear,
+  Wet,
+  Rust
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -178,7 +180,7 @@ class Battle
         if (metalItems.Count > 0)
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
-          string s = EffectApplier.Apply(EffectFlag.Rust, gs, damagedItem, target);
+          var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, damagedItem, target);
           if (s != "")
           {
             result.Messages.Add(s);
@@ -307,7 +309,7 @@ class Battle
       Item? weapon = actor.Inventory.ReadiedWeapon();
       if (weapon is not null)
       {
-        string s = EffectApplier.Apply(EffectFlag.Rust, gs, weapon, actor);
+        var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
         if (s != "" && attacker is Player)
         {
           result.Messages.Add(s);

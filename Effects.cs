@@ -13,15 +13,6 @@ using System.Text;
 
 namespace Yarl2;
 
-// I suspect I might eventually drop this?
-[Flags]
-enum EffectFlag
-{
-  None = 0,
-  Wet = 1,
-  Rust = 2
-}
-
 // I sort of feel like it's maybe 'better' design to have each Item/Trait host
 // the code that's specific to an effect inside the class? But for my dumb brain
 // I think it makes sense to have the effects code in one place.
@@ -140,16 +131,44 @@ class EffectApplier
     thing.Traits = keepers;
   }
 
-  public static string Apply(EffectFlag flag, GameState gs, GameObj receiver, Actor? owner)
-  {    
-    switch (flag)
+  static (string, bool) ApplyFire(GameState gs, GameObj receiver, Actor? owner)
+  {
+    int chance = 50;
+    if (owner is not null)
     {
-      case EffectFlag.Wet:
-        return ApplyWet(gs, receiver, owner);
-      case EffectFlag.Rust:
-        return ApplyRust(gs, receiver, owner);
+      foreach (Trait t in owner.Traits)
+      {
+        if (t is ImmunityTrait it && it.Type == DamageType.Fire)
+          return ("", false);
+        if (t is ResistanceTrait rt && rt.Type == DamageType.Fire) 
+        {
+          chance = 10;
+          break;
+        }
+      }
+    }
+
+    if (receiver.HasTrait<FlammableTrait>() && gs.Rng.Next(100) < chance)
+    {
+      string s = $"{receiver.FullName.IndefArticle().Capitalize()} burns up!";
+      return (s, true);
+    }
+
+    return ("", false);
+  }
+
+  public static (string, bool) Apply(DamageType damageType, GameState gs, GameObj receiver, Actor? owner)
+  {    
+    switch (damageType)
+    {
+      case DamageType.Wet:
+        return (ApplyWet(gs, receiver, owner), false);
+      case DamageType.Rust:
+        return (ApplyRust(gs, receiver, owner), false);
+      case DamageType.Fire:
+        return ApplyFire(gs, receiver, owner);
       default:
-        return "";
+        return ("", false);
     }    
   }
 }

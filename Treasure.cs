@@ -238,7 +238,7 @@ class Treasure
         break;
       case 3:
         Item helm = ItemFactory.Get(ItemNames.HELMET, objDb);
-        EffectApplier.Apply(EffectFlag.Rust, gs, helm, null);
+        EffectApplier.Apply(DamageType.Rust, gs, helm, null);
         items.Add(helm);
         break;
       case 4:
@@ -257,6 +257,11 @@ class Treasure
         break;
       case 6:
         items.Add(ItemFactory.Get(ItemNames.GHOSTCAP_MUSHROOM, objDb));
+        break;
+      case 7:
+        Item claymore = ItemFactory.Get(ItemNames.CLAYMORE, objDb);
+        EffectApplier.Apply(DamageType.Rust, gs, claymore, null);
+        items.Add(claymore);
         break;
       default:
         break;

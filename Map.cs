@@ -189,18 +189,15 @@ abstract class Tile(TileType type) : IZLevel
     _ => "unknown"
   };
 
-  public List<EffectFlag> TerrainFlags()
+  public List<DamageType> TerrainEffects()
   {
-    List<EffectFlag> flags = [];
+    List<DamageType> flags = [];
 
     switch (Type)
     {
       case TileType.Water:
       case TileType.DeepWater:
-        flags.Add(EffectFlag.Wet);
-        break;
-      default:
-        flags.Add(EffectFlag.None);
+        flags.Add(DamageType.Wet);
         break;
     }
 

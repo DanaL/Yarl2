@@ -2312,9 +2312,9 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 
   public void Used() {}
 
-  public string ReceiveEffect(EffectFlag flag, GameState gs, Item item, Loc loc)
+  public string ReceiveEffect(DamageType damageType, GameState gs, Item item, Loc loc)
   {
-    if (Lit && flag == EffectFlag.Wet)
+    if (Lit && damageType == DamageType.Wet)
       return Extinguish(gs, item, loc);
     else
       return "";
@@ -2628,9 +2628,9 @@ class TraitFactory
           Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
           MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
     { "MobMelee", (pieces, gameObj) => {
-      Enum.TryParse(pieces[3], out DamageType dt);
+      Enum.TryParse(pieces[5], out DamageType dt);
       return new MobMeleeTrait() {
-          Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
+          Name = "Melee", DamageDie = int.Parse(pieces[3]), DamageDice = int.Parse(pieces[4]),
           MinRange = 1, MaxRange = 1, DamageType = dt }; }},
     { "MobMissile", (pieces, gameObj) => {
       Enum.TryParse(pieces[5], out DamageType dt);

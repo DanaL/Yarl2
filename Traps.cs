@@ -160,7 +160,7 @@ class Traps
         s = $"{actor.FullName.Capitalize()} is soaked by a blast of water";
       }
       List<string> msgs = [ s ];      
-      s = actor.Inventory.ApplyEffectToInv(EffectFlag.Wet, gs, loc);
+      s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);
       if (s != "")
         msgs.Add(s);
 

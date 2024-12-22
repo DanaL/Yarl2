@@ -154,8 +154,12 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;
+    bool fireDamage = false;
     foreach (var dmg in damages)
     {
+      if (dmg.Item2 == DamageType.Fire)
+        fireDamage = true;
+
       int d = dmg.Item1;
       if (dmg.Item2 == DamageType.Blunt && HasActiveTrait<ResistBluntTrait>())
         d /= 2;
@@ -189,6 +193,13 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     {
       total += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
       msg += $" {weapon.FullName.DefArticle().Capitalize()} sears {FullName}!";
+    }
+
+    if (total > 0 && fireDamage)
+    {
+      string s = Inventory.ApplyEffectToInv(DamageType.Fire, gs, Loc);
+      if (s != "")
+        msg += $" {s}";
     }
 
     AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();

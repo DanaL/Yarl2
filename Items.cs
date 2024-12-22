@@ -700,16 +700,21 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return (EquipingResult.Conflict, ArmourParts.Shirt);
   }
 
-  public string ApplyEffectToInv(EffectFlag effect, GameState gs, Loc loc)
+  public string ApplyEffectToInv(DamageType damageType, GameState gs, Loc loc)
   {
     Actor? owner = (Actor?) gs.ObjDb.GetObj(OwnerID);
     List<string> msgs = [];
 
     foreach (var item in Items())
     {
-      string s = EffectApplier.Apply(effect, gs, item, owner);
+      var (s, destroyed) = EffectApplier.Apply(damageType, gs, item, owner);
       if (s != "")
         msgs.Add(s);
+      if (destroyed)
+      {
+        RemoveByID(item.ID);
+        gs.ObjDb.RemoveItemFromGame(loc, item);
+      }
     }
 
     return string.Join(' ', msgs).Trim();
