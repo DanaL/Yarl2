@@ -94,14 +94,21 @@ class DeckBuilder
     // Sorry, I just think of dungeon levels as 1-indexed instead of 0-indexed
     for (int lvl = 1; lvl <= 5; lvl++)
     {
-      var deck = ReadDeck(earlyMainOccupant, lvl, rng);
+      MonsterDeck deck = ReadDeck(earlyMainOccupant, lvl, rng);
       deck.Reshuffle(rng);
       decks.Add(deck);
     }
 
     for (int lvl = 6; lvl <= 10; lvl++)
     {
-      var deck = ReadDeck("midlevel", lvl, rng);
+      MonsterDeck deck = ReadDeck("midlevel", lvl, rng);
+
+      if (villain == VillainType.FieryDemon)
+      {
+        deck.Monsters.Add("flame beetle");
+        deck.Monsters.Add("flame beetle");
+      }
+      
       deck.Reshuffle(rng);
       decks.Add(deck);
     }
