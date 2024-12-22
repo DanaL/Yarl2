@@ -1268,7 +1268,7 @@ abstract class UserInterface
     string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
     text[7] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|          |    |";
-    text[8] = $@"    |       on level: {depth}       |          |____|";
+    text[8] = $@"    |       on level {depth}        |          |____|";
     ClosePopup();
     CheatSheetMode = CheatSheetMode.Messages;
     SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
