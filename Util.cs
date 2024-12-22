@@ -511,7 +511,7 @@ class Util
     TileType.DungeonWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.DungeonFloor => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.StoneFloor => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.StoneRoad => new Glyph('•', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.StoneRoad => new Glyph('·', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.ClosedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.LockedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.OpenDoor => new Glyph('\\', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
