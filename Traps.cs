@@ -17,7 +17,7 @@ class Traps
   {
     UserInterface ui = gs.UIRef();
     bool trapSqVisible = gs.LastPlayerFoV.Contains(actor.Loc);
-
+    
     if (actor.HasTrait<IllusionTrait>())
       return;
 
@@ -29,6 +29,7 @@ class Traps
       
       if (actor is Player player)
       {
+        player.Stats[Attribute.Nerve].Change(-15);
         player.Running = false;
         ui.SetPopup(new Popup(msg, "", -1, -1));
       }
@@ -49,12 +50,20 @@ class Traps
       msgs.Add(gs.ThingAddedToLoc(loc));
       gs.UIRef().AlertPlayer(msgs);
 
+      if (actor is Player player)
+      {
+        player.Stats[Attribute.Nerve].Change(-15);
+      }
+
       throw new AbnormalMovement(loc);
     }
     else if (!flying && (tile.Type == TileType.HiddenPit || tile.Type == TileType.Pit))
     {
-      if (actor is Player player)
+      if (actor is Player player) 
+      {
+        player.Stats[Attribute.Nerve].Change(-10);
         player.Running = false;
+      }
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
       string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!";
@@ -77,6 +86,7 @@ class Traps
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
+      // Hmm I don't think I'll charge stress for teleport traps
       if (actor is Player player)
         player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TeleportTrap));
@@ -108,8 +118,11 @@ class Traps
     }
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
     {
-      if (actor is Player player)
+      if (actor is Player player) 
+      {
         player.Running = false;
+        player.Stats[Attribute.Nerve].Change(-10);
+      }
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
       if (trapSqVisible)
         gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!");
@@ -153,6 +166,7 @@ class Traps
       string s;
       if (actor is Player player) 
       {
+        player.Stats[Attribute.Nerve].Change(-10);
         player.Running = false;
         s = "You are soaked by a blast of water!";
       }
@@ -169,8 +183,11 @@ class Traps
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
     {
-      if (actor is Player player)
+      if (actor is Player player) 
+      {
+        player.Stats[Attribute.Nerve].Change(-5);
         player.Running = false;
+      }
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
       
       List<string> msgs = [];
@@ -237,6 +254,11 @@ class Traps
       _ => (0, -1)
     };
 
+    if (actor is Player player)
+    {
+      player.Stats[Attribute.Nerve].Change(-10);
+    }
+    
     HashSet<Loc> affected = [];
     Loc start = trigger.JetLoc with { Row = trigger.JetLoc.Row + delta.Item1, Col = trigger.JetLoc.Col + delta.Item2 };
     affected.Add(start);
