@@ -929,7 +929,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     if (InWilderness)
     {
-      // stress is releaved during the day
+      var (hour, _) = CurrTime();
+      if (hour >= 5 && hour < 21)
+        Player.Stats[Attribute.Nerve].Change(1);
     }
     else
     {
