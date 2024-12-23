@@ -42,12 +42,13 @@ enum Attribute
   BowUse,
   CudgelUse,
   FinesseUse,
-  PolearmsUse,
+  PolearmsUse, 
   SwordUse,  
   MetPlayer,
   ShopMenu,
   MobAttitude,
-  InventoryRefresh
+  InventoryRefresh,
+  Nerve
 }
 
 class Stat

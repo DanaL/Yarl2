@@ -96,7 +96,8 @@ class PlayerCreator
       { Attribute.Dexterity, new Stat(StatRoll(rng)) },
       { Attribute.Piety, new Stat(StatRoll(rng)) },
       { Attribute.Will, new Stat(StatRoll(rng)) },
-      { Attribute.Depth, new Stat(0) },      
+      { Attribute.Depth, new Stat(0) },
+      { Attribute.Nerve, new Stat(1000) }
     };
 
     int roll;

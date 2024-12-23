@@ -913,6 +913,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
     
+    CheckForStress();
+
     ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
 
     if (UI.PauseForResponse)
@@ -920,6 +922,34 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.BlockFoResponse(this);
       UI.PauseForResponse = false;
       UI.ClosePopup();
+    }
+  }
+
+  void CheckForStress()
+  {
+    if (InWilderness)
+    {
+      // stress is releaved during the day
+    }
+    else
+    {
+      // The player accrues stress more slowly on levels they've already
+      // explored
+      int maxDepth = Player.Stats[Attribute.Depth].Curr - 1;
+      if (CurrLevel < maxDepth && Turn % 4 == 0)
+        return;
+
+      // limit how stressed the player will get depending on how deep we are
+      int stresssFloor = CurrLevel switch 
+      {
+        0 or 1 or 2 => 601,
+        3 or 4 or 5 => 301,
+        6 or 7 or 8 => 151,
+        _ => 0
+      };
+      int curr = Player.Stats[Attribute.Nerve].Curr;
+      if (curr > stresssFloor)
+        Player.Stats[Attribute.Nerve].Change(-1);
     }
   }
 
