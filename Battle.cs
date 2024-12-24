@@ -495,7 +495,11 @@ class Battle
       }
     }
     
-    int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon);    
+    int roll = AttackRoll(gs.Rng) + CalcAttackMod(attacker, weapon);
+    
+    var (stressPenalty, _) = attacker.StressPenalty();
+    roll -= stressPenalty;
+
     if (roll >= target.AC)
     {
       if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
@@ -705,7 +709,10 @@ class Battle
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (attacker.HasTrait<TipsyTrait>())
       roll -= gs.Rng.Next(1, 6);
-      
+  
+    var (stressPenalty, _) = attacker.StressPenalty();
+    roll -= stressPenalty;
+
     if (roll >= target.AC)
     {      
       if (anim is not null)

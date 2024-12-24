@@ -112,6 +112,28 @@ abstract class Actor : GameObj, IPerformer, IZLevel
     return baseNoise;
   }
 
+  public (int, StressLevel) StressPenalty()
+  {
+    int penalty = 0;
+    StressLevel level = StressLevel.None;
+
+    if (Traits.OfType<StressTrait>().FirstOrDefault() is StressTrait stress)
+    {
+      level = stress.Stress;
+      penalty = stress.Stress switch 
+      {
+        StressLevel.Skittish => -1,
+        StressLevel.Nervous => -2,
+        StressLevel.Anxious => -3,
+        StressLevel.Paranoid => -4,
+        StressLevel.Hystrical => -5,
+        _ => 0
+      };
+    }
+
+    return (penalty, level);
+  }
+
   public bool AbleToMove() 
   {
     foreach (var t in Traits)
