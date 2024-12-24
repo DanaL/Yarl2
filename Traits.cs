@@ -660,6 +660,14 @@ class StickyTrait : BasicTrait
   public override string AsText() => "Sticky";
 }
 
+class StressTrait : Trait 
+{
+  public StressLevel Stress { get; set; }
+  public ulong OwnerID { get; set; }
+
+  public override string AsText() => $"Stress#{Stress}#{OwnerID}";
+}
+
 class DividerTrait : Trait
 {
   public override string AsText() => "Divider";
@@ -2753,6 +2761,12 @@ class TraitFactory
       return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
+    { "Stress", (pieces, gameObj) => 
+      {
+        Enum.TryParse(pieces[1], out StressLevel stress);
+        return new StressTrait() { Stress = stress, OwnerID = ulong.Parse(pieces[2]) };
+      }
+    },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
     { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]), Name=pieces[0] }},
     { "Sword", (pieces, gameObj) => new SwordTrait() },

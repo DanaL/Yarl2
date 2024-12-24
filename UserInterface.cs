@@ -639,6 +639,18 @@ abstract class UserInterface
             break;
         }
       }
+      else if (trait is StressTrait st)
+      {
+        Colour colour = st.Stress switch 
+        {
+          StressLevel.Hystrical => Colours.BRIGHT_RED,
+          StressLevel.Paranoid => Colours.BRIGHT_RED,
+          StressLevel.Nervous => Colours.YELLOW_ORANGE,
+          _ => Colours.YELLOW,
+        };
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (colour, st.Stress.ToString().ToUpper())];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+      }
     }
     if (!statuses.Contains("GRAPPLED") && gs.Player.HasActiveTrait<GrappledTrait>())
     {

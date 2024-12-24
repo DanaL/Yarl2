@@ -27,6 +27,16 @@ enum PlayerBackground
   Skullduggery
 }
 
+enum StressLevel
+{
+  None,
+  Skittish,
+  Nervous,
+  Anxious,
+  Paranoid,
+  Hystrical
+}
+
 class Player : Actor, IPerformer, IGameEventListener
 {
   public const int MAX_VISION_RADIUS = 25;
@@ -113,6 +123,40 @@ class Player : Actor, IPerformer, IGameEventListener
       baseHP = 1;
 
     Stats[Attribute.HP].SetMax(baseHP);
+  }
+
+  public void CalcStress()
+  {
+    int nerve = Stats[Attribute.Nerve].Curr;
+    StressLevel stress;
+    if (nerve > 750)
+      stress = StressLevel.None;
+    else if (nerve > 600)
+      stress = StressLevel.Skittish;
+    else if (nerve > 450)
+      stress = StressLevel.Nervous;
+    else if (nerve > 300)
+      stress = StressLevel.Anxious;
+    else if (nerve > 150)
+      stress = StressLevel.Paranoid;
+    else
+      stress = StressLevel.Hystrical;
+    
+    StressTrait? current = Traits.OfType<StressTrait>().FirstOrDefault();
+    if (stress == StressLevel.None)
+    {
+      if (current is not null)
+        Traits.Remove(current);
+    }
+    else if (current is null)
+    {
+      current = new StressTrait() { Stress = stress, OwnerID = ID };
+      Traits.Add(current);
+    }
+    else
+    {
+      current.Stress = stress;
+    }
   }
 
   public override int TotalMissileAttackModifier(Item weapon)
@@ -289,6 +333,8 @@ class Player : Actor, IPerformer, IGameEventListener
         traitsToShow.Add("You have sticky fingers");
       if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
+      if (trait is StressTrait st)    
+        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");      
     }
     
     if (alacrity < 0)
@@ -304,7 +350,7 @@ class Player : Actor, IPerformer, IGameEventListener
    
     lines.Add($"Stress: {Stats[Attribute.Nerve].Curr}");
     lines.Add("");
-    
+
     if (Stats[Attribute.Depth].Max == 0)
       lines.Add("You have yet to venture into the Dungeon.");
     else

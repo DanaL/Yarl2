@@ -953,6 +953,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (curr > stresssFloor)
         Player.Stats[Attribute.Nerve].Change(-1);
     }
+
+    Player.CalcStress();
   }
 
   void SpawnMonster()
