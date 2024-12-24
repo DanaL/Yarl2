@@ -88,6 +88,18 @@ class Player : Actor, IPerformer, IGameEventListener
                   .Select(t => t.ArmourMod)
                   .Sum();
 
+      // Anxious is sort of a sweet spot where I picture the character going 
+      // very defnesive to protect themselves, but with even more stress they
+      // are beginning to lose it
+      var (_, stress) = StressPenalty();
+      ac += stress switch 
+      {
+        StressLevel.Anxious => 1,
+        StressLevel.Paranoid => -1,
+        StressLevel.Hystrical => -2,
+        _ => 0
+      };
+
       return ac + armour;
     }
   }
