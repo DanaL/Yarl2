@@ -787,6 +787,11 @@ class Battle
   {
     List<string> messages = [];
 
+    if (imbiber.Stats.TryGetValue(Attribute.Nerve, out var nerve))
+    {
+      nerve.Change(100);
+    }
+
     bool alreadyTipsy = imbiber.HasTrait<TipsyTrait>();
     int dc = alreadyTipsy ? 15 : 12;
     if (imbiber.AbilityCheck(Attribute.Constitution, dc, gs.Rng))
