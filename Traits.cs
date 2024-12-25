@@ -269,6 +269,55 @@ class HealAlliesTrait : ActionTrait
   public override string AsText() => $"HealAllies#{Cooldown}";
 }
 
+class HeroismTrait : TemporaryTrait 
+{
+  public override string AsText() => $"Heroism#{OwnerID}#{ExpiresOn}#{SourceId}";
+  protected override string ExpiryMsg => "You feel less heroic.";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    if (target.Stats.TryGetValue(Attribute.Nerve, out var nerve))
+    {
+      nerve.Change(125);
+    }
+
+    // You can't stack heroism, so if another source is applied, just extend
+    // duration of current source
+    foreach (Trait t in target.Traits)
+    {
+      if (t is HeroismTrait ht)
+      {
+        ht.ExpiresOn += (ulong) gs.Rng.Next(50, 76);
+        return [];
+      }
+    }
+    
+    OwnerID = target.ID;
+    target.Traits.Add(this);
+
+    // Note for if you ever implement monsters using items: this will fail
+    // to grant monsters bonus HP
+    if (target is Player p)
+      p.CalcHP();
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);   
+
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} heroic!" ];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn)
+    {
+      gs.StopListening(GameEventType.EndOfRound, this);
+      Remove(gs);
+
+      if (gs.ObjDb.GetObj(OwnerID) is Player player)
+        player.CalcHP();      
+    }
+  }
+}
+
 class HiddenTrait : Trait
 {
   public override string AsText() => $"Hidden";
@@ -577,7 +626,7 @@ class ResistanceTrait : TemporaryTrait
 {
   public DamageType Type { get; set; }
 
-  protected override string ExpiryMsg() => $"You no longer feel resistant to {Type}.";
+  protected override string ExpiryMsg => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}#{SourceId}";
 
   public override List<string> Apply(Actor target, GameState gs)
@@ -817,7 +866,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public bool Expired { get; set; }
   public bool Listening => true;
   public ulong OwnerID {  get; set; }
-  protected virtual string ExpiryMsg() => "";
+  protected virtual string ExpiryMsg => "";
   public virtual ulong ObjId => OwnerID;
   
   public virtual void Remove(GameState gs)
@@ -827,7 +876,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     gs.RemoveListener(this);
 
     if (obj is Player)
-      gs.UIRef().AlertPlayer(ExpiryMsg());
+      gs.UIRef().AlertPlayer(ExpiryMsg);
   }
 
   public virtual void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -844,8 +893,8 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
 }
 
 class TelepathyTrait : TemporaryTrait
-{  
-  protected override string ExpiryMsg() => "You can no longer sense others' minds!";
+{
+  protected override string ExpiryMsg => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
 
   public override List<string> Apply(Actor target, GameState gs)
@@ -860,7 +909,7 @@ class TelepathyTrait : TemporaryTrait
 
 class TipsyTrait : TemporaryTrait
 {
-  protected override string ExpiryMsg() => "A fog lifts.";
+  protected override string ExpiryMsg => "A fog lifts.";
   public override string AsText() => $"Tipsy#{OwnerID}#{ExpiresOn}";
 
   public override List<string> Apply(Actor target, GameState gs)
@@ -881,8 +930,8 @@ class TipsyTrait : TemporaryTrait
 }
 
 class LevitationTrait : TemporaryTrait
-{  
-  protected override string ExpiryMsg() => "You alight on the ground.";
+{
+  protected override string ExpiryMsg => "You alight on the ground.";
 
   public override string AsText() => $"Levitation#{OwnerID}#{ExpiresOn}";
 
@@ -1172,6 +1221,10 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "buffstrength" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
                           OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID }), null),
+    "heroism" => new UseResult(true, "", 
+                   new ApplyTraitAction(gs, user, 
+                     new HeroismTrait() { 
+                       OwnerID = user.ID, ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 75), SourceId = item!.ID}), null),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -2054,7 +2107,7 @@ class StatDebuffTrait : TemporaryTrait
 
 class BlindTrait : TemporaryTrait
 {
-  protected override string ExpiryMsg() => "You can see again!";
+  protected override string ExpiryMsg => "You can see again!";
 
   public override List<string> Apply(Actor target, GameState gs)
   {
@@ -2186,7 +2239,7 @@ class RegenerationTrait : BasicTrait, IGameEventListener
 
 class SeeInvisibleTrait : TemporaryTrait
 {
-  protected override string ExpiryMsg() => "Your vision returns to normal.";
+  protected override string ExpiryMsg => "Your vision returns to normal.";
 
   public override List<string> Apply(Actor target, GameState gs)
   {
@@ -2601,6 +2654,11 @@ class TraitFactory
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
+    { "Heroism", (pieces, gameObj) => new HeroismTrait() 
+      { 
+        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), SourceId = ulong.Parse(pieces[3])
+      } 
+    },
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceId = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },

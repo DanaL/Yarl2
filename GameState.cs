@@ -933,7 +933,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (hour >= 5 && hour < 21)
         Player.Stats[Attribute.Nerve].Change(1);
     }
-    else
+    else if (!Player.HasTrait<HeroismTrait>())
     {
       // The player accrues stress more slowly on levels they've already
       // explored

@@ -259,3 +259,6 @@ Metal gloves infused with runes in the language of giants, granting their streng
 #
 flame beetle
 A dog-sized beetle whose carapace glows with fiery heat.
+#
+potion of heroism
+Hero-brand™  fantasy energy drink. Gives adventurers a temporary boost in both vitality and chutzpah.

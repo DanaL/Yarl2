@@ -997,5 +997,17 @@
       "Plural",
       "Grants#StatBuff&0&max&Strength&2&item"
     ]
-  }
+  },
+  {
+    "Name": "POTION_HEROISM",
+    "DescriptiveName": "potion of heroism",
+    "Type": "Potion",
+    "Value": 25,
+    "Glyph": "!,limegreen,green,black,black",
+    "Traits": [
+      "UseSimple#heroism",
+      "Consumable",
+      "Stackable"      
+    ]
+  }  
 ]
