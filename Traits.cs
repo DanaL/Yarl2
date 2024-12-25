@@ -19,7 +19,7 @@ enum ActionType
   Passive = 0b1000
 }
 
-record UseResult(bool Successful, string Message, Action? ReplacementAction, Inputer? Accumulator);
+record UseResult(Action? ReplacementAction, Inputer? Accumulator, bool Successful = true, string Message = "");
 
 interface INeedsID
 {
@@ -1187,41 +1187,38 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
-    "antidote" => new UseResult(true, "", new AntidoteAction(gs, user), null),
-    "blink" => new UseResult(true, "", new BlinkAction(gs, user), null),
-    "booze" => new UseResult(true, "", new DrinkBoozeAction(gs, user), null),
-    "disarm" => new UseResult(true, "", new DisarmAction(gs, user, user.Loc), null),
-    "minorheal" => new UseResult(true, "", new HealAction(gs, user, 4, 4), null),
-    "maxheal" => new UseResult(true, "", new HealAction(gs, user, int.MaxValue, -1), null),
-    "trivialheal" => new UseResult(true, "", new HealAction(gs, user, 1, 1), null),
-    "telepathy" => new UseResult(true, "", new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null),
-    "magicmap" => new UseResult(true, "", new MagicMapAction(gs, user), null),
-    "resistfire" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null),
-    "resistcold" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null),
-    "recall" => new UseResult(true, "", new WordOfRecallAction(gs), null),
-    "levitation" => 
-      new UseResult(true, "", new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
-    "knock" => new UseResult(true, "", new KnockAction(gs, user), null),
-    "identify" => new UseResult(true, "", 
-        new InventoryChoiceAction(gs, user, 
+    "antidote" => new UseResult(new AntidoteAction(gs, user), null, true, ""),
+    "blink" => new UseResult(new BlinkAction(gs, user), null, true, ""),
+    "booze" => new UseResult(new DrinkBoozeAction(gs, user), null, true, ""),
+    "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc), null, true, ""),
+    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4), null, true, ""),
+    "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1), null, true, ""),
+    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1), null, true, ""),
+    "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null, true, ""),
+    "magicmap" => new UseResult(new MagicMapAction(gs, user), null, true, ""),
+    "resistfire" => new UseResult(new ApplyTraitAction(gs, user, 
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null, true, ""),
+    "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), null, true, ""),
+    "recall" => new UseResult(new WordOfRecallAction(gs), null, true, ""),
+    "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait() 
+                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null, true, ""),
+    "knock" => new UseResult(new KnockAction(gs, user), null, true, ""),
+    "identify" => new UseResult(new InventoryChoiceAction(gs, user, 
           new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
-          new IdentifyItemAction(gs, user)), null),
-    "applypoison" => new UseResult(true, "",
-        new InventoryChoiceAction(gs, user,
+          new IdentifyItemAction(gs, user)), null, true, ""),
+    "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
-          new ApplyPoisonAction(gs, user)), null),
-    "seeinvisible" => new UseResult(true, "", new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
-            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null),
-    "protection" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
-                        new AuraOfProtectionTrait() { HP = 25 }), null),
-    "blindness" => new UseResult(true, "", new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs)), null),
-    "buffstrength" => new UseResult(true, "", new ApplyTraitAction(gs, user, 
+          new ApplyPoisonAction(gs, user)), null, true, ""),
+    "seeinvisible" => new UseResult(new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
+            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), null, true, ""),
+    "protection" => new UseResult(new ApplyTraitAction(gs, user, 
+                        new AuraOfProtectionTrait() { HP = 25 }), null, true, ""),
+    "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs)), null, true, ""),
+    "buffstrength" => new UseResult(new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
                           OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID }), null),
-    "heroism" => new UseResult(true, "", 
+    "heroism" => new UseResult( 
                    new ApplyTraitAction(gs, user, 
                      new HeroismTrait() { 
                        OwnerID = user.ID, ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 75), SourceId = item!.ID}), null),
@@ -2157,7 +2154,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
     var action = new CloseMenuAction(gs, 1.0);
     var acc = new PauseForMoreInputer();
 
-    return new UseResult(false, "", action, acc);
+    return new UseResult(action, acc, false);
   }
 
   public void Used() {}
@@ -2415,7 +2412,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
     if (Lit)
     {
       var msg = Extinguish(gs, item!, loc);
-      return new UseResult(true, msg, null, null);
+      return new UseResult(null, null, true, msg);
     }
     else if (Fuel > 0)
     {
@@ -2425,11 +2422,11 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
       item.Traits.Add(new LightSourceTrait() { Radius = 5 });
 
-      return new UseResult(true, $"The {item.Name} sparks to life!", null, null);
+      return new UseResult(null, null, true, $"The {item!.Name} sparks to life!");
     }
     else
     {
-      return new UseResult(false, $"That {item!.Name} is burnt out!", null, null);
+      return new UseResult(null, null, false, $"That {item!.Name} is burnt out!");
     }
   }
 
@@ -2487,11 +2484,11 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc
     if (Charges == 0) 
     {
       IDed = true;
-      return new UseResult(true, "Nothing happens", new PassAction(), null);
+      return new UseResult(new PassAction(), null, true, "Nothing happens");
     }
 
     ulong itemId = item is not null ? item.ID : 0;
-    return new UseResult(true, "", new UseWandAction(gs, user, this, itemId), null);  
+    return new UseResult(new UseWandAction(gs, user, this, itemId), null, true, "");  
   }
 
   public void Used() => --Charges;
