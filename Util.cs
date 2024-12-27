@@ -58,6 +58,7 @@ class Colours
   public static readonly Colour FAINT_PINK = new(178, 102, 255, 125);
   public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
   public static readonly Colour SEARCH_HIGHLIGHT = new(55, 198, 255, 75);
+  public static readonly Colour SOPHIE_GREEN = new(138, 195, 171, 255);
 
   public static string ColourToText(Colour colour)
   {
@@ -89,6 +90,7 @@ class Colours
     else if (colour == FAINT_PINK) return "faintpink";
     else if (colour == ICE_BLUE) return "iceblue";
     else if (colour == HILITE) return "hilite";
+    else if (colour == SOPHIE_GREEN) return "sophiegreen";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -123,6 +125,7 @@ class Colours
     "faintpink" => FAINT_PINK,
     "iceblue" => ICE_BLUE,
     "hilite" => HILITE,
+    "sophiegreen" => SOPHIE_GREEN,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
