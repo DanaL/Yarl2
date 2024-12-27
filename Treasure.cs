@@ -193,15 +193,15 @@ class Treasure
     {
       case ItemNames.ZORKMIDS_PITTANCE:
         zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(1, 11);
+        zorkmids.Value = rng.Next(1, 21);
         return zorkmids;
       case ItemNames.ZORKMIDS_MEDIOCRE:
         zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(1, 11);
+        zorkmids.Value = rng.Next(10, 31);
         return zorkmids;
       case ItemNames.ZORKMIDS_GOOD:
         zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(15, 31);
+        zorkmids.Value = rng.Next(15, 51);
         return zorkmids;
       default:
         return ItemFactory.Get(name, objDb);
@@ -328,7 +328,7 @@ class Treasure
       for (int j = 0; j < rng.Next(1, 4); j++)
       {
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(15,26);
+        zorkmids.Value = rng.Next(15,36);
         AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
       }
     }
@@ -352,7 +352,7 @@ class Treasure
       for (int j = 0; j < rng.Next(1, 4); j++)
       {
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(15,26);
+        zorkmids.Value = rng.Next(15,36);
         AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
       }
     }
