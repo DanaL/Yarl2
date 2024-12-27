@@ -1217,7 +1217,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (tile.Type == TileType.BusinessSign)
       UIRef().SetPopup(new Popup(tile.StepMessage, "", 6, -1));
 
-
     Dictionary<Item, int> items = [];
     foreach (var item in ObjDb.VisibleItemsAt(loc))
     {
@@ -1484,11 +1483,33 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return lit;
   }
 
+  Glyph Hallucination()
+  {
+    char ch = (char)(Rng.Next(2) == 0 ? 
+      Rng.Next('A', 'Z' + 1) : 
+      Rng.Next('a', 'z' + 1));
+
+    Colour colour = Rng.Next(10) switch 
+    {
+      0 => Colours.WHITE,
+      1 => Colours.GREEN,
+      2 => Colours.LIGHT_BLUE,
+      3 => Colours.BLUE,
+      4 => Colours.YELLOW_ORANGE,
+      5 => Colours.LIGHT_PURPLE,
+      6 => Colours.PINK,
+      7 => Colours.LIGHT_BROWN,
+      8 => Colours.YELLOW,
+      _ => Colours.TORCH_YELLOW
+    };
+
+    return new Glyph(ch, colour, colour, Colours.BLACK, Colours.BLACK);
+  }
+
   public void PrepareFieldOfView()
   {
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
-    //Console.WriteLine($"UpdateFoV called by: {callingMethod}");
     Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
@@ -1524,6 +1545,28 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     RecentlySeenMonsters = prevSeenMonsters;
 
+    // an extremely stressed character will may see hallucinations
+    HashSet<Loc> hallucinations = [];
+    if (!InWilderness && Player.Traits.OfType<StressTrait>().FirstOrDefault() is StressTrait stress)
+    {
+      int hallucinationCount = 0;
+      if (stress.Stress == StressLevel.Paranoid)
+        hallucinationCount = Rng.Next(1, 4);
+      else if (stress.Stress == StressLevel.Hystrical)
+        hallucinationCount = Rng.Next(2, 6);
+
+      if (hallucinationCount > 0) 
+      {
+        var fovLocs = fov.ToList();
+        for (int j = 0; j < hallucinationCount && fovLocs.Count > 0; j++)
+        {
+          int i = Rng.Next(fovLocs.Count);
+          hallucinations.Add(fovLocs[i]);
+          fovLocs.RemoveAt(i);
+        }
+      }
+    }
+
     foreach (var loc in fov)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
@@ -1533,7 +1576,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         // Remember the terrain tile if there's nothing visible on the square
 
         // If it's a chasm, we display the tile from the level below
-        if (tile.Type != TileType.Chasm)
+        if (hallucinations.Contains(loc))
+        {
+          glyph = Hallucination();
+        }
+        else if (tile.Type != TileType.Chasm)
         {
           glyph = Util.TileToGlyph(tile);
         }
