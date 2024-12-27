@@ -767,7 +767,6 @@
     "Value": 2,
     "Glyph": "(,lightbrown,brown,black,black",
     "Traits": [
-      "Flammable",
       "Stackable",
       "Torch#owner#false#750"
     ]
