@@ -669,7 +669,6 @@ class RestingTrait : TemporaryTrait
   public override List<string> Apply(Actor target, GameState gs)
   {
     target.Traits.Add(this);
-    target.Traits.Add(new FloatingTrait());
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
 
