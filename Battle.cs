@@ -502,7 +502,7 @@ class Battle
 
     if (roll >= target.AC)
     {
-      if (target.HasTrait<DodgeTrait>() && target.AbleToMove())
+      if (target.HasTrait<DodgeTrait>() && target.AbleToMove() && !target.HasTrait<InPitTrait>())
       {
         int dodgeChance = target.Traits.OfType<DodgeTrait>().First().Rate;
         int dodgeRoll = gs.Rng.Next(100);
