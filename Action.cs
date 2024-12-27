@@ -777,7 +777,8 @@ class InnkeeperServiceAction : Action
     {
       GameState!.Player.Inventory.Zorkmids -= Invoice;
       GameState.Player.Stats[Attribute.HP].Reset();
-
+      GameState.Player.Stats[Attribute.Nerve].Change(500);
+      
       // Resting at an inn cures poison. It's part of room service.
       foreach (var t in GameState.Player.Traits.OfType<PoisonedTrait>())
       {
