@@ -1428,6 +1428,7 @@ class BoostMaxStatTrait : TemporaryTrait
         Attribute.FinesseUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept with light weapons!",
         Attribute.SwordUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at swordplay!",
         Attribute.AxeUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at axe-work!",
+        Attribute.BowUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more skilled with bows!",
         _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
       };
       msgs.Add(s);
