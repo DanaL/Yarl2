@@ -1102,8 +1102,10 @@ abstract class UserInterface
         Glyph glyph;
         if (gs.ObjDb.Occupant(loc) is Actor actor && actor.VisibleTo(gs.Player))
           glyph = actor.Glyph;
-        else 
-          glyph = remembered[loc];
+        else if (remembered.TryGetValue(loc, out Glyph rememberedGlyph))
+          glyph = rememberedGlyph;
+        else
+          glyph = GameObjectDB.EMPTY;
         sqr = new Sqr(glyph.Lit, glyph.BGLit, glyph.Ch);
       }
     }
@@ -1150,6 +1152,9 @@ abstract class UserInterface
       int range = int.Max(ViewHeight / 2, ViewWidth / 2);
       foreach (var mob in gs.ObjDb.ActorsWithin(gs.Player.Loc, range))
       {
+        if (mob.HasTrait<BrainlessTrait>())
+          continue;
+
         if (mob != gs.Player)
         {
           var viewed = Util.Adj8Locs(mob.Loc).ToList();
