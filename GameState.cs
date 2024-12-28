@@ -137,6 +137,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       int maxDepth = Player.Stats[Attribute.Depth].Max;
       if (level + 1 > maxDepth)
         Player.Stats[Attribute.Depth].SetMax(level + 1);
+
+      // When the player reaches certain details for the first time, raise
+      // their nerve.
+      // Or maybe I should do it 50/level?
+      if (level + 1 == 5 && maxDepth < 5)
+      {
+        Player.Stats[Attribute.Nerve].ChangeMax(250);
+        Player.Stats[Attribute.Nerve].Change(250);
+      }
     }
 
     if (CurrentDungeon.LevelMaps[CurrLevel].Alerts.Count > 0)
