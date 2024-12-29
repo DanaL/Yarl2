@@ -1018,5 +1018,12 @@
     "Traits": [
       "Wand#20#false#summoning"
     ]
+  },
+  {
+    "Name": "GENERIC_WAND",
+    "DescriptiveName": "generic wand",
+    "Type": "Wand",
+    "Value": 5,
+    "Glyph": "/,lightbrown,brown,black,black"
   }
 ]

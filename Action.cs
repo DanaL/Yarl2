@@ -2321,6 +2321,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
       ItemType.Bow => true,
       ItemType.Ring => true,
       ItemType.Talisman => true,
+      ItemType.Wand => true,
       _ => false
     };
 
@@ -2334,8 +2335,9 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     switch (equipResult)
     {
       case EquipingResult.Equipped:
-        alert = MsgFactory.Phrase(Actor.ID, Verb.Ready, item.ID, 1, false, GameState);
-        result = new ActionResult() { Complete = true, Messages = [alert], EnergyCost = 1.0 };
+        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
+        s += item.Type == ItemType.Wand ? " as a spellcasting focus." : ".";
+        result = new ActionResult() { Complete = true, Messages = [s], EnergyCost = 1.0 };
 
         if (item.HasTrait<CursedTrait>())
         {
@@ -2362,6 +2364,9 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         break;
       case EquipingResult.TooManyTalismans:
         result = new ActionResult() { Complete = true, Messages = ["You may only use two talismans at a time!"], EnergyCost = 0.0 };
+        break;
+      case EquipingResult.NoFreeHand:
+        result = new ActionResult() { Complete = true, Messages = ["You have no free hands!"], EnergyCost = 0.0 };
         break;
       default:
         string msg = "You are already wearing ";

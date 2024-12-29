@@ -887,9 +887,14 @@ class Player : Actor, IPerformer, IGameEventListener
       }
       else if (ch == 'z')
       {
+        Item? rw = Inventory.ReadiedWeapon();
         if (SpellsKnown.Count == 0)
         {
           gameState.UIRef().SetPopup(new Popup("You don't know any spells!", "", -1, -1));
+        }
+        else if (!(Inventory.FocusEquipped() || (rw is not null && rw.Name == "quarterstaff")))
+        {
+          gameState.UIRef().SetPopup(new Popup("You must have a spellcasting focus prepared, like a wand or staff!", "", -1, -1));
         }
         else
         {

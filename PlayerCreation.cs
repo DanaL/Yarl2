@@ -170,8 +170,36 @@ class PlayerCreator
     }
   }
 
+  static void StartingGearForScholar(Player player, GameObjectDB objDb, Random rng)
+  {
+    Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
+    dagger.Equipped = true;
+    player.Inventory.Add(dagger, player.ID);
+
+    Item focus = ItemFactory.Get(ItemNames.GENERIC_WAND, objDb);
+    focus.Equipped = true;
+    player.Inventory.Add(focus, player.ID);
+
+    for (int i = 0; i < rng.Next(3, 6); i++)
+    {
+      player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
+    }
+
+    // Scholars start off with less money because they are still paying off
+    // their student loans
+    var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    money.Value = rng.Next(10, 26);
+    player.Inventory.Add(money, player.ID);
+  }
+
   public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
   {
+    if (player.Background == PlayerBackground.Scholar)
+    {
+      StartingGearForScholar(player, objDb, rng);
+      return;
+    }
+
     var leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
     leather.Traits.Add(new AdjectiveTrait("battered"));
     leather.Equipped = true;
@@ -217,13 +245,11 @@ class PlayerCreator
         break;
     }
 
-    switch (player.Background)
+    if (player.Background == PlayerBackground.Skullduggery)
     {
-      case PlayerBackground.Skullduggery:
-        startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
-        if (!player.Stats.ContainsKey(Attribute.FinesseUse)) 
-          player.Stats.Add(Attribute.FinesseUse, new Stat(100));
-        break;
+      startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
+      if (!player.Stats.ContainsKey(Attribute.FinesseUse)) 
+        player.Stats.Add(Attribute.FinesseUse, new Stat(100));
     }
 
     startWeapon.Equipped = true;
