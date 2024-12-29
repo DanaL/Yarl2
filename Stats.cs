@@ -18,7 +18,6 @@ namespace Yarl2;
 enum Attribute
 {
   HP,
-  HitDie,
   Strength,
   Dexterity,
   Constitution,

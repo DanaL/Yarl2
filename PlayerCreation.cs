@@ -128,19 +128,16 @@ class PlayerCreator
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Strength].Curr)
           stats[Attribute.Strength].SetMax(roll);
-        stats.Add(Attribute.HitDie, new Stat(12));
         break;
       case PlayerBackground.Skullduggery:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Dexterity].Curr)
           stats[Attribute.Dexterity].SetMax(roll);
-        stats.Add(Attribute.HitDie, new Stat(10));
         break;
       case PlayerBackground.Scholar:
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Will].Curr)
           stats[Attribute.Will].SetMax(roll);
-        stats.Add(Attribute.HitDie, new Stat(8));
         break;      
     }
     
