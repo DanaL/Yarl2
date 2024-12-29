@@ -43,6 +43,8 @@ class Player : Actor, IPerformer, IGameEventListener
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
   public ulong SourceId { get; set; }
+  public List<string> SpellsKnown = [];
+  public string LastSpellCast = "";
 
   Inputer? _inputController;
   Action? _deferred;
@@ -584,6 +586,12 @@ class Player : Actor, IPerformer, IGameEventListener
     return adj.Count() == 1 ? adj.First() : Loc.Nowhere;
   }
 
+  void SetupSpellcastingMenu(GameState gs)
+  {
+    _inputController = new SpellcastMenu(gs);
+    _deferred = new NullAction();
+  }
+
   Action PickupCommand(GameState gs, UserInterface ui)
   {
     var allItems = gs.ObjDb.VisibleItemsAt(Loc);
@@ -876,6 +884,17 @@ class Player : Actor, IPerformer, IGameEventListener
       {
         _inputController = new WizardCommander(gameState);
         _deferred = new NullAction();
+      }
+      else if (ch == 'z')
+      {
+        if (SpellsKnown.Count == 0)
+        {
+          gameState.UIRef().SetPopup(new Popup("You don't know any spells!", "", -1, -1));
+        }
+        else
+        {
+          SetupSpellcastingMenu(gameState);
+        }
       }
       else if (ch == ' ' || ch == '.')
         return new PassAction();

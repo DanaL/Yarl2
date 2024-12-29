@@ -166,6 +166,10 @@ class PlayerCreator
       case PlayerBackground.Skullduggery:
         player.Traits.Add(new LightStepTrait());
         break;
+      case PlayerBackground.Scholar:
+        player.SpellsKnown.Add("arcane spark");
+        player.SpellsKnown.Add("illume");
+        break;
     }
   }
 

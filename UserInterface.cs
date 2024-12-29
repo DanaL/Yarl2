@@ -372,8 +372,9 @@ abstract class UserInterface
     ];
     WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
 
-    w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit  "),
-      (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item  "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine item  "),
+    w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit "),
+      (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine "),
+      (Colours.LIGHT_BLUE, "z"), (Colours.LIGHT_GREY, ": cast spell "),
       (Colours.LIGHT_BLUE, ","), (Colours.LIGHT_GREY, ": pickup item")
     ];
     WriteText(w, ScreenHeight - 2, 0, ScreenWidth);
