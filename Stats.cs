@@ -48,7 +48,8 @@ enum Attribute
   ShopMenu,
   MobAttitude,
   InventoryRefresh,
-  Nerve
+  Nerve,
+  MagicPoints
 }
 
 class Stat

@@ -549,6 +549,12 @@ abstract class UserInterface
     int currHP = gs.Player.Stats[Attribute.HP].Curr;
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
     WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
+    {
+      WriteLine($"| HP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    }
+
     WriteLine($"| AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
     List<(Colour, string)> zorkmidLine = [(Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];

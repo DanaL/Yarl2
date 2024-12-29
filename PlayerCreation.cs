@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.NetworkInformation;
+
 namespace Yarl2;
 
 class PlayerCreator
@@ -141,6 +143,7 @@ class PlayerCreator
         if (roll > stats[Attribute.Will].Curr)
           stats[Attribute.Will].SetMax(roll);
         stats.Add(Attribute.HitDie, new Stat(8));
+        stats.Add(Attribute.MagicPoints, new Stat(10));
         break;      
     }
     
