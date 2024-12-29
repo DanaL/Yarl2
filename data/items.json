@@ -1008,5 +1008,15 @@
       "Consumable",
       "Stackable"      
     ]
-  }  
+  },
+  {
+    "Name": "WAND_SUMMONING",
+    "DescriptiveName": "wand of summoning",
+    "Type": "Wand",
+    "Value": 75,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#20#false#summoning"
+    ]
+  }
 ]

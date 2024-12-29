@@ -2840,8 +2840,29 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
         player.ReplacePendingAction(new RayOfSlownessAction(GameState!, player, _wand, wandId), inputer);
         result.Messages.Add("Which way?");
         break;
+      case "summoning":
+        return HandleSummoning(result);
     }
     
+    return result;
+  }
+
+  ActionResult HandleSummoning(ActionResult result)
+  {
+    // Kind of dorky to hardcore it, but otherwise I'd have to query ObjDb by the wand item ID to 
+    // get it's name and currently it is always going to be wand of summoning...
+    Item.IDInfo["wand of summoning"] = Item.IDInfo["wand of summoning"] with { Known = true };
+    _wand.Used();
+    
+    // We don't need to replace the player's pending action here because 
+    // there's no input needed from the player
+    SummonAction summon = new(Actor!.Loc, GameState!.RandomMonster(Actor.Loc.DungeonID), 1)
+    {
+      GameState = GameState,
+      Actor = Actor
+    };
+    result.AltAction = summon;
+
     return result;
   }
 }

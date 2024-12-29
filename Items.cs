@@ -163,8 +163,8 @@ enum ItemNames
   RING_OF_FRAILITY, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_DISARM, SCROLL_IDENTIFY, SCROLL_KNOCK, 
   SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
   SMOULDERING_CHARM, SPEAR, STATUE, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, TROLL_BROOCH, 
-  VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SWAP, 
-  ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
+  VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER,
+  WAND_SUMMONING, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
 }
 
 class JsonItem
@@ -219,7 +219,7 @@ class ItemFactory
 
   static Item FromTemplate(ItemTemplate template)
   {
-    Item item = new Item()
+    Item item = new()
     {
       Name = template.Name,
       Type = template.Type,
@@ -305,6 +305,7 @@ class ItemFactory
       "iron wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
       "ebony wand" => new Glyph('/', Colours.DARK_BLUE, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
       "cherrywood wand" => new Glyph('/', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
+      "jade wand" => new Glyph('/', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
       _ => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
     };
   }

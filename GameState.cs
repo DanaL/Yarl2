@@ -1024,6 +1024,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     AddPerformer(monster);
   }
 
+  public string RandomMonster(int dungeonId)
+  {
+    if (dungeonId == 0)
+    {
+      // I don't yet have a monster deck for the wildneress
+      return Rng.NextDouble() < 0.5 ? "wolf" : "dire bat";
+    }
+    
+    MonsterDeck deck = Campaign.MonsterDecks[Rng.Next(Campaign.MonsterDecks.Count)];
+    
+    return deck.Monsters[Rng.Next(deck.Monsters.Count)];
+  }
+
   public void SetDMaps(Loc loc)
   {
     HashSet<(int, int)> blocked = [];
