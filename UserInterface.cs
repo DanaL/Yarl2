@@ -553,7 +553,7 @@ abstract class UserInterface
 
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
     {
-      WriteLine($"| HP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"| MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     WriteLine($"| AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);

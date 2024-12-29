@@ -211,6 +211,8 @@ class Aimer : Inputer
   public Aimer(GameState gs, Loc start, int maxRange)
   {
     _ui = gs.UIRef();
+    _ui.ClosePopup();
+        
     _start = start;
     _target = start;
     _maxRange = maxRange;
