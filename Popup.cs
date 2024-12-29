@@ -241,7 +241,10 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
 
   void IPopup.Draw(UserInterface ui)
   {
-    int width = MenuItems.Select(i => i.Length).Max() + 4;  
+    int width = MenuItems.Select(i => i.Length).Max() + 4;
+    if (Title.Length + 4 > width)
+      width = Title.Length + 5;
+
     int col = (UserInterface.ViewWidth - width) / 2;
     int row = 2;
     
