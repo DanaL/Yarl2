@@ -2336,7 +2336,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       case EquipingResult.Equipped:
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
-        s += item.Type == ItemType.Wand ? " as a spellcasting focus." : ".";
+        s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         result = new ActionResult() { Complete = true, Messages = [s], EnergyCost = 1.0 };
 
         if (item.HasTrait<CursedTrait>())

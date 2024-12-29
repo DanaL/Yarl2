@@ -130,7 +130,7 @@ class Popup : IPopup
     if (width > 0)
       Width = width + 4;
     else if (widthGuess == 0 || title.Length > widthGuess)
-      Width = title.Length + 5;
+      Width = title.Length + 6;
     else if (widthGuess < UserInterface.ViewWidth - 4)
       Width = widthGuess + 4;
     else
@@ -244,7 +244,7 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
     int width = MenuItems.Select(i => i.Length).Max() + 4;
     if (Title.Length + 4 > width)
       width = Title.Length + 5;
-      
+
     int col = (UserInterface.ViewWidth - width) / 2;
     int row = 2;
     

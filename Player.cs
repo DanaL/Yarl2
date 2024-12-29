@@ -894,7 +894,7 @@ class Player : Actor, IPerformer, IGameEventListener
         }
         else if (!(Inventory.FocusEquipped() || (rw is not null && rw.Name == "quarterstaff")))
         {
-          gameState.UIRef().SetPopup(new Popup("You must have a spellcasting focus prepared, like a wand or staff!", "", -1, -1));
+          gameState.UIRef().SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
         }
         else
         {

@@ -25,6 +25,18 @@
     ]
   },
   {
+    "Name": "QUARTERSTAFF",
+    "DescriptiveName": "quarterstaff",
+    "Type": "Weapon",
+    "Value": 5,
+    "Glyph": "|,lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#6#1#Blunt",
+      "Polearm",
+      "TwoHanded"    
+    ]
+  },
+  {
     "Name": "DAGGER",
     "DescriptiveName": "dagger",
     "Type": "Weapon",
