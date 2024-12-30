@@ -867,7 +867,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     foreach (var i in txt.Split(','))
     {
       char slot = i[0];
-      ulong id = ulong.Parse(i.Substring(2));
+      ulong id = ulong.Parse(i[2..]);
       _items.Add((slot, id));
     }
   }
