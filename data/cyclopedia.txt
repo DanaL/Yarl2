@@ -265,3 +265,6 @@ Hero-brand™  fantasy energy drink. Gives adventurers a temporary boost in both
 #
 generic wand
 Cheap, mass-produced wand that's at least good enough to use as a spellcasting focus.
+#
+quarterstaff
+A stout wood staff. Classic style choice for wizards.
