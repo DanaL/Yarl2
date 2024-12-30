@@ -43,19 +43,7 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
 
     if (!CheckCost(1, 10, result))
       return result;
-
-    Stat magicPoints = Actor!.Stats[Attribute.MagicPoints];
-    if (magicPoints.Curr == 0)
-    {
-      result.EnergyCost = 0.0;
-      result.Complete = false;
-      result.Messages.Add("You don't have enough mana!");
-      return result;
-    }
-    magicPoints.Change(-1);
-    int stress = int.Max(0, 10 - Actor!.Stats[Attribute.Will].Curr);
-    Actor.Stats[Attribute.Nerve].Change(-stress);
-
+      
     Item spark = new()
     {
       Name = "spark",
@@ -129,11 +117,16 @@ class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
 class SpellcastMenu : Inputer
 {
   readonly GameState GS;
-  int row = 0;
+  int row;
   bool targeting = false;
 
   public SpellcastMenu(GameState gs)
   {
+    row = 0;
+    int lastCast = gs.Player.SpellsKnown.IndexOf(gs.Player.LastSpellCast);
+    if (lastCast > -1)
+      row = lastCast;
+
     GS = gs;
     WritePopup();
   }
