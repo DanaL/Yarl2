@@ -43,7 +43,7 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
 
     if (!CheckCost(1, 10, result))
       return result;
-      
+
     Item spark = new()
     {
       Name = "spark",
@@ -114,6 +114,26 @@ class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
   public override void ReceiveUIResult(UIResult result) {}
 }
 
+class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    if (!CheckCost(2, 20, result))
+      return result;
+
+    LightSpellTrait ls = new();
+    result.Messages.AddRange(ls.Apply(Actor!, GameState!));
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) {}
+}
+
 class SpellcastMenu : Inputer
 {
   readonly GameState GS;
@@ -174,6 +194,10 @@ class SpellcastMenu : Inputer
       case "mage armour":
         inputer = new DummyInputer();
         GS.Player.ReplacePendingAction(new CastMageArmourAction(GS, GS.Player), inputer);
+        break;
+      case "illume":
+        inputer = new DummyInputer();
+        GS.Player.ReplacePendingAction(new CastIllumeAction(GS, GS.Player), inputer);
         break;
     }
   }

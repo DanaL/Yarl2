@@ -2377,6 +2377,53 @@ class LightSourceTrait : BasicTrait, IOwner
   public override string AsText() => $"LightSource#{OwnerID}#{Radius}";
 }
 
+class LightSpellTrait : TemporaryTrait
+{
+  static readonly int Radius = 5;
+  protected override string ExpiryMsg => $"Your light spell fades.";
+  public override string AsText() => $"LightSpell#{ExpiresOn}#{OwnerID}";
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    // Remove a (or the) light source from the owner. If there is
+    // more than one light source of the same radius, it doesn't 
+    // really matter which one we remove
+    if (gs.ObjDb.GetObj(OwnerID) is not GameObj obj)
+      return;
+
+    int i = -1;
+    for (int j = 0; j < obj.Traits.Count; j++)
+    {
+      if (obj.Traits[j] is LightSourceTrait ls && ls.Radius == Radius)
+      {
+        i = j;
+        break;
+      }
+    }
+    if (i > -1)
+      obj.Traits.RemoveAt(i);
+  }
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    LightSourceTrait lst = new()
+    {
+      Radius = Radius,
+      OwnerID = target.ID
+    };
+
+    ExpiresOn = gs.Turn + 20;    
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    target.Traits.Add(this);
+    target.Traits.Add(lst);
+    OwnerID = target.ID;
+
+    return [ "Let there be light!" ];
+  }
+}
+
 // Who knew torches would be so complicated...
 class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 {

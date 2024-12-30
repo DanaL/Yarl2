@@ -166,6 +166,7 @@ class PlayerCreator
       case PlayerBackground.Scholar:
         player.SpellsKnown.Add("arcane spark");
         player.SpellsKnown.Add("mage armour");
+        player.SpellsKnown.Add("illume");
         break;
     }
   }
