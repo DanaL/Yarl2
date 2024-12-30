@@ -34,6 +34,17 @@ abstract class Inputer
 
 record LocDetails(string Title, string Desc, char Ch);
 
+class DummyInputer : Inputer
+{
+  public DummyInputer()
+  {
+    Done = true;
+    Success = true;
+  }
+
+  public override void Input(char ch) { }
+}
+
 // I might be able to merge some code between this and AimAccumulator
 class Examiner : Inputer
 {

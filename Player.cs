@@ -86,9 +86,13 @@ class Player : Actor, IPerformer, IGameEventListener
         }
       }
 
-      ac += Traits.OfType<ACModTrait>()
-                  .Select(t => t.ArmourMod)
-                  .Sum();
+      foreach (Trait t in Traits)
+      {
+        if (t is ACModTrait acMod)
+          ac += acMod.ArmourMod;
+        if (t is MageArmourTrait ma)
+          ac += 3;
+      }
 
       // Anxious is sort of a sweet spot where I picture the character going 
       // very defnesive to protect themselves, but with even more stress they

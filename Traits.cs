@@ -527,6 +527,31 @@ class LikeableTrait : Trait
   public override string AsText() => "Likeable";
 }
 
+class MageArmourTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => $"You feel less protected.";
+  public override string AsText() => $"MageArmour#{ExpiresOn}#{OwnerID}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    foreach (Trait t in target.Traits)
+    {
+      if (t is MageArmourTrait ma)
+      {
+        ma.ExpiresOn += 150;
+        return [];
+      }
+    }
+
+    ExpiresOn = gs.Turn + 150;    
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    target.Traits.Add(this);
+    OwnerID = target.ID;
+
+    return [ "Magical runes surround you, then disappear. You feel protected." ];
+  }
+}
+
 class MetalTrait : Trait
 {
   public Metals Type {  get; set; }
@@ -2681,6 +2706,9 @@ class TraitFactory
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Likeable", (pieces, gameObj) => new LikeableTrait() },
+    { "MageArmour", (pieces, gameObj) =>
+      new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
+    },
     { "Melee", (pieces, gameObj) => {
       Enum.TryParse(pieces[3], out DamageType dt);
       return new MobMeleeTrait() {
