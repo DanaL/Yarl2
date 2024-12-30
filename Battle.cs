@@ -20,6 +20,7 @@ enum DamageType
   Blunt,
   Fire,
   Cold,
+  Electricity,
   Poison,
   Acid,
   Necrotic,

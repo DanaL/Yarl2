@@ -649,10 +649,14 @@ class GameObjDBSave
       p.Inventory.RestoreFromText(fields[12]);
     }
 
+    if (fields[13] != "")
+    {
+      p.SpellsKnown = [.. fields[13].Split(',')];
+    }
+
     return p;
   }
 
-  // Mob:DumbMoveStrategy|PriestBehaviour|uiliorw|23|@,yellow,yelloworange,black|0,0,111,117|||1|1|0|a||False|tall elf with curly hair, and piercing eyes
   static Mob InflateMob(string txt, GameObjectDB objDb)
   {
     var fields = txt.Split('|');
@@ -788,6 +792,8 @@ class GameObjDBSave
         sb.Append(player.Inventory.NextSlot);
         sb.Append('|');
         sb.Append(player.Inventory.ToText());
+        sb.Append('|');
+        sb.Append(string.Join(',', player.SpellsKnown));
 
         sidb.Objects.Add(sb.ToString());
       }

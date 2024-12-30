@@ -155,16 +155,17 @@ enum ItemNames
 {
   ANTIDOTE, ANTISNAIL_SANDALS, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, BOOTS_OF_WATER_WALKING, 
   CAMPFIRE, CHAINMAIL, CLAYMORE, CLOAK_OF_PROTECTION, CUTPURSE_CREST, DAGGER, DART, FIRE_GIANT_ESSENCE, FIREBOLT, 
-  FLASK_OF_BOOZE, FROST_GIANT_ESSENCE, GASTON_BADGE, GAUNTLETS_OF_POWER, GHOSTCAP_MUSHROOM, GOLDEN_APPLE, GREATSWORD, 
-  GUIDE_STABBY, GUIDE_AXES, GUIDE_BOWS, GUIDE_SWORDS, GUISARME, HAND_AXE, HEAVY_BOOTS, HELMET, HILL_GIANT_ESSENCE, 
-  LEATHER_ARMOUR, LEATHER_GLOVES, LESSER_BURLY_CHARM, LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM,  LOCK_PICK, LONGBOW, 
-  LONGSWORD, MACE, MITHRIL_ORE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, POTION_FIRE_RES, POTION_HEALING, 
-  POTION_HEROISM, POTION_MIND_READING, POTION_OF_LEVITATION, RAPIER, RING_OF_ADORNMENT, RING_OF_AGGRESSION, 
-  RING_OF_FRAILITY, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_DISARM, SCROLL_IDENTIFY, SCROLL_KNOCK, 
-  SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, 
-  SMOULDERING_CHARM, SPEAR, STATUE, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, TROLL_BROOCH, 
-  VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER,
-  WAND_SUMMONING, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
+  FLASK_OF_BOOZE, FROST_GIANT_ESSENCE, GASTON_BADGE, GAUNTLETS_OF_POWER, GENERIC_WAND, GHOSTCAP_MUSHROOM, GOLDEN_APPLE, 
+  GREATSWORD, GUIDE_STABBY, GUIDE_AXES, GUIDE_BOWS, GUIDE_SWORDS, GUISARME, HAND_AXE, HEAVY_BOOTS, HELMET, 
+  HILL_GIANT_ESSENCE, LEATHER_ARMOUR, LEATHER_GLOVES, LESSER_BURLY_CHARM, LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM,  
+  LOCK_PICK, LONGBOW, LONGSWORD, MACE, MITHRIL_ORE, OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, 
+  POTION_FIRE_RES, POTION_HEALING, POTION_HEROISM, POTION_MIND_READING, POTION_OF_LEVITATION, QUARTERSTAFF, RAPIER, 
+  RING_OF_ADORNMENT, RING_OF_AGGRESSION, RING_OF_FRAILITY, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, 
+  SCROLL_DISARM, SCROLL_IDENTIFY, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SHIELD, SHORTSHORD, 
+  SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SMOULDERING_CHARM, SPEAR, STATUE, STUDDED_LEATHER_ARMOUR, 
+  TALISMAN_OF_CIRCUMSPECTION, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, 
+  WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, 
+  ZORKMIDS_PITTANCE
 }
 
 class JsonItem
@@ -467,6 +468,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return false;
   }
 
+  public bool FocusEquipped() => Items().Any(i => i.Type == ItemType.Wand && i.Equipped);
+
   public Item? ReadiedWeapon()
   {
     foreach (var item in Items())
@@ -584,13 +587,40 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return removed;
   }
 
+  static (EquipingResult, ArmourParts) UnequipItem(Item item)
+  {
+  if (item.HasTrait<CursedTrait>())
+  {
+    return (EquipingResult.Cursed, ArmourParts.None);
+  }
+      
+    item.Equipped = false;
+    return (EquipingResult.Unequipped, ArmourParts.None);
+  }
+
+  (EquipingResult, ArmourParts) ToggleWand(Item wand, int freeHands)
+  {
+    if (wand.Equipped)
+    {
+      return UnequipItem(wand);
+    }
+   
+    if (freeHands > 0)
+    {
+      wand.Equipped = true;
+      return (EquipingResult.Equipped, ArmourParts.None);
+    }
+    
+    return (EquipingResult.NoFreeHand, ArmourParts.None);
+  }
+
   // This toggles the equip status of gear only and recalculation of stuff
   // like armour class has to be done elsewhere because it felt icky to 
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
   {    
     bool EquippedTwoHandedWeapon() => ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
-
+    
     // I suppose at some point I'll have items that can't be equipped
     // (or like it doesn't make sense for them to be) and I'll have
     // to check for that
@@ -606,22 +636,32 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     if (item is not null)
     {
+      int freeHands = 2;
+      if (EquippedTwoHandedWeapon())
+        freeHands = 0;
+      else
+      {
+        if (ReadiedWeapon() is not null)
+          --freeHands;
+        if (ShieldEquipped())
+          --freeHands;
+        if (FocusEquipped())
+          --freeHands;
+      }
+ 
+      if (item.Type == ItemType.Wand)
+        return ToggleWand(item, freeHands);
+
       if (item.Equipped)
       {
-        if (item.HasTrait<CursedTrait>())
-        {
-          return (EquipingResult.Cursed, ArmourParts.None);
-        }
-        
-        item.Equipped = false;
-        return (EquipingResult.Unequipped, ArmourParts.None);
+       return UnequipItem(item);
       }
 
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
       {
-        if (item.HasTrait<TwoHandedTrait>() && ShieldEquipped())
+        if (freeHands == 0)
         {
-          return (EquipingResult.ShieldConflict, ArmourParts.Shield);
+          return (EquipingResult.NoFreeHand, ArmourParts.None);
         }
 
         // If there is a weapon already equipped, unequip it
@@ -632,7 +672,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
 
         item.Equipped = true;
-        return (EquipingResult.Equipped, ArmourParts.Shirt);
+        return (EquipingResult.Equipped, ArmourParts.None);
       }
       else if (item.Type == ItemType.Armour)
       {
@@ -698,7 +738,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       }
     }
 
-    return (EquipingResult.Conflict, ArmourParts.Shirt);
+    return (EquipingResult.Conflict, ArmourParts.None);
   }
 
   public string ApplyEffectToInv(DamageType damageType, GameState gs, Loc loc)
@@ -794,6 +834,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           desc += " (wearing)";
         else if (item.Type == ItemType.Talisman)
           desc += " (equipped)";
+        else if (item.Type == ItemType.Wand)
+          desc += " (focus)";
       }
       lines.Add($"{s}) {desc}");
     }
@@ -825,7 +867,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     foreach (var i in txt.Split(','))
     {
       char slot = i[0];
-      ulong id = ulong.Parse(i.Substring(2));
+      ulong id = ulong.Parse(i[2..]);
       _items.Add((slot, id));
     }
   }
@@ -858,7 +900,8 @@ enum EquipingResult
   TwoHandedConflict,
   TooManyRings,
   TooManyTalismans,
-  Cursed
+  Cursed,
+  NoFreeHand
 }
 
 class EmptyInventory : Inventory 

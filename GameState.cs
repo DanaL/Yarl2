@@ -887,6 +887,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       Player.Stats[Attribute.HP].Change(1);
     }
+    else if (Turn % 17 == 0 && Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
+    {
+      magicPoints.Change(1);
+    }
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it

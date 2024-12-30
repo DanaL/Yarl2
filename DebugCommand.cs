@@ -97,7 +97,8 @@ class DebugCommand(GameState gs)
     {"cloak of protection", ItemNames.CLOAK_OF_PROTECTION },
     {"gauntlets of power", ItemNames.GAUNTLETS_OF_POWER },
     {"potion of heroism", ItemNames.POTION_HEROISM },
-    {"wand of summoning", ItemNames.WAND_SUMMONING }
+    {"wand of summoning", ItemNames.WAND_SUMMONING },
+    {"quarterstaff", ItemNames.QUARTERSTAFF }
   };
 
   public string DoCommand(string txt)

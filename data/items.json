@@ -25,6 +25,18 @@
     ]
   },
   {
+    "Name": "QUARTERSTAFF",
+    "DescriptiveName": "quarterstaff",
+    "Type": "Weapon",
+    "Value": 5,
+    "Glyph": "|,lightbrown,brown,black,black",
+    "Traits": [
+      "Damage#6#1#Blunt",
+      "Polearm",
+      "TwoHanded"    
+    ]
+  },
+  {
     "Name": "DAGGER",
     "DescriptiveName": "dagger",
     "Type": "Weapon",
@@ -1018,5 +1030,12 @@
     "Traits": [
       "Wand#20#false#summoning"
     ]
+  },
+  {
+    "Name": "GENERIC_WAND",
+    "DescriptiveName": "generic wand",
+    "Type": "Wand",
+    "Value": 5,
+    "Glyph": "/,lightbrown,brown,black,black"
   }
 ]
