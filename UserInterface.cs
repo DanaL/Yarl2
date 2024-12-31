@@ -59,6 +59,8 @@ abstract class UserInterface
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
+  public GameEvent FUPoll() => PollForEvent();
+
   public CheatSheetMode CheatSheetMode { get; set; } = CheatSheetMode.Messages;
 
   protected List<string> MenuRows { get; set; } = [];

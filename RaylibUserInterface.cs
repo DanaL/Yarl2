@@ -18,9 +18,13 @@ namespace Yarl2;
 class RaylibUserInterface : UserInterface
 {
   Font _font;
-  private int _fontWidth;
-  private int _fontHeight;
-  private Dictionary<Colour, Color> _colours = [];
+  int _fontWidth;
+  int _fontHeight;
+  Dictionary<Colour, Color> _colours = [];
+
+  const float KEY_REPEAT_DELAY = 1.5f;
+  const float KEY_REPEAT_RATE = 1.1f;
+  DateTime _lastKeyTime = DateTime.MinValue;
 
   public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
   {
@@ -29,6 +33,7 @@ class RaylibUserInterface : UserInterface
     int height = ScreenHeight * opt.FontSize + (padding * 2);
 
     SetConfigFlags(ConfigFlags.VSyncHint);
+    SetExitKey(KeyboardKey.Null);
     InitWindow(width, height, windowTitle);
     SetTargetFPS(60);
 
@@ -53,23 +58,61 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent()
   {
-    if (WindowShouldClose())
-      return new GameEvent(GameEventType.Quiting, '\0');
+    int ch = GetCharPressed();
+    if (ch > 0)
+    {
+      return new GameEvent(GameEventType.KeyInput, (char)ch);
+    }
+  
+    bool isAnyKeyDown = false;
+    GameEvent? gameEvent = null;
 
-    if (IsKeyPressed(KeyboardKey.Escape))
-      return new GameEvent(GameEventType.KeyInput, (char)KeyboardKey.Escape);
+    if (IsKeyDown(KeyboardKey.Left))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, 'h');
+    }
+    else if (IsKeyDown(KeyboardKey.Right))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, 'l');
+    }
+    else if (IsKeyDown(KeyboardKey.Up))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, 'k');
+    }
+    else if (IsKeyDown(KeyboardKey.Down))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, 'j');
+    }
+    else if (IsKeyPressed(KeyboardKey.Escape))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.ESC);
+    }
+    else if (IsKeyPressed(KeyboardKey.Enter)) 
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, (char)13);  // ASCII CR
+    }
+    else if (IsKeyDown(KeyboardKey.Backspace)) 
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.BACKSPACE);
+    }
 
-    // Handle arrow keys
-    if (IsKeyPressed(KeyboardKey.Left)) return new GameEvent(GameEventType.KeyInput, 'h');
-    if (IsKeyPressed(KeyboardKey.Right)) return new GameEvent(GameEventType.KeyInput, 'l');
-    if (IsKeyPressed(KeyboardKey.Up)) return new GameEvent(GameEventType.KeyInput, 'k');
-    if (IsKeyPressed(KeyboardKey.Down)) return new GameEvent(GameEventType.KeyInput, 'j');
-
-    // Get text input
-    int key = GetCharPressed();
-    if (key != 0)
-      return new GameEvent(GameEventType.KeyInput, (char)key);
-
+    if (isAnyKeyDown && gameEvent is not null)
+    {
+      TimeSpan delta = DateTime.Now - _lastKeyTime;
+      if (isAnyKeyDown && delta.TotalMilliseconds >= 150)
+      {
+        _lastKeyTime = DateTime.Now;
+        return (GameEvent) gameEvent;
+      }
+    }
+   
     return new GameEvent(GameEventType.NoEvent, '\0');
   }
 
@@ -94,47 +137,16 @@ class RaylibUserInterface : UserInterface
     message = message.PadRight(width);
     Vector2 position = new(col * _fontWidth, lineNum * _fontHeight);
 
-    if (bgColour != Colours.BLACK)
-    {
-      DrawRectangle((int)position.X, (int)position.Y,
-                    width * _fontWidth, _fontHeight,
-                    ToRaylibColor(bgColour));
-    }
-
-    DrawTextEx(_font, message, position, _fontHeight, 1, ToRaylibColor(textColour));
+    DrawRectangle((int)position.X, (int)position.Y, width * _fontWidth, _fontHeight, ToRaylibColor(bgColour));
+    DrawTextEx(_font, message, position, _fontHeight, 0, ToRaylibColor(textColour));
   }
 
   protected override void WriteSq(int row, int col, Sqr sq)
   {
-    // const int GLYPH_COUNT = 65535;  // Maximum Unicode BMP (Basic Multilingual Plane)
-    // int[] codepoints = new int[GLYPH_COUNT];
-    // for (int i = 0; i < GLYPH_COUNT; i++)
-    // {
-    //   codepoints[i] = i;
-    // }
-    // Font font = Raylib.LoadFontEx("DejaVuSansMono.ttf", 18, codepoints, GLYPH_COUNT);
-
-    // Calculate position with proper spacing
-    //int x = col * SqrWidth;
-    //int y = row * SqrHeight;
-
-    // Draw background (always needed, even for spaces)
-    //DrawRectangle(x, y, SqrWidth + 5, SqrHeight, ToRaylibColor(sq.Bg));
-
-    // Debug info (but not for every space to avoid console spam)
-
-    // Draw all characters, including spaces
     Vector2 position = new(col * (FontSize / 2), row * FontSize);
-    Raylib.DrawTextEx(_font, sq.Ch.ToString(), position, FontSize, 1, ToRaylibColor(sq.Fg));
-    // DrawTextCodepoint(
-    //     _font,
-    //     (int)sq.Ch,  // Convert char to codepoint
-    //     new Vector2(x, y),
-    //     FontSize,
-    //     ToRaylibColor(sq.Fg));
-
-    // Uncomment to see the grid
-    //DrawRectangleLines(x, y, _fontWidth, _fontHeight, Color.Red);
+    DrawRectangle((int) position.X, (int) position.Y, FontSize / 2, FontSize, ToRaylibColor(sq.Bg));
+    
+    DrawTextEx(_font, sq.Ch.ToString(), position, FontSize, 0, ToRaylibColor(sq.Fg));
   }
 
   protected override void ClearScreen() => ClearBackground(Color.Black);
@@ -142,49 +154,46 @@ class RaylibUserInterface : UserInterface
 
   public override void UpdateDisplay(GameState? gs)
   {
-    if (!WindowShouldClose())  // Make sure window is still open
+    BeginDrawing();
+    ClearBackground(Color.Black);
+
+    if (_longMessage is not null)
     {
-      BeginDrawing();
-      ClearBackground(Color.Black);
-
-      if (_longMessage is not null)
+      for (int j = 0; j < _longMessage.Count; j++)
       {
-        for (int j = 0; j < _longMessage.Count; j++)
-        {
-          WriteLine(_longMessage[j], j, 0, ScreenWidth, Colours.WHITE);
-        }
-        WritePopUp();
+        WriteLine(_longMessage[j], j, 0, ScreenWidth, Colours.WHITE);
       }
-      else
-      {
-        if (gs is not null && gs.Player is not null)
-        {
-          WriteSideBar(gs);
-        }
-
-        // Update main display
-        int displayHeight = SqsOnScreen.GetLength(0);
-        int displayWidth = SqsOnScreen.GetLength(1);
-        for (int row = 0; row < displayHeight; row++)
-        {
-          for (int col = 0; col < displayWidth; col++)
-          {
-            WriteSq(row, col, SqsOnScreen[row, col]);
-          }
-        }
-
-        WriteMessagesSection();
-
-        if (MenuRows.Count > 0)
-        {
-          WriteDropDown();
-        }
-
-        WritePopUp();
-        WriteConfirmation();
-      }
-
-      EndDrawing();
+      WritePopUp();
     }
+    else
+    {
+      if (gs is not null && gs.Player is not null)
+      {
+        WriteSideBar(gs);
+      }
+
+      // Update main display
+      int displayHeight = SqsOnScreen.GetLength(0);
+      int displayWidth = SqsOnScreen.GetLength(1);
+      for (int row = 0; row < displayHeight; row++)
+      {
+        for (int col = 0; col < displayWidth; col++)
+        {
+          WriteSq(row, col, SqsOnScreen[row, col]);
+        }
+      }
+
+      WriteMessagesSection();
+
+      if (MenuRows.Count > 0)
+      {
+        WriteDropDown();
+      }
+
+      WritePopUp();
+      WriteConfirmation();
+    }
+
+    EndDrawing();
   }
 }
