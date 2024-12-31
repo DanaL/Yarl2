@@ -2414,7 +2414,7 @@ class LightSpellTrait : TemporaryTrait
       OwnerID = target.ID
     };
 
-    ExpiresOn = gs.Turn + 20;    
+    ExpiresOn = gs.Turn + 250;    
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     target.Traits.Add(this);
     target.Traits.Add(lst);
