@@ -50,14 +50,14 @@ class RaylibUserInterface : UserInterface
     _fontWidth = FontSize / 2;
     _fontHeight = FontSize;
 
-    SetWindowPosition(100, 100);
+    SetWindowPosition(100, 0);
   }
 
   protected override GameEvent PollForEvent()
   {
     if (WindowShouldClose())
       return new GameEvent(GameEventType.Quiting, '\0');
-      
+
     int ch = GetCharPressed();
     if (ch > 0)
     {
