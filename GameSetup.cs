@@ -675,11 +675,11 @@ class CampaignCreator(UserInterface ui)
     s += "\n\na) go back";
     s += "\nb) [BRIGHTRED ERASE] existing save and continue";
     UI.SetPopup(new Popup(s, "", -1, -1));
-    UI.UpdateDisplay(null);
-
+    
     char c;    
     do
     {
+      UI.UpdateDisplay(null);
       Thread.Sleep(30);
       c = UI.GetKeyInput();
 
