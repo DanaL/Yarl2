@@ -85,7 +85,6 @@ try
 }
 catch (GameQuitException)
 {
-  Console.WriteLine("game quit?");
 }
 
 //catch (Exception ex)

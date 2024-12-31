@@ -21,9 +21,6 @@ class RaylibUserInterface : UserInterface
   int _fontWidth;
   int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
-
-  const float KEY_REPEAT_DELAY = 1.5f;
-  const float KEY_REPEAT_RATE = 1.1f;
   DateTime _lastKeyTime = DateTime.MinValue;
 
   public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
@@ -32,9 +29,9 @@ class RaylibUserInterface : UserInterface
     int width = ScreenWidth * (opt.FontSize / 2) + (padding * 2);
     int height = ScreenHeight * opt.FontSize + (padding * 2);
 
-    SetConfigFlags(ConfigFlags.VSyncHint);
-    SetExitKey(KeyboardKey.Null);
+    SetConfigFlags(ConfigFlags.VSyncHint);    
     InitWindow(width, height, windowTitle);
+    SetExitKey(KeyboardKey.Null);
     SetTargetFPS(60);
 
     FontSize = opt.FontSize;
@@ -58,6 +55,9 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent()
   {
+    if (WindowShouldClose())
+      return new GameEvent(GameEventType.Quiting, '\0');
+      
     int ch = GetCharPressed();
     if (ch > 0)
     {
