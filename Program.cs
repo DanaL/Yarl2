@@ -16,11 +16,13 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
+Console.WriteLine("Good morning, wonderful Catarina!");
+
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);
 else
-  display = new SDLUserInterface($"Dana's Delve {Constants.VERSION} + SDL", options);
+  display = new RaylibUserInterface($"Dana's Delve {Constants.VERSION} + Raylib", options);
 
 try
 {
@@ -84,6 +86,7 @@ try
 catch (GameQuitException)
 {
 }
+
 //catch (Exception ex)
 //{
 //  List<string> lines = [];
