@@ -29,8 +29,10 @@ class RaylibUserInterface : UserInterface
     int width = ScreenWidth * (opt.FontSize / 2) + (padding * 2);
     int height = ScreenHeight * opt.FontSize + (padding * 2);
 
-    SetConfigFlags(ConfigFlags.VSyncHint);    
+    SetConfigFlags(ConfigFlags.VSyncHint);
+    SetTraceLogLevel(TraceLogLevel.None); 
     InitWindow(width, height, windowTitle);
+    
     SetExitKey(KeyboardKey.Null);
     SetTargetFPS(60);
 
