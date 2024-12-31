@@ -16,8 +16,6 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
-Console.WriteLine("Good morning, wonderful Catarina!");
-
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);
@@ -146,7 +144,7 @@ namespace Yarl2
 
       Options options = new()
       {
-        Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "SDL",
+        Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "Raylib",
         FontSize = 14,
         BumpToOpen = true,
         HighlightPlayer = false,
