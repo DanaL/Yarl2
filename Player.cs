@@ -368,8 +368,11 @@ class Player : Actor, IPerformer, IGameEventListener
       lines.Add("");
     }
    
-    lines.Add($"Stress: {Stats[Attribute.Nerve].Curr}");
-    lines.Add("");
+    if (Stats.ContainsKey(Attribute.Nerve))
+    {
+      lines.Add($"Stress: {Stats[Attribute.Nerve].Curr}");
+      lines.Add("");
+    }
 
     if (Stats[Attribute.Depth].Max == 0)
       lines.Add("You have yet to venture into the Dungeon.");

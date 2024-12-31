@@ -926,7 +926,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
     
-    CheckForStress();
+    if (!UI.InTutorial)
+      CheckForStress();
 
     ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
 
