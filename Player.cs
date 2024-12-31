@@ -675,8 +675,7 @@ class Player : Actor, IPerformer, IGameEventListener
         if (paralyzed.TurnsParalyzed % 5 == 0)
         {
           ui.SetPopup(new Popup("You are paralyzed", "", -1, -1));
-          ui.UpdateDisplay(gameState);
-          ui.BlockForInput();
+          ui.BlockForInput(gameState);
           ui.ClosePopup();
         }
          

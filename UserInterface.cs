@@ -59,8 +59,6 @@ abstract class UserInterface
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 
-  public GameEvent FUPoll() => PollForEvent();
-
   public CheatSheetMode CheatSheetMode { get; set; } = CheatSheetMode.Messages;
 
   protected List<string> MenuRows { get; set; } = [];
@@ -185,7 +183,7 @@ abstract class UserInterface
     var popup = new Popup($"\nYou have defeated {bossName}!\n\n  -- Press any key to continue --", "Victory", -1, -1);
     SetPopup(popup);
     UpdateDisplay(gs);
-    BlockForInput();
+    BlockForInput(gs);
     ClearLongMessage();
 
     var town = gs.Campaign.Town!;
@@ -860,8 +858,7 @@ abstract class UserInterface
         success = true;
 
         WriteLongMessage([" Be seeing you..."]);
-        UpdateDisplay(gs);
-        BlockForInput();
+        BlockForInput(gs);
       }
       catch (Exception ex)
       {
@@ -924,13 +921,14 @@ abstract class UserInterface
     return '\0';
   }
 
-  public void BlockForInput()
+  public void BlockForInput(GameState gs)
   {
     GameEvent e;
     do
     {
       e = PollForEvent();
-
+    
+      UpdateDisplay(gs);
       Delay();
     }
     while (e.Type == GameEventType.NoEvent);
@@ -1250,7 +1248,7 @@ abstract class UserInterface
     sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
 
     DrawFullScreen(sqs);
-    BlockForInput();
+    BlockForInput(gs);
   }
 
   void DrawFullScreen(Sqr[,] sqs)
@@ -1308,8 +1306,8 @@ abstract class UserInterface
         SqsOnScreen[r + 1, c + 1] = s;
       }
     }
-    UpdateDisplay(gameState);
-    BlockForInput();
+    
+    BlockForInput(gameState);
   }
 
   public RunningState GameLoop(GameState gameState)
