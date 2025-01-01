@@ -25,7 +25,7 @@ enum TileType
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, Shortcut, ShortcutDown,
-  BusinessSign, FakeStairs
+  BusinessSign, FakeStairs, HiddenSummonsTrap
 }
 
 interface ITriggerable
@@ -112,6 +112,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.MagicMouth => true,
     TileType.HiddenMagicMouth => true,
     TileType.HiddenBridgeCollapseTrap => true,
+    TileType.HiddenSummonsTrap => true,
     _ => false
   };
 
@@ -186,6 +187,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HiddenBridgeCollapseTrap => "stone floor",
     TileType.BusinessSign => "a sign",
     TileType.FakeStairs => "stairs",
+    TileType.HiddenSummonsTrap => "stone floor",
     _ => "unknown"
   };
 
@@ -551,6 +553,7 @@ class TileFactory
   private static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
   private static readonly Tile DisturbedGrave = new BasicTile(TileType.DisturbedGrave, true, false, true);
   private static readonly Tile FakeStairs = new BasicTile(TileType.FakeStairs, true, false, true);
+  private static readonly Tile HiddenSummonsTrap = new BasicTile(TileType.HiddenSummonsTrap, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -607,6 +610,7 @@ class TileFactory
     TileType.Pool => Pool,
     TileType.DisturbedGrave => DisturbedGrave,
     TileType.FakeStairs => FakeStairs,
+    TileType.HiddenSummonsTrap => HiddenSummonsTrap,
     _ => Unknown
   };
 }

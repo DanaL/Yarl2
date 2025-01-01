@@ -667,11 +667,11 @@ class MainDungeonBuilder : DungeonBuilder
   {
     int[] trapOpts;
     if (level == 0)
-      trapOpts = [3, 6];      
+      trapOpts = [3, 6, 7];      
     else if (level == dungeonDepth - 1)
-      trapOpts = [0, 1, 2, 3, 4]; // no trap doors on bottom level
+      trapOpts = [0, 1, 2, 3, 4, 6, 7]; // no trap doors on bottom level
     else
-      trapOpts = [0, 1, 2, 3, 4, 5];
+      trapOpts = [0, 1, 2, 3, 4, 5, 6, 7];
    
     (int, int) sq;
     int numOfTraps = rng.Next(1, 6);
@@ -708,6 +708,12 @@ class MainDungeonBuilder : DungeonBuilder
         case 6:
           sq = map.RandomTile(TileType.DungeonFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
+          break;
+        case 7:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          if (level == 0)
+            Console.WriteLine($"Summons trap: {sq}");          
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
           break;
       }
     }

@@ -1002,7 +1002,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     List<Loc> outOfSight = openLoc.Where(l => !LastPlayerFoV.Contains(l)).ToList();
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
-        
+    
+    Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
+    SpawnLevelAppropriateMonster(spawnPoint);
+  }
+
+  public void SpawnLevelAppropriateMonster(Loc loc)
+  {
     int monsterLevel = CurrLevel;
     if (monsterLevel > 0)
     {
@@ -1022,10 +1028,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     string m = deck.Monsters[deck.Indexes.Dequeue()];
         
     Actor monster = MonsterFactory.Get(m, ObjDb, Rng);
-    Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
-    monster.Loc = spawnPoint;
+    
+    monster.Loc = loc;
     ObjDb.Add(monster);
-    ObjDb.AddToLoc(spawnPoint, monster);
+    ObjDb.AddToLoc(loc, monster);
     AddPerformer(monster);
   }
 

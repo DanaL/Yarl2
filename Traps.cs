@@ -236,7 +236,46 @@ class Traps
           }          
         }
       }
+
       gs.UIRef().AlertPlayer(msgs);
+    }
+    else if (tile.Type == TileType.HiddenSummonsTrap && actor is Player player)
+    {
+      // I'm only going to have the player set off summons trap...
+      // because magic?
+      
+      List<Loc> opts = [];
+      foreach (Loc adj in Util.Adj8Locs(player.Loc))
+      {
+        if (gs.TileAt(adj).Passable() && ! gs.ObjDb.Occupied(adj))
+          opts.Add(adj);
+      }
+
+      if (opts.Count == 0)
+        return;
+      
+      int numOfMonsters = gs.Rng.Next(int.Min(3, opts.Count)) + 1;
+      for (int j = 0; j < numOfMonsters; j++)
+      {
+        int i = gs.Rng.Next(opts.Count);
+        Loc spawnLoc = opts[i];
+        gs.SpawnLevelAppropriateMonster(spawnLoc);
+        opts.RemoveAt(i);
+
+        SqAnimation anim = new(gs, spawnLoc, Colours.LIGHT_BLUE, Colours.BLACK, '*');
+        gs.UIRef().RegisterAnimation(anim);
+      }
+
+      player.Stats[Attribute.Nerve].Change(-5);
+      player.Running = false;
+      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+
+      string s;
+      if (player.HasTrait<BlindTrait>())
+        s = "You hear a loud roar and something appears beside you!";
+      else
+        s = "There is a flash of light and smoke and monsters appear!";
+      gs.UIRef().AlertPlayer(s);
     }
   }
 
