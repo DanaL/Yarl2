@@ -79,6 +79,41 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   }
 }
 
+class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, actor)
+{
+  Loc TargetLoc { get; set; } = targetLoc;
+  int DC { get; set; } = dc;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor victim)
+      return result;
+
+    string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "bite")} {victim.FullName}!";
+    result.Messages.Add(s);
+
+    if (!victim.AbilityCheck(Attribute.Dexterity, DC, GameState.Rng))
+    {
+      s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swallow")} {victim.FullName} whole!";
+      result.Messages.Add(s);
+
+      SwallowedTrait st = new ()
+      {
+        VictimID = victim.ID,
+        SwallowerID = Actor.ID,
+        SwallowerColour = Actor.Glyph.Lit
+      };
+      victim.Traits.Add(st);
+    }
+
+    return result;
+  }
+}
+
 // This is a different class from MissileAttackAction because it will take the result the 
 // aim selection. It also handles the animation and following the path of the arrow
 class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attackBonus) : TargetedAction(gs, actor)

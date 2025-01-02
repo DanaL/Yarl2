@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Data.SqlTypes;
 using System.Text;
 
 namespace Yarl2;
@@ -1310,6 +1311,37 @@ abstract class UserInterface
     BlockForInput(gameState);
   }
 
+  // This feels a bit kludgy but there are times (at the moment just for
+  // being swallowed) where I want to override whatever else has been 
+  // calculated to display
+  void SpecialVisionStates(GameState gs)
+  {
+    foreach (Trait t in gs.Player.Traits)
+    {
+      if (t is SwallowedTrait swallowed)
+      {
+        for (int r = 0; r < ViewHeight; r++)
+        {
+          for (int c = 0; c < ViewWidth; c++)
+          {            
+            SqsOnScreen[r, c] = Constants.BLANK_SQ;
+          }
+        }
+
+        Colour colour = swallowed.SwallowerColour;
+        SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BGLit, PlayerGlyph.Ch);
+        SqsOnScreen[PlayerScreenRow - 1, PlayerScreenCol - 1 ] = new Sqr(colour, Colours.BLACK, '/');
+        SqsOnScreen[PlayerScreenRow - 1, PlayerScreenCol ] = new Sqr(colour, Colours.BLACK, '-');
+        SqsOnScreen[PlayerScreenRow - 1, PlayerScreenCol + 1 ] = new Sqr(colour, Colours.BLACK, '\\');
+        SqsOnScreen[PlayerScreenRow, PlayerScreenCol - 1 ] = new Sqr(colour, Colours.BLACK, '|');
+        SqsOnScreen[PlayerScreenRow, PlayerScreenCol + 1 ] = new Sqr(colour, Colours.BLACK, '|');
+        SqsOnScreen[PlayerScreenRow + 1, PlayerScreenCol - 1 ] = new Sqr(colour, Colours.BLACK, '\\');
+        SqsOnScreen[PlayerScreenRow + 1, PlayerScreenCol ] = new Sqr(colour, Colours.BLACK, '-');
+        SqsOnScreen[PlayerScreenRow + 1, PlayerScreenCol + 1 ] = new Sqr(colour, Colours.BLACK, '/');
+      }
+    }
+  }
+
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
@@ -1375,6 +1407,7 @@ abstract class UserInterface
           l.Update();
         _animations = _animations.Where(a => a.Expiry > DateTime.Now)
                                  .ToList();
+        SpecialVisionStates(gameState);
         UpdateDisplay(gameState);
         refresh = DateTime.Now;
       }

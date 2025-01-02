@@ -348,6 +348,11 @@ class MonsterBehaviour : IBehaviour
       _lastUse[act.Name] = gs.Turn;
       return new ShriekAction(gs, mob, shriek.ShriekRadius);
     }
+    else if (act is GulpTrait gulp)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp.DC);
+    }
 
     return new NullAction();
   }

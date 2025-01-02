@@ -92,6 +92,7 @@ abstract class ActionTrait : BasicTrait
   public virtual ActionType ActionType { get; set; }
 
   public abstract bool Available(Mob mob, GameState gs);
+
   protected bool InRange(Mob mob, GameState gs)
   {
     int dist = Util.Distance(mob.Loc, gs.Player.Loc);
@@ -238,6 +239,15 @@ class SummonUndeadTrait : ActionTrait
   }
 
   public override string AsText() => $"SummonUndead#{Cooldown}";
+}
+
+class SwallowedTrait : Trait
+{
+  public ulong VictimID { get; set; }
+  public ulong SwallowerID { get; set; }
+  public Colour SwallowerColour { get; set; }
+
+  public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Colours.ColourToText(SwallowerColour)}";
 }
 
 class HealAlliesTrait : ActionTrait
@@ -1400,6 +1410,22 @@ class GrapplerTrait : BasicTrait
   public int DC { get; set; }
 
   public override string AsText() => $"Grappler#{DC}";
+}
+
+class GulpTrait : ActionTrait
+{
+  public int DC { get; set; }
+  public int AcidDie { get; set; }
+  public int AcidDice { get; set; }
+  public override ActionType ActionType => ActionType.Attack;
+  public override string AsText() => $"Gulp#{DC}#{AcidDie}#{AcidDice}";
+  
+  public override bool Available(Mob mob, GameState gs)
+  {
+    // Eventually it won't be available when the mob has already
+    // swallowed someone
+    return true;
+  }
 }
 
 class ParalyzingGazeTrait : BasicTrait
@@ -2722,6 +2748,11 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
+    { "Gulp", (pieces, gameObj) => new GulpTrait() 
+      { 
+        DC = int.Parse(pieces[1]), AcidDie = int.Parse(pieces[2]), AcidDice = int.Parse(pieces[3])
+      }
+    },
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Heroism", (pieces, gameObj) => new HeroismTrait() 
       { 
@@ -2902,6 +2933,12 @@ class TraitFactory
     },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
     { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]), Name=pieces[0] }},
+    { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
+      {
+        VictimID = ulong.Parse(pieces[1]), SwallowerID = ulong.Parse(pieces[2]),
+        SwallowerColour = Colours.TextToColour(pieces[3])
+      }
+    },
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
