@@ -47,3 +47,4 @@ rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|Melee#4#1#Pie
 python            |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crusher#4#1,Melee#4#1#Blunt|Grappler#15
 rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#4#5,Melee#4#1#Slashing|Intelligent,PoorLoot
 flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|Melee#6#1#Fire|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1
+giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#13#6#1|
