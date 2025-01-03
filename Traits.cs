@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.NetworkInformation;
+
 namespace Yarl2;
 
 enum ActionType
@@ -471,11 +473,21 @@ class DialogueScriptTrait : Trait
   public override string AsText() => $"DialogueScript#{ScriptFile}";
 }
 
+class DigestionTrait : ActionTrait
+{
+  public int AcidDie { get; set; }
+  public int AcidDice { get; set; }
+
+  public override ActionType ActionType => ActionType.Attack;
+  public override string AsText() => $"Digestion#{AcidDie}#{AcidDice}";
+  public override bool Available(Mob mob, GameState gs) => mob.HasTrait<FullBellyTrait>();
+}
+
 class DodgeTrait : Trait
 {
-public int Rate { get; set; }
+  public int Rate { get; set; }
 
-public override string AsText() => $"Dodge#{Rate}#{SourceId}";
+  public override string AsText() => $"Dodge#{Rate}#{SourceId}";
 }
 
 class FinesseTrait : Trait
@@ -1194,6 +1206,13 @@ class FrightenedTrait : TemporaryTrait
   }
 }
 
+class FullBellyTrait : Trait
+{
+  public ulong VictimID { get; set; }
+
+  public override string AsText() => $"FullBelly#{VictimID}";
+}
+
 class OpaqueTrait : Trait
 {
   public override string AsText() => "Opaque";  
@@ -1415,17 +1434,10 @@ class GrapplerTrait : BasicTrait
 class GulpTrait : ActionTrait
 {
   public int DC { get; set; }
-  public int AcidDie { get; set; }
-  public int AcidDice { get; set; }
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"Gulp#{DC}#{AcidDie}#{AcidDice}";
+  public override string AsText() => $"Gulp#{DC}";
   
-  public override bool Available(Mob mob, GameState gs)
-  {
-    // Eventually it won't be available when the mob has already
-    // swallowed someone
-    return true;
-  }
+  public override bool Available(Mob mob, GameState gs) => !mob.HasTrait<FullBellyTrait>();
 }
 
 class ParalyzingGazeTrait : BasicTrait
@@ -2703,6 +2715,7 @@ class TraitFactory
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
+    { "Digestion", (pieces, gameObj) => new DigestionTrait() { AcidDie = int.Parse(pieces[1]), AcidDice = int.Parse(pieces[2]) }},
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
@@ -2740,6 +2753,7 @@ class TraitFactory
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
+    { "FullBelly", (pieces, gameObj) => new FullBellyTrait() { VictimID = ulong.Parse(pieces[1]) }},
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
@@ -2748,11 +2762,7 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
-    { "Gulp", (pieces, gameObj) => new GulpTrait() 
-      { 
-        DC = int.Parse(pieces[1]), AcidDie = int.Parse(pieces[2]), AcidDice = int.Parse(pieces[3])
-      }
-    },
+    { "Gulp", (pieces, gameObj) => new GulpTrait() { DC = int.Parse(pieces[1]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Heroism", (pieces, gameObj) => new HeroismTrait() 
       { 

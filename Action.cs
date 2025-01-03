@@ -101,13 +101,50 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
       s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swallow")} {victim.FullName} whole!";
       result.Messages.Add(s);
 
-      SwallowedTrait st = new ()
+      SwallowedTrait st = new()
       {
         VictimID = victim.ID,
         SwallowerID = Actor.ID,
         SwallowerColour = Actor.Glyph.Lit
       };
       victim.Traits.Add(st);
+
+      Actor.Traits.Add(new FullBellyTrait() { VictimID = victim.ID });
+    }
+
+    return result;
+  }
+}
+
+class DigestionAction(GameState gs, Actor actor, ulong victimId, int acidDie, int acidDice) : Action(gs, actor)
+{
+  ulong VictimId { get; set; } = victimId;
+  int AcidDie { get; set; } = acidDie;
+  int AcidDice { get; set; } = acidDice;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    if (GameState!.ObjDb.GetObj(VictimId) is Actor victim)
+    {
+      int total = 0;
+      for (int j = 0; j < AcidDice; j++)
+        total += GameState.Rng.Next(AcidDie) + 1;
+      List<(int, DamageType)> dmg = [(total, DamageType.Acid)];
+      var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, Actor, 1.0);
+      if (hpLeft < 1)
+      {
+        GameState.ActorKilled(victim, $"being digested", result, null);
+      }        
+      
+      if (GameState.LastPlayerFoV.Contains(victim.Loc))
+      {        
+        string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} digesting {victim.FullName}!";
+        result.Messages.Add(s);
+      }
     }
 
     return result;
@@ -2492,7 +2529,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
       {
         result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
 
-        var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
         if (hpLeft < 1)
         {
           GameState.ActorKilled(victim, "a fireball", result, null);

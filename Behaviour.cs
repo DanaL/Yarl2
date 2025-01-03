@@ -353,6 +353,12 @@ class MonsterBehaviour : IBehaviour
       _lastUse[act.Name] = gs.Turn;
       return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp.DC);
     }
+    else if (act is DigestionTrait digestion)
+    {
+      _lastUse[act.Name] = gs.Turn;
+      FullBellyTrait fbt = mob.Traits.OfType<FullBellyTrait>().First();
+      return new DigestionAction(gs, mob, fbt.VictimID, digestion.AcidDie, digestion.AcidDice);
+    }
 
     return new NullAction();
   }
