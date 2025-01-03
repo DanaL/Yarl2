@@ -533,8 +533,10 @@ class Battle
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
       ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
+  
+      bool swallowed = attacker.HasTrait<SwallowedTrait>();
 
-      if (weapon is not null && weapon.HasTrait<CleaveTrait>())
+      if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
       {
         // A versatile weapon only cleaves if it is being wielded with two hands
         // (ie., the attacker doesn't have a shield equipped)
@@ -545,7 +547,7 @@ class Battle
         }        
       }
      
-      if (weapon is not null && weapon.HasTrait<ImpaleTrait>())
+      if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
         ResolveImpale(attacker, target, roll, gs, result, weaponBonus);
       
       if (attacker.HasActiveTrait<KnockBackTrait>())
@@ -562,7 +564,7 @@ class Battle
           result.Messages.Add(msg);
       }
 
-      if (attacker.HasTrait<CutpurseTrait>())
+      if (attacker.HasTrait<CutpurseTrait>() && !swallowed)
       {
         HandleCutpurse(attacker, target, gs, result);
       }

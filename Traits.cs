@@ -243,13 +243,35 @@ class SummonUndeadTrait : ActionTrait
   public override string AsText() => $"SummonUndead#{Cooldown}";
 }
 
-class SwallowedTrait : Trait
+class SwallowedTrait : Trait, IGameEventListener
 {
   public ulong VictimID { get; set; }
   public ulong SwallowerID { get; set; }
   public Colour SwallowerColour { get; set; }
+  public bool Expired { get => false; set {} }
+  public bool Listening => true;
+  public ulong ObjId => VictimID;
 
   public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Colours.ColourToText(SwallowerColour)}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is Actor victim)
+    {
+      victim.Traits.Remove(this);
+      gs.StopListening(GameEventType.Death, this);
+      if (gs.LastPlayerFoV.Contains(victim.Loc))
+      {
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} expelled!";
+        gs.UIRef().AlertPlayer(s);
+      }
+
+      if (gs.ObjDb.GetObj(SwallowerID) is Actor swallower)
+      {
+        swallower.Traits = swallower.Traits.Where(t => t is not FullBellyTrait).ToList();
+      }      
+    }
+  }
 }
 
 class HealAlliesTrait : ActionTrait

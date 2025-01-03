@@ -87,9 +87,21 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (isPlayer)
         result.Messages.Add("You cannot go that way!");
     }
+    else if (Actor.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    {
+      // if the actor is swalled by another creature, any direction they move
+      // in will attack the monster
+      if (GameState.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
+      {
+        var attackAction = new MeleeAttackAction(GameState, Actor, target.Loc);
+        result.AltAction = attackAction;
+      }
+
+      // plus attacking gives a chance to expel the victim
+    }
     // There are corner cases when I want to move the actor onto the sq they're already
     // on (like digging while in a pit and turning it into a trapdoor) to re-resolve
-    // the effects of moving onto the sq
+    // the effects of moving onto the sq, hence the Occupant ID != Actor.ID check
     else if (GameState.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor.ID)
     {
       result.Complete = false;

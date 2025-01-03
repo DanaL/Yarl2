@@ -107,6 +107,7 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
         SwallowerID = Actor.ID,
         SwallowerColour = Actor.Glyph.Lit
       };
+      GameState.RegisterForEvent(GameEventType.Death, st, Actor.ID);
       victim.Traits.Add(st);
 
       Actor.Traits.Add(new FullBellyTrait() { VictimID = victim.ID });
