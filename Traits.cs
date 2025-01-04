@@ -253,8 +253,9 @@ class SwallowedTrait : Trait, IGameEventListener
   public ulong ObjId => VictimID;
 
   public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Colours.ColourToText(SwallowerColour)}";
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc) => Remove(gs);
 
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  public void Remove(GameState gs)
   {
     if (gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
