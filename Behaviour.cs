@@ -477,6 +477,9 @@ class MonsterBehaviour : IBehaviour
         fullBelly = true;
     }
     
+    if (fullBelly && actor.HasTrait<FrightenedTrait>())
+      EmptyBelly(actor, gs);
+      
     switch (actor.Stats[Attribute.MobAttitude].Curr)
     {
       case Mob.INACTIVE:
