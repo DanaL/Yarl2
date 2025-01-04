@@ -8,6 +8,7 @@
           "How are your adventurers going?" 
           "There was another raid by #EARLY_DENIZEN a few days ago. Someone needs to do something!"
           "They say a sketchy, uncertified necromancer entered the dungeon and unleashed something terrible. Dark rituals and all that."
+          "Ever hear the one about the whale? Well there's other monsters what can swallow you up too!"
         ))))
 
   (else 
