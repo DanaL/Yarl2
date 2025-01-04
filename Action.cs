@@ -1887,9 +1887,25 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     }
     else
     {
-      // Teleporting removes the grapple trait and in-pit traits
-      Actor.Traits = Actor.Traits.Where(t => t is not GrappledTrait && t is not InPitTrait).ToList();
-        
+      // Teleporting removes the grapple trait, swallowed, and in-pit traits
+      var toRemove = Actor.Traits.Where(t => t is InPitTrait || t is GrappledTrait || t is SwallowedTrait).ToList();
+      foreach (Trait t in toRemove)
+      {
+        if (t is InPitTrait)
+        {
+          Actor.Traits.Remove(t);
+        }
+        else if (t is GrappledTrait grappled)
+        {
+          Actor.Traits.Remove(t);
+          GameState!.StopListening(GameEventType.Death, grappled);
+        }
+        else if (t is SwallowedTrait swallowed)
+        {
+          swallowed.Remove(GameState!);
+        }
+      }
+      
       var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
       var mv = new MoveAction(GameState, Actor, landingSpot);
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
