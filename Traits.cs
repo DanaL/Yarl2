@@ -1458,7 +1458,17 @@ class GulpTrait : ActionTrait
   public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"Gulp#{DC}";
   
-  public override bool Available(Mob mob, GameState gs) => !mob.HasTrait<FullBellyTrait>();
+  public override bool Available(Mob mob, GameState gs) 
+  {
+    if (mob.HasTrait<FullBellyTrait>())
+      return false;
+
+    // need to eventually have a PickTarget method in Mob
+    if (Util.Distance(mob.Loc, gs.Player.Loc) > 1)
+      return false;
+
+    return true;
+  }
 }
 
 class ParalyzingGazeTrait : BasicTrait
