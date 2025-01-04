@@ -720,7 +720,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.Now.GetHashCode();
-      
+      seed = 924314040;
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();

@@ -20,7 +20,8 @@ enum BuildingType
   Home,
   Tavern,
   Market,
-  Smithy
+  Smithy,
+  WitchesCottage
 }
 
 class Town
@@ -33,6 +34,8 @@ class Town
   public List<HashSet<Loc>> Homes { get; set; } = [];
   public HashSet<int> TakenHomes { get; set; } = [];
   public HashSet<Loc> TownSquare { get; set; } = [];
+  public HashSet<Loc> WitchesCottage { get; set; } = [];
+
   public int Row { get; set; }
   public int Col { get; set; }
   public int Height { get; set; }
@@ -53,7 +56,7 @@ class TownBuilder
   // This requires the templates to be squares and while I was writing this code I
   // was too dumb to figure out how to rotate a rectangle so for now I'm going to 
   // stick with square building templates :P
-  char[] Rotate(char[] sqs, int width)
+  static char[] Rotate(char[] sqs, int width)
   {
     var indices = ListUtils.Filled(0, width * width);
     var rotated = ListUtils.Filled('`', width * width);
@@ -136,6 +139,21 @@ class TownBuilder
         };
 
         sqs.Add((currRow, currCol));
+        // if the tile is grass or a tree and the underlying tile is a 
+        // river, we don't want to overwrite it        
+        if (map.TileAt(currRow, currCol).Type == TileType.Water)
+        {          
+          switch (tileType)
+          {
+            case TileType.Grass:
+            case TileType.Conifer:
+            case TileType.GreenTree:
+            case TileType.OrangeTree:
+            case TileType.YellowTree:
+            case TileType.RedTree:
+              continue;
+          }
+        }
         map.SetTile(currRow, currCol, TileFactory.Get(tileType));
       }
     }
@@ -156,6 +174,9 @@ class TownBuilder
       case BuildingType.Smithy:
         Town.Smithy = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
         InstallSign(map, building, sqs, rng);
+        break;
+      case BuildingType.WitchesCottage:
+        // Witches' cottage is set up outside the main town building functions
         break;
       default:
         Town.Homes.Add(sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet());
@@ -702,6 +723,96 @@ class TownBuilder
     return blocked;
   }
 
+  void DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, Random rng)
+  {
+    DrawBuilding(map, r, c, townCentreRow, townCentreCol, template, BuildingType.WitchesCottage, rng);
+
+    // The witches also get a well
+    List<(int, int)> opts = [];
+    for (int dr = 0; dr < 15; dr++) 
+    {
+      for (int dc = 0; dc < 15; dc++)
+      {
+        Town.WitchesCottage.Add(new Loc(0, 0, r + dr, c + dc));
+        TileType tile = map.TileAt(r + dr, c + dc).Type;
+        switch (tile)
+        {
+          case TileType.Grass:
+          case TileType.Dirt:
+          case TileType.Conifer:
+          case TileType.GreenTree:
+          case TileType.OrangeTree:
+          case TileType.RedTree:
+          case TileType.YellowTree:
+          case TileType.Sand:
+            opts.Add((r + dr, c + dc));
+            break;
+        }
+      }
+    }
+
+    int gr = rng.Next(15) + r;
+    int gc = (gr > r + 11 ? rng.Next(15) : rng.Next(12, 15)) + c;
+
+    // draw the garden, which is just dirt but maybe I'll eventually
+    // have crops/plants
+    for (int gardenRow = gr; gardenRow < gr + 3; gardenRow++)
+    {
+      map.SetTile(gardenRow, gc, TileFactory.Get(TileType.Dirt));
+      map.SetTile(gardenRow, gc + 1, TileFactory.Get(TileType.Dirt));
+    }
+
+    if (opts.Count > 0)
+    {
+      var wellSq = opts[rng.Next(opts.Count)];
+      map.SetTile(wellSq, TileFactory.Get(TileType.Well));
+    }
+  }
+
+  void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, Random rng)
+  {
+    // Find candidate spots for the witches' cottage
+    List<(int, int)> candidates = [];
+    for (int r = 3; r < map.Height - 16; r++)
+    {
+      for (int c = 3; c < map.Width - 16; c++)
+      {
+        if (Util.Distance(r, c, townCentreRow, townCentreCol) >= 65)
+          candidates.Add((r, c));
+      }
+    }
+    candidates.Shuffle(rng);
+
+    int topLeftRow = -1, topLeftCol = -1;
+    foreach (var sq in candidates)
+    {
+      int waterCount = 0;
+      int mountainCount = 0;
+      for (int r = 0; r < 15; r++)
+      {
+        for (int c = 0; c < 15; c++)
+        {
+          Tile tile = map.TileAt(sq.Item1 + r, sq.Item2 + c);
+          if (tile.Type == TileType.Mountain || tile.Type == TileType.SnowPeak)
+            ++mountainCount;
+          if (tile.Type == TileType.DeepWater || tile.Type == TileType.Water)
+            ++ waterCount;
+        }
+      }
+
+      if (waterCount >= 75 || mountainCount >= 75)
+        continue;
+
+      topLeftRow = sq.Item1;
+      topLeftCol = sq.Item2;
+      break;
+    }
+
+    Console.WriteLine($"Witch cottage at {topLeftRow}, {topLeftCol}");
+    if (topLeftRow > -1 && topLeftCol > -1)
+      DrawWitchesCottage(map, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
+  }
+
   public Map DrawnTown(Map map, Random rng)
   {
     int rows = 0, width = 0;
@@ -742,7 +853,7 @@ class TownBuilder
     // We'll loop up to 5 times and then try to place buildings. (If we can't
     // place enough cottages the map will be rejected anyhow)
     int startRow, startCol;
-    int acceptableBlocked = (int)((TOWN_WIDTH * TOWN_HEIGHT) * 0.15);
+    int acceptableBlocked = (int)(TOWN_WIDTH * TOWN_HEIGHT * 0.15);
     int tries = 0;
     do
     {
@@ -787,6 +898,8 @@ class TownBuilder
     DrawPathsInTown(map, rng, startRow, startCol);
 
     AddWell(map, rng);
+
+    AddWitchesCottage(map, centreRow, centreCol, Templates["cottage 3"], rng);
 
     return map;
   }
