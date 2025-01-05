@@ -677,6 +677,76 @@ class PriestBehaviour : NPCBehaviour
   }
 }
 
+class WitchBehaviour : IBehaviour, IDialoguer
+{
+  List<DialogueOption> Options { get; set; } = [];
+  DateTime _lastBark = new(1900, 1, 1);
+
+  static string PickBark(GameState gs)
+  {
+    string grocerName = "";
+    if (gs.FactDb.FactCheck("GrocerId") is SimpleFact fact)
+    {
+      ulong grocerId = ulong.Parse(fact.Value);
+      if (gs.ObjDb.GetObj(grocerId) is Actor grocer)
+        grocerName = grocer.FullName.Capitalize();
+    }
+    
+    return gs.Rng.Next(4) switch
+    {
+      0 => "Sophie, did you see that sparrow?",
+      1 => $"{grocerName} is charging HOW MUCH for mandrake root?",
+      2 => "Do not tarry!",
+      _ => "Dark augeries..."
+    };
+  }
+
+  public Action CalcAction(Mob witch, GameState gameState)
+  {
+    Action action  = new PassAction(gameState, witch);
+    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    {
+      action.Quip = PickBark(gameState);
+      _lastBark = DateTime.Now;
+    }
+
+    return action;
+  }
+
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  {
+    var acc = new Dialoguer(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialogue = new DialogueInterpreter();
+
+    string txt = dialogue.Run(scriptFile, mob, gs);
+    Options = dialogue.Options;
+    List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
+    
+    return (txt, opts);
+  }
+
+  public void SelectOption(Mob mob, char choice, GameState gs)
+  {
+    foreach (DialogueOption opt in Options)
+    {
+      if (opt.Ch == choice)
+      {
+        var dialogue = new DialogueInterpreter();
+        dialogue.Run(opt.Expr, mob, gs);
+        break;
+      }
+    }
+  }
+}
+
 class SmithBehaviour : IBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);

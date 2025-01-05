@@ -271,21 +271,39 @@ class CampaignCreator(UserInterface ui)
   static bool InTown(int row, int col, Town town) =>
       row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width;
 
-  static int CostForRoadBuilding(Tile tile) => tile.Type switch
+  static int CostForRoadBuilding(Tile tile) 
   {
-    TileType.HWindow or TileType.VWindow or TileType.StoneWall or TileType.WoodWall => 1,
-    _ => tile.Passable() ? 1 : int.MaxValue
-  };
+    if (tile.IsTree() || tile.Type == TileType.Water)
+      return 2;
+    else if (tile.Passable())
+      return 1;
+    else 
+      return int.MaxValue;
+  }
 
-  static void DrawOldRoad(Map map, HashSet<(int, int)> region, int overWorldWidth, (int, int) entrance, Town town, Random rng)
+  static (int, int) RandomSqInTown(Map map, Town town, Random rng)
   {
-    int tcRow = town.Row + town.Height / 2;
-    int tcCol = town.Col + town.Width / 2;
+    List<(int, int)> opts = [];
+    for (int r = town.Row; r < town.Row + town.Height; r++)
+    {
+      for (int c = town.Col; c < town.Col + town.Width; c++)
+      {
+        Tile tile = map.TileAt(r, c);
+        if (tile.IsTree() || tile.Type == TileType.Grass || tile.Type == TileType.Dirt)
+          opts.Add((r, c));
+      }
+    }
 
-    var dmap = new DijkstraMap(map, [], overWorldWidth, overWorldWidth, true);
-    var tt = map.TileAt(tcRow, tcCol);
+    return opts[rng.Next(opts.Count)];
+  }
 
-    dmap.Generate(CostForRoadBuilding, (tcRow, tcCol), 257);
+  static public void DrawRoad(Map map, int overWorldWidth, (int, int) entrance, Town town, TileType roadTile, bool drawComplete, Random rng)
+  {
+    DijkstraMap dmap = new(map, [], overWorldWidth, overWorldWidth, true);
+    (int, int) townSq = RandomSqInTown(map, town, rng);
+    Tile tt = map.TileAt(townSq);
+
+    dmap.Generate(CostForRoadBuilding, (townSq.Item1, townSq.Item2), 257);
     var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
 
     double draw = 1.0;
@@ -299,7 +317,10 @@ class CampaignCreator(UserInterface ui)
       if (map.TileAt(sq).Type == TileType.Water)
         map.SetTile(sq, TileFactory.Get(TileType.Bridge));
       else if (rng.NextDouble() < draw)
-        map.SetTile(sq, TileFactory.Get(TileType.StoneRoad));
+        map.SetTile(sq, TileFactory.Get(roadTile));
+      if (drawComplete) 
+        continue;
+
       draw -= delta;
       if (draw < 0.03)
         draw = 0.03;
@@ -566,7 +587,7 @@ class CampaignCreator(UserInterface ui)
         }
         var entrance = PickDungeonEntrance(wildernessMap, mainRegion, town, rng);
 
-        DrawOldRoad(wildernessMap, mainRegion, wildernessWidth, entrance, town, rng);
+        DrawRoad(wildernessMap, wildernessWidth, entrance, town, TileType.StoneRoad, false, rng);
 
         // Add a dash of devestation around the dungeon entrance
         foreach (var loc in Util.LocsInRadius(new(0, 0, entrance.Item1, entrance.Item2), 5, wildernessWidth, wildernessWidth))
@@ -720,7 +741,6 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.Now.GetHashCode();
-      
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
       var objDb = new GameObjectDB();
