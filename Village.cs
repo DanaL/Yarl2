@@ -221,14 +221,13 @@ class Village
       for (int j = 0; j < rng.Next(1, 4); j++)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb), grocer.ID);
     }
+
     return grocer;
   }
 
   static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob smith = BaseVillager(ng, rng);
-    smith.Traits.Add(new NamedTrait());
-    smith.Traits.Add(new VillagerTrait());
     
     smith.Loc = LocForVillager(map, town.Smithy, rng);
     smith.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
@@ -345,6 +344,23 @@ class Village
     widower.SetBehaviour(new WidowerBehaviour());
 
     return widower;
+  }
+
+  static void GenerateWitches(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
+  {
+     Mob kylie = new()
+    {
+      Name = "Kylie",
+      Appearance = "The local, stylish witch.",
+      Glyph = new Glyph('@', Colours.BLUE , Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK)
+    };
+    kylie.Traits.Add(new VillagerTrait());
+    kylie.Traits.Add(new NamedTrait());
+    var sqs = town.WitchesCottage.ToList();
+    kylie.Loc = sqs[rng.Next(sqs.Count)];
+    kylie.SetBehaviour(new WitchBehaviour());
+    objDb.Add(kylie);
+    objDb.AddToLoc(kylie.Loc, kylie);
   }
 
   static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
@@ -516,6 +532,8 @@ class Village
     var vet = GenerateVeteran(map, town, ng, objDb, rng);
     objDb.Add(vet);
     objDb.AddToLoc(vet.Loc, vet);
+
+    GenerateWitches(map, town, objDb, factDb, rng);
 
     ulong fallenAdventurerID = ulong.MaxValue;
     foreach (GameObj obj in objDb.Objs.Values)

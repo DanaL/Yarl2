@@ -273,7 +273,7 @@ class CampaignCreator(UserInterface ui)
 
   static int CostForRoadBuilding(Tile tile) 
   {
-    if (tile.IsTree())
+    if (tile.IsTree() || tile.Type == TileType.Water)
       return 2;
     else if (tile.Passable())
       return 1;
