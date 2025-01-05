@@ -922,7 +922,7 @@ abstract class UserInterface
     return '\0';
   }
 
-  public void BlockForInput(GameState gs)
+  public void BlockForInput(GameState? gs)
   {
     GameEvent e;
     do

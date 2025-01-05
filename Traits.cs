@@ -2673,7 +2673,7 @@ class TraitFactory
     { "Alacrity", (pieces, gameObj) =>  
       new AlacrityTrait() 
       { 
-        Amt = double.Parse(pieces[1]),
+        Amt = Util.ToDouble(pieces[1]),
         SourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0
       }
     },
@@ -3002,7 +3002,7 @@ class TraitFactory
       DamageTrait twoHanded = new DamageTrait() { DamageDie = int.Parse(pieces[7]), NumOfDie = int.Parse(pieces[8]), DamageType = dt };
       return new VersatileTrait(oneHanded, twoHanded);
     } },
-    { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = double.Parse(pieces[1]) }},
+    { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = Util.ToDouble(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "WaterWalking", (pieces, gameObj) => 
@@ -3010,7 +3010,7 @@ class TraitFactory
     },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
-    { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = double.Parse(pieces[1])} },
+    { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() }
   };

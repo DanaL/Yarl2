@@ -492,7 +492,7 @@ class MonsterFactory
     {
       Name = name,
       Glyph = glyph,
-      Recovery = double.Parse(fields[6])
+      Recovery = Util.ToDouble(fields[6])
     };
 
     int hp = int.Parse(fields[4]);

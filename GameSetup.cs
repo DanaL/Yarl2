@@ -613,7 +613,7 @@ class CampaignCreator(UserInterface ui)
         var dBuilder = new MainDungeonBuilder();
         var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 10,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
         SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
 
@@ -624,7 +624,7 @@ class CampaignCreator(UserInterface ui)
         {
           Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
         };
-        Loc entranceLoc = new Loc(0, 0, entrance.Item1, entrance.Item2);
+        Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);
         factDb.Add(new LocationFact()
         {

@@ -636,8 +636,8 @@ class GameObjDBSave
       }
     }
     p.Stats = StatsFromText(fields[7]);
-    p.Energy = double.Parse(fields[8]);
-    p.Recovery = double.Parse(fields[9]);
+    p.Energy = Util.ToDouble(fields[8]);
+    p.Recovery = Util.ToDouble(fields[9]);
 
     if (fields[12] != "")
     {
@@ -666,8 +666,8 @@ class GameObjDBSave
       Name = fields[2],
       Glyph = Glyph.TextToGlyph(fields[4]),
       Loc = Loc.FromStr(fields[5]),
-      Energy = double.Parse(fields[8]),
-      Recovery = double.Parse(fields[9]),
+      Energy = Util.ToDouble(fields[8]),
+      Recovery = Util.ToDouble(fields[9]),
       Appearance = fields[13]
     };
 
