@@ -760,11 +760,41 @@ class TownBuilder
 
     // draw the garden, which is just dirt but maybe I'll eventually
     // have crops/plants
-    for (int gardenRow = gr; gardenRow < gr + 3; gardenRow++)
-    {
-      map.SetTile(gardenRow, gc, TileFactory.Get(TileType.Dirt));
-      map.SetTile(gardenRow, gc + 1, TileFactory.Get(TileType.Dirt));
-    }
+    int gate = rng.Next(10);
+    map.SetTile(gr, gc, TileFactory.Get(TileType.CornerFence));
+    if (gate != 0)
+      map.SetTile(gr, gc + 1, TileFactory.Get(TileType.HFence));
+    if (gate != 1)
+      map.SetTile(gr, gc + 2, TileFactory.Get(TileType.HFence));
+    map.SetTile(gr, gc + 3, TileFactory.Get(TileType.CornerFence));
+
+    if (gate != 2)
+      map.SetTile(gr + 1, gc, TileFactory.Get(TileType.VFence));
+    map.SetTile(gr + 1, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 1, gc + 2, TileFactory.Get(TileType.Dirt));
+    if (gate != 3)
+      map.SetTile(gr + 1, gc + 3, TileFactory.Get(TileType.VFence));
+
+    if (gate != 4)
+      map.SetTile(gr + 2, gc, TileFactory.Get(TileType.VFence));
+    map.SetTile(gr + 2, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 2, gc + 2, TileFactory.Get(TileType.Dirt));
+    if (gate != 5)
+      map.SetTile(gr + 2, gc + 3, TileFactory.Get(TileType.VFence));
+
+    if (gate != 6)
+      map.SetTile(gr + 3, gc, TileFactory.Get(TileType.VFence));
+    map.SetTile(gr + 3, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 3, gc + 2, TileFactory.Get(TileType.Dirt));
+    if (gate != 7)
+      map.SetTile(gr + 3, gc + 3, TileFactory.Get(TileType.VFence));
+
+    map.SetTile(gr + 4, gc, TileFactory.Get(TileType.CornerFence));
+    if (gate != 8)
+      map.SetTile(gr + 4, gc + 1, TileFactory.Get(TileType.HFence));
+    if (gate != 9)
+      map.SetTile(gr + 4, gc + 2, TileFactory.Get(TileType.HFence));
+    map.SetTile(gr + 4, gc + 3, TileFactory.Get(TileType.CornerFence));
 
     // Draw a road from the front step to the town
     CampaignCreator.DrawRoad(map, map.Height, frontDoor, Town, TileType.Dirt, true, rng);
