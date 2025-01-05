@@ -37,10 +37,23 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
     }
 
+    // if the actor is currently swallowed, trying to dig should attack
+    // the monster instead
+    if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    {
+      if (GameState!.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
+      {
+        var attackAction = new MeleeAttackAction(GameState, Actor, target.Loc);
+        result.AltAction = attackAction;
+        result.Complete = false;
+        return result;
+      }
+    }
+
     // Assuming here if I implement NPC AI such that they might dig, the behaviour
     // code will ensure they don't try to dig an occupied tile, so I am assuming 
     // here the Actor is the player.
-    Loc targetLoc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+    Loc targetLoc = Actor.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
     if (targetLoc != Actor.Loc && GameState!.ObjDb.Occupant(targetLoc) is Actor occ)
     {
       if (Battle.PlayerWillAttack(occ))
