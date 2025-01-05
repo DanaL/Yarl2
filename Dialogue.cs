@@ -104,7 +104,7 @@ class ScriptScanner(string src)
 
   void Identifier()
   {
-    while (IsAlpha(Peek()))
+    while (IsAlpha(Peek()) || IsDigit(Peek()))
       Advance();
 
     string text = Source[Start..Current];
@@ -727,7 +727,9 @@ class DialogueInterpreter
           dungoenLoc = loc.Loc;
         return Util.RelativeDir(mob.Loc, dungoenLoc);
       case "ORCHARD_EXISTS":
-        return gs.FactDb.FactCheck("OrchardExists") is SimpleFact ? true : false;
+        return gs.FactDb.FactCheck("OrchardExists") is SimpleFact;
+      case "MAGIC101":
+        return gs.Player.Stats.ContainsKey(Attribute.MagicPoints);
       default:
         throw new Exception($"Unknown variable {name}");
     }    
