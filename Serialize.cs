@@ -211,6 +211,8 @@ class TownSave
   public HashSet<int> TakenHomes { get; set; } = [];
   [JsonInclude]
   public HashSet<Loc> TownSquare { get; set; } = [];
+  [JsonInclude]
+  public HashSet<Loc> WitchesCottage { get; set; } = [];
   public int Row { get; set; }
   public int Col { get; set; }
   public int Height { get; set; }
@@ -240,6 +242,7 @@ class CampaignSaver
       Market = c.Town.Market,
       Smithy = c.Town.Smithy,
       Homes = c.Town.Homes,
+      WitchesCottage = c.Town.WitchesCottage,
       TakenHomes = c.Town.TakenHomes,
       TownSquare = c.Town.TownSquare,
       Row = c.Town.Row,
@@ -287,6 +290,7 @@ class CampaignSaver
       Homes = sc.Town.Homes,
       TakenHomes = sc.Town.TakenHomes,
       TownSquare = sc.Town.TownSquare,
+      WitchesCottage = sc.Town.WitchesCottage,
       Row = sc.Town.Row,
       Col = sc.Town.Col,
       Height = sc.Town.Height,

@@ -729,6 +729,7 @@ class TownBuilder
 
     // The witches also get a well
     List<(int, int)> opts = [];
+    (int, int) frontDoor = (-1, -1);
     for (int dr = 0; dr < 15; dr++) 
     {
       for (int dc = 0; dc < 15; dc++)
@@ -747,6 +748,9 @@ class TownBuilder
           case TileType.Sand:
             opts.Add((r + dr, c + dc));
             break;
+          case TileType.ClosedDoor:
+            frontDoor = (r + dr, c + dc);
+            break;
         }
       }
     }
@@ -761,6 +765,9 @@ class TownBuilder
       map.SetTile(gardenRow, gc, TileFactory.Get(TileType.Dirt));
       map.SetTile(gardenRow, gc + 1, TileFactory.Get(TileType.Dirt));
     }
+
+    // Draw a road from the front step to the town
+    CampaignCreator.DrawRoad(map, map.Height, frontDoor, Town, TileType.Dirt, true, rng);
 
     if (opts.Count > 0)
     {
