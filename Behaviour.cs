@@ -677,8 +677,9 @@ class PriestBehaviour : NPCBehaviour
   }
 }
 
-class WitchBehaviour : IBehaviour
+class WitchBehaviour : IBehaviour, IDialoguer
 {
+  List<DialogueOption> Options { get; set; } = [];
   DateTime _lastBark = new(1900, 1, 1);
 
   static string PickBark(GameState gs)
@@ -714,7 +715,35 @@ class WitchBehaviour : IBehaviour
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
-    throw new NotImplementedException();
+    var acc = new Dialoguer(actor, gameState);
+    var action = new CloseMenuAction(gameState, 1.0);
+
+    return (action, acc);
+  }
+
+  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialogue = new DialogueInterpreter();
+
+    string txt = dialogue.Run(scriptFile, mob, gs);
+    Options = dialogue.Options;
+    List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
+    
+    return (txt, opts);
+  }
+
+  public void SelectOption(Mob mob, char choice, GameState gs)
+  {
+    foreach (DialogueOption opt in Options)
+    {
+      if (opt.Ch == choice)
+      {
+        var dialogue = new DialogueInterpreter();
+        dialogue.Run(opt.Expr, mob, gs);
+        break;
+      }
+    }
   }
 }
 

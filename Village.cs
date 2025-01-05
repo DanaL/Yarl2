@@ -356,6 +356,7 @@ class Village
     };
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
+    kylie.Traits.Add(new DialogueScriptTrait() { ScriptFile = "witch.txt" });
     var sqs = town.WitchesCottage.ToList();
     kylie.Loc = sqs[rng.Next(sqs.Count)];
     kylie.SetBehaviour(new WitchBehaviour());

@@ -1,0 +1,22 @@
+(cond
+
+  ((= MAGIC101 true)
+    (
+      (say 
+        (pick ("Looking for spells? You're better off studying with us than one of those shady underground magic dealers!"
+              "I studied library magic at Yendor University."
+              "Casting spells is stressful. But Sophie's mushroom stew is great for fraught nerves!"
+              "Have you considered joining the Adventurers' Union?")))
+      (option "Learn some spells." (set DIALOGUE_STATE 1))
+    )
+  )
+
+  (else
+    (
+      (say
+        (pick ("Need to learn the basics huh? I used to TA Magic 101."
+              "Oh, anyone can learn magic. Don't listen to Big Thaumatury.")))
+      (option "Study the basics of magic." (set DIALOGUE_STATE 1))
+    )
+  )
+)

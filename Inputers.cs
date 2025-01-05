@@ -725,8 +725,8 @@ class Dialoguer : Inputer
   {
     var dialgoue = _interlocutor.Behaviour as IDialoguer;
 
-    var sb = new StringBuilder(_interlocutor.Appearance.IndefArticle().Capitalize());
-    sb.Append(".\n\n");
+    var sb = new StringBuilder(_interlocutor.Appearance.Capitalize());
+    sb.Append("\n\n");
 
     string blurb;
     List<(string, char)> opts;
