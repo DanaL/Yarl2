@@ -211,7 +211,6 @@ class Util
     }
   }
 
-
   public static List<int> ToNums(string txt)
   {
     List<int> nums = [];
@@ -450,8 +449,42 @@ class Util
     return (newR, newC);
   }
 
+  // I've written floodfill here and there for various effects and noise, etc
+  // but I'm hoping I can consolidate on this veresion of the function
+  public static HashSet<Loc> FLoodFill(GameState gs, Loc origin, int range)
+  {
+    HashSet<Loc> locs = [];
+    Queue<Loc> q = [];
+    q.Enqueue(origin);
+
+    while (q.Count > 0)
+    {
+      Loc curr = q.Dequeue();
+      if (locs.Contains(curr))
+        continue;
+      locs.Add(curr);
+
+      foreach (Loc adj in Adj8Locs(curr))
+      {
+        if (Distance(origin, adj) > range)
+          continue;
+        if (locs.Contains(adj))
+          continue;
+        Tile tile = gs.TileAt(adj);
+        if (!(tile.Passable() || tile.PassableByFlight()))
+          continue;
+
+        q.Enqueue(adj);
+      }
+    }
+
+    return locs;
+  }
+
   // I am very bravely breaking from D&D traidtion and I'm just going to 
   // store the stat's modifier instead of the score from 3-18 :O
+  // ** I think this can be moved to player creation because that's should
+  // be the only place this is used
   public static int StatRollToMod(int roll)
   {
     if (roll < 4)

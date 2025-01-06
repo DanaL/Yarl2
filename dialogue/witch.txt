@@ -6,7 +6,8 @@
         (pick ("Looking for spells? You're better off studying with us than one of those shady underground magic dealers!"
               "I studied library magic at Yendor University."
               "Casting spells is stressful. But Sophie's mushroom stew is great for fraught nerves!"
-              "Have you considered joining the Adventurers' Union?")))
+              "Have you considered joining the Adventurers' Union?"
+              "You can't put undead to sleep with magic!")))
       (option "Learn some spells." (set DIALOGUE_STATE 1))
     )
   )

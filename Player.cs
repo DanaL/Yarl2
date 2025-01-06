@@ -110,6 +110,18 @@ class Player : Actor, IPerformer, IGameEventListener
     }
   }
 
+  public override int SpellDC
+  {
+    get 
+    {
+      int dc = 12 + Stats[Attribute.Will].Curr;
+
+      // Eventually items and other stuff will affect this value
+
+      return dc;
+    }
+  }
+
   public bool Expired { get; set; } = false;
   public bool Listening => true;
   public ulong ObjId => ID;

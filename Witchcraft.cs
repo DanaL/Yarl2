@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
+
 namespace Yarl2;
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
@@ -114,6 +116,61 @@ class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
   public override void ReceiveUIResult(UIResult result) {}
 }
 
+class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Complete = true;
+
+    if (!CheckCost(5, 15, result))
+      return result;
+
+    result.Messages.Add("Ala-ca-zzzzzzzzz!");
+    HashSet<Loc> flooded = Util.FLoodFill(GameState!, Actor!.Loc, 3);
+    HashSet<Loc> affected = [];
+    foreach (Loc loc in flooded)
+    {
+      if (loc == Actor.Loc)
+        continue;
+
+      if (GameState!.ObjDb.Occupied(loc))
+      {
+        affected.Add(loc);
+        SqAnimation anim = new(GameState, loc, Colours.WHITE, Colours.PURPLE, '*');
+        GameState.UIRef().RegisterAnimation(anim);
+      }      
+    }
+
+    int casterSpellDC = Actor.SpellDC;
+    foreach (Loc loc in affected)
+    {
+      if (GameState!.ObjDb.Occupant(loc) is Actor actor)
+      {
+        if (actor.HasTrait<UndeadTrait>())
+          continue;
+        if (actor.HasTrait<BrainlessTrait>())
+          continue;
+        if (actor.HasTrait<PlantTrait>())
+          continue;
+
+
+        int roll = GameState.Rng.Next(20) + 1;
+        if (roll < casterSpellDC)
+        {
+          result.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} asleep!");
+          actor.Traits.Add(new SleepingTrait());
+        } 
+      }
+    }
+   
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) { }
+}
+
 class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override ActionResult Execute()
@@ -198,6 +255,10 @@ class SpellcastMenu : Inputer
       case "illume":
         inputer = new DummyInputer();
         GS.Player.ReplacePendingAction(new CastIllumeAction(GS, GS.Player), inputer);
+        break;
+      case "slumbering song":
+        inputer = new DummyInputer();
+        GS.Player.ReplacePendingAction(new CastSlumberingSong(GS, GS.Player), inputer);
         break;
     }
   }
