@@ -414,7 +414,8 @@ class Mob : Actor
         
     if (heard && HasTrait<SleepingTrait>())
     {
-      Console.WriteLine($"{Name} wakes up");
+      if (gs.LastPlayerFoV.Contains(Loc))
+        gs.UIRef().AlertPlayer($"{FullName.Capitalize()} wakes up.");
       Traits.RemoveAll(t => t is SleepingTrait);
     }
   }
