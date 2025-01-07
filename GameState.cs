@@ -664,10 +664,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // Need to remove the victim from the Performer queue but also update 
     // current performer pointer if necessary. If _currPerformer > index
     // of victim, we want to decrement it
-    var performerIndex = Performers.IndexOf(victim);
-    if (_currPerformer > performerIndex)
-      --_currPerformer;
-    Performers.Remove(victim);
+    // performerIndex can be -1 if victim isn't on the current level when 
+    // they die (which can happen in some odd situations)
+    int performerIndex = Performers.IndexOf(victim);
+    if (performerIndex != -1)
+    {
+      if (_currPerformer > performerIndex)
+        --_currPerformer;
+      Performers.Remove(victim);
+    }
 
     foreach (var t in victim.Traits)
     {
