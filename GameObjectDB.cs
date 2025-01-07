@@ -506,4 +506,9 @@ class Campaign
     int id = Dungeons.Count == 0 ? 0 : Dungeons.Keys.Max() + 1;
     Dungeons.Add(id, dungeon);
   }
+
+  public void AddDungeon(Dungeon dungeon, int id)
+  {
+    Dungeons[id] = dungeon;
+  }
 }

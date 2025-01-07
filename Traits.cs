@@ -245,12 +245,12 @@ class SwallowedTrait : Trait, IGameEventListener
 {
   public ulong VictimID { get; set; }
   public ulong SwallowerID { get; set; }
-  public Colour SwallowerColour { get; set; }
   public bool Expired { get => false; set {} }
+  public Loc Origin { get; set; }
   public bool Listening => true;
   public ulong ObjId => VictimID;
 
-  public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Colours.ColourToText(SwallowerColour)}";
+  public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Origin}";
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc) => Remove(gs);
 
   public void Remove(GameState gs)
@@ -268,7 +268,17 @@ class SwallowedTrait : Trait, IGameEventListener
       if (gs.ObjDb.GetObj(SwallowerID) is Actor swallower)
       {
         swallower.Traits = swallower.Traits.Where(t => t is not FullBellyTrait).ToList();
-      }      
+      }
+
+      Loc start = victim.Loc;
+      gs.ActorEntersLevel(victim, Origin.DungeonID, Origin.Level);
+      string moveMsg = gs.ResolveActorMove(victim, start, Origin);
+      victim.Loc = Origin;
+      if (victim is Player)
+        gs.UIRef().AlertPlayer(moveMsg);
+
+      gs.RefreshPerformers();
+      gs.PrepareFieldOfView();
     }
   }
 }
@@ -2289,7 +2299,7 @@ class RecallTrait : BasicTrait, IGameEventListener
     LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb.FactCheck("Dungeon Entrance");
     if (entrance is not null)
     {
-      gs.PlayerEntersLevel(player, 0, 0);
+      gs.ActorEntersLevel(player, 0, 0);
       var start = player.Loc;
       player.Loc = entrance.Loc;
       string moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
@@ -2977,7 +2987,7 @@ class TraitFactory
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
       {
         VictimID = ulong.Parse(pieces[1]), SwallowerID = ulong.Parse(pieces[2]),
-        SwallowerColour = Colours.TextToColour(pieces[3])
+        Origin = Loc.FromStr(pieces[3])
       }
     },
     { "Sword", (pieces, gameObj) => new SwordTrait() },

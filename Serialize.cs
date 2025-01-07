@@ -530,6 +530,11 @@ internal class MapSaver
         case TileType.BusinessSign:
           tile = new BusinessSign(pieces[2]);
           break;
+        case TileType.MonsterWall:
+          Glyph glyph = Glyph.TextToGlyph(pieces[2]);
+          ulong monsterId = ulong.Parse(pieces[3]);
+          tile = new MonsterWall(glyph, monsterId);
+          break;
       }
 
       if (tile is not null)

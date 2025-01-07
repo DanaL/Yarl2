@@ -127,7 +127,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 
-  public void PlayerEntersLevel(Actor actor, int dungeon, int level)
+  public void ActorEntersLevel(Actor actor, int dungeon, int level)
   {
     CurrLevel = level;
     CurrDungeonID = dungeon;
@@ -603,7 +603,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
     if (actor is Player)
-      PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+      ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
 
     if (ObjDb.Occupied(landingSpot))
     {
@@ -1127,7 +1127,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       List<string> messages = [];
       if (actor is Player)
       {
-        PlayerEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+        ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       }
       
       string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);

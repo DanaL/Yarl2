@@ -26,7 +26,7 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, Shortcut, ShortcutDown,
   BusinessSign, FakeStairs, HiddenSummonsTrap,
-  HFence, VFence, CornerFence
+  HFence, VFence, CornerFence, MonsterWall
 }
 
 interface ITriggerable
@@ -500,6 +500,18 @@ class BusinessSign(string stepMessage) : Tile(TileType.BusinessSign)
   public override string StepMessage => _stepMessage;
 
   public override string ToString() => $"{(int)Type};{_stepMessage}";
+}
+
+class MonsterWall(Glyph glyph, ulong monsterId) : Tile(TileType.MonsterWall)
+{
+  public Glyph Glyph { get; set; } = glyph;
+  public ulong MonsterId { get; set; } = monsterId;
+
+  public override bool Opaque() => true;
+  public override bool Passable() => false;
+  public override bool PassableByFlight() => false;
+
+  public override string ToString() => $"{Glyph};{MonsterId}";
 }
 
 class TileFactory

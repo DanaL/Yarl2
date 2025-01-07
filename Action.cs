@@ -98,17 +98,31 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
 
     if (!victim.AbilityCheck(Attribute.Dexterity, DC, GameState.Rng))
     {
-      s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swallow")} {victim.FullName} whole!";
-      result.Messages.Add(s);
-
       SwallowedTrait st = new()
       {
         VictimID = victim.ID,
         SwallowerID = Actor.ID,
-        SwallowerColour = Actor.Glyph.Lit
+        Origin = victim.Loc
       };
       GameState.RegisterForEvent(GameEventType.Death, st, Actor.ID);
       victim.Traits.Add(st);
+
+      // This is where the player will 'enter' the pocket dimension representing
+      // the interior of the monster's belly.
+      var (entry, belly) = PocketDimension.MonsterBelly(Actor);
+      GameState.Campaign.AddDungeon(belly, belly.ID);
+
+      Loc start = victim.Loc;
+      GameState.ActorEntersLevel(victim, belly.ID, 0);      
+      string moveMsg = GameState.ResolveActorMove(victim, start, entry);
+      victim.Loc = entry;
+      result.Messages.Add(moveMsg);
+
+      GameState.RefreshPerformers();
+      GameState.PrepareFieldOfView();
+
+      if (belly.ArrivalMessage != "")
+      result.Messages.Add(belly.ArrivalMessage);
 
       Actor.Traits.Add(new FullBellyTrait() { VictimID = victim.ID });
     }
@@ -632,7 +646,7 @@ abstract class PortalAction : Action
     var start = GameState!.Player!.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
-    GameState.PlayerEntersLevel(GameState.Player!, dungeon, level);
+    GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     string moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);    
     result.Messages.Add(moveMsg);
@@ -1864,10 +1878,20 @@ class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
 class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   public override ActionResult Execute()
-  {
+  {    
+    // If the caster is currently swallowed, we want to remove the swallwed 
+    // trait before resolving the blink so that we're blinking to a loc in the
+    // real level. (This might have problems with weird interactions were, like,
+    // the player was standing in lava, then got swallowed, then blinked. 
+    // Technically the player would land on the lava sq then blink, which we 
+    // might not want. Problem for future Dana
+    if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    {
+      swallowed.Remove(GameState!);
+    }
+
     List<Loc> sqs = [];
     var start = Actor!.Loc;
-
     for (var r = start.Row - 12; r < start.Row + 12; r++)
     {
       for (var c = start.Col - 12; c < start.Col + 12; c++)
@@ -1899,11 +1923,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
         {
           Actor.Traits.Remove(t);
           GameState!.StopListening(GameEventType.Death, grappled);
-        }
-        else if (t is SwallowedTrait swallowed)
-        {
-          swallowed.Remove(GameState!);
-        }
+        }        
       }
       
       var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
