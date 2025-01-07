@@ -37,16 +37,14 @@ enum StressLevel
   Hystrical
 }
 
-class Player : Actor, IPerformer, IGameEventListener
+class Player : Actor, IPerformer
 {
   public const int MAX_VISION_RADIUS = 25;
   public PlayerLineage Lineage { get; set; }
   public PlayerBackground Background { get; set; }
-  public ulong SourceId { get; set; }
   public List<string> SpellsKnown = [];
   public string LastSpellCast = "";
-  public GameEventType EventType => GameEventType.EndOfRound;
-
+  
   Inputer? _inputController;
   Action? _deferred;
   public bool Running { get; set; } = false;
@@ -122,10 +120,6 @@ class Player : Actor, IPerformer, IGameEventListener
       return dc;
     }
   }
-
-  public bool Expired { get; set; } = false;
-  public bool Listening => true;
-  public ulong ObjId => ID;
 
   public void CalcHP()
   {
