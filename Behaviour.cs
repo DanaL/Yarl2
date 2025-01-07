@@ -351,7 +351,7 @@ class MonsterBehaviour : IBehaviour
     else if (act is GulpTrait gulp)
     {
       _lastUse[act.Name] = gs.Turn;
-      return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp.DC);
+      return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp);
     }
     
     return new NullAction();

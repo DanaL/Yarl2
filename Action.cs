@@ -79,10 +79,12 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   }
 }
 
-class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, actor)
+class GulpAction(GameState gs, Actor actor, Loc targetLoc, GulpTrait gt) : Action(gs, actor)
 {
   Loc TargetLoc { get; set; } = targetLoc;
-  int DC { get; set; } = dc;
+  int DC { get; set; } = gt.DC;
+  int AcidDie { get; set; } = gt.AcidDie;
+  int AcidDice { get; set; } = gt.AcidDice;
 
   public override ActionResult Execute()
   {
@@ -107,6 +109,16 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
       GameState.RegisterForEvent(GameEventType.Death, st, Actor.ID);
       victim.Traits.Add(st);
 
+      FullBellyTrait fbt = new()
+      {
+        VictimID = victim.ID,
+        ObjId = Actor.ID,
+        AcidDie = AcidDie,
+        AcidDice = AcidDice
+      };
+      Actor.Traits.Add(fbt);
+      GameState.RegisterForEvent(GameEventType.EndOfRound, fbt);
+
       // This is where the player will 'enter' the pocket dimension representing
       // the interior of the monster's belly.
       var (entry, belly) = PocketDimension.MonsterBelly(Actor);
@@ -123,8 +135,6 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
 
       if (belly.ArrivalMessage != "")
       result.Messages.Add(belly.ArrivalMessage);
-
-      Actor.Traits.Add(new FullBellyTrait() { VictimID = victim.ID });
     }
 
     return result;

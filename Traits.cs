@@ -268,7 +268,19 @@ class SwallowedTrait : Trait, IGameEventListener
 
       if (gs.ObjDb.GetObj(SwallowerID) is Actor swallower)
       {
-        swallower.Traits = swallower.Traits.Where(t => t is not FullBellyTrait).ToList();
+        List<Trait> toKeep = [];
+        foreach (Trait t in swallower.Traits)
+        {
+          if (t is FullBellyTrait fbt)
+          {
+            gs.RemoveListener(fbt);
+            continue;
+          }
+
+          toKeep.Add(t);
+        }
+
+        swallower.Traits = toKeep;
       }
 
       Loc start = victim.Loc;
@@ -503,23 +515,6 @@ class DialogueScriptTrait : Trait
   public string ScriptFile { get; set; } = "";
 
   public override string AsText() => $"DialogueScript#{ScriptFile}";
-}
-
-class DigestionTrait : Trait, IGameEventListener
-{
-  public int AcidDie { get; set; }
-  public int AcidDice { get; set; }
-  public bool Expired { get; set; } = false;
-  public bool Listening => true;
-  public GameEventType EventType => GameEventType.EndOfRound;
-  public ulong ObjId { get; set; }
-
-  public override string AsText() => $"Digestion#{AcidDie}#{AcidDice}#{ObjId}";
-
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
-  {
-    throw new NotImplementedException();
-  }
 }
 
 class DodgeTrait : Trait
@@ -1247,11 +1242,36 @@ class FrightenedTrait : TemporaryTrait
   }
 }
 
-class FullBellyTrait : Trait
+class FullBellyTrait : Trait, IGameEventListener
 {
   public ulong VictimID { get; set; }
+  public int AcidDie { get; set; }
+  public int AcidDice { get; set; }
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+  public GameEventType EventType => GameEventType.EndOfRound;
+  public ulong ObjId { get; set; }
 
-  public override string AsText() => $"FullBelly#{VictimID}";
+  public override string AsText() => $"FullBelly#{VictimID}#{AcidDie}#{AcidDice}#{ObjId}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(VictimID) is not Actor victim)
+      return;
+
+    if (victim is Player)
+      gs.UIRef().AlertPlayer("You are being digested!");
+
+    int total = 0;
+    for (int j = 0; j < AcidDice; j++)
+      total += gs.Rng.Next(AcidDie) + 1;
+    List<(int, DamageType)> dmg = [(total, DamageType.Acid)];
+    var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
+    if (hpLeft < 1)
+    {
+      gs.ActorKilled(victim, $"being digested", null, null);
+    }
+  }
 }
 
 class OpaqueTrait : Trait
@@ -1477,6 +1497,8 @@ class GrapplerTrait : BasicTrait
 class GulpTrait : ActionTrait
 {
   public int DC { get; set; }
+  public int AcidDie { get; set; }
+  public int AcidDice { get; set; }
   public override ActionType ActionType => ActionType.Attack;
   public override string AsText() => $"Gulp#{DC}";
   
@@ -2774,7 +2796,6 @@ class TraitFactory
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
-    { "Digestion", (pieces, gameObj) => new DigestionTrait() { AcidDie = int.Parse(pieces[1]), AcidDice = int.Parse(pieces[2]), ObjId = ulong.Parse(pieces[3]) }},
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
@@ -2812,7 +2833,14 @@ class TraitFactory
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
-    { "FullBelly", (pieces, gameObj) => new FullBellyTrait() { VictimID = ulong.Parse(pieces[1]) }},
+    { "FullBelly", (pieces, gameObj) => new FullBellyTrait() 
+      { 
+        VictimID = ulong.Parse(pieces[1]),
+        AcidDie = int.Parse(pieces[2]),
+        AcidDice = int.Parse(pieces[3]),
+        ObjId = ulong.Parse(pieces[4])
+      }
+    },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
@@ -2821,7 +2849,7 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
-    { "Gulp", (pieces, gameObj) => new GulpTrait() { DC = int.Parse(pieces[1]) }},
+    { "Gulp", (pieces, gameObj) => new GulpTrait() { DC = int.Parse(pieces[1]), AcidDie = int.Parse(pieces[2]), AcidDice = int.Parse(pieces[3]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Heroism", (pieces, gameObj) => new HeroismTrait() 
       { 
