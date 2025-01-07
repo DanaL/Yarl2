@@ -279,11 +279,24 @@ abstract class Actor : GameObj, IPerformer, IZLevel
         {
           Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
           msg += $" {FullName.Capitalize()} turns to flee!";
+
+          if (HasTrait<FullBellyTrait>())
+            EmptyBelly(gs);
         }
       }
     }
     
     return (Stats[Attribute.HP].Curr, msg.Trim(), total);
+  }
+
+  void EmptyBelly(GameState gs)
+  {
+    var full = Traits.OfType<FullBellyTrait>().First();
+    if (gs.ObjDb.GetObj(full.VictimID) is Actor victim)
+    {
+      var swallowed = victim.Traits.OfType<SwallowedTrait>().FirstOrDefault();
+      swallowed?.Remove(gs);
+    }
   }
 
   // Candidate spots will be spots adjacent to the contiguous group of the 

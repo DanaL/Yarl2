@@ -353,13 +353,7 @@ class MonsterBehaviour : IBehaviour
       _lastUse[act.Name] = gs.Turn;
       return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp.DC);
     }
-    else if (act is DigestionTrait digestion)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      FullBellyTrait fbt = mob.Traits.OfType<FullBellyTrait>().First();
-      return new DigestionAction(gs, mob, fbt.VictimID, digestion.AcidDie, digestion.AcidDice);
-    }
-
+    
     return new NullAction();
   }
 
@@ -443,16 +437,6 @@ class MonsterBehaviour : IBehaviour
     return escapeAction;
   }
   
-  static void EmptyBelly(Mob actor, GameState gs)
-  {
-    var full = actor.Traits.OfType<FullBellyTrait>().First();
-    if (gs.ObjDb.GetObj(full.VictimID) is Actor victim)
-    {
-      var swallowed = victim.Traits.OfType<SwallowedTrait>().FirstOrDefault();
-      swallowed?.Remove(gs);
-    }
-  }
-
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
     bool PassiveAvailable(ActionTrait action)
@@ -477,9 +461,6 @@ class MonsterBehaviour : IBehaviour
         fullBelly = true;
     }
     
-    if (fullBelly && actor.HasTrait<FrightenedTrait>())
-      EmptyBelly(actor, gs);
-      
     switch (actor.Stats[Attribute.MobAttitude].Curr)
     {
       case Mob.INACTIVE:
@@ -500,8 +481,6 @@ class MonsterBehaviour : IBehaviour
           return CalcMoveAction(actor, gs);
         }
       case Mob.AFRAID:
-        if (fullBelly)
-          EmptyBelly(actor, gs);
         if (gs.Rng.Next(10) == 0)
           actor.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
         return CalculateEscape(actor, gs);

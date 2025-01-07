@@ -314,6 +314,7 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
 
   public bool Expired { get; set; }
   public bool Listening => true;
+  public GameEventType EventType => GameEventType.LocChanged;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -420,7 +421,7 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
   public ulong SourceId { get; set; }
-
+  public GameEventType EventType => GameEventType.LocChanged;
   public ulong ObjId => 0;
 
   public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
@@ -460,6 +461,7 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
   public bool Listening => true;
   public HashSet<Loc> BridgeTiles { get; set; } = [];
   public ulong SourceId { get; set; }
+  public GameEventType EventType => GameEventType.LocChanged;
 
   public ulong ObjId => 0;
 

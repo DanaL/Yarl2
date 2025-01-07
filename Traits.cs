@@ -249,6 +249,7 @@ class SwallowedTrait : Trait, IGameEventListener
   public Loc Origin { get; set; }
   public bool Listening => true;
   public ulong ObjId => VictimID;
+  public GameEventType EventType => GameEventType.Death;
 
   public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Origin}";
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc) => Remove(gs);
@@ -258,7 +259,7 @@ class SwallowedTrait : Trait, IGameEventListener
     if (gs.ObjDb.GetObj(VictimID) is Actor victim)
     {
       victim.Traits.Remove(this);
-      gs.StopListening(GameEventType.Death, this);
+      gs.RemoveListener(this);
       if (gs.LastPlayerFoV.Contains(victim.Loc))
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} expelled!";
@@ -504,14 +505,21 @@ class DialogueScriptTrait : Trait
   public override string AsText() => $"DialogueScript#{ScriptFile}";
 }
 
-class DigestionTrait : ActionTrait
+class DigestionTrait : Trait, IGameEventListener
 {
   public int AcidDie { get; set; }
   public int AcidDice { get; set; }
+  public bool Expired { get; set; } = false;
+  public bool Listening => true;
+  public GameEventType EventType => GameEventType.EndOfRound;
+  public ulong ObjId { get; set; }
 
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"Digestion#{AcidDie}#{AcidDice}";
-  public override bool Available(Mob mob, GameState gs) => mob.HasTrait<FullBellyTrait>();
+  public override string AsText() => $"Digestion#{AcidDie}#{AcidDice}#{ObjId}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    throw new NotImplementedException();
+  }
 }
 
 class DodgeTrait : Trait
@@ -651,7 +659,8 @@ class AppleProducerTrait : Trait, IGameEventListener, IOwner
   public bool Expired {  get; set;  }
   public bool Listening => true;
   public ulong ObjId => OwnerID;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"AppleProducer#{OwnerID}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -945,7 +954,8 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
   public ulong OwnerID {  get; set; }
   protected virtual string ExpiryMsg => "";
   public virtual ulong ObjId => OwnerID;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public virtual void Remove(GameState gs)
   {
     var obj = gs.ObjDb.GetObj(OwnerID);
@@ -1424,7 +1434,8 @@ class IllusionTrait : BasicTrait, IGameEventListener
   public ulong ObjId { get; set; } // the GameObj the illusion trait is attached to
   public bool Expired { get => false; set { } }
   public bool Listening => true;
-  
+  public GameEventType EventType => GameEventType.Death;
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var obj = gs.ObjDb.GetObj(ObjId);
@@ -1445,7 +1456,8 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set {} }
   public bool Listening => true;
   public ulong ObjId => VictimID;
-  
+  public GameEventType EventType => GameEventType.Death;
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var victim = gs.ObjDb.GetObj(VictimID);
@@ -1714,7 +1726,8 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
   public int Strength { get; set; }
   public override string AsText() => $"NauseousAura#{OwnerID}#{Strength}";
   public ulong ObjId => OwnerID;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc _)
   {
     if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
@@ -1889,7 +1902,8 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public bool Listening => true;
   public bool Spreads { get; set; }
   public ulong ObjId => OwnerID;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"OnFire#{Expired}#{OwnerID}#{Lifetime}#{Spreads}";
 
   public void Extinguish(Item fireSrc, GameState gs)
@@ -2270,7 +2284,8 @@ class RecallTrait : BasicTrait, IGameEventListener
   public bool Expired { get; set; } = false;
   public bool Listening => true;
   public ulong ObjId => 0; // This trait will always/only be applied to the player (I think...)
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2318,7 +2333,8 @@ class RegenerationTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}#{SourceId}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2360,7 +2376,8 @@ class InvisibleTrait : BasicTrait, IGameEventListener
   public ulong ObjId => ActorID;
   public bool Expired { get; set; }
   public bool Listening => true;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2383,7 +2400,8 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   public ulong ObjId => OwnerID;
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
+
   public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2511,7 +2529,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
   public bool Lit { get; set; }
   public int Fuel { get; set; }
   public string Desc() => Lit ? "(lit)" : "";
-  
+  public GameEventType EventType => GameEventType.EndOfRound;
   public override bool Active => Lit;
   
   public bool Expired { get; set; } = false;
@@ -2756,7 +2774,7 @@ class TraitFactory
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
-    { "Digestion", (pieces, gameObj) => new DigestionTrait() { AcidDie = int.Parse(pieces[1]), AcidDice = int.Parse(pieces[2]) }},
+    { "Digestion", (pieces, gameObj) => new DigestionTrait() { AcidDie = int.Parse(pieces[1]), AcidDice = int.Parse(pieces[2]), ObjId = ulong.Parse(pieces[3]) }},
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },

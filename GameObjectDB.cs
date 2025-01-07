@@ -84,6 +84,7 @@ interface IGameEventListener
   public bool Listening { get; }
   public ulong ObjId { get; }
   public ulong SourceId { get; set; }
+  public GameEventType EventType { get; }
 
   void EventAlert(GameEventType eventType, GameState gs, Loc loc);
 }

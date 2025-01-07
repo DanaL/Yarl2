@@ -99,10 +99,12 @@ internal class Serialize
 
     gs.ObjDb = objDb;
 
-    // At the moment, EndOfRound is the only type of listener in the game
-    foreach (var l in objDb.ActiveListeners())
+    foreach (IGameEventListener l in objDb.ActiveListeners())
     {
-      gs.RegisterForEvent(GameEventType.EndOfRound, l);
+      if (l.EventType == GameEventType.Death)
+        gs.RegisterForEvent(GameEventType.Death, l);
+      else
+        gs.RegisterForEvent(GameEventType.EndOfRound, l);
     }
 
     Item.IDInfo = sgi.IDInfo;
@@ -777,7 +779,7 @@ class GameObjDBSave
     var sidb = new GameObjDBSave();
 
     sidb.LocListeners = objDb.LocListeners;
-
+    
     foreach (var kvp in objDb.Objs)
     {
       var obj = kvp.Value;

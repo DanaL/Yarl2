@@ -131,41 +131,6 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, int dc) : Action(gs, 
   }
 }
 
-class DigestionAction(GameState gs, Actor actor, ulong victimId, int acidDie, int acidDice) : Action(gs, actor)
-{
-  ulong VictimId { get; set; } = victimId;
-  int AcidDie { get; set; } = acidDie;
-  int AcidDice { get; set; } = acidDice;
-
-  public override ActionResult Execute()
-  {
-    ActionResult result = base.Execute();
-    result.Complete = true;
-    result.EnergyCost = 1.0;
-
-    if (GameState!.ObjDb.GetObj(VictimId) is Actor victim)
-    {
-      int total = 0;
-      for (int j = 0; j < AcidDice; j++)
-        total += GameState.Rng.Next(AcidDie) + 1;
-      List<(int, DamageType)> dmg = [(total, DamageType.Acid)];
-      var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, Actor, 1.0);
-      if (hpLeft < 1)
-      {
-        GameState.ActorKilled(victim, $"being digested", result, null);
-      }        
-      
-      if (GameState.LastPlayerFoV.Contains(victim.Loc))
-      {        
-        string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} digesting {victim.FullName}!";
-        result.Messages.Add(s);
-      }
-    }
-
-    return result;
-  }
-}
-
 // This is a different class from MissileAttackAction because it will take the result the 
 // aim selection. It also handles the animation and following the path of the arrow
 class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attackBonus) : TargetedAction(gs, actor)

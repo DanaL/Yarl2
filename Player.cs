@@ -45,6 +45,7 @@ class Player : Actor, IPerformer, IGameEventListener
   public ulong SourceId { get; set; }
   public List<string> SpellsKnown = [];
   public string LastSpellCast = "";
+  public GameEventType EventType => GameEventType.EndOfRound;
 
   Inputer? _inputController;
   Action? _deferred;
