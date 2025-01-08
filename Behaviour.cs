@@ -452,13 +452,10 @@ class MonsterBehaviour : IBehaviour
       return false;
     }
 
-    bool fullBelly = false;
     foreach (Trait t in actor.Traits)
     {
       if (t is ParalyzedTrait || t is SleepingTrait)
         return new PassAction();
-      if (t is FullBellyTrait)
-        fullBelly = true;
     }
     
     switch (actor.Stats[Attribute.MobAttitude].Curr)
