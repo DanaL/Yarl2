@@ -52,7 +52,7 @@ abstract class Trait : IEquatable<Trait>
 {
   public virtual bool Active => true;
   public abstract string AsText();
-  public ulong SourceId { get; set;}
+  public virtual ulong SourceId { get; set;}
 
   public bool Equals(Trait? other)
   {
@@ -250,6 +250,7 @@ class SwallowedTrait : Trait, IGameEventListener
   public bool Listening => true;
   public ulong ObjId => VictimID;
   public GameEventType EventType => GameEventType.Death;
+  public override ulong SourceId => SwallowerID;
 
   public override string AsText() => $"Swallowed#{VictimID}#{SwallowerID}#{Origin}";
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc) => Remove(gs);
@@ -1455,7 +1456,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
   public bool Expired { get => false; set { } }
   public bool Listening => true;
   public GameEventType EventType => GameEventType.Death;
-
+  
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     var obj = gs.ObjDb.GetObj(ObjId);
@@ -1477,6 +1478,7 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public bool Listening => true;
   public ulong ObjId => VictimID;
   public GameEventType EventType => GameEventType.Death;
+  public override ulong SourceId => GrapplerID;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -1500,7 +1502,7 @@ class GulpTrait : ActionTrait
   public int AcidDie { get; set; }
   public int AcidDice { get; set; }
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"Gulp#{DC}";
+  public override string AsText() => $"Gulp#{DC}#{AcidDie}#{AcidDice}";
   
   public override bool Available(Mob mob, GameState gs) 
   {
