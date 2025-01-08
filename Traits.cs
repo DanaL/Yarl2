@@ -1250,9 +1250,9 @@ class FullBellyTrait : Trait, IGameEventListener
   public bool Expired { get; set; } = false;
   public bool Listening => true;
   public GameEventType EventType => GameEventType.EndOfRound;
-  public ulong ObjId { get; set; }
+  public ulong ObjId => VictimID;
 
-  public override string AsText() => $"FullBelly#{VictimID}#{AcidDie}#{AcidDice}#{ObjId}";
+  public override string AsText() => $"FullBelly#{VictimID}#{AcidDie}#{AcidDice}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -2837,8 +2837,7 @@ class TraitFactory
       { 
         VictimID = ulong.Parse(pieces[1]),
         AcidDie = int.Parse(pieces[2]),
-        AcidDice = int.Parse(pieces[3]),
-        ObjId = ulong.Parse(pieces[4])
+        AcidDice = int.Parse(pieces[3])        
       }
     },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},

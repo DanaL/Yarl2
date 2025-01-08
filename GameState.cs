@@ -674,6 +674,22 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       Performers.Remove(victim);
     }
 
+    // Was anything listening for the the victims death?
+    // Making a copy is the easiest way to deal with the collection being
+    // modified by the alert
+    List<(ulong, IGameEventListener)> deathListeners = [..ObjDb.DeathWatchListeners];
+    bool dwFound = false;
+    foreach (var (targetID, listener) in deathListeners)
+    {
+      if (targetID == victim.ID) 
+      {
+        listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
+        dwFound = true;
+      }
+    }
+    if (dwFound)
+      ObjDb.DeathWatchListeners = ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID).ToList();
+
     foreach (var t in victim.Traits)
     {
       if (t is LootTrait lt)
@@ -694,15 +710,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         RetributionDamage(victim, rt, result);
       }
-    }
 
-    // Was anything listening for the the victims death?
-    foreach (var (targetID, listener) in ObjDb.DeathWatchListeners)
-    {
-      if (targetID == victim.ID)
-        listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
+      if (t is IGameEventListener el)
+        RemoveListener(el);
     }
-    ClearDeathWatch(victim.ID);
 
     // For illusory mobs, their death message is being displayed before the
     // death message of the caster, which I find unsatisfying but it's a bit
@@ -773,20 +784,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           ActorKilled(actor, dmgDesc, result, null);
       }
       ApplyDamageEffectToLoc(adj, retribution.Type);
-    }
-  }
-
-  void ClearDeathWatch(ulong victimID)
-  {
-    Stack<int> indexes = [];
-    for (int j = 0; j < ObjDb.DeathWatchListeners.Count; j++)
-    {
-      if (ObjDb.DeathWatchListeners[j].Item1 == victimID)
-        indexes.Push(j);
-    }
-    while (indexes.Count > 0)
-    {
-      ObjDb.DeathWatchListeners.RemoveAt(indexes.Pop());
     }
   }
 

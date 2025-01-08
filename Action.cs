@@ -112,7 +112,6 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, GulpTrait gt) : Actio
       FullBellyTrait fbt = new()
       {
         VictimID = victim.ID,
-        ObjId = Actor.ID,
         AcidDie = AcidDie,
         AcidDice = AcidDice
       };
