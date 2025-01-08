@@ -54,17 +54,16 @@ abstract class Action
   public virtual void ReceiveUIResult(UIResult result) { }
 }
 
-class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
+class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
 {
-  Loc _loc = loc;
-  
+  Loc Target { get; set; } = target;
+
   public override ActionResult Execute()
   {
     var result = base.Execute();
     result.Complete = true;
 
-    var target = GameState!.ObjDb.Occupant(_loc);
-    if (target is not null)
+    if (GameState!.ObjDb.Occupant(Target) is Actor target)
     {
       result = Battle.MeleeAttack(Actor!, target, GameState);
     }
@@ -79,9 +78,8 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   }
 }
 
-class GulpAction(GameState gs, Actor actor, Loc targetLoc, GulpTrait gt) : Action(gs, actor)
+class GulpAction(GameState gs, Actor actor, GulpTrait gt) : Action(gs, actor)
 {
-  Loc TargetLoc { get; set; } = targetLoc;
   int DC { get; set; } = gt.DC;
   int AcidDie { get; set; } = gt.AcidDie;
   int AcidDice { get; set; } = gt.AcidDice;
@@ -92,7 +90,8 @@ class GulpAction(GameState gs, Actor actor, Loc targetLoc, GulpTrait gt) : Actio
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor victim)
+    Loc targetLoc = Actor!.PickTargetLoc(GameState!);
+    if (GameState!.ObjDb.Occupant(targetLoc) is not Actor victim)
       return result;
 
     string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "bite")} {victim.FullName}!";
@@ -247,7 +246,7 @@ class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : Action
   }
 }
 
-class ShriekAction(GameState gs, Mob actor, int radius) : Action(gs, actor)
+class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
 {
   int Radius { get; set; } = radius;
 
@@ -1547,7 +1546,7 @@ class MirrorImageAction : Action
     }
 
     if (options.Count == 0)
-    {      
+    {
       return new ActionResult() { Complete = true, Messages = ["A spell fizzles..."], EnergyCost = 1.0 };
     }
 
@@ -1582,16 +1581,8 @@ class MirrorImageAction : Action
   }
 }
 
-class FogCloudAction : Action
-{
-  readonly Loc _target;
-
-  public FogCloudAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
-  {
-    GameState = gs;
-    _target = target;
-  }
-
+class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
+{    
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
@@ -1599,11 +1590,12 @@ class FogCloudAction : Action
     result.EnergyCost = 1.0;
 
     var gs = GameState!;
-    
-    if (gs.LastPlayerFoV.Contains(_target))
+
+    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!);
+    if (gs.LastPlayerFoV.Contains(targetLoc))
       result.Messages.Add($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!");
 
-    foreach (Loc loc in Util.LocsInRadius(_target, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
+    foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
     {
       var mist = ItemFactory.Mist(gs);
       var timer = mist.Traits.OfType<CountdownTrait>().First();
@@ -1616,16 +1608,8 @@ class FogCloudAction : Action
   }
 }
 
-class InduceNudityAction : Action
-{
-  readonly Loc _target;
-
-  public InduceNudityAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
-  {
-    GameState = gs;
-    _target = target;
-  }
-
+class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
+{    
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
@@ -1637,7 +1621,8 @@ class InduceNudityAction : Action
       string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "dance")} a peculiar jig.";
       result.Messages.Add(s);
 
-      if (GameState.ObjDb.Occupant(_target) is Actor victim)
+      Loc targetLoc = Actor.PickRangedTargetLoc(GameState);
+      if (GameState.ObjDb.Occupant(targetLoc) is Actor victim)
       {
         var clothes = victim.Inventory.Items()
                                       .Where(i => i.Type == ItemType.Armour && i.Equipped).ToList();
@@ -1704,20 +1689,15 @@ class DrainTorchAction : Action
   }
 }
 
-class EntangleAction : Action
+class EntangleAction(GameState gs, Actor caster) : Action(gs, caster)
 {
-  readonly Loc _target;
-
-  public EntangleAction(GameState gs, Actor caster, Loc target) : base(gs, caster)
-  {
-    _target = target;
-  }
-
+  
   public override ActionResult Execute()
   {
-    foreach (var (r, c) in Util.Adj8Sqs(_target.Row, _target.Col))
+    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!);
+    foreach (var (r, c) in Util.Adj8Sqs(targetLoc.Row, targetLoc.Col))
     {
-      var loc = _target with { Row = r, Col = c };
+      var loc = targetLoc with { Row = r, Col = c };
       var tile = GameState!.TileAt(loc);
       if (tile.Type != TileType.Unknown && tile.Passable() && !GameState.ObjDb.Occupied(loc))
       {
@@ -1748,40 +1728,42 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
     var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt, 0);
 
     string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Firebolt!";
+
     return new ActionResult() { Complete = true, Messages = [ txt ], AltAction = attack, EnergyCost = 0.0 };
   }
 }
 
 class WebAction : Action
 {
-  readonly Loc _target;
+  Loc Target { get; set; }
 
   public WebAction(GameState gs, Loc target)
   {
     GameState = gs;
-    _target = target;
+    Target = target;
   }
 
   public override ActionResult Execute()
   {
     var w = ItemFactory.Web();
     GameState!.ObjDb.Add(w);
-    GameState.ItemDropped(w, _target);
+    GameState.ItemDropped(w, Target);
 
-    foreach (var sq in Util.Adj8Sqs(_target.Row, _target.Col))
+    foreach (var sq in Util.Adj8Sqs(Target.Row, Target.Col))
     {
       if (GameState.Rng.NextDouble() < 0.666)
       {
         w = ItemFactory.Web();
         GameState.ObjDb.Add(w);
-        GameState.ItemDropped(w, _target with { Row = sq.Item1, Col = sq.Item2 });
+        GameState.ItemDropped(w, Target with { Row = sq.Item1, Col = sq.Item2 });
       }
     }
 
     var txt = "";
-    var victim = GameState.ObjDb.Occupant(_target);
+    var victim = GameState.ObjDb.Occupant(Target);
     if (victim is not null)
-      txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";    
+      txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
+
     return new ActionResult() { Complete = true, Messages = [txt], EnergyCost = 1.0 };
   }
 }

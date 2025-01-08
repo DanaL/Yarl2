@@ -109,6 +109,9 @@ class Player : Actor, IPerformer
     }
   }
 
+  public override Loc PickTargetLoc(GameState gamestate) => Loc;
+  public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
+ 
   public override int SpellDC
   {
     get 

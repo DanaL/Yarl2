@@ -9,6 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.IO;
+using System.Reflection.Metadata.Ecma335;
+
 namespace Yarl2;
 
 enum ActionType
@@ -92,6 +95,7 @@ abstract class ActionTrait : BasicTrait
   public virtual ActionType ActionType { get; set; }
 
   public abstract bool Available(Mob mob, GameState gs);
+  public abstract Action Action(Actor actor, GameState gs);
 
   protected bool InRange(Mob mob, GameState gs)
   {
@@ -111,7 +115,7 @@ abstract class ActionTrait : BasicTrait
     return true;
   }
 
-  public static List<Loc> Trajectory(Mob mob, Loc target)
+  public static List<Loc> Trajectory(Actor mob, Loc target)
   {
     return Util.Bresenham(mob.Loc.Row, mob.Loc.Col, target.Row, target.Col)
                .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
@@ -199,6 +203,16 @@ class SummonTrait : ActionTrait
     return false;
   }
 
+  public override Action Action(Actor actor, GameState gs)
+  {
+    return new SummonAction(actor.Loc, Summons, 1)
+    {
+      GameState = gs,
+      Actor = actor,
+      Quip = Quip
+    };
+  }
+
   public override string AsText() => $"Summon#{Cooldown}#{Summons}#{Quip}";  
 }
 
@@ -215,19 +229,20 @@ class SummonUndeadTrait : ActionTrait
     return levelPop < 100;
   }
 
-  public string Summons(GameState gs, Mob mob)
+  static string Summons(Actor actor, GameState gs)
   {
     List<string> undead = [ "skeleton", "zombie" ];
 
-    if (mob.Loc.Level >= 2)
+    if (actor.Loc.Level >= 2)
     {
       undead.Add("ghoul");
       undead.Add("phantom");
     }
-    if (mob.Loc.Level >= 1)
+
+    if (actor.Loc.Level >= 1)
       undead.Add("shadow");
     
-    if (mob.Loc.Level == 1)
+    if (actor.Loc.Level == 1)
     {
       undead.Add("skeleton");
       undead.Add("skeleton");
@@ -236,6 +251,12 @@ class SummonUndeadTrait : ActionTrait
     }
 
     return undead[gs.Rng.Next(undead.Count)];
+  }
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    string summons = Summons(actor, gs);
+    return new SummonAction(actor.Loc, summons, 1) { GameState = gs, Actor = actor };
   }
 
   public override string AsText() => $"SummonUndead#{Cooldown}";
@@ -323,6 +344,32 @@ class HealAlliesTrait : ActionTrait
     return false;
   }
 
+  public override Action Action(Actor actor, GameState gs)
+  {
+    if (actor.Traits.OfType<AlliesTrait>().FirstOrDefault() is not AlliesTrait alliesTrait)
+      return new NullAction();
+
+    List<Mob> candidates = [];
+    foreach (ulong id in alliesTrait.IDs)
+    {
+      if (gs.ObjDb.GetObj(id) is Mob m)
+      {
+        var hp = m.Stats[Attribute.HP];
+        if (hp.Curr < hp.Max)
+          candidates.Add(m);
+      }
+    }
+
+    if (candidates.Count > 0)
+    {
+      int i = gs.Rng.Next(candidates.Count);
+      string castText = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cast")} a healing spell!";
+      return new HealAction(gs, candidates[i], 4, 4) { Message = castText };
+    }
+
+    return new PassAction();
+  }
+
   public override string AsText() => $"HealAllies#{Cooldown}";
 }
 
@@ -402,6 +449,12 @@ class ConfusingScreamTrait : ActionTrait
     return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
   }
 
+  public override Action Action(Actor actor, GameState gs)
+  {
+    var txt = $"{actor.FullName.Capitalize()} screams!";
+    return new AoEAction(gs, actor, actor.Loc, $"Confused#0#{DC}#0", Radius, txt);
+  }
+
   public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}";
 }
 
@@ -414,6 +467,14 @@ class MobMeleeTrait : ActionTrait
   public DamageType DamageType { get; set; }
 
   public override bool Available(Mob mob, GameState gs) => InRange(mob, gs);
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    Mob mob = (Mob) actor;
+    mob.Dmg = new Damage(DamageDie, DamageDice, DamageType);
+    
+    return new MeleeAttackAction(gs, mob, mob.PickTargetLoc(gs));
+  }
 }
 
 class MobMissileTrait : ActionTrait
@@ -432,6 +493,19 @@ class MobMissileTrait : ActionTrait
     var p = gs.Player;
     return ClearShot(gs, Trajectory(mob, p.Loc));
   }
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    Mob mob = (Mob)actor;
+    mob.Dmg = new Damage(DamageDie, DamageDice, DamageType);
+
+    Loc targetLoc = mob.PickTargetLoc(gs);
+    var arrowAnim = new ArrowAnimation(gs, Trajectory(mob, targetLoc), Colours.LIGHT_BROWN);
+    gs.UIRef().RegisterAnimation(arrowAnim);
+
+    var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
+    return new MissileAttackAction(gs, mob, targetLoc, arrow, 0);
+  }
 }
 
 class MosquitoTrait : Trait
@@ -439,10 +513,10 @@ class MosquitoTrait : Trait
   public override string AsText() => "Mosquito";
 }
 
-class RangedSpellActionTrait : ActionTrait
+class SpellActionTrait : ActionTrait
 {
   public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"RangedSpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}";
+  public override string AsText() => $"SpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}";
   public override bool Available(Mob mob, GameState gs)
   {
     if (!InRange(mob, gs))
@@ -451,13 +525,27 @@ class RangedSpellActionTrait : ActionTrait
     var p = gs.Player;
     return ClearShot(gs, Trajectory(mob, p.Loc));
   }
-}
 
-class SpellActionTrait : ActionTrait
-{
-  public override ActionType ActionType { get; set; }
-  public override string AsText() => $"SpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}#{ActionType}";
-  public override bool Available(Mob mob, GameState gs) => true;
+  static Action CalcFireboltAction(Actor actor, GameState gs)
+  {
+    Loc targetLoc = actor.PickRangedTargetLoc(gs);
+    return new FireboltAction(gs, actor, targetLoc, Trajectory(actor, targetLoc));
+  }
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    return Name switch
+    {
+      "DrainTorch" => new DrainTorchAction(gs, actor, actor.PickRangedTargetLoc(gs)),
+      "Entangle" => new EntangleAction(gs, actor),
+      "Firebolt" => CalcFireboltAction(actor, gs),
+      "FogCloud" => new FogCloudAction(gs, actor),
+      "MirrorImage" => new MirrorImageAction(gs, actor, actor.PickTargetLoc(gs)),
+      "Nudity" => new InduceNudityAction(gs, actor),      
+      "Web" => new WebAction(gs, actor.PickRangedTargetLoc(gs)),
+      _ => throw new Exception($"Unknown spell: {Name}")
+    };
+  }
 }
 
 class AcidSplashTrait : Trait
@@ -544,6 +632,9 @@ class FireBreathTrait : ActionTrait
     return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
   }
 
+  public override Action Action(Actor actor, GameState gs) =>  
+    new FireBreathAction(gs, actor, actor.PickTargetLoc(gs), Range, DmgDie, DmgDice);
+  
   public override string AsText() => $"FireBreath#{DmgDie}#{DmgDice}#{Range}#{Cooldown}";
 }
 
@@ -771,10 +862,11 @@ class RumBreathTrait : ActionTrait
   public int DC { get; set; }
   public int Range { get; set; }
 
-  public override bool Available(Mob mob, GameState gs)
-  {
-    return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
-  }
+  public override bool Available(Mob mob, GameState gs) =>
+    Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
+  
+  public override Action Action(Actor actor, GameState gs) => 
+    new RumBreathAction(gs, actor, actor.PickTargetLoc(gs), Range);
 
   public override string AsText() => $"RumBreath#{Range}#{Cooldown}";
 }
@@ -819,6 +911,12 @@ class FearsomeBellowTrait : ActionTrait
   public override bool Available(Mob mob, GameState gs)
   {
     return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
+  }
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    string txt = $"{actor.FullName.Capitalize()} bellows fearsomely!";
+    return new AoEAction(gs, actor, actor.Loc, $"Frightened#0#{DC}#0", Radius, txt);
   }
 
   public override string AsText() => $"FearsomeBellow#{Radius}#{DC}#{Cooldown}";
@@ -1515,6 +1613,8 @@ class GulpTrait : ActionTrait
 
     return true;
   }
+
+  public override Action Action(Actor actor, GameState gs) => new GulpAction(gs, actor, this);  
 }
 
 class ParalyzingGazeTrait : BasicTrait
@@ -2029,6 +2129,7 @@ class ShriekTrait : ActionTrait
     return false;
   }
 
+  public override Action Action(Actor actor, GameState gs) => new ShriekAction(gs, actor, ShriekRadius); 
   public override string AsText() => $"Shriek#{Cooldown}#{ShriekRadius}";
 }
 
@@ -2281,6 +2382,14 @@ class BlindTrait : TemporaryTrait
   public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}#{SourceId}";
 }
 
+class BlinkTrait : ActionTrait
+{
+  public override ActionType ActionType => ActionType.Movement;
+  public override string AsText() => $"Blink#{Cooldown}";
+  public override bool Available(Mob mob, GameState gs) => true;
+  public override Action Action(Actor actor, GameState gs) => new BlinkAction(gs, actor);
+}
+
 class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 {
   public ulong OwnerID { get; set; }
@@ -2464,17 +2573,17 @@ class CrusherTrait : ActionTrait
   public int DmgDie { get; set; }
   public int DmgDice { get; set; }
 
-  public ulong Victim(Mob mob, GameState gs)
+  public ulong Victim(Actor actor, GameState gs)
   {
-    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
     {
-      if (gs.ObjDb.Occupant(adj) is not Actor actor)
+      if (gs.ObjDb.Occupant(adj) is not Actor victim)
         continue;
 
-      foreach (Trait t in actor.Traits)
+      foreach (Trait t in victim.Traits)
       {
-        if (t is GrappledTrait grappled && grappled.GrapplerID == mob.ID)
-          return actor.ID;
+        if (t is GrappledTrait grappled && grappled.GrapplerID == actor.ID)
+          return victim.ID;
       }
     }
 
@@ -2484,6 +2593,13 @@ class CrusherTrait : ActionTrait
   public override bool Available(Mob mob, GameState gs)
   {
     return Victim(mob, gs) != 0;
+  }
+
+  public override Action Action(Actor actor, GameState gs)
+  {
+    ulong victimId = Victim(actor, gs);
+
+    return new CrushAction(gs, actor, victimId, DmgDie, DmgDice);
   }
 
   public override string AsText() => $"Crusher#{DmgDie}#{DmgDice}";
@@ -2757,6 +2873,7 @@ class TraitFactory
         SourceId = pieces.Length > 3 ? ulong.Parse(pieces[3]) : 0
       }
     },
+    { "Blink", (pieces, GameObj) => new BlinkTrait() { Cooldown = ulong.Parse(pieces[1])} },
     { "Block", (pieces, gameObj) => new BlockTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
@@ -2938,10 +3055,7 @@ class TraitFactory
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
-        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
-    { "RangedSpellAction", (pieces, gameObj) =>
-    new RangedSpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]),
-        MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]) }},
+        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },    
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
@@ -2993,11 +3107,13 @@ class TraitFactory
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
-    { "SpellAction", (pieces, gameObj) =>
-      {
-        Enum.TryParse(pieces[3], out ActionType at);
-        return new SpellActionTrait() { Name = pieces[1], Cooldown = ulong.Parse(pieces[2]), ActionType = at };
-      }
+    { "SpellAction", (pieces, gameObj) => new SpellActionTrait() 
+      { 
+        Name = pieces[1], 
+        Cooldown = ulong.Parse(pieces[2]),
+        MinRange = int.Parse(pieces[3]),
+        MaxRange = int.Parse(pieces[4]) 
+      }     
     },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },

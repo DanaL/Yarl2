@@ -200,7 +200,7 @@ class PrinceOfRatsBehaviour : IBehaviour
     else if (distFromPlayer == 1)
     {
       actor.Dmg = new Damage(5, 2, DamageType.Slashing);
-      action = new MeleeAttackAction(gameState, actor, gameState.Player.Loc);     
+      action = new MeleeAttackAction(gameState, actor, actor.PickTargetLoc(gameState));     
     }
     else
     {

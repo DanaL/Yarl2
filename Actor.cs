@@ -351,6 +351,9 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
+  public abstract Loc PickTargetLoc(GameState gamestate);
+  public abstract Loc PickRangedTargetLoc(GameState gamestate);
+
   public abstract Action TakeTurn(GameState gameState);
 
   public bool AbilityCheck(Attribute attr, int dc, Random rng)
@@ -446,6 +449,12 @@ class Mob : Actor
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
   public override Action TakeTurn(GameState gameState) => _behaviour.CalcAction(this, gameState);
+  public override Loc PickTargetLoc(GameState gameState)
+  {
+    return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;
+  }
+  // I suspect eventually these will diverge
+  public override Loc PickRangedTargetLoc(GameState gameState) => PickTargetLoc(gameState);
 
   public void CalcMoveStrategy()
   {

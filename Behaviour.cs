@@ -211,152 +211,6 @@ class MonsterBehaviour : IBehaviour
 {
   readonly Dictionary<string, ulong> _lastUse = [];
 
-  static Loc CalcRangedTarget(Mob mob, GameState gs)
-  {
-    if (mob.HasTrait<ConfusedTrait>())
-      return Util.RandomAdjLoc(gs.Player.Loc, gs);
-    else
-      return gs.Player.Loc;
-  }
-
-  static Loc CalcAdjacentTarget(Mob mob, GameState gs)
-  {
-    if (mob.HasTrait<ConfusedTrait>())
-      return Util.RandomAdjLoc(mob.Loc, gs);
-    else
-      return gs.Player.Loc;
-  }
-
-  Action FromTrait(Mob mob, ActionTrait act, GameState gs)
-  {
-    if (act is MobMeleeTrait meleeAttack)
-    {      
-      var p = gs.Player;
-      mob.Dmg = new Damage(meleeAttack.DamageDie, meleeAttack.DamageDice, meleeAttack.DamageType);
-      _lastUse[act.Name] = gs.Turn;
-      
-      return new MeleeAttackAction(gs, mob, CalcAdjacentTarget(mob, gs));
-    }
-    else if (act is MobMissileTrait missileAttack)
-    {
-      mob.Dmg = new Damage(missileAttack.DamageDie, missileAttack.DamageDice, missileAttack.DamageType);
-      _lastUse[act.Name] = gs.Turn;
-
-      var arrowAnim = new ArrowAnimation(gs, ActionTrait.Trajectory(mob, gs.Player.Loc), Colours.LIGHT_BROWN);
-      gs.UIRef().RegisterAnimation(arrowAnim);
-
-      var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
-      return new MissileAttackAction(gs, mob, gs.Player.Loc, arrow, 0);
-    }
-    else if (act is SpellActionTrait || act is RangedSpellActionTrait)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      if (act.Name == "Blink")
-        return new BlinkAction(gs, mob);
-      else if (act.Name == "FogCloud")
-        return new FogCloudAction(gs, mob, CalcRangedTarget(mob, gs));
-      else if (act.Name == "Nudity")
-        return new InduceNudityAction(gs, mob, CalcRangedTarget(mob, gs));
-      else if (act.Name == "Entangle")
-        return new EntangleAction(gs, mob, CalcRangedTarget(mob, gs));
-      else if (act.Name == "Web")
-        return new WebAction(gs, gs.Player.Loc);
-      else if (act.Name == "Firebolt")
-      {
-        Loc targetLoc = CalcRangedTarget(mob, gs);
-        return new FireboltAction(gs, mob, targetLoc, ActionTrait.Trajectory(mob, targetLoc));
-      }
-      else if (act.Name == "MirrorImage")
-        return new MirrorImageAction(gs, mob, CalcAdjacentTarget(mob, gs));
-      else if (act.Name == "DrainTorch")
-      {
-        return new DrainTorchAction(gs, mob, CalcRangedTarget(mob, gs));
-      }      
-    }
-    else if (act is CrusherTrait crusher)
-    {
-      ulong victimId = crusher.Victim(mob, gs);
-
-      return new CrushAction(gs, mob, victimId, crusher.DmgDie, crusher.DmgDice);
-    }
-    else if (act is ConfusingScreamTrait scream)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      var txt = $"{mob.FullName.Capitalize()} screams!";
-      return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{scream.DC}#0", scream.Radius, txt);
-    }
-    else if (act is FearsomeBellowTrait bellow)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      var txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
-      return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{bellow.DC}#0", bellow.Radius, txt);
-    }
-    else if (act is FireBreathTrait fireBreath)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new FireBreathAction(gs, mob, gs.Player.Loc, fireBreath.Range, fireBreath.DmgDie, fireBreath.DmgDice);
-    }
-    else if (act is RumBreathTrait rumBreath)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new RumBreathAction(gs, mob, gs.Player.Loc, rumBreath.Range);
-    }
-    else if (act is SummonTrait summon)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new SummonAction(mob.Loc, summon.Summons, 1)
-      {
-        GameState = gs,
-        Actor = mob,
-        Quip = summon.Quip
-      };
-    }
-    else if (act is SummonUndeadTrait summonUndead)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new SummonAction(mob.Loc, summonUndead.Summons(gs, mob), 1) { GameState = gs, Actor = mob };
-    }
-    else if (act is HealAlliesTrait && mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait alliesTrait)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      List<Mob> candidates = [];
-      foreach (ulong id in alliesTrait.IDs)
-      {
-        if (gs.ObjDb.GetObj(id) is Mob m)
-        {
-          var hp = m.Stats[Attribute.HP];
-          if (hp.Curr < hp.Max)
-            candidates.Add(m);
-        }          
-      }
-
-      if (candidates.Count > 0)
-      { 
-        int i = gs.Rng.Next(candidates.Count);
-
-        string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
-        return new HealAction(gs, candidates[i], 4, 4)
-        {
-          Message = castText
-        };
-      }
-
-      return new PassAction();
-    }
-    else if (act is ShriekTrait shriek)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new ShriekAction(gs, mob, shriek.ShriekRadius);
-    }
-    else if (act is GulpTrait gulp)
-    {
-      _lastUse[act.Name] = gs.Turn;
-      return new GulpAction(gs, mob, CalcAdjacentTarget(mob, gs), gulp);
-    }
-    
-    return new NullAction();
-  }
-
   static Action CalcMoveAction(Mob mob, GameState gs)
   {
     // eventually add fleeing. Or maybe there will be a 
@@ -395,7 +249,10 @@ class MonsterBehaviour : IBehaviour
         continue;
 
       if (act.Available(actor, gs))
-        return FromTrait(actor, act, gs);
+      {
+        _lastUse[act.Name] = gs.Turn;
+        return act.Action(actor, gs);
+      }
     }
 
     return new NullAction();
@@ -416,7 +273,10 @@ class MonsterBehaviour : IBehaviour
     foreach (var act in actor.Actions)
     {
       if (act.ActionType == ActionType.Movement && _lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
-        return FromTrait(actor, act, gs);
+      {
+        _lastUse[act.Name] = gs.Turn;
+        return act.Action(actor, gs);
+      }
     }
 
     Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
@@ -467,7 +327,9 @@ class MonsterBehaviour : IBehaviour
 
         if (passive.Count > 0)
         {
-          return FromTrait(actor, passive[gs.Rng.Next(passive.Count)], gs);
+          ActionTrait act = passive[gs.Rng.Next(passive.Count)];
+          _lastUse[act.Name] = gs.Turn;
+          return act.Action(actor, gs);
         }
         else if (gs.Rng.NextDouble() < 0.5) 
         {
