@@ -513,7 +513,7 @@ class MonsterWall(Glyph glyph, ulong monsterId) : Tile(TileType.MonsterWall)
   public override bool Passable() => false;
   public override bool PassableByFlight() => false;
 
-  public override string ToString() => $"{Glyph};{MonsterId}";
+  public override string ToString() => $"{(int)Type};{Glyph};{MonsterId}";
 }
 
 class TileFactory

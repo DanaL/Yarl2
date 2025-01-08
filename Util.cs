@@ -196,7 +196,7 @@ class Util
     {
       try
       {
-        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string gamePath = Path.Combine(basePath, "ddelve", "Saves");
 
         // CreateDirectory is safe to call even if directory exists

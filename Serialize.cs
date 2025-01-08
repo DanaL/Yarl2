@@ -102,7 +102,7 @@ internal class Serialize
     foreach (IGameEventListener l in objDb.ActiveListeners())
     {
       if (l.EventType == GameEventType.Death)
-        gs.RegisterForEvent(GameEventType.Death, l);
+        gs.RegisterForEvent(GameEventType.Death, l, l.SourceId);
       else
         gs.RegisterForEvent(GameEventType.EndOfRound, l);
     }
