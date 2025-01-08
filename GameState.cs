@@ -654,6 +654,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       FactDb!.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
     }
+    else if (victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
+    {      
+      UI.AlertPlayer(dmt.Message);     
+    }
     else
     {
       result?.Messages.Add(MsgFactory.MobKilledMessage(victim, attacker, this));
@@ -713,17 +717,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (t is IGameEventListener el)
         RemoveListener(el);
-    }
-
-    // For illusory mobs, their death message is being displayed before the
-    // death message of the caster, which I find unsatisfying but it's a bit
-    // of work to change that. I'd have to return the message from here and
-    // then add it to the result message of whatever action called this message
-    // (Or create a more centralized queue of messages to display)
-    var deathMessage = victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault();
-    if (deathMessage != null)
-    {
-      UI.AlertPlayer(deathMessage.Message);
     }
   }
 
