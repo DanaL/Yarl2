@@ -364,7 +364,8 @@ class HealAlliesTrait : ActionTrait
     {
       int i = gs.Rng.Next(candidates.Count);
       string castText = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cast")} a healing spell!";
-      return new HealAction(gs, candidates[i], 4, 4) { Message = castText };
+      gs.UIRef().AlertPlayer(castText);
+      return new HealAction(gs, candidates[i], 4, 4);
     }
 
     return new PassAction();
@@ -1879,8 +1880,9 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
             OwnerID = victim.ID,
             ExpiresOn = gs.Turn + (ulong) duration
           };
-          List<string> msgs = nt.Apply(victim, gs);
-          gs.UIRef().AlertPlayer(msgs);
+          
+          foreach (string s in nt.Apply(victim, gs))
+            gs.UIRef().AlertPlayer(s);
         }
       }      
     }    

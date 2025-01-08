@@ -252,13 +252,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     item.ContainedBy = 0;
 
     var tile = TileAt(loc);
-    List<string> msgs = [];
     foreach (DamageType effect in tile.TerrainEffects())
     {
       var (s, _) = EffectApplier.Apply(effect, this, item, null);
       if (s != "")
       {
-        msgs.Add(s);
+        UI.AlertPlayer(s);
       }
     }
 
@@ -275,8 +274,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     ObjDb.SetToLoc(loc, item);
     string msg = ThingAddedToLoc(loc);
-    msgs.Add(msg);
-
+    UI.AlertPlayer(msg);
+    
     if (tile is IdolAltar idolAltar && item.ID == idolAltar.IdolID)
     {      
       Loc wallLoc = idolAltar.Wall;
@@ -284,14 +283,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         CurrentMap.SetTile(wallLoc.Row, wallLoc.Col, TileFactory.Get(TileType.DungeonFloor));
         if (LastPlayerFoV.Contains(wallLoc))
-          msgs.Add("As the idol touches the altar, a wall slides aside with a rumble.");
+          UI.AlertPlayer("As the idol touches the altar, a wall slides aside with a rumble.");
         else
-          msgs.Add("You hear grinding stone.");
+          UI.AlertPlayer("You hear grinding stone.");          
       }
     }
-
-    if (msgs.Count > 0)
-      UI.AlertPlayer(msgs);
   }
 
   public void ItemDestroyed(Item item, Loc loc)
@@ -350,7 +346,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     List<Item> items = [];
     items.AddRange(ObjDb.ItemsAt(loc));
     items.AddRange(ObjDb.EnvironmentsAt(loc));
-    List<string> messages = [];
     var tile = TileAt(loc);
     bool fireStarted = false;
 
@@ -386,7 +381,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
           if (item.HasTrait<FlammableTrait>())
           {
-            messages.Add($"{item.FullName.DefArticle().Capitalize()} burns up!");
+            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!");            
             ItemDestroyed(item, loc);
             fireStarted = true;
           }
@@ -437,8 +432,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         BridgeDestroyed(loc);
       }
     }
-
-    UI.AlertPlayer(messages);
   }
 
   void ActorFallsIntoWater(Actor actor, Loc loc)
@@ -632,12 +625,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
   {
     if (victim is Player)
-    {
-      if (result is not null && result.Messages.Count > 0)
-      {
-        UI.AlertPlayer(result.Messages);
-      }
-
+    {     
       // Play any queued explosions in case it was one of the explosions
       // that killed the player
       UI.PlayQueuedExplosions(this);
@@ -660,7 +648,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     else
     {
-      result?.Messages.Add(MsgFactory.MobKilledMessage(victim, attacker, this));
+      UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));      
     }
 
     ObjDb.RemoveActor(victim);
@@ -727,7 +715,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (result is not null)
     {
       string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
-      result.Messages.Add(txt);
+      UI.AlertPlayer(txt);
     }
 
     int dmg = 0;
@@ -770,9 +758,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       if (ObjDb.Occupant(adj) is Actor actor)
       {
-        result?.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");        
         var (hpLeft, msg, _) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null, 1.0);
-        result?.Messages.Add(msg);
+        UI.AlertPlayer(msg);
+
         if (hpLeft < 1)
           ActorKilled(actor, dmgDesc, result, null);
       }
@@ -1119,14 +1108,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       // NB, this code is basically the same as in FaillIntoChasm
       Loc landingSpot = candidateSpots[Rng.Next(candidateSpots.Count)];
 
-      List<string> messages = [];
       if (actor is Player)
       {
         ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       }
       
       string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-      messages.Add(moveMsg);
+      if (LastPlayerFoV.Contains(actor.Loc))
+        UI.AlertPlayer(moveMsg);
       
       ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
 
@@ -1141,8 +1130,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       
       if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
       {
-        UI.AlertPlayer(messages);
-        var s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+        string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
         UI.AlertPlayer(s);        
       }
     }

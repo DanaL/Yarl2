@@ -54,8 +54,10 @@ abstract class UserInterface
   public int PlayerScreenCol { get; protected set; }
   protected List<string>? _longMessage;
   protected Options _options;
-  
-  public Queue<char> InputBuffer = new Queue<char>();
+
+  Queue<string> Messages = [];
+
+  public Queue<char> InputBuffer = [];
 
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
@@ -771,24 +773,24 @@ abstract class UserInterface
 
   // TODO: DRY the two versions of AlertPlayer
   public void AlertPlayer(string alert)
-  {            
+  {
     if (alert.Trim().Length == 0)
       return;
 
-    HistoryUpdated = true;
-
-    if (MessageHistory.Count > 0 && MessageHistory[0].Message == alert)
-      MessageHistory[0] = new MsgHistory(alert, MessageHistory[0].Count + 1);
-    else
-      MessageHistory.Insert(0, new MsgHistory(alert, 1));
-
-    if (MessageHistory.Count > MaxHistory)
-      MessageHistory.RemoveAt(MaxHistory);
+    Messages.Enqueue(alert);
   }
 
-  public void AlertPlayer(List<string> messages)
+  public void WriteAlerts()
   {
-    string msgText = string.Join(' ', messages).Trim();
+    List<string> msgs = [];
+    while (Messages.Count > 0)
+    {
+      string s = Messages.Dequeue().Trim();
+      if (s.Length > 0)
+        msgs.Add(s);
+    }
+
+    string msgText = string.Join(' ', msgs).Trim();
     if (string.IsNullOrEmpty(msgText))
       return;
 
@@ -894,7 +896,7 @@ abstract class UserInterface
           action = result.AltAction;
         }
 
-        if (result.Messages.Count > 0)
+        if (Messages.Count > 0)        
           AlertPlayer(result.Messages);
 
         if (performer is Player)

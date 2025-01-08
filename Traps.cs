@@ -25,30 +25,28 @@ class Traps
     {      
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
       loc = gs.FallIntoTrapdoor(actor, loc);
-      string msg = $"A trap door opens up underneath {actor.FullName}!";
+      ui.AlertPlayer($"A trap door opens up underneath {actor.FullName}!");
       
       if (actor is Player player)
       {
         player.Stats[Attribute.Nerve].Change(-15);
         player.Running = false;
-        ui.SetPopup(new Popup(msg, "", -1, -1));
+        ui.SetPopup(new Popup($"A trap door opens up underneath {actor.FullName}!", "", -1, -1));
       }
-      
-      List<string> msgs = [ msg ];
-      msgs.Add(gs.ThingAddedToLoc(loc));
 
+      string s = gs.ThingAddedToLoc(loc);
       if (trapSqVisible)
-        gs.UIRef().AlertPlayer(msgs);
+        gs.UIRef().AlertPlayer(s);
       
       throw new AbnormalMovement(loc);
     }
     else if (tile.Type == TileType.TrapDoor && !flying)
     {
       loc = gs.FallIntoTrapdoor(actor, loc);
-      ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));
-      List<string> msgs = [ "You plummet into the trap door!" ];
-      msgs.Add(gs.ThingAddedToLoc(loc));
-      gs.UIRef().AlertPlayer(msgs);
+      ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));      
+      gs.UIRef().AlertPlayer("You plummet into the trap door!");
+      string s = gs.ThingAddedToLoc(loc);
+      gs.UIRef().AlertPlayer(s);
 
       if (actor is Player player)
       {
@@ -66,8 +64,8 @@ class Traps
       }
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
-      string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!";
-      ActionResult result = new() { Messages = [ s ]};
+      
+      ActionResult result = new();
       int total = 0;
       int damageDice = 1 + actor.Loc.Level / 5;
       for (int j = 0; j < damageDice; j++)
@@ -81,8 +79,9 @@ class Traps
 
       actor.Traits.Add(new InPitTrait());
 
+      string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!";
       if (trapSqVisible)
-        gs.UIRef().AlertPlayer(result.Messages);
+        gs.UIRef().AlertPlayer(s);      
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
@@ -137,9 +136,7 @@ class Traps
       if (attackRoll > actor.AC)
       {
         ActionResult result = new();
-        Battle.ResolveMissileHit(dart, actor, dart, gs, result);
-        if (trapSqVisible)
-          gs.UIRef().AlertPlayer(result.Messages);
+        Battle.ResolveMissileHit(dart, actor, dart, gs, result);        
       }
 
       gs.ItemDropped(dart, loc);
@@ -173,13 +170,13 @@ class Traps
       else{
         s = $"{actor.FullName.Capitalize()} is soaked by a blast of water";
       }
-      List<string> msgs = [ s ];      
-      s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);
-      if (s != "")
-        msgs.Add(s);
 
       if (gs.LastPlayerFoV.Contains(actor.Loc))
-        gs.UIRef().AlertPlayer(msgs);
+        gs.UIRef().AlertPlayer(s);
+
+      s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);      
+      if (gs.LastPlayerFoV.Contains(actor.Loc))
+        gs.UIRef().AlertPlayer(s);
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
     {
@@ -237,7 +234,8 @@ class Traps
         }
       }
 
-      gs.UIRef().AlertPlayer(msgs);
+      foreach (string s in msgs)
+        gs.UIRef().AlertPlayer(s);
     }
     else if (tile.Type == TileType.HiddenSummonsTrap && actor is Player player)
     {
@@ -337,7 +335,8 @@ class Traps
       gs.ApplyDamageEffectToLoc(pt, DamageType.Fire);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
-        result.Messages.Add($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
+        if (gs.LastPlayerFoV.Contains(loc))
+          gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
         
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
@@ -346,8 +345,5 @@ class Traps
         }
       }
     }
-
-    if (gs.LastPlayerFoV.Contains(loc))
-      gs.UIRef().AlertPlayer(result.Messages);
   }
 }

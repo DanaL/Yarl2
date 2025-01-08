@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Security.Cryptography;
-
 namespace Yarl2;
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
@@ -72,7 +70,6 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
         pts.Add(pt);
 
         var attackResult = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
-        result.Messages.AddRange(attackResult.Messages);
         if (attackResult.Complete)
         {
           pts = [];

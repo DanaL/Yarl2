@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using static System.Net.Mime.MediaTypeNames;
+
 namespace Yarl2;
 
 enum DamageType
@@ -105,10 +107,10 @@ class Battle
       bonusDamage += mdb.Curr;
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
-    result.Messages.Add(txt);
+    gs.UIRef().AlertPlayer(txt);    
     var (hpLeft, dmgMsg, _) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
-      result.Messages.Add(dmgMsg);
+      gs.UIRef().AlertPlayer(dmgMsg);    
     ResolveHit(attacker, target, hpLeft, result, gs);
     
     bool poisoner = false;
@@ -136,7 +138,9 @@ class Battle
       Strength = source.Strength,
       Duration = duration
     };
-    result.Messages.AddRange(poison.Apply(victim, gs));
+
+    foreach (string s in poison.Apply(victim, gs))
+      gs.UIRef().AlertPlayer(s);    
   }
 
   static void CheckAttackTraits(Actor target, GameState gs, ActionResult result, GameObj obj, int dmgDone)
@@ -161,7 +165,8 @@ class Battle
           ExpiresOn = gs.Turn + 100
         };
 
-        result.Messages.AddRange(debuff.Apply(target, gs));
+        foreach (string s in debuff.Apply(target, gs))
+          gs.UIRef().AlertPlayer(s);
       }
 
       if (dmgDone > 0 && obj is Actor actor && trait is MosquitoTrait && gs.Rng.NextDouble() < 0.6)
@@ -180,10 +185,7 @@ class Battle
         {
           var damagedItem = metalItems[gs.Rng.Next(metalItems.Count)];
           var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, damagedItem, target);
-          if (s != "")
-          {
-            result.Messages.Add(s);
-          }
+          gs.UIRef().AlertPlayer(s);
         }
       }
     }
@@ -205,7 +207,7 @@ class Battle
       gs.ObjDb.AddNewActor(spawnling, loc);
       gs.AddPerformer(spawnling);
       if (gs.LastPlayerFoV.Contains(loc))
-        result.Messages.Add($"{actor.FullName.Capitalize()} spawns!");
+        gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} spawns!");
     }
   }
 
@@ -225,8 +227,8 @@ class Battle
     if (target.HasTrait<SleepingTrait>())
     {
       string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "strike")} {target.FullName} at unawares.";
-      result.Messages.Add(txt);
-
+      gs.UIRef().AlertPlayer(txt);
+      
       foreach (var d in attacker.MeleeDamage())
       {
         var dr = DamageRoll(d, gs.Rng);
@@ -248,15 +250,16 @@ class Battle
     Item? weapon = attacker.Inventory.ReadiedWeapon();
 
     string msg = MsgFactory.HitMessage(attacker, target, attackVerb, gs);
-    result.Messages.Add(msg);
-
+    gs.UIRef().AlertPlayer(msg);
+    
     double dmgScale = 1.0;
     if (weapon is not null && weapon.Traits.OfType<ViciousTrait>().FirstOrDefault() is ViciousTrait vt)
       dmgScale = vt.Scale;
 
     var (hpLeft, dmgMsg, dmgDone) = target.ReceiveDmg(dmg, bonusDamage, gs, weapon, dmgScale);    
     if (dmgMsg != "")
-      result.Messages.Add(dmgMsg);
+      gs.UIRef().AlertPlayer(dmgMsg);
+    
     ResolveHit(attacker, target, hpLeft, result, gs);
 
     CheckAttackTraits(target, gs, result, attacker, dmgDone);
@@ -287,7 +290,7 @@ class Battle
         if (gs.ObjDb.Occupant(adj) is Actor victim)
         {
           string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
-          result.Messages.Add(txt);
+          gs.UIRef().AlertPlayer(txt);
           int roll = gs.Rng.Next(4) + 1;
           var (hpLeftAfterAcid, acidMsg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);   
           
@@ -295,8 +298,7 @@ class Battle
           
           if (hpLeftAfterAcid < 1)
             gs.ActorKilled(victim, "acid", result, null);
-          if (acidMsg != "")
-            result.Messages.Add(acidMsg);
+          gs.UIRef().AlertPlayer(acidMsg);
         }
       }      
     }
@@ -311,7 +313,7 @@ class Battle
         var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
         if (s != "" && attacker is Player)
         {
-          result.Messages.Add(s);
+          gs.UIRef().AlertPlayer(s);          
         }        
       }
     }
@@ -509,8 +511,8 @@ class Battle
         {
           string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "attack")}";
           txt += $" but {target.FullName} {Grammar.Conjugate(target, "dodge")} out of the way!";
-          result.Messages.Add(txt);
-
+          gs.UIRef().AlertPlayer(txt);
+          
           return result;
         }        
       }
@@ -522,7 +524,8 @@ class Battle
         {
           string txt = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "attack")}";
           txt += $" but {target.FullName} {Grammar.Conjugate(target, "shimmer")} away before reappearing!";
-          result.Messages.Add(txt);
+          gs.UIRef().AlertPlayer(txt);
+          
           return result;
         }        
       }
@@ -551,15 +554,13 @@ class Battle
       if (attacker.HasActiveTrait<KnockBackTrait>())
       {
         string msg = ResolveKnockBack(attacker, target, gs);
-        if (msg != "")
-          result.Messages.Add(msg);
+        gs.UIRef().AlertPlayer(msg);        
       }
       
       if (attacker.HasActiveTrait<GrapplerTrait>())
       {
         string msg = ResolveGrapple(attacker, target, gs);
-        if (msg != "")
-          result.Messages.Add(msg);
+        gs.UIRef().AlertPlayer(msg);        
       }
 
       if (attacker.HasTrait<CutpurseTrait>() && !swallowed)
@@ -569,9 +570,9 @@ class Battle
     }
     else
     {
-      // The attacker missed!
-      result.Messages.Add(MsgFactory.MissMessage(attacker, target, gs));
-
+      // The attacker missed!      
+      gs.UIRef().AlertPlayer(MsgFactory.MissMessage(attacker, target, gs));
+      
       // if it is the player, exercise their weapon on a miss
       if (attacker is Player player && weapon is not null)
       {
@@ -641,7 +642,7 @@ class Battle
         loot = Treasure.LootFromTrait(lt, gs.Rng, gs.ObjDb);
         if (loot is not null)
         {
-          result.Messages.Add($"You lift {ItemDesc(loot)} from {target.FullName}!");
+          gs.UIRef().AlertPlayer($"You lift {ItemDesc(loot)} from {target.FullName}!");
           target.Traits.Add(new RobbedTrait());
           attacker.Inventory.Add(loot, attacker.ID);
           return;
@@ -660,8 +661,8 @@ class Battle
     else
     {
       loot = Treasure.PoorTreasure(1, gs.Rng, gs.ObjDb)[0];
-    }
-    result.Messages.Add($"You lift {ItemDesc(loot)} from {target.FullName}!");
+    }    
+    gs.UIRef().AlertPlayer($"You lift {ItemDesc(loot)} from {target.FullName}!");
     target.Traits.Add(new RobbedTrait());
     attacker.Inventory.Add(loot, attacker.ID);
 
@@ -724,7 +725,7 @@ class Battle
     }
     else
     {
-      result.Messages.Add(MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, gs));
+      gs.UIRef().AlertPlayer(MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, gs));      
     }
 
     // Firebolts, ice, should apply their effects to the square they hit
@@ -753,7 +754,7 @@ class Battle
     else
     {
       string txt = $"{spell.FullName.DefArticle().Capitalize()} misses {target.FullName}.";
-      result.Messages.Add(txt);
+      gs.UIRef().AlertPlayer(txt);
     }
 
     // Firebolts, ice, should apply their effects to the square they hit
