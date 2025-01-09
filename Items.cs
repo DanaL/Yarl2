@@ -796,12 +796,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       string desc = "";
       try 
       {
-        if (count > 1)
+        if (item.HasTrait<PluralTrait>())
+          desc = $"some {item.FullName}";
+        else if (count > 1)
           desc = $"{count} {item.FullName.Pluralize()}";
         else if (item.HasTrait<NamedTrait>())
-          desc = item.FullName;
-        else if (item.HasTrait<PluralTrait>())
-          desc = $"some {item.FullName}";
+          desc = item.FullName;        
         else
           desc = item.FullName.IndefArticle();
       }
