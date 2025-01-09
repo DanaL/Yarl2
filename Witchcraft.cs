@@ -21,7 +21,7 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
     {
       result.EnergyCost = 0.0;
       result.Complete = false;
-      result.Messages.Add("You don't have enough mana!");
+      GameState!.UIRef().AlertPlayer("You don't have enough mana!");
       return false;
     }
 
@@ -105,7 +105,8 @@ class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       return result;
 
     MageArmourTrait t = new();
-    result.Messages.AddRange(t.Apply(Actor!, GameState!));
+    foreach (string s in t.Apply(Actor!, GameState!))
+      GameState!.UIRef().AlertPlayer(s);
 
     return result;
   }
@@ -124,7 +125,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(5, 15, result))
       return result;
 
-    result.Messages.Add("Ala-ca-zzzzzzzzz!");
+    GameState!.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
     HashSet<Loc> flooded = Util.FLoodFill(GameState!, Actor!.Loc, 3);
     HashSet<Loc> affected = [];
     foreach (Loc loc in flooded)
@@ -156,7 +157,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
         int roll = GameState.Rng.Next(20) + 1;
         if (roll < casterSpellDC)
         {
-          result.Messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} asleep!");
+          GameState.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} asleep!");
           actor.Traits.Add(new SleepingTrait());
         } 
       }
@@ -180,7 +181,8 @@ class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       return result;
 
     LightSpellTrait ls = new();
-    result.Messages.AddRange(ls.Apply(Actor!, GameState!));
+    foreach (string s in ls.Apply(Actor!, GameState!))
+      GameState!.UIRef().AlertPlayer(s);
 
     return result;
   }

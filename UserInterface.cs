@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Data.SqlTypes;
 using System.Text;
 
 namespace Yarl2;
@@ -889,15 +888,12 @@ abstract class UserInterface
         performer.Energy -= energyUsed;
         if (result.AltAction is not null)
         {
-          if (result.Messages.Count > 0)
-            AlertPlayer(result.Messages);
           result = result.AltAction.Execute();
           performer.Energy -= CalcEnergyUsed(result.EnergyCost, performer);
           action = result.AltAction;
         }
 
-        if (Messages.Count > 0)        
-          AlertPlayer(result.Messages);
+        WriteAlerts();
 
         if (performer is Player)
         {

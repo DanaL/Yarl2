@@ -715,7 +715,7 @@ class Dialoguer : Inputer
 
   void EndConversation(string text)
   {
-    _gs.UIRef().AlertPlayer([text]);
+    _gs.UIRef().AlertPlayer(text);
 
     Done = true;
     Success = true;

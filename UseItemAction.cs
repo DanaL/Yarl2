@@ -33,7 +33,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
       else
       {
-        result.Messages.Add($"You ready {Tool.Name.DefArticle()}.");
+        GameState!.UIRef().AlertPlayer($"You ready {Tool.Name.DefArticle()}.");
       }
     }
 
@@ -59,7 +59,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       if (Battle.PlayerWillAttack(occ))
       {
         var attackAction = new MeleeAttackAction(GameState, Actor, targetLoc);
-        result.Messages.Add($"When you have an axe, every {occ.Name} looks like a tree.");
+        GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
         result.AltAction = attackAction;
         result.Complete = false;
         return result;
@@ -67,7 +67,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       else
       {
         string msg = $"{occ.FullName.Capitalize()} is neither tree, nor rock.";
-        result.Messages.Add(msg);
+        GameState!.UIRef().AlertPlayer(msg);
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
       }
 
@@ -120,7 +120,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else
     {
-      result.Messages.Add("You swing your pickaxe through the air.");
+      GameState!.UIRef().AlertPlayer("You swing your pickaxe through the air.");
       GameState.UIRef().SetPopup(new Popup("You swing your pickaxe through the air.", "", -1, -1));
     }
 
@@ -143,14 +143,14 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       gs.ObjDb.RemoveItemFromGame(loc,blockage);
       string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, verb)} {blockage.Name.DefArticle()}.";
-      result.Messages.Add(s);
+      gs.UIRef().AlertPlayer(s);
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
     else
     {
       string s = $"{digger.FullName.Capitalize()} chip away at the {blockage.Name.DefArticle()}.";
-      result.Messages.Add(s);
+      gs.UIRef().AlertPlayer(s);
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
@@ -159,12 +159,12 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   static void DigInPit(Loc loc, ActionResult result, GameState gs, Actor digger)
   {
     if (loc.Level == gs.CurrentDungeon.LevelMaps.Count - 1) {      
-      result.Messages.Add("The floor is too hard to dig here.");
+      gs.UIRef().AlertPlayer("The floor is too hard to dig here.");
       gs.UIRef().SetPopup(new Popup("The floor is too hard to dig here.", "", -1, -1));
     }
     else
     {
-      result.Messages.Add("You break through the floor!");
+      gs.UIRef().AlertPlayer("You break through the floor!");
       gs.UIRef().SetPopup(new Popup("You break through the floor!", "", -1, -1));
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
 
@@ -183,7 +183,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DisturbedGrave));
 
     string s = "You desecrate the grave.";
-    result.Messages.Add(s);
+    gs.UIRef().AlertPlayer(s);
     
     if (gs.Rng.NextDouble() < 0.20)
     {
@@ -208,7 +208,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         gs.AddPerformer(spook);
       }
 
-      result.Messages.Add("The grave's occuptant was still at home!");
+      gs.UIRef().AlertPlayer("The grave's occuptant was still at home!");
       s += "\n\nYou feel unclean.";
 
       if (!digger.HasActiveTrait<ShunnedTrait>())
@@ -251,7 +251,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       }
     }
 
-    result.Messages.Add("You destroy some stairs.");
+    gs.UIRef().AlertPlayer("You destroy some stairs.");
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
   }
 
@@ -260,8 +260,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
     string msg = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "crack")} through the ice!";
     msg += gs.ResolveActorMove(digger, loc, loc);
-    if (msg != "")
-    result.Messages.Add(msg);
+    gs.UIRef().AlertPlayer(msg);
     if (digger == gs.Player) 
     {
       bool flying = digger.HasActiveTrait<FlyingTrait>() || digger.HasActiveTrait<FloatingTrait>();
@@ -285,7 +284,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     if (toDestroy.Count > 1)
       msg += " Neighbouring bridge segments are washed away!";
 
-    result.Messages.Add(msg);
+    gs.UIRef().AlertPlayer(msg);
     if (digger == gs.Player)
       gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
 
@@ -311,12 +310,12 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
       s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} but water rushes in!";
-      result.Messages.Add(s);
+      gs.UIRef().AlertPlayer(s);
       
       string msg = gs.ResolveActorMove(digger, loc, loc);
       if (msg != "") 
       {
-        result.Messages.Add(msg);
+        gs.UIRef().AlertPlayer(msg);
         s += "\n\n" + msg;
       }
         
@@ -328,7 +327,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
     s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} a pit.";
-    result.Messages.Add(s);
+    gs.UIRef().AlertPlayer(s);
+
     if (digger == gs.Player)
       gs.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
 
@@ -345,15 +345,15 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
     if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
     {
-      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";
-      result.Messages.Add(s);
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";      
+      GameState.UIRef().AlertPlayer(s);
       if (Actor == GameState.Player)
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
       GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.BrokenDoor));
     }
     else
     {
-      result.Messages.Add("Splinters fly but the door remains intact.");
+      GameState.UIRef().AlertPlayer("Splinters fly but the door remains intact.");
       GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
     }   
   }
@@ -368,7 +368,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       Item apple = ItemFactory.Get(ItemNames.APPLE, GameState.ObjDb);
       GameState.ItemDropped(apple, loc);
-      result.Messages.Add("An apple tumbles to the ground.");
+      GameState.UIRef().AlertPlayer("An apple tumbles to the ground.");
     }
 
     if (GameState.Rng.NextDouble() < 0.5)
@@ -382,7 +382,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         GameState.AddPerformer(bees);
         if (Actor == GameState.Player)
         GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
-        result.Messages.Add("Uh-oh, you've angered a swarm of bees!");
+        GameState.UIRef().AlertPlayer("Uh-oh, you've angered a swarm of bees!");
       }
     }
   }
@@ -417,22 +417,23 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
     
     Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
     Tile tile = GameState!.TileAt(loc);
+    UserInterface ui = GameState.UIRef();
 
     if (tile.Type == TileType.VaultDoor)
-    {
-      result.Messages.Add("That door requires a special key.");
+    {      
+      ui.AlertPlayer("That door requires a special key.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
     else if (tile.Type == TileType.OpenDoor)
     {
-      result.Messages.Add("That door is not closed.");
+      ui.AlertPlayer("That door is not closed.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
     else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
     {
-      result.Messages.Add("You find no lock there.");
+      ui.AlertPlayer("You find no lock there.");
       result.Complete = false;
       result.EnergyCost = 0.0;
     }
@@ -450,18 +451,18 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         if (tile.Type == TileType.LockedDoor)
         {
-          result.Messages.Add("The lock releases with a click.");
+          ui.AlertPlayer("The lock releases with a click.");
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.ClosedDoor));
         }
         else
         {
-          result.Messages.Add("You lock the door.");
+          ui.AlertPlayer("You lock the door.");
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.LockedDoor));
         }
       }
       else
       {
-        result.Messages.Add("You fumble at the lock.");
+        ui.AlertPlayer("You fumble at the lock.");
       }
     }
 
@@ -499,10 +500,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (!adj)
       {
-        return new ActionResult() { Messages = [ "You see nowhere to use that key." ], Complete = true, EnergyCost = 0.0 };
+        GameState!.UIRef().AlertPlayer("You see nowhere to use that key.");
+        return new ActionResult() { Complete = true, EnergyCost = 0.0 };
       }
 
-      string openMsg = "The metal doors swing open.";
+      GameState!.UIRef().AlertPlayer("The metal doors swing open.");
       var door = (VaultDoor) GameState!.CurrentMap.TileAt(doorLoc.Row, doorLoc.Col);
       door.Open = true;
 
@@ -510,7 +512,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.RemoveByID(key.ID);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
-      return new ActionResult() { Messages = [ openMsg ], Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
     }
 
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
@@ -569,7 +571,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         if (Actor.HasTrait<ConfusedTrait>())
         {
           string txt = $"{Actor.FullName} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
-          return new ActionResult() { Complete = true, Messages = [ txt ], EnergyCost = 1.0 };
+          GameState.UIRef().AlertPlayer(txt);
+          return new ActionResult() { Complete = true, EnergyCost = 1.0 };
         }
       }
 
@@ -596,7 +599,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           GameState.UIRef().SetPopup(new Popup("Gross!!\n\nYou feel [BRIGHTRED strong]!", "", -1, -1, 20));
         }
 
-        result.Messages.Add(s);
+        GameState.UIRef().AlertPlayer(s);
       }
 
       bool success = false;
@@ -604,8 +607,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         result.Complete = useResult.Successful;
-        if (useResult.Message != "")
-          result.Messages.Add(useResult.Message);
+        GameState.UIRef().AlertPlayer(useResult.Message);
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
@@ -618,7 +620,9 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       foreach (SideEffectTrait sideEffect in item.Traits.OfType<SideEffectTrait>())
       {
-        result.Messages.AddRange(sideEffect.Apply(Actor, GameState));
+        List<string> msgs = sideEffect.Apply(Actor, GameState);
+        foreach (string s in msgs)
+          GameState.UIRef().AlertPlayer(s);        
       }
 
       if (item.HasTrait<ConsumableTrait>())
@@ -645,10 +649,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
+      GameState.UIRef().AlertPlayer("You don't know a way to use that!");
       return new ActionResult() 
       { 
         Complete = true, 
-        Messages = [ "You don't know a way to use that!" ], 
         EnergyCost = 0.0 };
     }
   }

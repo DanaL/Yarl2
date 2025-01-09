@@ -385,7 +385,7 @@ class DisguisedMonsterBehaviour : MonsterBehaviour
     {
       var disguise = actor.Traits.OfType<DisguiseTrait>().First();
       string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
-      gs.UIRef().AlertPlayer([txt]);
+      gs.UIRef().AlertPlayer(txt);
       actor.Glyph = disguise.TrueForm;
       actor.Stats[Attribute.InDisguise].SetMax(0);
     }
