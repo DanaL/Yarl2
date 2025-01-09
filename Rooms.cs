@@ -698,6 +698,15 @@ class Rooms
     statue.Traits.Add(aura);
     objDb.EndOfRoundListeners.Add(aura);
 
+    AuraMessageTrait auraMsg = new()
+    {
+      ObjId= statue.ID,
+      Radius= range,
+      Message = "A feeling of peace washes over you."
+    };
+    statue.Traits.Add(auraMsg);
+    objDb.EndOfRoundListeners.Add(auraMsg);
+
     if (factDb.FactCheck("OrchardExists") is not SimpleFact orchardExists)
     {
       factDb.Add(new SimpleFact() { Name = "OrchardExists", Value = "true" });

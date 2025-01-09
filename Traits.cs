@@ -141,6 +141,43 @@ class AttackVerbTrait(Verb verb) : Trait
   public override string AsText() => $"AttackVerb#{Verb}";
 }
 
+class AuraMessageTrait : Trait, IGameEventListener
+{
+  public bool Expired { get => false; set { } }
+  public bool Listening => true;
+  public ulong ObjId { get; set; }
+  public int Radius { get; set; }
+  public ulong SourceID => ObjId;
+  public GameEventType EventType => GameEventType.EndOfRound;
+  public string Message { get; set; } = "";
+  bool PlayerSeen { get; set; }
+
+  public override string AsText() => $"AuraMessage#{ObjId}#{Radius}#{Message}";
+  
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {    
+    if (gs.ObjDb.GetObj(ObjId) is GameObj source)
+    {
+      foreach (Loc sq in FieldOfView.CalcVisible(Radius, source.Loc, gs.CurrentMap, gs.ObjDb).Keys)
+      {
+        if (gs.ObjDb.Occupant(sq) is Player)
+        {
+          if (!PlayerSeen)
+          {
+            gs.UIRef().AlertPlayer(Message);
+            gs.UIRef().SetPopup(new Popup(Message, "", -1, -1));
+          }
+
+          PlayerSeen = true;
+          return;
+        }
+      }
+
+      PlayerSeen = false;
+    }
+  }
+}
+
 class AuraOfProtectionTrait : TemporaryTrait
 {
   public int HP { get; set; }
@@ -914,8 +951,7 @@ class StressReliefAuraTrait : Trait, IGameEventListener
   {
     if (gs.ObjDb.GetObj(ObjId) is GameObj source)
     {
-      HashSet<Loc> locs = Util.FloodFill(gs, source.Loc, Radius);
-      foreach (Loc sq in locs)      
+      foreach (Loc sq in FieldOfView.CalcVisible(Radius, source.Loc, gs.CurrentMap, gs.ObjDb).Keys)
         CheckSq(gs, sq);      
     }    
   }
@@ -2893,6 +2929,7 @@ class TraitFactory
       Enum.TryParse(pieces[1], out Verb verb);
       return new AttackVerbTrait(verb);
     }},
+    { "AuraMessage", (pieces, gameObj) => new AuraMessageTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]), Message = pieces[3] } },
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     {
