@@ -326,7 +326,7 @@ class Util
     else if (angle <= -1.31 && angle > -1.82)
       return "south";
     else
-      return "southeast";
+      return "southwest";
   }
 
   public static List<(int, int)> Bresenham(int r0, int c0, int r1, int c1)
