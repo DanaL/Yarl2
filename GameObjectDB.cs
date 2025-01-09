@@ -436,8 +436,12 @@ class GameObjectDB
     
     foreach (Trait t in item.Traits.Where(t => t is IGameEventListener))
     {
-      EndOfRoundListeners.Remove((IGameEventListener)t);  
+      EndOfRoundListeners.Remove((IGameEventListener)t);            
     }
+
+    var toRemove = DeathWatchListeners.Where(dw => dw.Item1 == item.ID).ToList();
+    foreach (var dwl in toRemove)
+      DeathWatchListeners.Remove(dwl);
   }
 
   public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
