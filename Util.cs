@@ -451,7 +451,7 @@ class Util
 
   // I've written floodfill here and there for various effects and noise, etc
   // but I'm hoping I can consolidate on this veresion of the function
-  public static HashSet<Loc> FLoodFill(GameState gs, Loc origin, int range)
+  public static HashSet<Loc> FloodFill(GameState gs, Loc origin, int range)
   {
     HashSet<Loc> locs = [];
     Queue<Loc> q = [];

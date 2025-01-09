@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.IO;
 using System.Reflection.Metadata.Ecma335;
 
 namespace Yarl2;
@@ -890,6 +889,38 @@ class StressTrait : Trait
   public ulong OwnerID { get; set; }
 
   public override string AsText() => $"Stress#{Stress}#{OwnerID}";
+}
+
+class StressReliefAuraTrait : Trait, IGameEventListener
+{
+  public bool Expired { get => false; set { } }
+  public bool Listening => true;
+  public ulong ObjId { get; set; }
+  public int Radius { get; set; }
+  public ulong SourceID => ObjId;
+
+  public GameEventType EventType => GameEventType.EndOfRound;
+
+  static void CheckSq(GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.Occupant(loc) is Actor actor)
+    {
+      if (actor.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
+        nerve.Change(2);
+    }
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(ObjId) is GameObj source)
+    {
+      HashSet<Loc> locs = Util.FloodFill(gs, source.Loc, Radius);
+      foreach (Loc sq in locs)      
+        CheckSq(gs, sq);      
+    }    
+  }
+
+  public override string AsText() => $"StressReliefAura#{ObjId}#{Radius}";
 }
 
 class DividerTrait : Trait
@@ -2832,17 +2863,17 @@ class TraitFactory
   private static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
-    { "ACMod", (pieces, gameObj) => 
-      { 
+    { "ACMod", (pieces, gameObj) =>
+      {
         ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
         return new ACModTrait() { ArmourMod = int.Parse(pieces[1]), SourceId = sourceId };
       }
     },
     { "Adjective", (pieces, gameObj) => new AdjectiveTrait(pieces[1]) },
     { "Affixed", (pieces, gameObj) => new AffixedTrait() },
-    { "Alacrity", (pieces, gameObj) =>  
-      new AlacrityTrait() 
-      { 
+    { "Alacrity", (pieces, gameObj) =>
+      new AlacrityTrait()
+      {
         Amt = Util.ToDouble(pieces[1]),
         SourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0
       }
@@ -2864,10 +2895,10 @@ class TraitFactory
     }},
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
-    { 
-      "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])} 
+    {
+      "Berzerk", (pieces, gameObj) => pieces.Length == 1 ? new BerzerkTrait() : new BerzerkTrait() { SourceId = ulong.Parse(pieces[1])}
     },
-    { "Blind", (pieces, gameObj) => 
+    { "Blind", (pieces, gameObj) =>
       new BlindTrait()
       {
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
@@ -2899,19 +2930,19 @@ class TraitFactory
       {
         ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;
         return new CutpurseTrait() { SourceId = sourceId };
-      } 
+      }
     },
-    { "Damage", (pieces, gameObj) => 
+    { "Damage", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[3], out DamageType dt);
         ulong sourceId = pieces.Length >= 5 ? ulong.Parse(pieces[4]) : 0;
-        return new DamageTrait() 
-        { 
-          DamageDie = int.Parse(pieces[1]), 
-          NumOfDie = int.Parse(pieces[2]), 
+        return new DamageTrait()
+        {
+          DamageDie = int.Parse(pieces[1]),
+          NumOfDie = int.Parse(pieces[2]),
           DamageType = dt,
           SourceId = sourceId
-        }; 
+        };
       }
     },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
@@ -2920,8 +2951,8 @@ class TraitFactory
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
-    { "Dodge", (pieces, gameObj) => 
-      { 
+    { "Dodge", (pieces, gameObj) =>
+      {
         int rate = int.Parse(pieces[1]);
         ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
           return new DodgeTrait() { Rate = int.Parse(pieces[1]), SourceId = sourceId };
@@ -2933,7 +2964,7 @@ class TraitFactory
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FearsomeBellow", (pieces, gameObj) => new FearsomeBellowTrait()
       {
-        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), 
+        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]),
         Cooldown = ulong.Parse(pieces[3]), Name=pieces[0]
       }
     },
@@ -2954,11 +2985,11 @@ class TraitFactory
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
-    { "FullBelly", (pieces, gameObj) => new FullBellyTrait() 
-      { 
+    { "FullBelly", (pieces, gameObj) => new FullBellyTrait()
+      {
         VictimID = ulong.Parse(pieces[1]),
         AcidDie = int.Parse(pieces[2]),
-        AcidDice = int.Parse(pieces[3])        
+        AcidDice = int.Parse(pieces[3])
       }
     },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
@@ -2971,10 +3002,10 @@ class TraitFactory
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
     { "Gulp", (pieces, gameObj) => new GulpTrait() { DC = int.Parse(pieces[1]), AcidDie = int.Parse(pieces[2]), AcidDice = int.Parse(pieces[3]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
-    { "Heroism", (pieces, gameObj) => new HeroismTrait() 
-      { 
+    { "Heroism", (pieces, gameObj) => new HeroismTrait()
+      {
         OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), SourceId = ulong.Parse(pieces[3])
-      } 
+      }
     },
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
@@ -3057,7 +3088,7 @@ class TraitFactory
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
-        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },    
+        ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
@@ -3079,14 +3110,14 @@ class TraitFactory
         return new RepugnantTrait() { SourceId = sourceId };
       }
     },
-    { "Resistance", (pieces, gameObj) => 
+    { "Resistance", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out DamageType rdt);
         ulong expiresOn = pieces.Length >= 3 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
         ulong ownerID = pieces.Length >= 4 ? ulong.Parse(pieces[3]) : 0;
         ulong sourceId = pieces.Length >= 5 ? ulong.Parse(pieces[4] ): 0;
         return new ResistanceTrait() { Type = rdt, ExpiresOn = expiresOn, OwnerID = ownerID, SourceId = sourceId
-        }; 
+        };
       }
     },
     { "Resting", (pieces, gameObj) => new RestingTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
@@ -3102,6 +3133,7 @@ class TraitFactory
     { "Robbed", (pieces, gameObj) => new RobbedTrait() },
     { "RumBreath", (pieces, gameObj) => new RumBreathTrait() { Range=int.Parse(pieces[1]), Cooldown=ulong.Parse(pieces[2]), Name="RumBreath" } },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
+    { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
     { "Shriek", (pieces, gameObj) => new ShriekTrait() { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
@@ -3109,13 +3141,13 @@ class TraitFactory
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
-    { "SpellAction", (pieces, gameObj) => new SpellActionTrait() 
-      { 
-        Name = pieces[1], 
+    { "SpellAction", (pieces, gameObj) => new SpellActionTrait()
+      {
+        Name = pieces[1],
         Cooldown = ulong.Parse(pieces[2]),
         MinRange = int.Parse(pieces[3]),
-        MaxRange = int.Parse(pieces[4]) 
-      }     
+        MaxRange = int.Parse(pieces[4])
+      }
     },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
@@ -3141,12 +3173,13 @@ class TraitFactory
       return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
-    { "Stress", (pieces, gameObj) => 
+    { "Stress", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out StressLevel stress);
         return new StressTrait() { Stress = stress, OwnerID = ulong.Parse(pieces[2]) };
       }
     },
+    { "StressReliefAura", (pieces, gameObj) => new StressReliefAuraTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
     { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]), Name=pieces[0] }},
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
@@ -3180,14 +3213,13 @@ class TraitFactory
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = Util.ToDouble(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
-    { "WaterWalking", (pieces, gameObj) => 
+    { "WaterWalking", (pieces, gameObj) =>
       pieces.Length > 1 ? new WaterWalkingTrait() { SourceId = ulong.Parse(pieces[1])} : new WaterWalkingTrait()
     },
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
-    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } },
-    { "Scroll", (pieces, gameObj) => new ScrollTrait() }
+    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } }    
   };
 
   public static Trait FromText(string text, GameObj? container)

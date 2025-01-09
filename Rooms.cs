@@ -681,12 +681,22 @@ class Rooms
 
     int rowRange = maxRow - minRow;
     int colRange = maxCol - minCol;
+    int range = rowRange > colRange ? rowRange : colRange;
+
     statue.Traits.Add(new LightSourceTrait()
     {
       ExpiresOn = ulong.MaxValue, OwnerID = statue.ID, 
-      Radius = rowRange > colRange ? rowRange : colRange
+      Radius = range
     });
     objDb.SetToLoc(statueLoc, statue);
+
+    StressReliefAuraTrait aura = new()
+    {
+      ObjId = statue.ID,
+      Radius = range
+    };
+    statue.Traits.Add(aura);
+    objDb.EndOfRoundListeners.Add(aura);
 
     if (factDb.FactCheck("OrchardExists") is not SimpleFact orchardExists)
     {
