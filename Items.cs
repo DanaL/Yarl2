@@ -398,7 +398,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   List<(char, ulong)> _items = [];
   public char NextSlot { get; set; } = 'a';
   readonly GameObjectDB _objDb = objDb;
-
+  
   public bool Contains(ulong itemID)
   {
     foreach (var  item in _items)
@@ -422,6 +422,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     return items;
   }
+
+  bool PlayerInventory() => _objDb.GetObj(OwnerID) is Player;
 
   void FindNextSlot()
   {
@@ -553,6 +555,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         var item = _objDb.GetObj(_items[j].Item2) as Item;
         _items.RemoveAt(j);
+        if (!PlayerInventory())
+          item.Slot = '\0';
         return item;
       }
     }
@@ -573,17 +577,20 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     List<Item> removed = [];
     int totalToRemove = int.Min(count, indexes.Count);
+    bool playerInventory = PlayerInventory();
     for (int j = 0; j < totalToRemove; j++)
     {
       int index = indexes[j];
       var item = _objDb.GetObj(_items[index].Item2) as Item;
       if (item is not null)
       {
+        if (!playerInventory)
+          item.Slot = '\0';
         removed.Add(item);
         _items.RemoveAt(index);
       }
     }
-
+        
     return removed;
   }
 

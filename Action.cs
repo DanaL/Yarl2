@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 class ActionResult
