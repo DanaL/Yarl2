@@ -25,9 +25,8 @@ class RaylibUserInterface : UserInterface
 
   public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
   {
-    const int padding = 20;
-    int width = ScreenWidth * (opt.FontSize / 2) + (padding * 2);
-    int height = ScreenHeight * opt.FontSize + (padding * 2);
+    int width = ScreenWidth * (opt.FontSize / 2) + 2;
+    int height = ScreenHeight * opt.FontSize + 2;
 
     SetConfigFlags(ConfigFlags.VSyncHint);
     SetTraceLogLevel(TraceLogLevel.None); 
