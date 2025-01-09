@@ -1246,8 +1246,16 @@ abstract class UserInterface
     int playerCol = gs.Player.Loc.Col;
     sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
 
-    DrawFullScreen(sqs);
-    BlockForInput(gs);
+    GameEvent e;
+    do
+    {
+      e = PollForEvent();
+    
+      //UpdateDisplay(gs);
+      DrawFullScreen(sqs);
+      Delay();
+    }
+    while (e.Type == GameEventType.NoEvent);
   }
 
   void DrawFullScreen(Sqr[,] sqs)
