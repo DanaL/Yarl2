@@ -515,18 +515,10 @@ class PriestBehaviour : NPCBehaviour
   }
 }
 
-class WitchBehaviour : IBehaviour, IDialoguer
+class WitchBehaviour : NPCBehaviour
 {
-  List<DialogueOption> Options { get; set; } = [];
   DateTime _lastBark = new(1900, 1, 1);
-  Dictionary<string, int> Spells = new()
-  {
-    { "arcane spark", 15 },
-    { "mage armour", 20 },
-    { "illume", 20 },
-    { "slumbering song", 25 }
-  };
-
+  
   static string PickBark(GameState gs)
   {
     string grocerName = "";
@@ -546,7 +538,7 @@ class WitchBehaviour : IBehaviour, IDialoguer
     };
   }
 
-  public Action CalcAction(Mob witch, GameState gameState)
+  public override Action CalcAction(Mob witch, GameState gameState)
   {
     Action action  = new PassAction(gameState, witch);
     if ((DateTime.Now - _lastBark).TotalSeconds > 10)
@@ -558,67 +550,12 @@ class WitchBehaviour : IBehaviour, IDialoguer
     return action;
   }
 
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
-
-    return (action, acc);
-  }
-
-  List<(string, char)> SpellMenu(GameState gs)
-  {
-    List<(string, char)> spellOpts = [];
+    var acc = new WitchInputer(actor, gameState);
+    var action = new WitchServiceAction(gameState, actor);
     
-    int opt = 'a';
-    foreach (string spell in Spells.Keys)
-    {
-      if (!gs.Player.SpellsKnown.Contains(spell))
-      {
-        string s = $"{spell.CapitalizeWords()} - [YELLOW $]{Spells[spell]}";
-        spellOpts.Add((s, (char) opt++));
-      }
-    }
-
-    return spellOpts;
-  }
-
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
-  {
-    int dialogueState = mob.Stats[Attribute.DialogueState].Curr;
-
-    if (dialogueState == 0)
-    {
-      string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-      var dialogue = new DialogueInterpreter();
-
-      string txt = dialogue.Run(scriptFile, mob, gs);
-      Options = dialogue.Options;
-      List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
-
-      return (txt, opts);
-    }
-    else if (dialogueState == 1)
-    {
-      string txt = "Hmm, here is what I can teach you.";
-
-      return (txt, SpellMenu(gs));
-    }
-
-    return ("", []);
-  }
-
-  public void SelectOption(Mob mob, char choice, GameState gs)
-  {    
-    foreach (DialogueOption opt in Options)
-    {
-      if (opt.Ch == choice)
-      {
-        var dialogue = new DialogueInterpreter();
-        dialogue.Run(opt.Expr, mob, gs);
-        break;
-      }
-    }
+    return (action, acc);
   }
 }
 

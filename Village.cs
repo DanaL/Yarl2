@@ -352,12 +352,12 @@ class Village
     {
       Name = "Kylie",
       Appearance = "The local, stylish witch.",
-      Glyph = new Glyph('@', Colours.BLUE , Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('@', Colours.LIGHT_BLUE , Colours.DARK_BLUE, Colours.BLACK, Colours.BLACK)
     };
     kylie.Stats[Attribute.DialogueState] = new Stat(0);
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
-    kylie.Traits.Add(new DialogueScriptTrait() { ScriptFile = "witch.txt" });
+    
     var sqs = town.WitchesCottage.ToList();
     kylie.Loc = sqs[rng.Next(sqs.Count)];
     kylie.SetBehaviour(new WitchBehaviour());

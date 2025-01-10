@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace Yarl2;
@@ -536,6 +537,167 @@ class SmithyInputer : ShopMenuInputer
     }    
   }
 }
+
+record SpellInfo(int Price, int ManaCost);
+class WitchInputer : Inputer
+{
+  Actor Witch { get; set; } 
+  string Service { get; set; } = "";
+  List<char> Options { get; set; } = [];
+  GameState GS { get; set; }
+  string Blurb { get; set; } = "";
+
+  int DialogueState => Witch.Stats[Attribute.DialogueState].Curr;
+  int PlayerMana => GS.Player.Stats.TryGetValue(Attribute.MagicPoints, out Stat? mana) ? mana.Max : 0;
+
+  const int START_STATE = 0;
+  const int BUY_SPELLS = 1;
+  const int LEARN_MAGIC = 2;
+
+  readonly Dictionary<string, SpellInfo> Spells = new()
+  {
+    { "arcane spark", new SpellInfo(20, 1) },
+    { "mage armour", new SpellInfo(20, 2) },
+    { "illume", new SpellInfo(25, 2) },
+    { "slumbering song", new SpellInfo(25, 5) }
+  };
+
+  public WitchInputer(Actor witch, GameState gs)
+  {
+    Witch = witch;
+    GS = gs;
+    Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
+
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    int dialogueState = Witch.Stats[Attribute.DialogueState].Curr;
+
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+      return;
+    }
+
+    if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
+    {
+      Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
+    }
+    else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
+    {
+      Witch.Stats[Attribute.DialogueState].SetMax(LEARN_MAGIC);
+    }
+    else if (dialogueState == START_STATE && ch == 'b')
+    {
+      Done = true;
+      Success = false;
+      return;
+    }
+
+    SetDialogueText();
+    WritePopup();
+    //else if (Options.Contains(ch) && ch == 'a')
+    //{
+    //  Done = true;
+    //  Success = true;
+    //  Service = "Absolution";
+    //}
+  }
+
+  void SetSpellMenu()
+  {
+    Options = [];
+    int opt = 'a';
+
+    int available = 0;
+    int notYetAvailable = 0;
+    foreach (string spell in Spells.Keys)
+    {
+      if (GS.Player.SpellsKnown.Contains(spell))
+        continue;
+
+      if (Spells[spell].ManaCost <= PlayerMana)
+      {
+        SpellInfo info = Spells[spell];
+        char ch = (char)opt++;
+        Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{info.Price}\n";
+        Options.Add(ch);
+        ++available;
+      }
+      else
+      {
+        notYetAvailable++;
+      }
+    }
+
+    if (available == 0)
+      Blurb += "\nThere's nothing I can teach you right now.\n";
+    if (notYetAvailable > 0)
+      Blurb += "\nThere are more spells I can impart when you are more powerful!\n";
+  }
+
+  void SetDialogueText()
+  {    
+    switch (DialogueState)
+    {
+      case BUY_SPELLS:
+        
+        Blurb = "Hmm, here is what I can teach you.\n\n";
+        SetSpellMenu();        
+        break;
+      default:
+        
+        if (PlayerMana > 0)
+        {
+          Blurb = GS.Rng.Next(5) switch
+          {
+            0 => "Looking for spells? You're better off studying with us than one of those shady underground magic dealers!",
+            1 => "I studied library magic at Yendor University.",
+            2 => "Casting spells is stressful. But Sophie's mushroom stew is great for fraught nerves!",
+            3 => "Have you considered joining the Adventurers' Union?",
+            _ => "You can't put undead to sleep with magic!"
+          };
+          Blurb += "\n\na) Learn some spells";
+          Blurb += "\nb) Farewell";
+        }
+        else
+        {
+          if (GS.Rng.NextDouble() < 0.5)
+            Blurb = "Need to learn the basics huh? I used to TA Magic 101.";
+          else
+            Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumatury.";
+          Blurb += "\n\na) Study the basic of magic.";
+          Blurb += "\nb) Farewell";
+        }
+        Options = ['a', 'b'];
+        break;
+    }
+  }
+
+  protected void WritePopup()
+  {
+    SetDialogueText();
+
+    var sb = new StringBuilder(Witch.Appearance.Capitalize());
+    sb.Append("\n\n");
+    sb.Append(Blurb);
+    
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), Witch.FullName, -1, -1));
+  }
+
+  public override UIResult GetResult()
+  {
+    return new ServiceResult()
+    {
+      Zorkminds = 50,
+      Service = Service
+    };
+  }
+}
+
 
 class PriestInputer : Inputer
 {

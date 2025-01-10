@@ -140,7 +140,7 @@ class PlayerCreator
         roll = Util.StatRollToMod(10 + rng.Next(1, 5) + rng.Next(1, 5));
         if (roll > stats[Attribute.Will].Curr)
           stats[Attribute.Will].SetMax(roll);
-        stats.Add(Attribute.MagicPoints, new Stat(10));
+        stats.Add(Attribute.MagicPoints, new Stat(rng.Next(2, 5)));
         break;      
     }
     

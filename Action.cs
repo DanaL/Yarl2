@@ -907,6 +907,41 @@ class PriestServiceAction : Action
   }
 }
 
+class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
+{
+  int Invoice { get; set; }
+  string Service { get; set; } = "";
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    //if (Service == "Absolution")
+    //{
+    //  GameState!.Player.Inventory.Zorkmids -= Invoice;
+
+    //  string s = $"{_priest.FullName.Capitalize()} accepts your donation, chants a prayer while splashing you with holy water.";
+    //  s += "\n\nYou feel cleansed.";
+
+    //  GameState.UIRef().AlertPlayer("You feel cleansed.");
+    //  GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+    //  GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not ShunnedTrait).ToList();
+    //}
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var serviceResult = (ServiceResult)result;
+    Invoice = serviceResult.Zorkminds;
+    Service = serviceResult.Service;
+  }
+}
+
 class ShoppingCompletedAction : Action
 {
   readonly Mob _shopkeeper;

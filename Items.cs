@@ -556,7 +556,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         var item = _objDb.GetObj(_items[j].Item2) as Item;
         _items.RemoveAt(j);
         if (!PlayerInventory())
-          item.Slot = '\0';
+          item!.Slot = '\0';
         return item;
       }
     }
