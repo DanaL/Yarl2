@@ -195,7 +195,7 @@ class SpellcastMenu : Inputer
   readonly GameState GS;
   int row;
   bool targeting = false;
-
+  
   public SpellcastMenu(GameState gs)
   {
     row = 0;

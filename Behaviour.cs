@@ -519,6 +519,13 @@ class WitchBehaviour : IBehaviour, IDialoguer
 {
   List<DialogueOption> Options { get; set; } = [];
   DateTime _lastBark = new(1900, 1, 1);
+  Dictionary<string, int> Spells = new()
+  {
+    { "arcane spark", 15 },
+    { "mage armour", 20 },
+    { "illume", 20 },
+    { "slumbering song", 25 }
+  };
 
   static string PickBark(GameState gs)
   {
@@ -559,20 +566,50 @@ class WitchBehaviour : IBehaviour, IDialoguer
     return (action, acc);
   }
 
+  List<(string, char)> SpellMenu(GameState gs)
+  {
+    List<(string, char)> spellOpts = [];
+    
+    int opt = 'a';
+    foreach (string spell in Spells.Keys)
+    {
+      if (!gs.Player.SpellsKnown.Contains(spell))
+      {
+        string s = $"{spell.CapitalizeWords()} - [YELLOW $]{Spells[spell]}";
+        spellOpts.Add((s, (char) opt++));
+      }
+    }
+
+    return spellOpts;
+  }
+
   public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
-    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
-    var dialogue = new DialogueInterpreter();
+    int dialogueState = mob.Stats[Attribute.DialogueState].Curr;
 
-    string txt = dialogue.Run(scriptFile, mob, gs);
-    Options = dialogue.Options;
-    List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
-    
-    return (txt, opts);
+    if (dialogueState == 0)
+    {
+      string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+      var dialogue = new DialogueInterpreter();
+
+      string txt = dialogue.Run(scriptFile, mob, gs);
+      Options = dialogue.Options;
+      List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
+
+      return (txt, opts);
+    }
+    else if (dialogueState == 1)
+    {
+      string txt = "Hmm, here is what I can teach you.";
+
+      return (txt, SpellMenu(gs));
+    }
+
+    return ("", []);
   }
 
   public void SelectOption(Mob mob, char choice, GameState gs)
-  {
+  {    
     foreach (DialogueOption opt in Options)
     {
       if (opt.Ch == choice)
