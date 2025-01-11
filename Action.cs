@@ -918,18 +918,19 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    //if (Service == "Absolution")
-    //{
-    //  GameState!.Player.Inventory.Zorkmids -= Invoice;
+    if (Service == "Magic101")
+    {
 
-    //  string s = $"{_priest.FullName.Capitalize()} accepts your donation, chants a prayer while splashing you with holy water.";
-    //  s += "\n\nYou feel cleansed.";
+    }
+    else
+    {
+      GameState!.Player.Inventory.Zorkmids -= Invoice;
+      GameState.Player.SpellsKnown.Add(Service);
 
-    //  GameState.UIRef().AlertPlayer("You feel cleansed.");
-    //  GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
-
-    //  GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not ShunnedTrait).ToList();
-    //}
+      string s = $"{Actor!.FullName.Capitalize()} teaches you an arcane formula and you can now cast the [ICEBLUE {Service}] spell!";
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      GameState.UIRef().AlertPlayer("You have learned a new spell.");
+    }
 
     return result;
   }

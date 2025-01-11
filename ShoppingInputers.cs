@@ -543,9 +543,10 @@ class WitchInputer : Inputer
 {
   Actor Witch { get; set; } 
   string Service { get; set; } = "";
-  List<char> Options { get; set; } = [];
+  Dictionary<char, string> Options { get; set; } = [];
   GameState GS { get; set; }
   string Blurb { get; set; } = "";
+  int Invoice { get; set; } = 0;
 
   int DialogueState => Witch.Stats[Attribute.DialogueState].Curr;
   int PlayerMana => GS.Player.Stats.TryGetValue(Attribute.MagicPoints, out Stat? mana) ? mana.Max : 0;
@@ -568,6 +569,7 @@ class WitchInputer : Inputer
     GS = gs;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
+    SetDialogueText();
     WritePopup();
   }
 
@@ -582,7 +584,28 @@ class WitchInputer : Inputer
       return;
     }
 
-    if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
+    if (dialogueState == BUY_SPELLS && Options.ContainsKey(ch))
+    {
+      string spell = Options[ch];
+      int price = Spells[spell].Price;
+
+      if (GS.Player.Inventory.Zorkmids >= price)
+      {
+        Invoice = price;
+        Done = true;
+        Success = true;
+        Service = spell;
+      }
+      else
+      {
+        SetDialogueText();
+        Blurb += "\n[BRIGHTRED You can't afford that!]\n";
+        WritePopup();
+      }
+      
+      return;
+    }
+    else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
     {
       Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
     }
@@ -599,12 +622,6 @@ class WitchInputer : Inputer
 
     SetDialogueText();
     WritePopup();
-    //else if (Options.Contains(ch) && ch == 'a')
-    //{
-    //  Done = true;
-    //  Success = true;
-    //  Service = "Absolution";
-    //}
   }
 
   void SetSpellMenu()
@@ -624,7 +641,7 @@ class WitchInputer : Inputer
         SpellInfo info = Spells[spell];
         char ch = (char)opt++;
         Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{info.Price}\n";
-        Options.Add(ch);
+        Options.Add(ch, spell);
         ++available;
       }
       else
@@ -672,15 +689,14 @@ class WitchInputer : Inputer
           Blurb += "\n\na) Study the basic of magic.";
           Blurb += "\nb) Farewell";
         }
-        Options = ['a', 'b'];
+        Options.Add('a', "");
+        Options.Add('b', "");
         break;
     }
   }
 
   protected void WritePopup()
   {
-    SetDialogueText();
-
     var sb = new StringBuilder(Witch.Appearance.Capitalize());
     sb.Append("\n\n");
     sb.Append(Blurb);
@@ -692,7 +708,7 @@ class WitchInputer : Inputer
   {
     return new ServiceResult()
     {
-      Zorkminds = 50,
+      Zorkminds = Invoice,
       Service = Service
     };
   }
