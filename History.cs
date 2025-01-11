@@ -80,53 +80,46 @@ class Fact
   {
     var pieces = txt.Split('#');
 
-    switch (pieces[0])
-    {      
-      case "LocationFact":
-        return new LocationFact()
-        {
-          Loc = Loc.FromStr(pieces[1]),
-          Desc = pieces[2]
-        };
-      case "HistoricalFigure":
-        return new HistoricalFigure(pieces[1])
-        {
-          Title = pieces[2]
-        };
-      case "RulerInfo":
-        return new RulerInfo()
-        {
-          Name = pieces[1],
-          Title = pieces[2],
-          Epithet = pieces[3],
-          Beloved = pieces[4] == "true"
-        };
-      case "Nation":
-        return new Nation()
-        {
-          Name = pieces[1],
-          Desc = pieces[2]
-        };
-      case "Invasion":
-        return new Invasion()
-        {
-          Invader = pieces[1],
-          Type = (InvaderType)Enum.Parse(typeof(InvaderType), pieces[2]),
-          Successful = pieces[3] == "true"
-        };
-      case "Disaster":
-        return new Disaster()
-        {
-          Desc = pieces[1],
-          Type = (DisasterType)Enum.Parse(typeof(DisasterType), pieces[2])
-        };
-      default:
-        return new SimpleFact()
-        {
-          Name = pieces[1],
-          Value = pieces[2]
-        };
-    }
+    return pieces[0] switch
+    {
+      "LocationFact" => new LocationFact()
+      {
+        Loc = Loc.FromStr(pieces[1]),
+        Desc = pieces[2]
+      },
+      "HistoricalFigure" => new HistoricalFigure(pieces[1])
+      {
+        Title = pieces[2]
+      },
+      "RulerInfo" => new RulerInfo()
+      {
+        Name = pieces[1],
+        Title = pieces[2],
+        Epithet = pieces[3],
+        Beloved = pieces[4] == "true"
+      },
+      "Nation" => new Nation()
+      {
+        Name = pieces[1],
+        Desc = pieces[2]
+      },
+      "Invasion" => new Invasion()
+      {
+        Invader = pieces[1],
+        Type = (InvaderType)Enum.Parse(typeof(InvaderType), pieces[2]),
+        Successful = pieces[3] == "true"
+      },
+      "Disaster" => new Disaster()
+      {
+        Desc = pieces[1],
+        Type = (DisasterType)Enum.Parse(typeof(DisasterType), pieces[2])
+      },
+      _ => new SimpleFact()
+      {
+        Name = pieces[1],
+        Value = pieces[2]
+      },
+    };
   }
 }
 

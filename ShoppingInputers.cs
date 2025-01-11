@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Metadata;
 using System.Text;
 
 namespace Yarl2;
@@ -547,13 +546,15 @@ class WitchInputer : Inputer
   GameState GS { get; set; }
   string Blurb { get; set; } = "";
   int Invoice { get; set; } = 0;
+  bool QuestGiven { get; set; }
 
   int DialogueState => Witch.Stats[Attribute.DialogueState].Curr;
   int PlayerMana => GS.Player.Stats.TryGetValue(Attribute.MagicPoints, out Stat? mana) ? mana.Max : 0;
 
   const int START_STATE = 0;
   const int BUY_SPELLS = 1;
-  const int LEARN_MAGIC = 2;
+  const int GIVE_QUEST = 3;
+  const int ON_QUEST = 4;
 
   readonly Dictionary<string, SpellInfo> Spells = new()
   {
@@ -569,6 +570,12 @@ class WitchInputer : Inputer
     GS = gs;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
+    if (GS.FactDb.FactCheck("KylieQuest") is not null)
+    {
+      QuestGiven = true;
+      Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+    }
+    
     SetDialogueText();
     WritePopup();
   }
@@ -605,15 +612,31 @@ class WitchInputer : Inputer
       
       return;
     }
+    else if (dialogueState == GIVE_QUEST && ch == 'a')
+    {
+      Done = true;
+      Success = false;
+      return;
+    }
     else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
+    {
+      Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
+    }
+    else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'b')
     {
       Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
     }
     else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
     {
-      Witch.Stats[Attribute.DialogueState].SetMax(LEARN_MAGIC);
+      Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
     }
     else if (dialogueState == START_STATE && ch == 'b')
+    {
+      Done = true;
+      Success = false;
+      return;
+    }
+    else if (dialogueState == ON_QUEST && ch == 'a')
     {
       Done = true;
       Success = false;
@@ -656,17 +679,37 @@ class WitchInputer : Inputer
       Blurb += "\nThere are more spells I can impart when you are more powerful!\n";
   }
 
+  void SetupQuest()
+  {
+    Blurb = "Hmm, you're going to need a meditation crystal to get into the correct mindset for learning magic. ";
+    Blurb += "I'm fresh out, but you should be able to find one in a cave nearby. Retrieve it, and we can get started on your lessons!";
+    Blurb += "\n\na) Farewell";
+
+    GS.FactDb.Add(new SimpleFact() { Name="KylieQuest", Value="begun" });
+  }
+
   void SetDialogueText()
-  {    
+  {
+    if (QuestGiven)
+    {
+      Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
+      Blurb += "You should be able to find it in that cave of to the (direction)!";
+      Blurb += "\n\na) Farewell";
+      
+      return;
+    }
+
     switch (DialogueState)
     {
-      case BUY_SPELLS:
-        
+      case BUY_SPELLS:        
         Blurb = "Hmm, here is what I can teach you.\n\n";
         SetSpellMenu();        
         break;
+      case GIVE_QUEST:
+        SetupQuest();
+        break;
       default:
-        
+        Options = [];
         if (PlayerMana > 0)
         {
           Blurb = GS.Rng.Next(5) switch
