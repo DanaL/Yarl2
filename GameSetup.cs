@@ -572,7 +572,7 @@ class CampaignCreator(UserInterface ui)
 
         // find the 'hidden valleys' that may be among the mountains
         var regionFinder = new RegionFinder(new WildernessPassable());
-        var regions = regionFinder.Find(wildernessMap, false, TileType.Unknown);
+        var regions = regionFinder.Find(wildernessMap, false, 0, TileType.Unknown);
 
         // I'm assuming the largest area is the one we want to place the dungeon entrance in
         int largest = 0;
@@ -757,6 +757,8 @@ class CampaignCreator(UserInterface ui)
         ObjDb = objDb,
         Turn = 1
       };
+
+      WitchQuest.GenerateDungeon(gameState);
 
       string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";

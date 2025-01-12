@@ -467,7 +467,7 @@ class DungeonMap(Random rng)
     }
 
     var regionFinder = new RegionFinder(new DungeonPassable());
-    var regions = regionFinder.Find(map, true, TileType.DungeonWall);
+    var regions = regionFinder.Find(map, true, 3, TileType.DungeonWall);
 
     if (regions.Count > 1)
     {
@@ -501,7 +501,7 @@ class DungeonMap(Random rng)
         if (connectors.Count == 0)
         {
           RepairIsolatedRegion(map, regions);
-          regions = regionFinder.Find(map, true, TileType.DungeonWall);
+          regions = regionFinder.Find(map, true, 3, TileType.DungeonWall);
           if (regions.Count == 1)
             return;
         }
@@ -740,8 +740,8 @@ class DungeonMap(Random rng)
       return tile.Type == riverTile ? 1 : DijkstraMap.CostWithDoors(tile);
     }
 
-     var regionFinder = new RegionFinder(new DungeonPassable());
-    var regions = regionFinder.Find(map, false, TileType.Unknown);
+    var regionFinder = new RegionFinder(new DungeonPassable());
+    var regions = regionFinder.Find(map, false, 0, TileType.Unknown);
     int largest = 0;
     int count = 0;
     foreach (var k in regions.Keys)
@@ -1023,7 +1023,7 @@ class DungeonMap(Random rng)
         ConnectRooms(map, rooms, _rng);
 
         var regionFinder = new RegionFinder(new DungeonPassable());
-        var regions = regionFinder.Find(map, true, TileType.DungeonWall);
+        var regions = regionFinder.Find(map, true, 3, TileType.DungeonWall);
         if (regions.Count == 2)
         {
           BruteForceJoinRegions(map, regions[0], regions[1], _rng);

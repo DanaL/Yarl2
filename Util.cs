@@ -841,7 +841,7 @@ class RegionFinder(IPassable pc)
     return sqs;
   }
 
-  public Dictionary<int, HashSet<(int, int)>> Find(Map map, bool fillSmallRegions, TileType fillTile)
+  public Dictionary<int, HashSet<(int, int)>> Find(Map map, bool fillSmallRegions, int smallThreshold, TileType fillTile)
   {
     int regionID = 0;
     Dictionary<int, HashSet<(int, int)>> regions = [];
@@ -860,7 +860,7 @@ class RegionFinder(IPassable pc)
     {
       foreach (int k in regions.Keys)
       {
-        if (regions[k].Count <= 3)
+        if (regions[k].Count <= smallThreshold)
         {
           foreach (var sq in regions[k])
             map.SetTile(sq, TileFactory.Get(fillTile));

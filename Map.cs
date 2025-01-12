@@ -717,12 +717,7 @@ class Map : ICloneable
     for (int r = 1; r < Height - 1; r++)
     {
       for (int c = 1; c < Width - 1; c++)
-      {
-        if (r == 24 && (c == 3 || c == 4))
-        {
-          Console.WriteLine();
-        }
-
+      {        
         if (!visited[r, c] && IsRoomFloorTile(TileAt(r, c).Type) && IsRoomSq(r, c))
         {
           // Found a new potential room tile (has 8 adjacent floors), flood fill from this point
@@ -786,97 +781,6 @@ class Map : ICloneable
     RoomFloodFill(r + 1, c, visited, floors);
     RoomFloodFill(r, c - 1, visited, floors);
     RoomFloodFill(r, c + 1, visited, floors);
-  }
-
-  public static Map TestMap()
-  {
-    var map = new Map(20, 20);
-
-    for (var col = 0; col < 20; col++)
-    {
-      map.Tiles[col] = TileFactory.Get(TileType.PermWall);
-      map.Tiles[19 * 20 + col] = TileFactory.Get(TileType.PermWall);
-    }
-
-    for (var row = 1; row < 19; row++)
-    {
-      map.Tiles[row * 20] = TileFactory.Get(TileType.PermWall);
-      map.Tiles[row * 20 + 19] = TileFactory.Get(TileType.PermWall);
-
-      for (var col = 1; col < 19; col++)
-      {
-        map.Tiles[row * 20 + col] = TileFactory.Get(TileType.DungeonFloor);
-      }
-    }
-
-    map.Tiles[3 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 9] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 10] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 11] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 12] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 13] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[3 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-
-    map.Tiles[5 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[6 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[7 * 20 + 14] = TileFactory.Get(TileType.ClosedDoor);
-    map.Tiles[8 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[9 * 20 + 14] = TileFactory.Get(TileType.DungeonWall);
-
-    map.Tiles[12 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[12 * 20 + 5] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[12 * 20 + 6] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[12 * 20 + 7] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[12 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-
-    map.Tiles[13 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[13 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[14 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[14 * 20 + 8] = TileFactory.Get(TileType.ClosedDoor);
-    map.Tiles[15 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[15 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[16 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[16 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-
-    map.Tiles[17 * 20 + 4] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[17 * 20 + 5] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[17 * 20 + 6] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[17 * 20 + 7] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[17 * 20 + 8] = TileFactory.Get(TileType.DungeonWall);
-
-    map.Tiles[14 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[15 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[16 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[17 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
-    map.Tiles[18 * 20 + 15] = TileFactory.Get(TileType.DungeonWall);
-
-    return map;
-  }
-
-  public void SetRandomTestMap(Random rng)
-  {
-    for (int col = 0; col < Width; col++)
-    {
-      Tiles[col] = TileFactory.Get(TileType.PermWall);
-      Tiles[(Height - 1) * Width + col] = TileFactory.Get(TileType.PermWall);
-    }
-
-    for (int row = 1; row < Height - 1; row++)
-    {
-      Tiles[row * Width] = TileFactory.Get(TileType.PermWall);
-      Tiles[row * Width + Width - 1] = TileFactory.Get(TileType.PermWall);
-      for (int col = 1; col < Width - 1; col++)
-      {
-        Tiles[row * Width + col] = TileFactory.Get(TileType.DungeonFloor);
-      }
-    }
-
-    for (int j = 0; j < 1000; j++)
-    {
-      int row = rng.Next(1, Height);
-      int col = rng.Next(1, Width);
-      Tiles[row * Width + col] = TileFactory.Get(TileType.DungeonWall);
-    }
   }
 
   public void SetTile(int row, int col, Tile tile) => Tiles[row * Width + col] = tile;
@@ -955,7 +859,7 @@ class CACave
     return next;
   }
 
-  static void Dump(bool[,] map, int height, int width)
+  public static void Dump(bool[,] map, int height, int width)
   {
     for (int r = 0; r < height; r++)
     {
