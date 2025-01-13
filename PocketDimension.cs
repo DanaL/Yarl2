@@ -13,7 +13,26 @@ namespace Yarl2;
 
 class PocketDimension
 {
-  public static (Loc, Dungeon) MonsterBelly(Actor monster)
+  // I am flat out making the assumuption that I am going to create so many many
+  // temporary levels that I underflow into the 'real' dungeon IDs.
+  //
+  // Real dungeonIds start at 0 (the wilderness) and work upwards. I think when
+  // I have all the content I want in Delve, it'll be a half dozen dungeons at 
+  // most? Maybe a dozen.
+  //
+  // Anyhow, for temporary levels (like a toad's belly), I'm going to start at 
+  // MaxInt and work downward until you find an unused ID.
+  static int TempDungeonId(GameState gs)
+  {
+    int dungeonId = int.MaxValue;
+
+    while (gs.Campaign.Dungeons.ContainsKey(dungeonId))
+      --dungeonId;
+
+    return dungeonId;
+  }
+
+  public static (Loc, Dungeon) MonsterBelly(Actor monster, GameState gs)
   {
     Glyph mg = monster.Glyph;
     Map map = new(3, 3);
@@ -27,9 +46,11 @@ class PocketDimension
     map.SetTile(2, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
     map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
 
-    Dungeon belly = new(int.MaxValue, $"You've been swallowed by {monster.Name.IndefArticle()}!");
+    int dungeonId = TempDungeonId(gs);
+    Dungeon belly = new(dungeonId, $"You've been swallowed by {monster.Name.IndefArticle()}!");
     belly.AddMap(map);
 
-    return (new Loc(int.MaxValue, 0, 1, 1), belly);
+
+    return (new Loc(dungeonId, 0, 1, 1), belly);
   }
 }

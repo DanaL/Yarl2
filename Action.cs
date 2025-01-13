@@ -113,7 +113,7 @@ class GulpAction(GameState gs, Actor actor, GulpTrait gt) : Action(gs, actor)
 
       // This is where the player will 'enter' the pocket dimension representing
       // the interior of the monster's belly.
-      var (entry, belly) = PocketDimension.MonsterBelly(Actor);
+      var (entry, belly) = PocketDimension.MonsterBelly(Actor, GameState);
       GameState.Campaign.AddDungeon(belly, belly.ID);
 
       Loc start = victim.Loc;
