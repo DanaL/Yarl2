@@ -878,7 +878,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
-    if (!Tutorial && !InWilderness && Rng.Next(60) == 0)
+    if (Rng.Next(60) == 0)
     {
       SpawnMonster();
     }
@@ -957,6 +957,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void SpawnMonster()
   {
+    if (LevelAppropriateMonster(CurrDungeonID, CurrLevel) is not Actor monster)
+      return;
+
     List<Loc> openLoc = [];
     Map map = CurrentMap;
     for (int r = 0; r < map.Height; r++)
@@ -988,12 +991,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       openLoc = outOfSight;
     
     Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
-    SpawnLevelAppropriateMonster(spawnPoint);
+    monster.Loc = spawnPoint;
+    ObjDb.Add(monster);
+    ObjDb.AddToLoc(spawnPoint, monster);
+    AddPerformer(monster);
   }
 
-  public void SpawnLevelAppropriateMonster(Loc loc)
+  public Actor? LevelAppropriateMonster(int dungeonId, int level)
   {
-    int monsterLevel = CurrLevel;
+    Dungeon dungeon = Campaign.Dungeons[dungeonId];
+
+    int monsterLevel = level;
     if (monsterLevel > 0)
     {
       double roll = Rng.NextDouble();
@@ -1001,22 +1009,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         monsterLevel += 2;
       else if (roll > 0.8)
         monsterLevel += 1;
-      if (monsterLevel > CurrentDungeon.LevelMaps.Count)
-        monsterLevel = CurrentDungeon.LevelMaps.Count;
+      if (monsterLevel > dungeon.LevelMaps.Count)
+        monsterLevel = dungeon.LevelMaps.Count;
     }
-    monsterLevel = int.Min(monsterLevel, Campaign.Dungeons[loc.DungeonID].MonsterDecks.Count - 1);
 
-    MonsterDeck deck = Campaign.Dungeons[loc.DungeonID].MonsterDecks[monsterLevel];
+    monsterLevel = int.Min(monsterLevel, dungeon.MonsterDecks.Count - 1);
+    if (monsterLevel == -1 || monsterLevel >= dungeon.MonsterDecks.Count)
+      return null;
+    
+    MonsterDeck deck = dungeon.MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
       deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
         
-    Actor monster = MonsterFactory.Get(m, ObjDb, Rng);
-    
-    monster.Loc = loc;
-    ObjDb.Add(monster);
-    ObjDb.AddToLoc(loc, monster);
-    AddPerformer(monster);
+    return MonsterFactory.Get(m, ObjDb, Rng);    
   }
 
   public string RandomMonster(int dungeonId)

@@ -257,11 +257,18 @@ class Traps
       {
         int i = gs.Rng.Next(opts.Count);
         Loc spawnLoc = opts[i];
-        gs.SpawnLevelAppropriateMonster(spawnLoc);
         opts.RemoveAt(i);
+        Actor? monster = gs.LevelAppropriateMonster(spawnLoc.DungeonID, spawnLoc.Level);
+        if (monster is not null)
+        {          
+          monster.Loc = spawnLoc;
+          gs.ObjDb.Add(monster);
+          gs.ObjDb.AddToLoc(spawnLoc, monster);
+          gs.AddPerformer(monster);
 
-        SqAnimation anim = new(gs, spawnLoc, Colours.LIGHT_BLUE, Colours.BLACK, '*');
-        gs.UIRef().RegisterAnimation(anim);
+          SqAnimation anim = new(gs, spawnLoc, Colours.LIGHT_BLUE, Colours.BLACK, '*');
+          gs.UIRef().RegisterAnimation(anim);
+        }
       }
 
       player.Stats[Attribute.Nerve].Change(-5);
