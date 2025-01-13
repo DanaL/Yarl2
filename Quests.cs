@@ -12,7 +12,91 @@
 namespace Yarl2;
 
 class WitchQuest
-{
+{  
+  public static Loc QuestEntrance(GameState gs)
+  {
+    static bool ProbablyOpen(Map map, int r, int c)
+    {
+      int blocked = 0;
+      foreach (var adj in Util.Adj8Sqs(r, c))
+      {
+        TileType tile = map.TileAt(adj.Item1, adj.Item2).Type;
+        switch (tile)
+        {
+          case TileType.Mountain:
+          case TileType.SnowPeak:
+          case TileType.DeepWater:
+          case TileType.Water:
+            blocked++;
+            break;
+        }
+      }
+
+      return blocked <= 5;
+    }
+
+    Map wilderness = gs.Campaign.Dungeons[0].LevelMaps[0];
+
+    // To trim things town, we'll look for mountain tiles that have at least 
+    // 3 non-mountain, non-water tiles, then pick a random one that is 
+    // reachable from the witches' hut.
+    List<Loc> opts = [];
+    for (int r = 2; r < wilderness.Height - 2; r++)
+    {
+      for (int c = 2; c < wilderness.Width - 2; c++)
+      {
+        if (wilderness.TileAt(r, c).Type == TileType.Mountain && ProbablyOpen(wilderness, r, c))
+        {
+          opts.Add(new Loc(0, 0, r, c));
+        }
+      }
+    }
+
+    // pick start location
+    List<Loc> witchSqs = [];
+    foreach (Loc loc in gs.Town.WitchesCottage)
+    {
+      Tile tile = wilderness.TileAt(loc.Row, loc.Col);
+      if (tile.Type == TileType.Grass || tile.IsTree())
+        witchSqs.Add(loc);
+    }
+    Loc witches = witchSqs[gs.Rng.Next(witchSqs.Count)];
+
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.Grass, 1);
+    costs.Add(TileType.Sand, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.RedTree, 1);
+    costs.Add(TileType.OrangeTree, 1);
+    costs.Add(TileType.YellowTree, 1);
+    costs.Add(TileType.Conifer, 1);
+    costs.Add(TileType.Water, 1);
+    costs.Add(TileType.Well, 1);
+    costs.Add(TileType.WoodWall, 1);
+    costs.Add(TileType.StoneWall, 1);
+    costs.Add(TileType.WoodFloor, 1);
+
+    while (opts.Count > 0)
+    {
+      int i = gs.Rng.Next(opts.Count);
+      Loc loc = opts[i];
+      opts.RemoveAt(i);
+
+      // Start from the proposed entrance, otherwise pathfinding will fail
+      // because mountains aren't open
+      var path = AStar.FindPath(wilderness, loc, witches, costs, true);
+      if (path.Count > 0)
+        return loc;
+    }
+
+    // I'm not sure what to do if there are no valid locations? Just pick
+    // some random tree or grass tile??
+
+    return opts[0];
+  }
+
   static void JoinCaves(Map map, Random rng)
   {
     RegionFinder regionFinder = new(new DungeonPassable());
@@ -22,7 +106,7 @@ class WitchQuest
       return;
 
     int sqs = 0;
-    int largest = -1;    
+    int largest = -1;
     foreach (int k in regions.Keys)
     {
       if (regions[k].Count > sqs)
@@ -36,18 +120,18 @@ class WitchQuest
       { TileType.DungeonWall, 2 },
       { TileType.DungeonFloor, 1 }
     };
-    List<int> caves = [..regions.Keys];
+    List<int> caves = [.. regions.Keys];
     caves.Remove(largest);
     HashSet<(int, int)> mainCave = regions[largest];
-    List<(int, int)> mainSqs = [..mainCave];
+    List<(int, int)> mainSqs = [.. mainCave];
     foreach (int i in caves)
     {
-      List<(int, int)> cave = [..regions[i]];
+      List<(int, int)> cave = [.. regions[i]];
       var startSq = cave[rng.Next(cave.Count)];
       Loc start = new(0, 0, startSq.Item1, startSq.Item2);
       var endSqr = mainSqs[rng.Next(mainSqs.Count)];
       Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
-      
+
       Stack<Loc> path = AStar.FindPath(map, start, end, travelCost, false);
       while (path.Count > 0)
       {

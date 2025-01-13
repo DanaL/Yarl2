@@ -759,6 +759,7 @@ class CampaignCreator(UserInterface ui)
       };
 
       WitchQuest.GenerateDungeon(gameState);
+      Console.WriteLine(WitchQuest.QuestEntrance(gameState));
 
       string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
