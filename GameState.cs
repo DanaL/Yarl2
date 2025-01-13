@@ -1004,9 +1004,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (monsterLevel > CurrentDungeon.LevelMaps.Count)
         monsterLevel = CurrentDungeon.LevelMaps.Count;
     }
-    monsterLevel = int.Min(monsterLevel, Campaign.MonsterDecks.Count - 1);
+    monsterLevel = int.Min(monsterLevel, Campaign.Dungeons[loc.DungeonID].MonsterDecks.Count - 1);
 
-    MonsterDeck deck = Campaign.MonsterDecks[monsterLevel];
+    MonsterDeck deck = Campaign.Dungeons[loc.DungeonID].MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
       deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
@@ -1026,8 +1026,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       // I don't yet have a monster deck for the wildneress
       return Rng.NextDouble() < 0.5 ? "wolf" : "dire bat";
     }
-    
-    MonsterDeck deck = Campaign.MonsterDecks[Rng.Next(Campaign.MonsterDecks.Count)];
+
+    Dungeon dungeon = Campaign.Dungeons[dungeonId];
+    MonsterDeck deck = dungeon.MonsterDecks[Rng.Next(dungeon.MonsterDecks.Count)];
     
     return deck.Monsters[Rng.Next(deck.Monsters.Count)];
   }

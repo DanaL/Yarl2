@@ -638,7 +638,7 @@ class CampaignCreator(UserInterface ui)
 
         SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
 
-        campaign.MonsterDecks = monsterDecks;
+        mainDungeon.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
 
         var portal = new Portal("You stand before a looming portal.")

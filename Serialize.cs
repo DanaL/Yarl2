@@ -232,9 +232,7 @@ class CampaignSaver
   public string RulerInfo { get; set; } = "";
   public VillainType Villain { get; set; }
   public string VillainName { get; set; } = "";
-  [JsonInclude]
-  public List<string> MonsterDecks { get; set; } = [];
-
+  
   public static CampaignSaver Shrink(Campaign c)
   {
     var town = new TownSave()
@@ -269,8 +267,7 @@ class CampaignSaver
       Nations = c.FactDb!.Nations.Select(n => n.ToString()).ToList(),  
       RulerInfo = c.FactDb!.Ruler.ToString(),
       Villain = c.FactDb!.Villain,
-      VillainName = c.FactDb!.VillainName,
-      MonsterDecks = c.MonsterDecks.Select(deck => deck.ToString()).ToList()
+      VillainName = c.FactDb!.VillainName      
     };
 
     foreach (var k in c.Dungeons.Keys)
@@ -327,9 +324,7 @@ class CampaignSaver
       factDb.Add(Fact.FromStr(n));
     }
     campaign.FactDb = factDb;
-
-    campaign.MonsterDecks = sc.MonsterDecks.Select(MonsterDeck.FromString).ToList();
-
+    
     return campaign;
   }
 }
@@ -343,6 +338,8 @@ internal class DungeonSaver
   public List<string> RememberedLocs;
   [JsonInclude]
   public Dictionary<int, MapSaver> LevelMaps;
+  [JsonInclude]
+  public List<string> MonsterDecks { get; set; } = [];
 
   public DungeonSaver()
   {
@@ -356,7 +353,8 @@ internal class DungeonSaver
     {
       ID = dungeon.ID,
       ArrivalMessage = dungeon.ArrivalMessage,
-      RememberedLocs = []
+      RememberedLocs = [],
+      MonsterDecks = dungeon.MonsterDecks.Select(deck => deck.ToString()).ToList()
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -389,6 +387,8 @@ internal class DungeonSaver
     {
       d.LevelMaps.Add(k, MapSaver.Inflate(sd.LevelMaps[k]));
     }
+
+    d.MonsterDecks = sd.MonsterDecks.Select(MonsterDeck.FromString).ToList();
 
     return d;
   }

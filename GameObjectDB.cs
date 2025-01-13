@@ -489,6 +489,7 @@ class Dungeon(int ID, string arrivalMessage)
   public Dictionary<Loc, Glyph> RememberedLocs = [];
   public Dictionary<int, Map> LevelMaps = [];
   public string ArrivalMessage { get; } = arrivalMessage;
+  public List<MonsterDeck> MonsterDecks { get; set; } = [];
 
   public void AddMap(Map map)
   {
@@ -504,8 +505,7 @@ class Campaign
   public Town? Town { get; set; }
   public FactDb? FactDb { get; set; }
   public Dictionary<int, Dungeon> Dungeons = [];
-  public List<MonsterDeck> MonsterDecks { get; set; } = [];
-
+  
   public void AddDungeon(Dungeon dungeon)
   {
     int id = Dungeons.Count == 0 ? 0 : Dungeons.Keys.Max() + 1;
