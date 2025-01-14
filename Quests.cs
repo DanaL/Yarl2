@@ -37,22 +37,6 @@ class WitchQuest
 
     Map wilderness = gs.Campaign.Dungeons[0].LevelMaps[0];
 
-    // To trim things town, we'll look for mountain tiles that have at least 
-    // 3 non-mountain, non-water tiles, then pick a random one that is 
-    // reachable from the witches' hut.
-    List<Loc> opts = [];
-    for (int r = 2; r < wilderness.Height - 2; r++)
-    {
-      for (int c = 2; c < wilderness.Width - 2; c++)
-      {
-        if (wilderness.TileAt(r, c).Type == TileType.Mountain && ProbablyOpen(wilderness, r, c))
-        {
-          opts.Add(new Loc(0, 0, r, c));
-        }
-      }
-    }
-
-    // pick start location
     List<Loc> witchSqs = [];
     foreach (Loc loc in gs.Town.WitchesCottage)
     {
@@ -61,6 +45,32 @@ class WitchQuest
         witchSqs.Add(loc);
     }
     Loc witches = witchSqs[gs.Rng.Next(witchSqs.Count)];
+
+    // For the entrance to the cave where the witches' quest goal, pick a 
+    // location that's not too far from their hut, with a preference for a
+    // mountain tile.
+
+    int northRow = int.Max(2, witches.Row - 50);
+    int southRow = int.Min(wilderness.Height, witches.Row + 50);
+    int westCol = int.Max(2, witches.Col - 50);
+    int eastCol = int.Min(wilderness.Width, witches.Col + 50);
+    List<Loc> mountains = [];
+    List<Loc> others = [];
+    for (int r = northRow; r < southRow - 2; r++)
+    {
+      for (int c = westCol; c < eastCol - 2; c++)
+      {
+        // We don't want to be too close either
+        if (Util.Distance(r, c, witches.Row, witches.Col) < 25)
+          continue;
+
+        Tile tile = wilderness.TileAt(r, c);
+        if (tile.Type == TileType.Mountain && ProbablyOpen(wilderness, r, c))
+          mountains.Add(new Loc(0, 0, r, c));      
+        else if (tile.Type == TileType.Grass || tile.IsTree())
+          others.Add(new Loc(0, 0, r, c));
+      }
+    }
 
     Dictionary<TileType, int> costs = [];
     costs.Add(TileType.Grass, 1);
@@ -78,11 +88,11 @@ class WitchQuest
     costs.Add(TileType.StoneWall, 1);
     costs.Add(TileType.WoodFloor, 1);
 
-    while (opts.Count > 0)
+    while (mountains.Count > 0)
     {
-      int i = gs.Rng.Next(opts.Count);
-      Loc loc = opts[i];
-      opts.RemoveAt(i);
+      int i = gs.Rng.Next(mountains.Count);
+      Loc loc = mountains[i];
+      mountains.RemoveAt(i);
 
       // Start from the proposed entrance, otherwise pathfinding will fail
       // because mountains aren't open
@@ -91,10 +101,14 @@ class WitchQuest
         return loc;
     }
 
-    // I'm not sure what to do if there are no valid locations? Just pick
-    // some random tree or grass tile??
+    if (others.Count > 0)
+    {
+      return others[gs.Rng.Next(others.Count)];
+    }
 
-    return opts[0];
+    // I'm not sure what to do if there are no valid locations? Is it
+    // even possible?
+    throw new Exception("I couldn't find a spot for the Witch Quest!");
   }
 
   static void JoinCaves(Map map, Random rng)
@@ -186,7 +200,7 @@ class WitchQuest
     map.SetTile(exitSq, exitStairs);
 
     dungeon.AddMap(map);
-    
+
     return (dungeon, new Loc(id, 0, exitSq.Item1, exitSq.Item2));
   }
 }
