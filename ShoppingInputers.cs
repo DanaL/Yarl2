@@ -686,6 +686,17 @@ class WitchInputer : Inputer
     Blurb += "\n\na) Farewell";
 
     GS.FactDb.Add(new SimpleFact() { Name="KylieQuest", Value="begun" });
+
+    Loc entrance = WitchQuest.QuestEntrance(GS);
+    Console.WriteLine(entrance);
+    var (dungeon, dungeonExit) = WitchQuest.GenerateDungeon(GS, entrance);
+
+    var stairs = new Downstairs("")
+    {
+      Destination = dungeonExit
+    };
+    GS.Campaign.Dungeons[0].LevelMaps[0].SetTile(entrance.Row, entrance.Col, stairs);
+    GS.Campaign.AddDungeon(dungeon, dungeon.ID);
   }
 
   void SetDialogueText()

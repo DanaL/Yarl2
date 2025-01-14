@@ -143,18 +143,14 @@ class WitchQuest
           break;
       }
     }
-
-    map.Dump();
   }
 
-  public static Dungeon GenerateDungeon(GameState gs)
+  public static (Dungeon, Loc) GenerateDungeon(GameState gs, Loc entrance)
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.");
 
     bool[,] cave = CACave.GetCave(50, 50, gs.Rng);
-    CACave.Dump(cave, 50, 50);
-
     Map map = new(52, 52);
     for (int j = 0; j < 52; j++)
     {
@@ -163,17 +159,34 @@ class WitchQuest
       map.SetTile(j, 0, TileFactory.Get(TileType.PermWall));
       map.SetTile(j, 51, TileFactory.Get(TileType.PermWall));
     }
+    List<(int, int)> floors = [];
     for (int r = 0; r < 50; r++)
     {
       for (int c = 0; c < 50; c++)
       {
-        TileType tile = cave[r, c] ? TileType.DungeonFloor : TileType.DungeonWall;
+        TileType tile = TileType.DungeonWall;
+        if (cave[r, c])
+        {
+          tile = TileType.DungeonFloor;
+          floors.Add((r + 1, c + 1));
+        }
         map.SetTile(r + 1, c + 1, TileFactory.Get(tile));
       }
     }
 
     JoinCaves(map, gs.Rng);
 
-    return dungeon;
+    int i = gs.Rng.Next(floors.Count);
+    var exitSq = floors[i];
+    floors.RemoveAt(i);
+    var exitStairs = new Upstairs("")
+    {
+      Destination = entrance
+    };
+    map.SetTile(exitSq, exitStairs);
+
+    dungeon.AddMap(map);
+    
+    return (dungeon, new Loc(id, 0, exitSq.Item1, exitSq.Item2));
   }
 }

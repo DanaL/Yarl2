@@ -809,6 +809,8 @@ class Map : ICloneable
           TileType.YellowTree => 'T',
           TileType.DeepWater => '~',
           TileType.WoodBridge => '=',
+          TileType.Upstairs => '<',
+          TileType.Downstairs => '>',
           _ => ' '
         };
         Console.Write(ch);
@@ -857,19 +859,6 @@ class CACave
     }
 
     return next;
-  }
-
-  public static void Dump(bool[,] map, int height, int width)
-  {
-    for (int r = 0; r < height; r++)
-    {
-      for (int c = 0; c < width; c++)
-      {
-        Console.Write(map[r, c] ? '.' : '#');
-      }
-      Console.WriteLine();
-    }
-    Console.WriteLine();
   }
 
   public static bool[,] GetCave(int height, int width, Random rng)
