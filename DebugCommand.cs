@@ -98,7 +98,8 @@ class DebugCommand(GameState gs)
     {"gauntlets of power", ItemNames.GAUNTLETS_OF_POWER },
     {"potion of heroism", ItemNames.POTION_HEROISM },
     {"wand of summoning", ItemNames.WAND_SUMMONING },
-    {"quarterstaff", ItemNames.QUARTERSTAFF }
+    {"quarterstaff", ItemNames.QUARTERSTAFF },
+    {"meditation crystal", ItemNames.MEDITATION_CRYSTAL }
   };
 
   public string DoCommand(string txt)

@@ -546,7 +546,6 @@ class WitchInputer : Inputer
   GameState GS { get; set; }
   string Blurb { get; set; } = "";
   int Invoice { get; set; } = 0;
-  bool QuestGiven { get; set; }
 
   int DialogueState => Witch.Stats[Attribute.DialogueState].Curr;
   int PlayerMana => GS.Player.Stats.TryGetValue(Attribute.MagicPoints, out Stat? mana) ? mana.Max : 0;
@@ -555,6 +554,22 @@ class WitchInputer : Inputer
   const int BUY_SPELLS = 1;
   const int GIVE_QUEST = 3;
   const int ON_QUEST = 4;
+  const int QUEST_ITEM_FOUND = 5;
+  const int QUEST_DONE = 6;
+
+  bool PlayerHasCrystal 
+  {  
+    get
+    {
+      foreach (Item item in GS.Player.Inventory.Items())
+      {
+        if (item.Name == "meditation crystal")
+          return true;        
+      }
+
+      return false;
+    } 
+  }
 
   readonly Dictionary<string, SpellInfo> Spells = new()
   {
@@ -570,10 +585,21 @@ class WitchInputer : Inputer
     GS = gs;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
-    if (GS.FactDb.FactCheck("KylieQuest") is not null)
+    if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
     {
-      QuestGiven = true;
-      Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+      
+      if (fact.Value == "begun" && !PlayerHasCrystal)
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+      }
+      else if (fact.Value == "begun" && PlayerHasCrystal)
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(QUEST_ITEM_FOUND);
+      }
+      else
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(QUEST_DONE);
+      }
     }
     
     SetDialogueText();
@@ -629,6 +655,12 @@ class WitchInputer : Inputer
     else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
     {
       Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
+    }
+    else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
+    {
+      Done = true;
+      Success = false;
+      return;
     }
     else if (dialogueState == START_STATE && ch == 'b')
     {
@@ -700,25 +732,11 @@ class WitchInputer : Inputer
     Blurb += $"I'm fresh out, but you should be able to find one in a cave to the [ICEBLUE {entranceDir}]. Retrieve it, and we can get started on the curriculum!";
     Blurb += "\n\na) Farewell";
 
-    QuestGiven = true;
+    Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
   }
 
   void SetDialogueText()
   {
-    if (QuestGiven)
-    {
-      Loc questLoc = Loc.Nowhere;
-      if (GS.FactDb.FactCheck("KylieQuestEntrance") is LocationFact fact)
-          questLoc = fact.Loc;
-
-      string entranceDir = Util.RelativeDir(Witch.Loc, questLoc);
-      Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
-      Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
-      Blurb += "\n\na) Farewell";
-      
-      return;
-    }
-
     switch (DialogueState)
     {
       case BUY_SPELLS:        
@@ -727,6 +745,24 @@ class WitchInputer : Inputer
         break;
       case GIVE_QUEST:
         SetupQuest();
+        break;
+      case QUEST_ITEM_FOUND:
+        Blurb = "Great! You found one! Are you ready to learn some magic?";
+        Blurb += "\n\na) Learn to cast spells";
+        Blurb += "\nb) Farewell";
+        break;
+      case ON_QUEST:
+        Loc questLoc = Loc.Nowhere;
+        if (GS.FactDb.FactCheck("KylieQuestEntrance") is LocationFact fact)
+          questLoc = fact.Loc;
+
+        string entranceDir = Util.RelativeDir(Witch.Loc, questLoc);
+        Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
+        Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
+        Blurb += "\n\na) Farewell";
+        break;
+      case QUEST_DONE:
+        Blurb = "How go your magical studies?";        
         break;
       default:
         Options = [];
@@ -749,7 +785,7 @@ class WitchInputer : Inputer
             Blurb = "Need to learn the basics huh? I used to TA Magic 101.";
           else
             Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumatury.";
-          Blurb += "\n\na) Study the basic of magic.";
+          Blurb += "\n\na) I want to learn to cast spells.";
           Blurb += "\nb) Farewell";
         }
         Options.Add('a', "");
