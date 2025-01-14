@@ -216,15 +216,11 @@ class WitchQuest
     Item focus = ItemFactory.Get(itemName, gs.ObjDb);
     gs.ObjDb.SetToLoc(loc, focus);
 
-    int numOfCrystals = gs.Rng.Next(1, 4);
-    for (int j = 0; j < numOfCrystals; j++)
-    {
-      sq = floors[gs.Rng.Next(floors.Count)];
-      loc = new Loc(id, 0, sq.Item1, sq.Item2);
-      Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
-      gs.ObjDb.SetToLoc(loc, crystal);
-    }
-
+    sq = floors[gs.Rng.Next(floors.Count)];
+    loc = new Loc(id, 0, sq.Item1, sq.Item2);
+    Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
+    gs.ObjDb.SetToLoc(loc, crystal);
+ 
     // Add a few monsters to the cave
     int numOfMonsters = gs.Rng.Next(3, 6);
     for (int j = 0; j < numOfMonsters; j++)

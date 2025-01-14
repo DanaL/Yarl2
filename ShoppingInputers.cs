@@ -699,6 +699,8 @@ class WitchInputer : Inputer
     Blurb = "Hmm, you're going to need a meditation crystal to get into the correct mindset for learning magic. ";
     Blurb += $"I'm fresh out, but you should be able to find one in a cave to the [ICEBLUE {entranceDir}]. Retrieve it, and we can get started on the curriculum!";
     Blurb += "\n\na) Farewell";
+
+    QuestGiven = true;
   }
 
   void SetDialogueText()
