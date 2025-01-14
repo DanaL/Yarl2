@@ -60,7 +60,7 @@ class DeckBuilder
   // The upper levels won't really follow theme, but we will choose a preference 
   // for goblin dominated or kobold dominated
 
-  static MonsterDeck ReadDeck(string deckname, int level, Random rng)
+  static MonsterDeck ReadDeck(string deckname, int level)
   {
     MonsterDeck deck = new();
    
@@ -94,14 +94,14 @@ class DeckBuilder
     // Sorry, I just think of dungeon levels as 1-indexed instead of 0-indexed
     for (int lvl = 1; lvl <= 5; lvl++)
     {
-      MonsterDeck deck = ReadDeck(earlyMainOccupant, lvl, rng);
+      MonsterDeck deck = ReadDeck(earlyMainOccupant, lvl);
       deck.Reshuffle(rng);
       decks.Add(deck);
     }
 
     for (int lvl = 6; lvl <= 10; lvl++)
     {
-      MonsterDeck deck = ReadDeck("midlevel", lvl, rng);
+      MonsterDeck deck = ReadDeck("midlevel", lvl);
 
       if (villain == VillainType.FieryDemon)
       {

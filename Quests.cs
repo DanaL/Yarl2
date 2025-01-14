@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Threading;
+
 namespace Yarl2;
 
 class WitchQuest
@@ -163,14 +165,15 @@ class WitchQuest
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.");
+    MonsterDeck deck = new();
+    deck.Monsters.AddRange(["skeleten", "skeleten", "zombie", "zobmie", "dire bat"]);
+    dungeon.MonsterDecks.Add(deck);
 
     int caveHeight = 25;
     int caveWidth = 40;
     bool[,] cave = CACave.GetCave(caveHeight, caveWidth, gs.Rng);
     Map map = new(caveWidth + 2, caveHeight + 2, TileType.PermWall);
   
-    map.Dump();
-
     List<(int, int)> floors = [];
     for (int r = 0; r < caveHeight; r++)
     {
@@ -203,7 +206,7 @@ class WitchQuest
     i = gs.Rng.Next(floors.Count);
     var sq = floors[i];
     floors.RemoveAt(i);
-    Loc loc = new Loc(id, 0, sq.Item1, sq.Item2);
+    Loc loc = new(id, 0, sq.Item1, sq.Item2);
     Item skull = ItemFactory.Get(ItemNames.SKULL, gs.ObjDb);
     gs.ObjDb.SetToLoc(loc, skull);
     ItemNames itemName = gs.Rng.NextDouble() < 0.8 ? ItemNames.DAGGER : ItemNames.SILVER_DAGGER;
@@ -221,6 +224,35 @@ class WitchQuest
       Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
       gs.ObjDb.SetToLoc(loc, crystal);
     }
+
+    // Add a few monsters to the cave
+    int numOfMonsters = gs.Rng.Next(3, 6);
+    for (int j = 0; j < numOfMonsters; j++)
+    {
+      string name = gs.Rng.Next(3) switch
+      {
+        0 => "skeleton",
+        1 => "zombie",
+        _ => "dire bat"
+      };
+      Actor m = MonsterFactory.Get(name, gs.ObjDb, gs.Rng);
+
+      sq = floors[gs.Rng.Next(floors.Count)];
+      loc = new Loc(id, 0, sq.Item1, sq.Item2);
+
+      gs.ObjDb.AddNewActor(m, loc);      
+    }
+
+    // Add in a 'boss' monster
+    string boss = gs.Rng.Next(3) switch
+    {
+      0 => "ghoul",
+      1 => "shadow",
+      _ => "phantom"
+    };
+    Actor b = MonsterFactory.Get(boss, gs.ObjDb, gs.Rng);
+    gs.ObjDb.AddNewActor(b, loc);
+
     return (dungeon, new Loc(id, 0, exitSq.Item1, exitSq.Item2));
   }
 }

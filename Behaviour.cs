@@ -31,13 +31,13 @@ class WallMoveStrategy : MoveStrategy
 class DumbMoveStrategy : MoveStrategy
 {
   public override Action MoveAction(Mob actor, GameState gs)
-  {
+  {    
     var map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
     List<(int, int, int)> adj = map.Neighbours(actor.Loc.Row, actor.Loc.Col);
     foreach (var sq in adj)
     {
       var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-      
+
       // We still check if the tile is passable because, say, a door might be
       // closed after the current dijkstra map is calculated and before it is
       // refreshed
@@ -46,7 +46,7 @@ class DumbMoveStrategy : MoveStrategy
         return new MoveAction(gs, actor, loc);
       }
     }
-
+    
     // If we can't find a move to do, pass
     return new PassAction();
   }
@@ -54,14 +54,12 @@ class DumbMoveStrategy : MoveStrategy
   public override Action RandomMoveAction(Mob actor, GameState gs)
   {
     List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
-                         .ToList();
-    if (opts.Count == 0)
-      return new PassAction();
-    else
-      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
-  }
+                          .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
+                          .ToList();
 
+    return opts.Count == 0 ? new PassAction() : new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
+  }
+   
   public override Action EscapeRoute(Mob actor, GameState gs)
   {
     var map = gs.GetDMap();
