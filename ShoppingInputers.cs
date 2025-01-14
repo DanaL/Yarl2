@@ -705,8 +705,13 @@ class WitchInputer : Inputer
   {
     if (QuestGiven)
     {
+      Loc questLoc = Loc.Nowhere;
+      if (GS.FactDb.FactCheck("KylieQuestEntrance") is LocationFact fact)
+          questLoc = fact.Loc;
+
+      string entranceDir = Util.RelativeDir(Witch.Loc, questLoc);
       Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
-      Blurb += "You should be able to find it in that cave of to the (direction)!";
+      Blurb += $"You should be able to find it in that cave of to the [ICEBLUE {entranceDir}]!";
       Blurb += "\n\na) Farewell";
       
       return;

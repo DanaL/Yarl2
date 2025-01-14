@@ -164,19 +164,17 @@ class WitchQuest
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.");
 
-    bool[,] cave = CACave.GetCave(50, 50, gs.Rng);
-    Map map = new(52, 52);
-    for (int j = 0; j < 52; j++)
-    {
-      map.SetTile(0, j, TileFactory.Get(TileType.PermWall));
-      map.SetTile(51, j, TileFactory.Get(TileType.PermWall));
-      map.SetTile(j, 0, TileFactory.Get(TileType.PermWall));
-      map.SetTile(j, 51, TileFactory.Get(TileType.PermWall));
-    }
+    int caveHeight = 25;
+    int caveWidth = 40;
+    bool[,] cave = CACave.GetCave(caveHeight, caveWidth, gs.Rng);
+    Map map = new(caveWidth + 2, caveHeight + 2, TileType.PermWall);
+  
+    map.Dump();
+
     List<(int, int)> floors = [];
-    for (int r = 0; r < 50; r++)
+    for (int r = 0; r < caveHeight; r++)
     {
-      for (int c = 0; c < 50; c++)
+      for (int c = 0; c < caveWidth; c++)
       {
         TileType tile = TileType.DungeonWall;
         if (cave[r, c])
