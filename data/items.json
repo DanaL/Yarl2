@@ -33,7 +33,7 @@
     "Traits": [
       "Damage#6#1#Blunt",
       "Polearm",
-      "TwoHanded"    
+      "TwoHanded"
     ]
   },
   {
@@ -994,7 +994,7 @@
     "Value": 10,
     "Glyph": "[,grey,darkgrey,black,black",
     "Traits": [
-      "Armour#Cloak#2#0"      
+      "Armour#Cloak#2#0"
     ]
   },
   {
@@ -1018,7 +1018,7 @@
     "Traits": [
       "UseSimple#heroism",
       "Consumable",
-      "Stackable"      
+      "Stackable"
     ]
   },
   {
@@ -1037,5 +1037,16 @@
     "Type": "Wand",
     "Value": 5,
     "Glyph": "/,lightbrown,brown,black,black"
+  },
+  {
+    "Name": "MEDITATION_CRYSTAL",
+    "DescriptiveName": "meditation crystal",
+    "Type": "Reagent",
+    "Value": 10,
+    "Glyph": "*,iceblue,lightblue,black,black",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#1"
+    ]
   }
 ]

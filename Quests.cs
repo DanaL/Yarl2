@@ -199,6 +199,28 @@ class WitchQuest
 
     dungeon.AddMap(map);
 
+    // Place some remains
+    i = gs.Rng.Next(floors.Count);
+    var sq = floors[i];
+    floors.RemoveAt(i);
+    Loc loc = new Loc(id, 0, sq.Item1, sq.Item2);
+    Item skull = ItemFactory.Get(ItemNames.SKULL, gs.ObjDb);
+    gs.ObjDb.SetToLoc(loc, skull);
+    ItemNames itemName = gs.Rng.NextDouble() < 0.8 ? ItemNames.DAGGER : ItemNames.SILVER_DAGGER;
+    Item dagger = ItemFactory.Get(itemName, gs.ObjDb);
+    gs.ObjDb.SetToLoc(loc, dagger);
+    itemName = gs.Rng.NextDouble() < 0.5 ? ItemNames.QUARTERSTAFF : ItemNames.GENERIC_WAND;
+    Item focus = ItemFactory.Get(itemName, gs.ObjDb);
+    gs.ObjDb.SetToLoc(loc, focus);
+
+    int numOfCrystals = gs.Rng.Next(1, 4);
+    for (int j = 0; j < numOfCrystals; j++)
+    {
+      sq = floors[gs.Rng.Next(floors.Count)];
+      loc = new Loc(id, 0, sq.Item1, sq.Item2);
+      Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
+      gs.ObjDb.SetToLoc(loc, crystal);
+    }
     return (dungeon, new Loc(id, 0, exitSq.Item1, exitSq.Item2));
   }
 }
