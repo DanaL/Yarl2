@@ -47,12 +47,17 @@ class ShopMenuInputer : Inputer
 
   protected double CalcMarkup()
   {
-    double markup = Shopkeeper.Stats[Attribute.Markup].Curr / 100.0;
+    double markup;
+    if (Shopkeeper.Stats.TryGetValue(Attribute.Markup, out var markUpStat))
+      markup = markUpStat.Curr / 100.0;      
+    else
+      markup = 1.0;
+    
     if (Gs.Player.HasTrait<LikeableTrait>())
       markup -= 0.33;
     if (Gs.Player.HasTrait<RepugnantTrait>())
       markup += 2.0;
-      
+
     return markup;
   }
 

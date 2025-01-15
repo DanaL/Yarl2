@@ -365,6 +365,21 @@ class Village
     kylie.SetBehaviour(new WitchBehaviour());
     objDb.Add(kylie);
     objDb.AddToLoc(kylie.Loc, kylie);
+
+    Mob sophie = new()
+    {
+      Name = "Sophie",
+      Appearance = "A witch wearing an earthy dress and spectacles.",
+      Glyph = new Glyph('@', Colours.SOPHIE_GREEN, Colours.GREEN, Colours.BLACK, Colours.BLACK)
+    };
+    sophie.Traits.Add(new VillagerTrait());
+    sophie.Traits.Add(new NamedTrait());
+    sophie.Stats[Attribute.InventoryRefresh] = new Stat(1);
+
+    sophie.Loc = sqs[rng.Next(sqs.Count)];
+    sophie.SetBehaviour(new AlchemistBehaviour());
+    objDb.Add(sophie);
+    objDb.AddToLoc(sophie.Loc, sophie);
   }
 
   static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)

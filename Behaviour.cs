@@ -614,7 +614,6 @@ class SmithBehaviour : IBehaviour
 
   string Blurb(Mob mob, GameState gs)
   {
-    double markup = mob.Stats[Attribute.Markup].Curr / 100.0;
     var sb = new StringBuilder();
     sb.Append('"');
 
@@ -648,6 +647,40 @@ class SmithBehaviour : IBehaviour
     }
 
     var acc = new SmithyInputer(actor, Blurb(actor, gs), gs);
+    var action = new ShoppingCompletedAction(gs, actor);
+
+    return (action, acc);
+  }
+}
+
+class AlchemistBehaviour : NPCBehaviour
+{
+  DateTime _lastBark = new(1900, 1, 1);
+
+  static string PickBark(GameState gs) => gs.Rng.Next(4) switch
+  {
+    0 => "Kylie, what do you want for dinner?",
+    1 => "I've been working on a new song.",
+    2 => "We could use some rain!",
+    _ => "I'd better get to the weeding."
+  };
+
+  public override Action CalcAction(Mob alchemist, GameState gameState)
+  {
+    Action action = new PassAction(gameState, alchemist);
+    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    {
+      action.Quip = PickBark(gameState);
+      _lastBark = DateTime.Now;
+    }
+
+    return action;
+  }
+
+  public override (Action, Inputer?) Chat(Mob actor, GameState gs)
+  {
+    string s = "Oh, I dabble in alchemy and potioncraft if you're interested. It pays the bills between gigs.";
+    var acc = new ShopMenuInputer(actor, s, gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
