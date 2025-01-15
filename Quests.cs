@@ -166,7 +166,7 @@ class WitchQuest
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
     Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.");
     MonsterDeck deck = new();
-    deck.Monsters.AddRange(["skeleten", "skeleten", "zombie", "zobmie", "dire bat"]);
+    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     dungeon.MonsterDecks.Add(deck);
 
     int caveHeight = 25;

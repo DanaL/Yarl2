@@ -596,10 +596,6 @@ class WitchInputer : Inputer
       {
         Witch.Stats[Attribute.DialogueState].SetMax(QUEST_ITEM_FOUND);
       }
-      else
-      {
-        Witch.Stats[Attribute.DialogueState].SetMax(QUEST_DONE);
-      }
     }
     
     SetDialogueText();
@@ -655,6 +651,13 @@ class WitchInputer : Inputer
     else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
     {
       Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
+    }
+    else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
+    {
+      Invoice = 0;
+      Done = true;
+      Success = true;
+      Service = "magic101";
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
     {
@@ -761,10 +764,7 @@ class WitchInputer : Inputer
         Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
         Blurb += "\n\na) Farewell";
         break;
-      case QUEST_DONE:
-        Blurb = "How go your magical studies?";        
-        break;
-      default:
+       default:
         Options = [];
         if (PlayerMana > 0)
         {
@@ -782,10 +782,10 @@ class WitchInputer : Inputer
         else
         {
           if (GS.Rng.NextDouble() < 0.5)
-            Blurb = "Need to learn the basics huh? I used to TA Magic 101.";
+            Blurb = "Need to learn the basics, huh? I used to TA Magic 101.";
           else
             Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumatury.";
-          Blurb += "\n\na) I want to learn to cast spells.";
+          Blurb += "\n\na) Learn how to cast spells.";
           Blurb += "\nb) Farewell";
         }
         Options.Add('a', "");

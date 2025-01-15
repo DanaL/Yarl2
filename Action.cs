@@ -918,9 +918,39 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
     result.Complete = true;
     result.EnergyCost = 1.0;
 
-    if (Service == "Magic101")
+    if (Service == "magic101")
     {
+      Stat mp = new(GameState!.Rng.NextDouble() < 0.5 ? 1 : 2);
+      GameState.Player.Stats.Add(Attribute.MagicPoints, mp);
+      GameState.Player.SpellsKnown.Add("arcane spark");
 
+      Item? crystal = null;
+      bool hasFocus = false;
+      foreach (Item item in GameState.Player.Inventory.Items())
+      {
+        if (item.Name == "meditation crystal")
+          crystal = item;
+        if (item.Type == ItemType.Wand || item.Name == "quarterstaff")
+          hasFocus = true;
+      }
+
+      if (crystal is not null)
+      {
+        GameState.Player.Inventory.RemoveByID(crystal.ID);
+        GameState.ObjDb.RemoveItemFromGame(Loc.Nowhere, crystal);
+      }
+      
+      if (GameState.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
+      {
+        fact.Value = "complete";
+      }
+      
+      string s = $"{Actor!.FullName.Capitalize()} gives you a crash course in elementary magic! After some light magic theory and learning to focus through the meditation crystal, you become able to tap into your inner arcane power!";
+      if (!hasFocus)
+        s += "\n\nOh! You'll also need a magical focus to cast spells through. Any wand will do, or a good quarterstaff!";
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      GameState.UIRef().AlertPlayer("You have mastered Magic 101.");
+      GameState.UIRef().AlertPlayer("You have learned to cast arcane spark.");
     }
     else
     {
