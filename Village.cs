@@ -383,20 +383,28 @@ class Village
 
     sophie.Inventory = new Inventory(sophie.ID, objDb);
     // Set initial inventory for Sophie
-    for (int j = 0; j < rng.Next(1, 4); j++)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), sophie.ID);
+    for (int j = 0; j < rng.Next(1, 4); j++)    
+      sophie.Inventory.Add(SophieItem(ItemNames.POTION_HEALING), sophie.ID);    
     for (int j = 0; j < rng.Next(1, 4); j++)
       sophie.Inventory.Add(ItemFactory.Get(ItemNames.MUSHROOM_STEW, objDb), sophie.ID);
     if (rng.NextDouble() < 0.33)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEROISM, objDb), sophie.ID);
+      sophie.Inventory.Add(SophieItem(ItemNames.POTION_HEROISM), sophie.ID);    
     if (rng.NextDouble() < 0.33)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), sophie.ID);
+      sophie.Inventory.Add(SophieItem(ItemNames.POTION_OF_LEVITATION), sophie.ID);    
     if (rng.NextDouble() < 0.33)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), sophie.ID);
+      sophie.Inventory.Add(SophieItem(ItemNames.POTION_MIND_READING), sophie.ID);    
     if (rng.NextDouble() < 0.33)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), sophie.ID);
+      sophie.Inventory.Add(SophieItem(ItemNames.ANTIDOTE), sophie.ID);
     if (rng.NextDouble() < 0.33)
-      sophie.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), sophie.ID);    
+      sophie.Inventory.Add(SophieItem(ItemNames.ANTIDOTE), sophie.ID);
+
+    Item SophieItem(ItemNames name)
+    {
+      Item item = ItemFactory.Get(name, objDb);
+      item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
+
+      return item;
+    }
   }
 
   static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
