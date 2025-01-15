@@ -715,27 +715,35 @@ class WitchInputer : Inputer
   }
 
   void SetupQuest()
-  {  
-    GS.FactDb.Add(new SimpleFact() { Name="KylieQuest", Value="begun" });
-
-    Loc entrance = WitchQuest.QuestEntrance(GS);
-    Console.WriteLine(entrance);
-    var (dungeon, dungeonExit) = WitchQuest.GenerateDungeon(GS, entrance);
-    GS.FactDb.Add(new LocationFact() { Desc="KylieQuestEntrance", Loc=entrance});
-
-    var stairs = new Downstairs("")
+  {
+    if (GS.Player.Stats[Attribute.Depth].Curr == 0)
     {
-      Destination = dungeonExit
-    };
-    GS.Campaign.Dungeons[0].LevelMaps[0].SetTile(entrance.Row, entrance.Col, stairs);
-    GS.Campaign.AddDungeon(dungeon, dungeon.ID);
+      Blurb = "I feel like you should see a little more of the world before you delve into the arcane arts. Magic benefits from the wisdom of experience.";
+      Blurb += "\n\na) Farewell";
+    }
+    else
+    {
+      GS.FactDb.Add(new SimpleFact() { Name = "KylieQuest", Value = "begun" });
 
-    string entranceDir = Util.RelativeDir(Witch.Loc, entrance);
-    Blurb = "Hmm, you're going to need a meditation crystal to get into the correct mindset for learning magic. ";
-    Blurb += $"I'm fresh out, but you should be able to find one in a cave to the [ICEBLUE {entranceDir}]. Retrieve it, and we can get started on the curriculum!";
-    Blurb += "\n\na) Farewell";
+      Loc entrance = WitchQuest.QuestEntrance(GS);
+      Console.WriteLine(entrance);
+      var (dungeon, dungeonExit) = WitchQuest.GenerateDungeon(GS, entrance);
+      GS.FactDb.Add(new LocationFact() { Desc = "KylieQuestEntrance", Loc = entrance });
 
-    Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+      var stairs = new Downstairs("")
+      {
+        Destination = dungeonExit
+      };
+      GS.Campaign.Dungeons[0].LevelMaps[0].SetTile(entrance.Row, entrance.Col, stairs);
+      GS.Campaign.AddDungeon(dungeon, dungeon.ID);
+
+      string entranceDir = Util.RelativeDir(Witch.Loc, entrance);
+      Blurb = "Hmm, you're going to need a meditation crystal to get into the correct mindset for learning magic. ";
+      Blurb += $"I'm fresh out, but you should be able to find one in a cave to the [ICEBLUE {entranceDir}]. Retrieve it, and we can get started on the curriculum!";
+      Blurb += "\n\na) Farewell";
+
+      Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+    }    
   }
 
   void SetDialogueText()
