@@ -52,6 +52,7 @@ class WitchQuest
     // location that's not too far from their hut, with a preference for a
     // mountain tile.
 
+
     int northRow = int.Max(2, witches.Row - 50);
     int southRow = int.Min(wilderness.Height, witches.Row + 50);
     int westCol = int.Max(2, witches.Col - 50);
@@ -64,6 +65,9 @@ class WitchQuest
       {
         // We don't want to be too close either
         if (Util.Distance(r, c, witches.Row, witches.Col) < 25)
+          continue;
+
+        if (Util.PtInSqr(r, c, gs.Town.Row, gs.Town.Col, gs.Town.Height, gs.Town.Width))
           continue;
 
         Tile tile = wilderness.TileAt(r, c);

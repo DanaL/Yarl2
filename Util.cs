@@ -297,6 +297,12 @@ class Util
 
   public static int Distance(Loc a, Loc b) => Distance(a.Row, a.Col, b.Row, b.Col);
 
+  public static bool PtInSqr(int row, int col, int topRow, int leftCol, int height, int width)
+  {
+    return row >= topRow && row < topRow + height &&
+           col >= leftCol && col < leftCol + width;
+  }
+
   public static double AngleBetweenLocs(Loc a, Loc b)
   {
     double dX = b.Col - a.Col;
