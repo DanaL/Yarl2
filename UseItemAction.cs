@@ -364,6 +364,12 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     TileType t = GameState.Rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Grass;
     GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(t));
 
+    if (GameState.Rng.NextDouble() < 0.2)
+    {
+      Item staff = ItemFactory.Get(ItemNames.QUARTERSTAFF, GameState.ObjDb);
+      GameState.ItemDropped(staff, loc);
+    }
+    
     if (tile.Type != TileType.Conifer && GameState.Rng.NextDouble() < 0.1)
     {
       Item apple = ItemFactory.Get(ItemNames.APPLE, GameState.ObjDb);
