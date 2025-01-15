@@ -380,6 +380,21 @@ class Village
     sophie.SetBehaviour(new AlchemistBehaviour());
     objDb.Add(sophie);
     objDb.AddToLoc(sophie.Loc, sophie);
+
+    sophie.Inventory = new Inventory(sophie.ID, objDb);
+    // Set initial inventory for Sophie
+    for (int j = 0; j < rng.Next(1, 4); j++)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEROISM, objDb), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), sophie.ID);    
   }
 
   static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)

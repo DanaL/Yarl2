@@ -539,7 +539,7 @@ class WitchBehaviour : NPCBehaviour
   public override Action CalcAction(Mob witch, GameState gameState)
   {
     Action action  = new PassAction(gameState, witch);
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    if ((DateTime.Now - _lastBark).TotalSeconds > 9)
     {
       action.Quip = PickBark(gameState);
       _lastBark = DateTime.Now;
@@ -668,7 +668,7 @@ class AlchemistBehaviour : NPCBehaviour
   public override Action CalcAction(Mob alchemist, GameState gameState)
   {
     Action action = new PassAction(gameState, alchemist);
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    if ((DateTime.Now - _lastBark).TotalSeconds > 11)
     {
       action.Quip = PickBark(gameState);
       _lastBark = DateTime.Now;
