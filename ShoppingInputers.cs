@@ -133,78 +133,85 @@ class ShopMenuInputer : Inputer
     sb.Append(blurb);
     sb.Append("\n\n");
 
-    List<char> keys = [.. MenuItems.Keys];
-    keys.Sort();
-
-    List<string> lines = [];
-    foreach (var key in keys)
+    if (MenuItems.Count == 0)
     {
-      var line = new StringBuilder();
-      line.Append(key);
-      line.Append(") ");
-      line.Append(MenuItems[key].Item.FullName);
-
-      if (MenuItems[key].StockCount > 1)
-      {
-        line.Append(" (");
-        line.Append(MenuItems[key].StockCount);
-        line.Append(')');
-      }
-
-      if (MenuItems[key].Price > 0)
-      {
-        int price = MenuItems[key].Price;
-        line.Append(" - [YELLOW $]");
-        line.Append(price);
-      }
-      
-      if (MenuItems[key].StockCount > 1)
-        line.Append(" apiece");
-      lines.Add(line.ToString());
-    }
-
-    int widest = lines.Select(l => l.Length).Max() + 2;
-    int l = 0;
-    foreach (var key in keys)
-    {
-      if (MenuItems[key].SelectedCount > 0)
-      {
-        sb.Append(lines[l].PadRight(widest + 2));
-        if (MenuItems[key].StockCount == 1)
-        {
-          sb.Append("[GREEN *]");
-        }
-        else
-        {
-          sb.Append("[GREEN ");
-          sb.Append(MenuItems[key].SelectedCount);
-          sb.Append(']');
-        }
-      }
-      else
-      {
-        sb.Append(lines[l]);
-      }
-      sb.Append('\n');
-      ++l;
-    }
-
-    int invoice = TotalInvoice();
-    if (invoice > 0)
-    {
-      sb.Append("\nTotal bill: ");
-      sb.Append("[YELLOW $]");
-      sb.Append(invoice);
-      sb.Append('\n');
-    }
-
-    if (invoice > Gs.Player.Inventory.Zorkmids)
-    {
-      sb.Append("\n[brightred You don't have enough money for all that!]");
+      sb.Append("I'm afraid my shelves are a bit bare at the moment.");
     }
     else
     {
-      sb.Append("\n(Enter to accept)");
+      List<char> keys = [.. MenuItems.Keys];
+      keys.Sort();
+
+      List<string> lines = [];
+      foreach (var key in keys)
+      {
+        var line = new StringBuilder();
+        line.Append(key);
+        line.Append(") ");
+        line.Append(MenuItems[key].Item.FullName);
+
+        if (MenuItems[key].StockCount > 1)
+        {
+          line.Append(" (");
+          line.Append(MenuItems[key].StockCount);
+          line.Append(')');
+        }
+
+        if (MenuItems[key].Price > 0)
+        {
+          int price = MenuItems[key].Price;
+          line.Append(" - [YELLOW $]");
+          line.Append(price);
+        }
+
+        if (MenuItems[key].StockCount > 1)
+          line.Append(" apiece");
+        lines.Add(line.ToString());
+      }
+
+      int widest = lines.Select(l => l.Length).Max() + 2;
+      int l = 0;
+      foreach (var key in keys)
+      {
+        if (MenuItems[key].SelectedCount > 0)
+        {
+          sb.Append(lines[l].PadRight(widest + 2));
+          if (MenuItems[key].StockCount == 1)
+          {
+            sb.Append("[GREEN *]");
+          }
+          else
+          {
+            sb.Append("[GREEN ");
+            sb.Append(MenuItems[key].SelectedCount);
+            sb.Append(']');
+          }
+        }
+        else
+        {
+          sb.Append(lines[l]);
+        }
+        sb.Append('\n');
+        ++l;
+      }
+
+      int invoice = TotalInvoice();
+      if (invoice > 0)
+      {
+        sb.Append("\nTotal bill: ");
+        sb.Append("[YELLOW $]");
+        sb.Append(invoice);
+        sb.Append('\n');
+      }
+
+      if (invoice > Gs.Player.Inventory.Zorkmids)
+      {
+        sb.Append("\n[brightred You don't have enough money for all that!]");
+      }
+      else
+      {
+        sb.Append("\n(Enter to accept)");
+      }
     }
 
     return sb.ToString();
