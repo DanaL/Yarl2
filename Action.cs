@@ -2069,6 +2069,31 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
   }
 }
 
+class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
+{
+  int Amount { get; set; } = amount;
+  
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+
+    
+    if (Actor!.Stats.TryGetValue(Attribute.Nerve, out Stat? nerve))
+    {
+      GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} more calm.");
+      SqAnimation anim = new(GameState!, Actor.Loc, Colours.WHITE, Colours.SOPHIE_GREEN, '\u2665');
+      GameState!.UIRef().RegisterAnimation(anim);
+
+      nerve.Change(Amount);
+    }
+    
+    result.Complete = true;
+    result.EnergyCost = 1.0;
+
+    return result;
+  }
+}
+
 class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   int _amount;

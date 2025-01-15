@@ -1048,5 +1048,18 @@
       "Stackable",
       "LightSource#owner#1"
     ]
+  },
+  {
+    "Name": "MUSHROOM_STEW",
+    "DescriptiveName": "mushroom stew",
+    "Type": "Food",
+    "Value": 5,
+    "Glyph": ",,lightbrown,brown,black,black",
+    "Traits": [
+      "Edible",
+      "Consumable",
+      "Stackable",
+      "UseSimple#soothe"
+    ]
   }
 ]

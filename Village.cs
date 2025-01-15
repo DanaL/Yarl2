@@ -385,6 +385,8 @@ class Village
     // Set initial inventory for Sophie
     for (int j = 0; j < rng.Next(1, 4); j++)
       sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), sophie.ID);
+    for (int j = 0; j < rng.Next(1, 4); j++)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.MUSHROOM_STEW, objDb), sophie.ID);
     if (rng.NextDouble() < 0.33)
       sophie.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEROISM, objDb), sophie.ID);
     if (rng.NextDouble() < 0.33)

@@ -268,3 +268,6 @@ Cheap, mass-produced wand that's at least good enough to use as a spellcasting f
 #
 quarterstaff
 A stout wood staff. Classic style choice for wizards.
+#
+mushroom stew
+A delicious and hearty stew. Soothing comfort food that might help jangled nerves.
