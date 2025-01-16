@@ -221,6 +221,11 @@ class Village
       for (int j = 0; j < rng.Next(1, 4); j++)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb), grocer.ID);
     }
+    if (rng.NextDouble() < 0.25)
+    {
+      for (int j = 0; j < rng.Next(1, 4); j++)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
+    }
 
     return grocer;
   }
@@ -424,7 +429,7 @@ class Village
     int newStock = rng.Next(1, 4);
     for (int j = 0; j < newStock; j++)
     {
-      int roll = rng.Next(13);
+      int roll = rng.Next(14);
       if (roll < 3)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
       else if (roll < 5)
@@ -443,6 +448,8 @@ class Village
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), grocer.ID);
       else if (roll == 12)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), grocer.ID);
+      else if (roll == 13)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
     }
 
     // Grocer always keeps a few torches in stock

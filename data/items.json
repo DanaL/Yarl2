@@ -915,6 +915,20 @@
     ]
   },
   {
+    "Name": "SCROLL_TREASURE_DETECTION",
+    "DescriptiveName": "scroll of treasure detection",
+    "Type": "Scroll",
+    "Value": 15,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#detecttreasure",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
     "Name": "FLASK_OF_BOOZE",
     "DescriptiveName": "flask of booze",
     "Type": "Potion",

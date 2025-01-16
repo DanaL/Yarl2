@@ -1489,6 +1489,45 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
   }
 }
 
+class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
+{
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+
+    if (Actor is Player player)
+    {
+      Loc playerLoc = GameState!.Player.Loc;
+      result.Complete = true;
+      result.EnergyCost = 1.0;
+
+      int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
+      int topScreenCol = playerLoc.Col - UserInterface.ViewWidth / 2;
+      int itemsFound = 0;
+      for (int r = 1; r < GameState!.CurrentMap.Height - 1; r++)
+      {
+        for (int c = 1; c < GameState.CurrentMap.Width - 1; c++)
+        {
+          Loc loc = GameState.Player.Loc with { Row = r, Col = c };
+          Glyph glyph = GameState.ObjDb.ItemGlyphAt(loc);
+          if (glyph != GameObjectDB.EMPTY)
+          {
+            ++itemsFound;
+            GameState.CurrentDungeon.RememberedLocs.Add(loc, glyph);
+          }
+        }
+      }
+      
+      if (itemsFound > 0)
+        GameState.UIRef().AlertPlayer("Your nose twitches and you feel greedy!");
+      else
+        GameState.UIRef().AlertPlayer("You feel a sense of disappointment");
+    }
+
+    return result;
+  }
+}
+
 class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   // Essentially we want to flood fill out and mark all reachable squares as 

@@ -52,6 +52,7 @@ class DebugCommand(GameState gs)
     {"scroll of magic mapping", ItemNames.SCROLL_MAGIC_MAP},
     {"scroll of protection", ItemNames.SCROLL_PROTECTION},
     {"scroll of recall", ItemNames.SCROLL_RECALL},
+    {"scroll of treasure detection", ItemNames.SCROLL_TREASURE_DETECTION},
     {"wand of magic missiles", ItemNames.WAND_MAGIC_MISSILES},
     {"wand of swap", ItemNames.WAND_SWAP},
     {"wand of heal monster", ItemNames.WAND_HEAL_MONSTER},

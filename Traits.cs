@@ -1475,6 +1475,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1), null, true, ""),
     "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), null, true, ""),
     "magicmap" => new UseResult(new MagicMapAction(gs, user), null, true, ""),
+    "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user), null, true, ""),
     "resistfire" => new UseResult(new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null, true, ""),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 
