@@ -271,3 +271,9 @@ A stout wood staff. Classic style choice for wizards.
 #
 mushroom stew
 A delicious and hearty stew. Soothing comfort food that might help jangled nerves.
+#
+revealedsummonstrap|summoning trap
+A magic trap that will summon monsters.
+#
+reveealedbridgecollapseTrap|bridge trigger
+A trigger that will cause a nearby bridge to collapse.

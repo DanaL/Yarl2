@@ -24,8 +24,8 @@ enum TileType
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
-  BridgeTrigger, HiddenBridgeCollapseTrap, Shortcut, ShortcutDown,
-  BusinessSign, FakeStairs, HiddenSummonsTrap,
+  BridgeTrigger, HiddenBridgeCollapseTrap, ReveealedBridgeCollapseTrap, Shortcut, 
+  ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall
 }
 
@@ -94,6 +94,9 @@ abstract class Tile(TileType type) : IZLevel
     TileType.DartTrap => true,
     TileType.Pit => true,
     TileType.WaterTrap => true,
+    TileType.RevealedSummonsTrap => true,
+    TileType.ReveealedBridgeCollapseTrap => true,
+    TileType.MagicMouth => true,    
     _ => false
   };
 
@@ -113,7 +116,9 @@ abstract class Tile(TileType type) : IZLevel
     TileType.MagicMouth => true,
     TileType.HiddenMagicMouth => true,
     TileType.HiddenBridgeCollapseTrap => true,
+    TileType.ReveealedBridgeCollapseTrap => true,
     TileType.HiddenSummonsTrap => true,
+    TileType.RevealedSummonsTrap => true,
     _ => false
   };
 
@@ -192,6 +197,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.HFence => "fence",
     TileType.VFence => "fence",
     TileType.CornerFence => "fence",
+    TileType.RevealedSummonsTrap => "monster summon trap",
+    TileType.ReveealedBridgeCollapseTrap => "bridge collapse trigger",
     _ => "unknown"
   };
 
@@ -426,6 +433,8 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
 
   public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
+  public void Reveal() => Type = TileType.ReveealedBridgeCollapseTrap;
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (!Triggered)
@@ -572,6 +581,7 @@ class TileFactory
   private static readonly Tile DisturbedGrave = new BasicTile(TileType.DisturbedGrave, true, false, true);
   private static readonly Tile FakeStairs = new BasicTile(TileType.FakeStairs, true, false, true);
   private static readonly Tile HiddenSummonsTrap = new BasicTile(TileType.HiddenSummonsTrap, true, false, true);
+  private static readonly Tile RevealedSummonsTrap = new BasicTile(TileType.RevealedSummonsTrap, true, false, true);
   private static readonly Tile HFence = new BasicTile(TileType.HFence, false, false, true);
   private static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
   private static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
@@ -632,6 +642,7 @@ class TileFactory
     TileType.DisturbedGrave => DisturbedGrave,
     TileType.FakeStairs => FakeStairs,
     TileType.HiddenSummonsTrap => HiddenSummonsTrap,
+    TileType.RevealedSummonsTrap => RevealedSummonsTrap,
     TileType.HFence => HFence,
     TileType.VFence => VFence,
     TileType.CornerFence => CornerFence,

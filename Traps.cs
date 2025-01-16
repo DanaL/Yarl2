@@ -22,8 +22,9 @@ class Traps
       return;
 
     if (tile.Type == TileType.HiddenTrapDoor && !flying)
-    {      
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TrapDoor));
+    {
+      RevealTrap(tile, gs, loc);
+      
       loc = gs.FallIntoTrapdoor(actor, loc);
       ui.AlertPlayer($"A trap door opens up underneath {actor.FullName}!");
       
@@ -62,9 +63,9 @@ class Traps
         player.Stats[Attribute.Nerve].Change(-10);
         player.Running = false;
       }
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
 
-      
+      RevealTrap(tile, gs, loc);
+            
       ActionResult result = new();
       int total = 0;
       int damageDice = 1 + actor.Loc.Level / 5;
@@ -88,7 +89,8 @@ class Traps
       // Hmm I don't think I'll charge stress for teleport traps
       if (actor is Player player)
         player.Running = false;
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.TeleportTrap));
+
+      RevealTrap(tile, gs, loc);
 
       // Find candidate locations to teleport to
       List<Loc> candidates = [];
@@ -122,7 +124,9 @@ class Traps
         player.Running = false;
         player.Stats[Attribute.Nerve].Change(-10);
       }
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DartTrap));
+
+      RevealTrap(tile, gs, loc);
+
       if (trapSqVisible)
         gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!");
 
@@ -157,8 +161,8 @@ class Traps
       TriggerJetTrap((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
-    {      
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.WaterTrap));
+    {
+      RevealTrap(tile, gs, loc);
 
       string s;
       if (actor is Player player) 
@@ -185,8 +189,8 @@ class Traps
         player.Stats[Attribute.Nerve].Change(-5);
         player.Running = false;
       }
-      gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.MagicMouth));
-      
+      RevealTrap(tile, gs, loc);
+
       List<string> msgs = [];
       if (gs.LastPlayerFoV.Contains(loc))
       {
@@ -237,7 +241,7 @@ class Traps
       foreach (string s in msgs)
         gs.UIRef().AlertPlayer(s);
     }
-    else if (tile.Type == TileType.HiddenSummonsTrap && actor is Player player)
+    else if ((tile.Type == TileType.HiddenSummonsTrap || tile.Type == TileType.RevealedSummonsTrap) && actor is Player player)
     {
       // I'm only going to have the player set off summons trap...
       // because magic?
@@ -283,6 +287,53 @@ class Traps
       gs.UIRef().AlertPlayer(s);
     }
   }
+
+  public static void RevealTrap(Tile tile, GameState gs, Loc loc)
+  {
+    TileType revealedType = RevealedTrapType(tile.Type);
+    switch (tile.Type)
+    {
+      case TileType.HiddenPit:
+      case TileType.HiddenDartTrap:
+      case TileType.HiddenTrapDoor:
+      case TileType.HiddenTeleportTrap:
+      case TileType.HiddenSummonsTrap:
+      case TileType.HiddenWaterTrap:
+      case TileType.HiddenMagicMouth:
+        gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(revealedType));
+        break;
+      case TileType.JetTrigger:
+        JetTrigger trigger = (JetTrigger)tile;
+        trigger.Visible = true;
+        break;
+      case TileType.HiddenBridgeCollapseTrap:
+        BridgeCollapseTrap bridgeCollapse = (BridgeCollapseTrap)tile;
+        bridgeCollapse.Reveal();
+        break;
+    }
+  }
+
+  static TileType RevealedTrapType(TileType trap) => trap switch
+  {
+    TileType.TrapDoor => TileType.TrapDoor,
+    TileType.HiddenTrapDoor => TileType.TrapDoor,
+    TileType.HiddenTeleportTrap => TileType.TeleportTrap,
+    TileType.TeleportTrap => TileType.TeleportTrap,
+    TileType.HiddenDartTrap => TileType.DartTrap,
+    TileType.DartTrap => TileType.DartTrap,
+    TileType.JetTrigger => TileType.JetTrigger,
+    TileType.HiddenPit => TileType.Pit,
+    TileType.Pit => TileType.Pit,
+    TileType.WaterTrap => TileType.WaterTrap,
+    TileType.HiddenWaterTrap => TileType.WaterTrap,
+    TileType.MagicMouth => TileType.MagicMouth,
+    TileType.HiddenMagicMouth => TileType.MagicMouth,
+    TileType.HiddenSummonsTrap => TileType.RevealedSummonsTrap,
+    TileType.RevealedSummonsTrap => TileType.RevealedSummonsTrap,
+    TileType.HiddenBridgeCollapseTrap => TileType.ReveealedBridgeCollapseTrap,
+    TileType.ReveealedBridgeCollapseTrap => TileType.ReveealedBridgeCollapseTrap,
+    _ => throw new Exception("RevealedTrapType() shouldn't be called on a non-trap square")
+  };
 
   static void TriggerJetTrap(JetTrigger trigger, GameState gs, Actor actor)
   {

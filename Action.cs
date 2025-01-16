@@ -1509,11 +1509,13 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
         for (int c = 1; c < GameState.CurrentMap.Width - 1; c++)
         {
           Loc loc = GameState.Player.Loc with { Row = r, Col = c };
-          if (GameState.TileAt(loc).IsTrap())
+          Tile tile = GameState.TileAt(loc);
+          if (tile.IsTrap())
           {
             ++trapsFound;
             Glyph g = new Glyph('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
-            GameState.CurrentDungeon.RememberedLocs.Add(loc, g);
+            GameState.CurrentDungeon.RememberedLocs[loc] = g;
+            Traps.RevealTrap(tile, GameState, loc);
           }
         }
       }
