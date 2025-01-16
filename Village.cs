@@ -360,7 +360,27 @@ class Village
 
   static void GenerateWitches(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
   {
-     Mob kylie = new()
+    List<Loc> startLocs = [];
+    foreach (Loc loc in town.WitchesCottage)
+    {
+      Tile tile = map.TileAt(loc.Row, loc.Col);
+      if (tile.IsTree())
+        startLocs.Add(loc);
+      else
+      {
+        switch (tile.Type)
+        {
+          case TileType.Grass:
+          case TileType.Dirt:
+          case TileType.Sand:
+          case TileType.WoodFloor:
+            startLocs.Add(loc);
+            break;
+        }
+      }
+    }
+
+    Mob kylie = new()
     {
       Name = "Kylie",
       Appearance = "The local, stylish witch.",
@@ -369,9 +389,10 @@ class Village
     kylie.Stats[Attribute.DialogueState] = new Stat(0);
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
-    
-    var sqs = town.WitchesCottage.ToList();
-    kylie.Loc = sqs[rng.Next(sqs.Count)];
+
+    int i = rng.Next(startLocs.Count);
+    kylie.Loc = startLocs[i];
+    startLocs.RemoveAt(i);
     kylie.SetBehaviour(new WitchBehaviour());
     objDb.Add(kylie);
     objDb.AddToLoc(kylie.Loc, kylie);
@@ -379,14 +400,14 @@ class Village
     Mob sophie = new()
     {
       Name = "Sophie",
-      Appearance = "A witch wearing an earthy dress and spectacles.",
+      Appearance = "witch wearing an earthy dress and spectacles",
       Glyph = new Glyph('@', Colours.SOPHIE_GREEN, Colours.GREEN, Colours.BLACK, Colours.BLACK)
     };
     sophie.Traits.Add(new VillagerTrait());
     sophie.Traits.Add(new NamedTrait());
     sophie.Stats[Attribute.InventoryRefresh] = new Stat(1);
 
-    sophie.Loc = sqs[rng.Next(sqs.Count)];
+    sophie.Loc = startLocs[rng.Next(startLocs.Count)];
     sophie.SetBehaviour(new AlchemistBehaviour());
     objDb.Add(sophie);
     objDb.AddToLoc(sophie.Loc, sophie);
