@@ -29,7 +29,7 @@ class Treasure
       ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
       ItemNames.LOCK_PICK, ItemNames.SCROLL_IDENTIFY, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES,
-      ItemNames.SCROLL_TREASURE_DETECTION
+      ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION
   ]; 
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
@@ -45,7 +45,8 @@ class Treasure
       ItemNames.GUIDE_AXES, ItemNames.GUIDE_STABBY, ItemNames.GUIDE_SWORDS, ItemNames.BEETLE_CARAPACE,
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
-      ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION
+      ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
+      ItemNames.SCROLL_TRAP_DETECTION
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)

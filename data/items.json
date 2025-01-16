@@ -929,6 +929,20 @@
     ]
   },
   {
+    "Name": "SCROLL_TRAP_DETECTION",
+    "DescriptiveName": "scroll of trap detection",
+    "Type": "Scroll",
+    "Value": 10,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#detecttraps",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
     "Name": "FLASK_OF_BOOZE",
     "DescriptiveName": "flask of booze",
     "Type": "Potion",

@@ -226,6 +226,11 @@ class Village
       for (int j = 0; j < rng.Next(1, 4); j++)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
     }
+    if (rng.NextDouble() < 0.25)
+    {
+      for (int j = 0; j < rng.Next(1, 4); j++)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TRAP_DETECTION, objDb), grocer.ID);
+    }
 
     return grocer;
   }
@@ -429,7 +434,7 @@ class Village
     int newStock = rng.Next(1, 4);
     for (int j = 0; j < newStock; j++)
     {
-      int roll = rng.Next(14);
+      int roll = rng.Next(15);
       if (roll < 3)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
       else if (roll < 5)
@@ -449,6 +454,8 @@ class Village
       else if (roll == 12)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), grocer.ID);
       else if (roll == 13)
+        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
+      else if (roll == 14)
         grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
     }
 
