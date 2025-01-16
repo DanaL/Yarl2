@@ -1516,6 +1516,12 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
             Glyph g = new Glyph('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
             GameState.CurrentDungeon.RememberedLocs[loc] = g;
             Traps.RevealTrap(tile, GameState, loc);
+
+            if (Util.PtInSqr(r, c, topScreenRow, topScreenCol, UserInterface.ViewHeight, UserInterface.ViewWidth))
+            {
+              SqAnimation anim = new(GameState, loc, Colours.WHITE, Colours.LIGHT_PURPLE, '^') { IgnoreFoV = true };
+              GameState.UIRef().RegisterAnimation(anim);
+            }
           }
         }
       }
@@ -1554,7 +1560,13 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
           if (glyph != GameObjectDB.EMPTY)
           {
             ++itemsFound;
-            GameState.CurrentDungeon.RememberedLocs.Add(loc, glyph);
+            GameState.CurrentDungeon.RememberedLocs[loc] = glyph;
+
+            if (Util.PtInSqr(r, c, topScreenRow, topScreenCol, UserInterface.ViewHeight, UserInterface.ViewWidth))
+            {
+              SqAnimation anim = new(GameState, loc, Colours.WHITE, Colours.LIGHT_PURPLE, glyph.Ch) { IgnoreFoV = true };
+              GameState.UIRef().RegisterAnimation(anim);
+            }
           }
         }
       }

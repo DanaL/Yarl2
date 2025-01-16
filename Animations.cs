@@ -339,6 +339,7 @@ class BarkAnimation : Animation
 // preceded this
 class SqAnimation : Animation
 {
+  public bool IgnoreFoV { get; set; } = false;
   readonly GameState _gs;
   Loc _loc;
   Colour _fgColour;
@@ -360,7 +361,7 @@ class SqAnimation : Animation
     var ui = _gs.UIRef();
     var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-    if (!_gs.LastPlayerFoV.Contains(_loc))
+    if (!IgnoreFoV && !_gs.LastPlayerFoV.Contains(_loc))
       return;
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
