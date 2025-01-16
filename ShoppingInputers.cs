@@ -804,7 +804,7 @@ class WitchInputer : Inputer
           if (GS.Rng.NextDouble() < 0.5)
             Blurb = "Need to learn the basics, huh? I used to TA Magic 101.";
           else
-            Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumatury.";
+            Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumaturgy.";
           Blurb += "\n\na) Learn how to cast spells.";
           Blurb += "\nb) Farewell";
         }
