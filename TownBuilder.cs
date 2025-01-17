@@ -35,6 +35,7 @@ class Town
   public HashSet<int> TakenHomes { get; set; } = [];
   public HashSet<Loc> TownSquare { get; set; } = [];
   public HashSet<Loc> WitchesCottage { get; set; } = [];
+  public HashSet<Loc> WitchesGarden { get; set; }= [];
 
   public int Row { get; set; }
   public int Col { get; set; }
@@ -723,7 +724,7 @@ class TownBuilder
     return blocked;
   }
 
-  void DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, Random rng)
+  bool DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, Random rng)
   {
     DrawBuilding(map, r, c, townCentreRow, townCentreCol, template, BuildingType.WitchesCottage, rng);
 
@@ -758,6 +759,8 @@ class TownBuilder
     int gr = rng.Next(15) + r;
     int gc = (gr > r + 11 ? rng.Next(15) : rng.Next(12, 15)) + c;
 
+    Loc gardenSq = new(0, 0, gr + 1, gc + 1);
+
     // draw the garden, which is just dirt but maybe I'll eventually
     // have crops/plants
     int gate = rng.Next(10);
@@ -770,21 +773,27 @@ class TownBuilder
 
     if (gate != 2)
       map.SetTile(gr + 1, gc, TileFactory.Get(TileType.VFence));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 1, gc + 1));
     map.SetTile(gr + 1, gc + 1, TileFactory.Get(TileType.Dirt));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 1));
     map.SetTile(gr + 1, gc + 2, TileFactory.Get(TileType.Dirt));
     if (gate != 3)
       map.SetTile(gr + 1, gc + 3, TileFactory.Get(TileType.VFence));
 
     if (gate != 4)
       map.SetTile(gr + 2, gc, TileFactory.Get(TileType.VFence));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 1));
     map.SetTile(gr + 2, gc + 1, TileFactory.Get(TileType.Dirt));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 2));
     map.SetTile(gr + 2, gc + 2, TileFactory.Get(TileType.Dirt));
     if (gate != 5)
       map.SetTile(gr + 2, gc + 3, TileFactory.Get(TileType.VFence));
 
     if (gate != 6)
       map.SetTile(gr + 3, gc, TileFactory.Get(TileType.VFence));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 3, gc + 1));
     map.SetTile(gr + 3, gc + 1, TileFactory.Get(TileType.Dirt));
+    Town.WitchesGarden.Add(new Loc(0, 0, gr + 3, gc + 2));
     map.SetTile(gr + 3, gc + 2, TileFactory.Get(TileType.Dirt));
     if (gate != 7)
       map.SetTile(gr + 3, gc + 3, TileFactory.Get(TileType.VFence));
@@ -796,6 +805,24 @@ class TownBuilder
       map.SetTile(gr + 4, gc + 2, TileFactory.Get(TileType.HFence));
     map.SetTile(gr + 4, gc + 3, TileFactory.Get(TileType.CornerFence));
 
+    // Is it a good placement for the cottage? Make sure there's a walkable 
+    // path from the front door to the garden. (Sometimes the garden was 
+    // created in the middle of mountains, eetc)
+    Loc frontDoorLoc = new(0, 0, frontDoor.Item1, frontDoor.Item2);
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.Grass, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.YellowTree, 1);
+    costs.Add(TileType.RedTree, 1);
+    costs.Add(TileType.OrangeTree, 1);
+    costs.Add(TileType.Conifer, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.ClosedDoor, 1);
+
+    var gardenPath = AStar.FindPath(map, frontDoorLoc, gardenSq, costs, false);
+    if (gardenPath.Count == 0)
+      return false;
+
     // Draw a road from the front step to the town
     CampaignCreator.DrawRoad(map, map.Height, frontDoor, Town, TileType.Dirt, true, rng);
 
@@ -804,6 +831,8 @@ class TownBuilder
       var wellSq = opts[rng.Next(opts.Count)];
       map.SetTile(wellSq, TileFactory.Get(TileType.Well));
     }
+
+    return true;
   }
 
   void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, Random rng)
@@ -842,12 +871,19 @@ class TownBuilder
 
       topLeftRow = sq.Item1;
       topLeftCol = sq.Item2;
-      break;
-    }
 
-    Console.WriteLine($"Witch cottage at {topLeftRow}, {topLeftCol}");
-    if (topLeftRow > -1 && topLeftCol > -1)
-      DrawWitchesCottage(map, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
+      if (topLeftRow == -1 && topLeftCol == -1)
+        continue;
+
+      bool success = DrawWitchesCottage(map, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
+      if (success)
+      {
+        Console.WriteLine($"Witch cottage at {topLeftRow}, {topLeftCol}");
+        return;
+      }
+    }
+    
+    throw new Exception("Unable to find a valid placement for witches' cottage");
   }
 
   public Map DrawnTown(Map map, Random rng)
