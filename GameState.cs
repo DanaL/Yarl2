@@ -182,6 +182,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           grocer.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
         }
       }
+
+      // Every once in a while the witch is invisible after experimenting
+      // with one of their partner's potions
+      fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
+      ulong witchId = ulong.Parse(fact.Value);
+      if (ObjDb.GetObj(witchId) is Mob witch)
+      {
+        if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.33)
+        {
+          InvisibleTrait it = new()
+          {
+            ActorID = witchId,
+            Expired = false,
+            ExpiresOn = 2000
+          };
+          witch.Traits.Add(it);
+          RegisterForEvent(GameEventType.EndOfRound, it);
+        }        
+      }      
     }
   }
 

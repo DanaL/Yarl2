@@ -626,7 +626,7 @@ class GameObjDBSave
 
   static Player InflatePlayer(string txt, GameObjectDB objDb)
   {
-    var fields = txt.Split('|');
+    var fields = txt.Split(Constants.SEPARATOR);
     var p = new Player(fields[2]);
 
     Enum.TryParse(fields[0], out PlayerLineage charClass);
@@ -670,7 +670,7 @@ class GameObjDBSave
 
   static Mob InflateMob(string txt, GameObjectDB objDb)
   {
-    var fields = txt.Split('|');
+    var fields = txt.Split(Constants.SEPARATOR);
     var mob = new Mob()
     {
       ID = ulong.Parse(fields[3]),
@@ -726,9 +726,9 @@ class GameObjDBSave
   }
 
   static Item InflateItem(string txt)
-  {
-    var fields = txt.Split('|');
-
+  {    
+    string[] fields = txt.Split(Constants.SEPARATOR);
+    
     Enum.TryParse(fields[0], out ItemType itemType);
     var item = new Item()
     {
@@ -776,7 +776,7 @@ class GameObjDBSave
 
   public static GameObjDBSave Shrink(GameObjectDB objDb)
   {
-    var sidb = new GameObjDBSave();
+    GameObjDBSave sidb = new();
 
     sidb.LocListeners = objDb.LocListeners;
     
@@ -787,23 +787,23 @@ class GameObjDBSave
       {
         var sb = new StringBuilder("Player:");
         sb.Append(player.Lineage);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Background);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(obj.ToString());
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(StatsToText(player.Stats));
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Energy);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Recovery);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Inventory.Zorkmids);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Inventory.NextSlot);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(player.Inventory.ToText());
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(string.Join(',', player.SpellsKnown));
 
         sidb.Objects.Add(sb.ToString());
@@ -812,27 +812,27 @@ class GameObjDBSave
       {
         var sb = new StringBuilder("Mob:");
         sb.Append(mob.MoveStrategy.GetType().Name);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Behaviour.GetType().Name);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(obj.ToString());
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(StatsToText(mob.Stats));
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Energy);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Recovery);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Inventory.Zorkmids);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Inventory.NextSlot);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Inventory.ToText());
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Appearance);
 
         string actions = string.Join("`", mob.Actions.Select(t => t.AsText()));
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(actions);
 
         sidb.Objects.Add(sb.ToString());
@@ -841,17 +841,17 @@ class GameObjDBSave
       {
         var sb = new StringBuilder("Item:");
         sb.Append(item.Type);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(obj.ToString());
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(item.Slot);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(item.Equipped);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(item.ContainedBy);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(item.Value);
-        sb.Append('|');
+        sb.Append(Constants.SEPARATOR);
         sb.Append(item.Z());
 
         sidb.Objects.Add(sb.ToString());

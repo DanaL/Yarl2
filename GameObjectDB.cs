@@ -41,7 +41,7 @@ enum GlyphType { Terrain, Item, Mob }
 record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BGLit, Colour BGUnlit)
 {
   public override readonly string ToString()
-  {
+  {    
     return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(BGLit)},{Colours.ColourToText(BGUnlit)}";
   }
 
@@ -119,13 +119,13 @@ abstract class GameObj : IZLevel
   {
     var sb = new StringBuilder();
     sb.Append(Name);
-    sb.Append('|');
+    sb.Append(Constants.SEPARATOR);
     sb.Append(ID);
-    sb.Append('|');
+    sb.Append(Constants.SEPARATOR);
     sb.Append(Glyph.ToString());
-    sb.Append('|');
+    sb.Append(Constants.SEPARATOR);
     sb.Append(Loc.ToString());
-    sb.Append('|');
+    sb.Append(Constants.SEPARATOR);
     string traits = string.Join("`", Traits.Select(t => t.AsText()));
     sb.Append(traits);
 
