@@ -517,7 +517,7 @@ class WitchBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
   
-  static string PickBark(GameState gs)
+  static string PickBark(Mob witch, GameState gs)
   {
     string grocerName = "";
     if (gs.FactDb.FactCheck("GrocerId") is SimpleFact fact)
@@ -527,13 +527,25 @@ class WitchBehaviour : NPCBehaviour
         grocerName = grocer.FullName.Capitalize();
     }
     
-    return gs.Rng.Next(4) switch
+    if (witch.HasTrait<InvisibleTrait>())
     {
-      0 => "Sophie, did you see that sparrow?",
-      1 => $"{grocerName} is charging HOW MUCH for mandrake root?",
-      2 => "Do not tarry!",
-      _ => "Dark augeries..."
-    };
+      return gs.Rng.Next(3) switch
+      {
+        0 => "I'm over here.",
+        1 => "Sophie's been trying invisibility potions again.",
+        _ => "Is the potion working?"
+      };
+    }
+    else
+    {
+      return gs.Rng.Next(4) switch
+      {
+        0 => "Sophie, did you see that sparrow?",
+        1 => $"{grocerName} is charging HOW MUCH for mandrake root?",
+        2 => "Do not tarry!",
+        _ => "Dark augeries..."
+      };
+    }    
   }
 
   public override Action CalcAction(Mob witch, GameState gameState)
@@ -541,7 +553,7 @@ class WitchBehaviour : NPCBehaviour
     Action action  = new PassAction(gameState, witch);
     if ((DateTime.Now - _lastBark).TotalSeconds > 9)
     {
-      action.Quip = PickBark(gameState);
+      action.Quip = PickBark(witch, gameState);
       _lastBark = DateTime.Now;
     }
 
