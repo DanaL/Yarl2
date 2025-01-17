@@ -297,6 +297,9 @@ class BarkAnimation : Animation
 
     void SetSqr(int row, int col, Sqr sqr)
     {
+      if (row < 0 || row >= UserInterface.ViewHeight || col < 0 || col >= UserInterface.ViewWidth)
+        return;
+
       // If a loc is occupied, don't hide the Actor glyph
       Loc playerLoc = _gs.Player.Loc;
       var (mapRow, mapCol) = _ui.ScrLocToGameLoc(row, col, playerLoc.Row, playerLoc.Col);
@@ -361,7 +364,7 @@ class SqAnimation : Animation
     var ui = _gs.UIRef();
     var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-    if (!IgnoreFoV && !_gs.LastPlayerFoV.Contains(_loc))
+    if (!_gs.LastPlayerFoV.Contains(_loc))
       return;
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
