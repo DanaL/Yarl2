@@ -728,6 +728,9 @@ class TownBuilder
   {
     DrawBuilding(map, r, c, townCentreRow, townCentreCol, template, BuildingType.WitchesCottage, rng);
 
+    Town.WitchesCottage = [];
+    Town.WitchesGarden = [];
+
     // The witches also get a well
     List<(int, int)> opts = [];
     (int, int) frontDoor = (-1, -1);
@@ -875,9 +878,18 @@ class TownBuilder
       if (topLeftRow == -1 && topLeftCol == -1)
         continue;
 
-      bool success = DrawWitchesCottage(map, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
+      Map tmp = (Map) map.Clone();
+      bool success = DrawWitchesCottage(tmp, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
       if (success)
       {
+        for (int r = 0; r < map.Height; r++)
+        {
+          for (int c = 0; c < map.Width; c++)
+          {
+            map.SetTile(r, c, tmp.TileAt(r, c));
+          }
+        }
+
         Console.WriteLine($"Witch cottage at {topLeftRow}, {topLeftCol}");
         return;
       }

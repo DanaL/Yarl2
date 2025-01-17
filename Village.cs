@@ -390,12 +390,24 @@ class Village
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
 
+    factDb.Add(new SimpleFact() { Name = "WitchId", Value = kylie.ID.ToString() });
+    
     int i = rng.Next(startLocs.Count);
     kylie.Loc = startLocs[i];
     startLocs.RemoveAt(i);
     kylie.SetBehaviour(new WitchBehaviour());
     objDb.Add(kylie);
     objDb.AddToLoc(kylie.Loc, kylie);
+
+
+    InvisibleTrait it = new()
+    {
+      ActorID = kylie.ID,
+      Expired = false,
+      ExpiresOn = 2000
+    };
+    kylie.Traits.Add(it);
+    objDb.EndOfRoundListeners.Add(it);
 
     Mob sophie = new()
     {
