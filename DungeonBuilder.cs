@@ -342,7 +342,7 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.Add(adventurer);
   }
 
-  List<(int, int)> FloorsNearWater(Map map, int row, int col, int d)
+  static List<(int, int)> FloorsNearSq(Map map, int row, int col, int d)
   {
     List<(int, int)> sqs = [];
 
@@ -449,7 +449,7 @@ class MainDungeonBuilder : DungeonBuilder
       { 
         if (map.TileAt(r, c).Type == TileType.DeepWater)
         {
-          foreach (var sq in FloorsNearWater(map, r, c, 3))
+          foreach (var sq in FloorsNearSq(map, r, c, 3))
             candidates.Add(sq);
         }
       }
@@ -1256,6 +1256,48 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Random rng)
+  {
+    if (level > 0)
+    {
+      monsterDecks[level].Monsters.Add("deep one");
+      monsterDecks[level].Monsters.Add("deep one");
+      monsterDecks[level].Monsters.Add("deep one");
+      monsterDecks[level].Reshuffle(rng);
+
+      DeepOneShrine(map, dungeonId, level, objDb, rng);
+
+      // if there's a river, sometimes add seeweed nearby
+      if (rng.NextDouble() < 0.2)
+      {
+        HashSet<(int, int)> candidates = [];
+        for (int r = 0; r < map.Height; r++) 
+        { 
+          for (int c = 0; c < map.Width; c++) 
+          { 
+            if (map.TileAt(r, c).Type == TileType.DeepWater)
+            {
+              foreach (var sq in FloorsNearSq(map, r, c, 2))
+                candidates.Add(sq);
+            }
+          }
+        }
+
+        List<(int, int)> sqs = [..candidates];
+        int numOfWeeds = rng.Next(1, 4);
+        for (int j = 0; j < numOfWeeds; j++)
+        {
+          int i = rng.Next(sqs.Count);
+          (int, int) sq = sqs[i];
+          sqs.RemoveAt(i);
+          Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
+          Item weed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
+          objDb.SetToLoc(loc, weed);
+        }
+      }    
+    }
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks,
         Map wildernessMap)
@@ -1307,14 +1349,9 @@ class MainDungeonBuilder : DungeonBuilder
           }
         }
 
-        if (riverTile == TileType.DeepWater && levelNum > 0)
+        if (riverTile == TileType.DeepWater)
         {
-          monsterDecks[levelNum].Monsters.Add("deep one");
-          monsterDecks[levelNum].Monsters.Add("deep one");
-          monsterDecks[levelNum].Monsters.Add("deep one");
-          monsterDecks[levelNum].Reshuffle(rng);
-
-          DeepOneShrine(levels[levelNum], _dungeonID, levelNum, objDb, rng);
+          DecorateRiver(levels[levelNum], monsterDecks, _dungeonID, levelNum, objDb, rng);
         }
 
         riverAdded.Add(levelNum);
