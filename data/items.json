@@ -1089,5 +1089,18 @@
       "Stackable",
       "UseSimple#soothe"
     ]
+  },
+  {
+    "Name": "SEEWEED",
+    "DescriptiveName": "seeweed",
+    "Type": "Food",
+    "Value": 20,
+    "Glyph": ",,green,darkgreen,black,black",
+    "Traits": [
+      "Edible",
+      "UseSimple#seeinvisible",
+      "Consumable",
+      "Stackable"
+    ]
   }
 ]

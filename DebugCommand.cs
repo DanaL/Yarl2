@@ -101,7 +101,8 @@ class DebugCommand(GameState gs)
     {"potion of heroism", ItemNames.POTION_HEROISM },
     {"wand of summoning", ItemNames.WAND_SUMMONING },
     {"quarterstaff", ItemNames.QUARTERSTAFF },
-    {"meditation crystal", ItemNames.MEDITATION_CRYSTAL }
+    {"meditation crystal", ItemNames.MEDITATION_CRYSTAL },
+    {"seeweed", ItemNames.SEEWEED }
   };
 
   public string DoCommand(string txt)
