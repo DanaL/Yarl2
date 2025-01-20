@@ -1068,8 +1068,15 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
   }
 }
 
-class CloseDoorAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
-{  
+class CloseDoorAction : DirectionalAction
+{
+  public CloseDoorAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
+  public CloseDoorAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
+  {
+    Loc = loc;
+    GameState = gs;
+  }
+
   public override ActionResult Execute()
   {
     ActionResult result = new() { Complete = false, EnergyCost = 0.0 };

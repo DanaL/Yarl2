@@ -13,6 +13,206 @@ using System.Text;
 
 namespace Yarl2;
 
+// Behaviour tree stuff
+enum PlanStatus { Success, Failure, Running }
+
+abstract class BehaviourNode
+{
+  public abstract (PlanStatus, Action?) Execute(Actor actor, GameState gs);
+}
+
+class Sequence(List<BehaviourNode> nodes) : BehaviourNode
+{
+  List<BehaviourNode> Children { get; set; } = nodes;
+  int Curr { get; set; } = 0;
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    while (Curr < Children.Count) 
+    {
+      var (status, action) = Children[Curr].Execute(actor, gs);
+
+      if (status == PlanStatus.Running)
+      {
+        return (status, action);
+      }
+            
+
+      if (status == PlanStatus.Failure)
+      {
+        Curr = 0;
+        return (status, null);
+      }
+
+      ++Curr;
+    }
+    
+    return (PlanStatus.Success, null);
+  }
+}
+
+class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
+{
+  BehaviourNode Condition { get; set; } = condition;
+  BehaviourNode Child { get; set; } = child;
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    var (result, _) = Condition.Execute(actor, gs);
+
+    if (result == PlanStatus.Success)
+      return Child.Execute(actor, gs);
+
+    return (PlanStatus.Failure, null);
+  }  
+}
+
+class WanderInArea(HashSet<Loc> area) : BehaviourNode
+{
+  HashSet<Loc> Area { get; set; } = area;
+
+  // I'll need to take into account flying/floating creatures eventually
+  static bool LocOpen(Map map, GameState gs, Loc loc)
+  {
+    Tile tile = map.TileAt(loc.Row, loc.Col);
+
+    return tile.Passable() && !gs.ObjDb.Occupied(loc) && !gs.ObjDb.BlockersAtLoc(loc);
+  }
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    Map map = gs.MapForActor(actor);
+
+    List<Loc> adjs = Util.Adj8Locs(actor.Loc)
+                         .Where(l => Area.Contains(l) && LocOpen(map, gs, l))
+                         .ToList();
+
+    if (adjs.Count > 0)
+    {
+      Loc loc = adjs[gs.Rng.Next(adjs.Count)];
+      return (PlanStatus.Running, new MoveAction(gs, actor, loc));
+    }
+
+    return (PlanStatus.Failure, null);
+  }
+}
+
+class InArea(HashSet<Loc> sqs) : BehaviourNode
+{
+  readonly HashSet<Loc> Locations = sqs;
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    return Locations.Contains(actor.Loc) ? (PlanStatus.Success, null) 
+                                         : (PlanStatus.Failure, null);
+  }
+}
+
+class IsDaytime : BehaviourNode
+{
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    var (hour, _) = gs.CurrTime();
+    return hour >= 7 && hour <= 19 ? (PlanStatus.Success, null) 
+                                   : (PlanStatus.Failure, null);
+  }
+}
+
+class NavigateToGoal(BehaviourNode goal, Stack<Loc> path) : BehaviourNode
+{
+  BehaviourNode Goal { get; set; } = goal;
+  Stack<Loc> Path { get; set; } = path;
+  Loc PrevLoc { get; set; }
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    var (status, _) = Goal.Execute(actor, gs);
+    if (status == PlanStatus.Success)
+    {
+      return (status, null);
+    }
+
+    if (Path.Count > 0)
+    {
+      Loc next = Path.Pop();
+      Tile nextTile = gs.TileAt(next);
+      Tile prevTile = gs.TileAt(PrevLoc);
+      if (nextTile is Door door && !door.Open)
+      {
+        Path.Push(next);
+        return (PlanStatus.Running, new OpenDoorAction(gs, actor, next));
+      }
+      else if (prevTile is Door prevDoor && prevDoor.Open)
+      {
+        Path.Push(next);
+        return (PlanStatus.Running, new CloseDoorAction(gs, actor, PrevLoc));
+      }
+      else
+      {
+        PrevLoc = actor.Loc;
+        return (PlanStatus.Running, new MoveAction(gs, actor, next));
+      }
+    }
+
+    return (PlanStatus.Failure, null);
+  }
+}
+
+class Planner
+{  
+  public static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
+  {
+    // We need a goal location for the pathfinding, although the Mayor 
+    // will just wander to the area in general
+    Loc goalLoc = PickLocInArea(gs.Town.TownSquare, gs);
+
+    BehaviourNode goalcondition = new InArea(gs.Town.TownSquare);
+
+    Loc actorLoc = actor.Loc;
+    Map map = gs.Campaign.Dungeons[actorLoc.DungeonID].LevelMaps[actorLoc.Level];
+    Stack<Loc> path = AStar.FindPath(map, actorLoc, goalLoc, TravelCosts, false);
+    BehaviourNode movePlan = new NavigateToGoal(goalcondition, path);
+    BehaviourNode daytimeTest = new IsDaytime();
+
+    BehaviourNode seq = new Sequence(
+      [daytimeTest, movePlan, new RepeatWhile(daytimeTest, new WanderInArea(gs.Town.TownSquare))]
+    );
+
+    return seq;
+  }
+
+  static Loc PickLocInArea(HashSet<Loc> locs, GameState gs)
+  {
+    int i = gs.Rng.Next(locs.Count);
+    return locs.ToList()[i];
+  }
+
+  static Dictionary<TileType, int> TravelCosts
+  {
+    get
+    {
+      Dictionary<TileType, int> costs = [];
+      costs.Add(TileType.Grass, 1);
+      costs.Add(TileType.Sand, 1);
+      costs.Add(TileType.Dirt, 1);
+      costs.Add(TileType.Bridge, 1);
+      costs.Add(TileType.GreenTree, 1);
+      costs.Add(TileType.RedTree, 1);
+      costs.Add(TileType.OrangeTree, 1);
+      costs.Add(TileType.YellowTree, 1);
+      costs.Add(TileType.Conifer, 1);
+      costs.Add(TileType.StoneFloor, 1);
+      costs.Add(TileType.WoodFloor, 1);
+      costs.Add(TileType.OpenDoor, 1);
+      costs.Add(TileType.Well, 1);
+      costs.Add(TileType.ClosedDoor, 2);
+      costs.Add(TileType.Water, 3);
+
+      return costs;
+    }
+  }
+}
+
 abstract class MoveStrategy
 {
   public abstract Action MoveAction(Mob actor, GameState gs);
@@ -816,9 +1016,24 @@ class MayorBehaviour : NPCBehaviour
 {
   Stack<Loc> _path = [];
   DateTime _lastBark = new(1900, 1, 1);
+  BehaviourNode? CurrPlan { get; set; } = null;
 
   public override Action CalcAction(Mob actor, GameState gameState)
   {
+    CurrPlan ??= Planner.CreateMayorPlan(actor, gameState);
+
+    var (result, action) = CurrPlan.Execute(actor, gameState);
+    if (result == PlanStatus.Running && action is not null)
+    {
+      AddQuipToAction(actor, gameState, action);
+      return action;
+    }
+    
+    Action passAction = new PassAction();
+    AddQuipToAction(actor, gameState, passAction);
+
+    return passAction;
+
     if (_path.Count > 0)
     {
       // The mayor is on their way somewhere
@@ -861,6 +1076,17 @@ class MayorBehaviour : NPCBehaviour
     else
     {
       return NightSchedule(actor, gameState);
+    }
+  }
+
+  void AddQuipToAction(Actor actor, GameState gs, Action action)
+  {
+    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    {
+      action.Actor = actor;
+      action.GameState = gs;
+      action.Quip = "Today at least seems peaceful";
+      _lastBark = DateTime.Now;
     }
   }
 
@@ -933,7 +1159,7 @@ class MayorBehaviour : NPCBehaviour
     return new PassAction();
   }
 
-  static Dictionary<TileType, int> TravelCosts
+  public static Dictionary<TileType, int> TravelCosts
   {
     get
     {
