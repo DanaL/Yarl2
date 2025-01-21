@@ -75,7 +75,7 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
 
 abstract class BehaviourNode
 {
-  public abstract (PlanStatus, Action?) Execute(Actor actor, GameState gs);
+  public abstract PlanStatus Execute(Mob mob, GameState gs);
 }
 
 class Selector(List<BehaviourNode> nodes) : BehaviourNode
@@ -83,25 +83,25 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
   List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
     while (Curr < Children.Count)
     {
-      var (status, action) = Children[Curr].Execute(actor, gs);
+      PlanStatus status = Children[Curr].Execute(mob, gs);
       if (status == PlanStatus.Running)
       {
-        return (status, action);
+        return status;
       }
 
       if (status == PlanStatus.Success)
       {
-        return (status, null);
+        return status;
       }
 
       ++Curr;
     }
 
-    return (PlanStatus.Failure, null);
+    return PlanStatus.Failure;
   }
 }
 
@@ -110,27 +110,27 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
   List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
     while (Curr < Children.Count) 
     {
-      var (status, action) = Children[Curr].Execute(actor, gs);
+      PlanStatus status = Children[Curr].Execute(mob, gs);
 
       if (status == PlanStatus.Running)
       {
-        return (status, action);
+        return status;
       }
             
       if (status == PlanStatus.Failure)
       {
         Curr = 0;
-        return (status, null);
+        return status;
       }
 
       ++Curr;
     }
-    
-    return (PlanStatus.Success, null);
+
+    return PlanStatus.Success;
   }
 }
 
@@ -139,14 +139,14 @@ class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
   BehaviourNode Condition { get; set; } = condition;
   BehaviourNode Child { get; set; } = child;
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    var (result, _) = Condition.Execute(actor, gs);
+    var result = Condition.Execute(mob, gs);
 
     if (result == PlanStatus.Success)
-      return Child.Execute(actor, gs);
+      return Child.Execute(mob, gs);
 
-    return (PlanStatus.Failure, null);
+    return PlanStatus.Failure;
   }  
 }
 
@@ -162,21 +162,24 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
     return tile.Passable() && !gs.ObjDb.Occupied(loc) && !gs.ObjDb.BlockersAtLoc(loc);
   }
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    Map map = gs.MapForActor(actor);
+    Map map = gs.MapForActor(mob);
 
-    List<Loc> adjs = Util.Adj8Locs(actor.Loc)
+    List<Loc> adjs = Util.Adj8Locs(mob.Loc)
                          .Where(l => Area.Contains(l) && LocOpen(map, gs, l))
                          .ToList();
 
     if (adjs.Count > 0)
     {
       Loc loc = adjs[gs.Rng.Next(adjs.Count)];
-      return (PlanStatus.Running, new MoveAction(gs, actor, loc));
+      
+      mob.ExecuteAction(new MoveAction(gs, mob, loc));
+      return PlanStatus.Running;
     }
 
-    return (PlanStatus.Failure, null);
+
+    return PlanStatus.Failure;
   }
 }
 
@@ -184,30 +187,27 @@ class InArea(HashSet<Loc> sqs) : BehaviourNode
 {
   readonly HashSet<Loc> Locations = sqs;
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
-  {
-    return Locations.Contains(actor.Loc) ? (PlanStatus.Success, null) 
-                                         : (PlanStatus.Failure, null);
-  }
+  public override PlanStatus Execute(Mob mob, GameState gs) =>
+    Locations.Contains(mob.Loc) ? PlanStatus.Success : PlanStatus.Failure;
 }
 
 class IsDaytime : BehaviourNode
 {
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
     var (hour, _) = gs.CurrTime();
-    return hour >= 7 && hour < 19 ? (PlanStatus.Success, null) 
-                                  : (PlanStatus.Failure, null);
+    return hour >= 7 && hour < 19 ? PlanStatus.Success
+                                  : PlanStatus.Failure;
   }
 }
 
 class IsEvening : BehaviourNode
 {
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
     var (hour, _) = gs.CurrTime();
-    return hour >= 19 && hour < 22 ? (PlanStatus.Success, null) 
-                                   : (PlanStatus.Failure, null);
+    return hour >= 19 && hour < 22 ? PlanStatus.Success
+                                   : PlanStatus.Failure;
   }
 }
 
@@ -218,14 +218,14 @@ class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNo
   Stack<Loc>? Path { get; set; } = null;
   Loc PrevLoc { get; set; }
 
-  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    Path ??= PathBuilder.BuildPath(actor.Loc);
+    Path ??= PathBuilder.BuildPath(mob.Loc);
 
-    var (status, _) = Goal.Execute(actor, gs);
+    PlanStatus status = Goal.Execute(mob, gs);
     if (status == PlanStatus.Success)
     {
-      return (status, null);
+      return status;
     }
 
     if (Path.Count > 0)
@@ -236,21 +236,24 @@ class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNo
       if (nextTile is Door door && !door.Open)
       {
         Path.Push(next);
-        return (PlanStatus.Running, new OpenDoorAction(gs, actor, next));
+        mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
+        return PlanStatus.Running;
       }
       else if (prevTile is Door prevDoor && prevDoor.Open)
       {
         Path.Push(next);
-        return (PlanStatus.Running, new CloseDoorAction(gs, actor, PrevLoc));
+        mob.ExecuteAction(new CloseDoorAction(gs, mob, PrevLoc));
+        return PlanStatus.Running;
       }
       else
       {
-        PrevLoc = actor.Loc;
-        return (PlanStatus.Running, new MoveAction(gs, actor, next));
+        PrevLoc = mob.Loc;
+        mob.ExecuteAction(new MoveAction(gs, mob, next));
+        return PlanStatus.Running;
       }
     }
 
-    return (PlanStatus.Failure, null);
+    return PlanStatus.Failure;
   }
 }
 
@@ -296,7 +299,7 @@ class Planner
     );
   }
 
-  public static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
+  static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
   {
     BehaviourNode daytimePlan = MayorDayTimePlan(gs);
     BehaviourNode eveningPlan = MayorEveningPlan(gs);
@@ -308,7 +311,13 @@ class Planner
   {
     int i = gs.Rng.Next(locs.Count);
     return locs.ToList()[i];
-  }  
+  }
+
+  public static BehaviourNode GetPlan(string plan, Actor actor, GameState gs) => plan switch
+  {
+    "MayorPlan" => CreateMayorPlan(actor, gs),
+    _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
+  };
 }
 
 abstract class MoveStrategy
@@ -1113,23 +1122,22 @@ class NPCBehaviour : IBehaviour, IDialoguer
 class MayorBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
-  BehaviourNode? CurrPlan { get; set; } = null;
-
+  
   public override Action CalcAction(Mob actor, GameState gameState)
   {
-    CurrPlan ??= Planner.CreateMayorPlan(actor, gameState);
+    //CurrPlan ??= Planner.CreateMayorPlan(actor, gameState);
 
-    var (result, action) = CurrPlan.Execute(actor, gameState);
-    if (result == PlanStatus.Running && action is not null)
-    {
-      AddQuipToAction(actor, gameState, action);
-      return action;
-    }
+    //var (result, action) = CurrPlan.Execute(actor, gameState);
+    //if (result == PlanStatus.Running && action is not null)
+    //{
+    //  AddQuipToAction(actor, gameState, action);
+    //  return action;
+    //}
     
-    Action passAction = new PassAction();
-    AddQuipToAction(actor, gameState, passAction);
+    //Action passAction = new PassAction();
+    //AddQuipToAction(actor, gameState, passAction);
 
-    return passAction;
+    return new PassAction();
   }
 
   void AddQuipToAction(Actor actor, GameState gs, Action action)

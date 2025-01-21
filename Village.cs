@@ -295,6 +295,7 @@ class Village
   {
     Mob mayor = BaseVillager(ng, rng);
     mayor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "mayor.txt" });
+    mayor.Traits.Add(new BehaviourTreeTrait() { Plan = "MayorPlan" });
 
     var homeID = PickUnoccuppiedCottage(town, rng);
     mayor.Loc = LocForVillager(map, town.Homes[homeID], rng);

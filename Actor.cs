@@ -405,6 +405,7 @@ class Mob : Actor
 {
   public MoveStrategy MoveStrategy { get; set; }
   public List<ActionTrait> Actions { get; set; } = [];
+  BehaviourNode? CurrPlan { get; set; } = null;
 
   public const int  INACTIVE = 0;
   public const int INDIFFERENT = 1;
@@ -456,13 +457,14 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public override void TakeTurn(GameState gs)
+  public void ExecuteAction(Action action)
   {
-    Action? action = _behaviour.CalcAction(this, gs);
+    Action? currAction = action;
+
     ActionResult result;
     do
-    {      
-      result = action!.Execute();
+    {
+      result = currAction!.Execute();
 
       // I don't think I need to look over IPerformer anymore? The concept of 
       // items as performs is gone. I think?
@@ -471,10 +473,33 @@ class Mob : Actor
       {
         result = result.AltAction.Execute();
         Energy -= CalcEnergyUsed(result.EnergyCost);
-        action = result.AltAction;
+        currAction = result.AltAction;
       }
     }
     while (result.AltAction is not null);
+  }
+
+  public override void TakeTurn(GameState gs)
+  {
+    if (HasTrait<BehaviourTreeTrait>())
+    {
+      if (CurrPlan is null)
+      {
+        string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
+        CurrPlan = Planner.GetPlan(planName, this, gs);
+      }
+
+      if (CurrPlan.Execute(this, gs) == PlanStatus.Failure)
+      {
+        CurrPlan = null;
+        ExecuteAction(new PassAction());
+      }
+    }
+    else
+    {
+      Action? action = _behaviour.CalcAction(this, gs);
+      ExecuteAction(action);
+    }    
   } 
 
   public override Loc PickTargetLoc(GameState gameState)
