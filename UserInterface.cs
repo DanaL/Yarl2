@@ -808,47 +808,6 @@ abstract class UserInterface
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
   public void CloseMenu() => MenuRows = [];
 
-  void TakeTurn(IPerformer performer, GameState gs)
-  {
-    try
-    {
-      performer.TakeTurn(gs);
-      WriteAlerts();
-    }
-    catch (QuitGameException)
-    {
-      WriteAlerts();
-
-      if (InTutorial)
-        // this returns us to the title screen instead of exiting the program
-        throw new PlayerKilledException("");
-      else
-        throw new QuitGameException();
-    }
-    catch (SaveGameException)
-    {
-      WriteAlerts();
-
-      bool success;
-      try
-      {
-        Serialize.WriteSaveGame(gs, this);
-        success = true;
-
-        WriteLongMessage([" Be seeing you..."]);
-        BlockForInput(gs);
-      }
-      catch (Exception ex)
-      {
-        SetPopup(new Popup(ex.Message, "", -1, -1));
-        success = false;
-      }
-
-      if (success)
-        throw new QuitGameException();
-    }
-  }
-
   static void Delay(int ms = 10) => Thread.Sleep(ms);
 
   // I am using this in input menus outside of the main game. Primarily
@@ -1300,19 +1259,41 @@ abstract class UserInterface
         {
           currPerformer = gameState.NextPerformer();
         }
-        
-        TakeTurn(currPerformer, gameState);        
+
+        currPerformer.TakeTurn(gameState);
+        WriteAlerts();
+
+      }
+      catch (SaveGameException)
+      {
+        WriteAlerts();
+
+        bool success;
+        try
+        {
+          Serialize.WriteSaveGame(gameState, this);
+          success = true;
+
+          WriteLongMessage([" Be seeing you..."]);
+          BlockForInput(gameState);
+        }
+        catch (Exception ex)
+        {
+          SetPopup(new Popup(ex.Message, "", -1, -1));
+          success = false;
+        }
+
+        if (success)
+          return RunningState.Quitting;
       }
       catch (QuitGameException)
       {
-        return RunningState.Quitting;
+        MessageHistory = [];
+        return RunningState.GameOver;
       }
       catch (PlayerKilledException pke)
-      {        
-        if (!InTutorial)
-        {
-          DrawGravestone(gameState, pke.Message);
-        }
+      {
+        DrawGravestone(gameState, pke.Message);        
         MessageHistory = [];
         return RunningState.GameOver;
       }
