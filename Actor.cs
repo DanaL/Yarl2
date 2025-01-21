@@ -11,22 +11,10 @@
 
 namespace Yarl2;
 
-// Interface for anything that will get a turn in the game. I'm not sure this
-// needs to exist outside of Actor. Originally I was going to have Items and
-// Traits take turns to handle things like torch fuel counting down but now
-// that's handled by EndOfTurn events
-interface IPerformer
-{
-  double Energy { get; set; }
-  double Recovery { get; set; }
-  
-  void TakeTurn(GameState gs);
-}
-
 // Actor should really be an abstract class but abstract classes seemed
 // to be problematic when I was trying to use the JSON serialization
 // libraries
-abstract class Actor : GameObj, IPerformer, IZLevel
+abstract class Actor : GameObj, IZLevel
 {
   static readonly int FLYING_Z = 10;
   static readonly int DEFAULT_Z = 4;

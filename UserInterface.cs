@@ -1236,7 +1236,7 @@ abstract class UserInterface
       _animations.Add(new TorchLightAnimationListener(this, gameState));
 
     DateTime refresh = DateTime.Now;
-    IPerformer currPerformer = gameState.Player;
+    Actor currPerformer = gameState.Player;
     while (true)
     {
       var e = PollForEvent();
@@ -1262,7 +1262,6 @@ abstract class UserInterface
 
         currPerformer.TakeTurn(gameState);
         WriteAlerts();
-
       }
       catch (SaveGameException)
       {

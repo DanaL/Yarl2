@@ -25,7 +25,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public int CurrDungeonID { get; set; }
   public Campaign Campaign { get; set; } = c;
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
-  public List<IPerformer> Performers { get; set; } = [];
+  public List<Actor> Performers { get; set; } = [];
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
 
@@ -806,7 +806,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     Performers.Insert(0, player);
   }
 
-  public void AddPerformer(IPerformer performer)
+  public void AddPerformer(Actor performer)
   {
     performer.Energy = double.Max(0.0, performer.Recovery);
     Performers.Add(performer);      
@@ -814,7 +814,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void RefreshPerformers()
   {
-    IPerformer? curr = null;
+    Actor? curr = null;
     if (Performers.Count > 0)
     {
       curr = Performers[_currPerformer];
@@ -833,9 +833,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public IPerformer NextPerformer()
+  public Actor NextPerformer()
   {
-    IPerformer nextPerformer;
+    Actor nextPerformer;
 
     do
     {

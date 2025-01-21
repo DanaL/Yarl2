@@ -454,15 +454,14 @@ class GameObjectDB
     a.Loc = to;
   }
 
-  public List<IPerformer> GetPerformers(int dungeonID, int level)
+  public List<Actor> GetPerformers(int dungeonID, int level)
   {
-    List<IPerformer> performers = [];
+    List<Actor> performers = [];
 
     foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
-    {
-      var actor = Objs[_actorLocs[loc]] as Actor;
-      if (actor is IPerformer performer)
-        performers.Add(performer);
+    {      
+      if (Objs[_actorLocs[loc]] is Actor actor)
+        performers.Add(actor);
     }
 
     return performers;

@@ -37,7 +37,7 @@ enum StressLevel
   Hystrical
 }
 
-class Player : Actor, IPerformer
+class Player : Actor
 {
   public const int MAX_VISION_RADIUS = 25;
   public PlayerLineage Lineage { get; set; }
