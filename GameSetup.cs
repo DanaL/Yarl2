@@ -117,7 +117,7 @@ class GameLoader(UserInterface ui)
       
       return gameState;
     }
-    catch (GameQuitException)
+    catch (QuitGameException)
     {
       return null;
     }
@@ -776,7 +776,7 @@ class CampaignCreator(UserInterface ui)
 
       return gameState;
     }
-    catch (GameQuitException)
+    catch (QuitGameException)
     {
       return null;
     }

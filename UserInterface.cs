@@ -815,7 +815,7 @@ abstract class UserInterface
       performer.TakeTurn(gs);
       WriteAlerts();
     }
-    catch (GameQuitException)
+    catch (QuitGameException)
     {
       WriteAlerts();
 
@@ -823,9 +823,9 @@ abstract class UserInterface
         // this returns us to the title screen instead of exiting the program
         throw new PlayerKilledException("");
       else
-        throw new GameQuitException();
+        throw new QuitGameException();
     }
-    catch (GameSaveException)
+    catch (SaveGameException)
     {
       WriteAlerts();
 
@@ -845,7 +845,7 @@ abstract class UserInterface
       }
 
       if (success)
-        throw new GameQuitException();
+        throw new QuitGameException();
     }
   }
 
@@ -857,7 +857,7 @@ abstract class UserInterface
   {
     var e = PollForEvent();
     if (e.Type == GameEventType.Quiting)
-      throw new GameQuitException();
+      throw new QuitGameException();
 
     if (e.Type == GameEventType.KeyInput)
       return e.Value;
@@ -923,7 +923,7 @@ abstract class UserInterface
       }
       else if (e.Value == Constants.ESC || e.Type == GameEventType.Quiting)
       {
-        throw new GameQuitException();
+        throw new QuitGameException();
       }
       else if (options.Contains(e.Value))
       {
@@ -951,7 +951,7 @@ abstract class UserInterface
       }
       else if (e.Type == GameEventType.Quiting)
       {
-        throw new GameQuitException();
+        throw new QuitGameException();
       }
       else if (options.Contains(e.Value))
       {
@@ -981,7 +981,7 @@ abstract class UserInterface
       }
       else if (e.Type == GameEventType.Quiting)
       {
-        throw new GameQuitException();
+        throw new QuitGameException();
       }
       else 
       {
@@ -1018,7 +1018,7 @@ abstract class UserInterface
       }
       else if (e.Type == GameEventType.Quiting)
       {
-        throw new GameQuitException();
+        throw new QuitGameException();
       }
 
       if (e.Value == '\n' || e.Value == 13)
@@ -1303,7 +1303,7 @@ abstract class UserInterface
         
         TakeTurn(currPerformer, gameState);        
       }
-      catch (GameQuitException)
+      catch (QuitGameException)
       {
         return RunningState.Quitting;
       }

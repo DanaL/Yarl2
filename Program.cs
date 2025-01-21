@@ -81,7 +81,7 @@ try
   }
   while (state != RunningState.Quitting);
 }
-catch (GameQuitException)
+catch (QuitGameException)
 {
 }
 // catch (Exception ex)

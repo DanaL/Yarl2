@@ -3193,12 +3193,12 @@ class CloseMenuAction : Action
 // or quit and saved?
 class QuitAction : Action
 {
-  public override ActionResult Execute() => throw new GameQuitException();
+  public override ActionResult Execute() => throw new QuitGameException();
 }
 
 class SaveGameAction : Action
 {
-  public override ActionResult Execute() => throw new Exception("Shouldn't actually try to execute a Save Game action!");
+  public override ActionResult Execute() => throw new SaveGameException();
 }
 
 class NullAction : Action
