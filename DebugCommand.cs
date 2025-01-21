@@ -148,6 +148,9 @@ class DebugCommand(GameState gs)
       case "zorkmids":
       case "$":
         return GiveZorkminds(parts[1]);
+      case "timeskip":
+        _gs.Turn += ulong.Parse(parts[1]);
+        return "";
       case "stress":
         if (uint.TryParse(parts[1], out uint stress))
         {

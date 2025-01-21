@@ -16,9 +16,84 @@ namespace Yarl2;
 // Behaviour tree stuff
 enum PlanStatus { Success, Failure, Running }
 
+interface IPathBuilder
+{
+  Stack<Loc> BuildPath(Loc start);
+}
+
+class PathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
+{
+  HashSet<Loc> Area { get; set; } = area;
+  GameState GS { get; set; } = gs;
+
+  public Stack<Loc> BuildPath(Loc start)
+  {
+    Loc goalLoc = PickLocInArea(Area);
+    return AStar.FindPath(GS.MapForLoc(start), start, goalLoc, TravelCosts, false);
+  }
+
+  Loc PickLocInArea(HashSet<Loc> locs)
+  {
+    int i = GS.Rng.Next(locs.Count);
+    return locs.ToList()[i];
+  }
+
+  static Dictionary<TileType, int> TravelCosts
+  {
+    get
+    {
+      Dictionary<TileType, int> costs = [];
+      costs.Add(TileType.Grass, 1);
+      costs.Add(TileType.Sand, 1);
+      costs.Add(TileType.Dirt, 1);
+      costs.Add(TileType.Bridge, 1);
+      costs.Add(TileType.GreenTree, 1);
+      costs.Add(TileType.RedTree, 1);
+      costs.Add(TileType.OrangeTree, 1);
+      costs.Add(TileType.YellowTree, 1);
+      costs.Add(TileType.Conifer, 1);
+      costs.Add(TileType.StoneFloor, 1);
+      costs.Add(TileType.WoodFloor, 1);
+      costs.Add(TileType.OpenDoor, 1);
+      costs.Add(TileType.Well, 1);
+      costs.Add(TileType.ClosedDoor, 2);
+      costs.Add(TileType.Water, 3);
+
+      return costs;
+    }
+  }
+}
+
 abstract class BehaviourNode
 {
   public abstract (PlanStatus, Action?) Execute(Actor actor, GameState gs);
+}
+
+class Selector(List<BehaviourNode> nodes) : BehaviourNode
+{
+  List<BehaviourNode> Children { get; set; } = nodes;
+  int Curr { get; set; } = 0;
+
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    while (Curr < Children.Count)
+    {
+      var (status, action) = Children[Curr].Execute(actor, gs);
+      if (status == PlanStatus.Running)
+      {
+        return (status, action);
+      }
+
+      if (status == PlanStatus.Success)
+      {
+        return (status, null);
+      }
+
+      ++Curr;
+    }
+
+    return (PlanStatus.Failure, null);
+  }
 }
 
 class Sequence(List<BehaviourNode> nodes) : BehaviourNode
@@ -37,7 +112,6 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
         return (status, action);
       }
             
-
       if (status == PlanStatus.Failure)
       {
         Curr = 0;
@@ -113,19 +187,32 @@ class IsDaytime : BehaviourNode
   public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
   {
     var (hour, _) = gs.CurrTime();
-    return hour >= 7 && hour <= 19 ? (PlanStatus.Success, null) 
+    return hour >= 7 && hour < 19 ? (PlanStatus.Success, null) 
+                                  : (PlanStatus.Failure, null);
+  }
+}
+
+class IsEvening : BehaviourNode
+{
+  public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
+  {
+    var (hour, _) = gs.CurrTime();
+    return hour >= 19 && hour < 22 ? (PlanStatus.Success, null) 
                                    : (PlanStatus.Failure, null);
   }
 }
 
-class NavigateToGoal(BehaviourNode goal, Stack<Loc> path) : BehaviourNode
+class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNode
 {
   BehaviourNode Goal { get; set; } = goal;
-  Stack<Loc> Path { get; set; } = path;
+  IPathBuilder PathBuilder { get; set; } = pathBuilder;
+  Stack<Loc>? Path { get; set; } = null;
   Loc PrevLoc { get; set; }
 
   public override (PlanStatus, Action?) Execute(Actor actor, GameState gs)
   {
+    Path ??= PathBuilder.BuildPath(actor.Loc);
+
     var (status, _) = Goal.Execute(actor, gs);
     if (status == PlanStatus.Success)
     {
@@ -159,58 +246,48 @@ class NavigateToGoal(BehaviourNode goal, Stack<Loc> path) : BehaviourNode
 }
 
 class Planner
-{  
-  public static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
+{
+  static BehaviourNode GenerateMovePlan(GameState gs, HashSet<Loc> area)
   {
-    // We need a goal location for the pathfinding, although the Mayor 
-    // will just wander to the area in general
-    Loc goalLoc = PickLocInArea(gs.Town.TownSquare, gs);
+    BehaviourNode goalcondition = new InArea(area);
+    PathToArea pathBuilder = new(area, gs);
+    
+    return new NavigateToGoal(goalcondition, pathBuilder);
+  }
 
-    BehaviourNode goalcondition = new InArea(gs.Town.TownSquare);
-
-    Loc actorLoc = actor.Loc;
-    Map map = gs.Campaign.Dungeons[actorLoc.DungeonID].LevelMaps[actorLoc.Level];
-    Stack<Loc> path = AStar.FindPath(map, actorLoc, goalLoc, TravelCosts, false);
-    BehaviourNode movePlan = new NavigateToGoal(goalcondition, path);
+  static BehaviourNode MayorDayTimePlan(Actor actor, GameState gs)
+  {    
+    BehaviourNode movePlan = GenerateMovePlan(gs, gs.Town.TownSquare);
     BehaviourNode daytimeTest = new IsDaytime();
 
-    BehaviourNode seq = new Sequence(
+    return new Sequence(
       [daytimeTest, movePlan, new RepeatWhile(daytimeTest, new WanderInArea(gs.Town.TownSquare))]
     );
+  }
 
-    return seq;
+  static BehaviourNode MayorEveningPlan(Actor actor, GameState gs)
+  {
+    BehaviourNode movePlan = GenerateMovePlan(gs, gs.Town.Tavern);
+    BehaviourNode eveningTest = new IsEvening();
+
+    return new Sequence(
+      [eveningTest, movePlan, new RepeatWhile(eveningTest, new WanderInArea(gs.Town.Tavern))]
+    );
+  }
+
+  public static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
+  {
+    BehaviourNode daytimePlan = MayorDayTimePlan(actor, gs);
+    BehaviourNode eveningPlan = MayorEveningPlan(actor, gs);
+
+    return new Selector([daytimePlan, eveningPlan]);
   }
 
   static Loc PickLocInArea(HashSet<Loc> locs, GameState gs)
   {
     int i = gs.Rng.Next(locs.Count);
     return locs.ToList()[i];
-  }
-
-  static Dictionary<TileType, int> TravelCosts
-  {
-    get
-    {
-      Dictionary<TileType, int> costs = [];
-      costs.Add(TileType.Grass, 1);
-      costs.Add(TileType.Sand, 1);
-      costs.Add(TileType.Dirt, 1);
-      costs.Add(TileType.Bridge, 1);
-      costs.Add(TileType.GreenTree, 1);
-      costs.Add(TileType.RedTree, 1);
-      costs.Add(TileType.OrangeTree, 1);
-      costs.Add(TileType.YellowTree, 1);
-      costs.Add(TileType.Conifer, 1);
-      costs.Add(TileType.StoneFloor, 1);
-      costs.Add(TileType.WoodFloor, 1);
-      costs.Add(TileType.OpenDoor, 1);
-      costs.Add(TileType.Well, 1);
-      costs.Add(TileType.ClosedDoor, 2);
-      costs.Add(TileType.Water, 3);
-
-      return costs;
-    }
-  }
+  }  
 }
 
 abstract class MoveStrategy
@@ -1014,7 +1091,6 @@ class NPCBehaviour : IBehaviour, IDialoguer
 
 class MayorBehaviour : NPCBehaviour
 {
-  Stack<Loc> _path = [];
   DateTime _lastBark = new(1900, 1, 1);
   BehaviourNode? CurrPlan { get; set; } = null;
 
@@ -1033,50 +1109,6 @@ class MayorBehaviour : NPCBehaviour
     AddQuipToAction(actor, gameState, passAction);
 
     return passAction;
-
-    if (_path.Count > 0)
-    {
-      // The mayor is on their way somewhere
-      var mv = _path.Pop();
-
-      // Maybe have them say 'Excuse me' in a bark?
-      // Should probably also have a bail out if space is still occupied
-      // after a few turns
-      if (gameState.ObjDb.Occupied(mv)) 
-      {
-        _path.Push(mv);
-        return new PassAction();
-      }
-
-      Tile tile = gameState.TileAt(mv);
-      if (tile.Type == TileType.ClosedDoor)
-      {
-        // Should I implement code to make them polite and close the door after?
-        _path.Push(mv);
-        return new OpenDoorAction(gameState, actor, mv);
-      }
-      else
-      {
-        return new MoveAction(gameState, actor, mv);
-      }
-    }
-
-    // The mayor's schedule is that from 8:00am to 6:00pm, they'll hang out in the 
-    // town square. From 6:00pm to 9:00pm they'll be in the tavern
-    var time = gameState.CurrTime();
-
-    if (time.Item1 >= 8 && time.Item1 < 18)
-    {
-      return DayTimeSchedule(actor, gameState); 
-    }
-    else if (time.Item1 >= 18 && time.Item1 < 22)
-    {
-      return EveningSchedule(actor, gameState);
-    }
-    else
-    {
-      return NightSchedule(actor, gameState);
-    }
   }
 
   void AddQuipToAction(Actor actor, GameState gs, Action action)
@@ -1088,113 +1120,7 @@ class MayorBehaviour : NPCBehaviour
       action.Quip = "Today at least seems peaceful";
       _lastBark = DateTime.Now;
     }
-  }
-
-  Action DayTimeSchedule(Actor mayor, GameState gs)
-  {
-    Action action = new PassAction();
-
-    // The mayor wants to be hanging out in the town square
-    if (gs.Town.TownSquare.Contains(mayor.Loc))
-    {
-      // Pick a random move once in a while
-      if (gs.Rng.Next(4) == 0)
-      {
-        var loc = Util.RandomAdjLoc(mayor.Loc, gs);
-        var tile = gs.TileAt(loc);
-        if (tile.Passable() && !gs.ObjDb.Occupied(loc))
-        {
-          action = new MoveAction(gs, mayor, loc);
-          if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-          {
-            action.Quip = "Today at least seems peaceful";
-            _lastBark = DateTime.Now;
-          }
-          return action;
-        }
-      }
-    }
-    else if (_path.Count == 0)
-    {
-      var townSqaure = gs.Town.TownSquare.ToList();
-      Loc goal = PickDestination(gs.Wilderness, townSqaure, TravelCosts, gs.Rng);
-      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
-    }
-
-    return action;
-  }
-
-  Action EveningSchedule(Actor mayor, GameState gs)
-  {
-    // In the evening, the mayor will be in the tavern
-    if (gs.Town.Tavern.Contains(mayor.Loc))
-    {
-      var loc = Util.RandomAdjLoc(mayor.Loc, gs);
-      var tile = gs.TileAt(loc);
-      if (tile.Passable() && !gs.ObjDb.Occupied(loc))
-        return new MoveAction(gs, mayor, loc);
-    }
-    else if (_path.Count == 0)
-    {
-      var tavern = gs.Town.Tavern.ToList();
-      Loc goal = PickDestination(gs.Wilderness, tavern, TravelCosts, gs.Rng);
-      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
-    }
-
-    return new PassAction();
-  }
-
-  Action NightSchedule(Actor mayor, GameState gs)
-  {
-    int homeID = mayor.Stats[Attribute.HomeID].Curr;
-    var home = gs.Town.Homes[homeID];
-
-    if (!home.Contains(mayor.Loc))
-    {
-      var homeSqs = home.Where(sq => gs.TileAt(sq).Type == TileType.WoodFloor);
-      Loc goal = PickDestination(gs.Wilderness, [.. homeSqs], TravelCosts, gs.Rng);
-      _path = AStar.FindPath(gs.Wilderness, mayor.Loc, goal, TravelCosts);
-    }
-
-    return new PassAction();
-  }
-
-  public static Dictionary<TileType, int> TravelCosts
-  {
-    get
-    {
-      Dictionary<TileType, int> costs = [];
-      costs.Add(TileType.Grass, 1);
-      costs.Add(TileType.Sand, 1);
-      costs.Add(TileType.Dirt, 1);
-      costs.Add(TileType.Bridge, 1);
-      costs.Add(TileType.GreenTree, 1);
-      costs.Add(TileType.RedTree, 1);
-      costs.Add(TileType.OrangeTree, 1);
-      costs.Add(TileType.YellowTree, 1);
-      costs.Add(TileType.Conifer, 1);
-      costs.Add(TileType.StoneFloor, 1);
-      costs.Add(TileType.WoodFloor, 1);
-      costs.Add(TileType.OpenDoor, 1);
-      costs.Add(TileType.Well, 1);
-      costs.Add(TileType.ClosedDoor, 2);
-      costs.Add(TileType.Water, 3);
-
-      return costs;
-    }
-  }
-
-  static Loc PickDestination(Map map, List<Loc> options, Dictionary<TileType, int> passable, Random rng)
-  {
-    do
-    {
-      Loc goal = options[rng.Next(options.Count)];
-      Tile tile = map.TileAt(goal.Row, goal.Col);
-      if (passable.ContainsKey(tile.Type))
-        return goal;
-    }
-    while (true);
-  }
+  }  
 }
 
 class WidowerBehaviour: NPCBehaviour

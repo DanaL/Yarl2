@@ -209,6 +209,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public Map CurrentMap => Campaign!.Dungeons[CurrDungeonID].LevelMaps[CurrLevel];
   public bool InWilderness => CurrDungeonID == 0;
   public Map Wilderness => Campaign.Dungeons[0].LevelMaps[0];
+  public Map MapForLoc(Loc loc) => Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
   public Map MapForActor(Actor a) => Campaign.Dungeons[a.Loc.DungeonID].LevelMaps[a.Loc.Level];
 
   public void RememberLoc(Loc loc, Tile tile)
