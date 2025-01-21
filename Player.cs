@@ -671,7 +671,34 @@ class Player : Actor, IPerformer
     return new NullAction();
   }
 
-  public override Action DecideAction(GameState gameState)
+  public override void TakeTurn(GameState gs)
+  {
+    Action? action = DecideAction(gs);
+
+    if (action is NullAction)
+      return;
+
+    // One of those calls to PrepareFieldOfView() *HAS* to be redundant
+    ActionResult result;
+    do
+    {      
+      gs.PrepareFieldOfView();      
+      result = action!.Execute();
+
+      Energy -= CalcEnergyUsed(result.EnergyCost);
+      if (result.AltAction is not null)
+      {
+        result = result.AltAction.Execute();
+        Energy -= CalcEnergyUsed(result.EnergyCost);
+        action = result.AltAction;
+      }
+
+      gs.PrepareFieldOfView();
+    }
+    while (result.AltAction is not null);
+  }
+
+  public Action DecideAction(GameState gameState)
   {
     UserInterface ui = gameState.UIRef();
 

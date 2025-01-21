@@ -20,7 +20,7 @@ interface IPerformer
   double Energy { get; set; }
   double Recovery { get; set; }
   
-  Action DecideAction(GameState gameState);
+  void TakeTurn(GameState gs);
 }
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -353,8 +353,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
 
   public abstract Loc PickTargetLoc(GameState gamestate);
   public abstract Loc PickRangedTargetLoc(GameState gamestate);
-
-  public abstract Action DecideAction(GameState gameState);
+  public abstract void TakeTurn(GameState gs);
 
   public bool AbilityCheck(Attribute attr, int dc, Random rng)
   {
@@ -390,6 +389,27 @@ abstract class Actor : GameObj, IPerformer, IZLevel
       return false;
 
     return true;
+  }
+
+  protected double CalcEnergyUsed(double baseCost)
+  {    
+    // Maybe I should come up with a formal/better way to differentiate 
+    // between real in-game actions and things like opening inventory or
+    // looking athelp, etc?
+    if (baseCost == 0)
+      return 0;
+
+    // Note also there are some actions like Chatting, etc that
+    // shouldn't be made faster or slower by alacrity, but I'll
+    // worry about that later
+
+    foreach (var t in Traits.OfType<AlacrityTrait>())
+    {
+      baseCost -= t.Amt;
+    }
+
+    // I think boosts to speed should get you only so far
+    return Math.Max(0.35, baseCost);
   }
 }
 
@@ -448,7 +468,27 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public override Action DecideAction(GameState gameState) => _behaviour.CalcAction(this, gameState);
+  public override void TakeTurn(GameState gs)
+  {
+    Action? action = _behaviour.CalcAction(this, gs);
+    ActionResult result;
+    do
+    {      
+      result = action!.Execute();
+
+      // I don't think I need to look over IPerformer anymore? The concept of 
+      // items as performs is gone. I think?
+      Energy -= CalcEnergyUsed(result.EnergyCost);
+      if (result.AltAction is not null)
+      {
+        result = result.AltAction.Execute();
+        Energy -= CalcEnergyUsed(result.EnergyCost);
+        action = result.AltAction;
+      }
+    }
+    while (result.AltAction is not null);
+  } 
+
   public override Loc PickTargetLoc(GameState gameState)
   {
     return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;

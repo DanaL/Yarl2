@@ -810,49 +810,25 @@ abstract class UserInterface
 
   void TakeTurn(IPerformer performer, GameState gs)
   {
-    static double CalcEnergyUsed(double baseCost, IPerformer performer)
+    try
     {
-      if (performer is not Actor actor)
-        return baseCost;
-
-      // Maybe I should come up with a formal/better way to differentiate 
-      // between real in-game actions and things like opening inventory or
-      // looking athelp, etc?
-      if (baseCost == 0)
-        return 0;
-
-      // Note also there are some actions like Chatting, etc that
-      // shouldn't be made faster or slower by alacrity, but I'll
-      // worry about that later
-
-      foreach (var t in actor.Traits.OfType<AlacrityTrait>())
-      {
-        baseCost -= t.Amt;
-      }
-
-      // I think boosts to speed should get you only so far
-      return Math.Max(0.35, baseCost);
+      performer.TakeTurn(gs);
+      WriteAlerts();
     }
-
-    var action = performer.DecideAction(gs);
-    
-    if (action is NullAction)
+    catch (GameQuitException)
     {
-      // Player is idling
-      return;
-    }
+      WriteAlerts();
 
-    if (action is QuitAction)
-    {
-      // It feels maybe like overkill to use an exception here?
       if (InTutorial)
         // this returns us to the title screen instead of exiting the program
         throw new PlayerKilledException("");
       else
         throw new GameQuitException();
     }
-    else if (action is SaveGameAction)
+    catch (GameSaveException)
     {
+      WriteAlerts();
+
       bool success;
       try
       {
@@ -870,37 +846,6 @@ abstract class UserInterface
 
       if (success)
         throw new GameQuitException();
-    }    
-    else
-    {
-      ActionResult result;
-      do
-      {
-        if (performer is Player)
-        {
-          gs.PrepareFieldOfView();
-        }
-        result = action!.Execute();
-
-        // I don't think I need to look over IPerformer anymore? The concept of 
-        // items as performs is gone. I think?
-        double energyUsed = CalcEnergyUsed(result.EnergyCost, performer);
-        performer.Energy -= energyUsed;
-        if (result.AltAction is not null)
-        {
-          result = result.AltAction.Execute();
-          performer.Energy -= CalcEnergyUsed(result.EnergyCost, performer);
-          action = result.AltAction;
-        }
-
-        WriteAlerts();
-
-        if (performer is Player)
-        {
-          gs.PrepareFieldOfView();
-        }
-      }
-      while (result.AltAction is not null);
     }
   }
 

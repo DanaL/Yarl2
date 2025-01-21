@@ -977,6 +977,7 @@ class MapUtils
 }
 
 class GameQuitException : Exception { }
+class GameSaveException : Exception { }
 class GameNotLoadedException : Exception { }
 class PlayerKilledException(string message) : Exception(message) { }
 class VictoryException : Exception { }
