@@ -256,6 +256,17 @@ class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNo
 
 class Planner
 {
+  static HashSet<Loc> OnlyFloorsInArea(Map map, HashSet<Loc> area)
+  {
+    static bool IsFloor(Map map, Loc loc)
+    {
+      TileType tile = map.TileAt(loc.Row, loc.Col).Type;
+      return tile == TileType.WoodFloor || tile == TileType.StoneFloor;
+    }
+
+    return area.Where(l => IsFloor(map, l)).ToHashSet();
+  }
+
   static BehaviourNode GenerateMovePlan(GameState gs, HashSet<Loc> area)
   {
     BehaviourNode goalcondition = new InArea(area);
@@ -264,8 +275,8 @@ class Planner
     return new NavigateToGoal(goalcondition, pathBuilder);
   }
 
-  static BehaviourNode MayorDayTimePlan(Actor actor, GameState gs)
-  {    
+  static BehaviourNode MayorDayTimePlan(GameState gs)
+  {
     BehaviourNode movePlan = GenerateMovePlan(gs, gs.Town.TownSquare);
     BehaviourNode daytimeTest = new IsDaytime();
 
@@ -274,20 +285,21 @@ class Planner
     );
   }
 
-  static BehaviourNode MayorEveningPlan(Actor actor, GameState gs)
+  static BehaviourNode MayorEveningPlan(GameState gs)
   {
-    BehaviourNode movePlan = GenerateMovePlan(gs, gs.Town.Tavern);
+    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
+    BehaviourNode movePlan = GenerateMovePlan(gs, tavernFloors);
     BehaviourNode eveningTest = new IsEvening();
 
     return new Sequence(
-      [eveningTest, movePlan, new RepeatWhile(eveningTest, new WanderInArea(gs.Town.Tavern))]
+      [eveningTest, movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
     );
   }
 
   public static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
   {
-    BehaviourNode daytimePlan = MayorDayTimePlan(actor, gs);
-    BehaviourNode eveningPlan = MayorEveningPlan(actor, gs);
+    BehaviourNode daytimePlan = MayorDayTimePlan(gs);
+    BehaviourNode eveningPlan = MayorEveningPlan(gs);
 
     return new Selector([daytimePlan, eveningPlan]);
   }
