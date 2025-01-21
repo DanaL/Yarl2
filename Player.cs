@@ -671,7 +671,7 @@ class Player : Actor, IPerformer
     return new NullAction();
   }
 
-  public override Action TakeTurn(GameState gameState)
+  public override Action DecideAction(GameState gameState)
   {
     UserInterface ui = gameState.UIRef();
 

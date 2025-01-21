@@ -20,7 +20,7 @@ interface IPerformer
   double Energy { get; set; }
   double Recovery { get; set; }
   
-  Action TakeTurn(GameState gameState);
+  Action DecideAction(GameState gameState);
 }
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -354,7 +354,7 @@ abstract class Actor : GameObj, IPerformer, IZLevel
   public abstract Loc PickTargetLoc(GameState gamestate);
   public abstract Loc PickRangedTargetLoc(GameState gamestate);
 
-  public abstract Action TakeTurn(GameState gameState);
+  public abstract Action DecideAction(GameState gameState);
 
   public bool AbilityCheck(Attribute attr, int dc, Random rng)
   {
@@ -448,7 +448,7 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public override Action TakeTurn(GameState gameState) => _behaviour.CalcAction(this, gameState);
+  public override Action DecideAction(GameState gameState) => _behaviour.CalcAction(this, gameState);
   public override Loc PickTargetLoc(GameState gameState)
   {
     return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;

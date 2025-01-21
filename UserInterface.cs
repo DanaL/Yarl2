@@ -834,7 +834,7 @@ abstract class UserInterface
       return Math.Max(0.35, baseCost);
     }
 
-    var action = performer.TakeTurn(gs);
+    var action = performer.DecideAction(gs);
     
     if (action is NullAction)
     {
