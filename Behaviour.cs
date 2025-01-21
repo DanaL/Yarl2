@@ -21,15 +21,24 @@ interface IPathBuilder
   Stack<Loc> BuildPath(Loc start);
 }
 
-class PathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
+class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
 {
   HashSet<Loc> Area { get; set; } = area;
   GameState GS { get; set; } = gs;
 
   public Stack<Loc> BuildPath(Loc start)
   {
-    Loc goalLoc = PickLocInArea(Area);
-    return AStar.FindPath(GS.MapForLoc(start), start, goalLoc, TravelCosts, false);
+    List<Loc> locs = [..Area];
+    locs.Shuffle(GS.Rng);
+
+    foreach (Loc loc in locs)
+    {
+      Stack<Loc> path = AStar.FindPath(GS.MapForLoc(start), start, loc, TravelCosts, false);
+      if (path.Count > 0)
+        return path;
+    }
+
+    return [];
   }
 
   Loc PickLocInArea(HashSet<Loc> locs)
@@ -250,7 +259,7 @@ class Planner
   static BehaviourNode GenerateMovePlan(GameState gs, HashSet<Loc> area)
   {
     BehaviourNode goalcondition = new InArea(area);
-    PathToArea pathBuilder = new(area, gs);
+    FindPathToArea pathBuilder = new(area, gs);
     
     return new NavigateToGoal(goalcondition, pathBuilder);
   }
