@@ -501,7 +501,7 @@ class Player : Actor
       }
     }
 
-    return new MoveAction(gs, this, Loc.Move(dr, dc));
+    return new BumpAction(gs, this, Loc.Move(dr, dc));
   }
 
   // 'Running' just means repeated moving
