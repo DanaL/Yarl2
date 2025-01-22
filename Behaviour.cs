@@ -166,18 +166,19 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
   {
     Map map = gs.MapForActor(mob);
 
-    List<Loc> adjs = Util.Adj8Locs(mob.Loc)
-                         .Where(l => Area.Contains(l) && LocOpen(map, gs, l))
-                         .ToList();
+    List<Loc> adjs = [.. Util.Adj8Locs(mob.Loc).Where(l => Area.Contains(l) && LocOpen(map, gs, l))];
 
     if (adjs.Count > 0)
     {
       Loc loc = adjs[gs.Rng.Next(adjs.Count)];
       
-      mob.ExecuteAction(new MoveAction(gs, mob, loc));
+      Action mv = new MoveAction(gs, mob, loc);
+      string bark = mob.GetBark(gs);
+      if (bark != "")
+        mv.Quip = bark;
+      mob.ExecuteAction(mv);
       return PlanStatus.Running;
     }
-
 
     return PlanStatus.Failure;
   }
@@ -207,6 +208,16 @@ class IsEvening : BehaviourNode
   {
     var (hour, _) = gs.CurrTime();
     return hour >= 19 && hour < 22 ? PlanStatus.Success
+                                   : PlanStatus.Failure;
+  }
+}
+
+class IsNight : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    var (hour, _) = gs.CurrTime();
+    return hour >= 22 || hour <= 6 ? PlanStatus.Success
                                    : PlanStatus.Failure;
   }
 }
@@ -299,12 +310,26 @@ class Planner
     );
   }
 
+  static BehaviourNode MayorNightTimePlan(Actor actor, GameState gs)
+  {
+    int homeId = actor.Stats[Attribute.HomeID].Curr;
+    HashSet<Loc> homeSqs = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
+    BehaviourNode movePlan = GenerateMovePlan(gs, homeSqs);
+    BehaviourNode nightTest = new IsNight();
+
+    return new Sequence(
+      [nightTest, movePlan, new RepeatWhile(nightTest, new WanderInArea(homeSqs))]
+
+    );
+  }
+
   static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
   {
     BehaviourNode daytimePlan = MayorDayTimePlan(gs);
     BehaviourNode eveningPlan = MayorEveningPlan(gs);
+    BehaviourNode nighttimePlan = MayorNightTimePlan(actor, gs);
 
-    return new Selector([daytimePlan, eveningPlan]);
+    return new Selector([daytimePlan, eveningPlan, nighttimePlan]);
   }
 
   static Loc PickLocInArea(HashSet<Loc> locs, GameState gs)
@@ -494,6 +519,7 @@ interface IBehaviour
 {
   Action CalcAction(Mob actor, GameState gameState);
   (Action, Inputer?) Chat(Mob actor, GameState gameState);
+  string GetBark(Mob actor, GameState gs);
 }
 
 class NullBehaviour : IBehaviour
@@ -503,6 +529,7 @@ class NullBehaviour : IBehaviour
 
   public Action CalcAction(Mob actor, GameState gameState) => throw new NotImplementedException();  
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => throw new NotImplementedException();
+  public string GetBark(Mob actor, GameState gs) => "";
 }
 
 // I think I'll likely eventually merge this into IBehaviour
@@ -515,6 +542,8 @@ interface IDialoguer
 class MonsterBehaviour : IBehaviour
 {
   readonly Dictionary<string, ulong> _lastUse = [];
+
+  public string GetBark(Mob actor, GameState gs) => "";
 
   static Action CalcMoveAction(Mob mob, GameState gs)
   {
@@ -710,6 +739,8 @@ class VillagePupBehaviour : IBehaviour
     return true;
   }
 
+  public string GetBark(Mob actor, GameState gs) => "";
+
   static bool Passable(TileType type) => type switch
   {
     TileType.Grass => true,
@@ -880,6 +911,12 @@ class SmithBehaviour : IBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
+  // Eventually just replace/merge GetPark and PickBark
+  public string GetBark(Mob actor, GameState gs) 
+  {
+    return PickBark(actor, gs.Rng);
+  }
+
   static string PickBark(Mob smith, Random rng)
   {
     var items = smith.Inventory.UsedSlots()
@@ -1010,6 +1047,9 @@ class GrocerBehaviour : IBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
+  // Merge/replace with PickBark()
+  public string GetBark(Mob actor, GameState gs) => PickBark(gs.Rng);
+
   static string PickBark(Random rng)
   {
     int roll = rng.Next(3);
@@ -1080,6 +1120,8 @@ class NPCBehaviour : IBehaviour, IDialoguer
     return new PassAction();    
   }
 
+  public virtual string GetBark(Mob actor, GameState gs) => "";
+
   public virtual (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
     if (gameState.Player.HasTrait<ShunnedTrait>())
@@ -1125,19 +1167,33 @@ class MayorBehaviour : NPCBehaviour
   
   public override Action CalcAction(Mob actor, GameState gameState)
   {
-    //CurrPlan ??= Planner.CreateMayorPlan(actor, gameState);
-
-    //var (result, action) = CurrPlan.Execute(actor, gameState);
-    //if (result == PlanStatus.Running && action is not null)
-    //{
-    //  AddQuipToAction(actor, gameState, action);
-    //  return action;
-    //}
-    
-    //Action passAction = new PassAction();
-    //AddQuipToAction(actor, gameState, passAction);
-
     return new PassAction();
+  }
+
+  public override string GetBark(Mob actor, GameState gs)
+  {
+    string bark = "";
+
+    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    {
+      _lastBark = DateTime.Now;
+      var (hour, _) = gs.CurrTime();
+      if (hour >= 7 && hour < 19)
+      {
+        bark = "Today at least seems peaceful";
+      }
+      else if (gs.Town.Tavern.Contains(actor.Loc))
+      {
+        bark = gs.Rng.Next(3) switch
+        {
+          0 => "Maybe we should have a music festival in town?",
+          1 => "Ah the sounds of cheer and commerce!",
+          _ => "Drink and be merry, friends!"
+        };        
+      }
+    }
+    
+    return bark;
   }
 
   void AddQuipToAction(Actor actor, GameState gs, Action action)

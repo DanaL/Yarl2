@@ -130,6 +130,8 @@ class PrinceOfRatsBehaviour : IBehaviour
   Dictionary<string, ulong> _lastUse = [];
   DateTime _lastQuip = DateTime.Now;
 
+  public string GetBark(Mob actor, GameState gs) => "";
+  
   static Action CalcMoveAction(Mob mob, GameState gs)
   {
     if (mob.HasTrait<ConfusedTrait>())

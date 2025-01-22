@@ -479,6 +479,8 @@ class Mob : Actor
     while (result.AltAction is not null);
   }
 
+  public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);
+
   public override void TakeTurn(GameState gs)
   {
     if (HasTrait<BehaviourTreeTrait>())
