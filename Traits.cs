@@ -1837,16 +1837,23 @@ class LameTrait : TemporaryTrait
     return [];
   }
 
+  public void Remove(GameState gs, Actor victim)
+  {
+    victim.Recovery += 0.25;
+    victim.Stats[Attribute.Dexterity].Change(1);
+    victim.Traits.Remove(this);
+    Expired = true;
+    gs.StopListening(GameEventType.EndOfRound, this);
+
+    if (victim is Player)
+      gs.UIRef().AlertPlayer("Your leg feels better.");
+  }
+
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
-      victim.Recovery += 0.25;
-      victim.Stats[Attribute.Dexterity].Change(1);
-      victim.Traits.Remove(this);
-      Expired = true;
-      gs.StopListening(GameEventType.EndOfRound, this);
-      gs.UIRef().AlertPlayer("Your leg feels better.");      
+      Remove(gs, victim);
     }      
   }
 }

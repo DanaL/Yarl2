@@ -2164,6 +2164,11 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     result.Succcessful = true;
     result.EnergyCost = 1.0;
 
+    if (Actor.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
+    {
+      lame.Remove(GameState, Actor);
+    }
+
     return result;
   }
 }
