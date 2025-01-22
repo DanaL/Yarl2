@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class ActionResult
 {
-  public bool Complete { get; set; } = false;
+  public bool Succcessful { get; set; } = false;
   public Action? AltAction { get; set; }
   public double EnergyCost { get; set; } = 0.0;
   
@@ -55,7 +55,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (GameState!.ObjDb.Occupant(Target) is Actor target)
     {
@@ -80,7 +80,7 @@ class GulpAction(GameState gs, Actor actor, GulpTrait gt) : Action(gs, actor)
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     UserInterface ui = GameState!.UIRef();
@@ -157,10 +157,10 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
         pts.Add(pt);
         ActionResult attackResult = Battle.MissileAttack(Actor!, occ, GameState, _ammo, _attackBonus, new ArrowAnimation(GameState!, pts, _ammo.Glyph.Lit));
         creatureTargeted = true;
-        targetHit = attackResult.Complete;
+        targetHit = attackResult.Succcessful;
 
         result.EnergyCost = attackResult.EnergyCost;
-        if (attackResult.Complete)
+        if (attackResult.Succcessful)
         {
           pts = [];
           break;
@@ -199,7 +199,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int at
 
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = true };
+    var result = new ActionResult() { Succcessful = true };
 
     if (_loc is Loc loc)
     {
@@ -313,7 +313,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
@@ -369,7 +369,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
   {
     UserInterface ui = GameState!.UIRef();
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     if (GameState.LastPlayerFoV.Contains(Actor!.Loc))
@@ -465,7 +465,7 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       ui.AlertPlayer("Bam!");
       result.EnergyCost = 1.0;
-      result.Complete = false;
+      result.Succcessful = false;
 
       int dc = 14 + gs.CurrLevel/4;
       int roll = gs.Rng.Next(1, 21) + Actor!.Stats[Attribute.Strength].Curr;
@@ -524,7 +524,7 @@ class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
     UserInterface ui = GameState!.UIRef();
 
     Map map = GameState!.CurrentMap;
@@ -633,7 +633,7 @@ abstract class PortalAction : Action
     if (start.DungeonID != portal.Destination.DungeonID)
       GameState.UIRef().AlertPlayer(GameState.CurrentDungeon.ArrivalMessage);
     
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
   }
 }
@@ -642,7 +642,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
 {
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = false };
+    var result = new ActionResult() { Succcessful = false };
 
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
@@ -664,7 +664,7 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
 {
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = false };
+    var result = new ActionResult() { Succcessful = false };
 
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
@@ -713,7 +713,7 @@ class UpgradeItemAction : Action
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = Total > 0;
+    result.Succcessful = Total > 0;
     result.EnergyCost = 1.0;
 
     var (item, _) = GameState!.Player.Inventory.ItemAt(ItemSlot);
@@ -768,7 +768,7 @@ class RepairItemAction : Action
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = Total > 0;
+    result.Succcessful = Total > 0;
     result.EnergyCost = 1.0;
 
     GameState!.Player.Inventory.Zorkmids -= Total;
@@ -826,7 +826,7 @@ class InnkeeperServiceAction : Action
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     if (Service == "Booze")
@@ -880,7 +880,7 @@ class PriestServiceAction : Action
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     if (Service == "Absolution")
@@ -915,7 +915,7 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     if (Service == "magic101")
@@ -989,7 +989,7 @@ class ShoppingCompletedAction : Action
   {
     var result = new ActionResult()
     {
-      Complete = _invoice > 0,
+      Succcessful = _invoice > 0,
       EnergyCost = 1.0
     };
 
@@ -1035,7 +1035,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 {  
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = false };
+    var result = new ActionResult() { Succcessful = false };
 
     var other = GameState!.ObjDb.Occupant(Loc);
 
@@ -1051,7 +1051,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
       {
         string s = $"{other.FullName.Capitalize()} turns away from you.";
         GameState.UIRef().AlertPlayer(s);
-        result.Complete = true;
+        result.Succcessful = true;
         result.EnergyCost = 1.0;
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
         return result;
@@ -1061,7 +1061,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
         GameState.Player.ReplacePendingAction(chatAction, acc!);
       }
 
-      return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 
     return result;
@@ -1079,7 +1079,7 @@ class CloseDoorAction : DirectionalAction
 
   public override ActionResult Execute()
   {
-    ActionResult result = new() { Complete = false, EnergyCost = 0.0 };
+    ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
     UserInterface ui = GameState!.UIRef();
     Tile door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
@@ -1100,7 +1100,7 @@ class CloseDoorAction : DirectionalAction
       if (d.Open)
       {
         d.Open = false;
-        result.Complete = true;
+        result.Succcessful = true;
         result.EnergyCost = 1.0;
         ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, Verb.Close, GameState!));
       }
@@ -1130,7 +1130,7 @@ class OpenDoorAction : DirectionalAction
 
   public override ActionResult Execute()
   {
-    ActionResult result = new() { Complete = false };
+    ActionResult result = new() { Succcessful = false };
     Tile door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
     UserInterface ui = GameState.UIRef();
 
@@ -1138,7 +1138,7 @@ class OpenDoorAction : DirectionalAction
     {
       if (d.Type == TileType.LockedDoor)
       {
-        result.Complete = true;
+        result.Succcessful = true;
         result.EnergyCost = 1.0;
 
         ui.AlertPlayer("The door is locked!");
@@ -1146,7 +1146,7 @@ class OpenDoorAction : DirectionalAction
       else if (!d.Open)
       {
         d.Open = true;
-        result.Complete = true;
+        result.Succcessful = true;
         result.EnergyCost = 1.0;
         ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, Verb.Open, GameState!));        
       }
@@ -1178,7 +1178,7 @@ class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmg
 
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
 
     if (GameState!.ObjDb.GetObj(VictimId) is Actor victim)
     {
@@ -1210,7 +1210,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
   
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
 
     GameState!.ClearMenu();
     var itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
@@ -1222,13 +1222,13 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (!freeSlot)
     {
       ui.AlertPlayer("There's no room in your inventory!");
-      return new ActionResult() { Complete = false };
+      return new ActionResult() { Succcessful = false };
     }
 
     if (item.HasTrait<AffixedTrait>())
     {
       ui.AlertPlayer("You cannot pick that up!");
-      return new ActionResult() { EnergyCost = 0.0, Complete = false };
+      return new ActionResult() { EnergyCost = 0.0, Succcessful = false };
     }
 
     // First, is there anything preventing the actor from picking items up
@@ -1244,7 +1244,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         {
           var txt = $"{item.FullName.DefArticle().Capitalize()} {MsgFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
-          return new ActionResult() { EnergyCost = 1.0, Complete = false };
+          return new ActionResult() { EnergyCost = 1.0, Succcessful = false };
         }
         else
         {
@@ -1368,7 +1368,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
     foreach (string s in msgs)
       GameState!.UIRef().AlertPlayer(s);
 
-    return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
   }
 }
 
@@ -1377,7 +1377,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     GameState gs = GameState!;
@@ -1505,7 +1505,7 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
     if (Actor is Player player)
     {
       Loc playerLoc = GameState!.Player.Loc;
-      result.Complete = true;
+      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
@@ -1552,7 +1552,7 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
     if (Actor is Player player)
     {
       Loc playerLoc = GameState!.Player.Loc;
-      result.Complete = true;
+      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       int topScreenRow = playerLoc.Row - UserInterface.ViewHeight / 2;
@@ -1647,7 +1647,7 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
     // It's probably a bug if a monster invokes this action??
     if (Actor is Player player)
     {
-      result.Complete = true;
+      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       if (GameState!.InWilderness)
@@ -1725,7 +1725,7 @@ class MirrorImageAction : Action
     if (options.Count == 0)
     {
       GameState!.UIRef().AlertPlayer("A spell fizzles...");
-      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     }
 
     List<Mob> images = [];
@@ -1751,7 +1751,7 @@ class MirrorImageAction : Action
     GameState.SwapActors(Actor!, swap);
 
     var result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
     GameState.UIRef().AlertPlayer("How puzzling!");
 
@@ -1764,7 +1764,7 @@ class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     var gs = GameState!;
@@ -1791,7 +1791,7 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
     UserInterface ui = GameState!.UIRef();
 
@@ -1832,7 +1832,7 @@ class DrainTorchAction(GameState gs, Actor caster, Loc target) : Action(gs, cast
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
     UserInterface ui = GameState!.UIRef();
 
@@ -1886,7 +1886,7 @@ class EntangleAction(GameState gs, Actor caster) : Action(gs, caster)
     string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Entangle!";
     GameState!.UIRef().AlertPlayer(txt);
 
-    return new ActionResult() { Complete = true,EnergyCost = 1.0 };
+    return new ActionResult() { Succcessful = true,EnergyCost = 1.0 };
   }
 }
 
@@ -1906,7 +1906,7 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
     string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Firebolt!";
     GameState!.UIRef().AlertPlayer(txt);
 
-    return new ActionResult() { Complete = true, AltAction = attack, EnergyCost = 0.0 };
+    return new ActionResult() { Succcessful = true, AltAction = attack, EnergyCost = 0.0 };
   }
 }
 
@@ -1942,7 +1942,7 @@ class WebAction : Action
       string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
       GameState!.UIRef().AlertPlayer(txt);
     }
-    return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
   }
 }
 
@@ -1956,7 +1956,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     if (player.HasTrait<RecallTrait>() || player.Loc.DungeonID == 0)
     {
       GameState!.UIRef().AlertPlayer("You shudder for a moment.");
-      result.Complete = true;
+      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       return result;
@@ -1972,7 +1972,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     GameState.Player.Traits.Add(recall);
 
     GameState.UIRef().AlertPlayer("The air crackles around you.");
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     return result;
@@ -2042,7 +2042,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     if (sqs.Count == 0)
     {
       GameState!.UIRef().AlertPlayer("A spell fizzles...");
-      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     }
     else
     {
@@ -2067,7 +2067,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
 
       ActionResult result = base.Execute();
-      result.Complete = false;
+      result.Succcessful = false;
       result.EnergyCost = 0.0;
       result.AltAction = mv;
       if (GameState.LastPlayerFoV.Contains(Actor.Loc))
@@ -2085,7 +2085,7 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
     if (Actor is Player && !Actor.HasTrait<PoisonedTrait>())
     {
       GameState!.UIRef().AlertPlayer("That tasted not bad.");
-      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     }
 
     foreach (var t in Actor!.Traits.OfType<PoisonedTrait>())
@@ -2096,7 +2096,7 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
     string msg = $"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.";
     GameState!.UIRef().AlertPlayer(msg);
 
-    return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
   }
 }
 
@@ -2106,7 +2106,7 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
     UserInterface ui = GameState!.UIRef();
 
     bool canSeeLoc = GameState!.LastPlayerFoV.Contains(Actor!.Loc);
@@ -2161,7 +2161,7 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     GameState!.UIRef().RegisterAnimation(healAnim);
 
     GameState!.UIRef().AlertPlayer(txt);
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     return result;
@@ -2186,7 +2186,7 @@ class SootheAction(GameState gs, Actor target, int amount) : Action(gs, target)
       nerve.Change(Amount);
     }
     
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     return result;
@@ -2248,7 +2248,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     foreach (string s in msgs)
       GameState!.UIRef().AlertPlayer(s);
 
-    return new ActionResult() { Complete = successful, EnergyCost = cost };
+    return new ActionResult() { Succcessful = successful, EnergyCost = cost };
   }
   
   public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
@@ -2262,7 +2262,7 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
   public override ActionResult Execute()
   {
     GameState!.UIRef().ClosePopup();
-    ActionResult result = new() { Complete = true, EnergyCost = 1.0 };
+    ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
     var (item, itemCount) = Actor!.Inventory.ItemAt(_slot);
     if (item is null)
       return result; // This should never nhappen
@@ -2322,7 +2322,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     var ammo = Actor!.Inventory.Remove(_slot, 1).First();
     if (ammo != null)
     {
@@ -2344,7 +2344,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
           // neutral NPCs
           ActionResult attackResult = Battle.MissileAttack(Actor, occ, GameState, ammo, 0, null);
           result.EnergyCost = attackResult.EnergyCost;
-          if (attackResult.Complete)
+          if (attackResult.Succcessful)
           {
             break;
           }
@@ -2390,7 +2390,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
       player.FireReadedBow(item, GameState);
       
       result.EnergyCost = 0.0;
-      result.Complete = false;
+      result.Succcessful = false;
     }
 
     return result;
@@ -2411,13 +2411,13 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var (item, _) = player!.Inventory.ItemAt(Choice);
     if (item is null)
     {
-      var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
+      var result = new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
       GameState.UIRef().AlertPlayer("That doesn't make sense!");
       return result;
     }
     else if (item.Type == ItemType.Armour && item.Equipped)
     {
-      var result = new ActionResult() { Complete = false, EnergyCost = 0.0 };
+      var result = new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
       GameState.UIRef().AlertPlayer("You're wearing that!");
       return result;
     }
@@ -2429,7 +2429,7 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var acc = new Aimer(GameState, player.Loc, range);
     player.ReplacePendingAction(action, acc);
 
-    return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+    return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
   }
 
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
@@ -2450,7 +2450,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (inventory.Zorkmids == 0)
       {
         GameState.UIRef().AlertPlayer("You have no money!");
-        return new ActionResult() { Complete = false };
+        return new ActionResult() { Succcessful = false };
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
       ui.SetPopup(new Popup("How much?", "", -1, -1));
@@ -2458,11 +2458,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropMoney, acc);
-        return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+        return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
       }
       else
         // Will monsters ever just decide to drop money?
-        return new ActionResult() { Complete = true };
+        return new ActionResult() { Succcessful = true };
     }
 
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
@@ -2472,12 +2472,12 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item.Equipped && item.Type == ItemType.Armour)
     {
       GameState.UIRef().AlertPlayer("You cannot drop something you are wearing.");
-      return new ActionResult() { Complete = false };
+      return new ActionResult() { Succcessful = false };
     }
     if (item.Equipped && item.Type == ItemType.Ring)
     {
       GameState.UIRef().AlertPlayer("You'll need to take it off first.");
-      return new ActionResult() { Complete = false };
+      return new ActionResult() { Succcessful = false };
     }
     else if (itemCount > 1)
     {
@@ -2488,11 +2488,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropStackAction, acc);
-        return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+        return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
       }
       else
         // When monsters can drop stuff I guess I'll have to handle that here??
-        return new ActionResult() { Complete = true };
+        return new ActionResult() { Succcessful = true };
     }
     else
     {
@@ -2503,7 +2503,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.ItemDropped(item, Actor.Loc);
       item.Equipped = false;
 
-      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     }
   }
 
@@ -2535,7 +2535,7 @@ class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.UIRef().AlertPlayer(s);      
     }
 
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     return result;
@@ -2551,7 +2551,7 @@ class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     GameState!.ClearMenu();
@@ -2588,7 +2588,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item is null)
     {
       GameState.UIRef().AlertPlayer("You cannot equip that!");
-      return new ActionResult() { Complete = false };
+      return new ActionResult() { Succcessful = false };
     }
 
     bool equipable = item.Type switch
@@ -2606,7 +2606,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     if (!equipable)
     {
       GameState.UIRef().AlertPlayer("You cannot equip that!");
-      return new ActionResult() { Complete = false };
+      return new ActionResult() { Succcessful = false };
     }
 
     var (equipResult, conflict) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
@@ -2616,7 +2616,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
         s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         GameState.UIRef().AlertPlayer(s);
-        result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
 
         if (item.HasTrait<CursedTrait>())
         {
@@ -2626,31 +2626,31 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         break;
       case EquipingResult.Cursed:
         GameState.UIRef().AlertPlayer("You cannot remove it! It seems to be cursed!");
-        result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.Unequipped:
         GameState.UIRef().AlertPlayer(MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, GameState));
-        result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.TwoHandedConflict:
         GameState.UIRef().AlertPlayer("You cannot wear a shield with a two-handed weapon!");
-        result = new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
         break;
       case EquipingResult.ShieldConflict:
         GameState.UIRef().AlertPlayer("You cannot use a two-handed weapon with a shield!");
-        result = new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
         break;
       case EquipingResult.TooManyRings:
         GameState.UIRef().AlertPlayer("You are already wearing two rings!");
-        result = new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
         break;
       case EquipingResult.TooManyTalismans:
         GameState.UIRef().AlertPlayer("You may only use two talismans at a time!");
-        result = new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
         break;
       case EquipingResult.NoFreeHand:
         GameState.UIRef().AlertPlayer("You have no free hands!");
-        result = new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        result = new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
         break;
       default:
         string msg = "You are already wearing ";
@@ -2664,7 +2664,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
           _ => "some armour."
         };
         GameState.UIRef().AlertPlayer(msg);
-        result = new ActionResult() { Complete = true };
+        result = new ActionResult() { Succcessful = true };
         break;
     }
 
@@ -2698,7 +2698,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     // Fireball shoots toward the target and then explodes, but its path 
     // may be interrupted
@@ -2774,7 +2774,7 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
   {
     var result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     Item ray = new()
     {
@@ -2830,7 +2830,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   {
     var result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     Item ray = new()
     {
@@ -2881,7 +2881,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     Item missile = new()
     {
@@ -2905,7 +2905,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
         // attack bonus
         int attackMod = 5;
         var attackResult = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE));        
-        if (attackResult.Complete)
+        if (attackResult.Succcessful)
         {
           pts = [];
           break;
@@ -2980,7 +2980,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (GameState!.ObjDb.Occupant(_target) is Actor victim)
     {
@@ -3026,7 +3026,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
 
     if (GameState!.ObjDb.Occupant(_target) is Actor target)
@@ -3040,7 +3040,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
         var healAction = new HealAction(GameState, target, 6, 2);
         result.AltAction = healAction;
         result.EnergyCost = 0.0;
-        result.Complete = false;
+        result.Succcessful = false;
       }
 
       if (_source is WandTrait wand)
@@ -3092,7 +3092,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
   {
     ActionResult result = new()
     {
-      Complete = false,
+      Succcessful = false,
       EnergyCost = 0.0
     };
 
@@ -3168,7 +3168,7 @@ sealed class PassAction : Action
   {
     base.Execute();
 
-    return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
   }      
 }
 
@@ -3185,7 +3185,7 @@ class CloseMenuAction : Action
   public override ActionResult Execute()
   {
     GameState!.ClearMenu();
-    return new ActionResult() { Complete = true, EnergyCost = _energyCost };
+    return new ActionResult() { Succcessful = true, EnergyCost = _energyCost };
   }
 }
 

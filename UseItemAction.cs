@@ -27,7 +27,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       if (equipResult != EquipingResult.Equipped)
       {
         GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
-        result.Complete = false;
+        result.Succcessful = false;
         result.EnergyCost = 0.0;
         return result;
       }
@@ -45,7 +45,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         var attackAction = new MeleeAttackAction(GameState, Actor, target.Loc);
         result.AltAction = attackAction;
-        result.Complete = false;
+        result.Succcessful = false;
         return result;
       }
     }
@@ -61,7 +61,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         var attackAction = new MeleeAttackAction(GameState, Actor, targetLoc);
         GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
         result.AltAction = attackAction;
-        result.Complete = false;
+        result.Succcessful = false;
         return result;
       }
       else
@@ -74,7 +74,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       return result;
     }
 
-    result.Complete = true;
+    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     Tile tile = GameState!.TileAt(targetLoc);
@@ -173,7 +173,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits = digger.Traits.Where(t => t is not InPitTrait).ToList();
 
       result.AltAction = new MoveAction(gs, digger, loc);
-      result.Complete = false;
+      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
   }
@@ -428,24 +428,24 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
     if (tile.Type == TileType.VaultDoor)
     {      
       ui.AlertPlayer("That door requires a special key.");
-      result.Complete = false;
+      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else if (tile.Type == TileType.OpenDoor)
     {
       ui.AlertPlayer("That door is not closed.");
-      result.Complete = false;
+      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
     {
       ui.AlertPlayer("You find no lock there.");
-      result.Complete = false;
+      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else 
     {
-      result.Complete = true;
+      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
@@ -507,7 +507,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (!adj)
       {
         GameState!.UIRef().AlertPlayer("You see nowhere to use that key.");
-        return new ActionResult() { Complete = true, EnergyCost = 0.0 };
+        return new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
       }
 
       GameState!.UIRef().AlertPlayer("The metal doors swing open.");
@@ -518,7 +518,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.RemoveByID(key.ID);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
-      return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     }
 
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
@@ -544,7 +544,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       GameState!.ClearMenu();
       ((Player)Actor).FireReadedBow(item, GameState);      
-      return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 
     if (IsUseableTool(item))
@@ -556,7 +556,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       else
         ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer(GameState));
 
-      return new ActionResult() { Complete = false, EnergyCost = 0.0 };
+      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 
     bool torch = item.HasTrait<TorchTrait>();
@@ -578,7 +578,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         {
           string txt = $"{Actor.FullName} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
           GameState.UIRef().AlertPlayer(txt);
-          return new ActionResult() { Complete = true, EnergyCost = 1.0 };
+          return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         }
       }
 
@@ -591,7 +591,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         Actor.Inventory.Add(item, Actor.ID);
       }
 
-      var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+      var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
       if (item.HasTrait<EdibleTrait>())
       {
         string s;
@@ -612,13 +612,13 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       foreach (IUSeable trait in useableTraits)
       {
         var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
-        result.Complete = useResult.Successful;
+        result.Succcessful = useResult.Successful;
         GameState.UIRef().AlertPlayer(useResult.Message);
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
         {
-          result.Complete = false;
+          result.Succcessful = false;
           result.AltAction = useResult.ReplacementAction;
           result.EnergyCost = 0.0;
         }
@@ -658,7 +658,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("You don't know a way to use that!");
       return new ActionResult() 
       { 
-        Complete = true, 
+        Succcessful = true, 
         EnergyCost = 0.0 };
     }
   }

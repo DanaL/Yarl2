@@ -482,7 +482,7 @@ class Battle
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
   {
-    var result = new ActionResult() { Complete = true, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
     if (weapon is not null)
@@ -706,7 +706,7 @@ class Battle
   // bonsuses related to that here
   public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
   {
-    var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (attacker.HasTrait<TipsyTrait>())
@@ -721,7 +721,7 @@ class Battle
         gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, ammo, gs, result);
 
-      result.Complete = true;
+      result.Succcessful = true;
     }
     else
     {
@@ -741,7 +741,7 @@ class Battle
   // going to merge them just yet in case they diverge as I develop more spells
   public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation? anim)
   {
-    var result = new ActionResult() { Complete = false, EnergyCost = 1.0 };
+    var result = new ActionResult() { Succcessful = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
     if (roll >= target.AC)
@@ -749,7 +749,7 @@ class Battle
       if (anim is not null)
         gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, spell, gs, result);
-      result.Complete = true;
+      result.Succcessful = true;
     }
     else
     {

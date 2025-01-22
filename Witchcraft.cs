@@ -20,7 +20,7 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
     if (magicPoints.Curr < mpCost)
     {
       result.EnergyCost = 0.0;
-      result.Complete = false;
+      result.Succcessful = false;
       GameState!.UIRef().AlertPlayer("You don't have enough mana!");
       return false;
     }
@@ -39,7 +39,7 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (!CheckCost(1, 10, result))
       return result;
@@ -70,7 +70,7 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
         pts.Add(pt);
 
         var attackResult = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
-        if (attackResult.Complete)
+        if (attackResult.Succcessful)
         {
           pts = [];
           break;
@@ -99,7 +99,7 @@ class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (!CheckCost(2, 25, result))
       return result;
@@ -120,7 +120,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (!CheckCost(5, 15, result))
       return result;
@@ -175,7 +175,7 @@ class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Complete = true;
+    result.Succcessful = true;
 
     if (!CheckCost(2, 20, result))
       return result;
