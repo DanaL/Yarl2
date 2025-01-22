@@ -54,7 +54,7 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
       Dictionary<TileType, int> costs = [];
       costs.Add(TileType.Grass, 1);
       costs.Add(TileType.Sand, 1);
-      costs.Add(TileType.Dirt, 1);
+      costs.Add(TileType.Dirt, 0);
       costs.Add(TileType.Bridge, 1);
       costs.Add(TileType.GreenTree, 1);
       costs.Add(TileType.RedTree, 1);
