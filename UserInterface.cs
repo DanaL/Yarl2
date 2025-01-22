@@ -664,56 +664,62 @@ abstract class UserInterface
     if (!statuses.Contains("GRAPPLED") && gs.Player.HasActiveTrait<GrappledTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "GRAPPLED")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("GRAPPLED");
     }
     if (!statuses.Contains("PARALYZED") && gs.Player.HasActiveTrait<ParalyzedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "PARALYZED")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("PARALYZED");
     }
     if (!statuses.Contains("CONFUSED") && gs.Player.HasActiveTrait<ConfusedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "CONFUSED")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("CONFUSED");
     }
     if (gs.Player.HasActiveTrait<ExhaustedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "EXHAUSTED")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("EXHAUSTED");
+    }
+    if (gs.Player.HasActiveTrait<LameTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "LIMPING")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("LIMPING");
     }
     if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
     {      
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PURPLE, "TELEPATHIC")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TELEPATHIC");
     }
     if (!statuses.Contains("LEVITATING") && gs.Player.HasActiveTrait<LevitationTrait>())
     {
       // Maybe change the colour if the effect is going to expire soon?
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "LEVITATING")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("LEVITATING");
     }
     if (!statuses.Contains("BLIND") && gs.Player.HasTrait<BlindTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREY, "BLIND")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("BLIND");
     }
     if (!statuses.Contains("TIPSY") && gs.Player.HasTrait<TipsyTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "TIPSY")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TIPSY");
     }
     if (!statuses.Contains("AFRAID") && gs.Player.HasTrait<FrightenedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "AFRAID")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("AFRAID");
     }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
