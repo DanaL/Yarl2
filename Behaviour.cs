@@ -9,9 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Yarl2;
 
@@ -238,7 +236,12 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
       Tile prevTile = gs.TileAt(PrevLoc);
 
       Action action;
-      if (nextTile is Door door && !door.Open)
+      if (gs.ObjDb.Occupied(next))
+      {
+        mob.ExecuteAction(new PassAction(gs, mob) { Quip = "Excuse me" });
+        return PlanStatus.Failure;
+      }
+      else if (nextTile is Door door && !door.Open)
       {
         action = new OpenDoorAction(gs, mob, next);
       }
