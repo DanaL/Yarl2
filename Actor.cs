@@ -457,7 +457,7 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public void ExecuteAction(Action action)
+  public bool ExecuteAction(Action action)
   {
     Action? currAction = action;
 
@@ -477,6 +477,8 @@ class Mob : Actor
       }
     }
     while (result.AltAction is not null);
+
+    return result.Succcessful;
   }
 
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);

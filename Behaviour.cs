@@ -9,7 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Yarl2;
 
@@ -222,6 +224,44 @@ class IsNight : BehaviourNode
   }
 }
 
+class WalkPath(Stack<Loc> path) : BehaviourNode
+{
+  Stack<Loc> Path { get; set; } = path;
+  Loc PrevLoc { get; set; }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (Path.Count > 0)
+    {
+      Loc next = Path.Peek();
+      Tile nextTile = gs.TileAt(next);
+      Tile prevTile = gs.TileAt(PrevLoc);
+
+      Action action;
+      if (nextTile is Door door && !door.Open)
+      {
+        action = new OpenDoorAction(gs, mob, next);
+      }
+      else if (prevTile is Door prevDoor && prevDoor.Open)
+      {
+        action = new CloseDoorAction(gs, mob, PrevLoc);
+      }
+      else
+      {
+        PrevLoc = mob.Loc;
+        action = new MoveAction(gs, mob, next);
+        Path.Pop();
+      }
+
+      bool result = mob.ExecuteAction(action);
+
+      return result ? PlanStatus.Running : PlanStatus.Failure;
+    }
+
+    return PlanStatus.Success;
+  }  
+}
+
 class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNode
 {
   BehaviourNode Goal { get; set; } = goal;
@@ -281,55 +321,45 @@ class Planner
     return area.Where(l => IsFloor(map, l)).ToHashSet();
   }
 
-  static BehaviourNode GenerateMovePlan(GameState gs, HashSet<Loc> area)
-  {
-    BehaviourNode goalcondition = new InArea(area);
-    FindPathToArea pathBuilder = new(area, gs);
-    
-    return new NavigateToGoal(goalcondition, pathBuilder);
-  }
-
-  static BehaviourNode MayorDayTimePlan(GameState gs)
-  {
-    BehaviourNode movePlan = GenerateMovePlan(gs, gs.Town.TownSquare);
-    BehaviourNode daytimeTest = new IsDaytime();
-
-    return new Sequence(
-      [daytimeTest, movePlan, new RepeatWhile(daytimeTest, new WanderInArea(gs.Town.TownSquare))]
-    );
-  }
-
-  static BehaviourNode MayorEveningPlan(GameState gs)
-  {
-    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
-    BehaviourNode movePlan = GenerateMovePlan(gs, tavernFloors);
-    BehaviourNode eveningTest = new IsEvening();
-
-    return new Sequence(
-      [eveningTest, movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
-    );
-  }
-
-  static BehaviourNode MayorNightTimePlan(Actor actor, GameState gs)
-  {
-    int homeId = actor.Stats[Attribute.HomeID].Curr;
-    HashSet<Loc> homeSqs = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
-    BehaviourNode movePlan = GenerateMovePlan(gs, homeSqs);
-    BehaviourNode nightTest = new IsNight();
-
-    return new Sequence(
-      [nightTest, movePlan, new RepeatWhile(nightTest, new WanderInArea(homeSqs))]
-
-    );
-  }
-
   static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
-  {
-    BehaviourNode daytimePlan = MayorDayTimePlan(gs);
-    BehaviourNode eveningPlan = MayorEveningPlan(gs);
-    BehaviourNode nighttimePlan = MayorNightTimePlan(actor, gs);
+  {    
+    var (hour, _) = gs.CurrTime();
+    if (hour >= 7 && hour < 19)
+    {
+      // daytimeplan
+      FindPathToArea pathBuilder = new(gs.Town.TownSquare, gs);
+      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
 
-    return new Selector([daytimePlan, eveningPlan, nighttimePlan]);
+      BehaviourNode daytimeTest = new IsDaytime();
+      return new Sequence(
+        [movePlan, new RepeatWhile(daytimeTest, new WanderInArea(gs.Town.TownSquare))]
+      );
+    }
+    else if (hour >= 19 && hour < 22)
+    {
+      // evening plan -- the mayor wants to be in the pub
+      HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
+      FindPathToArea pathBuilder = new(tavernFloors, gs);      
+      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
+
+      BehaviourNode eveningTest = new IsEvening();
+      return new Sequence(
+        [movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
+      );
+    }
+    else
+    {
+      // night plan -- the mayor wants to be at home
+      int homeId = actor.Stats[Attribute.HomeID].Curr;
+      HashSet<Loc> homeFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
+      FindPathToArea pathBuilder = new(homeFloors, gs);
+      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
+
+      BehaviourNode nightTest = new IsNight();
+      return new Sequence(
+        [movePlan, new RepeatWhile(nightTest, new WanderInArea(homeFloors))]
+      );
+    }    
   }
 
   static Loc PickLocInArea(HashSet<Loc> locs, GameState gs)
