@@ -265,52 +265,6 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
   }  
 }
 
-class NavigateToGoal(BehaviourNode goal, IPathBuilder pathBuilder) : BehaviourNode
-{
-  BehaviourNode Goal { get; set; } = goal;
-  IPathBuilder PathBuilder { get; set; } = pathBuilder;
-  Stack<Loc>? Path { get; set; } = null;
-  Loc PrevLoc { get; set; }
-
-  public override PlanStatus Execute(Mob mob, GameState gs)
-  {
-    Path ??= PathBuilder.BuildPath(mob.Loc);
-
-    PlanStatus status = Goal.Execute(mob, gs);
-    if (status == PlanStatus.Success)
-    {
-      return status;
-    }
-
-    if (Path.Count > 0)
-    {
-      Loc next = Path.Pop();
-      Tile nextTile = gs.TileAt(next);
-      Tile prevTile = gs.TileAt(PrevLoc);
-      if (nextTile is Door door && !door.Open)
-      {
-        Path.Push(next);
-        mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
-        return PlanStatus.Running;
-      }
-      else if (prevTile is Door prevDoor && prevDoor.Open)
-      {
-        Path.Push(next);
-        mob.ExecuteAction(new CloseDoorAction(gs, mob, PrevLoc));
-        return PlanStatus.Running;
-      }
-      else
-      {
-        PrevLoc = mob.Loc;
-        mob.ExecuteAction(new MoveAction(gs, mob, next));
-        return PlanStatus.Running;
-      }
-    }
-
-    return PlanStatus.Failure;
-  }
-}
-
 class Planner
 {
   static HashSet<Loc> OnlyFloorsInArea(Map map, HashSet<Loc> area)
