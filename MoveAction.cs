@@ -72,6 +72,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
       return true;
     }
+
+    if (gs.ObjDb.Occupied(Loc))
+    {
+      result.Succcessful = false;
+      result.EnergyCost = 0.0;
+      return true;
+    }
     
     // Check for webs
     foreach (var env in gs.ObjDb.EnvironmentsAt(actor.Loc))
