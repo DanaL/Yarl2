@@ -113,6 +113,7 @@ class Examiner : Inputer
             case TileType.Pit:
             case TileType.DartTrap:
             case TileType.Well:
+            case TileType.GateTrigger:
               pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
               break;
           }

@@ -277,3 +277,6 @@ A magic trap that will summon monsters.
 #
 reveealedbridgecollapseTrap|bridge trigger
 A trigger that will cause a nearby bridge to collapse.
+#
+gatetrigger|trigger
+A pressure plate that will be triggered when stepped on, or when an object lands on the square.
