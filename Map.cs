@@ -330,6 +330,8 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
       portcullis.Trigger();  
       if (gs.LastPlayerFoV.Contains(loc))
         Found = true;
+      if (loc == gs.Player.Loc)
+        gs.Player.Running = false;
       gs.Noise(Gate.Row, Gate.Col, 7);
       gs.UIRef().AlertPlayer("You hear a metallic grinding!");
     }
