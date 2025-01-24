@@ -267,16 +267,15 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
 
 class Planner
 {
-  static Sequence ReturnHome(Actor actor, GameState gs)
+  static Sequence GoToBuilding(Actor actor, GameState gs, Map map, HashSet<Loc> area)
   {
-    int homeId = actor.Stats[Attribute.HomeID].Curr;
-    HashSet<Loc> homeFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
-    FindPathToArea pathBuilder = new(homeFloors, gs);
+    HashSet<Loc> floors = OnlyFloorsInArea(map, area);
+    FindPathToArea pathBuilder = new(floors, gs);
     BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
 
     BehaviourNode nightTest = new IsNight();
     return new Sequence(
-      [movePlan, new RepeatWhile(nightTest, new WanderInArea(homeFloors))]
+      [movePlan, new RepeatWhile(nightTest, new WanderInArea(floors))]
     );
   }
 
@@ -326,7 +325,7 @@ class Planner
     }
     else
     {
-      return ReturnHome(actor, gs);
+      return GoToBuilding(actor, gs, gs.Wilderness, gs.Town.Smithy);
     }
   }
 
@@ -350,7 +349,8 @@ class Planner
     }
     else
     {
-      return ReturnHome(actor, gs);
+      int homeId = actor.Stats[Attribute.HomeID].Curr;
+      return GoToBuilding(actor, gs, gs.Wilderness, gs.Town.Homes[homeId]);
     }    
   }
 
