@@ -246,6 +246,8 @@ class Village
     smith.SetBehaviour(new SmithBehaviour());
     smith.MoveStrategy = new WallMoveStrategy();
 
+    smith.Traits.Add(new BehaviourTreeTrait() { Plan = "SmithPlan" });
+
     smith.Inventory = new Inventory(smith.ID, objDb);
     smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
     smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);

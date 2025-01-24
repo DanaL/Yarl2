@@ -457,6 +457,14 @@ class SmithyInputer : ShopMenuInputer
 
   protected override void WritePopup(string blurb)
   {
+    if (!Gs.Town.Smithy.Contains(Shopkeeper.Loc))
+    {
+      string s = Shopkeeper.Appearance.IndefArticle().Capitalize();
+      s += ".\n\nI'm off the clock. Come see me at the forge tomorrow.";
+      Gs.UIRef().SetPopup(new Popup(s, Shopkeeper.FullName, -1, -1));
+      return;
+    }
+
     // If the player has any rusty items, offer a menu where they can choose between
     // shopping or repair. (And eventually also upgrade items)
     int menuState;

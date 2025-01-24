@@ -267,6 +267,31 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
 
 class Planner
 {
+  static Sequence ReturnHome(Actor actor, GameState gs)
+  {
+    int homeId = actor.Stats[Attribute.HomeID].Curr;
+    HashSet<Loc> homeFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
+    FindPathToArea pathBuilder = new(homeFloors, gs);
+    BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
+
+    BehaviourNode nightTest = new IsNight();
+    return new Sequence(
+      [movePlan, new RepeatWhile(nightTest, new WanderInArea(homeFloors))]
+    );
+  }
+
+  static Sequence VisitTavern(Actor actor, GameState gs)
+  {
+    HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
+    FindPathToArea pathBuilder = new(tavernFloors, gs);      
+    BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
+
+    BehaviourNode eveningTest = new IsEvening();
+    return new Sequence(
+      [movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
+    );
+  }
+
   static HashSet<Loc> OnlyFloorsInArea(Map map, HashSet<Loc> area)
   {
     static bool IsFloor(Map map, Loc loc)
@@ -276,6 +301,33 @@ class Planner
     }
 
     return area.Where(l => IsFloor(map, l)).ToHashSet();
+  }
+
+  static Sequence CreateSmithPlan(Actor actor, GameState gs)
+  {
+    List<BehaviourNode> nodes = [];
+    HashSet<Loc> smithy = OnlyFloorsInArea(gs.Wilderness, gs.Town.Smithy);
+
+    var (hour, _) = gs.CurrTime();
+    if (hour >= 7 && hour < 19)
+    {
+      if (!gs.Town.Smithy.Contains(actor.Loc))
+      {
+        FindPathToArea pathBuilder = new(smithy, gs);
+        nodes.Add(new WalkPath(pathBuilder.BuildPath(actor.Loc)));
+      }
+      
+      nodes.Add(new RepeatWhile(new IsDaytime(), new WanderInArea(smithy)));
+      return new Sequence(nodes);
+    }
+    else if (hour >= 19 && hour < 22)
+    {
+      return VisitTavern(actor, gs);
+    }
+    else
+    {
+      return ReturnHome(actor, gs);
+    }
   }
 
   static BehaviourNode CreateMayorPlan(Actor actor, GameState gs)
@@ -294,34 +346,18 @@ class Planner
     }
     else if (hour >= 19 && hour < 22)
     {
-      // evening plan -- the mayor wants to be in the pub
-      HashSet<Loc> tavernFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Tavern);
-      FindPathToArea pathBuilder = new(tavernFloors, gs);      
-      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
-
-      BehaviourNode eveningTest = new IsEvening();
-      return new Sequence(
-        [movePlan, new RepeatWhile(eveningTest, new WanderInArea(tavernFloors))]
-      );
+      return VisitTavern(actor, gs);
     }
     else
     {
-      // night plan -- the mayor wants to be at home
-      int homeId = actor.Stats[Attribute.HomeID].Curr;
-      HashSet<Loc> homeFloors = OnlyFloorsInArea(gs.Wilderness, gs.Town.Homes[homeId]);
-      FindPathToArea pathBuilder = new(homeFloors, gs);
-      BehaviourNode movePlan = new WalkPath(pathBuilder.BuildPath(actor.Loc));
-
-      BehaviourNode nightTest = new IsNight();
-      return new Sequence(
-        [movePlan, new RepeatWhile(nightTest, new WanderInArea(homeFloors))]
-      );
+      return ReturnHome(actor, gs);
     }    
   }
 
   public static BehaviourNode GetPlan(string plan, Actor actor, GameState gs) => plan switch
   {
     "MayorPlan" => CreateMayorPlan(actor, gs),
+    "SmithPlan" => CreateSmithPlan(actor, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 }
@@ -895,61 +931,63 @@ class SmithBehaviour : IBehaviour
   // Eventually just replace/merge GetPark and PickBark
   public string GetBark(Mob actor, GameState gs) 
   {
-    return PickBark(actor, gs.Rng);
-  }
+    string bark = "";
 
-  static string PickBark(Mob smith, Random rng)
-  {
-    var items = smith.Inventory.UsedSlots()
-                               .Select(smith.Inventory.ItemAt)
-                               .Select(si => si.Item1).ToList();
-    Item? item;
-    if (items.Count > 0)
-      item = items[rng.Next(items.Count)];
-    else
-      item = null;
-
-    int roll = rng.Next(2);
-    if (roll == 0 && item is not null)
+    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
     {
-      if (item.Type == ItemType.Weapon)
-      {
-        if (item.Traits.Any(t => t is DamageTrait trait && trait.DamageType == DamageType.Blunt))
-          return $"A stout {item.Name} will serve you well!";
-        else
-          return $"A sharp {item.Name} will serve you well!";
-      }
-      else if (item.Name == "helmet" || item.Name == "shield")
-        return $"A sturdy {item.Name} will serve you well!";
-      else
-        return $"Some sturdy {item.Name} will serve you well!";
-    }
-    else
-    {
-      return "More work...";
-    }
-  }
-
-  public Action CalcAction(Mob smith, GameState gameState)
-  {
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-    {
+      bark = PickBark(actor, gs);
       _lastBark = DateTime.Now;
+    }
 
-      return new PassAction()
-      {
-        Actor = smith,
-        GameState = gameState,
-        Quip = PickBark(smith, gameState.Rng)
-      };
-    }
-    else
-    {
-      return new PassAction();
-    }
+    return bark;
   }
 
-  string Blurb(Mob mob, GameState gs)
+  static string PickBark(Mob smith, GameState gs)
+  {
+    var (hour, _) = gs.CurrTime();
+
+    if (hour >= 19 && hour < 22) 
+    {
+      return "Nothing like a good ale after a day at the forge!";
+    }
+    else if (hour >= 7 && hour < 19) 
+    {
+      var items = smith.Inventory.UsedSlots()
+                                .Select(smith.Inventory.ItemAt)
+                                .Select(si => si.Item1).ToList();
+      Item? item;
+      if (items.Count > 0)
+        item = items[gs.Rng.Next(items.Count)];
+      else
+        item = null;
+
+      int roll = gs.Rng.Next(2);
+      if (roll == 0 && item is not null)
+      {
+        if (item.Type == ItemType.Weapon)
+        {
+          if (item.Traits.Any(t => t is DamageTrait trait && trait.DamageType == DamageType.Blunt))
+            return $"A stout {item.Name} will serve you well!";
+          else
+            return $"A sharp {item.Name} will serve you well!";
+        }
+        else if (item.Name == "helmet" || item.Name == "shield")
+          return $"A sturdy {item.Name} will serve you well!";
+        else
+          return $"Some sturdy {item.Name} will serve you well!";
+      }
+      else
+      {
+        return "More work...";
+      }
+    }
+    
+    return "";
+  }
+
+  public Action CalcAction(Mob smith, GameState gameState) => new PassAction();
+
+  string Blurb(GameState gs)
   {
     var sb = new StringBuilder();
     sb.Append('"');
@@ -983,7 +1021,7 @@ class SmithBehaviour : IBehaviour
       return (new NullAction(), new PauseForMoreInputer());
     }
 
-    var acc = new SmithyInputer(actor, Blurb(actor, gs), gs);
+    var acc = new SmithyInputer(actor, Blurb(gs), gs);
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
