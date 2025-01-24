@@ -682,7 +682,6 @@ class Player : Actor
     ActionResult result;
     do
     {      
-      gs.PrepareFieldOfView();      
       result = action!.Execute();
 
       Energy -= CalcEnergyUsed(result.EnergyCost);

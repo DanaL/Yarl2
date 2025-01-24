@@ -503,7 +503,9 @@ class Mob : Actor
     {
       Action? action = _behaviour.CalcAction(this, gs);
       ExecuteAction(action);
-    }    
+    }
+    
+    gs.PrepareFieldOfView();
   } 
 
   public override Loc PickTargetLoc(GameState gameState)
