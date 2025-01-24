@@ -3247,6 +3247,7 @@ class TraitFactory
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    { "Tipsy", (pieces, gameObj) => new TipsyTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Torch", (pieces, gameObj) => new TorchTrait()
       {
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
