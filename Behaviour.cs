@@ -319,12 +319,6 @@ class Planner
     }    
   }
 
-  static Loc PickLocInArea(HashSet<Loc> locs, GameState gs)
-  {
-    int i = gs.Rng.Next(locs.Count);
-    return locs.ToList()[i];
-  }
-
   public static BehaviourNode GetPlan(string plan, Actor actor, GameState gs) => plan switch
   {
     "MayorPlan" => CreateMayorPlan(actor, gs),
