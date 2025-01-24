@@ -103,7 +103,12 @@ class RaylibUserInterface : UserInterface
       isAnyKeyDown = true;
       gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.BACKSPACE);
     }
-
+    else if (IsKeyDown(KeyboardKey.Tab))
+    {
+      isAnyKeyDown = true;
+      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.TAB);
+    }
+    
     if (isAnyKeyDown && gameEvent is not null)
     {
       TimeSpan delta = DateTime.Now - _lastKeyTime;
