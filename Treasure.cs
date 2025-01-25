@@ -46,7 +46,7 @@ class Treasure
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
-      ItemNames.SCROLL_TRAP_DETECTION
+      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)

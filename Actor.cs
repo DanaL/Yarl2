@@ -123,6 +123,25 @@ abstract class Actor : GameObj, IZLevel
     return (penalty, level);
   }
 
+  // Clear out various Traits that may be pinning the Actor to a location
+  // (Usually due to various versions of teleportation)
+  public void ClearAnchors(GameState gs)
+  {
+    var toRemove = Traits.Where(t => t is InPitTrait || t is GrappledTrait || t is SwallowedTrait).ToList();
+    foreach (Trait t in toRemove)
+    {
+      if (t is InPitTrait)
+      {
+        Traits.Remove(t);
+      }
+      else if (t is GrappledTrait grappled)
+      {
+        Traits.Remove(t);
+        gs.StopListening(GameEventType.Death, grappled);
+      }        
+    }
+  }
+  
   public bool AbleToMove() 
   {
     foreach (var t in Traits)

@@ -2046,25 +2046,13 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     }
     else
     {
-      // Teleporting removes the grapple trait, swallowed, and in-pit traits
-      var toRemove = Actor.Traits.Where(t => t is InPitTrait || t is GrappledTrait || t is SwallowedTrait).ToList();
-      foreach (Trait t in toRemove)
-      {
-        if (t is InPitTrait)
-        {
-          Actor.Traits.Remove(t);
-        }
-        else if (t is GrappledTrait grappled)
-        {
-          Actor.Traits.Remove(t);
-          GameState!.StopListening(GameEventType.Death, grappled);
-        }        
-      }
+      Actor.ClearAnchors(GameState!);
       
-      var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
-      var mv = new MoveAction(GameState, Actor, landingSpot);
+      var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];      
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+
+      var mv = new MoveAction(GameState, Actor, landingSpot);
 
       ActionResult result = base.Execute();
       result.Succcessful = false;
@@ -3083,6 +3071,64 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
       player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
       Inputer inputer = new Inventorier([.. slots]);
       player.ReplacePendingAction(ReplacementAction, inputer);
+    }
+
+    return result;
+  }
+}
+
+class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
+
+    List<Loc> affected = [];
+    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState!.CurrentMap, GameState.ObjDb))
+    {
+      if (kvp.Value != Illumination.Full)
+        continue;
+      if (kvp.Key == Actor.Loc || !GameState.ObjDb.Occupied(kvp.Key))
+        continue;
+      affected.Add(kvp.Key);
+    }
+    
+    List<Loc> landingSpots = [];
+    for (int r = 0; r < GameState.CurrentMap.Height; r++)
+    {
+      for (int c = 0; c < GameState.CurrentMap.Width; c++)
+      {
+        Loc loc = new(GameState.CurrDungeonID, GameState.CurrLevel, r, c);
+
+        if (GameState.TileAt(loc).Passable() && !GameState.ObjDb.Occupied(loc))
+          landingSpots.Add(loc);
+      }
+    }
+
+    if (Actor is Player) 
+    {
+      GameState.UIRef().AlertPlayer("Aroint thee!");
+    }
+    else if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "read")} a scroll! Poof!";
+      GameState.UIRef().AlertPlayer(s);
+    }
+      
+    foreach (var loc in affected)
+    {
+      if (GameState.ObjDb.Occupant(loc) is not Actor victim)
+        continue;
+
+      int i = GameState.Rng.Next(landingSpots.Count);
+      Loc landingSpot = landingSpots[i];
+      landingSpots.RemoveAt(i);
+
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, loc, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
+      
+      victim.ClearAnchors(GameState);
+      GameState.ResolveActorMove(victim, loc, landingSpot);
     }
 
     return result;

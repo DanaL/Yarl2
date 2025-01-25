@@ -1488,6 +1488,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "magicmap" => new UseResult(new MagicMapAction(gs, user), null, true, ""),
     "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user), null, true, ""),
     "detecttraps" => new UseResult(new DetectTrapsAction(gs, user), null, true, ""),
+    "scatter" => new UseResult(new ScatterAction(gs, user), null, true, ""),
     "resistfire" => new UseResult(new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), null, true, ""),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 

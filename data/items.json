@@ -1102,5 +1102,19 @@
       "Consumable",
       "Stackable"
     ]
+  },
+  {
+    "Name": "SCROLL_SCATTERING",
+    "DescriptiveName": "scroll of scattering",
+    "Type": "Scroll",
+    "Value": 30,
+    "Glyph": "?,white,grey,black,black",
+    "Traits": [
+      "Consumable",
+      "UseSimple#scatter",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
   }
 ]
