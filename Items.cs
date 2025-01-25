@@ -701,11 +701,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           }
         }
 
+        if (part is ArmourParts.Shield && freeHands == 0)
+          return (EquipingResult.NoFreeHand, part);
+        
         if (part is ArmourParts.Shield && EquippedTwoHandedWeapon())
-        {
           return (EquipingResult.TwoHandedConflict, part);
-        }
-
+        
         item.Equipped = !item.Equipped;
 
         return (EquipingResult.Equipped, ArmourParts.Shirt);
