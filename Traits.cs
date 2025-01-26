@@ -2504,7 +2504,7 @@ class RecallTrait : BasicTrait, IGameEventListener
 {
   public bool Expired { get; set; } = false;
   public bool Listening => true;
-  public ulong ObjId => 0; // This trait will always/only be applied to the player (I think...)
+  public ulong ObjId { get; set; }
   public GameEventType EventType => GameEventType.EndOfRound;
 
   public override string AsText() => $"Recall#{ExpiresOn}#{Expired}";

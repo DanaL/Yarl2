@@ -1965,7 +1965,8 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(10, 21);
     var recall = new RecallTrait()
     {
-      ExpiresOn = happensOn
+      ExpiresOn = happensOn,
+      ObjId = player.ID
     };
 
     GameState.RegisterForEvent(GameEventType.EndOfRound, recall);
