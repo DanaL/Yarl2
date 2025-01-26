@@ -183,7 +183,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         }
       }
 
-      // Every once in a while the witch is invisible after experimenting
+      // Sometimes the witch is invisible after experimenting
       // with one of their partner's potions
       fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
       ulong witchId = ulong.Parse(fact.Value);
@@ -195,7 +195,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           {
             ActorID = witchId,
             Expired = false,
-            ExpiresOn = 2000
+            ExpiresOn = 3000
           };
           witch.Traits.Add(it);
           RegisterForEvent(GameEventType.EndOfRound, it);

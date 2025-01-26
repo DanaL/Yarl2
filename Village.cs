@@ -402,16 +402,6 @@ class Village
     objDb.Add(kylie);
     objDb.AddToLoc(kylie.Loc, kylie);
 
-
-    InvisibleTrait it = new()
-    {
-      ActorID = kylie.ID,
-      Expired = false,
-      ExpiresOn = 2000
-    };
-    kylie.Traits.Add(it);
-    objDb.EndOfRoundListeners.Add(it);
-
     Mob sophie = new()
     {
       Name = "Sophie",
