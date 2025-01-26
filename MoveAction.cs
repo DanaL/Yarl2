@@ -31,8 +31,18 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (CanFly(actor) && tile.PassableByFlight())
       return true;
-    else if ((tile.Type == TileType.Water || tile.Type == TileType.DeepWater) && actor.HasTrait<WaterWalkingTrait>())
-      return true;
+    else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
+    {
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is WaterWalkingTrait)
+          return true;
+        if (t is ConfusedTrait)
+          return true;
+        if (t is TipsyTrait)
+          return true;
+      }
+    }
 
     return false;
   }
@@ -284,57 +294,46 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     {
       result.Succcessful = false;
       Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
-
-      if (Actor.HasTrait<ConfusedTrait>())
+    
+      if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
-        result.Succcessful = true;
-        result.EnergyCost = 1.0;
-        string stumbleText = "You stumble in confusion!";
-        ui.AlertPlayer(stumbleText);
-        ui.AlertPlayer(BlockedMessage(tile));
+        var openAction = new OpenDoorAction(GameState, Actor, Loc);
+        result.AltAction = openAction;
       }
-      else 
+      else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
       {
-        if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
-        {
-          var openAction = new OpenDoorAction(GameState, Actor, Loc);
-          result.AltAction = openAction;
-        }
-        else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
-        {
-          // If we are in the dungeon, we'll let the player jump into rivers
-          // (and/or they can stumble in while confused, etc)
+        // If we are in the dungeon, we'll let the player jump into rivers
+        // (and/or they can stumble in while confused, etc)
 
-          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
-          {
-            ui.SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-            GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
-          }
-          else
-          {
-            GameState.RememberLoc(Loc, tile);
-            result.AltAction = new DiveAction(GameState, player, Loc, false);
-          }
-        }
-        else if (tile.Type == TileType.Chasm)
+        if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
         {
-          if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
-          {
-            ui.SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
-            GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
-          }
-          else
-          {
-            GameState.RememberLoc(Loc, tile);
-            result.AltAction = new DiveAction(GameState, player, Loc, false);
-          }
+          ui.SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
         }
         else
         {
-          ui.AlertPlayer(BlockedMessage(tile));
+          GameState.RememberLoc(Loc, tile);
+          result.AltAction = new DiveAction(GameState, player, Loc, false);
         }
       }
-
+      else if (tile.Type == TileType.Chasm)
+      {
+        if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
+        {
+          ui.SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
+        }
+        else
+        {
+          GameState.RememberLoc(Loc, tile);
+          result.AltAction = new DiveAction(GameState, player, Loc, false);
+        }
+      }
+      else
+      {
+        ui.AlertPlayer(BlockedMessage(tile));
+      }
+      
       // If the player is blind, remember what tile they bumped into
       // so that it displays on screen
       if (player.HasTrait<BlindTrait>())
