@@ -450,6 +450,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
       else if (tile.Type == TileType.WoodBridge)
       {
+        if (LastPlayerFoV.Contains(Player.Loc))
+          UI.AlertPlayer("The bridge burns up and collapses!");
+
         BridgeDestroyed(loc);
       }
     }
