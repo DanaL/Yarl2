@@ -852,7 +852,7 @@ class TownBuilder
     }
     candidates.Shuffle(rng);
 
-    int topLeftRow = -1, topLeftCol = -1;
+    int topLeftRow, topLeftCol;
     foreach (var sq in candidates)
     {
       int waterCount = 0;

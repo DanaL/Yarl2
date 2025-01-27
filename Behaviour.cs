@@ -360,6 +360,12 @@ class Planner
     "SmithPlan" => CreateSmithPlan(actor, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
+
+  // This will expand into the function to calculate the target for mob 
+  // attacks. I'm not sure if this belongs here, in the Mob/Actor class, or
+  // Behaviour class, but for the moment 'Planner' is where I am trying to
+  // place the "Decide what to do" code
+  public static ulong SelectTarget(Mob mob, GameState gs) => gs.Player.ID;
 }
 
 abstract class MoveStrategy

@@ -96,8 +96,16 @@ abstract class ActionTrait : BasicTrait
 
   protected bool InRange(Mob mob, GameState gs)
   {
-    int dist = Util.Distance(mob.Loc, gs.Player.Loc);
-    return MinRange <= dist && MaxRange >= dist;
+    ulong targetId = Planner.SelectTarget(mob, gs);
+    if (gs.ObjDb.GetObj(targetId) is Actor target)
+    {
+      int dist = Util.Distance(mob.Loc, target.Loc);
+      return MinRange <= dist && MaxRange >= dist;
+    }
+    else
+    {
+      return false;
+    }
   }
 
   protected static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
