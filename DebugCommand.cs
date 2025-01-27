@@ -103,7 +103,8 @@ class DebugCommand(GameState gs)
     {"wand of summoning", ItemNames.WAND_SUMMONING },
     {"quarterstaff", ItemNames.QUARTERSTAFF },
     {"meditation crystal", ItemNames.MEDITATION_CRYSTAL },
-    {"seeweed", ItemNames.SEEWEED }
+    {"seeweed", ItemNames.SEEWEED },
+    {"croesus charm", ItemNames.CROESUS_CHARM }
   };
 
   public string DoCommand(string txt)

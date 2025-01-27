@@ -730,6 +730,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (t is IGameEventListener el)
         RemoveListener(el);
     }
+
+    if (attacker is not null && attacker.HasTrait<CroesusTouchTrait>() && Rng.NextDouble() < 0.33)
+    {
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
+      zorkmids.Value = Rng.Next(10, 21);
+      ItemDropped(zorkmids, victim.Loc);
+
+      if (LastPlayerFoV.Contains(victim.Loc))
+      {
+        UI.AlertPlayer("Coins tumble to the ground.");
+      }
+    }
   }
 
   void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)

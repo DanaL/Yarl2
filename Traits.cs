@@ -2664,6 +2664,11 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class CroesusTouchTrait : Trait
+{
+  public override string AsText() => $"CroesusTouch#{SourceId}";
+}
+
 class CrusherTrait : ActionTrait
 {
   public int DmgDie { get; set; }
@@ -2988,6 +2993,7 @@ class TraitFactory
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
+    { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Crusher", (pieces, gameObj) => new CrusherTrait() { DmgDie = int.Parse(pieces[1]), DmgDice = int.Parse(pieces[2]) } },
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },

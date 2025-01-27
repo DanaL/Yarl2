@@ -1116,5 +1116,15 @@
       "Scroll",
       "Stackable"
     ]
+  },
+  {
+    "Name": "CROESUS_CHARM",
+    "DescriptiveName": "Croesus charm",
+    "Type": "Talisman",
+    "Value": 333,
+    "Glyph": "☥,yellow,yelloworange,black,black",
+    "Traits": [
+      "Grants#CroesusTouch&owner"
+    ]
   }
 ]

@@ -283,3 +283,6 @@ A pressure plate that will be triggered when stepped on, or when an object lands
 #
 scroll of scattering
 Originally invented by wizards to disperse party guests at the end of the night, this scroll teleports nearby beings away to random locations.
+#
+Croesus charm
+A souvenir from the Fort Ludios gift shop. This magic charm also has the handy effect of causing monsters to occasionally drop zorkminds when they are defeated.
