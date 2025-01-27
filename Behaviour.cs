@@ -150,6 +150,15 @@ class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
   }  
 }
 
+class PassTurn : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    mob.ExecuteAction(new PassAction());
+    return PlanStatus.Success;
+  }
+}
+
 class WanderInArea(HashSet<Loc> area) : BehaviourNode
 {
   HashSet<Loc> Area { get; set; } = area;
