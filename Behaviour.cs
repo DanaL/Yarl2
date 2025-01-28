@@ -169,7 +169,7 @@ class UsePower(Power power) : BehaviourNode
   {
     if (Available(mob, gs))
     {
-      bool result = mob.ExecuteAction(Power.Action(mob, gs));
+      bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs));
 
       return result ? PlanStatus.Success : PlanStatus.Failure;
     }
