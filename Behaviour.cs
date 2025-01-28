@@ -150,6 +150,34 @@ class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
   }  
 }
 
+class UsePower(Power power) : BehaviourNode
+{
+  Power Power { get; set; } = power;
+
+  bool Available(Mob mob, GameState gs)
+  {    
+    if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
+    {
+      if (gs.Turn > lastUse + Power.Cooldown)
+        return true;
+    }
+
+    return false;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (Available(mob, gs))
+    {
+      bool result = mob.ExecuteAction(Power.Action(mob, gs));
+
+      return result ? PlanStatus.Success : PlanStatus.Failure;
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
 class PassTurn : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)

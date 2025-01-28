@@ -140,6 +140,24 @@ abstract class GameObj : IZLevel
   }
 }
 
+sealed class NullGameObj : GameObj
+{
+  private static readonly NullGameObj instance = new();
+  public static NullGameObj Instance => instance;
+
+  private NullGameObj()
+  {
+    Name = "NullGameObject";
+    ID = 0;
+    Glyph = GameObjectDB.EMPTY;
+    Loc = Loc.Nowhere;
+  }
+
+  public override int Z() => -1;
+  public override string ToString() => "NullObject";
+}
+
+
 // Structure to store where items are in the world
 class GameObjectDB
 {

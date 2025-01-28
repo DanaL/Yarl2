@@ -424,6 +424,9 @@ class Mob : Actor
 {
   public MoveStrategy MoveStrategy { get; set; }
   public List<ActionTrait> Actions { get; set; } = [];
+  public List<Power> Powers { get; set; } = []; // this will supersede the Actions list
+  public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
+
   BehaviourNode? CurrPlan { get; set; } = null;
 
   public const int  INACTIVE = 0;
@@ -526,11 +529,12 @@ class Mob : Actor
     
     gs.PrepareFieldOfView();
   } 
-
+  
   public override Loc PickTargetLoc(GameState gameState)
   {
     return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;
   }
+
   // I suspect eventually these will diverge
   public override Loc PickRangedTargetLoc(GameState gameState) => PickTargetLoc(gameState);
 
@@ -618,6 +622,15 @@ class MonsterFactory
       }
     }
 
+    // temp debug stuff while I switch monsters to acting via behaviour trees    
+    m.Powers.Add(new Power()
+    {
+      Name = "MeleeSlashing",
+      DmgDie = 6,
+      NumOfDice = 1
+    });
+    m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
+
     if (!string.IsNullOrEmpty(fields[10]))
     {
       foreach (var traitTxt in fields[10].Split(','))
@@ -640,5 +653,48 @@ class MonsterFactory
       m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
     
     return m;
+  }
+}
+
+// Class for traicking powers/abilities monsters have access to
+class Power
+{
+  public string Name { get; set; } = "";
+  public int DC { get; set; }
+  public int MinRange { get; set; } = 1;
+  public int MaxRange { get; set; } = 1;
+  public int DmgDie { get; set; }
+  public int NumOfDice { get; set; }
+  public ulong Cooldown { get; set; }
+  public string Quip { get; set; } = "";
+
+  public Action Action(Mob mob, GameState gs, Loc loc)
+  {
+    switch (Name)
+    {
+      case "MeleeSlashing":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Slashing);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleePiercing":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Piercing);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeBlunt":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Blunt);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeAcid":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Acid);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeCold":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Cold);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeFire":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Fire);
+        return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeNecrotic":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);
+        return new MeleeAttackAction(gs, mob, loc);
+      default:
+        return new PassAction();
+    }    
   }
 }
