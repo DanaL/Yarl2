@@ -272,7 +272,7 @@ class ChaseTarget(Actor target) : BehaviourNode
   Actor Target { get; set; } = target;
   Stack<Loc>? Path { get; set; } = null;
 
-  PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
+  static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
   {
     DijkstraMap map = gs.GetDMap("doors") ?? throw new Exception("Dijkstra map should never be null");
     foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
@@ -295,7 +295,8 @@ class ChaseTarget(Actor target) : BehaviourNode
     return PlanStatus.Failure;
 
   }
-  PlanStatus ChasePlayerFlying(Mob mob, GameState gs)
+
+  static PlanStatus ChasePlayerFlying(Mob mob, GameState gs)
   {
     DijkstraMap map = gs.GetDMap("flying") ?? throw new Exception("Dijkstra map should never be null");
     foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
@@ -312,7 +313,7 @@ class ChaseTarget(Actor target) : BehaviourNode
     return PlanStatus.Failure;
   }
 
-  PlanStatus ChasePlayer(Mob mob, GameState gs)
+  static PlanStatus ChasePlayer(Mob mob, GameState gs)
   {
     DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
     foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
@@ -338,24 +339,17 @@ class ChaseTarget(Actor target) : BehaviourNode
     {
       // if we are chasing the player (the most likely scenario, we can use
       // the dijkstra maps available from  GameState
-      bool smart = false;
-      bool flying = false;
       foreach (Trait t in mob.Traits)
       {
         if (t is IntelligentTrait)
-          smart = true;
+          return ChasePlayerDoors(mob, gs);
         if (t is FloatingTrait)
-          flying = true;
+          return ChasePlayerFlying(mob, gs);
         if (t is FlyingTrait)
-          flying = true;
+          return ChasePlayerFlying(mob, gs);
       }
-
-      if (smart)
-        return ChasePlayerDoors(mob, gs);
-      else if (flying)
-        return ChasePlayerFlying(mob, gs);
-      else
-        return ChasePlayer(mob, gs);
+      
+      return ChasePlayer(mob, gs);
     }
     else
     {
