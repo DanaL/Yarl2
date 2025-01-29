@@ -109,6 +109,10 @@ class Player : Actor
     }
   }
 
+  public override Actor PickTarget(GameState gs)
+  {
+    throw new NotImplementedException();
+  }
   public override Loc PickTargetLoc(GameState gamestate) => Loc;
   public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
  

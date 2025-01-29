@@ -95,6 +95,7 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
 
       if (status == PlanStatus.Success)
       {
+        Curr = 0;
         return status;
       }
 
@@ -158,18 +159,25 @@ class UsePower(Power power) : BehaviourNode
   {    
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
-      if (gs.Turn > lastUse + Power.Cooldown)
-        return true;
+      if (gs.Turn <= lastUse + Power.Cooldown)
+        return false;
     }
 
-    return false;
+    Loc targetLoc = mob.PickTargetLoc(gs);
+    int d = Util.Distance(mob.Loc, targetLoc);
+    if (d < Power.MinRange || d > Power.MaxRange)
+    {
+      return false;
+    }
+
+    return true;
   }
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     if (Available(mob, gs))
     {
-      bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs));
+      bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
 
       return result ? PlanStatus.Success : PlanStatus.Failure;
     }
@@ -256,6 +264,42 @@ class IsNight : BehaviourNode
     var (hour, _) = gs.CurrTime();
     return hour >= 22 || hour <= 6 ? PlanStatus.Success
                                    : PlanStatus.Failure;
+  }
+}
+
+class WalkToTaget(Actor target) : BehaviourNode
+{
+  Actor Target { get; set; } = target;
+  Stack<Loc>? Path { get; set; } = null;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (Target is Player)
+    {
+      // if we are chasing the player (the most likely scenario, we can use
+      // the dijkstra maps available from  GameState
+      DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
+      foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+      {
+        Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
+
+        // We still check if the tile is passable because, say, a door might be
+        // closed after the current dijkstra map is calculated and before it is
+        // refreshed
+        if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
+        {
+          bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
+          return PlanStatus.Success;
+        }
+      }
+    }
+    else
+    {
+      // How to handle chasing someone other than the Player? I don't want to 
+      // calc A* on every turn...although maybe it won't be a problem??
+    }
+
+    return PlanStatus.Failure;
   }
 }
 
@@ -391,10 +435,26 @@ class Planner
     }    
   }
 
-  public static BehaviourNode GetPlan(string plan, Actor actor, GameState gs) => plan switch
+  static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
-    "MayorPlan" => CreateMayorPlan(actor, gs),
-    "SmithPlan" => CreateSmithPlan(actor, gs),
+    List<BehaviourNode> nodes = [];
+
+    foreach (Power p in mob.Powers)
+    {
+      nodes.Add(new UsePower(p));
+    }
+
+    Actor target = mob.PickTarget(gs);
+    nodes.Add(new WalkToTaget(target));
+
+    return new Selector(nodes);
+  }
+
+  public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
+  {
+    "MayorPlan" => CreateMayorPlan(mob, gs),
+    "SmithPlan" => CreateSmithPlan(mob, gs),
+    "MonsterPlan" => CreateMonsterPlan(mob, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 

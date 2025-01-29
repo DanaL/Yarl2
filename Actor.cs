@@ -358,6 +358,7 @@ abstract class Actor : GameObj, IZLevel
 
   public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
+  public abstract Actor PickTarget(GameState gs);
   public abstract Loc PickTargetLoc(GameState gamestate);
   public abstract Loc PickRangedTargetLoc(GameState gamestate);
   public abstract void TakeTurn(GameState gs);
@@ -528,8 +529,10 @@ class Mob : Actor
     }
     
     gs.PrepareFieldOfView();
-  } 
-  
+  }
+
+  public override Actor PickTarget(GameState gs) => gs.Player;
+
   public override Loc PickTargetLoc(GameState gameState)
   {
     return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;

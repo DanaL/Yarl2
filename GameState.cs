@@ -916,7 +916,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // conditions should affect it
     if (Rng.Next(60) == 0)
     {
-      SpawnMonster();
+      //SpawnMonster();
     }
 
     // Note to self: you build the list like this because as part of their
