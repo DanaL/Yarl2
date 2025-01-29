@@ -267,10 +267,70 @@ class IsNight : BehaviourNode
   }
 }
 
-class WalkToTaget(Actor target) : BehaviourNode
+class ChaseTarget(Actor target) : BehaviourNode
 {
   Actor Target { get; set; } = target;
   Stack<Loc>? Path { get; set; } = null;
+
+  PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
+  {
+    DijkstraMap map = gs.GetDMap("doors") ?? throw new Exception("Dijkstra map should never be null");
+    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+    {
+      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
+
+      Tile tile = gs.TileAt(loc);
+      if (tile is Door door && !door.Open)
+      {
+        bool result = mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
+        return result ? PlanStatus.Success : PlanStatus.Failure;
+      }
+      else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
+      {
+        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return result ? PlanStatus.Success : PlanStatus.Failure;
+      }
+    }
+
+    return PlanStatus.Failure;
+
+  }
+  PlanStatus ChasePlayerFlying(Mob mob, GameState gs)
+  {
+    DijkstraMap map = gs.GetDMap("flying") ?? throw new Exception("Dijkstra map should never be null");
+    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+    {
+      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
+
+      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).PassableByFlight())
+      {
+        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return result ? PlanStatus.Success : PlanStatus.Failure;
+      }
+    }
+
+    return PlanStatus.Failure;
+  }
+
+  PlanStatus ChasePlayer(Mob mob, GameState gs)
+  {
+    DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
+    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+    {
+      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
+
+      // We still check if the tile is passable because, say, a door might be
+      // closed after the current dijkstra map is calculated and before it is
+      // refreshed      
+      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
+      {
+        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return result ? PlanStatus.Success : PlanStatus.Failure;
+      }
+    }
+
+    return PlanStatus.Failure;
+  }
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
@@ -278,20 +338,24 @@ class WalkToTaget(Actor target) : BehaviourNode
     {
       // if we are chasing the player (the most likely scenario, we can use
       // the dijkstra maps available from  GameState
-      DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
-      foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+      bool smart = false;
+      bool flying = false;
+      foreach (Trait t in mob.Traits)
       {
-        Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
-
-        // We still check if the tile is passable because, say, a door might be
-        // closed after the current dijkstra map is calculated and before it is
-        // refreshed
-        if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
-        {
-          bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
-          return PlanStatus.Success;
-        }
+        if (t is IntelligentTrait)
+          smart = true;
+        if (t is FloatingTrait)
+          flying = true;
+        if (t is FlyingTrait)
+          flying = true;
       }
+
+      if (smart)
+        return ChasePlayerDoors(mob, gs);
+      else if (flying)
+        return ChasePlayerFlying(mob, gs);
+      else
+        return ChasePlayer(mob, gs);
     }
     else
     {
@@ -445,7 +509,7 @@ class Planner
     }
 
     Actor target = mob.PickTarget(gs);
-    nodes.Add(new WalkToTaget(target));
+    nodes.Add(new ChaseTarget(target));
 
     return new Selector(nodes);
   }
