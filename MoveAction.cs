@@ -160,13 +160,14 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     Tile currTile = gs.TileAt(actor.Loc);
     if (currTile.Type == TileType.FrozenDeepWater || currTile.Type == TileType.FrozenWater)
     {
+      int slipDC = actor.HasTrait<TipsyTrait>() ? 15 : 11;
       // For slippery tiles, the actor needs to succeed on a dex check before moving, unless 
       // the Actor is flying or floating
       if (actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>())
       {
         return false;
       }
-      else if (actor.AbilityCheck(Attribute.Dexterity, 11, gs.Rng))
+      else if (actor.AbilityCheck(Attribute.Dexterity, slipDC, gs.Rng))
       {
         return false;
       }
