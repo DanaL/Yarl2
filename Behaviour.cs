@@ -267,6 +267,83 @@ class IsNight : BehaviourNode
   }
 }
 
+class RandomMove : BehaviourNode
+{
+  static PlanStatus MoveOrDoor(Mob mob, GameState gs)
+  {
+    List<(Loc, bool)> opts = [];
+
+    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    {
+      Tile tile = gs.TileAt(adj);
+      if (tile.Passable() &&! gs.ObjDb.Occupied(adj))
+     {
+        opts.Add((adj, false));
+      }
+      else if (tile is Door door && !door.Open)
+      {
+        opts.Add((adj, true));
+      }
+    }
+
+    Action action;
+    if (opts.Count > 0)
+    {
+      var (loc, door) = opts[gs.Rng.Next(opts.Count)];
+      action = door ? new OpenDoorAction(gs, mob, loc) : new MoveAction(gs, mob, loc);
+    }
+    else
+    {
+      action = new PassAction();
+    }
+
+    bool result = mob.ExecuteAction(action);
+    return result ? PlanStatus.Success : PlanStatus.Failure;
+  }
+
+  static PlanStatus Move(Mob mob, GameState gs, bool flying)
+  {
+    List<Loc> opts = [];
+    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    {
+      Tile tile = gs.TileAt(adj);
+      if (gs.ObjDb.Occupied(adj))
+        continue;
+      if (tile.Passable())
+        opts.Add(adj);
+      else if (flying && tile.PassableByFlight())
+        opts.Add(adj);
+    }
+
+    Action action;
+    if (opts.Count > 0)
+    {
+      Loc loc = opts[gs.Rng.Next(opts.Count)];
+      action = new MoveAction(gs, mob, loc);
+    }
+    else
+    {
+      action = new PassAction();
+    }
+
+    bool result = mob.ExecuteAction(action);
+    return result ? PlanStatus.Success : PlanStatus.Failure;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait)
+        return MoveOrDoor(mob, gs);
+      if (t is FloatingTrait || t is FlyingTrait)
+        return Move(mob, gs, true);
+    }
+
+    return Move(mob, gs, false);
+  }
+}
+
 class ChaseTarget(Actor target) : BehaviourNode
 {
   Actor Target { get; set; } = target;
@@ -495,7 +572,7 @@ class Planner
 
   static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
-    List<BehaviourNode> nodes = [];
+    
         
     foreach (Trait t in mob.Traits)
     {
@@ -505,15 +582,40 @@ class Planner
 
     // Need to handle confused monsters around here
 
-    foreach (Power p in mob.Powers)
+    switch (mob.Stats[Attribute.MobAttitude].Curr)
     {
-      nodes.Add(new UsePower(p));
+      case Mob.INACTIVE:
+        return new PassTurn();
+      case Mob.INDIFFERENT:
+        // check for passive actions
+
+        if (gs.Rng.NextDouble() < 0.5)
+          return new PassTurn();
+        else
+          return new RandomMove();
+      case Mob.AGGRESSIVE:
+        List<BehaviourNode> nodes = [];
+        foreach (Power p in mob.Powers)
+        {
+          nodes.Add(new UsePower(p));
+        }
+
+        Actor target = mob.PickTarget(gs);
+        nodes.Add(new ChaseTarget(target));
+
+        return new Selector(nodes);
     }
+    //List<BehaviourNode> nodes = [];
+    //foreach (Power p in mob.Powers)
+    //{
+    //  nodes.Add(new UsePower(p));
+    //}
 
-    Actor target = mob.PickTarget(gs);
-    nodes.Add(new ChaseTarget(target));
+    //Actor target = mob.PickTarget(gs);
+    //nodes.Add(new ChaseTarget(target));
 
-    return new Selector(nodes);
+    //return new Selector(nodes);
+    return new PassTurn();
   }
 
   public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
