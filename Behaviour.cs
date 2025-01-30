@@ -496,6 +496,14 @@ class Planner
   static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
     List<BehaviourNode> nodes = [];
+        
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is ParalyzedTrait || t is SleepingTrait)
+        return new PassTurn();
+    }
+
+    // Need to handle confused monsters around here
 
     foreach (Power p in mob.Powers)
     {
