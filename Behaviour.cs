@@ -131,6 +131,8 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
       ++Curr;
     }
 
+    Curr = 0;
+    
     return PlanStatus.Success;
   }
 }
@@ -199,6 +201,9 @@ class TryToEscape : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
+    if (gs.Rng.Next(10) == 0)
+      mob.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
+
     bool smart = false;
     bool airborne = false;
     bool immobile = false;
@@ -349,6 +354,30 @@ class IsNight : BehaviourNode
     var (hour, _) = gs.CurrTime();
     return hour >= 22 || hour <= 6 ? PlanStatus.Success
                                    : PlanStatus.Failure;
+  }
+}
+
+class CheckMonsterAttitude(int status) : BehaviourNode
+{
+  int Status { get; set; } = status;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (mob.Stats.TryGetValue(Attribute.MobAttitude, out Stat? att))
+      return att.Curr == Status ? PlanStatus.Success : PlanStatus.Failure;
+
+    return PlanStatus.Failure;
+  }
+}
+
+class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
+{
+  List<BehaviourNode> Nodes { get; set; } = nodes;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    BehaviourNode choice = Nodes[gs.Rng.Next(Nodes.Count)];
+    return choice.Execute(mob, gs);
   }
 }
 
@@ -663,49 +692,21 @@ class Planner
         return new PassTurn();
     }
 
-    // Need to handle confused monsters around here
+    // Not yet handling confused monsters, etc
+    List<BehaviourNode> plan = [];
+    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]));
+    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INDIFFERENT), new PickRandom([new PassTurn(), new RandomMove()])]));
+    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
-    switch (mob.Stats[Attribute.MobAttitude].Curr)
-    {
-      case Mob.INACTIVE:
-        return new PassTurn();
-      case Mob.INDIFFERENT:
-        // check for passive actions
-
-        if (gs.Rng.NextDouble() < 0.5)
-          return new PassTurn();
-        else
-          return new RandomMove();
-      case Mob.AFRAID:
-        // Not sure this check really belongs here, but it's 
-        // a convenient spot and I can't think where else to
-        // put it
-        if (gs.Rng.Next(10) == 0)
-          mob.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
-        return new TryToEscape();
-      case Mob.AGGRESSIVE:
-        List<BehaviourNode> nodes = [];
-        foreach (Power p in mob.Powers)
-        {
-          nodes.Add(new UsePower(p));
-        }
-
-        Actor target = mob.PickTarget(gs);
-        nodes.Add(new ChaseTarget(target));
-
-        return new Selector(nodes);
-    }
-    //List<BehaviourNode> nodes = [];
-    //foreach (Power p in mob.Powers)
-    //{
-    //  nodes.Add(new UsePower(p));
-    //}
-
-    //Actor target = mob.PickTarget(gs);
-    //nodes.Add(new ChaseTarget(target));
-
-    //return new Selector(nodes);
-    return new PassTurn();
+    List<BehaviourNode> actions = [];
+    foreach (Power p in mob.Powers)
+      actions.Add(new UsePower(p));
+    actions.Add(new ChaseTarget(mob.PickTarget(gs)));
+    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
+    
+    plan.Add(new PassTurn());
+    
+    return new Selector(plan);
   }
 
   public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
