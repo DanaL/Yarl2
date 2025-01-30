@@ -282,7 +282,7 @@ abstract class Actor : GameObj, IZLevel
       if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2)
       {
         float odds = (float)currHP / maxHP;
-        if (gs.Rng.NextDouble() < odds)
+        if (gs.Rng.NextDouble() < odds || true)
         {
           Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
           msg += $" {FullName.Capitalize()} turns to flee!";
@@ -630,7 +630,8 @@ class MonsterFactory
     {
       Name = "MeleeSlashing",
       DmgDie = 6,
-      NumOfDice = 1
+      NumOfDice = 1,
+      Type = PowerType.Attack
     });
     m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
@@ -660,6 +661,7 @@ class MonsterFactory
 }
 
 // Class for traicking powers/abilities monsters have access to
+enum PowerType { Attack, Passive, Movement }
 class Power
 {
   public string Name { get; set; } = "";
@@ -670,6 +672,7 @@ class Power
   public int NumOfDice { get; set; }
   public ulong Cooldown { get; set; }
   public string Quip { get; set; } = "";
+  public PowerType Type { get; set; }
 
   public Action Action(Mob mob, GameState gs, Loc loc)
   {

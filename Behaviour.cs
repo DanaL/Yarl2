@@ -195,6 +195,91 @@ class PassTurn : BehaviourNode
   }
 }
 
+class TryToEscape : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    bool smart = false;
+    bool airborne = false;
+    bool immobile = false;
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait)
+        smart = true;
+      else if (t is FloatingTrait || t is FlyingTrait)
+        airborne = true;
+      else if (t is ImmobileTrait)
+        immobile = true;
+    }
+
+    // A smart monster will jump on a teleport trap to escape
+    if (smart)
+    {
+      foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+      {
+        if (gs.TileAt(adj).Type == TileType.TeleportTrap && !gs.ObjDb.Occupied(adj))
+        {
+          if (gs.LastPlayerFoV.Contains(adj))
+            gs.UIRef().AlertPlayer($"{mob.FullName.Capitalize()} jumps into the teleport trap!");
+          bool result = mob.ExecuteAction(new MoveAction(gs, mob, adj));
+          return result ? PlanStatus.Running : PlanStatus.Failure;          
+        }
+      }
+    }
+
+    // Do we have a movement power like Blink available?
+    foreach (Power power in mob.Powers)
+    {
+      if (power.Type == PowerType.Movement)
+      {
+        UsePower usePower = new(power);
+        if (usePower.Execute(mob, gs) == PlanStatus.Success)        
+          return PlanStatus.Running;        
+      }
+    }
+
+    if (!immobile)
+    {
+      DijkstraMap? map;
+      if (airborne)
+        map = gs.GetDMap("flying");
+      else if (smart)
+        map = gs.GetDMap("doors");
+      else
+        map = gs.GetDMap();
+      if (map is null)
+        throw new Exception("Dijkstra maps should never be null");
+
+      List<(int, int)> route = map.EscapeRoute(mob.Loc.Row, mob.Loc.Col, 5);
+      if (route.Count > 0)
+      {
+        Loc loc = mob.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
+
+        Tile tile = gs.TileAt(loc);
+        bool result;
+        if (tile is Door door && !door.Open)
+          result = result = mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
+        else
+          result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return result ? PlanStatus.Running : PlanStatus.Failure;
+      }
+    }
+    
+    // Failing that, the monster will try to use one of its powers.
+    List<BehaviourNode> nodes = [];
+    foreach (Power power in mob.Powers)
+    {
+      nodes.Add(new UsePower(power));
+    }
+    Selector selector = new(nodes);
+    PlanStatus status = selector.Execute(mob, gs);
+    if (status == PlanStatus.Success)
+      return PlanStatus.Running;
+
+    return mob.ExecuteAction(new PassAction()) ? PlanStatus.Running : PlanStatus.Failure;
+  }
+}
+
 class WanderInArea(HashSet<Loc> area) : BehaviourNode
 {
   HashSet<Loc> Area { get; set; } = area;
@@ -572,8 +657,6 @@ class Planner
 
   static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
-    
-        
     foreach (Trait t in mob.Traits)
     {
       if (t is ParalyzedTrait || t is SleepingTrait)
@@ -593,6 +676,13 @@ class Planner
           return new PassTurn();
         else
           return new RandomMove();
+      case Mob.AFRAID:
+        // Not sure this check really belongs here, but it's 
+        // a convenient spot and I can't think where else to
+        // put it
+        if (gs.Rng.Next(10) == 0)
+          mob.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
+        return new TryToEscape();
       case Mob.AGGRESSIVE:
         List<BehaviourNode> nodes = [];
         foreach (Power p in mob.Powers)
