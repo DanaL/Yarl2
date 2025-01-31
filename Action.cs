@@ -281,7 +281,10 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
 
   public override ActionResult Execute()
   {
-    var result = base.Execute();
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
     GameState!.UIRef().AlertPlayer(EffectText);
     
     var affected = GameState.Flood(Target, Radius);
