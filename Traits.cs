@@ -484,26 +484,6 @@ class FinesseTrait : Trait
   public override string AsText() => "Finesse";
 }
 
-class FireBreathTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-
-  public int DC { get; set; }
-  public int Range { get; set; }
-  public int DmgDie { get; set; }
-  public int DmgDice { get; set; }
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    return Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
-  }
-
-  public override Action Action(Actor actor, GameState gs) =>  
-    new FireBreathAction(gs, actor, actor.PickTargetLoc(gs), Range, DmgDie, DmgDice);
-  
-  public override string AsText() => $"FireBreath#{DmgDie}#{DmgDice}#{Range}#{Cooldown}";
-}
-
 class ImmunityTrait : BasicTrait
 {
   public DamageType Type {  get; set; }
@@ -2836,16 +2816,7 @@ class TraitFactory
       }
     },
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
-    { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireBreath", (pieces, gameObj) => new FireBreathTrait()
-      {
-        DmgDie = int.Parse(pieces[1]),
-        DmgDice = int.Parse(pieces[2]),
-        Range = int.Parse(pieces[3]),
-        Cooldown = ulong.Parse(pieces[4]),
-        Name=pieces[0]
-      }
-    },
+    { "Finesse", (pieces, gameObj) => new FinesseTrait() },   
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },

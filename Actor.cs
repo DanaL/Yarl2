@@ -769,6 +769,8 @@ class Power
         return new DrainTorchAction(gs, mob, loc);
       case "Entangle":
         return new EntangleAction(gs, mob);
+      case "FireBreath":
+        return new FireBreathAction(gs, mob, loc, MaxRange, DmgDie, NumOfDice);
       default:
         return new PassAction();
     }    
