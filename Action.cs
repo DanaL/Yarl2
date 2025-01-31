@@ -402,8 +402,8 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     }
 
     int total = 0;
-    for (int j = 0; j < 4; j++)
-      total += GameState.Rng.Next(6) + 1;
+    for (int j = 0; j < DmgDice; j++)
+      total += GameState.Rng.Next(DmgDie) + 1;
     List<(int, DamageType)> dmg = [(total, DamageType.Fire)];    
     foreach (var pt in affected)
     {
