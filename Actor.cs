@@ -758,6 +758,8 @@ class Power
         return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob };
       case "Web":
         return new WebAction(gs, loc);
+      case "FireBolt":
+        return new FireboltAction(gs, mob, loc);
       default:
         return new PassAction();
     }    

@@ -438,19 +438,12 @@ class SpellActionTrait : ActionTrait
     return ClearShot(gs, Trajectory(mob, p.Loc));
   }
 
-  static Action CalcFireboltAction(Actor actor, GameState gs)
-  {
-    Loc targetLoc = actor.PickRangedTargetLoc(gs);
-    return new FireboltAction(gs, actor, targetLoc, Trajectory(actor, targetLoc));
-  }
-
   public override Action Action(Actor actor, GameState gs)
   {
     return Name switch
     {
       "DrainTorch" => new DrainTorchAction(gs, actor, actor.PickRangedTargetLoc(gs)),
       "Entangle" => new EntangleAction(gs, actor),
-      "Firebolt" => CalcFireboltAction(actor, gs),
       "MirrorImage" => new MirrorImageAction(gs, actor, actor.PickTargetLoc(gs)),      
       _ => throw new Exception($"Unknown spell: {Name}")
     };

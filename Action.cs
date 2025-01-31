@@ -203,7 +203,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
     ArrowAnimation arrowAnim = new(GameState!, Util.Trajectory(Actor!.Loc, _loc), _ammo.Glyph.Lit);
     GameState!.UIRef().RegisterAnimation(arrowAnim);
 
-    var target = GameState!.ObjDb.Occupant(loc);
+    var target = GameState!.ObjDb.Occupant(_loc);
     if (target is not null)
       result = Battle.MissileAttack(Actor!, target, GameState, _ammo, 0, null);
 
@@ -1896,13 +1896,12 @@ class EntangleAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
-class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajectory) : Action(gs, caster)
+class FireboltAction(GameState gs, Actor caster, Loc target) : Action(gs, caster)
 {
   readonly Loc _target = target;
-  readonly List<Loc> _trajectory = trajectory;
 
   public override ActionResult Execute()
-  {    
+  {
     var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
     var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
 

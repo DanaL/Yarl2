@@ -11,7 +11,7 @@ nilbog            |g|lightblue    |blue        |14|20|3| 1.0|10|14|Nudity#2#7#0#
 kobold foreman    |k|yelloworange |dullred     |13|25|3| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Passive#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10||Plant,Plural,Immunity#Confusion,Brainless,Immobile
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0#0#7#Attack,MeleePiercing#1#1#9#1#0#0#Attack|Teflon,Poisoner#13#2#20
-goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|SpellAction#Firebolt#2#2#4,MeleeSlashing#1#1#5#1#0#0#Attack|Intelligent
+goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#0#0#0#2#AttackMelee,Slashing#1#1#5#1#0#0#Attack|Intelligent
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,ResistBlunt,Immunity#Confusion,Brainless
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
