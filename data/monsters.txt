@@ -34,7 +34,7 @@ phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#Butt
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#3#10|Plant,Immunity#Confusion,Immobile,Brainless
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|NauseousAura#owner#10,Undead
-haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#25|Undead,Immunity#Confusion,Construct,Immobile,GoodMagicLoot
+haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive|Undead,Immunity#Confusion,Construct,Immobile,GoodMagicLoot
 giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Drop#beetle_carapace#33
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying
 displacer beast   |f|grey         |darkgrey    |14|25|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Displacement

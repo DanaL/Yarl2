@@ -732,7 +732,30 @@ class Power
           GameState = gs,
           Actor = mob,
           Quip = Quip
-        };        
+        };
+      case "SummonUndead":
+        List<string> undead = ["skeleton", "zombie"];
+
+        if (mob.Loc.Level >= 2)
+        {
+          undead.Add("ghoul");
+          undead.Add("phantom");
+        }
+
+        if (mob.Loc.Level >= 1)
+          undead.Add("shadow");
+
+        if (mob.Loc.Level == 1)
+        {
+          undead.Add("skeleton");
+          undead.Add("skeleton");
+          undead.Add("zombie");
+          undead.Add("zombie");
+        }
+
+        string summons = undead[gs.Rng.Next(undead.Count)];
+
+        return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob };
       default:
         return new PassAction();
     }    

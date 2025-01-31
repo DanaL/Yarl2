@@ -1327,6 +1327,17 @@ class SummonAction(Loc target, string summons, int count) : Action()
   {
     base.Execute();
 
+    // We'll keep the level from getting too over-populated. I don't know what
+    // a good number is yet, but let's start with 100
+    int levelPop = GameState!.ObjDb.LevelCensus(Actor!.Loc.DungeonID, Actor.Loc.Level);
+    if (levelPop > 100)
+    {
+      if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+        GameState.UIRef().AlertPlayer("A spell fizzles");
+
+      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+    }
+
     int summonCount = 0;
     for (int j = 0; j < _count; j++)
     {

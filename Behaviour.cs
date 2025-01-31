@@ -159,7 +159,7 @@ class UsePower(Power power) : BehaviourNode
   Power Power { get; set; } = power;
 
   bool Available(Mob mob, GameState gs)
-  {    
+  {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
       if (gs.Turn <= lastUse + Power.Cooldown)
@@ -689,22 +689,48 @@ class Planner
 
   static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
+    bool immobile = false;
+    bool paralyzed = false;
     foreach (Trait t in mob.Traits)
     {
       if (t is ParalyzedTrait || t is SleepingTrait)
-        return new PassTurn();
+        paralyzed = true;
+      else if (t is ImmobileTrait)
+        immobile = true;
+    }
+
+    if (paralyzed)
+      return new PassTurn();
+
+    List<BehaviourNode> actions = [];
+    List<BehaviourNode> passive = [];
+    foreach (Power p in mob.Powers)
+    {
+      BehaviourNode up = new UsePower(p);
+      actions.Add(new UsePower(p));
+      if (p.Type == PowerType.Passive)
+        passive.Add(up);
     }
 
     // Not yet handling confused monsters, etc
+
     List<BehaviourNode> plan = [];
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]));
-    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INDIFFERENT), new PickRandom([new PassTurn(), new RandomMove()])]));
+
+    List<BehaviourNode> indifferentNodes = [new CheckMonsterAttitude(Mob.INDIFFERENT)];
+    if (passive.Count > 0)
+      indifferentNodes.Add(new Selector(passive));
+    if (immobile)
+      indifferentNodes.Add(new PassTurn());
+    else
+      indifferentNodes.Add(new PickRandom([new PassTurn(), new RandomMove()]));    
+    plan.Add(new Sequence(indifferentNodes));
+
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
-    List<BehaviourNode> actions = [];
-    foreach (Power p in mob.Powers)
-      actions.Add(new UsePower(p));
-    actions.Add(new ChaseTarget(mob.PickTarget(gs)));
+    if (!immobile)
+      actions.Add(new ChaseTarget(mob.PickTarget(gs)));
+
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
     
     plan.Add(new PassTurn());

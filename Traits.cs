@@ -223,87 +223,6 @@ class CarriesTrait : LootTrait
   public override string AsText() => $"Carries#{ItemName}#{Chance}";
 }
 
-class SummonTrait : ActionTrait
-{
-  public string Summons { get; set; } = "";
-  public string Quip { get; set; } = "";
-  public override ActionType ActionType => ActionType.Attack;
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    // I don't want them spamming the level with summons so they'll only
-    // perform a summons if they are near the player
-    if (Util.Distance(mob.Loc, gs.Player.Loc) > 3)
-      return false;
-
-    foreach (var adj in Util.Adj8Locs(mob.Loc))
-    {
-      if (!gs.ObjDb.Occupied(adj))
-        return true;
-    }
-
-    return false;
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    return new SummonAction(actor.Loc, Summons, 1)
-    {
-      GameState = gs,
-      Actor = actor,
-      Quip = Quip
-    };
-  }
-
-  public override string AsText() => $"Summon#{Cooldown}#{Summons}#{Quip}";  
-}
-
-class SummonUndeadTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Passive;
-
-  // I'm not sure what a good limit is, but let's start with 100 and see 
-  // if that's too many or causes performance issues
-  public override bool Available(Mob mob, GameState gs) 
-  {
-    int levelPop = gs.ObjDb.LevelCensus(mob.Loc.DungeonID, mob.Loc.Level);
-
-    return levelPop < 100;
-  }
-
-  static string Summons(Actor actor, GameState gs)
-  {
-    List<string> undead = [ "skeleton", "zombie" ];
-
-    if (actor.Loc.Level >= 2)
-    {
-      undead.Add("ghoul");
-      undead.Add("phantom");
-    }
-
-    if (actor.Loc.Level >= 1)
-      undead.Add("shadow");
-    
-    if (actor.Loc.Level == 1)
-    {
-      undead.Add("skeleton");
-      undead.Add("skeleton");
-      undead.Add("zombie");
-      undead.Add("zombie");
-    }
-
-    return undead[gs.Rng.Next(undead.Count)];
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    string summons = Summons(actor, gs);
-    return new SummonAction(actor.Loc, summons, 1) { GameState = gs, Actor = actor };
-  }
-
-  public override string AsText() => $"SummonUndead#{Cooldown}";
-}
-
 class SwallowedTrait : Trait, IGameEventListener
 {
   public ulong VictimID { get; set; }
@@ -3162,8 +3081,6 @@ class TraitFactory
       }
     },
     { "StressReliefAura", (pieces, gameObj) => new StressReliefAuraTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
-    { "Summon", (pieces, gameObj) => new SummonTrait() { Name = pieces[0], Cooldown = ulong.Parse(pieces[1]), Summons = pieces[2], Quip = pieces[3] } },
-    { "SummonUndead", (pieces, gameObj) => new SummonUndeadTrait() { Cooldown = ulong.Parse(pieces[1]), Name=pieces[0] }},
     { "Swallowed", (pieces, gameObj) => new SwallowedTrait()
       {
         VictimID = ulong.Parse(pieces[1]), SwallowerID = ulong.Parse(pieces[2]),
