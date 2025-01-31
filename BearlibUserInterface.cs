@@ -80,6 +80,7 @@ internal class BLUserInferface : UserInterface, IDisposable
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_7, 'y');
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_8, 'k');
     KeyToChar.Add((int)TKCodes.InputEvents.TK_KP_9, 'u');
+    KeyToChar.Add((int)TKCodes.InputEvents.TK_MINUS, '-');
   }
 
   protected override GameEvent PollForEvent()
