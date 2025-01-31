@@ -762,6 +762,11 @@ class Power
         return new FireboltAction(gs, mob, loc);
       case "MirrorImage":
         return new MirrorImageAction(gs, mob, loc);
+      case "ConfusingScream":
+        string txt = $"{mob.FullName.Capitalize()} screams!";
+        return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{DC}#0", DmgDie, txt);
+      case "DrainTorch":
+        return new DrainTorchAction(gs, mob, loc);
       default:
         return new PassAction();
     }    

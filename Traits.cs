@@ -442,7 +442,6 @@ class SpellActionTrait : ActionTrait
   {
     return Name switch
     {
-      "DrainTorch" => new DrainTorchAction(gs, actor, actor.PickRangedTargetLoc(gs)),
       "Entangle" => new EntangleAction(gs, actor),      
       _ => throw new Exception($"Unknown spell: {Name}")
     };
