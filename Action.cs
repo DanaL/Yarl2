@@ -1188,7 +1188,7 @@ class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmg
       {
         damageRolls.Add((GameState.Rng.Next(DmgDie) + 1, DamageType.Blunt));        
       }
-      var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(damageRolls, 0, GameState, null, 1.0);
+      var (hpLeft, _, _) = victim.ReceiveDmg(damageRolls, 0, GameState, null, 1.0);
       if (hpLeft < 1)
       {
         GameState.ActorKilled(victim, "being crushed", result, null);

@@ -720,6 +720,12 @@ class Power
         return new MissileAttackAction(gs, mob, loc, arrow);
       case "RumBreath":
         return new RumBreathAction(gs, mob, loc, MaxRange);
+      case "Nudity":
+        return new InduceNudityAction(gs, mob);
+      case "FogCloud":
+        return new FogCloudAction(gs, mob);
+      case "Blink":
+        return new BlinkAction(gs, mob);
       default:
         return new PassAction();
     }    

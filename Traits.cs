@@ -532,9 +532,7 @@ class SpellActionTrait : ActionTrait
       "DrainTorch" => new DrainTorchAction(gs, actor, actor.PickRangedTargetLoc(gs)),
       "Entangle" => new EntangleAction(gs, actor),
       "Firebolt" => CalcFireboltAction(actor, gs),
-      "FogCloud" => new FogCloudAction(gs, actor),
       "MirrorImage" => new MirrorImageAction(gs, actor, actor.PickTargetLoc(gs)),
-      "Nudity" => new InduceNudityAction(gs, actor),      
       "Web" => new WebAction(gs, actor.PickRangedTargetLoc(gs)),
       _ => throw new Exception($"Unknown spell: {Name}")
     };

@@ -168,11 +168,11 @@ class UsePower(Power power) : BehaviourNode
 
     Loc targetLoc = mob.PickTargetLoc(gs);
     int d = Util.Distance(mob.Loc, targetLoc);
-    if (d < Power.MinRange || d > Power.MaxRange)
-    {
+    if (Power.MinRange == 0 && Power.MaxRange == 0)
+      return true;
+    if (d < Power.MinRange || d > Power.MaxRange)    
       return false;
-    }
-
+    
     return true;
   }
 
