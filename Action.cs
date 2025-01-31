@@ -1857,7 +1857,7 @@ class DrainTorchAction(GameState gs, Actor caster, Loc target) : Action(gs, cast
             int drain = GameState.Rng.Next(350, 751);
             torch.Fuel = int.Max(0, torch.Fuel - drain);
             string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "drain")}";
-            ui.AlertPlayer($" {item.FullName.Possessive(victim)}!");
+            ui.AlertPlayer(s + $" {item.FullName.Possessive(victim)}!");
             success = true;
           }
         }
