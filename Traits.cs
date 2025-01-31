@@ -11,14 +11,6 @@
 
 namespace Yarl2;
 
-enum ActionType
-{
-  Attack = 0b0001,
-  Movement = 0b0010,
-  Buff = 0b0100,
-  Passive = 0b1000
-}
-
 record UseResult(Action? ReplacementAction, Inputer? Accumulator, bool Successful = true, string Message = "");
 
 interface INeedsID
@@ -76,57 +68,6 @@ abstract class BasicTrait : Trait
 }
 
 abstract class LootTrait : Trait { }
-
-// To let me classify traits that mobs can take on their turns
-// Not sure if this is the best way to go...
-abstract class ActionTrait : BasicTrait
-{
-  // I was thinking I could use MinRange to set abilities a monster might use
-  // from further away. Ie., gobin archer has one attack from distance 2 to 7
-  // and another they use when they are in melee range.
-  public int MinRange { get; set; } = 0;
-  public virtual int MaxRange { get; set; } = 0;
-  public ulong Cooldown { get; set; } = 0;
-  public string Name { get; set; } = "";
-
-  public virtual ActionType ActionType { get; set; }
-
-  public abstract bool Available(Mob mob, GameState gs);
-  public abstract Action Action(Actor actor, GameState gs);
-
-  protected bool InRange(Mob mob, GameState gs)
-  {
-    ulong targetId = Planner.SelectTarget(mob, gs);
-    if (gs.ObjDb.GetObj(targetId) is Actor target)
-    {
-      int dist = Util.Distance(mob.Loc, target.Loc);
-      return MinRange <= dist && MaxRange >= dist;
-    }
-    else
-    {
-      return false;
-    }
-  }
-
-  protected static bool ClearShot(GameState gs, IEnumerable<Loc> trajectory)
-  {
-    foreach (var loc in trajectory)
-    {
-      var tile = gs.TileAt(loc);
-      if (!(tile.Passable() || tile.PassableByFlight()))
-        return false;
-    }
-
-    return true;
-  }
-
-  public static List<Loc> Trajectory(Actor mob, Loc target)
-  {
-    return Util.Bresenham(mob.Loc.Row, mob.Loc.Col, target.Row, target.Col)
-               .Select(sq => mob.Loc with { Row = sq.Item1, Col = sq.Item2 })
-               .ToList();
-  }
-}
 
 class AdjectiveTrait(string adj) : Trait
 {
