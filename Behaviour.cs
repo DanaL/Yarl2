@@ -242,6 +242,64 @@ class GulpPower(Power power) : UsePower(power)
   }
 }
 
+class HealAlliesPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
+    {
+      if (gs.Turn <= lastUse + Power.Cooldown)
+        return false;
+    }
+
+    if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
+    {
+      Loc loc = mob.Loc;
+      var fov = FieldOfView.CalcVisible(6, loc, gs.CurrentMap, gs.ObjDb);
+      foreach (ulong id in allies.IDs)
+      {
+        if (gs.ObjDb.GetObj(id) is Actor ally)
+        {
+          Stat hp = ally.Stats[Attribute.HP];
+          if (fov.ContainsKey(ally.Loc) && hp.Curr < hp.Max)
+            return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is not AlliesTrait alliesTrait)
+      return PlanStatus.Failure;
+
+    List<Mob> candidates = [];
+    foreach (ulong id in alliesTrait.IDs)
+    {
+      if (gs.ObjDb.GetObj(id) is Mob m)
+      {
+        var hp = m.Stats[Attribute.HP];
+        if (hp.Curr < hp.Max)
+          candidates.Add(m);
+      }
+    }
+
+    if (candidates.Count > 0)
+    {
+      int i = gs.Rng.Next(candidates.Count);
+      string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
+      gs.UIRef().AlertPlayer(castText);
+
+      bool result = mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4));
+      return result ? PlanStatus.Success : PlanStatus.Failure;      
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
 class PassTurn : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -765,6 +823,7 @@ class Planner
       {
         "Gulp" => new GulpPower(p),
         "Crush" => new CrushPower(p),
+        "HealAllies" => new HealAlliesPower(p),
         _ => new UsePower(p)
       };
 

@@ -279,62 +279,6 @@ class SwallowedTrait : Trait, IGameEventListener
   }
 }
 
-class HealAlliesTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Buff;
-
-  // Bsaically, if there is an ally the trait owner can see nearby who needs healing, indicate 
-  // that the action is available
-  public override bool Available(Mob mob, GameState gs)
-  {
-    if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is AlliesTrait allies)
-    {
-      Loc loc = mob.Loc;
-      var fov = FieldOfView.CalcVisible(6, loc, gs.CurrentMap, gs.ObjDb);
-      foreach (ulong id in allies.IDs)
-      {
-        if (gs.ObjDb.GetObj(id) is Actor ally)
-        {
-          Stat hp = ally.Stats[Attribute.HP];
-          if (fov.ContainsKey(ally.Loc) && hp.Curr < hp.Max)
-            return true;
-        }        
-      }
-    }
-
-    return false;
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    if (actor.Traits.OfType<AlliesTrait>().FirstOrDefault() is not AlliesTrait alliesTrait)
-      return new NullAction();
-
-    List<Mob> candidates = [];
-    foreach (ulong id in alliesTrait.IDs)
-    {
-      if (gs.ObjDb.GetObj(id) is Mob m)
-      {
-        var hp = m.Stats[Attribute.HP];
-        if (hp.Curr < hp.Max)
-          candidates.Add(m);
-      }
-    }
-
-    if (candidates.Count > 0)
-    {
-      int i = gs.Rng.Next(candidates.Count);
-      string castText = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cast")} a healing spell!";
-      gs.UIRef().AlertPlayer(castText);
-      return new HealAction(gs, candidates[i], 4, 4);
-    }
-
-    return new PassAction();
-  }
-
-  public override string AsText() => $"HealAllies#{Cooldown}";
-}
-
 class HeroismTrait : TemporaryTrait 
 {
   public override string AsText() => $"Heroism#{OwnerID}#{ExpiresOn}#{SourceId}";
@@ -2719,7 +2663,6 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
-    { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Heroism", (pieces, gameObj) => new HeroismTrait()
       {
         OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), SourceId = ulong.Parse(pieces[3])
