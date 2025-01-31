@@ -691,6 +691,8 @@ class Power
 
   public Action Action(Mob mob, GameState gs, Loc loc)
   {
+    string txt;
+
     switch (Name)
     {
       case "MeleeSlashing":
@@ -763,7 +765,7 @@ class Power
       case "MirrorImage":
         return new MirrorImageAction(gs, mob, loc);
       case "ConfusingScream":
-        string txt = $"{mob.FullName.Capitalize()} screams!";
+        txt = $"{mob.FullName.Capitalize()} screams!";
         return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{DC}#0", DmgDie, txt);
       case "DrainTorch":
         return new DrainTorchAction(gs, mob, loc);
@@ -771,6 +773,9 @@ class Power
         return new EntangleAction(gs, mob);
       case "FireBreath":
         return new FireBreathAction(gs, mob, loc, MaxRange, DmgDie, NumOfDice);
+      case "FearsomeBellow":
+        txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
+        return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{DC}#0", MaxRange, txt);
       default:
         return new PassAction();
     }    

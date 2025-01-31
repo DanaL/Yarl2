@@ -46,12 +46,7 @@ class BossFactory
     // {MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}
     g.Traits.Add(new IntelligentTrait());    
     g.Traits.Add(new KnockBackTrait());
-    g.Traits.Add(new FearsomeBellowTrait()
-    {
-      Radius = 2,
-      DC = 15,
-      Cooldown = 20
-    });
+    
     g.CalcMoveStrategy();
 
     return g;

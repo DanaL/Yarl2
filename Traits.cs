@@ -762,27 +762,6 @@ class FallenAdventurerTrait : Trait
   public override string AsText() => "FallenAdventurer";
 }
 
-class FearsomeBellowTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-
-  public int DC { get; set; }
-  public int Radius { get; set; }
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    string txt = $"{actor.FullName.Capitalize()} bellows fearsomely!";
-    return new AoEAction(gs, actor, actor.Loc, $"Frightened#0#{DC}#0", Radius, txt);
-  }
-
-  public override string AsText() => $"FearsomeBellow#{Radius}#{DC}#{Cooldown}";
-}
-
 class FinalBossTrait : Trait
 {
   public override string AsText() => "FinalBoss";
@@ -2808,13 +2787,7 @@ class TraitFactory
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
-    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
-    { "FearsomeBellow", (pieces, gameObj) => new FearsomeBellowTrait()
-      {
-        Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]),
-        Cooldown = ulong.Parse(pieces[3]), Name=pieces[0]
-      }
-    },
+    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },    
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },   
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
