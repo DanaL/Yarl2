@@ -1963,28 +1963,6 @@ class RetributionTrait : Trait
   public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}";
 }
 
-class ShriekTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Passive;
-  public override int MaxRange => 1;
-
-  public int ShriekRadius { get; set; }
-
-  public override bool Available(Mob actor, GameState gs) 
-  {
-    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
-    {
-      if (gs.ObjDb.Occupied(adj))
-        return true;
-    }
-
-    return false;
-  }
-
-  public override Action Action(Actor actor, GameState gs) => new ShriekAction(gs, actor, ShriekRadius); 
-  public override string AsText() => $"Shriek#{Cooldown}#{ShriekRadius}";
-}
-
 class ShunnedTrait : Trait
 {
   public override string AsText() => "Shunned";
@@ -2926,8 +2904,6 @@ class TraitFactory
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
-    { "Shriek", (pieces, gameObj) => new ShriekTrait() { Cooldown = ulong.Parse(pieces[1]), ShriekRadius = int.Parse(pieces[2]) }
-    },
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },

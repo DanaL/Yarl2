@@ -776,6 +776,8 @@ class Power
       case "FearsomeBellow":
         txt = $"{mob.FullName.Capitalize()} bellows fearsomely!";
         return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{DC}#0", MaxRange, txt);
+      case "Shriek":
+        return new ShriekAction(gs, mob, MaxRange);
       default:
         return new PassAction();
     }    
