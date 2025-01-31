@@ -180,6 +180,8 @@ class UsePower(Power power) : BehaviourNode
   {
     if (Available(mob, gs))
     {
+      mob.LastPowerUse[Power.Name] = gs.Turn;
+
       bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
 
       return result ? PlanStatus.Success : PlanStatus.Failure;

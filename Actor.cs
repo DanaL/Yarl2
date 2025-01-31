@@ -717,7 +717,9 @@ class Power
       case "MissilePiercing":
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);        
         var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
-        return new MissileAttackAction(gs, mob, loc, arrow);        
+        return new MissileAttackAction(gs, mob, loc, arrow);
+      case "RumBreath":
+        return new RumBreathAction(gs, mob, loc, MaxRange);
       default:
         return new PassAction();
     }    

@@ -858,22 +858,6 @@ class RobbedTrait : Trait
   public override string AsText() => "Robbed";
 }
 
-class RumBreathTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-
-  public int DC { get; set; }
-  public int Range { get; set; }
-
-  public override bool Available(Mob mob, GameState gs) =>
-    Util.Distance(mob.Loc, gs.Player.Loc) <= Range;
-  
-  public override Action Action(Actor actor, GameState gs) => 
-    new RumBreathAction(gs, actor, actor.PickTargetLoc(gs), Range);
-
-  public override string AsText() => $"RumBreath#{Range}#{Cooldown}";
-}
-
 class SleepingTrait : Trait
 {
   public override string AsText() => "Sleeping";
@@ -3132,7 +3116,6 @@ class TraitFactory
     { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
     { "ResistSlashing", (pieces, gameObj) => new ResistSlashingTrait() },
     { "Robbed", (pieces, gameObj) => new RobbedTrait() },
-    { "RumBreath", (pieces, gameObj) => new RumBreathTrait() { Range=int.Parse(pieces[1]), Cooldown=ulong.Parse(pieces[2]), Name="RumBreath" } },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
