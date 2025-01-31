@@ -399,27 +399,6 @@ class HomebodyTrait : Trait
   public override string AsText() => $"Homebody#{Loc}#{Range}";
 }
 
-class ConfusingScreamTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-
-  public int DC { get; set; }
-  public int Radius { get; set; }
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    return Util.Distance(mob.Loc, gs.Player.Loc) <= Radius;
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    var txt = $"{actor.FullName.Capitalize()} screams!";
-    return new AoEAction(gs, actor, actor.Loc, $"Confused#0#{DC}#0", Radius, txt);
-  }
-
-  public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}";
-}
-
 class MosquitoTrait : Trait
 {
   public override string AsText() => "Mosquito";
@@ -2806,7 +2785,6 @@ class TraitFactory
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
-    { "ConfusingScream", (pieces, gameObj) => new ConfusingScreamTrait() { Radius = int.Parse(pieces[1]), DC = int.Parse(pieces[2]), Cooldown = ulong.Parse(pieces[3]) }},
     { "Construct", (pieces, gameObj) => new ConstructTrait() },
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
