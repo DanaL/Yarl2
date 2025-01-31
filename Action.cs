@@ -191,28 +191,23 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
   }
 }
 
-class MissileAttackAction(GameState gs, Actor actor, Loc? loc, Item ammo, int attackBonus) : Action(gs, actor)
+class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Action(gs, actor)
 {
-  Loc? _loc = loc;
+  Loc _loc = loc;
   readonly Item _ammo = ammo;
-  readonly int _attackBonus = attackBonus;
-
+  
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Succcessful = true };
+    ActionResult result = new() { Succcessful = true };
 
-    if (_loc is Loc loc)
-    {
-      var target = GameState!.ObjDb.Occupant(loc);
-      if (target is not null)
-        result = Battle.MissileAttack(Actor!, target, GameState, _ammo, _attackBonus, null);
+    ArrowAnimation arrowAnim = new(GameState!, Util.Trajectory(Actor!.Loc, _loc), _ammo.Glyph.Lit);
+    GameState!.UIRef().RegisterAnimation(arrowAnim);
 
-      return result;
-    }
-    else
-    {
-      throw new Exception("Null location passed to MissileAttackAction. Why would you do that?");
-    }
+    var target = GameState!.ObjDb.Occupant(loc);
+    if (target is not null)
+      result = Battle.MissileAttack(Actor!, target, GameState, _ammo, 0, null);
+
+    return result;
   }
 
   public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
@@ -1896,12 +1891,9 @@ class FireboltAction(GameState gs, Actor caster, Loc target, List<Loc> trajector
   readonly List<Loc> _trajectory = trajectory;
 
   public override ActionResult Execute()
-  {
-    var anim = new ArrowAnimation(GameState!, _trajectory, Colours.YELLOW_ORANGE);
-    GameState!.UIRef().RegisterAnimation(anim);
-
+  {    
     var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
-    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt, 0);
+    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
 
     string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Firebolt!";
     GameState!.UIRef().AlertPlayer(txt);

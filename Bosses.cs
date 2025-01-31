@@ -44,15 +44,7 @@ class BossFactory
     g.Stats.Add(Attribute.MobAttitude, new Stat(Mob.INDIFFERENT));
 
     // {MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}
-    g.Traits.Add(new IntelligentTrait());
-    g.Traits.Add(new MobMeleeTrait()
-    {
-      MinRange = 1,
-      MaxRange = 1,
-      DamageDie = 10,
-      DamageDice = 1, 
-      DamageType = DamageType.Blunt
-    });
+    g.Traits.Add(new IntelligentTrait());    
     g.Traits.Add(new KnockBackTrait());
     g.Traits.Add(new FearsomeBellowTrait()
     {

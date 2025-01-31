@@ -102,6 +102,7 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
       ++Curr;
     }
 
+    Curr = 0;
     return PlanStatus.Failure;
   }
 }

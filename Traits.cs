@@ -501,56 +501,6 @@ class ConfusingScreamTrait : ActionTrait
   public override string AsText() => $"ConfusingScream#{Radius}#{DC}#{Cooldown}";
 }
 
-class MobMeleeTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"MobMelee#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}";
-  public int DamageDie { get; set; }
-  public int DamageDice { get; set; }
-  public DamageType DamageType { get; set; }
-
-  public override bool Available(Mob mob, GameState gs) => InRange(mob, gs);
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    Mob mob = (Mob) actor;
-    mob.Dmg = new Damage(DamageDie, DamageDice, DamageType);
-    
-    return new MeleeAttackAction(gs, mob, mob.PickTargetLoc(gs));
-  }
-}
-
-class MobMissileTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"MobMissile#{MinRange}#{MaxRange}#{DamageDie}#{DamageDice}#{DamageType}";
-  public int DamageDie { get; set; }
-  public int DamageDice { get; set; }
-  public DamageType DamageType { get; set; }
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    if (!InRange(mob, gs))
-      return false;
-
-    var p = gs.Player;
-    return ClearShot(gs, Trajectory(mob, p.Loc));
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    Mob mob = (Mob)actor;
-    mob.Dmg = new Damage(DamageDie, DamageDice, DamageType);
-
-    Loc targetLoc = mob.PickTargetLoc(gs);
-    var arrowAnim = new ArrowAnimation(gs, Trajectory(mob, targetLoc), Colours.LIGHT_BROWN);
-    gs.UIRef().RegisterAnimation(arrowAnim);
-
-    var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
-    return new MissileAttackAction(gs, mob, targetLoc, arrow, 0);
-  }
-}
-
 class MosquitoTrait : Trait
 {
   public override string AsText() => "Mosquito";
@@ -3106,28 +3056,8 @@ class TraitFactory
     { "MageArmour", (pieces, gameObj) =>
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
-    { "Melee", (pieces, gameObj) => {
-      Enum.TryParse(pieces[3], out DamageType dt);
-      return new MobMeleeTrait() {
-          Name = "Melee", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
-          MinRange = 1, MaxRange = 1, DamageType = dt }; }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
-    { "Missile", (pieces, gameObj) => {
-      Enum.TryParse(pieces[5], out DamageType dt);
-      return new MobMissileTrait() {
-          Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
-          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
-    { "MobMelee", (pieces, gameObj) => {
-      Enum.TryParse(pieces[5], out DamageType dt);
-      return new MobMeleeTrait() {
-          Name = "Melee", DamageDie = int.Parse(pieces[3]), DamageDice = int.Parse(pieces[4]),
-          MinRange = 1, MaxRange = 1, DamageType = dt }; }},
-    { "MobMissile", (pieces, gameObj) => {
-      Enum.TryParse(pieces[5], out DamageType dt);
-      return new MobMissileTrait() {
-          Name = "Missile", DamageDie = int.Parse(pieces[1]), DamageDice = int.Parse(pieces[2]),
-          MinRange = int.Parse(pieces[3]), MaxRange = int.Parse(pieces[4]), DamageType = dt }; }},
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },

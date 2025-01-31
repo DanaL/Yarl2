@@ -714,6 +714,10 @@ class Power
       case "MeleeNecrotic":
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);
         return new MeleeAttackAction(gs, mob, loc);
+      case "MissilePiercing":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);        
+        var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
+        return new MissileAttackAction(gs, mob, loc, arrow);        
       default:
         return new PassAction();
     }    
