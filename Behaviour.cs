@@ -952,114 +952,11 @@ class MonsterBehaviour : IBehaviour
       return acc;
     }      
   }
+   
 
-  Action SelectAction(Mob actor, GameState gs)
-  {
-    foreach (var act in actor.Actions)
-    {
-      // Actions should be in the list in order of prerfence
-      if (_lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
-        continue;
-
-      if (act.Available(actor, gs))
-      {
-        _lastUse[act.Name] = gs.Turn;
-        return act.Action(actor, gs);
-      }
-    }
-
-    return new NullAction();
-  }
-
-  Action CalculateEscape(Mob actor, GameState gs)
-  {
-    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
-    {
-      if (gs.TileAt(adj).Type == TileType.TeleportTrap && !gs.ObjDb.Occupied(adj) && actor.HasTrait<IntelligentTrait>())
-      {
-        if (gs.LastPlayerFoV.Contains(adj))
-          gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} jumps into the teleport trap!");
-        return new MoveAction(gs, actor, adj);
-      }
-    }
-
-    foreach (var act in actor.Actions)
-    {
-      if (act.ActionType == ActionType.Movement && _lastUse.TryGetValue(act.Name, out var last) && last + act.Cooldown > gs.Turn)
-      {
-        _lastUse[act.Name] = gs.Turn;
-        return act.Action(actor, gs);
-      }
-    }
-
-    Action escapeAction = actor.MoveStrategy.EscapeRoute(actor, gs);
-    // If we ge a PassAction back, there was no viable MoveAction for
-    // the mob to take.
-    if (escapeAction is PassAction)
-    {
-      // If a monster is cornered, they might freeze and if not
-      // do a regular action (such as attack the player)
-      if (gs.Rng.NextDouble() < 0.2)
-        return escapeAction;
-
-      escapeAction = SelectAction(actor, gs);
-      if (escapeAction is NullAction)
-        escapeAction = new PassAction();
-    }
-
-    return escapeAction;
-  }
-  
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
-    bool PassiveAvailable(ActionTrait action)
-    {
-      if (action.ActionType != ActionType.Passive || !action.Available(actor, gs))
-        return false;
-
-      if (!_lastUse.TryGetValue(action.Name, out var last))
-        return true;
-      else if (last + action.Cooldown <= gs.Turn)
-        return true;
-
-      return false;
-    }
-
-    foreach (Trait t in actor.Traits)
-    {
-      if (t is ParalyzedTrait || t is SleepingTrait)
-        return new PassAction();
-    }
     
-    switch (actor.Stats[Attribute.MobAttitude].Curr)
-    {
-      case Mob.INACTIVE:
-        return new PassAction();
-      case Mob.INDIFFERENT:
-        var passive = actor.Actions.Where(a => PassiveAvailable(a)).ToList();
-
-        if (passive.Count > 0)
-        {
-          ActionTrait act = passive[gs.Rng.Next(passive.Count)];
-          _lastUse[act.Name] = gs.Turn;
-          return act.Action(actor, gs);
-        }
-        else if (gs.Rng.NextDouble() < 0.5) 
-        {
-          return new PassAction();
-        }
-        else
-        {
-          return CalcMoveAction(actor, gs);
-        }
-      case Mob.AFRAID:
-        if (gs.Rng.Next(10) == 0)
-          actor.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
-        return CalculateEscape(actor, gs);
-      case Mob.AGGRESSIVE:
-        Action action = SelectAction(actor, gs);
-        return action is NullAction ? CalcMoveAction(actor, gs) : action;
-    }
 
     return new PassAction();
   

@@ -711,14 +711,14 @@ class GameObjDBSave
       mob.Inventory.RestoreFromText(fields[12]);
     }
 
-    if (fields[14] != "")
-    {
-      foreach (var a in fields[14].Split('`'))
-      {
-        var action = (ActionTrait) TraitFactory.FromText(a, mob);
-        mob.Actions.Add(action);
-      }
-    }
+    //if (fields[14] != "")
+    //{
+    //  foreach (var a in fields[14].Split('`'))
+    //  {
+    //    var action = (ActionTrait) TraitFactory.FromText(a, mob);
+    //    mob.Actions.Add(action);
+    //  }
+    //}
 
     mob.CalcMoveStrategy();
 
@@ -831,9 +831,9 @@ class GameObjDBSave
         sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Appearance);
 
-        string actions = string.Join("`", mob.Actions.Select(t => t.AsText()));
+        //string actions = string.Join("`", mob.Actions.Select(t => t.AsText()));
         sb.Append(Constants.SEPARATOR);
-        sb.Append(actions);
+        //sb.Append(actions);
 
         sidb.Objects.Add(sb.ToString());
       }

@@ -388,14 +388,14 @@ class CampaignCreator(UserInterface ui)
     gargoyle.Stats.Add(Attribute.Strength, new Stat(1));
     gargoyle.Stats.Add(Attribute.Dexterity, new Stat(1));
 
-    gargoyle.Actions.Add(new MobMeleeTrait()
-    {
-      MinRange = 1,
-      MaxRange = 1,
-      DamageDie = 5,
-      DamageDice = 2,
-      DamageType = DamageType.Blunt
-    });
+    //gargoyle.Actions.Add(new MobMeleeTrait()
+    //{
+    //  MinRange = 1,
+    //  MaxRange = 1,
+    //  DamageDie = 5,
+    //  DamageDice = 2,
+    //  DamageType = DamageType.Blunt
+    //});
 
     gargoyle.Stats[Attribute.InDisguise] = new Stat(1);
 

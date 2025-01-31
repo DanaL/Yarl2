@@ -424,7 +424,6 @@ abstract class Actor : GameObj, IZLevel
 class Mob : Actor
 {
   public MoveStrategy MoveStrategy { get; set; }
-  public List<ActionTrait> Actions { get; set; } = [];
   public List<Power> Powers { get; set; } = []; // this will supersede the Actions list
   public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
 
@@ -603,6 +602,7 @@ class MonsterFactory
       Glyph = glyph,
       Recovery = Util.ToDouble(fields[6])
     };
+    m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
     int hp = int.Parse(fields[4]);
     m.Stats.Add(Attribute.HP, new Stat(hp));
@@ -619,21 +619,15 @@ class MonsterFactory
 
     if (fields[9] != "")
     {
-      foreach (var actionTxt in fields[9].Split(','))
+      foreach (var powerTxt in fields[9].Split(','))
       {
-        m.Actions.Add((ActionTrait)TraitFactory.FromText(actionTxt, m));
+        try
+        {
+          m.Powers.Add(Power.FromText(powerTxt));
+        }
+        catch (Exception) { }
       }
     }
-
-    // temp debug stuff while I switch monsters to acting via behaviour trees    
-    m.Powers.Add(new Power()
-    {
-      Name = "MeleeSlashing",
-      DmgDie = 6,
-      NumOfDice = 1,
-      Type = PowerType.Attack
-    });
-    m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
     if (!string.IsNullOrEmpty(fields[10]))
     {
@@ -665,14 +659,35 @@ enum PowerType { Attack, Passive, Movement }
 class Power
 {
   public string Name { get; set; } = "";
-  public int DC { get; set; }
   public int MinRange { get; set; } = 1;
   public int MaxRange { get; set; } = 1;
   public int DmgDie { get; set; }
   public int NumOfDice { get; set; }
+  public int DC { get; set; }
   public ulong Cooldown { get; set; }
-  public string Quip { get; set; } = "";
   public PowerType Type { get; set; }
+  public string Quip { get; set; } = "";
+    
+  public static Power FromText(string txt)
+  {
+    string[] pieces = txt.Split('#');
+    
+    Enum.TryParse(pieces[7], out PowerType type);
+    string quip = pieces.Length > 8 ? pieces[8] : "";
+
+    return new Power()
+    {
+      Name = pieces[0],
+      MinRange = int.Parse(pieces[1]),
+      MaxRange = int.Parse(pieces[2]),
+      DmgDie = int.Parse(pieces[3]),
+      NumOfDice = int.Parse(pieces[4]),
+      DC = int.Parse(pieces[5]),
+      Cooldown = ulong.Parse(pieces[6]),
+      Type = type,
+      Quip = quip
+    };
+  }
 
   public Action Action(Mob mob, GameState gs, Loc loc)
   {
