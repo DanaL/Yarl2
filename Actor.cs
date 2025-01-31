@@ -767,6 +767,8 @@ class Power
         return new AoEAction(gs, mob, mob.Loc, $"Confused#0#{DC}#0", DmgDie, txt);
       case "DrainTorch":
         return new DrainTorchAction(gs, mob, loc);
+      case "Entangle":
+        return new EntangleAction(gs, mob);
       default:
         return new PassAction();
     }    

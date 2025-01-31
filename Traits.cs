@@ -425,29 +425,6 @@ class MosquitoTrait : Trait
   public override string AsText() => "Mosquito";
 }
 
-class SpellActionTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"SpellAction#{Name}#{Cooldown}#{MinRange}#{MaxRange}";
-  public override bool Available(Mob mob, GameState gs)
-  {
-    if (!InRange(mob, gs))
-      return false;
-
-    var p = gs.Player;
-    return ClearShot(gs, Trajectory(mob, p.Loc));
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    return Name switch
-    {
-      "Entangle" => new EntangleAction(gs, actor),      
-      _ => throw new Exception($"Unknown spell: {Name}")
-    };
-  }
-}
-
 class AcidSplashTrait : Trait
 {
   public override string AsText() => "AcidSplash";
@@ -3032,14 +3009,6 @@ class TraitFactory
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },
     { "Sleeping", (pieces, gameObj) => new SleepingTrait() },
-    { "SpellAction", (pieces, gameObj) => new SpellActionTrait()
-      {
-        Name = pieces[1],
-        Cooldown = ulong.Parse(pieces[2]),
-        MinRange = int.Parse(pieces[3]),
-        MaxRange = int.Parse(pieces[4])
-      }
-    },
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>
