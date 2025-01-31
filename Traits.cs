@@ -2189,14 +2189,6 @@ class BlindTrait : TemporaryTrait
   public override string AsText() => $"Blind#{OwnerID}#{ExpiresOn}#{SourceId}";
 }
 
-class BlinkTrait : ActionTrait
-{
-  public override ActionType ActionType => ActionType.Movement;
-  public override string AsText() => $"Blink#{Cooldown}";
-  public override bool Available(Mob mob, GameState gs) => true;
-  public override Action Action(Actor actor, GameState gs) => new BlinkAction(gs, actor);
-}
-
 class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 {
   public ulong OwnerID { get; set; }
@@ -2687,7 +2679,6 @@ class TraitFactory
         SourceId = pieces.Length > 3 ? ulong.Parse(pieces[3]) : 0
       }
     },
-    { "Blink", (pieces, GameObj) => new BlinkTrait() { Cooldown = ulong.Parse(pieces[1])} },
     { "Block", (pieces, gameObj) => new BlockTrait() },
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
