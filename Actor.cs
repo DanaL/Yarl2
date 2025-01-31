@@ -778,6 +778,8 @@ class Power
         return new AoEAction(gs, mob, mob.Loc, $"Frightened#0#{DC}#0", MaxRange, txt);
       case "Shriek":
         return new ShriekAction(gs, mob, MaxRange);
+      case "Gulp":
+        return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);
       default:
         return new PassAction();
     }    

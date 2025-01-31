@@ -1438,29 +1438,6 @@ class GrapplerTrait : BasicTrait
   public override string AsText() => $"Grappler#{DC}";
 }
 
-class GulpTrait : ActionTrait
-{
-  public int DC { get; set; }
-  public int AcidDie { get; set; }
-  public int AcidDice { get; set; }
-  public override ActionType ActionType => ActionType.Attack;
-  public override string AsText() => $"Gulp#{DC}#{AcidDie}#{AcidDice}";
-  
-  public override bool Available(Mob mob, GameState gs) 
-  {
-    if (mob.HasTrait<FullBellyTrait>())
-      return false;
-
-    // need to eventually have a PickTarget method in Mob
-    if (Util.Distance(mob.Loc, gs.Player.Loc) > 1)
-      return false;
-
-    return true;
-  }
-
-  public override Action Action(Actor actor, GameState gs) => new GulpAction(gs, actor, this);  
-}
-
 class ParalyzingGazeTrait : BasicTrait
 {
   public int DC { get; set; }
@@ -2789,7 +2766,6 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
-    { "Gulp", (pieces, gameObj) => new GulpTrait() { DC = int.Parse(pieces[1]), AcidDie = int.Parse(pieces[2]), AcidDice = int.Parse(pieces[3]) }},
     { "HealAllies", (pieces, gameObj) => new HealAlliesTrait() { Cooldown = ulong.Parse(pieces[1]) }},
     { "Heroism", (pieces, gameObj) => new HeroismTrait()
       {

@@ -71,11 +71,11 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
   }
 }
 
-class GulpAction(GameState gs, Actor actor, GulpTrait gt) : Action(gs, actor)
+class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) : Action(gs, actor)
 {
-  int DC { get; set; } = gt.DC;
-  int AcidDie { get; set; } = gt.AcidDie;
-  int AcidDice { get; set; } = gt.AcidDice;
+  int DC { get; set; } = dc;
+  int AcidDie { get; set; } = dmgDie;
+  int AcidDice { get; set; } = numOfDice;
 
   public override ActionResult Execute()
   {

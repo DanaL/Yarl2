@@ -158,7 +158,7 @@ class UsePower(Power power) : BehaviourNode
 {
   Power Power { get; set; } = power;
 
-  bool Available(Mob mob, GameState gs)
+  protected virtual bool Available(Mob mob, GameState gs)
   {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
@@ -188,6 +188,20 @@ class UsePower(Power power) : BehaviourNode
     }
 
     return PlanStatus.Failure;
+  }
+}
+
+class GulpPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    if (!base.Available(mob, gs))
+      return false;
+
+    if (mob.HasTrait<FullBellyTrait>())
+      return false;
+
+    return true;
   }
 }
 
@@ -706,7 +720,16 @@ class Planner
     List<BehaviourNode> passive = [];
     foreach (Power p in mob.Powers)
     {
-      BehaviourNode up = new UsePower(p);
+      // Ugh a few of the powers have slightly more complicated ways of
+      // calculating if they are available to use so I am doing them as 
+      // subclasses of UsePower. If I get too many of them and this gets gross,
+      // I'll have to come up with something cleaner. An actual factory or such?
+      BehaviourNode up = p.Name switch
+      {
+        "Gulp" => new GulpPower(p),
+        _ => new UsePower(p)
+      };
+
       actions.Add(new UsePower(p));
       if (p.Type == PowerType.Passive)
         passive.Add(up);
