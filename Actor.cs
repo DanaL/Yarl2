@@ -760,6 +760,8 @@ class Power
         return new WebAction(gs, loc);
       case "FireBolt":
         return new FireboltAction(gs, mob, loc);
+      case "MirrorImage":
+        return new MirrorImageAction(gs, mob, loc);
       default:
         return new PassAction();
     }    

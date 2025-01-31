@@ -20,7 +20,7 @@ centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|MeleePiercing
 duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent,Carries#mithril_ore#25
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|MissilePiercing#2#5#6#1#0#0#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
 owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|MeleeSlashing#1#1#6#1#0#0#Attack|Grappler#14
-cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|SpellAction#MirrorImage#7#1#3,MeleePiercing#1#1#8#1#0#0#Attack|Flying
+cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|MirrorImage#1#3#0#0#0#7#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Flying
 shadow            | |black        |black       |13|20|3| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead
 floating eye      |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless
 screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|ConfusingScream#3#14#7,MeleePiercing#1#1#6#1#0#0#Attack|Flying,Immunity#Confusion
