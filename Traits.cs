@@ -2372,43 +2372,6 @@ class CroesusTouchTrait : Trait
   public override string AsText() => $"CroesusTouch#{SourceId}";
 }
 
-class CrusherTrait : ActionTrait
-{
-  public int DmgDie { get; set; }
-  public int DmgDice { get; set; }
-
-  public ulong Victim(Actor actor, GameState gs)
-  {
-    foreach (Loc adj in Util.Adj8Locs(actor.Loc))
-    {
-      if (gs.ObjDb.Occupant(adj) is not Actor victim)
-        continue;
-
-      foreach (Trait t in victim.Traits)
-      {
-        if (t is GrappledTrait grappled && grappled.GrapplerID == actor.ID)
-          return victim.ID;
-      }
-    }
-
-    return 0;
-  }
-
-  public override bool Available(Mob mob, GameState gs)
-  {
-    return Victim(mob, gs) != 0;
-  }
-
-  public override Action Action(Actor actor, GameState gs)
-  {
-    ulong victimId = Victim(actor, gs);
-
-    return new CrushAction(gs, actor, victimId, DmgDie, DmgDice);
-  }
-
-  public override string AsText() => $"Crusher#{DmgDie}#{DmgDice}";
-}
-
 // A light source that doesn't have fuel/burn out on its own.
 class LightSourceTrait : BasicTrait, IOwner
 {
@@ -2695,7 +2658,6 @@ class TraitFactory
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
-    { "Crusher", (pieces, gameObj) => new CrusherTrait() { DmgDie = int.Parse(pieces[1]), DmgDice = int.Parse(pieces[2]) } },
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },
     { "Cutpurse", (pieces, gameObj) =>

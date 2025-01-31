@@ -779,7 +779,7 @@ class Power
       case "Shriek":
         return new ShriekAction(gs, mob, MaxRange);
       case "Gulp":
-        return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);
+        return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);      
       default:
         return new PassAction();
     }    

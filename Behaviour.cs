@@ -156,7 +156,7 @@ class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
 
 class UsePower(Power power) : BehaviourNode
 {
-  Power Power { get; set; } = power;
+  protected Power Power { get; set; } = power;
 
   protected virtual bool Available(Mob mob, GameState gs)
   {
@@ -184,6 +184,43 @@ class UsePower(Power power) : BehaviourNode
 
       bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
 
+      return result ? PlanStatus.Success : PlanStatus.Failure;
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
+class CrushPower(Power power) : UsePower(power)
+{
+  static ulong Victim(Mob mob, GameState gs)
+  {
+    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    {
+      if (gs.ObjDb.Occupant(adj) is not Actor victim)
+        continue;
+
+      foreach (Trait t in victim.Traits)
+      {
+        if (t is GrappledTrait grappled && grappled.GrapplerID == mob.ID)
+          return victim.ID;
+      }
+    }
+
+    return 0;
+  }
+
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    return Victim(mob, gs) != 0;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    ulong victimId = Victim(mob, gs);
+    if (victimId != 0 )
+    {      
+      bool result = mob.ExecuteAction(new CrushAction(gs, mob, victimId, Power.DmgDie, Power.NumOfDice));
       return result ? PlanStatus.Success : PlanStatus.Failure;
     }
 
@@ -727,10 +764,11 @@ class Planner
       BehaviourNode up = p.Name switch
       {
         "Gulp" => new GulpPower(p),
+        "Crush" => new CrushPower(p),
         _ => new UsePower(p)
       };
 
-      actions.Add(new UsePower(p));
+      actions.Add(up);
       if (p.Type == PowerType.Passive)
         passive.Add(up);
     }
