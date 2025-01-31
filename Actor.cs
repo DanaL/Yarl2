@@ -726,6 +726,13 @@ class Power
         return new FogCloudAction(gs, mob);
       case "Blink":
         return new BlinkAction(gs, mob);
+      case "SummonKobold":
+        return new SummonAction(mob.Loc, "kobold", 1)
+        {
+          GameState = gs,
+          Actor = mob,
+          Quip = Quip
+        };        
       default:
         return new PassAction();
     }    
