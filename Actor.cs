@@ -756,6 +756,8 @@ class Power
         string summons = undead[gs.Rng.Next(undead.Count)];
 
         return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob };
+      case "Web":
+        return new WebAction(gs, loc);
       default:
         return new PassAction();
     }    
