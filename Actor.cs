@@ -279,7 +279,7 @@ abstract class Actor : GameObj, IZLevel
     {
       int currHP = Stats[Attribute.HP].Curr;
       int maxHP = Stats[Attribute.HP].Max;
-      if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2)
+      if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2 && currHP > 0)
       {
         float odds = (float)currHP / maxHP;
         if (gs.Rng.NextDouble() < odds || true)
