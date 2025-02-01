@@ -186,7 +186,7 @@ class UsePower(Power power) : BehaviourNode
 
       if (!ClearShot(gs, mob.Loc, targetLoc))
         return false;
-        
+
       if (Power.MinRange == 0 && Power.MaxRange == 0)
         return true;
       if (d < Power.MinRange || d > Power.MaxRange)    
@@ -335,7 +335,11 @@ class TryToEscape : BehaviourNode
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     if (gs.Rng.Next(10) == 0)
-      mob.Stats[Attribute.MobAttitude].SetCurr(Mob.INDIFFERENT);
+    {
+      int att = gs.Rng.NextDouble() < 0.75 ? Mob.AGGRESSIVE : Mob.INDIFFERENT;
+      mob.Stats[Attribute.MobAttitude].SetCurr(att);
+      return PlanStatus.Success;
+    }
 
     bool smart = false;
     bool airborne = false;
