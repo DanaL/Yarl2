@@ -7,7 +7,7 @@ goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing
 goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent
 kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|PoorLoot,Intelligent
-nilbog            |g|lightblue    |blue        |14|20|3| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#5#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent
+nilbog            |g|lightblue    |blue        |14|20|3| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#7#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent
 kobold foreman    |k|yelloworange |dullred     |13|25|3| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Passive#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10||Plant,Plural,Immunity#Confusion,Brainless,Immobile
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0#0#7#Attack,MeleePiercing#1#1#9#1#0#0#Attack|Teflon,Poisoner#13#2#20

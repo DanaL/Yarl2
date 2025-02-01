@@ -689,6 +689,8 @@ class Power
     };
   }
 
+  public override string ToString() => $"{Name}#{MinRange}#{MaxRange}#{DmgDie}#{NumOfDice}#{DC}#{Cooldown}#{Type}#{Quip}";
+  
   public Action Action(Mob mob, GameState gs, Loc loc)
   {
     string txt;
