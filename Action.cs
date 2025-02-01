@@ -1696,8 +1696,7 @@ class MirrorImageAction : Action
     {
       Name = src.Name,
       Glyph = glyph,
-      Recovery = 1.0,
-      MoveStrategy = new SimpleFlightMoveStrategy()
+      Recovery = 1.0
     };
 
     dup.Stats.Add(Attribute.HP, new Stat(1));
@@ -1711,7 +1710,7 @@ class MirrorImageAction : Action
       SourceId = src.ID,
       ObjId = dup.ID
     };
-    dup.Traits.Add(illusion);   
+    dup.Traits.Add(illusion);
     gs.RegisterForEvent(GameEventType.Death, illusion, src.ID);
 
     var msg = new DeathMessageTrait() { Message = $"{dup.FullName.Capitalize()} fades away!" };

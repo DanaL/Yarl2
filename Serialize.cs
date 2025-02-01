@@ -673,16 +673,16 @@ class GameObjDBSave
     var fields = txt.Split(Constants.SEPARATOR);
     var mob = new Mob()
     {
-      ID = ulong.Parse(fields[3]),
-      Name = fields[2],
-      Glyph = Glyph.TextToGlyph(fields[4]),
-      Loc = Loc.FromStr(fields[5]),
-      Energy = Util.ToDouble(fields[8]),
-      Recovery = Util.ToDouble(fields[9]),
-      Appearance = fields[13]
+      ID = ulong.Parse(fields[2]),
+      Name = fields[1],
+      Glyph = Glyph.TextToGlyph(fields[3]),
+      Loc = Loc.FromStr(fields[4]),
+      Energy = Util.ToDouble(fields[7]),
+      Recovery = Util.ToDouble(fields[8]),
+      Appearance = fields[12]
     };
 
-    string behaviourStr = fields[1];
+    string behaviourStr = fields[0];
     if (Type.GetType($"Yarl2.{behaviourStr}") is Type type)
     {
       IBehaviour behaviour = (IBehaviour)(Activator.CreateInstance(type) ?? throw new Exception("Unable deserialize behaviour"));
@@ -690,38 +690,36 @@ class GameObjDBSave
     }
 
     // Parse the traits
-    if (fields[6] != "")
+    if (fields[5] != "")
     {      
-      foreach (var t in fields[6].Split('`'))
+      foreach (var t in fields[5].Split('`'))
       {
         var trait = TraitFactory.FromText(t, mob);
         mob.Traits.Add(trait);
       }
     }
     
-    mob.Stats = StatsFromText(fields[7]);
+    mob.Stats = StatsFromText(fields[6]);
 
-    if (fields[12] != "")
+    if (fields[11] != "")
     {
       mob.Inventory = new Inventory(mob.ID, objDb)
       {
-        Zorkmids = int.Parse(fields[10]),
-        NextSlot = fields[11][0]
+        Zorkmids = int.Parse(fields[9]),
+        NextSlot = fields[10][0]
       };
-      mob.Inventory.RestoreFromText(fields[12]);
+      mob.Inventory.RestoreFromText(fields[11]);
     }
 
-    if (fields[14] != "")
+    if (fields[13] != "")
     {
-      foreach (var s in fields[14].Split('`'))
+      foreach (var s in fields[13].Split('`'))
       {
         Power p = Power.FromText(s);
         mob.Powers.Add(p);
       }
     }
  
-    mob.CalcMoveStrategy();
-
     return mob;
   }
 
@@ -811,8 +809,6 @@ class GameObjDBSave
       else if (obj is Mob mob)
       {
         var sb = new StringBuilder("Mob:");
-        sb.Append(mob.MoveStrategy.GetType().Name);
-        sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Behaviour.GetType().Name);
         sb.Append(Constants.SEPARATOR);
         sb.Append(obj.ToString());

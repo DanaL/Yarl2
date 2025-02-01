@@ -377,7 +377,6 @@ class CampaignCreator(UserInterface ui)
     {
       Name = "gargoyle",
       Recovery = 1.0,
-      MoveStrategy = new SimpleFlightMoveStrategy(),
       Glyph = glyph
     };
     gargoyle.SetBehaviour(new DisguisedMonsterBehaviour());

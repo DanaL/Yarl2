@@ -142,7 +142,6 @@ class Village
   static Mob GenerateInnkeeper(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
   {
     Mob innkeeper = BaseVillager(ng, rng);
-    innkeeper.MoveStrategy = new WallMoveStrategy();
     innkeeper.SetBehaviour(new InnkeeperBehaviour());
     
     var tavernSqs = town.Tavern.ToList();
@@ -168,8 +167,7 @@ class Village
 
     cleric.Loc = LocForVillager(map, town.Shrine, rng);
     cleric.SetBehaviour(new PriestBehaviour());
-    cleric.MoveStrategy = new WallMoveStrategy();
-
+    
     int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
     foreach (Loc loc in town.Shrine)
     {
@@ -195,7 +193,6 @@ class Village
     Mob grocer = BaseVillager(ng, rng);
     
     grocer.Loc = LocForVillager(map, town.Market, rng);
-    grocer.MoveStrategy = new WallMoveStrategy();
     grocer.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
     grocer.Stats[Attribute.InventoryRefresh] = new Stat(1);
     grocer.SetBehaviour(new GrocerBehaviour());
@@ -244,8 +241,7 @@ class Village
     smith.Stats[Attribute.ShopMenu] = new Stat(0);
     smith.Stats[Attribute.InventoryRefresh] = new Stat(1);
     smith.SetBehaviour(new SmithBehaviour());
-    smith.MoveStrategy = new WallMoveStrategy();
-
+    
     smith.Traits.Add(new BehaviourTreeTrait() { Plan = "SmithPlan" });
 
     smith.Inventory = new Inventory(smith.ID, objDb);
@@ -302,7 +298,6 @@ class Village
     var homeID = PickUnoccuppiedCottage(town, rng);
     mayor.Loc = LocForVillager(map, town.Homes[homeID], rng);
     mayor.Stats.Add(Attribute.HomeID, new Stat(homeID));
-    mayor.MoveStrategy = new WallMoveStrategy();
     mayor.SetBehaviour(new MayorBehaviour());
 
     return mayor;
@@ -313,7 +308,6 @@ class Village
     Mob veteran = BaseVillager(ng, rng);
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
-    veteran.MoveStrategy = new WallMoveStrategy();
     veteran.SetBehaviour(new NPCBehaviour());
 
     var tavernSqs = town.Tavern.ToList();
@@ -340,7 +334,6 @@ class Village
     int homeID  = PickUnoccuppiedCottage(town, rng);
     villager.Loc = LocForVillager(map, town.Homes[homeID], rng);
     villager.Stats.Add(Attribute.HomeID, new Stat(homeID));
-    villager.MoveStrategy = new WallMoveStrategy();
     villager.SetBehaviour(new NPCBehaviour());
 
     return villager;
@@ -355,7 +348,6 @@ class Village
     widower.Loc = LocForVillager(map, town.Homes[homeID], rng);
     
     widower.Stats.Add(Attribute.HomeID, new Stat(homeID));
-    widower.MoveStrategy = new WallMoveStrategy();
     widower.SetBehaviour(new WidowerBehaviour());
 
     return widower;

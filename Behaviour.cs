@@ -872,177 +872,7 @@ class Planner
   // place the "Decide what to do" code
   public static ulong SelectTarget(Mob mob, GameState gs) => gs.Player.ID;
 }
-
-abstract class MoveStrategy
-{
-  public abstract Action MoveAction(Mob actor, GameState gs);
-  public abstract Action RandomMoveAction(Mob actor, GameState gs);
-  public abstract Action EscapeRoute(Mob mob, GameState gs);
-}
-
-class WallMoveStrategy : MoveStrategy
-{
-  public override Action MoveAction(Mob actor, GameState gs) => new PassAction();
-  public override Action RandomMoveAction(Mob actor, GameState gs) => new PassAction();
-  public override Action EscapeRoute(Mob actor, GameState gs) => new PassAction();
-}
-
-// For creatures that don't know how to open doors
-class DumbMoveStrategy : MoveStrategy
-{
-  public override Action MoveAction(Mob actor, GameState gs)
-  {    
-    var map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
-    List<(int, int, int)> adj = map.Neighbours(actor.Loc.Row, actor.Loc.Col);
-    foreach (var sq in adj)
-    {
-      var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-
-      // We still check if the tile is passable because, say, a door might be
-      // closed after the current dijkstra map is calculated and before it is
-      // refreshed
-      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
-      {
-        return new MoveAction(gs, actor, loc);
-      }
-    }
-    
-    // If we can't find a move to do, pass
-    return new PassAction();
-  }
-
-  public override Action RandomMoveAction(Mob actor, GameState gs)
-  {
-    List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                          .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
-                          .ToList();
-
-    return opts.Count == 0 ? new PassAction() : new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
-  }
-   
-  public override Action EscapeRoute(Mob actor, GameState gs)
-  {
-    var map = gs.GetDMap();
-    if (map is null)
-      throw new Exception("No map found");
-    List<(int, int)> route = map.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
-    if (route.Count > 0)
-    {
-      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
-      return new MoveAction(gs, actor, loc);
-    }
-
-    return new PassAction();
-  }
-}
-
-// I don't know what to call this class, but it's movement for creatures who
-// can open doors. OpposableThumbMoveStrategy? :P
-class DoorOpeningMoveStrategy : MoveStrategy
-{
-  public override Action MoveAction(Mob actor, GameState gs)
-  {
-    var mapWithDoors = gs.GetDMap("doors") ?? throw new Exception("No doors map found");
-    List<(int, int, int)> adj = mapWithDoors.Neighbours(actor.Loc.Row, actor.Loc.Col);
-    foreach (var sq in adj)
-    {
-      var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-
-      if (gs.CurrentMap.TileAt(loc.Row, loc.Col).Type == TileType.ClosedDoor)
-      {
-        return new OpenDoorAction(gs, actor, loc);
-      }
-      else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
-      {
-        // the square is free so move there!
-        return new MoveAction(gs, actor, loc);
-      }
-    }
-
-    // Otherwise do nothing!
-    return new PassAction();
-  }
-
-  public override Action RandomMoveAction(Mob actor, GameState gs)
-  {
-    List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).Passable() && !gs.ObjDb.BlockersAtLoc(l))
-                         .ToList();
-    if (opts.Count == 0)
-      return new PassAction();
-    else
-      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
-  }
-
-  public override Action EscapeRoute(Mob actor, GameState gs)
-  {
-    var mapWithDoorts = gs.GetDMap("doors");
-    if (mapWithDoorts is null)
-      throw new Exception("No doors map found");
-    List<(int, int)> route = mapWithDoorts.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
-    if (route.Count > 0)
-    {      
-      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
-      if (gs.TileAt(loc).Type == TileType.ClosedDoor) 
-      {
-        Map map = gs.CurrentDungeon.LevelMaps[loc.Level];
-        return new OpenDoorAction(gs, actor, loc);
-      }
-
-      return new MoveAction(gs, actor, loc);
-    }
-
-    return new PassAction();
-  }
-}
-
-class SimpleFlightMoveStrategy : MoveStrategy
-{
-  public override Action MoveAction(Mob actor, GameState gs)
-  {
-    var flyingMap = gs.GetDMap("flying");
-    if (flyingMap is null)
-      throw new Exception("No flying map found");
-    List<(int, int, int)> adj = flyingMap.Neighbours(actor.Loc.Row, actor.Loc.Col);
-    foreach (var sq in adj)
-    {
-      var loc = new Loc(actor.Loc.DungeonID, actor.Loc.Level, sq.Item1, sq.Item2);
-      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).PassableByFlight())
-      {
-        // the square is free so move there!
-        return new MoveAction(gs, actor, loc);
-      }
-    }
-
-    // Otherwise do nothing!
-    return new PassAction();
-  }
-
-  public override Action RandomMoveAction(Mob actor, GameState gs)
-  {
-    List<Loc> opts = Util.Adj8Locs(actor.Loc)
-                         .Where(l => !gs.ObjDb.Occupied(l) && gs.TileAt(l).PassableByFlight() && !gs.ObjDb.BlockersAtLoc(l))
-                         .ToList();
-    if (opts.Count == 0)
-      return new PassAction();
-    else
-      return new MoveAction(gs, actor, opts[gs.Rng.Next(opts.Count)]);
-  }
-
-  public override Action EscapeRoute(Mob actor, GameState gs)
-  {
-    var map = gs.GetDMap("flying") ?? throw new Exception("Hmm this shouldn't have happened");      
-    List<(int, int)> route = map.EscapeRoute(actor.Loc.Row, actor.Loc.Col, 5);
-    if (route.Count > 0)
-    {
-      Loc loc = actor.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
-      return new MoveAction(gs, actor, loc);
-    }
-
-    return new PassAction();
-  }
-}
-
+ 
 interface IBehaviour
 {
   Action CalcAction(Mob actor, GameState gameState);
@@ -1073,41 +903,17 @@ class MonsterBehaviour : IBehaviour
 
   public string GetBark(Mob actor, GameState gs) => "";
 
-  static Action CalcMoveAction(Mob mob, GameState gs)
-  {
-    // eventually add fleeing. Or maybe there will be a 
-    // CalcRetreat() method since some monsters can teleport, etc
-
-    if (mob.HasTrait<ConfusedTrait>()) 
-      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));    
-    else 
-    {
-      Action acc;
-
-      bool indifferent = mob.Stats[Attribute.MobAttitude].Curr == Mob.INDIFFERENT;      
-      if (indifferent)
-        acc = mob.MoveStrategy.RandomMoveAction(mob, gs);
-      else 
-        acc = mob.MoveStrategy.MoveAction(mob, gs);
-
-      // Note: maybe HomebodyTrait should prevent a mob from becomming
-      // aggressive for reasons other than taking damage?
-      if (indifferent && acc is MoveAction move && mob.Traits.OfType<HomebodyTrait>().FirstOrDefault() is HomebodyTrait homebody)
-      {
-        if (Util.Distance(move.Loc, homebody.Loc) > homebody.Range)
-          return new PassAction();
-      }
-
-      return acc;
-    }      
-  }
-   
-
   public virtual Action CalcAction(Mob actor, GameState gs)
   {
     
 
     return new PassAction();
+
+  }
+
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+}
+
   
     // if (actor.HasTrait<WorshiperTrait>() && actor.HasTrait<IndifferentTrait>())
     // {
@@ -1125,11 +931,7 @@ class MonsterBehaviour : IBehaviour
 
     //   return act;
     // }
-  }
-
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
-}
-
+    
 // Disguised monsters behave differently while they are disguised, but then act like a normal monster
 // so it just seemed simple (or easy...) to extend MonsterBevaviour
 class DisguisedMonsterBehaviour : MonsterBehaviour

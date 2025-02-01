@@ -423,7 +423,6 @@ abstract class Actor : GameObj, IZLevel
 
 class Mob : Actor
 {
-  public MoveStrategy MoveStrategy { get; set; }
   public List<Power> Powers { get; set; } = []; // this will supersede the Actions list
   public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
 
@@ -434,11 +433,7 @@ class Mob : Actor
   public const int AGGRESSIVE = 2;
   public const int AFRAID = 4;
 
-  public Mob()
-  {
-    _behaviour = new MonsterBehaviour();
-    MoveStrategy = new DumbMoveStrategy();
-  }
+  public Mob() => _behaviour = new MonsterBehaviour();
 
   public Damage? Dmg { get; set; }
   public override List<Damage> MeleeDamage()
@@ -539,31 +534,6 @@ class Mob : Actor
 
   // I suspect eventually these will diverge
   public override Loc PickRangedTargetLoc(GameState gameState) => PickTargetLoc(gameState);
-
-  public void CalcMoveStrategy()
-  {
-    bool flying = false;
-    bool immobile = false;
-    bool intelligent = false;
-    foreach (var t in Traits)
-    {
-      if (t is FlyingTrait || t is FloatingTrait)
-        flying = true;
-      else if (t is IntelligentTrait)
-        intelligent = true;
-      else if (t is ImmobileTrait)
-        immobile = true;
-    }
-
-    if (flying)
-      MoveStrategy = new SimpleFlightMoveStrategy();
-    else if (intelligent)
-      MoveStrategy = new DoorOpeningMoveStrategy();
-    else if (immobile)
-      MoveStrategy = new WallMoveStrategy();
-    else
-      MoveStrategy = new DumbMoveStrategy();
-  }
 }
 
 class MonsterFactory
@@ -642,8 +612,6 @@ class MonsterFactory
         }
       }
     }
-
-    m.CalcMoveStrategy();
 
     // Yes, I will write code just to insert a joke/Simpsons reference
     // into the game

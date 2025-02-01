@@ -47,8 +47,6 @@ class BossFactory
     g.Traits.Add(new IntelligentTrait());    
     g.Traits.Add(new KnockBackTrait());
     
-    g.CalcMoveStrategy();
-
     return g;
   }
 
@@ -59,7 +57,6 @@ class BossFactory
     {
       Name = "Prince of Rats",
       Recovery = 1.0,
-      MoveStrategy = new DoorOpeningMoveStrategy(),
       Glyph = glyph
     };
     prince.SetBehaviour(new PrinceOfRatsBehaviour());
@@ -119,14 +116,6 @@ class PrinceOfRatsBehaviour : IBehaviour
 
   public string GetBark(Mob actor, GameState gs) => "";
   
-  static Action CalcMoveAction(Mob mob, GameState gs)
-  {
-    if (mob.HasTrait<ConfusedTrait>())
-      return new MoveAction(gs, mob, Util.RandomAdjLoc(mob.Loc, gs));
-    else
-      return mob.MoveStrategy.MoveAction(mob, gs);
-  }
-
   static void CheckChangeForm(Mob prince, GameState gs, int currForm)
   {
     if (gs.Rng.NextDouble() < 0.1)
@@ -193,7 +182,7 @@ class PrinceOfRatsBehaviour : IBehaviour
     }
     else
     {
-      action = CalcMoveAction(actor, gameState);
+      action = new PassAction();
     }
 
     if (currForm == HUMAN_FORM && (DateTime.Now - _lastQuip).TotalSeconds > 10)
