@@ -158,6 +158,19 @@ class UsePower(Power power) : BehaviourNode
 {
   protected Power Power { get; set; } = power;
 
+  protected static bool ClearShot(GameState gs, Loc origin, Loc target)
+  {
+    List<Loc> trajectory = Util.Trajectory(origin, target);
+    foreach (var loc in trajectory)
+    {
+      var tile = gs.TileAt(loc);
+      if (!(tile.Passable() || tile.PassableByFlight()))
+        return false;
+    }
+
+    return true;
+  }
+
   protected virtual bool Available(Mob mob, GameState gs)
   {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
@@ -166,12 +179,20 @@ class UsePower(Power power) : BehaviourNode
         return false;
     }
 
-    Loc targetLoc = mob.PickTargetLoc(gs);
-    int d = Util.Distance(mob.Loc, targetLoc);
-    if (Power.MinRange == 0 && Power.MaxRange == 0)
-      return true;
-    if (d < Power.MinRange || d > Power.MaxRange)    
-      return false;
+    if (Power.Type == PowerType.Attack)
+    {
+      Loc targetLoc = mob.PickTargetLoc(gs);      
+      int d = Util.Distance(mob.Loc, targetLoc);
+
+      if (!ClearShot(gs, mob.Loc, targetLoc))
+        return false;
+        
+      if (Power.MinRange == 0 && Power.MaxRange == 0)
+        return true;
+      if (d < Power.MinRange || d > Power.MaxRange)    
+        return false;
+    }
+    
     
     return true;
   }
