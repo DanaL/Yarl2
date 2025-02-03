@@ -481,7 +481,7 @@ class Battle
   }
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
-  {
+  {    
     var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
@@ -500,6 +500,8 @@ class Battle
     
     var (stressPenalty, _) = attacker.StressPenalty();
     roll -= stressPenalty;
+
+    ClearObscured(attacker, gs);
 
     if (roll >= target.AC)
     {
@@ -734,6 +736,8 @@ class Battle
       gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
     }
 
+    ClearObscured(attacker, gs);
+
     return result;
   }
 
@@ -763,7 +767,18 @@ class Battle
       gs.ApplyDamageEffectToLoc(target.Loc, dmg.DamageType);
     }
 
+    ClearObscured(attacker, gs);
+
     return result;
+  }
+
+  static void ClearObscured(Actor attacker, GameState gs)
+  {
+    // hmm maybe I should just prevent acquiring more than one source of
+    // obscurity?
+    List<NondescriptTrait> toRemove = [.. attacker.Traits.OfType<NondescriptTrait>()];
+    foreach (var t in toRemove)
+      t.Remove(gs);
   }
 
   // A poison source that is just coated in poison (like a poison dart) has a 
