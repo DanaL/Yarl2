@@ -105,7 +105,8 @@ class DebugCommand(GameState gs)
     {"meditation crystal", ItemNames.MEDITATION_CRYSTAL },
     {"seeweed", ItemNames.SEEWEED },
     {"croesus charm", ItemNames.CROESUS_CHARM },
-    {"potion of obscurity", ItemNames.POTION_OBSCURITY}
+    {"potion of obscurity", ItemNames.POTION_OBSCURITY},
+    {"wand of digging", ItemNames.WAND_DIGGING }
   };
 
   public string DoCommand(string txt)

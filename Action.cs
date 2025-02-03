@@ -2820,6 +2820,63 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
   }
 }
 
+class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
+{
+  readonly Trait Source = src;
+
+  public override ActionResult Execute()
+  {
+    var result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    List<Loc> pts = Trajectory(false);
+
+    var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BROWN, Colours.WHITE);
+
+    UserInterface ui = GameState!.UIRef();
+    ui.PlayAnimation(anim, GameState);
+
+    if (Actor is Player)
+      ui.AlertPlayer("You hear a zap and the faint, ghostly humming of unseen dwarven miners!");
+
+    foreach (Loc loc in pts)
+    {
+      if (!GameState.CurrentMap.InBounds(loc.Row, loc.Col))
+        break;
+      Tile tile = GameState.TileAt(loc);
+      switch (tile.Type)
+      {
+        case TileType.DungeonWall:
+          GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+          break;
+        case TileType.StoneWall:
+        case TileType.WoodWall:
+        case TileType.HWindow:
+        case TileType.VWindow:
+          GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Dirt));
+          break;
+      }
+
+      var blockages = gs.ObjDb.ItemsAt(loc).Where(i => i.Type == ItemType.Landscape);
+      foreach (Item block in blockages)
+        gs.ObjDb.RemoveItemFromGame(loc, block);
+    }
+
+    if (Source is WandTrait wand)
+    {
+      Item.IDInfo["wand of digging"] = Item.IDInfo["wand of digging"] with { Known = true };
+      wand.Used();
+    }
+    else if (Source is IUSeable useable)
+    {
+      useable.Used();
+    }
+
+    return result;
+  }
+}
+
 class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
 {
   readonly Trait _source = src;
@@ -3182,6 +3239,11 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
       case "slowmonster":
         inputer = new Aimer(GameState!, player.Loc, 9);
         player.ReplacePendingAction(new RayOfSlownessAction(GameState!, player, _wand, wandId), inputer);
+        GameState!.UIRef().AlertPlayer("Which way?");
+        break;
+      case "digging":
+        inputer = new Aimer(GameState!, player.Loc, 10);
+        player.ReplacePendingAction(new DigRayAction(GameState!, player, _wand), inputer);
         GameState!.UIRef().AlertPlayer("Which way?");
         break;
       case "summoning":

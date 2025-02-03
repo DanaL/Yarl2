@@ -174,6 +174,11 @@ class CampaignCreator(UserInterface ui)
 
     j = rng.Next(wandMaterials.Count);
     Item.IDInfo.Add("wand of slow monster", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
+
+    j = rng.Next(wandMaterials.Count);
+    Item.IDInfo.Add("wand of digging", new ItemIDInfo(false, $"{wandMaterials[j]} wand"));
+    wandMaterials.RemoveAt(j);
 
     List<string> ringMaterials = ["silver", "iron", "ruby", "diamond", "gold", "jade", "wood"];
     j = rng.Next(ringMaterials.Count);

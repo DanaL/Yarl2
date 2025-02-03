@@ -141,7 +141,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     string verb = blockage.Type == ItemType.Statue ? "destroy" : "clear";
     if (digger.AbilityCheck(Attribute.Strength, dc, gs.Rng))
     {
-      gs.ObjDb.RemoveItemFromGame(loc,blockage);
+      gs.ObjDb.RemoveItemFromGame(loc, blockage);
       string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, verb)} {blockage.Name.DefArticle()}.";
       gs.UIRef().AlertPlayer(s);
       if (digger == gs.Player)

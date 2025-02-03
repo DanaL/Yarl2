@@ -518,6 +518,16 @@
     ]
   },
   {
+    "Name": "WAND_DIGGING",
+    "DescriptiveName": "wand of digging",
+    "Type": "Wand",
+    "Value": 125,
+    "Glyph": "/,lightblue,blue,black,black",
+    "Traits": [
+      "Wand#5#false#digging"
+    ]
+  },
+  {
     "Name": "RING_OF_PROTECTION",
     "DescriptiveName": "ring of protection",
     "Type": "Ring",
