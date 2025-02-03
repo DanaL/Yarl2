@@ -200,7 +200,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           witch.Traits.Add(it);
           RegisterForEvent(GameEventType.EndOfRound, it);
         }        
-      }      
+      }
+
+      fact = FactDb.FactCheck("AlchemistId") as SimpleFact ?? throw new Exception("AlchemistId should not be null!");
+      ulong alchemistId = ulong.Parse(fact.Value);
+      if (ObjDb.GetObj(alchemistId) is Mob alchemist) 
+      {
+        int lastRefresh = alchemist.Stats[Attribute.InventoryRefresh].Curr;
+        if (Turn > (ulong)lastRefresh + 750)
+        {
+          Village.RefreshAlchemistInventory(alchemist, ObjDb, Rng);
+          alchemist.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
+        }
+      }
     }
   }
 

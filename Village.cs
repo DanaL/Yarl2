@@ -404,6 +404,8 @@ class Village
     sophie.Traits.Add(new NamedTrait());
     sophie.Stats[Attribute.InventoryRefresh] = new Stat(1);
 
+    factDb.Add(new SimpleFact() { Name = "AlchemistId", Value = sophie.ID.ToString() });
+
     sophie.Loc = startLocs[rng.Next(startLocs.Count)];
     sophie.SetBehaviour(new AlchemistBehaviour());
     objDb.Add(sophie);
@@ -571,6 +573,37 @@ class Village
         smith.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), smith.ID);
       else if (roll == 11)
         smith.Inventory.Add(ItemFactory.Get(ItemNames.QUARTERSTAFF, objDb), smith.ID);
+    }
+  }
+
+  public static void RefreshAlchemistInventory(Mob alchemist, GameObjectDB objDb, Random rng)
+  {
+    List<Item> currStock = alchemist.Inventory.Items();
+    foreach (Item item in currStock)
+    {
+      if (rng.NextDouble() < 0.2)
+      {
+        alchemist.Inventory.RemoveByID(item.ID);
+        objDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = rng.Next(1, 5);
+    for (int j = 0; j < newStock; j++)
+    {      
+      ItemNames itemName = rng.Next(7) switch
+      {
+        0 => ItemNames.POTION_HEALING,
+        1 => ItemNames.POTION_HEROISM,
+        2 => ItemNames.POTION_OF_LEVITATION,
+        3 => ItemNames.POTION_MIND_READING,
+        4 => ItemNames.ANTIDOTE,
+        5 => ItemNames.POTION_OBSCURITY,
+        _ => ItemNames.MUSHROOM_STEW
+      };
+      Item item = ItemFactory.Get(itemName, objDb);
+      item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
+      alchemist.Inventory.Add(item, alchemist.ID);
     }
   }
 
