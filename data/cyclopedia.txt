@@ -286,3 +286,6 @@ Originally invented by wizards to disperse party guests at the end of the night,
 #
 Croesus charm
 A souvenir from the Fort Ludios gift shop. This magic charm also has the handy effect of causing monsters to occasionally drop zorkminds when they are defeated.
+#
+potion of obscurity
+Drinking this potion causes others to simply not notice you. Handy for escaping household chores, meetings, and monsters. Be warned that if you draw attention to yourself, the effect will end.
