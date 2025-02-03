@@ -509,6 +509,28 @@ class CheckMonsterAttitude(int status) : BehaviourNode
   }
 }
 
+class ValidTarget(Actor actor) : BehaviourNode
+{
+  Actor Actor { get; set; } = actor;
+
+  public override PlanStatus Execute(Mob mob, GameState gs) => 
+    Actor is NoOne ? PlanStatus.Failure : PlanStatus.Success;  
+}
+
+class IsParalyzed : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is ParalyzedTrait)
+        return PlanStatus.Success;
+    }
+
+    return PlanStatus.Failure;
+  }  
+}
+
 class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
 {
   List<BehaviourNode> Nodes { get; set; } = nodes;
@@ -597,13 +619,15 @@ class RandomMove : BehaviourNode
   }
 }
 
-class ChaseTarget(Actor target) : BehaviourNode
+class ChaseTarget : BehaviourNode
 {
-  Actor Target { get; set; } = target;
   Stack<Loc>? Path { get; set; } = null;
 
   static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
   {
+    if (mob.HasTrait<ImmobileTrait>())
+      return PlanStatus.Failure;
+
     DijkstraMap map = gs.GetDMap("doors") ?? throw new Exception("Dijkstra map should never be null");
     foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
     {
@@ -646,6 +670,7 @@ class ChaseTarget(Actor target) : BehaviourNode
   static PlanStatus ChasePlayer(Mob mob, GameState gs)
   {
     DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
+
     foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
     {
       Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
@@ -665,7 +690,13 @@ class ChaseTarget(Actor target) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    if (Target is Player)
+    Actor target = mob.PickTarget(gs);
+
+    ValidTarget valid = new(target);
+    if (valid.Execute(mob, gs) == PlanStatus.Failure)
+      return PlanStatus.Failure;
+
+    if (target is Player)
     {
       // if we are chasing the player (the most likely scenario, we can use
       // the dijkstra maps available from  GameState
@@ -825,18 +856,7 @@ class Planner
 
   static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
   {
-    bool immobile = false;
-    bool paralyzed = false;
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is ParalyzedTrait || t is SleepingTrait)
-        paralyzed = true;
-      else if (t is ImmobileTrait)
-        immobile = true;
-    }
-
-    if (paralyzed)
-      return new PassTurn();
+    bool immobile = mob.HasTrait<ImmobileTrait>();
 
     List<BehaviourNode> actions = [];
     List<BehaviourNode> passive = [];
@@ -862,8 +882,15 @@ class Planner
     // Not yet handling confused monsters, etc
 
     List<BehaviourNode> plan = [];
+
+    // A paralized monster will just pass its turn
+    plan.Add(new Sequence([new IsParalyzed(), new PassTurn()]));
+
+    // As will an inactive one
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]));
 
+    // An indifferent monster might use Passive abilities and/or wander randomly
+    // (if not immobile)
     List<BehaviourNode> indifferentNodes = [new CheckMonsterAttitude(Mob.INDIFFERENT)];
     if (passive.Count > 0)
       indifferentNodes.Add(new Selector(passive));
@@ -873,15 +900,11 @@ class Planner
       indifferentNodes.Add(new PickRandom([new PassTurn(), new RandomMove()]));    
     plan.Add(new Sequence(indifferentNodes));
 
+    // An afraid monster tries to escape
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
-    if (!immobile) 
-    {
-      Actor target = mob.PickTarget(gs);
-      if (target is not NoOne)
-        actions.Add(new ChaseTarget(target));
-    }
-      
+    // Finally, try to attack the player or move toward them.
+    actions.Add(new ChaseTarget());
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
     
     plan.Add(new PassTurn());
