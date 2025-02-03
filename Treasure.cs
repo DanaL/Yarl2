@@ -46,7 +46,7 @@ class Treasure
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
-      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING
+      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
@@ -177,7 +177,7 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
-  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(7) switch
+  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(8) switch
   {
     0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
     1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
@@ -185,6 +185,7 @@ class Treasure
     3 => ItemFactory.Get(ItemNames.SCROLL_MAGIC_MAP, objDb),
     4 => ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb),
     5 => ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb),
+    6 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
     _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
   };
 

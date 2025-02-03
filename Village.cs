@@ -425,6 +425,8 @@ class Village
       sophie.Inventory.Add(SophieItem(ItemNames.ANTIDOTE), sophie.ID);
     if (rng.NextDouble() < 0.33)
       sophie.Inventory.Add(SophieItem(ItemNames.ANTIDOTE), sophie.ID);
+    if (rng.NextDouble() < 0.33)
+      sophie.Inventory.Add(SophieItem(ItemNames.POTION_OBSCURITY), sophie.ID);
 
     Item SophieItem(ItemNames name)
     {
