@@ -1126,5 +1126,17 @@
     "Traits": [
       "Grants#CroesusTouch&owner"
     ]
+  },
+  {
+    "Name": "POTION_OBSCURITY",
+    "DescriptiveName": "potion of obscurity",
+    "Type": "Potion",
+    "Value": 40,
+    "Glyph": "!,grey,darkgrey,black,black",
+    "Traits": [
+      "UseSimple#nondescript",
+      "Consumable",
+      "Stackable"
+    ]
   }
 ]

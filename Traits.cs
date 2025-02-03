@@ -1164,6 +1164,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                    new ApplyTraitAction(gs, user, 
                      new HeroismTrait() { 
                        OwnerID = user.ID, ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 75), SourceId = item!.ID}), null),
+    "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait() { ExpiresOn = gs.Turn + 50 }), null, true, ""),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1598,6 +1599,21 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
         }
       }      
     }    
+  }
+}
+
+class NondescriptTrait : TemporaryTrait, IGameEventListener
+{
+  protected override string ExpiryMsg => "You feel the attention of others turn toward you.";
+  public override string AsText() => $"Nondescript#{base.AsText()}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);    
+    OwnerID = target.ID;
+
+    return [ $"{target.FullName.Capitalize()} escape the notice of others!" ];
   }
 }
 
@@ -2599,7 +2615,7 @@ class TraitFactory
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
-      string[] grantedTraits = pieces[1].Split(';').Select(s => s.Replace('&', '#')).ToArray();
+      string[] grantedTraits = [.. pieces[1].Split(';').Select(s => s.Replace('&', '#'))];
       return new GrantsTrait() { TraitsGranted = grantedTraits };
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
@@ -2647,7 +2663,8 @@ class TraitFactory
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Strength = int.Parse(pieces[2])
       }
-    },
+    },    
+    { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     { "OnFire", (pieces, gameObj) => new OnFireTrait()
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),

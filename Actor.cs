@@ -525,10 +525,21 @@ class Mob : Actor
     gs.PrepareFieldOfView();
   }
 
-  public override Actor PickTarget(GameState gs) => gs.Player;
+  // At the moment, monsters will pick the player, but I'm working toward
+  // changing thawt
+  public override Actor PickTarget(GameState gs) 
+  {
+    if (gs.Player.HasTrait<NondescriptTrait>())
+      return NoOne.Instance();
+
+    return gs.Player;
+  }
 
   public override Loc PickTargetLoc(GameState gameState)
   {
+    if (gameState.Player.HasTrait<NondescriptTrait>())
+      return Loc.Nowhere;
+
     return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;
   }
 
@@ -754,4 +765,21 @@ class Power
         return new PassAction();
     }    
   }
+}
+
+class NoOne : Actor
+{
+    private static NoOne? _instance;
+    public static NoOne Instance() => _instance ??= new NoOne();
+
+    private NoOne()
+    {
+        Name = "No One";
+        Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK);
+    }
+
+    public override Actor PickTarget(GameState gs) => this;
+    public override Loc PickTargetLoc(GameState gamestate) => Loc;
+    public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
+    public override void TakeTurn(GameState gs) { }
 }

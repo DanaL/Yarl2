@@ -722,6 +722,12 @@ abstract class UserInterface
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("AFRAID");
     }
+    if (!statuses.Contains("OBSCURED") && gs.Player.HasTrait<NondescriptTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREY, "OBSCURED")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("OBSCURED");
+    }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)

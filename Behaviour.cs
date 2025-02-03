@@ -181,7 +181,10 @@ class UsePower(Power power) : BehaviourNode
 
     if (Power.Type == PowerType.Attack)
     {
-      Loc targetLoc = mob.PickTargetLoc(gs);      
+      Loc targetLoc = mob.PickTargetLoc(gs);    
+      if (targetLoc == Loc.Nowhere)
+        return false;
+
       int d = Util.Distance(mob.Loc, targetLoc);
 
       if (!ClearShot(gs, mob.Loc, targetLoc))
@@ -192,7 +195,6 @@ class UsePower(Power power) : BehaviourNode
       if (d < Power.MinRange || d > Power.MaxRange)    
         return false;
     }
-    
     
     return true;
   }
@@ -873,9 +875,13 @@ class Planner
 
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
-    if (!immobile)
-      actions.Add(new ChaseTarget(mob.PickTarget(gs)));
-
+    if (!immobile) 
+    {
+      Actor target = mob.PickTarget(gs);
+      if (target is not NoOne)
+        actions.Add(new ChaseTarget(target));
+    }
+      
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
     
     plan.Add(new PassTurn());
