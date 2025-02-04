@@ -330,6 +330,14 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
           result.AltAction = new DiveAction(GameState, player, Loc, false);
         }
       }
+      else if (tile.Type == TileType.Lever)
+      {
+        Lever lever = (Lever)tile;
+        lever.Activate(GameState);
+
+        result.EnergyCost = 1.0;
+        result.Succcessful = true;
+      }
       else
       {
         ui.AlertPlayer(BlockedMessage(tile));

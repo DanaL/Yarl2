@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Yarl2;
 
 enum TileType
@@ -528,9 +530,10 @@ class MonsterWall(Glyph glyph, ulong monsterId) : Tile(TileType.MonsterWall)
   public override string ToString() => $"{(int)Type};{Glyph};{MonsterId}";
 }
 
-class Lever(TileType type, bool on) : Tile(type)
+class Lever(TileType type, bool on, Loc gate) : Tile(type)
 {
   public bool On { get; set; } = on;
+  public Loc Gate { get; set; } = gate;
 
   // Not sure if this is a good way to handle this for places like 
   // the pathfinding code or if it's a gross hack
@@ -538,7 +541,18 @@ class Lever(TileType type, bool on) : Tile(type)
   public override bool PassableByFlight() => false;
   public override bool Opaque() => true;
 
-  public override string ToString() => $"{(int)Type};{On}";
+  public override string ToString() => $"{(int)Type};{On};{Gate}";
+
+  public void Activate(GameState gs)
+  {
+    if (gs.TileAt(Gate) is Portcullis portcullis)
+    {
+      On = !On;
+      portcullis.Trigger();      
+      gs.Noise(Gate.Row, Gate.Col, 7);
+      gs.UIRef().AlertPlayer("You hear a metallic grinding!");
+    }
+  }
 }
 
 class TileFactory

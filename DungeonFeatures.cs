@@ -431,8 +431,9 @@ class CaptiveFeature
     }
 
     // kind of assuming there will always be at least one...
+    Loc gateLoc = new(dungeonId, level, gateR, gateC);
     var (leverR, leverC) = leverSqs.ToList()[rng.Next(leverSqs.Count)];
-    Lever lever = new(TileType.Lever, false);
+    Lever lever = new(TileType.Lever, false, gateLoc);
     map.SetTile(leverR, leverC, lever);
   }
 }
