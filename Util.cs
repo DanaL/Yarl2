@@ -638,6 +638,9 @@ class Util
     TileType.VFence => new Glyph('|', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.CornerFence => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.MonsterWall => ((MonsterWall)tile).Glyph,
+    TileType.Lever =>
+      ((Lever)tile).On ? new Glyph('\\', Colours.LIGHT_GREY, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK)
+                       : new Glyph('/', Colours.LIGHT_GREY, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 

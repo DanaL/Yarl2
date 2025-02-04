@@ -18,6 +18,54 @@ namespace Yarl2;
 abstract class DungeonBuilder
 {
   public (int, int) ExitLoc { get; set; }
+
+  static bool GoodClosetSpot(Map map, int r, int c)
+  {
+    if (map.TileAt(r, c).Type != TileType.DungeonFloor)
+      return false;
+
+    return Util.Adj8Sqs(r, c)
+               .Where(t => map.InBounds(t.Item1, t.Item2))
+               .Count(t => map.TileAt(t).Type == TileType.DungeonFloor) == 5;
+  }
+
+  public static List<(int, int, int, int, int, int)> PotentialClosets(Map map)
+  {
+    var closets = new List<(int, int, int, int, int, int)>();
+
+    // Check each tile in the map
+    for (int r = 2; r < map.Height - 2; r++)
+    {
+      for (int c = 2; c < map.Width - 2; c++)
+      {
+        if (map.TileAt(r, c).Type != TileType.DungeonWall)
+          continue;
+
+        bool surroundedByWalls = true;
+        foreach (var sq in Util.Adj8Sqs(r, c))
+        {
+          if (map.TileAt(sq).Type != TileType.DungeonWall)
+          {
+            surroundedByWalls = false;
+            break;
+          }
+        }
+        if (!surroundedByWalls)
+          continue;
+
+        if (GoodClosetSpot(map, r - 2, c))
+          closets.Add((r, c, r - 2, c, r - 1, c));
+        else if (GoodClosetSpot(map, r + 2, c))
+          closets.Add((r, c, r + 2, c, r + 1, c));
+        else if (GoodClosetSpot(map, r, c - 2))
+          closets.Add((r, c, r, c - 2, r, c - 1));
+        else if (GoodClosetSpot(map, r, c + 2))
+          closets.Add((r, c, r, c + 2, r, c + 1));
+      }
+    }
+
+    return closets;
+  }
 }
 
 class MainDungeonBuilder : DungeonBuilder
@@ -949,6 +997,7 @@ class MainDungeonBuilder : DungeonBuilder
       }
     }
 
+    bool captive = false;
     for (int level = 0; level < levels.Length; level++)
     {
       List<List<(int, int)>> rooms = levels[level].FindRooms();
@@ -1029,6 +1078,13 @@ class MainDungeonBuilder : DungeonBuilder
         int roomId = rng.Next(rooms.Count);
         Rooms.MakeMinedChamber(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
+      }
+
+      // Not technically a room but...
+      if (level == 0 && rng.NextDouble() < 0.998 && !captive)
+      {
+        captive = true;
+        CaptiveFeature.Create(dungeonId, level, levels[level], objDb, rng);
       }
     }
   }

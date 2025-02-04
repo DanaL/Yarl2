@@ -327,60 +327,12 @@ class Decorations
 }
 
 class IdolAltarMaker
-{
-  static List<(int, int, int, int, int, int)> PotentialClosets(Map map)
-  {
-    var closets = new List<(int, int, int, int, int, int)>();
-
-    // Check each tile in the map
-    for (int r = 2; r < map.Height - 2; r++)
-    {
-      for (int c = 2; c < map.Width - 2; c++)
-      {
-        if (map.TileAt(r, c).Type != TileType.DungeonWall)
-          continue;
-
-        bool surroundedByWalls = true;
-        foreach (var sq in Util.Adj8Sqs(r, c))
-        {
-          if (map.TileAt(sq).Type != TileType.DungeonWall)
-          {
-            surroundedByWalls = false;
-            break;
-          }
-        }        
-        if (!surroundedByWalls)
-          continue;
-
-        if (GoodAltarSpot(map, r - 2, c))
-          closets.Add((r, c, r - 2, c, r - 1, c));
-        else if (GoodAltarSpot(map, r + 2, c))
-          closets.Add((r, c, r + 2, c, r + 1, c));
-        else if (GoodAltarSpot(map, r, c - 2))
-          closets.Add((r, c, r, c - 2, r, c - 1));
-        else if (GoodAltarSpot(map, r, c + 2))
-          closets.Add((r, c, r, c + 2, r, c + 1));
-      }
-    }
-
-    return closets;
-  }
-
-  static bool GoodAltarSpot(Map map, int r, int c)
-  {
-    if (map.TileAt(r, c).Type != TileType.DungeonFloor)
-      return false;
-
-    return Util.Adj8Sqs(r, c)
-               .Where(t => map.InBounds(t.Item1, t.Item2))
-               .Count(t => map.TileAt(t).Type == TileType.DungeonFloor) == 5;
-  }
-
+{ 
   public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng, int level)
   {
     Map altarLevel = levels[level];
     Tile sacredSq;
-    var closets = PotentialClosets(altarLevel);    
+    var closets = DungeonBuilder.PotentialClosets(altarLevel);
     if (closets.Count > 0)
     {
       var (closetR, closetC, altarR, altarC, wallR, wallC) = closets[rng.Next(closets.Count)];
@@ -440,6 +392,48 @@ class IdolAltarMaker
       levels[level].SetTile(altarR, altarC, altar);
       levels[level].SetTile(closetR, closetC, sacredSq);
     }
+  }
+}
+
+class CaptiveFeature
+{
+  public static void Create(int dungeonId, int level, Map map, GameObjectDB objDb, Random rng)
+  {
+    var cells = DungeonBuilder.PotentialClosets(map);
+    if (cells.Count == 0)
+      return;
+
+    var (cellR, cellC, _, _, gateR, gateC) = cells[rng.Next(cells.Count)];
+
+    map.SetTile(cellR, cellC, TileFactory.Get(TileType.DungeonFloor));
+    map.SetTile(gateR, gateC, new Portcullis(false));
+
+    HashSet<(int, int)> leverSqs = [];
+    for (int r = cellR - 5; r < cellR + 5; r++)
+    {
+      for (int c = cellC - 5; c < cellC + 5; c++)
+      {
+        if (!map.InBounds(r, c) || map.TileAt(r, c).Type != TileType.DungeonWall)
+          continue;
+        if (Util.Distance(r, c, gateR, gateC) == 1)
+          continue;
+
+        int floors = 0;
+        foreach (var (adjR, adjC) in Util.Adj4Sqs(r, c))
+        {
+          if (map.TileAt(adjR, adjC).Type == TileType.DungeonFloor)
+            ++floors;
+        }
+
+        if (floors > 0)
+          leverSqs.Add((r, c));
+      }
+    }
+
+    // kind of assuming there will always be at least one...
+    var (leverR, leverC) = leverSqs.ToList()[rng.Next(leverSqs.Count)];
+    Lever lever = new(TileType.Lever, false);
+    map.SetTile(leverR, leverC, lever);
   }
 }
 

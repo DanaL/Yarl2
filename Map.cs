@@ -26,7 +26,7 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, ReveealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
-  HFence, VFence, CornerFence, MonsterWall
+  HFence, VFence, CornerFence, MonsterWall, Lever
 }
 
 interface ITriggerable
@@ -199,6 +199,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.CornerFence => "fence",
     TileType.RevealedSummonsTrap => "monster summon trap",
     TileType.ReveealedBridgeCollapseTrap => "bridge collapse trigger",
+    TileType.Lever => "a lever",
     _ => "unknown"
   };
 
@@ -525,6 +526,19 @@ class MonsterWall(Glyph glyph, ulong monsterId) : Tile(TileType.MonsterWall)
   public override bool PassableByFlight() => false;
 
   public override string ToString() => $"{(int)Type};{Glyph};{MonsterId}";
+}
+
+class Lever(TileType type, bool on) : Tile(type)
+{
+  public bool On { get; set; } = on;
+
+  // Not sure if this is a good way to handle this for places like 
+  // the pathfinding code or if it's a gross hack
+  public override bool Passable() => false;
+  public override bool PassableByFlight() => false;
+  public override bool Opaque() => true;
+
+  public override string ToString() => $"{(int)Type};{On}";
 }
 
 class TileFactory
