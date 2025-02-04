@@ -880,7 +880,15 @@ class LevitationTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
 
-    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "begin")} to float in the air!" ];
+    List<string> msgs = [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "begin")} to float in the air!" ];
+
+    if (target.HasTrait<InPitTrait>())
+    {
+      target.Traits = [.. target.Traits.Where(t => t is not InPitTrait)];
+      msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "rise")} up out of the pit!");
+    }
+    
+    return msgs;
   }
 }
 

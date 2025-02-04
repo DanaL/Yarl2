@@ -126,6 +126,14 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.HP].Reset();
       return "";
     }
+    else if (txt == "pit")
+    {
+      List<Loc> adj = AdjSpots(_gs.Player.Loc);
+      Loc loc = adj[_gs.Rng.Next(adj.Count)];
+      _gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pit));
+      _gs.PrepareFieldOfView();
+      return "";
+    }
     else if (txt == "dmap")
     {
       var start = DateTime.Now;
