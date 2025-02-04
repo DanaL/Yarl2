@@ -76,7 +76,6 @@ class MainDungeonBuilder : DungeonBuilder
   {
     List<List<(int, int)>> floors = [];
 
-    // It's convenient to know where all the stairs are.
     for (int lvl = 0; lvl < numOfLevels; lvl++)
     {
       floors.Add([]);

@@ -1172,7 +1172,6 @@ abstract class UserInterface
     {
       e = PollForEvent();
     
-      //UpdateDisplay(gs);
       DrawFullScreen(sqs);
       Delay();
     }
