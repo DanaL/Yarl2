@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace Yarl2;
 
 enum TileType
@@ -479,7 +477,8 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
 
   public ulong ObjId => 0;
 
-  public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
+  public override string ToString() => 
+    $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {

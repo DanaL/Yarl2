@@ -258,15 +258,13 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   static void DigFrozenWater(Loc loc, ActionResult result, GameState gs, Actor digger)
   {
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
-    string msg = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "crack")} through the ice!";
-    msg += gs.ResolveActorMove(digger, loc, loc);
-    gs.UIRef().AlertPlayer(msg);
+    gs.ResolveActorMove(digger, loc, loc);
+    gs.UIRef().AlertPlayer($"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "crack")} through the ice!");
     if (digger == gs.Player) 
     {
       bool flying = digger.HasActiveTrait<FlyingTrait>() || digger.HasActiveTrait<FloatingTrait>();
       if (!flying)
-        msg += "\n\nYou plunge into the icy water below!";
-      gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+        gs.UIRef().SetPopup(new Popup("You plunge into the icy water below!", "", -1, -1));
     }
   }
 
@@ -312,12 +310,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, "dig")} but water rushes in!";
       gs.UIRef().AlertPlayer(s);
       
-      string msg = gs.ResolveActorMove(digger, loc, loc);
-      if (msg != "") 
-      {
-        gs.UIRef().AlertPlayer(msg);
-        s += "\n\n" + msg;
-      }
+      gs.ResolveActorMove(digger, loc, loc);
         
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));

@@ -348,23 +348,17 @@ class Battle
 
     if (CanPass(first, gs) && CanPass(second, gs))
     {
-      string moveMsg = gs.ResolveActorMove(target, target.Loc, second);
+      gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
-      var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
-      if (moveMsg != "")
-        txt += " " + moveMsg;
-
-      return txt;
+      
+      return $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
     }
     else if (CanPass(first, gs))
     {
-      string moveMsg = gs.ResolveActorMove(target, target.Loc, first);
+      gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
-      var txt = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stagger)} backward!";
-      if (moveMsg != "")
-        txt += " " + moveMsg;
-
-      return txt;
+      
+      return $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stagger)} backward!";
     }
 
     return "";
@@ -613,8 +607,7 @@ class Battle
     if (options.Count > 0)
     {
       Loc sq = options.ToList()[gs.Rng.Next(options.Count)];
-      string moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
-      gs.UIRef().AlertPlayer(moveMsg);
+      gs.ResolveActorMove(target, target.Loc, sq);      
       return true;
     }
 
@@ -694,8 +687,7 @@ class Battle
     if (options.Count > 0)
     {
       var sq = options.ToList()[gs.Rng.Next(options.Count)];
-      string moveMsg = gs.ResolveActorMove(target, target.Loc, sq);
-      gs.UIRef().AlertPlayer(moveMsg);
+      gs.ResolveActorMove(target, target.Loc, sq);
       target.Loc = sq;
 
       return true;

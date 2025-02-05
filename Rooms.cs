@@ -403,7 +403,9 @@ class Rooms
   {
     HashSet<(int, int)> exits = [];
     List<(int, int)> chasmSqs = [];
-    
+
+    HashSet<TileType> others = [];
+
     foreach (var (r, c) in room)
     {    
       List<(int, int)> adjSqs = Util.Adj4Sqs(r, c).ToList();
@@ -422,7 +424,11 @@ class Rooms
               case TileType.ClosedDoor:
               case TileType.LockedDoor:
               case TileType.DungeonFloor:
+              case TileType.Bridge:
                 exits.Add(adj);
+                break;
+              default:
+                others.Add(map.TileAt(adj).Type);
                 break;
             }
           }
@@ -533,7 +539,7 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
-    if (info.ChasmSqs.Count == 0 || info.IslandSqs.Count == 0)
+    if (info.ChasmSqs.Count == 0 || info.IslandSqs.Count == 0) // || info.Exits.Count == 0)
       return;
 
     MakeChasm(map, mapBelow, info.ChasmSqs);

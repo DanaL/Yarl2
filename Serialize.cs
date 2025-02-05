@@ -439,9 +439,9 @@ internal class MapSaver
     {
       Tile? tile = null;
       List<int> digits;
-      var pieces = s.Split(';');
-      var j = int.Parse(pieces[0]);
-      var type = (TileType)int.Parse(pieces[1]);
+      string[] pieces = s.Split(';');
+      int j = int.Parse(pieces[0]);
+      TileType type = (TileType)int.Parse(pieces[1]);
 
       switch (type)
       {
@@ -537,6 +537,14 @@ internal class MapSaver
           ulong monsterId = ulong.Parse(pieces[3]);
           tile = new MonsterWall(glyph, monsterId);
           break;
+        case TileType.Lever:          
+          bool on = bool.Parse(pieces[2]);
+          digits = Util.ToNums(pieces[3]);
+          Loc gateLoc = new(digits[0], digits[1], digits[2], digits[3]);
+          Lever l = new(TileType.Lever, on, gateLoc);
+          tile = l;
+          break;
+
       }
 
       if (tile is not null)
@@ -550,7 +558,7 @@ internal class MapSaver
 
   public static Map Inflate(MapSaver sm)
   {
-    var map = new Map(sm.Width, sm.Height);
+      var map = new Map(sm.Width, sm.Height);
 
     if (sm.Tiles is null || sm.SpecialTiles is null)
       throw new Exception("Invalid save game data!");

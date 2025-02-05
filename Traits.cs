@@ -209,11 +209,8 @@ class SwallowedTrait : Trait, IGameEventListener
 
       Loc start = victim.Loc;
       gs.ActorEntersLevel(victim, Origin.DungeonID, Origin.Level);
-      string moveMsg = gs.ResolveActorMove(victim, start, Origin);
-      victim.Loc = Origin;
-      if (victim is Player)
-        gs.UIRef().AlertPlayer(moveMsg);
-
+      gs.ResolveActorMove(victim, start, Origin);
+      victim.Loc = Origin;      
       gs.RefreshPerformers();
       gs.PrepareFieldOfView();
     }
@@ -2158,11 +2155,10 @@ class RecallTrait : BasicTrait, IGameEventListener
       gs.ActorEntersLevel(player, 0, 0);
       var start = player.Loc;
       player.Loc = entrance.Loc;
-      string moveMsg = gs.ResolveActorMove(player, start, entrance.Loc);
+      gs.ResolveActorMove(player, start, entrance.Loc);
       gs.RefreshPerformers();
       gs.PrepareFieldOfView();
       gs.UIRef().AlertPlayer("A wave of vertigo...");
-      gs.UIRef().AlertPlayer(moveMsg);      
     }
   }
 }

@@ -118,10 +118,8 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
 
       Loc start = victim.Loc;
       GameState.ActorEntersLevel(victim, belly.ID, 0);      
-      string moveMsg = GameState.ResolveActorMove(victim, start, entry);
+      GameState.ResolveActorMove(victim, start, entry);
       victim.Loc = entry;
-
-      ui.AlertPlayer(moveMsg);
 
       GameState.RefreshPerformers();
       GameState.PrepareFieldOfView();
@@ -622,9 +620,8 @@ abstract class PortalAction : Action
     
     GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
-    string moveMsg = GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
-    GameState.UIRef().AlertPlayer(moveMsg);
-
+    GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
+    
     GameState.RefreshPerformers();
     GameState.PrepareFieldOfView();
 

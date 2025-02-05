@@ -306,7 +306,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ObjDb.SetToLoc(loc, item);
-    string msg = ThingAddedToLoc(loc);
+    string msg = ThingTouchesFloor(loc);
     UI.AlertPlayer(msg);
     
     if (tile is IdolAltar idolAltar && item.ID == idolAltar.IdolID)
@@ -565,8 +565,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var candidates = shores.ToList();
       var destination = candidates[Rng.Next(candidates.Count)];
-      string moveMsg = ResolveActorMove(actor, actor.Loc, destination);
-      messages.Add(moveMsg);
+      ResolveActorMove(actor, actor.Loc, destination);      
       actor.Loc = destination;
 
       string invMsgs = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
@@ -639,8 +638,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       landingSpot = NearestUnoccupied(landingSpot);
     }
 
-    string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-    UI.AlertPlayer(moveMsg);
+    ResolveActorMove(actor, actor.Loc, landingSpot);
     actor.Loc = landingSpot;
 
     if (actor is Player)
@@ -1168,12 +1166,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       }
       
-      string moveMsg = ResolveActorMove(actor, actor.Loc, landingSpot);
-      if (LastPlayerFoV.Contains(actor.Loc))
-        UI.AlertPlayer(moveMsg);
+      ResolveActorMove(actor, actor.Loc, landingSpot);      
       
-      ObjDb.ActorMoved(actor, actor.Loc, landingSpot);
-
       int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
       var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
       if (hpLeft < 1)
@@ -1197,7 +1191,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return actor.Loc;
   }
 
-  public string ResolveActorMove(Actor actor, Loc start, Loc dest)
+  public void ResolveActorMove(Actor actor, Loc start, Loc dest)
   {
     ObjDb.ActorMoved(actor, start, dest);
 
@@ -1213,10 +1207,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     bool flying = actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>();
     bool waterWalking = actor.HasActiveTrait<WaterWalkingTrait>();
 
-    string s = ThingAddedToLoc(dest);
-    if (s != "")
-      UI.AlertPlayer(s);
-
+    // At the moment ThingTouchesFLoor (formerly ThingAddedToLoc) only handles
+    // floor triggers, but if it starts doing more I'll have to split it into
+    // seperate moethods, or actually pass the object in
+    if (!flying)
+    {
+      string s = ThingTouchesFloor(dest); UI.AlertPlayer(s);
+    }
+    
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);
@@ -1230,11 +1228,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       ActorFallsIntoWater(actor, dest);
     }
-
-    return s;
   }
 
-  public string ThingAddedToLoc(Loc loc)
+  public string ThingTouchesFloor(Loc loc)
   {
     List<string> messages = [];
 

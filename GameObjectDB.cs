@@ -31,8 +31,15 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
 
   public static Loc FromStr(string text)
   {
-    var digits = Util.ToNums(text);
-    return new Loc(digits[0], digits[1], digits[2], digits[3]);
+    try
+    {
+      var digits = Util.ToNums(text);
+      return new Loc(digits[0], digits[1], digits[2], digits[3]);
+    }
+    catch (Exception e)
+    {
+      return Loc.Nowhere;
+    }
   }
 }
 

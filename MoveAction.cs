@@ -212,8 +212,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 
     try
     {
-      string moveMsg = GameState.ResolveActorMove(Actor!, Actor!.Loc, Loc);
-      ui.AlertPlayer(moveMsg);
+      GameState.ResolveActorMove(Actor!, Actor!.Loc, Loc);
     }
     catch (AbnormalMovement abMov)
     {

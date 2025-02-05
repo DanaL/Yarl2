@@ -35,7 +35,7 @@ class Traps
         ui.SetPopup(new Popup($"A trap door opens up underneath {actor.FullName}!", "", -1, -1));
       }
 
-      string s = gs.ThingAddedToLoc(loc);
+      string s = gs.ThingTouchesFloor(loc);
       if (trapSqVisible)
         gs.UIRef().AlertPlayer(s);
       
@@ -46,7 +46,7 @@ class Traps
       loc = gs.FallIntoTrapdoor(actor, loc);
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));      
       gs.UIRef().AlertPlayer("You plummet into the trap door!");
-      string s = gs.ThingAddedToLoc(loc);
+      string s = gs.ThingTouchesFloor(loc);
       gs.UIRef().AlertPlayer(s);
 
       if (actor is Player player)
@@ -112,9 +112,7 @@ class Traps
       if (candidates.Count > 0)
       {
         Loc newDest = candidates[gs.Rng.Next(candidates.Count)];
-        string msg = gs.ResolveActorMove(actor, loc, newDest);
-        if (msg != "")
-          gs.UIRef().AlertPlayer(msg);
+        gs.ResolveActorMove(actor, loc, newDest);
       }
     }
     else if (tile.Type == TileType.DartTrap || tile.Type == TileType.HiddenDartTrap)
