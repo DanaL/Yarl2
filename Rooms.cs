@@ -539,7 +539,7 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
-    if (info.ChasmSqs.Count == 0 || info.IslandSqs.Count == 0) // || info.Exits.Count == 0)
+    if (info.ChasmSqs.Count == 0 || info.IslandSqs.Count == 0 || info.Exits.Count == 0)
       return;
 
     MakeChasm(map, mapBelow, info.ChasmSqs);
