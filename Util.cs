@@ -604,7 +604,7 @@ class Util
     TileType.FrozenDeepWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.OpenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
     TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
@@ -639,8 +639,8 @@ class Util
     TileType.CornerFence => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.MonsterWall => ((MonsterWall)tile).Glyph,
     TileType.Lever =>
-      ((Lever)tile).On ? new Glyph('\\', Colours.LIGHT_GREY, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK)
-                       : new Glyph('/', Colours.LIGHT_GREY, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+      ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK)
+                       : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 

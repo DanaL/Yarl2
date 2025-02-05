@@ -30,16 +30,9 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
   public override readonly string ToString() => $"{DungeonID},{Level},{Row},{Col}";
 
   public static Loc FromStr(string text)
-  {
-    try
-    {
-      var digits = Util.ToNums(text);
-      return new Loc(digits[0], digits[1], digits[2], digits[3]);
-    }
-    catch (Exception e)
-    {
-      return Loc.Nowhere;
-    }
+  {    
+    var digits = Util.ToNums(text);
+    return new Loc(digits[0], digits[1], digits[2], digits[3]);   
   }
 }
 

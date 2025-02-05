@@ -538,7 +538,7 @@ class Lever(TileType type, bool on, Loc gate) : Tile(type)
   // the pathfinding code or if it's a gross hack
   public override bool Passable() => false;
   public override bool PassableByFlight() => false;
-  public override bool Opaque() => true;
+  public override bool Opaque() => false;
 
   public override string ToString() => $"{(int)Type};{On};{Gate}";
 
