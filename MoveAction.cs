@@ -81,7 +81,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     }
 
-    if (gs.ObjDb.Occupied(Loc))
+    // We have to check if the occupant is the Actor because in cases like 
+    // tunneling into the floor, we move the actor onto their current location
+    // in order to correctly resolve as though they had stepped onto the
+    // square
+    if (gs.ObjDb.Occupied(Loc) && gs.ObjDb.Occupant(Loc) != Actor)
     {
       result.Succcessful = false;
       result.EnergyCost = 0.0;
