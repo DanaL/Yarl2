@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
 using System.Text;
 
 namespace Yarl2;
@@ -327,7 +328,15 @@ class PassTurn : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    mob.ExecuteAction(new PassAction());
+    PassAction action;
+    string bark = mob.GetBark(gs);
+    if (bark != "")
+      action = new PassAction(gs, mob) { Quip = bark };
+    else
+      action = new PassAction();
+
+    mob.ExecuteAction(action);
+
     return PlanStatus.Success;
   }
 }
@@ -496,6 +505,19 @@ class IsNight : BehaviourNode
   }
 }
 
+class CheckDialogueState(int state) : BehaviourNode
+{
+  int DialogueState { get; set; } = state;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (mob.Stats.TryGetValue(Attribute.DialogueState, out Stat? att))
+      return att.Curr == DialogueState ? PlanStatus.Success : PlanStatus.Failure;
+
+    return PlanStatus.Failure;
+  }
+}
+
 class CheckMonsterAttitude(int status) : BehaviourNode
 {
   int Status { get; set; } = status;
@@ -569,8 +591,12 @@ class RandomMove : BehaviourNode
     }
     else
     {
-      action = new PassAction();
+      action = new PassAction(gs, mob);
     }
+
+    string bark = mob.GetBark(gs);
+    if (bark != "")
+      action.Quip = bark;
 
     bool result = mob.ExecuteAction(action);
     return result ? PlanStatus.Success : PlanStatus.Failure;
@@ -598,8 +624,12 @@ class RandomMove : BehaviourNode
     }
     else
     {
-      action = new PassAction();
+      action = new PassAction(gs, mob);
     }
+
+    string bark = mob.GetBark(gs);
+    if (bark != "")
+      action.Quip = bark;
 
     bool result = mob.ExecuteAction(action);
     return result ? PlanStatus.Success : PlanStatus.Failure;
@@ -854,7 +884,7 @@ class Planner
     }    
   }
 
-  static BehaviourNode CreateMonsterPlan(Mob mob, GameState gs)
+  static BehaviourNode CreateMonsterPlan(Mob mob)
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
 
@@ -912,11 +942,34 @@ class Planner
     return new Selector(plan);
   }
 
+  static BehaviourNode CreatePrisonerPlan(Mob mob)
+  {
+    List<BehaviourNode> plan = [];
+
+    // Prisoner trapped
+    Sequence trapped = new([
+      new CheckDialogueState(PrisonerBehaviour.DIALOGUE_CAPTIVE), 
+      new Selector([new RandomMove(), new PassTurn()])
+    ]);
+    plan.Add(trapped);
+
+    // Prisoner trapped but hasn't yet rewarded the player
+    Sequence free = new([
+      new CheckDialogueState(PrisonerBehaviour.DIALOGUE_FREE),
+      new RandomMove()
+    ]);
+    plan.Add(free);
+    //return new PassTurn();
+
+    return new Selector(plan);
+  }
+
   public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
   {
     "MayorPlan" => CreateMayorPlan(mob, gs),
     "SmithPlan" => CreateSmithPlan(mob, gs),
-    "MonsterPlan" => CreateMonsterPlan(mob, gs),
+    "MonsterPlan" => CreateMonsterPlan(mob),
+    "PrisonerPlan" => CreatePrisonerPlan(mob),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
@@ -1531,5 +1584,35 @@ class WidowerBehaviour: NPCBehaviour
     }
 
     return action;
+  }
+}
+
+class PrisonerBehaviour : NPCBehaviour
+{
+  public const int DIALOGUE_CAPTIVE = 0;
+  public const int DIALOGUE_FREE = 1;
+  public const int DIALOGUE_FREE_BOON = 2;
+
+  DateTime _lastBark = new(1900, 1, 1);
+
+  public override string GetBark(Mob actor, GameState gs)
+  {
+    int dialogueState = actor.Stats[Attribute.DialogueState].Curr;
+
+    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    {
+      _lastBark = DateTime.Now;
+
+      return dialogueState switch
+      {
+        DIALOGUE_FREE => "Thank you!",
+        DIALOGUE_FREE_BOON => "Hmm...which way to the exit?",
+        _ => gs.Rng.NextDouble() < 0.5 ? "Help me!" : "Can you free me?"
+      };
+    }
+    else
+    {
+      return "";
+    }
   }
 }

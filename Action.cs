@@ -2855,9 +2855,9 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
           break;
       }
 
-      var blockages = gs.ObjDb.ItemsAt(loc).Where(i => i.Type == ItemType.Landscape);
+      var blockages = GameState.ObjDb.ItemsAt(loc).Where(i => i.Type == ItemType.Landscape);
       foreach (Item block in blockages)
-        gs.ObjDb.RemoveItemFromGame(loc, block);
+        GameState.ObjDb.RemoveItemFromGame(loc, block);
     }
 
     if (Source is WandTrait wand)

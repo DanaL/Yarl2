@@ -468,6 +468,30 @@ class PoorLootTrait : LootTrait
   public override string AsText() => "PoorLoot";
 }
 
+class PrisonerTrait : TemporaryTrait
+{
+  public Loc Cell { get; set; }
+  public override ulong ObjId => SourceId;
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(SourceId) is Actor prisoner)
+    {
+      if (prisoner.Loc != Cell)
+      {
+        prisoner.Traits.Remove(this);
+        gs.RemoveListener(this);
+
+        prisoner.Stats[Attribute.DialogueState].SetMax(PrisonerBehaviour.DIALOGUE_FREE);
+      }
+    }
+  }
+
+  public override string AsText() => $"Prisoner#{SourceId}#{Cell}";
+
+  public override List<string> Apply(Actor target, GameState gs) => [];
+}
+
 class AppleProducerTrait : Trait, IGameEventListener, IOwner
 {
   public ulong OwnerID { get; set; }
@@ -2690,6 +2714,7 @@ class TraitFactory
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
+    { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },

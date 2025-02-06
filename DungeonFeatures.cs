@@ -435,6 +435,39 @@ class CaptiveFeature
     var (leverR, leverC) = leverSqs.ToList()[rng.Next(leverSqs.Count)];
     Lever lever = new(TileType.Lever, false, gateLoc);
     map.SetTile(leverR, leverC, lever);
+
+    MakePrisoner(cellR, cellC, dungeonId, level, map, objDb, rng);
+  }
+
+  static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, Random rng)
+  {
+    Loc cell = new(dungeonId, level, cellRow, cellCol);
+    NameGenerator ng = new(rng, Util.NamesFile);
+
+    List<string> species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
+    string s = species[rng.Next(species.Count)];
+    Mob prisoner = new()
+    {
+      Name = ng.GenerateName(rng.Next(5, 9)),
+      Glyph = new Glyph('@', Colours.FAINT_PINK, Colours.PINK, Colours.BLACK, Colours.BLACK),
+      Appearance = $"A disheveled, exhausted-looking {s}."
+    };
+    prisoner.Traits.Add(new VillagerTrait());
+    prisoner.Traits.Add(new NamedTrait());
+    prisoner.Traits.Add(new IntelligentTrait());
+    prisoner.Traits.Add(new BehaviourTreeTrait() { Plan = "PrisonerPlan" });
+    prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
+
+    PrisonerTrait pt = new() { SourceId = prisoner.ID, Cell = cell };
+    prisoner.Traits.Add(pt);
+    objDb.EndOfRoundListeners.Add(pt);
+
+    prisoner.SetBehaviour(new PrisonerBehaviour());
+    
+    prisoner.Stats[Attribute.DialogueState] = new Stat(0);
+    prisoner.Stats[Attribute.HP] = new Stat(15);
+    
+    objDb.AddNewActor(prisoner, cell);
   }
 }
 

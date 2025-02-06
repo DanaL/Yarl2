@@ -1,0 +1,9 @@
+﻿(cond
+	((= DIALOGUE_STATE 0)
+		(say "I'm trapped in here!")
+	)
+	((= DIALOGUE_STATE 1)
+		(say "Let me grant you a boon!")
+	)
+	(else (say "You've freed me! You have my eternal gratitude!"))
+)
