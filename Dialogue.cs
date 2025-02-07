@@ -730,6 +730,11 @@ class DialogueInterpreter
         return gs.FactDb.FactCheck("OrchardExists") is SimpleFact;
       case "MAGIC101":
         return gs.Player.Stats.ContainsKey(Attribute.MagicPoints);
+      case "IMPRISONED_BY":
+        if (gs.FactDb.FactCheck("ImprisonedBy") is SimpleFact fact)
+          return fact.Value;
+        else
+          return "";
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -774,6 +779,12 @@ class DialogueInterpreter
     if (s.Contains("#LEVEL_FIVE_BOSS"))
     {
       s = s.Replace("#LEVEL_FIVE_BOSS", CheckVal("LEVEL_FIVE_BOSS", mob, gs).ToString());
+    }
+
+    if (s.Contains("#IMPRISONED_BY"))
+    {
+      string imprisonedBy = gs.FactDb.FactCheck("ImprisonedBy") is SimpleFact fact ? fact.Value : "";
+      s = s.Replace("#IMPRISONED_BY", imprisonedBy);
     }
 
     s = s.Replace(@"\n", Environment.NewLine);

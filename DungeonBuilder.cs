@@ -1083,7 +1083,7 @@ class MainDungeonBuilder : DungeonBuilder
       if (level == 0 && rng.NextDouble() < 0.998 && !captive)
       {
         captive = true;
-        CaptiveFeature.Create(dungeonId, level, levels[level], objDb, rng);
+        CaptiveFeature.Create(dungeonId, level, levels[level], objDb, factDb, rng);
       }
     }
   }

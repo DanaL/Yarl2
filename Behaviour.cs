@@ -1603,22 +1603,23 @@ class PrisonerBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {
-    int dialogueState = actor.Stats[Attribute.DialogueState].Curr;
-
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-    {
-      _lastBark = DateTime.Now;
-
-      return dialogueState switch
-      {
-        DIALOGUE_FREE => "Thank you!",
-        DIALOGUE_FREE_BOON => "Hmm...which way to the exit?",
-        _ => gs.Rng.NextDouble() < 0.5 ? "Help me!" : "Can you free me?"
-      };
-    }
-    else
-    {
+    if ((DateTime.Now - _lastBark).TotalSeconds <= 10)
       return "";
-    }
+
+    _lastBark = DateTime.Now;
+
+    int dialogueState = actor.Stats[Attribute.DialogueState].Curr;
+    string capturedBy = ((SimpleFact) gs.FactDb.FactCheck("ImprisonedBy")!).Value;
+    return dialogueState switch
+    {
+      DIALOGUE_FREE => "Thank you!",
+      DIALOGUE_FREE_BOON => "Hmm...which way to the exit?",
+      _ => gs.Rng.Next(3) switch
+            {
+              0 => $"I was captured by {capturedBy}!",
+              1 => "Help me!",
+              _ => "Can you free me?"
+            }
+    };
   }
 }

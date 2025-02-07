@@ -397,7 +397,7 @@ class IdolAltarMaker
 
 class CaptiveFeature
 {
-  public static void Create(int dungeonId, int level, Map map, GameObjectDB objDb, Random rng)
+  public static void Create(int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
   {
     var cells = DungeonBuilder.PotentialClosets(map);
     if (cells.Count == 0)
@@ -436,10 +436,10 @@ class CaptiveFeature
     Lever lever = new(TileType.Lever, false, gateLoc);
     map.SetTile(leverR, leverC, lever);
 
-    MakePrisoner(cellR, cellC, dungeonId, level, map, objDb, rng);
+    MakePrisoner(cellR, cellC, dungeonId, level, map, objDb, factDb, rng);
   }
 
-  static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, Random rng)
+  static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
   {
     Loc cell = new(dungeonId, level, cellRow, cellCol);
     NameGenerator ng = new(rng, Util.NamesFile);
@@ -456,11 +456,17 @@ class CaptiveFeature
     prisoner.Traits.Add(new NamedTrait());
     prisoner.Traits.Add(new IntelligentTrait());
     prisoner.Traits.Add(new BehaviourTreeTrait() { Plan = "PrisonerPlan" });
-    prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
-
+    
+    // My intent right now is for there to be only one prisoner per run, at least of the type
+    // who grants a boon
+    string earlyDenizen = factDb.FactCheck("EarlyDenizen") is SimpleFact fact ? fact.Value.Pluralize() : "";
+    string imprisonedBy = rng.NextDouble() < 0.25 ? "cultists" : earlyDenizen;
+    factDb.Add(new SimpleFact() { Name="ImprisonedBy", Value=imprisonedBy });
     PrisonerTrait pt = new() { SourceId = prisoner.ID, Cell = cell };
     prisoner.Traits.Add(pt);
     objDb.EndOfRoundListeners.Add(pt);
+
+    prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
 
     prisoner.SetBehaviour(new PrisonerBehaviour());
     

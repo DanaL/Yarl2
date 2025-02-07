@@ -472,7 +472,7 @@ class PrisonerTrait : TemporaryTrait
 {
   public Loc Cell { get; set; }
   public override ulong ObjId => SourceId;
-
+  
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(SourceId) is Actor prisoner)
@@ -488,7 +488,6 @@ class PrisonerTrait : TemporaryTrait
   }
 
   public override string AsText() => $"Prisoner#{SourceId}#{Cell}";
-
   public override List<string> Apply(Actor target, GameState gs) => [];
 }
 
