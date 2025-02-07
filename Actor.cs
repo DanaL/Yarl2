@@ -716,6 +716,13 @@ class Power
           Actor = mob,
           Quip = Quip
         };
+      case "SummonCentipede":
+        return new SummonAction(mob.Loc, "centipede", 2)
+        {
+          GameState = gs,
+          Actor = mob,
+          Quip = Quip
+        };
       case "SummonUndead":
         List<string> undead = ["skeleton", "zombie"];
 

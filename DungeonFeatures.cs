@@ -441,6 +441,7 @@ class CaptiveFeature
 
   static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
   {
+    
     Loc cell = new(dungeonId, level, cellRow, cellCol);
     NameGenerator ng = new(rng, Util.NamesFile);
 
@@ -456,12 +457,11 @@ class CaptiveFeature
     prisoner.Traits.Add(new NamedTrait());
     prisoner.Traits.Add(new IntelligentTrait());
     prisoner.Traits.Add(new BehaviourTreeTrait() { Plan = "PrisonerPlan" });
-    
+
     // My intent right now is for there to be only one prisoner per run, at least of the type
     // who grants a boon
-    string earlyDenizen = factDb.FactCheck("EarlyDenizen") is SimpleFact fact ? fact.Value.Pluralize() : "";
-    string imprisonedBy = rng.NextDouble() < 0.25 ? "cultists" : earlyDenizen;
-    factDb.Add(new SimpleFact() { Name="ImprisonedBy", Value=imprisonedBy });
+    string captors = SetCaptors(cell, map, objDb, factDb, rng);
+    factDb.Add(new SimpleFact() { Name="ImprisonedBy", Value=captors });
     PrisonerTrait pt = new() { SourceId = prisoner.ID, Cell = cell };
     prisoner.Traits.Add(pt);
     objDb.EndOfRoundListeners.Add(pt);
@@ -474,6 +474,89 @@ class CaptiveFeature
     prisoner.Stats[Attribute.HP] = new Stat(15);
     
     objDb.AddNewActor(prisoner, cell);
+  }
+
+  static string SetCaptors(Loc cell, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
+  {
+    string captors;
+    if (cell.Level < 5)
+    {
+      string earlyDenizen = factDb.FactCheck("EarlyDenizen") is SimpleFact fact ? fact.Value.Pluralize() : "";
+      captors = rng.NextDouble() < 0.25 ? "cultists" : earlyDenizen;
+    }
+    else
+    {
+      captors = rng.Next(3) switch
+      {
+        0 => "ogres",
+        1 => "duergar",
+        _ => "drow"
+      };
+    }
+
+    List<Loc> sqsNearCell = [];
+    for (int r = cell.Row - 5; r <= cell.Row + 5; r++)
+    {
+      for (int c = cell.Col - 5; c <= cell.Col + 5; c++)
+      {
+        if (!map.InBounds(r, c))
+          continue;
+        if (!map.TileAt(r, c).Passable())
+          continue;
+        Loc loc = cell with { Row = r, Col = c };
+        if (!Util.GoodFloorSpace(objDb, loc) && !objDb.Occupied(loc))
+          continue;
+
+        sqsNearCell.Add(loc);
+      }
+    }
+
+    if (sqsNearCell.Count < 3)
+      return captors;
+
+    switch (captors)
+    {
+      case "kobolds":
+        PlaceMonster("kobold", objDb, sqsNearCell);
+        PlaceMonster("kobold", objDb, sqsNearCell);
+        PlaceMonster("kobold foreman", objDb, sqsNearCell);
+        break;
+      case "goblins":
+        PlaceMonster("hobgoblin", objDb, sqsNearCell);
+        PlaceMonster("goblin", objDb, sqsNearCell);
+        PlaceMonster("goblin", objDb, sqsNearCell);
+        break;
+      case "cultists":
+        PlaceMonster("cult leader", objDb, sqsNearCell);
+        PlaceMonster("cultist", objDb, sqsNearCell);
+        PlaceMonster("cultist", objDb, sqsNearCell);
+        break;
+      case "drow":
+        PlaceMonster("drow warrior", objDb, sqsNearCell);
+        PlaceMonster("drow warrior", objDb, sqsNearCell);
+        PlaceMonster("drow warrior", objDb, sqsNearCell);
+        break;
+      case "duergar":
+        PlaceMonster("duergar soldier", objDb, sqsNearCell);
+        PlaceMonster("duergar soldier", objDb, sqsNearCell);
+        PlaceMonster("duergar soldier", objDb, sqsNearCell);
+        break;
+      case "ogres":
+        PlaceMonster("ogre", objDb, sqsNearCell);
+        PlaceMonster("ogre", objDb, sqsNearCell);
+        break;
+    }
+
+    return captors;
+
+    void PlaceMonster(string name, GameObjectDB objDb, List<Loc> sqs)
+    {
+      Actor monster = MonsterFactory.Get(name, objDb, rng);
+      int i = rng.Next(sqsNearCell.Count);
+      Loc loc = sqsNearCell[i];
+      sqsNearCell.RemoveAt(i);
+      objDb.AddNewActor(monster, loc);
+    }
   }
 }
 

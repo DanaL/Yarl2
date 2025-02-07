@@ -683,6 +683,18 @@ class Util
     Metals.Mithril => (Colours.LIGHT_BLUE, Colours.LIGHT_GREY),
     _ => (Colours.DARK_GREY, Colours.DARK_GREY)
   };
+
+  // Filter for locs where we may not want to place items
+  public static bool GoodFloorSpace(GameObjectDB objDb, Loc loc)
+  {
+    foreach (Item item in objDb.ItemsAt(loc))
+    {
+      if (item.HasTrait<OnFireTrait>())
+        return false;
+    }
+
+    return true;
+  }
 }
 
 static class ListUtils
