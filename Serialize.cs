@@ -441,110 +441,122 @@ internal class MapSaver
       List<int> digits;
       string[] pieces = s.Split(';');
       int j = int.Parse(pieces[0]);
+      HashSet<Loc> tilesSet = [];
+
       TileType type = (TileType)int.Parse(pieces[1]);
-
-      switch (type)
+      try
       {
-        case TileType.Portal:
-          tile = new Portal(pieces[3]);
-          digits = Util.ToNums(pieces[2]);
-          ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-          break;
-        case TileType.Upstairs:
-          tile = new Upstairs(pieces[3]);
-          digits = Util.ToNums(pieces[2]);
-          ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-          break;
-        case TileType.Downstairs:
-          tile = new Downstairs(pieces[3]);
-          digits = Util.ToNums(pieces[2]);
-          ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-          break;
-        case TileType.Shortcut:
-          tile = new Shortcut();
-          digits = Util.ToNums(pieces[2]);
-          ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-          break;
-        case TileType.ShortcutDown:
-          tile = new ShortcutDown();
-          digits = Util.ToNums(pieces[2]);
-          ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-          break;
-        case TileType.OpenDoor:
-        case TileType.ClosedDoor:
-          open = Convert.ToBoolean(pieces[2]);
-          // technically wrong for open doors but the internal state
-          // of the door will work itself out
-          tile = new Door(TileType.ClosedDoor, open);
-          break;
-        case TileType.OpenPortcullis:
-        case TileType.Portcullis:
-          open = Convert.ToBoolean(pieces[2]);
-          tile = new Portcullis(open);
-          break;
-        case TileType.GateTrigger:
-          digits = Util.ToNums(pieces[2]);
-          GateTrigger gt = new(new Loc(digits[0], digits[1], digits[2], digits[3]));
-          gt.Found = bool.Parse(pieces[3]);
-          tile = gt;
-          break;
-        case TileType.Landmark:
-          tile = new Landmark(pieces[2]);
-          break;
-        case TileType.Gravestone:
-          tile = new Gravestone(pieces[2]);
-          break;
-        case TileType.IdolAltar:
-          tile = new IdolAltar(pieces[2]) 
-          { 
-            IdolID = ulong.Parse(pieces[3]),
-            Wall = Loc.FromStr(pieces[4])
-          };        
-          break;
-        case TileType.VaultDoor:
-          open = Convert.ToBoolean(pieces[2]);
-          Enum.TryParse(pieces[3], out Metals met);
-          tile = new VaultDoor(open, met);
-          break;
-        case TileType.FireJetTrap:
-          open = Convert.ToBoolean(pieces[2]);
-          Enum.TryParse(pieces[3], out Dir dir);
-          tile = new FireJetTrap(open, dir);
-          break;
-        case TileType.JetTrigger:
-          digits = Util.ToNums(pieces[2]);
-          tile = new JetTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]), Convert.ToBoolean(pieces[3]));
-          break;
-        case TileType.BridgeTrigger:
-          tile = new BridgeTrigger()
-          {
-            Triggered = bool.Parse(pieces[2]),
-            BridgeTiles = pieces[3].Split('|').Select(Loc.FromStr).ToHashSet()
-          };
-          break;
-        case TileType.HiddenBridgeCollapseTrap:
-          tile = new BridgeCollapseTrap()
-          {
-            Triggered = bool.Parse(pieces[2]),
-            BridgeTiles = pieces[3].Split('|').Select(Loc.FromStr).ToHashSet()
-          };
-          break;
-        case TileType.BusinessSign:
-          tile = new BusinessSign(pieces[2]);
-          break;
-        case TileType.MonsterWall:
-          Glyph glyph = Glyph.TextToGlyph(pieces[2]);
-          ulong monsterId = ulong.Parse(pieces[3]);
-          tile = new MonsterWall(glyph, monsterId);
-          break;
-        case TileType.Lever:          
-          bool on = bool.Parse(pieces[2]);
-          digits = Util.ToNums(pieces[3]);
-          Loc gateLoc = new(digits[0], digits[1], digits[2], digits[3]);
-          Lever l = new(TileType.Lever, on, gateLoc);
-          tile = l;
-          break;
+        switch (type)
+        {
+          case TileType.Portal:
+            tile = new Portal(pieces[3]);
+            digits = Util.ToNums(pieces[2]);
+            ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
+          case TileType.Upstairs:
+            tile = new Upstairs(pieces[3]);
+            digits = Util.ToNums(pieces[2]);
+            ((Upstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
+          case TileType.Downstairs:
+            tile = new Downstairs(pieces[3]);
+            digits = Util.ToNums(pieces[2]);
+            ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
+          case TileType.Shortcut:
+            tile = new Shortcut();
+            digits = Util.ToNums(pieces[2]);
+            ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
+          case TileType.ShortcutDown:
+            tile = new ShortcutDown();
+            digits = Util.ToNums(pieces[2]);
+            ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
+          case TileType.OpenDoor:
+          case TileType.ClosedDoor:
+            open = Convert.ToBoolean(pieces[2]);
+            // technically wrong for open doors but the internal state
+            // of the door will work itself out
+            tile = new Door(TileType.ClosedDoor, open);
+            break;
+          case TileType.OpenPortcullis:
+          case TileType.Portcullis:
+            open = Convert.ToBoolean(pieces[2]);
+            tile = new Portcullis(open);
+            break;
+          case TileType.GateTrigger:
+            digits = Util.ToNums(pieces[2]);
+            GateTrigger gt = new(new Loc(digits[0], digits[1], digits[2], digits[3]));
+            gt.Found = bool.Parse(pieces[3]);
+            tile = gt;
+            break;
+          case TileType.Landmark:
+            tile = new Landmark(pieces[2]);
+            break;
+          case TileType.Gravestone:
+            tile = new Gravestone(pieces[2]);
+            break;
+          case TileType.IdolAltar:
+            tile = new IdolAltar(pieces[2])
+            {
+              IdolID = ulong.Parse(pieces[3]),
+              Wall = Loc.FromStr(pieces[4])
+            };
+            break;
+          case TileType.VaultDoor:
+            open = Convert.ToBoolean(pieces[2]);
+            Enum.TryParse(pieces[3], out Metals met);
+            tile = new VaultDoor(open, met);
+            break;
+          case TileType.FireJetTrap:
+            open = Convert.ToBoolean(pieces[2]);
+            Enum.TryParse(pieces[3], out Dir dir);
+            tile = new FireJetTrap(open, dir);
+            break;
+          case TileType.JetTrigger:
+            digits = Util.ToNums(pieces[2]);
+            tile = new JetTrigger(new Loc(digits[0], digits[1], digits[2], digits[3]), Convert.ToBoolean(pieces[3]));
+            break;
+          case TileType.BridgeTrigger:
+            if (pieces[3] != "")
+              tilesSet = [.. pieces[3].Split('|').Select(Loc.FromStr)];
+            tile = new BridgeTrigger()
+            {
+              Triggered = bool.Parse(pieces[2]),
+              BridgeTiles = tilesSet
+            };
+            break;
+          case TileType.HiddenBridgeCollapseTrap:
+            if (pieces[3] != "")
+              tilesSet = [.. pieces[3].Split('|').Select(Loc.FromStr)];
+            tile = new BridgeCollapseTrap()
+            {
+              Triggered = bool.Parse(pieces[2]),
+              BridgeTiles = tilesSet
+            };
+            break;
+          case TileType.BusinessSign:
+            tile = new BusinessSign(pieces[2]);
+            break;
+          case TileType.MonsterWall:
+            Glyph glyph = Glyph.TextToGlyph(pieces[2]);
+            ulong monsterId = ulong.Parse(pieces[3]);
+            tile = new MonsterWall(glyph, monsterId);
+            break;
+          case TileType.Lever:
+            bool on = bool.Parse(pieces[2]);
+            digits = Util.ToNums(pieces[3]);
+            Loc gateLoc = new(digits[0], digits[1], digits[2], digits[3]);
+            Lever l = new(TileType.Lever, on, gateLoc);
+            tile = l;
+            break;
 
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.Message);
       }
 
       if (tile is not null)
