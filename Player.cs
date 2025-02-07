@@ -614,19 +614,14 @@ class Player : Actor
   }
 
   Action PickupCommand(GameState gs, UserInterface ui)
-  {
-    var allItems = gs.ObjDb.VisibleItemsAt(Loc);
-    if (allItems is null || allItems.Count == 0)
-    {
-      ui.AlertPlayer("There's nothing there...");
-      return new NullAction();
-    }
-
+  {   
     List<Item> items = [];
     List<Item> itemsInPit = [];
-    foreach (var item in gs.ObjDb.VisibleItemsAt(Loc))
+    foreach (Item item in gs.ObjDb.VisibleItemsAt(Loc))
     {
       if (item.HasTrait<BlockTrait>())
+        continue;
+      if (item.HasTrait<AffixedTrait>())
         continue;
 
       if (item.HasTrait<InPitTrait>())
@@ -634,7 +629,13 @@ class Player : Actor
       else
         items.Add(item);
     }
-    
+
+    if (items.Count == 0)
+    {
+      ui.AlertPlayer("There's nothing here you can pick up.");
+      return new NullAction();
+    }
+
     // Note that in the current state of the game, an item that is on a pit square
     // will be in the pit. There's (currently) no concept of floating items so I
     // don't have to the worry about the situation where there are items in the pit

@@ -373,7 +373,7 @@ internal class DungeonSaver
 
   public static Dungeon Inflate(DungeonSaver sd)
   {
-    Dungeon d = new Dungeon(sd.ID, sd.ArrivalMessage ?? "");
+    Dungeon d = new(sd.ID, sd.ArrivalMessage ?? "");
     
     foreach (string s in sd.RememberedLocs)
     {
