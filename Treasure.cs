@@ -135,6 +135,18 @@ class Treasure
 
   static void AddObjectToLevel(Item item, GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
   {
+    bool GoodFloorTile(Loc loc)
+    {
+      foreach (Item item in objDb.ItemsAt(loc))
+      {
+        if (item.HasTrait<OnFireTrait>())
+          return false;
+      }
+
+      return true;
+    }
+
+    // I'm generating this list for every item placed, which is pretty dumb
     List<Loc> candidates = [];
     for (int r = 0; r < level.Height; r++)
     {
@@ -147,7 +159,9 @@ class Treasure
           case TileType.TrapDoor:
           case TileType.TeleportTrap:
           case TileType.HiddenTeleportTrap:
-            candidates.Add(new Loc(dungeonID, levelNum, r, c));
+            Loc floor = new(dungeonID, levelNum, r, c);
+            if (GoodFloorTile(floor))
+             candidates.Add(floor);
             break;
         }
       }

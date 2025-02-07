@@ -236,6 +236,17 @@ class MainDungeonBuilder : DungeonBuilder
       return adjFloorCount> 3;
     }
 
+    bool GoodFloorSpot(Loc loc)
+    {
+      foreach (Item item in objDb.ItemsAt(loc))
+      {
+        if (item.HasTrait<OnFireTrait>())
+          return false;
+      }
+
+      return true;
+    }
+
     var decorations = Decorations.GenDecorations(factDb, rng);
     
     // I eventually probably won't include every decoration from every fact
@@ -245,7 +256,8 @@ class MainDungeonBuilder : DungeonBuilder
         continue;
         
       int level = rng.Next(numOfLevels);
-      List<(int, int)> floorTiles = levels[level].SqsOfType(TileType.DungeonFloor);
+      List<(int, int)> floorTiles = [ ..levels[level].SqsOfType(TileType.DungeonFloor)
+                                                     .Where(sq => GoodFloorSpot(new Loc(dungeonId, level, sq.Item1, sq.Item2)))];
 
       if (decoration.Type == DecorationType.Statue)
       {
@@ -289,7 +301,7 @@ class MainDungeonBuilder : DungeonBuilder
     AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
-    {      
+    {
       Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], _dungeonID, levelNum, rng);
       SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
 
