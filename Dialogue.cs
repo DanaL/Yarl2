@@ -993,22 +993,49 @@ class DialogueInterpreter
 
   void EvalGive(ScriptGive gift, Actor mob, GameState gs)
   {
-      Item item = gift.Gift switch
-      {
-        "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
-        "LEVEL_FIVE_KEY" => LevelFiveKey(gs),
-        _ => throw new Exception($"Unknown variable: {gift.Gift}"),
-      };
-      
-      Sb.Append("\n\n");
-      Sb.Append(gift.Blurb);
-      Sb.Append("\n\n[GREEN ");
-      Sb.Append(mob.FullName.Capitalize());
-      Sb.Append(" gives you ");
-      Sb.Append(item.Name.IndefArticle());
-      Sb.Append("!]");
+    if (gift.Gift == "BOON_STR")
+    {
+      Stat str = gs.Player.Stats[Attribute.Strength];
+      str.SetMax(str.Curr + 3);
+      gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
+      gs.UIRef().AlertPlayer("You feel stronger!");      
+      return;
+    }
+    else if (gift.Gift == "BOON_DEX")
+    {
+      Stat dex = gs.Player.Stats[Attribute.Dexterity];
+      dex.SetMax(dex.Curr + 3);
+      gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
+      gs.UIRef().AlertPlayer("You feel more agile!");
+      return;
+    }
+    else if (gift.Gift == "BOON_CON")
+    {
+      Stat con = gs.Player.Stats[Attribute.Constitution];
+      con.SetMax(con.Curr + 3);
+      gs.Player.Stats[Attribute.HP].ChangeMax(15);
+      gs.Player.Stats[Attribute.HP].Change(15);
+      gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
+      gs.UIRef().AlertPlayer("You feel healthier!");
+      return;      
+    }
 
-      gs.Player.Inventory.Add(item, gs.Player.ID);
+    Item item = gift.Gift switch
+    {
+      "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
+      "LEVEL_FIVE_KEY" => LevelFiveKey(gs),
+      _ => throw new Exception($"Unknown variable: {gift.Gift}"),
+    };
+    
+    Sb.Append("\n\n");
+    Sb.Append(gift.Blurb);
+    Sb.Append("\n\n[GREEN ");
+    Sb.Append(mob.FullName.Capitalize());
+    Sb.Append(" gives you ");
+    Sb.Append(item.Name.IndefArticle());
+    Sb.Append("!]");
+
+    gs.Player.Inventory.Add(item, gs.Player.ID);
   }
 
   void EvalOffer(ScriptOffer offer, Actor mob, GameState gs)

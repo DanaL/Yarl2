@@ -959,7 +959,13 @@ class Planner
       new RandomMove()
     ]);
     plan.Add(free);
-    //return new PassTurn();
+
+    // Prisoner has given the player their boon
+    Sequence afterBoon = new([
+      new CheckDialogueState(PrisonerBehaviour.DIALOGUE_FREE_BOON),
+      new PassTurn()
+    ]);
+    plan.Add(afterBoon);
 
     return new Selector(plan);
   }
