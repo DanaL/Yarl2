@@ -1282,7 +1282,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     Tile tile = map.TileAt(loc.Row, loc.Col);
     sb.Append(tile.StepMessage);
     if (tile.Type == TileType.BusinessSign)
+    {
       UIRef().SetPopup(new Popup(tile.StepMessage, "", 6, -1));
+    }
+    else if (tile.Type == TileType.CreepyAltar)
+    {
+      string s = Rng.Next(3) switch
+      {
+        0 => "A raspy whisper:\n\nI yearn for blood.",
+        1 => "A low growl:\n\nBring me souls!",
+        _ => "A voice in your mind:\n\nI can grant you power!"
+      };
+      UIRef().SetPopup(new Popup(s, "", 6, -1));
+    }
 
     Dictionary<Item, int> items = [];
     foreach (var item in ObjDb.VisibleItemsAt(loc))

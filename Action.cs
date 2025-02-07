@@ -1345,6 +1345,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
       if (loc != Loc.Nowhere)
       {
         var summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
+        summoned.Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
         GameState.ObjDb.AddNewActor(summoned, loc);
         GameState.AddPerformer(summoned);
         ++summonCount;

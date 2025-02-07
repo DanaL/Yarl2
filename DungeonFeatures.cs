@@ -466,14 +466,38 @@ class CaptiveFeature
     prisoner.Traits.Add(pt);
     objDb.EndOfRoundListeners.Add(pt);
 
+    SetCreepyAltar(cell, map, rng);
     prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
 
     prisoner.SetBehaviour(new PrisonerBehaviour());
     
     prisoner.Stats[Attribute.DialogueState] = new Stat(0);
     prisoner.Stats[Attribute.HP] = new Stat(15);
-    
+        
     objDb.AddNewActor(prisoner, cell);
+  }
+
+  static void SetCreepyAltar(Loc cell, Map map, Random rng)
+  {
+    List<Loc> sqsNearCell = [];
+    for (int r = cell.Row - 3; r <= cell.Row + 3; r++)
+    {
+      for (int c = cell.Col - 3; c <= cell.Col + 3; c++)
+      {
+        if (!map.InBounds(r, c))
+          continue;
+        if (map.TileAt(r, c).Type != TileType.DungeonFloor)
+          continue;
+        Loc loc = cell with { Row = r, Col = c };        
+        sqsNearCell.Add(loc);
+      }
+    }
+
+    if (sqsNearCell.Count > 0)
+    {
+      Loc altarLoc = sqsNearCell[rng.Next(sqsNearCell.Count)];
+      map.SetTile(altarLoc.Row, altarLoc.Col, TileFactory.Get(TileType.CreepyAltar));
+    }
   }
 
   static string SetCaptors(Loc cell, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
