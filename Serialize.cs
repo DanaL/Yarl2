@@ -364,7 +364,7 @@ internal class DungeonSaver
 
     foreach (var kvp in dungeon.RememberedLocs)
     {
-      string s = $"{kvp.Key};{kvp.Value}";
+      string s = $"{kvp.Key}{Constants.SEPARATOR}{kvp.Value}";
       sd.RememberedLocs.Add(s);      
     }
 
@@ -377,7 +377,7 @@ internal class DungeonSaver
     
     foreach (string s in sd.RememberedLocs)
     {
-      var pieces = s.Split(';');
+      var pieces = s.Split(Constants.SEPARATOR);
       Loc loc = Loc.FromStr(pieces[0]);
       Glyph g = Glyph.TextToGlyph(pieces[1]);
       d.RememberedLocs[loc] = g;
