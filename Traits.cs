@@ -340,6 +340,13 @@ class CorrosiveTrait : Trait
   public override string AsText() => "Corrosive";
 }
 
+class CorruptionTrait : Trait
+{
+  public int Amt { get; set; }
+
+  public override string AsText() => $"Corruption#{Amt}";
+}
+
 class DescriptionTrait(string text) : Trait
 {
   public string Text { get; set; } = text;
@@ -2584,6 +2591,7 @@ class TraitFactory
     { "Construct", (pieces, gameObj) => new ConstructTrait() },
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
+    { "Corruption", (pieces, gameObj) => new CorruptionTrait() { Amt = int.Parse(pieces[1]) } },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },

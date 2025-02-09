@@ -786,8 +786,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (!playerAdj)
       return;
-      
-    UI.SetPopup(new Popup("Sacrilicious!", "", -1, -1));
+
+    int roll = Rng.Next(10);
+    if (roll == 0 || true)
+    {
+      InfernalBoons.Sacrifice(this, altarLoc);
+    }
   }
 
   void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)
@@ -1327,7 +1331,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         0 => ("I yearn for blood. Bring me a sacrifice.", "A raspy whisper"),
         1 => ("Bring me souls!", "A low growl"),
-        _ => ("I can grant you power! But you must proffer blood", "A voice in your mind")
+        _ => ("I can grant you power! But you must proffer blood.", "A voice in your mind")
       };
       UI.SetPopup(new Popup(s, t, 6, -1));
     }
