@@ -22,7 +22,7 @@ class InfernalBoons
     string txt = "";
     int i = weapon is not null || bow is not null ? 4 : 3;
     int roll = gs.Rng.Next(i);
-    roll = 2;
+    roll = 3;
     switch (roll)
     {
       case 0:
@@ -48,12 +48,42 @@ class InfernalBoons
         AuraOfProtectionTrait aura = new() { HP = 50 };
         aura.Apply(gs.Player, gs);
         break;
+      case 3:
+        txt = "Your mind is filled with visions of battle and conflict, of armies clashing, and soldiers killing and being killed.";
+        txt += "\n\nYou feel more skilled with your weapon.";
+        Attribute attr = Attribute.BowUse;
+        if (weapon is not null)
+        {
+          foreach (Trait t in weapon.Traits)
+          {            
+            switch (t)
+            {            
+              case AxeTrait:
+                attr = Attribute.AxeUse;
+                break;
+              case CudgelTrait:
+                attr = Attribute.CudgelUse;
+                break;
+              case FinesseTrait:
+                attr = Attribute.FinesseUse;
+                break;
+              case PolearmTrait:
+                attr = Attribute.PolearmsUse;
+                break;
+              case SwordTrait:
+                attr = Attribute.SwordUse;
+                break;
+            }
+          }        
+        }
+        
+        if (gs.Player.Stats.TryGetValue(attr, out var stat))
+          stat.SetMax(stat.Curr + 100);
+        else
+          gs.Player.Stats[attr] = new Stat(100);
+        break;
     }
 
     ui.SetPopup(new Popup(txt, "A harsh whisper", -1, -1));
-    // stat boost
-    // wealth
-    // protection
-    // weapon skill
   }
 }
