@@ -1331,7 +1331,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         0 => ("I yearn for blood. Bring me a sacrifice.", "A raspy whisper"),
         1 => ("Bring me souls!", "A low growl"),
-        _ => ("I can grant you power! But you must proffer blood.", "A voice in your mind")
+        _ => ("I can grant you power! But you must proffer blood.", "A seductive murmur")
       };
       UI.SetPopup(new Popup(s, t, 6, -1));
     }

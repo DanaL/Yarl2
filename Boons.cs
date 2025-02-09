@@ -22,6 +22,7 @@ class InfernalBoons
     string txt = "";
     int i = weapon is not null || bow is not null ? 4 : 3;
     int roll = gs.Rng.Next(i);
+    roll = 2;
     switch (roll)
     {
       case 0:
@@ -41,6 +42,11 @@ class InfernalBoons
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
         zorkmids.Value = 100;
         gs.ObjDb.SetToLoc(altarLoc, zorkmids);
+        break;
+      case 2:
+        txt = "\"I shall ward you from the assaults of those who would stand in our way!\"\n\nYou are surrounded by a shimmering aura.";
+        AuraOfProtectionTrait aura = new() { HP = 50 };
+        aura.Apply(gs.Player, gs);
         break;
     }
 
