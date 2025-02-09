@@ -752,6 +752,42 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         UI.AlertPlayer("Coins tumble to the ground.");
       }
     }
+
+    Tile tile = TileAt(victim.Loc);
+    if (tile.Type == TileType.CreepyAltar)
+    {
+      HandleSacrifice(victim, victim.Loc);
+    }
+  }
+
+  void HandleSacrifice(Actor victim, Loc altarLoc)
+  {
+    foreach (Trait t in victim.Traits)
+    {
+      if (t is UndeadTrait)
+        return;
+      else if (t is PlantTrait)
+        return;
+      else if (t is BrainlessTrait)
+        return;
+    }
+
+    // So long as the player is adjacent to the altar, they'll get the credit
+    // for the sacrifice
+    bool playerAdj = false;;
+    foreach (Loc adj in Util.Adj8Locs(altarLoc))
+    {
+      if (adj == Player.Loc)
+      {
+        playerAdj = true;
+        break;
+      }
+    }
+
+    if (!playerAdj)
+      return;
+      
+    UI.SetPopup(new Popup("Sacrilicious!", "", -1, -1));
   }
 
   void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)
@@ -1287,13 +1323,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     else if (tile.Type == TileType.CreepyAltar)
     {
-      string s = Rng.Next(3) switch
+      var (s, t) = Rng.Next(3) switch
       {
-        0 => "A raspy whisper:\n\nI yearn for blood.",
-        1 => "A low growl:\n\nBring me souls!",
-        _ => "A voice in your mind:\n\nI can grant you power!"
+        0 => ("I yearn for blood. Bring me a sacrifice.", "A raspy whisper"),
+        1 => ("Bring me souls!", "A low growl"),
+        _ => ("I can grant you power! But you must proffer blood", "A voice in your mind")
       };
-      UIRef().SetPopup(new Popup(s, "", 6, -1));
+      UI.SetPopup(new Popup(s, t, 6, -1));
     }
 
     Dictionary<Item, int> items = [];
