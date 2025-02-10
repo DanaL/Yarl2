@@ -1241,7 +1241,7 @@ abstract class UserInterface
   {
     Options opts = gameState.Options;
     gameState.BuildPerformersList();
-    _animations.Add(new CloudAnimationListener(this, gameState));
+    _animations.Add(new CloudAnimation(this, gameState));
 
     if (opts.TorchLightAnimation) 
       _animations.Add(new TorchLightAnimationListener(this, gameState));

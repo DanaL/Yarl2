@@ -561,8 +561,10 @@ class TorchLightAnimationListener : Animation
   }
 }
 
-class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
+class CloudAnimation(UserInterface ui, GameState gs) : Animation
 {
+  readonly UserInterface _ui = ui;
+  readonly GameState _gs = gs;
   static Sqr _cloudSqr = new Sqr(Colours.WHITE, Colours.BLACK, '#');
   bool[] _cloud = new bool[9];
   int _row;
@@ -575,11 +577,11 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
   {
     int count = 0;
     List<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    locs.Shuffle(gs.Rng);
+    locs.Shuffle(_gs.Rng);
 
     foreach (var k in locs)
     {
-      if (count < 7 && gs.Rng.NextDouble() < 0.7)
+      if (count < 7 && _gs.Rng.NextDouble() < 0.7)
       {
         _cloud[k] = true;
         ++count;
@@ -590,15 +592,15 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
       }
     }
 
-    if (gs.Rng.NextDouble() < 0.5)
+    if (_gs.Rng.NextDouble() < 0.5)
     {
-      _row = gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewHeight));
+      _row = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewHeight));
       _col = -3;
     }
     else
     {
       _row = -3;
-      _col = gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewWidth));
+      _col = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewWidth));
     }
 
     _paused = false;
@@ -616,7 +618,7 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
         int cr = _row + r;
         int cc = _col + c;
         if (cr >= 0 && cr < h && cc >= 0 && cc < w)
-          ui.ZLayer[cr, cc] = Constants.BLANK_SQ;
+          _ui.ZLayer[cr, cc] = Constants.BLANK_SQ;
       }
     }
   }
@@ -640,9 +642,9 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
       if (zrow < 0 || zrow >= h || zcol < 0 || zcol >= w)
         continue;
       if (_cloud[j])
-        ui.ZLayer[zrow, zcol] = _cloudSqr;
+        _ui.ZLayer[zrow, zcol] = _cloudSqr;
       else
-        ui.ZLayer[zrow, zcol] = Constants.BLANK_SQ;
+        _ui.ZLayer[zrow, zcol] = Constants.BLANK_SQ;
     }
   }
 
@@ -650,12 +652,12 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
   {
     var dd = DateTime.Now - _lastFrame;
 
-    if (!_paused && !gs.InWilderness)
+    if (!_paused && !_gs.InWilderness)
     {
       _paused = true;
       EraseCloud();
     }
-    else if (_paused && gs.InWilderness && DateTime.Now > _nextCloud)
+    else if (_paused && _gs.InWilderness && DateTime.Now > _nextCloud)
     {
       _paused = false;
       MakeCloud();
@@ -671,7 +673,7 @@ class CloudAnimationListener(UserInterface ui, GameState gs) : Animation
       if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth)
       {
         _paused = true;
-        _nextCloud = DateTime.Now.AddSeconds(gs.Rng.Next(5, 16));
+        _nextCloud = DateTime.Now.AddSeconds(_gs.Rng.Next(5, 16));
       }
     }
   }
