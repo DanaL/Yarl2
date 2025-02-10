@@ -115,6 +115,7 @@ class Examiner : Inputer
             case TileType.Well:
             case TileType.GateTrigger:
             case TileType.Lever:
+            case TileType.CreepyAltar:
               pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
               break;
           }

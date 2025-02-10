@@ -295,3 +295,6 @@ A lever (bump to activate). It likely activates some mechanism within the dungeo
 #
 portcullis|Portcullis
 A stout metal gate. Unlike doors, it cannot have its lock picked or be easily smashed down.
+#
+creepyaltar|blood-stained altar
+An altar carved from black stone and stained with dried blood.

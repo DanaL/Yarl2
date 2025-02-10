@@ -15,16 +15,10 @@ class InfernalBoons
 {
   public static void Sacrifice(GameState gs, Loc altarLoc)
   {
-    if (gs.Player.Traits.OfType<CorruptionTrait>().FirstOrDefault() is CorruptionTrait ct)
-    {
-      ct.Amt += 1;
-    }
-    else
-    {
-      gs.Player.Traits.Add(new CorruptionTrait() { Amt = 1});
-    }
+    CorruptionTrait? corruption = gs.Player.Traits.OfType<CorruptionTrait>().FirstOrDefault();
 
-    if (gs.Rng.Next(7) == 0)
+    // Your first boon is free so that you get a taste for it
+    if (gs.Rng.Next(7) == 0 || corruption is null)
     {
       SacrificialBoon(gs, altarLoc);
     }
@@ -32,6 +26,15 @@ class InfernalBoons
     {
       string s = "Your sacrifice vanishes in a puff of sulphur and ash.";
       gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    }
+
+    if (corruption is not null)
+    {
+      corruption.Amt += 1;
+    }
+    else
+    {
+      gs.Player.Traits.Add(new CorruptionTrait() { Amt = 1});
     }
   }
 
