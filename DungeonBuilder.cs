@@ -1097,6 +1097,15 @@ class MainDungeonBuilder : DungeonBuilder
         captive = true;
         CaptiveFeature.Create(dungeonId, level, levels[level], objDb, factDb, rng);
       }
+      else if (rng.NextDouble() < 0.15)
+      {
+        // If there's no prisoner on the level, give a small chance of there
+        // being a blood-stained altar. (Mainly because I don't want to bother
+        // checking against the possibility of two altars)
+        List<(int, int)> floors = levels[level].SqsOfType(TileType.DungeonFloor);
+        (int, int) altar = floors[rng.Next(floors.Count)];
+        levels[level].SetTile(altar, TileFactory.Get(TileType.CreepyAltar));
+      }
     }
   }
 
