@@ -5,7 +5,7 @@
 	)
 	((= DIALOGUE_STATE 1)
 		(
-      (say "Thank you! I'd been captured by #IMPRISONED_BY. I think they meant to sacrifice me!")
+      (say "Whew! I'd been captured by #IMPRISONED_BY. They were going to make me their supper!")
       (option "A boon of Strength"  ((give BOON_STR "May you have the might of giants!") (set DIALOGUE_STATE 2)))
 			(option "A boon of Dexterity" ((give BOON_DEX "May you be quick as a fox!") (set DIALOGUE_STATE 2)))
       (option "A boon of Health"    ((give BOON_CON "May you be stout as an ox!") (set DIALOGUE_STATE 2)))
@@ -14,9 +14,9 @@
 	(else
     (say 
       (pick
-        ("You've freed me! You have my eternal gratitude!"
-         "They were just waiting until the moon was right before dragging me to their creepy altar."
-         "Those #IMPRISONED_BY didn't serve a cool deity like Huntokar. It was some weird, sinister deity.")
+        ("You've freed me! Thank you -- I did not want to be stew!"
+         "They were just waiting until they captured someone carrying a bag of turnips."
+         "The #IMPRISONED_BY kept arguing about how much salt to use. You got here just in time!")
       )
     )
   )

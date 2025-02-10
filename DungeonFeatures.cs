@@ -466,8 +466,16 @@ class CaptiveFeature
     prisoner.Traits.Add(pt);
     objDb.EndOfRoundListeners.Add(pt);
 
-    SetCreepyAltar(cell, map, rng);
-    prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
+    // Were the captors going to sacrifice the prisoner?
+    if (captors == "cultists" || rng.NextDouble() < 0.2)
+    {
+      SetCreepyAltar(cell, map, rng);
+      prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
+    }
+    else
+    {
+      prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner2.txt" });
+    }
 
     prisoner.SetBehaviour(new PrisonerBehaviour());
     
