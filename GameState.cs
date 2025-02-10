@@ -787,11 +787,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (!playerAdj)
       return;
 
-    int roll = Rng.Next(10);
-    if (roll == 0 || true)
-    {
-      InfernalBoons.Sacrifice(this, altarLoc);
-    }
+    InfernalBoons.Sacrifice(this, altarLoc);    
   }
 
   void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)

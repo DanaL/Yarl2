@@ -15,6 +15,20 @@ class InfernalBoons
 {
   public static void Sacrifice(GameState gs, Loc altarLoc)
   {
+    if (gs.Player.Traits.OfType<CorruptionTrait>().FirstOrDefault() is CorruptionTrait ct)
+    {
+      ct.Amt += 1;
+    }
+    else
+    {
+      gs.Player.Traits.Add(new CorruptionTrait() { Amt = 1});
+    }
+
+    SacrificialBoon(gs, altarLoc);
+  }
+
+  static void SacrificialBoon(GameState gs, Loc altarLoc)
+  {
     Item? weapon = gs.Player.Inventory.ReadiedWeapon();
     Item? bow = gs.Player.Inventory.ReadiedBow();
     UserInterface ui = gs.UIRef();
