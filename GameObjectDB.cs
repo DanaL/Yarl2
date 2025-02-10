@@ -369,6 +369,18 @@ class GameObjectDB
       _itemLocs.Add(loc, stack);
     }
 
+    if (item.Type == ItemType.Zorkmid)
+    {
+      foreach (Item other in stack)
+      {
+        if (other.Type == ItemType.Zorkmid)
+        {
+          other.Value += item.Value;
+          return;
+        }
+      }
+    }
+    
     // I could have made _items Stack<Item> instead of a list, but there
     // are times when I want to iterate over the items in a location,
     // and sometimes the player will want to remove an item from the middle.

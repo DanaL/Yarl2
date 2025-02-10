@@ -2215,8 +2215,8 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     else
     {      
       var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
-      GameState.ItemDropped(coins, Actor.Loc);
       coins.Value = _amount;
+      GameState.ItemDropped(coins, Actor.Loc);      
       msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";
       if (_amount == 1)
         msg += "a single zorkmid.";
