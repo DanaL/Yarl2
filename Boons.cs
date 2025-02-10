@@ -24,7 +24,15 @@ class InfernalBoons
       gs.Player.Traits.Add(new CorruptionTrait() { Amt = 1});
     }
 
-    SacrificialBoon(gs, altarLoc);
+    if (gs.Rng.Next(7) == 0)
+    {
+      SacrificialBoon(gs, altarLoc);
+    }
+    else
+    {
+      string s = "Your sacrifice vanishes in a puff of sulphur and ash.";
+      gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    }
   }
 
   static void SacrificialBoon(GameState gs, Loc altarLoc)
@@ -35,9 +43,7 @@ class InfernalBoons
 
     string txt = "";
     int i = weapon is not null || bow is not null ? 4 : 3;
-    int roll = gs.Rng.Next(i);
-    roll = 3;
-    switch (roll)
+    switch (gs.Rng.Next(i))
     {
       case 0:
         Stat str = gs.Player.Stats[Attribute.Strength];
@@ -46,7 +52,7 @@ class InfernalBoons
         con.SetMax(con.Curr + 1);
         gs.Player.Stats[Attribute.HP].ChangeMax(5);
         gs.Player.Stats[Attribute.HP].Change(5);
-        txt = "\"My supplicants must be mighty if they are to serve. I shall give you a sliver of my potency!\"\n\nYou feel flush with infernal vigour!";
+        txt = "\"My supplicants must be mighty if they are to serve. I shall grant you a sliver of my potency!\"\n\nYou feel flush with infernal vigour!";
         txt += "\n\nYou feel [BRIGHTRED stronger]! You feel [BRIGHTRED healther]!";
         ui.AlertPlayer("You feel stronger!");
         ui.AlertPlayer("You feel healthier!");        

@@ -1323,12 +1323,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     else if (tile.Type == TileType.CreepyAltar)
     {
-      var (s, t) = Rng.Next(3) switch
+      string s, t;
+      if (Player.HasTrait<CorruptionTrait>())
       {
-        0 => ("I yearn for blood. Bring me a sacrifice.", "A raspy whisper"),
-        1 => ("Bring me souls!", "A low growl"),
-        _ => ("I can grant you power! But you must proffer blood.", "A seductive murmur")
-      };
+        (s, t) = Rng.Next(3) switch
+        {
+          0 => ("\nMy hunger is endless, my servant.\n", "A low growl"),
+          _ => ("\nHave you returned with blood and souls?\n", "A voice in your mind")
+        };
+      }
+      else
+      {
+        (s, t) = Rng.Next(3) switch
+        {
+          0 => ("\nI yearn for blood. Bring me a sacrifice.\n", "A raspy whisper"),
+          1 => ("\nBring me souls!\n", "A low growl"),
+          _ => ("\nI can grant you power! But you must proffer blood.\n", "A seductive murmur")
+        };
+      }
+      
       UI.SetPopup(new Popup(s, t, 6, -1));
     }
 
