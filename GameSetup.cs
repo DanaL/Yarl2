@@ -745,7 +745,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.Now.GetHashCode();
-      seed = 9599510;
+      //seed = 9599510;
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);
