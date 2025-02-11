@@ -2560,6 +2560,12 @@ class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (Item.IDInfo.TryGetValue(item.Name, out var idInfo))
       Item.IDInfo[item.Name] = idInfo with { Known = true };
     
+    foreach (Trait t in item.Traits)
+    {
+      if (t is WandTrait wt)
+        wt.IDed = true;
+    }
+
     string s = $"\n It's {item.FullName.IndefArticle()}! \n";
     GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
 
@@ -3119,7 +3125,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 
 class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Action replacementAction) : Action(gs, actor)
 {
-  InventoryOptions InvOptions = opts;
+  readonly InventoryOptions InvOptions = opts;
   Action ReplacementAction { get; set; } = replacementAction;
 
   public override ActionResult Execute()

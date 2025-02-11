@@ -798,7 +798,14 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
       if ((options.Options & InvOption.UnidentifiedOnly) == InvOption.UnidentifiedOnly)
       {
-        if (!Item.IDInfo.TryGetValue(item.Name, out var idInfo) || idInfo.Known)
+        bool known = !Item.IDInfo.TryGetValue(item.Name, out var idInfo) || idInfo.Known;
+        foreach (Trait t in item.Traits)
+        {
+          if (t is WandTrait wt && !wt.IDed)
+            known = false;
+        }
+        
+        if (known)
           continue;
       }
       
