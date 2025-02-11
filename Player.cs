@@ -368,7 +368,9 @@ class Player : Actor
       if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
       if (trait is StressTrait st)    
-        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");      
+        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");   
+      if (trait is FeatherFallTrait)
+        traitsToShow.Add("You have feather fall");
     }
     
     if (alacrity < 0)

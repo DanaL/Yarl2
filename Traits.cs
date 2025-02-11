@@ -674,6 +674,22 @@ class FallenAdventurerTrait : Trait
   public override string AsText() => "FallenAdventurer";
 }
 
+class FeatherFallTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => "You no longer feel feathery.";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = target.ID;
+
+    return [ $"{target.FullName.Capitalize()} feel light as a feather!" ];
+  }
+
+  public override string AsText() => $"FeatherFall#{OwnerID}#{ExpiresOn}";
+}
+
 class FinalBossTrait : Trait
 {
   public override string AsText() => "FinalBoss";
@@ -2631,7 +2647,12 @@ class TraitFactory
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
-    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },    
+    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
+    { "FeatherFall", (pieces, gameObj) => {
+      ulong id = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]);
+      ulong expiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
+      return new FeatherFallTrait() { OwnerID = id, ExpiresOn = expiresOn };
+    }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },   
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },

@@ -646,13 +646,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (actor.HasTrait<IllusionTrait>())
       return;
 
+    bool featherFalling = actor.HasTrait<FeatherFallTrait>();
+
     landingSpot = CalcFinalLandingSpot(landingSpot);
     int levelsFallen = landingSpot.Level - actor.Loc.Level;
     
-    UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
+    if (featherFalling)
+      UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
+    else
+      UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
+
     if (actor is Player) 
     {
-      if (levelsFallen > 1)
+      if (levelsFallen > 1 && !featherFalling)
         UI.AlertPlayer("You plummet a great distance!");
       ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
     }
@@ -669,9 +675,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       RefreshPerformers();     
     }
 
-    CalculateFallDamage(actor, levelsFallen);
-
-    UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!");
+    if (!featherFalling)
+    {
+      CalculateFallDamage(actor, levelsFallen);
+    }    
   }
 
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
@@ -1225,12 +1232,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       CalculateFallDamage(actor, 1);
 
       RefreshPerformers();
-      
-      if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
-      {
-        string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
-        UI.AlertPlayer(s);        
-      }
     }
     else
     {
@@ -1255,6 +1256,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (hpLeft < 1)
     {
       ActorKilled(actor, "a fall", null, null);
+    }
+
+    if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
+    {
+      string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
+      UI.AlertPlayer(s);        
     }
   }
 

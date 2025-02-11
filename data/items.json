@@ -870,6 +870,18 @@
     ]
   },
   {
+    "Name": "FEATHERFALL_BOOTS",
+    "DescriptiveName": "boots of feather falling",
+    "Type": "Armour",
+    "Value": 50,
+    "Glyph": "[,brown,lightbrown,black,black",
+    "Traits": [
+      "Armour#Boots#0#0",
+      "Grants#FeatherFall&owner&max",
+      "Plural"
+    ]
+  },
+  {
     "Name": "HEAVY_BOOTS",
     "DescriptiveName": "heavy boots",
     "Type": "Armour",

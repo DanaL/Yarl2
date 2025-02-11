@@ -46,7 +46,8 @@ class Treasure
       ItemNames.HILL_GIANT_ESSENCE, ItemNames.FROST_GIANT_ESSENCE, ItemNames.FIRE_GIANT_ESSENCE,
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
-      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY
+      ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY,
+      ItemNames.FEATHERFALL_BOOTS
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
@@ -94,7 +95,7 @@ class Treasure
 
   public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(21);
+    int roll = rng.Next(22);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -116,6 +117,7 @@ class Treasure
       16 => ItemFactory.Get(ItemNames.RING_OF_PROTECTION, objDb),
       18 => ItemFactory.Get(ItemNames.RING_OF_ADORNMENT, objDb),
       19 => ItemFactory.Get(ItemNames.WAND_SLOW_MONSTER, objDb),
+      20 => ItemFactory.Get(ItemNames.FEATHERFALL_BOOTS, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }
