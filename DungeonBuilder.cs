@@ -99,6 +99,9 @@ class MainDungeonBuilder : DungeonBuilder
     
     for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
+      if (lvl == 4)
+        continue;
+        
       CreateStairway(levels[lvl], levels[lvl + 1], lvl, height, width, rng);
 
       if (rng.NextDouble() < 0.1)
