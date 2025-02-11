@@ -70,7 +70,7 @@ abstract class DungeonBuilder
 
 class MainDungeonBuilder : DungeonBuilder
 {
-  private int _dungeonID;
+  int _dungeonID;
 
   void SetStairs(Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Random rng)
   {
@@ -99,6 +99,8 @@ class MainDungeonBuilder : DungeonBuilder
     
     for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
+      // The stairs from level 5 to level 6 are created in
+      // PlaceLevelFiveGate()
       if (lvl == 4)
         continue;
         
@@ -113,7 +115,7 @@ class MainDungeonBuilder : DungeonBuilder
   // the stairs between floors will be at the same location. (Ie., if 
   // the down stairs on level 3 is at 34,60 then the stairs up from 
   // level 4 should be at 34,60 too)
-  private void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Random rng)
+  void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Random rng)
   {
     // find the pairs of floor squares shared between the two levels
     List<(int, int)> shared = [];
@@ -143,7 +145,7 @@ class MainDungeonBuilder : DungeonBuilder
     nextLevel.SetTile(pick.Item1, pick.Item2, up);
   }
 
-  void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
+  static void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
   {
     List<(int, int)> candidateSqs = [];
     // We're looking for any floor square that's adjacent to wall
@@ -901,7 +903,9 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  (bool, Dir) ValidSpotForGatedStairs(Map map, int r, int c)
+  // Dir is the direction of the floor space adjacent to where the 
+  // portcullis would go
+  static (bool, Dir) ValidSpotForGatedStairs(Map map, Map level6Map, int r, int c)
   {
     int walls = 0;
     int floors = 0;
@@ -923,22 +927,28 @@ class MainDungeonBuilder : DungeonBuilder
       return (false, Dir.None);
     
     TileType df = TileType.DungeonFloor;
-    if (tiles[0] == df && tiles[1] == df && tiles[2] == df)
+
+    if (tiles[0] == df && tiles[1] == df && tiles[2] == df && CheckBelow(r + 1, c))
       return (true, Dir.North);
 
-    if (tiles[0] == df && tiles[3] == df && tiles[6] == df)
+    if (tiles[0] == df && tiles[3] == df && tiles[6] == df && CheckBelow(r, c + 1))
       return (true, Dir.West);
 
-    if (tiles[2] == df && tiles[5] == df && tiles[8] == df)
+    if (tiles[2] == df && tiles[5] == df && tiles[8] == df && CheckBelow(r, c - 1))
       return (true, Dir.East);
 
-    if (tiles[6] == df && tiles[7] == df && tiles[8] == df)
+    if (tiles[6] == df && tiles[7] == df && tiles[8] == df && CheckBelow(r - 1, c))
       return (true, Dir.South);
 
     return (false, Dir.None);
+
+    bool CheckBelow(int r, int c)
+    {
+      return level6Map.TileAt(r, c).Type == TileType.DungeonFloor;
+    }
   }
 
-  void PlaceLevelFiveGate(int dungeonId, Map map, Random rng, FactDb factDb, GameObjectDB objDb)
+  void PlaceLevelFiveGate(int dungeonId, Map map, Map level6Map, Random rng, FactDb factDb, GameObjectDB objDb)
   {
     List<(int, int, Dir)> candidates = [];
 
@@ -952,7 +962,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       for (int c = 1; c < map.Width - 1; c += 2)
       {
-        var (valid, dir) = ValidSpotForGatedStairs(map, r, c);
+        var (valid, dir) = ValidSpotForGatedStairs(map, level6Map, r, c);
         if (valid)
           candidates.Add((r, c, dir));          
       }
@@ -969,32 +979,32 @@ class MainDungeonBuilder : DungeonBuilder
     map.SetTile(sr, sc, door);
     Loc doorLoc = new(dungeonId, 4, sr, sc);
     factDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
-    Loc stairsLoc;
+    
     switch (sdir)
     {
       case Dir.North:
-        stairsLoc = new(dungeonId, 4, sr + 1, sc);
-        map.SetTile(sr + 1, sc, stairs);
+        SetStairs(sr + 1, sc, map, level6Map);
         break;
       case Dir.South:
       map.SetTile(sr - 1, sc, stairs);
-        stairsLoc = new(dungeonId, 4, sr - 1, sc);
+        SetStairs(sr - 1, sc, map, level6Map);
         break;
       case Dir.East:
-        stairsLoc = new(dungeonId, 4, sr, sc - 1);
-        map.SetTile(sr, sc - 1, stairs);
+        SetStairs(sr, sc - 1, map, level6Map);
         break;
       default: // West
-        stairsLoc = new(dungeonId, 4, sr, sc + 1);
-        map.SetTile(sr, sc + 1, stairs);
+        SetStairs(sr, sc + 1, map, level6Map);
         break;
     }
 
-    string txt = @"Congratulations! You've effectively achieved victory in this early Delve demo!
-    
-    Look for Delve 0.3 soon, which will feature an even deeper dungeon and more dangers, treasure, and adventure!";
-    PlayerAtLoc pal = new(stairsLoc, txt);
-    objDb.ConditionalEvents.Add(pal);
+    void SetStairs(int r, int c, Map map5, Map map6)
+    {
+      Downstairs down = new("") { Destination = new Loc(_dungeonID, 5, r, c) };
+      map5.SetTile(r, c, down);
+
+      Upstairs up = new("") { Destination = new Loc(_dungeonID, 4, r, c) };
+      map6.SetTile(r, c, up);
+    }
   }
 
   void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
@@ -1478,7 +1488,7 @@ class MainDungeonBuilder : DungeonBuilder
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
-    PlaceLevelFiveGate(id, levels[4], rng, factDb, objDb);
+    PlaceLevelFiveGate(id, levels[4], levels[5], rng, factDb, objDb);
     PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
     
     // Add a couple of guaranteed good items to dungeon
