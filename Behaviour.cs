@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
 using System.Text;
 
 namespace Yarl2;
@@ -649,10 +648,114 @@ class RandomMove : BehaviourNode
   }
 }
 
-class ChaseTarget : BehaviourNode
+// This will probably eventually be a set of subclasses for finding various
+// goals.
+class FindUpStairs : BehaviourNode
 {
+  Loc Goal { get; set; }
   Stack<Loc>? Path { get; set; } = null;
 
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    PlanStatus CheckActionResult(bool result)
+    {      
+      if (result)
+        return PlanStatus.Success;
+
+      Path = null;
+      return PlanStatus.Failure;
+    }
+
+    Path ??= PathToGoal(mob, gs);
+
+    if (mob.Loc == Goal)
+      return PlanStatus.Success;
+
+    if (Path.Count > 0)
+    {
+      Loc next = Path.Pop();
+
+      // If the mob moved abnormally, they probably need to recalculate their path
+      // Note: there's probably a degenerate case where a mob moving to a specific
+      // loc falls through a pit or something and now their goal is on another 
+      // level. The game doesn't really handle that yet, but hopefully it will 
+      // result in them recalculating their Plan
+      if (Util.Distance(mob.Loc, Goal) > 1)
+      {
+        return CheckActionResult(false);
+      }
+
+      Tile tile = gs.TileAt(next);
+      if (tile is Door door && !door.Open)
+      {
+        bool result = false;
+        if (mob.HasTrait<IntelligentTrait>())
+        {
+          result = mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
+          Path.Push(next);          
+        }
+        
+        return CheckActionResult(result);        
+      }
+      else
+      {
+        bool result = mob.ExecuteAction(new MoveAction(gs, mob, next));
+        CheckActionResult(result);
+      }      
+    }
+
+    Path = null;
+    return PlanStatus.Failure;
+  }
+
+  Stack<Loc> PathToGoal(Mob mob, GameState gs)
+  {
+    List<(int, int)> stairs = gs.CurrentMap.SqsOfType(TileType.Upstairs);
+
+    if (stairs.Count == 0)
+      return [];
+
+    Loc stairsLoc = mob.Loc with {  Row = stairs[0].Item1, Col = stairs[0].Item2 };
+    Goal = stairsLoc;
+    return AStar.FindPath(gs.CurrentMap, mob.Loc, Goal, TravelCosts(mob), true);
+  }
+
+  Dictionary<TileType, int> TravelCosts(Mob mob)
+  {
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.DungeonFloor, 1);
+    costs.Add(TileType.DisturbedGrave, 1);
+    costs.Add(TileType.Gravestone, 1);
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.MagicMouth, 1);
+    costs.Add(TileType.HiddenMagicMouth, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.OpenDoor, 1);
+    costs.Add(TileType.BrokenDoor, 1);
+    costs.Add(TileType.OpenPortcullis, 1);
+    costs.Add(TileType.CreepyAltar, 1);
+    costs.Add(TileType.Pool, 1);
+    costs.Add(TileType.FrozenDeepWater, 2);
+    costs.Add(TileType.FrozenWater, 2);
+    costs.Add(TileType.Well, 1);
+    costs.Add(TileType.Upstairs, 1);
+    costs.Add(TileType.Downstairs, 1);
+
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait)
+        costs.Add(TileType.ClosedDoor, 2);
+      if (t is FloatingTrait || t is FlyingTrait)
+        costs.Add(TileType.DeepWater, 1);
+    }
+
+    return costs;
+  }
+}
+
+class ChaseTarget : BehaviourNode
+{  
   static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
   {
     if (mob.HasTrait<ImmobileTrait>())
@@ -963,6 +1066,7 @@ class Planner
     // Prisoner has given the player their boon
     Sequence afterBoon = new([
       new CheckDialogueState(PrisonerBehaviour.DIALOGUE_FREE_BOON),
+      new FindUpStairs(),
       new PassTurn()
     ]);
     plan.Add(afterBoon);
@@ -1017,11 +1121,8 @@ class MonsterBehaviour : IBehaviour
   public string GetBark(Mob actor, GameState gs) => "";
 
   public virtual Action CalcAction(Mob actor, GameState gs)
-  {
-    
-
+  {    
     return new PassAction();
-
   }
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);

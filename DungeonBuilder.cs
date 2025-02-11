@@ -1092,7 +1092,7 @@ class MainDungeonBuilder : DungeonBuilder
       }
 
       // Not technically a room but...
-      if (level > 0 && rng.NextDouble() < 0.2 && !captive)
+      if ((level == 0 || level > 0 && rng.NextDouble() < 0.2) && !captive)
       {
         captive = true;
         CaptiveFeature.Create(dungeonId, level, levels[level], objDb, factDb, rng);
