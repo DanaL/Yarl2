@@ -1151,14 +1151,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
     {
-      if (obj.HasTrait<BlockTrait>())
+      foreach (Trait t in obj.Traits)
       {
-        extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
-      }
-      else if (obj.HasTrait<OnFireTrait>())
-      {
-        (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
-        extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 15;
+        if (t is BlockTrait)
+        {
+          extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
+        }
+        else if (t is OnFireTrait)
+        {
+          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
+          extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 15;
+        }
       }
     }
 

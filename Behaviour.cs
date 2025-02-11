@@ -586,15 +586,34 @@ class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
 
 class RandomMove : BehaviourNode
 {
+  static bool BadSquare(GameState gs, Loc loc)
+  {
+    foreach (Item item in gs.ObjDb.ItemsAt(loc))
+    {
+      foreach (Trait t in  item.Traits)
+      {
+        if (t is BlockTrait)
+          return true;
+        if (t is OnFireTrait)
+          return true;
+      }
+    }
+
+    return false;
+  }
+
   static PlanStatus MoveOrDoor(Mob mob, GameState gs)
   {
     List<(Loc, bool)> opts = [];
 
     foreach (Loc adj in Util.Adj8Locs(mob.Loc))
-    {
+    {      
+      if (BadSquare(gs, adj))
+        continue;
+
       Tile tile = gs.TileAt(adj);
       if (tile.Passable() &&! gs.ObjDb.Occupied(adj))
-     {
+      {
         opts.Add((adj, false));
       }
       else if (tile is Door door && !door.Open)
