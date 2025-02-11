@@ -3143,6 +3143,18 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
   {
     ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
 
+    // Scatter can be used to escape from being swallowed, so if the casting 
+    // actor is player and they are swallowed, treat this like a BlinkAction 
+    // instead.
+    if (Actor is Player && Actor.HasTrait<SwallowedTrait>())
+    {
+      result.Succcessful = false;
+      result.EnergyCost = 0.0;
+      result.AltAction = new BlinkAction(GameState!, Actor);
+
+      return result;
+    }
+
     List<Loc> affected = [];
     foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState!.CurrentMap, GameState.ObjDb))
     {
