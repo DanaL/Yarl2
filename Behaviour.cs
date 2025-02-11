@@ -657,15 +657,6 @@ class FindUpStairs : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    PlanStatus CheckActionResult(bool result)
-    {      
-      if (result)
-        return PlanStatus.Success;
-
-      Path = null;
-      return PlanStatus.Failure;
-    }
-
     Path ??= PathToGoal(mob, gs);
 
     if (mob.Loc == Goal)
@@ -680,9 +671,10 @@ class FindUpStairs : BehaviourNode
       // loc falls through a pit or something and now their goal is on another 
       // level. The game doesn't really handle that yet, but hopefully it will 
       // result in them recalculating their Plan
-      if (Util.Distance(mob.Loc, Goal) > 1)
+      if (Util.Distance(mob.Loc, next) > 1)
       {
-        return CheckActionResult(false);
+        Path = null;
+        return PlanStatus.Failure;
       }
 
       Tile tile = gs.TileAt(next);
@@ -695,12 +687,25 @@ class FindUpStairs : BehaviourNode
           Path.Push(next);          
         }
         
-        return CheckActionResult(result);        
+        if (result)
+          return PlanStatus.Running;
+        else
+        {
+          Path = null;
+          return PlanStatus.Failure;
+        }
       }
       else
       {
         bool result = mob.ExecuteAction(new MoveAction(gs, mob, next));
-        CheckActionResult(result);
+
+        if (result)
+          return PlanStatus.Running;
+        else
+        {
+          Path = null;
+          return PlanStatus.Failure;
+        }
       }      
     }
 
