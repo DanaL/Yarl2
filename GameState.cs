@@ -1,5 +1,4 @@
-﻿
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -1148,26 +1147,33 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void SetDMaps(Loc loc)
   {
-    HashSet<(int, int)> blocked = [];
+    Dictionary<(int, int), int> extraCosts = [];
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
     {
       if (obj.HasTrait<BlockTrait>())
       {
-        blocked.Add((obj.Loc.Row, obj.Loc.Col));
+        extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
+      }
+      else if (obj.HasTrait<OnFireTrait>())
+      {
+        (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
+        extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 15;
       }
     }
-    foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
-      blocked.Add((occ.Row, occ.Col));
 
-    DMap = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
+    foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
+    {
+      extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;      
+    }
+    DMap = new DijkstraMap(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
+    DMapDoors = new DijkstraMap(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapDoors.Generate(DijkstraMap.CostWithDoors, (loc.Row, loc.Col), 25);
 
-    DMapFlight = new DijkstraMap(CurrentMap, blocked, CurrentMap.Height, CurrentMap.Width, false);
+    DMapFlight = new DijkstraMap(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
   }
 

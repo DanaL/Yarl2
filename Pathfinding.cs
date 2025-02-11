@@ -16,13 +16,18 @@ delegate IEnumerable<(int, int)> AdjSqs(int r, int c);
 
 // My implementation of Djisktra Maps, as defined at RogueBasin. Bsaically
 // a flood fill that'll find the shortest paths from a given goal(s)
-class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, bool cardinalMovesOnly)
+class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, int width, bool cardinalMovesOnly)
 {
+  public const int IMPASSABLE = 9999;
   Map Map { get; set; } = map;
   int Height { get; set; } = height;
   int Width { get; set; } = width;
   int[,]? _dijkstraMap { get; set; }
-  HashSet<(int, int)> Blocked { get; set; } = blocked;
+  Dictionary<(int, int), int> ExtraCosts { get; set; } = extraCosts;
+
+  public GameState? GS { get; set; }
+  public ulong DungeonId { get; set; }
+  public ulong Level { get; set; }
 
   // For monster pathfinding we do 8-dir movement but in places where we're 
   // drawing roads or bridges we want to use 4-dir movement
@@ -115,9 +120,11 @@ class DijkstraMap(Map map, HashSet<(int, int)> blocked, int height, int width, b
       var tile = Map.TileAt(sq.Item1, sq.Item2);
 
       int cost = calcCost(tile);
-      if (cost == int.MaxValue || Blocked.Contains(sq))
+      if (ExtraCosts.TryGetValue(sq, out int extraCost))
+        cost += extraCost;
+      if (cost > IMPASSABLE)
         continue;
-
+      
       int cheapestNeighbour = int.MaxValue;
       foreach (var n in calcAdjSqs(sq.Item1, sq.Item2))
       {
