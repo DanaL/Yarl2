@@ -481,8 +481,9 @@ class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 
     // I should impose a small chance of penalty/injury so that spamming
     // bashing is a little risky
-    if (CheckForInjury(tile.Type) && gs.Rng.Next(4) == 0) {
-      var lame = new LameTrait()
+    if (CheckForInjury(tile.Type) && gs.Rng.Next(4) == 0) 
+    {
+      LameTrait lame = new()
       {
         OwnerID = Actor!.ID,
         ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(100, 151)

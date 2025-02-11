@@ -675,6 +675,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       fallDamage += Rng.Next(1, 7);
     }
 
+    LameTrait lame = new() { OwnerID = actor.ID, ExpiresOn = Turn + (ulong) Rng.Next(100, 151) };
+    lame.Apply(actor, this);
+
     var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
     if (hpLeft < 1)
     {
