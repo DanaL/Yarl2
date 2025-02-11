@@ -971,30 +971,40 @@ class MainDungeonBuilder : DungeonBuilder
     // Gotta throw an exception if there were no candidates
     var (sr, sc, sdir) = candidates[rng.Next(candidates.Count)];
 
-    // I guess I should be making sure the stair location actually makes sense
-    // for the next level
-    Tile door = new VaultDoor(false, Metals.Iron);
-    Tile stairs = TileFactory.Get(TileType.FakeStairs);
-    
+    Tile door = new VaultDoor(false, Metals.Iron);    
     map.SetTile(sr, sc, door);
     Loc doorLoc = new(dungeonId, 4, sr, sc);
     factDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
-    
+
+    (int, int) stairsLoc;
     switch (sdir)
     {
       case Dir.North:
+        stairsLoc = (sr + 1, sc);
         SetStairs(sr + 1, sc, map, level6Map);
         break;
       case Dir.South:
-      map.SetTile(sr - 1, sc, stairs);
+        stairsLoc = (sr - 1, sc);
         SetStairs(sr - 1, sc, map, level6Map);
         break;
       case Dir.East:
+        stairsLoc = (sr, sc - 1);
         SetStairs(sr, sc - 1, map, level6Map);
         break;
       default: // West
+        stairsLoc = (sr, sc + 1);
         SetStairs(sr, sc + 1, map, level6Map);
         break;
+    }
+
+    // Replace the walls surround the stairs with permanent walls so players
+    // can short-circuit the quest and dig around the portcullis
+    foreach (var (r, c) in Util.Adj8Sqs(stairsLoc.Item1, stairsLoc.Item2))
+    {
+      if (map.TileAt(r, c).Type == TileType.DungeonWall)
+      {
+        map.SetTile(r, c, TileFactory.Get(TileType.PermWall));
+      }
     }
 
     void SetStairs(int r, int c, Map map5, Map map6)
