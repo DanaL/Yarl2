@@ -86,29 +86,38 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       ChopDoor(targetLoc, result);
     }
+    else if (tile.Type == TileType.DungeonWall)
+    {
+      DigDungeonWall(targetLoc);
+    }
+    else if (tile.Type == TileType.PermWall)
+    {
+      GameState!.UIRef().AlertPlayer("Your pickaxe bounces off the wall without leaving the merest scratch.");
+      GameState.UIRef().SetPopup(new Popup("Your pickaxe bounces off the wall without leaving the merest scratch.", "", -1, -1));
+    }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.DungeonFloor)
     {
-      DigDungeonFloor(targetLoc, result, GameState, Actor);
+      DigDungeonFloor(targetLoc, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.WoodBridge)
     {
-      DigBridge(targetLoc, result, GameState, Actor);
+      DigBridge(targetLoc, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.FrozenDeepWater)
     {
-      DigFrozenWater(targetLoc, result, GameState, Actor);
+      DigFrozenWater(targetLoc, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Gravestone)
     {
-      GraveRob(targetLoc, result, GameState, Actor);
+      GraveRob(targetLoc, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Downstairs)
     {
-      DigStairs(targetLoc, tile.Type, result, GameState, Actor);
+      DigStairs(targetLoc, tile.Type, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Upstairs)
     {
-      DigStairs(targetLoc, tile.Type, result, GameState, Actor);
+      DigStairs(targetLoc, tile.Type, GameState, Actor);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Pit)
     {
@@ -116,8 +125,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else if (GameState.ObjDb.ItemsAt(targetLoc).Any(i => i.HasTrait<BlockTrait>()))
     {
-      DigBlock(targetLoc, result, GameState, Actor);
-    }
+      DigBlock(targetLoc, GameState, Actor);
+    }    
     else
     {
       GameState!.UIRef().AlertPlayer("You swing your pickaxe through the air.");
@@ -127,7 +136,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     return result;
   }
 
-  static void DigBlock(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigBlock(Loc loc, GameState gs, Actor digger)
   {
     int dc = 13 + gs.CurrLevel / 4;
     if (digger is Player && gs.Player.Lineage == PlayerLineage.Dwarf)
@@ -178,7 +187,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
   }
 
-  static void GraveRob(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void GraveRob(Loc loc, GameState gs, Actor digger)
   {
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DisturbedGrave));
 
@@ -218,7 +227,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
   }
 
-  static void DigStairs(Loc loc, TileType tile, ActionResult result, GameState gs, Actor digger)
+  static void DigStairs(Loc loc, TileType tile, GameState gs, Actor digger)
   {
     string s = "You destroy the stairs! This probably won't be a problem...";
 
@@ -255,7 +264,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
   }
 
-  static void DigFrozenWater(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigFrozenWater(Loc loc, GameState gs, Actor digger)
   {
     gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
     gs.ResolveActorMove(digger, loc, loc);
@@ -268,7 +277,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
   }
 
-  static void DigBridge(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigBridge(Loc loc, GameState gs, Actor digger)
   {
     // digging a bridge tile destroys it and any adjacent bridge tiles
     List<Loc> toDestroy = [ loc ];
@@ -290,7 +299,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       gs.BridgeDestroyed(bridge);
   }
 
-  static void DigDungeonFloor(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigDungeonFloor(Loc loc, GameState gs, Actor digger)
   {
     string s;
 
@@ -330,6 +339,28 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits.Add(new InPitTrait());
   }
 
+  void DigDungeonWall(Loc loc)
+  {
+    int dc = 16 + GameState!.CurrLevel / 4;
+    if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
+      dc -= 2;
+
+    if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tunnel")} into the wall!";
+      GameState.UIRef().AlertPlayer(s);
+      if (Actor == GameState.Player)
+        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
+      GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+    }
+    else
+    {
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chip")} away at the wall!";
+      GameState.UIRef().AlertPlayer(s);
+      GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    }
+  }
+
   void ChopDoor(Loc loc, ActionResult result)
   {
     int dc = 11 + GameState!.CurrLevel / 4;
@@ -348,7 +379,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       GameState.UIRef().AlertPlayer("Splinters fly but the door remains intact.");
       GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
-    }   
+    }
   }
 
   void ChopTree(Loc loc, Tile tile, ActionResult result)
