@@ -432,6 +432,15 @@ class TryToEscape : BehaviourNode
   }
 }
 
+class WanderInTavern : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    WanderInArea wander = new(gs.Town.Tavern);
+    return wander.Execute(mob, gs);
+  }
+}
+
 class WanderInArea(HashSet<Loc> area) : BehaviourNode
 {
   HashSet<Loc> Area { get; set; } = area;
@@ -514,6 +523,18 @@ class CheckDialogueState(int state) : BehaviourNode
       return att.Curr == DialogueState ? PlanStatus.Success : PlanStatus.Failure;
 
     return PlanStatus.Failure;
+  }
+}
+
+class SetDialogueState(int state) : BehaviourNode
+{
+  int DialogueState { get; set; } = state;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    mob.Stats[Attribute.DialogueState] = new Stat(DialogueState);
+
+    return PlanStatus.Success;
   }
 }
 
@@ -648,6 +669,31 @@ class RandomMove : BehaviourNode
   }
 }
 
+class JumpToTavern() : BehaviourNode
+{  
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    Map surface = gs.Campaign.Dungeons[0].LevelMaps[0];    
+    List<Loc> opts = [];
+    foreach (Loc loc in gs.Town.Tavern)
+    {
+      TileType tile = surface.TileAt(loc.Row, loc.Col).Type;
+      if ((tile == TileType.WoodFloor || tile == TileType.StoneFloor) && !gs.ObjDb.Occupied(loc))
+        opts.Add(loc);
+    }
+
+    if (opts.Count == 0)
+      return PlanStatus.Failure;
+
+    Loc dest = opts[gs.Rng.Next(opts.Count)];
+    gs.ResolveActorMove(mob, mob.Loc, dest);
+    mob.ExecuteAction(new PassAction());
+    gs.RefreshPerformers();
+
+    return PlanStatus.Success;
+  }
+}
+
 // This will probably eventually be a set of subclasses for finding various
 // goals.
 class FindUpStairs : BehaviourNode
@@ -725,7 +771,7 @@ class FindUpStairs : BehaviourNode
     return AStar.FindPath(gs.CurrentMap, mob.Loc, Goal, TravelCosts(mob), true);
   }
 
-  Dictionary<TileType, int> TravelCosts(Mob mob)
+  static Dictionary<TileType, int> TravelCosts(Mob mob)
   {
     Dictionary<TileType, int> costs = [];
     costs.Add(TileType.DungeonFloor, 1);
@@ -1072,10 +1118,24 @@ class Planner
     Sequence afterBoon = new([
       new CheckDialogueState(PrisonerBehaviour.DIALOGUE_FREE_BOON),
       new FindUpStairs(),
-      new PassTurn()
+      new PassTurn(),
+      new SetDialogueState(PrisonerBehaviour.DIALOGUE_ESCAPING)
     ]);
     plan.Add(afterBoon);
 
+    Sequence escape = new([
+      new CheckDialogueState(PrisonerBehaviour.DIALOGUE_ESCAPING),
+      new JumpToTavern(),
+      new SetDialogueState(PrisonerBehaviour.DIALOGUE_AT_INN)
+    ]);
+    plan.Add(escape);
+
+    Sequence atInn = new ([
+      new CheckDialogueState(PrisonerBehaviour.DIALOGUE_AT_INN),
+      new WanderInTavern()
+    ]);
+    plan.Add(atInn);
+    
     return new Selector(plan);
   }
 
@@ -1704,6 +1764,8 @@ class PrisonerBehaviour : NPCBehaviour
   public const int DIALOGUE_CAPTIVE = 0;
   public const int DIALOGUE_FREE = 1;
   public const int DIALOGUE_FREE_BOON = 2;
+  public const int DIALOGUE_ESCAPING = 3;
+  public const int DIALOGUE_AT_INN = 4;
 
   DateTime _lastBark = new(1900, 1, 1);
 

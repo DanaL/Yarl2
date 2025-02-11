@@ -1239,7 +1239,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       SetDMaps(dest);
     }
 
-    Tile tile = CurrentMap.TileAt(dest.Row, dest.Col);
+    Map map = Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
+    Tile tile = map.TileAt(dest.Row, dest.Col);
     bool flying = actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>();
     bool waterWalking = actor.HasActiveTrait<WaterWalkingTrait>();
 
