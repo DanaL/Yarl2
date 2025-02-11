@@ -669,20 +669,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       RefreshPerformers();     
     }
 
-    int fallDamage = Rng.Next(1, 7);
-    for (int j = 0; j < levelsFallen; j++)
-    {
-      fallDamage += Rng.Next(1, 7);
-    }
-
-    LameTrait lame = new() { OwnerID = actor.ID, ExpiresOn = Turn + (ulong) Rng.Next(100, 151) };
-    lame.Apply(actor, this);
-
-    var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
-    if (hpLeft < 1)
-    {
-      ActorKilled(actor, "a fall", null, null);
-    }
+    CalculateFallDamage(actor, levelsFallen);
 
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!");
   }
@@ -1235,12 +1222,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       
       ResolveActorMove(actor, actor.Loc, landingSpot);      
       
-      int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
-      var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
-      if (hpLeft < 1)
-      {
-        ActorKilled(actor, "a fall", null, null);
-      }
+      CalculateFallDamage(actor, 1);
 
       RefreshPerformers();
       
@@ -1256,6 +1238,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     return actor.Loc;
+  }
+
+  void CalculateFallDamage(Actor actor, int levelsFallen)
+  {
+    int fallDamage = Rng.Next(1, 7);
+    for (int j = 0; j < levelsFallen; j++)
+    {
+      fallDamage += Rng.Next(1, 7);
+    }
+
+    LameTrait lame = new() { OwnerID = actor.ID, ExpiresOn = Turn + (ulong) Rng.Next(100, 151) };
+    lame.Apply(actor, this);
+
+    var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
+    if (hpLeft < 1)
+    {
+      ActorKilled(actor, "a fall", null, null);
+    }
   }
 
   public void ResolveActorMove(Actor actor, Loc start, Loc dest)
