@@ -626,12 +626,36 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void FallIntoChasm(Actor actor, Loc landingSpot)
   {
+    Loc CalcFinalLandingSpot(Loc landingSpot)
+    {
+      Dungeon dungeon = Campaign.Dungeons[landingSpot.DungeonID];
+      do
+      {
+        Map map = dungeon.LevelMaps[landingSpot.Level];
+        if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
+          return landingSpot;
+        landingSpot = landingSpot with { Level = landingSpot.Level + 1};
+      }
+      while (landingSpot.Level < dungeon.LevelMaps.Count);
+
+      // Possibly I should just throw an exception here? This would be an error
+      // condition, most likely in level generation
+      return Loc.Nowhere;
+    }
+
     if (actor.HasTrait<IllusionTrait>())
       return;
 
+    landingSpot = CalcFinalLandingSpot(landingSpot);
+    int levelsFallen = landingSpot.Level - actor.Loc.Level;
+    
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
-    if (actor is Player)
+    if (actor is Player) 
+    {
+      if (levelsFallen > 1)
+        UI.AlertPlayer("You plummet a great distance!");
       ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
+    }
 
     if (ObjDb.Occupied(landingSpot))
     {
@@ -639,14 +663,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ResolveActorMove(actor, actor.Loc, landingSpot);
-    actor.Loc = landingSpot;
-
+    
     if (actor is Player)
     {
       RefreshPerformers();     
     }
 
-    int fallDamage = Rng.Next(6) + Rng.Next(6) + 2;
+    int fallDamage = Rng.Next(1, 7);
+    for (int j = 0; j < levelsFallen; j++)
+    {
+      fallDamage += Rng.Next(1, 7);
+    }
+
     var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
     if (hpLeft < 1)
     {
