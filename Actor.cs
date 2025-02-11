@@ -204,12 +204,12 @@ abstract class Actor : GameObj, IZLevel
         {
           d = 0;
           bonusDamage = 0;
-          msg = "The attack seems ineffectual!";
+          msg = "It is seems ineffectual!";
         }
         else if (trait is ResistanceTrait resist && resist.Type == dmg.Item2)
         {
           d /= 2;
-          msg = "The attack seems less effective!";          
+          msg = "It seems less effective!";          
         }
       }
       

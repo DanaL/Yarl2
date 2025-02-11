@@ -1823,6 +1823,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     ++Lifetime;
+
     if (gs.ObjDb.GetObj(OwnerID) is Item fireSrc)
     {
       if (Lifetime > 3 && gs.Rng.NextDouble() < 0.5)
@@ -1836,24 +1837,24 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
 
       if (victim is not null)
       {
+        UserInterface ui = gs.UIRef();
         int fireDmg = gs.Rng.Next(8) + 1;
         List<(int, DamageType)> fire = [(fireDmg, DamageType.Fire)];
         var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(fire, 0, gs, null, 1.0);
-        if (dmgMsg != "")
-        {
-          gs.UIRef().AlertPlayer(dmgMsg);
-        }
           
         if (hpLeft < 1)
         {
           string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
-          gs.UIRef().AlertPlayer(msg);
+          ui.AlertPlayer(msg);
           gs.ActorKilled(victim, "fire", null, null);
         }
         else
         {
           string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
-          gs.UIRef().AlertPlayer(txt);
+          ui.AlertPlayer(txt);
+
+          if (dmgMsg != "")
+            ui.AlertPlayer(dmgMsg);          
         }
       }
 
