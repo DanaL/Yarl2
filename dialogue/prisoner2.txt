@@ -11,6 +11,16 @@
       (option "A boon of Health"    ((give BOON_CON "May you be stout as an ox!") (set DIALOGUE_STATE 2)))
     )
 	)
+  ((= DIALOGUE_STATE 4)
+    (say
+      (pick
+        (
+          "It's my saviour!"
+          "Come, let me buy you a drink, fiend!"
+        )
+      )
+    )
+  )
 	(else
     (say 
       (pick

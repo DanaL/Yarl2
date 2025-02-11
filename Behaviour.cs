@@ -1782,6 +1782,12 @@ class PrisonerBehaviour : NPCBehaviour
     {
       DIALOGUE_FREE => "Thank you!",
       DIALOGUE_FREE_BOON => "Hmm...which way to the exit?",
+      DIALOGUE_AT_INN => gs.Rng.Next(3) switch
+        {
+          0 => "Fresh air at last!",
+          1 => "Adventuring is for suckers.",
+          _ => "I'm hanging up my sword."
+        },        
       _ => gs.Rng.Next(3) switch
             {
               0 => $"I was captured by {capturedBy}!",
