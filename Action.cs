@@ -2805,7 +2805,15 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
         }
 
         if (!alreadyAffected)
+        {
+          if (GameState.LastPlayerFoV.Contains(loc))
+          {
+            string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "begin")} to move slower.";
+            GameState.UIRef().AlertPlayer(s);
+          }
+            
           victim.Traits.Add(new AlacrityTrait() { Amt = -0.5, SourceId = SourceId });
+        }
       }
     }
 

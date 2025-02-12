@@ -162,8 +162,7 @@ class PlayerCreator
         player.Traits.Add(new LightStepTrait());
         break;
       case PlayerBackground.Scholar:
-        player.SpellsKnown.Add("arcane spark");
-        player.SpellsKnown.Add("ersatz elevator");
+        player.SpellsKnown.Add("arcane spark");        
         break;
     }
   }
