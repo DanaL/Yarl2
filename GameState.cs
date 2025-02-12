@@ -256,6 +256,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
                 : TileFactory.Get(TileType.Unknown);
   }
 
+  public bool LocOpen(Loc loc)
+  {
+    if (!TileAt(loc).Passable())
+      return false;
+
+    if (ObjDb.Occupied(loc))
+      return false;
+
+    foreach (Item item in ObjDb.ItemsAt(loc))
+    {
+      if (item.HasTrait<BlockTrait>())
+        return false;
+    }
+
+    return true;
+  }
+
   public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
   {
     var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];

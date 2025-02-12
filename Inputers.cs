@@ -1009,6 +1009,29 @@ class YesOrNoInputer : Inputer
   }
 }
 
+class CharSetInputer(HashSet<char> allowed) : Inputer
+{
+  HashSet<char> Allowed { get; set; } = allowed;
+  char Result { get; set; } = '\0';
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (Allowed.Contains(ch)) 
+    {
+      Result = ch;
+      Done = true;
+      Success = true;
+    }
+  }
+
+  public override UIResult GetResult() => new CharUIResult() { Ch = Result };
+}
+
 class DirectionalInputer : Inputer
 {
   (int, int) _result;
@@ -1090,4 +1113,9 @@ class MenuUIResult : UIResult
 class NumericUIResult : UIResult
 {
   public int Amount { get; set; }
+}
+
+class CharUIResult : UIResult
+{
+  public char Ch { get; set; }
 }

@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
@@ -293,12 +295,103 @@ class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override void ReceiveUIResult(UIResult result) {}
 }
 
-class SpellcastMenu : Inputer
+class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
+  char Dir { get; set; } = '\0';
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+    
+    if (!CheckCost(3, 25, result))
+      return result;
+
+    GameState gs = GameState!;
+    int maxDungeonLevel = gs.CurrentDungeon.LevelMaps.Count - 1;
+
+    if (GameState!.InWilderness || (gs.Player.Loc.Level == maxDungeonLevel && Dir == '>'))
+    {
+      gs.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+    }    
+    else if (gs.Player.Loc.Level == 0 && Dir == '<')
+    {
+      // Exiting the dungeon will bring you to the portal entrance in the wilderness
+      FactDb factDb = gs.Campaign.FactDb!;
+      if (factDb.FactCheck("Dungeon Entrance") is LocationFact entrance)
+      {
+        DoElevate(entrance.Loc, "You rise up through the ceiling!", gs);
+      }
+    }
+    else
+    {
+      Loc dest = PickDestLoc(gs);
+      if (dest == Loc.Nowhere)
+      {
+        gs.UIRef().AlertPlayer("Your spell fizzles!");
+        GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+      }
+      else
+      {
+        string s = Dir == '>' ? "You sink through the floor!" : "You rise up through the ceiling!";
+        DoElevate(dest, s, gs);
+      }
+    }
+
+    return result;
+  }
+
+  Loc PickDestLoc(GameState gs)
+  {
+    int delta = Dir == '>' ? 1 : -1;
+    Loc dest = gs.Player.Loc with { Level = gs.Player.Loc.Level + delta };
+    
+    if (gs.LocOpen(dest) || gs.TileAt(dest).Type == TileType.Chasm)
+      return dest;
+
+    // if the loc directly above (or below) the player is blocked or impassable
+    // we'll jsut pick a random, unoccupied spot
+    List<Loc> opts = [];
+    Map map = gs.Campaign.Dungeons[dest.DungeonID].LevelMaps[dest.Level];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {        
+        Loc loc = new(dest.DungeonID, dest.Level, r, c);
+        if (gs.LocOpen(loc))
+          opts.Add(loc);
+      }
+    }
+
+    if (opts.Count > 0)
+      return opts[gs.Rng.Next(opts.Count)];
+    
+    return Loc.Nowhere;
+  }
+
+  void DoElevate(Loc dest, string msg, GameState gs)
+  {
+    gs.UIRef().AlertPlayer(msg);
+    Loc start = gs.Player.Loc;
+    gs.ActorEntersLevel(gs.Player, dest.DungeonID, dest.Level);
+    gs.ResolveActorMove(gs.Player, start, dest);
+    gs.RefreshPerformers();
+    gs.PrepareFieldOfView();    
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Dir = ((CharUIResult) result).Ch;
+}
+
+class SpellcastMenu : Inputer
+{  
   readonly GameState GS;
   int row;
-  bool targeting = false;
-  
+  bool SpellSelection { get; set; } = true;
+  string PopupText { get; set; } = "";
+  int PopupRow { get; set; } = -1;
+
   public SpellcastMenu(GameState gs)
   {
     row = 0;
@@ -348,7 +441,9 @@ class SpellcastMenu : Inputer
       case "arcane spark":        
         inputer = new Aimer(GS, GS.Player.Loc, 7);
         GS.Player.ReplacePendingAction(new CastArcaneSparkAction(GS, GS.Player), inputer);
-        targeting = true;
+        SpellSelection = false;
+        PopupText = "Select target";
+        PopupRow = -3;
         break;
       case "mage armour":
         inputer = new DummyInputer();
@@ -365,14 +460,22 @@ class SpellcastMenu : Inputer
       case "spark arc":
         inputer = new Aimer(GS, GS.Player.Loc, 7);
         GS.Player.ReplacePendingAction(new CastSparkArc(GS, GS.Player), inputer);
-        targeting = true;
+        SpellSelection = false;
+        PopupText = "Select target";
+        PopupRow = -3;
+        break;
+      case "ersatz elevator":
+        inputer = new CharSetInputer(['<', '>']);
+        GS.Player.ReplacePendingAction(new CastErsatzElevator(GS, GS.Player), inputer);
+        SpellSelection = false;
+        PopupText = "Which direction? [LIGHTBLUE <] for up, [LIGHTBLUE >] for down";        
         break;
     }
   }
 
   void WritePopup()
   {
-    if (!targeting)
+    if (SpellSelection)
     {
       List<string> spells = GS.Player.SpellsKnown
                             .Select(s => s.CapitalizeWords()).ToList();
@@ -380,7 +483,7 @@ class SpellcastMenu : Inputer
     }
     else
     {
-      GS.UIRef().SetPopup(new Popup("Select target", "", -3, -1));
+      GS.UIRef().SetPopup(new Popup(PopupText, "", PopupRow, -1));
     }
   }
 }

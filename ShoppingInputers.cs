@@ -595,9 +595,10 @@ class WitchInputer : Inputer
   {
     { "arcane spark", new SpellInfo(20, 1, "") },
     { "mage armour", new SpellInfo(20, 2, "") },
-    { "illume", new SpellInfo(25, 2, "") },
+    { "illume", new SpellInfo(20, 1, "") },
     { "slumbering song", new SpellInfo(25, 5, "") },
-    { "spark arc", new SpellInfo(25, 2, "arcane spark") }
+    { "spark arc", new SpellInfo(25, 2, "arcane spark") },
+    { "ersatz elevator", new SpellInfo(25, 3, "") }
   };
 
   public WitchInputer(Actor witch, GameState gs)
