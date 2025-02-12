@@ -557,7 +557,7 @@ class SmithyInputer : ShopMenuInputer
   }
 }
 
-record SpellInfo(int Price, int ManaCost);
+record SpellInfo(int Price, int ManaCost, string Prereq);
 class WitchInputer : Inputer
 {
   Actor Witch { get; set; } 
@@ -593,10 +593,11 @@ class WitchInputer : Inputer
 
   readonly Dictionary<string, SpellInfo> Spells = new()
   {
-    { "arcane spark", new SpellInfo(20, 1) },
-    { "mage armour", new SpellInfo(20, 2) },
-    { "illume", new SpellInfo(25, 2) },
-    { "slumbering song", new SpellInfo(25, 5) }
+    { "arcane spark", new SpellInfo(20, 1, "") },
+    { "mage armour", new SpellInfo(20, 2, "") },
+    { "illume", new SpellInfo(25, 2, "") },
+    { "slumbering song", new SpellInfo(25, 5, "") },
+    { "spark arc", new SpellInfo(25, 2, "arcane spark") }
   };
 
   public WitchInputer(Actor witch, GameState gs)
@@ -714,11 +715,11 @@ class WitchInputer : Inputer
       if (GS.Player.SpellsKnown.Contains(spell))
         continue;
 
-      if (Spells[spell].ManaCost <= PlayerMana)
+      SpellInfo si = Spells[spell];
+      if (si.ManaCost <= PlayerMana && (si.Prereq == "" || GS.Player.SpellsKnown.Contains(si.Prereq)))
       {
-        SpellInfo info = Spells[spell];
         char ch = (char)opt++;
-        Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{info.Price}\n";
+        Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{si.Price}\n";
         Options.Add(ch, spell);
         ++available;
       }

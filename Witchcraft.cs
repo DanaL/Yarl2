@@ -62,7 +62,7 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
     List<Loc> pts = [];
     
     // I think I can probably clean this crap up
-    foreach (var pt in Trajectory(false))
+    foreach (var pt in Trajectory(Actor.Loc, false))
     {
       var tile = GameState!.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
@@ -89,7 +89,117 @@ class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, act
     var anim = new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
+    GameState!.ObjDb.RemoveItemFromGame(spark.Loc, spark);
+
     return result;
+  }
+}
+
+class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  HashSet<ulong> PreviousTargets { get; set; } = [];
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    if (!CheckCost(0, 10, result))
+      return result;
+
+    GameState gs = GameState!;
+
+    if (!gs.ObjDb.Occupied(Target))
+    {
+      gs.UIRef().AlertPlayer("The spell fizzles");
+      return result;
+    }
+
+    PreviousTargets.Add(Actor!.ID);
+
+    int attackMod = 2;
+    if (Actor!.Stats.TryGetValue(Attribute.Will, out Stat? will))
+      attackMod += will.Curr;
+      
+    Item spark = new()
+    {
+      Name = "spark",
+      Type = ItemType.Weapon,
+      Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, Colours.BLACK)
+    };
+    spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });
+    gs.ObjDb.Add(spark);
+
+    Loc origin = Actor.Loc;
+    for (int j = 0; j < 3; j++)
+    {
+      // Hmmm variants of this code are in a bunch of acitons like Magic Missile, shooting bows,
+      // etc etc. I wonder if I can push more of this up into TargetedAction?
+      List<Loc> pts = [];
+    
+      // I think I can probably clean this crap up
+      foreach (var pt in Trajectory(origin, false))
+      {
+        var tile = GameState!.TileAt(pt);
+        if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
+        {
+          pts.Add(pt);
+
+          var attackResult = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
+
+          origin = occ.Loc;
+          PreviousTargets.Add(occ.ID);
+          if (!SelectNextTarget(occ.Loc, gs))
+          {
+            j = 4;
+          }
+
+          if (attackResult.Succcessful)
+          {
+            pts = [];
+            break;
+          }          
+        }
+        else if (tile.Passable() || tile.PassableByFlight())
+        {
+          pts.Add(pt);
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      var anim = new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE);
+      GameState!.UIRef().PlayAnimation(anim, GameState);
+    }
+
+    GameState!.ObjDb.RemoveItemFromGame(spark.Loc, spark);
+
+    return result;
+  }
+
+  bool SelectNextTarget(Loc currTarget, GameState gs)
+  {
+    List<Loc> targets = [];
+    Dictionary<Loc, Illumination> visible = FieldOfView.CalcVisible(7, currTarget, gs.CurrentMap, gs.ObjDb);    
+    foreach (Loc loc in visible.Keys)
+    {
+      if (visible[loc] != Illumination.Full)
+        continue;
+      if (gs.ObjDb.Occupant(loc) is Actor actor && !PreviousTargets.Contains(actor.ID))
+      {
+        targets.Add(loc);
+      }
+    }
+
+    if (targets.Count == 0)
+      return false;
+
+    Target = targets[gs.Rng.Next(targets.Count)];
+
+    return true;
   }
 }
 
@@ -258,6 +368,11 @@ class SpellcastMenu : Inputer
       case "slumbering song":
         inputer = new DummyInputer();
         GS.Player.ReplacePendingAction(new CastSlumberingSong(GS, GS.Player), inputer);
+        break;
+      case "spark arc":
+        inputer = new Aimer(GS, GS.Player.Loc, 7);
+        GS.Player.ReplacePendingAction(new CastSparkArc(GS, GS.Player), inputer);
+        targeting = true;
         break;
     }
   }

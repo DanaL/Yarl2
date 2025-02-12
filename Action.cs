@@ -142,7 +142,7 @@ class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attac
   public override ActionResult Execute()
   {
     var result = base.Execute();
-    var trajectory = Trajectory(false);
+    var trajectory = Trajectory(Actor!.Loc, false);
     List<Loc> pts = [];
     bool creatureTargeted = false;
     bool targetHit = false;
@@ -2324,9 +2324,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     if (ammo != null)
     {
       // Calculate where the projectile will actually stop
-      var trajectory = Util.Bresenham(Actor.Loc.Row, Actor.Loc.Col, _target.Row, _target.Col)
-                              .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                              .ToList();
+      var trajectory = Util.Trajectory(Actor.Loc, _target);
       List<Loc> pts = [];
       for (int j = 0; j < trajectory.Count; j++)
       {
@@ -2707,7 +2705,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     // may be interrupted
     List<Loc> pts = [];
     Loc actualLoc = Target;
-    foreach (var pt in Trajectory(true))
+    foreach (var pt in Trajectory(Actor!.Loc, true))
     {            
       actualLoc = pt;
       pts.Add(pt);
@@ -2787,7 +2785,7 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
     };
     GameState!.ObjDb.Add(ray);
 
-    List<Loc> pts = Trajectory(true).Skip(1).ToList();
+    List<Loc> pts = Trajectory(Actor!.Loc, true).Skip(1).ToList();
     var anim = new BeamAnimation(GameState!, pts, Colours.FADED_PURPLE, Colours.BLACK);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
@@ -2835,7 +2833,7 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
     result.EnergyCost = 1.0;
     result.Succcessful = true;
 
-    List<Loc> pts = Trajectory(false);
+    List<Loc> pts = Trajectory(Actor!.Loc, false);
 
     var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BROWN, Colours.WHITE);
 
@@ -2903,7 +2901,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
     // Ray of frost is a beam so unlike things like magic missle, it doesn't stop 
     // when it hits an occupant.
-    List<Loc> pts = Trajectory(true);
+    List<Loc> pts = Trajectory(Actor!.Loc, true);
 
     var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
@@ -2954,7 +2952,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
 
     List<Loc> pts = [];
     // I think I can probably clean this crap up
-    foreach (var pt in Trajectory(false))
+    foreach (var pt in Trajectory(Actor!.Loc, false))
     {
       var tile = GameState!.TileAt(pt);
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
@@ -3015,17 +3013,15 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
     return true;
   }
 
-  protected List<Loc> Trajectory(bool filterBlockers)
+  protected List<Loc> Trajectory(Loc origin, bool filterBlockers)
   {
     if (filterBlockers)
-      return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
-               .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-               .Where(l => ClearTileAt(l))
-               .ToList();
+      return [.. Util.Bresenham(origin.Row, origin.Col, Target.Row, Target.Col)
+               .Select(p => new Loc(origin.DungeonID, origin.Level, p.Item1, p.Item2))
+               .Where(l => ClearTileAt(l))];
     else
-      return Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col)
-                 .Select(p => new Loc(Actor.Loc.DungeonID, Actor.Loc.Level, p.Item1, p.Item2))
-                 .ToList();
+      return [.. Util.Bresenham(origin.Row, origin.Col, Target.Row, Target.Col)
+                 .Select(p => new Loc(origin.DungeonID, origin.Level, p.Item1, p.Item2))];
   }
 
   public override void ReceiveUIResult(UIResult result) => Target = ((LocUIResult)result).Loc;

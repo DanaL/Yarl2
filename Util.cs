@@ -369,9 +369,8 @@ class Util
 
   public static List<Loc> Trajectory(Loc origin, Loc target)
   {
-    return Bresenham(origin.Row, origin.Col, target.Row, target.Col)
-            .Select(sq => origin with { Row = sq.Item1, Col = sq.Item2 })
-            .ToList();
+    return [..Bresenham(origin.Row, origin.Col, target.Row, target.Col)
+            .Select(sq => origin with { Row = sq.Item1, Col = sq.Item2 })];
   }
 
   public static HashSet<Loc> LocsInRadius(Loc origin, int radius, int height, int width)
