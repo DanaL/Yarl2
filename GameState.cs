@@ -957,10 +957,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // that's countdown timer for healing. Then its period can be tweaked by effects and items.
   // I don't what to have every single effect have its own turn like light sources do, but 
   // maybe Actors can have a list of effects I check for each turn?
-  //
-  // Also not sure how often monsters should regenerate.
-  //
-  // TODO: gotta eventually add monster respawns
   void EndOfTurn()
   {
     bool IsActiveListener(GameObj obj)
@@ -986,7 +982,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // conditions should affect it
     if (Rng.Next(60) == 0)
     {
-      //SpawnMonster();
+      SpawnMonster();
     }
 
     // Note to self: you build the list like this because as part of their

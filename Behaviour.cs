@@ -676,6 +676,12 @@ class RandomMove : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
+    if (mob.HasTrait<ImmobileTrait>())
+    {
+      mob.ExecuteAction(new PassAction());
+      return PlanStatus.Success;
+    }
+      
     foreach (Trait t in mob.Traits)
     {
       if (t is IntelligentTrait)
@@ -1107,7 +1113,8 @@ class Planner
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
     // Finally, try to attack the player or move toward them.
-    actions.Add(new ChaseTarget());
+    if (!mob.HasTrait<ImmobileTrait>())
+      actions.Add(new ChaseTarget()); 
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
     
     plan.Add(new PassTurn());
