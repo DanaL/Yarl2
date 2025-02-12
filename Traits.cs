@@ -792,6 +792,29 @@ class PolearmTrait : Trait
   public override string AsText() => "Polearm";
 }
 
+class PolymorphedTrait : Trait
+{
+  public ulong OriginalId { get; set; }
+
+  public Actor Morph(Actor victim, GameState gs, string newForm)
+  {
+    Actor morphed = MonsterFactory.Get(newForm, gs.ObjDb, gs.Rng);
+    
+    Loc loc = victim.Loc;
+    victim.Loc = Loc.Nowhere;
+
+    gs.ObjDb.AddNewActor(morphed, loc);
+    gs.RefreshPerformers();
+
+    OriginalId = victim.ID;
+    morphed.Traits.Add(this);
+
+    return morphed;
+  }
+
+  public override string AsText() => $"Polymorphed#{OriginalId}";
+}
+
 class RustedTrait : Trait
 {
   public Rust Amount { get; set; }
@@ -2742,6 +2765,7 @@ class TraitFactory
     },
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
+    { "Polymorphed", (pieces, gameObj) => new PolymorphedTrait() { OriginalId = ulong.Parse(pieces[1]) } },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor

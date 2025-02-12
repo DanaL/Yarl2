@@ -162,7 +162,8 @@ class PlayerCreator
         player.Traits.Add(new LightStepTrait());
         break;
       case PlayerBackground.Scholar:
-        player.SpellsKnown.Add("arcane spark");        
+        player.SpellsKnown.Add("arcane spark");
+        player.SpellsKnown.Add("frogify");
         break;
     }
   }

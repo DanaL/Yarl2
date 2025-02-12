@@ -384,6 +384,50 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Dir = ((CharUIResult) result).Ch;
 }
 
+class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    if (!CheckCost(0, 10, result))
+      return result;
+
+    // I don't yet want to deal with the player being polymorphed...
+    if (Target == Actor!.Loc)
+    {
+      gs.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState!.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+    }
+   
+    if (GameState!.ObjDb.Occupant(Target) is Actor victim)
+    {
+      SqAnimation anim = new(GameState, Target, Colours.WHITE, Colours.DARK_GREEN, 't');
+      GameState.UIRef().PlayAnimation(anim, GameState);
+
+      PolymorphedTrait pt = new();
+      Actor frog = pt.Morph(victim, GameState, "frog");
+      frog.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+      
+      if (GameState.LastPlayerFoV.Contains(frog.Loc))
+      {
+        string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}";
+        GameState.UIRef().AlertPlayer(s);
+        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      }      
+    }
+    else
+    {
+      gs.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState!.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+    }
+
+    return result;
+  }
+}
+
 class SpellcastMenu : Inputer
 {  
   readonly GameState GS;
@@ -469,6 +513,13 @@ class SpellcastMenu : Inputer
         GS.Player.ReplacePendingAction(new CastErsatzElevator(GS, GS.Player), inputer);
         SpellSelection = false;
         PopupText = "Which direction? [LIGHTBLUE <] for up, [LIGHTBLUE >] for down";        
+        break;
+      case "frogify":
+        inputer = new Aimer(GS, GS.Player.Loc, 5);
+        GS.Player.ReplacePendingAction(new CastFrogify(GS, GS.Player), inputer);
+        SpellSelection = false;
+        PopupText = "Select target:";
+        PopupRow = -3;
         break;
     }
   }
