@@ -105,16 +105,8 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     result.EnergyCost = 1.0;
     result.Succcessful = true;
 
-    if (!CheckCost(0, 10, result))
+    if (!CheckCost(2, 10, result))
       return result;
-
-    GameState gs = GameState!;
-
-    if (!gs.ObjDb.Occupied(Target))
-    {
-      gs.UIRef().AlertPlayer("The spell fizzles");
-      return result;
-    }
 
     PreviousTargets.Add(Actor!.ID);
 
@@ -122,66 +114,69 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (Actor!.Stats.TryGetValue(Attribute.Will, out Stat? will))
       attackMod += will.Curr;
       
-    Item spark = new()
-    {
-      Name = "spark",
-      Type = ItemType.Weapon,
-      Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, Colours.BLACK)
-    };
-    spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });
-    gs.ObjDb.Add(spark);
-
-    Loc origin = Actor.Loc;
-    for (int j = 0; j < 3; j++)
-    {
-      // Hmmm variants of this code are in a bunch of acitons like Magic Missile, shooting bows,
-      // etc etc. I wonder if I can push more of this up into TargetedAction?
-      List<Loc> pts = [];
+    Loc endPt = Arc(Actor.Loc, Target, attackMod, GameState!);
     
-      // I think I can probably clean this crap up
-      foreach (var pt in Trajectory(origin, false))
-      {
-        var tile = GameState!.TileAt(pt);
-        if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
-        {
-          pts.Add(pt);
+    Loc target2 = SelectNextTarget(endPt, gs);
+    if (target2 == Loc.Nowhere)
+      return result;
+    endPt = Arc(endPt, target2, attackMod, GameState!);
 
-          var attackResult = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
-
-          origin = occ.Loc;
-          PreviousTargets.Add(occ.ID);
-          if (!SelectNextTarget(occ.Loc, gs))
-          {
-            j = 4;
-          }
-
-          if (attackResult.Succcessful)
-          {
-            pts = [];
-            break;
-          }          
-        }
-        else if (tile.Passable() || tile.PassableByFlight())
-        {
-          pts.Add(pt);
-        }
-        else
-        {
-          break;
-        }
-      }
-
-      var anim = new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE);
-      GameState!.UIRef().PlayAnimation(anim, GameState);
-    }
-
-    GameState!.ObjDb.RemoveItemFromGame(spark.Loc, spark);
+    Loc target3 = SelectNextTarget(endPt, gs);
+    if (target3 == Loc.Nowhere)
+      return result;
+    Arc(endPt, target3, attackMod, GameState!);
 
     return result;
   }
 
-  bool SelectNextTarget(Loc currTarget, GameState gs)
+  Loc Arc(Loc start, Loc target, int attackMod, GameState gs)
   {
+    Loc endPt = Loc.Nowhere;
+    List<Loc> trajectory = Util.Trajectory(start, target);
+    List<Loc> pts = [];
+
+    Item spark = new()
+    {
+      Name = "spark", Type = ItemType.Weapon,
+      Glyph = new Glyph('*', Colours.ICE_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, Colours.BLACK)
+    };
+    spark.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = DamageType.Electricity });
+    
+    foreach (Loc pt in trajectory)
+    {
+      Tile tile = gs.TileAt(pt);
+      if (!tile.PassableByFlight())
+      {
+        break;
+      }
+
+      pts.Add(pt);
+
+      if (gs.ObjDb.Occupant(pt) is Actor occ && !PreviousTargets.Contains(occ.ID))
+      {
+        ActionResult attackResult = Battle.MagicAttack(Actor!, occ, gs, spark, attackMod, new ArrowAnimation(gs, pts, Colours.ICE_BLUE));        
+        if (attackResult.Succcessful)
+        {
+          PreviousTargets.Add(occ.ID);
+          return pt;
+        }
+      }
+    }
+
+    if (pts.Count > 0)
+    {
+      ArrowAnimation anim = new(gs, pts, Colours.ICE_BLUE);
+      gs.UIRef().PlayAnimation(anim, gs);
+    }
+
+    return endPt;
+  }
+
+  Loc SelectNextTarget(Loc currTarget, GameState gs)
+  {
+    if (currTarget == Loc.Nowhere)
+      return Loc.Nowhere;
+
     List<Loc> targets = [];
     Dictionary<Loc, Illumination> visible = FieldOfView.CalcVisible(7, currTarget, gs.CurrentMap, gs.ObjDb);    
     foreach (Loc loc in visible.Keys)
@@ -195,11 +190,9 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     }
 
     if (targets.Count == 0)
-      return false;
+      return Loc.Nowhere;
 
-    Target = targets[gs.Rng.Next(targets.Count)];
-
-    return true;
+    return targets[gs.Rng.Next(targets.Count)];
   }
 }
 
