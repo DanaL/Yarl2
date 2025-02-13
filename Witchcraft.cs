@@ -404,19 +404,27 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
    
     if (GameState!.ObjDb.Occupant(Target) is Actor victim)
     {
-      SqAnimation anim = new(GameState, Target, Colours.WHITE, Colours.DARK_GREEN, 't');
-      GameState.UIRef().PlayAnimation(anim, GameState);
-
-      PolymorphedTrait pt = new();
-      Actor frog = pt.Morph(victim, GameState, "frog");
-      frog.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
-      
-      if (GameState.LastPlayerFoV.Contains(frog.Loc))
+      if (victim.Name != "giant toad")
       {
-        string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}.";
-        GameState.UIRef().AlertPlayer(s);
-        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
-      }      
+        SqAnimation anim = new(GameState, Target, Colours.WHITE, Colours.DARK_GREEN, 't');
+        GameState.UIRef().PlayAnimation(anim, GameState);
+
+        PolymorphedTrait pt = new();
+        Actor frog = pt.Morph(victim, GameState, "frog");
+        frog.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+
+        if (GameState.LastPlayerFoV.Contains(frog.Loc))
+        {
+          string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}.";
+          GameState.UIRef().AlertPlayer(s);
+          GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+        }
+      }
+      else if (GameState.LastPlayerFoV.Contains(victim.Loc))
+      {
+        GameState.UIRef().AlertPlayer("The spell fizzles as a giant toad is more or less already a frog.");
+        GameState.UIRef().SetPopup(new Popup("The spell fizzles as a giant toad is more or less already a frog.", "", -1, -1));
+      }
     }
     else
     {
