@@ -404,7 +404,21 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
    
     if (GameState!.ObjDb.Occupant(Target) is Actor victim)
     {
+<<<<<<< HEAD
       if (victim.Name != "giant toad")
+=======
+      SqAnimation anim = new(GameState, Target, Colours.WHITE, Colours.DARK_GREEN, 't');
+      GameState.UIRef().PlayAnimation(anim, GameState);
+
+      PolymorphedTrait pt = new();
+      string form = "frog";
+      if (victim.HasTrait<UndeadTrait>())
+        form = "zombie frog";
+      Actor frog = pt.Morph(victim, GameState, form);
+      frog.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+      
+      if (GameState.LastPlayerFoV.Contains(frog.Loc))
+>>>>>>> f6bb490636c8f040161917c766a1f67dd04aa8d7
       {
         SqAnimation anim = new(GameState, Target, Colours.WHITE, Colours.DARK_GREEN, 't');
         GameState.UIRef().PlayAnimation(anim, GameState);

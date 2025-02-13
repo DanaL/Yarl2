@@ -298,3 +298,6 @@ A stout metal gate. Unlike doors, it cannot have its lock picked or be easily sm
 #
 creepyaltar|blood-stained altar
 An altar carved from black stone and stained with dried blood.
+#
+boots of feather falling
+Stylish, comfortable, and especially popular with people who have a tendency to fall down holes and mineshafts.
