@@ -113,7 +113,16 @@ abstract class GameObj : IZLevel
 
   public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
                                      .OfType<T>().Any();
-  public bool HasTrait<T>() => Traits.OfType<T>().Any();
+  public bool HasTrait<T>() where T : Trait
+  {
+    foreach (Trait trait in Traits)
+    {
+      if (trait is T)
+        return true;
+    }
+
+    return false;
+  }
 
   public override string ToString()
   {
