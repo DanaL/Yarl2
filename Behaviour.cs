@@ -1112,12 +1112,19 @@ class Planner
     // An afraid monster tries to escape
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
 
-    // Finally, try to attack the player or move toward them.
-    if (!mob.HasTrait<ImmobileTrait>())
-      actions.Add(new ChaseTarget()); 
-    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
-    
-    plan.Add(new PassTurn());
+    if (!mob.HasTrait<PassiveTrait>())
+    {
+      // Finally, try to attack the player or move toward them.
+      if (!mob.HasTrait<ImmobileTrait>())
+        actions.Add(new ChaseTarget());
+      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
+
+      plan.Add(new PassTurn());
+    }
+    else
+    {
+      plan.Add(new RandomMove());
+    }
     
     return new Selector(plan);
   }

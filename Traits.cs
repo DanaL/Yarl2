@@ -1405,6 +1405,11 @@ class ParalyzingGazeTrait : BasicTrait
   public override string AsText() => $"ParalyzingGaze#{DC}";
 }
 
+class PassiveTrait : Trait
+{
+  public override string AsText() => $"Passive";
+}
+
 class BoostMaxStatTrait : TemporaryTrait
 {
   public Attribute Stat {  get; set; }
@@ -2755,6 +2760,7 @@ class TraitFactory
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
+    { "Passive", (pieces, gameObj) => new PassiveTrait() },
     { "Plant", (pieces, gameObj) => new PlantTrait() },
     { "Plural", (pieces, gameObj) => new PluralTrait() },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },

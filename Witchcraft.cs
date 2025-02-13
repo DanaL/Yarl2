@@ -413,7 +413,7 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       
       if (GameState.LastPlayerFoV.Contains(frog.Loc))
       {
-        string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}";
+        string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}.";
         GameState.UIRef().AlertPlayer(s);
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
       }      
