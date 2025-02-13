@@ -526,6 +526,12 @@ class CheckDialogueState(int state) : BehaviourNode
   }
 }
 
+class HasTrait<T> : BehaviourNode where T : Trait
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+    => mob.HasTrait<T>() ? PlanStatus.Success : PlanStatus.Failure;  
+}
+
 class SetDialogueState(int state) : BehaviourNode
 {
   int DialogueState { get; set; } = state;
@@ -1215,6 +1221,29 @@ class Planner
     return new WanderInArea(townSqs);
   }
 
+  static BehaviourNode WitchPlan(Mob witch, GameState gs)
+  {
+    // If the witch is invisible, she'll just stay still. (Just to
+    // make it easier for the character to talk to her)
+    Sequence isInvisible = new([
+      new HasTrait<InvisibleTrait>(),
+      new PassTurn()
+    ]);
+
+    Sequence daytime = new([
+      new IsDaytime(),
+      new WanderInArea(gs.Town.WitchesCottage)
+    ]);
+
+    HashSet<Loc> indoors = OnlyFloorsInArea(gs.Wilderness, gs.Town.WitchesCottage);
+    Sequence evening = new([
+      GoToBuilding(witch, gs, gs.Wilderness, indoors),
+      new WanderInArea(indoors)
+    ]);
+
+    return new Selector([isInvisible, daytime, evening]);
+  }
+
   // Maybe the Actor/Mob class returns its own plan, obviating the need for 
   // this function?
   public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
@@ -1226,7 +1255,7 @@ class Planner
     "PriestPlan" => WanderInHome(gs.Town.Shrine, gs),
     "GrocerPlan" => WanderInHome(gs.Town.Market, gs),
     "BasicVillagerPlan" => BasicVillager(mob, gs),
-    "WitchPlan" => new PassTurn(),
+    "WitchPlan" => WitchPlan(mob, gs),
     "AlchemistPlan" => new PassTurn(),
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),

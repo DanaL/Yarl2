@@ -890,7 +890,6 @@ class TownBuilder
           }
         }
 
-        Console.WriteLine($"Witch cottage at {topLeftRow}, {topLeftCol}");
         return;
       }
     }

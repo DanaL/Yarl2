@@ -390,7 +390,7 @@ class Village
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
     kylie.Traits.Add(new BehaviourTreeTrait() { Plan = "WitchPlan" });
-
+    
     factDb.Add(new SimpleFact() { Name = "WitchId", Value = kylie.ID.ToString() });
     
     int i = rng.Next(startLocs.Count);
