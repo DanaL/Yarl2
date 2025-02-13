@@ -1179,13 +1179,25 @@ class Planner
     return new WanderInArea(home);
   }
 
-  static BehaviourNode WanderInHome(HashSet<Loc> home) => new WanderInArea(home);
+  static BehaviourNode WanderInHome(HashSet<Loc> home, GameState gs)
+  {
+    HashSet<Loc> sqs = [];
+
+    foreach (Loc loc in home)
+    {
+      TileType tile = gs.TileAt(loc).Type;
+      if (tile == TileType.WoodFloor || tile == TileType.StoneFloor)
+        sqs.Add(loc);
+    }
+
+    return new WanderInArea(sqs);
+  }
   
   static BehaviourNode BasicVillager(Mob mob, GameState gs)
   {
     int homeId = mob.Stats[Attribute.HomeID].Curr;
 
-    return WanderInHome(gs.Town.Homes[homeId]);
+    return WanderInHome(gs.Town.Homes[homeId], gs);
   }
 
   static BehaviourNode Pup(GameState gs)
@@ -1211,12 +1223,12 @@ class Planner
     "SmithPlan" => CreateSmithPlan(mob, gs),
     "MonsterPlan" => CreateMonsterPlan(mob),
     "PrisonerPlan" => CreatePrisonerPlan(mob),
-    "PriestPlan" => WanderInHome(gs.Town.Shrine),
-    "GrocerPlan" => WanderInHome(gs.Town.Market),
+    "PriestPlan" => WanderInHome(gs.Town.Shrine, gs),
+    "GrocerPlan" => WanderInHome(gs.Town.Market, gs),
     "BasicVillagerPlan" => BasicVillager(mob, gs),
     "WitchPlan" => new PassTurn(),
     "AlchemistPlan" => new PassTurn(),
-    "BarHoundPlan" => WanderInHome(gs.Town.Tavern),
+    "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
@@ -1541,20 +1553,21 @@ class GrocerBehaviour : IBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  // Merge/replace with PickBark()
-  public string GetBark(Mob actor, GameState gs) => PickBark(gs.Rng);
-
-  static string PickBark(Random rng)
+  public string GetBark(Mob actor, GameState gs)
   {
-    int roll = rng.Next(3);
-    if (roll == 0)
-      return "Supplies for the prudent adventurer!";
-    else if (roll == 1)
-      return "Check out our specials!";
-    else
-      return "Store credit only.";
-  }
+    if ((DateTime.Now - _lastBark).TotalSeconds < 10)
+      return "";
 
+    _lastBark = DateTime.Now;
+
+    return gs.Rng.Next(3) switch
+    {
+      0 => "Supplies for the prudent adventurer!",
+      1 => "Check out our specials!",
+      _ => "Store credit only."
+    };
+  }
+  
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
@@ -1647,27 +1660,20 @@ class MayorBehaviour : NPCBehaviour
     
     return bark;
   }
-
-  void AddQuipToAction(Actor actor, GameState gs, Action action)
-  {
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-    {
-      action.Actor = actor;
-      action.GameState = gs;
-      action.Quip = "Today at least seems peaceful";
-      _lastBark = DateTime.Now;
-    }
-  }  
 }
 
 class WidowerBehaviour: NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  static string PickBark(Mob mob, Random rng)
+  public override string GetBark(Mob actor, GameState gs)
   {
+    if ((DateTime.Now - _lastBark).TotalSeconds < 15)
+      return "";
+    _lastBark = DateTime.Now;
+
     int state;
-    if (mob.Stats.TryGetValue(Attribute.DialogueState, out var stateState))
+    if (actor.Stats.TryGetValue(Attribute.DialogueState, out var stateState))
       state = stateState.Curr;
     else
       state = 0;
@@ -1685,7 +1691,7 @@ class WidowerBehaviour: NPCBehaviour
       barks.Add("When will you return?");
     }
 
-    return barks[rng.Next(barks.Count)];
+    return barks[gs.Rng.Next(barks.Count)];
   }
 }
 
