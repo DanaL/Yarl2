@@ -1172,12 +1172,52 @@ class Planner
     return new Selector(plan);
   }
 
+  static BehaviourNode CreateSimpleVillagerPlan(Mob mob)
+  {
+    HashSet<Loc> home = [];
+
+    return new WanderInArea(home);
+  }
+
+  static BehaviourNode WanderInHome(HashSet<Loc> home) => new WanderInArea(home);
+  
+  static BehaviourNode BasicVillager(Mob mob, GameState gs)
+  {
+    int homeId = mob.Stats[Attribute.HomeID].Curr;
+
+    return WanderInHome(gs.Town.Homes[homeId]);
+  }
+
+  static BehaviourNode Pup(GameState gs)
+  {
+    HashSet<Loc> townSqs = [];
+
+    for (int r = gs.Town.Row; r < gs.Town.Row + gs.Town.Height; r++)
+    {
+      for (int c = gs.Town.Col; c < gs.Town.Col + gs.Town.Width; c++)
+      {
+        townSqs.Add(new Loc(0, 0, r, c));
+      }
+    }
+
+    return new WanderInArea(townSqs);
+  }
+
+  // Maybe the Actor/Mob class returns its own plan, obviating the need for 
+  // this function?
   public static BehaviourNode GetPlan(string plan, Mob mob, GameState gs) => plan switch
   {
     "MayorPlan" => CreateMayorPlan(mob, gs),
     "SmithPlan" => CreateSmithPlan(mob, gs),
     "MonsterPlan" => CreateMonsterPlan(mob),
     "PrisonerPlan" => CreatePrisonerPlan(mob),
+    "PriestPlan" => WanderInHome(gs.Town.Shrine),
+    "GrocerPlan" => WanderInHome(gs.Town.Market),
+    "BasicVillagerPlan" => BasicVillager(mob, gs),
+    "WitchPlan" => new PassTurn(),
+    "AlchemistPlan" => new PassTurn(),
+    "BarHoundPlan" => WanderInHome(gs.Town.Tavern),
+    "PupPlan" => Pup(gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
@@ -1190,7 +1230,6 @@ class Planner
  
 interface IBehaviour
 {
-  Action CalcAction(Mob actor, GameState gameState);
   (Action, Inputer?) Chat(Mob actor, GameState gameState);
   string GetBark(Mob actor, GameState gs);
 }
@@ -1200,7 +1239,6 @@ class NullBehaviour : IBehaviour
   private static readonly NullBehaviour instance = new();
   public static NullBehaviour Instance() => instance;
 
-  public Action CalcAction(Mob actor, GameState gameState) => throw new NotImplementedException();  
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => throw new NotImplementedException();
   public string GetBark(Mob actor, GameState gs) => "";
 }
@@ -1217,11 +1255,6 @@ class MonsterBehaviour : IBehaviour
   readonly Dictionary<string, ulong> _lastUse = [];
 
   public string GetBark(Mob actor, GameState gs) => "";
-
-  public virtual Action CalcAction(Mob actor, GameState gs)
-  {    
-    return new PassAction();
-  }
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
 }
@@ -1248,94 +1281,28 @@ class MonsterBehaviour : IBehaviour
 // so it just seemed simple (or easy...) to extend MonsterBevaviour
 class DisguisedMonsterBehaviour : MonsterBehaviour
 {
-  public override Action CalcAction(Mob actor, GameState gs)
-  {
-    bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
-    if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
-      return new PassAction();
+  //public override Action CalcAction(Mob actor, GameState gs)
+  //{
+  //  bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
+  //  if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
+  //    return new PassAction();
 
-    if (disguised)
-    {
-      var disguise = actor.Traits.OfType<DisguiseTrait>().First();
-      string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
-      gs.UIRef().AlertPlayer(txt);
-      actor.Glyph = disguise.TrueForm;
-      actor.Stats[Attribute.InDisguise].SetMax(0);
-    }
+  //  if (disguised)
+  //  {
+  //    var disguise = actor.Traits.OfType<DisguiseTrait>().First();
+  //    string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
+  //    gs.UIRef().AlertPlayer(txt);
+  //    actor.Glyph = disguise.TrueForm;
+  //    actor.Stats[Attribute.InDisguise].SetMax(0);
+  //  }
 
-    return base.CalcAction(actor, gs);
-  }
+  //  return base.CalcAction(actor, gs);
+  //}
 }
 
 class VillagePupBehaviour : IBehaviour
-{
-  static bool LocInTown(int row, int col, Town t)
-  {
-    if (row < t.Row || row >= t.Row + t.Height)
-      return false;
-    if (col < t.Col || col >= t.Col + t.Width)
-      return false;
-    return true;
-  }
-
+{  
   public string GetBark(Mob actor, GameState gs) => "";
-
-  static bool Passable(TileType type) => type switch
-  {
-    TileType.Grass => true,
-    TileType.GreenTree => true,
-    TileType.RedTree => true,
-    TileType.OrangeTree => true,
-    TileType.YellowTree => true,
-    TileType.Dirt => true,
-    TileType.Sand => true,
-    TileType.Bridge => true,
-    _ => false
-  };
-
-  public Action CalcAction(Mob pup, GameState gameState)
-  {
-    double roll = gameState.Rng.NextDouble();
-    if (roll < 0.25)
-      return new PassAction();
-
-    // in the future, when they become friendly with the player they'll move toward them
-    List<Loc> mvOpts = [];
-    foreach (var sq in Util.Adj8Sqs(pup.Loc.Row, pup.Loc.Col))
-    {
-      if (LocInTown(sq.Item1, sq.Item2, gameState.Town))
-      {
-        var loc = pup.Loc with { Row = sq.Item1, Col = sq.Item2 };
-        if (Passable(gameState.TileAt(loc).Type) && !gameState.ObjDb.Occupied(loc))
-          mvOpts.Add(loc);
-      }
-    }
-
-    // Keep the animal tending somewhat to move toward the center of town
-    var centerRow = gameState.Town.Row + gameState.Town.Height / 2;
-    var centerCol = gameState.Town.Col + gameState.Town.Width / 2;
-    var adj = pup.Loc;
-    if (pup.Loc.Row < centerRow && pup.Loc.Col < centerCol)
-      adj = pup.Loc with { Row = pup.Loc.Row + 1, Col = pup.Loc.Col + 1 };
-    else if (pup.Loc.Row > centerRow && pup.Loc.Col > centerCol)
-      adj = pup.Loc with { Row = pup.Loc.Row - 1, Col = pup.Loc.Col - 1 };
-    else if (pup.Loc.Row < centerRow && pup.Loc.Col > centerCol)
-      adj = pup.Loc with { Row = pup.Loc.Row + 1, Col = pup.Loc.Col - 1 };
-    else if (pup.Loc.Row > centerRow && pup.Loc.Col < centerCol)
-      adj = pup.Loc with { Row = pup.Loc.Row - 1, Col = pup.Loc.Col + 1 };
-
-    if (adj != pup.Loc && Passable(gameState.TileAt(adj).Type) && !gameState.ObjDb.Occupied(adj))
-    {
-      mvOpts.Add(adj);
-      mvOpts.Add(adj);
-      mvOpts.Add(adj);
-    }
-
-    if (mvOpts.Count == 0)
-      return new PassAction();
-    else
-      return new MoveAction(gameState, pup, mvOpts[gameState.Rng.Next(mvOpts.Count)]);
-  }
 
   public (Action, Inputer) Chat(Mob animal, GameState gs)
   {
@@ -1362,19 +1329,18 @@ class InnkeeperBehaviour : NPCBehaviour
 }
 
 class PriestBehaviour : NPCBehaviour
-{
-  DateTime _lastIntonation = new(1900, 1, 1);
+{  
+  DateTime _lastBark = new(1900, 1, 1);
 
-  public override Action CalcAction(Mob actor, GameState gameState)
-  {
-    Action action = base.CalcAction(actor, gameState);
-    if ((DateTime.Now - _lastIntonation).TotalSeconds > 10)
+  public override string GetBark(Mob actor, GameState gs)
+  {    
+    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
     {
-      _lastIntonation = DateTime.Now;
-      action.Quip = "Praise be to Huntokar!";
+      _lastBark = DateTime.Now;
+      return "Praise be to Huntokar!";
     }
 
-    return action;
+    return "";
   }
 
   public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
@@ -1394,8 +1360,13 @@ class WitchBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
   
-  static string PickBark(Mob witch, GameState gs)
+  public override string GetBark(Mob mob, GameState gs)
   {
+    if ((DateTime.Now - _lastBark).TotalSeconds < 9)
+      return "";
+
+    _lastBark = DateTime.Now;
+
     string grocerName = "";
     if (gs.FactDb.FactCheck("GrocerId") is SimpleFact fact)
     {
@@ -1404,7 +1375,7 @@ class WitchBehaviour : NPCBehaviour
         grocerName = grocer.FullName.Capitalize();
     }
     
-    if (witch.HasTrait<InvisibleTrait>())
+    if (mob.HasTrait<InvisibleTrait>())
     {
       return gs.Rng.Next(3) switch
       {
@@ -1423,18 +1394,6 @@ class WitchBehaviour : NPCBehaviour
         _ => "Dark augeries..."
       };
     }    
-  }
-
-  public override Action CalcAction(Mob witch, GameState gameState)
-  {
-    Action action  = new PassAction(gameState, witch);
-    if ((DateTime.Now - _lastBark).TotalSeconds > 9)
-    {
-      action.Quip = PickBark(witch, gameState);
-      _lastBark = DateTime.Now;
-    }
-
-    return action;
   }
 
   public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
@@ -1507,9 +1466,7 @@ class SmithBehaviour : IBehaviour
     return "";
   }
 
-  public Action CalcAction(Mob smith, GameState gameState) => new PassAction();
-
-  string Blurb(GameState gs)
+  static string Blurb(GameState gs)
   {
     var sb = new StringBuilder();
     sb.Append('"');
@@ -1554,24 +1511,20 @@ class AlchemistBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  static string PickBark(GameState gs) => gs.Rng.Next(4) switch
+  public override string GetBark(Mob actor, GameState gs)
   {
-    0 => "Kylie, what do you want for dinner?",
-    1 => "I've been working on a new song.",
-    2 => "We could use some rain!",
-    _ => "I'd better get to the weeding."
-  };
+    if ((DateTime.Now - _lastBark).TotalSeconds < 9)
+      return "";
 
-  public override Action CalcAction(Mob alchemist, GameState gameState)
-  {
-    Action action = new PassAction(gameState, alchemist);
-    if ((DateTime.Now - _lastBark).TotalSeconds > 11)
+    _lastBark = DateTime.Now;
+    
+    return gs.Rng.Next(4) switch
     {
-      action.Quip = PickBark(gameState);
-      _lastBark = DateTime.Now;
-    }
-
-    return action;
+      0 => "Kylie, what do you want for dinner?",
+      1 => "I've been working on a new song.",
+      2 => "We could use some rain!",
+      _ => "I'd better get to the weeding."
+    };
   }
 
   public override (Action, Inputer?) Chat(Mob actor, GameState gs)
@@ -1602,23 +1555,6 @@ class GrocerBehaviour : IBehaviour
       return "Store credit only.";
   }
 
-  public Action CalcAction(Mob grocer, GameState gameState)
-  {
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-    {
-      _lastBark = DateTime.Now;
-
-      return new PassAction()
-      {
-        Actor = grocer,
-        GameState = gameState,
-        Quip = PickBark(gameState.Rng)
-      };
-    }
-    
-    return new PassAction();    
-  }
-
   public (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
@@ -1640,26 +1576,6 @@ class GrocerBehaviour : IBehaviour
 class NPCBehaviour : IBehaviour, IDialoguer
 {
   List<DialogueOption> Options { get; set; } = [];
-
-  public virtual Action CalcAction(Mob actor, GameState gameState)
-  {
-    if (gameState.Rng.Next(3) == 0)
-    {
-      Loc loc = Util.RandomAdjLoc(actor.Loc, gameState);
-      TileType tile = gameState.TileAt(loc).Type;
-      
-      if (gameState.ObjDb.Occupied(loc))
-        return new PassAction();
-      if (gameState.ObjDb.BlockersAtLoc(loc))
-        return new PassAction();
-      if (!(tile == TileType.WoodFloor || tile == TileType.StoneFloor))
-        return new PassAction();
-      
-      return new MoveAction(gameState, actor, loc);      
-    }
-    
-    return new PassAction();    
-  }
 
   public virtual string GetBark(Mob actor, GameState gs) => "";
 
@@ -1706,11 +1622,6 @@ class MayorBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
   
-  public override Action CalcAction(Mob actor, GameState gameState)
-  {
-    return new PassAction();
-  }
-
   public override string GetBark(Mob actor, GameState gs)
   {
     string bark = "";
@@ -1775,20 +1686,6 @@ class WidowerBehaviour: NPCBehaviour
     }
 
     return barks[rng.Next(barks.Count)];
-  }
-
-  public override Action CalcAction(Mob actor, GameState gs)
-  {
-    Action action = base.CalcAction(actor, gs);
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
-    {
-      _lastBark = DateTime.Now;
-      action.Quip = PickBark(actor, gs.Rng);
-      action.Actor = actor;
-      action.GameState = gs;
-    }
-
-    return action;
   }
 }
 

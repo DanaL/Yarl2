@@ -143,7 +143,7 @@ class Village
   {
     Mob innkeeper = BaseVillager(ng, rng);
     innkeeper.SetBehaviour(new InnkeeperBehaviour());
-    
+    innkeeper.Traits.Add(new BehaviourTreeTrait() { Plan = "BarHoundPlan" });
     var tavernSqs = town.Tavern.ToList();
     do
     {
@@ -167,6 +167,7 @@ class Village
 
     cleric.Loc = LocForVillager(map, town.Shrine, rng);
     cleric.SetBehaviour(new PriestBehaviour());
+    cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "PriestPlan" });
     
     int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
     foreach (Loc loc in town.Shrine)
@@ -196,7 +197,8 @@ class Village
     grocer.Stats[Attribute.Markup] = new Stat(125 + rng.Next(76));
     grocer.Stats[Attribute.InventoryRefresh] = new Stat(1);
     grocer.SetBehaviour(new GrocerBehaviour());
-
+    grocer.Traits.Add(new BehaviourTreeTrait() { Plan = "GrocerPlan" });
+    
     grocer.Inventory = new Inventory(grocer.ID, objDb);
     grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
     grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
@@ -309,6 +311,7 @@ class Village
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
     veteran.SetBehaviour(new NPCBehaviour());
+    veteran.Traits.Add(new BehaviourTreeTrait() { Plan = "BarHoundPlan" });
 
     var tavernSqs = town.Tavern.ToList();
     do
@@ -330,6 +333,7 @@ class Village
   {
     Mob villager = BaseVillager(ng, rng);
     villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
+    villager.Traits.Add(new BehaviourTreeTrait() { Plan = "BasicVillagerPlan" });
 
     int homeID  = PickUnoccuppiedCottage(town, rng);
     villager.Loc = LocForVillager(map, town.Homes[homeID], rng);
@@ -343,6 +347,7 @@ class Village
   {
     Mob widower = BaseVillager(ng, rng);
     widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
+    widower.Traits.Add(new BehaviourTreeTrait() { Plan = "BasicVillagerPlan" });
 
     int homeID = PickUnoccuppiedCottage(town, rng);
     widower.Loc = LocForVillager(map, town.Homes[homeID], rng);
@@ -384,6 +389,7 @@ class Village
     kylie.Stats[Attribute.DialogueState] = new Stat(0);
     kylie.Traits.Add(new VillagerTrait());
     kylie.Traits.Add(new NamedTrait());
+    kylie.Traits.Add(new BehaviourTreeTrait() { Plan = "WitchPlan" });
 
     factDb.Add(new SimpleFact() { Name = "WitchId", Value = kylie.ID.ToString() });
     
@@ -403,6 +409,7 @@ class Village
     sophie.Traits.Add(new VillagerTrait());
     sophie.Traits.Add(new NamedTrait());
     sophie.Stats[Attribute.InventoryRefresh] = new Stat(1);
+    sophie.Traits.Add(new BehaviourTreeTrait() { Plan = "AlchemistPlan" });
 
     factDb.Add(new SimpleFact() { Name = "AlchemistId", Value = sophie.ID.ToString() });
 
@@ -478,6 +485,7 @@ class Village
     };
     pup.SetBehaviour(new VillagePupBehaviour());
     pup.Traits.Add(new VillagerTrait());
+    pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
     return pup;
   }
