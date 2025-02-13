@@ -49,5 +49,6 @@ rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4
 flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1
 giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|
 frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||
+zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless
 cultist           |@|grey         |darkgrey    |13|15|3| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent
 cult leader       |@|grey         |darkgrey    |13|20|3| 1.0|12|10|SummonCentipede#0#0#0#0#0#4#Attack#Nag'l fh'tagn!,HealAllies#0#0#0#0#0#05#Passive,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent

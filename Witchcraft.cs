@@ -408,7 +408,10 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       GameState.UIRef().PlayAnimation(anim, GameState);
 
       PolymorphedTrait pt = new();
-      Actor frog = pt.Morph(victim, GameState, "frog");
+      string form = "frog";
+      if (victim.HasTrait<UndeadTrait>())
+        form = "zombie frog";
+      Actor frog = pt.Morph(victim, GameState, form);
       frog.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
       
       if (GameState.LastPlayerFoV.Contains(frog.Loc))
