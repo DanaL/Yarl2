@@ -782,6 +782,26 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         RemoveListener(el);
     }
 
+    if (victim.Traits.OfType<PolymorphedTrait>().FirstOrDefault() is PolymorphedTrait pt)
+    {
+      if (ObjDb.GetObj(pt.OriginalId) is Actor originalForm)
+      {
+        ObjDb.ActorMoved(originalForm, originalForm.Loc, victim.Loc);
+        RefreshPerformers();
+
+        if (LastPlayerFoV.Contains(victim.Loc))
+        {
+          string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "turn")} back into {originalForm.Name.IndefArticle()}!";          
+          UI.AlertPlayer(s);
+          UI.SetPopup(new Popup(s, "", -1, -1));
+        }
+      }
+      else
+      {
+        throw new Exception("Can't find original form for polymorphed creature");
+      }
+    }
+
     if (attacker is not null && attacker.HasTrait<CroesusTouchTrait>() && Rng.NextDouble() < 0.33)
     {
       Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
