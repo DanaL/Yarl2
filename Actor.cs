@@ -513,8 +513,6 @@ class Mob : Actor
       CurrPlan = null;
       ExecuteAction(new PassAction());
     }
-    
-    gs.PrepareFieldOfView();
   }
 
   // At the moment, monsters will pick the player, but I'm working toward
