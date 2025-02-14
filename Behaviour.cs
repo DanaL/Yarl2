@@ -1716,14 +1716,24 @@ class AlchemistBehaviour : NPCBehaviour
       return "";
 
     _lastBark = DateTime.Now;
-    
-    return gs.Rng.Next(4) switch
+
+    var (hour, _) = gs.CurrTime();
+
+    List<string> barks;
+    if (gs.Town.WitchesGarden.Contains(actor.Loc))
     {
-      0 => "Kylie, what do you want for dinner?",
-      1 => "I've been working on a new song.",
-      2 => "We could use some rain!",
-      _ => "I'd better get to the weeding."
-    };
+      barks = ["Kylie, what do you want for dinner?", "Hey plant buddies, you'all doing great!", "Hello bee friends!", "Hmm you need a little more water", "♪ Hmm mmm ♪♪"];
+    }
+    else if (hour < 7 || hour >= 19)
+    {
+      barks = ["I've been working on a new song!", "How was your day?", "I want to tweak that a recipe a bit."];
+    }
+    else
+    {
+      barks = ["I've been working on a new song!", "𝅘𝅥𝅯 Hmm mmm 𝅘𝅥𝅘𝅥", "Kylie, what do you want for dinner?"];
+    }
+    
+    return barks[gs.Rng.Next(barks.Count)];
   }
 
   public override (Action, Inputer?) Chat(Mob actor, GameState gs)
