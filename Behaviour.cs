@@ -513,6 +513,21 @@ class IsNight : BehaviourNode
   }
 }
 
+class CheckTime(int start, int end) : BehaviourNode
+{
+  int Start { get; set; } = start;
+  int End { get; set; } = end;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    var (hour, _) = gs.CurrTime();
+    if (hour >= Start && hour <= End)
+      return PlanStatus.Success;
+
+    return PlanStatus.Failure;
+  }
+}
+
 class CheckDialogueState(int state) : BehaviourNode
 {
   int DialogueState { get; set; } = state;
@@ -588,6 +603,132 @@ class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
     BehaviourNode choice = Nodes[gs.Rng.Next(Nodes.Count)];
     return choice.Execute(mob, gs);
   }
+}
+
+class FindWayToArea(HashSet<Loc> area) : BehaviourNode
+{
+  List<Loc> Area { get; set; } = [..area];
+  Stack<Loc>? Path { get; set; } = null;
+  Loc PrevLoc { get; set; }
+  string PrevAction { get; set; } = "";
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (Path is null)
+    {
+      if (Area.Contains(mob.Loc))
+        return PlanStatus.Success;
+
+      Path = BuildPath(mob, gs);
+    }
+    
+    if (Path.Count > 0)
+    {
+      Loc next = Path.Peek();
+      Tile nextTile = gs.TileAt(next);
+      Tile prevTile = gs.TileAt(PrevLoc);
+
+      // If the mob moved abnormally, they probably need to recalculate their path
+      // Note: there's probably a degenerate case where a mob moving to a specific
+      // loc falls through a pit or something and now their goal is on another 
+      // level. The game doesn't really handle that yet, but hopefully it will 
+      // result in them recalculating their Plan
+      if (Util.Distance(mob.Loc, next) > 1)
+      {
+        Path = null;
+        return PlanStatus.Failure;
+      }
+
+      Action action;
+      if (gs.ObjDb.Occupied(next))
+      {
+        PrevAction = "pass";
+        mob.ExecuteAction(new PassAction(gs, mob) { Quip = "Excuse me" });
+        Path = null;
+        return PlanStatus.Failure;
+      }
+      else if (nextTile is Door door && !door.Open)
+      {
+        PrevAction = "opendoor";
+        action = new OpenDoorAction(gs, mob, next);
+      }
+      else if (prevTile is Door prevDoor && prevDoor.Open && PrevAction != "closedoor")
+      {
+        PrevAction = "closedoor";
+        action = new CloseDoorAction(gs, mob, PrevLoc);
+      }
+      else
+      {
+        PrevAction = "move";
+        PrevLoc = mob.Loc;
+        action = new MoveAction(gs, mob, next);
+        Path.Pop();
+      }
+
+      if (mob.ExecuteAction(action))
+        return PlanStatus.Running;      
+    }
+    else if (Path.Count == 0)
+    {
+      Path = null;
+      return PlanStatus.Success;
+    }
+
+    Path = null;
+    return PlanStatus.Failure;
+  }
+
+  Stack<Loc> BuildPath(Mob mob, GameState gs)
+  {
+    Loc goal = Area[gs.Rng.Next(Area.Count)];
+
+    var path = AStar.FindPath(gs.CurrentMap, mob.Loc, goal, TravelCosts(mob), true);
+    return path;
+  }
+
+  static Dictionary<TileType, int> TravelCosts(Mob mob)
+  {
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.DungeonFloor, 1);
+    costs.Add(TileType.DisturbedGrave, 2);
+    costs.Add(TileType.Gravestone, 2);
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.MagicMouth, 1);
+    costs.Add(TileType.HiddenMagicMouth, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.GreenTree, 2);
+    costs.Add(TileType.OpenDoor, 1);
+    costs.Add(TileType.BrokenDoor, 1);
+    costs.Add(TileType.OpenPortcullis, 1);
+    costs.Add(TileType.CreepyAltar, 1);
+    costs.Add(TileType.Pool, 1);
+    costs.Add(TileType.FrozenDeepWater, 2);
+    costs.Add(TileType.FrozenWater, 2);
+    costs.Add(TileType.Well, 2);
+    costs.Add(TileType.Upstairs, 1);
+    costs.Add(TileType.Downstairs, 1);
+    costs.Add(TileType.Grass, 1);
+    costs.Add(TileType.YellowTree, 2);
+    costs.Add(TileType.OrangeTree, 2);
+    costs.Add(TileType.RedTree, 2);
+    costs.Add(TileType.Conifer, 2);
+    costs.Add(TileType.WoodFloor, 1);
+    costs.Add(TileType.StoneFloor, 1);
+    costs.Add(TileType.WoodBridge, 1);
+    costs.Add(TileType.Water, 3);
+    costs.Add(TileType.Sand, 1);
+
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait || t is VillagerTrait)
+        costs.Add(TileType.ClosedDoor, 2);
+      if (t is FloatingTrait || t is FlyingTrait)
+        costs.Add(TileType.DeepWater, 1);
+    }
+
+    return costs;
+  }
+
 }
 
 class RandomMove : BehaviourNode
@@ -809,6 +950,7 @@ class FindUpStairs : BehaviourNode
     costs.Add(TileType.DisturbedGrave, 1);
     costs.Add(TileType.Gravestone, 1);
     costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.WoodBridge, 1);
     costs.Add(TileType.MagicMouth, 1);
     costs.Add(TileType.HiddenMagicMouth, 1);
     costs.Add(TileType.Dirt, 1);
@@ -982,6 +1124,12 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
 
 class Planner
 {
+  static BehaviourNode GoToArea(Actor actor, GameState gs, Map map, HashSet<Loc> area)
+  {
+    FindPathToArea pathBuilder = new(area, gs);
+    return new WalkPath(pathBuilder.BuildPath(actor.Loc));   
+  }
+
   static Sequence GoToBuilding(Actor actor, GameState gs, Map map, HashSet<Loc> area)
   {
     HashSet<Loc> floors = OnlyFloorsInArea(map, area);
@@ -1230,18 +1378,28 @@ class Planner
       new PassTurn()
     ]);
 
-    Sequence daytime = new([
-      new IsDaytime(),
-      new WanderInArea(gs.Town.WitchesCottage)
-    ]);
+    RepeatWhile daytime = new(new IsDaytime(), new WanderInArea(gs.Town.WitchesYard));
 
     HashSet<Loc> indoors = OnlyFloorsInArea(gs.Wilderness, gs.Town.WitchesCottage);
-    Sequence evening = new([
-      GoToBuilding(witch, gs, gs.Wilderness, indoors),
-      new WanderInArea(indoors)
-    ]);
+    Sequence evening = new([new FindWayToArea(indoors), new WanderInArea(indoors)]);
 
     return new Selector([isInvisible, daytime, evening]);
+  }
+
+  static BehaviourNode AlchemistPlan(Mob alchemist, GameState gs)
+  {
+    Sequence gardening = new([
+      new CheckTime(8, 12),
+      new FindWayToArea(gs.Town.WitchesGarden),
+      new PickRandom([new PassTurn(), new PassTurn(), new WanderInArea(gs.Town.WitchesGarden)])      
+    ]);
+
+    RepeatWhile daytime = new(new IsDaytime(), new WanderInArea(gs.Town.WitchesYard));
+
+    HashSet<Loc> indoors = OnlyFloorsInArea(gs.Wilderness, gs.Town.WitchesCottage);
+    Sequence evening = new([new FindWayToArea(indoors), new WanderInArea(indoors)]);
+    
+    return new Selector([gardening, daytime, evening]);
   }
 
   // Maybe the Actor/Mob class returns its own plan, obviating the need for 
@@ -1256,7 +1414,7 @@ class Planner
     "GrocerPlan" => WanderInHome(gs.Town.Market, gs),
     "BasicVillagerPlan" => BasicVillager(mob, gs),
     "WitchPlan" => WitchPlan(mob, gs),
-    "AlchemistPlan" => new PassTurn(),
+    "AlchemistPlan" => AlchemistPlan(mob, gs),
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")

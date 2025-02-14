@@ -748,6 +748,7 @@ class CampaignCreator(UserInterface ui)
       //seed = 9599510;
       //seed = 600926617;
       // seed = 428910977; // <-- seed crashes during dungeon building
+      // seed =  2034329865; // <-- crashes trying to place witches cottage
 
       Console.WriteLine($"Seed: {seed}");
       var rng = new Random(seed);

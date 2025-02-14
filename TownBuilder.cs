@@ -36,6 +36,7 @@ class Town
   public HashSet<Loc> TownSquare { get; set; } = [];
   public HashSet<Loc> WitchesCottage { get; set; } = [];
   public HashSet<Loc> WitchesGarden { get; set; }= [];
+  public HashSet<Loc> WitchesYard { get; set; } = [];
 
   public int Row { get; set; }
   public int Col { get; set; }
@@ -890,10 +891,37 @@ class TownBuilder
           }
         }
 
+        // Record the full bounds of the witches' property
+        int minRow = int.MaxValue, maxRow = 0, minCol = int.MaxValue, maxCol = 0;
+        foreach (Loc loc in Town.WitchesGarden)
+        {
+          if (loc.Row < minRow) minRow = loc.Row;
+          if (loc.Row > maxRow) maxRow = loc.Row;
+          if (loc.Col < minCol) minCol = loc.Col;
+          if (loc.Col > maxCol) maxCol = loc.Col;
+        }
+        foreach (Loc loc in Town.WitchesCottage)
+        {
+          if (loc.Row < minRow) minRow = loc.Row;
+          if (loc.Row > maxRow) maxRow = loc.Row;
+          if (loc.Col < minCol) minCol = loc.Col;
+          if (loc.Col > maxCol) maxCol = loc.Col;
+        }
+
+        for (int r = minRow - 2; r < maxRow + 2; r++)
+        {
+          for (int c = minCol - 2; c < maxCol + 2; c++)
+          {
+            if (!map.InBounds(r, c))
+              continue;
+            Town.WitchesYard.Add(new Loc(0, 0, r, c));
+          }
+        }
+
         return;
       }
     }
-    
+
     throw new Exception("Unable to find a valid placement for witches' cottage");
   }
 
