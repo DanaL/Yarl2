@@ -26,13 +26,14 @@ class Traps
       RevealTrap(tile, gs, loc);
       
       loc = gs.FallIntoTrapdoor(actor, loc);
-      ui.AlertPlayer($"A trap door opens up underneath {actor.FullName}!");
+      if (trapSqVisible)
+        ui.AlertPlayer($"A trap door opens up underneath {actor.FullName}!");
       
       if (actor is Player player)
       {
         player.Stats[Attribute.Nerve].Change(-15);
         player.Running = false;
-        ui.SetPopup(new Popup($"A trap door opens up underneath {actor.FullName}!", "", -1, -1));
+        ui.SetPopup(new Popup($"A trap door opens up underneath you!", "", -1, -1));
       }
 
       string s = gs.ThingTouchesFloor(loc);
@@ -277,12 +278,13 @@ class Traps
       player.Running = false;
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
 
-      string s;
       if (player.HasTrait<BlindTrait>())
-        s = "You hear a loud roar and something appears beside you!";
-      else
-        s = "There is a flash of light and smoke and monsters appear!";
-      gs.UIRef().AlertPlayer(s);
+        gs.UIRef().AlertPlayer("You hear a loud roar and something appears beside you!");
+      else 
+      {
+        gs.UIRef().AlertPlayer("You step on a summon monster trap!");
+        gs.UIRef().AlertPlayer("There is a flash of light and smoke and monsters appear!");
+      }      
     }
   }
 

@@ -145,7 +145,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (actor.AbilityCheck(Attribute.Strength, 13, gs.Rng))
       {
         string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "crawl")} to the edge of the pit.";
-        ui.AlertPlayer(s);
+        if (gs.LastPlayerFoV.Contains(actor.Loc))
+          ui.AlertPlayer(s);
         actor.Traits = [.. actor.Traits.Where(t => t is not InPitTrait)];
       }
       else if (Actor is Player)

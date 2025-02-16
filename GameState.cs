@@ -699,6 +699,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
   {
+    bool locVisible = LastPlayerFoV.Contains(victim.Loc);
     if (victim is Player)
     {     
       // Play any queued explosions in case it was one of the explosions
@@ -717,11 +718,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       FactDb!.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
     }
-    else if (victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
+    else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {      
       UI.AlertPlayer(dmt.Message);     
     }
-    else
+    else if (locVisible)
     {
       UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));      
     }

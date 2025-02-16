@@ -118,12 +118,12 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       
     Loc endPt = Arc(Actor.Loc, Target, attackMod, GameState!);
     
-    Loc target2 = SelectNextTarget(endPt, gs);
+    Loc target2 = SelectNextTarget(endPt, GameState!);
     if (target2 == Loc.Nowhere)
       return result;
     endPt = Arc(endPt, target2, attackMod, GameState!);
 
-    Loc target3 = SelectNextTarget(endPt, gs);
+    Loc target3 = SelectNextTarget(endPt, GameState!);
     if (target3 == Loc.Nowhere)
       return result;
     Arc(endPt, target3, attackMod, GameState!);
@@ -398,8 +398,8 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     // I don't yet want to deal with the player being polymorphed...
     if (Target == Actor!.Loc)
     {
-      gs.UIRef().AlertPlayer("Your spell fizzles!");
-      GameState!.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+      GameState!.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
     }
    
     if (GameState!.ObjDb.Occupant(Target) is Actor victim)
@@ -430,8 +430,8 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     }
     else
     {
-      gs.UIRef().AlertPlayer("Your spell fizzles!");
-      GameState!.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
+      GameState.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
     }
 
     return result;
