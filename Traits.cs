@@ -161,6 +161,8 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
+abstract class BlessingTrait : TemporaryTrait {}
+
 // For items that can be used by the Apply command but don't need to
 // implement IUseable
 class CanApplyTrait : Trait
@@ -174,6 +176,36 @@ class CarriesTrait : LootTrait
   public int Chance { get; set; }
 
   public override string AsText() => $"Carries#{ItemName}#{Chance}";
+}
+
+class ChampionBlessingTrait : BlessingTrait
+{
+  protected override string ExpiryMsg => "Your blessing fades.";
+
+  public override List<string> Apply(Actor giver, GameState gs)
+  {
+    ACModTrait ac = new() { ArmourMod = 2, SourceId = giver.ID };
+    gs.Player.Traits.Add(ac);
+    AuraOfProtectionTrait prot = new() { HP = 50 };
+    prot.Apply(gs.Player, gs);
+    AttackModTrait amt = new() { Amt = 3, SourceId = giver.ID };
+    gs.Player.Traits.Add(amt);
+
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.Traits = [..gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"ChampionBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
 }
 
 class SwallowedTrait : Trait, IGameEventListener
@@ -2615,7 +2647,7 @@ class TraitFactory
       return new AttackVerbTrait(verb);
     }},
     { "AuraMessage", (pieces, gameObj) => new AuraMessageTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]), Message = pieces[3] } },
-    { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1])}},
+    { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1]) }},
     { "Axe", (pieces, gameObj) => new AxeTrait() },
     { "BehaviourTree", (pieces, gameObj) => new BehaviourTreeTrait() { Plan = pieces[1] } },
     {
