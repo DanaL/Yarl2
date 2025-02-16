@@ -76,9 +76,21 @@ class AdjectiveTrait(string adj) : Trait
   public override string AsText() => $"Adjective#{Adj}";
 }
 
+class ACModTrait : BasicTrait
+{
+  public int ArmourMod { get; set; }
+  public override string AsText() => $"ACMod#{ArmourMod}#{SourceId}";
+}
+
 class AffixedTrait : Trait
 {
   public override string AsText() => $"Affixed";
+}
+
+class AttackModTrait : Trait
+{
+  public int Amt { get; set; }
+  public override string AsText() => $"AttackModTrait#{Amt}#{SourceId}";
 }
 
 class AttackVerbTrait(Verb verb) : Trait
@@ -745,9 +757,9 @@ class GrantsTrait : Trait
     return msgs;
   }
 
-  public void Remove(GameObj obj, GameState gs, GameObj src)
+  public static void Remove(GameObj obj, GameState gs, GameObj src)
   {
-    List<Trait> traits = obj.Traits.Where(t => t.SourceId == src.ID).ToList();
+    List<Trait> traits = [..obj.Traits.Where(t => t.SourceId == src.ID)];
     foreach (Trait t in traits)
     {
       if (t is TemporaryTrait tt)
@@ -1299,12 +1311,6 @@ class DamageTrait : Trait
   public DamageType DamageType { get; set; }
 
   public override string AsText() => $"Damage#{DamageDie}#{NumOfDie}#{DamageType}#{SourceId}";  
-}
-
-class ACModTrait : BasicTrait
-{
-  public int ArmourMod { get; set; }
-  public override string AsText() => $"ACMod#{ArmourMod}#{SourceId}";
 }
 
 class ArmourTrait : Trait
@@ -2603,6 +2609,7 @@ class TraitFactory
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
     },
+    { "AttackMod", (pieces, gameObj) => new AttackModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) } },
     { "AttackVerb", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Verb verb);
       return new AttackVerbTrait(verb);

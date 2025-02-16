@@ -466,9 +466,12 @@ class Battle
       totalMod += str.Curr;
     }
 
-    if (attacker.HasTrait<NauseaTrait>())
+    foreach (Trait t in attacker.Traits)
     {
-      totalMod -= 3;
+      if (t is NauseaTrait)
+        totalMod -= 3;
+      if (t is AttackModTrait amt)
+        totalMod += amt.Amt;
     }
 
     return totalMod;
