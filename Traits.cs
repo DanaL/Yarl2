@@ -182,13 +182,15 @@ class ChampionBlessingTrait : BlessingTrait
 {
   protected override string ExpiryMsg => "Your blessing fades.";
 
-  public override List<string> Apply(Actor giver, GameState gs)
+  public override List<string> Apply(Actor granter, GameState gs)
   {
-    ACModTrait ac = new() { ArmourMod = 2, SourceId = giver.ID };
+    ExpiresOn = gs.Turn + 1000;
+
+    ACModTrait ac = new() { ArmourMod = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
     AuraOfProtectionTrait prot = new() { HP = 50 };
     prot.Apply(gs.Player, gs);
-    AttackModTrait amt = new() { Amt = 3, SourceId = giver.ID };
+    AttackModTrait amt = new() { Amt = 3, SourceId = granter.ID };
     gs.Player.Traits.Add(amt);
 
     gs.Player.Traits.Add(this);
@@ -2669,6 +2671,7 @@ class TraitFactory
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Carries", (pieces, gameObj) => new CarriesTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
+    { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
