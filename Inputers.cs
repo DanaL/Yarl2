@@ -951,7 +951,7 @@ class LongMessagerInputer : Inputer
 {
   UserInterface _ui;
   int _row;
-  IEnumerable<string> _lines;
+  List<string> _wrappedLines;
   bool _done;
   int _pageCount = 1;
 
@@ -961,24 +961,59 @@ class LongMessagerInputer : Inputer
   public LongMessagerInputer(UserInterface ui, IEnumerable<string> lines)
   {
     _ui = ui;
-    _lines = lines;
+    _wrappedLines = WrapLines(lines);
 
     _done = false;
-    var page = _lines.Take(UserInterface.ScreenHeight).ToList();
+    var page = _wrappedLines.Take(UserInterface.ScreenHeight).ToList();
     ui.WriteLongMessage(page);
     _row = page.Count;
   }
 
+  static List<string> WrapLines(IEnumerable<string> lines)
+  {
+    List<string> wrapped = [];
+    
+    foreach (string line in lines)
+    {
+      if (line.Length <= UserInterface.ScreenWidth)
+      {
+        wrapped.Add(line);
+        continue;
+      }
+
+      string[] words = line.Split(' ');
+      StringBuilder currentLine = new();
+
+      foreach (var word in words)
+      {
+        if (currentLine.Length + word.Length + 1 > UserInterface.ScreenWidth)
+        {
+          wrapped.Add(currentLine.ToString().TrimEnd());
+          currentLine.Clear();
+        }
+
+        if (currentLine.Length > 0)
+          currentLine.Append(' ');
+        currentLine.Append(word);
+      }
+
+      if (currentLine.Length > 0)
+        wrapped.Add(currentLine.ToString());
+    }
+
+    return wrapped;
+  }
+
   public override void Input(char ch)
   {
-    if (_row >= _lines.Count())
+    if (_row >= _wrappedLines.Count())
     {
       _done = true;
       _ui.ClearLongMessage();
     }
     else
     {
-      var page = _lines.Skip(_row).Take(UserInterface.ScreenHeight - 1).ToList();
+      var page = _wrappedLines.Skip(_row).Take(UserInterface.ScreenHeight - 1).ToList();
       var txt = $"~ page {++_pageCount} ~";
       txt = txt.PadLeft(UserInterface.ScreenWidth / 2 - txt.Length + txt.Length / 2, ' ');
       page.Insert(0, txt);
