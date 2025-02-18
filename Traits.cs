@@ -90,7 +90,7 @@ class AffixedTrait : Trait
 class AttackModTrait : Trait
 {
   public int Amt { get; set; }
-  public override string AsText() => $"AttackModTrait#{Amt}#{SourceId}";
+  public override string AsText() => $"AttackMod#{Amt}#{SourceId}";
 }
 
 class AttackVerbTrait(Verb verb) : Trait
@@ -479,6 +479,12 @@ class MageArmourTrait : TemporaryTrait
 
     return [ "Magical runes surround you, then disappear. You feel protected." ];
   }
+}
+
+class MeleeDamageModTrait : Trait
+{
+  public int Amt { get; set; }
+  public override string AsText() => $"MeleeDamageMod#{Amt}#{SourceId}";
 }
 
 class MetalTrait : Trait
@@ -2780,6 +2786,7 @@ class TraitFactory
     { "MageArmour", (pieces, gameObj) =>
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
+    { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[2]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },

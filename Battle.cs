@@ -244,9 +244,15 @@ class Battle
       bonusDamage += str.Curr;
     if (attacker.Stats.TryGetValue(Attribute.MeleeDmgBonus, out var mdb))
       bonusDamage += mdb.Curr;
-    if (attacker.HasActiveTrait<RageTrait>())
-      bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
 
+    foreach (Trait t in attacker.Traits)
+    {
+      if (t is RageTrait)
+        bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+      else if (t is MeleeDamageModTrait dmt)
+        bonusDamage += dmt.Amt;
+    }
+    
     Item? weapon = attacker.Inventory.ReadiedWeapon();
 
     string msg = MsgFactory.HitMessage(attacker, target, attackVerb, gs);
