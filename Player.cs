@@ -358,6 +358,7 @@ class Player : Actor
     bool blessed = false;
     int acmod = 0;
     int attackMod = 0;
+    int meleeDmgMod = 0;
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -374,12 +375,16 @@ class Player : Actor
         traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");   
       else if (trait is FeatherFallTrait)
         traitsToShow.Add("You have feather fall");
+       else if (trait is FrighteningTrait)
+        traitsToShow.Add("You can frighten your foes");
       else if (trait is BlessingTrait)
         blessed = true;
       else if (trait is ACModTrait acm)
         acmod += acm.ArmourMod;
       else if (trait is AttackModTrait attm)
         attackMod += attm.Amt;
+      else if (trait is MeleeDamageModTrait mdm)
+        meleeDmgMod += mdm.Amt;
     }
     
     if (alacrity < 0)
@@ -396,6 +401,11 @@ class Player : Actor
       traitsToShow.Add("You have an attack penalty");
     else if (attackMod > 0)
       traitsToShow.Add("You have an attack bonus");
+
+    if (meleeDmgMod < 0)
+      traitsToShow.Add("You deal reduced damage in melee");
+    else if (meleeDmgMod > 0)
+      traitsToShow.Add("You deal more damage in melee");
 
     if (blessed)
       traitsToShow.Add("You are blessed");

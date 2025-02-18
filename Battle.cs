@@ -247,7 +247,7 @@ class Battle
 
     foreach (Trait t in attacker.Traits)
     {
-      if (t is RageTrait)
+      if (t is RageTrait rt && rt.Active)
         bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
       else if (t is MeleeDamageModTrait dmt)
         bonusDamage += dmt.Amt;
@@ -533,11 +533,6 @@ class Battle
         }        
       }
 
-      Verb verb = Verb.Hit;
-      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
-        verb = avt.Verb;
-      ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
-  
       bool swallowed = attacker.HasTrait<SwallowedTrait>();
 
       if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
@@ -577,7 +572,12 @@ class Battle
         {
           HandleFrightening(target, gs, ft);
         }
-      }    
+      }
+
+      Verb verb = Verb.Hit;
+      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
+        verb = avt.Verb;
+      ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
     }
     else
     {

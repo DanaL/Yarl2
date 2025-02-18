@@ -22,7 +22,7 @@ enum TokenType
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   OPTION, SPEND, END, 
-  BLESSINGS, GRANT_CHAMP_BLESSING,
+  BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
   EOF
 }
 
@@ -127,6 +127,7 @@ class ScriptScanner(string src)
       "offer" => TokenType.OFFER,
       "blessings-options" => TokenType.BLESSINGS,
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
+      "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
       _ => TokenType.IDENTIFIER
     };
 
@@ -223,6 +224,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OPTION => OptionExpr(),
       TokenType.BLESSINGS => BlessingsExpr(),
       TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
+      TokenType.GRANT_REAVER_BLESSING => GrantReaverBlessingExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -307,6 +309,14 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptChampionBlessing();
+  }
+
+  ScriptReaverBlessing GrantReaverBlessingExpr()
+  {
+    Consume(TokenType.BLESSINGS);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptReaverBlessing();
   }
 
   ScriptSpend SpendExpr()
@@ -628,6 +638,7 @@ class ScriptSpend(int amount) : ScriptExpr
 }
 
 class ScriptChampionBlessing : ScriptExpr {}
+class ScriptReaverBlessing : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -886,9 +897,13 @@ class DialogueInterpreter
     {
       EvalBlessings(gs);
     }
-    else if (Expr is ScriptChampionBlessing blessing)
+    else if (Expr is ScriptChampionBlessing)
     {
       EvalChampionBlessing(mob, gs);
+    }
+    else if (Expr is ScriptReaverBlessing)
+    {
+      EvalReaverBlessing(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1174,6 +1189,7 @@ class DialogueInterpreter
     {
       Sb.Append("\n\nHuntoker offers blessings to those who would drive back the darkness!");
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
     }
     else
     {
@@ -1186,7 +1202,13 @@ class DialogueInterpreter
     ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
 
-    gs.UIRef().SetPopup(new Popup("You are awash in holy light!", "", -1, -1));
+    throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalReaverBlessing(Actor mob, GameState gs)
+  {
+    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    reaver.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }

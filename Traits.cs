@@ -161,7 +161,10 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
-abstract class BlessingTrait : TemporaryTrait {}
+abstract class BlessingTrait : TemporaryTrait 
+{
+  protected override string ExpiryMsg => "Your blessing fades.";
+}
 
 // For items that can be used by the Apply command but don't need to
 // implement IUseable
@@ -179,9 +182,7 @@ class CarriesTrait : LootTrait
 }
 
 class ChampionBlessingTrait : BlessingTrait
-{
-  protected override string ExpiryMsg => "Your blessing fades.";
-
+{  
   public override List<string> Apply(Actor granter, GameState gs)
   {
     ExpiresOn = gs.Turn + 1000;
@@ -2244,6 +2245,38 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
   public void Used() {}
 }
 
+class ReaverBlessingTrait : BlessingTrait
+{
+  public override List<string> Apply(Actor granter, GameState gs)
+  {
+    ExpiresOn = gs.Turn + 1000;
+
+    MeleeDamageModTrait dmg = new() { Amt = 5, SourceId = granter.ID };
+    gs.Player.Traits.Add(dmg);
+
+    // Do I want this to be will? Or should I make it whichever is higher:
+    // will or strength (kind of like Chr vs Str intimidation checks in 5e)
+    int will = gs.Player.Stats[Attribute.Will].Curr;
+    FrighteningTrait fright = new() { DC = 10 + will, SourceId = granter.ID };
+    gs.Player.Traits.Add(fright);
+        
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"ReaverBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 // I am making the assumption it will only be the Player who uses Recall.
 class RecallTrait : BasicTrait, IGameEventListener
 {
@@ -2684,7 +2717,7 @@ class TraitFactory
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Carries", (pieces, gameObj) => new CarriesTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
-    { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
@@ -2794,7 +2827,7 @@ class TraitFactory
     { "MageArmour", (pieces, gameObj) =>
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
-    { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[2]), SourceId = ulong.Parse(pieces[2]) }},
+    { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
@@ -2835,6 +2868,7 @@ class TraitFactory
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
+    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
     { "Regeneration", (pieces, gameObj) => {
       ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
