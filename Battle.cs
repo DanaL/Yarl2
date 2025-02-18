@@ -317,7 +317,7 @@ class Battle
       if (weapon is not null)
       {
         var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
-        if (s != "" && attacker is Player)
+        if (attacker is Player)
         {
           gs.UIRef().AlertPlayer(s);          
         }        
@@ -570,7 +570,12 @@ class Battle
 
         if (t is CutpurseTrait && !swallowed)
         {
-          HandleCutpurse(attacker, target, gs, result);
+          HandleCutpurse(attacker, target, gs);
+        }
+
+        if (t is FrighteningTrait ft && !swallowed)
+        {
+          HandleFrightening(target, gs, ft);
         }
       }    
     }
@@ -624,7 +629,19 @@ class Battle
     return false;
   }
 
-  static void HandleCutpurse(Actor attacker, Actor target, GameState gs, ActionResult result)
+  static void HandleFrightening(Actor target, GameState gs, FrighteningTrait fright)
+  {
+    FrightenedTrait frightened = new() { DC = fright.DC, ExpiresOn = gs.Turn + 25 };
+    List<string> msgs = frightened.Apply(target, gs);
+
+    UserInterface ui = gs.UIRef();
+    foreach (string msg in msgs)
+    {
+      ui.AlertPlayer(msg, gs, target.Loc);
+    }
+  }
+
+  static void HandleCutpurse(Actor attacker, Actor target, GameState gs)
   {
     // If you are attacking with reach, like with a polearm, you don't get 
     // to be a cutpurse
