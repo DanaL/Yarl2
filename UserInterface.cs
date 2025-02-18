@@ -788,13 +788,20 @@ abstract class UserInterface
     WriteLine("", row, col, width, colour);
   }
 
-  // TODO: DRY the two versions of AlertPlayer
   public void AlertPlayer(string alert)
   {
     if (alert.Trim().Length == 0)
       return;
 
     Messages.Enqueue(alert);
+  }
+
+  public void AlertPlayer(string alert, GameState gs, Loc loc)
+  {
+    if (!gs.LastPlayerFoV.Contains(loc))
+      return;
+
+    AlertPlayer(alert);
   }
 
   public void WriteAlerts()

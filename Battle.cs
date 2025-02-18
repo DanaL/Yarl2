@@ -370,15 +370,12 @@ class Battle
     return "";
   }
 
-  static string ResolveGrapple(Actor actor, Actor target, GameState gs)
+  static string ResolveGrapple(Actor actor, Actor target, GameState gs, GrapplerTrait grapple)
   {
     // You can only be grappled by one thing at a time
     if (target.HasTrait<GrappledTrait>())
       return "";
 
-    var grapple = actor.Traits
-                       .OfType<GrapplerTrait>()
-                       .First();
     if (target.AbilityCheck(Attribute.Strength, grapple.DC, gs.Rng))
       return "";
 
@@ -393,6 +390,7 @@ class Battle
     target.Traits.Add(grappled);
     var msg = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} grappled by "; 
     msg += actor.FullName + "!";
+
     return msg;
   }
 
@@ -556,22 +554,25 @@ class Battle
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
         ResolveImpale(attacker, target, roll, gs, result, weaponBonus);
       
-      if (attacker.HasActiveTrait<KnockBackTrait>())
+      foreach (Trait t in attacker.Traits)
       {
-        string msg = ResolveKnockBack(attacker, target, gs);
-        gs.UIRef().AlertPlayer(msg);        
-      }
-      
-      if (attacker.HasActiveTrait<GrapplerTrait>())
-      {
-        string msg = ResolveGrapple(attacker, target, gs);
-        gs.UIRef().AlertPlayer(msg);        
-      }
+        if (t is KnockBackTrait)
+        {
+          string msg = ResolveKnockBack(attacker, target, gs);
+          gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);          
+        }
 
-      if (attacker.HasTrait<CutpurseTrait>() && !swallowed)
-      {
-        HandleCutpurse(attacker, target, gs, result);
-      }
+        if (t is GrapplerTrait gt)
+        {
+          string msg = ResolveGrapple(attacker, target, gs, gt);
+          gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);
+        }
+
+        if (t is CutpurseTrait && !swallowed)
+        {
+          HandleCutpurse(attacker, target, gs, result);
+        }
+      }    
     }
     else
     {
@@ -665,7 +666,8 @@ class Battle
     else
     {
       loot = Treasure.PoorTreasure(1, gs.Rng, gs.ObjDb)[0];
-    }    
+    }
+
     gs.UIRef().AlertPlayer($"You lift {ItemDesc(loot)} from {target.FullName}!");
     target.Traits.Add(new RobbedTrait());
     attacker.Inventory.Add(loot, attacker.ID);
