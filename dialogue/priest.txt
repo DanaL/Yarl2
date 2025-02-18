@@ -1,23 +1,30 @@
-﻿(cond
-	((= ORCHARD_EXISTS true) 
-		(say
-			(pick
-				("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
-          "Have you heard the good word about Huntokar?" 
-          "It's said in ancient days the elves of old would grow magic fruit in their secret orchards."
+﻿(
+  (cond
+    ((= ORCHARD_EXISTS true) 
+      (say
+        (pick
+          ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
+            "Have you heard the good word about Huntokar?" 
+            "It's said in ancient days the elves of old would grow magic fruit in their secret orchards."
+            "We await a great adventurer who can take up the mantle and deliver our town from the hordes."
+            "Long ago a darkness arose in the nearby ruins and since then evil has spewed forth, endangering #TOWN_NAME")
+        )
+      )
+    )
+    (else
+      (say
+        (pick
+          ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
+          "Have you heard the good word about Huntokar?"
           "We await a great adventurer who can take up the mantle and deliver our town from the hordes."
           "Long ago a darkness arose in the nearby ruins and since then evil has spewed forth, endangering #TOWN_NAME")
-			)
-		)
-	)
-	(else
-		(say
-			(pick
-				("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
-        "Have you heard the good word about Huntokar?"
-        "We await a great adventurer who can take up the mantle and deliver our town from the hordes."
-        "Long ago a darkness arose in the nearby ruins and since then evil has spewed forth, endangering #TOWN_NAME")
-			)
-		)
-	)
+        )
+      )
+    )
+  )
+
+  (
+    
+    (blessings-options)
+  )
 )

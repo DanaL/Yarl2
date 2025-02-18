@@ -355,28 +355,50 @@ class Player : Actor
 
     List<string> traitsToShow = [];
     double alacrity = 0;
+    bool blessed = false;
+    int acmod = 0;
+    int attackMod = 0;
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
         traitsToShow.Add("You have the ability to rage");
-      if (trait is LightStepTrait)
+      else if (trait is LightStepTrait)
         traitsToShow.Add("You step lightly");
-      if (trait is DodgeTrait)
+      else if (trait is DodgeTrait)
         traitsToShow.Add("You sometimes can dodge attacks");
-      if (trait is CutpurseTrait)
+      else if (trait is CutpurseTrait)
         traitsToShow.Add("You have sticky fingers");
-      if (trait is AlacrityTrait alacrityTrait)
+      else if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
-      if (trait is StressTrait st)    
+      else if (trait is StressTrait st)    
         traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");   
-      if (trait is FeatherFallTrait)
+      else if (trait is FeatherFallTrait)
         traitsToShow.Add("You have feather fall");
+      else if (trait is BlessingTrait)
+        blessed = true;
+      else if (trait is ACModTrait acm)
+        acmod += acm.ArmourMod;
+      else if (trait is AttackModTrait attm)
+        attackMod += attm.Amt;
     }
     
     if (alacrity < 0)
       traitsToShow.Add("You are quicker than normal");
     else if (alacrity > 0)
       traitsToShow.Add("You are somewhat slowed");
+
+    if (acmod < 0)
+      traitsToShow.Add("You have a penalty to your AC");
+    else if (acmod > 0)
+      traitsToShow.Add("You have a bonus to your AC");
+
+    if (attackMod < 0)
+      traitsToShow.Add("You have an attack penalty");
+    else if (attackMod > 0)
+      traitsToShow.Add("You have an attack bonus");
+
+    if (blessed)
+      traitsToShow.Add("You are blessed");
 
     if (traitsToShow.Count > 0)
     {

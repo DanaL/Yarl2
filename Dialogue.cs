@@ -21,7 +21,8 @@ enum TokenType
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
-  OPTION, SPEND, END,
+  OPTION, SPEND, END, 
+  BLESSINGS, GRANT_CHAMP_BLESSING,
   EOF
 }
 
@@ -124,6 +125,8 @@ class ScriptScanner(string src)
       "spend" => TokenType.SPEND,
       "end" => TokenType.END,
       "offer" => TokenType.OFFER,
+      "blessings-options" => TokenType.BLESSINGS,
+      "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
       _ => TokenType.IDENTIFIER
     };
 
@@ -172,7 +175,7 @@ class ScriptScanner(string src)
   char Peek() => IsAtEnd() ? '\0' : Source[Current];
   char Advance() => Source[Current++];
   bool IsAtEnd() => Current >= Source.Length;
-  static bool IsAlpha(char c) => char.IsLetter(c) || c == '_';
+  static bool IsAlpha(char c) => char.IsLetter(c) || c == '_' || c == '-';
   static bool IsDigit(char c) => char.IsAsciiDigit(c);
 
   private bool Match(char expected)
@@ -218,6 +221,8 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.AND => AndExpr(),
       TokenType.OR => OrExpr(),
       TokenType.OPTION => OptionExpr(),
+      TokenType.BLESSINGS => BlessingsExpr(),
+      TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -288,6 +293,22 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptOption(str, expr);
   }
   
+  ScriptBlessings BlessingsExpr()
+  {
+    Consume(TokenType.BLESSINGS);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptBlessings();
+  }
+
+  ScriptChampionBlessing GrantChampionBlessingExpr()
+  {
+    Consume(TokenType.BLESSINGS);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptChampionBlessing();
+  }
+
   ScriptSpend SpendExpr()
   {
     Consume(TokenType.SPEND);
@@ -599,10 +620,14 @@ class ScriptOption(string text, ScriptExpr expr) : ScriptExpr
   public ScriptExpr Expr { get; set; } = expr;  
 }
 
+class ScriptBlessings : ScriptExpr {}
+
 class ScriptSpend(int amount) : ScriptExpr
 {
   public int Amount { get; set; } = amount;
 }
+
+class ScriptChampionBlessing : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -843,7 +868,7 @@ class DialogueInterpreter
     else if (Expr is ScriptGive gift)
     {
       EvalGive(gift, mob, gs);
-    }
+    }    
     else if (Expr is ScriptSet set)
     {
       EvalSet(set, mob, gs);
@@ -856,6 +881,14 @@ class DialogueInterpreter
     else if (Expr is ScriptOption opt)
     {
       EvalOption(opt, mob, gs);
+    }
+    else if (Expr is ScriptBlessings)
+    {
+      EvalBlessings(gs);
+    }
+    else if (Expr is ScriptChampionBlessing blessing)
+    {
+      EvalChampionBlessing(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1131,6 +1164,31 @@ class DialogueInterpreter
   {
     int purse = gs.Player.Inventory.Zorkmids;
     gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
+  }
+
+  void EvalBlessings(GameState gs)
+  {
+    bool blessed = gs.Player.HasTrait<BlessingTrait>();
+    
+    if (!blessed)
+    {
+      Sb.Append("\n\nHuntoker offers blessings to those who would drive back the darkness!");
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
+    }
+    else
+    {
+      Sb.Append("\n\nYou go forth with Huntokar's blessing and protection!");
+    }
+  }
+
+  static void EvalChampionBlessing(Actor mob, GameState gs)
+  {
+    ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    blessing.Apply(mob, gs);
+
+    gs.UIRef().SetPopup(new Popup("You are awash in holy light!", "", -1, -1));
+
+    throw new ConversationEnded("You are bathed in holy light!");
   }
 }
 

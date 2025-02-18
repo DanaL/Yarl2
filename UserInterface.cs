@@ -728,6 +728,12 @@ abstract class UserInterface
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("OBSCURED");
     }
+    if (!statuses.Contains("BLESSED") && gs.Player.HasTrait<BlessingTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "BLESSED")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("YELLOW");
+    }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)

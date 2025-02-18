@@ -791,7 +791,7 @@ class GrantsTrait : Trait
     return msgs;
   }
 
-  public static void Remove(GameObj obj, GameState gs, GameObj src)
+  public void Remove(GameObj obj, GameState gs, GameObj src)
   {
     List<Trait> traits = [..obj.Traits.Where(t => t.SourceId == src.ID)];
     foreach (Trait t in traits)
