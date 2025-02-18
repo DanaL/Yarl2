@@ -523,6 +523,38 @@ class EdibleTrait : Trait
   public override string AsText() => "Edible";
 }
 
+class EmberBlessingTrait : BlessingTrait
+{
+  public override List<string> Apply(Actor granter, GameState gs)
+  {
+    ExpiresOn = gs.Turn + 1000;
+
+    //MeleeDamageModTrait dmg = new() { Amt = 5, SourceId = granter.ID };
+    //gs.Player.Traits.Add(dmg);
+
+    //// Do I want this to be will? Or should I make it whichever is higher:
+    //// will or strength (kind of like Chr vs Str intimidation checks in 5e)
+    //int will = gs.Player.Stats[Attribute.Will].Curr;
+    //FrighteningTrait fright = new() { DC = 10 + will, SourceId = granter.ID };
+    //gs.Player.Traits.Add(fright);
+
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"EmberBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class PoorLootTrait : LootTrait
 {
   public override string AsText() => "PoorLoot";
@@ -2763,6 +2795,7 @@ class TraitFactory
     },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
+    { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FeatherFall", (pieces, gameObj) => {
