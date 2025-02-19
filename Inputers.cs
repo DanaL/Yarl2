@@ -683,13 +683,22 @@ class Dialoguer : Inputer
 {
   readonly Mob _interlocutor;
   readonly GameState _gs;
+  readonly IDialoguer _dialogue;
   HashSet<char> _currOptions = [];
   char _exitOpt = '\0';
+  readonly int _popupWidth = 60;
 
   public Dialoguer(Mob interlocutor, GameState gs)
   {
     _interlocutor = interlocutor;
     _gs = gs;
+    
+    // Cast and validate the dialogue interface upfront
+    if (interlocutor.Behaviour is not IDialoguer dialogue)
+    {
+      throw new ArgumentException("Interlocutor must have IDialoguer behaviour", nameof(interlocutor));
+    }
+    _dialogue = dialogue;
 
     WritePopup();
   }
@@ -699,71 +708,107 @@ class Dialoguer : Inputer
     if (ch == Constants.ESC || ch == _exitOpt)
     {
       EndConversation("Farewell.");
+      return;
     }
-    else if (_currOptions.Contains(ch))
-    {
-      try
-      {
-        var dialgoue = (IDialoguer)_interlocutor.Behaviour;
-        dialgoue.SelectOption(_interlocutor, ch, _gs);
 
-        WritePopup();
-      }
-      catch (ConversationEnded ce)
-      {
-        EndConversation(ce.Message);
-      }
+    if (!_currOptions.Contains(ch))
+    {
+      return; // Ignore invalid inputs
+    }
+
+    try
+    {
+      _dialogue.SelectOption(_interlocutor, ch, _gs);
+      WritePopup();
+    }
+    catch (ConversationEnded ce)
+    {
+      EndConversation(ce.Message);
     }
   }
 
   void EndConversation(string text)
   {
     _gs.UIRef().AlertPlayer(text);
-
     Done = true;
     Success = true;
   }
 
   void WritePopup()
   {
-    var dialgoue = _interlocutor.Behaviour as IDialoguer;
-
     var sb = new StringBuilder(_interlocutor.Appearance.Capitalize());
     sb.Append("\n\n");
 
-    string blurb;
-    List<(string, char)> opts;
     try
     {
-      (blurb, opts) = dialgoue!.CurrentText(_interlocutor, _gs);
+      var (blurb, opts) = _dialogue.CurrentText(_interlocutor, _gs);
+
+      if (string.IsNullOrEmpty(blurb))
+      {
+        EndConversation($"{_interlocutor.FullName.Capitalize()} turns away from you.");
+        return;
+      }
+
+      sb.Append(blurb)
+        .Append("\n\n");
+
+      _currOptions = [];      
+      foreach (var (text, key) in opts)
+      {
+        _currOptions.Add(key);
+        
+        string optionPrefix = $"{key}) ";
+        int availableWidth = _popupWidth - optionPrefix.Length;
+        string remainingText = text;
+        bool isFirstLine = true;
+
+        while (remainingText.Length > availableWidth)
+        {
+            int splitPoint = availableWidth;
+            while (splitPoint > 0 && remainingText[splitPoint - 1] != ' ')
+            {
+                splitPoint--;
+            }
+
+            if (splitPoint == 0)
+            {
+                splitPoint = availableWidth;
+            }
+
+            if (isFirstLine)
+            {
+                sb.AppendLine(optionPrefix + remainingText[..splitPoint].TrimEnd());
+                isFirstLine = false;
+            }
+            else
+            {
+                sb.AppendLine($"\t{remainingText[..splitPoint].TrimEnd()}");
+            }
+
+            remainingText = remainingText[splitPoint..].TrimStart();
+        }
+
+        if (remainingText.Length > 0)
+        {
+            if (isFirstLine)
+            {
+                sb.AppendLine(optionPrefix + remainingText);
+            }
+            else
+            {
+                sb.AppendLine($"\t{remainingText}");
+            }
+        }
+      }
+
+      _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
+      sb.AppendLine($"{_exitOpt}) Farewell.");
+
+      _gs.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -2, -1, _popupWidth));
     }
     catch (ConversationEnded ce)
     {
       EndConversation(ce.Message);
-      return;
-    }
-
-    if (blurb == "")
-    {
-      EndConversation($"{_interlocutor.FullName.Capitalize()} turns away from you.");
-    }
-    else
-    {
-      sb.Append(blurb);
-      sb.Append("\n\n");
-      char c = '`';
-      _currOptions = [];
-      foreach (var opt in opts)
-      {
-        c = opt.Item2;
-        _currOptions.Add(c);
-        sb.Append($"{c}) {opt.Item1}\n");
-      }
-      ++c;
-      _exitOpt = c;
-      sb.Append($"{c}) Farewell.\n");
-
-      _gs.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -1, -1));
     }
   }
 }

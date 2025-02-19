@@ -43,6 +43,9 @@ class LineScanner(string line)
       case '\n':
         Words.Add((CurrentColour, "\n"));
         break;
+      case '\t':
+        Words.Add((CurrentColour, "\t"));
+        break;
       case '\\':
         if (Peek() == 'n')
         {
@@ -195,6 +198,11 @@ class Popup : IPopup
       if (word == "\n")
       {
         WritePaddedLine();
+      }
+      else if (word == "\t")
+      {
+        line.Add((Colours.BLACK, "   "));
+        currWidth += 3;
       }
       else if (word.Length < Width - currWidth - 2)
       {
