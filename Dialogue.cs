@@ -1203,7 +1203,7 @@ class DialogueInterpreter
     
     if (!blessed)
     {
-      Sb.Append("\n\nHuntoker offers blessings to those who would drive back the darkness!");
+      Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));

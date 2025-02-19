@@ -789,15 +789,11 @@ class Dialoguer : Inputer
         }
 
         if (remainingText.Length > 0)
-        {
-            if (isFirstLine)
-            {
-                sb.AppendLine(optionPrefix + remainingText);
-            }
-            else
-            {
-                sb.AppendLine($"\t{remainingText}");
-            }
+        {          
+          if (isFirstLine)          
+            sb.AppendLine(optionPrefix + remainingText);          
+          else
+            sb.AppendLine($"\t{remainingText}");          
         }
       }
 
