@@ -137,8 +137,7 @@ class Traps
       int attackRoll = gs.Rng.Next(1, 21) + loc.Level / 3;
       if (attackRoll > actor.AC)
       {
-        ActionResult result = new();
-        Battle.ResolveMissileHit(dart, actor, dart, gs, result);        
+        Battle.ResolveMissileHit(dart, actor, dart, gs);        
       }
 
       gs.ItemDropped(dart, loc);

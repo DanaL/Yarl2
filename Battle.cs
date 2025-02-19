@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using static System.Net.Mime.MediaTypeNames;
-
 namespace Yarl2;
 
 enum DamageType
@@ -47,7 +45,7 @@ class Battle
     return (total, dmg.Type);
   }
 
-  static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, int weaponBonus)
+  static bool ResolveImpale(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
   {
     bool success = false;
 
@@ -58,14 +56,14 @@ class Battle
     Actor? occ = gs.ObjDb.Occupant(checkLoc);
     if (occ is not null && attackRoll >= occ.AC)
     {
-      ResolveMeleeHit(attacker, occ, gs, result, Verb.Impale, weaponBonus);
+      ResolveMeleeHit(attacker, occ, gs, Verb.Impale, weaponBonus);
       success = true;
     }
 
     return success;
   }
 
-  static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, ActionResult result, int weaponBonus)
+  static bool ResolveCleave(Actor attacker, Actor target, int attackRoll, GameState gs, int weaponBonus)
   {
     bool success = false;
     // Check for any cleave targets Adj4 to main target and Adj to attacker
@@ -78,7 +76,7 @@ class Battle
       {
         if (attackRoll >= occ.AC)
         {
-          ResolveMeleeHit(attacker, occ, gs, result, Verb.Cleave, weaponBonus);
+          ResolveMeleeHit(attacker, occ, gs, Verb.Cleave, weaponBonus);
           success = true;
         }
       }
@@ -87,7 +85,7 @@ class Battle
     return success;
   }
 
-  public static void ResolveMissileHit(GameObj attacker, Actor target, Item ammo, GameState gs, ActionResult result)
+  public static void ResolveMissileHit(GameObj attacker, Actor target, Item ammo, GameState gs)
   {
     List<(int, DamageType)> dmg = [];
     foreach (var trait in ammo.Traits)
@@ -118,7 +116,7 @@ class Battle
     {
       if (trait is PoisonerTrait poison)
       {
-        ApplyPoison(poison, target, gs, result);
+        ApplyPoison(poison, target, gs);
         poisoner = true;
       }
     }
@@ -127,7 +125,7 @@ class Battle
       CheckCoatedPoison(ammo, gs.Rng);
   }
 
-  static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs, ActionResult result)
+  static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs)
   {
     int duration = source.Duration + gs.Rng.Next(-5, 6);
     if (duration < 0)
@@ -143,14 +141,14 @@ class Battle
       gs.UIRef().AlertPlayer(s);    
   }
 
-  static void CheckAttackTraits(Actor target, GameState gs, ActionResult result, GameObj obj, int dmgDone)
+  static void CheckAttackTraits(Actor target, GameState gs, GameObj obj, int dmgDone)
   {
     bool poisoner = false;
     foreach (Trait trait in obj.Traits)
     {
       if (trait is PoisonerTrait poison)
       {
-        ApplyPoison(poison, target, gs, result);
+        ApplyPoison(poison, target, gs);
         poisoner = true;
       }
 
@@ -171,7 +169,7 @@ class Battle
 
       if (dmgDone > 0 && obj is Actor actor && trait is MosquitoTrait && gs.Rng.NextDouble() < 0.6)
       {
-        Spawn(actor, gs, result);
+        Spawn(actor, gs);
       }
 
       if (trait is CorrosiveTrait)
@@ -194,7 +192,7 @@ class Battle
       CheckCoatedPoison(obj, gs.Rng);
   }
 
-  static void Spawn(Actor actor, GameState gs, ActionResult result)
+  static void Spawn(Actor actor, GameState gs)
   {
     List<Loc> options = Util.Adj8Locs(actor.Loc)
                             .Where(loc => gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))
@@ -211,7 +209,7 @@ class Battle
     }
   }
 
-  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, ActionResult result, Verb attackVerb, int weaponBonus)
+  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, Verb attackVerb, int weaponBonus)
   {    
     // Need to handle the case where the player isn't currently wielding a weapon...
     List<(int, DamageType)> dmg = [];
@@ -272,11 +270,11 @@ class Battle
     
     ResolveHit(attacker, target, hpLeft, gs);
 
-    CheckAttackTraits(target, gs, result, attacker, dmgDone);
+    CheckAttackTraits(target, gs, attacker, dmgDone);
 
     if (weapon is not null) 
     { 
-      CheckAttackTraits(target, gs, result, weapon, dmgDone);
+      CheckAttackTraits(target, gs, weapon, dmgDone);
     }      
   }
 
@@ -529,12 +527,12 @@ class Battle
         bool versatile = weapon.HasTrait<VersatileTrait>();
         if (!(versatile && attacker.Inventory.ShieldEquipped()))
         {
-          ResolveCleave(attacker, target, roll, gs, result, weaponBonus);
+          ResolveCleave(attacker, target, roll, gs, weaponBonus);
         }        
       }
      
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
-        ResolveImpale(attacker, target, roll, gs, result, weaponBonus);
+        ResolveImpale(attacker, target, roll, gs, weaponBonus);
       
       foreach (Trait t in attacker.Traits)
       {
@@ -564,7 +562,7 @@ class Battle
       Verb verb = Verb.Hit;
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
-      ResolveMeleeHit(attacker, target, gs, result, verb, weaponBonus);
+      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
     }
     else
     {
@@ -728,7 +726,7 @@ class Battle
     {      
       if (anim is not null)
         gs.UIRef().PlayAnimation(anim, gs);
-      ResolveMissileHit(attacker, target, ammo, gs, result);
+      ResolveMissileHit(attacker, target, ammo, gs);
 
       result.Succcessful = true;
     }
@@ -759,7 +757,7 @@ class Battle
     {
       if (anim is not null)
         gs.UIRef().PlayAnimation(anim, gs);
-      ResolveMissileHit(attacker, target, spell, gs, result);
+      ResolveMissileHit(attacker, target, spell, gs);
       result.Succcessful = true;
     }
     else
