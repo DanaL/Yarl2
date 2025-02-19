@@ -159,7 +159,7 @@ class Tutorial(UserInterface ui)
 
     [LIGHTBLUE Dungeons are dark, so let's light up a torch! Tap 'a' to open a menu of your current equipment and select the letter for a torch.]
     ";
-    UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8), true);
+    UI.SetPopup(new Popup(welcomeText, "Tutorial", -3, -1, UserInterface.ScreenWidth - 8));
 
     FullyEquipped fe = new(new Loc(1, 0, 5, 10));
     foreach (var item in objDb.ItemsAt(new Loc(1, 0, 1, 8)))    

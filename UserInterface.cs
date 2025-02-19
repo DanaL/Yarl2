@@ -316,19 +316,13 @@ abstract class UserInterface
     while (e.Type == GameEventType.NoEvent);
   }
 
+  public void SetPopup(IPopup popup) => _popup = popup;
   public void ClosePopup()
   {
     _popup = null;
     _confirm = null;
   }
-
   public void CloseConfirmation() => _confirm = null;
-
-  public void SetPopup(IPopup popup, bool fullWidth = false) 
-  {
-    popup.FullWidth = fullWidth;
-    _popup = popup;
-  }
 
   public void PlayQueuedExplosions(GameState gs)
   {

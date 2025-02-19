@@ -112,7 +112,6 @@ class LineScanner(string line)
 interface IPopup
 {
   void Draw(UserInterface ui);
-  bool FullWidth { get; set; }
   void SetDefaultTextColour(Colour colour);
 }
 
@@ -124,8 +123,7 @@ class Popup : IPopup
   readonly int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
-  public bool FullWidth { get; set; }
-
+  
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     int widthGuess = GuessWidth(message);
@@ -153,12 +151,13 @@ class Popup : IPopup
   public void Draw(UserInterface ui)
   {
     int col, row;
-    if (PreferredCol == -1 && FullWidth)
-      col = (UserInterface.ScreenWidth - Width) / 2;
-    else if (PreferredCol == -1)
+    if (PreferredCol != -1)
+      col = PreferredCol - (Width / 2);
+    else if (Width < UserInterface.ViewWidth)
       col = (UserInterface.ViewWidth - Width) / 2;
     else
-      col = PreferredCol - (Width / 2);
+      col = (UserInterface.ScreenWidth - Width) / 2;
+      
     if (PreferredRow == -1)
       row = 5;
     else

@@ -130,7 +130,7 @@ class TitleScreen
   void AboutPopup()
   {
     string text = File.ReadAllText(ResourcePath.GetDataFilePath("about.txt"));
-    UI.SetPopup(new Popup(text, "", -1, -1, UserInterface.ScreenWidth - 20), true);
+    UI.SetPopup(new Popup(text, "", -1, -1, UserInterface.ScreenWidth - 20));
   }
 
   void UpdatePlayer()
