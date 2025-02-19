@@ -1206,7 +1206,7 @@ class DialogueInterpreter
       Sb.Append("\n\nHuntoker offers blessings to those who would drive back the darkness!");
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptReaverBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
     }
     else
     {
@@ -1232,8 +1232,8 @@ class DialogueInterpreter
 
   static void EvalEmberBlessing(Actor mob, GameState gs)
   {
-    EmberBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
-    reaver.Apply(mob, gs);
+    EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    ember.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }

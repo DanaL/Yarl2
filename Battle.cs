@@ -111,7 +111,7 @@ class Battle
     var (hpLeft, dmgMsg, _) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);    
-    ResolveHit(attacker, target, hpLeft, result, gs);
+    ResolveHit(attacker, target, hpLeft, gs);
     
     bool poisoner = false;
     foreach (var trait in ammo.Traits)
@@ -248,9 +248,13 @@ class Battle
     foreach (Trait t in attacker.Traits)
     {
       if (t is RageTrait rt && rt.Active)
+      {
         bonusDamage += gs.Rng.Next(1, 7) + gs.Rng.Next(1, 7);
+      }
       else if (t is MeleeDamageModTrait dmt)
+      {
         bonusDamage += dmt.Amt;
+      }      
     }
     
     Item? weapon = attacker.Inventory.ReadiedWeapon();
@@ -266,7 +270,7 @@ class Battle
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
     
-    ResolveHit(attacker, target, hpLeft, result, gs);
+    ResolveHit(attacker, target, hpLeft, gs);
 
     CheckAttackTraits(target, gs, result, attacker, dmgDone);
 
@@ -276,40 +280,23 @@ class Battle
     }      
   }
 
-  static void ResolveHit(GameObj attacker, Actor target, int hpLeft, ActionResult result, GameState gs)
+  static void ResolveHit(GameObj attacker, Actor target, int hpLeft, GameState gs)
   {
-    static void HitAnim(Actor target, GameState gs)
-    {
-      var hitAnim = new HitAnimation(target.ID, gs, Colours.FX_RED);
-      gs.UIRef().RegisterAnimation(hitAnim);
-    }
-
     if (hpLeft < 1)
-      gs.ActorKilled(target, attacker.Name.IndefArticle(), result, attacker);
-    
-    HitAnim(target, gs);
+      gs.ActorKilled(target, attacker.Name.IndefArticle(), attacker);
 
-    if (target.HasTrait<AcidSplashTrait>())
+    HitAnimation hitAnim = new(target.ID, gs, Colours.FX_RED);
+    gs.UIRef().RegisterAnimation(hitAnim);
+
+    foreach (Trait t in target.Traits)
     {
-      foreach (var adj in Util.Adj8Locs(target.Loc))
-      {
-        if (gs.ObjDb.Occupant(adj) is Actor victim)
-        {
-          string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
-          gs.UIRef().AlertPlayer(txt);
-          int roll = gs.Rng.Next(4) + 1;
-          var (hpLeftAfterAcid, acidMsg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);   
-          
-          HitAnim(victim, gs);
-          
-          if (hpLeftAfterAcid < 1)
-            gs.ActorKilled(victim, "acid", result, null);
-          gs.UIRef().AlertPlayer(acidMsg);
-        }
-      }      
+      if (t is AcidSplashTrait acid)
+        acid.HandleSplash(target, gs);
+      else if (t is FireRebukeTrait rebuke && attacker is Actor att)
+        rebuke.Rebuke(target, att, gs);
     }
-
-    Actor?  actor = attacker as Actor ?? null;
+    
+    Actor? actor = attacker as Actor ?? null;
 
     if (actor is not null && target.HasTrait<CorrosiveTrait>())
     {

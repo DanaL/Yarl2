@@ -414,7 +414,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
           ui.AlertPlayer(dmgMsg);
         if (hpLeft < 1)
         {
-          GameState.ActorKilled(victim, "fiery breath", result, null);
+          GameState.ActorKilled(victim, "fiery breath", null);
         }        
       }
     }
@@ -1191,7 +1191,7 @@ class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmg
       var (hpLeft, _, _) = victim.ReceiveDmg(damageRolls, 0, GameState, null, 1.0);
       if (hpLeft < 1)
       {
-        GameState.ActorKilled(victim, "being crushed", result, null);
+        GameState.ActorKilled(victim, "being crushed", null);
       }
     }
     
@@ -2746,7 +2746,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
         if (hpLeft < 1)
         {
-          GameState.ActorKilled(victim, "a fireball", result, null);
+          GameState.ActorKilled(victim, "a fireball", null);
         }        
       }
     }

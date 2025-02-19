@@ -67,7 +67,6 @@ class Traps
 
       RevealTrap(tile, gs, loc);
             
-      ActionResult result = new();
       int total = 0;
       int damageDice = 1 + actor.Loc.Level / 5;
       for (int j = 0; j < damageDice; j++)
@@ -76,7 +75,7 @@ class Traps
       var (hpLeft, _, _) = actor.ReceiveDmg(fallDmg, 0, gs, null, 1.0);
       if (hpLeft < 1)
       {        
-        gs.ActorKilled(actor, "a fall", result, null);
+        gs.ActorKilled(actor, "a fall", null);
       }
 
       actor.Traits.Add(new InPitTrait());
@@ -382,7 +381,6 @@ class Traps
       gs.UIRef().PlayAnimation(explosion, gs);
     }
 
-    ActionResult result = new();
     int total = 0;
     int damageDice = 2 + actor.Loc.Level / 4;
     for (int j = 0; j < damageDice; j++)
@@ -399,7 +397,7 @@ class Traps
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
         {
-          gs.ActorKilled(victim, "flames", result, null);
+          gs.ActorKilled(victim, "flames", null);
         }
       }
     }

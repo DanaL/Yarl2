@@ -697,7 +697,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }    
   }
 
-  public void ActorKilled(Actor victim, string killedBy, ActionResult? result, GameObj? attacker)
+  public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
   {
     bool locVisible = LastPlayerFoV.Contains(victim.Loc);
     if (victim is Player)
@@ -776,7 +776,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
       else if (t is RetributionTrait rt)
       {
-        RetributionDamage(victim, rt, result);
+        RetributionDamage(victim, rt);
       }
 
       if (t is IGameEventListener el)
@@ -852,16 +852,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     InfernalBoons.Sacrifice(this, altarLoc);    
   }
 
-  void RetributionDamage(Actor src, RetributionTrait retribution, ActionResult? result)
+  void RetributionDamage(Actor src, RetributionTrait retribution)
   {
-    string dmgDesc = retribution.Type.ToString().ToLower();
-
-    if (result is not null)
-    {
-      string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
-      UI.AlertPlayer(txt);
-    }
-
+    string dmgDesc = retribution.Type.ToString().ToLower();    
+    string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
+    UI.AlertPlayer(txt, this, src.Loc);
+    
     int dmg = 0;
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
@@ -907,7 +903,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         UI.AlertPlayer(msg);
 
         if (hpLeft < 1)
-          ActorKilled(actor, dmgDesc, result, null);
+          ActorKilled(actor, dmgDesc, null);
       }
       ApplyDamageEffectToLoc(adj, retribution.Type);
     }
@@ -938,6 +934,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void RefreshPerformers()
   {
     Actor? curr = null;
+    if (_currPerformer >= Performers.Count)
+      _currPerformer = 0;
+
     if (Performers.Count > 0)
     {
       curr = Performers[_currPerformer];
@@ -1298,7 +1297,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
     if (hpLeft < 1)
     {
-      ActorKilled(actor, "a fall", null, null);
+      ActorKilled(actor, "a fall", null);
     }
 
     if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)

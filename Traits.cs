@@ -336,6 +336,27 @@ class MosquitoTrait : Trait
 class AcidSplashTrait : Trait
 {
   public override string AsText() => "AcidSplash";
+
+  public void HandleSplash(Actor target, GameState gs)
+  {
+    foreach (var adj in Util.Adj8Locs(target.Loc))
+    {
+      if (gs.ObjDb.Occupant(adj) is Actor victim)
+      {
+        string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} splashed by acid!";
+        gs.UIRef().AlertPlayer(txt, gs, adj);
+        int roll = gs.Rng.Next(4) + 1;
+        var (hpLeftAfterAcid, acidMsg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);
+
+        HitAnimation hitAnim = new(victim.ID, gs, Colours.DARK_GREEN);
+        gs.UIRef().RegisterAnimation(hitAnim);
+        
+        if (hpLeftAfterAcid < 1)
+          gs.ActorKilled(victim, "acid", null);
+        gs.UIRef().AlertPlayer(acidMsg, gs, adj);
+      }
+    }
+  }
 }
 
 class AlacrityTrait : Trait
@@ -418,6 +439,58 @@ class DodgeTrait : Trait
 class FinesseTrait : Trait
 {
   public override string AsText() => "Finesse";
+}
+
+// If I add more rebuke types, I'll either generalize this class or create a
+// a superclass RebukeTrait
+class FireRebukeTrait : Trait
+{
+  public override string AsText() => "FireRebuke";
+
+  public void Rebuke(Actor target, Actor attacker, GameState gs)
+  {
+    int hpLeft;
+    string msg;
+
+    UserInterface ui = gs.UIRef();
+    ui.AlertPlayer("Flames lash out at your foe!");
+
+    int dmg = gs.Rng.Next(1, 7);
+    (hpLeft, msg, _) = attacker.ReceiveDmg([(dmg, DamageType.Fire)], 0, gs, target, 0);
+    ui.AlertPlayer(msg, gs, attacker.Loc);
+    SqAnimation anim = new(gs, attacker.Loc, Colours.BRIGHT_RED, Colours.TORCH_ORANGE, '\u22CF');
+    ui.RegisterAnimation(anim);
+
+    if (hpLeft < 1)
+    {
+      gs.ActorKilled(attacker, "fire", null);
+    }
+
+    if (gs.Rng.Next(10) == 0 || true)
+    {
+      ui.AlertPlayer("The fire flares around you!");
+
+      foreach (var adj in Util.Adj8Locs(target.Loc))
+      {
+        gs.ApplyDamageEffectToLoc(adj, DamageType.Fire);
+
+        if (gs.ObjDb.Occupant(adj) is Actor victim)
+        {
+          string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} engulfed in flames!";
+          gs.UIRef().AlertPlayer(txt, gs, adj);
+          int roll = gs.Rng.Next(1, 7);
+          (hpLeft, msg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);
+
+          anim = new(gs, adj, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, '\u22CF');
+          ui.RegisterAnimation(anim);
+
+          if (hpLeft < 1)
+            gs.ActorKilled(victim, "fire", null);
+          gs.UIRef().AlertPlayer(msg, gs, adj);
+        }
+      }
+    }
+  }
 }
 
 class ImmunityTrait : BasicTrait
@@ -529,14 +602,26 @@ class EmberBlessingTrait : BlessingTrait
   {
     ExpiresOn = gs.Turn + 1000;
 
-    //MeleeDamageModTrait dmg = new() { Amt = 5, SourceId = granter.ID };
-    //gs.Player.Traits.Add(dmg);
+    ulong expiry = gs.Turn + 1000;
+    ResistanceTrait resist = new() 
+    {
+      SourceId = granter.ID, OwnerID = gs.Player.ID, 
+      ExpiresOn = expiry, Type = DamageType.Fire 
+    };
+    // I'm not calling the Apply() method here because I don't want a separate listener
+    // registered for the ResistanceTrait. This trait will be removed when 
+    // EmberBlessingTrait is removed.
+    gs.Player.Traits.Add(resist);
 
-    //// Do I want this to be will? Or should I make it whichever is higher:
-    //// will or strength (kind of like Chr vs Str intimidation checks in 5e)
-    //int will = gs.Player.Stats[Attribute.Will].Curr;
-    //FrighteningTrait fright = new() { DC = 10 + will, SourceId = granter.ID };
-    //gs.Player.Traits.Add(fright);
+    DamageTrait dt = new() 
+    { 
+      SourceId = granter.ID, DamageType = DamageType.Fire,
+      DamageDie = 6, NumOfDie = 1
+    };
+    gs.Player.Traits.Add(dt);
+
+    FireRebukeTrait rebuke = new() { SourceId = granter.ID };
+    gs.Player.Traits.Add(rebuke);
 
     gs.Player.Traits.Add(this);
 
@@ -1259,7 +1344,7 @@ class FullBellyTrait : Trait, IGameEventListener
     var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
     if (hpLeft < 1)
     {
-      gs.ActorKilled(victim, $"being digested", null, null);
+      gs.ActorKilled(victim, $"being digested", null);
     }
   }
 }
@@ -1450,7 +1535,7 @@ class IllusionTrait : BasicTrait, IGameEventListener
     var obj = gs.ObjDb.GetObj(ObjId);
     if (obj is not null and Actor actor)
     {
-      gs.ActorKilled(actor, "", null, null);
+      gs.ActorKilled(actor, "", null);
     }    
   }
 
@@ -1896,7 +1981,7 @@ class PoisonedTrait : TemporaryTrait
     {
       string msg = $"{victim.FullName.Capitalize()} died from poison!";
       gs.UIRef().AlertPlayer(msg);
-      gs.ActorKilled(victim, "poison", null, null);
+      gs.ActorKilled(victim, "poison", null);
     }
     else if (victim is Player)
     {
@@ -1960,7 +2045,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
         {
           string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
           ui.AlertPlayer(msg);
-          gs.ActorKilled(victim, "fire", null, null);
+          gs.ActorKilled(victim, "fire", null);
         }
         else
         {
@@ -2804,7 +2889,8 @@ class TraitFactory
       return new FeatherFallTrait() { OwnerID = id, ExpiresOn = expiresOn };
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
-    { "Finesse", (pieces, gameObj) => new FinesseTrait() },   
+    { "Finesse", (pieces, gameObj) => new FinesseTrait() },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
@@ -2901,7 +2987,7 @@ class TraitFactory
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
-    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },    
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
     { "Regeneration", (pieces, gameObj) => {
       ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
