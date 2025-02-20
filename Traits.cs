@@ -668,6 +668,11 @@ class PrisonerTrait : TemporaryTrait
   public override List<string> Apply(Actor target, GameState gs) => [];
 }
 
+class QuietTrait : Trait
+{
+  public override string AsText() => $"Quiet#{SourceId}";  
+}
+
 class AppleProducerTrait : Trait, IGameEventListener, IOwner
 {
   public ulong OwnerID { get; set; }
@@ -2983,6 +2988,7 @@ class TraitFactory
     { "Polymorphed", (pieces, gameObj) => new PolymorphedTrait() { OriginalId = ulong.Parse(pieces[1]) } },
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
+    { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },

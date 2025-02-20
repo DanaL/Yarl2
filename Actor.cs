@@ -73,12 +73,18 @@ abstract class Actor : GameObj, IZLevel
   public virtual void HearNoise(int volume, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual int SpellDC => 12;
 
-  // I'm sure eventually there will be more factors that do into determining
-  // how noisy an Actor's walking is. Wearing metal armour for instance
   public int GetMovementNoise()
   {
-    int baseNoise = HasTrait<LightStepTrait>() ? 3 : 9;
-
+    int baseNoise = 9;
+    int modifiers = 0;
+    foreach (Trait t in Traits) 
+    {
+      if (t is LightStepTrait)
+        baseNoise = 5;
+      else if (t is QuietTrait) // Sources of Quiet can stack
+        modifiers -= 3;
+    }
+    
     // If the actor is wearing a shirt that's made of non-mithril metal, it will add
     // to the noisiness. (Only shirts because I feel like a metal helmet wouldn't 
     // be especially loud)
@@ -92,13 +98,13 @@ abstract class Actor : GameObj, IZLevel
         var metal = piece.MetalType();
         if (metal != Metals.NotMetal && metal != Metals.Mithril)
         {
-          baseNoise += 3;
+          modifiers += 3;
           break;
         }
       }
     }
 
-    return baseNoise;
+    return int.Max(1, baseNoise + modifiers);
   }
 
   public (int, StressLevel) StressPenalty()
