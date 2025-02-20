@@ -595,6 +595,13 @@ class SpellcastMenu : Inputer
         inputer = new DummyInputer();
         GS.Player.ReplacePendingAction(new CastPhaseDoor(GS, GS.Player), inputer);
         break;
+      case "cone of cold":
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
+        SpellSelection = false;
+        GS.Player.ReplacePendingAction(new PassAction(GS, GS.Player), inputer);
+        PopupRow = -3;
+        PopupText = "Which direction?";
+        break;
     }
   }
 

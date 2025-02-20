@@ -94,6 +94,34 @@ class ArrowAnimation : Animation
   }
 }
 
+class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int range) : Animation
+{
+  UserInterface UI { get; set; } = ui;
+  GameState GS { get; set; } = gs;
+  Loc Origin { get; set; } = origin;
+  public Loc Target { get; set; } = target;
+  int Range { get; set; } = range;
+
+  public override void Update()
+  {
+    if (Expiry < DateTime.Now)
+      return;
+
+    Map map = GS.Campaign.Dungeons[Origin.DungeonID].LevelMaps[Origin.Level];
+    List<Loc> included = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb);
+
+    foreach (Loc loc in included)
+    {
+      var (scrR, scrC) = UI.LocToScrLoc(loc.Row, loc.Col, GS.Player.Loc.Row, GS.Player.Loc.Col);
+      if (scrR > 0 && scrR < UserInterface.ScreenHeight && scrC > 0 && scrC < UserInterface.ScreenWidth)
+      {
+        Sqr sq = UI.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = Colours.HILITE };
+        UI.SqsOnScreen[scrR, scrC] = sq;
+      }
+    }
+  }
+}
+
 class BeamAnimation : Animation
 {
   readonly GameState _gs;

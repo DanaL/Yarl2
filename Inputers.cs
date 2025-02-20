@@ -255,7 +255,7 @@ class Aimer : Inputer
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
         var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);
-        if (Util.Distance(_start, loc) > _maxRange)
+        if (Distance(_start, loc) > _maxRange)
           continue;
         if (!_gs.ObjDb.Occupied(loc) || loc == _gs.Player.Loc)
           continue;
@@ -309,7 +309,7 @@ class Aimer : Inputer
       return;
     }
 
-    var dir = Util.KeyToDir(ch);
+    var dir = KeyToDir(ch);
     if (dir != (0, 0))
     {
       Loc mv = _target with
@@ -317,7 +317,7 @@ class Aimer : Inputer
         Row = _target.Row + dir.Item1,
         Col = _target.Col + dir.Item2
       };
-      if (Util.Distance(_start, mv) <= _maxRange && _gs.CurrentMap.InBounds(mv.Row, mv.Col))
+      if (Distance(_start, mv) <= _maxRange && _gs.CurrentMap.InBounds(mv.Row, mv.Col))
       {
         _target = mv;
         _anim.Target = mv;
@@ -1159,6 +1159,69 @@ class DirectionalInputer : Inputer
     {
       Row = _result.Item1,
       Col = _result.Item2
+    };
+  }
+}
+
+class ConeTargeter : Inputer
+{  
+  int Range {  get; set; }
+  Loc Origin { get; set; }
+  Loc Target { get; set; }
+  GameState GS { get; set; }
+  ConeAnimation Anim { get; set; }
+
+  public ConeTargeter(GameState gs, int range, Loc origin)
+  {
+    Done = false;
+    GS = gs;
+    Range = range;
+    Origin = origin;
+    Target = origin with { Row = origin.Row - 1 };
+
+    string prompt = "Which direction?";
+    int width = prompt.Length + 2;
+
+    UserInterface ui = gs.UIRef();
+    //ui.SetPopup(new Popup(prompt, "foo", gs.UIRef().PlayerScreenRow - 8, -1, width));
+
+    Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range);
+    ui.RegisterAnimation(Anim);
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+      Anim.Expiry = DateTime.MinValue;
+
+      return;
+    }
+    else if (ch == '\n')
+    {
+      Done = true;
+      Success = true;
+      Anim.Expiry = DateTime.MinValue;
+
+      return;
+    }
+
+    var dir = KeyToDir(ch);
+    if (dir != (0, 0))
+    {      
+      Target = Origin with { Row = Origin.Row + Range * dir.Item1, Col = Origin.Col + Range * dir.Item2 };
+      Anim.Target = Target;      
+    }      
+  }
+
+  public override UIResult GetResult()
+  {
+    return new DirectionUIResult()
+    {
+      Row = 0,
+      Col = 0
     };
   }
 }

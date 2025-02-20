@@ -163,6 +163,7 @@ class PlayerCreator
         break;
       case PlayerBackground.Scholar:
         player.SpellsKnown.Add("arcane spark");
+        player.SpellsKnown.Add("cone of cold");
         break;
     }
   }
