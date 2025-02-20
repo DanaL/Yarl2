@@ -1204,6 +1204,7 @@ class DialogueInterpreter
     if (!blessed)
     {
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
+      Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
@@ -1216,7 +1217,7 @@ class DialogueInterpreter
 
   static void EvalChampionBlessing(Actor mob, GameState gs)
   {
-    ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
@@ -1224,7 +1225,7 @@ class DialogueInterpreter
 
   static void EvalReaverBlessing(Actor mob, GameState gs)
   {
-    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    ReaverBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     reaver.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
@@ -1232,7 +1233,7 @@ class DialogueInterpreter
 
   static void EvalEmberBlessing(Actor mob, GameState gs)
   {
-    EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
+    EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     ember.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
