@@ -10,8 +10,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
@@ -438,6 +436,25 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   }
 }
 
+class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    if (!CheckCost(1, 20, result))
+      return result;
+
+    result.AltAction = new BlinkAction(gs, actor);
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) { }
+}
+
 class SpellcastMenu : Inputer
 {  
   readonly GameState GS;
@@ -530,6 +547,10 @@ class SpellcastMenu : Inputer
         SpellSelection = false;
         PopupText = "Select target:";
         PopupRow = -3;
+        break;
+      case "phase door":
+        inputer = new DummyInputer();
+        GS.Player.ReplacePendingAction(new CastPhaseDoor(GS, GS.Player), inputer);
         break;
     }
   }

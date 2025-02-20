@@ -163,7 +163,7 @@ class PlayerCreator
         break;
       case PlayerBackground.Scholar:
         player.SpellsKnown.Add("arcane spark");
-        player.SpellsKnown.Add("frogify");
+        player.SpellsKnown.Add("phase door");
         break;
     }
   }
