@@ -1218,10 +1218,11 @@ class ConeTargeter : Inputer
 
   public override UIResult GetResult()
   {
-    return new DirectionUIResult()
+    Map map = GS.Campaign.Dungeons[Origin.DungeonID].LevelMaps[Origin.Level];
+    
+    return new AffectedLocsUIResult()
     {
-      Row = 0,
-      Col = 0
+      Affected = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb)
     };
   }
 }
@@ -1257,4 +1258,9 @@ class NumericUIResult : UIResult
 class CharUIResult : UIResult
 {
   public char Ch { get; set; }
+}
+
+class AffectedLocsUIResult : UIResult
+{
+  public List<Loc> Affected { get; set; } = [];
 }

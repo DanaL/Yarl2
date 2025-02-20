@@ -47,7 +47,7 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
   }
 }
 
-class CastArcaneSparkAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override ActionResult Execute()
   {
@@ -210,7 +210,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   }
 }
 
-class CastMageArmourAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override ActionResult Execute()
   {
@@ -286,7 +286,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override void ReceiveUIResult(UIResult result) { }
 }
 
-class CastIllumeAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   public override ActionResult Execute()
   {
@@ -461,12 +461,65 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(1, 20, result))
       return result;
 
-    result.AltAction = new BlinkAction(gs, actor);
+    result.AltAction = new BlinkAction(GameState!, Actor!);
 
     return result;
   }
 
   public override void ReceiveUIResult(UIResult result) { }
+}
+
+class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  List<Loc> Affected { get; set; } = [];
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    if (!CheckCost(1, 20, result))
+      return result;
+
+    ExplosionAnimation blast = new(GameState!)
+    {
+      MainColour = Colours.ICE_BLUE,
+      AltColour1 = Colours.LIGHT_BLUE,
+      AltColour2 = Colours.BLUE,
+      Highlight = Colours.WHITE,
+      Centre = Actor!.Loc,
+      Sqs = [.. Affected],
+      Ch = '*'
+    };
+    blast.Sqs.Add(Actor.Loc);
+    GameState!.UIRef().PlayAnimation(blast, GameState);
+
+    foreach (Loc loc in Affected)
+    {
+      GameState.ApplyDamageEffectToLoc(loc, DamageType.Cold);
+    }
+
+    //UserInterface ui = GameState.UIRef();
+    //foreach (var pt in affected)
+    //{
+    //  if (GameState.ObjDb.Occupant(pt) is Actor victim)
+    //  {
+    //    foreach (string s in Battle.HandleTipsy(victim, GameState))
+    //      ui.AlertPlayer(s);
+    //  }
+    //}
+
+    return result;
+  }
+
+  public override void ReceiveUIResult(UIResult result) 
+  {
+    if (result is AffectedLocsUIResult affected)
+    {
+      Affected = affected.Affected.Where(l => l != Actor!.Loc).ToList();
+    }
+  }
 }
 
 class SpellcastMenu : Inputer
@@ -554,18 +607,18 @@ class SpellcastMenu : Inputer
     {
       case "arcane spark":        
         inputer = new Aimer(GS, GS.Player.Loc, 7);
-        GS.Player.ReplacePendingAction(new CastArcaneSparkAction(GS, GS.Player), inputer);
+        GS.Player.ReplacePendingAction(new CastArcaneSpark(GS, GS.Player), inputer);
         SpellSelection = false;
         PopupText = "Select target";
         PopupRow = -3;
         break;
       case "mage armour":
         inputer = new DummyInputer();
-        GS.Player.ReplacePendingAction(new CastMageArmourAction(GS, GS.Player), inputer);
+        GS.Player.ReplacePendingAction(new CastMageArmour(GS, GS.Player), inputer);
         break;
       case "illume":
         inputer = new DummyInputer();
-        GS.Player.ReplacePendingAction(new CastIllumeAction(GS, GS.Player), inputer);
+        GS.Player.ReplacePendingAction(new CastIllume(GS, GS.Player), inputer);
         break;
       case "slumbering song":
         inputer = new DummyInputer();
@@ -598,7 +651,7 @@ class SpellcastMenu : Inputer
       case "cone of cold":
         inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
         SpellSelection = false;
-        GS.Player.ReplacePendingAction(new PassAction(GS, GS.Player), inputer);
+        GS.Player.ReplacePendingAction(new CastConeOfCold(GS, GS.Player), inputer);
         PopupRow = -3;
         PopupText = "Which direction?";
         break;
