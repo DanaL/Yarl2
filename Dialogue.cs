@@ -23,7 +23,7 @@ enum TokenType
   TRUE, FALSE,
   OPTION, SPEND, END, 
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
-  GRANT_EMBER_BLESSING,
+  GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING,
   EOF
 }
 
@@ -130,6 +130,7 @@ class ScriptScanner(string src)
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
       "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
       "ember-blessing" => TokenType.GRANT_EMBER_BLESSING,
+      "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
       _ => TokenType.IDENTIFIER
     };
 
@@ -228,6 +229,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
       TokenType.GRANT_REAVER_BLESSING => GrantReaverBlessingExpr(),
       TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
+      TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -325,6 +327,14 @@ class ScriptParser(List<ScriptToken> tokens)
   ScriptEmberBlessing GrantEmberBlessingExpr()
   {
     Consume(TokenType.GRANT_EMBER_BLESSING);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptEmberBlessing();
+  }
+
+  ScriptTricksterBlessing GrantTricksterBlessingExpr()
+  {
+    Consume(TokenType.GRANT_TRICKSTER_BLESSSING);
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptEmberBlessing();
@@ -651,6 +661,7 @@ class ScriptSpend(int amount) : ScriptExpr
 class ScriptChampionBlessing : ScriptExpr {}
 class ScriptReaverBlessing : ScriptExpr {}
 class ScriptEmberBlessing : ScriptExpr {}
+class ScriptTricksterBlessing : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -920,6 +931,10 @@ class DialogueInterpreter
     else if (Expr is ScriptEmberBlessing)
     {
       EvalEmberBlessing(mob, gs);
+    }
+    else if (Expr is ScriptTricksterBlessing)
+    {
+      EvalTricksterBlessing(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1234,6 +1249,12 @@ class DialogueInterpreter
   {
     EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 1000, OwnerID = gs.Player.ID };
     ember.Apply(mob, gs);
+
+    throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalTricksterBlessing(Actor mob, GameState gs)
+  {
 
     throw new ConversationEnded("You are bathed in holy light!");
   }

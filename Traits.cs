@@ -2721,6 +2721,29 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
   }
 }
 
+class TricksterBlessingTrait : BlessingTrait
+{
+  public override List<string> Apply(Actor granter, GameState gs)
+  {
+    ExpiresOn = gs.Turn + 1000;
+
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"TricksterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class UndeadTrait : Trait
 {
   public override string AsText() => $"Undead";
@@ -3089,6 +3112,7 @@ class TraitFactory
         Fuel = int.Parse(pieces[3])
       }
     },
+    { "TricksterBlessing", (pieces, gameObj) => new TricksterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "TwoHanded", (pieces, gameObj) => new TwoHandedTrait() },
     { "Undead", (pieces, gameObj) => new UndeadTrait() },
     { "UseSimple", (pieces, gameObj) => new UseSimpleTrait(pieces[1]) },
