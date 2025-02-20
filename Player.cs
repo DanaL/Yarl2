@@ -359,6 +359,7 @@ class Player : Actor
     int acmod = 0;
     int attackMod = 0;
     int meleeDmgMod = 0;
+    bool quiet = false;
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -371,11 +372,11 @@ class Player : Actor
         traitsToShow.Add("You have sticky fingers");
       else if (trait is AlacrityTrait alacrityTrait)
         alacrity -= alacrityTrait.Amt;
-      else if (trait is StressTrait st)    
-        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");   
+      else if (trait is StressTrait st)
+        traitsToShow.Add($"You are feeling {st.Stress.ToString().ToLower()}");
       else if (trait is FeatherFallTrait)
         traitsToShow.Add("You have feather fall");
-       else if (trait is FrighteningTrait)
+      else if (trait is FrighteningTrait)
         traitsToShow.Add("You can frighten your foes");
       else if (trait is BlessingTrait)
         blessed = true;
@@ -385,6 +386,8 @@ class Player : Actor
         attackMod += attm.Amt;
       else if (trait is MeleeDamageModTrait mdm)
         meleeDmgMod += mdm.Amt;
+      else if (trait is QuietTrait)
+        quiet = true;
     }
     
     if (alacrity < 0)
@@ -409,6 +412,9 @@ class Player : Actor
 
     if (blessed)
       traitsToShow.Add("You are blessed");
+
+    if (quiet)
+      traitsToShow.Add("You are quiet");
 
     if (traitsToShow.Count > 0)
     {
@@ -968,12 +974,12 @@ class Player : Actor
       }
       else if (ch == 'z')
       {
-        Item? rw = Inventory.ReadiedWeapon();
+        
         if (SpellsKnown.Count == 0)
         {
           gameState.UIRef().SetPopup(new Popup("You don't know any spells!", "", -1, -1));
         }
-        else if (!(Inventory.FocusEquipped() || (rw is not null && rw.Name == "quarterstaff")))
+        else if (!SpellcasingPrereqs())
         {
           gameState.UIRef().SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
         }
@@ -987,6 +993,25 @@ class Player : Actor
     }
 
     return new NullAction();
+
+    // Check if the player has a focus readied, or knows spells that don't need a focus
+    bool SpellcasingPrereqs()
+    {
+      if (Inventory.FocusEquipped())
+        return true;
+
+      Item? rw = Inventory.ReadiedWeapon();
+      if (rw is not null && rw.Name == "quarterstaff")
+        return true;
+
+      foreach (string spell in SpellsKnown)
+      {
+        if (Spells.NoFocus(spell))
+          return true;
+      }
+
+      return false;
+    }
   }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)

@@ -337,7 +337,7 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.GRANT_TRICKSTER_BLESSSING);
     Consume(TokenType.RIGHT_PAREN);
 
-    return new ScriptEmberBlessing();
+    return new ScriptTricksterBlessing();
   }
 
   ScriptSpend SpendExpr()
@@ -1223,6 +1223,7 @@ class DialogueInterpreter
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", 'd', new ScriptTricksterBlessing()));
     }
     else
     {
@@ -1256,6 +1257,8 @@ class DialogueInterpreter
 
   static void EvalTricksterBlessing(Actor mob, GameState gs)
   {
+    TricksterBlessingTrait trickster = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    trickster.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }

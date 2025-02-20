@@ -12,6 +12,20 @@
 
 namespace Yarl2;
 
+class Spells
+{
+  public static bool NoFocus(string spell)
+  {
+    switch (spell.ToLower())
+    {
+      case "phase door":
+        return true;
+      default:
+        return false;
+    }
+  }
+}
+
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
 {
   protected bool CheckCost(int mpCost, int stressCost, ActionResult result)
@@ -462,16 +476,45 @@ class SpellcastMenu : Inputer
   bool SpellSelection { get; set; } = true;
   string PopupText { get; set; } = "";
   int PopupRow { get; set; } = -1;
+  List<string> SpellList { get; set; } = [];
 
   public SpellcastMenu(GameState gs)
-  {
+  {   
+    GS = gs;
+
+    SetSpellMenu();
+
     row = 0;
-    int lastCast = gs.Player.SpellsKnown.IndexOf(gs.Player.LastSpellCast);
+    int lastCast = SpellList.IndexOf(gs.Player.LastSpellCast);
     if (lastCast > -1)
       row = lastCast;
 
-    GS = gs;
     WritePopup();
+  }
+
+  void SetSpellMenu()
+  {
+    bool focusEquiped;
+    if (GS.Player.Inventory.FocusEquipped())
+      focusEquiped = true;
+    else if (GS.Player.Inventory.ReadiedWeapon() is Item rw && rw.Name == "quarterstaff")
+      focusEquiped = true;
+    else
+      focusEquiped = false;
+
+    if (focusEquiped)
+    {
+      SpellList = GS.Player.SpellsKnown
+                        .Select(s => s.CapitalizeWords())
+                        .ToList();
+    }
+    else
+    {
+      SpellList = GS.Player.SpellsKnown
+                        .Where(s => Spells.NoFocus(s))
+                        .Select(s => s.CapitalizeWords())
+                        .ToList();
+    }
   }
 
   public override void Input(char ch)
@@ -483,17 +526,17 @@ class SpellcastMenu : Inputer
     }
     else if (ch == 'j')
     {
-      row = (row + 1 ) % GS.Player.SpellsKnown.Count;
+      row = (row + 1 ) % SpellList.Count;
     }
     else if (ch == 'k')
     {
       --row;
       if (row < 0)
-        row = GS.Player.SpellsKnown.Count - 1;
+        row = SpellList.Count - 1;
     }
     else if (ch == '\n' || ch == '\r')
     {
-      string spell = GS.Player.SpellsKnown[row];
+      string spell = SpellList[row].ToLower();
       GS.Player.LastSpellCast = spell;
       HandleSelectedSpell(spell);
       Done = true;
@@ -556,12 +599,10 @@ class SpellcastMenu : Inputer
   }
 
   void WritePopup()
-  {
+  {    
     if (SpellSelection)
     {
-      List<string> spells = GS.Player.SpellsKnown
-                            .Select(s => s.CapitalizeWords()).ToList();
-      GS.UIRef().SetPopup(new PopupMenu("Cast which spell?", spells) { SelectedRow = row });
+      GS.UIRef().SetPopup(new PopupMenu("Cast which spell?", SpellList) { SelectedRow = row });
     }
     else
     {

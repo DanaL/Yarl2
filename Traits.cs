@@ -184,9 +184,7 @@ class CarriesTrait : LootTrait
 class ChampionBlessingTrait : BlessingTrait
 {  
   public override List<string> Apply(Actor granter, GameState gs)
-  {
-    ExpiresOn = gs.Turn + 1000;
-
+  {    
     ACModTrait ac = new() { ArmourMod = 2, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
     AuraOfProtectionTrait prot = new() { HP = 50 };
@@ -599,14 +597,11 @@ class EdibleTrait : Trait
 class EmberBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
-  {
-    ExpiresOn = gs.Turn + 1000;
-
-    ulong expiry = gs.Turn + 1000;
+  {    
     ResistanceTrait resist = new() 
     {
       SourceId = granter.ID, OwnerID = gs.Player.ID, 
-      ExpiresOn = expiry, Type = DamageType.Fire 
+      ExpiresOn = ExpiresOn, Type = DamageType.Fire 
     };
     // I'm not calling the Apply() method here because I don't want a separate listener
     // registered for the ResistanceTrait. This trait will be removed when 
@@ -2370,9 +2365,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 class ReaverBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
-  {
-    ExpiresOn = gs.Turn + 1000;
-
+  {    
     MeleeDamageModTrait dmg = new() { Amt = 5, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
@@ -2725,7 +2718,21 @@ class TricksterBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
   {
-    ExpiresOn = gs.Turn + 1000;
+    QuietTrait quiet = new() { SourceId = granter.ID };
+    gs.Player.Traits.Add(quiet);
+
+    if (!gs.Player.SpellsKnown.Contains("phase door"))
+      gs.Player.SpellsKnown.Add("phase door");
+
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(2);
+      mp.Change(2);
+    }
+    else
+    {
+      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
+    }
 
     gs.Player.Traits.Add(this);
 
@@ -2737,6 +2744,12 @@ class TricksterBlessingTrait : BlessingTrait
   public override void Remove(GameState gs)
   {
     base.Remove(gs);
+
+    gs.Player.SpellsKnown.Remove("phase door");
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(-2);
+    }
 
     gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
   }

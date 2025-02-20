@@ -547,7 +547,7 @@ abstract class UserInterface
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
     WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
-    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints) && magicPoints.Max > 0)
     {
       WriteLine($"| MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
     }

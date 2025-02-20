@@ -1535,11 +1535,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   // the noise
   public HashSet<ulong> Noise(int startRow, int startCol, int volume)
   {
-    var alerted = new HashSet<ulong>();
-    var map = CurrentMap;
-    var q = new Queue<(int, int, int)>();
+    HashSet<ulong> alerted = [];
+    Map map = CurrentMap;
+    Queue<(int, int, int)> q = new();
     q.Enqueue((startRow, startCol, volume + 1));
-    var visited = new HashSet<(int, int)>() { (startRow, startCol) };
+    HashSet<(int, int)> visited = [(startRow, startCol)];
 
     while (q.Count > 0)
     {
