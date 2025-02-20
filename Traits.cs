@@ -2808,6 +2808,56 @@ class WeaponBonusTrait : Trait
   public override string AsText() => $"WeaponBonus#{Bonus}";
 }
 
+class WinterBlessingTrait : BlessingTrait
+{
+  public override List<string> Apply(Actor granter, GameState gs)
+  {
+    ResistanceTrait resist = new()
+    {
+      SourceId = granter.ID,
+      OwnerID = gs.Player.ID,
+      ExpiresOn = ExpiresOn,
+      Type = DamageType.Cold
+    };
+    gs.Player.Traits.Add(resist);
+
+    //if (!gs.Player.SpellsKnown.Contains("phase door"))
+    //  gs.Player.SpellsKnown.Add("phase door");
+
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(2);
+      mp.Change(2);
+    }
+    else
+    {
+      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
+    }
+
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.SpellsKnown.Remove("cone of cold");
+    gs.Player.SpellsKnown.Remove("gust of wind");
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(-2);
+    }
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"WinterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class WorshiperTrait : Trait
 {
   public Loc Altar { get; set; }
@@ -3147,6 +3197,7 @@ class TraitFactory
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
+    { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } }    
   };
 

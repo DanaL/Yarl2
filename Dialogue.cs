@@ -23,7 +23,7 @@ enum TokenType
   TRUE, FALSE,
   OPTION, SPEND, END, 
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
-  GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING,
+  GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   EOF
 }
 
@@ -131,6 +131,7 @@ class ScriptScanner(string src)
       "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
       "ember-blessing" => TokenType.GRANT_EMBER_BLESSING,
       "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
+      "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
       _ => TokenType.IDENTIFIER
     };
 
@@ -230,6 +231,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.GRANT_REAVER_BLESSING => GrantReaverBlessingExpr(),
       TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
+      TokenType.GRANT_WINTER_BLESSING => GrantWinterBlessing(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -338,6 +340,14 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptTricksterBlessing();
+  }
+
+  ScriptWinterBlessing GrantWinterBlessing()
+  {
+    Consume(TokenType.GRANT_WINTER_BLESSING);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptWinterBlessing();
   }
 
   ScriptSpend SpendExpr()
@@ -662,6 +672,7 @@ class ScriptChampionBlessing : ScriptExpr {}
 class ScriptReaverBlessing : ScriptExpr {}
 class ScriptEmberBlessing : ScriptExpr {}
 class ScriptTricksterBlessing : ScriptExpr {}
+class ScriptWinterBlessing : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -935,6 +946,10 @@ class DialogueInterpreter
     else if (Expr is ScriptTricksterBlessing)
     {
       EvalTricksterBlessing(mob, gs);
+    }
+    else if (Expr is ScriptWinterBlessing)
+    {
+      EvalWinterBlessing(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1224,6 +1239,7 @@ class DialogueInterpreter
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", 'd', new ScriptTricksterBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Blessing of Winter]: Use the power of arctic storms to aid your quest!", 'e', new ScriptWinterBlessing()));
     }
     else
     {
@@ -1259,6 +1275,14 @@ class DialogueInterpreter
   {
     TricksterBlessingTrait trickster = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     trickster.Apply(mob, gs);
+
+    throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalWinterBlessing(Actor mob, GameState gs)
+  {
+    WinterBlessingTrait winter = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    winter.Apply(mob, gs);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }
