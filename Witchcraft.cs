@@ -483,6 +483,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(1, 20, result))
       return result;
 
+    HashSet<Loc> animLocs = [..Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
     {
       MainColour = Colours.ICE_BLUE,
@@ -490,7 +491,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       AltColour2 = Colours.BLUE,
       Highlight = Colours.WHITE,
       Centre = Actor!.Loc,
-      Sqs = [.. Affected],
+      Sqs = animLocs,
       Ch = '*'
     };
     blast.Sqs.Add(Actor.Loc);
