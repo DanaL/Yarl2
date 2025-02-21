@@ -500,16 +500,6 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       GameState.ApplyDamageEffectToLoc(loc, DamageType.Cold);
     }
 
-    //UserInterface ui = GameState.UIRef();
-    //foreach (var pt in affected)
-    //{
-    //  if (GameState.ObjDb.Occupant(pt) is Actor victim)
-    //  {
-    //    foreach (string s in Battle.HandleTipsy(victim, GameState))
-    //      ui.AlertPlayer(s);
-    //  }
-    //}
-
     return result;
   }
 
@@ -517,7 +507,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     if (result is AffectedLocsUIResult affected)
     {
-      Affected = affected.Affected.Where(l => l != Actor!.Loc).ToList();
+      Affected = [..affected.Affected.Where(l => l != Actor!.Loc)];
     }
   }
 }

@@ -1179,12 +1179,8 @@ class ConeTargeter : Inputer
     Origin = origin;
     Target = origin with { Row = origin.Row - 1 };
 
-    string prompt = "Which direction?";
-    int width = prompt.Length + 2;
-
     UserInterface ui = gs.UIRef();
-    //ui.SetPopup(new Popup(prompt, "foo", gs.UIRef().PlayerScreenRow - 8, -1, width));
-
+    
     Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range);
     ui.RegisterAnimation(Anim);
   }
@@ -1199,7 +1195,7 @@ class ConeTargeter : Inputer
 
       return;
     }
-    else if (ch == '\n')
+    else if (ch == '\n' || ch == '\r')
     {
       Done = true;
       Success = true;
