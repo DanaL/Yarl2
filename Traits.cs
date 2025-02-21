@@ -2821,8 +2821,8 @@ class WinterBlessingTrait : BlessingTrait
     };
     gs.Player.Traits.Add(resist);
 
-    //if (!gs.Player.SpellsKnown.Contains("phase door"))
-    //  gs.Player.SpellsKnown.Add("phase door");
+    if (!gs.Player.SpellsKnown.Contains("cone of cold"))
+      gs.Player.SpellsKnown.Add("cone of cold");
 
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
     {

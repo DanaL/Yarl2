@@ -19,6 +19,7 @@ class Spells
     switch (spell.ToLower())
     {
       case "phase door":
+      case "cone of cold":
         return true;
       default:
         return false;
