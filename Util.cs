@@ -1041,15 +1041,12 @@ class ConeCalculator
 
     while (octantA != octantB)
     {
-      affected = affected.Union(CalcOctant(range, origin, map, octantA, objDb))
-                        .ToHashSet();
+      affected = [..affected.Union(CalcOctant(range, origin, map, octantA, objDb))];
       --octantA;
       if (octantA < 0)
         octantA = 7;
     }
-    affected = affected.Union(CalcOctant(range, origin, map, octantB, objDb))
-                      .ToHashSet();
-
+    affected = [..affected.Union(CalcOctant(range, origin, map, octantB, objDb))];
     double angleA = Util.AngleBetweenLocs(origin, beamA);
     double angleB = Util.AngleBetweenLocs(origin, beamB);
 
@@ -1069,7 +1066,7 @@ class ConeCalculator
     // So the shadowcasting covers 2 or 3 octants (90 to 135 degrees) so we
     // want to trim it to the actual cone/triangle, which I want to be about
     // 60 degrees.
-    return affected.Where(l =>
+    return [..affected.Where(l =>
     {
       double angle = Util.AngleBetweenLocs(origin, l);
 
@@ -1078,7 +1075,7 @@ class ConeCalculator
         angle += 2 * Math.PI;
 
       return angle >= minAngle && angle <= maxAngle;
-    }).ToList();
+    })];
   }
 
   public static int OctantForBeam(Loc origin, Loc beam)
@@ -1101,7 +1098,6 @@ class ConeCalculator
       return 2;
 
     return 3;
-
   }
 
   static Shadow ProjectTile(int row, int col)
@@ -1150,7 +1146,7 @@ class ConeCalculator
         if (!line.IsInShadow(projection))
         {
           Loc loc = origin with { Row = r, Col = c };
-          if (!map.TileAt(r, c).Passable() || objDb.BlockersAtLoc(loc))
+          if (!map.TileAt(r, c).PassableByFlight() || objDb.BlockersAtLoc(loc))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();

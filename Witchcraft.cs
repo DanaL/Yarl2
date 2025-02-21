@@ -495,9 +495,21 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     blast.Sqs.Add(Actor.Loc);
     GameState!.UIRef().PlayAnimation(blast, GameState);
 
+    GameState gs = GameState!;
+    List<(int, DamageType)> dmg = [ (gs.Rng.Next(1, 7), DamageType.Cold), (gs.Rng.Next(1, 7), DamageType.Cold) ];
     foreach (Loc loc in Affected)
     {
       GameState.ApplyDamageEffectToLoc(loc, DamageType.Cold);
+      if (GameState.ObjDb.Occupant(loc) is Actor victim)
+      {
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} blasted by cold!";
+        gs.UIRef().AlertPlayer(s, gs, loc);
+        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(victim, "freezing", null);
+        }        
+      }
     }
 
     return result;
