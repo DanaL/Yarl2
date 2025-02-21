@@ -506,7 +506,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} blasted by cold!";
         gs.UIRef().AlertPlayer(s, gs, loc);
-        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
+        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 3, GameState, null, 1.0);
         if (hpLeft < 1)
         {
           GameState.ActorKilled(victim, "freezing", null);

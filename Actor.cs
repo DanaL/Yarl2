@@ -165,6 +165,9 @@ abstract class Actor : GameObj, IZLevel
   {
     string msg = "";
 
+    if (!Stats.TryGetValue(Attribute.HP, out var currHP))
+        return (0, "", 0);
+
     Traits.RemoveAll(t => t is SleepingTrait);
     if (Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
     {
@@ -255,14 +258,14 @@ abstract class Actor : GameObj, IZLevel
       }
     }
 
-    Stats[Attribute.HP].Curr -= total;
+    currHP.Curr -= total;
 
-    if (Stats[Attribute.HP].Curr < 1 && HasTrait<InvincibleTrait>())
+    if (currHP.Curr < 1 && HasTrait<InvincibleTrait>())
     {
-      Stats[Attribute.HP].SetCurr(1);
+      currHP.SetCurr(1);
     }
 
-    if (HasTrait<DividerTrait>() && Stats[Attribute.HP].Curr > 2)
+    if (HasTrait<DividerTrait>() && currHP.Curr > 2)
     {
       foreach (var dmg in damages)
       {
@@ -283,11 +286,10 @@ abstract class Actor : GameObj, IZLevel
     // Is the monster now afraid?
     if (Stats.TryGetValue(Attribute.MobAttitude, out attitude) && attitude.Curr != Mob.AFRAID)
     {
-      int currHP = Stats[Attribute.HP].Curr;
       int maxHP = Stats[Attribute.HP].Max;
-      if (this is Mob && !HasTrait<BrainlessTrait>() && currHP <= maxHP / 2 && currHP > 0)
+      if (this is Mob && !HasTrait<BrainlessTrait>() && currHP.Curr <= maxHP / 2 && currHP.Curr > 0)
       {
-        float odds = (float)currHP / maxHP;
+        float odds = (float)currHP.Curr / maxHP;
         if (gs.Rng.NextDouble() < odds)
         {
           Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
