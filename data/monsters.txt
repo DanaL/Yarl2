@@ -15,7 +15,7 @@ goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,ResistBlunt,Immunity#Confusion,Brainless
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
-ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33
+ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10
 duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent,Carries#mithril_ore#25
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|MissilePiercing#2#5#6#1#0#0#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
@@ -28,7 +28,7 @@ deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Corrosive
 will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#8#1#0#0#Attack|LightSource#owner#2,Retribution#Fire#8#1,Flying
-troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent
+troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent,Heavy
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|MeleePiercing}#1#1#4#2#0#0#Attack|Poisoner#14#2#15,CoinsLoot#20#30,Brainless
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#Butt
@@ -39,7 +39,7 @@ giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying
 displacer beast   |f|grey         |darkgrey    |14|25|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Displacement
 the Great Goblin  |g|lightpurple  |purple      |16|50|6| 1.0|14|14|FearsomeBellow#0#2#0#0#15#12#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|KnockBack,Intelligent,MiniBoss5,Named,GoodMagicLoot
-wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#10#1#15#5#Attack,MeleePiercing#1#1#8#1#0#0#Attack|
+wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#10#1#15#5#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Heavy
 kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,MiniBoss5,Named,GoodMagicLoot
 test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#1#1#15#5#Attack|Immobile
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashing#1#1#4#1#0#0#Attack|Immobile
@@ -47,7 +47,7 @@ rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePiercing
 python            |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crush#1#1#4#1#0#0#Attack,MeleeBlunt#1#1#6#1#0#0#Attack|Grappler#15
 rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,PoorLoot
 flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1
-giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|
+giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy
 frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive
 zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless
 cultist           |@|grey         |darkgrey    |13|15|3| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent

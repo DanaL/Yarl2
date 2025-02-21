@@ -1569,6 +1569,11 @@ class GrapplerTrait : BasicTrait
   public override string AsText() => $"Grappler#{DC}";
 }
 
+class HeavyTrait : Trait
+{
+  public override string AsText() => "Heavy";
+}
+
 class ParalyzingGazeTrait : BasicTrait
 {
   public int DC { get; set; }
@@ -2995,8 +3000,7 @@ class TraitFactory
         AcidDie = int.Parse(pieces[2]),
         AcidDice = int.Parse(pieces[3])
       }
-    },
-    { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    },    
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
       string[] grantedTraits = [.. pieces[1].Split(';').Select(s => s.Replace('&', '#'))];
@@ -3004,6 +3008,7 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
+    { "Heavy", (pieces, gameObj) => new HeavyTrait() },
     { "Heroism", (pieces, gameObj) => new HeroismTrait()
       {
         OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), SourceId = ulong.Parse(pieces[3])
@@ -3030,6 +3035,7 @@ class TraitFactory
       }
     },
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
+    { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },

@@ -1,3 +1,4 @@
+using System.Linq;
 
 // Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
@@ -526,6 +527,149 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   }
 }
 
+class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  List<Loc> Affected { get; set; } = [];
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = base.Execute();
+    result.EnergyCost = 1.0;
+    result.Succcessful = true;
+
+    if (!CheckCost(1, 20, result))
+      return result;
+
+    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
+    ExplosionAnimation blast = new(GameState!)
+    {
+      MainColour = Colours.LIGHT_GREY,
+      AltColour1 = Colours.GREY,
+      AltColour2 = Colours.ICE_BLUE,
+      Highlight = Colours.BLACK,
+      Centre = Actor!.Loc,
+      Sqs = animLocs,
+      Ch = '#'
+    };
+    blast.Sqs.Add(Actor.Loc);
+    GameState!.UIRef().PlayAnimation(blast, GameState);
+
+    List<GameObj> affectedObjs = [];
+    foreach (Loc loc in Affected)
+    {
+      if (GameState.ObjDb.Occupant(loc) is Actor actor)
+        affectedObjs.Add(actor);
+      foreach (Item item in GameState.ObjDb.ItemsAt(loc))
+      {
+        bool moveable = true;
+        foreach (Trait t in item.Traits)
+        {
+          if (t is AffixedTrait || t is BlockTrait || t is ImmobileTrait)
+          {
+            moveable = false;
+            break;
+          }
+        }
+        if (!moveable)
+          continue;
+        affectedObjs.Add(item);
+      }
+    }
+   
+    Loc origin = Actor!.Loc;
+    affectedObjs.Sort((a, b) => 
+      Util.Distance(a.Loc, origin).CompareTo(Util.Distance(b.Loc, origin)));
+
+    // Pre-calculate the landing spots for everything affected by the gust
+    List<(GameObj, Loc)> landingSpots = [];
+    foreach (GameObj obj in affectedObjs) 
+    {
+      Loc l = CalcLandingSpot(obj, GameState, origin);
+      if (obj is Actor actor)
+      {
+        //GameState.ObjDb.ActorMoved(actor, actor.Loc, l);
+        BlowActorBack(actor, origin, GameState);
+      }
+      else if (obj is Item item)
+      {
+        GameState.ObjDb.RemoveItemFromLoc(item.Loc, item);
+        GameState.ObjDb.SetToLoc(l, item);
+      }      
+    }
+
+    return result;
+  }
+
+  void BlowActorBack(Actor actor, Loc origin, GameState gs)
+  {
+    int distance;
+    if (actor.HasTrait<FlyingTrait>())
+      distance = 5;
+    else if (actor.HasTrait<HeavyTrait>())
+      distance = 1;
+    else
+      distance = 3;
+
+    var (r, c) = Util.ExtendLine(origin.Row, origin.Col, actor.Loc.Row, actor.Loc.Col, distance);
+    List<(int, int)> path = Util.Bresenham(actor.Loc.Row, actor.Loc.Col, r, c);
+
+    (int, int) finalSq = path[0];
+    Loc landingLoc = actor.Loc;
+    string msg = "";
+    for (int j = 1; j < path.Count; j++)
+    {
+      Loc loc = origin with { Row = path[j].Item1, Col = path[j].Item2 };
+      Tile tile = gs.TileAt(loc);
+      if (!tile.PassableByFlight())
+      {
+        msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {Tile.TileDesc(tile.Type)}.";
+        int d = gs.Rng.Next(1, 5);
+        var (hpLeft, _, _) = actor.ReceiveDmg([(d, DamageType.Blunt)], 0, gs, null, 1.0);
+        if (hpLeft < 1)
+        {
+          gs.ObjDb.ActorMoved(actor, actor.Loc, landingLoc);
+          gs.ActorKilled(actor, "a collision", null);
+          return;
+        }
+
+        break;
+      }
+      else if (gs.ObjDb.BlockersAtLoc(loc))
+      {
+        Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
+        msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {blocker.Name.IndefArticle()}.";
+      }
+      else if (gs.ObjDb.Occupant(loc) is Actor occupant)
+      {
+        landingLoc = loc;
+        string name = occupant.HasTrait<NamedTrait>() ? occupant.Name.Capitalize() : occupant.Name.IndefArticle();
+        msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {name}.";
+        break;
+      }
+
+      landingLoc = loc;
+    }
+
+    gs.UIRef().AlertPlayer(msg, gs, landingLoc);
+    gs.ResolveActorMove(actor,actor.Loc, landingLoc);
+  }
+
+  Loc CalcLandingSpot(GameObj obj, GameState gs, Loc origin)
+  {
+    var (r, c) = Util.ExtendLine(origin.Row, origin.Col, obj.Loc.Row, obj.Loc.Col, 3);
+
+    return obj.Loc with { Row = r, Col = c };
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    if (result is AffectedLocsUIResult affected)
+    {
+      Affected = [.. affected.Affected.Where(l => l != Actor!.Loc)];
+    }
+  }
+}
+
 class SpellcastMenu : Inputer
 {  
   readonly GameState GS;
@@ -656,6 +800,13 @@ class SpellcastMenu : Inputer
         inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
         SpellSelection = false;
         GS.Player.ReplacePendingAction(new CastConeOfCold(GS, GS.Player), inputer);
+        PopupRow = -3;
+        PopupText = "Which direction?";
+        break;
+      case "gust of wind":
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
+        SpellSelection = false;
+        GS.Player.ReplacePendingAction(new CastGustOfWindAction(GS, GS.Player), inputer);
         PopupRow = -3;
         PopupText = "Which direction?";
         break;
