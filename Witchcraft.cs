@@ -528,7 +528,7 @@ class SpellcastMenu : Inputer
     SetSpellMenu();
 
     row = 0;
-    int lastCast = SpellList.IndexOf(gs.Player.LastSpellCast);
+    int lastCast = SpellList.FindIndex(s => s.Equals(gs.Player.LastSpellCast, StringComparison.OrdinalIgnoreCase));
     if (lastCast > -1)
       row = lastCast;
 
