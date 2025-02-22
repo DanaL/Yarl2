@@ -600,7 +600,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     return result;
   }
 
-  void BlowActorBack(Actor actor, Loc origin, GameState gs)
+  static void BlowActorBack(Actor actor, Loc origin, GameState gs)
   {
     int distance;
     if (actor.HasTrait<FlyingTrait>())
@@ -623,14 +623,8 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       if (!tile.PassableByFlight())
       {
         msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {Tile.TileDesc(tile.Type)}.";
-        int d = gs.Rng.Next(1, 5);
-        var (hpLeft, _, _) = actor.ReceiveDmg([(d, DamageType.Blunt)], 0, gs, null, 1.0);
-        if (hpLeft < 1)
-        {
-          gs.ObjDb.ActorMoved(actor, actor.Loc, landingLoc);
-          gs.ActorKilled(actor, "a collision", null);
+        if (InjuredByCollision(actor, gs, landingLoc))
           return;
-        }
 
         break;
       }
@@ -638,6 +632,10 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       {
         Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
         msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {blocker.Name.IndefArticle()}.";
+        if (InjuredByCollision(actor, gs, landingLoc))
+          return;
+
+        break;
       }
       else if (gs.ObjDb.Occupant(loc) is Actor occupant)
       {
@@ -652,6 +650,20 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
 
     gs.UIRef().AlertPlayer(msg, gs, landingLoc);
     gs.ResolveActorMove(actor,actor.Loc, landingLoc);
+  }
+
+  static bool InjuredByCollision(Actor actor, GameState gs, Loc landingLoc)
+  {
+    int d = gs.Rng.Next(1, 5);
+    var (hpLeft, _, _) = actor.ReceiveDmg([(d, DamageType.Blunt)], 0, gs, null, 1.0);
+    if (hpLeft < 1)
+    {
+      gs.ObjDb.ActorMoved(actor, actor.Loc, landingLoc);
+      gs.ActorKilled(actor, "a collision", null);
+      return true;
+    }
+
+    return false;
   }
 
   Loc CalcLandingSpot(GameObj obj, GameState gs, Loc origin)
