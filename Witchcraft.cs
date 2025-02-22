@@ -540,6 +540,8 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     if (!CheckCost(1, 20, result))
       return result;
 
+    GameState!.UIRef().AlertPlayer("Whoooosh!!");
+
     HashSet<Loc> animLocs = [.. Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
     {
@@ -584,20 +586,66 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     List<(GameObj, Loc)> landingSpots = [];
     foreach (GameObj obj in affectedObjs) 
     {
-      Loc l = CalcLandingSpot(obj, GameState, origin);
       if (obj is Actor actor)
-      {
-        //GameState.ObjDb.ActorMoved(actor, actor.Loc, l);
         BlowActorBack(actor, origin, GameState);
-      }
       else if (obj is Item item)
-      {
-        GameState.ObjDb.RemoveItemFromLoc(item.Loc, item);
-        GameState.ObjDb.SetToLoc(l, item);
-      }      
+        BlowItemBack(item, origin, GameState);
     }
 
     return result;
+  }
+
+  static void BlowItemBack(Item item, Loc origin, GameState gs)
+  {
+    int distance = item.Type switch
+    {
+      ItemType.Scroll => 5,
+      ItemType.Document => 5,
+      ItemType.Armour => 3,
+      _ => 4
+    };
+
+    var (r, c) = Util.ExtendLine(origin.Row, origin.Col, item.Loc.Row, item.Loc.Col, distance);
+    List<(int, int)> path = Util.Bresenham(item.Loc.Row, item.Loc.Col, r, c);
+
+    (int, int) finalSq = path[0];
+    Loc landingLoc = item.Loc;
+    string msg = "";
+    for (int j = 1; j < path.Count; j++)
+    {
+      Loc loc = origin with { Row = path[j].Item1, Col = path[j].Item2 };
+      Tile tile = gs.TileAt(loc);
+      if (!tile.PassableByFlight())
+      {
+        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {Tile.TileDesc(tile.Type)}.";
+        gs.UIRef().AlertPlayer(msg, gs, landingLoc);
+        CheckForItemDamage(item, landingLoc, gs);
+        break;
+      }
+      else if (gs.ObjDb.BlockersAtLoc(loc))
+      {
+        Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
+        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {blocker.Name.IndefArticle()}.";
+        gs.UIRef().AlertPlayer(msg, gs, landingLoc);
+        CheckForItemDamage(item, landingLoc, gs);
+        break;
+      }
+      else if (gs.ObjDb.Occupant(loc) is Actor occupant)
+      {
+        landingLoc = loc;
+        string name = occupant.HasTrait<NamedTrait>() ? occupant.Name.Capitalize() : occupant.Name.IndefArticle();
+        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {occupant.FullName}.";
+        gs.UIRef().AlertPlayer(msg, gs, landingLoc);
+        InjuredByCollision(occupant, gs, landingLoc);
+        CheckForItemDamage(item, landingLoc, gs);
+        break;
+      }
+
+      landingLoc = loc;
+    }
+
+    gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
+    gs.ItemDropped(item, landingLoc);
   }
 
   static void BlowActorBack(Actor actor, Loc origin, GameState gs)
@@ -652,9 +700,23 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     gs.ResolveActorMove(actor,actor.Loc, landingLoc);
   }
 
+  static void CheckForItemDamage(Item item, Loc loc, GameState gs)
+  {
+    if (item.Type == ItemType.Potion)
+    {
+      gs.ObjDb.RemoveItemFromGame(item.Loc, item);
+      gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} shatters!", gs, loc);
+    }
+    else if (Item.IDInfo.TryGetValue(item.Name, out var idInfo) && idInfo.Desc.Contains("glass"))
+    {
+      gs.ObjDb.RemoveItemFromGame(item.Loc, item);
+      gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} shatters!", gs, loc);
+    }
+  }
+
   static bool InjuredByCollision(Actor actor, GameState gs, Loc landingLoc)
   {
-    int d = gs.Rng.Next(1, 5);
+    int d = gs.Rng.Next(1, 7);
     var (hpLeft, _, _) = actor.ReceiveDmg([(d, DamageType.Blunt)], 0, gs, null, 1.0);
     if (hpLeft < 1)
     {
@@ -664,13 +726,6 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     }
 
     return false;
-  }
-
-  Loc CalcLandingSpot(GameObj obj, GameState gs, Loc origin)
-  {
-    var (r, c) = Util.ExtendLine(origin.Row, origin.Col, obj.Loc.Row, obj.Loc.Col, 3);
-
-    return obj.Loc with { Row = r, Col = c };
   }
 
   public override void ReceiveUIResult(UIResult result)
