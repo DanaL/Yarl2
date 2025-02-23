@@ -293,8 +293,8 @@ abstract class Actor : GameObj, IZLevel
         if (gs.Rng.NextDouble() < odds)
         {
           Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
-          msg += $" {FullName.Capitalize()} turns to flee!";
-
+          msg += VisibleTo(gs.Player) ? $" {FullName.Capitalize()}" : "A monster";
+          msg += " turns to flee!";
           if (HasTrait<FullBellyTrait>())
             EmptyBelly(gs);
         }
@@ -401,7 +401,16 @@ abstract class Actor : GameObj, IZLevel
     if (ID == other.ID)
       return true;
 
-    if (HasTrait<InvisibleTrait>() && !other.HasTrait<SeeInvisibleTrait>())
+    bool seeInvisible = false;
+    foreach (Trait t in other.Traits)
+    {
+      if (t is SeeInvisibleTrait || t is TelepathyTrait)
+      {
+        seeInvisible = true;
+        break;  
+      }
+    }
+    if (HasTrait<InvisibleTrait>() && !seeInvisible)
       return false;
 
     return true;

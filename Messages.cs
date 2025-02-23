@@ -228,11 +228,11 @@ class MsgFactory
 
     if (attacker is Player)
     {
-      return canSeeTarget ? $"You {CalcVerb(attacker, verb)} {target.FullName}!" : "You hit!";
+      return canSeeTarget ? $"You {CalcVerb(attacker, verb)} {CalcName(target, gs.Player)}!" : "You hit!";
     }
     else if (target is Player)
     {
-      return canSeeAttacker ? $"{attacker.FullName.Capitalize()} {CalcVerb(attacker, verb)} you!" : "Something hits you!";
+      return $"{CalcName(attacker, gs.Player).Capitalize()} {CalcVerb(attacker, verb)} you!";
     }
     else
     {
@@ -246,9 +246,9 @@ class MsgFactory
     bool canSeeAttacker = AwareOfActor(attacker, gs);
 
     if (target is Player)
-      return canSeeAttacker ? $"{attacker.FullName.Capitalize()} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
+      return canSeeAttacker ? $"{CalcName(attacker, gs.Player).Capitalize()} {CalcVerb(attacker, Verb.Miss)} you!" : "You are missed by an attack!";
     else if (attacker is Player)
-      return canSeeTarget ? $"You {CalcVerb(attacker, Verb.Miss)} {target.FullName}!" : "Your attack misses!";
+      return canSeeTarget ? $"You {CalcVerb(attacker, Verb.Miss)} {CalcName(target, gs.Player)}!" : "Your attack misses!";
     else
       return "You hear the sounds of battle.";
   }
