@@ -162,28 +162,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ulong smithId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(smithId) is Mob smith)
       {
-        int lastRefresh = smith.Stats[Attribute.InventoryRefresh].Curr;
-        if (Turn > (ulong)lastRefresh + 750)
-        {
-          Village.RefreshSmithInventory(smith, ObjDb, Rng);
-          smith.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
-        }
+        ((NPCBehaviour)smith.Behaviour).RefreshShop(smith, this);
       }
 
       fact = FactDb.FactCheck("GrocerId") as SimpleFact ?? throw new Exception("GrocerId should never be null!");
       ulong grocerId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(grocerId) is Mob grocer)
       {
-        int lastRefresh = grocer.Stats[Attribute.InventoryRefresh].Curr;
-        if (Turn > (ulong)lastRefresh + 750) 
-        { 
-          Village.RefreshGrocerInventory(grocer, ObjDb, Rng);
-          grocer.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
-        }
+        ((NPCBehaviour)grocer.Behaviour).RefreshShop(grocer, this);
       }
 
-      // Sometimes the witch is invisible after experimenting
-      // with one of their partner's potions
+      // Sometimes the witch is invisible after experimenting with one of their
+      // partner's potions
       fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
       ulong witchId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(witchId) is Mob witch)
@@ -205,12 +195,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ulong alchemistId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(alchemistId) is Mob alchemist) 
       {
-        int lastRefresh = alchemist.Stats[Attribute.InventoryRefresh].Curr;
-        if (Turn > (ulong)lastRefresh + 750)
-        {
-          Village.RefreshAlchemistInventory(alchemist, ObjDb, Rng);
-          alchemist.Stats[Attribute.InventoryRefresh].SetMax((int)Turn + 750);
-        }
+        ((NPCBehaviour)alchemist.Behaviour).RefreshShop(alchemist, this);
       }
     }
   }

@@ -1633,12 +1633,12 @@ class WitchBehaviour : NPCBehaviour
   }
 }
 
-class SmithBehaviour : IBehaviour
+class SmithBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
   // Eventually just replace/merge GetPark and PickBark
-  public string GetBark(Mob actor, GameState gs) 
+  public override string GetBark(Mob actor, GameState gs) 
   {
     string bark = "";
 
@@ -1721,7 +1721,7 @@ class SmithBehaviour : IBehaviour
     return sb.ToString();
   }
 
-  public (Action, Inputer) Chat(Mob actor, GameState gs)
+  public override (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
@@ -1732,6 +1732,55 @@ class SmithBehaviour : IBehaviour
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
+  }
+
+  public override void RefreshShop(Actor npc, GameState gs) 
+  {
+    int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
+    int turn = (int)(gs.Turn % int.MaxValue);
+
+    if (Math.Abs(turn - lastRefresh) < 750)
+      return;
+    npc.Stats[Attribute.InventoryRefresh].SetMax(turn);
+    
+    List<Item> currStock = npc.Inventory.Items();
+
+    foreach (Item item in currStock)
+    {
+      if (gs.Rng.NextDouble() < 0.2)
+      {
+        npc.Inventory.RemoveByID(item.ID);
+        gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = gs.Rng.Next(1, 5);
+    for (int j = 0; j < newStock; j++)
+    {
+      int roll = gs.Rng.Next(12);
+      if (roll == 0)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, gs.ObjDb), npc.ID);
+      else if (roll == 1)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, gs.ObjDb), npc.ID);
+      else if (roll == 3)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.BATTLE_AXE, gs.ObjDb), npc.ID);
+      else if (roll == 4)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, gs.ObjDb), npc.ID);
+      else if (roll == 5)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_DAGGER, gs.ObjDb), npc.ID);
+      else if (roll == 6)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.GUISARME, gs.ObjDb), npc.ID);
+      else if (roll == 7)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, gs.ObjDb), npc.ID);
+      else if (roll == 8)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, gs.ObjDb), npc.ID);
+      else if (roll == 9)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, gs.ObjDb), npc.ID);
+      else if (roll == 10)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, gs.ObjDb), npc.ID);
+      else if (roll == 11)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.QUARTERSTAFF, gs.ObjDb), npc.ID);
+    }
   }
 }
 
@@ -1773,13 +1822,51 @@ class AlchemistBehaviour : NPCBehaviour
 
     return (action, acc);
   }
+
+  public override void RefreshShop(Actor npc, GameState gs) 
+  {
+    int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
+    int turn = (int)(gs.Turn % int.MaxValue);
+
+    if (Math.Abs(turn - lastRefresh) < 750)
+      return;
+    npc.Stats[Attribute.InventoryRefresh].SetMax(turn);
+
+    List<Item> currStock = npc.Inventory.Items();
+    foreach (Item item in currStock)
+    {
+      if (gs.Rng.NextDouble() < 0.2)
+      {
+        npc.Inventory.RemoveByID(item.ID);
+        gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = gs.Rng.Next(1, 5);
+    for (int j = 0; j < newStock; j++)
+    {      
+      ItemNames itemName = gs.Rng.Next(7) switch
+      {
+        0 => ItemNames.POTION_HEALING,
+        1 => ItemNames.POTION_HEROISM,
+        2 => ItemNames.POTION_OF_LEVITATION,
+        3 => ItemNames.POTION_MIND_READING,
+        4 => ItemNames.ANTIDOTE,
+        5 => ItemNames.POTION_OBSCURITY,
+        _ => ItemNames.MUSHROOM_STEW
+      };
+      Item item = ItemFactory.Get(itemName, gs.ObjDb);
+      item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
+      npc.Inventory.Add(item, npc.ID);
+    }
+  }
 }
 
-class GrocerBehaviour : IBehaviour
+class GrocerBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  public string GetBark(Mob actor, GameState gs)
+  public override string GetBark(Mob actor, GameState gs)
   {
     if ((DateTime.Now - _lastBark).TotalSeconds < 10)
       return "";
@@ -1794,7 +1881,7 @@ class GrocerBehaviour : IBehaviour
     };
   }
   
-  public (Action, Inputer) Chat(Mob actor, GameState gs)
+  public override (Action, Inputer) Chat(Mob actor, GameState gs)
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
@@ -1809,6 +1896,65 @@ class GrocerBehaviour : IBehaviour
     var action = new ShoppingCompletedAction(gs, actor);
 
     return (action, acc);
+  }
+
+  public override void RefreshShop(Actor npc, GameState gs) 
+  {
+    int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
+    int turn = (int)(gs.Turn % int.MaxValue);
+
+    if (Math.Abs(turn - lastRefresh) < 750)
+      return;
+    npc.Stats[Attribute.InventoryRefresh].SetMax(turn);
+
+    List<Item> currStock = npc.Inventory.Items();
+
+    foreach (Item item in currStock)
+    {
+      if (gs.Rng.NextDouble() < 0.2)
+      {
+        npc.Inventory.RemoveByID(item.ID);
+        gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
+      }
+    }
+
+    int newStock = gs.Rng.Next(1, 4);
+    for (int j = 0; j < newStock; j++)
+    {
+      int roll = gs.Rng.Next(15);
+      if (roll < 3)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), npc.ID);
+      else if (roll < 5)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, gs.ObjDb), npc.ID);
+      else if (roll == 6)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, gs.ObjDb), npc.ID);
+      else if (roll == 7)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, gs.ObjDb), npc.ID);
+      else if (roll == 8)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, gs.ObjDb), npc.ID);
+      else if (roll == 9)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, gs.ObjDb), npc.ID);
+      else if (roll == 10)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, gs.ObjDb), npc.ID);
+      else if (roll == 11)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, gs.ObjDb), npc.ID);
+      else if (roll == 12)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, gs.ObjDb), npc.ID);
+      else if (roll == 13)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, gs.ObjDb), npc.ID);
+      else if (roll == 14)
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, gs.ObjDb), npc.ID);
+    }
+
+    // Grocer always keeps a few torches in stock
+    bool torchesInStock = npc.Inventory.Items().Any(i => i.Name == "torch");
+    if (!torchesInStock)
+    {
+      for (int j = 0; j < gs.Rng.Next(2, 5); j++)
+      {
+        npc.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, gs.ObjDb), npc.ID);
+      }
+    }
   }
 }
 

@@ -176,7 +176,7 @@ class Village
       Items = [1, 2, 3 + rng.Next(3)]
     };
     cleric.Traits.Add(nlt);
-    
+
     int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
     foreach (Loc loc in town.Shrine)
     {
@@ -496,131 +496,6 @@ class Village
     pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
     return pup;
-  }
-
-  public static void RefreshGrocerInventory(Mob grocer, GameObjectDB objDb, Random rng)
-  {
-    List<Item> currStock = grocer.Inventory.Items();
-
-    foreach (Item item in currStock)
-    {
-      if (rng.NextDouble() < 0.2)
-      {
-        grocer.Inventory.RemoveByID(item.ID);
-        objDb.RemoveItemFromGame(Loc.Nowhere, item);
-      }
-    }
-
-    int newStock = rng.Next(1, 4);
-    for (int j = 0; j < newStock; j++)
-    {
-      int roll = rng.Next(15);
-      if (roll < 3)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
-      else if (roll < 5)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_HEALING, objDb), grocer.ID);
-      else if (roll == 6)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.ANTIDOTE, objDb), grocer.ID);
-      else if (roll == 7)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb), grocer.ID);
-      else if (roll == 8)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb), grocer.ID);
-      else if (roll == 9)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_KNOCK, objDb), grocer.ID);
-      else if (roll == 10)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb), grocer.ID);
-      else if (roll == 11)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb), grocer.ID);
-      else if (roll == 12)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb), grocer.ID);
-      else if (roll == 13)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
-      else if (roll == 14)
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.SCROLL_TREASURE_DETECTION, objDb), grocer.ID);
-    }
-
-    // Grocer always keeps a few torches in stock
-    bool torchesInStock = grocer.Inventory.Items().Any(i => i.Name == "torch");
-    if (!torchesInStock)
-    {
-      for (int j = 0; j < rng.Next(2, 5); j++)
-      {
-        grocer.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), grocer.ID);
-      }
-    }
-  }
-
-  public static void RefreshSmithInventory(Mob smith, GameObjectDB objDb, Random rng)
-  {
-     List<Item> currStock = smith.Inventory.Items();
-
-    foreach (Item item in currStock)
-    {
-      if (rng.NextDouble() < 0.2)
-      {
-        smith.Inventory.RemoveByID(item.ID);
-        objDb.RemoveItemFromGame(Loc.Nowhere, item);
-      }
-    }
-
-    int newStock = rng.Next(1, 5);
-    for (int j = 0; j < newStock; j++)
-    {
-      int roll = rng.Next(12);
-      if (roll == 0)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.CHAINMAIL, objDb), smith.ID);
-      else if (roll == 1)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.SHIELD, objDb), smith.ID);
-      else if (roll == 3)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.BATTLE_AXE, objDb), smith.ID);
-      else if (roll == 4)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.PICKAXE, objDb), smith.ID);
-      else if (roll == 5)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.SILVER_DAGGER, objDb), smith.ID);
-      else if (roll == 6)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.GUISARME, objDb), smith.ID);
-      else if (roll == 7)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.RAPIER, objDb), smith.ID);
-      else if (roll == 8)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.RINGMAIL, objDb), smith.ID);
-      else if (roll == 9)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.HELMET, objDb), smith.ID);
-      else if (roll == 10)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.LEATHER_GLOVES, objDb), smith.ID);
-      else if (roll == 11)
-        smith.Inventory.Add(ItemFactory.Get(ItemNames.QUARTERSTAFF, objDb), smith.ID);
-    }
-  }
-
-  public static void RefreshAlchemistInventory(Mob alchemist, GameObjectDB objDb, Random rng)
-  {
-    List<Item> currStock = alchemist.Inventory.Items();
-    foreach (Item item in currStock)
-    {
-      if (rng.NextDouble() < 0.2)
-      {
-        alchemist.Inventory.RemoveByID(item.ID);
-        objDb.RemoveItemFromGame(Loc.Nowhere, item);
-      }
-    }
-
-    int newStock = rng.Next(1, 5);
-    for (int j = 0; j < newStock; j++)
-    {      
-      ItemNames itemName = rng.Next(7) switch
-      {
-        0 => ItemNames.POTION_HEALING,
-        1 => ItemNames.POTION_HEROISM,
-        2 => ItemNames.POTION_OF_LEVITATION,
-        3 => ItemNames.POTION_MIND_READING,
-        4 => ItemNames.ANTIDOTE,
-        5 => ItemNames.POTION_OBSCURITY,
-        _ => ItemNames.MUSHROOM_STEW
-      };
-      Item item = ItemFactory.Get(itemName, objDb);
-      item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
-      alchemist.Inventory.Add(item, alchemist.ID);
-    }
   }
 
   public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
