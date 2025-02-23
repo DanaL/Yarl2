@@ -562,6 +562,12 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       if (GameState.ObjDb.Occupant(loc) is Actor actor)
         affectedObjs.Add(actor);
 
+      if (GameState.TileAt(loc) is Door door && door.Type == TileType.ClosedDoor)
+      {
+        door.Open = true;
+        GameState.UIRef().AlertPlayer("The door is blown open!", GameState, loc);
+      }
+
       foreach (Item item in GameState.ObjDb.ItemsAt(loc))
       {
         if (item.Name == "campfire")
@@ -664,7 +670,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
 
     if (broken)
       return;
-      
+
     if (item.Type == ItemType.Zorkmid && item.Value > 1)
     {
       ScatterCoins(item, landingLoc, gs);

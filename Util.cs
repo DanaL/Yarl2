@@ -1143,10 +1143,17 @@ class ConeCalculator
           break;
 
         Shadow projection = ProjectTile(row, col);
+        
         if (!line.IsInShadow(projection))
         {
           Loc loc = origin with { Row = r, Col = c };
-          if (!map.TileAt(r, c).PassableByFlight() || objDb.BlockersAtLoc(loc))
+          if (map.TileAt(r, c) is Door door && !door.Open)
+          {
+            affected.Add(loc);
+            line.Add(projection);
+            fullShadow = line.IsFullShadow();
+          }
+          else if (!map.TileAt(r, c).PassableByFlight() || objDb.BlockersAtLoc(loc))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();
