@@ -1553,6 +1553,35 @@ class PriestBehaviour : NPCBehaviour
 
     return base.Chat(actor, gameState);
   }
+
+  public override void RefreshShop(Actor npc, GameState gs) 
+  {
+    int lastRefresh = npc.Stats[Attribute.InventoryRefresh].Curr;
+    int turn = (int)(gs.Turn % int.MaxValue);
+
+    if (Math.Abs(turn - lastRefresh) < 2500)
+      return;
+
+    List<int> newMenu = [];
+    List<int> options = [ 1, 2, 3, 4, 5 ];
+    int lastBlessing = gs.Player.Stats[Attribute.LastBlessing].Curr;
+    if (lastBlessing > 0)
+    {
+      newMenu.Add(lastBlessing);
+      options.Remove(lastBlessing);
+    }
+    while (newMenu.Count < 3)
+    {
+      int b = options[gs.Rng.Next(options.Count)];
+      newMenu.Add(b);
+      options.Remove(b);
+    }
+  
+    NumberListTrait blessings = npc.Traits.OfType<NumberListTrait>().Where(t => t.Name == "Blessings").First();
+    blessings.Items = newMenu;
+    
+    npc.Stats[Attribute.InventoryRefresh].SetMax(turn);
+  }
 }
 
 class WitchBehaviour : NPCBehaviour
@@ -1826,6 +1855,8 @@ class NPCBehaviour : IBehaviour, IDialoguer
       }
     }
   }
+
+  public virtual void RefreshShop(Actor npc, GameState gs) { }
 }
 
 class MayorBehaviour : NPCBehaviour

@@ -48,7 +48,8 @@ enum Attribute
   MobAttitude,
   InventoryRefresh,
   Nerve,
-  MagicPoints
+  MagicPoints,
+  LastBlessing
 }
 
 class Stat

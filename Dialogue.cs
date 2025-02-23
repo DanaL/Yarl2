@@ -1233,6 +1233,7 @@ class DialogueInterpreter
     
     if (!blessed)
     {
+      ((NPCBehaviour) mob.Behaviour).RefreshShop(mob, gs);
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
       char opt = 'a';
@@ -1269,7 +1270,8 @@ class DialogueInterpreter
   {
     ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
-
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
+    
     throw new ConversationEnded("You are bathed in holy light!");
   }
 
@@ -1277,6 +1279,7 @@ class DialogueInterpreter
   {
     ReaverBlessingTrait reaver = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     reaver.Apply(mob, gs);
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1285,6 +1288,7 @@ class DialogueInterpreter
   {
     EmberBlessingTrait ember = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     ember.Apply(mob, gs);
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(2);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1293,6 +1297,7 @@ class DialogueInterpreter
   {
     TricksterBlessingTrait trickster = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     trickster.Apply(mob, gs);
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(4);
 
     throw new ConversationEnded("You are bathed in holy light!");
   }
@@ -1301,7 +1306,8 @@ class DialogueInterpreter
   {
     WinterBlessingTrait winter = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     winter.Apply(mob, gs);
-
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
+    
     throw new ConversationEnded("You are bathed in holy light!");
   }
 }
