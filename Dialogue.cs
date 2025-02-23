@@ -1235,11 +1235,29 @@ class DialogueInterpreter
     {
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", 'a', new ScriptChampionBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", 'd', new ScriptTricksterBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", 'e', new ScriptWinterBlessing()));
+      char opt = 'a';
+      NumberListTrait blessings = mob.Traits.OfType<NumberListTrait>().Where(t => t.Name == "Blessings").First();
+      foreach (int blessing in blessings.Items)
+      {
+        switch (blessing)
+        {
+          case 1:
+            Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
+            break;
+          case 2:
+            Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));    
+            break;
+          case 3:
+            Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
+            break;
+          case 4:
+            Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));
+            break;
+          case 5:
+            Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
+            break;
+        }
+      }
     }
     else
     {
