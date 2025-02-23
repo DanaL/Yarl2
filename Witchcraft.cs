@@ -545,13 +545,13 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     HashSet<Loc> animLocs = [.. Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
     {
-      MainColour = Colours.LIGHT_GREY,
-      AltColour1 = Colours.GREY,
+      MainColour = Colours.LIGHT_BLUE,
+      AltColour1 = Colours.WHITE,
       AltColour2 = Colours.ICE_BLUE,
-      Highlight = Colours.BLACK,
+      Highlight = Colours.BLUE,
       Centre = Actor!.Loc,
       Sqs = animLocs,
-      Ch = '#'
+      Ch = '≈'
     };
     blast.Sqs.Add(Actor.Loc);
     GameState!.UIRef().PlayAnimation(blast, GameState);
@@ -611,13 +611,22 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     (int, int) finalSq = path[0];
     Loc landingLoc = item.Loc;
     string msg = "";
+
+    string itemName = item.FullName.DefArticle().Capitalize();    
+    string verb = Grammar.Conjugate(item, "hit");
+    if (item.Type == ItemType.Zorkmid)
+    {
+      itemName = itemName.Pluralize();
+      verb = "hit";
+    }
+      
     for (int j = 1; j < path.Count; j++)
     {
       Loc loc = origin with { Row = path[j].Item1, Col = path[j].Item2 };
       Tile tile = gs.TileAt(loc);
       if (!tile.PassableByFlight())
       {
-        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {Tile.TileDesc(tile.Type)}.";
+        msg = $"{itemName} {verb} {Tile.TileDesc(tile.Type)}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
         CheckForItemDamage(item, landingLoc, gs);
         break;
@@ -625,7 +634,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       else if (gs.ObjDb.BlockersAtLoc(loc))
       {
         Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
-        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {blocker.Name.IndefArticle()}.";
+        msg = $"{itemName} {verb} {blocker.Name.IndefArticle()}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
         CheckForItemDamage(item, landingLoc, gs);
         break;
@@ -634,7 +643,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       {
         landingLoc = loc;
         string name = occupant.HasTrait<NamedTrait>() ? occupant.Name.Capitalize() : occupant.Name.IndefArticle();
-        msg = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "hit")} {occupant.FullName}.";
+        msg = $"{itemName} {verb} {occupant.FullName}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
         InjuredByCollision(occupant, gs, landingLoc);
         CheckForItemDamage(item, landingLoc, gs);
@@ -644,8 +653,39 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       landingLoc = loc;
     }
 
-    gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
-    gs.ItemDropped(item, landingLoc);
+    if (item.Type == ItemType.Zorkmid && item.Value > 1)
+    {
+      ScatterCoins(item, landingLoc, gs);
+    }
+    else
+    {
+      gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
+      gs.ItemDropped(item, landingLoc);
+    }
+  }
+
+  static void ScatterCoins(Item zorkmids, Loc landingLoc, GameState gs)
+  {
+    gs.ObjDb.RemoveItemFromGame(zorkmids.Loc, zorkmids);
+    gs.UIRef().AlertPlayer("The coins scatter!");
+
+    List<Loc> locs = [..Util.Adj8Locs(landingLoc).Where(l => gs.TileAt(l).PassableByFlight())];
+    locs.Add(landingLoc);
+
+    int total = zorkmids.Value;
+    while (total > 0)
+    {
+      Item z = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+      int amt = gs.Rng.Next(1, 5);
+      if (amt > total)
+        amt = total;
+      z.Value = amt;
+
+      Loc loc = locs[gs.Rng.Next(locs.Count)];
+      gs.ItemDropped(z, loc);
+
+      total -= amt;
+    }
   }
 
   static void BlowActorBack(Actor actor, Loc origin, GameState gs)
