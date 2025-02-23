@@ -30,7 +30,7 @@ rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1
 will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#8#1#0#0#Attack|LightSource#owner#2,Retribution#Fire#8#1,Flying
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent,Heavy
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|MeleePiercing}#1#1#4#2#0#0#Attack|Poisoner#14#2#15,CoinsLoot#20#30,Brainless
-phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead
+phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#Butt
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#0#10#0#0#0#3#Passive|Plant,Immunity#Confusion,Immobile,Brainless
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|NauseousAura#owner#10,Undead
