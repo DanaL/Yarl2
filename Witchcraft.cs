@@ -627,7 +627,8 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       itemName = itemName.Pluralize();
       verb = "hit";
     }
-      
+    
+    bool broken = false;
     for (int j = 1; j < path.Count; j++)
     {
       Loc loc = origin with { Row = path[j].Item1, Col = path[j].Item2 };
@@ -636,7 +637,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
       {
         msg = $"{itemName} {verb} {Tile.TileDesc(tile.Type)}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
-        CheckForItemDamage(item, landingLoc, gs);
+        broken = CheckForItemDamage(item, landingLoc, gs);
         break;
       }
       else if (gs.ObjDb.BlockersAtLoc(loc))
@@ -644,7 +645,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
         Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
         msg = $"{itemName} {verb} {blocker.Name.IndefArticle()}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
-        CheckForItemDamage(item, landingLoc, gs);
+        broken = CheckForItemDamage(item, landingLoc, gs);
         break;
       }
       else if (gs.ObjDb.Occupant(loc) is Actor occupant)
@@ -654,13 +655,16 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
         msg = $"{itemName} {verb} {occupant.FullName}.";
         gs.UIRef().AlertPlayer(msg, gs, landingLoc);
         InjuredByCollision(occupant, gs, landingLoc);
-        CheckForItemDamage(item, landingLoc, gs);
+        broken = CheckForItemDamage(item, landingLoc, gs);
         break;
       }
 
       landingLoc = loc;
     }
 
+    if (broken)
+      return;
+      
     if (item.Type == ItemType.Zorkmid && item.Value > 1)
     {
       ScatterCoins(item, landingLoc, gs);
@@ -746,18 +750,24 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     gs.ResolveActorMove(actor,actor.Loc, landingLoc);
   }
 
-  static void CheckForItemDamage(Item item, Loc loc, GameState gs)
+  static bool CheckForItemDamage(Item item, Loc loc, GameState gs)
   {
     if (item.Type == ItemType.Potion)
     {
       gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} shatters!", gs, loc);
+
+      return true;
     }
     else if (Item.IDInfo.TryGetValue(item.Name, out var idInfo) && idInfo.Desc.Contains("glass"))
     {
       gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} shatters!", gs, loc);
+
+      return true;
     }
+
+    return false;
   }
 
   static bool InjuredByCollision(Actor actor, GameState gs, Loc landingLoc)
