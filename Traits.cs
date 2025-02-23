@@ -1872,6 +1872,14 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
   }
 }
 
+class NumberListTrait : Trait
+{
+  public string Name { get; set; } = "";
+  public List<int> Items { get; set; } = [];
+
+  public override string AsText() => $"NumberList#{Name}#{string.Join(',', Items)}";
+}
+
 // Trait for items who have a specific owner, mainly so I can alert them when,
 // say, the player picks them up, etc
 class OwnedTrait : Trait
@@ -3058,12 +3066,13 @@ class TraitFactory
       }
     },    
     { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    { "NumberList", (pieces, gameObj) => new NumberListTrait() { Name = pieces[1], Items = [..pieces[2].Split(',').Select(int.Parse)] } },
     { "OnFire", (pieces, gameObj) => new OnFireTrait()
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
       Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) }
-    },
-    { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = pieces[1].Split(',').Select(ulong.Parse).ToList() } },
+    },    
+    { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() },
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },

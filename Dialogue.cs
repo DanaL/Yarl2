@@ -929,7 +929,7 @@ class DialogueInterpreter
     }
     else if (Expr is ScriptBlessings)
     {
-      EvalBlessings(gs);
+      EvalBlessings(mob, gs);
     }
     else if (Expr is ScriptChampionBlessing)
     {
@@ -1227,7 +1227,7 @@ class DialogueInterpreter
     gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
   }
 
-  void EvalBlessings(GameState gs)
+  void EvalBlessings(Actor mob, GameState gs)
   {
     bool blessed = gs.Player.HasTrait<BlessingTrait>();
     
@@ -1239,7 +1239,7 @@ class DialogueInterpreter
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", 'b', new ScriptReaverBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", 'c', new ScriptEmberBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", 'd', new ScriptTricksterBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of Winter]: Use the power of arctic storms to aid your quest!", 'e', new ScriptWinterBlessing()));
+      Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", 'e', new ScriptWinterBlessing()));
     }
     else
     {
