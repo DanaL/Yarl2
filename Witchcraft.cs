@@ -561,8 +561,16 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     {
       if (GameState.ObjDb.Occupant(loc) is Actor actor)
         affectedObjs.Add(actor);
+
       foreach (Item item in GameState.ObjDb.ItemsAt(loc))
       {
+        if (item.Name == "campfire")
+        {
+          GameState.UIRef().AlertPlayer("The campfire is extinguished!", GameState, loc);
+          GameState.ObjDb.RemoveItemFromGame(loc, item);
+          continue;
+        }
+
         bool moveable = true;
         foreach (Trait t in item.Traits)
         {
@@ -676,9 +684,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     while (total > 0)
     {
       Item z = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
-      int amt = gs.Rng.Next(1, 5);
-      if (amt > total)
-        amt = total;
+      int amt = int.Min(total, gs.Rng.Next(1, 5));
       z.Value = amt;
 
       Loc loc = locs[gs.Rng.Next(locs.Count)];

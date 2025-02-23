@@ -107,7 +107,8 @@ class DebugCommand(GameState gs)
     {"croesus charm", ItemNames.CROESUS_CHARM },
     {"potion of obscurity", ItemNames.POTION_OBSCURITY},
     {"wand of digging", ItemNames.WAND_DIGGING },
-    {"boots of feather falling", ItemNames.FEATHERFALL_BOOTS }
+    {"boots of feather falling", ItemNames.FEATHERFALL_BOOTS },
+    {"campfire", ItemNames.CAMPFIRE }
   };
 
   public string DoCommand(string txt)
