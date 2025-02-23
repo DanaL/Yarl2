@@ -300,14 +300,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     item.ContainedBy = 0;
 
-    var tile = TileAt(loc);
+    Tile tile = TileAt(loc);
+
+    if (tile.Type == TileType.Chasm)
+    {
+      UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", this, loc);
+      ItemDropped(item, loc with { Level = loc.Level + 1});
+      return;
+    }
+
+    ObjDb.SetToLoc(loc, item);
+    string msg = ThingTouchesFloor(loc);
+    UI.AlertPlayer(msg);
+    
     foreach (DamageType effect in tile.TerrainEffects())
     {
       var (s, _) = EffectApplier.Apply(effect, this, item, null);
-      if (s != "")
-      {
-        UI.AlertPlayer(s);
-      }
+      UI.AlertPlayer(s);      
     }
 
     foreach (var t in item.Traits)
@@ -321,10 +330,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       item.Traits.Add(new InPitTrait());
     }
 
-    ObjDb.SetToLoc(loc, item);
-    string msg = ThingTouchesFloor(loc);
-    UI.AlertPlayer(msg);
-    
     if (tile is IdolAltar idolAltar && item.ID == idolAltar.IdolID)
     {      
       Loc wallLoc = idolAltar.Wall;
@@ -537,9 +542,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     var itemsToFall = ObjDb.ItemsAt(loc);
     foreach (var item in itemsToFall)
     {
-      UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!");
       ObjDb.RemoveItemFromLoc(loc, item);
-      ItemDropped(item, landingSpot);
+      ItemDropped(item, loc);
     }
   }
 

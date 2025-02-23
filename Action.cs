@@ -2287,35 +2287,6 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
   readonly char _slot = slot;
   Loc _target { get; set; }
 
-  Loc FinalLandingSpot(Loc loc)
-  {
-    var tile = GameState!.TileAt(loc);
-
-    while (tile.Type == TileType.Chasm)
-    {
-      loc = loc with { Level = loc.Level + 1 };
-      tile = GameState.TileAt(loc);
-    }
-
-    return loc;
-  }
-
-  void ProjectileLands(List<Loc> pts, Item ammo, ActionResult result)
-  {
-    var anim = new ThrownMissileAnimation(GameState!, ammo.Glyph, pts, ammo);
-    GameState!.UIRef().PlayAnimation(anim, GameState);
-
-    var landingPt = FinalLandingSpot(pts.Last());
-    GameState.ItemDropped(ammo, landingPt);
-    ammo.Equipped = false;
-    
-    var tile = GameState.TileAt(landingPt);
-    if (tile.Type == TileType.Chasm)
-    {
-      GameState!.UIRef().AlertPlayer($"{ammo.FullName.DefArticle().Capitalize()} tumbles into the darkness.");
-    }
-  }
-
   public override ActionResult Execute()
   {
     var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
@@ -2353,7 +2324,12 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
         }
       }
 
-      ProjectileLands(pts, ammo, result);
+      var anim = new ThrownMissileAnimation(GameState!, ammo.Glyph, pts, ammo);
+      GameState!.UIRef().PlayAnimation(anim, GameState);
+
+      var landingPt = pts.Last();
+      GameState.ItemDropped(ammo, landingPt);
+      ammo.Equipped = false;
     }
 
     return result;
