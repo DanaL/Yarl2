@@ -21,6 +21,7 @@ class Spells
     {
       case "phase door":
       case "cone of cold":
+      case "gust of wind":
         return true;
       default:
         return false;
@@ -558,15 +559,15 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
 
     List<GameObj> affectedObjs = [];
     foreach (Loc loc in Affected)
-    {
-      if (GameState.ObjDb.Occupant(loc) is Actor actor)
-        affectedObjs.Add(actor);
-
+    {      
       if (GameState.TileAt(loc) is Door door && door.Type == TileType.ClosedDoor)
       {
         door.Open = true;
         GameState.UIRef().AlertPlayer("The door is blown open!", GameState, loc);
       }
+
+      if (GameState.ObjDb.Occupant(loc) is Actor actor)
+        affectedObjs.Add(actor);
 
       foreach (Item item in GameState.ObjDb.ItemsAt(loc))
       {

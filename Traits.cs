@@ -2828,6 +2828,8 @@ class WinterBlessingTrait : BlessingTrait
 
     if (!gs.Player.SpellsKnown.Contains("cone of cold"))
       gs.Player.SpellsKnown.Add("cone of cold");
+    if (!gs.Player.SpellsKnown.Contains("gust of wind"))
+      gs.Player.SpellsKnown.Add("gust of wind");
 
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
     {
