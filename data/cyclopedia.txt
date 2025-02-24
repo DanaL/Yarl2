@@ -301,3 +301,6 @@ An altar carved from black stone and stained with dried blood.
 #
 boots of feather falling
 Stylish, comfortable, and especially popular with people who have a tendency to fall down holes and mineshafts.
+#
+wind fan
+Painted with symbols of Sorrel, goddess of storms. A consumable item that can be used to cast Gust of Wind.

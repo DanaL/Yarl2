@@ -170,7 +170,7 @@ abstract class BlessingTrait : TemporaryTrait
 // implement IUseable
 class CanApplyTrait : Trait
 {
-  public override string AsText() => $"CanApply";
+  public override string AsText() => "CanApply";
 }
 
 class CarriesTrait : LootTrait
@@ -179,6 +179,20 @@ class CarriesTrait : LootTrait
   public int Chance { get; set; }
 
   public override string AsText() => $"Carries#{ItemName}#{Chance}";
+}
+
+class CastTrait : Trait, IUSeable
+{
+  public string Spell { get; set; } = "";
+
+  public override string AsText() => $"Cast#{Spell}";
+
+  public UseResult Use(Actor caster, GameState gs, int row, int col, Item? item)
+  {
+    return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind"), null, true, "");
+  }
+
+  public void Used(){ }
 }
 
 class ChampionBlessingTrait : BlessingTrait
@@ -2801,7 +2815,7 @@ class WandTrait : Trait, IUSeable, INeedsID, IDesc
     }
 
     ulong itemId = item is not null ? item.ID : 0;
-    return new UseResult(new UseWandAction(gs, user, this, itemId), null, true, "");  
+    return new UseResult(new UseWandAction(gs, user, this, itemId), null, true, "");
   }
 
   public void Used() => --Charges;
@@ -2940,6 +2954,7 @@ class TraitFactory
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Carries", (pieces, gameObj) => new CarriesTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
+    { "Cast", (pieces, gameObj) => new CastTrait() { Spell = pieces[1] }},
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },

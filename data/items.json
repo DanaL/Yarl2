@@ -1160,5 +1160,16 @@
       "Consumable",
       "Stackable"
     ]
+  },
+  {
+    "Name": "WIND_FAN",
+    "DescriptiveName": "wind fan",
+    "Type": "Tool",
+    "Value": 25,
+    "Glyph": "),lightblue,blue,black,black",
+    "Traits": [
+      "Consumable",
+      "Cast#GustOfWind"
+    ]
   }
 ]

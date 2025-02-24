@@ -530,6 +530,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
 class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
+  public bool FreeToCast { get; set; } = false;
   List<Loc> Affected { get; set; } = [];
 
   public override ActionResult Execute()
@@ -538,7 +539,7 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
     result.EnergyCost = 1.0;
     result.Succcessful = true;
 
-    if (!CheckCost(1, 20, result))
+    if (!FreeToCast && !CheckCost(1, 20, result))
       return result;
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");

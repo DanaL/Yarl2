@@ -460,10 +460,10 @@ class Player : Actor
     ReplacePendingAction(missleAction, acc);
   }
 
-  public void ReplacePendingAction(Action newAction, Inputer inputer)
+  public void ReplacePendingAction(Action? newAction, Inputer? inputer)
   {
-    _deferred = newAction;
-    _inputController = inputer;
+    _deferred = newAction ?? _deferred;
+    _inputController = inputer ?? _inputController;
   }
 
   private static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()

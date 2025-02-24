@@ -3193,6 +3193,29 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class UseSpellItemAction(GameState gs, Actor actor, string spell) : Action(gs, actor)
+{
+  string Spell { get; set; } = spell;
+
+  public override ActionResult Execute()
+  {
+    ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
+
+    Player player = GameState!.Player;
+    switch (Spell)
+    {
+      case "gust of wind":
+        player.ReplacePendingAction(
+          new CastGustOfWindAction(GameState, player) { FreeToCast = true }, 
+          new ConeTargeter(GameState!, 5, player.Loc)
+        );
+        break;
+    }
+
+    return result;
+  }
+}
+
 class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : Action(gs, actor)
 {
   readonly WandTrait _wand = wand;

@@ -108,7 +108,8 @@ class DebugCommand(GameState gs)
     {"potion of obscurity", ItemNames.POTION_OBSCURITY},
     {"wand of digging", ItemNames.WAND_DIGGING },
     {"boots of feather falling", ItemNames.FEATHERFALL_BOOTS },
-    {"campfire", ItemNames.CAMPFIRE }
+    {"campfire", ItemNames.CAMPFIRE },
+    {"wind fan", ItemNames.WIND_FAN }
   };
 
   public string DoCommand(string txt)

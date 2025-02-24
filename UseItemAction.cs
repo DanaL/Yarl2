@@ -635,7 +635,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       bool success = false;
       foreach (IUSeable trait in useableTraits)
       {
-        var useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
+        UseResult useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         result.Succcessful = useResult.Successful;
         GameState.UIRef().AlertPlayer(useResult.Message);
         success = useResult.Successful;
