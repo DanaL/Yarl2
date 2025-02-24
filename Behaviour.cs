@@ -793,6 +793,9 @@ class RandomMove : BehaviourNode
     List<Loc> opts = [];
     foreach (Loc adj in Util.Adj8Locs(mob.Loc))
     {
+      if (BadSquare(gs, adj))
+        continue;
+        
       Tile tile = gs.TileAt(adj);
       if (gs.ObjDb.Occupied(adj))
         continue;
@@ -1586,7 +1589,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
     }
 
     gs.Player.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
-    
+
     gs.UIRef().AlertPlayer($"You hand over your money and {npc.FullName} gives you your goods.");
     
     selections.Items = [];
