@@ -179,7 +179,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  private void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Random rng)
+  void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Random rng)
   {
     // Any floor will do...
     List<(int, int)> candidateSqs = [];
@@ -1424,6 +1424,7 @@ class MainDungeonBuilder : DungeonBuilder
     flinFlon.Stats[Attribute.ShopInvoice] = new Stat(0);
     flinFlon.Traits.Add(new VillagerTrait());
     flinFlon.Traits.Add(new NamedTrait());
+    flinFlon.Traits.Add(new IntelligentTrait());
     flinFlon.Traits.Add(new DialogueScriptTrait() { ScriptFile = "gnome_merchant.txt" });
     flinFlon.SetBehaviour(new GnomeMerchantBehaviour());
     flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "GnomeMerchantPlan" });
@@ -1459,6 +1460,29 @@ class MainDungeonBuilder : DungeonBuilder
 
     Loc startLoc = floors[rng.Next(floors.Count)];
     objDb.AddNewActor(flinFlon, startLoc);
+
+    floors = [..floors.Where(l => Util.Distance(startLoc, l) >= 10)];
+    for (int j = 0; j < 3; j++)
+    {
+      Item flyer = new()
+      {
+        Name = "neatly printed flyer",
+        Type = ItemType.Document,
+        Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+      };
+      flyer.Traits.Add(new FlammableTrait());
+      flyer.Traits.Add(new ScrollTrait());
+      objDb.Add(flyer);
+      
+      string txt = "Flin Flon's Supplies and Mercantile!\n\nCome find us for a selection of discounted adventuring gear you may literally not survive without!!\n\nale! Sale! Sale!";
+      ReadableTrait rt = new(txt) { OwnerID = flyer.ID };
+      flyer.Traits.Add(rt);
+
+      int i = rng.Next(floors.Count);
+      Loc loc = floors[i];
+      floors.RemoveAt(i);
+      objDb.SetToLoc(loc, flyer);
+    }
   }
 
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
