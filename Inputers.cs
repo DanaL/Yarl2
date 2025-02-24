@@ -699,7 +699,8 @@ class Dialoguer : Inputer
       throw new ArgumentException("Interlocutor must have IDialoguer behaviour", nameof(interlocutor));
     }
     _dialogue = dialogue;
-
+    _dialogue.InitDialogue(interlocutor);
+    
     WritePopup();
   }
 
@@ -709,6 +710,13 @@ class Dialoguer : Inputer
     {
       EndConversation("Farewell.");
       return;
+    }
+
+    if (_interlocutor.Behaviour is NPCBehaviour npc && (ch == '\n' || ch == '\r'))
+    {
+      if (!npc.ConfirmChoices(_interlocutor, _gs))
+        return;
+      EndConversation("Farewell!");
     }
 
     if (!_currOptions.Contains(ch))
@@ -741,7 +749,7 @@ class Dialoguer : Inputer
 
     try
     {
-      var (blurb, opts) = _dialogue.CurrentText(_interlocutor, _gs);
+      var (blurb, footer, opts) = _dialogue.CurrentText(_interlocutor, _gs);
 
       if (string.IsNullOrEmpty(blurb))
       {
@@ -749,8 +757,9 @@ class Dialoguer : Inputer
         return;
       }
 
+      sb.Append('"');
       sb.Append(blurb)
-        .Append("\n\n");
+        .Append("\"\n\n");
 
       _currOptions = [];      
       foreach (var (text, key) in opts)
@@ -799,6 +808,8 @@ class Dialoguer : Inputer
 
       _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
       sb.AppendLine($"{_exitOpt}) Farewell.");
+
+      sb.Append(footer);
 
       _gs.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -2, -1, _popupWidth));
     }

@@ -6,7 +6,7 @@
 // worldwide. This software is distributed without any warranty.
 //
 // You should have received a copy of the CC0 Public Domain Dedication along 
-// with this software. If not, 
+// with this software. If not, f
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
@@ -24,6 +24,7 @@ enum TokenType
   OPTION, SPEND, END, 
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
+  SHOP_MENU, SHOP_SELECTION,
   EOF
 }
 
@@ -132,6 +133,8 @@ class ScriptScanner(string src)
       "ember-blessing" => TokenType.GRANT_EMBER_BLESSING,
       "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
       "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
+      "shop-menu" => TokenType.SHOP_MENU,
+      "shop-selection" => TokenType.SHOP_SELECTION,
       _ => TokenType.IDENTIFIER
     };
 
@@ -232,6 +235,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
       TokenType.GRANT_WINTER_BLESSING => GrantWinterBlessing(),
+      TokenType.SHOP_MENU => ShopMenuExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -302,6 +306,14 @@ class ScriptParser(List<ScriptToken> tokens)
     return new ScriptOption(str, expr);
   }
   
+  ScriptShopMenu ShopMenuExpr()
+  {
+    Consume(TokenType.SHOP_MENU);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptShopMenu();
+  } 
+
   ScriptBlessings BlessingsExpr()
   {
     Consume(TokenType.BLESSINGS);
@@ -662,6 +674,11 @@ class ScriptOption(string text, ScriptExpr expr) : ScriptExpr
 }
 
 class ScriptBlessings : ScriptExpr {}
+class ScriptShopMenu : ScriptExpr {}
+class ScriptShopSelection(char opt) : ScriptExpr 
+{
+  public char Choice { get; set; } = opt;
+}
 
 class ScriptSpend(int amount) : ScriptExpr
 {
@@ -684,11 +701,11 @@ record DialogueOption(string Text, char Ch, ScriptExpr Expr);
 class DialogueInterpreter
 {
   public List<DialogueOption> Options = [];
-  StringBuilder Sb { get; set; } = new StringBuilder();
-
+  StringBuilder Sb { get; set; } = new();
+  StringBuilder Footer { get; set; } = new();
   public DialogueInterpreter() { }
 
-  public string Run(string filename, Actor mob, GameState gs)
+  public (string, string) Run(string filename, Actor mob, GameState gs)
   {
     string path = ResourcePath.GetDialogueFilePath(filename);
     var txt = File.ReadAllText(path);
@@ -699,7 +716,7 @@ class DialogueInterpreter
     ScriptExpr expr = parser.Parse();
     Eval(expr, mob, gs);
 
-    return Sb.ToString();
+    return (Sb.ToString(), Footer.ToString());
   }
 
   public string Run(ScriptExpr expr, Actor mob, GameState gs)
@@ -931,6 +948,14 @@ class DialogueInterpreter
     {
       EvalBlessings(mob, gs);
     }
+    else if (Expr is ScriptShopMenu)
+    {
+      EvalShopMenu(mob, gs);
+    }
+    else if (Expr is ScriptShopSelection selection)
+    {
+      EvalShopSelection(selection.Choice, mob, gs);
+    }
     else if (Expr is ScriptChampionBlessing)
     {
       EvalChampionBlessing(mob, gs);
@@ -1017,7 +1042,7 @@ class DialogueInterpreter
     throw new ConversationEnded(msg);
   }
 
-  ScriptBool EvallBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
+  static ScriptBool EvallBooleanExpr(ScriptBooleanExpr expr, Actor mob, GameState gs)
   {
     object val = CheckVal(expr.Identifier, mob, gs);
 
@@ -1225,6 +1250,52 @@ class DialogueInterpreter
   {
     int purse = gs.Player.Inventory.Zorkmids;
     gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
+  }
+
+  void EvalShopMenu(Actor mob, GameState gs)
+  {
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+
+    Sb.Append("\n\nHere's what I have left:");
+
+    int bill = 0;
+    char opt = 'a';
+    foreach (Item item in mob.Inventory.Items())
+    {
+      string s = $"{item.FullName.IndefArticle()} - [YELLOW $]20";
+      if (selections.Items.Contains(opt - 'a')) 
+      {
+        s += " [GREEN *]";
+        bill += 20;
+      }
+      Options.Add(new DialogueOption(s, opt, new ScriptShopSelection(opt)));
+      ++opt;
+    }
+
+    mob.Stats[Attribute.ShopInvoice] = new Stat(bill);
+    
+    if (bill > 0)
+    {
+      Footer.Append("\nTotal bill: [YELLOW $]");
+      Footer.Append(bill);
+
+      if (bill <= gs.Player.Inventory.Zorkmids)
+        Footer.Append("\n\n(Enter to accept)");
+      else
+        Footer.Append("\n\n[BRIGHTRED You don't have enough money for all that!]");
+    }
+  }
+
+  static void EvalShopSelection(char choice, Actor mob, GameState gs)
+  {
+    int itemNum = choice - 'a';
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+    if (!selections.Items.Remove(itemNum))
+      selections.Items.Add(itemNum);
   }
 
   void EvalBlessings(Actor mob, GameState gs)

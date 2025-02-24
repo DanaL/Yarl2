@@ -3080,7 +3080,13 @@ class TraitFactory
       }
     },    
     { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
-    { "NumberList", (pieces, gameObj) => new NumberListTrait() { Name = pieces[1], Items = [..pieces[2].Split(',').Select(int.Parse)] } },
+    { "NumberList", (pieces, gameObj) => 
+      new NumberListTrait() 
+      { 
+        Name = pieces[1], 
+        Items = pieces[2] == "" ? [] : [..pieces[2].Split(',').Select(int.Parse)] 
+      } 
+    },
     { "OnFire", (pieces, gameObj) => new OnFireTrait()
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),

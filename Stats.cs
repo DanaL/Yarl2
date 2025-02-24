@@ -49,7 +49,8 @@ enum Attribute
   InventoryRefresh,
   Nerve,
   MagicPoints,
-  LastBlessing
+  LastBlessing,
+  ShopInvoice
 }
 
 class Stat

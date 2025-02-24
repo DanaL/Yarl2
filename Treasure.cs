@@ -47,7 +47,7 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY,
-      ItemNames.FEATHERFALL_BOOTS
+      ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN
   ];
 
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
@@ -95,7 +95,7 @@ class Treasure
 
   public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(22);
+    int roll = rng.Next(25);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -118,6 +118,10 @@ class Treasure
       18 => ItemFactory.Get(ItemNames.RING_OF_ADORNMENT, objDb),
       19 => ItemFactory.Get(ItemNames.WAND_SLOW_MONSTER, objDb),
       20 => ItemFactory.Get(ItemNames.FEATHERFALL_BOOTS, objDb),
+      21 => ItemFactory.Get(ItemNames.WIND_FAN, objDb),
+      22 => ItemFactory.Get(ItemNames.GAUNTLETS_OF_POWER, objDb),
+      23 => ItemFactory.Get(ItemNames.CLOAK_OF_PROTECTION, objDb),
+      24 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }
@@ -164,21 +168,13 @@ class Treasure
 
   public static Item ItemByQuality(TreasureQuality quality, GameObjectDB objDb, Random rng)
   {
-    ItemNames name;
-    switch (quality)
+    var name = quality switch
     {
-      case TreasureQuality.Uncommon:
-        name = UncommonItems[rng.Next(UncommonItems.Count)];
-        break;
-      case TreasureQuality.Good:
-        name = GoodItems[rng.Next(GoodItems.Count)];
-        break;
-      default:
-        name = CommonItems[rng.Next(CommonItems.Count)];
-        break;
-
-    }
-
+      TreasureQuality.Uncommon => UncommonItems[rng.Next(UncommonItems.Count)],
+      TreasureQuality.Good => GoodItems[rng.Next(GoodItems.Count)],
+      _ => CommonItems[rng.Next(CommonItems.Count)],
+    };
+    
     return GenerateItem(name, objDb, rng);
   }
 

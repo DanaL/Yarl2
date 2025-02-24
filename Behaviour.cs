@@ -1417,6 +1417,7 @@ class Planner
     "AlchemistPlan" => AlchemistPlan(mob, gs),
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),
+    "GnomeMerchantPlan" => new Selector([new RandomMove(), new PassTurn()]),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
@@ -1445,7 +1446,8 @@ class NullBehaviour : IBehaviour
 // I think I'll likely eventually merge this into IBehaviour
 interface IDialoguer
 {
-  (string, List<(string, char)>) CurrentText(Mob mob, GameState gs);
+  void InitDialogue(Mob actor);
+  (string, string, List<(string, char)>) CurrentText(Mob mob, GameState gs);
   void SelectOption(Mob actor, char opt, GameState gs);
 }
 
@@ -1524,6 +1526,72 @@ class InnkeeperBehaviour : NPCBehaviour
     var action = new InnkeeperServiceAction(gameState, actor);
 
     return (action, acc);    
+  }
+}
+
+class GnomeMerchantBehaviour : NPCBehaviour
+{
+  DateTime _lastBark = new(1900, 1, 1);
+
+  public override void InitDialogue(Mob mob)
+  {
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+    selections.Items = [];
+    mob.Stats[Attribute.ShopInvoice] = new Stat(0);
+  }
+
+  public override string GetBark(Mob actor, GameState gs)
+  {    
+    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
+    {
+      _lastBark = DateTime.Now;
+      return gs.Rng.Next(4) switch
+      {
+        0 => "Priced to clear!",
+        1 => "I thought this would be easy money!",
+        2 => "The customer is always something, something...",
+        _ => "Everything must go!"
+      };
+      
+    }
+
+    return "";
+  }
+
+  public override bool ConfirmChoices(Actor npc, GameState gs)
+  {
+    NumberListTrait selections = npc.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+
+    if (selections.Items.Count == 0 || npc.Stats[Attribute.ShopInvoice].Curr > gs.Player.Inventory.Zorkmids)
+    {
+      return false;
+    }
+
+    List<Item> inventory = npc.Inventory.Items();
+    List<ulong> purchases = [];
+    for (int i = 0; i < inventory.Count; i++)
+    {
+      if (selections.Items.Contains(i))
+        purchases.Add(inventory[i].ID);
+    }
+
+    foreach (ulong id in purchases)
+    {
+      Item item = npc.Inventory.RemoveByID(id)!;
+      gs.Player.Inventory.Add(item, gs.Player.ID);
+    }
+
+    gs.Player.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
+    
+    gs.UIRef().AlertPlayer($"You hand over your money and {npc.FullName} gives you your goods.");
+    
+    selections.Items = [];
+
+    return true;
   }
 }
 
@@ -1962,6 +2030,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
 {
   List<DialogueOption> Options { get; set; } = [];
 
+  public virtual void InitDialogue(Mob actor) {}
   public virtual string GetBark(Mob actor, GameState gs) => "";
 
   public virtual (Action, Inputer?) Chat(Mob actor, GameState gameState)
@@ -1971,22 +2040,22 @@ class NPCBehaviour : IBehaviour, IDialoguer
       return (new NullAction(), new PauseForMoreInputer());
     }
 
-    var acc = new Dialoguer(actor, gameState);
-    var action = new CloseMenuAction(gameState, 1.0);
+    Dialoguer acc = new(actor, gameState);
+    CloseMenuAction action = new(gameState, 1.0);
 
     return (action, acc);
   }
 
-  public (string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  public virtual (string, string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
   {
     string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
     var dialogue = new DialogueInterpreter();
 
-    string txt = dialogue.Run(scriptFile, mob, gs);
+    var (txt, footer) = dialogue.Run(scriptFile, mob, gs);
     Options = dialogue.Options;
-    List<(string, char)> opts = Options.Select(o => (o.Text, o.Ch)).ToList();
+    List<(string, char)> opts = [..Options.Select(o => (o.Text, o.Ch))];
     
-    return (txt, opts);
+    return (txt, footer, opts);
   }
 
   public void SelectOption(Mob mob, char choice, GameState gs)
@@ -2001,6 +2070,8 @@ class NPCBehaviour : IBehaviour, IDialoguer
       }
     }
   }
+
+  public virtual bool ConfirmChoices(Actor npc, GameState gs) => false;
 
   public virtual void RefreshShop(Actor npc, GameState gs) { }
 }

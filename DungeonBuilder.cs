@@ -322,7 +322,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Random rng)
+  static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Random rng)
   {
     var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
     List<Loc> openFloors = sqs.Where(l => !objDb.BlockersAtLoc(l)).ToList();
@@ -1017,7 +1017,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
+  static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
   {    
     int graveyardOnLevel = -1;
     string plagueDesc = "";
@@ -1397,6 +1397,70 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static void GnomeMerchant(Map[] levels, int dungeonId, Random rng, GameObjectDB objDb)
+  {
+    int level = -1;
+    for (int j = 2; j < levels.Length; j++)
+    {
+      if (rng.NextDouble() <= 0.31)
+      {
+        level = j;
+        break;        
+      }
+    }
+
+    if (level == -1)
+      return;
+
+    level = 0;
+
+    Mob flinFlon = new()
+    {
+      Name = "Flin Flon",
+      Appearance = "A mildly dishevelled gnome with a sparse beard. He's carrying a heavy satchel.",
+      Glyph = new Glyph('G', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
+    };
+    flinFlon.Stats[Attribute.HP] = new Stat(50);
+    flinFlon.Stats[Attribute.ShopInvoice] = new Stat(0);
+    flinFlon.Traits.Add(new VillagerTrait());
+    flinFlon.Traits.Add(new NamedTrait());
+    flinFlon.Traits.Add(new DialogueScriptTrait() { ScriptFile = "gnome_merchant.txt" });
+    flinFlon.SetBehaviour(new GnomeMerchantBehaviour());
+    flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "GnomeMerchantPlan" });
+    flinFlon.Traits.Add(new NumberListTrait() { Name = "ShopSelections", Items = [] });
+    
+    flinFlon.Inventory = new Inventory(flinFlon.ID, objDb);
+    int numItems = rng.Next(3, 6);
+    while (numItems > 0)
+    {
+      Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+      if (item.Type == ItemType.Zorkmid)
+        continue;
+      flinFlon.Inventory.Add(item, flinFlon.ID);
+
+      --numItems;
+    }
+     
+    Map map = levels[level];
+    List<Loc> floors = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        Tile tile = map.TileAt(r, c);
+        if (tile.Type != TileType.DungeonFloor)
+          continue;
+        Loc loc = new(dungeonId, level, r, c);
+        if (objDb.Occupied(loc) || objDb.BlockersAtLoc(loc) || objDb.HazardsAtLoc(loc))
+          continue;
+        floors.Add(loc);
+      }
+    }
+
+    Loc startLoc = floors[rng.Next(floors.Count)];
+    objDb.AddNewActor(flinFlon, startLoc);
+  }
+
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks,
         Map wildernessMap)
@@ -1504,6 +1568,8 @@ class MainDungeonBuilder : DungeonBuilder
     // Add a couple of guaranteed good items to dungeon
     AddGoodItemToLevel(levels[1], id, 1, rng, objDb);
     AddGoodItemToLevel(levels[3], id, 3, rng, objDb);
+
+    GnomeMerchant(levels, id, rng, objDb);
 
     return dungeon;
   }
