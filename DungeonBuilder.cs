@@ -1402,7 +1402,7 @@ class MainDungeonBuilder : DungeonBuilder
     int level = -1;
     for (int j = 2; j < levels.Length; j++)
     {
-      if (rng.NextDouble() <= 0.31)
+      if (rng.NextDouble() <= 0.20)
       {
         level = j;
         break;        
@@ -1411,8 +1411,6 @@ class MainDungeonBuilder : DungeonBuilder
 
     if (level == -1)
       return;
-
-    level = 0;
 
     Mob flinFlon = new()
     {
@@ -1429,7 +1427,10 @@ class MainDungeonBuilder : DungeonBuilder
     flinFlon.SetBehaviour(new GnomeMerchantBehaviour());
     flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "GnomeMerchantPlan" });
     flinFlon.Traits.Add(new NumberListTrait() { Name = "ShopSelections", Items = [] });
-    
+    LeaveDungeonTrait ldt = new() { SourceId = flinFlon.ID };
+    objDb.EndOfRoundListeners.Add(ldt);
+    flinFlon.Traits.Add(ldt);
+
     flinFlon.Inventory = new Inventory(flinFlon.ID, objDb);
     int numItems = rng.Next(3, 6);
     while (numItems > 0)
@@ -1474,7 +1475,7 @@ class MainDungeonBuilder : DungeonBuilder
       flyer.Traits.Add(new ScrollTrait());
       objDb.Add(flyer);
       
-      string txt = "Flin Flon's Supplies and Mercantile!\n\nCome find us for a selection of discounted adventuring gear you may literally not survive without!!\n\nale! Sale! Sale!";
+      string txt = "Flin Flon's Supplies and Mercantile!\n\nCome find us for a selection of discounted adventuring gear you may literally not survive without!!\n\nSale! Sale! Sale!";
       ReadableTrait rt = new(txt) { OwnerID = flyer.ID };
       flyer.Traits.Add(rt);
 

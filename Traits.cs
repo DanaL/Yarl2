@@ -1755,6 +1755,38 @@ class LameTrait : TemporaryTrait
   }
 }
 
+class LeaveDungeonTrait : Trait, IGameEventListener
+{
+  public bool Expired { get; set; }
+  public bool Listening => true;
+  public ulong ObjId => SourceId;
+
+  public GameEventType EventType => GameEventType.EndOfRound;
+
+  public override string AsText() => $"LeaveDungeon#{SourceId}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(SourceId) is Actor actor)
+    {
+      // I'm implementing this for now for the Gnome Merchant in the dungeon
+      // but if I ever have other NPCs who need different conditions I'll
+      // implement a configurable parameter of some sort.
+      if (actor.Inventory.Items().Count == 0)
+      {
+        gs.RemovePerformer(actor);
+
+        if (gs.LastPlayerFoV.Contains(actor.Loc))
+        {
+          string s = $"{actor.FullName.Capitalize()} disappears in a puff of smoke!";
+          gs.UIRef().AlertPlayer(s);
+          gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+        }
+      }
+    }
+  }
+}
+
 class GoodMagicLootTrait : LootTrait
 {
   public override string AsText() => "GoodMagicLoot";
@@ -3060,6 +3092,7 @@ class TraitFactory
     },
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },

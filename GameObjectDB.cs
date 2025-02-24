@@ -300,6 +300,17 @@ class GameObjectDB
   {
     Objs.Remove(actor.ID);
     _actorLocs.Remove(actor.Loc);
+
+    foreach (Trait t in actor.Traits.Where(t => t is IGameEventListener))
+    {
+      EndOfRoundListeners.Remove((IGameEventListener)t);            
+    }
+
+    var toRemove = DeathWatchListeners.Where(dw => dw.Item1 == actor.ID).ToList();
+    foreach (var dwl in toRemove)
+      DeathWatchListeners.Remove(dwl);
+
+    // should probably check their invetory too...
   }
 
   public Actor? Occupant(Loc loc)
