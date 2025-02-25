@@ -718,8 +718,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));      
     }
 
-    RemovePerformer(victim);
-
     // Was anything listening for the the victims death?
     // Making a copy is the easiest way to deal with the collection being
     // modified by the alert
@@ -735,6 +733,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     if (dwFound)
       ObjDb.DeathWatchListeners = ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID).ToList();
+
+    RemovePerformer(victim);
 
     foreach (var t in victim.Traits)
     {
