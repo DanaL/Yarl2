@@ -178,7 +178,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       ulong witchId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(witchId) is Mob witch)
       {
-        if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.33)
+        if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
         {
           InvisibleTrait it = new()
           {
