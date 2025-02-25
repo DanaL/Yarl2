@@ -21,28 +21,22 @@ class Traps
     if (actor.HasTrait<IllusionTrait>())
       return;
 
-    if (tile.Type == TileType.HiddenTrapDoor && !flying)
+    if (actor is Player && tile.Type == TileType.HiddenTrapDoor && !flying)
     {
       RevealTrap(tile, gs, loc);
       
       loc = gs.FallIntoTrapdoor(actor, loc);
-      if (trapSqVisible)
-        ui.AlertPlayer($"A trap door opens up underneath {actor.FullName}!");
+      gs.Player.Stats[Attribute.Nerve].Change(-15);
+      gs.Player.Running = false;
+      ui.AlertPlayer("A trap door opens up underneath you!");
+      ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
       
-      if (actor is Player player)
-      {
-        player.Stats[Attribute.Nerve].Change(-15);
-        player.Running = false;
-        ui.SetPopup(new Popup($"A trap door opens up underneath you!", "", -1, -1));
-      }
-
-      string s = gs.ThingTouchesFloor(loc);
-      if (trapSqVisible)
-        gs.UIRef().AlertPlayer(s);
+      string s = gs.ThingTouchesFloor(loc);      
+      gs.UIRef().AlertPlayer(s);
       
       throw new AbnormalMovement(loc);
     }
-    else if (tile.Type == TileType.TrapDoor && !flying)
+    else if (actor is Player && tile.Type == TileType.TrapDoor && !flying)
     {
       loc = gs.FallIntoTrapdoor(actor, loc);
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));      
@@ -50,10 +44,7 @@ class Traps
       string s = gs.ThingTouchesFloor(loc);
       gs.UIRef().AlertPlayer(s);
 
-      if (actor is Player player)
-      {
-        player.Stats[Attribute.Nerve].Change(-15);
-      }
+      gs.Player.Stats[Attribute.Nerve].Change(-15);
 
       throw new AbnormalMovement(loc);
     }
@@ -80,9 +71,7 @@ class Traps
 
       actor.Traits.Add(new InPitTrait());
 
-      string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!";
-      if (trapSqVisible)
-        gs.UIRef().AlertPlayer(s);      
+      gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tumble")} into a pit!", gs, loc);      
     }
     else if (tile.Type == TileType.HiddenTeleportTrap || tile.Type == TileType.TeleportTrap)
     {
