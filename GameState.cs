@@ -177,17 +177,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
       ulong witchId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(witchId) is Mob witch)
-      {
+      {        
         if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
-        {
+        {          
           InvisibleTrait it = new()
           {
             ActorID = witchId,
             Expired = false,
-            ExpiresOn = 3000
+            ExpiresOn = Turn + (ulong) Rng.Next(500, 1000)
           };
           witch.Traits.Add(it);
           RegisterForEvent(GameEventType.EndOfRound, it);
+
+          witch.ClearPlan();
         }        
       }
 

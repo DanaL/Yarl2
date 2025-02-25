@@ -444,6 +444,7 @@ class Mob : Actor
   public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
 
   BehaviourNode? CurrPlan { get; set; } = null;
+  public void ClearPlan() => CurrPlan = null;
 
   public const int  INACTIVE = 0;
   public const int INDIFFERENT = 1;
