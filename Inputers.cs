@@ -699,7 +699,7 @@ class Dialoguer : Inputer
       throw new ArgumentException("Interlocutor must have IDialoguer behaviour", nameof(interlocutor));
     }
     _dialogue = dialogue;
-    _dialogue.InitDialogue(interlocutor);
+    _dialogue.InitDialogue(interlocutor, gs);
     
     WritePopup();
   }

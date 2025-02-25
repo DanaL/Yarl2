@@ -50,6 +50,7 @@ enum Attribute
   Nerve,
   MagicPoints,
   LastBlessing,
+  LastGiftTime,
   ShopInvoice
 }
 

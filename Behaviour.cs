@@ -1449,7 +1449,7 @@ class NullBehaviour : IBehaviour
 // I think I'll likely eventually merge this into IBehaviour
 interface IDialoguer
 {
-  void InitDialogue(Mob actor);
+  void InitDialogue(Mob actor, GameState gs);
   (string, string, List<(string, char)>) CurrentText(Mob mob, GameState gs);
   void SelectOption(Mob actor, char opt, GameState gs);
 }
@@ -1536,6 +1536,18 @@ class MoonDaughtersClericBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
+  public override void InitDialogue(Mob mob, GameState gs)
+  {
+    int dialogueState = mob.Stats.TryGetValue(Attribute.DialogueState, out var ds) ? ds.Curr : 0;
+    int lastGiftTime = mob.Stats.TryGetValue(Attribute.LastGiftTime, out var lgt) ? lgt.Curr : 0;
+    int turn = (int)gs.Turn % int.MaxValue;
+    
+    if (dialogueState > 0 && turn - lastGiftTime > 1000)
+    {
+      mob.Stats[Attribute.DialogueState] = new Stat(0);
+    }
+  }
+
   public override string GetBark(Mob actor, GameState gs)
   {    
     if ((DateTime.Now - _lastBark).TotalSeconds > 17)
@@ -1552,7 +1564,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
 
-  public override void InitDialogue(Mob mob)
+  public override void InitDialogue(Mob mob, GameState gs)
   {
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
                                            .Where(t => t.Name == "ShopSelections")
@@ -2049,7 +2061,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
 {
   List<DialogueOption> Options { get; set; } = [];
 
-  public virtual void InitDialogue(Mob actor) {}
+  public virtual void InitDialogue(Mob actor, GameState gs) {}
   public virtual string GetBark(Mob actor, GameState gs) => "";
 
   public virtual (Action, Inputer?) Chat(Mob actor, GameState gameState)

@@ -1098,6 +1098,9 @@ class DialogueInterpreter
 
         gs.FactDb.Add(new SimpleFact() { Name = "Level 5 Key Given", Value = setValue });        
         break;
+      case "LAST_GIFT_TIME":
+        mob.Stats[Attribute.LastGiftTime] = new Stat((int)gs.Turn % int.MaxValue);
+        break;
       default:
         throw new Exception($"Unknown variable: {set.Name}");
     }
