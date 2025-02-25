@@ -1412,8 +1412,6 @@ class MainDungeonBuilder : DungeonBuilder
     if (level == -1)
       return;
 
-    level = 0;
-
     NameGenerator ng = new(rng, Util.NamesFile);
     Mob cleric = new()
     {
