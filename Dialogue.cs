@@ -1123,12 +1123,116 @@ class DialogueInterpreter
 
   void EvalGive(ScriptGive gift, Actor mob, GameState gs)
   {
-    if (gift.Gift == "BOON_STR")
+    if (gift.Gift == "BOON_MAP")
+    {
+      Dungeon dungeon = gs.Campaign.Dungeons[mob.Loc.DungeonID];
+      Map map = dungeon.LevelMaps[mob.Loc.Level];
+
+      HashSet<Loc> visited = [];
+      Queue<Loc> q = new();
+      q.Enqueue(mob.Loc);
+    
+      while (q.Count > 0) 
+      { 
+        var curr = q.Dequeue();
+        visited.Add(curr);
+
+        foreach (var adj in Util.Adj8Locs(curr)) 
+        {        
+          if (visited.Contains(adj))
+            continue;
+
+          Tile tile = gs.TileAt(adj);
+          switch (tile.Type)
+          {
+            case TileType.Unknown:
+            case TileType.DungeonWall:
+            case TileType.PermWall:
+            case TileType.WorldBorder:            
+              break;
+            case TileType.SecretDoor:
+              map.SetTile(adj.Row, adj.Col, TileFactory.Get(TileType.ClosedDoor));
+              if (!visited.Contains(adj))
+                q.Enqueue(adj);
+              break;
+            default:
+              if (!visited.Contains(adj))
+                q.Enqueue(adj);
+              break;
+          }
+
+          visited.Add(adj);
+        }
+      }
+      
+      foreach (Loc loc in visited)
+      {
+        Tile tile = gs.TileAt(loc);
+        Glyph glyph = Util.TileToGlyph(tile);
+        dungeon.RememberedLocs.TryAdd(loc, glyph);
+      }
+
+      return;
+    }
+    else if (gift.Gift == "BOON_TRAPS")
+    {
+      for (int r = 1; r < gs.CurrentMap.Height - 1; r++)
+      {
+        for (int c = 1; c < gs.CurrentMap.Width - 1; c++)
+        {
+          Loc loc = mob.Loc with { Row = r, Col = c };
+          Tile tile = gs.TileAt(loc);
+          if (tile.IsTrap())
+          {
+            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+            gs.CurrentDungeon.RememberedLocs[loc] = g;
+            Traps.RevealTrap(tile, gs, loc);            
+          }
+        }
+      }
+      return;
+    }
+    else if (gift.Gift == "BOON_HEALING")
+    {
+      gs.Player.Stats[Attribute.HP].Reset();
+
+      bool cured = false;
+      foreach (var t in gs.Player.Traits.OfType<PoisonedTrait>())
+      {
+        gs.StopListening(GameEventType.EndOfRound, t);
+        cured = true;
+      }
+      gs.Player.Traits = [..gs.Player.Traits.Where(t => t is not PoisonedTrait)];
+      if (cured)
+        gs.UIRef().AlertPlayer("You feel better!");
+
+      if (gs.Player.Traits.OfType<LameTrait>().FirstOrDefault() is LameTrait lame)
+      {
+        lame.Remove(gs, gs.Player);
+      }
+
+      return;
+    }
+    else if (gift.Gift == "BOON_RECALL")
+    {
+       LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb!.FactCheck("Dungeon Entrance");
+      if (entrance is not null)
+      {
+        gs.ActorEntersLevel(gs.Player, 0, 0);
+        Loc start = gs.Player.Loc;
+        gs.ResolveActorMove(gs.Player, start, entrance.Loc);
+        gs.RefreshPerformers();
+        gs.PrepareFieldOfView();        
+      }
+
+      return;
+    }
+    else if (gift.Gift == "BOON_STR")
     {
       Stat str = gs.Player.Stats[Attribute.Strength];
       str.SetMax(str.Curr + 3);
       gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
-      gs.UIRef().AlertPlayer("You feel stronger!");      
+      gs.UIRef().AlertPlayer("You feel stronger!");
       return;
     }
     else if (gift.Gift == "BOON_DEX")

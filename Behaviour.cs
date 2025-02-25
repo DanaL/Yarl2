@@ -1420,7 +1420,7 @@ class Planner
     "AlchemistPlan" => AlchemistPlan(mob, gs),
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),
-    "GnomeMerchantPlan" => new Selector([new RandomMove(), new PassTurn()]),
+    "SimpleRandomPlan" => new Selector([new RandomMove(), new PassTurn()]),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
@@ -1529,6 +1529,22 @@ class InnkeeperBehaviour : NPCBehaviour
     var action = new InnkeeperServiceAction(gameState, actor);
 
     return (action, acc);    
+  }
+}
+
+class MoonDaughtersClericBehaviour : NPCBehaviour
+{
+  DateTime _lastBark = new(1900, 1, 1);
+
+  public override string GetBark(Mob actor, GameState gs)
+  {    
+    if ((DateTime.Now - _lastBark).TotalSeconds > 17)
+    {
+      _lastBark = DateTime.Now;
+      return "Darkness can protect as well as conceal.";
+    }
+
+    return "";
   }
 }
 

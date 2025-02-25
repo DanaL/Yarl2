@@ -727,6 +727,28 @@ class Map : ICloneable
     while (true);
   }
 
+  // List of floors that are good spots to place items or mobs. Should be
+  // free of other occuptants, rubble/statues, or hazards like campfires
+  public List<Loc> ClearFloors(int dungeonId, int level, GameObjectDB objDb)
+  {     
+    List<Loc> floors = [];
+    for (int r = 0; r < Height; r++)
+    {
+      for (int c = 0; c <Width; c++)
+      {
+        Tile tile = TileAt(r, c);
+        if (tile.Type != TileType.DungeonFloor)
+          continue;
+        Loc loc = new(dungeonId, level, r, c);
+        if (objDb.Occupied(loc) || objDb.BlockersAtLoc(loc) || objDb.HazardsAtLoc(loc))
+          continue;
+        floors.Add(loc);
+      }
+    }
+
+    return floors;
+  }
+
   static bool IsRoomFloorTile(TileType type) => type switch
   {
     TileType.DungeonFloor => true,
@@ -749,6 +771,7 @@ class Map : ICloneable
 
     return sqs;
   }
+
   // Find rooms -- flood fill to find areas on map that are rooms,
   // ie contiguous floor squares at least 9x9 and no longer than 16x16
   public List<List<(int, int)>> FindRooms()

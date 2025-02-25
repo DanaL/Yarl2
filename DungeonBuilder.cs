@@ -1397,6 +1397,44 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
+  static void MoonDaughterCleric(Map[] levels, int dungeonId, Random rng, GameObjectDB objDb)
+  {
+    int level = -1;
+    for (int j = 2; j < levels.Length; j++)
+    {
+      if (rng.NextDouble() <= 0.20)
+      {
+        level = j;
+        break;        
+      }
+    }
+
+    if (level == -1)
+      return;
+
+    level = 0;
+
+    NameGenerator ng = new(rng, Util.NamesFile);
+    Mob cleric = new()
+    {
+      Name = ng.GenerateName(8),
+      Appearance = "A cleric whose face is concealed by a deep hood. They are suffused with a faint silver glow.",
+      Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK)
+    };
+    cleric.Stats[Attribute.HP] = new Stat(50);
+    cleric.Traits.Add(new VillagerTrait());
+    cleric.Traits.Add(new NamedTrait());
+    cleric.Traits.Add(new IntelligentTrait());
+    cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "moon_daughter_cleric.txt" });
+    cleric.SetBehaviour(new MoonDaughtersClericBehaviour());
+    cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "SimpleRandomPlan" });
+    
+    List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
+
+    Loc startLoc = floors[rng.Next(floors.Count)];
+    objDb.AddNewActor(cleric, startLoc);
+  }
+
   static void GnomeMerchant(Map[] levels, int dungeonId, Random rng, GameObjectDB objDb)
   {
     int level = -1;
@@ -1425,7 +1463,7 @@ class MainDungeonBuilder : DungeonBuilder
     flinFlon.Traits.Add(new IntelligentTrait());
     flinFlon.Traits.Add(new DialogueScriptTrait() { ScriptFile = "gnome_merchant.txt" });
     flinFlon.SetBehaviour(new GnomeMerchantBehaviour());
-    flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "GnomeMerchantPlan" });
+    flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "SimpleRandomPlan" });
     flinFlon.Traits.Add(new NumberListTrait() { Name = "ShopSelections", Items = [] });
     LeaveDungeonTrait ldt = new() { SourceId = flinFlon.ID };
     objDb.EndOfRoundListeners.Add(ldt);
@@ -1443,21 +1481,7 @@ class MainDungeonBuilder : DungeonBuilder
       --numItems;
     }
      
-    Map map = levels[level];
-    List<Loc> floors = [];
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        Tile tile = map.TileAt(r, c);
-        if (tile.Type != TileType.DungeonFloor)
-          continue;
-        Loc loc = new(dungeonId, level, r, c);
-        if (objDb.Occupied(loc) || objDb.BlockersAtLoc(loc) || objDb.HazardsAtLoc(loc))
-          continue;
-        floors.Add(loc);
-      }
-    }
+    List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
 
     Loc startLoc = floors[rng.Next(floors.Count)];
     objDb.AddNewActor(flinFlon, startLoc);
@@ -1595,6 +1619,7 @@ class MainDungeonBuilder : DungeonBuilder
     AddGoodItemToLevel(levels[3], id, 3, rng, objDb);
 
     GnomeMerchant(levels, id, rng, objDb);
+    MoonDaughterCleric(levels, id, rng, objDb);
 
     return dungeon;
   }

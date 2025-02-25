@@ -1527,7 +1527,7 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
           if (tile.IsTrap())
           {
             ++trapsFound;
-            Glyph g = new Glyph('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
             GameState.CurrentDungeon.RememberedLocs[loc] = g;
             Traps.RevealTrap(tile, GameState, loc);
 
@@ -2083,7 +2083,7 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
     {
       GameState!.StopListening(GameEventType.EndOfRound, t);
     }
-    Actor.Traits = Actor.Traits.Where(t => t is not PoisonedTrait).ToList();
+    Actor.Traits = [..Actor.Traits.Where(t => t is not PoisonedTrait)];
     string msg = $"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.";
     GameState!.UIRef().AlertPlayer(msg);
 

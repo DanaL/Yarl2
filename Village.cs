@@ -500,40 +500,40 @@ class Village
 
   public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
   {
-    var ng = new NameGenerator(rng, Util.NamesFile);
+    NameGenerator ng = new(rng, Util.NamesFile);
 
-    var cleric = GeneratePriest(map, town, ng, objDb, rng);
+    Mob cleric = GeneratePriest(map, town, ng, objDb, rng);
     objDb.Add(cleric);
     objDb.AddToLoc(cleric.Loc, cleric);
 
-    var smith = GenerateSmith(map, town, ng, objDb, rng);
+    Mob smith = GenerateSmith(map, town, ng, objDb, rng);
     objDb.Add(smith);
     objDb.AddToLoc(smith.Loc, smith);
     factDb.Add(new SimpleFact() { Name = "SmithId", Value = smith.ID.ToString() });
 
-    var grocer = GenerateGrocer(map, town, ng, objDb, rng);
+    Mob grocer = GenerateGrocer(map, town, ng, objDb, rng);
     objDb.Add(grocer);
     objDb.AddToLoc(grocer.Loc, grocer);
     factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
 
-    var innkeeper = GenerateInnkeeper(map, town, ng, objDb, rng);
+    Mob innkeeper = GenerateInnkeeper(map, town, ng, objDb, rng);
     objDb.Add(innkeeper);
     objDb.AddToLoc(innkeeper.Loc, innkeeper);
     factDb.Add(new SimpleFact() { Name = "TavernName", Value = NameGenerator.GenerateTavernName(rng) });
 
-    var pup = GeneratePuppy(map, town, objDb, rng);
+    Mob pup = GeneratePuppy(map, town, objDb, rng);
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
 
-    var mayor = GenerateMayor(map, town, ng, rng);
+    Mob mayor = GenerateMayor(map, town, ng, rng);
     objDb.Add(mayor);
     objDb.AddToLoc(mayor.Loc, mayor);
 
-    var v1 = GenerateVillager1(map, town, ng, rng);
+    Mob v1 = GenerateVillager1(map, town, ng, rng);
     objDb.Add(v1);
     objDb.AddToLoc(v1.Loc, v1);
 
-    var vet = GenerateVeteran(map, town, ng, objDb, rng);
+    Mob vet = GenerateVeteran(map, town, ng, objDb, rng);
     objDb.Add(vet);
     objDb.AddToLoc(vet.Loc, vet);
 
