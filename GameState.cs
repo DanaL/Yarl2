@@ -697,7 +697,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       // that killed the player
       UI.PlayQueuedExplosions(this);
 
-      UI.AlertPlayer($"Oh noes you've been killed by {killedBy} :(");
       throw new PlayerKilledException(killedBy);
     }
     else if (victim.HasTrait<FinalBossTrait>())

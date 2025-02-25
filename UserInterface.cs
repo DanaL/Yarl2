@@ -1310,6 +1310,10 @@ abstract class UserInterface
       }
       catch (PlayerKilledException pke)
       {
+        string s = $"Oh noes you've been killed by {pke.Message} :(";
+        SetPopup(new Popup(s, "", -1, - 1));
+        BlockFoResponse(gameState);
+
         DrawGravestone(gameState, pke.Message);        
         MessageHistory = [];
         return RunningState.GameOver;
