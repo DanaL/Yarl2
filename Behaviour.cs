@@ -1948,7 +1948,7 @@ class AlchemistBehaviour : NPCBehaviour
     List<string> barks;
     if (gs.Town.WitchesGarden.Contains(actor.Loc))
     {
-      barks = ["Kylie, what do you want for dinner?", "Hey plant buddies, you'all doing great!", "Hello bee friends!", "Hmm you need a little more water", "♪ Hmm mmm ♪♪"];
+      barks = ["Kylie, what do you want for dinner?", "Hey plant buddies, you'all doing great!", "Hello bee friends!", "Hmm you need a little more water.", "♪ Hmm mmm ♪♪"];
     }
     else if (hour < 7 || hour >= 19)
     {

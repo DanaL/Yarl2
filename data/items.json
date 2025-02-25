@@ -339,7 +339,7 @@
     "Name": "POTION_MIND_READING",
     "DescriptiveName": "potion of mind reading",
     "Type": "Potion",
-    "Value": 125,
+    "Value": 30,
     "Glyph": "!,lightblue,blue,black,black",
     "Traits": [
       "UseSimple#telepathy",
@@ -351,7 +351,7 @@
     "Name": "POTION_FIRE_RES",
     "DescriptiveName": "potion of fire resistance",
     "Type": "Potion",
-    "Value": 100,
+    "Value": 15,
     "Glyph": "!,lightblue,blue,black,black",
     "Traits": [
       "UseSimple#resistfire",
@@ -363,7 +363,7 @@
     "Name": "POTION_COLD_RES",
     "DescriptiveName": "potion of cold resistance",
     "Type": "Potion",
-    "Value": 100,
+    "Value": 15,
     "Glyph": "!,lightblue,blue,black,black",
     "Traits": [
       "UseSimple#resistcold",
@@ -387,7 +387,7 @@
     "Name": "SCROLL_BLINK",
     "DescriptiveName": "scroll of blink",
     "Type": "Scroll",
-    "Value": 125,
+    "Value": 25,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -401,7 +401,7 @@
     "Name": "SCROLL_IDENTIFY",
     "DescriptiveName": "scroll of identify",
     "Type": "Scroll",
-    "Value": 75,
+    "Value": 10,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -415,7 +415,7 @@
     "Name": "SCROLL_KNOCK",
     "DescriptiveName": "scroll of knock",
     "Type": "Scroll",
-    "Value": 100,
+    "Value": 15,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -429,7 +429,7 @@
     "Name": "SCROLL_PROTECTION",
     "DescriptiveName": "scroll of protection",
     "Type": "Scroll",
-    "Value": 125,
+    "Value": 30,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -443,7 +443,7 @@
     "Name": "SCROLL_MAGIC_MAP",
     "DescriptiveName": "scroll of magic mapping",
     "Type": "Scroll",
-    "Value": 100,
+    "Value": 20,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -457,7 +457,7 @@
     "Name": "SCROLL_RECALL",
     "DescriptiveName": "scroll of word of recall",
     "Type": "Scroll",
-    "Value": 100,
+    "Value": 25,
     "Glyph": "?,white,grey,black,black",
     "Traits": [
       "Consumable",
@@ -584,7 +584,7 @@
     "Name": "VIAL_OF_POISON",
     "DescriptiveName": "vial of poison",
     "Type": "Potion",
-    "Value": 100,
+    "Value": 40,
     "Glyph": "!,limegreen,darkgreen,black,black",
     "Traits": [
       "Consumable",
