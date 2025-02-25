@@ -61,7 +61,7 @@ class PlayerCreator
       " and tough.                          frugality, when you read scrolls there's",
       "                                     a small chance they won't be consumed.",
       "",
-      "                                     (not recommended in this version)",
+      "                                     (weaker than the others in this version)",
       "",
       " (3) Skullduggery                    ",
       "",
