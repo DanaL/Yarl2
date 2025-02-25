@@ -358,7 +358,7 @@ abstract class Actor : GameObj, IZLevel
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
       
-      gs.UIRef().AlertPlayer($"{Name.DefArticle()} divides into two!!");
+      gs.UIRef().AlertPlayer($"{Name.DefArticle().Capitalize()} divides into two!!");
       gs.ObjDb.AddNewActor(other, spot);
       gs.AddPerformer(other);
     }

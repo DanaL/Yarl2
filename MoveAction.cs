@@ -278,9 +278,20 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         result.EnergyCost = 1.0;
         result.Succcessful = true;
       }
+      else if (Actor.Traits.OfType<GrappledTrait>().FirstOrDefault() is GrappledTrait grappled && occ!.ID != grappled.GrapplerID)
+      {
+        result.EnergyCost = 1.0;
+        result.Succcessful = false;
+
+        if (GameState.ObjDb.GetObj(grappled.GrapplerID) is Actor grappler)
+        {
+          string s = $"You cannot attack {occ.FullName} while grappled by {grappler.FullName}!";
+          GameState.UIRef().AlertPlayer(s);
+        }
+      }
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
       {
-        result.Succcessful = false;        
+        result.Succcessful = false;
         ui.AlertPlayer($"You don't want to attack {occ.FullName}!");
       }
       else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
