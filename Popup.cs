@@ -168,14 +168,14 @@ class Popup : IPopup
     if (col < 0)
       col = 0;
 
-    string border = "+".PadRight(Width - 1, '-') + "+";
+    string border = "┍".PadRight(Width - 1, '─') + "┑";
 
     if (Title.Length > 0)
     {
       int left = int.Max(2, (Width - Title.Length) / 2 - 2);
-      string title = "+".PadRight(left, '-') + ' ';
+      string title = "┍".PadRight(left, '─') + ' ';
       title += Title + ' ';
-      title = title.PadRight(Width - 1, '-') + "+";
+      title = title.PadRight(Width - 1, '─') + "┑";
       ui.WriteLine(title, row++, col, Width, DefaultTextColour);
     }
     else
@@ -185,7 +185,7 @@ class Popup : IPopup
 
     int currWidth = 0;
     int w = 0;
-    List<(Colour, string)> line = [(DefaultTextColour, "| ")];
+    List<(Colour, string)> line = [(DefaultTextColour, "│ ")];
 
     while (w < Words.Count)
     {
@@ -217,7 +217,8 @@ class Popup : IPopup
 
     WritePaddedLine();
 
-    ui.WriteLine(border, row, col, Width, DefaultTextColour);
+    string bottomBorder = "┕".PadRight(Width - 1, '─') + "┙";;
+    ui.WriteLine(bottomBorder, row, col, Width, DefaultTextColour);
 
     void WritePaddedLine()
     {
@@ -227,9 +228,9 @@ class Popup : IPopup
       // Pad out so that the right border lines up
       int padding = Width - actualWidth;
       if (padding > 0)
-        line.Add((DefaultTextColour, "|".PadLeft(padding, ' ')));
+        line.Add((DefaultTextColour, "│".PadLeft(padding, ' ')));
       ui.WriteText(line, row++, col, Width);
-      line = [(DefaultTextColour, "| ")];
+      line = [(DefaultTextColour, "│ ")];
       currWidth = 0;
     }
   }

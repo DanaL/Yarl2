@@ -526,7 +526,7 @@ abstract class UserInterface
         {
           int pos = FindSplit(piece.Item2);
           string part1 = piece.Item2[..pos];
-          string part2 = "|  " + piece.Item2[pos..];
+          string part2 = "│  " + piece.Item2[pos..];
           pieces.Add((piece.Item1, part1));
           WriteText(pieces, row++, ViewWidth, SideBarWidth);
           WriteText([(piece.Item1, part2)], row++, ViewWidth, SideBarWidth);
@@ -542,28 +542,28 @@ abstract class UserInterface
   protected void WriteSideBar(GameState gs)
   {
     int row = 0;
-    WriteLine($"| {gs.Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine($"│ {gs.Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
     int currHP = gs.Player.Stats[Attribute.HP].Curr;
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
-    WriteLine($"| HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine($"│ HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints) && magicPoints.Max > 0)
     {
-      WriteLine($"| MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"│ MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
-    WriteLine($"| AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine($"│ AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
-    List<(Colour, string)> zorkmidLine = [(Colours.WHITE, "|  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];
+    List<(Colour, string)> zorkmidLine = [(Colours.WHITE, "│  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];
     row = WriteSideBarLine(zorkmidLine, row);
     
-    string blank = "|".PadRight(ViewWidth);
+    string blank = "│".PadRight(ViewWidth);
     WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
     var weapon = gs.Player.Inventory.ReadiedWeapon();
     if (weapon is not null)
     {
-      List<(Colour, string)> weaponLine = [(Colours.WHITE, "| "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
+      List<(Colour, string)> weaponLine = [(Colours.WHITE, "│ "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
       if (weapon.HasTrait<TwoHandedTrait>() || (weapon.HasTrait<VersatileTrait>() && !gs.Player.Inventory.ShieldEquipped()))
         weaponLine.Add((Colours.WHITE, $" {weapon.FullName.IndefArticle()} (in hands)"));
       else
@@ -590,25 +590,25 @@ abstract class UserInterface
     {
       if (!statuses.Contains("POISONED") && trait is PoisonedTrait)
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "POISONED")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREEN, "POISONED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("POISONED");
       }
       else if (!statuses.Contains("NAUSEOUS") && gs.Player.HasTrait<NauseaTrait>())
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREEN, "NAUSEOUS")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREEN, "NAUSEOUS")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("NAUSEOUS");
       }
       else if (!statuses.Contains("RAGE") && trait is RageTrait rage && rage.Active) 
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RAGE")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "RAGE")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("RAGE");
       }
       else if (!statuses.Contains("BERZERK") && trait is BerzerkTrait) 
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "BERZERK")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "BERZERK")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("BERZERK");
       }
@@ -621,7 +621,7 @@ abstract class UserInterface
           colour = Colours.LIGHT_BLUE;
         else
           colour = Colours.BLUE;
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (colour, "PROTECTED")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (colour, "PROTECTED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("PROTECTION");
       }
@@ -631,12 +631,12 @@ abstract class UserInterface
         switch (resist.Type)
         {
           case DamageType.Fire:
-            statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "RESIST FIRE")];
+            statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "RESIST FIRE")];
             row = WriteSideBarLine(statusLine, statusLineNum--);
             statuses.Add("RESIST FIRE");
             break;
           case DamageType.Cold:
-            statusLine = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "RESIST COLD")];
+            statusLine = [(Colours.WHITE, "│ "), (Colours.LIGHT_BLUE, "RESIST COLD")];
             row = WriteSideBarLine(statusLine, statusLineNum--);
             statuses.Add("RESIST COLD");
             break;
@@ -651,80 +651,80 @@ abstract class UserInterface
           StressLevel.Nervous => Colours.YELLOW_ORANGE,
           _ => Colours.YELLOW,
         };
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (colour, st.Stress.ToString().ToUpper())];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (colour, st.Stress.ToString().ToUpper())];
         row = WriteSideBarLine(statusLine, statusLineNum--);
       }
     }
     if (!statuses.Contains("GRAPPLED") && gs.Player.HasActiveTrait<GrappledTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "GRAPPLED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "GRAPPLED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("GRAPPLED");
     }
     if (!statuses.Contains("PARALYZED") && gs.Player.HasActiveTrait<ParalyzedTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "PARALYZED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.YELLOW, "PARALYZED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("PARALYZED");
     }
     if (!statuses.Contains("CONFUSED") && gs.Player.HasActiveTrait<ConfusedTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "CONFUSED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.YELLOW, "CONFUSED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("CONFUSED");
     }
     if (gs.Player.HasActiveTrait<ExhaustedTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "EXHAUSTED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PINK, "EXHAUSTED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("EXHAUSTED");
     }
     if (gs.Player.HasActiveTrait<LameTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "LIMPING")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PINK, "LIMPING")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("LIMPING");
     }
     if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
     {      
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PURPLE, "TELEPATHIC")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PURPLE, "TELEPATHIC")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TELEPATHIC");
     }
     if (!statuses.Contains("LEVITATING") && gs.Player.HasActiveTrait<LevitationTrait>())
     {
       // Maybe change the colour if the effect is going to expire soon?
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.LIGHT_BLUE, "LEVITATING")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.LIGHT_BLUE, "LEVITATING")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("LEVITATING");
     }
     if (!statuses.Contains("BLIND") && gs.Player.HasTrait<BlindTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREY, "BLIND")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREY, "BLIND")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("BLIND");
     }
     if (!statuses.Contains("TIPSY") && gs.Player.HasTrait<TipsyTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.PINK, "TIPSY")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PINK, "TIPSY")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TIPSY");
     }
     if (!statuses.Contains("AFRAID") && gs.Player.HasTrait<FrightenedTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "AFRAID")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.YELLOW, "AFRAID")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("AFRAID");
     }
     if (!statuses.Contains("OBSCURED") && gs.Player.HasTrait<NondescriptTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.GREY, "OBSCURED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREY, "OBSCURED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("OBSCURED");
     }
     if (!statuses.Contains("BLESSED") && gs.Player.HasTrait<BlessingTrait>())
     {
-      List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.YELLOW, "BLESSED")];
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.YELLOW, "BLESSED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("YELLOW");
     }
@@ -732,7 +732,7 @@ abstract class UserInterface
     {
       if (!statuses.Contains("WEAKENED") && statBuff.Attr == Attribute.Strength)
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "| "), (Colours.BRIGHT_RED, "WEAKENED")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "WEAKENED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("WEAKENED");
       }
@@ -753,18 +753,18 @@ abstract class UserInterface
       }
     }
 
-    List<(Colour, string)> tileLine = [(Colours.WHITE, "| "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
+    List<(Colour, string)> tileLine = [(Colours.WHITE, "│ "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
     WriteSideBarLine(tileLine, ViewHeight - 2);
 
     if (gs.CurrDungeonID == 0)
     {
       var time = gs.CurrTime();
       var mins = time.Item2.ToString().PadLeft(2, '0');
-      WriteLine($"| Outside {time.Item1}:{mins}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"│ Outside {time.Item1}:{mins}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
     else
     {
-      WriteLine($"| Depth: {gs.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"│ Depth: {gs.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
   }
 
