@@ -1,0 +1,24 @@
+(cond	
+	((= DIALOGUE_STATE 0)
+		(
+      (say (pick ("We are tasked by the Moon Daughters to aid those who delve the darkness. We can unveil secrets long hidden away."
+              "The moon is, like, cool man!")
+      ))
+      (option "Reveal the twists and turns of this level."  
+        ((give BOON_MAP "All will be revealed!") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "The level is revealed to you!"))
+      )
+      (option "Reveal any hidden traps."  
+        ((give BOON_TRAPS "Dangers are now laid bare!") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Dangers are now laid bare!"))
+      )
+      (option "We can heal your wounds."  
+        ((give BOON_HEALING "The cleric lays on hands.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "You are fully healed!"))
+      )
+      (option "Are you lost? We can guide you back to the surface."  
+        ((give BOON_RECALL "The cleric lays on hands.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "A beam of moonlight draws you upward!"))
+      )			
+    )
+	)
+  (else
+    (say (pick ("Return to us later, should you need further help." "The moon is, like, cool man!")))
+  )
+)

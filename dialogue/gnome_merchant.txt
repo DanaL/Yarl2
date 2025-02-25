@@ -1,0 +1,10 @@
+(
+  (say 
+    (pick
+      ("I thought I'd make a few zorkmids selling gear to adventurers, but this dungeon is way too dangerous!"
+      "Go to where the customers are, they said. Location is key, they said."
+      "I'm selling off my remaining stock at a discount and getting out of here.")
+    )
+  )
+  (shop-menu)
+)
