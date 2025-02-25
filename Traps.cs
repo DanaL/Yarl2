@@ -77,9 +77,9 @@ class Traps
     {
       // Hmm I don't think I'll charge stress for teleport traps
       if (actor is Player player)
-        player.Running = false;
-
-      RevealTrap(tile, gs, loc);
+      {
+        player.Running = false;       
+      }
 
       // Find candidate locations to teleport to
       List<Loc> candidates = [];
@@ -94,9 +94,16 @@ class Traps
       }
 
       if (actor is Player)
+      {
         gs.UIRef().AlertPlayer("Your stomach lurches!");
+        RevealTrap(tile, gs, loc);
+      }
+        
       else if (trapSqVisible)
+      {
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} disappears!");
+        RevealTrap(tile, gs, loc);
+      }
 
       if (candidates.Count > 0)
       {
@@ -109,13 +116,14 @@ class Traps
       if (actor is Player player) 
       {
         player.Running = false;
-        player.Stats[Attribute.Nerve].Change(-10);
+        player.Stats[Attribute.Nerve].Change(-10);        
       }
 
-      RevealTrap(tile, gs, loc);
-
       if (trapSqVisible)
+      {
         gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!");
+        RevealTrap(tile, gs, loc);
+      }
 
       Item dart = ItemFactory.Get(ItemNames.DART, gs.ObjDb);
       dart.Loc = loc;
@@ -147,9 +155,7 @@ class Traps
       TriggerJetTrap((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
-    {
-      RevealTrap(tile, gs, loc);
-
+    {      
       string s;
       if (actor is Player player) 
       {
@@ -162,7 +168,10 @@ class Traps
       }
 
       if (gs.LastPlayerFoV.Contains(actor.Loc))
+      {
         gs.UIRef().AlertPlayer(s);
+        RevealTrap(tile, gs, loc);
+      }
 
       s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);      
       if (gs.LastPlayerFoV.Contains(actor.Loc))
@@ -324,9 +333,14 @@ class Traps
 
   static void TriggerJetTrap(JetTrigger trigger, GameState gs, Actor actor)
   {
-    trigger.Visible = true;
+    if (gs.LastPlayerFoV.Contains(actor.Loc))
+    {
+      trigger.Visible = true;
+    }
 
     FireJetTrap jet = (FireJetTrap) gs.TileAt(trigger.JetLoc);
+    // Reveal the jet even if the player didn't see it get triggered
+    // (presumbly there are scorch marks, etc)
     jet.Seen = true;
     (int, int) delta = jet.Dir switch 
     {
