@@ -1427,7 +1427,7 @@ class MainDungeonBuilder : DungeonBuilder
     cleric.Traits.Add(new IntelligentTrait());
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "moon_daughter_cleric.txt" });
     cleric.SetBehaviour(new MoonDaughtersClericBehaviour());
-    cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "SimpleRandomPlan" });
+    cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "MoonClericPlan" });
     
     List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
 

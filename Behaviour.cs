@@ -138,6 +138,39 @@ class Sequence(List<BehaviourNode> nodes) : BehaviourNode
   }
 }
 
+class MoveLevel : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {  
+    // They won't move levels if the player can see them
+    if (gs.LastPlayerFoV.Contains(mob.Loc))
+      return PlanStatus.Failure;
+
+    Dungeon dungeon = gs.Campaign.Dungeons[mob.Loc.DungeonID];
+    int nextLevel;
+    if (mob.Loc.Level == 0)
+      nextLevel = 1;
+    else if (mob.Loc.Level == dungeon.LevelMaps.Count - 1)
+      nextLevel = mob.Loc.Level - 1;
+    else if (gs.Rng.NextDouble() <= 0.5)
+      nextLevel = mob.Loc.Level - 1;
+    else
+      nextLevel = mob.Loc.Level + 1;
+
+    Map nextMap = dungeon.LevelMaps[nextLevel];
+    List<Loc> floors = nextMap.ClearFloors(mob.Loc.DungeonID, nextLevel, gs.ObjDb);
+    Loc dest = floors[gs.Rng.Next(floors.Count)];
+
+    // This is to expend the actor's energy
+    mob.ExecuteAction(new PassAction());
+
+    gs.RemovePerformer(mob);
+    gs.ResolveActorMove(mob, mob.Loc, dest);
+    
+    return PlanStatus.Success;
+  }
+}
+
 class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
 {
   BehaviourNode Condition { get; set; } = condition;
@@ -524,6 +557,18 @@ class CheckTime(int start, int end) : BehaviourNode
     if (hour >= Start && hour <= End)
       return PlanStatus.Success;
 
+    return PlanStatus.Failure;
+  }
+}
+
+class DiceRoll(int odds) : BehaviourNode
+{
+  int Odds { get; set; } = odds;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (gs.Rng.Next(Odds) == 0)
+      return PlanStatus.Success;
     return PlanStatus.Failure;
   }
 }
@@ -1421,6 +1466,10 @@ class Planner
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
     "PupPlan" => Pup(gs),
     "SimpleRandomPlan" => new Selector([new RandomMove(), new PassTurn()]),
+    "MoonClericPlan" => new Selector([
+      new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),
+      new RandomMove(), new PassTurn()]),
+
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 
