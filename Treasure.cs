@@ -34,10 +34,9 @@ class Treasure
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
       ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
-      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK,
-      ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL,
-      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD,
-      ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
+      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL, 
+      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.HELMET, 
+      ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
@@ -49,7 +48,26 @@ class Treasure
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY,
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN
   ];
-
+  static readonly List<ItemNames> Consumables = [
+    ItemNames.POTION_COLD_RES,
+    ItemNames.POTION_FIRE_RES,
+    ItemNames.POTION_HEALING,
+    ItemNames.POTION_MIND_READING,
+    ItemNames.POTION_OBSCURITY,
+    ItemNames.POTION_OF_LEVITATION,
+    ItemNames.SCROLL_BLINK,
+    ItemNames.SCROLL_DISARM,
+    ItemNames.SCROLL_IDENTIFY,
+    ItemNames.SCROLL_KNOCK,
+    ItemNames.SCROLL_MAGIC_MAP,
+    ItemNames.SCROLL_PROTECTION,
+    ItemNames.SCROLL_RECALL,
+    ItemNames.SCROLL_SCATTERING,
+    ItemNames.SCROLL_TRAP_DETECTION,
+    ItemNames.SCROLL_TREASURE_DETECTION,
+    ItemNames.VIAL_OF_POISON,
+    ItemNames.WIND_FAN
+  ];
   public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
   {
     if (trait is PoorLootTrait)
@@ -277,6 +295,18 @@ class Treasure
     return items;
   }
 
+  static void AddConsumables(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
+  {
+    int n = rng.Next(2, 5);
+    while (n > 0)
+    {
+      ItemNames name = Consumables[rng.Next(Consumables.Count)];
+      Item item = ItemFactory.Get(name, objDb);
+      AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      --n;
+    }
+  }
+
   public static void AddTreasureToDungeonLevel(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
   {
     if (levelNum == 0) 
@@ -360,5 +390,7 @@ class Treasure
         AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
       }
     }
+
+    AddConsumables(objDb, level, dungeonID, levelNum, rng);
   }
 }

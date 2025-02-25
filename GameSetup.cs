@@ -635,8 +635,8 @@ class CampaignCreator(UserInterface ui)
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
         var monsterDecks = DeckBuilder.MakeDecks(earlyMainOccupant, factDb.Villain, rng);
         
-        var dBuilder = new MainDungeonBuilder();
-        var mainDungeon = dBuilder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 10,
+        MainDungeonBuilder builder = new();
+        var mainDungeon = builder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 10,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
         PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
@@ -645,9 +645,9 @@ class CampaignCreator(UserInterface ui)
         mainDungeon.MonsterDecks = monsterDecks;
         campaign.AddDungeon(mainDungeon);
 
-        var portal = new Portal("You stand before a looming portal.")
+        Portal portal = new("You stand before a looming portal.")
         {
-          Destination = new Loc(1, 0, dBuilder.ExitLoc.Item1, dBuilder.ExitLoc.Item2)
+          Destination = new Loc(1, 0, builder.ExitLoc.Item1, builder.ExitLoc.Item2)
         };
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);
