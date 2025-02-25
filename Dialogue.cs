@@ -1263,14 +1263,14 @@ class DialogueInterpreter
       "LEVEL_FIVE_KEY" => LevelFiveKey(gs),
       _ => throw new Exception($"Unknown variable: {gift.Gift}"),
     };
-    
-    Sb.Append("\n\n");
-    Sb.Append(gift.Blurb);
-    Sb.Append("\n\n[GREEN ");
-    Sb.Append(mob.FullName.Capitalize());
-    Sb.Append(" gives you ");
-    Sb.Append(item.Name.IndefArticle());
-    Sb.Append("!]");
+
+    Footer.Append('\n');
+    Footer.Append(gift.Blurb);
+    Footer.Append("\n\n[GREEN ");
+    Footer.Append(mob.FullName.Capitalize());
+    Footer.Append(" gives you ");
+    Footer.Append(item.Name.IndefArticle());
+    Footer.Append("!]");
 
     gs.Player.Inventory.Add(item, gs.Player.ID);
   }
