@@ -1402,7 +1402,7 @@ class MainDungeonBuilder : DungeonBuilder
     int level = -1;
     for (int j = 2; j < levels.Length; j++)
     {
-      if (rng.NextDouble() <= 0.20)
+      if (rng.NextDouble() <= 0.2)
       {
         level = j;
         break;        
@@ -1426,7 +1426,8 @@ class MainDungeonBuilder : DungeonBuilder
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "moon_daughter_cleric.txt" });
     cleric.SetBehaviour(new MoonDaughtersClericBehaviour());
     cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "MoonClericPlan" });
-    
+    cleric.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = cleric.ID });
+
     List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
 
     Loc startLoc = floors[rng.Next(floors.Count)];
