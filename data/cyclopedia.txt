@@ -304,3 +304,6 @@ Stylish, comfortable, and especially popular with people who have a tendency to 
 #
 wind fan
 Painted with symbols of Sorrel, goddess of storms. A consumable item that can be used to cast Gust of Wind.
+#
+sticky ooze
+Malevolent, cursed mounds of semi-sentient honey. Legend has it these monsters were originally created by a mad Bear Wizard.

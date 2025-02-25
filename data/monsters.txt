@@ -15,6 +15,7 @@ goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,ResistBlunt,Immunity#Confusion,Brainless
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
+sticky ooze       |b|yelloworange |torchorange |12|25|3| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Grappler#18,Brainless,Divider
 ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10
 duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent,Carries#mithril_ore#25
