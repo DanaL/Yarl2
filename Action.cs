@@ -2493,14 +2493,15 @@ class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
 
     if (item != null)
-    {      
+    {
+      string objName = item.FullName.DefArticle();
+
       item.Traits.Add(new PoisonCoatedTrait());
       item.Traits.Add(new AdjectiveTrait("poisoned"));
-      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 1, Duration = 10 });
+      item.Traits.Add(new PoisonerTrait() { DC = 15, Strength = 2, Duration = 10 });
 
       string name = Actor.FullName.Capitalize();
-      string verb = Grammar.Conjugate(Actor, "smear");
-      string objName = item.FullName.DefArticle();
+      string verb = Grammar.Conjugate(Actor, "smear");      
       string s = $"{name} {verb} some poison on {objName}.";
       GameState.UIRef().AlertPlayer(s);      
     }
