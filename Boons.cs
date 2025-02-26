@@ -55,13 +55,13 @@ class InfernalBoons
         con.SetMax(con.Curr + 1);
         gs.Player.Stats[Attribute.HP].ChangeMax(5);
         gs.Player.Stats[Attribute.HP].Change(5);
-        txt = "\"My supplicants must be mighty if they are to serve. I shall grant you a sliver of my potency!\"\n\nYou feel flush with infernal vigour!";
+        txt = "\"My supplicants must be mighty if they are to serve. I grant you a sliver of my potency!\"\n\nYou feel flush with infernal vigour!";
         txt += "\n\nYou feel [BRIGHTRED stronger]! You feel [BRIGHTRED healther]!";
         ui.AlertPlayer("You feel stronger!");
         ui.AlertPlayer("You feel healthier!");        
         break;
       case 1:
-        txt = "\"Those in my service shall not want for wealth!\"\n\nA pile of [YELLOW coins] appears on the altar!";
+        txt = "\"Those in my service shall not want for lucre!\"\n\nA pile of [YELLOW coins] appears on the altar!";
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
         zorkmids.Value = 100;
         gs.ObjDb.SetToLoc(altarLoc, zorkmids);

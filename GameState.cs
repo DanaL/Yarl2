@@ -819,14 +819,30 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   void HandleSacrifice(Actor victim, Loc altarLoc)
   {
+    bool rejected = false;
     foreach (Trait t in victim.Traits)
     {
       if (t is UndeadTrait)
-        return;
+      {
+        rejected = true;
+        break;
+      }
       else if (t is PlantTrait)
-        return;
+      {
+        rejected = true;
+        break;
+      }        
       else if (t is BrainlessTrait)
-        return;
+      {
+        rejected = true;
+        break;
+      }
+    }
+
+    if (rejected)
+    {
+      UIRef().SetPopup(new Popup("Insult me not with this dross!", "", -1, -1));
+      return;
     }
 
     // So long as the player is adjacent to the altar, they'll get the credit
@@ -1410,10 +1426,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
       else
       {
-        (s, t) = Rng.Next(3) switch
+        (s, t) = Rng.Next(4) switch
         {
           0 => ("\nI yearn for blood. Bring me a sacrifice.\n", "A raspy whisper"),
           1 => ("\nBring me souls!\n", "A low growl"),
+          2 => ("\nI would trade you flesh for power!\n", "A seductive murmur"),
           _ => ("\nI can grant you power! But you must proffer blood.\n", "A seductive murmur")
         };
       }
