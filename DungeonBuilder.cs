@@ -753,8 +753,8 @@ class MainDungeonBuilder : DungeonBuilder
           map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
           break;
         case 2:
-          var corners = FindCorners(map, dungeonID, level);
-          var (corner, dir) = corners[0];
+          List<(Loc, string)> corners = FindCorners(map, dungeonID, level);
+          (Loc corner, string dir) = corners[rng.Next(corners.Count)];
           FireJetTrap(map, corner, dir, rng);
           break;
         case 3:
