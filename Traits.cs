@@ -189,7 +189,7 @@ class CastTrait : Trait, IUSeable
 
   public UseResult Use(Actor caster, GameState gs, int row, int col, Item? item)
   {
-    return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind"), true, "");
+    return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind"), true);
   }
 
   public void Used(){ }
@@ -1390,33 +1390,33 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
 
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
-    "antidote" => new UseResult(new AntidoteAction(gs, user), true, ""),
-    "blink" => new UseResult(new BlinkAction(gs, user), true, ""),
-    "booze" => new UseResult(new DrinkBoozeAction(gs, user), true, ""),
-    "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc), true, ""),
-    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4), true, ""),    
-    "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1), true, ""),
-    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1), true, ""),
-    "soothe" => new UseResult(new SootheAction(gs, user, 21), true, ""),
-    "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), true, ""),
-    "magicmap" => new UseResult(new MagicMapAction(gs, user), true, ""),
-    "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user), true, ""),
-    "detecttraps" => new UseResult(new DetectTrapsAction(gs, user), true, ""),
-    "scatter" => new UseResult(new ScatterAction(gs, user), true, ""),
+    "antidote" => new UseResult(new AntidoteAction(gs, user), true),
+    "blink" => new UseResult(new BlinkAction(gs, user), true),
+    "booze" => new UseResult(new DrinkBoozeAction(gs, user), true),
+    "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc), true),
+    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4), true),    
+    "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1), true),
+    "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1), true),
+    "soothe" => new UseResult(new SootheAction(gs, user, 21), true),
+    "telepathy" => new UseResult(new ApplyTraitAction(gs, user, new TelepathyTrait() { ExpiresOn = gs.Turn + 200 }), true),
+    "magicmap" => new UseResult(new MagicMapAction(gs, user), true),
+    "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user), true),
+    "detecttraps" => new UseResult(new DetectTrapsAction(gs, user), true),
+    "scatter" => new UseResult(new ScatterAction(gs, user), true),
     "resistfire" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), true, ""),
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200}), true),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), true, ""),
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200}), true),
     "recall" => new UseResult(new WordOfRecallAction(gs), true, ""),
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), true, ""),
-    "knock" => new UseResult(new KnockAction(gs, user), true, ""),
+                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), true),
+    "knock" => new UseResult(new KnockAction(gs, user), true),
     "identify" => new UseResult(new InventoryChoiceAction(gs, user, 
           new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
-          new IdentifyItemAction(gs, user)), true, ""),
+          new IdentifyItemAction(gs, user, item)), true),
     "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
-          new ApplyPoisonAction(gs, user)), true, ""),
+          new ApplyPoisonAction(gs, user, item)), true),
     "seeinvisible" => new UseResult(new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
             { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) }), true),
     "protection" => new UseResult(new ApplyTraitAction(gs, user, 

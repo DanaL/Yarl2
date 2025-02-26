@@ -2498,9 +2498,10 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
+class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
 {
   public char Choice { get; set; }
+  Item? SourceItem { get; set; } = item;
 
   public override ActionResult Execute()
   {
@@ -2521,7 +2522,12 @@ class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
       string name = Actor.FullName.Capitalize();
       string verb = Grammar.Conjugate(Actor, "smear");      
       string s = $"{name} {verb} some poison on {objName}.";
-      GameState.UIRef().AlertPlayer(s);      
+      GameState.UIRef().AlertPlayer(s);
+
+      if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
+      {
+        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState.Rng);
+      }
     }
 
     result.Succcessful = true;
@@ -2533,9 +2539,10 @@ class ApplyPoisonAction(GameState gs, Actor actor) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
+class IdentifyItemAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
 {
   public char Choice { get; set; }
+  Item? SourceItem { get; set; } = item;
 
   public override ActionResult Execute()
   {
@@ -2563,7 +2570,12 @@ class IdentifyItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
     string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
     GameState.UIRef().AlertPlayer(m);
-    
+
+    if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
+    {
+      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState.Rng);
+    }
+
     return result;
   }
 
