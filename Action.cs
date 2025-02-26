@@ -1706,7 +1706,7 @@ class MirrorImageAction : Action
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
     // may drift over water/lava 
-    var dup = new Mob()
+    Mob dup = new()
     {
       Name = src.Name,
       Glyph = glyph,
@@ -1728,7 +1728,7 @@ class MirrorImageAction : Action
     gs.RegisterForEvent(GameEventType.Death, illusion, src.ID);
 
     dup.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
-    
+
     var msg = new DeathMessageTrait() { Message = $"{dup.FullName.Capitalize()} fades away!" };
     dup.Traits.Add(msg);
 

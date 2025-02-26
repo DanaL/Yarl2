@@ -473,30 +473,6 @@ class CampaignCreator(UserInterface ui)
     }   
   }
 
-  static void PrinceOfRats(Dungeon dungeon, GameObjectDB objDb, Random rng)
-  {
-    var prince = BossFactory.Get("Prince of Rats", rng);
-    var sq = dungeon.LevelMaps[4].RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(dungeon.ID, 4, sq.Item1, sq.Item2);
-    objDb.AddNewActor(prince, loc);
-
-    // Drop a hint somewhere about the Prince of Rat's immunity
-    var immunity = prince.Traits.OfType<ImmunityTrait>().First();
-    string desc;
-    if (immunity.Type == DamageType.Slashing)
-      desc = "axe";
-    else if (immunity.Type == DamageType.Blunt)
-      desc = "mace";
-    else
-      desc = "spear";
-
-    var landmark = new Landmark($"Scrawled in blood: the Prince of Rats is a devil! My {desc} was useless against him!");
-    var level = rng.Next(0, 4);
-    sq = dungeon.LevelMaps[level].RandomTile(TileType.DungeonFloor, rng);
-    Console.WriteLine($"{level} {sq}");
-    dungeon.LevelMaps[level].SetTile(sq, landmark);
-  }
-
   // This is very temporary/early code since eventually dungeons will need to
   // know how to populate themselves (or receive a populator class of some 
   // sort) because monsters will spawn as the player explores
