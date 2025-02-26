@@ -829,7 +829,7 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == '\n' || ch == '\r')
     {
       Done = true;
       Success = false;
