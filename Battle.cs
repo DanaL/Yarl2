@@ -286,14 +286,22 @@ class Battle
     HitAnimation hitAnim = new(target.ID, gs, Colours.FX_RED);
     gs.UIRef().RegisterAnimation(hitAnim);
 
+    // This looks convoluted but the target's collection of traits can be modified
+    // if the attacker is killed by the acidSplash or fireRebuke (for example, if
+    // the attacker had been grappling the target)
+    AcidSplashTrait? acidSplash = null;
+    FireRebukeTrait? fireRebuke = null;
     foreach (Trait t in target.Traits)
     {
       if (t is AcidSplashTrait acid)
-        acid.HandleSplash(target, gs);
-      else if (t is FireRebukeTrait rebuke && attacker is Actor att)
-        rebuke.Rebuke(target, att, gs);
+        acidSplash = acid;
+      else if (t is FireRebukeTrait rebuke)
+        fireRebuke = rebuke;
     }
-    
+    acidSplash?.HandleSplash(target, gs);
+    if (fireRebuke is not null && attacker is Actor att)
+      fireRebuke.Rebuke(target, att, gs);
+
     Actor? actor = attacker as Actor ?? null;
 
     if (actor is not null && target.HasTrait<CorrosiveTrait>())
