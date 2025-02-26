@@ -351,8 +351,10 @@ class Traps
     };
 
     if (actor is Player player)
-    {      
-      player.Stats[Attribute.Nerve].Change(-15);
+    {
+      bool fireResistance = player.Traits.OfType<ResistanceTrait>()
+                                         .Any(rt => rt.Type == DamageType.Fire);
+      player.Stats[Attribute.Nerve].Change(fireResistance ? -5 : -15);
     }
     
     HashSet<Loc> affected = [];
