@@ -1469,7 +1469,7 @@ class Planner
     "MoonClericPlan" => new Selector([
       new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),
       new RandomMove(), new PassTurn()]),
-
+    "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 

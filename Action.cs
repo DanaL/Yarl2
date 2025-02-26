@@ -1727,6 +1727,8 @@ class MirrorImageAction : Action
     dup.Traits.Add(illusion);
     gs.RegisterForEvent(GameEventType.Death, illusion, src.ID);
 
+    dup.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
+    
     var msg = new DeathMessageTrait() { Message = $"{dup.FullName.Capitalize()} fades away!" };
     dup.Traits.Add(msg);
 
