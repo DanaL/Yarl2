@@ -360,6 +360,8 @@ class Player : Actor
     int attackMod = 0;
     int meleeDmgMod = 0;
     bool quiet = false;
+    bool fireDmg = false;
+    bool fireRebuke = false;
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -388,6 +390,10 @@ class Player : Actor
         meleeDmgMod += mdm.Amt;
       else if (trait is QuietTrait)
         quiet = true;
+      else if (trait is DamageTrait dt && dt.DamageType == DamageType.Fire)
+        fireDmg = true;
+      else if (trait is FireRebukeTrait)
+        fireRebuke = true;
     }
     
     if (alacrity < 0)
@@ -416,6 +422,12 @@ class Player : Actor
     if (quiet)
       traitsToShow.Add("You are quiet");
 
+    if (fireDmg)
+      traitsToShow.Add("You deal extra fire damage");
+
+    if (fireRebuke)
+      traitsToShow.Add("You may rebuke foes with flames");
+      
     if (traitsToShow.Count > 0)
     {
       lines.Add(string.Join(". ", traitsToShow) + ".");
