@@ -351,11 +351,12 @@ class Traps
     };
 
     if (actor is Player player)
-    {
-      player.Stats[Attribute.Nerve].Change(-10);
+    {      
+      player.Stats[Attribute.Nerve].Change(-15);
     }
     
     HashSet<Loc> affected = [];
+    HashSet<Loc> seen = [];
     Loc start = trigger.JetLoc with { Row = trigger.JetLoc.Row + delta.Item1, Col = trigger.JetLoc.Col + delta.Item2 };
     affected.Add(start);
     Loc loc = start;
@@ -365,21 +366,23 @@ class Traps
       if (!gs.TileAt(loc).PassableByFlight())
         break;
       affected.Add(loc);
+      if (gs.LastPlayerFoV.Contains(loc))
+        seen.Add(loc);
     }
     
-    var explosion = new ExplosionAnimation(gs!)
-    {
-      MainColour = Colours.BRIGHT_RED,
-      AltColour1 = Colours.YELLOW,
-      AltColour2 = Colours.YELLOW_ORANGE,
-      Highlight = Colours.WHITE,
-      Centre = start,
-      Sqs = affected
-    };
-
-    if (gs.LastPlayerFoV.Contains(loc))
+    if (seen.Count > 0)
     {
       gs.UIRef().AlertPlayer("Whoosh!! A fire trap!");
+
+      ExplosionAnimation explosion = new(gs!)
+      {
+        MainColour = Colours.BRIGHT_RED,
+        AltColour1 = Colours.YELLOW,
+        AltColour2 = Colours.YELLOW_ORANGE,
+        Highlight = Colours.WHITE,
+        Centre = start,
+        Sqs = affected
+      };      
       gs.UIRef().PlayAnimation(explosion, gs);
     }
 
