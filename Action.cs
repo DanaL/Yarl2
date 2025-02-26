@@ -615,13 +615,29 @@ abstract class PortalAction : Action
 
   protected void UsePortal(Portal portal, ActionResult result)
   {
-    var start = GameState!.Player!.Loc;        
+    Player player = GameState!.Player;
+    Loc start = player.Loc;        
     var (dungeon, level, _, _) = portal.Destination;
     
+    bool trip = level > start.Level && GameState.Player.HasTrait<TipsyTrait>() && GameState.Rng.NextDouble() < 0.33;
+
     GameState.ActorEntersLevel(GameState.Player!, dungeon, level);
     GameState.Player!.Loc = portal.Destination;
     GameState.ResolveActorMove(GameState.Player!, start, portal.Destination);
     
+    if (trip)
+    {
+      GameState.UIRef().AlertPlayer("You trip and fall down the stairs!");
+      int dmg = GameState.Rng.Next(1, 5);
+      List<(int, DamageType)> fallDmg = [(dmg, DamageType.Blunt)];
+      var (hpLeft, dmgMsg, _) = GameState.Player.ReceiveDmg(fallDmg, 0, GameState, null, 1.0);
+      GameState.UIRef().AlertPlayer(dmgMsg);
+      if (hpLeft < 1)
+      {
+        GameState.ActorKilled(player, "drunken fall", null);
+      }
+    }
+
     GameState.RefreshPerformers();
     GameState.PrepareFieldOfView();
 
