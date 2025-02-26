@@ -293,3 +293,29 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
 
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }
+
+class Overlay(List<string> text, int row) : IPopup
+{
+  Colour DefaultTextColour { get; set; } = Colours.WHITE with { Alpha = 125 };
+  List<string> Text { get; set; } = text;
+  int Row { get; set; } = row;
+
+  public void SetDefaultTextColour(Colour colour)
+  {
+    DefaultTextColour = colour with { Alpha = 175 };
+  }
+
+  public void Draw(UserInterface ui)
+  {
+    int widest = Text.Select(s => s.Length).Max();
+    int col = (UserInterface.ViewWidth - widest) / 2;
+
+    int row = Row;
+    foreach (string s in Text)
+    {
+      ui.WriteText([(DefaultTextColour, s)], row++, col, s.Length);
+    }
+  }  
+}
+
+  

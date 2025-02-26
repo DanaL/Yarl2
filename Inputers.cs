@@ -60,7 +60,7 @@ class Examiner : Inputer
     FindTargets(start);
     _cyclopedia = LoadCyclopedia();
 
-    gs.UIRef().SetPopup(new Popup("Hit TAB for info about dungeon features", "", -1, -1));
+    gs.UIRef().SetPopup(new Overlay(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
   }
 
   void FindTargets(Loc start)
