@@ -307,3 +307,9 @@ Painted with symbols of Sorrel, goddess of storms. A consumable item that can be
 #
 sticky ooze
 Malevolent, cursed mounds of semi-sentient honey. Legend has it these monsters were originally created by a mad Bear Wizard.
+#
+longbow
+Classic tool of the archer's trade. Shoot with the fire (f) command (will auto-select an equiped bow).
+#
+dagger
+Use it to slice your dinner or stab your foe! Truly a multi-functional piece of adventuring kit.
