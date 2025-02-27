@@ -359,7 +359,6 @@ class BarkAnimation : Animation
       if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
         return;
 
-      RenderLine(scrR, scrC, _bark);
       if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
       {
         RenderLine(scrR, scrC, _bark);
