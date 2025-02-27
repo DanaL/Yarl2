@@ -143,9 +143,14 @@ abstract class GameObj : IZLevel
 
   public virtual int LightRadius()
   {
-    var lights = Traits.OfType<LightSourceTrait>().Select(l => l.Radius);
+    int lightRadius = 0;
+    foreach (Trait t in Traits)
+    {
+      if (t is LightSourceTrait ls && ls.Radius > lightRadius)
+        lightRadius = ls.Radius;
+    }
 
-    return lights.Any() ? lights.Max() : 0;
+    return lightRadius;
   }
 }
 
