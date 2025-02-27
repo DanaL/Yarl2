@@ -683,7 +683,7 @@ class GameObjDBSave
       p.Inventory = new Inventory(p.ID, objDb)
       {
         Zorkmids = int.Parse(fields[10]),
-        NextSlot = fields[11][0]
+        LastSlot = fields[11][0]
       };
       p.Inventory.RestoreFromText(fields[12]);
     }
@@ -734,7 +734,7 @@ class GameObjDBSave
       mob.Inventory = new Inventory(mob.ID, objDb)
       {
         Zorkmids = int.Parse(fields[9]),
-        NextSlot = fields[10][0]
+        LastSlot = fields[10][0]
       };
       mob.Inventory.RestoreFromText(fields[11]);
     }
@@ -826,7 +826,7 @@ class GameObjDBSave
         sb.Append(Constants.SEPARATOR);
         sb.Append(player.Inventory.Zorkmids);
         sb.Append(Constants.SEPARATOR);
-        sb.Append(player.Inventory.NextSlot);
+        sb.Append(player.Inventory.LastSlot);
         sb.Append(Constants.SEPARATOR);
         sb.Append(player.Inventory.ToText());
         sb.Append(Constants.SEPARATOR);
@@ -849,7 +849,7 @@ class GameObjDBSave
         sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Inventory.Zorkmids);
         sb.Append(Constants.SEPARATOR);
-        sb.Append(mob.Inventory.NextSlot);
+        sb.Append(mob.Inventory.LastSlot);
         sb.Append(Constants.SEPARATOR);
         sb.Append(mob.Inventory.ToText());
         sb.Append(Constants.SEPARATOR);

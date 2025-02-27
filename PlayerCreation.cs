@@ -251,6 +251,7 @@ class PlayerCreator
     }
 
     startWeapon.Equipped = true;
+    startWeapon.Slot = 'a';
     player.Inventory.Add(startWeapon, player.ID);
 
     // Everyone gets 3 to 5 torches to start with

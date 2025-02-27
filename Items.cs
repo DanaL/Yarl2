@@ -396,8 +396,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 {
   public ulong OwnerID { get; init; } = ownerID;
   public int Zorkmids { get; set; }
-  List<(char, ulong)> _items = [];
-  public char NextSlot { get; set; } = 'a';
+  readonly List<(char, ulong)> _items = [];
+  public char LastSlot { get; set; } = '\0';
   readonly GameObjectDB _objDb = objDb;
   
   public bool Contains(ulong itemID)
@@ -426,31 +426,15 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   bool PlayerInventory() => _objDb.GetObj(OwnerID) is Player;
 
-  void FindNextSlot()
+  public char[] UsedSlots() =>[..  _items.Select(i => i.Item1).Distinct()];
+
+  char[] AvailableSlots()
   {
-    char start = NextSlot;
-    var slots = UsedSlots().ToHashSet();
-
-    while (true)
-    {
-      ++NextSlot;
-      if (NextSlot == 123)
-        NextSlot = 'a';
-
-      if (!slots.Contains(NextSlot))
-      {
-        break;
-      }
-      if (NextSlot == start)
-      {
-        // there were no free slots
-        NextSlot = '\0';
-        break;
-      }
-    }
+    var allSlots = Enumerable.Range('a', 26).Select(i => (char)i);
+    char[] usedSlots = UsedSlots();
+    
+    return [.. allSlots.Where(c => !usedSlots.Contains(c))];
   }
-
-  public char[] UsedSlots() => _items.Select(i => i.Item1).Distinct().ToArray();
 
   public (Item?, int) ItemAt(char slot)
   {
@@ -499,9 +483,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       Zorkmids += item.Value;
       return '\0';
     }
-
-    // Find the slot for the item
-    var usedSlots = UsedSlots().ToHashSet();
+    
     char slotToUse = '\0';
 
     // If the item is stackable and there are others of the same item, use
@@ -521,29 +503,33 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
       }
     }
-    
+
+    // If there are no slots available, and we didn't find an item to stack with
+    // then the inventory is full, so return a null character
+    char[] availableSlots = AvailableSlots();
+    if (slotToUse == '\0' && availableSlots.Length == 0)
+    {      
+      return '\0';
+    }
+
+    // Find the slot for the item
+    HashSet<char> usedSlots = [.. UsedSlots()];
     if (slotToUse == '\0' && item.Slot != '\0' && !usedSlots.Contains(item.Slot))
     {
       slotToUse = item.Slot;
     }
 
-
     if (slotToUse == '\0')
     {
-      slotToUse = NextSlot;
-      FindNextSlot();
+      char nextSlot = availableSlots.FirstOrDefault(c => c > LastSlot);
+      slotToUse = nextSlot == '\0' ? availableSlots[0] : nextSlot;
     }
 
-    if (slotToUse != '\0')
-    {
-      item.Slot = slotToUse;
-      item.ContainedBy = ownerID;
-      _items.Add((slotToUse, item.ID));
-    }
-    else
-    {
-      // There was no free slot, which I am not currently handling...
-    }
+    item.Slot = slotToUse;
+    item.ContainedBy = ownerID;
+    _items.Add((slotToUse, item.ID));
+
+    LastSlot = slotToUse;
 
     return slotToUse;
   }
