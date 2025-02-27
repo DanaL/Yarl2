@@ -188,8 +188,8 @@ class CastTrait : Trait, IUSeable
   public override string AsText() => $"Cast#{Spell}";
 
   public UseResult Use(Actor caster, GameState gs, int row, int col, Item? item)
-  {
-    return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind"), true);
+  {          
+    return new UseResult(new UseSpellItemAction(gs, caster, "gust of wind", item), true);
   }
 
   public void Used(){ }

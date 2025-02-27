@@ -528,10 +528,11 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   }
 }
 
-class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAction(gs, actor)
 {
   public bool FreeToCast { get; set; } = false;
   List<Loc> Affected { get; set; } = [];
+  Item? Item { get; set; } = item;
 
   public override ActionResult Execute()
   {
@@ -606,6 +607,11 @@ class CastGustOfWindAction(GameState gs, Actor actor) : CastSpellAction(gs, acto
         BlowActorBack(actor, origin, GameState);
       else if (obj is Item item)
         BlowItemBack(item, origin, GameState);
+    }
+
+    if (Item is not null && Item.HasTrait<ConsumableTrait>())
+    {
+      Actor!.Inventory.ConsumeItem(Item, Actor, GameState.Rng);
     }
 
     return result;
@@ -937,7 +943,7 @@ class SpellcastMenu : Inputer
       case "gust of wind":
         inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
         SpellSelection = false;
-        GS.Player.ReplacePendingAction(new CastGustOfWindAction(GS, GS.Player), inputer);
+        GS.Player.ReplacePendingAction(new CastGustOfWindAction(GS, GS.Player, null), inputer);
         PopupRow = -3;
         PopupText = "Which direction?";
         break;

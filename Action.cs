@@ -3224,9 +3224,10 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class UseSpellItemAction(GameState gs, Actor actor, string spell) : Action(gs, actor)
+class UseSpellItemAction(GameState gs, Actor actor, string spell, Item? item) : Action(gs, actor)
 {
   string Spell { get; set; } = spell;
+  Item? Item { get; set; } = item;
 
   public override ActionResult Execute()
   {
@@ -3237,7 +3238,7 @@ class UseSpellItemAction(GameState gs, Actor actor, string spell) : Action(gs, a
     {
       case "gust of wind":
         player.ReplacePendingAction(
-          new CastGustOfWindAction(GameState, player) { FreeToCast = true }, 
+          new CastGustOfWindAction(GameState, player, item) { FreeToCast = true }, 
           new ConeTargeter(GameState!, 5, player.Loc)
         );
         break;

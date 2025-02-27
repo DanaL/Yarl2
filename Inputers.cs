@@ -1205,6 +1205,9 @@ class ConeTargeter : Inputer
     
     Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range);
     ui.RegisterAnimation(Anim);
+
+    if (gs.Options.ShowHints)
+      gs.UIRef().SetPopup(new Hint(["Select direction with movement keys", "", "ENTER to select"], 3));
   }
 
   public override void Input(char ch)

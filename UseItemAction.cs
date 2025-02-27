@@ -651,7 +651,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           // consuming the item from the player's inventory until later in 
           // case they ESC the selection menu. (So that will have to be
           // handled in the final Action
-          if (useResult.ReplacementAction is InventoryChoiceAction)
+          if (useResult.ReplacementAction is InventoryChoiceAction || useResult.ReplacementAction is UseSpellItemAction)
           {
             return result;
           }
