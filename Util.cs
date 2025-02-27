@@ -157,6 +157,10 @@ class Constants
   public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
   public const int TELEPATHY_RANGE = 40; // I don't really have a better spot for this right now
   public static readonly string VERSION = "0.3.2";
+  public const char TOP_LEFT_CORNER = '┍';
+  public const char TOP_RIGHT_CORNER = '┑';
+  public const char BOTTOM_LEFT_CORNER = '┕';
+  public const char BOTTOM_RIGHT_CORNER = '┙';
 }
 
 class Util

@@ -168,14 +168,14 @@ class Popup : IPopup
     if (col < 0)
       col = 0;
 
-    string border = "┍".PadRight(Width - 1, '─') + "┑";
+    string border = Constants.TOP_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.TOP_RIGHT_CORNER;
 
     if (Title.Length > 0)
     {
       int left = int.Max(2, (Width - Title.Length) / 2 - 2);
-      string title = "┍".PadRight(left, '─') + ' ';
+      string title = Constants.TOP_LEFT_CORNER.ToString().PadRight(left, '─') + ' ';
       title += Title + ' ';
-      title = title.PadRight(Width - 1, '─') + "┑";
+      title = title.PadRight(Width - 1, '─') + Constants.TOP_RIGHT_CORNER;
       ui.WriteLine(title, row++, col, Width, DefaultTextColour);
     }
     else
@@ -217,7 +217,7 @@ class Popup : IPopup
 
     WritePaddedLine();
 
-    string bottomBorder = "┕".PadRight(Width - 1, '─') + "┙";;
+    string bottomBorder = Constants.BOTTOM_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.BOTTOM_RIGHT_CORNER.ToString();
     ui.WriteLine(bottomBorder, row, col, Width, DefaultTextColour);
 
     void WritePaddedLine()
@@ -256,19 +256,18 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
     int col = (UserInterface.ViewWidth - width) / 2;
     int row = 2;
     
-    string border = "+".PadRight(width - 1, '-') + "+";
-
     if (Title.Length > 0)
     {
       int left = int.Max(2, (width - Title.Length) / 2 - 2);
-      string title = "+".PadRight(left, '-') + ' ';
+      string title = Constants.TOP_LEFT_CORNER.ToString().PadRight(left, '─') + ' ';
       title += Title + ' ';
-      title = title.PadRight(width - 1, '-') + "+";
+      title = title.PadRight(width - 1, '─') + Constants.TOP_RIGHT_CORNER;
       ui.WriteLine(title, row++, col, width, DefaultTextColour);
     }
     else
     {
-      ui.WriteLine(border, row++, col, width, DefaultTextColour);
+      string topBorder = Constants.TOP_LEFT_CORNER.ToString().PadRight(width - 1, '─') + Constants.TOP_RIGHT_CORNER;
+      ui.WriteLine(topBorder, row++, col, width, DefaultTextColour);
     }
 
     for (int i = 0; i < MenuItems.Count; i++)
@@ -278,17 +277,17 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
       {
         // Mild kludge: HILITE makes the tile transparent, so write a black background
         // before we draw highlighted line
-        ui.WriteLine($"| {" ".PadRight(width - 4)} |", row, col, width, DefaultTextColour);
+        ui.WriteLine($"│ {" ".PadRight(width - 4)} │", row, col, width, DefaultTextColour);
         ui.WriteLine($"{item.PadRight(width - 8)}", row++, col + 2, width - 4, DefaultTextColour, Colours.HILITE);
       }
       else
       {
-        ui.WriteLine($"| {item.PadRight(width - 4)} |", row++, col, width, DefaultTextColour);
+        ui.WriteLine($"│ {item.PadRight(width - 4)} │", row++, col, width, DefaultTextColour);
       }
     }
-    
 
-    ui.WriteLine(border, row, col, width, DefaultTextColour);
+    string bottom = Constants.BOTTOM_LEFT_CORNER.ToString().PadRight(width - 1, '─') + Constants.BOTTOM_RIGHT_CORNER;
+    ui.WriteLine(bottom, row, col, width, DefaultTextColour);
   }
 
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
