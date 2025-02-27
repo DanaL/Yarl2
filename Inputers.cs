@@ -53,6 +53,7 @@ class Examiner : Inputer
   int _currTarget;
   (int, int) _curr;
   readonly Dictionary<string, CyclopediaEntry> _cyclopedia;
+  static Colour highlightColour = Colours.ICE_BLUE with { Alpha = 175 };
 
   public Examiner(GameState gs, Loc start)
   {
@@ -85,7 +86,7 @@ class Examiner : Inputer
           if (loc == _gs.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
-            ui.ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, '@');
+            ui.ZLayer[r, c] = new Sqr(Colours.WHITE, highlightColour, '@');
             _curr = (r, c);
             distance = int.MaxValue;
           }
@@ -148,7 +149,7 @@ class Examiner : Inputer
       var (r, c) = _gs.UIRef().LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
       LocDetails details = LocInfo(loc);
-      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.HILITE, details.Ch);
+      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, highlightColour, details.Ch);
       _gs.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
       _curr = (r, c);
       _gs.LastPlayerFoV.Add(loc);
