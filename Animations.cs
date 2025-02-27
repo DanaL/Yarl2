@@ -175,17 +175,19 @@ class ExplosionAnimation(GameState gs) : Animation
   public HashSet<Loc> Sqs { get; set; } = [];
   readonly Dictionary<Loc, Sqr> _toDraw = [];
   int _radius = 0;
-  DateTime _lastFrame;
+  DateTime _lastFrame = DateTime.Now;
   readonly GameState _gs = gs;
   bool _finalFrame = false;
+  readonly double _acceleration = 0.75;
+  double _currentDelay = 5.0;
 
   public override void Update()
   {
-    var ui = _gs.UIRef();
+    UserInterface ui = _gs.UIRef();
 
-    if ((DateTime.Now - _lastFrame).TotalMilliseconds > 5)
-    {      
-      var newSqs = Sqs.Where(s => Util.Distance(s, Centre) == _radius).ToList();
+    if ((DateTime.Now - _lastFrame).TotalMilliseconds > _currentDelay)
+    {
+      List<Loc> newSqs = [.. Sqs.Where(s => Util.Distance(s, Centre) == _radius)];
       if (newSqs.Count == 0 && !_finalFrame)
       {
 
@@ -194,7 +196,7 @@ class ExplosionAnimation(GameState gs) : Animation
       }
       else
       {
-        foreach (var loc in newSqs)
+        foreach (Loc loc in newSqs)
         {
           double roll = _gs.Rng.NextDouble();
           Colour colour;
@@ -207,8 +209,7 @@ class ExplosionAnimation(GameState gs) : Animation
           _toDraw.Add(loc, new Sqr(Highlight, colour, Ch));
         }
 
-        ++_radius;
-        _lastFrame = DateTime.Now;
+        ++_radius;       
       }
     }
 
@@ -219,6 +220,9 @@ class ExplosionAnimation(GameState gs) : Animation
       var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);      
       ui.SqsOnScreen[scrR, scrC] = _toDraw[pt];
     }
+
+    _currentDelay *= _acceleration;
+    _lastFrame = DateTime.Now;
   }
 }
 
@@ -266,7 +270,6 @@ class ThrownMissileAnimation : Animation
       if (tile.Type == TileType.DeepWater)
       {
         var item = _ammo.FullName.DefArticle().Capitalize();
-
       }
     }
   }
@@ -418,11 +421,13 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
   int _index = 0;
   DateTime _lastFrame = DateTime.Now;
   readonly Queue<HighlightSqr> _sqsToMark = [];
-  
+  double _delay = 15;
+  double _acceleration = 0.1;
+
   public override void Update()
   {    
     var dd = DateTime.Now - _lastFrame;
-    if (dd.TotalMilliseconds < 15)
+    if (dd.TotalMilliseconds < _delay)
       return;
 
     int next = int.Min(_index + 25, _locs.Count);      
@@ -468,6 +473,7 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
     }
 
     _lastFrame = DateTime.Now;
+    _delay *= _acceleration;
   }
 }
 

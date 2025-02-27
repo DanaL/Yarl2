@@ -1658,8 +1658,8 @@ class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
     List<Loc> locs = [];
     while (locsQ.Count > 0)
       locs.Add(locsQ.Dequeue());
-    
-    var anim = new MagicMapAnimation(gs, dungeon, locs);
+
+    MagicMapAnimation anim = new(gs, dungeon, locs);
     gs.UIRef().RegisterAnimation(anim);
   }
 
