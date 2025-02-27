@@ -294,15 +294,15 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
   public void SetDefaultTextColour(Colour colour) => DefaultTextColour = colour;
 }
 
-class Overlay(List<string> text, int row) : IPopup
+class Hint(List<string> text, int row) : IPopup
 {
-  Colour DefaultTextColour { get; set; } = Colours.WHITE with { Alpha = 125 };
+  Colour DefaultTextColour { get; set; } = Colours.WHITE;
   List<string> Text { get; set; } = text;
   int Row { get; set; } = row;
 
   public void SetDefaultTextColour(Colour colour)
   {
-    DefaultTextColour = colour with { Alpha = 175 };
+    DefaultTextColour = colour;
   }
 
   public void Draw(UserInterface ui)

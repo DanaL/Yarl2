@@ -60,7 +60,7 @@ class Examiner : Inputer
     FindTargets(start);
     _cyclopedia = LoadCyclopedia();
 
-    gs.UIRef().SetPopup(new Overlay(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
+    gs.UIRef().SetPopup(new Hint(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
   }
 
   void FindTargets(Loc start)
@@ -244,6 +244,8 @@ class Aimer : Inputer
 
     _anim = new AimAnimation(_ui, gs, start, _target);
     _ui.RegisterAnimation(_anim);
+
+    gs.UIRef().SetPopup(new Hint(["Use movement keys or TAB to select target", "", "ENTER to select"], 3));
   }
 
   void FindTargets()
