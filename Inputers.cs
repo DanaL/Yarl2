@@ -60,7 +60,8 @@ class Examiner : Inputer
     FindTargets(start);
     _cyclopedia = LoadCyclopedia();
 
-    gs.UIRef().SetPopup(new Hint(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
+    if (gs.Options.ShowHints)
+      gs.UIRef().SetPopup(new Hint(["Hit TAB to see info", "about dungeon features"], gs.UIRef().PlayerScreenRow - 4));
   }
 
   void FindTargets(Loc start)
@@ -245,7 +246,8 @@ class Aimer : Inputer
     _anim = new AimAnimation(_ui, gs, start, _target);
     _ui.RegisterAnimation(_anim);
 
-    gs.UIRef().SetPopup(new Hint(["Use movement keys or TAB to select target", "", "ENTER to select"], 3));
+    if (gs.Options.ShowHints)
+      gs.UIRef().SetPopup(new Hint(["Use movement keys or TAB to select target", "", "ENTER to select"], 3));
   }
 
   void FindTargets()
@@ -572,7 +574,7 @@ class OptionsScreen : Inputer
 {
   readonly GameState GS;
   int row = 0;
-  const int numOfOptions = 3;
+  const int numOfOptions = 4;
 
   public OptionsScreen(GameState gs)
   {
@@ -605,6 +607,8 @@ class OptionsScreen : Inputer
         GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
       else if (row == 2)
         GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
+      else if (row == 3)
+        GS.Options.ShowHints = !GS.Options.ShowHints;
       GS.UIRef().SetOptions(GS.Options, GS);
     }
 
@@ -616,10 +620,12 @@ class OptionsScreen : Inputer
     string bumpToOpen = GS.Options.BumpToOpen ? "On" : "Off";
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
     string torchAnim = GS.Options.TorchLightAnimation ? "On" : "Off";
+    string hints = GS.Options.ShowHints ? "On" : "Off";
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
       $"Highlight player: {hilitePlayer}",
-      $"Torchlight animation: {torchAnim}"
+      $"Torchlight animation: {torchAnim}",
+      $"Show command hints: {hints}"
     ];
    
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });

@@ -129,6 +129,7 @@ namespace Yarl2
     public bool BumpToOpen { get; set; }
     public bool HighlightPlayer { get; set; }
     public bool TorchLightAnimation { get; set; }
+    public bool ShowHints { get; set; }
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
@@ -140,7 +141,7 @@ namespace Yarl2
         userDir.Create();
 
       string optionsPath = Path.Combine(userDir.FullName, "ddoptions.json");
-      var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+      string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
       File.WriteAllText(optionsPath, json);
     }
 
@@ -155,7 +156,8 @@ namespace Yarl2
         FontSize = 14,
         BumpToOpen = true,
         HighlightPlayer = false,
-        TorchLightAnimation = true
+        TorchLightAnimation = true,
+        ShowHints = true
       };
 
       var userDir = Util.UserDir;
