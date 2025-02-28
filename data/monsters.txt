@@ -1,5 +1,5 @@
 skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Immunity#Poison,ResistPiercing,Undead,Brainless
-zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlune#1#1#6#1#0#0#Attack|Undead,Brainless
+zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#1#6#1#0#0#Attack|Undead,Brainless
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack|
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying
