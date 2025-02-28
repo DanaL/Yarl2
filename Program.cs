@@ -127,6 +127,7 @@ namespace Yarl2
     public string? Display { get; set; }
     public int FontSize { get; set; }
     public bool BumpToOpen { get; set; }
+    public bool BumpToChat { get; set; }
     public bool HighlightPlayer { get; set; }
     public bool TorchLightAnimation { get; set; }
     public bool ShowHints { get; set; }
@@ -155,6 +156,7 @@ namespace Yarl2
         Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "Raylib",
         FontSize = 14,
         BumpToOpen = true,
+        BumpToChat = true,
         HighlightPlayer = false,
         TorchLightAnimation = true,
         ShowHints = true

@@ -292,7 +292,16 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
       {
         result.Succcessful = false;
-        ui.AlertPlayer($"You don't want to attack {occ.FullName}!");
+
+        if (GameState.Options.BumpToChat)
+        {
+          ChatAction chat = new (GameState, GameState.Player) { Loc = Loc };
+          result.AltAction = chat;
+        }
+        else
+        {
+          ui.AlertPlayer($"You don't want to attack {occ.FullName}!");
+        }        
       }
       else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
       {

@@ -575,7 +575,7 @@ class OptionsScreen : Inputer
 {
   readonly GameState GS;
   int row = 0;
-  const int numOfOptions = 4;
+  const int numOfOptions = 5;
 
   public OptionsScreen(GameState gs)
   {
@@ -605,10 +605,12 @@ class OptionsScreen : Inputer
       if (row == 0) 
         GS.Options.BumpToOpen = !GS.Options.BumpToOpen;
       else if (row == 1)
-        GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
+        GS.Options.BumpToChat = !GS.Options.BumpToChat;
       else if (row == 2)
-        GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
+        GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
       else if (row == 3)
+        GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
+      else if (row == 4)
         GS.Options.ShowHints = !GS.Options.ShowHints;
       GS.UIRef().SetOptions(GS.Options, GS);
     }
@@ -619,11 +621,13 @@ class OptionsScreen : Inputer
   void WritePopup()
   {
     string bumpToOpen = GS.Options.BumpToOpen ? "On" : "Off";
+    string bumpToChat = GS.Options.BumpToChat ? "On" : "Off";
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
     string torchAnim = GS.Options.TorchLightAnimation ? "On" : "Off";
     string hints = GS.Options.ShowHints ? "On" : "Off";
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
+      $"Bump to chat: {bumpToChat}",
       $"Highlight player: {hilitePlayer}",
       $"Torchlight animation: {torchAnim}",
       $"Show command hints: {hints}"
