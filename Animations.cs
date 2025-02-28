@@ -17,24 +17,14 @@ abstract class Animation
   public abstract void Update();
 }
 
-class AimAnimation : Animation
+class AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget) : Animation
 {
-  public Loc Target { get; set; }
-  Loc _start;
-  readonly int _scrW;
-  readonly int _scrH;
-  readonly UserInterface _ui;
-  readonly GameState _gs;
-
-  public AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget)
-  {
-    _start = origin;
-    Target = initialTarget;
-    _ui = ui;
-    _gs = gs;
-    _scrW = UserInterface.ViewWidth;
-    _scrH = UserInterface.ViewHeight;
-  }
+  public Loc Target { get; set; } = initialTarget;
+  Loc _start = origin;
+  readonly int _scrW = UserInterface.ViewWidth;
+  readonly int _scrH = UserInterface.ViewHeight;
+  readonly UserInterface _ui = ui;
+  readonly GameState _gs = gs;
 
   public override void Update()
   {
@@ -122,22 +112,14 @@ class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int 
   }
 }
 
-class BeamAnimation : Animation
+class BeamAnimation(GameState gs, List<Loc> pts, Colour background, Colour foreground) : Animation
 {
-  readonly GameState _gs;
-  readonly List<Loc> _pts;
+  readonly GameState _gs = gs;
+  readonly List<Loc> _pts = pts;
   int _end = 0;
   DateTime _lastFrame;
-  Colour _background;
-  Colour _foreground;
-
-  public BeamAnimation(GameState gs, List<Loc> pts, Colour background, Colour foreground)
-  {
-    _gs = gs;
-    _background = background;
-    _foreground = foreground;
-    _pts = pts;
-  }
+  Colour _background = background;
+  Colour _foreground = foreground;
 
   public override void Update()
   {
@@ -226,24 +208,14 @@ class ExplosionAnimation(GameState gs) : Animation
   }
 }
 
-class ThrownMissileAnimation : Animation
+class ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo) : Animation
 {
-  readonly GameState _gs;
-  Glyph _glyph;
-  List<Loc> _pts;
-  int _frame;
-  DateTime _lastFrame;
-  Item _ammo;
-
-  public ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo)
-  {
-    _gs = gs;
-    _glyph = glyph;
-    _pts = pts;
-    _frame = 0;
-    _lastFrame = DateTime.Now;
-    _ammo = ammo;
-  }
+  readonly GameState _gs = gs;
+  Glyph _glyph = glyph;
+  List<Loc> _pts = pts;
+  int _frame = 0;
+  DateTime _lastFrame = DateTime.Now;
+  Item _ammo = ammo;
 
   public override void Update()
   {
