@@ -80,7 +80,7 @@ class ShopMenuInputer : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == ' ')
     {
       Done = true;
       Success = false;
@@ -243,7 +243,7 @@ class InnkeeperInputer : Inputer
   {
     InsufficentFunds = false;
 
-    if (ch == Constants.ESC || ch == 'c')
+    if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ' || ch == 'c')
     {
       Done = true;
       Success = false;
@@ -352,7 +352,7 @@ class SmithyInputer : ShopMenuInputer
       menuState = 0;
 
     string blurb = Blurb;
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == ' ')
     {
       Done = true;
       Success = false;
@@ -627,7 +627,7 @@ class WitchInputer : Inputer
   {
     int dialogueState = Witch.Stats[Attribute.DialogueState].Curr;
 
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
       Done = true;
       Success = false;
@@ -842,7 +842,6 @@ class WitchInputer : Inputer
   }
 }
 
-
 class PriestInputer : Inputer
 {
   readonly Actor Priest;
@@ -862,7 +861,7 @@ class PriestInputer : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC)
+    if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
       Done = true;
       Success = false;

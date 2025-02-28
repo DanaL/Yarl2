@@ -2151,7 +2151,13 @@ class NPCBehaviour : IBehaviour, IDialoguer
     }
   }
 
-  public virtual bool ConfirmChoices(Actor npc, GameState gs) => false;
+  public virtual bool ConfirmChoices(Actor npc, GameState gs) 
+  {
+    bool hasSelections = npc.Traits.OfType<NumberListTrait>()
+                                   .Where(t => t.Name == "ShopSelections")
+                                   .Any();
+    return !hasSelections;
+  }
 
   public virtual void RefreshShop(Actor npc, GameState gs) { }
 }

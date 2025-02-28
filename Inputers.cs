@@ -721,7 +721,7 @@ class Dialoguer : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || ch == _exitOpt)
+    if (ch == Constants.ESC || ch == _exitOpt || ch == ' ')
     {
       EndConversation("Farewell.");
       return;
