@@ -616,7 +616,7 @@ class TileFactory
   private static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
   private static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
   private static readonly Tile CreepyAltar = new BasicTile(TileType.CreepyAltar, true, false, true);
-
+  
   public static Tile Get(TileType type) => type switch
   {
     TileType.WorldBorder => WorldBorder,

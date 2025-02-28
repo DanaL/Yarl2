@@ -161,6 +161,7 @@ class Constants
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
   public const char BOTTOM_RIGHT_CORNER = '┙';
+  public static Sqr ROOF = new(Colours.LIGHT_BROWN, Colours.BLACK, '░');
 }
 
 class Util

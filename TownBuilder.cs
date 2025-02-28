@@ -38,6 +38,8 @@ class Town
   public HashSet<Loc> WitchesGarden { get; set; }= [];
   public HashSet<Loc> WitchesYard { get; set; } = [];
 
+  public HashSet<Loc> Roofs { get; set; } = [];
+
   public int Row { get; set; }
   public int Col { get; set; }
   public int Height { get; set; }
@@ -673,33 +675,27 @@ class TownBuilder
 
   public void AddWell(Map map, Random rng)
   {
-    List<Loc> locs = Town.TownSquare.Select(sq => sq).ToList();
-    locs.Shuffle(rng);
-
-    while (locs.Count > 0)
+    List<Loc> locs = [];
+    foreach (Loc loc in Town.TownSquare)
     {
-      var sq = locs[0];
-      locs.RemoveAt(0);
-
       bool okay = true;
-      foreach (var adj in Util.Adj4Sqs(sq.Row, sq.Col))
+      foreach (var adj in Util.Adj4Sqs(loc.Row, loc.Col))
       {
-        var tile = map.TileAt(adj.Item1, adj.Item2);
+        Tile tile = map.TileAt(adj.Item1, adj.Item2);
         if (tile.Type != TileType.Grass && tile.Type != TileType.Dirt && !tile.IsTree())
         {
           okay = false;
           break;
         }
       }
+
       if (!okay)
         continue;
-
-      map.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.Well));
-
-      foreach (var adj in Util.Adj8Sqs(sq.Row, sq.Col))
-        map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.StoneFloor));
-      break;
+      locs.Add(loc);
     }
+
+    Loc well = locs[rng.Next(locs.Count)];
+    map.SetTile(well.Row, well.Col, TileFactory.Get(TileType.Well));
   }
 
   static int CountBlockedSqs(Map map, int startRow, int startCol)
@@ -925,6 +921,27 @@ class TownBuilder
     throw new Exception("Unable to find a valid placement for witches' cottage");
   }
 
+  void CalcRoofs(Map map)
+  {
+    void CalcBuilding(HashSet<Loc> building)
+    {
+      foreach (Loc loc in building)
+      {
+        Tile tile = map.TileAt(loc.Row, loc.Col);
+        if (tile.Type == TileType.WoodFloor || tile.Type == TileType.StoneFloor || tile.Type == TileType.Forge)
+          Town.Roofs.Add(loc);
+      }
+    }
+
+    CalcBuilding(Town.Shrine);
+    CalcBuilding(Town.Tavern);
+    CalcBuilding(Town.Market);
+    CalcBuilding(Town.Smithy);
+    CalcBuilding(Town.WitchesCottage);
+    foreach (HashSet<Loc> home in Town.Homes)
+      CalcBuilding(home);
+  }
+
   public Map DrawnTown(Map map, Random rng)
   {
     int rows = 0, width = 0;
@@ -1012,6 +1029,8 @@ class TownBuilder
     AddWell(map, rng);
 
     AddWitchesCottage(map, centreRow, centreCol, Templates["cottage 3"], rng);
+
+    CalcRoofs(map);
 
     return map;
   }

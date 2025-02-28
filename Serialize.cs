@@ -219,6 +219,9 @@ class TownSave
   public HashSet<Loc> WitchesGarden { get; set; } = [];
   [JsonInclude]
   public HashSet<Loc> WitchesYard { get; set; } = [];
+  [JsonInclude]
+  public HashSet<Loc> Roofs { get; set; } = [];
+
   public int Row { get; set; }
   public int Col { get; set; }
   public int Height { get; set; }
@@ -239,7 +242,7 @@ class CampaignSaver
   
   public static CampaignSaver Shrink(Campaign c)
   {
-    var town = new TownSave()
+    TownSave town = new()
     {
       Shrine = c.Town!.Shrine,
       Tavern = c.Town.Tavern,
@@ -255,7 +258,8 @@ class CampaignSaver
       Col = c.Town.Col,
       Height = c.Town.Height,
       Width = c.Town.Width,
-      Name = c.Town.Name
+      Name = c.Town.Name,
+      Roofs = c.Town.Roofs,
     };
 
     if (c.FactDb is null)
@@ -286,7 +290,7 @@ class CampaignSaver
 
   public static Campaign Inflate(CampaignSaver sc)
   {
-    var town = new Town()
+    Town town = new()
     {
       Shrine = sc.Town!.Shrine,
       Tavern = sc.Town.Tavern,
@@ -302,7 +306,8 @@ class CampaignSaver
       Col = sc.Town.Col,
       Height = sc.Town.Height,
       Width = sc.Town.Width,
-      Name = sc.Town.Name
+      Name = sc.Town.Name,
+      Roofs= sc.Town.Roofs
     };
 
     Campaign campaign = new()

@@ -721,7 +721,7 @@ class Battle
   // bonsuses related to that here
   public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
   {
-    var result = new ActionResult() { Succcessful = false, EnergyCost = 1.0 };
+    ActionResult result = new() { Succcessful = false, EnergyCost = 1.0 };
 
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (attacker.HasTrait<TipsyTrait>())

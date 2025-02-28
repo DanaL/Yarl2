@@ -212,11 +212,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public void RememberLoc(Loc loc, Tile tile)
   {
-    Glyph glyph = Util.TileToGlyph(tile);    
-    if (!CurrentDungeon.RememberedLocs.TryAdd(loc, glyph))
-    {
-      CurrentDungeon.RememberedLocs[loc] = glyph;
-    }
+    Glyph glyph = Util.TileToGlyph(tile);
+    CurrentDungeon.RememberedLocs[loc] = glyph;
   }
 
   // I made life difficult for myself by deciding that Turn 0 of the game is 
@@ -1754,7 +1751,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // halt running when a monster comes into view)
     var prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
     RecentlySeenMonsters = [Player.ID];
-    foreach (var loc in fov)
+    foreach (Loc loc in fov)
     {
       if (ObjDb.Occupant(loc) is Actor occ && occ.VisibleTo(Player))
         RecentlySeenMonsters.Add(occ.ID);
@@ -1788,7 +1785,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
 
-    foreach (var loc in fov)
+    foreach (Loc loc in fov)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (glyph, z) = ObjDb.ItemGlyph(loc);

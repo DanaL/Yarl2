@@ -1030,7 +1030,7 @@ abstract class UserInterface
       {
         Glyph glyph;
         if (gs.ObjDb.Occupant(loc) is Actor actor && actor.VisibleTo(gs.Player))
-          glyph = actor.Glyph;
+          glyph = actor.Glyph;        
         else if (remembered.TryGetValue(loc, out Glyph rememberedGlyph))
           glyph = rememberedGlyph;
         else
@@ -1040,7 +1040,10 @@ abstract class UserInterface
     }
     else if (remembered.TryGetValue(loc, out var glyph))
     {
-      sqr = new Sqr(glyph.Unlit, glyph.BGUnlit, glyph.Ch);
+      if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
+        sqr = Constants.ROOF;
+      else
+        sqr = new Sqr(glyph.Unlit, glyph.BGUnlit, glyph.Ch);
     }
     else
     {
