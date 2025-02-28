@@ -28,7 +28,7 @@ class AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget
 
   public override void Update()
   {
-    if (Expiry < DateTime.Now)
+    if (Expiry < DateTime.UtcNow)
       return;
 
     foreach (var pt in Util.Bresenham(_start.Row, _start.Col, Target.Row, Target.Col))
@@ -76,9 +76,9 @@ class ArrowAnimation : Animation
     var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
     ui.SqsOnScreen[scrR, scrC] = sq;
 
-    if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
+    if ((DateTime.UtcNow - _lastFrame).TotalMicroseconds > 150)
     {
-      _lastFrame = DateTime.Now;
+      _lastFrame = DateTime.UtcNow;
       ++_frame;
     }
   }
@@ -94,7 +94,7 @@ class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int 
 
   public override void Update()
   {
-    if (Expiry < DateTime.Now)
+    if (Expiry < DateTime.UtcNow)
       return;
 
     Map map = GS.Campaign.Dungeons[Origin.DungeonID].LevelMaps[Origin.Level];
@@ -138,9 +138,9 @@ class BeamAnimation(GameState gs, List<Loc> pts, Colour background, Colour foreg
       ui.SqsOnScreen[scrR, scrC] = new Sqr(_foreground, _background, ch);
     }
 
-    if ((DateTime.Now - _lastFrame).TotalMicroseconds > 150)
+    if ((DateTime.UtcNow - _lastFrame).TotalMicroseconds > 150)
     {
-      _lastFrame = DateTime.Now;
+      _lastFrame = DateTime.UtcNow;
       ++_end;
     }
   }
@@ -157,7 +157,7 @@ class ExplosionAnimation(GameState gs) : Animation
   public HashSet<Loc> Sqs { get; set; } = [];
   readonly Dictionary<Loc, Sqr> _toDraw = [];
   int _radius = 0;
-  DateTime _lastFrame = DateTime.Now;
+  DateTime _lastFrame = DateTime.UtcNow;
   readonly GameState _gs = gs;
   bool _finalFrame = false;
   readonly double _acceleration = 0.75;
@@ -167,13 +167,13 @@ class ExplosionAnimation(GameState gs) : Animation
   {
     UserInterface ui = _gs.UIRef();
 
-    if ((DateTime.Now - _lastFrame).TotalMilliseconds > _currentDelay)
+    if ((DateTime.UtcNow - _lastFrame).TotalMilliseconds > _currentDelay)
     {
       List<Loc> newSqs = [.. Sqs.Where(s => Util.Distance(s, Centre) == _radius)];
       if (newSqs.Count == 0 && !_finalFrame)
       {
 
-        Expiry = DateTime.Now.AddMilliseconds(50);
+        Expiry = DateTime.UtcNow.AddMilliseconds(50);
         _finalFrame = true;
       }
       else
@@ -204,7 +204,7 @@ class ExplosionAnimation(GameState gs) : Animation
     }
 
     _currentDelay *= _acceleration;
-    _lastFrame = DateTime.Now;
+    _lastFrame = DateTime.UtcNow;
   }
 }
 
@@ -214,7 +214,7 @@ class ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo
   Glyph _glyph = glyph;
   List<Loc> _pts = pts;
   int _frame = 0;
-  DateTime _lastFrame = DateTime.Now;
+  DateTime _lastFrame = DateTime.UtcNow;
   Item _ammo = ammo;
 
   public override void Update()
@@ -225,9 +225,9 @@ class ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo
     var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
     ui.SqsOnScreen[scrR, scrC] = sq;
 
-    if ((DateTime.Now - _lastFrame).TotalMicroseconds > 250)
+    if ((DateTime.UtcNow - _lastFrame).TotalMicroseconds > 250)
     {
-      _lastFrame = DateTime.Now;
+      _lastFrame = DateTime.UtcNow;
       ++_frame;
     }
 
@@ -258,7 +258,7 @@ class BarkAnimation : Animation
   public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
   {
     _gs = gs;
-    Expiry = DateTime.Now.AddMilliseconds(duration);
+    Expiry = DateTime.UtcNow.AddMilliseconds(duration);
     _actor = actor;
     _bark = bark;
     _ui = gs.UIRef();
@@ -358,7 +358,7 @@ class SqAnimation : Animation
     _fgColour = fg;
     _bgColour = bg;
     _ch = ch;
-    Expiry = DateTime.Now.AddMilliseconds(250);
+    Expiry = DateTime.UtcNow.AddMilliseconds(250);
   }
 
   public override void Update()
@@ -390,14 +390,14 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
   readonly UserInterface _ui = gs.UIRef();
   readonly List<Loc> _locs = locs;
   int _index = 0;
-  DateTime _lastFrame = DateTime.Now;
+  DateTime _lastFrame = DateTime.UtcNow;
   readonly Queue<HighlightSqr> _sqsToMark = [];
   double _delay = 15;
   double _acceleration = 0.1;
 
   public override void Update()
   {    
-    var dd = DateTime.Now - _lastFrame;
+    var dd = DateTime.UtcNow - _lastFrame;
     if (dd.TotalMilliseconds < _delay)
       return;
 
@@ -421,12 +421,12 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
       
       var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
       double delay = Fast ? 250 : 750;
-      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.Now.AddMilliseconds(delay)));
+      _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.UtcNow.AddMilliseconds(delay)));
 
       ++_index;
     }
 
-    while (_sqsToMark.Count > 0 && _sqsToMark.Peek().Expiry < DateTime.Now)
+    while (_sqsToMark.Count > 0 && _sqsToMark.Peek().Expiry < DateTime.UtcNow)
       _sqsToMark.Dequeue();
 
     foreach (var sq in _sqsToMark)
@@ -439,11 +439,11 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
     if (_index >= _locs.Count)
     {
       if (_sqsToMark.Count == 0)
-        Expiry = DateTime.Now;
+        Expiry = DateTime.UtcNow;
       return;
     }
 
-    _lastFrame = DateTime.Now;
+    _lastFrame = DateTime.UtcNow;
     _delay *= _acceleration;
   }
 }
@@ -459,7 +459,7 @@ class HitAnimation : Animation
     _gs = gs;
     _colour = colour;
     _victimID = victimID;
-    Expiry = DateTime.Now.AddMilliseconds(400);
+    Expiry = DateTime.UtcNow.AddMilliseconds(400);
   }
 
   public override void Update()
@@ -492,7 +492,7 @@ class PolearmAnimation : Animation
     _colour = colour;
     _origin = origin;
     _target = target;
-    Expiry = DateTime.Now.AddMilliseconds(400);
+    Expiry = DateTime.UtcNow.AddMilliseconds(400);
   }
 
   public override void Update()
@@ -517,7 +517,7 @@ class TorchLightAnimationListener : Animation
   {
     _ui = ui;
     _gs = gs;
-    _lastFrame = DateTime.Now;
+    _lastFrame = DateTime.UtcNow;
   }
 
   public override void Update()
@@ -525,12 +525,12 @@ class TorchLightAnimationListener : Animation
     if (_gs.InWilderness)
       return; // we're in the wilderness
 
-    var dd = DateTime.Now - _lastFrame;
+    var dd = DateTime.UtcNow - _lastFrame;
 
     if (dd.TotalMilliseconds > 500)
     {
       PickFlickeringSqs();
-      _lastFrame = DateTime.Now;
+      _lastFrame = DateTime.UtcNow;
     }
 
     SetFlickeringSqsToScreen();
@@ -574,7 +574,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
   bool[] _cloud = new bool[9];
   int _row;
   int _col;
-  DateTime _lastFrame = DateTime.Now;
+  DateTime _lastFrame = DateTime.UtcNow;
   DateTime _nextCloud;
   bool _paused;
 
@@ -655,14 +655,14 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 
   public override void Update()
   {
-    var dd = DateTime.Now - _lastFrame;
+    var dd = DateTime.UtcNow - _lastFrame;
 
     if (!_paused && !_gs.InWilderness)
     {
       _paused = true;
       EraseCloud();
     }
-    else if (_paused && _gs.InWilderness && DateTime.Now > _nextCloud)
+    else if (_paused && _gs.InWilderness && DateTime.UtcNow > _nextCloud)
     {
       _paused = false;
       MakeCloud();
@@ -671,14 +671,14 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
     if (!_paused && dd.TotalMilliseconds >= 200)
     {
       AnimationStep();
-      _lastFrame = DateTime.Now;
+      _lastFrame = DateTime.UtcNow;
 
       // The cloud has drifted offscreen. We'll wait a little while before 
       // creating the next one.
       if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth)
       {
         _paused = true;
-        _nextCloud = DateTime.Now.AddSeconds(_gs.Rng.Next(5, 16));
+        _nextCloud = DateTime.UtcNow.AddSeconds(_gs.Rng.Next(5, 16));
       }
     }
   }

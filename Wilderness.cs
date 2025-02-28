@@ -28,7 +28,7 @@ internal class Wilderness(Random rng, int length)
       return TileType.Conifer;
 
     bool fallColours = false;
-    int day = DateTime.Now.DayOfYear;
+    int day = DateTime.UtcNow.DayOfYear;
     if (day > 320) 
     {
       fallColours = true;

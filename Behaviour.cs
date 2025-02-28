@@ -1599,9 +1599,9 @@ class MoonDaughtersClericBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {    
-    if ((DateTime.Now - _lastBark).TotalSeconds > 17)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds > 17)
     {
-      _lastBark = DateTime.Now;
+      _lastBark = DateTime.UtcNow;
       return "Darkness can protect as well as conceal.";
     }
 
@@ -1624,9 +1624,9 @@ class GnomeMerchantBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {    
-    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds > 13)
     {
-      _lastBark = DateTime.Now;
+      _lastBark = DateTime.UtcNow;
       return gs.Rng.Next(4) switch
       {
         0 => "Priced to clear!",
@@ -1681,9 +1681,9 @@ class PriestBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {    
-    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds > 13)
     {
-      _lastBark = DateTime.Now;
+      _lastBark = DateTime.UtcNow;
       return "Praise be to Huntokar!";
     }
 
@@ -1738,10 +1738,10 @@ class WitchBehaviour : NPCBehaviour
   
   public override string GetBark(Mob mob, GameState gs)
   {
-    if ((DateTime.Now - _lastBark).TotalSeconds < 9)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds < 9)
       return "";
 
-    _lastBark = DateTime.Now;
+    _lastBark = DateTime.UtcNow;
 
     string grocerName = "";
     if (gs.FactDb.FactCheck("GrocerId") is SimpleFact fact)
@@ -1790,10 +1790,10 @@ class SmithBehaviour : NPCBehaviour
   {
     string bark = "";
 
-    if ((DateTime.Now - _lastBark).TotalSeconds > 13)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds > 13)
     {
       bark = PickBark(actor, gs);
-      _lastBark = DateTime.Now;
+      _lastBark = DateTime.UtcNow;
     }
 
     return bark;
@@ -1938,10 +1938,10 @@ class AlchemistBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {
-    if ((DateTime.Now - _lastBark).TotalSeconds < 9)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds < 9)
       return "";
 
-    _lastBark = DateTime.Now;
+    _lastBark = DateTime.UtcNow;
 
     var (hour, _) = gs.CurrTime();
 
@@ -2016,10 +2016,10 @@ class GrocerBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {
-    if ((DateTime.Now - _lastBark).TotalSeconds < 10)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds < 10)
       return "";
 
-    _lastBark = DateTime.Now;
+    _lastBark = DateTime.UtcNow;
 
     return gs.Rng.Next(3) switch
     {
@@ -2170,9 +2170,9 @@ class MayorBehaviour : NPCBehaviour
   {
     string bark = "";
 
-    if ((DateTime.Now - _lastBark).TotalSeconds > 10)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds > 10)
     {
-      _lastBark = DateTime.Now;
+      _lastBark = DateTime.UtcNow;
       var (hour, _) = gs.CurrTime();
       if (hour >= 7 && hour < 19)
       {
@@ -2199,9 +2199,9 @@ class WidowerBehaviour: NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {
-    if ((DateTime.Now - _lastBark).TotalSeconds < 15)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds < 15)
       return "";
-    _lastBark = DateTime.Now;
+    _lastBark = DateTime.UtcNow;
 
     int state;
     if (actor.Stats.TryGetValue(Attribute.DialogueState, out var stateState))
@@ -2238,10 +2238,10 @@ class PrisonerBehaviour : NPCBehaviour
 
   public override string GetBark(Mob actor, GameState gs)
   {
-    if ((DateTime.Now - _lastBark).TotalSeconds <= 10)
+    if ((DateTime.UtcNow - _lastBark).TotalSeconds <= 10)
       return "";
 
-    _lastBark = DateTime.Now;
+    _lastBark = DateTime.UtcNow;
 
     int dialogueState = actor.Stats[Attribute.DialogueState].Curr;
     string capturedBy = ((SimpleFact) gs.FactDb.FactCheck("ImprisonedBy")!).Value;

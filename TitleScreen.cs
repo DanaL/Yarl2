@@ -115,10 +115,10 @@ class TitleScreen
       else if (c == 'Z')
         throw new Exception("Test exception!");
         
-      if ((DateTime.Now - lastRedraw).TotalMilliseconds >= 250)
+      if ((DateTime.UtcNow - lastRedraw).TotalMilliseconds >= 250)
       {
         UpdatePlayer();
-        lastRedraw = DateTime.Now;
+        lastRedraw = DateTime.UtcNow;
       }
 
       DrawDungeonMiniScreen();
@@ -181,7 +181,7 @@ class TitleScreen
         return;
 
       Sqr hit = new(Colours.WHITE, Colours.FX_RED, opponent.Glyph.Ch);
-      var frame = (hit, DateTime.Now.AddMilliseconds(200));
+      var frame = (hit, DateTime.UtcNow.AddMilliseconds(200));
 
       Loc hitLoc = rng.NextDouble() < 0.65 ? loc : Player;
       if (!SpecialSqs.TryAdd(hitLoc, frame))
@@ -299,7 +299,7 @@ class TitleScreen
         {
           if (SpecialSqs.TryGetValue(Player, out var frame))
           {
-            if (frame.Item2 > DateTime.Now)
+            if (frame.Item2 > DateTime.UtcNow)
             {
               UI.SqsOnScreen[viewR + 11, viewC + 30] = new Sqr(Colours.WHITE, Colours.FX_RED, '@');
               continue;
@@ -322,7 +322,7 @@ class TitleScreen
           Glyph objGlyph = ObjDb.GlyphAt(loc);
           if (SpecialSqs.TryGetValue(loc, out var frame))
           {
-            if (frame.Item2 > DateTime.Now) 
+            if (frame.Item2 > DateTime.UtcNow) 
             {
               UI.SqsOnScreen[viewR + 11, viewC + 30] = frame.Item1;
               continue;

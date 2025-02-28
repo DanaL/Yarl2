@@ -111,10 +111,10 @@ class RaylibUserInterface : UserInterface
     
     if (isAnyKeyDown && gameEvent is not null)
     {
-      TimeSpan delta = DateTime.Now - _lastKeyTime;
+      TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
       if (isAnyKeyDown && delta.TotalMilliseconds >= 150)
       {
-        _lastKeyTime = DateTime.Now;
+        _lastKeyTime = DateTime.UtcNow;
         return (GameEvent) gameEvent;
       }
     }

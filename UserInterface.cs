@@ -255,7 +255,7 @@ abstract class UserInterface
         screenC = 7;
       }
 
-      if (bark is not null && bark.Expiry > DateTime.Now)
+      if (bark is not null && bark.Expiry > DateTime.UtcNow)
       {
         bark.Update();        
       }
@@ -340,7 +340,7 @@ abstract class UserInterface
   // UI will be blocked while it is playing
   public void PlayAnimation(Animation animation, GameState gs)
   {
-    while (animation.Expiry > DateTime.Now)
+    while (animation.Expiry > DateTime.UtcNow)
     {
       SetSqsOnScreen(gs);
       animation.Update();
@@ -1253,7 +1253,7 @@ abstract class UserInterface
     if (opts.TorchLightAnimation) 
       _animations.Add(new TorchLightAnimationListener(this, gameState));
 
-    DateTime refresh = DateTime.Now;
+    DateTime refresh = DateTime.UtcNow;
     Actor currPerformer = gameState.Player;
     while (true)
     {
@@ -1324,7 +1324,7 @@ abstract class UserInterface
         return RunningState.GameOver;
       }
 
-      TimeSpan elapsed = DateTime.Now - refresh;
+      TimeSpan elapsed = DateTime.UtcNow - refresh;
       int totalMs = (int) elapsed.TotalMilliseconds;
       if (totalMs >= 16)
       {
@@ -1332,11 +1332,11 @@ abstract class UserInterface
 
         foreach (var l in _animations)
           l.Update();
-        _animations = _animations.Where(a => a.Expiry > DateTime.Now)
+        _animations = _animations.Where(a => a.Expiry > DateTime.UtcNow)
                                  .ToList();
         
         UpdateDisplay(gameState);
-        refresh = DateTime.Now;
+        refresh = DateTime.UtcNow;
       }
       else
       {
