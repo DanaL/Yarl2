@@ -762,7 +762,6 @@ class Player : Actor
     {
       if (t is ParalyzedTrait paralyzed)
       {
-        ++paralyzed.TurnsParalyzed;
         ui.AlertPlayer("You cannot move!");
 
         if (paralyzed.TurnsParalyzed % 5 == 0)

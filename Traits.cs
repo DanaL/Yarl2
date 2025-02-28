@@ -1964,7 +1964,11 @@ class ParalyzedTrait : TemporaryTrait
   {
     if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
     {
-      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng))
+      ++TurnsParalyzed;
+
+      // If you have a low enough Will score you might never pass the saving 
+      // throw, so put a ceiling on how long someone can be paralyzed.
+      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng) ||  TurnsParalyzed > 75)
       {
         victim.Traits.Remove(this);
         Expired = true;
