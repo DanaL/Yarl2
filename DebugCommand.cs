@@ -137,15 +137,11 @@ class DebugCommand(GameState gs)
       _gs.PrepareFieldOfView();
       return "";
     }
-    else if (txt == "dmap")
+    else if (txt == "lorem")
     {
-      var start = DateTime.Now;
-      for (int i = 0; i < 1000; i++)
-      {
-        _gs.SetDMaps(_gs.Player.Loc);
-      }
-      var elapsed = DateTime.Now - start;
-      _gs.UIRef().AlertPlayer($"{elapsed.TotalMilliseconds}ms");
+      string s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
+      s += "Here is some test text that should be long enough to push the text across three lines.";
+      _gs.UIRef().AlertPlayer(s);
       return "";
     }
 

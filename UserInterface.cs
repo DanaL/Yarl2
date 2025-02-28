@@ -384,15 +384,14 @@ abstract class UserInterface
 
   void WriteMessages()
   {
-    var msgs = MessageHistory.Take(5)
-                             .Select(msg => msg.Fmt);
-
-    int count = 0;
-    int row = ScreenHeight - 1;
+    Queue<(Colour, string)> buffer = [];    
+    int j = 0;
     Colour colour = Colours.WHITE;
-    foreach (var msg in msgs)
+    while (j < 5 && j < MessageHistory.Count)
     {
-      if (msg.Length >= ScreenWidth)
+      string s = MessageHistory[j++].Fmt;
+      List<(Colour, string)> pieces = [];
+      while (s.Length >= ScreenWidth)
       {
         int c;
         // Find the point to split the line. I'm never going to send a
@@ -400,28 +399,29 @@ abstract class UserInterface
         // screen am I...
         for (c = ScreenWidth - 1; c >= 0; c--)
         {
-          if (msg[c] == ' ')
+          if (s[c] == ' ')
             break;
         }
-        string s1 = msg[(c + 1)..].TrimStart().PadRight(ScreenWidth);
-        string s2 = msg[..c].TrimStart().PadRight(ScreenWidth);
-        WriteLine(s1, row--, 0, ScreenWidth, colour);
-        if (ScreenHeight - row < 5)
-          WriteLine(s2, row--, 0, ScreenWidth, colour);
+        pieces.Add((colour, s[..c].Trim()));
+        s = s[c..];        
       }
-      else
-      {
-        string s = msg.PadRight(ScreenWidth);
-        WriteLine(s, row--, 0, ScreenWidth, colour);
-      }
-
-      if (++count == 5)
-        break;
+      pieces.Add((colour, s.Trim()));
+      
+      pieces.Reverse();
+      foreach (var p in pieces)
+        buffer.Enqueue(p);
 
       if (colour == Colours.WHITE)
         colour = Colours.GREY;
       else if (colour == Colours.GREY)
         colour = Colours.DARK_GREY;
+    }
+
+    int row = ScreenHeight - 1;
+    while (buffer.Count > 0 && row > ViewHeight)
+    {
+      var (c, s) = buffer.Dequeue();
+      WriteLine(s, row--, 0, ScreenWidth, c);
     }
   }
 

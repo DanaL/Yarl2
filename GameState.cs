@@ -1766,7 +1766,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     RecentlySeenMonsters = prevSeenMonsters;
 
-    // an extremely stressed character will may see hallucinations
+    // an extremely stressed character may see hallucinations
     HashSet<Loc> hallucinations = [];
     if (!InWilderness && Player.Traits.OfType<StressTrait>().FirstOrDefault() is StressTrait stress)
     {
