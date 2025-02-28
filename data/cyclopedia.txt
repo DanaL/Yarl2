@@ -313,3 +313,6 @@ Classic tool of the archer's trade. Shoot with the fire (f) command (will auto-s
 #
 dagger
 Use it to slice your dinner or stab your foe! Truly a multi-functional piece of adventuring kit.
+#
+golden apple
+Fruit from an elven grove. Certain to have magical properties.
