@@ -119,9 +119,8 @@ class ShopMenuInputer : Inputer
   public override UIResult GetResult() => new ShoppingUIResult()
   {
     Zorkminds = TotalInvoice(),
-    Selections = MenuItems.Values.Where(i => i.SelectedCount > 0)
-                                    .Select(i => (i.Slot, i.SelectedCount))
-                                    .ToList()
+    Selections = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
+                                    .Select(i => (i.Slot, i.SelectedCount))]
   };
 
   protected int TotalInvoice() => MenuItems.Values.Select(mi => mi.SelectedCount * mi.Price).Sum();

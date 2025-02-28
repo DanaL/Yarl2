@@ -382,6 +382,18 @@ abstract class Actor : GameObj, IZLevel
     return roll >= dc;
   }
 
+  public char AddToInventory(Item item, GameState gs)
+  {
+    char slot = Inventory.Add(item, ID);
+    if (slot == '\0')
+    {
+      gs.ItemDropped(item, Loc);
+      gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} falls to the ground.", gs, Loc);
+    }
+
+    return slot;
+  }
+
   // The default is that a monster/NPC will get angry if the player picks up 
   // something which belongs to them
   public virtual string PossessionPickedUp(ulong itemID, Actor other, GameState gameState)

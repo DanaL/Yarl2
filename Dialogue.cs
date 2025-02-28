@@ -1272,7 +1272,7 @@ class DialogueInterpreter
     Footer.Append(item.Name.IndefArticle());
     Footer.Append("!]");
 
-    gs.Player.Inventory.Add(item, gs.Player.ID);
+    gs.Player.AddToInventory(item, gs);
   }
 
   void EvalOffer(ScriptOffer offer, Actor mob, GameState gs)

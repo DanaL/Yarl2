@@ -844,7 +844,7 @@ class InnkeeperServiceAction : Action
     {
       GameState!.Player.Inventory.Zorkmids -= Invoice;
       Item booze = ItemFactory.Get(ItemNames.FLASK_OF_BOOZE, GameState.ObjDb);
-      GameState.Player.Inventory.Add(booze, GameState.Player.ID);
+      GameState.Player.AddToInventory(booze, GameState);
       GameState.UIRef().AlertPlayer($"You purchase a flask of booze from {_innkeeper.FullName}.");
     }
     else if (Service == "Rest")
@@ -1006,19 +1006,28 @@ class ShoppingCompletedAction : Action
 
     GameState!.Player.Inventory.Zorkmids -= _invoice;
 
-    foreach (var (slot, count) in _selections)
-    {
-      List<Item> bought = _shopkeeper.Inventory.Remove(slot, count);
-      foreach (var item in bought)
-        GameState.Player.Inventory.Add(item, GameState.Player.ID);
-    }
-
     string txt = $"You pay {_shopkeeper.FullName} {_invoice} zorkmid";
     if (_invoice > 1)
       txt += "s";
     txt += " and collect your goods.";
-
     GameState.UIRef().AlertPlayer(txt);
+
+    bool overflow = false;
+    foreach (var (slot, count) in _selections)
+    {
+      List<Item> bought = _shopkeeper.Inventory.Remove(slot, count);      
+      foreach (Item item in bought)
+      {
+        char inventorySlot = GameState.Player.AddToInventory(item, GameState);
+        if (inventorySlot == '\0')
+          overflow = true;
+      }
+    }
+
+    if (overflow)
+    {
+      GameState.UIRef().AlertPlayer("Uh-oh - you didn't have enough room in your inventory!");      
+    }
 
     return result;
   }
@@ -3238,7 +3247,7 @@ class UseSpellItemAction(GameState gs, Actor actor, string spell, Item? item) : 
     {
       case "gust of wind":
         player.ReplacePendingAction(
-          new CastGustOfWindAction(GameState, player, item) { FreeToCast = true }, 
+          new CastGustOfWindAction(GameState, player, Item) { FreeToCast = true }, 
           new ConeTargeter(GameState!, 5, player.Loc)
         );
         break;

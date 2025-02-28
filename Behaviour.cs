@@ -1662,7 +1662,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
     foreach (ulong id in purchases)
     {
       Item item = npc.Inventory.RemoveByID(id)!;
-      gs.Player.Inventory.Add(item, gs.Player.ID);
+      gs.Player.AddToInventory(item, gs);
     }
 
     gs.Player.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
