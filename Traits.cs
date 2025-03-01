@@ -457,7 +457,7 @@ class FinesseTrait : Trait
 // a superclass RebukeTrait
 class FireRebukeTrait : Trait
 {
-  public override string AsText() => "FireRebuke";
+  public override string AsText() => $"FireRebuke#{SourceId}";
 
   public void Rebuke(Actor target, Actor attacker, GameState gs)
   {
@@ -611,7 +611,7 @@ class EdibleTrait : Trait
 class EmberBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
-  {    
+  {
     ResistanceTrait resist = new() 
     {
       SourceId = granter.ID, OwnerID = gs.Player.ID, 
@@ -3046,7 +3046,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
