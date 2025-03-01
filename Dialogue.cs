@@ -1218,7 +1218,7 @@ class DialogueInterpreter
     }
     else if (gift.Gift == "BOON_RECALL")
     {
-       LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb!.FactCheck("Dungeon Entrance");
+      LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb!.FactCheck("Dungeon Entrance");
       if (entrance is not null)
       {
         gs.ActorEntersLevel(gs.Player, 0, 0);
@@ -1227,6 +1227,17 @@ class DialogueInterpreter
         gs.RefreshPerformers();
         gs.PrepareFieldOfView();        
       }
+
+      return;
+    }
+    else if (gift.Gift == "BOON_ID")
+    {
+      foreach (Item i in gs.Player.Inventory.Items())
+      {
+        i.Identify();
+      }
+
+      gs.UIRef().AlertPlayer("Secrets revealed!");
 
       return;
     }

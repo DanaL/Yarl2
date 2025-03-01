@@ -2565,14 +2565,7 @@ class IdentifyItemAction(GameState gs, Actor actor, Item? item) : Action(gs, act
     if (item is null)
       return result; // I think this should be impossible?
 
-    if (Item.IDInfo.TryGetValue(item.Name, out var idInfo))
-      Item.IDInfo[item.Name] = idInfo with { Known = true };
-    
-    foreach (Trait t in item.Traits)
-    {
-      if (t is WandTrait wt)
-        wt.IDed = true;
-    }
+    item.Identify();
 
     string s = $"\n It's {item.FullName.IndefArticle()}! \n";
     GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));

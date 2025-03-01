@@ -2,7 +2,7 @@ skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|MeleeSlashing
 zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#1#6#1#0#0#Attack|Undead,Brainless
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack|
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|
-dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying,Carries#apple#100
+dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying
 goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|PoorLoot,Intelligent
 goblin archer     |g|blue         |darkblue    |12|10|2| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent

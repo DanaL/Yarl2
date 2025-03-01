@@ -54,6 +54,18 @@ class Item : GameObj, IEquatable<Item>
     return _z;
   }
 
+  public void Identify()
+  {
+    if (IDInfo.TryGetValue(Name, out var idInfo))
+      IDInfo[Name] = idInfo with { Known = true };
+    
+    foreach (Trait t in Traits)
+    {
+      if (t is WandTrait wt)
+        wt.IDed = true;
+    }
+  }
+
   string CalcFullName()
   {
     string name;
