@@ -440,8 +440,7 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
     else
-      return stack.Where(i => i.Type != ItemType.Environment)
-                  .ToList();
+      return [..stack.Where(i => i.Type != ItemType.Environment)];
   }
 
   public List<Item> VisibleItemsAt(Loc loc)
@@ -449,8 +448,7 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
     else
-      return stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())
-                  .ToList();
+      return [..stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())];
   }
 
   public List<Item> EnvironmentsAt(Loc loc)

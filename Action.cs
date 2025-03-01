@@ -1955,22 +1955,22 @@ class WebAction : Action
     GameState!.ObjDb.Add(w);
     GameState.ItemDropped(w, Target);
 
-    foreach (var sq in Util.Adj8Sqs(Target.Row, Target.Col))
+    foreach (Loc adj in Util.Adj8Locs(Target))
     {
-      if (GameState.Rng.NextDouble() < 0.666)
+      if (GameState.TileAt(adj).Passable() && GameState.Rng.NextDouble() < 0.666)
       {
         w = ItemFactory.Web();
         GameState.ObjDb.Add(w);
-        GameState.ItemDropped(w, Target with { Row = sq.Item1, Col = sq.Item2 });
+        GameState.ItemDropped(w, Target with { Row = adj.Row, Col = adj.Col });
       }
     }
 
-    var victim = GameState.ObjDb.Occupant(Target);
-    if (victim is not null)
+    if (GameState.ObjDb.Occupant(Target) is Actor victim)
     {
       string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
-      GameState!.UIRef().AlertPlayer(txt);
+      GameState!.UIRef().AlertPlayer(txt, GameState, Target);
     }
+
     return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
   }
 }
