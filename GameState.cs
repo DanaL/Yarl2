@@ -53,76 +53,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   int _currPerformer = 0;
 
-  static readonly Dictionary<TileType, int> _passableBasic = new()
-  {
-    { TileType.DungeonFloor, 1 },
-    { TileType.Landmark, 1 },
-    { TileType.Upstairs, 1 },
-    { TileType.Downstairs, 1 },
-    { TileType.OpenDoor, 1 },
-    { TileType.BrokenDoor, 1 },
-    { TileType.WoodBridge, 1 },
-    { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 },
-    { TileType.HiddenPit, 1},
-    { TileType.GreenTree, 1},
-    { TileType.Dirt, 1},
-    { TileType.HiddenTeleportTrap, 1 },
-    { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 },
-    { TileType.HiddenTrapDoor, 1 }
-  };
-
-  static readonly Dictionary<TileType, int> _passableWithDoors = new()
-  {
-    { TileType.DungeonFloor, 1 },
-    { TileType.Landmark, 1 },
-    { TileType.Upstairs, 1 },
-    { TileType.Downstairs, 1 },
-    { TileType.OpenDoor, 1 },
-    { TileType.BrokenDoor, 1 },
-    { TileType.ClosedDoor, 1 },
-    { TileType.WoodBridge, 1 },
-    { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 },
-    { TileType.HiddenPit, 1},
-    { TileType.GreenTree, 1},
-    { TileType.Dirt, 1},
-    { TileType.HiddenTeleportTrap, 1 },
-    { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 },
-    { TileType.HiddenTrapDoor, 1 }
-  };
-
-  static readonly Dictionary<TileType, int> _passableFlying = new()
-  {
-    { TileType.DungeonFloor, 1 },
-    { TileType.Landmark, 1 },
-    { TileType.Upstairs, 1 },
-    { TileType.Downstairs, 1 },
-    { TileType.OpenDoor, 1 },
-    { TileType.BrokenDoor, 1 },
-    { TileType.WoodBridge, 1 },
-    { TileType.DeepWater, 1 },
-    { TileType.Water, 1 },
-    { TileType.Chasm, 1 },
-    { TileType.OpenPortcullis, 1 },
-    { TileType.BrokenPortcullis, 1 },
-    { TileType.MagicMouth, 1 },
-    { TileType.HiddenMagicMouth, 1 },
-    { TileType.HiddenPit, 1},
-    { TileType.GreenTree, 1},
-    { TileType.Dirt, 1},
-    { TileType.HiddenTeleportTrap, 1 },
-    { TileType.HiddenWaterTrap, 1 },
-    { TileType.HiddenDartTrap, 1 },
-    { TileType.HiddenTrapDoor, 1 }
-  };
-
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 
@@ -303,7 +233,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(s);      
     }
 
-    foreach (var t in item.Traits)
+    foreach (Trait t in item.Traits)
     {
       if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)
         ApplyDamageEffectToLoc(loc, DamageType.Fire);
@@ -686,7 +616,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
-  {
+  {    
     bool locVisible = LastPlayerFoV.Contains(victim.Loc);
     if (victim is Player)
     {     
@@ -728,17 +658,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
     if (dwFound)
-      ObjDb.DeathWatchListeners = ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID).ToList();
+      ObjDb.DeathWatchListeners = [..ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
 
     RemovePerformer(victim);
 
     foreach (var t in victim.Traits)
     {
-      if (t is LootTrait lt)
+      if (t is LootTrait lt && Treasure.LootFromTrait(lt, Rng, ObjDb) is Item loot)
       {
-        var loot = Treasure.LootFromTrait(lt, Rng, ObjDb);
-        if (loot is not null)
-          ItemDropped(loot, victim.Loc);
+        ItemDropped(loot, victim.Loc);
       }
       else if (t is DropTrait d)
       {

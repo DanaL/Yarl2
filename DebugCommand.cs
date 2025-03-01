@@ -240,11 +240,10 @@ class DebugCommand(GameState gs)
 
   List<Loc> AdjSpots(Loc loc)
   {
-    return Util.Adj8Locs(loc)
+    return [..Util.Adj8Locs(loc)
         .Where(loc => !_gs.ObjDb.Occupied(loc) 
                           && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable()
-                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()) .Any())
-        .ToList();
+                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()) .Any())];
   }
 
   private string AddMonster(string monsterName)

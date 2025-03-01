@@ -52,10 +52,11 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     if (!tile.PassableByFlight())
       return int.MaxValue;
 
-    if (tile.IsVisibleTrap())
-      return int.MaxValue;
-
-    if (tile is JetTrigger trigger && trigger.Visible)
+    // JetTriggers aren't triggered by flight but they aren't covered
+    // in IsVisibleTrap(). I can't remember if that's intentional or an
+    // an oversight...
+    TileType t = tile.Type;
+    if (tile.IsVisibleTrap() && !(t == TileType.Pit || t == TileType.TrapDoor))
       return int.MaxValue;
 
     return 1;
