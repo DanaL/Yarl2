@@ -11,7 +11,7 @@
         ((give BOON_TRAPS "Dangers are now laid bare!") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Dangers are now laid bare!"))
       )
       (option "Identify unknown items in your inventory."  
-        ((give BOON_ID "The cleric chants.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Know thyself!"))
+        ((give BOON_ID "The cleric chants.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "Secrets revealed."))
       )
       (option "Are you lost? We can guide you back to the surface."  
         ((give BOON_RECALL "The cleric lays on hands.") (set DIALOGUE_STATE 1) (set LAST_GIFT_TIME 0) (end "A beam of moonlight draws you upward!"))

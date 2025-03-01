@@ -1237,8 +1237,6 @@ class DialogueInterpreter
         i.Identify();
       }
 
-      gs.UIRef().AlertPlayer("Secrets revealed!");
-
       return;
     }
     else if (gift.Gift == "BOON_STR")
