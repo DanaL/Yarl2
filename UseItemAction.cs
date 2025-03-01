@@ -600,8 +600,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         // Eventually being blind will prevent you from reading things
         if (Actor.HasTrait<ConfusedTrait>())
         {
-          string txt = $"{Actor.FullName} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
+          string txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} too confused to read that!";
           GameState.UIRef().AlertPlayer(txt);
+          if (Actor is Player)
+            GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
           return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         }
       }
