@@ -100,7 +100,7 @@ class WitchQuest
 
       // Start from the proposed entrance, otherwise pathfinding will fail
       // because mountains aren't open
-      var path = AStar.FindPath(wilderness, loc, witches, costs, true);
+      var path = AStar.FindPath(gs.ObjDb, wilderness, loc, witches, costs, true);
       if (path.Count > 0)
         return loc;
     }
@@ -115,7 +115,7 @@ class WitchQuest
     throw new Exception("I couldn't find a spot for the Witch Quest!");
   }
 
-  static void JoinCaves(Map map, Random rng)
+  static void JoinCaves(Map map, GameState gs)
   {
     RegionFinder regionFinder = new(new DungeonPassable());
     var regions = regionFinder.Find(map, true, 4, TileType.DungeonWall);
@@ -145,12 +145,12 @@ class WitchQuest
     foreach (int i in caves)
     {
       List<(int, int)> cave = [.. regions[i]];
-      var startSq = cave[rng.Next(cave.Count)];
+      var startSq = cave[gs.Rng.Next(cave.Count)];
       Loc start = new(0, 0, startSq.Item1, startSq.Item2);
-      var endSqr = mainSqs[rng.Next(mainSqs.Count)];
+      var endSqr = mainSqs[gs.Rng.Next(mainSqs.Count)];
       Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
 
-      Stack<Loc> path = AStar.FindPath(map, start, end, travelCost, false);
+      Stack<Loc> path = AStar.FindPath(gs.ObjDb, map, start, end, travelCost, false);
       while (path.Count > 0)
       {
         var sq = path.Pop();
@@ -191,7 +191,7 @@ class WitchQuest
       }
     }
 
-    JoinCaves(map, gs.Rng);
+    JoinCaves(map, gs);
 
     int i = gs.Rng.Next(floors.Count);
     var exitSq = floors[i];

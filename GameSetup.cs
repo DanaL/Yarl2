@@ -218,7 +218,7 @@ class CampaignCreator(UserInterface ui)
     };
   }
 
-  static (int, int) PickStartLoc(Map map, Town town, Random rng)
+  static (int, int) PickStartLoc(Map map, Town town, GameObjectDB objDb, Random rng)
   {
     List<(int, int)> opts = [];
 
@@ -266,7 +266,7 @@ class CampaignCreator(UserInterface ui)
       var (r, c) = opts[i];
 
       Loc loc = new(0, 0, r, c);
-      var path = AStar.FindPath(map, loc, goal, costs);
+      var path = AStar.FindPath(objDb, map, loc, goal, costs);
       if (path.Count > 0)
         return (r, c);
 
@@ -642,7 +642,7 @@ class CampaignCreator(UserInterface ui)
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
         campaign.Town = town;
 
-        (startR, startC) = PickStartLoc(wildernessMap, town, rng);
+        (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {
           // If there was somehow no valid path for any start location, 

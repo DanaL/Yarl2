@@ -464,7 +464,7 @@ class Rooms
     }
   }
 
-  static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, Random rng)
+  static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, GameObjectDB objDb, Random rng)
   {
     HashSet<Loc> bridges = [];
 
@@ -483,7 +483,7 @@ class Rooms
     {
       Loc startLoc = new(dungeonID, level, r, c);      
       Loc goalLoc = new(dungeonID, level, goalSq.Item1, goalSq.Item2);
-      Stack<Loc> path = AStar.FindPath(map, startLoc, goalLoc, passable, false);
+      Stack<Loc> path = AStar.FindPath(objDb, map, startLoc, goalLoc, passable, false);
       if (path.Count > 0)
       {
         while (path.Count > 0)
@@ -508,7 +508,7 @@ class Rooms
       return;
 
     MakeChasm(map, mapBelow, info.ChasmSqs);
-    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, objDb, rng);
     foreach (Loc bridge in bridges)
     {
       map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));
@@ -543,7 +543,7 @@ class Rooms
       return;
 
     MakeChasm(map, mapBelow, info.ChasmSqs);
-    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, objDb, rng);
 
     (int, int) triggerSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
     BridgeTrigger trigger = new()
@@ -570,7 +570,7 @@ class Rooms
       return;
       
     MakeChasm(map, mapBelow, info.ChasmSqs);
-    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, rng);
+    HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, objDb, rng);
     foreach (Loc bridge in bridges)
     {
       map.SetTile(bridge.Row, bridge.Col, TileFactory.Get(TileType.WoodBridge));

@@ -33,7 +33,7 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
 
     foreach (Loc loc in locs)
     {
-      Stack<Loc> path = AStar.FindPath(GS.MapForLoc(start), start, loc, TravelCosts, false);
+      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, TravelCosts, false);
       if (path.Count > 0)
         return path;
     }
@@ -727,7 +727,7 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
   {
     Loc goal = Area[gs.Rng.Next(Area.Count)];
 
-    var path = AStar.FindPath(gs.CurrentMap, mob.Loc, goal, TravelCosts(mob), true);
+    var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, goal, TravelCosts(mob), true);
     return path;
   }
 
@@ -988,7 +988,7 @@ class FindUpStairs : BehaviourNode
 
     Loc stairsLoc = mob.Loc with {  Row = stairs[0].Item1, Col = stairs[0].Item2 };
     Goal = stairsLoc;
-    return AStar.FindPath(gs.CurrentMap, mob.Loc, Goal, TravelCosts(mob), true);
+    return AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, Goal, TravelCosts(mob), true);
   }
 
   static Dictionary<TileType, int> TravelCosts(Mob mob)

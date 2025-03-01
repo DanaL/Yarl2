@@ -270,9 +270,9 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 class AStar
 {
-  static public Stack<Loc> FindPath(Map map, Loc start, Loc goal, Dictionary<TileType, int> travelCost, bool allowDiagonal = true)
+  static public Stack<Loc> FindPath(GameObjectDB objDb, Map map, Loc start, Loc goal, Dictionary<TileType, int> travelCost, bool allowDiagonal = true)
   {
-    var q = new PriorityQueue<Loc, int>();
+    PriorityQueue<Loc, int> q = new();
     q.Enqueue(start, 0);
     Dictionary<Loc, Loc> cameFrom = [];
     cameFrom[start] = start;
@@ -281,20 +281,20 @@ class AStar
 
     while (q.Count > 0)
     {
-      var curr = q.Dequeue();
+      Loc curr = q.Dequeue();
 
       if (curr == goal)
         break;
 
       var adjSqs = allowDiagonal ? Util.Adj8Locs(curr) : Util.Adj4Locs(curr);
-      foreach (var adj in adjSqs)
+      foreach (Loc adj in adjSqs)
       {
-        var tileType = map.TileAt(adj.Row, adj.Col).Type;
+        TileType tileType = map.TileAt(adj.Row, adj.Col).Type;
         if (!travelCost.TryGetValue(tileType, out int travel))
-        {
           continue;
-        }
-
+        else if (objDb.BlockersAtLoc(adj))
+          continue;
+        
         int newCost = costs[curr] + travel;
         if (!costs.TryGetValue(adj, out int value) || newCost < value)
         {

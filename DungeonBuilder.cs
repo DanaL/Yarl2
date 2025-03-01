@@ -1143,7 +1143,7 @@ class MainDungeonBuilder : DungeonBuilder
     return false;
   }
 
-  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Random rng, FactDb factDb)
+  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Random rng, GameObjectDB objDb, FactDb factDb)
   {
     Dictionary<TileType, int> passable = [];
     passable.Add(TileType.Grass, 1);
@@ -1214,7 +1214,7 @@ class MainDungeonBuilder : DungeonBuilder
       int i = rng.Next(opts.Count);      
       (int, int) sq = opts[rng.Next(opts.Count)];
       Loc loc = new(0, 0, sq.Item1, sq.Item2);
-      var path = AStar.FindPath(wildernessMap, loc, goal, passable, false);
+      var path = AStar.FindPath(objDb, wildernessMap, loc, goal, passable, false);
       if (path.Count > 0)
       {
         Tile p = new Portcullis(false);
@@ -1325,7 +1325,7 @@ class MainDungeonBuilder : DungeonBuilder
       foreach (var (dr, dc) in downStairs)
       {
         Loc goal = new(0, 0, dr, dc);
-        Stack<Loc> path = AStar.FindPath(map, start, goal, passable);
+        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
         if (path.Count == 0)
         {
           AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
@@ -1611,7 +1611,7 @@ class MainDungeonBuilder : DungeonBuilder
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
     PlaceLevelFiveGate(id, levels[4], levels[5], rng, factDb, objDb);
-    PlaceShortCut(wildernessMap,levels[4], entrance, rng, factDb);
+    PlaceShortCut(wildernessMap,levels[4], entrance, rng, objDb, factDb);
     
     // Add a couple of guaranteed good items to dungeon
     AddGoodItemToLevel(levels[1], id, 1, rng, objDb);

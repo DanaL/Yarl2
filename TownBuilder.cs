@@ -721,7 +721,7 @@ class TownBuilder
     return blocked;
   }
 
-  bool DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, Random rng)
+  bool DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Random rng)
   {
     DrawBuilding(map, r, c, townCentreRow, townCentreCol, template, BuildingType.WitchesCottage, rng);
 
@@ -819,7 +819,7 @@ class TownBuilder
     costs.Add(TileType.Dirt, 1);
     costs.Add(TileType.ClosedDoor, 1);
 
-    var gardenPath = AStar.FindPath(map, frontDoorLoc, gardenSq, costs, false);
+    var gardenPath = AStar.FindPath(objDb, map, frontDoorLoc, gardenSq, costs, false);
     if (gardenPath.Count == 0)
       return false;
 
@@ -835,7 +835,7 @@ class TownBuilder
     return true;
   }
 
-  void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, Random rng)
+  void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Random rng)
   {
     // Find candidate spots for the witches' cottage
     List<(int, int)> candidates = [];
@@ -876,7 +876,7 @@ class TownBuilder
         continue;
 
       Map tmp = (Map) map.Clone();
-      bool success = DrawWitchesCottage(tmp, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, rng);
+      bool success = DrawWitchesCottage(tmp, topLeftRow, topLeftCol, townCentreRow, townCentreCol, template, objDb, rng);
       if (success)
       {
         for (int r = 0; r < map.Height; r++)
@@ -1028,7 +1028,7 @@ class TownBuilder
 
     AddWell(map, rng);
 
-    AddWitchesCottage(map, centreRow, centreCol, Templates["cottage 3"], rng);
+    AddWitchesCottage(map, centreRow, centreCol, Templates["cottage 3"], new GameObjectDB(), rng);
 
     CalcRoofs(map);
 

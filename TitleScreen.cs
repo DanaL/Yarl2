@@ -252,7 +252,7 @@ class TitleScreen
       var (startR, startC) = startingSpots[j];
       startingSpots.RemoveAt(j);
       Loc start = new(0, 0, startR, startC);
-      Stack<Loc> path = AStar.FindPath(Map, start, dungeon, TravelCost);
+      Stack<Loc> path = AStar.FindPath(ObjDb, Map, start, dungeon, TravelCost);
 
       if (path.Count > 0)
       {
@@ -414,7 +414,7 @@ class TitleScreen
     if (monster is null)
       return;
     
-    Stack<Loc> path = AStar.FindPath(Map, Player, monster.Loc, TravelCost);
+    Stack<Loc> path = AStar.FindPath(ObjDb, Map, Player, monster.Loc, TravelCost);
     if (path.Count > 0)
     {
       path.Pop();
