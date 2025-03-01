@@ -682,17 +682,6 @@ class Player : Actor
         items.Add(item);
     }
 
-    if (items.Count == 0)
-    {
-      ui.AlertPlayer("There's nothing here you can pick up.");
-      return new NullAction();
-    }
-
-    // Note that in the current state of the game, an item that is on a pit square
-    // will be in the pit. There's (currently) no concept of floating items so I
-    // don't have to the worry about the situation where there are items in the pit
-    // and items floating above the pit and what a player can and cannot reach in
-    // that situation. This will change if/when I add floating items.
     bool playerInPit = HasTrait<InPitTrait>();
     if (itemsInPit.Count == 1 && !playerInPit)
     {
@@ -705,8 +694,21 @@ class Player : Actor
       return new NullAction();
     }
 
+    // Note that in the current state of the game, an item that is on a pit square
+    // will be in the pit. There's (currently) no concept of floating items so I
+    // don't have to the worry about the situation where there are items in the pit
+    // and items floating above the pit and what a player can and cannot reach in
+    // that situation. This will change if/when I add floating items.
     if (itemsInPit.Count > 0)
+    {
       items = itemsInPit;
+    }
+
+    if (items.Count == 0)
+    {
+      ui.AlertPlayer("There's nothing here you can pick up.");
+      return new NullAction();
+    }
 
     if (items.Count == 1)
     {
