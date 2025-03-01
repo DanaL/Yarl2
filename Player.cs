@@ -353,7 +353,7 @@ class Player : Actor
 
     lines.Add("");
 
-    List<string> traitsToShow = [];
+    HashSet<string> traitsToShow = [];
     double alacrity = 0;
     bool blessed = false;
     int acmod = 0;
@@ -394,6 +394,8 @@ class Player : Actor
         fireDmg = true;
       else if (trait is FireRebukeTrait)
         fireRebuke = true;
+      else if (trait is LikeableTrait)
+        traitsToShow.Add("You are especially likeable");
     }
     
     if (alacrity < 0)

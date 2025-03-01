@@ -858,6 +858,16 @@
     ]
   },
   {
+    "Name": "RING_OF_ADORNMENT",
+    "DescriptiveName": "ring of adornment",
+    "Type": "Ring",
+    "Value": 50,
+    "Glyph": "o,white,grey,black,black",
+    "Traits": [
+      "Grants#Likeable"
+    ]
+  },
+  {
     "Name": "ANTISNAIL_SANDALS",
     "DescriptiveName": "anti-snail sandals",
     "Type": "Armour",
