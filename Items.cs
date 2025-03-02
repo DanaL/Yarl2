@@ -625,9 +625,17 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
   {    
-    bool EquippedTwoHandedWeapon() => ReadiedWeapon() is Item w && 
-                                        (w.HasTrait<TwoHandedTrait>() || w.Type == ItemType.Bow);
-    
+    bool EquippedTwoHandedWeapon() 
+    { 
+      if (ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>())
+        return true;
+
+      if (ReadiedBow() is not null)
+        return true;
+
+      return false;
+    }
+
     // I suppose at some point I'll have items that can't be equipped
     // (or like it doesn't make sense for them to be) and I'll have
     // to check for that
