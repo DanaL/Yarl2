@@ -1939,8 +1939,8 @@ class FireboltAction(GameState gs, Actor caster, Loc target) : Action(gs, caster
     var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
     var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
 
-    string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Firebolt!";
-    GameState!.UIRef().AlertPlayer(txt);
+    string txt = $"{MsgFactory.CalcName(Actor!, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor!, "cast")} firebolt!";
+    GameState.UIRef().AlertPlayer(txt);
 
     return new ActionResult() { Succcessful = true, AltAction = attack, EnergyCost = 0.0 };
   }

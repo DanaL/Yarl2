@@ -1322,6 +1322,7 @@ abstract class UserInterface
       {
         string s = $"Oh noes you've been killed by {pke.Message} :(";
         SetPopup(new Popup(s, "", -1, - 1));
+        WriteAlerts();
         BlockFoResponse(gameState);
 
         DrawGravestone(gameState, pke.Message);        
