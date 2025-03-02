@@ -322,3 +322,6 @@ A minor ghost that dwells mostly beyond the veil, meaning it is invisible to mor
 #
 scroll of word of recall
 The three great wizarding virtues are: laziness, impatience, and hubris. This scroll was first invented by a mage too lazy to trudge all the way out of the dungeon.
+#
+goblin firestarter
+Little goblin liked to burn things.
