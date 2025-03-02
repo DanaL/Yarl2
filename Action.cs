@@ -2477,6 +2477,11 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("You'll need to take it off first.");
       return new ActionResult() { Succcessful = false };
     }
+    else if (item.Equipped && item.Type == ItemType.Talisman)
+    {
+      GameState.UIRef().AlertPlayer("You'll need to un-equip it first.");
+      return new ActionResult() { Succcessful = false };
+    }
     else if (itemCount > 1)
     {
       var dropStackAction = new DropStackAction(GameState, Actor, Choice);
