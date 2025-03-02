@@ -488,7 +488,8 @@ class FireRebukeTrait : Trait
 
         if (gs.ObjDb.Occupant(adj) is Actor victim)
         {
-          string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} engulfed in flames!";
+          string victimName = MsgFactory.CalcName(victim, gs.Player).Capitalize();
+          string txt = $"{victimName} {Grammar.Conjugate(victim, "is")} engulfed in flames!";
           gs.UIRef().AlertPlayer(txt, gs, adj);
           int roll = gs.Rng.Next(1, 7);
           (hpLeft, msg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);
@@ -3046,7 +3047,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() /* { SourceId = ulong.Parse(pieces[1])}*/ },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },

@@ -1335,8 +1335,7 @@ abstract class UserInterface
 
         foreach (var l in _animations)
           l.Update();
-        _animations = _animations.Where(a => a.Expiry > DateTime.UtcNow)
-                                 .ToList();
+        _animations = [.. _animations.Where(a => a.Expiry > DateTime.UtcNow)];
         
         UpdateDisplay(gameState);
         refresh = DateTime.UtcNow;
