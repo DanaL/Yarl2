@@ -1247,12 +1247,19 @@ abstract class UserInterface
     BlockForInput(gameState);
   }
 
+  // Clear out anything that should shouldn't persist between games
+  void Reset()
+  {
+    MessageHistory = [];
+    _animations = [];
+  }
+
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
     gameState.BuildPerformersList();
-    _animations.Add(new CloudAnimation(this, gameState));
 
+    _animations.Add(new CloudAnimation(this, gameState));
     if (opts.TorchLightAnimation) 
       _animations.Add(new TorchLightAnimationListener(this, gameState));
 
@@ -1308,7 +1315,7 @@ abstract class UserInterface
       }
       catch (QuitGameException)
       {
-        MessageHistory = [];
+        Reset();
         return RunningState.GameOver;
       }
       catch (PlayerKilledException pke)
@@ -1318,12 +1325,12 @@ abstract class UserInterface
         BlockFoResponse(gameState);
 
         DrawGravestone(gameState, pke.Message);        
-        MessageHistory = [];
+        Reset();
         return RunningState.GameOver;
       }
       catch (VictoryException) 
       {
-        MessageHistory = [];
+        Reset();
         return RunningState.GameOver;
       }
 
