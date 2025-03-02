@@ -153,6 +153,10 @@ class DebugCommand(GameState gs)
     {
       case "add":
         return AddMonster(parts[1]);
+      case "clearfact":
+        if (_gs.FactDb.FactCheck(parts[1]) is Fact fact)
+          _gs.FactDb.ClearFact(fact);
+        return "";
       case "give":
       case "drop":
         return AddItem(parts[0].ToLower(), parts[1]);

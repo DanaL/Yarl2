@@ -60,6 +60,8 @@ class FactDb(RulerInfo ruler)
       _facts.Add(fact);
   }
 
+  public void ClearFact(Fact fact) => _facts.Remove(fact);
+
   public Fact? FactCheck(string name)
   {
     foreach (var fact in _facts)

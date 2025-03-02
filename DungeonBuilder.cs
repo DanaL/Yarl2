@@ -974,7 +974,7 @@ class MainDungeonBuilder : DungeonBuilder
     Tile door = new VaultDoor(false, Metals.Iron);    
     map.SetTile(sr, sc, door);
     Loc doorLoc = new(dungeonId, 4, sr, sc);
-    factDb.Add(new SimpleFact() { Name = "Level 5 Gate Loc", Value = doorLoc.ToString()});
+    factDb.Add(new LocationFact() { Desc = "Level 5 Gate Loc", Loc = doorLoc });
 
     (int, int) stairsLoc;
     switch (sdir)
