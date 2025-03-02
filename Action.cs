@@ -197,13 +197,20 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   public override ActionResult Execute()
   {
     ActionResult result = new() { Succcessful = true };
-
     ArrowAnimation arrowAnim = new(GameState!, Util.Trajectory(Actor!.Loc, _loc), _ammo.Glyph.Lit);
     GameState!.UIRef().RegisterAnimation(arrowAnim);
 
-    var target = GameState!.ObjDb.Occupant(_loc);
-    if (target is not null)
+    if (GameState!.ObjDb.Occupant(_loc) is Actor target)
+    {
+      if (Actor is not Player)
+      {
+        string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} shoots at ";
+        s+= $"{MsgFactory.CalcName(target, GameState.Player)}!";
+        GameState.UIRef().AlertPlayer(s);
+      }
+
       result = Battle.MissileAttack(Actor!, target, GameState, _ammo, 0, null);
+    }
 
     return result;
   }
