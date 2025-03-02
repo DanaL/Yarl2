@@ -56,7 +56,7 @@ class Battle
     Actor? occ = gs.ObjDb.Occupant(checkLoc);
     if (occ is not null && attackRoll >= occ.AC)
     {
-      ResolveMeleeHit(attacker, occ, gs, Verb.Impale, weaponBonus);
+      ResolveMeleeHit(attacker, occ, gs, "impale", weaponBonus);
       success = true;
     }
 
@@ -76,7 +76,7 @@ class Battle
       {
         if (attackRoll >= occ.AC)
         {
-          ResolveMeleeHit(attacker, occ, gs, Verb.Cleave, weaponBonus);
+          ResolveMeleeHit(attacker, occ, gs, "cleave", weaponBonus);
           success = true;
         }
       }
@@ -209,7 +209,7 @@ class Battle
     }
   }
 
-  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, Verb attackVerb, int weaponBonus)
+  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, string attackVerb, int weaponBonus)
   {    
     // Need to handle the case where the player isn't currently wielding a weapon...
     List<(int, DamageType)> dmg = [];
@@ -350,14 +350,14 @@ class Battle
       gs.ResolveActorMove(target, target.Loc, second);
       target.Loc = second;
       
-      return $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} knocked backward!";
+      return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} knocked backward!";
     }
     else if (CanPass(first, gs))
     {
       gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       
-      return $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Stagger)} backward!";
+      return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} backward!";
     }
 
     return "";
@@ -381,7 +381,7 @@ class Battle
     gs.RegisterForEvent(GameEventType.Death, grappled, actor.ID);
     
     target.Traits.Add(grappled);
-    var msg = $"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} grappled by "; 
+    var msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} grappled by "; 
     msg += actor.FullName + "!";
 
     return msg;
@@ -567,7 +567,7 @@ class Battle
         }
       }
 
-      Verb verb = Verb.Hit;
+      string verb = "hit";
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
       ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
@@ -740,7 +740,8 @@ class Battle
     }
     else
     {
-      gs.UIRef().AlertPlayer(MsgFactory.Phrase(ammo.ID, Verb.Miss, target.ID, 0, true, gs));      
+      string s = $"{ammo.Name.DefArticle().Capitalize()} misses {MsgFactory.CalcName(target, gs.Player)}!";
+      gs.UIRef().AlertPlayer(s, gs, target.Loc);      
     }
 
     // Firebolts, ice, should apply their effects to the square they hit

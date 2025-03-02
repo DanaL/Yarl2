@@ -93,9 +93,9 @@ class AttackModTrait : Trait
   public override string AsText() => $"AttackMod#{Amt}#{SourceId}";
 }
 
-class AttackVerbTrait(Verb verb) : Trait
+class AttackVerbTrait(string verb) : Trait
 {
-  public Verb Verb { get; set; } = verb;
+  public string Verb { get; set; } = verb;
 
   public override string AsText() => $"AttackVerb#{Verb}";
 }
@@ -2013,7 +2013,7 @@ class PoisonedTrait : TemporaryTrait
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       OwnerID = target.ID;
       ExpiresOn = gs.Turn + (ulong)Duration;
-      return [$"{target.FullName.Capitalize()} {MsgFactory.CalcVerb(target, Verb.Etre)} poisoned!"];
+      return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} poisoned!"];
     }
 
     return [];
@@ -2030,7 +2030,7 @@ class PoisonedTrait : TemporaryTrait
       victim.Traits.Remove(this);
       gs.RemoveListener(this);
       Expired = true;
-      string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Feel)} better.";
+      string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} better.";
       gs.UIRef().AlertPlayer(msg);
 
       return;
@@ -2107,13 +2107,13 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
           
         if (hpLeft < 1)
         {
-          string msg = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Die)} from fire!";
+          string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "die")} by fire!";
           ui.AlertPlayer(msg);
           gs.ActorKilled(victim, "fire", null);
         }
         else
         {
-          string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} burnt!";
+          string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} burnt!";
           ui.AlertPlayer(txt);
 
           if (dmgMsg != "")
@@ -2605,8 +2605,8 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
 
       // This is rather tied to Fog Cloud atm -- I should perhaps provide an
       // expiry message that can be set for each trait
-      string msg = MsgFactory.Phrase(item.ID, Verb.Dissipate, 0, 1, false, gs);
-      gs.UIRef().AlertPlayer(msg);
+      string msg = $"{item.Name.DefArticle().Capitalize()} dissipates!";
+      gs.UIRef().AlertPlayer(msg, gs, item.Loc);
     }
   }
 }
@@ -2762,7 +2762,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       Expired = true;
 
       if (gs.ObjDb.GetObj(OwnerID) is Item item)
-      {
+      {        
         if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
         {
           // I don't think owner should ever be null, barring a bug
@@ -2770,8 +2770,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
           owner.Inventory.Remove(item.Slot, 1);
         }
 
-        string msg = MsgFactory.Phrase(item.ID, Verb.BurnsOut, 0, 1, false, gs);
-        gs.UIRef().AlertPlayer(msg);
+        string msg = $"{item.Name.IndefArticle().Capitalize()} burnts out.";
+        gs.UIRef().AlertPlayer(msg, gs, loc);
       }
     }
   }
@@ -2963,10 +2963,7 @@ class TraitFactory
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
     },
     { "AttackMod", (pieces, gameObj) => new AttackModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) } },
-    { "AttackVerb", (pieces, gameObj) => {
-      Enum.TryParse(pieces[1], out Verb verb);
-      return new AttackVerbTrait(verb);
-    }},
+    { "AttackVerb", (pieces, gameObj) => new AttackVerbTrait(pieces[1])},
     { "AuraMessage", (pieces, gameObj) => new AuraMessageTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]), Message = pieces[3] } },
     { "AuraOfProtection", (pieces, gameObj) => new AuraOfProtectionTrait() { HP = int.Parse(pieces[1]) }},
     { "Axe", (pieces, gameObj) => new AxeTrait() },

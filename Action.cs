@@ -1122,7 +1122,7 @@ class CloseDoorAction : DirectionalAction
         d.Open = false;
         result.Succcessful = true;
         result.EnergyCost = 1.0;
-        ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, Verb.Close, GameState!));
+        ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, "close", GameState!));
       }
       else if (Actor is Player)
       {
@@ -1168,7 +1168,7 @@ class OpenDoorAction : DirectionalAction
         d.Open = true;
         result.Succcessful = true;
         result.EnergyCost = 1.0;
-        ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, Verb.Open, GameState!));        
+        ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, "open", GameState!));        
       }
       else if (Actor is Player)
       {
@@ -1262,13 +1262,13 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
         if (!strCheck)
         {
-          var txt = $"{item.FullName.DefArticle().Capitalize()} {MsgFactory.CalcVerb(item, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
+          var txt = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "is")} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
           return new ActionResult() { EnergyCost = 1.0, Succcessful = false };
         }
         else
         {
-          var txt = $"{Actor.FullName.Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Tear)} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
+          var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tear")} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
           ui.AlertPlayer(txt);
         }
       }
@@ -1967,7 +1967,7 @@ class WebAction : Action
 
     if (GameState.ObjDb.Occupant(Target) is Actor victim)
     {
-      string txt = $"{victim.FullName.Capitalize()} {MsgFactory.CalcVerb(victim, Verb.Etre)} caught up in webs!";
+      string txt = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught up in webs!";
       GameState!.UIRef().AlertPlayer(txt, GameState, Target);
     }
 
@@ -2111,7 +2111,7 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
       GameState!.StopListening(GameEventType.EndOfRound, t);
     }
     Actor.Traits = [..Actor.Traits.Where(t => t is not PoisonedTrait)];
-    string msg = $"That makes {Actor.FullName} {MsgFactory.CalcVerb(Actor, Verb.Feel)} better.";
+    string msg = $"That makes {Actor.FullName} {Grammar.Conjugate(Actor, "feel")} better.";
     GameState!.UIRef().AlertPlayer(msg);
 
     return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
@@ -2244,7 +2244,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
       var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       coins.Value = _amount;
       GameState.ItemDropped(coins, Actor.Loc);      
-      msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {MsgFactory.CalcVerb(Actor, Verb.Drop)} ";
+      msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor, "drop")} ";
       if (_amount == 1)
         msg += "a single zorkmid.";
       else if (_amount == inventory.Zorkmids)
@@ -2300,8 +2300,9 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
       droppedItem.Equipped = false;
     }
 
-    string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, _amount, false, GameState);
-    GameState!.UIRef().AlertPlayer(alert);
+    string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor, "drop")} ";
+    s += MsgFactory.CalcName(item, GameState.Player, _amount) + ".";
+    GameState!.UIRef().AlertPlayer(s, GameState, Actor.Loc);
 
     return result;
   }
@@ -2493,8 +2494,9 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {
-      string alert = MsgFactory.Phrase(Actor.ID, Verb.Drop, item.ID, 1, false, GameState);
-      ui.AlertPlayer(alert);
+      string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor, "drop")} ";
+      s += MsgFactory.CalcName(item, GameState.Player) + ".";
+      ui.AlertPlayer(s);
 
       Actor.Inventory.Remove(Choice, 1);
       GameState.ItemDropped(item, Actor.Loc);
@@ -2619,10 +2621,11 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     var (equipResult, conflict) = ((Player)Actor).Inventory.ToggleEquipStatus(Choice);
+    string s;
     switch (equipResult)
     {
       case EquipingResult.Equipped:
-        string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "ready")} {item.FullName.DefArticle()}";
         s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         GameState.UIRef().AlertPlayer(s);
         result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
@@ -2638,7 +2641,8 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.Unequipped:
-        GameState.UIRef().AlertPlayer(MsgFactory.Phrase(Actor.ID, Verb.Unready, item.ID, 1, false, GameState));
+        s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "remove")} {item.FullName.DefArticle()}.";
+        GameState.UIRef().AlertPlayer(s);
         result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
         break;
       case EquipingResult.TwoHandedConflict:
@@ -2684,8 +2688,8 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (equipResult == EquipingResult.Equipped)
       {
-        foreach (string s in grants.Grant(Actor, GameState, item))
-          GameState.UIRef().AlertPlayer(s);
+        foreach (string msg in grants.Grant(Actor, GameState, item))
+          GameState.UIRef().AlertPlayer(msg);
       }
       else if (equipResult == EquipingResult.Unequipped)
       {

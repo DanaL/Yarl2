@@ -103,13 +103,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         {
           result.EnergyCost = 1.0;
           result.Succcessful = false;
-          var txt = $"{actor.FullName.Capitalize()} {MsgFactory.CalcVerb(actor, Verb.Etre)} stuck to {env.Name.DefArticle()}!";
+          var txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
           return true;
         }
         else
         {
-          var txt = $"{actor.FullName.Capitalize()} {MsgFactory.CalcVerb(actor, Verb.Tear)} through {env.Name.DefArticle()}.";
+          var txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tear")} through {env.Name.DefArticle()}.";
           ui.AlertPlayer(txt);
           gs.ObjDb.RemoveItemFromGame(env.Loc, env);
         }
@@ -123,12 +123,12 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (actor.AbilityCheck(Attribute.Strength, gt.DC, gs.Rng))
       {
         actor.Traits.Remove(gt);
-        string txt = $"{actor.FullName.Capitalize()} {MsgFactory.CalcVerb(actor, Verb.Break)} free of the grapple!";
+        string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "break")} free of the grapple!";
         ui.AlertPlayer(txt);        
       }
       else
       {
-        string txt = $"{actor.FullName.Capitalize()} {MsgFactory.CalcVerb(actor, Verb.Etre)} grappled by ";
+        string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} grappled by ";
         GameObj? grappler = gs.ObjDb.GetObj(gt.GrapplerID);
         txt += $"{grappler!.FullName}!";
         ui.AlertPlayer(txt);
