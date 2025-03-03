@@ -1525,7 +1525,6 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
 
     var anim = new MagicMapAnimation(gs, gs.CurrentDungeon, sqsToSearch, false)
     {
-      Fast = true,
       Colour = Colours.SEARCH_HIGHLIGHT,
       AltColour = Colours.SEARCH_HIGHLIGHT
     };
@@ -1630,7 +1629,7 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
 class MagicMapAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   // Essentially we want to flood fill out and mark all reachable squares as 
-  // remembered, ignoreable Passable() or not but stopping a walls. This will
+  // remembered, ignoreable Passable() or not but stopping at walls. This will
   // currently not fully map a level with disjoint spaces but I'm not sure if
   // I think that's a problem or not.
   void FloodFillMap(GameState gs, Loc start)
