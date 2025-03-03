@@ -44,11 +44,15 @@ class Player : Actor
   public PlayerBackground Background { get; set; }
   public List<string> SpellsKnown = [];
   public string LastSpellCast = "";
-  
-  Inputer? _inputController;
-  Action? _deferred;
+
   public bool Running { get; set; } = false;
-  
+
+  //  Ugh,  maybe I should set these up as Queues?
+  Inputer? _inputController;
+  Action? _deferred;  
+  Inputer? FollowupInputer { get; set; }
+  Action? FollowupAction { get; set; }
+
   char RepeatingCmd { get; set; }
   HashSet<Loc> LocsRan { get; set; } = [];
 
@@ -474,6 +478,12 @@ class Player : Actor
     ReplacePendingAction(missleAction, acc);
   }
 
+  public void SetFollowupAction(Action action, Inputer inputer)
+  {
+    FollowupAction = action;
+    FollowupInputer = inputer;
+  }
+
   public void ReplacePendingAction(Action? newAction, Inputer? inputer)
   {
     _deferred = newAction ?? _deferred;
@@ -760,6 +770,14 @@ class Player : Actor
 
   public Action DecideAction(GameState gameState)
   {
+    if (FollowupAction is not null)
+    {
+      _inputController = FollowupInputer;
+      _deferred = FollowupAction;
+      FollowupAction = null;
+      return new NullAction();
+    }
+
     UserInterface ui = gameState.UIRef();
 
     foreach (Trait t in Traits)
@@ -798,7 +816,9 @@ class Player : Actor
     }
 
     if (_inputController is not null)
-    {     
+    {
+      _inputController.OnUpdate();
+
       if (ch != '\0')
       {
         _inputController.Input(ch);        
@@ -824,7 +844,7 @@ class Player : Actor
       ui.CloseMenu();
       ui.ClosePopup();
       ui.AlertPlayer("Nevermind.");
-      return new NullAction();        
+      return new NullAction();
     }
 
     if (ch != '\0')
@@ -841,8 +861,7 @@ class Player : Actor
         return new UpstairsAction(gameState);
       else if (ch == 'i')
       {
-        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "You are carrying:", Options = InvOption.MentionMoney });
-        _inputController = new InventoryDetails(gameState);
+        _inputController = new InventoryDetails(gameState, "You are carrying", InvOption.MentionMoney);
         _deferred = new CloseMenuAction(gameState);
       }
       else if (ch == ',')

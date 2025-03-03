@@ -26,6 +26,8 @@ abstract class Inputer
 
   public abstract void Input(char ch);
 
+  public virtual void OnUpdate() { }
+
   public virtual UIResult GetResult()
   {
     return new UIResult();
@@ -871,14 +873,24 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
 
 class InventoryDetails : Inputer
 {
+  public string MenuTitle { get; set; } = "";
+  public InvOption MenuOptions { get; set; } = InvOption.None;
+
   GameState GameState { get; set; }
   HashSet<char> Options { get; set; } = [];
   readonly Dictionary<string, CyclopediaEntry> Cyclopedia;
   HashSet<string> InteractionMenu { get; set; } = [];
   Item? SelectedItem { get; set; } = null;
 
-  public InventoryDetails(GameState gs)
+  public override void OnUpdate()
   {
+    GameState.Player.Inventory.ShowMenu(GameState.UIRef(), new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
+  }
+
+  public InventoryDetails(GameState gs, string menuTile, InvOption menuOptions)
+  {
+    MenuTitle = menuTile;
+    MenuOptions = menuOptions;
     GameState = gs;
     Options = [.. GameState.Player.Inventory.UsedSlots()];
     Cyclopedia = LoadCyclopedia();
@@ -886,13 +898,15 @@ class InventoryDetails : Inputer
 
   public override void Input(char ch)
   {
-    bool itemPopup = GameState.UIRef().ActivePopup;
+    UserInterface ui = GameState.UIRef();
+
+    bool itemPopup = ui.ActivePopup;
     if (ch == ' ' || ch == '\n' || ch == '\r' || ch == Constants.ESC)
     {
       if (itemPopup)
       {
         Options = [.. GameState.Player.Inventory.UsedSlots()];
-        GameState.UIRef().ClosePopup();
+        ui.ClosePopup();
         SelectedItem = null;
       }
       else
@@ -906,6 +920,8 @@ class InventoryDetails : Inputer
       SetUpItemCommand(SelectedItem, ch);
       Done = true;
       Success = true;
+
+      return;
     }
     else if (Options.Contains(ch))
     {
@@ -962,7 +978,7 @@ class InventoryDetails : Inputer
         }
       }
 
-      GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1, width));
+      ui.SetPopup(new Popup(desc, title, -1, -1, width));
     }
   }
 
@@ -973,9 +989,17 @@ class InventoryDetails : Inputer
     {
       case 'd':
         action = new DropItemAction(GameState, GameState.Player) { Choice = item.Slot };
-        GameState.Player.ReplacePendingAction(action, new JustDoItInputer());
+        break;
+      case 'a':
+        action = new UseItemAction(GameState, GameState.Player) { Choice = item.Slot };
+        break;
+      default:
+        action = new ToggleEquippedAction(GameState, GameState.Player) { Choice = item.Slot };
+        GameState.Player.SetFollowupAction(new CloseMenuAction(GameState), new InventoryDetails(GameState,  MenuTitle, MenuOptions));
         break;
     }
+
+    GameState.Player.ReplacePendingAction(action, new JustDoItInputer());
   }
 
   void SetInteractionMenu(Item item)
