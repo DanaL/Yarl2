@@ -1016,6 +1016,14 @@ class InventoryDetails : Inputer
         else
           InteractionMenu.Add("equip");
         break;
+      case ItemType.Armour:
+        if (!item.Equipped)
+          InteractionMenu.Add("drop");
+        if (item.Equipped)
+          InteractionMenu.Add("unequip");
+        else
+          InteractionMenu.Add("equip");
+        break;
       default:
         InteractionMenu.Add("drop");
         break;
