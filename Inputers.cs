@@ -973,7 +973,7 @@ class InventoryDetails : Inputer
     {
       case 'd':
         action = new DropItemAction(GameState, GameState.Player) { Choice = item.Slot };
-        GameState.Player.ReplacePendingAction(action, new NullInputer());
+        GameState.Player.ReplacePendingAction(action, new JustDoItInputer());
         break;
     }
   }
@@ -1334,8 +1334,11 @@ class ConeTargeter : Inputer
   }
 }
 
-class NullInputer : Inputer
+class JustDoItInputer : Inputer
 {
+  public override bool Done => true;
+  public override bool Success => true;
+  
   public override void Input(char ch) { }
 }
 

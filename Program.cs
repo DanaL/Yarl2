@@ -84,28 +84,28 @@ try
 catch (QuitGameException)
 {
 }
-catch (Exception ex)
-{
- List<string> lines = [];
- lines.Add("");
- lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
- lines.Add(" The execption thrown was: ");
- lines.Add(" " + ex.Message);
- lines.Add("");
- lines.Add(" Delve will now need to exit.");
+//catch (Exception ex)
+//{
+// List<string> lines = [];
+// lines.Add("");
+// lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
+// lines.Add(" The execption thrown was: ");
+// lines.Add(" " + ex.Message);
+// lines.Add("");
+// lines.Add(" Delve will now need to exit.");
 
-  var userDir = Util.UserDir;
-  if (!userDir.Exists)
-    userDir.Create();
+//  var userDir = Util.UserDir;
+//  if (!userDir.Exists)
+//    userDir.Create();
   
-  string logPath = Path.Combine(userDir.FullName, "crash.txt");
-  File.WriteAllLines(logPath, lines);
-  File.AppendAllText(logPath, ex.StackTrace);
+//  string logPath = Path.Combine(userDir.FullName, "crash.txt");
+//  File.WriteAllLines(logPath, lines);
+//  File.AppendAllText(logPath, ex.StackTrace);
   
-  display.ClosePopup();
-  display.WriteLongMessage(lines);
-  display.BlockForInput(null);
-}
+//  display.ClosePopup();
+//  display.WriteLongMessage(lines);
+//  display.BlockForInput(null);
+//}
 
 namespace Yarl2
 {

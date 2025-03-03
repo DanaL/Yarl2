@@ -797,37 +797,38 @@ class Player : Actor
       ch = ui.InputBuffer.Dequeue();
     }
 
-    if (ch != '\0')
-    {
-      if (_inputController is not null)
+    if (_inputController is not null)
+    {     
+      if (ch != '\0')
       {
-        _inputController.Input(ch);
-        if (!_inputController.Done)
-        {
-          if (_inputController.Msg != "")
-            ui.SetPopup(new Popup(_inputController.Msg, "", -1, -1));
-          return new NullAction();
-        }
-        else
-        {
-          if (_inputController.Success && _deferred is not null)
-          {
-            _deferred.ReceiveUIResult(_inputController.GetResult());
-            _inputController = null;
-            ui.ClosePopup();
-            return _deferred;
-          }
-          else
-          {
-            _inputController = null;
-            ui.CloseMenu();
-            ui.ClosePopup();
-            ui.AlertPlayer("Nevermind.");
-            return new NullAction();
-          }
-        }
+        _inputController.Input(ch);        
       }
 
+      if (!_inputController.Done)
+      {
+        if (_inputController.Msg != "")
+          ui.SetPopup(new Popup(_inputController.Msg, "", -1, -1));
+        return new NullAction();
+      }
+      
+      if (_inputController.Success && _deferred is not null)
+      {
+        if (_inputController is not JustDoItInputer)
+          _deferred.ReceiveUIResult(_inputController.GetResult());
+        _inputController = null;
+        ui.ClosePopup();
+        return _deferred;
+       }
+       
+      _inputController = null;
+      ui.CloseMenu();
+      ui.ClosePopup();
+      ui.AlertPlayer("Nevermind.");
+      return new NullAction();        
+    }
+
+    if (ch != '\0')
+    {     
       ui.ClosePopup();
 
       if (IsMoveKey(ch))
