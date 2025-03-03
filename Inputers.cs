@@ -82,7 +82,7 @@ class Examiner : Inputer
 
         if (_gs.ObjDb.Occupied(loc) && _gs.LastPlayerFoV.Contains(loc))
         {
-          int distance = Distance(_gs.Player.Loc, loc);          
+          int distance = Distance(_gs.Player.Loc, loc);
           if (loc == _gs.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
@@ -95,7 +95,7 @@ class Examiner : Inputer
         }
         else if (_gs.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));          
+          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
         }
         else
         {
@@ -120,7 +120,7 @@ class Examiner : Inputer
             case TileType.GateTrigger:
             case TileType.Lever:
             case TileType.CreepyAltar:
-              pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));              
+              pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
               break;
           }
         }
@@ -172,7 +172,7 @@ class Examiner : Inputer
       {
         name = actor.FullName.Capitalize();
         desc = "A villager.";
-      }      
+      }
       else
       {
         name = actor.Name.IndefArticle().Capitalize();
@@ -193,7 +193,7 @@ class Examiner : Inputer
         details = item.Traits.OfType<DescriptionTrait>().First().Text;
       else if (_cyclopedia.TryGetValue(item.Name, out var v))
         details = v.Text;
-      
+
       return new LocDetails(title, details, item.Glyph.Ch);
     }
 
@@ -230,7 +230,7 @@ class Aimer : Inputer
   {
     _ui = gs.UIRef();
     _ui.ClosePopup();
-        
+
     _start = start;
     _target = start;
     _maxRange = maxRange;
@@ -592,7 +592,7 @@ class OptionsScreen : Inputer
     }
     else if (ch == 'j')
     {
-      row = (row + 1 ) % numOfOptions;
+      row = (row + 1) % numOfOptions;
     }
     else if (ch == 'k')
     {
@@ -602,7 +602,7 @@ class OptionsScreen : Inputer
     }
     else if (ch == '\n' || ch == '\r')
     {
-      if (row == 0) 
+      if (row == 0)
         GS.Options.BumpToOpen = !GS.Options.BumpToOpen;
       else if (row == 1)
         GS.Options.BumpToChat = !GS.Options.BumpToChat;
@@ -632,7 +632,7 @@ class OptionsScreen : Inputer
       $"Torchlight animation: {torchAnim}",
       $"Show command hints: {hints}"
     ];
-   
+
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });
   }
 }
@@ -643,7 +643,7 @@ class WizardCommander : Inputer
   string Buffer { get; set; } = "";
   string ErrorMessage { get; set; } = "";
 
-  public WizardCommander(GameState gs) 
+  public WizardCommander(GameState gs)
   {
     _gs = gs;
     WritePopup();
@@ -663,7 +663,7 @@ class WizardCommander : Inputer
       ErrorMessage = "";
     }
     else if (ch == '\n' || ch == '\r')
-    {    
+    {
       DebugCommand cmd = new(_gs);
       ErrorMessage = cmd.DoCommand(Buffer.Trim());
 
@@ -707,7 +707,7 @@ class Dialoguer : Inputer
   {
     _interlocutor = interlocutor;
     _gs = gs;
-    
+
     // Cast and validate the dialogue interface upfront
     if (interlocutor.Behaviour is not IDialoguer dialogue)
     {
@@ -715,7 +715,7 @@ class Dialoguer : Inputer
     }
     _dialogue = dialogue;
     _dialogue.InitDialogue(interlocutor, gs);
-    
+
     WritePopup();
   }
 
@@ -776,11 +776,11 @@ class Dialoguer : Inputer
       sb.Append(blurb)
         .Append("\"\n\n");
 
-      _currOptions = [];      
+      _currOptions = [];
       foreach (var (text, key) in opts)
       {
         _currOptions.Add(key);
-        
+
         string optionPrefix = $"{key}) ";
         int availableWidth = _popupWidth - optionPrefix.Length;
         string remainingText = text;
@@ -788,36 +788,36 @@ class Dialoguer : Inputer
 
         while (remainingText.Length > availableWidth)
         {
-            int splitPoint = availableWidth;
-            while (splitPoint > 0 && remainingText[splitPoint - 1] != ' ')
-            {
-                splitPoint--;
-            }
+          int splitPoint = availableWidth;
+          while (splitPoint > 0 && remainingText[splitPoint - 1] != ' ')
+          {
+            splitPoint--;
+          }
 
-            if (splitPoint == 0)
-            {
-                splitPoint = availableWidth;
-            }
+          if (splitPoint == 0)
+          {
+            splitPoint = availableWidth;
+          }
 
-            if (isFirstLine)
-            {
-                sb.AppendLine(optionPrefix + remainingText[..splitPoint].TrimEnd());
-                isFirstLine = false;
-            }
-            else
-            {
-                sb.AppendLine($"\t{remainingText[..splitPoint].TrimEnd()}");
-            }
+          if (isFirstLine)
+          {
+            sb.AppendLine(optionPrefix + remainingText[..splitPoint].TrimEnd());
+            isFirstLine = false;
+          }
+          else
+          {
+            sb.AppendLine($"\t{remainingText[..splitPoint].TrimEnd()}");
+          }
 
-            remainingText = remainingText[splitPoint..].TrimStart();
+          remainingText = remainingText[splitPoint..].TrimStart();
         }
 
         if (remainingText.Length > 0)
-        {          
-          if (isFirstLine)          
-            sb.AppendLine(optionPrefix + remainingText);          
+        {
+          if (isFirstLine)
+            sb.AppendLine(optionPrefix + remainingText);
           else
-            sb.AppendLine($"\t{remainingText}");          
+            sb.AppendLine($"\t{remainingText}");
         }
       }
 
@@ -872,10 +872,12 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
 class InventoryDetails : Inputer
 {
   GameState GameState { get; set; }
-  HashSet<char> Options { get; set; }
+  HashSet<char> Options { get; set; } = [];
   readonly Dictionary<string, CyclopediaEntry> Cyclopedia;
+  HashSet<string> InteractionMenu { get; set; } = [];
+  Item? SelectedItem { get; set; } = null;
 
-  public InventoryDetails(GameState gs) 
+  public InventoryDetails(GameState gs)
   {
     GameState = gs;
     Options = [.. GameState.Player.Inventory.UsedSlots()];
@@ -884,17 +886,24 @@ class InventoryDetails : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || Options.Count == 0 || ch == '\n' || ch == '\r')
+    bool itemPopup = GameState.UIRef().ActivePopup;
+    if (ch == ' ' || ch == '\n' || ch == '\r' || ch == Constants.ESC)
     {
-      Done = true;
-      Success = true;
-    }
-    else if (GameState.UIRef().ActivePopup && ch == ' ')
+      if (itemPopup)
+      {
+        Options = [.. GameState.Player.Inventory.UsedSlots()];
+        GameState.UIRef().ClosePopup();
+        SelectedItem = null;
+      }
+      else
+      {
+        Done = true;
+        Success = true;
+      }
+    }    
+    else if (itemPopup && Options.Contains(ch) && SelectedItem is not null)
     {
-      GameState.UIRef().ClosePopup();
-    }
-    else if (!GameState.UIRef().ActivePopup && ch == ' ')
-    {
+      SetUpItemCommand(SelectedItem, ch);
       Done = true;
       Success = true;
     }
@@ -904,7 +913,9 @@ class InventoryDetails : Inputer
       if (item is null)
         return;
 
-      string title = item.FullName.Capitalize();      
+      SelectedItem = item;
+
+      string title = item.FullName.Capitalize();
       string desc = "";
       if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
         desc = text;
@@ -913,8 +924,8 @@ class InventoryDetails : Inputer
       else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
         desc = entry.Text;
 
-      int width = desc.Length;
-      
+      int width = Math.Max(desc.Length, title.Length + 1);
+
       string extraDesc = ExtraDetails(item);
       if (extraDesc != "")
       {
@@ -923,8 +934,79 @@ class InventoryDetails : Inputer
       width = Math.Max(width, extraDesc.Length);
       if (width > UserInterface.ScreenWidth - 10)
         width = -1;
+
+      SetInteractionMenu(item);
+      if (InteractionMenu.Count > 0)
+      {
+        Options.Clear();
+        desc += "\n\n";
+        if (InteractionMenu.Contains("use"))
+        {
+          desc += "[ICEBLUE a)] use item\n";
+          Options.Add('a');
+        }
+        if (InteractionMenu.Contains("drop"))
+        {
+          desc += "[ICEBLUE d)] drop item\n";
+          Options.Add('d');
+        }
+        if (InteractionMenu.Contains("equip"))
+        {
+          desc += "[ICEBLUE e)] equip item\n";
+          Options.Add('e');
+        }
+        if (InteractionMenu.Contains("unequip"))
+        {
+          desc += "[ICEBLUE e)] unequip item\n";
+          Options.Add('e');
+        }
+      }
+
       GameState.UIRef().SetPopup(new Popup(desc, title, -1, -1, width));
     }
+  }
+
+  void SetUpItemCommand(Item item, char cmd)
+  {
+    Action action;
+    switch (cmd)
+    {
+      case 'd':
+        action = new DropItemAction(GameState, GameState.Player) { Choice = item.Slot };
+        GameState.Player.ReplacePendingAction(action, new NullInputer());
+        break;
+    }
+  }
+
+  void SetInteractionMenu(Item item)
+  {
+    InteractionMenu = [];
+
+    switch (item.Type)
+    {
+      case ItemType.Weapon:
+      case ItemType.Bow:
+        InteractionMenu.Add("drop");
+        if (item.Equipped)
+          InteractionMenu.Add("unequip");
+        else
+          InteractionMenu.Add("equip");
+        break;
+      default:
+        InteractionMenu.Add("drop");
+        break;
+    }
+
+    foreach (Trait t in item.Traits)
+    {
+      if (t is IUSeable)
+        InteractionMenu.Add("use");
+      else if (t is VaultKeyTrait)
+        InteractionMenu.Add("use");
+    }
+
+    if (item.IsUseableTool())
+      InteractionMenu.Add("use");
   }
 
   static string ExtraDetails(Item item)
@@ -1039,7 +1121,7 @@ class LongMessagerInputer : Inputer
   static List<string> WrapLines(IEnumerable<string> lines)
   {
     List<string> wrapped = [];
-    
+
     foreach (string line in lines)
     {
       if (line.Length <= UserInterface.ScreenWidth)
@@ -1123,7 +1205,7 @@ class CharSetInputer(HashSet<char> allowed) : Inputer
       Done = true;
       Success = false;
     }
-    else if (Allowed.Contains(ch)) 
+    else if (Allowed.Contains(ch))
     {
       Result = ch;
       Done = true;
@@ -1146,7 +1228,7 @@ class DirectionalInputer : Inputer
 
     string prompt = "Which direction?";
     int width = prompt.Length + 2;
-    if (targetSelf) 
+    if (targetSelf)
     {
       prompt += "\n(hit '.' to target your location.)";
       width = 35;
@@ -1190,8 +1272,8 @@ class DirectionalInputer : Inputer
 }
 
 class ConeTargeter : Inputer
-{  
-  int Range {  get; set; }
+{
+  int Range { get; set; }
   Loc Origin { get; set; }
   Loc Target { get; set; }
   GameState GS { get; set; }
@@ -1206,7 +1288,7 @@ class ConeTargeter : Inputer
     Target = origin with { Row = origin.Row - 1 };
 
     UserInterface ui = gs.UIRef();
-    
+
     Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range);
     ui.RegisterAnimation(Anim);
 
@@ -1235,21 +1317,26 @@ class ConeTargeter : Inputer
 
     var dir = KeyToDir(ch);
     if (dir != (0, 0))
-    {      
+    {
       Target = Origin with { Row = Origin.Row + Range * dir.Item1, Col = Origin.Col + Range * dir.Item2 };
-      Anim.Target = Target;      
-    }      
+      Anim.Target = Target;
+    }
   }
 
   public override UIResult GetResult()
   {
     Map map = GS.Campaign.Dungeons[Origin.DungeonID].LevelMaps[Origin.Level];
-    
+
     return new AffectedLocsUIResult()
     {
       Affected = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb)
     };
   }
+}
+
+class NullInputer : Inputer
+{
+  public override void Input(char ch) { }
 }
 
 class UIResult { }

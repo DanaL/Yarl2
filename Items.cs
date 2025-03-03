@@ -54,6 +54,16 @@ class Item : GameObj, IEquatable<Item>
     return _z;
   }
 
+  public bool IsUseableTool()
+  {
+    if (Type != ItemType.Tool)
+      return false;
+    if (Name == "lock pick" || Name == "pickaxe")
+      return true;
+
+    return false;
+  }
+
   public void Identify()
   {
     if (IDInfo.TryGetValue(Name, out var idInfo))
