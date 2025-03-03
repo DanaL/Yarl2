@@ -200,6 +200,9 @@ class ExplosionAnimation(GameState gs) : Animation
       double roll = _gs.Rng.NextDouble();
       
       var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);      
+      if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
+        continue;
+
       ui.SqsOnScreen[scrR, scrC] = _toDraw[pt];
     }
 
