@@ -61,7 +61,7 @@ class Alchemy
         {
           armour.Bonus += 1;
           success = true;
-          msg = $"Your {item.Name} now offers more protection!\n\n{reagent.Name.IndefArticle().Capitalize()} was consumed.";
+          msg = $"Your {item.Name} now {Grammar.Conjugate(item, "offer")} more protection!\n\n{reagent.Name.IndefArticle().Capitalize()} was consumed.";
         }
         break;
       case "ogre liver":

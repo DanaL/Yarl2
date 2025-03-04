@@ -32,7 +32,7 @@ class Grammar
     else if (verb == "is")
       return verb;
 
-    if (subject is Player)
+    if (subject is Player || subject.HasTrait<PluralTrait>())
       return verb;
     else if (verb.EndsWith("ss") || verb.EndsWith("sh"))
       return verb + "es";

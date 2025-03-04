@@ -745,12 +745,13 @@ class UpgradeItemAction : Action
     {
       GameState.Player.Inventory.Zorkmids -= Total;
 
-      var (success, msg) = Alchemy.UpgradeItem(item, reagent);
+      var (_, msg) = Alchemy.UpgradeItem(item, reagent);
 
       GameState.Player.Inventory.RemoveByID(reagent.ID);
 
       GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
-      GameState.UIRef().AlertPlayer(msg);      
+      foreach (string s in msg.Split('\n'))
+        GameState.UIRef().AlertPlayer(s.Trim());      
     }
     else
     {
