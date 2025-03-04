@@ -54,6 +54,16 @@ class Item : GameObj, IEquatable<Item>
     return _z;
   }
 
+  public bool IsUseableTool()
+  {
+    if (Type != ItemType.Tool)
+      return false;
+    if (Name == "lock pick" || Name == "pickaxe")
+      return true;
+
+    return false;
+  }
+
   public void Identify()
   {
     if (IDInfo.TryGetValue(Name, out var idInfo))
@@ -624,17 +634,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   // like armour class has to be done elsewhere because it felt icky to 
   // have a reference back to the inventory's owner in the inventory object
   public (EquipingResult, ArmourParts) ToggleEquipStatus(char slot)
-  {    
-    bool EquippedTwoHandedWeapon() 
-    { 
-      if (ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>())
-        return true;
-
-      if (ReadiedBow() is not null)
-        return true;
-
-      return false;
-    }
+  {
+    bool twoHandedWeapon = ReadiedWeapon() is Item w && w.HasTrait<TwoHandedTrait>();
+    bool bowEquiped = ReadiedBow() is not null;
 
     // I suppose at some point I'll have items that can't be equipped
     // (or like it doesn't make sense for them to be) and I'll have
@@ -652,7 +654,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     if (item is not null)
     {
       int freeHands = 2;
-      if (EquippedTwoHandedWeapon())
+      if (twoHandedWeapon)
         freeHands = 0;
       else
       {
@@ -672,17 +674,29 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
        return UnequipItem(item);
       }
 
-      if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool || item.Type == ItemType.Bow)
+      if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
         if (freeHands == 0)
-        {
           return (EquipingResult.NoFreeHand, ArmourParts.None);
-        }
-
+        
         // If there is a weapon already equipped, unequip it
         foreach (Item other in Items())
         {
           if ((other.Type == ItemType.Weapon || other.Type == ItemType.Tool) && other.Equipped)
+            other.Equipped = false;
+        }
+
+        item.Equipped = true;
+        return (EquipingResult.Equipped, ArmourParts.None);
+      }
+      else if (item.Type == ItemType.Bow)
+      {
+        if (ShieldEquipped())
+          return (EquipingResult.NoFreeHand, ArmourParts.None);
+
+        foreach (Item other in Items())
+        {
+          if ((other.Type == ItemType.Bow) && other.Equipped)
             other.Equipped = false;
         }
 
@@ -711,7 +725,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (part is ArmourParts.Shield && freeHands == 0)
           return (EquipingResult.NoFreeHand, part);
         
-        if (part is ArmourParts.Shield && EquippedTwoHandedWeapon())
+        if (part is ArmourParts.Shield && (twoHandedWeapon|| bowEquiped))
           return (EquipingResult.TwoHandedConflict, part);
         
         item.Equipped = !item.Equipped;

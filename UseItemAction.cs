@@ -548,16 +548,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
   }
 
-  static bool IsUseableTool(Item item)
-  {
-    if (item.Type != ItemType.Tool)
-      return false;
-    if (item.Name == "lock pick" || item.Name == "pickaxe")
-      return true;
-
-    return false;
-  }
-
   public override ActionResult Execute()
   {
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
@@ -571,7 +561,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 
-    if (IsUseableTool(item))
+    if (item.IsUseableTool())
     {
       GameState!.ClearMenu();
       
