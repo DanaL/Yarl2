@@ -273,7 +273,7 @@ mushroom stew
 A delicious and hearty stew. Soothing comfort food that might help jangled nerves.
 #
 revealedsummonstrap|summoning trap
-A magic trap that will summon monsters.
+A magical rune that will summon monsters. This is the sort of thing wizards do for fun.
 #
 reveealedbridgecollapseTrap|bridge trigger
 A trigger that will cause a nearby bridge to collapse.
@@ -334,3 +334,6 @@ A stout, double-bladed axe. When you hold it, everything looks like a tree.
 #
 vial of poison
 Dab a little on your blade to let your foes know you really want them to perish.
+#
+scroll of trap detection
+Why is it scrolls of trap detection are sold in six packs but scrolls of disarming are sold in packs of eight?

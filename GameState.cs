@@ -1024,7 +1024,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       };
       int curr = Player.Stats[Attribute.Nerve].Curr;
       if (curr > stresssFloor)
-        Player.Stats[Attribute.Nerve].Change(-1);
+      {
+        int delta = Player.LightRadius() < 2 ? -2 : -1;
+        Player.Stats[Attribute.Nerve].Change(delta);
+      }        
     }
 
     Player.CalcStress();
