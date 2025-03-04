@@ -24,12 +24,14 @@ class Traps
     if (actor is Player && tile.Type == TileType.HiddenTrapDoor && !flying)
     {
       RevealTrap(tile, gs, loc);
-      
+
+      ui.AlertPlayer("A trap door opens up underneath you!");
+      ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
+
       loc = gs.FallIntoTrapdoor(actor, loc);
       gs.Player.Stats[Attribute.Nerve].Change(-15);
       gs.Player.Running = false;
-      ui.AlertPlayer("A trap door opens up underneath you!");
-      ui.SetPopup(new Popup("A trap door opens up underneath you!", "", -1, -1));
+      
       
       string s = gs.ThingTouchesFloor(loc);      
       gs.UIRef().AlertPlayer(s);
@@ -37,10 +39,11 @@ class Traps
       throw new AbnormalMovement(loc);
     }
     else if (actor is Player && tile.Type == TileType.TrapDoor && !flying)
-    {
-      loc = gs.FallIntoTrapdoor(actor, loc);
+    {      
       ui.SetPopup(new Popup("You plummet into the trap door!", "", -1, -1));      
       gs.UIRef().AlertPlayer("You plummet into the trap door!");
+
+      loc = gs.FallIntoTrapdoor(actor, loc);
       string s = gs.ThingTouchesFloor(loc);
       gs.UIRef().AlertPlayer(s);
 
