@@ -311,7 +311,7 @@ class BarkAnimation : Animation
       var (mapRow, mapCol) = _ui.ScrLocToGameLoc(row, col, playerLoc.Row, playerLoc.Col);
       Loc mapLoc = playerLoc with { Row = mapRow, Col = mapCol };
 
-      if (!_gs.ObjDb.Occupied(mapLoc))
+      if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.Contains(mapLoc))
         _ui.SqsOnScreen[row, col] = sqr;
     }
   }
