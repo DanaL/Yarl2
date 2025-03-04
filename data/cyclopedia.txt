@@ -325,3 +325,12 @@ The three great wizarding virtues are: laziness, impatience, and hubris. This sc
 #
 goblin firestarter
 Little goblin liked to burn things.
+#
+hand axe
+Chop wood, chop your enemies. You can do it all with this one.
+#
+battle axe
+A stout, double-bladed axe. When you hold it, everything looks like a tree.
+#
+vial of poison
+Dab a little on your blade to let your foes know you really want them to perish.
