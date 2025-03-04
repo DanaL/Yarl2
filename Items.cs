@@ -54,6 +54,18 @@ class Item : GameObj, IEquatable<Item>
     return _z;
   }
 
+  public bool Equipable() => Type switch
+  {
+    ItemType.Armour => true,
+    ItemType.Weapon => true,
+    ItemType.Tool => true,
+    ItemType.Bow => true,
+    ItemType.Ring => true,
+    ItemType.Talisman => true,
+    ItemType.Wand => true,
+    _ => false
+  };
+
   public bool IsUseableTool()
   {
     if (Type != ItemType.Tool)

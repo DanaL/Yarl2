@@ -2613,19 +2613,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
       return new ActionResult() { Succcessful = false };
     }
 
-    bool equipable = item.Type switch
-    {
-      ItemType.Armour => true,
-      ItemType.Weapon => true,
-      ItemType.Tool => true,
-      ItemType.Bow => true,
-      ItemType.Ring => true,
-      ItemType.Talisman => true,
-      ItemType.Wand => true,
-      _ => false
-    };
-
-    if (!equipable)
+    if (!item.Equipable())
     {
       GameState.UIRef().AlertPlayer("You cannot equip that!");
       return new ActionResult() { Succcessful = false };

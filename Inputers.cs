@@ -1006,29 +1006,19 @@ class InventoryDetails : Inputer
   {
     InteractionMenu = [];
 
-    switch (item.Type)
+    if (!(item.Type == ItemType.Armour && item.Equipped))
     {
-      case ItemType.Weapon:
-      case ItemType.Bow:
-        InteractionMenu.Add("drop");
-        if (item.Equipped)
-          InteractionMenu.Add("unequip");
-        else
-          InteractionMenu.Add("equip");
-        break;
-      case ItemType.Armour:
-        if (!item.Equipped)
-          InteractionMenu.Add("drop");
-        if (item.Equipped)
-          InteractionMenu.Add("unequip");
-        else
-          InteractionMenu.Add("equip");
-        break;
-      default:
-        InteractionMenu.Add("drop");
-        break;
+      InteractionMenu.Add("drop");
     }
 
+    if (item.Equipable())
+    {
+      if (item.Equipped)
+        InteractionMenu.Add("unequip");
+      else
+        InteractionMenu.Add("equip");
+    }
+    
     foreach (Trait t in item.Traits)
     {
       if (t is IUSeable)
