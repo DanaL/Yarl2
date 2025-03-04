@@ -357,7 +357,7 @@ class Battle
       gs.ResolveActorMove(target, target.Loc, first);
       target.Loc = first;
       
-      return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} backward!";
+      return $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} knocked backward!";
     }
 
     return "";
