@@ -838,10 +838,19 @@ class Dialoguer : Inputer
   }
 }
 
-class PickUpper(HashSet<(char, ulong)> options) : Inputer
+class PickUpper : Inputer
 {
+  GameState GS { get; set; }
+  List<Item> Items { get; set; }
   ulong _choice;
-  readonly HashSet<(char, ulong)> _options = options;
+  //readonly HashSet<(char, ulong)> _options = options;
+
+  public PickUpper(List<Item> items, GameState gs)
+  {
+    Items = items;
+    GS = gs;
+    WritePopup();
+  }
 
   public override void Input(char ch)
   {
@@ -850,26 +859,74 @@ class PickUpper(HashSet<(char, ulong)> options) : Inputer
       Done = true;
       Success = false;
     }
-    else if (_options.Any(o => o.Item1 == ch))
-    {
-      Msg = "";
-      ulong itemID = _options.Where(o => o.Item1 == ch).First().Item2;
-      _choice = itemID;
-      Done = true;
-      Success = true;
-    }
-    else
-    {
-      Msg = "That doesn't seem to exist.";
-      Done = false;
-      Success = false;
-    }
+    // else if (_options.Any(o => o.Item1 == ch))
+    // {
+    //   Msg = "";
+    //   ulong itemID = _options.Where(o => o.Item1 == ch).First().Item2;
+    //   _choice = itemID;
+    //   Done = true;
+    //   Success = true;
+    // }
+    // else
+    // {
+    //   Msg = "That doesn't seem to exist.";
+    //   Done = false;
+    //   Success = false;
+    // }
   }
 
   public override UIResult GetResult() => new ObjIdUIResult()
   {
     ID = _choice
   };
+
+  void WritePopup()
+  {
+    StringBuilder sb = new();
+    foreach (var (slot, id, desc) in CalcPickupMenu(GS.UIRef()))
+    {
+      sb.AppendLine($"{slot}) {desc}");
+    }
+    sb.AppendLine("\n-enter- to accept");
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), "Pick up what?", -1, -1));
+  }
+
+  HashSet<(char, ulong, string)> CalcPickupMenu(UserInterface ui)
+  {
+    Dictionary<Item, int> counts = [];
+    foreach (var item in Items)
+    {
+      if (item.HasTrait<StackableTrait>() && counts.TryGetValue(item, out int value))
+        counts[item] = value + 1;
+      else
+        counts.Add(item, 1);
+    }
+
+    HashSet<(char, ulong, string)> options = [];
+    char slot = 'a';
+    foreach (var (item, count) in counts)
+    {      
+      string desc;
+      if (count > 1)
+      {
+        desc = $"{count} {item.FullName.Pluralize()}";
+      }
+      else if (item.Type == ItemType.Zorkmid)
+      {
+        desc = $"{item.Value} zorkmid";
+        if (item.Value != 1)
+          desc += "s";
+      }
+      else
+      {
+        desc = item.FullName;
+      }
+      
+      options.Add((slot++, item.ID, desc));
+    }
+    
+    return options;
+  }
 }
 
 class InventoryDetails : Inputer

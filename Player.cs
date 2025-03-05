@@ -267,45 +267,6 @@ class Player : Actor
     return dmgs;
   }
 
-  static HashSet<(char, ulong)> ShowPickupMenu(UserInterface ui, List<Item> items)
-  {
-    var counts = new Dictionary<Item, int>();
-    foreach (var item in items)
-    {
-      if (item.HasTrait<StackableTrait>() && counts.TryGetValue(item, out int value))
-        counts[item] = value + 1;
-      else
-        counts.Add(item, 1);
-    }
-
-    HashSet<(char, ulong)> options = [];
-    List<string> lines = ["What do you pick up?"];
-    char slot = 'a';
-    foreach (var (item, count) in counts)
-    {
-      options.Add((slot, item.ID));
-      string desc;
-      if (count > 1)
-      {
-        desc = $"{count} {item.FullName.Pluralize()}";
-      }
-      else if (item.Type == ItemType.Zorkmid)
-      {
-        desc = $"{item.Value} zorkmid";
-        if (item.Value != 1)
-          desc += "s";
-      }
-      else
-      {
-        desc = item.FullName;
-      }
-      lines.Add($"{slot++}) {desc}");
-    }
-    ui.ShowDropDown(lines);
-
-    return options;
-  }
-
   string PrintStat(Attribute attr)
   {
     static string Fmt(int v)
@@ -734,8 +695,7 @@ class Player : Actor
     }
     else
     {
-      var opts = ShowPickupMenu(ui, items);
-      _inputController = new PickUpper(opts);
+      _inputController = new PickUpper(items, gs);
       _deferred = new PickupItemAction(gs, this);
     }
 
