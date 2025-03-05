@@ -842,8 +842,8 @@ class PickUpper : Inputer
 {
   GameState GS { get; set; }
   List<Item> Items { get; set; }
-  ulong _choice;
-  //readonly HashSet<(char, ulong)> _options = options;
+  HashSet<char> Options { get; set; } = [];
+  HashSet<char> Choices { get; set; } = [];
 
   public PickUpper(List<Item> items, GameState gs)
   {
@@ -873,11 +873,27 @@ class PickUpper : Inputer
     //   Done = false;
     //   Success = false;
     // }
+    else if (Options.Contains(ch) && !Choices.Contains(ch))
+    {
+      Choices.Add(ch);
+    }
+    else if (Options.Contains(ch) && Choices.Contains(ch))
+    {
+      Choices.Remove(ch);
+    }
+    else if (ch == '\n' || ch == '\r')
+    {
+      // eventually, we need to pass a list of ulongs to the action
+      Done = true;
+      Success = Choices.Count > 0;
+    }
+
+    WritePopup();
   }
 
   public override UIResult GetResult() => new ObjIdUIResult()
   {
-    ID = _choice
+    ID = 0
   };
 
   void WritePopup()
@@ -885,10 +901,18 @@ class PickUpper : Inputer
     StringBuilder sb = new();
     foreach (var (slot, id, desc) in CalcPickupMenu(GS.UIRef()))
     {
-      sb.AppendLine($"{slot}) {desc}");
+      string s = desc;
+      if (Choices.Contains(slot))
+        s += " [GREEN *]";
+      sb.AppendLine($"{slot}) {s}");
     }
-    sb.AppendLine("\n-enter- to accept");
-    GS.UIRef().SetPopup(new Popup(sb.ToString(), "Pick up what?", -1, -1));
+
+    if (Choices.Count == 0)
+      sb.AppendLine("\nSelect items to pick up");
+    else
+      sb.AppendLine("\n-enter- to pick up items");
+      
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), "Pick up what?", -1, -1, 30));
   }
 
   HashSet<(char, ulong, string)> CalcPickupMenu(UserInterface ui)
@@ -922,6 +946,7 @@ class PickUpper : Inputer
         desc = item.FullName;
       }
       
+      Options.Add(slot);
       options.Add((slot++, item.ID, desc));
     }
     

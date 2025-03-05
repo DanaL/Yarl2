@@ -683,7 +683,8 @@ class Player : Actor
       return new NullAction();
     }
 
-    if (items.Count == 1)
+    int numStacks = items.DistinctBy(i => i.Slot).Count();
+    if (numStacks == 1)
     {
       var a = new PickupItemAction(gs, this);
       // A bit kludgy but this sets up the Action as though

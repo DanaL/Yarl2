@@ -1262,21 +1262,20 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     // First, is there anything preventing the actor from picking items up
     // off the floor? (At the moment it's just webs in the game, but a 
     // Sword-in-the-Stone situation might be neat)
-    foreach (var env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
+    foreach (Item env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
-      var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
-      if (web is not null)
+      if (env.Traits.OfType<StickyTrait>().FirstOrDefault() is StickyTrait web)
       {
         bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
         if (!strCheck)
         {
-          var txt = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "is")} stuck to {env.Name.DefArticle()}!";
+          string txt = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "is")} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
           return new ActionResult() { EnergyCost = 1.0, Succcessful = false };
         }
         else
         {
-          var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tear")} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
+          string txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tear")} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
           ui.AlertPlayer(txt);
         }
       }
@@ -1286,7 +1285,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     int count = 0;
     if (item.HasTrait<StackableTrait>())
     {
-      foreach (var pickedUp in itemStack.Where(i => i == item))
+      foreach (Item pickedUp in itemStack.Where(i => i == item))
       {
         GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, pickedUp);
         slot = inv.Add(pickedUp, Actor.ID);
