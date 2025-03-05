@@ -337,3 +337,27 @@ Dab a little on your blade to let your foes know you really want them to perish.
 #
 scroll of trap detection
 Why is it scrolls of trap detection are sold in six packs but scrolls of disarming are sold in packs of eight?
+#
+wand of fireballs
+Fireballs: a true classic for fans of explosions.
+#
+wand of magic missiles
+This game is strict enough about genre that you won't find any guns. But is this kind of close?
+#
+wand of swap
+Trade places with your target! Great for cutting the line at the tavern.
+#
+wand of heal monster
+Heal the target monster. Sometimes you feel guilty killing all those monsters?
+#
+wand of frost
+Shoot a blast of frost in a straight line.
+#
+wand of digging
+Carve tunnels through stone. No, I'm not offended that my proc-gen dungeon map isn't good enough for you :(
+#
+wand of slow monster
+Make the target sluggish and slower to act.
+#
+wand of summoning
+Interrupt whatever a monster was doing with its day and summon them to a square adjacent to you.
