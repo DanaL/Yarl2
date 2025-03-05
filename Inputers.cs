@@ -1051,6 +1051,11 @@ class InventoryDetails : Inputer
           desc += "[ICEBLUE e)] unequip item\n";
           Options.Add('e');
         }
+        if (InteractionMenu.Contains("throw"))
+        {
+          desc += "[ICEBLUE t)] throw item\n";
+          Options.Add('t');
+        }
       }
 
       ui.SetPopup(new Popup(desc, title, -1, -1, width));
@@ -1068,6 +1073,9 @@ class InventoryDetails : Inputer
       case 'a':
         action = new UseItemAction(GameState, GameState.Player) { Choice = item.Slot };
         break;
+      case 't':
+        action = new ThrowSelectionAction(GameState, GameState.Player) { Choice = item.Slot };
+        break;
       default:
         action = new ToggleEquippedAction(GameState, GameState.Player) { Choice = item.Slot };
         GameState.Player.SetFollowupAction(new CloseMenuAction(GameState), new InventoryDetails(GameState,  MenuTitle, MenuOptions));
@@ -1081,9 +1089,10 @@ class InventoryDetails : Inputer
   {
     InteractionMenu = [];
 
-    if (!(item.Type == ItemType.Armour && item.Equipped))
+    bool equipedArmour = item.Type == ItemType.Armour && item.Equipped;
+    if (!equipedArmour)
     {
-      InteractionMenu.Add("drop");
+      InteractionMenu.Add("drop"); InteractionMenu.Add("throw");
     }
 
     if (item.Equipable())
@@ -1093,7 +1102,7 @@ class InventoryDetails : Inputer
       else
         InteractionMenu.Add("equip");
     }
-    
+
     foreach (Trait t in item.Traits)
     {
       if (t is IUSeable)
