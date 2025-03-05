@@ -1125,10 +1125,30 @@ class MainDungeonBuilder : DungeonBuilder
         // If there's no prisoner on the level, give a small chance of there
         // being a blood-stained altar. (Mainly because I don't want to bother
         // checking against the possibility of two altars)
-        List<(int, int)> floors = levels[level].SqsOfType(TileType.DungeonFloor);
+        List<(int, int)> floors = [];
+        foreach (var (r, c) in levels[level].SqsOfType(TileType.DungeonFloor))
+        {
+          if (AdjWalls(levels[level], r, c) >= 3)
+            continue;
+          floors.Add((r, c));
+        }
+ 
         (int, int) altar = floors[rng.Next(floors.Count)];
         levels[level].SetTile(altar, TileFactory.Get(TileType.CreepyAltar));
       }
+    }
+
+    static int AdjWalls(Map map, int r, int c)
+    {
+      int walls = 0;
+      foreach (var sq in Util.Adj8Sqs(r, c))
+      {
+        Tile tile = map.TileAt(sq);
+        if (tile.Type == TileType.DungeonWall || tile.Type == TileType.PermWall || tile.Type == TileType.WorldBorder)
+          ++walls;
+      }
+
+      return walls;
     }
   }
 

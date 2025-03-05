@@ -485,17 +485,33 @@ class CaptiveFeature
     objDb.AddNewActor(prisoner, cell);
   }
 
+  static int AdjWalls(Map map, int r, int c)
+  {
+    int walls = 0;
+    foreach (var sq in Util.Adj8Sqs(r, c))
+    {
+      Tile tile = map.TileAt(sq);
+      if (tile.Type == TileType.DungeonWall || tile.Type == TileType.PermWall || tile.Type == TileType.WorldBorder)
+        ++walls;
+    }
+
+    return walls;
+  }
+
   static void SetCreepyAltar(Loc cell, Map map, Random rng)
   {
     List<Loc> sqsNearCell = [];
-    for (int r = cell.Row - 3; r <= cell.Row + 3; r++)
+    for (int r = cell.Row - 4; r <= cell.Row + 4; r++)
     {
-      for (int c = cell.Col - 3; c <= cell.Col + 3; c++)
+      for (int c = cell.Col - 4; c <= cell.Col + 4; c++)
       {
         if (!map.InBounds(r, c))
           continue;
         if (map.TileAt(r, c).Type != TileType.DungeonFloor)
           continue;
+        if (AdjWalls(map, r, c) >= 3)
+          continue;
+
         Loc loc = cell with { Row = r, Col = c };        
         sqsNearCell.Add(loc);
       }
