@@ -2443,22 +2443,28 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     var (item, _) = player!.Inventory.ItemAt(Choice);
     if (item is null)
     {
-      var result = new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
+      ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
       GameState.UIRef().AlertPlayer("That doesn't make sense!");
       return result;
     }
     else if (item.Type == ItemType.Armour && item.Equipped)
     {
-      var result = new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
+      ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
       GameState.UIRef().AlertPlayer("You're wearing that!");
       return result;
     }
+    else if ((item.Type == ItemType.Ring || item.Type == ItemType.Talisman) && item.Equipped)
+    {
+      ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
+      GameState.UIRef().AlertPlayer("You'll need to un-equip it first!");
+      return result;
+    }
 
-    var action = new ThrowAction(GameState, player, Choice);
-    var range = 7 + player.Stats[Attribute.Strength].Curr;
+    ThrowAction action = new(GameState, player, Choice);
+    int range = 7 + player.Stats[Attribute.Strength].Curr;
     if (range < 2)
       range = 2;
-    var acc = new Aimer(GameState, player.Loc, range);
+    Aimer acc = new(GameState, player.Loc, range);
     player.ReplacePendingAction(action, acc);
 
     return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
