@@ -2177,6 +2177,13 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
   {
     ActionResult result = base.Execute();
 
+    if (!Actor!.Stats.ContainsKey(Attribute.HP))
+    {
+      GameState!.UIRef().AlertPlayer("The spell seems to fizzle.", GameState, Actor.Loc);
+      result.Succcessful = true;
+      result.EnergyCost = 1.0;
+    }
+
     Stat hpStat = Actor!.Stats[Attribute.HP];
     int hpBefore = hpStat.Curr;
 
