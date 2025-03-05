@@ -683,20 +683,20 @@ class Player : Actor
       return new NullAction();
     }
 
-    int numStacks = items.DistinctBy(i => i.Slot).Count();
+    int numStacks = items.DistinctBy(i => i.Name).Count();
     if (numStacks == 1)
     {
-      var a = new PickupItemAction(gs, this);
+      PickupItemAction action = new(gs, this);
       // A bit kludgy but this sets up the Action as though
       // the player had selected the first item in a list of one
-      var r = new ObjIdUIResult() { ID = items[0].ID };
-      a.ReceiveUIResult(r);
+      LongListResult res = new() { Values = [items[0].ID] };
+      action.ReceiveUIResult(res);
 
-      return a;
+      return action;
     }
     else
     {
-      _inputController = new PickUpper(items, gs);
+      _inputController = new PickupMenu(items, gs);
       _deferred = new PickupItemAction(gs, this);
     }
 

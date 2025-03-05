@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Xml.Linq;
+
 namespace Yarl2;
 
 class ActionResult
@@ -1234,104 +1236,123 @@ class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmg
 
 class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  public ulong ItemID { get; set; }
+  public List<ulong> ItemIDs { get; set; } = [];
   
   public override ActionResult Execute()
   {
-    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+    ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
 
-    GameState!.ClearMenu();
-    var itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
-    var inv = Actor.Inventory;
-    bool freeSlot = inv.UsedSlots().Length < 26;
-    Item item = itemStack.Where(i => i.ID == ItemID).First();
-    UserInterface ui = GameState.UIRef();
+    UserInterface ui = GameState!.UIRef();
+    ui.ClosePopup();
+    
+    List<Item> itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
+    Inventory inv = Actor.Inventory;
 
-    if (!freeSlot)
-    {
-      ui.AlertPlayer("There's no room in your inventory!");
-      return new ActionResult() { Succcessful = false };
-    }
-
-    if (item.HasTrait<AffixedTrait>())
-    {
-      ui.AlertPlayer("You cannot pick that up!");
-      return new ActionResult() { EnergyCost = 0.0, Succcessful = false };
-    }
-
-    // First, is there anything preventing the actor from picking items up
-    // off the floor? (At the moment it's just webs in the game, but a 
+    int webDC = 0;
+    string webName = "";
+    // First, is there anything preventing the actor from picking items up off
+    // the floor? (At the moment it's just webs in the game, but a 
     // Sword-in-the-Stone situation might be neat)
     foreach (Item env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
     {
       if (env.Traits.OfType<StickyTrait>().FirstOrDefault() is StickyTrait web)
       {
-        bool strCheck = Actor.AbilityCheck(Attribute.Strength, web.DC, GameState.Rng);
-        if (!strCheck)
+        webDC = int.Max(webDC, web.DC);
+        webName = env.Name.DefArticle();
+      }
+    }
+
+    bool anythingPickedUp = false;
+    foreach (ulong id in ItemIDs)
+    {
+      Item item = itemStack.Where(i => i.ID == id).First();
+
+      if (item.HasTrait<AffixedTrait>())
+      {
+        ui.AlertPlayer($"You cannot pick up {item.FullName.DefArticle()}!");
+        continue;
+      }
+
+      if (webDC > 0)
+      {
+        bool strCheck = Actor.AbilityCheck(Attribute.Strength, webDC, GameState.Rng);
+        if (strCheck)
         {
-          string txt = $"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "is")} stuck to {env.Name.DefArticle()}!";
-          ui.AlertPlayer(txt);
-          return new ActionResult() { EnergyCost = 1.0, Succcessful = false };
+          ui.AlertPlayer($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tear")} {item.FullName.DefArticle()} from {webName}.");          
         }
         else
         {
-          string txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "tear")} {item.FullName.DefArticle()} from {env.Name.DefArticle()}.";
-          ui.AlertPlayer(txt);
+          ui.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} {Grammar.Conjugate(item, "is")} stuck to {webName}!");
+          continue;
         }
       }
-    }
 
-    char slot = '\0';
-    int count = 0;
-    if (item.HasTrait<StackableTrait>())
-    {
-      foreach (Item pickedUp in itemStack.Where(i => i == item))
+      bool freeSlot = inv.UsedSlots().Length < 26;
+      if (!freeSlot)
       {
-        GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, pickedUp);
-        slot = inv.Add(pickedUp, Actor.ID);
-        ++count;
+        ui.AlertPlayer("There's no room left in your inventory!");
+        break;
       }
+
+      int count = 0;
+      if (item.HasTrait<StackableTrait>())
+      {
+        foreach (Item pickedUp in itemStack.Where(i => i == item))
+        {
+          GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, pickedUp);
+          inv.Add(pickedUp, Actor.ID);
+          ++count;
+        }
+      }
+      else
+      {
+        GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, item);
+        inv.Add(item, Actor.ID);
+      }
+
+      string pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
+      if (item.Type == ItemType.Zorkmid && item.Value == 1)
+        pickupMsg += "a zorkmid.";
+      else if (item.Type == ItemType.Zorkmid)
+        pickupMsg += $"{item.Value} zorkmids.";
+      else if (count > 1)
+        pickupMsg += $"{count} {item.FullName.Pluralize()}.";
+      else if (item.HasTrait<NamedTrait>())
+        pickupMsg += item.FullName;
+      else
+        pickupMsg += item.FullName.DefArticle() + ".";
+
+      if (item.Traits.OfType<OwnedTrait>().FirstOrDefault() is OwnedTrait ownedTrait)
+      {
+        List<string> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);
+        foreach (string s in msgs)
+          ui.AlertPlayer(s);
+      }
+
+      // Clear the 'in a pit' flag when an item is picked up
+      if (item.HasTrait<InPitTrait>())
+      {
+        item.Traits = item.Traits.Where(t => t is not InPitTrait).ToList();
+      }
+
+      anythingPickedUp = true;
+      ui.AlertPlayer(pickupMsg);
     }
-    else
+
+    if (!anythingPickedUp)
     {
-      GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, item);
-      slot = inv.Add(item, Actor.ID);
+      result.Succcessful = false;
+      result.EnergyCost = 0.0;
     }
-
-    var pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
-    if (item.Type == ItemType.Zorkmid && item.Value == 1)
-      pickupMsg += "a zorkmid.";
-    else if (item.Type == ItemType.Zorkmid)
-      pickupMsg += $"{item.Value} zorkmids.";
-    else if (count > 1)
-      pickupMsg += $"{count} {item.FullName.Pluralize()}.";
-    else if (item.HasTrait<NamedTrait>())
-      pickupMsg += item.FullName;
-    else
-      pickupMsg += item.FullName.DefArticle() + ".";
-
-    if (slot != '\0')
-      pickupMsg += $" ({slot})";
-    
-    if (item.Traits.OfType<OwnedTrait>().FirstOrDefault() is OwnedTrait ownedTrait)
-    {
-      List<string> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);
-      foreach (string s in msgs)
-        ui.AlertPlayer(s);
-    }
-
-    // Clear the 'in a pit' flag when an item is picked up
-    if (item.HasTrait<InPitTrait>())
-    {
-      item.Traits = item.Traits.Where(t => t is not InPitTrait).ToList();
-    }
-
-    ui.AlertPlayer(pickupMsg);
-
+            
     return result;
   }
 
-  public override void ReceiveUIResult(UIResult result) => ItemID = ((ObjIdUIResult)result).ID;
+  public override void ReceiveUIResult(UIResult result)
+  {
+    if (result is LongListResult list)
+      ItemIDs = list.Values;    
+  }
 }
 
 class SummonAction(Loc target, string summons, int count) : Action()

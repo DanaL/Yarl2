@@ -838,14 +838,14 @@ class Dialoguer : Inputer
   }
 }
 
-class PickUpper : Inputer
+class PickupMenu : Inputer
 {
   GameState GS { get; set; }
   List<Item> Items { get; set; }
-  HashSet<char> Options { get; set; } = [];
+  Dictionary<char, ulong> MenuOptions { get; set; } = [];
   HashSet<char> Choices { get; set; } = [];
 
-  public PickUpper(List<Item> items, GameState gs)
+  public PickupMenu(List<Item> items, GameState gs)
   {
     Items = items;
     GS = gs;
@@ -854,30 +854,16 @@ class PickUpper : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || ch == '\n' || ch == '\r')
+    if (ch == Constants.ESC || ch == ' ')
     {
       Done = true;
       Success = false;
     }
-    // else if (_options.Any(o => o.Item1 == ch))
-    // {
-    //   Msg = "";
-    //   ulong itemID = _options.Where(o => o.Item1 == ch).First().Item2;
-    //   _choice = itemID;
-    //   Done = true;
-    //   Success = true;
-    // }
-    // else
-    // {
-    //   Msg = "That doesn't seem to exist.";
-    //   Done = false;
-    //   Success = false;
-    // }
-    else if (Options.Contains(ch) && !Choices.Contains(ch))
+    else if (MenuOptions.ContainsKey(ch) && !Choices.Contains(ch))
     {
       Choices.Add(ch);
     }
-    else if (Options.Contains(ch) && Choices.Contains(ch))
+    else if (MenuOptions.ContainsKey(ch) && Choices.Contains(ch))
     {
       Choices.Remove(ch);
     }
@@ -891,20 +877,26 @@ class PickUpper : Inputer
     WritePopup();
   }
 
-  public override UIResult GetResult() => new ObjIdUIResult()
+  public override UIResult GetResult()
   {
-    ID = 0
-  };
+    LongListResult result = new();
+    foreach (char c in Choices)
+    {
+      result.Values.Add(MenuOptions[c]);
+    }
+
+    return result;
+  }
 
   void WritePopup()
   {
     StringBuilder sb = new();
-    foreach (var (slot, id, desc) in CalcPickupMenu(GS.UIRef()))
+    foreach (var (slot, desc) in CalcPickupMenu(GS.UIRef()))
     {
       string s = desc;
       if (Choices.Contains(slot))
         s += " [GREEN *]";
-      sb.AppendLine($"{slot}) {s}");
+      sb.AppendLine($"[ICEBLUE {slot})] {s}");
     }
 
     if (Choices.Count == 0)
@@ -915,7 +907,7 @@ class PickUpper : Inputer
     GS.UIRef().SetPopup(new Popup(sb.ToString(), "Pick up what?", -1, -1, 30));
   }
 
-  HashSet<(char, ulong, string)> CalcPickupMenu(UserInterface ui)
+  HashSet<(char, string)> CalcPickupMenu(UserInterface ui)
   {
     Dictionary<Item, int> counts = [];
     foreach (var item in Items)
@@ -926,7 +918,7 @@ class PickUpper : Inputer
         counts.Add(item, 1);
     }
 
-    HashSet<(char, ulong, string)> options = [];
+    HashSet<(char, string)> options = [];
     char slot = 'a';
     foreach (var (item, count) in counts)
     {      
@@ -945,9 +937,9 @@ class PickUpper : Inputer
       {
         desc = item.FullName;
       }
-      
-      Options.Add(slot);
-      options.Add((slot++, item.ID, desc));
+
+      MenuOptions[slot] = item.ID;
+      options.Add((slot++, desc));
     }
     
     return options;
@@ -1019,7 +1011,7 @@ class InventoryDetails : Inputer
       if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
         desc = text;
       else if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? info) && !info.Known)
-        desc = "An item of unknown utility.";
+        desc = "An item of unknown utility. You have not identified it yet.";
       else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
         desc = entry.Text;
 
@@ -1458,6 +1450,11 @@ class DirectionUIResult : UIResult
 {
   public int Row { get; set; }
   public int Col { get; set; }
+}
+
+class LongListResult : UIResult
+{
+  public List<ulong> Values { get; set; } = [];
 }
 
 class ObjIdUIResult : UIResult
