@@ -26,7 +26,7 @@
       (pick
         ("You've freed me! You have my eternal gratitude!"
          "They were just waiting until the moon was right before dragging me to their creepy altar."
-         "Those #IMPRISONED_BY didn't serve a cool deity like Huntokar. It was some weird, sinister deity.")
+         "Those #IMPRISONED_BY didn't serve a cool deity like Huntokar. It was some weird, sinister god.")
       )
     )
   )
