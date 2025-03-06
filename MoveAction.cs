@@ -239,6 +239,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
 class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameState, actor, loc)
 {
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
+  readonly bool _lockedDoorMenu = gameState.Options.BumpForLockedDoors;
 
   public override ActionResult Execute()
   {
@@ -322,8 +323,12 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
-        var openAction = new OpenDoorAction(GameState, Actor, Loc);
-        result.AltAction = openAction;
+        result.AltAction = new OpenDoorAction(GameState, Actor, Loc);
+      }
+      else if (_lockedDoorMenu && tile.Type == TileType.LockedDoor)
+      {
+        ui.AlertPlayer(BlockedMessage(tile));
+        GameState.Player.ReplacePendingAction(null, new LockedDoorMenu(ui, GameState, Loc));
       }
       else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
       {

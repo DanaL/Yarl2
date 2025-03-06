@@ -434,7 +434,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
 
 class BashAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  Loc Target { get; set; }
+  public Loc Target { get; set; }
 
   static bool CheckForInjury(TileType type) => type switch
   {

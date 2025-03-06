@@ -246,7 +246,6 @@ class PopupMenu(string title, List<string> menuItems) : IPopup
   string Title { get; set; } = title;
   List<string> MenuItems { get; set; } = menuItems;
   
-
   void IPopup.Draw(UserInterface ui)
   {
     int width = MenuItems.Select(i => i.Length).Max() + 4;

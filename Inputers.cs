@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System;
 using System.Text;
 using static Yarl2.Util;
 
@@ -847,7 +848,7 @@ class PickupMenu : Inputer
   GameState GS { get; set; }
   List<Item> Items { get; set; }
   Dictionary<char, ulong> MenuOptions { get; set; } = [];
-  HashSet<char> Choices { get; set; } = [];
+  List<char> Choices { get; set; } = [];
 
   public PickupMenu(List<Item> items, GameState gs)
   {
@@ -947,6 +948,165 @@ class PickupMenu : Inputer
     }
     
     return options;
+  }
+}
+
+class LockedDoorMenu : Inputer
+{
+  UserInterface UI { get; set; }
+  GameState GS { get; set; }
+  Loc Loc { get; set; }
+  List<char> Options { get; set; } = ['F'];
+  List<string> MenuItems { get; set; } = [];
+  int Row = 0;
+    
+  public LockedDoorMenu(UserInterface ui, GameState gs, Loc loc)
+  {
+    UI = ui;
+    Loc = loc;
+    GS = gs;
+    SetMenu();
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Done = true;
+      Success = false;
+    }
+    else if (Options.Contains(ch))
+    {
+      SetUpCommand(ch);
+    }
+    else if (ch == '\n' || ch == '\n')
+    {
+      SetUpCommand(Options[Row]);
+    }
+    else if (ch == 'j')
+    {
+      Row = (Row + 1) % Options.Count;
+    }
+    else if (ch == 'k')
+    {
+      --Row;
+      if (Row < 0)
+        Row = Options.Count - 1;
+    }
+
+    WritePopup();
+  }
+
+  void SetUpCommand(char ch)
+  {
+    switch (ch)
+    {
+      case 'F':
+        SetUpBash();
+        break;
+      case 'a':
+        SetUpPickLock();
+        break;
+      case 'r':
+        SetUpKnock();
+        break;
+      case 'c':
+        SetUpPickAxe();
+        break;
+    }
+
+    Done = true;
+    Success = true;
+  }
+
+  void SetUpPickAxe()
+  {
+    foreach (Item item in GS.Player.Inventory.Items())
+    {
+      if (item.Name == "pickaxe")
+      {
+        Loc playerLoc = GS.Player.Loc;        
+        DigAction dig = new(GS, GS.Player, item);
+        DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
+        dig.ReceiveUIResult(res);
+        GS.Player.ReplacePendingAction(dig, new JustDoItInputer());
+        return;
+      }
+    }
+  }
+
+  void SetUpPickLock()
+  {
+    Loc playerLoc = GS.Player.Loc;    
+    PickLockAction pickLock = new(GS, GS.Player);
+    DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
+    pickLock.ReceiveUIResult(res);
+    GS.Player.ReplacePendingAction(pickLock, new JustDoItInputer());
+  }
+
+  void SetUpKnock()
+  {
+    char slot = '\0';
+    foreach (Item item in GS.Player.Inventory.Items())
+    {
+      if (item.Name == "scroll of knock")
+      {
+        slot = item.Slot;
+        break;
+      }
+    }
+
+    UseItemAction useItem = new(GS, GS.Player) { Choice = slot };
+    GS.Player.ReplacePendingAction(useItem, new JustDoItInputer());
+  }
+
+  void SetUpBash()
+  {
+    BashAction bash = new(GS, GS.Player) { Target = Loc };
+    GS.Player.ReplacePendingAction(bash, new JustDoItInputer());
+  }
+
+  void SetMenu()
+  {
+    MenuItems = ["F) kick it down"];
+
+    bool lockpick = false;
+    bool knock = false;
+    bool pickaxe = false;
+    foreach (Item item in GS.Player.Inventory.Items())
+    {
+      if (item.Name == "lock pick")
+        lockpick = true;
+      else if (item.Name == "scroll of knock")
+        knock = true;
+      else if (item.Name == "pickaxe")
+        pickaxe = true;
+    }
+
+    if (lockpick)
+    {
+      Options.Add('a');
+      MenuItems.Add("a) use lock pick");
+    }
+
+    if (knock)
+    {
+      Options.Add('r');
+      MenuItems.Add("r) read scroll of knock");
+    }
+
+    if (pickaxe)
+    {
+      Options.Add('c');
+      MenuItems.Add("c) chop door with pickaxe");
+    }
+  }
+
+  void WritePopup()
+  {
+    PopupMenu menu = new("locked door  ", MenuItems) { SelectedRow = Row };
+    UI.SetPopup(menu);
   }
 }
 
