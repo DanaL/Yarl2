@@ -184,6 +184,35 @@ class Examiner : Inputer
           desc = v.Text;
       }
 
+      string extraInfo = "";
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is PoisonedTrait)
+          extraInfo += "[GREEN Poisoned]. ";
+        else if (t is ConfusedTrait)
+          extraInfo += "[YELLOW Confused]. ";
+        else if (t is SleepingTrait)
+          extraInfo += "[PINK Sleeping]. ";
+        else if (t is TipsyTrait)
+          extraInfo += "[PINK Tipsy]. ";
+        else if (t is FrightenedTrait)
+          extraInfo += "[YELLOW Frightened]. ";
+      }
+
+      if (actor.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
+      {
+        if (attitude.Curr == Mob.INDIFFERENT)
+          extraInfo += "[WHITE Indifferent]. ";
+        else if (attitude.Curr == Mob.INACTIVE)
+          extraInfo += "[WHITE Inactive]. ";
+      }
+
+      extraInfo = extraInfo.Trim();
+      if (extraInfo.Length > 0)
+      {
+        desc += "\n\n" + extraInfo;
+      }
+
       return new LocDetails(name, desc, actor.Glyph.Ch);
     }
 
