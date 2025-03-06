@@ -1,5 +1,5 @@
 skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Immunity#Poison,ResistPiercing,Undead,Brainless
-zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#1#6#1#0#0#Attack|Undead,Brainless
+zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#1#6#1#0#0#Attack|Undead,Brainless,Immunity#Poison
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack|
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying
@@ -22,7 +22,7 @@ duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|MeleeBlunt#1#
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|MissilePiercing#2#5#6#1#0#0#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
 owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|MeleeSlashing#1#1#6#1#0#0#Attack|Grappler#14
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|MirrorImage#1#3#0#0#0#7#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Flying
-shadow            | |black        |black       |13|20|3| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead
+shadow            | |black        |black       |13|20|3| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead,Immunity#Poison
 floating eye      |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless
 screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|ConfusingScream#0#0#4#0#14#7#Attack,MeleePiercing#1#1#6#1#0#0#Attack|Flying,Immunity#Confusion
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
@@ -31,11 +31,11 @@ rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1
 will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#8#1#0#0#Attack|LightSource#owner#2,Retribution#Fire#8#1,Flying
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent,Heavy
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|MeleePiercing#1#1#4#2#0#0#Attack|Poisoner#14#2#15,CoinsLoot#20#30,Brainless
-phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying
+phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying,Immunity#Poison
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#Butt
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#0#10#0#0#0#3#Passive|Plant,Immunity#Confusion,Immobile,Brainless
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|NauseousAura#owner#10,Undead
-haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive|Undead,Immunity#Confusion,Construct,Immobile,GoodMagicLoot
+haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive|Undead,Immunity#Confusion,Construct,Immobile,GoodMagicLoot,Immunity#Poison
 giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Drop#beetle_carapace#33
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying
 displacer beast   |f|grey         |darkgrey    |14|25|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Displacement
@@ -50,6 +50,6 @@ rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4
 flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1
 giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy
 frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive
-zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless
+zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless,Immunity#Poison
 cultist           |@|grey         |darkgrey    |13|15|3| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent
 cult leader       |@|grey         |darkgrey    |13|20|3| 1.0|12|10|SummonCentipede#0#0#0#0#0#4#Attack#Nag'l fh'tagn!,HealAllies#0#0#0#0#0#05#Passive,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent
