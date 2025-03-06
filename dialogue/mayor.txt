@@ -21,6 +21,7 @@
                         "Thank goodness it isn't an election year." 
                         "This looming doom is terrible for tourism. Adventurers aside, of course."
                         "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
+                        "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
                   )))
         )
       )
