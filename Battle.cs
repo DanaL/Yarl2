@@ -818,17 +818,22 @@ class Battle
   {
     List<string> messages = [];
 
+    
+
+    TipsyTrait? tipsy = imbiber.Traits.OfType<TipsyTrait>()
+                                     .FirstOrDefault();
+
+    // Imbiding always reduces stress, even if you pass your saving throw
     if (imbiber.Stats.TryGetValue(Attribute.Nerve, out var nerve))
     {
-      nerve.Change(100);
+      nerve.Change(tipsy == null ? 100 : 25);
     }
-
-    bool alreadyTipsy = imbiber.HasTrait<TipsyTrait>();
-    int dc = alreadyTipsy ? 15 : 12;
+    
+    int dc = tipsy is null ? 15 : 12;
     if (imbiber.AbilityCheck(Attribute.Constitution, dc, gs.Rng))
       return messages;
 
-    if (imbiber.Traits.OfType<TipsyTrait>().FirstOrDefault() is TipsyTrait tipsy)
+    if (tipsy is not null)
     {
       tipsy.ExpiresOn += (ulong) gs.Rng.Next(50, 76);
       if (gs!.LastPlayerFoV.Contains(imbiber!.Loc))
