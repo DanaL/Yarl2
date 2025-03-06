@@ -1183,20 +1183,28 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   public Loc FallIntoTrapdoor(Actor actor, Loc trapdoorLoc)
   {
-    // find a clear, random landing spot on the level below
+    // Find candidates for the landing spot. We'll look for tiles that are 
+    // reachable from the stairs up (to avoid situations where the player 
+    // lands in a locked vault, etc) and are unoccupied.
     Map lowerLevel = CurrentDungeon.LevelMaps[trapdoorLoc.Level + 1];
-    List<Loc> candidateSpots = [];
+    Loc stairs = Loc.Nowhere;
+    bool found = false;
     for (int r = 0; r < lowerLevel.Height; r++)
     {
-      for (int c = 0; c < lowerLevel.Width; c++)
+      for (int c = 0; !found && c < lowerLevel.Width; c++)
       {
-        var loc = new Loc(CurrDungeonID, trapdoorLoc.Level + 1, r, c);
-        if (lowerLevel.TileAt(r, c).Type == TileType.DungeonFloor && !ObjDb.Occupied(loc))
+        if (lowerLevel.TileAt(r, c).Type == TileType.Upstairs)
         {
-          candidateSpots.Add(loc);
+          stairs = new(CurrDungeonID, trapdoorLoc.Level + 1, r, c);
+          found = true;
+          break;
         }
       }
     }
+
+    HashSet<TileType> doors = [TileType.ClosedDoor, TileType.LockedDoor, TileType.SecretDoor];
+    List<Loc> candidateSpots = [..Util.FloodFill(this, stairs, lowerLevel.Height, doors)
+                                      .Where(loc => !ObjDb.Occupied(loc))];
 
     if (candidateSpots.Count > 0)
     {
