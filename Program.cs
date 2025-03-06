@@ -128,6 +128,7 @@ namespace Yarl2
     public int FontSize { get; set; }
     public bool BumpToOpen { get; set; }
     public bool BumpToChat { get; set; }
+    public bool BumpForLockedDoors { get; set; }
     public bool HighlightPlayer { get; set; }
     public bool TorchLightAnimation { get; set; }
     public bool ShowHints { get; set; }
@@ -157,6 +158,7 @@ namespace Yarl2
         FontSize = 14,
         BumpToOpen = true,
         BumpToChat = true,
+        BumpForLockedDoors = true,
         HighlightPlayer = false,
         TorchLightAnimation = true,
         ShowHints = true
