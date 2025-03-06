@@ -23,6 +23,12 @@ Green-skinned humanoids who love nothing more than chaos and harassing adventure
 nilbog
 A goblin trickster who has learned several rather irritating spells.
 #
+hobgoblin
+A bigger, tougher goblin who bullies other goblins into doing their bidding.
+#
+goblin archer
+A goblin with a bow is even more annoying than a regular goblin.
+#
 portal
 An entrance leading from the surface into a dungeon. Use the '>' command to enter!
 #
