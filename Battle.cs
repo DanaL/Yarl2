@@ -799,7 +799,7 @@ class Battle
   // chance of the poison wearing out during an attack so check for that here.
   static void CheckCoatedPoison(GameObj obj, Random rng)
   {
-    if (obj.HasTrait<PoisonCoatedTrait>() && rng.NextDouble() < 0.5)
+    if (obj.HasTrait<PoisonCoatedTrait>() && rng.NextDouble() < 0.2)
     {
       List<Trait> traits = [];
       foreach (Trait t in obj.Traits) 
