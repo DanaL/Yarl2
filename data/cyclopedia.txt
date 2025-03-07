@@ -89,6 +89,9 @@ An noxious undead creature with a taste for bones.
 giant beetle
 An enormous, hard-shelled, sharp-pincer-ed version of a regular beetle.
 #
+bridgetrigger|trigger
+A pressure plate that will trigger some sort of mechanism.
+#
 jettrigger|trigger
 A trigger on the floor that will almost certainly set off a trap.
 #

@@ -439,25 +439,23 @@ class GameObjectDB
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    else
-      return [..stack.Where(i => i.Type != ItemType.Environment)];
+    
+    return [..stack.Where(i => i.Type != ItemType.Environment)];
   }
 
   public List<Item> VisibleItemsAt(Loc loc)
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    else
-      return [..stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())];
+    
+    return [..stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())];
   }
 
   public List<Item> EnvironmentsAt(Loc loc)
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    else
-      return stack.Where(i => i.Type == ItemType.Environment)
-                  .ToList();
+    return [..stack.Where(i => i.Type == ItemType.Environment)];
   }
 
   public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level) => 
