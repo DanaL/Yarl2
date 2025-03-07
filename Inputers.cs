@@ -1009,7 +1009,7 @@ class LockedDoorMenu : Inputer
     {
       SetUpCommand(ch);
     }
-    else if (ch == '\n' || ch == '\n')
+    else if (ch == '\n' || ch == '\r')
     {
       SetUpCommand(Options[Row]);
     }
