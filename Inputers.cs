@@ -1302,6 +1302,8 @@ class InventoryDetails : Inputer
         InteractionMenu.Add("use");
       else if (t is VaultKeyTrait)
         InteractionMenu.Add("use");
+      else if (t is CanApplyTrait)
+        InteractionMenu.Add("use");
     }
 
     if (item.IsUseableTool())
