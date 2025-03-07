@@ -367,3 +367,6 @@ Make the target sluggish and slower to act.
 #
 wand of summoning
 Interrupt whatever a monster was doing with its day and summon them to a square adjacent to you.
+#
+scroll of magic mapping
+Another innovation of the powerful Greater Yendorian Tourism board, these scrolls provide magical knowledge of the layout of an entire dungoen level.
