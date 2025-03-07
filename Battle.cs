@@ -282,7 +282,7 @@ class Battle
   {
     if (hpLeft < 1)
     {
-      string killerName = MsgFactory.CalcName(attacker, gs.Player);
+      string killerName = MsgFactory.CalcName(attacker, gs.Player, 0, true);
       if (killerName == "something")
         killerName = "???";
       else

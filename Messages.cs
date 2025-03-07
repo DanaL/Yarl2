@@ -55,7 +55,7 @@ class Grammar
 
 class MsgFactory
 {
-  public static string CalcName(GameObj gobj, Player player, int amount = 0)
+  public static string CalcName(GameObj gobj, Player player, int amount = 0, bool noArticle = false)
   {
     StringBuilder sb = new();
     if (gobj is Item item)
@@ -72,13 +72,13 @@ class MsgFactory
       }
       else
       {
-        sb.Append(item.FullName.DefArticle());
+        sb.Append(noArticle ? item.FullName : item.FullName.DefArticle());
       }
     }
     else if (gobj is Actor actor)
     {
       if (actor.VisibleTo(player))
-        sb.Append(gobj.FullName);
+        sb.Append(noArticle ? gobj.Name : gobj.FullName);
       else
         sb.Append("something");
     }
