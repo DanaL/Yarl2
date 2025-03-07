@@ -514,18 +514,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       else
         conMod = 0;
       ulong endsOn = Turn + (ulong)(250 - 10 * conMod);
-      var exhausted = new ExhaustedTrait()
+      ExhaustedTrait exhausted = new()
       {
         OwnerID = actor.ID,
         ExpiresOn = endsOn
       };
-      var msgs = exhausted.Apply(actor, this);
-      foreach (var msg in msgs)
+      List<string> msgs = exhausted.Apply(actor, this);
+      foreach (string msg in msgs)
       {
         messages.Add(msg);
       }
 
-      messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!");
+      if (LastPlayerFoV.Contains(destination))
+        messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!");
     }
     else
     {
