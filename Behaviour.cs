@@ -345,8 +345,12 @@ class HealAlliesPower(Power power) : UsePower(power)
     if (candidates.Count > 0)
     {
       int i = gs.Rng.Next(candidates.Count);
-      string castText = $"{mob.FullName.Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
-      gs.UIRef().AlertPlayer(castText);
+      
+      if (Util.AwareOfActor(mob, gs))
+      {
+        string castText = $"{MsgFactory.CalcName(mob, gs.Player).Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
+        gs.UIRef().AlertPlayer(castText);
+      }
 
       bool result = mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4));
       return result ? PlanStatus.Success : PlanStatus.Failure;      

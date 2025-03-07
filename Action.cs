@@ -2200,19 +2200,17 @@ class HealAction(GameState gs, Actor target, int healDie, int healDice) : Action
     int delta = hpStat.Curr - hpBefore;
 
     string txt;
-    if (delta > 0)
-    {
-      txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "is")} healed for {delta} HP.";
-    }
+    if (delta > 0 && Actor is Player)
+      txt = $"You are healed for {delta} HP.";
+    else if (delta > 0)
+      txt = $"{Actor.FullName.Capitalize()} is healed.";
     else
-    {
       txt = "";
-    }
+    GameState!.UIRef().AlertPlayer(txt, GameState, Actor.Loc);
 
     var healAnim = new SqAnimation(GameState!, Actor.Loc, Colours.WHITE, Colours.PURPLE, '\u2665');
     GameState!.UIRef().RegisterAnimation(healAnim);
-
-    GameState!.UIRef().AlertPlayer(txt);
+    
     result.Succcessful = true;
     result.EnergyCost = 1.0;
 
