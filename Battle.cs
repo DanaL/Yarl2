@@ -281,8 +281,15 @@ class Battle
   static void ResolveHit(GameObj attacker, Actor target, int hpLeft, GameState gs)
   {
     if (hpLeft < 1)
-      gs.ActorKilled(target, attacker.Name.IndefArticle(), attacker);
-
+    {
+      string killerName = MsgFactory.CalcName(attacker, gs.Player);
+      if (killerName == "something")
+        killerName = "???";
+      else
+        killerName = killerName.IndefArticle();
+      gs.ActorKilled(target, killerName, attacker);
+    }
+    
     HitAnimation hitAnim = new(target.ID, gs, Colours.FX_RED);
     gs.UIRef().RegisterAnimation(hitAnim);
 
