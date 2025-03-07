@@ -102,20 +102,9 @@ class MsgFactory
       return "You hear a clatter!";
   }
 
-  static bool AwareOfActor(Actor actor, GameState gs)
-  {
-    if (gs.LastPlayerFoV.Contains(actor.Loc))
-      return true;
-    else if (gs.Player.HasActiveTrait<TelepathyTrait>() && Util.Distance(gs.Player.Loc, actor.Loc) <= Constants.TELEPATHY_RANGE)
-      return true;
-    else if (gs.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swalloewd)
-      return swalloewd.SwallowerID == actor.ID;
-
-    return false;
-  }
   public static string DoorMessage(Actor actor, Loc loc, string verb, GameState gs)
   {
-    if (AwareOfActor(actor, gs))    
+    if (Util.AwareOfActor(actor, gs))    
       return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, verb)} the door.";    
     else if (actor is Player)
       return $"You fumble with a door handle and {verb} a door.";
@@ -127,7 +116,7 @@ class MsgFactory
 
   public static string HitMessage(Actor attacker, Actor target, string verb, GameState gs)
   {
-    bool canSeeTarget = AwareOfActor(target, gs);
+    bool canSeeTarget = Util.AwareOfActor(target, gs);
     
     if (attacker is Player)
     {
@@ -145,8 +134,8 @@ class MsgFactory
 
   public static string MissMessage(Actor attacker, Actor target, GameState gs)
   {
-    bool canSeeTarget = AwareOfActor(target, gs);
-    bool canSeeAttacker = AwareOfActor(attacker, gs);
+    bool canSeeTarget = Util.AwareOfActor(target, gs);
+    bool canSeeAttacker = Util.AwareOfActor(attacker, gs);
 
     if (target is Player)
       return canSeeAttacker ? $"{CalcName(attacker, gs.Player).Capitalize()} {Grammar.Conjugate(attacker, "miss")} you!" : "You are missed by an attack!";
@@ -169,7 +158,7 @@ class MsgFactory
     }
  
     string etre = plural ? "are" : "is";
-    if (AwareOfActor(victim, gs))
+    if (Util.AwareOfActor(victim, gs))
       return $"{CalcName(victim, gs.Player).Capitalize()} {etre} {verb}.";
     else if (attacker is Player)
       return "You kill something!";

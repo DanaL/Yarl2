@@ -100,7 +100,7 @@ class Examiner : Inputer
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
 
-        if (_gs.ObjDb.Occupied(loc) && _gs.LastPlayerFoV.Contains(loc))
+        if (_gs.ObjDb.Occupant(loc) is Actor actor && Util.AwareOfActor(actor, _gs))
         {
           int distance = Distance(_gs.Player.Loc, loc);
           if (loc == _gs.Player.Loc)
