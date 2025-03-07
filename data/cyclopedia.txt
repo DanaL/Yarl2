@@ -376,3 +376,9 @@ Another innovation of the powerful Greater Yendorian Tourism board, these scroll
 #
 webs
 Not just your average, work-a-day cobweb. These are fantasy webs made by magic or a giant, fantasy spider. Items (and you) can stick to them.
+#
+fire
+Something is aflame. You should probably be warned that fire may spread and destroy some wooden structures.
+#
+mist|Mist/Fog
+A low-lying cloud that obscures your vision.

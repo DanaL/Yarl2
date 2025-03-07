@@ -259,7 +259,10 @@ class Examiner : Inputer
       string title = item.Name.Capitalize();
       string details = "";
       if (_cyclopedia.TryGetValue(item.Name, out var v))
+      {
+        title = v.Title;
         details = v.Text;
+      }
 
       return new LocDetails(title, details, item.Glyph.Ch);
     }
