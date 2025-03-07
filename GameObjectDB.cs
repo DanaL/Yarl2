@@ -459,8 +459,7 @@ class GameObjectDB
   }
 
   public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level) => 
-    _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)
-                   .ToHashSet();
+    [.. _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)];
 
   public int LevelCensus(int dungeonID, int level) =>
     _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level)

@@ -373,3 +373,6 @@ Interrupt whatever a monster was doing with its day and summon them to a square 
 #
 scroll of magic mapping
 Another innovation of the powerful Greater Yendorian Tourism board, these scrolls provide magical knowledge of the layout of an entire dungoen level.
+#
+webs
+Not just your average, work-a-day cobweb. These are fantasy webs made by magic or a giant, fantasy spider. Items (and you) can stick to them.

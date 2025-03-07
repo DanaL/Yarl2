@@ -117,6 +117,10 @@ class Examiner : Inputer
         {
           pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
         }
+        else if (_gs.ObjDb.EnvironmentsAt(loc).Count > 0)
+        {
+          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
+        }
         else
         {
           var tile = _gs.TileAt(loc);
@@ -234,7 +238,7 @@ class Examiner : Inputer
       return new LocDetails(name, desc, actor.Glyph.Ch);
     }
 
-    var items = _gs.ObjDb.ItemsAt(loc);
+    List<Item> items = _gs.ObjDb.ItemsAt(loc);
     if (items.Count > 0)
     {
       Item item = items[0];
@@ -243,6 +247,18 @@ class Examiner : Inputer
       if (item.Type == ItemType.Statue && item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;
       else if (_cyclopedia.TryGetValue(item.Name, out var v))
+        details = v.Text;
+
+      return new LocDetails(title, details, item.Glyph.Ch);
+    }
+
+    List<Item> env = _gs.ObjDb.EnvironmentsAt(loc);
+    if (env.Count > 0)
+    {
+      Item item = env[0];
+      string title = item.Name.Capitalize();
+      string details = "";
+      if (_cyclopedia.TryGetValue(item.Name, out var v))
         details = v.Text;
 
       return new LocDetails(title, details, item.Glyph.Ch);
