@@ -79,7 +79,24 @@ class Examiner : Inputer
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
-        var loc = new Loc(start.DungeonID, start.Level, startRow + r, startCol + c);
+        Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);
+
+        // This is a bad kludge because at the moment, a scroll of magic 
+        // mapping can reveal the floor's map, which I implement by adding 
+        // them to RememberedSqs dictionary for the Dungeon. So, the player
+        // now 'remembers' squares they haven't seen yet so they haven't seen
+        // items on the floor. But later on this function we're looking for 
+        // items at a location that's visible on screen, which was revealing
+        // items the player didn't know about. What I need to do is perhaps
+        // track actually squares seen separately from map tiles known. But for
+        // now this will prevent most of the unknown items from appearing.
+        switch (ui.SqsOnScreen[r, c].Ch)
+        {
+          case '.':
+          case '\\':
+          case '=':
+            continue;
+        }
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
 
