@@ -2578,7 +2578,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   public bool Listening => true;
   public GameEventType EventType => GameEventType.EndOfRound;
 
-  public override string AsText() => $"Countdown#{OwnerID}#{Expired}";
+  public override string AsText() => $"Countdown#{OwnerID}#{ExpiresOn}";
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
@@ -2999,7 +2999,7 @@ class TraitFactory
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Corruption", (pieces, gameObj) => new CorruptionTrait() { Amt = int.Parse(pieces[1]) } },
-    { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) }},
+    { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Cursed", (pieces, gameObj) => new CursedTrait() },

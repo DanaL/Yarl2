@@ -761,7 +761,7 @@ class GameObjDBSave
     string[] fields = txt.Split(Constants.SEPARATOR);
     
     Enum.TryParse(fields[0], out ItemType itemType);
-    var item = new Item()
+    Item item = new()
     {
       Type = itemType,
       Name = fields[1],
@@ -774,12 +774,11 @@ class GameObjDBSave
       Value = int.Parse(fields[9]),
     };
 
-    // Parse the traits
     if (fields[5] != "")
     {
-      foreach (var t in fields[5].Split('`'))
+      foreach (string t in fields[5].Split('`'))
       {
-        var trait = TraitFactory.FromText(t, item);
+        Trait trait = TraitFactory.FromText(t, item);
         item.Traits.Add(trait);
       }
     }
