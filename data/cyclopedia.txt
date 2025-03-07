@@ -382,3 +382,6 @@ Something is aflame. You should probably be warned that fire may spread and dest
 #
 mist|Mist/Fog
 A low-lying cloud that obscures your vision.
+#
+tin locket
+A small charm made out of tin. It doesn't seem to be magical.
