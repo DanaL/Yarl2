@@ -571,12 +571,21 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
       if (GameState.ObjDb.Occupant(loc) is Actor actor)
         affectedObjs.Add(actor);
 
-      foreach (Item item in GameState.ObjDb.ItemsAt(loc))
+      List<Item> items = GameState.ObjDb.ItemsAt(loc);
+      items.AddRange(GameState.ObjDb.EnvironmentsAt(loc));
+      foreach (Item item in items)
       {
         if (item.Name == "campfire")
         {
           GameState.UIRef().AlertPlayer("The campfire is extinguished!", GameState, loc);
           GameState.ObjDb.RemoveItemFromGame(loc, item);
+          continue;
+        }
+
+        if (item.Name == "mist")
+        {
+          GameState.UIRef().AlertPlayer("The mist is dispersed!", GameState, item.Loc);
+          GameState.ObjDb.RemoveItemFromGame(item.Loc, item);
           continue;
         }
 
