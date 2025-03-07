@@ -36,6 +36,7 @@ class Colours
   public static readonly Colour YELLOW = new(255, 255, 53, 255);
   public static readonly Colour YELLOW_ORANGE = new(255, 159, 0, 255);
   public static readonly Colour LIGHT_BROWN = new(160, 82, 45, 255);
+  public static readonly Colour ROOF_TILE = LIGHT_BROWN with { Alpha = 200 };
   public static readonly Colour BROWN = new(150, 75, 0, 255);
   public static readonly Colour GREEN = new(144, 238, 144, 255);
   public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
@@ -91,6 +92,7 @@ class Colours
     else if (colour == ICE_BLUE) return "iceblue";
     else if (colour == HILITE) return "hilite";
     else if (colour == SOPHIE_GREEN) return "sophiegreen";
+    else if (colour == ROOF_TILE) return "rooftile";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -126,6 +128,7 @@ class Colours
     "iceblue" => ICE_BLUE,
     "hilite" => HILITE,
     "sophiegreen" => SOPHIE_GREEN,
+    "rooftile" => ROOF_TILE,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
@@ -161,7 +164,7 @@ class Constants
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
   public const char BOTTOM_RIGHT_CORNER = '┙';
-  public static Sqr ROOF = new(Colours.LIGHT_BROWN with { Alpha = 200 }, Colours.BLACK, '░');
+  public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
 }
 
 class Util

@@ -328,6 +328,9 @@ class HealAlliesPower(Power power) : UsePower(power)
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
+    if (!Available(mob, gs))
+      return PlanStatus.Failure;
+
     if (mob.Traits.OfType<AlliesTrait>().FirstOrDefault() is not AlliesTrait alliesTrait)
       return PlanStatus.Failure;
 
