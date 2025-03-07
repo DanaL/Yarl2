@@ -625,13 +625,15 @@ class ValidTarget(Actor actor) : BehaviourNode
     Actor is NoOne ? PlanStatus.Failure : PlanStatus.Success;  
 }
 
-class IsParalyzed : BehaviourNode
+class IsImmobilized : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     foreach (Trait t in mob.Traits)
     {
       if (t is ParalyzedTrait)
+        return PlanStatus.Success;
+      else if (t is SleepingTrait)
         return PlanStatus.Success;
     }
 
@@ -1295,7 +1297,7 @@ class Planner
     List<BehaviourNode> plan = [];
 
     // A paralized monster will just pass its turn
-    plan.Add(new Sequence([new IsParalyzed(), new PassTurn()]));
+    plan.Add(new Sequence([new IsImmobilized(), new PassTurn()]));
 
     // As will an inactive one
     plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]));
