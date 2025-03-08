@@ -34,8 +34,19 @@ record struct Damage(int Die, int NumOfDie, DamageType Type);
 class Battle
 {
   // We'll average two d20 rolls to make combat rolls a bit less swinging/
-  // evenly distributed
-  static int AttackRoll(Random rng) => (rng.Next(1, 21) + rng.Next(1, 21)) / 2;
+  // evenly distributed. Also, if the first roll is a 20 then the attack hits 
+  // regardless. (So even if you have a very high AC lowly monsters still have
+  // a small chance of hitting you -- I'm simulating this by returning 100, 
+  // which should beat any AC in the game)
+  static int AttackRoll(Random rng) 
+  {
+    int a = rng.Next(1, 21);
+    int b = rng.Next(1, 21);
+    if (a == 20)
+      return 100;
+
+    return (a + b) / 2;
+  } 
 
   static (int, DamageType) DamageRoll(Damage dmg, Random rng)
   {
@@ -289,7 +300,7 @@ class Battle
         killerName = killerName.IndefArticle();
       gs.ActorKilled(target, killerName, attacker);
     }
-    
+
     HitAnimation hitAnim = new(target.ID, gs, Colours.FX_RED);
     gs.UIRef().RegisterAnimation(hitAnim);
 
