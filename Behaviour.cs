@@ -164,7 +164,10 @@ class MoveLevel : BehaviourNode
     // This is to expend the actor's energy
     mob.ExecuteAction(new PassAction());
 
-    gs.RemovePerformer(mob);
+    gs.RemovePerformerFromGame(mob);
+    // We don't actually want to remove them from the game, just from the
+    // current performer list so add them back in. A bit of a kludge :/
+    gs.ObjDb.Add(mob);
     gs.ResolveActorMove(mob, mob.Loc, dest);
     
     return PlanStatus.Success;

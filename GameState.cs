@@ -659,7 +659,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (dwFound)
       ObjDb.DeathWatchListeners = [..ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
 
-    RemovePerformer(victim);
+    RemovePerformerFromGame(victim);
 
     foreach (var t in victim.Traits)
     {
@@ -723,7 +723,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public void RemovePerformer(Actor performer)
+  public void RemovePerformerFromGame(Actor performer)
   {
     ObjDb.RemoveActor(performer);
 

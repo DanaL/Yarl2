@@ -367,7 +367,7 @@ class GameObjectDB
   {
     static bool InRange(Loc a, Loc b, int r)
     {
-      return (a.DungeonID == b.DungeonID && a.Level == b.Level && Util.Distance(a, b) <= r);
+      return a.DungeonID == b.DungeonID && a.Level == b.Level && Util.Distance(a, b) <= r;
     }
 
     List<Actor> actors = [];
@@ -389,16 +389,10 @@ class GameObjectDB
     AddToLoc(loc, actor);
   }
 
-  public void Add(GameObj obj)
-  {
-    Objs[obj.ID] = obj;
-  }
+  public void Add(GameObj obj) => Objs[obj.ID] = obj;
 
-  public void AddToLoc(Loc loc, Actor actor)
-  {
-    _actorLocs[loc] = actor.ID;
-  }
-
+  public void AddToLoc(Loc loc, Actor actor) => _actorLocs[loc] = actor.ID;
+  
   public void SetToLoc(Loc loc, Item item)
   {
     item.Loc = loc;

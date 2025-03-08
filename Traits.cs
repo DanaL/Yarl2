@@ -1775,7 +1775,7 @@ class LeaveDungeonTrait : Trait, IGameEventListener
       // implement a configurable parameter of some sort.
       if (actor.Inventory.Items().Count == 0)
       {
-        gs.RemovePerformer(actor);
+        gs.RemovePerformerFromGame(actor);
 
         if (gs.LastPlayerFoV.Contains(actor.Loc))
         {
