@@ -544,11 +544,6 @@ class Battle
         }        
       }
 
-      string verb = "hit";
-      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
-        verb = avt.Verb;
-      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
-      
       bool swallowed = attacker.HasTrait<SwallowedTrait>();
 
       if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
@@ -589,6 +584,11 @@ class Battle
           HandleFrightening(target, gs, ft);
         }
       }
+
+      string verb = "hit";
+      if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
+        verb = avt.Verb;
+      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
     }
     else
     {
