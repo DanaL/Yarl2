@@ -579,9 +579,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
     else
       ui.AlertPlayer("You hear a splash!");
     
-    string msg = gs.FallIntoWater(actor, Loc);
-    if (msg.Length > 0)
-      ui.AlertPlayer(msg);
+    gs.FallIntoWater(actor, Loc);
   }
 
   void PlungeIntoChasm(Actor actor, GameState gs, ActionResult result)
@@ -869,6 +867,13 @@ class InnkeeperServiceAction : Action
         GameState.StopListening(GameEventType.EndOfRound, t);
       }
       GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not PoisonedTrait).ToList();
+
+      // Leet's be nice an extinguish the player's torch for them if they 
+      // forget to do it before they rest.
+      foreach (Item item in GameState.Player.Inventory.Items())
+      {
+        EffectApplier.ExtinguishTorch(GameState, item);
+      }
 
       // Rest for six hours
       RestingTrait rt = new() { ExpiresOn = GameState.Turn + 360 };

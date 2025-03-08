@@ -18,16 +18,15 @@ namespace Yarl2;
 // I think it makes sense to have the effects code in one place.
 class EffectApplier
 {
-  static string ApplyWet(GameState gs, GameObj receiver, Actor? owner)
+  public static string ExtinguishTorch(GameState gs, GameObj receiver)
   {
-    var sb = new StringBuilder();
-
+    StringBuilder sb = new();
     // Work on a copy of the traits because apply wet to one trait may
     // cause another to be removed, altering the list collection we are
     // iterating over. (Ie., extinguishing a lit torch will remove the fire
     // damage trait)
-    var traits = receiver.Traits.Select(t => t).ToList();
-    foreach (var trait in traits) 
+    List<Trait> traits = [..receiver.Traits.Select(t => t)];
+    foreach (Trait trait in traits) 
     { 
       if (trait is TorchTrait torch && torch.Lit)
       {
@@ -36,10 +35,21 @@ class EffectApplier
       }
     }
 
+    return sb.ToString();
+  }
+
+  static string ApplyWet(GameState gs, GameObj receiver, Actor? owner)
+  {
+    StringBuilder sb = new();
+
+    string s = ExtinguishTorch(gs, receiver);
+    if (s != "")
+      sb.Append(s);
+
     // Let's say 1 in 3 chance that an item becomes Wet that it might Rust
     if (receiver is Item item && item.CanCorrode() && gs.Rng.Next(3) != 0)
     {
-      string s = ApplyRust(gs, item, owner);
+      s = ApplyRust(gs, item, owner);
       sb.Append(s);
     }
 

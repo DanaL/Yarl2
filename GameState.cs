@@ -412,9 +412,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the water!");
 
-    string msg = FallIntoWater(actor, loc);
-    if (msg.Length > 0)
-      UI.AlertPlayer(msg);
+    FallIntoWater(actor, loc);
   }
 
   void BridgeDestroyedOverWater(Loc loc)
@@ -461,13 +459,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public string FallIntoWater(Actor actor, Loc loc)
+  public void FallIntoWater(Actor actor, Loc loc)
   {
     List<string> messages = [];
 
     // When someone jumps/falls into water, they wash ashore at a random loc
     // and incur the Exhausted condition first, find candidate shore sqs
-    var q = new Queue<Loc>();
+    Queue<Loc> q = new();
     q.Enqueue(loc);
     HashSet<Loc> visited = [];
     HashSet<Loc> shores = [];
@@ -533,7 +531,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       // What happens if there are somehow no free shore sqs? Does the mob drown??
     }
 
-    return string.Join(' ', messages).Trim();
+    UI.AlertPlayer(string.Join(' ', messages).Trim());
   }
 
   Loc NearestUnoccupied(Loc loc)
