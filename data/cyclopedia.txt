@@ -388,3 +388,6 @@ A small charm made out of tin. It doesn't seem to be magical.
 #
 flask of booze
 Dungeoneering is a nerve-wracking endeavour and sometimes you need a little something-something to steady yourself.
+#
+seeweed
+A magical plant that grows in dungeons. Much coveted by seers.
