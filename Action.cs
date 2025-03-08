@@ -206,9 +206,16 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
     {
       if (Actor is not Player)
       {
-        string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} shoots at ";
-        s+= $"{MsgFactory.CalcName(target, GameState.Player)}!";
-        GameState.UIRef().AlertPlayer(s);
+        if (GameState.LastPlayerFoV.Contains(Actor.Loc)) 
+        {
+          string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} shoots at ";
+          s+= $"{MsgFactory.CalcName(target, GameState.Player)}!";
+          GameState.UIRef().AlertPlayer(s);
+        }
+        else
+        {
+          GameState.UIRef().AlertPlayer("Twang!");
+        }
       }
 
       result = Battle.MissileAttack(Actor!, target, GameState, _ammo, 0, null);
