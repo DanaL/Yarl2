@@ -663,6 +663,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       }
     }
 
+    bool shield = ShieldEquipped();
+
     if (item is not null)
     {
       int freeHands = 2;
@@ -672,7 +674,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         if (ReadiedWeapon() is not null)
           --freeHands;
-        if (ShieldEquipped())
+        if (shield)
           --freeHands;
         if (FocusEquipped())
           --freeHands;
@@ -682,13 +684,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         return ToggleWand(item, freeHands);
 
       if (item.Equipped)
-      {
        return UnequipItem(item);
-      }
-
+      
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
-        if (freeHands == 0)
+        if (freeHands == 0 && shield)
           return (EquipingResult.NoFreeHand, ArmourParts.None);
         
         // If there is a weapon already equipped, unequip it
@@ -699,6 +699,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
 
         item.Equipped = true;
+        
         return (EquipingResult.Equipped, ArmourParts.None);
       }
       else if (item.Type == ItemType.Bow)
