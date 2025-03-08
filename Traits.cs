@@ -3047,7 +3047,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() /* { SourceId = ulong.Parse(pieces[1])}*/ },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
