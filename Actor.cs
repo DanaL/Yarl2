@@ -143,7 +143,6 @@ abstract class Actor : GameObj, IZLevel
       else if (t is GrappledTrait grappled)
       {
         Traits.Remove(t);
-        gs.StopListening(GameEventType.Death, grappled);
       }        
     }
   }
