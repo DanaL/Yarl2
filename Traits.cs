@@ -1577,6 +1577,8 @@ class GrappledTrait : BasicTrait, IGameEventListener
     {
       grappler.Traits = [..grappler.Traits.Where(t => t is not GrapplingTrait)];
     }
+
+    gs.ObjDb.DeathWatchListeners = [..gs.ObjDb.DeathWatchListeners.Where(w => w.Item1 != GrapplerID)];
   }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)

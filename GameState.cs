@@ -459,6 +459,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
+  void BreakGrapple(Actor actor)
+  {
+    GrappledTrait? grappled = actor.Traits.OfType<GrappledTrait>().FirstOrDefault();
+    grappled?.Remove(this);
+    GrapplingTrait? grappling = actor.Traits.OfType<GrapplingTrait>().FirstOrDefault();
+    if (grappling is not null && ObjDb.GetObj(grappling.VictimId) is Actor victim)
+    {
+      grappled = victim.Traits.OfType<GrappledTrait>().FirstOrDefault();
+      grappled?.Remove(this);
+    }
+  }
+
   public void FallIntoWater(Actor actor, Loc loc)
   {
     List<string> messages = [];
@@ -469,6 +481,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     q.Enqueue(loc);
     HashSet<Loc> visited = [];
     HashSet<Loc> shores = [];
+
+    // if the actor falls into water, break any grapple they are under
+    BreakGrapple(actor);
 
     // Build set of potential places for the actor to wash ashore
     while (q.Count > 0)
@@ -579,6 +594,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (actor.HasTrait<IllusionTrait>())
       return;
 
+    // if the actor falls into a chasm, break any grapple they are participating in
+    BreakGrapple(actor);
+
     bool featherFalling = actor.HasTrait<FeatherFallTrait>();
 
     landingSpot = CalcFinalLandingSpot(landingSpot);
@@ -647,17 +665,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // Making a copy is the easiest way to deal with the collection being
     // modified by the alert
     List<(ulong, IGameEventListener)> deathListeners = [..ObjDb.DeathWatchListeners];
-    bool dwFound = false;
     foreach (var (targetID, listener) in deathListeners)
     {
       if (targetID == victim.ID) 
       {
         listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
-        dwFound = true;
+        ObjDb.DeathWatchListeners = [..ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
       }
     }
-    if (dwFound)
-      ObjDb.DeathWatchListeners = [..ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
 
     RemovePerformerFromGame(victim);
 
