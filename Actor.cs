@@ -295,13 +295,33 @@ abstract class Actor : GameObj, IZLevel
           Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
           msg += VisibleTo(gs.Player) ? $" {FullName.Capitalize()}" : "A monster";
           msg += " turns to flee!";
+          
           if (HasTrait<FullBellyTrait>())
             EmptyBelly(gs);
+
+          if (Traits.OfType<GrapplingTrait>().FirstOrDefault() is GrapplingTrait gt)
+            ClearGrapple(gt, gs);
         }
       }
     }
     
     return (Stats[Attribute.HP].Curr, msg.Trim(), total);
+  }
+
+  void ClearGrapple(GrapplingTrait gt, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(gt.VictimId) is Actor victim)
+    {
+      if (victim.Traits.OfType<GrappledTrait>().FirstOrDefault() is GrappledTrait grappled)
+      {
+        grappled.Remove(gs);
+
+        string victimName = MsgFactory.CalcName(victim, gs.Player).Capitalize();
+        string grappler = MsgFactory.CalcName(this, gs.Player);
+        string s = $"{victimName} {Grammar.Conjugate(victim, "is")} released by {grappler}!";
+        gs.UIRef().AlertPlayer(s, gs, victim.Loc);
+      }
+    }
   }
 
   void EmptyBelly(GameState gs)

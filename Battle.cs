@@ -381,28 +381,30 @@ class Battle
     return "";
   }
 
-  static string ResolveGrapple(Actor actor, Actor target, GameState gs, GrapplerTrait grapple)
+  static void ResolveGrapple(Actor actor, Actor target, GameState gs, GrapplerTrait grapple)
   {
     // You can only be grappled by one thing at a time
     if (target.HasTrait<GrappledTrait>())
-      return "";
+      return;
 
     if (target.AbilityCheck(Attribute.Strength, grapple.DC, gs.Rng))
-      return "";
+      return;
 
-    var grappled = new GrappledTrait()
+    GrappledTrait grappled = new()
     {
       VictimID = target.ID,
       GrapplerID = actor.ID,
       DC = grapple.DC
     };
     gs.RegisterForEvent(GameEventType.Death, grappled, actor.ID);
-    
     target.Traits.Add(grappled);
-    var msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} grappled by "; 
-    msg += actor.FullName + "!";
 
-    return msg;
+    GrapplingTrait grappling = new() { VictimId = target.ID };
+    actor.Traits.Add(grappling);
+
+    string msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} grappled by "; 
+    msg += actor.FullName + "!";
+    gs.UIRef().AlertPlayer(msg, gs, actor.Loc);
   }
 
   static int CalcAttackMod(Actor attacker, Item? weapon)
@@ -560,6 +562,7 @@ class Battle
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
       
+      GrapplerTrait? grappler = null;
       foreach (Trait t in attacker.Traits)
       {
         if (t is KnockBackTrait)
@@ -569,10 +572,7 @@ class Battle
         }
 
         if (t is GrapplerTrait gt)
-        {
-          string msg = ResolveGrapple(attacker, target, gs, gt);
-          gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);
-        }
+          grappler = gt;
 
         if (t is CutpurseTrait && !swallowed)
         {
@@ -584,6 +584,9 @@ class Battle
           HandleFrightening(target, gs, ft);
         }
       }
+
+      if (grappler is not null)
+        ResolveGrapple(attacker, target, gs, grappler);
 
       string verb = "hit";
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)

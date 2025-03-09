@@ -1568,10 +1568,20 @@ class GrappledTrait : BasicTrait, IGameEventListener
   public GameEventType EventType => GameEventType.Death;
   public override ulong SourceId => GrapplerID;
 
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  public void Remove(GameState gs)
   {
     var victim = gs.ObjDb.GetObj(VictimID);
-    victim?.Traits.Remove(this);    
+    victim?.Traits.Remove(this);
+
+    if (gs.ObjDb.GetObj(GrapplerID) is Actor grappler)
+    {
+      grappler.Traits = [..grappler.Traits.Where(t => t is not GrapplingTrait)];
+    }
+  }
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    Remove(gs);
   }
 
   public override string AsText() => $"Grappled#{VictimID}#{GrapplerID}#{DC}";
@@ -1582,6 +1592,13 @@ class GrapplerTrait : BasicTrait
   public int DC { get; set; }
 
   public override string AsText() => $"Grappler#{DC}";
+}
+
+class GrapplingTrait : Trait
+{
+  public ulong VictimId { get; set; }
+
+  public override string AsText() => $"Grappling#{VictimId}";
 }
 
 class HeavyTrait : Trait
@@ -3069,6 +3086,7 @@ class TraitFactory
      }},
     { "Grappled", (pieces, gameObj) => new GrappledTrait() { VictimID = ulong.Parse(pieces[1]), GrapplerID = ulong.Parse(pieces[2]), DC = int.Parse(pieces[3]) } },
     { "Grappler", (pieces, gameObj) => new GrapplerTrait { DC = int.Parse(pieces[1]) }},
+    { "Grappling", (pieces, gameObj) => new GrapplingTrait { VictimId = ulong.Parse(pieces[1]) }},
     { "Heavy", (pieces, gameObj) => new HeavyTrait() },
     { "Heroism", (pieces, gameObj) => new HeroismTrait()
       {
