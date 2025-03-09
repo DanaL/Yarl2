@@ -57,68 +57,103 @@ class RaylibUserInterface : UserInterface
   protected override GameEvent PollForEvent()
   {
     if (WindowShouldClose())
+    {
+      _lastKeyTime = DateTime.UtcNow;
       return new GameEvent(GameEventType.Quiting, '\0');
+    }
 
+    // Handle the initial key press
     int ch = GetCharPressed();
     if (ch > 0)
     {
+      _lastKeyTime = DateTime.UtcNow;
       return new GameEvent(GameEventType.KeyInput, (char)ch);
     }
-  
-    bool isAnyKeyDown = false;
-    GameEvent? gameEvent = null;
 
-    if (IsKeyDown(KeyboardKey.Left))
+    ch = GetKeyPressed();
+    if (ch == (int)KeyboardKey.Escape && IsKeyPressed(KeyboardKey.Escape))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, 'h');
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.ESC);
     }
-    else if (IsKeyDown(KeyboardKey.Right))
-    {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, 'l');
+    else if (ch == (int)KeyboardKey.Enter && IsKeyPressed(KeyboardKey.Enter))
+    {        
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)13);
     }
-    else if (IsKeyDown(KeyboardKey.Up))
+    else if (ch == (int)KeyboardKey.Backspace && IsKeyPressed(KeyboardKey.Backspace))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, 'k');
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.BACKSPACE);
     }
-    else if (IsKeyDown(KeyboardKey.Down))
+    else if (ch == (int)KeyboardKey.Tab && IsKeyPressed(KeyboardKey.Tab))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, 'j');
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.TAB);
     }
-    else if (IsKeyPressed(KeyboardKey.Escape))
+
+    TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
+    double ms = delta.TotalMilliseconds;
+
+    if (ms < 150)
+      return new GameEvent(GameEventType.NoEvent, '\0');;
+
+    if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.ESC);
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'h');
     }
-    else if (IsKeyPressed(KeyboardKey.Enter)) 
+    else if (IsKeyDown(KeyboardKey.Right) || IsKeyDown(KeyboardKey.L))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, (char)13);  // ASCII CR
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'l');
     }
-    else if (IsKeyDown(KeyboardKey.Backspace)) 
+    else if (IsKeyDown(KeyboardKey.Up) || IsKeyDown(KeyboardKey.K))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.BACKSPACE);
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'k');
+    }
+    else if (IsKeyDown(KeyboardKey.Down) || IsKeyDown(KeyboardKey.J))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'j');
+    }
+    else if (IsKeyDown(KeyboardKey.Y))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'y');
+    }
+    else if (IsKeyDown(KeyboardKey.U))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'u');
+    }
+    else if (IsKeyDown(KeyboardKey.B))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'b');
+    }
+    else if (IsKeyDown(KeyboardKey.N))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 'n');
+    }
+    else if (IsKeyDown(KeyboardKey.Backspace))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.BACKSPACE);
     }
     else if (IsKeyDown(KeyboardKey.Tab))
     {
-      isAnyKeyDown = true;
-      gameEvent = new GameEvent(GameEventType.KeyInput, (char) Constants.TAB);
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.TAB);
+    }
+    else if (IsKeyDown(KeyboardKey.Escape))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, (char)Constants.ESC);
     }
     
-    if (isAnyKeyDown && gameEvent is not null)
-    {
-      TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
-      if (isAnyKeyDown && delta.TotalMilliseconds >= 150)
-      {
-        _lastKeyTime = DateTime.UtcNow;
-        return (GameEvent) gameEvent;
-      }
-    }
-   
     return new GameEvent(GameEventType.NoEvent, '\0');
   }
 
