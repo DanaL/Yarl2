@@ -80,6 +80,9 @@ abstract class UserInterface
   public bool InTutorial { get; set; } = false;
   public bool PauseForResponse { get; set; } = false;
 
+  Inputer? InputController { get; set; } = null;
+  public void SetInputController(Inputer inputer) => InputController = inputer;
+
   public UserInterface(Options opts)
   {
     _options = opts;
@@ -1263,6 +1266,7 @@ abstract class UserInterface
     if (opts.TorchLightAnimation) 
       _animations.Add(new TorchLightAnimationListener(this, gameState));
 
+    InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
     Actor currPerformer = gameState.Player;
     while (true)
@@ -1273,10 +1277,17 @@ abstract class UserInterface
 
       if (e.Type == GameEventType.KeyInput)
       {
+        char ch;
         if (opts.KeyRemaps.TryGetValue(e.Value, out var cmd))
-          InputBuffer.Enqueue(KeyMapper.CmdToKey(cmd));
+          ch = KeyMapper.CmdToKey(cmd);
         else
-          InputBuffer.Enqueue(e.Value);        
+          ch = e.Value;
+
+        InputController.Input(ch);
+        //if (opts.KeyRemaps.TryGetValue(e.Value, out var cmd))
+        //  InputBuffer.Enqueue(KeyMapper.CmdToKey(cmd));
+        //else
+        //  InputBuffer.Enqueue(e.Value);        
       }
 
       try

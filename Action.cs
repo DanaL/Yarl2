@@ -1098,10 +1098,9 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
         return result;
       }
-      else
-      {
-        GameState.Player.ReplacePendingAction(chatAction, acc!);
-      }
+
+      acc!.DeferredAction = chatAction;
+      GameState.UIRef().SetInputController(acc);
 
       return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
@@ -2502,7 +2501,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
       ui.SetPopup(new Popup("How much?", "", -1, -1));
-      var acc = new NumericInputer(gs, ui, "How much?");
+      var acc = new NumericInputer(gs, "How much?");
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropMoney, acc);
@@ -2532,20 +2531,15 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("You'll need to un-equip it first.");
       return new ActionResult() { Succcessful = false };
     }
-    else if (itemCount > 1)
+    else if (itemCount > 1 && Actor is Player)
     {
-      var dropStackAction = new DropStackAction(GameState, Actor, Choice);
-      var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
+      DropStackAction dropStackAction = new(GameState, Actor, Choice);
+      string prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
       ui.SetPopup(new Popup(prompt, "", -1, -1));
-      var acc = new NumericInputer(gs, ui, prompt);
-      if (Actor is Player player)
-      {
-        player.ReplacePendingAction(dropStackAction, acc);
-        return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
-      }
-      else
-        // When monsters can drop stuff I guess I'll have to handle that here??
-        return new ActionResult() { Succcessful = true };
+      ui.SetInputController(new NumericInputer(gs, prompt) { DeferredAction = dropStackAction });
+      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
+
+      // When monsters can drop stuff I guess I'll have to handle that here??
     }
     else
     {

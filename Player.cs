@@ -294,7 +294,7 @@ class Player : Actor
     return $"{Lineage.ToString().ToLower().IndefArticle()} who majored in {major}.";
   }
 
-  List<string> CharacterSheet()
+  public List<string> CharacterSheet()
   {
     List<string> lines = [];
 
@@ -621,75 +621,9 @@ class Player : Actor
     return '\0';
   }
 
-  static Loc SingleAdjTile(GameState gs, Loc centre, TileType seeking)
-  {
-    var adj = Util.Adj8Locs(centre)
-                  .Where(loc => gs.TileAt(loc).Type == seeking);
-    return adj.Count() == 1 ? adj.First() : Loc.Nowhere;
-  }
-
   void SetupSpellcastingMenu(GameState gs)
   {
     _inputController = new SpellcastMenu(gs);
-  }
-
-  void PickupCommand(GameState gs, UserInterface ui)
-  {   
-    List<Item> items = [];
-    List<Item> itemsInPit = [];
-    foreach (Item item in gs.ObjDb.VisibleItemsAt(Loc))
-    {
-      if (item.HasTrait<BlockTrait>())
-        continue;
-      if (item.HasTrait<AffixedTrait>())
-        continue;
-
-      if (item.HasTrait<InPitTrait>())
-        itemsInPit.Add(item);
-      else
-        items.Add(item);
-    }
-
-    bool playerInPit = HasTrait<InPitTrait>();
-    if (itemsInPit.Count == 1 && !playerInPit)
-    {
-      ui.AlertPlayer($"You cannot reach {itemsInPit[0].FullName.DefArticle()}.");      
-    }
-    else if (itemsInPit.Count > 0 && !playerInPit)
-    {
-      ui.AlertPlayer("You cannot reach the items in the pit.");      
-    }
-
-    // Note that in the current state of the game, an item that is on a pit square
-    // will be in the pit. There's (currently) no concept of floating items so I
-    // don't have to the worry about the situation where there are items in the pit
-    // and items floating above the pit and what a player can and cannot reach in
-    // that situation. This will change if/when I add floating items.
-    if (itemsInPit.Count > 0)
-    {
-      items = itemsInPit;
-    }
-
-    if (items.Count == 0)
-    {
-      ui.AlertPlayer("There's nothing here you can pick up.");      
-    }
-
-    int numStacks = items.DistinctBy(i => i.Name).Count();
-    if (numStacks == 1)
-    {
-      PickupItemAction action = new(gs, this);
-      // A bit kludgy but this sets up the Action as though
-      // the player had selected the first item in a list of one
-      LongListResult res = new() { Values = [items[0].ID] };
-      action.ReceiveUIResult(res);
-      ActionQ.Enqueue(action);
-    }
-    else
-    {
-      _inputController = new PickupMenu(items, gs) { DeferredAction = new PickupItemAction(gs, this) };
-      //_deferred = new PickupItemAction(gs, this);
-    }
   }
 
   public override void TakeTurn(GameState gs)
@@ -814,31 +748,15 @@ class Player : Actor
         CalcMovementAction(gameState, ch);
       else if (IsMoveKey(char.ToLower(ch)))
         StartRunning(gameState, ch);
-      else if (ch == '>')
-        ActionQ.Enqueue(new DownstairsAction(gameState));
-      else if (ch == '<')
-        ActionQ.Enqueue(new UpstairsAction(gameState));
+      
       else if (ch == 'i')
       {
         _inputController = new InventoryDetails(gameState, "You are carrying", InvOption.MentionMoney);
         _deferred = new CloseMenuAction(gameState);
       }
-      else if (ch == ',')
-      {
-        PickupCommand(gameState, ui);
-      }
-      else if (ch == 'a')
-      {
-        Inventory.ShowMenu(ui, new InventoryOptions("Use which item?"));
-        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]) { DeferredAction = new UseItemAction(gameState, this) };        
-      }      
-      else if (ch == 'd')
-      {
-        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
-        HashSet<char> slots = [.. Inventory.UsedSlots()];
-        slots.Add('$');
-        _inputController = new Inventorier(gameState, slots) { DeferredAction = new DropItemAction(gameState, this) };
-      }
+      
+       
+      
       else if (ch == 'f')
       {
         // If the player has an equipped bow, automatically select that, otherwise
@@ -853,10 +771,7 @@ class Player : Actor
           _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]) { DeferredAction = new FireSelectedBowAction(gameState, this) };
         }
       }
-      else if (ch == 'F')
-      {
-        _inputController = new DirectionalInputer(gameState) { DeferredAction = new BashAction(gameState, this) };
-      }
+      
       else if (ch == 't')
       {
         // Eventually I'll want to remember the last item thrown
@@ -866,88 +781,12 @@ class Player : Actor
         _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
-      else if (ch == 'e')
-      {
-        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]);
-        _deferred = new ToggleEquippedAction(gameState, this);
-        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?" });
-      }
-      else if (ch == 'c')
-      {
-        Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.OpenDoor);
-        if (singleDoor != Loc.Nowhere)
-          return new CloseDoorAction(gameState, this) {  Loc = singleDoor };
-
-        _inputController = new DirectionalInputer(gameState);
-        _deferred = new CloseDoorAction(gameState, this);
-      }
-      else if (ch == 'C')
-      {
-        _inputController = new DirectionalInputer(gameState);
-        _deferred = new ChatAction(gameState, this);
-      }
-      else if (ch == 'o')
-      {
-        Loc singleDoor = SingleAdjTile(gameState, Loc, TileType.ClosedDoor);
-        if (singleDoor != Loc.Nowhere)
-          return new OpenDoorAction(gameState, this) { Loc = singleDoor };
-
-        _inputController = new DirectionalInputer(gameState);
-        _deferred = new OpenDoorAction(gameState, this);
-      }
-      else if (ch == 'Q')
-      {
-        _inputController = new YesOrNoInputer(gameState) { DeferredAction = new QuitAction() };
-        ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
-      }
-      else if (ch == 'S' && !ui.InTutorial)
-      {
-        _inputController = new YesOrNoInputer(gameState) { DeferredAction = new SaveGameAction() };
-        ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
-      }
-      else if (ch == 'S' && ui.InTutorial)
-      {
-        ui.SetPopup(new Popup("Saving is disabled in the tutorial.", "", -1, -1));
-      }
-      else if (ch == 's')
-      {
-        ActionQ.Enqueue(new SearchAction(gameState, this));        
-      }
-      else if (ch == '*')
-      {
-        var lines = ui.MessageHistory.Select(m => m.Fmt);
-        _inputController = new LongMessagerInputer(gameState, ui, lines) { DeferredAction = new NullAction() };        
-      }
-      else if (ch == '@')
-      {
-        var lines = CharacterSheet();
-        _inputController = new LongMessagerInputer(gameState, ui, lines) { DeferredAction = new NullAction() };
-      }
-      else if (ch == '/')
-      {    
-        int x = (int)ui.CheatSheetMode + 1;
-        ui.CheatSheetMode = (CheatSheetMode)(x % 4);
-        _deferred = new NullAction();
-      }
-      else if (ch == 'M')
-      {
-        if (gameState.CurrDungeonID == 0)
-          ui.AlertPlayer("Not in the wilderness.");
-        else
-          gameState.UIRef().DisplayMapView(gameState);
-      }
-      else if (ch == '?')
-      {
-        _inputController = new HelpScreenInputer(gameState, gameState.UIRef());        
-      }
+      
       else if (ch == '=')
       {
         _inputController = new OptionsScreen(gameState);        
       }
-      else if (ch == 'x')
-      {
-        _inputController = new Examiner(gameState, Loc);
-      }
+      
       else if (ch == 'W')
       {
         _inputController = new WizardCommander(gameState);
@@ -968,8 +807,7 @@ class Player : Actor
           SetupSpellcastingMenu(gameState);
         }
       }
-      else if (ch == ' ' || ch == '.')
-        return new PassAction();
+      
     }
 
     return new NullAction();
