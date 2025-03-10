@@ -373,6 +373,8 @@ class Aimer : Inputer
       Done = true;
       Success = false;
 
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       ExpireAnimation();
       return;
     }
@@ -383,14 +385,14 @@ class Aimer : Inputer
       _anim.Target = _monsters[next];
       _targeted = next;
     }
-
     else if (ch == '\n' || ch == '\r' || ch == 'f')
     {
       Done = true;
       Success = true;
 
+      GS.UIRef().ClosePopup();
       ExpireAnimation();
-
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
 
       return;

@@ -235,6 +235,18 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       GS.Player.QueueAction(new SearchAction(GS, GS.Player));
     }
+    else if (ch == 't')
+    {
+      // Eventually I'll want to remember the last item thrown
+      // so the player doesn't need to always select an item if
+      // they're throwing draggers several turns in a row
+      gs.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?" });
+      Inventorier inv = new(GS, [.. GS.Player.Inventory.UsedSlots()])
+      {
+        DeferredAction = new ThrowSelectionAction(GS, GS.Player)
+      };
+      ui.SetInputController(inv);
+    }
     else if (ch == 'x')
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));

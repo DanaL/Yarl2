@@ -2473,8 +2473,8 @@ class ThrowSelectionAction(GameState gs, Player player) : Action(gs, player)
     int range = 7 + player.Stats[Attribute.Strength].Curr;
     if (range < 2)
       range = 2;
-    Aimer acc = new(GameState, player.Loc, range);
-    player.ReplacePendingAction(action, acc);
+    Aimer acc = new(GameState, player.Loc, range) { DeferredAction = action };
+    GameState.UIRef().SetInputController(acc);
 
     return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
   }

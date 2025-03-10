@@ -772,15 +772,7 @@ class Player : Actor
         }
       }
       
-      else if (ch == 't')
-      {
-        // Eventually I'll want to remember the last item thrown
-        // so the player doesn't need to always select an item if
-        // they're throwing draggers several turns in a row
-        Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?" });
-        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]);
-        _deferred = new ThrowSelectionAction(gameState, this);
-      }
+      
       
       else if (ch == '=')
       {
