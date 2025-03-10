@@ -631,7 +631,6 @@ class Player : Actor
   void SetupSpellcastingMenu(GameState gs)
   {
     _inputController = new SpellcastMenu(gs);
-    _deferred = new NullAction();
   }
 
   void PickupCommand(GameState gs, UserInterface ui)
@@ -917,14 +916,12 @@ class Player : Actor
       else if (ch == '*')
       {
         var lines = ui.MessageHistory.Select(m => m.Fmt);
-        _inputController = new LongMessagerInputer(gameState, ui, lines);
-        _deferred = new NullAction();
+        _inputController = new LongMessagerInputer(gameState, ui, lines) { DeferredAction = new NullAction() };        
       }
       else if (ch == '@')
       {
         var lines = CharacterSheet();
-        _inputController = new LongMessagerInputer(gameState, ui, lines);
-        _deferred = new NullAction();
+        _inputController = new LongMessagerInputer(gameState, ui, lines) { DeferredAction = new NullAction() };
       }
       else if (ch == '/')
       {    
@@ -941,23 +938,19 @@ class Player : Actor
       }
       else if (ch == '?')
       {
-        _inputController = new HelpScreenInputer(gameState, gameState.UIRef());
-        _deferred = new NullAction();
+        _inputController = new HelpScreenInputer(gameState, gameState.UIRef());        
       }
       else if (ch == '=')
       {
-        _inputController = new OptionsScreen(gameState);
-        _deferred = new NullAction();
+        _inputController = new OptionsScreen(gameState);        
       }
       else if (ch == 'x')
       {
         _inputController = new Examiner(gameState, Loc);
-        _deferred = new NullAction();
       }
       else if (ch == 'W')
       {
         _inputController = new WizardCommander(gameState);
-        _deferred = new NullAction();
       }
       else if (ch == 'z')
       {
