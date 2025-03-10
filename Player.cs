@@ -415,28 +415,6 @@ class Player : Actor
     return lines;
   }
 
-  public void FireReadedBow(Item bow, GameState gs)
-  {    
-    int range;
-    Item arrow;
-    if (bow.Traits.OfType<AmmoTrait>().FirstOrDefault() is AmmoTrait ammoTrait)
-    {
-      arrow = ammoTrait.Arrow(gs);
-      range = ammoTrait.Range;
-    }
-    else
-    {
-      arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
-      range = 6;
-    }
-
-    int archeryBonus = 0;
-    if (Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
-      archeryBonus = ab.Curr;
-    ArrowShotAction missleAction = new(gs, this, bow, arrow, archeryBonus);
-    _inputController = new Aimer(gs, Loc, range) { DeferredAction = missleAction };
-  }
-
   public void SetFollowupAction(Action action, Inputer inputer)
   {
     FollowupAction = action;
@@ -744,9 +722,7 @@ class Player : Actor
     {     
       ui.ClosePopup();
 
-      if (IsMoveKey(ch))
-        CalcMovementAction(gameState, ch);
-      else if (IsMoveKey(char.ToLower(ch)))
+      if (IsMoveKey(char.ToLower(ch)))
         StartRunning(gameState, ch);
       
       else if (ch == 'i')
@@ -754,24 +730,6 @@ class Player : Actor
         _inputController = new InventoryDetails(gameState, "You are carrying", InvOption.MentionMoney);
         _deferred = new CloseMenuAction(gameState);
       }
-      
-       
-      
-      else if (ch == 'f')
-      {
-        // If the player has an equipped bow, automatically select that, otherwise
-        // have them pick a bow (and then equip it)
-        if (Inventory.ReadiedBow() is Item bow)
-        {
-          FireReadedBow(bow, gameState);
-        }
-        else
-        {          
-          Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Fire what?" });
-          _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]) { DeferredAction = new FireSelectedBowAction(gameState, this) };
-        }
-      }
-      
       
       
       else if (ch == '=')

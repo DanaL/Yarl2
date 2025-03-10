@@ -557,7 +557,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (item.Type == ItemType.Bow)
     {
       GameState!.ClearMenu();
-      ((Player)Actor).FireReadedBow(item, GameState);      
+      PlayerCommandController.FireReadedBow(item, GameState);
+      
       return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 

@@ -1,5 +1,16 @@
 ﻿
-using Yarl2;
+// Yarl2 - A roguelike computer RPG
+// Written in 2024 by Dana Larose <ywg.dana@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright
+// and related and neighboring rights to this software to the public domain
+// worldwide. This software is distributed without any warranty.
+//
+// You should have received a copy of the CC0 Public Domain Dedication along 
+// with this software. If not, 
+// see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+namespace Yarl2;
 
 class PlayerCommandController(GameState gs) : Inputer(gs)
 {
@@ -91,6 +102,29 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
 
     gs.Player.QueueAction(new BumpAction(gs, gs.Player, gs.Player.Loc.Move(dr, dc)));
+  }
+
+  static public void FireReadedBow(Item bow, GameState gs)
+  {    
+    int range;
+    Item arrow;
+    if (bow.Traits.OfType<AmmoTrait>().FirstOrDefault() is AmmoTrait ammoTrait)
+    {
+      arrow = ammoTrait.Arrow(gs);
+      range = ammoTrait.Range;
+    }
+    else
+    {
+      arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
+      range = 6;
+    }
+
+    int archeryBonus = 0;
+    if (gs.Player.Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
+      archeryBonus = ab.Curr;
+    ArrowShotAction missleAction = new(gs, gs.Player, bow, arrow, archeryBonus);
+    Aimer aimer = new(gs, gs.Player.Loc, range) { DeferredAction = missleAction };
+    gs.UIRef().SetInputController(aimer);
   }
 
   static void PickupCommand(GameState gs, UserInterface ui)
@@ -201,6 +235,25 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         DeferredAction = new ToggleEquippedAction(GS, GS.Player)
       };
       ui.SetInputController(inven);      
+    }
+    else if (ch == 'f')
+    {
+      // If the player has an equipped bow, automatically select that, otherwise
+      // have them pick a bow (and then equip it)
+      if (GS.Player.Inventory.ReadiedBow() is Item bow)
+      {
+        FireReadedBow(bow, GS);
+      }
+      else
+      {
+        GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Fire what?" });
+        Inventorier inv = new(GS, [.. GS.Player.Inventory.UsedSlots()]) 
+        { 
+          DeferredAction = new FireSelectedBowAction(GS, GS.Player) 
+        };
+
+        GS.UIRef().SetInputController(inv);
+      }
     }
     else if (ch == 'F')
     {

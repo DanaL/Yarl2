@@ -2428,7 +2428,7 @@ class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)
     }
     else
     {
-      player.FireReadedBow(item, GameState);
+      PlayerCommandController.FireReadedBow(item, GameState);
       
       result.EnergyCost = 0.0;
       result.Succcessful = false;

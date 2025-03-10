@@ -180,7 +180,7 @@ namespace Yarl2
 
         if (File.Exists(optionsPath))
         {
-          var json = File.ReadAllText(optionsPath);
+          string json = File.ReadAllText(optionsPath);
           var opts = JsonSerializer.Deserialize<Options>(json);
           if (opts is not null)
             options = opts;
