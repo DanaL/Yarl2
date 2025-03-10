@@ -25,14 +25,12 @@ class ShopMenuItem(char slot, Item item, int stockCount, int price)
 class ShopMenuInputer : Inputer
 {
   protected Mob Shopkeeper { get; set; }
-  protected GameState Gs { get; set; }
   protected Dictionary<char, ShopMenuItem> MenuItems { get; set; } = [];
   protected string Blurb { get; set; }
   protected bool SingleSelection { get; set; } = false;
 
-  public ShopMenuInputer(Actor shopkeeper, string blurb, GameState gs)
+  public ShopMenuInputer(Actor shopkeeper, string blurb, GameState gs) : base(gs)
   {
-    Gs = gs;
     Blurb = blurb;
     Shopkeeper = (Mob)shopkeeper;
     MenuItems = MenuFromInventory(Shopkeeper);
@@ -53,9 +51,9 @@ class ShopMenuInputer : Inputer
     else
       markup = 1.0;
     
-    if (Gs.Player.HasTrait<LikeableTrait>())
+    if (GS.Player.HasTrait<LikeableTrait>())
       markup -= 0.33;
-    if (Gs.Player.HasTrait<RepugnantTrait>())
+    if (GS.Player.HasTrait<RepugnantTrait>())
       markup += 2.0;
 
     return markup;
@@ -85,7 +83,7 @@ class ShopMenuInputer : Inputer
       Done = true;
       Success = false;
     }
-    else if ((ch == '\n' || ch == '\r') && Gs.Player.Inventory.Zorkmids >= TotalInvoice())
+    else if ((ch == '\n' || ch == '\r') && GS.Player.Inventory.Zorkmids >= TotalInvoice())
     {
       Done = true;
       Success = true;
@@ -203,7 +201,7 @@ class ShopMenuInputer : Inputer
         sb.Append('\n');
       }
 
-      if (invoice > Gs.Player.Inventory.Zorkmids)
+      if (invoice > GS.Player.Inventory.Zorkmids)
       {
         sb.Append("\n[brightred You don't have enough money for all that!]");
       }
@@ -220,22 +218,20 @@ class ShopMenuInputer : Inputer
   {
     string inventoryScreen = MenuScreen(blurb);  
 
-    Gs.UIRef().SetPopup(new Popup(inventoryScreen, Shopkeeper.FullName, -1, -1));
+    GS.UIRef().SetPopup(new Popup(inventoryScreen, Shopkeeper.FullName, -1, -1));
   }
 }
 
 class InnkeeperInputer : Inputer
 {
-  GameState GameState { get; set; } 
   Actor Shopkeeper { get; set; }
   bool InsufficentFunds { get; set; }
   string Selection { get; set; } = "";
   int Zorkmids { get; set; }
 
-  public InnkeeperInputer(Actor shopkeeper, GameState gs) { 
-    Shopkeeper = shopkeeper;
-    GameState = gs;
-
+  public InnkeeperInputer(Actor shopkeeper, GameState gs) : base(gs)
+  {
+    Shopkeeper = shopkeeper;    
     WritePopup();
   }
 
@@ -249,7 +245,7 @@ class InnkeeperInputer : Inputer
       Success = false;
       return;
     }
-    else if (ch == 'a' && GameState.Player.Inventory.Zorkmids < 2)
+    else if (ch == 'a' && GS.Player.Inventory.Zorkmids < 2)
     {
       InsufficentFunds = true;
     }
@@ -260,7 +256,7 @@ class InnkeeperInputer : Inputer
       Done = true;
       Success = true;
     }
-    else if (ch == 'b' && GameState.Player.Inventory.Zorkmids < 5)
+    else if (ch == 'b' && GS.Player.Inventory.Zorkmids < 5)
     {
       InsufficentFunds = true;
     }
@@ -277,7 +273,7 @@ class InnkeeperInputer : Inputer
 
   string Blurb()
   {
-    return GameState.Rng.Next(4) switch
+    return GS.Rng.Next(4) switch
     {
       0 => "Come to sooth your dusty throat? We've got just your poison!",
       1 => "What'll it be?",
@@ -288,7 +284,7 @@ class InnkeeperInputer : Inputer
 
   protected void WritePopup()
   {
-    SimpleFact tavernName = GameState.FactDb.FactCheck("TavernName") as SimpleFact 
+    SimpleFact tavernName = GS.FactDb.FactCheck("TavernName") as SimpleFact 
                                       ?? throw new Exception("Should never not be a tavern name");
      var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\nWelcome to [LIGHTBLUE ");
@@ -303,7 +299,7 @@ class InnkeeperInputer : Inputer
     if (InsufficentFunds)
       sb.Append("\n[BRIGHTRED You don't have enough money!]");
 
-    GameState.UIRef().SetPopup(new Popup(sb.ToString(), Shopkeeper.FullName, -1, -1));
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), Shopkeeper.FullName, -1, -1));
   }
 
   public override UIResult GetResult() => new ServiceResult()
@@ -323,7 +319,7 @@ class SmithyInputer : ShopMenuInputer
   {    
     _offerRepair = false;
     _offerUpgrade = false;
-    foreach (Item item in Gs.Player.Inventory.Items())
+    foreach (Item item in GS.Player.Inventory.Items())
     {
       if (item.HasTrait<RustedTrait>())
         _offerRepair = true;
@@ -375,18 +371,18 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 1)
     {
-      Gs.Player.ReplacePendingAction(new ShoppingCompletedAction(Gs, Shopkeeper), this);
+      GS.Player.ReplacePendingAction(new ShoppingCompletedAction(GS, Shopkeeper), this);
       base.Input(ch);
     }
     else if (menuState == 2)
     {
-      Gs.Player.ReplacePendingAction(new RepairItemAction(Gs, Shopkeeper), this);
+      GS.Player.ReplacePendingAction(new RepairItemAction(GS, Shopkeeper), this);
       blurb = "What would you like repaired?";
       base.Input(ch);
     }
     else if (menuState == 3 && MenuItems.ContainsKey(ch))
     {
-      Gs.Player.ReplacePendingAction(new UpgradeItemAction(Gs, Shopkeeper), this);
+      GS.Player.ReplacePendingAction(new UpgradeItemAction(GS, Shopkeeper), this);
       _itemToEnchant = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
       MenuItems = ReagentMenu();      
@@ -405,7 +401,7 @@ class SmithyInputer : ShopMenuInputer
     Dictionary<char, ShopMenuItem> menuItems = [];
 
     double markup = CalcMarkup();
-    var reagents = Gs.Player.Inventory.Items()
+    var reagents = GS.Player.Inventory.Items()
                             .Where(i => i.Type == ItemType.Reagent)
                             .OrderBy(i => i.Slot);
     foreach (Item item in reagents)
@@ -421,7 +417,7 @@ class SmithyInputer : ShopMenuInputer
   Dictionary<char, ShopMenuItem> UpgradeMenu()
   {
     Dictionary<char, ShopMenuItem> menuItems = [];
-    foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
+    foreach (Item item in GS.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
       if (menuItems.ContainsKey(item.Slot))
         continue;
@@ -442,7 +438,7 @@ class SmithyInputer : ShopMenuInputer
     Dictionary<char, ShopMenuItem> menuItems = [];
     int slot = 0;
     
-    foreach (Item item in Gs.Player.Inventory.Items().OrderBy(i => i.Slot))
+    foreach (Item item in GS.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
       if (item.Traits.OfType<RustedTrait>().FirstOrDefault() is not RustedTrait rust)
         continue;
@@ -456,11 +452,11 @@ class SmithyInputer : ShopMenuInputer
 
   protected override void WritePopup(string blurb)
   {
-    if (!Gs.Town.Smithy.Contains(Shopkeeper.Loc))
+    if (!GS.Town.Smithy.Contains(Shopkeeper.Loc))
     {
       string s = Shopkeeper.Appearance.IndefArticle().Capitalize();
       s += ".\n\nI'm off the clock. Come see me at the forge tomorrow.";
-      Gs.UIRef().SetPopup(new Popup(s, Shopkeeper.FullName, -1, -1));
+      GS.UIRef().SetPopup(new Popup(s, Shopkeeper.FullName, -1, -1));
       return;
     }
 
@@ -505,7 +501,7 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 4)
     {
-      var (item, _) = Gs.Player.Inventory.ItemAt(_itemToEnchant);
+      var (item, _) = GS.Player.Inventory.ItemAt(_itemToEnchant);
       string txt = $"Try to enchant your [ICEBLUE {item!.FullName}] with what?";
       dialogueText = MenuScreen(txt);
     }
@@ -514,7 +510,7 @@ class SmithyInputer : ShopMenuInputer
       dialogueText = "Hmm this shouldn't happen?";
     }
 
-    Gs.UIRef().SetPopup(new Popup(dialogueText, Shopkeeper.FullName, -1, -1));
+    GS.UIRef().SetPopup(new Popup(dialogueText, Shopkeeper.FullName, -1, -1));
   }
 
   public override UIResult GetResult()
@@ -600,10 +596,9 @@ class WitchInputer : Inputer
     { "ersatz elevator", new SpellInfo(25, 3, "") }
   };
 
-  public WitchInputer(Actor witch, GameState gs)
+  public WitchInputer(Actor witch, GameState gs) : base(gs)
   {
     Witch = witch;
-    GS = gs;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
     if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
@@ -846,16 +841,14 @@ class PriestInputer : Inputer
 {
   readonly Actor Priest;
   readonly string Blurb;
-  readonly GameState Gs;
   string Service { get; set; } = "";
   List<char> Options { get; set; } = [];
 
-  public PriestInputer(Actor priest, string blurb, GameState gs)
+  public PriestInputer(Actor priest, string blurb, GameState gs) : base(gs)
   {
     Priest = priest;
     Blurb = blurb;
-    Gs = gs;
-
+    
     WritePopup(blurb);
   }
 
@@ -884,7 +877,7 @@ class PriestInputer : Inputer
     sb.Append("\n\n");
 
     Options = [];
-    if (Gs.Player.Inventory.Zorkmids >= 50)
+    if (GS.Player.Inventory.Zorkmids >= 50)
     {
       sb.Append("a) Absolution. [YELLOW $]50\n");
       Options.Add('a');
@@ -894,7 +887,7 @@ class PriestInputer : Inputer
       sb.Append("Ah child, Huntokar would expect a donation of at least 50 zorkmids for this service.\n");
     }
 
-    Gs.UIRef().SetPopup(new Popup(sb.ToString(), Priest.FullName, -1, -1));
+    GS.UIRef().SetPopup(new Popup(sb.ToString(), Priest.FullName, -1, -1));
   }
 
   public override UIResult GetResult()

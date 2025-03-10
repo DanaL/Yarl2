@@ -1578,7 +1578,7 @@ class VillagePupBehaviour : IBehaviour
     sb.Append("Arf! Arf!");
 
     gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1));
-    return (new PassAction(), new PauseForMoreInputer());
+    return (new PassAction(), new PauseForMoreInputer(gs));
   }
 }
 
@@ -1885,7 +1885,7 @@ class SmithBehaviour : NPCBehaviour
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer());
+      return (new NullAction(), new PauseForMoreInputer(gs));
     }
 
     var acc = new SmithyInputer(actor, Blurb(gs), gs);
@@ -2045,7 +2045,7 @@ class GrocerBehaviour : NPCBehaviour
   {
     if (gs.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer());
+      return (new NullAction(), new PauseForMoreInputer(gs));
     }
     var sb = new StringBuilder();
     sb.Append("\"Welcome to the ");
@@ -2129,7 +2129,7 @@ class NPCBehaviour : IBehaviour, IDialoguer
   {
     if (gameState.Player.HasTrait<ShunnedTrait>())
     {
-      return (new NullAction(), new PauseForMoreInputer());
+      return (new NullAction(), new PauseForMoreInputer(gameState));
     }
 
     Dialoguer acc = new(actor, gameState);

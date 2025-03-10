@@ -338,7 +338,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
         {
           ui.SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer(GameState));
         }
         else
         {
@@ -351,7 +351,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
         {
           ui.SetPopup(new Popup("Really jump into the chasm? (y/n)", "", -1, -1));
-          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer());
+          GameState.Player.ReplacePendingAction(new DiveAction(GameState, player, Loc, true), new YesOrNoInputer(GameState));
         }
         else
         {

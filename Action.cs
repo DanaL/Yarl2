@@ -2502,7 +2502,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
       var dropMoney = new DropZorkmidsAction(GameState, Actor);
       ui.SetPopup(new Popup("How much?", "", -1, -1));
-      var acc = new NumericInputer(ui, "How much?");
+      var acc = new NumericInputer(gs, ui, "How much?");
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropMoney, acc);
@@ -2537,7 +2537,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       var dropStackAction = new DropStackAction(GameState, Actor, Choice);
       var prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
       ui.SetPopup(new Popup(prompt, "", -1, -1));
-      var acc = new NumericInputer(ui, prompt);
+      var acc = new NumericInputer(gs, ui, prompt);
       if (Actor is Player player)
       {
         player.ReplacePendingAction(dropStackAction, acc);
@@ -3195,7 +3195,7 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
     {
       char[] slots = player.Inventory.UsedSlots();
       player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
-      Inputer inputer = new Inventorier([.. slots]);
+      Inputer inputer = new Inventorier(GameState!, [.. slots]);
       player.ReplacePendingAction(ReplacementAction, inputer);
     }
 

@@ -433,10 +433,8 @@ class Player : Actor
     int archeryBonus = 0;
     if (Stats.TryGetValue(Attribute.ArcheryBonus, out var ab))
       archeryBonus = ab.Curr;
-    var missleAction = new ArrowShotAction(gs, this, bow, arrow, archeryBonus);
-
-    var acc = new Aimer(gs, Loc, range);
-    ReplacePendingAction(missleAction, acc);
+    ArrowShotAction missleAction = new(gs, this, bow, arrow, archeryBonus);
+    _inputController = new Aimer(gs, Loc, range) { DeferredAction = missleAction };
   }
 
   public void SetFollowupAction(Action action, Inputer inputer)
@@ -833,16 +831,14 @@ class Player : Actor
       else if (ch == 'a')
       {
         Inventory.ShowMenu(ui, new InventoryOptions("Use which item?"));
-        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
-        _deferred = new UseItemAction(gameState, this);
+        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]) { DeferredAction = new UseItemAction(gameState, this) };        
       }      
       else if (ch == 'd')
       {
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
         HashSet<char> slots = [.. Inventory.UsedSlots()];
         slots.Add('$');
-        _inputController = new Inventorier(slots);
-        _deferred = new DropItemAction(gameState, this);
+        _inputController = new Inventorier(gameState, slots) { DeferredAction = new DropItemAction(gameState, this) };
       }
       else if (ch == 'f')
       {
@@ -855,14 +851,12 @@ class Player : Actor
         else
         {          
           Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Fire what?" });
-          _inputController = new Inventorier([.. Inventory.UsedSlots()]);
-          _deferred = new FireSelectedBowAction(gameState, this);
+          _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]) { DeferredAction = new FireSelectedBowAction(gameState, this) };
         }
       }
       else if (ch == 'F')
       {
-        _inputController = new DirectionalInputer(gameState);
-        _deferred = new BashAction(gameState, this);
+        _inputController = new DirectionalInputer(gameState) { DeferredAction = new BashAction(gameState, this) };
       }
       else if (ch == 't')
       {
@@ -870,12 +864,12 @@ class Player : Actor
         // so the player doesn't need to always select an item if
         // they're throwing draggers several turns in a row
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?" });
-        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
+        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]);
         _deferred = new ThrowSelectionAction(gameState, this);
       }
       else if (ch == 'e')
       {
-        _inputController = new Inventorier([.. Inventory.UsedSlots()]);
+        _inputController = new Inventorier(gameState, [.. Inventory.UsedSlots()]);
         _deferred = new ToggleEquippedAction(gameState, this);
         Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Equip what?" });
       }
@@ -904,13 +898,13 @@ class Player : Actor
       }
       else if (ch == 'Q')
       {
-        _inputController = new YesOrNoInputer();
+        _inputController = new YesOrNoInputer(gameState);
         _deferred = new QuitAction();
         ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
       }
       else if (ch == 'S' && !ui.InTutorial)
       {
-        _inputController = new YesOrNoInputer();
+        _inputController = new YesOrNoInputer(gameState);
         _deferred = new SaveGameAction();
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
       }
@@ -925,13 +919,13 @@ class Player : Actor
       else if (ch == '*')
       {
         var lines = ui.MessageHistory.Select(m => m.Fmt);
-        _inputController = new LongMessagerInputer(ui, lines);
+        _inputController = new LongMessagerInputer(gameState, ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == '@')
       {
         var lines = CharacterSheet();
-        _inputController = new LongMessagerInputer(ui, lines);
+        _inputController = new LongMessagerInputer(gameState, ui, lines);
         _deferred = new NullAction();
       }
       else if (ch == '/')
@@ -949,7 +943,7 @@ class Player : Actor
       }
       else if (ch == '?')
       {
-        _inputController = new HelpScreenInputer(gameState.UIRef());
+        _inputController = new HelpScreenInputer(gameState, gameState.UIRef());
         _deferred = new NullAction();
       }
       else if (ch == '=')

@@ -818,17 +818,14 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
 
 class SpellcastMenu : Inputer
 {  
-  readonly GameState GS;
   int row;
   bool SpellSelection { get; set; } = true;
   string PopupText { get; set; } = "";
   int PopupRow { get; set; } = -1;
   List<string> SpellList { get; set; } = [];
 
-  public SpellcastMenu(GameState gs)
-  {   
-    GS = gs;
-
+  public SpellcastMenu(GameState gs) : base(gs)
+  {       
     SetSpellMenu();
 
     row = 0;
@@ -907,15 +904,15 @@ class SpellcastMenu : Inputer
         PopupRow = -3;
         break;
       case "mage armour":
-        inputer = new DummyInputer();
+        inputer = new DummyInputer(GS);
         GS.Player.ReplacePendingAction(new CastMageArmour(GS, GS.Player), inputer);
         break;
       case "illume":
-        inputer = new DummyInputer();
+        inputer = new DummyInputer(GS);
         GS.Player.ReplacePendingAction(new CastIllume(GS, GS.Player), inputer);
         break;
       case "slumbering song":
-        inputer = new DummyInputer();
+        inputer = new DummyInputer(GS);
         GS.Player.ReplacePendingAction(new CastSlumberingSong(GS, GS.Player), inputer);
         break;
       case "spark arc":
@@ -926,7 +923,7 @@ class SpellcastMenu : Inputer
         PopupRow = -3;
         break;
       case "ersatz elevator":
-        inputer = new CharSetInputer(['<', '>']);
+        inputer = new CharSetInputer(GS, ['<', '>']);
         GS.Player.ReplacePendingAction(new CastErsatzElevator(GS, GS.Player), inputer);
         SpellSelection = false;
         PopupText = "Which direction? [LIGHTBLUE <] for up, [LIGHTBLUE >] for down";        
@@ -939,7 +936,7 @@ class SpellcastMenu : Inputer
         PopupRow = -3;
         break;
       case "phase door":
-        inputer = new DummyInputer();
+        inputer = new DummyInputer(GS);
         GS.Player.ReplacePendingAction(new CastPhaseDoor(GS, GS.Player), inputer);
         break;
       case "cone of cold":

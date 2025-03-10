@@ -18,7 +18,7 @@ namespace Yarl2;
 // smarter could come up with a cleaner solution but this is what I hit on
 // when I decided to switch my Game Loop to be non-blocking
 
-abstract class Inputer
+abstract class Inputer(GameState gs)
 {
   public virtual bool Success { get; set; }
   public virtual bool Done { get; set; }
@@ -29,6 +29,16 @@ abstract class Inputer
 
   public virtual void OnUpdate() { }
 
+  protected GameState GS { get; set; } = gs;
+
+  protected void QueueDeferredAction()
+  {
+    if (DeferredAction is not null)
+    {
+      DeferredAction.ReceiveUIResult(GetResult());
+      GS.Player.QueueAction(DeferredAction);
+    }
+  }
   public virtual UIResult GetResult()
   {
     return new UIResult();
@@ -39,7 +49,7 @@ record LocDetails(string Title, string Desc, char Ch);
 
 class DummyInputer : Inputer
 {
-  public DummyInputer()
+  public DummyInputer(GameState gs) : base(gs) 
   {
     Done = true;
     Success = true;
@@ -51,16 +61,14 @@ class DummyInputer : Inputer
 // I might be able to merge some code between this and AimAccumulator
 class Examiner : Inputer
 {
-  readonly GameState _gs;
   readonly List<Loc> _targets = [];
   int _currTarget;
   (int, int) _curr;
   readonly Dictionary<string, CyclopediaEntry> _cyclopedia;
   static Colour highlightColour = Colours.ICE_BLUE with { Alpha = 175 };
 
-  public Examiner(GameState gs, Loc start)
+  public Examiner(GameState gs, Loc start) : base(gs)
   {
-    _gs = gs;
     FindTargets(start);
     _cyclopedia = LoadCyclopedia();
 
@@ -70,9 +78,9 @@ class Examiner : Inputer
 
   void FindTargets(Loc start)
   {
-    var ui = _gs.UIRef();
-    int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
-    int startCol = _gs.Player.Loc.Col - ui.PlayerScreenCol;
+    var ui = GS.UIRef();
+    int startRow = GS.Player.Loc.Row - ui.PlayerScreenRow;
+    int startCol = GS.Player.Loc.Col - ui.PlayerScreenCol;
     var pq = new PriorityQueue<Loc, int>();
 
     for (int r = 0; r < UserInterface.ViewHeight; r++)
@@ -100,10 +108,10 @@ class Examiner : Inputer
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
 
-        if (_gs.ObjDb.Occupant(loc) is Actor actor && Util.AwareOfActor(actor, _gs))
+        if (GS.ObjDb.Occupant(loc) is Actor actor && Util.AwareOfActor(actor, GS))
         {
-          int distance = Distance(_gs.Player.Loc, loc);
-          if (loc == _gs.Player.Loc)
+          int distance = Distance(GS.Player.Loc, loc);
+          if (loc == GS.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
             ui.ZLayer[r, c] = new Sqr(Colours.WHITE, highlightColour, '@');
@@ -113,17 +121,17 @@ class Examiner : Inputer
 
           pq.Enqueue(loc, distance);
         }
-        else if (_gs.ObjDb.VisibleItemsAt(loc).Count > 0)
+        else if (GS.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
+          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
         }
-        else if (_gs.ObjDb.EnvironmentsAt(loc).Count > 0)
+        else if (GS.ObjDb.EnvironmentsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
+          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
         }
         else
         {
-          var tile = _gs.TileAt(loc);
+          var tile = GS.TileAt(loc);
           switch (tile.Type)
           {
             case TileType.Upstairs:
@@ -146,7 +154,7 @@ class Examiner : Inputer
             case TileType.CreepyAltar:
             case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
-              pq.Enqueue(loc, Distance(_gs.Player.Loc, loc));
+              pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
               break;
           }
         }
@@ -172,13 +180,13 @@ class Examiner : Inputer
       _currTarget = (_currTarget + 1) % _targets.Count;
       ClearHighlight();
       var loc = _targets[_currTarget];
-      var (r, c) = _gs.UIRef().LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+      var (r, c) = GS.UIRef().LocToScrLoc(loc.Row, loc.Col, GS.Player.Loc.Row, GS.Player.Loc.Col);
 
       LocDetails details = LocInfo(loc);
-      _gs.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, highlightColour, details.Ch);
-      _gs.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
+      GS.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, highlightColour, details.Ch);
+      GS.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
       _curr = (r, c);
-      _gs.LastPlayerFoV.Add(loc);
+      GS.LastPlayerFoV.Add(loc);
     }
   }
 
@@ -187,7 +195,7 @@ class Examiner : Inputer
     string name;
     string desc = "I have no further info about this object. This is probably Dana's fault.";
 
-    if (_gs.ObjDb.Occupant(loc) is Actor actor)
+    if (GS.ObjDb.Occupant(loc) is Actor actor)
     {
       if (actor is Player)
       {
@@ -238,7 +246,7 @@ class Examiner : Inputer
       return new LocDetails(name, desc, actor.Glyph.Ch);
     }
 
-    List<Item> items = _gs.ObjDb.ItemsAt(loc);
+    List<Item> items = GS.ObjDb.ItemsAt(loc);
     if (items.Count > 0)
     {
       Item item = items[0];
@@ -252,7 +260,7 @@ class Examiner : Inputer
       return new LocDetails(title, details, item.Glyph.Ch);
     }
 
-    List<Item> env = _gs.ObjDb.EnvironmentsAt(loc);
+    List<Item> env = GS.ObjDb.EnvironmentsAt(loc);
     if (env.Count > 0)
     {
       Item item = env[0];
@@ -267,7 +275,7 @@ class Examiner : Inputer
       return new LocDetails(title, details, item.Glyph.Ch);
     }
 
-    Tile tile = _gs.TileAt(loc);
+    Tile tile = GS.TileAt(loc);
     name = tile.Type.ToString().ToLower();
     if (_cyclopedia.TryGetValue(name, out var v2))
     {
@@ -280,15 +288,14 @@ class Examiner : Inputer
 
   void ClearHighlight()
   {
-    _gs.UIRef().ZLayer[_curr.Item1, _curr.Item2] = Constants.BLANK_SQ;
-    _gs.UIRef().ClosePopup();
+    GS.UIRef().ZLayer[_curr.Item1, _curr.Item2] = Constants.BLANK_SQ;
+    GS.UIRef().ClosePopup();
   }
 }
 
 class Aimer : Inputer
 {
   readonly UserInterface _ui;
-  readonly GameState _gs;
   Loc _start;
   Loc _target;
   readonly AimAnimation _anim;
@@ -296,7 +303,7 @@ class Aimer : Inputer
   readonly List<Loc> _monsters = [];
   int _targeted = -1;
 
-  public Aimer(GameState gs, Loc start, int maxRange)
+  public Aimer(GameState gs, Loc start, int maxRange) : base(gs)
   {
     _ui = gs.UIRef();
     _ui.ClosePopup();
@@ -304,7 +311,6 @@ class Aimer : Inputer
     _start = start;
     _target = start;
     _maxRange = maxRange;
-    _gs = gs;
     FindTargets();
 
     // If there's only one valid target, select it by default
@@ -323,9 +329,9 @@ class Aimer : Inputer
 
   void FindTargets()
   {
-    var ui = _gs.UIRef();
-    int startRow = _gs.Player.Loc.Row - ui.PlayerScreenRow;
-    int startCol = _gs.Player.Loc.Col - ui.PlayerScreenCol;
+    var ui = GS.UIRef();
+    int startRow = GS.Player.Loc.Row - ui.PlayerScreenRow;
+    int startCol = GS.Player.Loc.Col - ui.PlayerScreenCol;
 
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
@@ -334,10 +340,10 @@ class Aimer : Inputer
         var loc = new Loc(_start.DungeonID, _start.Level, startRow + r, startCol + c);
         if (Distance(_start, loc) > _maxRange)
           continue;
-        if (!_gs.ObjDb.Occupied(loc) || loc == _gs.Player.Loc)
+        if (!GS.ObjDb.Occupied(loc) || loc == GS.Player.Loc)
           continue;
 
-        if (_gs.ObjDb.Occupant(loc) is Actor occ)
+        if (GS.ObjDb.Occupant(loc) is Actor occ)
         {
           if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
             continue;
@@ -348,7 +354,7 @@ class Aimer : Inputer
           {
             _monsters.Add(loc);
 
-            if (occ.ID == _gs.LastTarget)
+            if (occ.ID == GS.LastTarget)
             {
               _targeted = _monsters.Count - 1;
               _target = loc;
@@ -383,6 +389,9 @@ class Aimer : Inputer
       Success = true;
 
       ExpireAnimation();
+
+      QueueDeferredAction();
+
       return;
     }
 
@@ -394,7 +403,7 @@ class Aimer : Inputer
         Row = _target.Row + dir.Item1,
         Col = _target.Col + dir.Item2
       };
-      if (Distance(_start, mv) <= _maxRange && _gs.CurrentMap.InBounds(mv.Row, mv.Col))
+      if (Distance(_start, mv) <= _maxRange && GS.CurrentMap.InBounds(mv.Row, mv.Col))
       {
         _target = mv;
         _anim.Target = mv;
@@ -414,17 +423,17 @@ class Aimer : Inputer
       Loc = _target
     };
 
-    var occ = _gs.ObjDb.Occupant(_target);
+    var occ = GS.ObjDb.Occupant(_target);
     if (occ is not null)
     {
-      _gs.LastTarget = occ.ID;
+      GS.LastTarget = occ.ID;
     }
 
     return result;
   }
 }
 
-class NumericInputer(UserInterface ui, string prompt) : Inputer
+class NumericInputer(GameState gs, UserInterface ui, string prompt) : Inputer(gs)
 {
   UserInterface _ui = ui;
   string _prompt = prompt;
@@ -474,7 +483,7 @@ class HelpScreenInputer : Inputer
   readonly int _textAreaWidth;
   int _page = 0;
 
-  public HelpScreenInputer(UserInterface ui)
+  public HelpScreenInputer(GameState gs, UserInterface ui) : base(gs)
   {
     _ui = ui;
     _entries = [];
@@ -643,15 +652,10 @@ class HelpScreenInputer : Inputer
 
 class OptionsScreen : Inputer
 {
-  readonly GameState GS;
   int row = 0;
   const int numOfOptions = 6;
 
-  public OptionsScreen(GameState gs)
-  {
-    GS = gs;
-    WritePopup();
-  }
+  public OptionsScreen(GameState gs) : base(gs) => WritePopup();
 
   public override void Input(char ch)
   {
@@ -713,15 +717,10 @@ class OptionsScreen : Inputer
 
 class WizardCommander : Inputer
 {
-  readonly GameState _gs;
   string Buffer { get; set; } = "";
   string ErrorMessage { get; set; } = "";
 
-  public WizardCommander(GameState gs)
-  {
-    _gs = gs;
-    WritePopup();
-  }
+  public WizardCommander(GameState gs) : base(gs) => WritePopup();
 
   public override void Input(char ch)
   {
@@ -738,7 +737,7 @@ class WizardCommander : Inputer
     }
     else if (ch == '\n' || ch == '\r')
     {
-      DebugCommand cmd = new(_gs);
+      DebugCommand cmd = new(GS);
       ErrorMessage = cmd.DoCommand(Buffer.Trim());
 
       Console.WriteLine(ErrorMessage);
@@ -764,24 +763,22 @@ class WizardCommander : Inputer
       message += $"\n\n[BRIGHTRED {ErrorMessage}]";
 
     int width = int.Max(message.Length + 2, 25);
-    _gs.UIRef().SetPopup(new Popup(message, "Debug Command", -1, -1, width));
+    GS.UIRef().SetPopup(new Popup(message, "Debug Command", -1, -1, width));
   }
 }
 
 class Dialoguer : Inputer
 {
   readonly Mob _interlocutor;
-  readonly GameState _gs;
   readonly IDialoguer _dialogue;
   HashSet<char> _currOptions = [];
   char _exitOpt = '\0';
   readonly int _popupWidth = 60;
 
-  public Dialoguer(Mob interlocutor, GameState gs)
+  public Dialoguer(Mob interlocutor, GameState gs) : base(gs)
   {
     _interlocutor = interlocutor;
-    _gs = gs;
-
+    
     // Cast and validate the dialogue interface upfront
     if (interlocutor.Behaviour is not IDialoguer dialogue)
     {
@@ -803,7 +800,7 @@ class Dialoguer : Inputer
 
     if (_interlocutor.Behaviour is NPCBehaviour npc && (ch == '\n' || ch == '\r'))
     {
-      if (!npc.ConfirmChoices(_interlocutor, _gs))
+      if (!npc.ConfirmChoices(_interlocutor, GS))
         return;
       EndConversation("Farewell!");
     }
@@ -815,7 +812,7 @@ class Dialoguer : Inputer
 
     try
     {
-      _dialogue.SelectOption(_interlocutor, ch, _gs);
+      _dialogue.SelectOption(_interlocutor, ch, GS);
       WritePopup();
     }
     catch (ConversationEnded ce)
@@ -826,7 +823,7 @@ class Dialoguer : Inputer
 
   void EndConversation(string text)
   {
-    _gs.UIRef().AlertPlayer(text);
+    GS.UIRef().AlertPlayer(text);
     Done = true;
     Success = true;
   }
@@ -838,7 +835,7 @@ class Dialoguer : Inputer
 
     try
     {
-      var (blurb, footer, opts) = _dialogue.CurrentText(_interlocutor, _gs);
+      var (blurb, footer, opts) = _dialogue.CurrentText(_interlocutor, GS);
 
       if (string.IsNullOrEmpty(blurb))
       {
@@ -900,7 +897,7 @@ class Dialoguer : Inputer
 
       sb.Append(footer);
 
-      _gs.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -2, -1, _popupWidth));
+      GS.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -2, -1, _popupWidth));
     }
     catch (ConversationEnded ce)
     {
@@ -911,15 +908,13 @@ class Dialoguer : Inputer
 
 class PickupMenu : Inputer
 {
-  GameState GS { get; set; }
   List<Item> Items { get; set; }
   Dictionary<char, ulong> MenuOptions { get; set; } = [];
   List<char> Choices { get; set; } = [];
 
-  public PickupMenu(List<Item> items, GameState gs)
+  public PickupMenu(List<Item> items, GameState gs) : base(gs)
   {
     Items = items;
-    GS = gs;
     WritePopup();
   }
 
@@ -940,13 +935,8 @@ class PickupMenu : Inputer
     }
     else if (ch == '\n' || ch == '\r')
     {
-      // It would actually be a bug if DeferredAction was null
-      if (DeferredAction is not null)
-      {
-        DeferredAction.ReceiveUIResult(GetResult());
-        GS.Player.QueueAction(DeferredAction);
-      }
-      
+      QueueDeferredAction();
+
       Done = true;
       Success = Choices.Count > 0;
     }
@@ -1026,17 +1016,15 @@ class PickupMenu : Inputer
 class LockedDoorMenu : Inputer
 {
   UserInterface UI { get; set; }
-  GameState GS { get; set; }
   Loc Loc { get; set; }
   List<char> Options { get; set; } = ['F'];
   List<string> MenuItems { get; set; } = [];
   int Row = 0;
     
-  public LockedDoorMenu(UserInterface ui, GameState gs, Loc loc)
+  public LockedDoorMenu(UserInterface ui, GameState gs, Loc loc) : base(gs)
   {
     UI = ui;
     Loc = loc;
-    GS = gs;
     SetMenu();
     WritePopup();
   }
@@ -1102,7 +1090,7 @@ class LockedDoorMenu : Inputer
         DigAction dig = new(GS, GS.Player, item);
         DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
         dig.ReceiveUIResult(res);
-        GS.Player.ReplacePendingAction(dig, new JustDoItInputer());
+        GS.Player.ReplacePendingAction(dig, new JustDoItInputer(GS));
         return;
       }
     }
@@ -1114,7 +1102,7 @@ class LockedDoorMenu : Inputer
     PickLockAction pickLock = new(GS, GS.Player);
     DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
     pickLock.ReceiveUIResult(res);
-    GS.Player.ReplacePendingAction(pickLock, new JustDoItInputer());
+    GS.Player.ReplacePendingAction(pickLock, new JustDoItInputer(GS));
   }
 
   void SetUpKnock()
@@ -1130,13 +1118,13 @@ class LockedDoorMenu : Inputer
     }
 
     UseItemAction useItem = new(GS, GS.Player) { Choice = slot };
-    GS.Player.ReplacePendingAction(useItem, new JustDoItInputer());
+    GS.Player.ReplacePendingAction(useItem, new JustDoItInputer(GS));
   }
 
   void SetUpBash()
   {
     BashAction bash = new(GS, GS.Player) { Target = Loc };
-    GS.Player.ReplacePendingAction(bash, new JustDoItInputer());
+    GS.Player.ReplacePendingAction(bash, new JustDoItInputer(GS));
   }
 
   void SetMenu()
@@ -1187,7 +1175,6 @@ class InventoryDetails : Inputer
   public string MenuTitle { get; set; } = "";
   public InvOption MenuOptions { get; set; } = InvOption.None;
 
-  GameState GameState { get; set; }
   HashSet<char> Options { get; set; } = [];
   readonly Dictionary<string, CyclopediaEntry> Cyclopedia;
   HashSet<string> InteractionMenu { get; set; } = [];
@@ -1195,28 +1182,27 @@ class InventoryDetails : Inputer
 
   public override void OnUpdate()
   {
-    GameState.Player.Inventory.ShowMenu(GameState.UIRef(), new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
+    GS.Player.Inventory.ShowMenu(GS.UIRef(), new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
   }
 
-  public InventoryDetails(GameState gs, string menuTile, InvOption menuOptions)
+  public InventoryDetails(GameState gs, string menuTile, InvOption menuOptions) : base(gs)
   {
     MenuTitle = menuTile;
     MenuOptions = menuOptions;
-    GameState = gs;
-    Options = [.. GameState.Player.Inventory.UsedSlots()];
+    Options = [.. GS.Player.Inventory.UsedSlots()];
     Cyclopedia = LoadCyclopedia();
   }
 
   public override void Input(char ch)
   {
-    UserInterface ui = GameState.UIRef();
+    UserInterface ui = GS.UIRef();
 
     bool itemPopup = ui.ActivePopup;
     if (ch == ' ' || ch == '\n' || ch == '\r' || ch == Constants.ESC)
     {
       if (itemPopup)
       {
-        Options = [.. GameState.Player.Inventory.UsedSlots()];
+        Options = [.. GS.Player.Inventory.UsedSlots()];
         ui.ClosePopup();
         SelectedItem = null;
       }
@@ -1236,7 +1222,7 @@ class InventoryDetails : Inputer
     }
     else if (Options.Contains(ch))
     {
-      var (item, _) = GameState.Player.Inventory.ItemAt(ch);
+      var (item, _) = GS.Player.Inventory.ItemAt(ch);
       if (item is null)
         return;
 
@@ -1304,21 +1290,21 @@ class InventoryDetails : Inputer
     switch (cmd)
     {
       case 'd':
-        action = new DropItemAction(GameState, GameState.Player) { Choice = item.Slot };
+        action = new DropItemAction(GS, GS.Player) { Choice = item.Slot };
         break;
       case 'a':
-        action = new UseItemAction(GameState, GameState.Player) { Choice = item.Slot };
+        action = new UseItemAction(GS, GS.Player) { Choice = item.Slot };
         break;
       case 't':
-        action = new ThrowSelectionAction(GameState, GameState.Player) { Choice = item.Slot };
+        action = new ThrowSelectionAction(GS, GS.Player) { Choice = item.Slot };
         break;
       default:
-        action = new ToggleEquippedAction(GameState, GameState.Player) { Choice = item.Slot };
-        GameState.Player.SetFollowupAction(new CloseMenuAction(GameState), new InventoryDetails(GameState,  MenuTitle, MenuOptions));
+        action = new ToggleEquippedAction(GS, GS.Player) { Choice = item.Slot };
+        GS.Player.SetFollowupAction(new CloseMenuAction(GS), new InventoryDetails(GS,  MenuTitle, MenuOptions));
         break;
     }
 
-    GameState.Player.ReplacePendingAction(action, new JustDoItInputer());
+    GS.Player.ReplacePendingAction(action, new JustDoItInputer(GS));
   }
 
   void SetInteractionMenu(Item item)
@@ -1393,7 +1379,7 @@ class InventoryDetails : Inputer
   }
 }
 
-class Inventorier(HashSet<char> options) : Inputer
+class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
 {
   char _choice;
   readonly HashSet<char> _options = options;
@@ -1411,6 +1397,8 @@ class Inventorier(HashSet<char> options) : Inputer
       _choice = ch;
       Done = true;
       Success = true;
+
+      QueueDeferredAction();
     }
     else
     {
@@ -1429,7 +1417,7 @@ class Inventorier(HashSet<char> options) : Inputer
   }
 }
 
-class PauseForMoreInputer : Inputer
+class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
   bool _keyPressed;
 
@@ -1451,7 +1439,7 @@ class LongMessagerInputer : Inputer
   public override bool Done => _done;
   public override bool Success => true;
 
-  public LongMessagerInputer(UserInterface ui, IEnumerable<string> lines)
+  public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)
   {
     _ui = ui;
     _wrappedLines = WrapLines(lines);
@@ -1519,7 +1507,7 @@ class LongMessagerInputer : Inputer
 
 class YesOrNoInputer : Inputer
 {
-  public YesOrNoInputer() => Done = false;
+  public YesOrNoInputer(GameState gs) : base(gs) => Done = false;
 
   public override void Input(char ch)
   {
@@ -1537,7 +1525,7 @@ class YesOrNoInputer : Inputer
   }
 }
 
-class CharSetInputer(HashSet<char> allowed) : Inputer
+class CharSetInputer(GameState gs, HashSet<char> allowed) : Inputer(gs)
 {
   HashSet<char> Allowed { get; set; } = allowed;
   char Result { get; set; } = '\0';
@@ -1565,7 +1553,7 @@ class DirectionalInputer : Inputer
   (int, int) _result;
   bool TargetSelf { get; set; }
 
-  public DirectionalInputer(GameState gs, bool targetSelf = false)
+  public DirectionalInputer(GameState gs, bool targetSelf = false) : base(gs)
   {
     TargetSelf = targetSelf;
     Done = false;
@@ -1595,12 +1583,16 @@ class DirectionalInputer : Inputer
         _result = dir;
         Done = true;
         Success = true;
+
+        QueueDeferredAction();
       }
       else if (TargetSelf && ch == '.')
       {
         _result = (0, 0);
         Done = true;
         Success = true;
+
+        QueueDeferredAction();
       }
     }
   }
@@ -1620,10 +1612,9 @@ class ConeTargeter : Inputer
   int Range { get; set; }
   Loc Origin { get; set; }
   Loc Target { get; set; }
-  GameState GS { get; set; }
   ConeAnimation Anim { get; set; }
 
-  public ConeTargeter(GameState gs, int range, Loc origin)
+  public ConeTargeter(GameState gs, int range, Loc origin) : base(gs)
   {
     Done = false;
     GS = gs;
@@ -1678,7 +1669,7 @@ class ConeTargeter : Inputer
   }
 }
 
-class JustDoItInputer : Inputer
+class JustDoItInputer(GameState gs) : Inputer(gs)
 {
   public override bool Done => true;
   public override bool Success => true;
