@@ -31,11 +31,12 @@ abstract class Actor : GameObj, IZLevel
 
   public double Energy { get; set; } = 0.0;
   public double Recovery { get; set; } = 1.0;
-  public bool RemoveFromQueue { get; set; }
   public string Appearance { get; set; } = "";
 
   protected IBehaviour _behaviour;
   public IBehaviour Behaviour => _behaviour;
+
+  protected Queue<Action> ActionQ { get; set; } = [];
 
   public override int Z()
   {
@@ -72,6 +73,8 @@ abstract class Actor : GameObj, IZLevel
   public virtual List<Damage> MeleeDamage() => [];
   public virtual void HearNoise(int volume, int sourceRow, int sourceColumn, GameState gs) { }
   public virtual int SpellDC => 12;
+
+  public void QueueAction(Action action) => ActionQ.Enqueue(action);
 
   public int GetMovementNoise()
   {

@@ -495,7 +495,7 @@ class Player : Actor
     };   
   }
 
-  Action CalcMovementAction(GameState gs, char ch)
+  void CalcMovementAction(GameState gs, char ch)
   {
     if (HasTrait<ConfusedTrait>())
     {
@@ -526,15 +526,15 @@ class Player : Actor
         var anim = new PolearmAnimation(gs, colour, Loc, adj2);
         gs.UIRef().RegisterAnimation(anim);
 
-        return new MeleeAttackAction(gs, this, adj2);
+        ActionQ.Enqueue(new MeleeAttackAction(gs, this, adj2));
       }
     }
 
-    return new BumpAction(gs, this, Loc.Move(dr, dc));
+    ActionQ.Enqueue(new BumpAction(gs, this, Loc.Move(dr, dc)));   
   }
 
   // 'Running' just means repeated moving
-  NullAction StartRunning(GameState gs, char ch)
+  void StartRunning(GameState gs, char ch)
   {
     if (HasTrait<ConfusedTrait>())
     {
@@ -545,8 +545,6 @@ class Player : Actor
     Running = true;
     RepeatingCmd = char.ToLower(ch);
     LocsRan = [];
-
-    return new NullAction();
   }
 
   Loc[] RunningToward(char ch)
@@ -638,7 +636,7 @@ class Player : Actor
     _deferred = new NullAction();
   }
 
-  Action PickupCommand(GameState gs, UserInterface ui)
+  void PickupCommand(GameState gs, UserInterface ui)
   {   
     List<Item> items = [];
     List<Item> itemsInPit = [];
@@ -658,13 +656,11 @@ class Player : Actor
     bool playerInPit = HasTrait<InPitTrait>();
     if (itemsInPit.Count == 1 && !playerInPit)
     {
-      ui.AlertPlayer($"You cannot reach {itemsInPit[0].FullName.DefArticle()}.");
-      return new NullAction();
+      ui.AlertPlayer($"You cannot reach {itemsInPit[0].FullName.DefArticle()}.");      
     }
     else if (itemsInPit.Count > 0 && !playerInPit)
     {
-      ui.AlertPlayer("You cannot reach the items in the pit.");
-      return new NullAction();
+      ui.AlertPlayer("You cannot reach the items in the pit.");      
     }
 
     // Note that in the current state of the game, an item that is on a pit square
@@ -679,8 +675,7 @@ class Player : Actor
 
     if (items.Count == 0)
     {
-      ui.AlertPlayer("There's nothing here you can pick up.");
-      return new NullAction();
+      ui.AlertPlayer("There's nothing here you can pick up.");      
     }
 
     int numStacks = items.DistinctBy(i => i.Name).Count();
@@ -691,22 +686,28 @@ class Player : Actor
       // the player had selected the first item in a list of one
       LongListResult res = new() { Values = [items[0].ID] };
       action.ReceiveUIResult(res);
-
-      return action;
+      ActionQ.Enqueue(action);
     }
     else
     {
-      _inputController = new PickupMenu(items, gs);
-      _deferred = new PickupItemAction(gs, this);
+      _inputController = new PickupMenu(items, gs) { DeferredAction = new PickupItemAction(gs, this) };
+      //_deferred = new PickupItemAction(gs, this);
     }
-
-    return new NullAction();
   }
 
   public override void TakeTurn(GameState gs)
   {
-    Action? action = DecideAction(gs);
+    Action? action;
 
+    if (ActionQ.Count > 0)
+    {
+      action = ActionQ.Dequeue();
+    }
+    else
+    {
+      action = DecideAction(gs);
+    }
+    
     if (action is NullAction)
       return;
 
@@ -813,13 +814,13 @@ class Player : Actor
       ui.ClosePopup();
 
       if (IsMoveKey(ch))
-        return CalcMovementAction(gameState, ch);
+        CalcMovementAction(gameState, ch);
       else if (IsMoveKey(char.ToLower(ch)))
-        return StartRunning(gameState, ch);
+        StartRunning(gameState, ch);
       else if (ch == '>')
-        return new DownstairsAction(gameState);
+        ActionQ.Enqueue(new DownstairsAction(gameState));
       else if (ch == '<')
-        return new UpstairsAction(gameState);
+        ActionQ.Enqueue(new UpstairsAction(gameState));
       else if (ch == 'i')
       {
         _inputController = new InventoryDetails(gameState, "You are carrying", InvOption.MentionMoney);
@@ -827,7 +828,7 @@ class Player : Actor
       }
       else if (ch == ',')
       {
-        return PickupCommand(gameState, ui);        
+        PickupCommand(gameState, ui);
       }
       else if (ch == 'a')
       {
@@ -919,7 +920,7 @@ class Player : Actor
       }
       else if (ch == 's')
       {
-        return new SearchAction(gameState, this);
+        ActionQ.Enqueue(new SearchAction(gameState, this));        
       }
       else if (ch == '*')
       {

@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System;
 using System.Text;
 using static Yarl2.Util;
 
@@ -24,6 +23,7 @@ abstract class Inputer
   public virtual bool Success { get; set; }
   public virtual bool Done { get; set; }
   public string Msg { get; set; } = "";
+  public Action? DeferredAction { get; set; } = null;
 
   public abstract void Input(char ch);
 
@@ -940,7 +940,13 @@ class PickupMenu : Inputer
     }
     else if (ch == '\n' || ch == '\r')
     {
-      // eventually, we need to pass a list of ulongs to the action
+      // It would actually be a bug if DeferredAction was null
+      if (DeferredAction is not null)
+      {
+        DeferredAction.ReceiveUIResult(GetResult());
+        GS.Player.QueueAction(DeferredAction);
+      }
+      
       Done = true;
       Success = Choices.Count > 0;
     }
