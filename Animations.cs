@@ -569,13 +569,13 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 {
   readonly UserInterface _ui = ui;
   readonly GameState _gs = gs;
-  static Sqr _cloudSqr = new Sqr(Colours.WHITE, Colours.BLACK, '#');
+  static Sqr _cloudSqr = new(Colours.WHITE, Colours.BLACK, '#');
   bool[] _cloud = new bool[9];
   int _row;
   int _col;
   DateTime _lastFrame = DateTime.UtcNow;
   DateTime _nextCloud;
-  bool _paused;
+  bool _cloudFinished = true;
 
   void MakeCloud()
   {
@@ -596,88 +596,71 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
       }
     }
 
+    int height = UserInterface.ViewHeight / 2;
+    int width = UserInterface.ViewWidth / 2;
+    int screenRow = _gs.Player.Loc.Row;
+    int screenCol = _gs.Player.Loc.Col;
+
     if (_gs.Rng.NextDouble() < 0.5)
     {
-      _row = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewHeight));
-      _col = -3;
+      _row = _gs.Rng.Next(screenRow - height - 1, screenRow + 3);
+      _col =  screenCol - width - 1;
     }
     else
     {
-      _row = -3;
-      _col = _gs.Rng.Next(-3, (int)(0.33 * UserInterface.ViewWidth));
+      _row = screenRow - height - 1;
+      _col = _gs.Rng.Next(screenCol - width - 1, screenCol + 3);
     }
 
-    _paused = false;
+    _cloudFinished = false;
   }
 
-  private void EraseCloud()
+  private void DrawCloud()
   {
-    int h = UserInterface.ViewHeight;
-    int w = UserInterface.ViewWidth;
-
     for (int r = 0; r < 3; r++)
     {
       for (int c = 0; c < 3; c++)
       {
-        int cr = _row + r;
-        int cc = _col + c;
-        if (cr >= 0 && cr < h && cc >= 0 && cc < w)
-          _ui.ZLayer[cr, cc] = Constants.BLANK_SQ;
+        int j = r * 3 + c;
+        if (!_cloud[j])
+          continue;
+
+        int cloudRow = _row + r;
+        int cloudCol = _col + c;
+        
+        if (!_gs.LastPlayerFoV.Contains(new Loc(0, 0, cloudRow, cloudCol)))
+          continue;
+
+        var (scrR, scrC) = _ui.LocToScrLoc(cloudRow, cloudCol, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+        if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
+        {
+          _ui.SqsOnScreen[scrR, scrC] =_cloudSqr;
+        }
       }
-    }
-  }
-
-  private void AnimationStep()
-  {
-    int h = UserInterface.ViewHeight;
-    int w = UserInterface.ViewWidth;
-
-    EraseCloud();
-
-    // move and set the new spot
-    ++_row;
-    ++_col;
-
-    for (int j = 0; j < 9; j++)
-    {
-      int cr = j / 3;
-      int zrow = j / 3 + _row;
-      int zcol = j - cr * 3 + _col;
-      if (zrow < 0 || zrow >= h || zcol < 0 || zcol >= w)
-        continue;
-      if (_cloud[j])
-        _ui.ZLayer[zrow, zcol] = _cloudSqr;
-      else
-        _ui.ZLayer[zrow, zcol] = Constants.BLANK_SQ;
     }
   }
 
   public override void Update()
   {
-    var dd = DateTime.UtcNow - _lastFrame;
+    TimeSpan dd = DateTime.UtcNow - _lastFrame;
 
-    if (!_paused && !_gs.InWilderness)
+    if (_cloudFinished && _gs.InWilderness && DateTime.UtcNow > _nextCloud)
     {
-      _paused = true;
-      EraseCloud();
-    }
-    else if (_paused && _gs.InWilderness && DateTime.UtcNow > _nextCloud)
-    {
-      _paused = false;
       MakeCloud();
     }
 
-    if (!_paused && dd.TotalMilliseconds >= 200)
+    DrawCloud();
+
+    if (!_cloudFinished && dd.TotalMilliseconds >= 200)
     {
-      AnimationStep();
+      ++_row;
+      ++_col;
       _lastFrame = DateTime.UtcNow;
 
-      // The cloud has drifted offscreen. We'll wait a little while before 
-      // creating the next one.
-      if (_row >= UserInterface.ViewHeight || _col >= UserInterface.ViewWidth)
+      if (_row >= _gs.Wilderness.Height || _col >= _gs.Wilderness.Width)
       {
-        _paused = true;
-        _nextCloud = DateTime.UtcNow.AddSeconds(_gs.Rng.Next(5, 16));
+        _cloudFinished = true;
+        _nextCloud = DateTime.UtcNow.AddSeconds(_gs.Rng.Next(5, 15));
       }
     }
   }
