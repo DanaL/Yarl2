@@ -898,14 +898,12 @@ class Player : Actor
       }
       else if (ch == 'Q')
       {
-        _inputController = new YesOrNoInputer(gameState);
-        _deferred = new QuitAction();
+        _inputController = new YesOrNoInputer(gameState) { DeferredAction = new QuitAction() };
         ui.SetPopup(new Popup("Really quit?\n\nYour game won't be saved! (y/n)", "", -1, -1));
       }
       else if (ch == 'S' && !ui.InTutorial)
       {
-        _inputController = new YesOrNoInputer(gameState);
-        _deferred = new SaveGameAction();
+        _inputController = new YesOrNoInputer(gameState) { DeferredAction = new SaveGameAction() };
         ui.SetPopup(new Popup("Quit & Save? (y/n)", "", -1, -1));
       }
       else if (ch == 'S' && ui.InTutorial)

@@ -1516,6 +1516,8 @@ class YesOrNoInputer : Inputer
     {
       Done = true;
       Success = true;
+
+      QueueDeferredAction();
     }
     else if (ch == 'n')
     {
