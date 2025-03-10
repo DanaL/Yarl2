@@ -669,8 +669,11 @@ class OptionsScreen : Inputer
   {
     if (ch == Constants.ESC)
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
+      return;
     }
     else if (ch == 'j')
     {
@@ -682,7 +685,7 @@ class OptionsScreen : Inputer
       if (row < 0)
         row = numOfOptions - 1;
     }
-    else if (ch == '\n' || ch == '\r')
+    else if (ch == '\n' || ch == '\r' || ch == ' ')
     {
       if (row == 0)
         GS.Options.BumpToOpen = !GS.Options.BumpToOpen;

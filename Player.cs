@@ -732,10 +732,7 @@ class Player : Actor
       }
       
       
-      else if (ch == '=')
-      {
-        _inputController = new OptionsScreen(gameState);        
-      }
+      
       
       else if (ch == 'W')
       {

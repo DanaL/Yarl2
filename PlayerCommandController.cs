@@ -342,6 +342,10 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       ui.SetInputController(new HelpScreenInputer(GS, ui));
     }
+    else if (ch == '=')
+    {
+      ui.SetInputController(new OptionsScreen(GS));
+    }
     else if (ch == ' ' || ch == '.')
     {
       GS.Player.QueueAction(new PassAction());
