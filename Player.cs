@@ -630,15 +630,9 @@ class Player : Actor
     if (action is null)
       return;
 
-    // One of those calls to PrepareFieldOfView() *HAS* to be redundant
-    ActionResult result;
-    do
-    {      
-      result = action!.Execute();
-      Energy -= CalcEnergyUsed(result.EnergyCost);
-      gs.PrepareFieldOfView();
-    }
-    while (result.AltAction is not null);
+    ActionResult result = action.Execute();
+    Energy -= CalcEnergyUsed(result.EnergyCost);
+    gs.PrepareFieldOfView();
   }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
