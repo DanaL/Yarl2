@@ -668,7 +668,7 @@ class HelpScreenInputer : Inputer
 class OptionsScreen : Inputer
 {
   int row = 0;
-  const int numOfOptions = 6;
+  const int numOfOptions = 7;
 
   public OptionsScreen(GameState gs) : base(gs) => WritePopup();
 
@@ -706,6 +706,9 @@ class OptionsScreen : Inputer
         GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
       else if (row == 5)
         GS.Options.ShowHints = !GS.Options.ShowHints;
+      else if (row == 6)
+        GS.Options.ShowTurns = !GS.Options.ShowTurns;
+
       GS.UIRef().SetOptions(GS.Options, GS);
     }
 
@@ -720,13 +723,15 @@ class OptionsScreen : Inputer
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
     string torchAnim = GS.Options.TorchLightAnimation ? "On" : "Off";
     string hints = GS.Options.ShowHints ? "On" : "Off";
+    string turns = GS.Options.ShowTurns ? "On" : "Off";
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
       $"Bump for locked door menu: {bumpDoorMenu}",
       $"Bump to chat: {bumpToChat}",
       $"Highlight player: {hilitePlayer}",
       $"Torchlight animation: {torchAnim}",
-      $"Show command hints: {hints}"
+      $"Show command hints: {hints}",
+      $"Show turns: {turns}"
     ];
 
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });

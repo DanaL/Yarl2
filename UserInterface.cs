@@ -548,6 +548,8 @@ abstract class UserInterface
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
     WriteLine($"│ HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
+    int bottomOffset = _options.ShowTurns ? 2 : 1;
+
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints) && magicPoints.Max > 0)
     {
       WriteLine($"│ MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
@@ -585,7 +587,7 @@ abstract class UserInterface
     }
 
     // Write statuses
-    int statusLineNum = ViewHeight - 3;
+    int statusLineNum = ViewHeight - bottomOffset - 2;
     HashSet<string> statuses = [];
     foreach (var trait in gs.Player.Traits)
     {
@@ -755,17 +757,22 @@ abstract class UserInterface
     }
 
     List<(Colour, string)> tileLine = [(Colours.WHITE, "│ "), (tileSq.Fg, tileSq.Ch.ToString()), (Colours.WHITE, " " + tileText)];
-    WriteSideBarLine(tileLine, ViewHeight - 2);
+    WriteSideBarLine(tileLine, ViewHeight - bottomOffset - 1);
 
     if (gs.CurrDungeonID == 0)
     {
       var time = gs.CurrTime();
       var mins = time.Item2.ToString().PadLeft(2, '0');
-      WriteLine($"│ Outside {time.Item1}:{mins}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"│ Outside {time.Item1}:{mins}", ViewHeight - bottomOffset, ViewWidth, SideBarWidth, Colours.WHITE);
     }
     else
     {
-      WriteLine($"│ Depth: {gs.CurrLevel + 1}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
+      WriteLine($"│ Depth: {gs.CurrLevel + 1}", ViewHeight - bottomOffset, ViewWidth, SideBarWidth, Colours.WHITE);
+    }
+
+    if (gs.Options.ShowTurns)
+    {
+      WriteLine($"│ Turn: {gs.Turn}", ViewHeight - 1, ViewWidth, SideBarWidth, Colours.WHITE);
     }
   }
 
