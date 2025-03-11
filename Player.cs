@@ -725,19 +725,12 @@ class Player : Actor
       if (IsMoveKey(char.ToLower(ch)))
         StartRunning(gameState, ch);
       
-      else if (ch == 'i')
-      {
-        _inputController = new InventoryDetails(gameState, "You are carrying", InvOption.MentionMoney);
-        _deferred = new CloseMenuAction(gameState);
-      }
       
       
       
       
-      else if (ch == 'W')
-      {
-        _inputController = new WizardCommander(gameState);
-      }
+      
+      
       else if (ch == 'z')
       {
         

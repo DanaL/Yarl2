@@ -259,6 +259,21 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       ui.SetInputController(new DirectionalInputer(GS) { DeferredAction = new BashAction(GS, GS.Player) });      
     }
+    else if (ch == 'i')
+    {
+      InventoryDetails details = new(GS, "You are carrying", InvOption.MentionMoney)
+      {
+        DeferredAction = new CloseMenuAction(GS)
+      };
+      ui.SetInputController(details);
+    }
+    else if (ch == 'M')
+    {
+      if (GS.InWilderness)
+        ui.AlertPlayer("Not in the wilderness.");
+      else
+        ui.DisplayMapView(GS);
+    }
     else if (ch == 'o')
     {
       Loc singleDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.ClosedDoor);
@@ -300,6 +315,10 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       };
       ui.SetInputController(inv);
     }
+    else if (ch == 'W')
+    {
+      ui.SetInputController(new WizardCommander(GS));
+    }
     else if (ch == 'x')
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));
@@ -330,14 +349,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       int x = (int)ui.CheatSheetMode + 1;
       ui.CheatSheetMode = (CheatSheetMode)(x % 4);
-    }
-    else if (ch == 'M')
-    {
-      if (GS.InWilderness)
-        ui.AlertPlayer("Not in the wilderness.");
-      else
-        ui.DisplayMapView(GS);
-    }
+    }    
     else if (ch == '?')
     {
       ui.SetInputController(new HelpScreenInputer(GS, ui));

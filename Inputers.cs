@@ -737,8 +737,11 @@ class WizardCommander : Inputer
   {
     if (ch == Constants.ESC)
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
+      return;
     }
     else if (ch == Constants.BACKSPACE)
     {
@@ -756,6 +759,9 @@ class WizardCommander : Inputer
       {
         Done = true;
         Success = true;
+        GS.UIRef().ClosePopup();
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        return;
       }
     }
     else
@@ -1192,14 +1198,9 @@ class InventoryDetails : Inputer
   public InvOption MenuOptions { get; set; } = InvOption.None;
 
   HashSet<char> Options { get; set; } = [];
-  readonly Dictionary<string, CyclopediaEntry> Cyclopedia;
+  readonly Dictionary<string, CyclopediaEntry> Cyclopedia = [];
   HashSet<string> InteractionMenu { get; set; } = [];
   Item? SelectedItem { get; set; } = null;
-
-  public override void OnUpdate()
-  {
-    GS.Player.Inventory.ShowMenu(GS.UIRef(), new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
-  }
 
   public InventoryDetails(GameState gs, string menuTile, InvOption menuOptions) : base(gs)
   {
@@ -1207,33 +1208,36 @@ class InventoryDetails : Inputer
     MenuOptions = menuOptions;
     Options = [.. GS.Player.Inventory.UsedSlots()];
     Cyclopedia = LoadCyclopedia();
+    GS.Player.Inventory.ShowMenu(GS.UIRef(), new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
   }
 
   public override void Input(char ch)
   {
     UserInterface ui = GS.UIRef();
+    GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = MenuTitle, Options = MenuOptions });
 
     bool itemPopup = ui.ActivePopup;
     if (ch == ' ' || ch == '\n' || ch == '\r' || ch == Constants.ESC)
     {
       if (itemPopup)
       {
-        Options = [.. GS.Player.Inventory.UsedSlots()];
+        Options = [.. GS.Player.Inventory.UsedSlots()];        
         ui.ClosePopup();
         SelectedItem = null;
       }
       else
       {
+        ui.CloseMenu();
+        ui.ClosePopup();
+        ui.SetInputController(new PlayerCommandController(GS));
         Done = true;
         Success = true;
+        return;
       }
     }    
     else if (itemPopup && Options.Contains(ch) && SelectedItem is not null)
     {
       SetUpItemCommand(SelectedItem, ch);
-      Done = true;
-      Success = true;
-
       return;
     }
     else if (Options.Contains(ch))
@@ -1302,25 +1306,30 @@ class InventoryDetails : Inputer
 
   void SetUpItemCommand(Item item, char cmd)
   {
-    Action action;
     switch (cmd)
     {
       case 'd':
-        action = new DropItemAction(GS, GS.Player) { Choice = item.Slot };
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.Player.QueueAction(new DropItemAction(GS, GS.Player) { Choice = item.Slot });        
         break;
       case 'a':
-        action = new UseItemAction(GS, GS.Player) { Choice = item.Slot };
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.Player.QueueAction(new UseItemAction(GS, GS.Player) { Choice = item.Slot });
         break;
       case 't':
-        action = new ThrowSelectionAction(GS, GS.Player) { Choice = item.Slot };
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.Player.QueueAction(new ThrowSelectionAction(GS, GS.Player) { Choice = item.Slot });
         break;
-      default:
-        action = new ToggleEquippedAction(GS, GS.Player) { Choice = item.Slot };
-        GS.Player.SetFollowupAction(new CloseMenuAction(GS), new InventoryDetails(GS,  MenuTitle, MenuOptions));
+      default:        
+        ToggleEquippedAction toggle = new(GS, GS.Player) { Choice = item.Slot };
+        GS.Player.QueueAction(toggle);
         break;
     }
 
-    GS.Player.ReplacePendingAction(action, new JustDoItInputer(GS));
+    GS.UIRef().ClosePopup();
+    GS.UIRef().CloseMenu();
+    Done = true;
+    Success = true;
   }
 
   void SetInteractionMenu(Item item)

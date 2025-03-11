@@ -2734,6 +2734,8 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
 
+    GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
+    
     return result;
   }
 
