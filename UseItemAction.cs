@@ -43,8 +43,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       if (GameState!.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
       {
-        var attackAction = new MeleeAttackAction(GameState, Actor, target.Loc);
-        result.AltAction = attackAction;
+        MeleeAttackAction attackAction = new(GameState, Actor, target.Loc);
+        Actor.QueueAction(attackAction);
         result.Succcessful = false;
         return result;
       }
@@ -58,9 +58,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     {
       if (Battle.PlayerWillAttack(occ))
       {
-        var attackAction = new MeleeAttackAction(GameState, Actor, targetLoc);
         GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
-        result.AltAction = attackAction;
+        Actor.QueueAction(new MeleeAttackAction(GameState, Actor, targetLoc));
         result.Succcessful = false;
         return result;
       }
@@ -179,9 +178,9 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
       // Need to do this so that when we are resovling the move, the actor 
       // isn't still technically stuck in the pit and unable to leave the square
-      digger.Traits = digger.Traits.Where(t => t is not InPitTrait).ToList();
+      digger.Traits = [..digger.Traits.Where(t => t is not InPitTrait)];
 
-      result.AltAction = new MoveAction(gs, digger, loc);
+      digger.QueueAction(new MoveAction(gs, digger, loc));
       result.Succcessful = false;
       result.EnergyCost = 0.0;
     }

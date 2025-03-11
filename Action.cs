@@ -14,7 +14,6 @@ namespace Yarl2;
 class ActionResult
 {
   public bool Succcessful { get; set; } = false;
-  public Action? AltAction { get; set; }
   public double EnergyCost { get; set; } = 0.0;
   
   public ActionResult() { }
@@ -1965,13 +1964,12 @@ class FireboltAction(GameState gs, Actor caster, Loc target) : Action(gs, caster
 
   public override ActionResult Execute()
   {
-    var firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
-    var attack = new MissileAttackAction(GameState, Actor!, _target, firebolt);
-
-    string txt = $"{MsgFactory.CalcName(Actor!, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor!, "cast")} firebolt!";
+    string txt = $"{MsgFactory.CalcName(Actor!, GameState!.Player).Capitalize()} {Grammar.Conjugate(Actor!, "cast")} firebolt!";
     GameState.UIRef().AlertPlayer(txt);
 
-    return new ActionResult() { Succcessful = true, AltAction = attack, EnergyCost = 0.0 };
+    Item firebolt = ItemFactory.Get(ItemNames.FIREBOLT, GameState!.ObjDb);
+    Actor!.QueueAction(new MissileAttackAction(GameState, Actor!, _target, firebolt));
+    return new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
   }
 }
 
@@ -3151,8 +3149,7 @@ class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)
       }
       else
       {
-        var healAction = new HealAction(GameState, target, 6, 2);
-        result.AltAction = healAction;
+        Actor!.QueueAction(new HealAction(GameState, target, 6, 2));
         result.EnergyCost = 0.0;
         result.Succcessful = false;
       }

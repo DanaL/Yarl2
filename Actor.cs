@@ -530,22 +530,8 @@ class Mob : Actor
   {
     Action? currAction = action;
 
-    ActionResult result;
-    do
-    {
-      result = currAction!.Execute();
-
-      // I don't think I need to look over IPerformer anymore? The concept of 
-      // items as performs is gone. I think?
-      Energy -= CalcEnergyUsed(result.EnergyCost);
-      if (result.AltAction is not null)
-      {
-        result = result.AltAction.Execute();
-        Energy -= CalcEnergyUsed(result.EnergyCost);
-        currAction = result.AltAction;
-      }
-    }
-    while (result.AltAction is not null);
+    ActionResult result = currAction!.Execute();
+    Energy -= CalcEnergyUsed(result.EnergyCost);      
 
     return result.Succcessful;
   }

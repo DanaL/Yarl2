@@ -253,8 +253,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       // in will attack the monster
       if (GameState!.ObjDb.GetObj(swallowed.SwallowerID) is Actor target)
       {
-        var attackAction = new MeleeAttackAction(GameState, Actor, target.Loc);
-        result.AltAction = attackAction;        
+        Actor.QueueAction(new MeleeAttackAction(GameState, Actor, target.Loc));
       }
       else
       {
@@ -297,7 +296,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         if (GameState.Options.BumpToChat)
         {
           ChatAction chat = new (GameState, GameState.Player) { Loc = Loc };
-          result.AltAction = chat;
+          GameState.Player.QueueAction(chat);
         }
         else
         {
@@ -312,8 +311,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       }
       else
       {
-        var attackAction = new MeleeAttackAction(GameState, player, Loc);
-        result.AltAction = attackAction;
+        player.QueueAction(new MeleeAttackAction(GameState, player, Loc));
       }
     }
     else if (!CanMoveTo(player, GameState.CurrentMap, Loc))
@@ -323,7 +321,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
-        result.AltAction = new OpenDoorAction(GameState, Actor, Loc);
+        player.QueueAction(new OpenDoorAction(GameState, Actor, Loc));
       }
       else if (_lockedDoorMenu && tile.Type == TileType.LockedDoor)
       {
@@ -347,7 +345,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         else
         {
           GameState.RememberLoc(Loc, tile);
-          result.AltAction = new DiveAction(GameState, player, Loc, false);
+          player.QueueAction(new DiveAction(GameState, player, Loc, false));
         }
       }
       else if (tile.Type == TileType.Chasm)
@@ -364,7 +362,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         else
         {
           GameState.RememberLoc(Loc, tile);
-          result.AltAction = new DiveAction(GameState, player, Loc, false);
+          player.QueueAction(new DiveAction(GameState, player, Loc, false));
         }
       }
       else if (tile.Type == TileType.Lever)
