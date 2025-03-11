@@ -533,7 +533,8 @@ class Mob : Actor
     ActionResult result = currAction!.Execute();
     Energy -= CalcEnergyUsed(result.EnergyCost);      
 
-    return result.Succcessful;
+    // I think I can eliminate the bool return from this function
+    return Energy > 0.0;
   }
 
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);

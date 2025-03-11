@@ -27,7 +27,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       if (equipResult != EquipingResult.Equipped)
       {
         GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
-        result.Succcessful = false;
         result.EnergyCost = 0.0;
         return result;
       }
@@ -45,7 +44,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         MeleeAttackAction attackAction = new(GameState, Actor, target.Loc);
         Actor.QueueAction(attackAction);
-        result.Succcessful = false;
         return result;
       }
     }
@@ -60,7 +58,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
         Actor.QueueAction(new MeleeAttackAction(GameState, Actor, targetLoc));
-        result.Succcessful = false;
         return result;
       }
       else
@@ -73,7 +70,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       return result;
     }
 
-    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     Tile tile = GameState!.TileAt(targetLoc);
@@ -181,7 +177,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits = [..digger.Traits.Where(t => t is not InPitTrait)];
 
       digger.QueueAction(new MoveAction(gs, digger, loc));
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
   }
@@ -451,24 +446,20 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
     if (tile.Type == TileType.VaultDoor)
     {      
       ui.AlertPlayer("That door requires a special key.");
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else if (tile.Type == TileType.OpenDoor)
     {
       ui.AlertPlayer("That door is not closed.");
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
     {
       ui.AlertPlayer("You find no lock there.");
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
     }
     else 
     {
-      result.Succcessful = true;
       result.EnergyCost = 1.0;
 
       bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
@@ -530,7 +521,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (!adj)
       {
         GameState!.UIRef().AlertPlayer("You see nowhere to use that key.");
-        return new ActionResult() { Succcessful = true, EnergyCost = 0.0 };
+        return new ActionResult() { EnergyCost = 0.0 };
       }
 
       GameState!.UIRef().AlertPlayer("The metal doors swing open.");
@@ -541,7 +532,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.RemoveByID(key.ID);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
-      return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+      return new ActionResult() { EnergyCost = 1.0 };
     }
 
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
@@ -558,7 +549,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState!.ClearMenu();
       PlayerCommandController.FireReadedBow(item, GameState);
       
-      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
+      return new ActionResult();
     }
 
     if (item.IsUseableTool())
@@ -573,7 +564,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       GameState.UIRef().SetInputController(dir);
       
-      return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
+      return new ActionResult();
     }
 
     bool torch = item.HasTrait<TorchTrait>();
@@ -597,7 +588,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           GameState.UIRef().AlertPlayer(txt);
           if (Actor is Player)
             GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
-          return new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+          return new ActionResult() { EnergyCost = 1.0 };
         }
       }
 
@@ -610,7 +601,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         Actor.Inventory.Add(item, Actor.ID);
       }
 
-      ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
+      ActionResult result = new() { EnergyCost = 1.0 };
       if (item.HasTrait<EdibleTrait>())
       {
         string s;
@@ -631,15 +622,12 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       foreach (IUSeable trait in useableTraits)
       {
         UseResult useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
-        result.Succcessful = useResult.Successful;
         GameState.UIRef().AlertPlayer(useResult.Message);
         success = useResult.Successful;
 
         if (useResult.ReplacementAction is not null)
         {
-          result.Succcessful = false;
           result.EnergyCost = 0.0;
-
           Actor.QueueAction(useResult.ReplacementAction);
         }
       }
@@ -676,11 +664,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     else
     {
       GameState.UIRef().AlertPlayer("You don't know a way to use that!");
-      return new ActionResult() 
-      { 
-        Succcessful = true, 
-        EnergyCost = 0.0 
-      };
+      return new ActionResult();      
     }
   }
 

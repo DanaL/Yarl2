@@ -496,7 +496,7 @@ class Battle
 
   public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
   {    
-    var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+    var result = new ActionResult() { EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
     if (weapon is not null)
@@ -630,9 +630,8 @@ class Battle
 
   public static bool HandleDisplacement(Actor attacker, Actor target, GameState gs)
   {
-    HashSet<Loc> options = Util.Adj8Locs(attacker.Loc)
-                               .Where(sq => !gs.ObjDb.Occupied(sq) && gs.TileAt(sq).Passable())
-                               .ToHashSet();
+    HashSet<Loc> options = [..Util.Adj8Locs(attacker.Loc)
+                               .Where(sq => !gs.ObjDb.Occupied(sq) && gs.TileAt(sq).Passable())];
     if (options.Count > 0)
     {
       Loc sq = options.ToList()[gs.Rng.Next(options.Count)];
@@ -740,10 +739,9 @@ class Battle
 
   // attackBonus is because at this point I don't know what weapon shot the ammunition so pass
   // bonsuses related to that here
-  public static ActionResult MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
+  public static bool MissileAttack(Actor attacker, Actor target, GameState gs, Item ammo, int attackBonus, Animation? anim)
   {
-    ActionResult result = new() { Succcessful = false, EnergyCost = 1.0 };
-
+    bool success = false;
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (attacker.HasTrait<TipsyTrait>())
       roll -= gs.Rng.Next(1, 6);
@@ -757,7 +755,7 @@ class Battle
         gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, ammo, gs);
 
-      result.Succcessful = true;
+      success = true;
     }
     else
     {
@@ -773,22 +771,21 @@ class Battle
 
     ClearObscured(attacker, gs);
 
-    return result;
+    return success;
   }
 
   // This is identical to MissileAttack, save for which ability is used for the attack roll. Not
   // going to merge them just yet in case they diverge as I develop more spells
-  public static ActionResult MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation? anim)
+  public static bool MagicAttack(Actor attacker, Actor target, GameState gs, Item spell, int attackBonus, Animation? anim)
   {
-    var result = new ActionResult() { Succcessful = false, EnergyCost = 1.0 };
-
+    bool success = false;
     int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
     if (roll >= target.AC)
     {
       if (anim is not null)
         gs.UIRef().PlayAnimation(anim, gs);
       ResolveMissileHit(attacker, target, spell, gs);
-      result.Succcessful = true;
+      success = true;
     }
     else
     {
@@ -804,7 +801,7 @@ class Battle
 
     ClearObscured(attacker, gs);
 
-    return result;
+    return success;
   }
 
   static void ClearObscured(Actor attacker, GameState gs)

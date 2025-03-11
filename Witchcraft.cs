@@ -37,7 +37,6 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
     if (magicPoints.Curr < mpCost)
     {
       result.EnergyCost = 0.0;
-      result.Succcessful = false;
       GameState!.UIRef().AlertPlayer("You don't have enough mana!");
       return false;
     }
@@ -56,8 +55,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
-
+    
     if (!CheckCost(1, 10, result))
       return result;
 
@@ -86,8 +84,8 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       {
         pts.Add(pt);
 
-        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
-        if (attackResult.Succcessful)
+        bool attackSuccessful = Battle.MagicAttack(Actor!, occ, GameState, spark, attackMod, new ArrowAnimation(GameState!, pts, Colours.ICE_BLUE));
+        if (attackSuccessful)
         {
           pts = [];
           break;
@@ -120,7 +118,6 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     if (!CheckCost(2, 10, result))
       return result;
@@ -171,8 +168,8 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
       if (gs.ObjDb.Occupant(pt) is Actor occ && !PreviousTargets.Contains(occ.ID))
       {
-        ActionResult attackResult = Battle.MagicAttack(Actor!, occ, gs, spark, attackMod, new ArrowAnimation(gs, pts, Colours.ICE_BLUE));        
-        if (attackResult.Succcessful)
+        bool attackSuccessful = Battle.MagicAttack(Actor!, occ, gs, spark, attackMod, new ArrowAnimation(gs, pts, Colours.ICE_BLUE));        
+        if (attackSuccessful)
         {
           PreviousTargets.Add(occ.ID);
           return pt;
@@ -219,7 +216,6 @@ class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     if (!CheckCost(2, 25, result))
       return result;
@@ -240,7 +236,6 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     if (!CheckCost(5, 15, result))
       return result;
@@ -295,7 +290,6 @@ class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     if (!CheckCost(2, 20, result))
       return result;
@@ -318,7 +312,6 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
     
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
 
@@ -407,7 +400,6 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     if (!CheckCost(0, 10, result))
       return result;
@@ -461,7 +453,6 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 0.0;
-    result.Succcessful = true;
 
     if (!CheckCost(1, 20, result))
     {
@@ -485,7 +476,6 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
@@ -546,7 +536,6 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
   {
     ActionResult result = base.Execute();
     result.EnergyCost = 1.0;
-    result.Succcessful = true;
 
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();

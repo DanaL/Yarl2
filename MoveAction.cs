@@ -75,7 +75,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         ui.AlertPlayer(msg);
       }
 
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
 
       return true;
@@ -87,7 +86,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     // square
     if (gs.ObjDb.Occupied(Loc) && gs.ObjDb.Occupant(Loc) != Actor)
     {
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
       return true;
     }
@@ -102,8 +100,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         if (!strCheck)
         {
           result.EnergyCost = 1.0;
-          result.Succcessful = false;
-          var txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck to {env.Name.DefArticle()}!";
+          string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
           return true;
         }
@@ -133,7 +130,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         txt += $"{grappler!.FullName}!";
         ui.AlertPlayer(txt);
         ui.AlertPlayer($"{actor.FullName.Capitalize()} cannot get away!");
-        result.Succcessful = false;
         result.EnergyCost = 1.0;
 
         return true;
@@ -154,7 +150,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         ui.AlertPlayer("You are still stuck in the pit.");
       }
 
-      result.Succcessful = false;
       result.EnergyCost = 1.0;
 
       // return true regardless because even if you successfully escape, 
@@ -178,7 +173,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
       else
       {
-        result.Succcessful = false;
         result.EnergyCost = 1.0;
         ui.AlertPlayer(MsgFactory.SlipOnIceMessage(actor, actor.Loc, gs));
       }
@@ -198,7 +192,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     if (!GameState.CurrentMap.InBounds(Loc.Row, Loc.Col))
     {
       // in theory this shouldn't ever happen...
-      result.Succcessful = false;
       if (Actor is Player)
         ui.AlertPlayer("You cannot go that way!");
 
@@ -206,13 +199,11 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     }
     else if (!CanMoveTo(Actor!, GameState.CurrentMap, Loc))
     {
-      result.Succcessful = false;
       result.EnergyCost = 0.0;
 
       return result;
     }
     
-    result.Succcessful = true;
     result.EnergyCost = 1.0;
 
     try
@@ -243,7 +234,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
 
   public override ActionResult Execute()
   {
-    ActionResult result = new() { Succcessful = false, EnergyCost = 0.0 };
+    ActionResult result = new();
     UserInterface ui = GameState!.UIRef();
     Player player = GameState!.Player;
 
@@ -265,7 +256,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     // the effects of moving onto the sq, hence the Occupant ID != Actor.ID check
     else if (GameState!.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor.ID)
     {
-      result.Succcessful = false;
       Actor? occ = GameState.ObjDb.Occupant(Loc);
       if (occ is not null && occ.Behaviour is VillagePupBehaviour)
       {
@@ -276,13 +266,11 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
           msg = $"You give {occ.FullName} some scritches.";
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
         result.EnergyCost = 1.0;
-        result.Succcessful = true;
       }
       else if (Actor.Traits.OfType<GrappledTrait>().FirstOrDefault() is GrappledTrait grappled && occ!.ID != grappled.GrapplerID)
       {
         result.EnergyCost = 1.0;
-        result.Succcessful = false;
-
+        
         if (GameState.ObjDb.GetObj(grappled.GrapplerID) is Actor grappler)
         {
           string s = $"You cannot attack {occ.FullName} while grappled by {grappler.FullName}!";
@@ -290,9 +278,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         }
       }
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
-      {
-        result.Succcessful = false;
-
+      {        
         if (GameState.Options.BumpToChat)
         {
           ChatAction chat = new (GameState, GameState.Player) { Loc = Loc };
@@ -306,7 +292,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
       {
         result.EnergyCost = 1.0;
-        result.Succcessful = false;
         ui.AlertPlayer("You are too frightened to attack!");
       }
       else
@@ -316,7 +301,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     }
     else if (!CanMoveTo(player, GameState.CurrentMap, Loc))
     {
-      result.Succcessful = false;
       Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
     
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
@@ -371,7 +355,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         lever.Activate(GameState);
 
         result.EnergyCost = 1.0;
-        result.Succcessful = true;
       }
       else
       {
