@@ -621,6 +621,13 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           energyCost = 0.0;
           Actor.QueueAction(useResult.ReplacementAction);
         }
+
+        // This prevents a consumable item from getting used up in the event
+        // a targeting menu or such is bailed out of.
+        if (useResult.ReplacementAction is UseSpellItemAction)
+        {
+          return 0.0;
+        }
       }
 
       foreach (SideEffectTrait sideEffect in item.Traits.OfType<SideEffectTrait>())

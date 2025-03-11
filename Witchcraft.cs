@@ -522,9 +522,6 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
   {
     base.Execute();
     
-    if (!CheckCost(1, 20))
-      return 0.0;
-
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
     
