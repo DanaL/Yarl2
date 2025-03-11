@@ -635,15 +635,7 @@ class Player : Actor
     do
     {      
       result = action!.Execute();
-
       Energy -= CalcEnergyUsed(result.EnergyCost);
-      if (result.AltAction is not null)
-      {
-        result = result.AltAction.Execute();
-        Energy -= CalcEnergyUsed(result.EnergyCost);
-        action = result.AltAction;
-      }
-
       gs.PrepareFieldOfView();
     }
     while (result.AltAction is not null);

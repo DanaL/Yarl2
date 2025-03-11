@@ -3214,7 +3214,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       result.Succcessful = false;
       result.EnergyCost = 0.0;
-      result.AltAction = new BlinkAction(GameState!, Actor);
+      Actor.QueueAction(new BlinkAction(GameState!, Actor));
 
       return result;
     }
