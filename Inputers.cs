@@ -1070,10 +1070,12 @@ class LockedDoorMenu : Inputer
     else if (Options.Contains(ch))
     {
       SetUpCommand(ch);
+      return;
     }
     else if (ch == '\n' || ch == '\r')
     {
       SetUpCommand(Options[Row]);
+      return;
     }
     else if (ch == 'j')
     {
