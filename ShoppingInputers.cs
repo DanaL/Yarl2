@@ -80,11 +80,16 @@ class ShopMenuInputer : Inputer
   {
     if (ch == Constants.ESC || ch == ' ')
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
     }
     else if ((ch == '\n' || ch == '\r') && GS.Player.Inventory.Zorkmids >= TotalInvoice())
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      QueueDeferredAction();
       Done = true;
       Success = true;
     }
@@ -371,18 +376,18 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 1)
     {
-      GS.Player.ReplacePendingAction(new ShoppingCompletedAction(GS, Shopkeeper), this);
+      GS.Player.QueueAction(new ShoppingCompletedAction(GS, Shopkeeper));
       base.Input(ch);
     }
     else if (menuState == 2)
     {
-      GS.Player.ReplacePendingAction(new RepairItemAction(GS, Shopkeeper), this);
+      GS.Player.QueueAction(new RepairItemAction(GS, Shopkeeper));
       blurb = "What would you like repaired?";
       base.Input(ch);
     }
     else if (menuState == 3 && MenuItems.ContainsKey(ch))
     {
-      GS.Player.ReplacePendingAction(new UpgradeItemAction(GS, Shopkeeper), this);
+      GS.Player.QueueAction(new UpgradeItemAction(GS, Shopkeeper));
       _itemToEnchant = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
       MenuItems = ReagentMenu();      
@@ -558,7 +563,6 @@ class WitchInputer : Inputer
   Actor Witch { get; set; } 
   string Service { get; set; } = "";
   Dictionary<char, string> Options { get; set; } = [];
-  GameState GS { get; set; }
   string Blurb { get; set; } = "";
   int Invoice { get; set; } = 0;
 

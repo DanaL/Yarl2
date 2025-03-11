@@ -47,12 +47,6 @@ class Player : Actor
 
   public bool Running { get; set; } = false;
 
-  //  Ugh,  maybe I should set these up as Queues?
-  Inputer? _inputController;
-  Action? _deferred;  
-  Inputer? FollowupInputer { get; set; }
-  Action? FollowupAction { get; set; }
-
   char RepeatingCmd { get; set; }
   HashSet<Loc> LocsRan { get; set; } = [];
 
@@ -415,18 +409,6 @@ class Player : Actor
     return lines;
   }
 
-  public void SetFollowupAction(Action action, Inputer inputer)
-  {
-    FollowupAction = action;
-    FollowupInputer = inputer;
-  }
-
-  public void ReplacePendingAction(Action? newAction, Inputer? inputer)
-  {
-    _deferred = newAction ?? _deferred;
-    _inputController = inputer ?? _inputController;
-  }
-
   private static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
   {
     ['h'] = (0, -1),   // left
@@ -601,18 +583,51 @@ class Player : Actor
 
   public override void TakeTurn(GameState gs)
   {
-    Action? action;
+    Action? action = null;
+    UserInterface ui = gs.UIRef();
 
-    if (ActionQ.Count > 0)
+    // Check for repeated action here?
+    // if (Running)
+    // {
+    //   ch = UpdateRunning(gameState);
+    // }
+    
+    //if (IsMoveKey(char.ToLower(ch)))
+    //    StartRunning(gameState, ch);
+
+    bool passTurn = false;
+    foreach (Trait t in Traits)
+    {
+      if (t is ParalyzedTrait paralyzed)
+      {
+        ui.AlertPlayer("You cannot move!");
+
+        if (paralyzed.TurnsParalyzed % 5 == 0)
+        {
+          ui.SetPopup(new Popup("You are paralyzed", "", -1, -1));
+          ui.BlockForInput(gs);
+          ui.ClosePopup();
+        }
+
+        passTurn = true;
+        action = new PassAction(gs, this);
+        break;
+      }
+
+      if (t is RestingTrait) 
+      {
+        passTurn = true;
+        action = new PassAction(gs, this);
+        break;
+      }
+    }
+
+    if (!passTurn && ActionQ.Count > 0)
     {
       action = ActionQ.Dequeue();
     }
-    else
-    {
-      action = DecideAction(gs);
-    }
     
-    if (action is NullAction)
+    if (action is null)
       return;
 
     // One of those calls to PrepareFieldOfView() *HAS* to be redundant
@@ -632,106 +647,6 @@ class Player : Actor
       gs.PrepareFieldOfView();
     }
     while (result.AltAction is not null);
-  }
-
-  public Action DecideAction(GameState gameState)
-  {
-    if (FollowupAction is not null)
-    {
-      _inputController = FollowupInputer;
-      _deferred = FollowupAction;
-      FollowupAction = null;
-      return new NullAction();
-    }
-
-    UserInterface ui = gameState.UIRef();
-
-    foreach (Trait t in Traits)
-    {
-      if (t is ParalyzedTrait paralyzed)
-      {
-        ui.AlertPlayer("You cannot move!");
-
-        if (paralyzed.TurnsParalyzed % 5 == 0)
-        {
-          ui.SetPopup(new Popup("You are paralyzed", "", -1, -1));
-          ui.BlockForInput(gameState);
-          ui.ClosePopup();
-        }
-         
-        return new PassAction(gameState, this);
-      }
-
-      if (t is RestingTrait)
-        return new PassAction(gameState, this);
-    }
-    
-    char ch = '\0';
-
-    if (ui.InputBuffer.Count > 0 && ui.InputBuffer.Peek() == ' ')
-      Running = false;
-
-    // Check for repeated action here?
-    if (Running)
-    {
-      ch = UpdateRunning(gameState);
-    }
-    else if (ui.InputBuffer.Count > 0)
-    {
-      ch = ui.InputBuffer.Dequeue();
-    }
-
-    if (_inputController is not null)
-    {
-      _inputController.OnUpdate();
-
-      if (ch != '\0')
-      {
-        _inputController.Input(ch);        
-      }
-
-      if (!_inputController.Done)
-      {
-        if (_inputController.Msg != "")
-          ui.SetPopup(new Popup(_inputController.Msg, "", -1, -1));
-        return new NullAction();
-      }
-      
-      if (_inputController.Success && _deferred is not null)
-      {
-        if (_inputController is not JustDoItInputer)
-          _deferred.ReceiveUIResult(_inputController.GetResult());
-        _inputController = null;
-        ui.ClosePopup();
-        return _deferred;
-       }
-       
-      _inputController = null;
-      ui.CloseMenu();
-      ui.ClosePopup();
-      ui.AlertPlayer("Nevermind.");
-      return new NullAction();
-    }
-
-    if (ch != '\0')
-    {     
-      ui.ClosePopup();
-
-      if (IsMoveKey(char.ToLower(ch)))
-        StartRunning(gameState, ch);
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    }
-
-    return new NullAction();
-
   }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)

@@ -436,10 +436,16 @@ class Aimer : Inputer
   }
 }
 
-class NumericInputer(GameState gs, string prompt) : Inputer(gs)
+class NumericInputer : Inputer
 {
-  readonly string _prompt = prompt;
+  readonly string _prompt;
   string _value = "";
+
+  public NumericInputer(GameState gs, string prompt) : base(gs)
+  {
+    _prompt = prompt;
+    GS.UIRef().SetPopup(new Popup($"{_prompt}\n{_value}", "", -1, -1));
+  }
 
   public override void Input(char ch)
   {
@@ -448,6 +454,7 @@ class NumericInputer(GameState gs, string prompt) : Inputer(gs)
       Done = true;
       Success = false;
 
+      GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));      
     }
     else if (ch == '\n' || ch == '\r')
@@ -1112,7 +1119,7 @@ class LockedDoorMenu : Inputer
         DigAction dig = new(GS, GS.Player, item);
         DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
         dig.ReceiveUIResult(res);
-        GS.Player.ReplacePendingAction(dig, new JustDoItInputer(GS));
+        GS.Player.QueueAction(dig);
         return;
       }
     }
@@ -1124,7 +1131,7 @@ class LockedDoorMenu : Inputer
     PickLockAction pickLock = new(GS, GS.Player);
     DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
     pickLock.ReceiveUIResult(res);
-    GS.Player.ReplacePendingAction(pickLock, new JustDoItInputer(GS));
+    GS.Player.QueueAction(pickLock);
   }
 
   void SetUpKnock()
@@ -1140,13 +1147,13 @@ class LockedDoorMenu : Inputer
     }
 
     UseItemAction useItem = new(GS, GS.Player) { Choice = slot };
-    GS.Player.ReplacePendingAction(useItem, new JustDoItInputer(GS));
+    GS.Player.QueueAction(useItem);
   }
 
   void SetUpBash()
   {
     BashAction bash = new(GS, GS.Player) { Target = Loc };
-    GS.Player.ReplacePendingAction(bash, new JustDoItInputer(GS));
+    GS.Player.QueueAction(bash);
   }
 
   void SetMenu()

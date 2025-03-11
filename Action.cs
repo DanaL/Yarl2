@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Xml.Linq;
-
 namespace Yarl2;
 
 class ActionResult
@@ -2499,12 +2497,15 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
         GameState.UIRef().AlertPlayer("You have no money!");
         return new ActionResult() { Succcessful = false };
       }
-      var dropMoney = new DropZorkmidsAction(GameState, Actor);
-      ui.SetPopup(new Popup("How much?", "", -1, -1));
-      var acc = new NumericInputer(gs, "How much?");
-      if (Actor is Player player)
+      
+      if (Actor is Player)
       {
-        player.ReplacePendingAction(dropMoney, acc);
+        NumericInputer acc = new(GameState, "How much?")
+        {
+          DeferredAction = new DropZorkmidsAction(GameState, Actor)
+        };
+        ui.SetInputController(acc);
+
         return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
       }
       else
@@ -2536,7 +2537,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       DropStackAction dropStackAction = new(GameState, Actor, Choice);
       string prompt = $"Drop how many {item.FullName.Pluralize()}?\n(enter for all)";
       ui.SetPopup(new Popup(prompt, "", -1, -1));
-      ui.SetInputController(new NumericInputer(gs, prompt) { DeferredAction = dropStackAction });
+      ui.SetInputController(new NumericInputer(GameState, prompt) { DeferredAction = dropStackAction });
       return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
 
       // When monsters can drop stuff I guess I'll have to handle that here??
@@ -3191,8 +3192,11 @@ class InventoryChoiceAction(GameState gs, Actor actor, InventoryOptions opts, Ac
     {
       char[] slots = player.Inventory.UsedSlots();
       player.Inventory.ShowMenu(GameState!.UIRef(), InvOptions);
-      Inputer inputer = new Inventorier(GameState!, [.. slots]);
-      player.ReplacePendingAction(ReplacementAction, inputer);
+      Inventorier inputer = new(GameState!, [.. slots])
+      {
+        DeferredAction = ReplacementAction
+      };
+      GameState.UIRef().SetInputController(inputer);
     }
 
     return result;
@@ -3309,48 +3313,68 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
     if (Actor is not Player player)
       throw new Exception("Boy did something sure go wrong!");
 
+    GameState gs = GameState!;
     Inputer inputer;
     switch (_wand.Effect)
     {
       case "magicmissile":
-        inputer = new Aimer(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new MagicMissleAction(GameState!, player, _wand), inputer);
+        inputer = new Aimer(GameState!, player.Loc, 7)
+        {
+          DeferredAction = new MagicMissleAction(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "fireball":
-        inputer = new Aimer(GameState!, player.Loc, 12);
-        player.ReplacePendingAction(new FireballAction(GameState!, player, _wand), inputer);
+        inputer = new Aimer(GameState!, player.Loc, 12)
+        {
+          DeferredAction = new FireballAction(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "swap":
-        inputer = new Aimer(GameState!, player.Loc, 25);
-        player.ReplacePendingAction(new SwapWithMobAction(GameState!, player, _wand), inputer);
+        inputer = new Aimer(GameState!, player.Loc, 25)
+        {
+          DeferredAction = new SwapWithMobAction(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "healmonster":
-        inputer = new Aimer(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new CastHealMonster(GameState!, player, _wand), inputer);
+        inputer = new Aimer(GameState!, player.Loc, 7)
+        {
+          DeferredAction = new CastHealMonster(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "frost":
-        inputer = new Aimer(GameState!, player.Loc, 7);
-        player.ReplacePendingAction(new FrostRayAction(GameState!, player, _wand), inputer);
-        GameState!.UIRef().AlertPlayer("Which way?");
+        inputer = new Aimer(GameState!, player.Loc, 7)
+        {
+          DeferredAction = new FrostRayAction(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "slowmonster":
-        inputer = new Aimer(GameState!, player.Loc, 9);
-        player.ReplacePendingAction(new RayOfSlownessAction(GameState!, player, _wand, wandId), inputer);
-        GameState!.UIRef().AlertPlayer("Which way?");
+        inputer = new Aimer(GameState!, player.Loc, 9)
+        {
+          DeferredAction = new RayOfSlownessAction(GameState!, player, _wand, wandId)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "digging":
-        inputer = new Aimer(GameState!, player.Loc, 10);
-        player.ReplacePendingAction(new DigRayAction(GameState!, player, _wand), inputer);
-        GameState!.UIRef().AlertPlayer("Which way?");
+        inputer = new Aimer(GameState!, player.Loc, 10)
+        {
+          DeferredAction = new DigRayAction(GameState!, player, _wand)
+        };
+        gs.UIRef().SetInputController(inputer);
         break;
       case "summoning":
-        return HandleSummoning(result);
+        SetupSummoning();
+        break;
     }
     
     return result;
   }
 
-  ActionResult HandleSummoning(ActionResult result)
+  void SetupSummoning()
   {
     // Kind of dorky to hardcore it, but otherwise I'd have to query ObjDb by the wand item ID to 
     // get it's name and currently it is always going to be wand of summoning...
@@ -3364,9 +3388,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
       GameState = GameState,
       Actor = Actor
     };
-    result.AltAction = summon;
-
-    return result;
+    Actor.QueueAction(summon);
   }
 }
 

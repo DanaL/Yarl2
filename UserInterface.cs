@@ -56,8 +56,6 @@ abstract class UserInterface
 
   Queue<string> Messages = [];
 
-  public Queue<char> InputBuffer = [];
-
   public Sqr[,] SqsOnScreen;
   public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
 

@@ -566,11 +566,14 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       GameState!.ClearMenu();
       
+      DirectionalInputer dir = new(GameState, true);
       if (item.Name == "pickaxe")
-        ((Player)Actor).ReplacePendingAction(new DigAction(GameState, Actor, item), new DirectionalInputer(GameState, true));
+        dir.DeferredAction = new DigAction(GameState, Actor, item);
       else
-        ((Player)Actor).ReplacePendingAction(new PickLockAction(GameState, Actor), new DirectionalInputer(GameState));
+        dir.DeferredAction = new PickLockAction(GameState, Actor);
 
+      GameState.UIRef().SetInputController(dir);
+      
       return new ActionResult() { Succcessful = false, EnergyCost = 0.0 };
     }
 

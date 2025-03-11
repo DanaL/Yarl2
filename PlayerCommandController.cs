@@ -241,8 +241,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'd')
     {
-      gs.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
-      HashSet<char> slots = [.. gs.Player.Inventory.UsedSlots()];
+      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Drop what?", Options = InvOption.MentionMoney });
+      HashSet<char> slots = [.. GS.Player.Inventory.UsedSlots()];
       slots.Add('$');
       ui.SetInputController(new Inventorier(GS, slots) { DeferredAction = new DropItemAction(GS, GS.Player) });      
     }
@@ -327,7 +327,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       // Eventually I'll want to remember the last item thrown
       // so the player doesn't need to always select an item if
       // they're throwing draggers several turns in a row
-      gs.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?" });
+      GS.Player.Inventory.ShowMenu(ui, new InventoryOptions() { Title = "Throw what?" });
       Inventorier inv = new(GS, [.. GS.Player.Inventory.UsedSlots()])
       {
         DeferredAction = new ThrowSelectionAction(GS, GS.Player)
