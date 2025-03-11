@@ -1062,6 +1062,8 @@ class LockedDoorMenu : Inputer
   {
     if (ch == Constants.ESC)
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
     }
@@ -1120,6 +1122,8 @@ class LockedDoorMenu : Inputer
         DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
         dig.ReceiveUIResult(res);
         GS.Player.QueueAction(dig);
+        GS.UIRef().ClosePopup();
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
         return;
       }
     }
@@ -1132,6 +1136,8 @@ class LockedDoorMenu : Inputer
     DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
     pickLock.ReceiveUIResult(res);
     GS.Player.QueueAction(pickLock);
+    GS.UIRef().ClosePopup();
+    GS.UIRef().SetInputController(new PlayerCommandController(GS));
   }
 
   void SetUpKnock()
@@ -1146,14 +1152,16 @@ class LockedDoorMenu : Inputer
       }
     }
 
-    UseItemAction useItem = new(GS, GS.Player) { Choice = slot };
-    GS.Player.QueueAction(useItem);
+    GS.Player.QueueAction(new UseItemAction(GS, GS.Player) { Choice = slot });
+    GS.UIRef().ClosePopup();
+    GS.UIRef().SetInputController(new PlayerCommandController(GS));
   }
 
   void SetUpBash()
   {
-    BashAction bash = new(GS, GS.Player) { Target = Loc };
-    GS.Player.QueueAction(bash);
+    GS.Player.QueueAction(new BashAction(GS, GS.Player) { Target = Loc });
+    GS.UIRef().ClosePopup();
+    GS.UIRef().SetInputController(new PlayerCommandController(GS));
   }
 
   void SetMenu()
