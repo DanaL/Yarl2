@@ -530,8 +530,8 @@ class Mob : Actor
   {
     Action? currAction = action;
 
-    ActionResult result = currAction!.Execute();
-    Energy -= CalcEnergyUsed(result.EnergyCost);      
+    double result = currAction!.Execute();
+    Energy -= CalcEnergyUsed(result);      
 
     // I think I can eliminate the bool return from this function
     return Energy > 0.0;

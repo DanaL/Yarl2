@@ -47,7 +47,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     return false;
   }
 
-  protected bool StuckOnLoc(Actor actor, ActionResult result, GameState gs, UserInterface ui)
+  protected bool StuckOnLoc(Actor actor, GameState gs, UserInterface ui)
   {
     // Is something blocking your egress from your loc?
     if (gs.ObjDb.ItemsAt(Loc).Any(item => item.HasTrait<BlockTrait>()))
@@ -75,8 +75,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         ui.AlertPlayer(msg);
       }
 
-      result.EnergyCost = 0.0;
-
       return true;
     }
 
@@ -86,7 +84,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     // square
     if (gs.ObjDb.Occupied(Loc) && gs.ObjDb.Occupant(Loc) != Actor)
     {
-      result.EnergyCost = 0.0;
       return true;
     }
     
@@ -99,7 +96,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         bool strCheck = actor.AbilityCheck(Attribute.Strength, web.DC, gs.Rng);
         if (!strCheck)
         {
-          result.EnergyCost = 1.0;
           string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck to {env.Name.DefArticle()}!";
           ui.AlertPlayer(txt);
           return true;
@@ -130,7 +126,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         txt += $"{grappler!.FullName}!";
         ui.AlertPlayer(txt);
         ui.AlertPlayer($"{actor.FullName.Capitalize()} cannot get away!");
-        result.EnergyCost = 1.0;
 
         return true;
       }
@@ -149,8 +144,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       {        
         ui.AlertPlayer("You are still stuck in the pit.");
       }
-
-      result.EnergyCost = 1.0;
 
       // return true regardless because even if you successfully escape, 
       // it still takes up your move action.
@@ -173,7 +166,6 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       }
       else
       {
-        result.EnergyCost = 1.0;
         ui.AlertPlayer(MsgFactory.SlipOnIceMessage(actor, actor.Loc, gs));
       }
     }
@@ -181,13 +173,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     return false;
   }
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
+    base.Execute();
     UserInterface ui = GameState!.UIRef();
 
-    if (StuckOnLoc(Actor!, result, GameState!, ui))
-      return result;
+    if (StuckOnLoc(Actor!, GameState!, ui))
+      return 1.0;
 
     if (!GameState.CurrentMap.InBounds(Loc.Row, Loc.Col))
     {
@@ -195,17 +187,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (Actor is Player)
         ui.AlertPlayer("You cannot go that way!");
 
-      return result;
+      return 0.0;
     }
     else if (!CanMoveTo(Actor!, GameState.CurrentMap, Loc))
     {
-      result.EnergyCost = 0.0;
-
-      return result;
+      return 0.0;
     }
     
-    result.EnergyCost = 1.0;
-
     try
     {
       GameState.ResolveActorMove(Actor!, Actor!.Loc, Loc);
@@ -221,7 +209,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       GameState.Noise(Actor.Loc.Row, Actor.Loc.Col, Actor.GetMovementNoise());
     }
 
-    return result;
+    return 1.0;
   }
 }
 
@@ -232,9 +220,8 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
   readonly bool _bumpToOpen = gameState.Options!.BumpToOpen;
   readonly bool _lockedDoorMenu = gameState.Options.BumpForLockedDoors;
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = new();
     UserInterface ui = GameState!.UIRef();
     Player player = GameState!.Player;
 
@@ -265,12 +252,9 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         else
           msg = $"You give {occ.FullName} some scritches.";
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
-        result.EnergyCost = 1.0;
       }
       else if (Actor.Traits.OfType<GrappledTrait>().FirstOrDefault() is GrappledTrait grappled && occ!.ID != grappled.GrapplerID)
       {
-        result.EnergyCost = 1.0;
-        
         if (GameState.ObjDb.GetObj(grappled.GrapplerID) is Actor grappler)
         {
           string s = $"You cannot attack {occ.FullName} while grappled by {grappler.FullName}!";
@@ -287,16 +271,18 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         else
         {
           ui.AlertPlayer($"You don't want to attack {occ.FullName}!");
-        }        
+        }
+        
+        return 0.0;
       }
       else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
       {
-        result.EnergyCost = 1.0;
         ui.AlertPlayer("You are too frightened to attack!");
       }
       else
       {
         player.QueueAction(new MeleeAttackAction(GameState, player, Loc));
+        return 0.0;
       }
     }
     else if (!CanMoveTo(player, GameState.CurrentMap, Loc))
@@ -306,11 +292,13 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
         player.QueueAction(new OpenDoorAction(GameState, Actor, Loc));
+        return 0.0;
       }
       else if (_lockedDoorMenu && tile.Type == TileType.LockedDoor)
       {
         ui.AlertPlayer(BlockedMessage(tile));
         GameState.UIRef().SetInputController(new LockedDoorMenu(ui, GameState, Loc));
+        return 0.0;
       }
       else if (!GameState.InWilderness && tile.Type == TileType.DeepWater)
       {
@@ -331,6 +319,8 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
           GameState.RememberLoc(Loc, tile);
           player.QueueAction(new DiveAction(GameState, player, Loc, false));
         }
+
+        return 0.0;
       }
       else if (tile.Type == TileType.Chasm)
       {
@@ -348,13 +338,13 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
           GameState.RememberLoc(Loc, tile);
           player.QueueAction(new DiveAction(GameState, player, Loc, false));
         }
+
+        return 0.0;
       }
       else if (tile.Type == TileType.Lever)
       {
         Lever lever = (Lever)tile;
         lever.Activate(GameState);
-
-        result.EnergyCost = 1.0;
       }
       else
       {
@@ -368,10 +358,10 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     }
     else
     {
-      result = base.Execute();
+      return base.Execute();
     }
 
-    return result;
+    return 1.0;
   }
 
   static string BlockedMessage(Tile tile) => tile.Type switch

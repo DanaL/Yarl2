@@ -630,8 +630,8 @@ class Player : Actor
     if (action is null)
       return;
 
-    ActionResult result = action.Execute();
-    Energy -= CalcEnergyUsed(result.EnergyCost);
+    double result = action.Execute();
+    Energy -= CalcEnergyUsed(result);
     gs.PrepareFieldOfView();
   }
 

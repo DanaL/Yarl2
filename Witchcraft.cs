@@ -31,12 +31,11 @@ class Spells
 
 abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, actor)
 {
-  protected bool CheckCost(int mpCost, int stressCost, ActionResult result)
+  protected bool CheckCost(int mpCost, int stressCost)
   {
     Stat magicPoints = Actor!.Stats[Attribute.MagicPoints];
     if (magicPoints.Curr < mpCost)
     {
-      result.EnergyCost = 0.0;
       GameState!.UIRef().AlertPlayer("You don't have enough mana!");
       return false;
     }
@@ -51,13 +50,10 @@ abstract class CastSpellAction(GameState gs, Actor actor) : TargetedAction(gs, a
 
 class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-    
-    if (!CheckCost(1, 10, result))
-      return result;
+    if (!CheckCost(1, 10))
+      return 0.0;
 
     Item spark = new()
     {
@@ -106,7 +102,7 @@ class CastArcaneSpark(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
     GameState!.ObjDb.RemoveItemFromGame(spark.Loc, spark);
 
-    return result;
+    return 1.0;
   }
 }
 
@@ -114,13 +110,12 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   HashSet<ulong> PreviousTargets { get; set; } = [];
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-
-    if (!CheckCost(2, 10, result))
-      return result;
+    base.Execute();
+    
+    if (!CheckCost(2, 10))
+      return 0.0;
 
     PreviousTargets.Add(Actor!.ID);
 
@@ -132,15 +127,15 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     
     Loc target2 = SelectNextTarget(endPt, GameState!);
     if (target2 == Loc.Nowhere)
-      return result;
+      return 1.0;
     endPt = Arc(endPt, target2, attackMod, GameState!);
 
     Loc target3 = SelectNextTarget(endPt, GameState!);
     if (target3 == Loc.Nowhere)
-      return result;
+      return 1.0;
     Arc(endPt, target3, attackMod, GameState!);
 
-    return result;
+    return 1.0;
   }
 
   Loc Arc(Loc start, Loc target, int attackMod, GameState gs)
@@ -212,19 +207,18 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
 class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-
-    if (!CheckCost(2, 25, result))
-      return result;
+    base.Execute();
+    
+    if (!CheckCost(2, 25))
+      return 0.0;
 
     MageArmourTrait t = new();
     foreach (string s in t.Apply(Actor!, GameState!))
       GameState!.UIRef().AlertPlayer(s);
 
-    return result;
+    return 1.0;
   }
 
   public override void ReceiveUIResult(UIResult result) {}
@@ -232,13 +226,12 @@ class CastMageArmour(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
 class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-
-    if (!CheckCost(5, 15, result))
-      return result;
+    base.Execute();
+    
+    if (!CheckCost(5, 15))
+      return 0.0;
 
     GameState!.UIRef().AlertPlayer("Ala-ca-zzzzzzzzz!");
     HashSet<Loc> flooded = Util.FloodFill(GameState!, Actor!.Loc, 3, []);
@@ -278,7 +271,7 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       }
     }
    
-    return result;
+    return 1.0;
   }
 
   public override void ReceiveUIResult(UIResult result) { }
@@ -286,19 +279,18 @@ class CastSlumberingSong(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
 class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-
-    if (!CheckCost(2, 20, result))
-      return result;
+    base.Execute();
+    
+    if (!CheckCost(2, 20))
+      return 0.0;
 
     LightSpellTrait ls = new();
     foreach (string s in ls.Apply(Actor!, GameState!))
       GameState!.UIRef().AlertPlayer(s);
 
-    return result;
+    return 1.0;
   }
 
   public override void ReceiveUIResult(UIResult result) {}
@@ -308,15 +300,14 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   char Dir { get; set; } = '\0';
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
+    base.Execute();
     
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
 
-    if (!CheckCost(3, 25, result))
-      return result;
+    if (!CheckCost(3, 25))
+      return 0.0;
 
     GameState gs = GameState!;
     int maxDungeonLevel = gs.CurrentDungeon.LevelMaps.Count - 1;
@@ -350,7 +341,7 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       }
     }
 
-    return result;
+    return 1.0;
   }
 
   Loc PickDestLoc(GameState gs)
@@ -396,13 +387,12 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 
 class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
-
-    if (!CheckCost(0, 10, result))
-      return result;
+    base.Execute();
+    
+    if (!CheckCost(0, 10))
+      return 0.0;
 
     // I don't yet want to deal with the player being polymorphed...
     if (Target == Actor!.Loc)
@@ -443,26 +433,22 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
     }
 
-    return result;
+    return 1.0;
   }
 }
 
 class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 0.0;
-
-    if (!CheckCost(1, 20, result))
+    base.Execute();
+    
+    if (CheckCost(1, 20))
     {
-      result.EnergyCost = 1.0;
-      return result;
+      GameState!.Player.QueueAction(new BlinkAction(GameState, Actor!));
     }
 
-    GameState!.Player.QueueAction(new BlinkAction(GameState, Actor!));
-
-    return result;
+    return 0.0;
   }
 
   public override void ReceiveUIResult(UIResult result) { }
@@ -472,16 +458,16 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
 {
   List<Loc> Affected { get; set; } = [];
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
+    base.Execute();
+    
 
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(1, 20, result))
-      return result;
+    if (!CheckCost(1, 20))
+      return 0.0;
 
     HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
@@ -514,7 +500,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       }
     }
 
-    return result;
+    return 1.0;
   }
 
   public override void ReceiveUIResult(UIResult result) 
@@ -532,16 +518,18 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
   List<Loc> Affected { get; set; } = [];
   Item? Item { get; set; } = item;
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
+    base.Execute();
+    
+    if (!CheckCost(1, 20))
+      return 0.0;
 
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
     
-    if (!FreeToCast && !CheckCost(1, 20, result))
-      return result;
+    if (!FreeToCast && !CheckCost(1, 20))
+      return 0.0;
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");
 
@@ -623,7 +611,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
       Actor!.Inventory.ConsumeItem(Item, Actor, GameState.Rng);
     }
 
-    return result;
+    return 1.0;
   }
 
   static void BlowItemBack(Item item, Loc origin, GameState gs)

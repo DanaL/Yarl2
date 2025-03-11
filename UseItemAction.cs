@@ -17,18 +17,15 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   int Row;
   int Col;
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-
     if (!Tool.Equipped)
     {
       var (equipResult, _) = ((Player)Actor!).Inventory.ToggleEquipStatus(Tool.Slot);
       if (equipResult != EquipingResult.Equipped)
       {
         GameState!.UIRef().SetPopup(new Popup("You are unable to ready the pickaxe!", "", -1, -1));
-        result.EnergyCost = 0.0;
-        return result;
+        return 0.0;
       }
       else
       {
@@ -44,7 +41,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         MeleeAttackAction attackAction = new(GameState, Actor, target.Loc);
         Actor.QueueAction(attackAction);
-        return result;
+        return 0.0;
       }
     }
 
@@ -58,7 +55,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         GameState!.UIRef().AlertPlayer($"When you have an axe, every {occ.Name} looks like a tree.");
         Actor.QueueAction(new MeleeAttackAction(GameState, Actor, targetLoc));
-        return result;
       }
       else
       {
@@ -67,19 +63,18 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
       }
 
-      return result;
+      return 0.0;
     }
 
-    result.EnergyCost = 1.0;
-
+    double energyCost = 1.0;
     Tile tile = GameState!.TileAt(targetLoc);
     if (tile.IsTree())
     {
-      ChopTree(targetLoc, tile, result);
+      ChopTree(targetLoc, tile);
     }
     else if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
     {
-      ChopDoor(targetLoc, result);
+      ChopDoor(targetLoc);
     }
     else if (tile.Type == TileType.DungeonWall)
     {
@@ -116,7 +111,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Pit)
     {
-      DigInPit(targetLoc, result, GameState, Actor);
+      DigInPit(targetLoc, GameState, Actor);
+      energyCost = 0.0;
     }
     else if (GameState.ObjDb.ItemsAt(targetLoc).Any(i => i.HasTrait<BlockTrait>()))
     {
@@ -128,7 +124,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().SetPopup(new Popup("You swing your pickaxe through the air.", "", -1, -1));
     }
 
-    return result;
+    return energyCost;
   }
 
   static void DigBlock(Loc loc, GameState gs, Actor digger)
@@ -160,7 +156,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
   }
 
-  static void DigInPit(Loc loc, ActionResult result, GameState gs, Actor digger)
+  static void DigInPit(Loc loc, GameState gs, Actor digger)
   {
     if (loc.Level == gs.CurrentDungeon.LevelMaps.Count - 1) {      
       gs.UIRef().AlertPlayer("The floor is too hard to dig here.");
@@ -177,7 +173,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits = [..digger.Traits.Where(t => t is not InPitTrait)];
 
       digger.QueueAction(new MoveAction(gs, digger, loc));
-      result.EnergyCost = 0.0;
     }
   }
 
@@ -355,7 +350,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
   }
 
-  void ChopDoor(Loc loc, ActionResult result)
+  void ChopDoor(Loc loc)
   {
     int dc = 11 + GameState!.CurrLevel / 4;
     if (Actor is Player && GameState.Player.Lineage == PlayerLineage.Dwarf)
@@ -376,7 +371,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
   }
 
-  void ChopTree(Loc loc, Tile tile, ActionResult result)
+  void ChopTree(Loc loc, Tile tile)
   {
     GameState!.UIRef().SetPopup(new Popup("You chop down the tree...", "", -1, -1, 20));
     TileType t = GameState.Rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Grass;
@@ -435,35 +430,33 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
   int Row;
   int Col;
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
-    ActionResult result = base.Execute();
-    
     Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
     Tile tile = GameState!.TileAt(loc);
     UserInterface ui = GameState.UIRef();
 
+    double energyCost = 1.0;
     if (tile.Type == TileType.VaultDoor)
     {      
       ui.AlertPlayer("That door requires a special key.");
-      result.EnergyCost = 0.0;
+      energyCost = 0.0;
     }
     else if (tile.Type == TileType.OpenDoor)
     {
       ui.AlertPlayer("That door is not closed.");
-      result.EnergyCost = 0.0;
+      energyCost = 0.0;
     }
     else if (!(tile.Type == TileType.LockedDoor || tile.Type == TileType.ClosedDoor))
     {
       ui.AlertPlayer("You find no lock there.");
-      result.EnergyCost = 0.0;
+      energyCost = 0.0;
     }
     else 
     {
-      result.EnergyCost = 1.0;
-
       bool rogue = GameState.Player.Background == PlayerBackground.Skullduggery;
       int dc = 12 + GameState.CurrLevel + 1;
+
       if (rogue)
         dc -= 5;
       int roll = GameState.Rng.Next(1, 21);
@@ -486,7 +479,7 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
 
-    return result;
+    return energyCost;
   }
 
   public override void ReceiveUIResult(UIResult result) 
@@ -501,7 +494,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
   
-  ActionResult UseVaultKey(Item key)
+  double UseVaultKey(Item key)
   {
     VaultKeyTrait? keyTrait = key.Traits.OfType<VaultKeyTrait>()
                                         .FirstOrDefault();
@@ -521,7 +514,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (!adj)
       {
         GameState!.UIRef().AlertPlayer("You see nowhere to use that key.");
-        return new ActionResult() { EnergyCost = 0.0 };
+        return 0.0;
       }
 
       GameState!.UIRef().AlertPlayer("The metal doors swing open.");
@@ -532,13 +525,13 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       Actor.Inventory.RemoveByID(key.ID);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
-      return new ActionResult() { EnergyCost = 1.0 };
+      return 1.0;
     }
 
     throw new Exception("Attempted to use a vault key that isn't a vault key? This shouldn't happen!");
   }
 
-  public override ActionResult Execute()
+  public override double Execute()
   {
     var (item, itemCount) = Actor!.Inventory.ItemAt(Choice);
     if (item is null)
@@ -549,7 +542,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState!.ClearMenu();
       PlayerCommandController.FireReadedBow(item, GameState);
       
-      return new ActionResult();
+      return 0.0;
     }
 
     if (item.IsUseableTool())
@@ -564,7 +557,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
       GameState.UIRef().SetInputController(dir);
       
-      return new ActionResult();
+      return 0.0;
     }
 
     bool torch = item.HasTrait<TorchTrait>();
@@ -588,7 +581,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           GameState.UIRef().AlertPlayer(txt);
           if (Actor is Player)
             GameState.UIRef().SetPopup(new Popup(txt, "", -1, -1));
-          return new ActionResult() { EnergyCost = 1.0 };
+          return 1.0;
         }
       }
 
@@ -601,7 +594,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         Actor.Inventory.Add(item, Actor.ID);
       }
 
-      ActionResult result = new() { EnergyCost = 1.0 };
+      double energyCost = 1.0;
       if (item.HasTrait<EdibleTrait>())
       {
         string s;
@@ -627,7 +620,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
 
         if (useResult.ReplacementAction is not null)
         {
-          result.EnergyCost = 0.0;
+          energyCost = 0.0;
           Actor.QueueAction(useResult.ReplacementAction);
         }
       }
@@ -659,12 +652,12 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         }
       }
 
-      return result;
+      return energyCost;
     }
     else
     {
       GameState.UIRef().AlertPlayer("You don't know a way to use that!");
-      return new ActionResult();      
+      return 0.0;      
     }
   }
 
