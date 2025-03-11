@@ -1266,7 +1266,7 @@ abstract class UserInterface
 
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
-    Actor currPerformer = gameState.Player;
+    
     while (true)
     {
       var e = PollForEvent();
@@ -1290,11 +1290,12 @@ abstract class UserInterface
 
       try
       {
-        currPerformer = gameState.NextPerformer();
-        currPerformer.TakeTurn(gameState);
-
-        if (currPerformer.Energy >= 1.0) 
-          gameState.PushPerformer(currPerformer);
+        if (gameState.NextPerformer() is Actor actor)
+        {
+          actor.TakeTurn(gameState);
+          if (actor.Energy >= 1.0)
+            gameState.PushPerformer(actor);
+        }
 
         WriteAlerts();
       }

@@ -857,26 +857,31 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       // Was I worried status effects might end up giving someone negative
       // recovery?
       actor.Energy += double.Max(0.0, actor.Recovery);
-      Performers.Push(actor);
+
+      if (actor.Energy >= 1.0)
+        Performers.Push(actor);
     }    
   }
 
-  public Actor NextPerformer()
+  public Actor? NextPerformer()
   {
     if (Performers.Count == 0)
     {      
       EndOfTurn();
       RefreshPerformers();
     }
-      
-    // It's probably an error for their to be no performers after calling 
-    // refresh because the player should always exist
-    if (Performers.Pop() is Actor nextPerformer)
+
+    Actor? next = null;    
+    if (Performers.Pop() is Actor a)
     {
-      return nextPerformer;
+      next = a;
     }
 
-    throw new Exception("Performers should never be empty!");
+    // next might be null in a weird situation like every single actor on the 
+    // level has recovery of less than 1.0. So RefreshPerformers() will keep
+    // getting called until *someone* has enough energy to act.
+
+    return next;
   }
 
   // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait
