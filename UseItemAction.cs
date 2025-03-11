@@ -611,7 +611,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         Actor.Inventory.Add(item, Actor.ID);
       }
 
-      var result = new ActionResult() { Succcessful = true, EnergyCost = 1.0 };
+      ActionResult result = new() { Succcessful = true, EnergyCost = 1.0 };
       if (item.HasTrait<EdibleTrait>())
       {
         string s;
@@ -641,16 +641,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           result.Succcessful = false;
           result.EnergyCost = 0.0;
 
-          // If using the item requires further interaction (like selecting 
-          // another menu item), bail out here. This way we can defer 
-          // consuming the item from the player's inventory until later in 
-          // case they ESC the selection menu. (So that will have to be
-          // handled in the final Action
-          if (useResult.ReplacementAction is InventoryChoiceAction || useResult.ReplacementAction is UseSpellItemAction)
-          {            
-            Actor.QueueAction(useResult.ReplacementAction);
-            return result;
-          }
+          Actor.QueueAction(useResult.ReplacementAction);
         }
       }
 
@@ -689,7 +680,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return new ActionResult() 
       { 
         Succcessful = true, 
-        EnergyCost = 0.0 };
+        EnergyCost = 0.0 
+      };
     }
   }
 

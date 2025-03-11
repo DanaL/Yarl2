@@ -2118,12 +2118,10 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
 
-      var mv = new MoveAction(GameState, Actor, landingSpot);
-
       ActionResult result = base.Execute();
       result.Succcessful = false;
       result.EnergyCost = 0.0;
-      result.AltAction = mv;
+      Actor.QueueAction(new MoveAction(GameState, Actor, landingSpot));
       if (GameState.LastPlayerFoV.Contains(Actor.Loc))
         GameState.UIRef().AlertPlayer($"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!");
       
