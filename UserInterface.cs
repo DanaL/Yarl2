@@ -1291,15 +1291,7 @@ abstract class UserInterface
       try
       {
         currPerformer = gameState.NextPerformer();
-
-        if (currPerformer is not Player)
-          Console.WriteLine();
-
-        
         currPerformer.TakeTurn(gameState);
-
-        if (currPerformer is not Player)
-          Console.WriteLine();
 
         if (currPerformer.Energy >= 1.0) 
           gameState.PushPerformer(currPerformer);
