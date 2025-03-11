@@ -1572,6 +1572,8 @@ class CharSetInputer(GameState gs, HashSet<char> allowed) : Inputer(gs)
   {
     if (ch == Constants.ESC)
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
     }
@@ -1580,6 +1582,9 @@ class CharSetInputer(GameState gs, HashSet<char> allowed) : Inputer(gs)
       Result = ch;
       Done = true;
       Success = true;
+      QueueDeferredAction();
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
   }
 
@@ -1683,7 +1688,8 @@ class ConeTargeter : Inputer
       Done = true;
       Success = false;
       Anim.Expiry = DateTime.MinValue;
-
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       return;
     }
     else if (ch == '\n' || ch == '\r')
@@ -1691,7 +1697,7 @@ class ConeTargeter : Inputer
       Done = true;
       Success = true;
       Anim.Expiry = DateTime.MinValue;
-
+      QueueDeferredAction();
       return;
     }
 

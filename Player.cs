@@ -599,11 +599,6 @@ class Player : Actor
     return '\0';
   }
 
-  void SetupSpellcastingMenu(GameState gs)
-  {
-    _inputController = new SpellcastMenu(gs);
-  }
-
   public override void TakeTurn(GameState gs)
   {
     Action? action;
@@ -731,45 +726,12 @@ class Player : Actor
       
       
       
-      else if (ch == 'z')
-      {
-        
-        if (SpellsKnown.Count == 0)
-        {
-          gameState.UIRef().SetPopup(new Popup("You don't know any spells!", "", -1, -1));
-        }
-        else if (!SpellcasingPrereqs())
-        {
-          gameState.UIRef().SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
-        }
-        else
-        {
-          SetupSpellcastingMenu(gameState);
-        }
-      }
+      
       
     }
 
     return new NullAction();
 
-    // Check if the player has a focus readied, or knows spells that don't need a focus
-    bool SpellcasingPrereqs()
-    {
-      if (Inventory.FocusEquipped())
-        return true;
-
-      Item? rw = Inventory.ReadiedWeapon();
-      if (rw is not null && rw.Name == "quarterstaff")
-        return true;
-
-      foreach (string spell in SpellsKnown)
-      {
-        if (Spells.NoFocus(spell))
-          return true;
-      }
-
-      return false;
-    }
   }
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)

@@ -116,7 +116,7 @@ class GameLoader(UserInterface ui)
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-      File.Delete(path);
+      //File.Delete(path);
       
       return gameState;
     }

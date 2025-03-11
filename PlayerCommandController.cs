@@ -104,6 +104,25 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     gs.Player.QueueAction(new BumpAction(gs, gs.Player, gs.Player.Loc.Move(dr, dc)));
   }
 
+  // Check if the player has a focus readied, or knows spells that don't need a focus
+  bool SpellcastingPrereqs()
+  {
+    if (GS.Player.Inventory.FocusEquipped())
+      return true;
+
+    Item? rw = GS.Player.Inventory.ReadiedWeapon();
+    if (rw is not null && rw.Name == "quarterstaff")
+      return true;
+
+    foreach (string spell in GS.Player.SpellsKnown)
+    {
+      if (Spells.NoFocus(spell))
+        return true;
+    }
+
+    return false;
+  }
+
   static public void FireReadedBow(Item bow, GameState gs)
   {    
     int range;
@@ -322,6 +341,21 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else if (ch == 'x')
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));
+    }
+    else if (ch == 'z')
+    {
+      if (GS.Player.SpellsKnown.Count == 0)
+      {
+        ui.SetPopup(new Popup("You don't know any spells!", "", -1, -1));
+      }
+      else if (!SpellcastingPrereqs())
+      {
+        ui.SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
+      }
+      else
+      {
+        ui.SetInputController(new SpellcastMenu(GS));
+      }
     }
     else if (ch == ',')
     {

@@ -320,6 +320,8 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     result.EnergyCost = 1.0;
     result.Succcessful = true;
     
+    GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
+
     if (!CheckCost(3, 25, result))
       return result;
 
@@ -458,13 +460,16 @@ class CastPhaseDoor(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override ActionResult Execute()
   {
     ActionResult result = base.Execute();
-    result.EnergyCost = 1.0;
+    result.EnergyCost = 0.0;
     result.Succcessful = true;
 
     if (!CheckCost(1, 20, result))
+    {
+      result.EnergyCost = 1.0;
       return result;
+    }
 
-    result.AltAction = new BlinkAction(GameState!, Actor!);
+    GameState!.Player.QueueAction(new BlinkAction(GameState, Actor!));
 
     return result;
   }
@@ -482,10 +487,13 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     result.EnergyCost = 1.0;
     result.Succcessful = true;
 
+    GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
+    GameState.UIRef().ClosePopup();
+
     if (!CheckCost(1, 20, result))
       return result;
 
-    HashSet<Loc> animLocs = [..Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
+    HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
     {
       MainColour = Colours.ICE_BLUE,
@@ -540,6 +548,9 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     result.EnergyCost = 1.0;
     result.Succcessful = true;
 
+    GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
+    GameState.UIRef().ClosePopup();
+    
     if (!FreeToCast && !CheckCost(1, 20, result))
       return result;
 
@@ -848,16 +859,14 @@ class SpellcastMenu : Inputer
 
     if (focusEquiped)
     {
-      SpellList = GS.Player.SpellsKnown
-                        .Select(s => s.CapitalizeWords())
-                        .ToList();
+      SpellList = [..GS.Player.SpellsKnown
+                        .Select(s => s.CapitalizeWords())];
     }
     else
     {
-      SpellList = GS.Player.SpellsKnown
+      SpellList = [..GS.Player.SpellsKnown
                         .Where(s => Spells.NoFocus(s))
-                        .Select(s => s.CapitalizeWords())
-                        .ToList();
+                        .Select(s => s.CapitalizeWords())];
     }
   }
 
@@ -865,8 +874,11 @@ class SpellcastMenu : Inputer
   {
     if (ch == Constants.ESC)
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
+      return;
     }
     else if (ch == 'j')
     {
@@ -885,6 +897,7 @@ class SpellcastMenu : Inputer
       HandleSelectedSpell(spell);
       Done = true;
       Success = false;
+      return;
     }
 
     WritePopup();
@@ -893,63 +906,85 @@ class SpellcastMenu : Inputer
   void HandleSelectedSpell(string spell)
   {
     Inputer inputer;
-
     switch (spell)
     {
       case "arcane spark":        
-        inputer = new Aimer(GS, GS.Player.Loc, 7);
-        GS.Player.ReplacePendingAction(new CastArcaneSpark(GS, GS.Player), inputer);
+        inputer = new Aimer(GS, GS.Player.Loc, 7)
+        {
+          DeferredAction = new CastArcaneSpark(GS, GS.Player)
+        };
         SpellSelection = false;
         PopupText = "Select target";
         PopupRow = -3;
+        GS.UIRef().SetInputController(inputer);
         break;
       case "mage armour":
-        inputer = new DummyInputer(GS);
-        GS.Player.ReplacePendingAction(new CastMageArmour(GS, GS.Player), inputer);
+        GS.Player.QueueAction(new CastMageArmour(GS, GS.Player));
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.UIRef().ClosePopup();
         break;
       case "illume":
-        inputer = new DummyInputer(GS);
-        GS.Player.ReplacePendingAction(new CastIllume(GS, GS.Player), inputer);
+        GS.Player.QueueAction(new CastIllume(GS, GS.Player));
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.UIRef().ClosePopup();
         break;
       case "slumbering song":
-        inputer = new DummyInputer(GS);
-        GS.Player.ReplacePendingAction(new CastSlumberingSong(GS, GS.Player), inputer);
+        GS.Player.QueueAction(new CastSlumberingSong(GS, GS.Player));
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.UIRef().ClosePopup();
         break;
       case "spark arc":
-        inputer = new Aimer(GS, GS.Player.Loc, 7);
-        GS.Player.ReplacePendingAction(new CastSparkArc(GS, GS.Player), inputer);
+        inputer = new Aimer(GS, GS.Player.Loc, 7)
+        {
+          DeferredAction = new CastArcaneSpark(GS, GS.Player)
+        };        
+        GS.UIRef().SetInputController(inputer);
         SpellSelection = false;
         PopupText = "Select target";
         PopupRow = -3;
         break;
       case "ersatz elevator":
-        inputer = new CharSetInputer(GS, ['<', '>']);
-        GS.Player.ReplacePendingAction(new CastErsatzElevator(GS, GS.Player), inputer);
+        inputer = new CharSetInputer(GS, ['<', '>'])
+        {
+          DeferredAction = new CastErsatzElevator(GS, GS.Player)
+        };
+        GS.UIRef().SetInputController(inputer);
         SpellSelection = false;
-        PopupText = "Which direction? [LIGHTBLUE <] for up, [LIGHTBLUE >] for down";        
+        PopupText = "Which direction? [LIGHTBLUE <] for up, [LIGHTBLUE >] for down";
+        GS.UIRef().SetPopup(new Popup(PopupText, "", -1, -1));
         break;
       case "frogify":
-        inputer = new Aimer(GS, GS.Player.Loc, 5);
-        GS.Player.ReplacePendingAction(new CastFrogify(GS, GS.Player), inputer);
+        inputer = new Aimer(GS, GS.Player.Loc, 5)
+        {
+          DeferredAction = new CastFrogify(GS, GS.Player)
+        };
+        GS.UIRef().SetInputController(inputer);
         SpellSelection = false;
         PopupText = "Select target:";
         PopupRow = -3;
         break;
       case "phase door":
-        inputer = new DummyInputer(GS);
-        GS.Player.ReplacePendingAction(new CastPhaseDoor(GS, GS.Player), inputer);
+        GS.Player.QueueAction(new CastPhaseDoor(GS, GS.Player));
+        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        GS.UIRef().ClosePopup();
         break;
       case "cone of cold":
-        inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        {
+          DeferredAction = new CastConeOfCold(GS, GS.Player)
+        };
         SpellSelection = false;
-        GS.Player.ReplacePendingAction(new CastConeOfCold(GS, GS.Player), inputer);
+        GS.UIRef().SetInputController(inputer);
         PopupRow = -3;
         PopupText = "Which direction?";
         break;
       case "gust of wind":
-        inputer = new ConeTargeter(GS, 5, GS.Player.Loc);
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        {
+          DeferredAction = new CastGustOfWindAction(GS, GS.Player, null)
+        };
+        GS.UIRef().SetInputController(inputer);
         SpellSelection = false;
-        GS.Player.ReplacePendingAction(new CastGustOfWindAction(GS, GS.Player, null), inputer);
         PopupRow = -3;
         PopupText = "Which direction?";
         break;

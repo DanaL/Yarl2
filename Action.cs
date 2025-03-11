@@ -2735,7 +2735,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     GameState.UIRef().SetInputController(new PlayerCommandController(GameState));
-    
+
     return result;
   }
 
@@ -3282,10 +3282,11 @@ class UseSpellItemAction(GameState gs, Actor actor, string spell, Item? item) : 
     switch (Spell)
     {
       case "gust of wind":
-        player.ReplacePendingAction(
-          new CastGustOfWindAction(GameState, player, Item) { FreeToCast = true }, 
-          new ConeTargeter(GameState!, 5, player.Loc)
-        );
+        ConeTargeter cone = new(GameState!, 5, player.Loc)
+        {
+          DeferredAction = new CastGustOfWindAction(GameState, player, Item) { FreeToCast = true }
+        };
+        GameState.UIRef().SetInputController(cone);
         break;
     }
 

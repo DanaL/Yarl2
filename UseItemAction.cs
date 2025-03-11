@@ -636,7 +636,6 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         if (useResult.ReplacementAction is not null)
         {
           result.Succcessful = false;
-          result.AltAction = useResult.ReplacementAction;
           result.EnergyCost = 0.0;
 
           // If using the item requires further interaction (like selecting 
@@ -645,7 +644,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           // case they ESC the selection menu. (So that will have to be
           // handled in the final Action
           if (useResult.ReplacementAction is InventoryChoiceAction || useResult.ReplacementAction is UseSpellItemAction)
-          {
+          {            
+            Actor.QueueAction(useResult.ReplacementAction);
             return result;
           }
         }
