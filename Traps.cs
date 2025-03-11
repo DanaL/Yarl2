@@ -266,8 +266,7 @@ class Traps
           monster.Loc = spawnLoc;
           gs.ObjDb.Add(monster);
           gs.ObjDb.AddToLoc(spawnLoc, monster);
-          gs.AddPerformer(monster);
-
+          
           SqAnimation anim = new(gs, spawnLoc, Colours.LIGHT_BLUE, Colours.BLACK, '*');
           gs.UIRef().RegisterAnimation(anim);
         }

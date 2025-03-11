@@ -240,10 +240,9 @@ class UsePower(Power power) : BehaviourNode
     if (Available(mob, gs))
     {
       mob.LastPowerUse[Power.Name] = gs.Turn;
+      mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
 
-      bool result = mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
-
-      return result ? PlanStatus.Success : PlanStatus.Failure;
+      return PlanStatus.Success;
     }
 
     return PlanStatus.Failure;
@@ -279,8 +278,8 @@ class CrushPower(Power power) : UsePower(power)
     ulong victimId = Victim(mob, gs);
     if (victimId != 0 )
     {      
-      bool result = mob.ExecuteAction(new CrushAction(gs, mob, victimId, Power.DmgDie, Power.NumOfDice));
-      return result ? PlanStatus.Success : PlanStatus.Failure;
+      mob.ExecuteAction(new CrushAction(gs, mob, victimId, Power.DmgDie, Power.NumOfDice));
+      return PlanStatus.Success;
     }
 
     return PlanStatus.Failure;
@@ -358,8 +357,8 @@ class HealAlliesPower(Power power) : UsePower(power)
         gs.UIRef().AlertPlayer(castText);
       }
 
-      bool result = mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4));
-      return result ? PlanStatus.Success : PlanStatus.Failure;      
+      mob.ExecuteAction(new HealAction(gs, candidates[i], 4, 4));
+      return PlanStatus.Success;
     }
 
     return PlanStatus.Failure;
@@ -416,8 +415,8 @@ class TryToEscape : BehaviourNode
         {
           if (gs.LastPlayerFoV.Contains(adj))
             gs.UIRef().AlertPlayer($"{mob.FullName.Capitalize()} jumps into the teleport trap!");
-          bool result = mob.ExecuteAction(new MoveAction(gs, mob, adj));
-          return result ? PlanStatus.Running : PlanStatus.Failure;          
+          mob.ExecuteAction(new MoveAction(gs, mob, adj));
+          return PlanStatus.Running;
         }
       }
     }
@@ -453,10 +452,10 @@ class TryToEscape : BehaviourNode
         Tile tile = gs.TileAt(loc);
         bool result;
         if (tile is Door door && !door.Open)
-          result = result = mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
+          mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         else
-          result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return result ? PlanStatus.Running : PlanStatus.Failure;
+          mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return PlanStatus.Running;
       }
     }
     
@@ -471,7 +470,8 @@ class TryToEscape : BehaviourNode
     if (status == PlanStatus.Success)
       return PlanStatus.Running;
 
-    return mob.ExecuteAction(new PassAction()) ? PlanStatus.Running : PlanStatus.Failure;
+    mob.ExecuteAction(new PassAction());
+    return PlanStatus.Running;
   }
 }
 
@@ -722,8 +722,8 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
         Path.Pop();
       }
 
-      if (mob.ExecuteAction(action))
-        return PlanStatus.Running;      
+      mob.ExecuteAction(action);
+      return PlanStatus.Running;      
     }
     else if (Path.Count == 0)
     {
@@ -841,8 +841,8 @@ class RandomMove : BehaviourNode
     if (bark != "")
       action.Quip = bark;
 
-    bool result = mob.ExecuteAction(action);
-    return result ? PlanStatus.Success : PlanStatus.Failure;
+    mob.ExecuteAction(action);
+    return PlanStatus.Success;
   }
 
   static PlanStatus Move(Mob mob, GameState gs, bool flying)
@@ -877,8 +877,8 @@ class RandomMove : BehaviourNode
     if (bark != "")
       action.Quip = bark;
 
-    bool result = mob.ExecuteAction(action);
-    return result ? PlanStatus.Success : PlanStatus.Failure;
+    mob.ExecuteAction(action);
+    return PlanStatus.Success;
   }
 
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -961,7 +961,7 @@ class FindUpStairs : BehaviourNode
         bool result = false;
         if (mob.HasTrait<IntelligentTrait>())
         {
-          result = mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
+          mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
           Path.Push(next);          
         }
         
@@ -975,15 +975,8 @@ class FindUpStairs : BehaviourNode
       }
       else
       {
-        bool result = mob.ExecuteAction(new MoveAction(gs, mob, next));
-
-        if (result)
-          return PlanStatus.Running;
-        else
-        {
-          Path = null;
-          return PlanStatus.Failure;
-        }
+        mob.ExecuteAction(new MoveAction(gs, mob, next));
+        return PlanStatus.Running;
       }      
     }
 
@@ -1053,13 +1046,13 @@ class ChaseTarget : BehaviourNode
       Tile tile = gs.TileAt(loc);
       if (tile is Door door && !door.Open)
       {
-        bool result = mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
-        return result ? PlanStatus.Success : PlanStatus.Failure;
+        mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
+        return PlanStatus.Success;
       }
       else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
-        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return result ? PlanStatus.Success : PlanStatus.Failure;
+        mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return PlanStatus.Success;
       }
     }
 
@@ -1076,8 +1069,8 @@ class ChaseTarget : BehaviourNode
 
       if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).PassableByFlight())
       {
-        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return result ? PlanStatus.Success : PlanStatus.Failure;
+        mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return PlanStatus.Success;
       }
     }
 
@@ -1097,8 +1090,8 @@ class ChaseTarget : BehaviourNode
       // refreshed      
       if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
       {
-        bool result = mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return result ? PlanStatus.Success : PlanStatus.Failure;
+        mob.ExecuteAction(new MoveAction(gs, mob, loc));
+        return PlanStatus.Success;
       }
     }
 
@@ -1173,9 +1166,9 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
         Path.Pop();
       }
 
-      bool result = mob.ExecuteAction(action);
+      mob.ExecuteAction(action);
 
-      return result ? PlanStatus.Running : PlanStatus.Failure;
+      return PlanStatus.Running;
     }
 
     return PlanStatus.Success;

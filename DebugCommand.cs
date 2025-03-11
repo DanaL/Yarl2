@@ -263,7 +263,6 @@ class DebugCommand(GameState gs)
       var monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
 
       _gs.ObjDb.AddNewActor(monster, spawnLoc);
-      _gs.AddPerformer(monster);
 
       return "";
     }

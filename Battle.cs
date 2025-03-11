@@ -214,7 +214,7 @@ class Battle
       Actor spawnling = MonsterFactory.Get(actor.Name, gs.ObjDb, gs.Rng);
       spawnling.Stats[Attribute.HP].SetCurr(actor.Stats[Attribute.HP].Curr);
       gs.ObjDb.AddNewActor(spawnling, loc);
-      gs.AddPerformer(spawnling);
+      
       if (gs.LastPlayerFoV.Contains(loc))
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} spawns!");
     }

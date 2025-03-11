@@ -1360,10 +1360,9 @@ class SummonAction(Loc target, string summons, int count) : Action()
       var loc = SpawnPt();
       if (loc != Loc.Nowhere)
       {
-        var summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
+        Actor summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
         summoned.Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
         GameState.ObjDb.AddNewActor(summoned, loc);
-        GameState.AddPerformer(summoned);
         ++summonCount;
       }
     }
@@ -1750,10 +1749,9 @@ class MirrorImageAction : Action
       Loc loc = options[i];
       options.RemoveAt(i);
 
-      var dup = MakeDuplciate(GameState, Actor!);
+      Mob dup = MakeDuplciate(GameState, Actor!);
       GameState.ObjDb.AddNewActor(dup, loc);
-      GameState.AddPerformer(dup);
-
+      
       images.Add(dup);
 
       --duplicates;

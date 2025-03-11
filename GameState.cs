@@ -24,9 +24,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public int CurrDungeonID { get; set; }
   public Campaign Campaign { get; set; } = c;
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
-  public List<Actor> Performers { get; set; } = [];
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
+
+  PerformersStacks Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
@@ -50,8 +51,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public FactDb FactDb => Campaign.FactDb ?? throw new Exception("FactDb should never be null!");
 
   UserInterface UI { get; set; } = ui;
-
-  int _currPerformer = 0;
 
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
@@ -741,19 +740,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public void RemovePerformerFromGame(Actor performer)
   {
     ObjDb.RemoveActor(performer);
-
-    // Need to remove the victim from the Performer queue but also update 
-    // current performer pointer if necessary. If _currPerformer > index
-    // of victim, we want to decrement it
-    // performerIndex can be -1 if victim isn't on the current level when 
-    // they die (which can happen in some odd situations)
-    int performerIndex = Performers.IndexOf(performer);
-    if (performerIndex != -1)
-    {
-      if (_currPerformer > performerIndex)
-        --_currPerformer;
-      Performers.Remove(performer);
-    }
+    Performers.Remove(performer.ID);
   } 
 
   void HandleSacrifice(Actor victim, Loc altarLoc)
@@ -859,85 +846,37 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  public void BuildPerformersList()
-  {
-    RefreshPerformers();
-
-    foreach (var performer in Performers)
-    {
-      performer.Energy = double.Max(0.0, performer.Recovery);
-    }
-
-    // Let the player go first when starting a session
-    var i = Performers.FindIndex(p => p is Player);
-    var player = Performers[i];
-    Performers.RemoveAt(i);
-    Performers.Insert(0, player);
-  }
-
-  public void AddPerformer(Actor performer)
-  {
-    performer.Energy = double.Max(0.0, performer.Recovery);
-    Performers.Add(performer);      
-  }
+  public void PushPerformer(Actor actor) => Performers.Push(actor);
 
   public void RefreshPerformers()
   {
-    Actor? curr = null;
-    if (_currPerformer >= Performers.Count)
-      _currPerformer = 0;
-
-    if (Performers.Count > 0)
+    Performers.Flush();
+    foreach (Actor actor in ObjDb.GetPerformers(CurrDungeonID, CurrLevel))
     {
-      curr = Performers[_currPerformer];
-    }
-
-    Performers.Clear();
-    Performers.AddRange(ObjDb.GetPerformers(CurrDungeonID, CurrLevel));
-
-    if (curr is not null)
-    {
-      // If the player changes dungeons/level on someone else's turn
-      // _currPerformer may no longer be in the list, so default to
-      // index 0 in that case.
-      int i = Performers.IndexOf(curr);
-      _currPerformer = i > -1 ? i : 0;
-    }
+      // I cannot remember why I am doing the double.Max() call here D:  
+      // Was I worried status effects might end up giving someone negative
+      // recovery?
+      actor.Energy += double.Max(0.0, actor.Recovery);
+      Performers.Push(actor);
+    }    
   }
 
   public Actor NextPerformer()
   {
-    Actor nextPerformer;
-
-    do
-    {
-      // There are situations (likely bugs) where we get here
-      // with _currPerformer > count but this will keep the game
-      // from crashing until I find them
-      if (_currPerformer >= Performers.Count)
-        RefreshPerformers();
-
-      nextPerformer = Performers[_currPerformer];
-
-      if (nextPerformer.Energy < 1.0)
-      {
-        nextPerformer.Energy += double.Max(0.0, nextPerformer.Recovery);
-        ++_currPerformer;
-      }
-      else
-      {
-        return nextPerformer;
-      }
-
-      if (_currPerformer >= Performers.Count)
-      {
-        ++Turn;
-        _currPerformer = 0;
-        EndOfTurn();
-        PrepareFieldOfView();
-      }
+    if (Performers.Count == 0)
+    {      
+      EndOfTurn();
+      RefreshPerformers();
     }
-    while (true);
+      
+    // It's probably an error for their to be no performers after calling 
+    // refresh because the player should always exist
+    if (Performers.Pop() is Actor nextPerformer)
+    {
+      return nextPerformer;
+    }
+
+    throw new Exception("Performers should never be empty!");
   }
 
   // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait
@@ -955,6 +894,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       return false;
     }
+
+    ++Turn;
 
     if (Turn % 11 == 0)
     {
@@ -1086,7 +1027,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     monster.Loc = spawnPoint;
     ObjDb.Add(monster);
     ObjDb.AddToLoc(spawnPoint, monster);
-    AddPerformer(monster);
   }
 
   public Actor? LevelAppropriateMonster(int dungeonId, int level)
@@ -1775,5 +1715,50 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       CurrentDungeon.RememberedLocs[loc] = glyph;
     }
+  }
+}
+
+class PerformersStacks
+{
+  List<Actor> performers = [];
+
+  public int Count => performers.Count;
+  public void Push(Actor a) => performers.Add(a);
+  
+  public void Flush()
+  {
+    foreach (Actor a in performers)
+    {
+      a.Energy = 0.0;
+    }
+    
+    performers = [];
+  }
+
+  public Actor? Pop()
+  {
+    if (Count == 0)
+      return null;
+
+    Actor a = performers[Count - 1];
+    performers.RemoveAt(Count - 1);
+
+    return a;
+  }
+
+  public void Remove(ulong id)
+  {
+    int i = -1;
+    for (int j = 0; j < performers.Count; j++)
+    {
+      if (performers[j].ID == id)
+      {
+        i = j;
+        break;
+      }
+    }
+
+    if (i > -1)
+      performers.RemoveAt(i);
   }
 }

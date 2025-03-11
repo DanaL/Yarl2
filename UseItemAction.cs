@@ -203,7 +203,6 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
           _ => MonsterFactory.Get("ghoul", gs.ObjDb, gs.Rng),
         };
         gs.ObjDb.AddNewActor(spook, spookLoc);
-        gs.AddPerformer(spook);
       }
 
       gs.UIRef().AlertPlayer("The grave's occuptant was still at home!");
@@ -398,9 +397,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       {
         Actor bees = MonsterFactory.Get("swarm of bees", GameState.ObjDb, GameState.Rng);
         GameState.ObjDb.AddNewActor(bees, swarmLoc);
-        GameState.AddPerformer(bees);
         if (Actor == GameState.Player)
-        GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
+          GameState!.UIRef().SetPopup(new Popup("Uh-oh, you've angered a swarm of bees!", "", -1, -1, 20));
         GameState.UIRef().AlertPlayer("Uh-oh, you've angered a swarm of bees!");
       }
     }

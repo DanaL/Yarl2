@@ -617,7 +617,7 @@ class CampaignCreator(UserInterface ui)
         MainDungeonBuilder builder = new();
         var mainDungeon = builder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 10,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
         SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
 

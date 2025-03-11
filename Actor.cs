@@ -381,8 +381,7 @@ abstract class Actor : GameObj, IZLevel
       other.Stats[Attribute.HP].SetMax(half);
       
       gs.UIRef().AlertPlayer($"{Name.DefArticle().Capitalize()} divides into two!!");
-      gs.ObjDb.AddNewActor(other, spot);
-      gs.AddPerformer(other);
+      gs.ObjDb.AddNewActor(other, spot);      
     }
   }
 
@@ -526,15 +525,10 @@ class Mob : Actor
 
   public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
 
-  public bool ExecuteAction(Action action)
+  public void ExecuteAction(Action action)
   {
-    Action? currAction = action;
-
-    double result = currAction!.Execute();
-    Energy -= CalcEnergyUsed(result);      
-
-    // I think I can eliminate the bool return from this function
-    return Energy > 0.0;
+    double result = action.Execute();
+    Energy -= CalcEnergyUsed(result);
   }
 
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);

@@ -1258,7 +1258,7 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
-    gameState.BuildPerformersList();
+    gameState.RefreshPerformers();
 
     _animations.Add(new CloudAnimation(this, gameState));
     if (opts.TorchLightAnimation) 
@@ -1290,14 +1290,20 @@ abstract class UserInterface
 
       try
       {
-        // Update step! This is where all the current performers gets a chance
-        // to take their turn!
-        if (currPerformer.Energy < 1.0) 
-        {
-          currPerformer = gameState.NextPerformer();
-        }
+        currPerformer = gameState.NextPerformer();
 
+        if (currPerformer is not Player)
+          Console.WriteLine();
+
+        
         currPerformer.TakeTurn(gameState);
+
+        if (currPerformer is not Player)
+          Console.WriteLine();
+
+        if (currPerformer.Energy >= 1.0) 
+          gameState.PushPerformer(currPerformer);
+
         WriteAlerts();
       }
       catch (SaveGameException)
