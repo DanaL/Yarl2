@@ -43,6 +43,30 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   static char DirToKey((int dr, int dc) dir) =>
     MovementDirections.FirstOrDefault(x => x.Value == dir).Key;
 
+  void SetUpRunningPath(GameState gs, char ch)
+  {
+    Player player = GS.Player;
+
+    if (gs.Player.HasTrait<ConfusedTrait>())
+    {
+      gs.UIRef().AlertPlayer("You are too confused!");
+      player.Running = false;
+      return;      
+    }
+
+    Map map = gs.CurrentMap;
+    List<Action> moves = [];
+    char dir = char.ToLower(ch);
+    var (dr, dc) = MovementDirections[dir];
+    Loc loc = player.Loc with { Row = player.Loc.Row + dr, Col = player.Loc.Col + dc };
+    while (MoveAction.CanMoveTo(player, map, loc))
+    {
+      moves.Add(new MoveAction(gs, player, loc));
+      player.QueueAction(new MoveAction(gs, player, loc));
+      loc = player.Loc with { Row = loc.Row + dr, Col = loc.Col + dc };
+    }    
+  }
+
   static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
   {
     ['h'] = (0, -1),   // left
@@ -205,7 +229,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else
     {
       ui.SetInputController(new PickupMenu(items, gs) { DeferredAction = new PickupItemAction(gs, player) });
-    }
+    }    
   }
 
   public override void Input(char ch)
@@ -216,6 +240,10 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     if (IsMoveKey(ch))
     {
       CalcMovementAction(GS, ch);
+    }
+    else if (IsMoveKey(char.ToLower(ch)))
+    {
+      SetUpRunningPath(GS, ch);
     }
     else if (ch == 'a')
     {
