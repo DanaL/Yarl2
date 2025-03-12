@@ -608,12 +608,12 @@ class MonsterFactory
     };
     m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
+    int ac = int.Parse(fields[3]);
+    m.Stats.Add(Attribute.AC, new Stat(ac));
     int hp = int.Parse(fields[4]);
     m.Stats.Add(Attribute.HP, new Stat(hp));
     int attBonus = int.Parse(fields[5]);
-    m.Stats.Add(Attribute.AttackBonus, new Stat(attBonus));
-    int ac = int.Parse(fields[3]);
-    m.Stats.Add(Attribute.AC, new Stat(ac));
+    m.Stats.Add(Attribute.AttackBonus, new Stat(attBonus));    
     int str = Util.StatRollToMod(int.Parse(fields[7]));
     m.Stats.Add(Attribute.Strength, new Stat(str));
     int dex = Util.StatRollToMod(int.Parse(fields[8]));

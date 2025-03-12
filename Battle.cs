@@ -563,6 +563,7 @@ class Battle
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
       
       GrapplerTrait? grappler = null;
+      bool thief = false;
       foreach (Trait t in attacker.Traits)
       {
         if (t is KnockBackTrait)
@@ -579,6 +580,14 @@ class Battle
           HandleCutpurse(attacker, target, gs);
         }
 
+        // Thief trait is different from cutpurse because cutpurse just 
+        // randomly generates coins. Thief actually takes money out of target's 
+        // invetory and puts it in attacker's
+        if (t is ThiefTrait && !swallowed)
+        {
+          thief = true;
+        }
+
         if (t is FrighteningTrait ft && !swallowed)
         {
           HandleFrightening(target, gs, ft);
@@ -592,6 +601,12 @@ class Battle
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
       ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
+
+      // Handling this here just so messages resulting from it happen after messages from ResolveMeleeHIt()
+      if (thief)
+      {
+        HandleThief(attacker, target, gs);
+      }
     }
     else
     {
@@ -652,6 +667,21 @@ class Battle
     {
       ui.AlertPlayer(msg, gs, target.Loc);
     }
+  }
+
+  static void HandleThief(Actor attacker, Actor target, GameState gs)
+  {
+    if (target.Inventory.Zorkmids == 0 || gs.Rng.NextDouble() > 0.2)
+      return;
+
+    int zorkmids = int.Min(target.Inventory.Zorkmids, gs.Rng.Next(5, 15));
+    target.Inventory.Zorkmids -= zorkmids;
+    attacker.Inventory.Zorkmids += zorkmids;
+
+    string targetName = MsgFactory.CalcName(target, gs.Player);
+    string thiefName = MsgFactory.CalcName(attacker, gs.Player);
+    string s = $"{thiefName.Capitalize()} {Grammar.Conjugate(attacker, "lift")} some coins from {targetName}!";
+    gs.UIRef().AlertPlayer(s, gs, target.Loc);
   }
 
   static void HandleCutpurse(Actor attacker, Actor target, GameState gs)

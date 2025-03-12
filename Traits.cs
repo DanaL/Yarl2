@@ -1064,6 +1064,11 @@ class TelepathyTrait : TemporaryTrait
   }
 }
 
+class ThiefTrait : Trait
+{
+  public override string AsText() => "Thief";
+}
+
 class TipsyTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "A fog lifts.";
@@ -3262,6 +3267,7 @@ class TraitFactory
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    { "Thief", (pieces, gameObj) => new ThiefTrait() },
     { "Tipsy", (pieces, gameObj) => new TipsyTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Torch", (pieces, gameObj) => new TorchTrait()
       {

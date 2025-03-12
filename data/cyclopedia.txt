@@ -391,3 +391,6 @@ Dungeoneering is a nerve-wracking endeavour and sometimes you need a little some
 #
 seeweed
 A magical plant that grows in dungeons. Much coveted by seers.
+#
+penny pincher
+A sneaky-looking goblin wearing a mask and a striped shirt.
