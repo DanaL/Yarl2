@@ -43,6 +43,62 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   static char DirToKey((int dr, int dc) dir) =>
     MovementDirections.FirstOrDefault(x => x.Value == dir).Key;
 
+  List<(char, Loc, bool)> Turns(char ch, Loc loc, Actor p, Map m)
+  {
+    List<(char, Loc, bool)> turns = [];
+    Loc a, b;
+    bool valid;
+    switch (ch)
+    {
+      case 'l':
+      case 'h':
+        a = loc with { Row = loc.Row + 1};        
+        valid = MoveAction.CanMoveTo(p, m, a);
+        turns.Add(('j', a, valid));
+        b = loc with { Row = loc.Row - 1};
+        valid = MoveAction.CanMoveTo(p, m, b);
+        turns.Add(('k', b, valid));
+        break;
+      case 'j':
+      case 'k':
+        a = loc with { Col = loc.Col + 1};        
+        valid = MoveAction.CanMoveTo(p, m, a);
+        turns.Add(('l', a, valid));
+        b = loc with { Col = loc.Col - 1};
+        valid = MoveAction.CanMoveTo(p, m, b);
+        turns.Add(('h', b, valid));
+        break;
+    }
+
+   return turns;
+  }
+
+  static bool InterestingTiles( GameState gs, Loc loc)
+  {
+    foreach (Loc adj in Util.Adj4Locs(loc))
+    {
+      Tile tile = gs.TileAt(adj);
+      switch (tile.Type)
+      {
+        case TileType.ClosedDoor:
+        case TileType.OpenDoor:
+        case TileType.LockedDoor:
+        case TileType.BrokenDoor:
+        case TileType.Landmark:
+        case TileType.Upstairs:
+        case TileType.Downstairs:
+          return true;
+      }
+
+      if (gs.ObjDb.ItemsAt(adj).Count > 0)
+      {
+        return true;
+      }
+    }
+
+    return false;    
+  }
+
   void SetUpRunningPath(GameState gs, char ch)
   {
     Player player = GS.Player;
@@ -61,9 +117,48 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     Loc loc = player.Loc with { Row = player.Loc.Row + dr, Col = player.Loc.Col + dc };
     while (MoveAction.CanMoveTo(player, map, loc))
     {
-      moves.Add(new MoveAction(gs, player, loc));
+      moves.Add(new MoveAction(gs, player, loc));  
       player.QueueAction(new MoveAction(gs, player, loc));
+      Loc prev = loc;
       loc = player.Loc with { Row = loc.Row + dr, Col = loc.Col + dc };
+      
+      int adjFloors = 0;
+      foreach (Loc adj in Util.Adj4Locs(prev))
+      {
+        if (gs.TileAt(adj).Type == TileType.DungeonFloor)
+          ++adjFloors;
+      }
+      if (adjFloors > 2)
+        break;
+
+      if (InterestingTiles(gs, prev))
+        break;
+
+      if (!MoveAction.CanMoveTo(player, map, loc))
+      {
+        List<(char, Loc, bool)> turns = Turns(dir, prev, player, map);
+        var (ndir1, nloc1, valid1) = turns[0];
+        var (ndir2, nloc2, valid2) = turns[1];
+
+        if (valid1 && valid2)
+        {
+          // if both choices are valid, we're at an intersection 
+          // or such so stop
+          break;
+        }
+        else if (valid1)
+        {
+          loc = nloc1;
+          dir = ndir1;
+          (dr, dc) = MovementDirections[dir];
+        }
+        else if (valid2)
+        {
+          loc = nloc2;
+          dir = ndir2;
+          (dr, dc) = MovementDirections[dir];
+        }
+      }
     }    
   }
 

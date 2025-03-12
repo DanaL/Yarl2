@@ -47,9 +47,6 @@ class Player : Actor
 
   public bool Running { get; set; } = false;
 
-  char RepeatingCmd { get; set; }
-  HashSet<Loc> LocsRan { get; set; } = [];
-
   public Player(string name)
   {
     Name = name;
@@ -59,7 +56,6 @@ class Player : Actor
   }
 
   public override int Z() => 12;
-
   public override string FullName => "you";
 
   public override int AC
@@ -409,191 +405,10 @@ class Player : Actor
     return lines;
   }
 
-  private static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
-  {
-    ['h'] = (0, -1),   // left
-    ['j'] = (1, 0),    // down
-    ['k'] = (-1, 0),   // up
-    ['l'] = (0, 1),    // right
-    ['y'] = (-1, -1),  // up-left
-    ['u'] = (-1, 1),   // up-right
-    ['b'] = (1, -1),   // down-left
-    ['n'] = (1, 1)     // down-right
-  };
-
-  static bool IsMoveKey(char ch) => MovementDirections.ContainsKey(ch);
-
-  static (int, int) KeyToDir(char ch) => 
-    MovementDirections.TryGetValue(ch, out var dir) ? dir : (0, 0);
-
-  static char DirToKey((int dr, int dc) dir) => 
-    MovementDirections.FirstOrDefault(x => x.Value == dir).Key;
-
-  bool AttackingWithReach()
-  {
-    if (Inventory.ReadiedWeapon() is Item item && item.HasTrait<ReachTrait>())
-      return true;
-
-    return false;
-  }
-
-  static char CalcStagger(GameState gs, char ch)
-  {
-    double roll = gs.Rng.NextDouble();
-    return ch switch
-    {
-      'k' => roll < 0.5 ? 'y' : 'u',
-      'u' => roll < 0.5 ? 'k' : 'l',
-      'l' => roll < 0.5 ? 'u' : 'n',
-      'n' => roll < 0.5 ? 'l' : 'j',
-      'j' => roll < 0.5 ? 'n' : 'b',
-      'b' => roll < 0.5 ? 'j' : 'h',
-      'h' => roll < 0.5 ? 'b' : 'y',
-      _ => roll < 0.5 ? 'h' : 'k'
-    };   
-  }
-
-  void CalcMovementAction(GameState gs, char ch)
-  {
-    if (HasTrait<ConfusedTrait>())
-    {
-      gs.UIRef().AlertPlayer("You are confused!");
-      char[] dirs = ['h', 'j', 'k', 'l', 'y', 'u', 'b', 'n'];
-      ch = dirs[gs.Rng.Next(dirs.Length)];
-    }
-
-    if (HasTrait<TipsyTrait>() && gs.Rng.NextDouble() < 0.15)
-    {
-      gs.UIRef().AlertPlayer("You stagger!");
-      ch = CalcStagger(gs, ch);
-    }
-
-    (int dr, int dc) = KeyToDir(ch);
-
-    // I'm not sure this is the best spot for this but it is a convenient place
-    // to calculate attacking with Reach
-    if (AttackingWithReach())
-    {
-      Loc adj = Loc.Move(dr, dc);
-      Tile adjTile = gs.TileAt(adj);
-      Loc adj2 = Loc.Move(dr * 2, dc * 2);
-
-      if (adjTile.PassableByFlight() && !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Battle.PlayerWillAttack(occ))
-      {
-        var colour = Inventory.ReadiedWeapon()!.Glyph.Lit;
-        var anim = new PolearmAnimation(gs, colour, Loc, adj2);
-        gs.UIRef().RegisterAnimation(anim);
-
-        ActionQ.Enqueue(new MeleeAttackAction(gs, this, adj2));
-      }
-    }
-
-    ActionQ.Enqueue(new BumpAction(gs, this, Loc.Move(dr, dc)));   
-  }
-
-  // 'Running' just means repeated moving
-  void StartRunning(GameState gs, char ch)
-  {
-    if (HasTrait<ConfusedTrait>())
-    {
-      gs.UIRef().AlertPlayer("You are too confused!");
-      Running = false;
-    }
-
-    Running = true;
-    RepeatingCmd = char.ToLower(ch);
-    LocsRan = [];
-  }
-
-  Loc[] RunningToward(char ch)
-  {
-    List<(int, int)> next = ch switch
-    {
-      'h' => [(-1, -1), (0, -1), (1, -1), (1, 0), (-1, 0)],
-      'j' => [(1, -1), (1, 0), (1, 1), (0, 1), (0, -1)],
-      'k' => [(-1, -1), (-1, 0), (-1, 1), (0, 1), (0, -1)],
-      'l' => [(-1, 1), (0, 1), (1, 1), (1, 0), (-1, 0)],
-      'y' => [(0, -1), (-1, -1), (-1, 0), (1, -1), (-1, 1)],
-      'u' => [(-1, 0), (-1, 1), (0, 1), (-1, -1), (1, 1)],
-      'b' => [(0, -1), (1, -1), (1, 0), (1, -1), (1, 1)],
-      _ => [(1, 0), (1, 1), (0, 1), (1, -1), (-1, 1)]
-    };
-
-    return next.Select(n => Loc with { Row = Loc.Row + n.Item1, Col = Loc.Col + n.Item2 })
-                .Where(l => !LocsRan.Contains(l))
-                .ToArray();
-  }
-
-  char UpdateRunning(GameState gs)
-  {
-    Loc[] nextLocs = RunningToward(RepeatingCmd);
-
-    // Running is interrupted by some tiles or sqs with items
-    foreach (var loc in nextLocs)
-    {
-      var tile = gs.TileAt(loc);
-      switch (tile.Type)
-      {
-        case TileType.ClosedDoor:
-        case TileType.OpenDoor:
-        case TileType.LockedDoor:
-        case TileType.BrokenDoor:
-        case TileType.Landmark:
-        case TileType.Upstairs:
-        case TileType.Downstairs:
-          Running = false;
-          return '\0';
-      }
-
-      if (tile.IsVisibleTrap())
-      {
-        Running = false;
-        return '\0';
-      }
-
-      if (gs.ObjDb.ItemsAt(loc).Count > 0)
-      {
-        Running = false;
-        return '\0';
-      }
-    }
-
-    var (dr, dc) = KeyToDir(RepeatingCmd);
-    var nextLoc = Loc with { Row = Loc.Row + dr, Col = Loc.Col + dc };
-    if (MoveAction.CanMoveTo(this, gs.CurrentMap, nextLoc))
-    {
-      LocsRan.Add(nextLoc);
-      return RepeatingCmd;
-    }
-
-    // If we can't travel any further in current direction and there's only one option 
-    // of where to continue, change directions and keep going.
-    var open = nextLocs.Where(l => MoveAction.CanMoveTo(this, gs.CurrentMap, l)).ToList();
-    if (open.Count == 1)
-    {
-      var loc = (open[0].Row - Loc.Row, open[0].Col - Loc.Col);
-      LocsRan.Add(open[0]);
-      RepeatingCmd = DirToKey(loc);
-      return RepeatingCmd;
-    }
-
-    Running = false;
-    return '\0';
-  }
-
   public override void TakeTurn(GameState gs)
   {
     Action? action = null;
     UserInterface ui = gs.UIRef();
-
-    // Check for repeated action here?
-    // if (Running)
-    // {
-    //   ch = UpdateRunning(gameState);
-    // }
-    
-    //if (IsMoveKey(char.ToLower(ch)))
-    //    StartRunning(gameState, ch);
 
     bool passTurn = false;
     foreach (Trait t in Traits)
