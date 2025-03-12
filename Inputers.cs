@@ -1385,20 +1385,23 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
   {
     if (ch == Constants.ESC || ch == ' ' || ch == '\n' || ch == '\r')
     {
+      GS.UIRef().CloseMenu();
       Close();
     }
     else if (_options.Contains(ch))
     {
       Msg = "";
       _choice = ch;
-      
+
+      GS.UIRef().CloseMenu();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
     }
     else
     {
       Msg = "You don't have that.";
-      
+
+      GS.UIRef().CloseMenu();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
   }
