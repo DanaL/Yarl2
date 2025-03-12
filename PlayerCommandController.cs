@@ -99,14 +99,13 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     return false;    
   }
 
-  void SetUpRunningPath(GameState gs, char ch)
+  void SetUpTravelPath(GameState gs, char ch)
   {
     Player player = GS.Player;
 
     if (gs.Player.HasTrait<ConfusedTrait>())
     {
       gs.UIRef().AlertPlayer("You are too confused!");
-      player.Running = false;
       return;      
     }
 
@@ -336,9 +335,9 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       CalcMovementAction(GS, ch);
     }
-    else if (IsMoveKey(char.ToLower(ch)))
+    else if (ch == 'H' || ch == 'J' || ch == 'K' || ch == 'L')
     {
-      SetUpRunningPath(GS, ch);
+      SetUpTravelPath(GS, ch);
     }
     else if (ch == 'a')
     {
