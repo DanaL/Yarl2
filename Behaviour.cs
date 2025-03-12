@@ -450,7 +450,6 @@ class TryToEscape : BehaviourNode
         Loc loc = mob.Loc with { Row = route[0].Item1, Col = route[0].Item2 };
 
         Tile tile = gs.TileAt(loc);
-        bool result;
         if (tile is Door door && !door.Open)
           mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         else

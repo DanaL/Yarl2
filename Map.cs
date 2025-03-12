@@ -333,7 +333,7 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
       if (gs.LastPlayerFoV.Contains(loc))
         Found = true;
       if (loc == gs.Player.Loc)
-        gs.Player.Running = false;
+        gs.Player.HaltTravel();
       gs.Noise(Gate.Row, Gate.Col, 7);
       gs.UIRef().AlertPlayer("You hear a metallic grinding!");
     }

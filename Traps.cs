@@ -30,8 +30,7 @@ class Traps
 
       loc = gs.FallIntoTrapdoor(actor, loc);
       gs.Player.Stats[Attribute.Nerve].Change(-15);
-      gs.Player.Running = false;
-      
+      gs.Player.HaltTravel();
       
       string s = gs.ThingTouchesFloor(loc);      
       gs.UIRef().AlertPlayer(s);
@@ -56,7 +55,7 @@ class Traps
       if (actor is Player player) 
       {
         player.Stats[Attribute.Nerve].Change(-10);
-        player.Running = false;
+        gs.Player.HaltTravel();
       }
 
       RevealTrap(tile, gs, loc);
@@ -81,7 +80,7 @@ class Traps
       // Hmm I don't think I'll charge stress for teleport traps
       if (actor is Player player)
       {
-        player.Running = false;       
+        gs.Player.HaltTravel();     
       }
 
       // Find candidate locations to teleport to
@@ -118,7 +117,7 @@ class Traps
     {
       if (actor is Player player) 
       {
-        player.Running = false;
+        gs.Player.HaltTravel();
         player.Stats[Attribute.Nerve].Change(-10);        
       }
 
@@ -154,7 +153,7 @@ class Traps
     else if (!flying && tile.Type == TileType.JetTrigger)
     {
       if (actor is Player player)
-        player.Running = false;
+        gs.Player.HaltTravel();
       TriggerJetTrap((JetTrigger) tile, gs, actor);
     }
     else if (tile.Type == TileType.HiddenWaterTrap || tile.Type == TileType.WaterTrap)
@@ -163,7 +162,7 @@ class Traps
       if (actor is Player player) 
       {
         player.Stats[Attribute.Nerve].Change(-10);
-        player.Running = false;
+        gs.Player.HaltTravel();
         s = "You are soaked by a blast of water!";
       }
       else{
@@ -185,7 +184,7 @@ class Traps
       if (actor is Player player) 
       {
         player.Stats[Attribute.Nerve].Change(-5);
-        player.Running = false;
+        gs.Player.HaltTravel();
       }
       RevealTrap(tile, gs, loc);
 
@@ -273,7 +272,7 @@ class Traps
       }
 
       player.Stats[Attribute.Nerve].Change(-5);
-      player.Running = false;
+      gs.Player.HaltTravel();
       gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
 
       if (player.HasTrait<BlindTrait>())

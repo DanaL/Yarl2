@@ -158,7 +158,9 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
           (dr, dc) = MovementDirections[dir];
         }
       }
-    }    
+    }
+
+    player.Running = true;
   }
 
   static readonly Dictionary<char, (int dr, int dc)> MovementDirections = new()
@@ -327,7 +329,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   }
 
   public override void Input(char ch)
-  {    
+  {
+    GS.Player.HaltTravel();
     UserInterface ui = GS.UIRef();
     ui.ClosePopup();
 

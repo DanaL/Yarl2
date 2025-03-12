@@ -45,8 +45,6 @@ class Player : Actor
   public List<string> SpellsKnown = [];
   public string LastSpellCast = "";
 
-  public bool Running { get; set; } = false;
-
   public Player(string name)
   {
     Name = name;
@@ -57,6 +55,8 @@ class Player : Actor
 
   public override int Z() => 12;
   public override string FullName => "you";
+
+  public bool Running { get; set; } = false;
 
   public override int AC
   {
@@ -450,9 +450,15 @@ class Player : Actor
     gs.PrepareFieldOfView();
   }
 
+  public void HaltTravel() 
+  {
+    Running = false;
+    ActionQ = [];
+  }
+
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
-    if (eventType == GameEventType.MobSpotted)
-      Running = false;
+    if (Running && eventType == GameEventType.MobSpotted)
+      HaltTravel();
   }
 }
