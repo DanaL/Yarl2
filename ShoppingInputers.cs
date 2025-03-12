@@ -28,6 +28,7 @@ class ShopMenuInputer : Inputer
   protected Dictionary<char, ShopMenuItem> MenuItems { get; set; } = [];
   protected string Blurb { get; set; }
   protected bool SingleSelection { get; set; } = false;
+  protected bool Done { get; set; } = false;
 
   public ShopMenuInputer(Actor shopkeeper, string blurb, GameState gs) : base(gs)
   {
@@ -81,12 +82,14 @@ class ShopMenuInputer : Inputer
     if (ch == Constants.ESC || ch == ' ')
     {
       Close();
+      Done = true;
       return;
     }
     else if ((ch == '\n' || ch == '\r') && TotalInvoice() > 0 && GS.Player.Inventory.Zorkmids >= TotalInvoice())
     {
       Close();
       QueueDeferredAction();
+      Done = true;
       return;
     }
     else if (MenuItems.ContainsKey(ch))
@@ -316,8 +319,7 @@ class SmithyInputer : ShopMenuInputer
   bool _offerRepair;
   bool _offerUpgrade;
   char _itemToEnchant;
-  bool Done { get; set; } = false;
-
+  
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {    
     _offerRepair = false;
