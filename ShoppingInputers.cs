@@ -250,6 +250,8 @@ class InnkeeperInputer : Inputer
     {
       Done = true;
       Success = false;
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       return;
     }
     else if (ch == 'a' && GS.Player.Inventory.Zorkmids < 2)
@@ -260,19 +262,27 @@ class InnkeeperInputer : Inputer
     {
       Selection = "Booze";
       Zorkmids = 2;
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      QueueDeferredAction();
       Done = true;
       Success = true;
+      return;
     }
     else if (ch == 'b' && GS.Player.Inventory.Zorkmids < 5)
     {
       InsufficentFunds = true;
     }
     else if (ch == 'b')
-    {
+    {      
       Selection = "Rest";
       Zorkmids = 5;
       Done = true;
       Success = true;
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      QueueDeferredAction();
+      return;
     }
 
     WritePopup();

@@ -39,6 +39,7 @@ abstract class Inputer(GameState gs)
       GS.Player.QueueAction(DeferredAction);
     }
   }
+  
   public virtual UIResult GetResult()
   {
     return new UIResult();
