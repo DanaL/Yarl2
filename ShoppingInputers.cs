@@ -82,7 +82,6 @@ class ShopMenuInputer : Inputer
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
       return;
     }
     else if ((ch == '\n' || ch == '\r') && TotalInvoice() > 0 && GS.Player.Inventory.Zorkmids >= TotalInvoice())
@@ -90,7 +89,6 @@ class ShopMenuInputer : Inputer
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
-      Done = true;
       return;
     }
     else if (MenuItems.ContainsKey(ch))
@@ -246,7 +244,6 @@ class InnkeeperInputer : Inputer
 
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ' || ch == 'c')
     {
-      Done = true;
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       return;
@@ -262,7 +259,6 @@ class InnkeeperInputer : Inputer
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
-      Done = true;
       return;
     }
     else if (ch == 'b' && GS.Player.Inventory.Zorkmids < 5)
@@ -273,7 +269,6 @@ class InnkeeperInputer : Inputer
     {      
       Selection = "Rest";
       Zorkmids = 5;
-      Done = true;
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
@@ -326,6 +321,7 @@ class SmithyInputer : ShopMenuInputer
   bool _offerRepair;
   bool _offerUpgrade;
   char _itemToEnchant;
+  bool Done { get; set; } = false;
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {    
@@ -364,7 +360,6 @@ class SmithyInputer : ShopMenuInputer
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
       return;
     }
     else if (menuState == 0 && ch == 'a')
@@ -636,7 +631,6 @@ class WitchInputer : Inputer
 
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
-      Done = true;
       return;
     }
 
@@ -648,7 +642,6 @@ class WitchInputer : Inputer
       if (GS.Player.Inventory.Zorkmids >= price)
       {
         Invoice = price;
-        Done = true;
         Service = spell;
       }
       else
@@ -662,7 +655,6 @@ class WitchInputer : Inputer
     }
     else if (dialogueState == GIVE_QUEST && ch == 'a')
     {
-      Done = true;
       return;
     }
     else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
@@ -680,22 +672,18 @@ class WitchInputer : Inputer
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
     {
       Invoice = 0;
-      Done = true;
       Service = "magic101";
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
     {
-      Done = true;
       return;
     }
     else if (dialogueState == START_STATE && ch == 'b')
     {
-      Done = true;
       return;
     }
     else if (dialogueState == ON_QUEST && ch == 'a')
     {
-      Done = true;
       return;
     }
 
@@ -861,12 +849,12 @@ class PriestInputer : Inputer
   {
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
-      Done = true;
+      return;
     }
     else if (Options.Contains(ch) && ch == 'a')
     {
-      Done = true;
       Service = "Absolution";
+      return;
     }
     
     WritePopup(Blurb);

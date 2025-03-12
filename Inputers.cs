@@ -20,7 +20,6 @@ namespace Yarl2;
 
 abstract class Inputer(GameState gs)
 {
-  public virtual bool Done { get; set; }
   public string Msg { get; set; } = "";
   public Action? DeferredAction { get; set; } = null;
 
@@ -47,10 +46,8 @@ abstract class Inputer(GameState gs)
 
 record LocDetails(string Title, string Desc, char Ch);
 
-class DummyInputer : Inputer
+class DummyInputer(GameState gs) : Inputer(gs)
 {
-  public DummyInputer(GameState gs) : base(gs)  => Done = true;
-
   public override void Input(char ch) { }
 }
 
@@ -167,7 +164,6 @@ class Examiner : Inputer
   {
     if (ch == Constants.ESC || ch == '\n' || ch == '\r')
     {
-      Done = true;
       ClearHighlight();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -364,9 +360,7 @@ class Aimer : Inputer
   public override void Input(char ch)
   {
     if (ch == Constants.ESC)
-    {
-      Done = true;
-      
+    {      
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       ExpireAnimation();
@@ -381,8 +375,6 @@ class Aimer : Inputer
     }
     else if (ch == '\n' || ch == '\r' || ch == 'f')
     {
-      Done = true;
-      
       GS.UIRef().ClosePopup();
       ExpireAnimation();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
@@ -444,15 +436,11 @@ class NumericInputer : Inputer
   {
     if (ch == Constants.ESC)
     {
-      Done = true;
-      
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));      
     }
     else if (ch == '\n' || ch == '\r')
     {
-      Done = true;
-      
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
     }
@@ -528,7 +516,6 @@ class HelpScreenInputer : Inputer
   {
     if (ch == Constants.ESC)
     {
-      Done = true;
       _ui.ClearLongMessage();
       _ui.SetInputController(new PlayerCommandController(GS));
       return;
@@ -668,7 +655,6 @@ class OptionsScreen : Inputer
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
       return;
     }
     else if (ch == 'j')
@@ -740,7 +726,6 @@ class WizardCommander : Inputer
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
       return;
     }
     else if (ch == Constants.BACKSPACE)
@@ -757,7 +742,6 @@ class WizardCommander : Inputer
       Console.WriteLine(ErrorMessage);
       if (ErrorMessage == "")
       {
-        Done = true;
         GS.UIRef().ClosePopup();
         GS.UIRef().SetInputController(new PlayerCommandController(GS));
         return;
@@ -842,8 +826,7 @@ class Dialoguer : Inputer
     GS.UIRef().ClosePopup();
     GS.UIRef().SetInputController(new PlayerCommandController(GS));
     GS.UIRef().AlertPlayer(text);
-    QueueDeferredAction();
-    Done = true;
+    QueueDeferredAction();    
   }
 
   void WritePopup()
@@ -940,7 +923,6 @@ class PickupMenu : Inputer
   {
     if (ch == Constants.ESC || ch == ' ')
     {
-      Done = true;
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
     else if (MenuOptions.ContainsKey(ch) && !Choices.Contains(ch))
@@ -955,8 +937,6 @@ class PickupMenu : Inputer
     {
       QueueDeferredAction();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-
-      Done = true;      
     }
 
     WritePopup();
@@ -1052,8 +1032,7 @@ class LockedDoorMenu : Inputer
     if (ch == Constants.ESC)
     {
       GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));      
     }
     else if (Options.Contains(ch))
     {
@@ -1096,8 +1075,6 @@ class LockedDoorMenu : Inputer
         SetUpPickAxe();
         break;
     }
-
-    Done = true;
   }
 
   void SetUpPickAxe()
@@ -1234,7 +1211,6 @@ class InventoryDetails : Inputer
         ui.CloseMenu();
         ui.ClosePopup();
         ui.SetInputController(new PlayerCommandController(GS));
-        Done = true;
         return;
       }
     }    
@@ -1331,7 +1307,6 @@ class InventoryDetails : Inputer
 
     GS.UIRef().ClosePopup();
     GS.UIRef().CloseMenu();
-    Done = true;
   }
 
   void SetInteractionMenu(Item item)
@@ -1415,7 +1390,6 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
   {
     if (ch == Constants.ESC || ch == ' ' || ch == '\n' || ch == '\r')
     {
-      Done = true;
       GS.UIRef().CloseMenu();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -1423,16 +1397,13 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
     {
       Msg = "";
       _choice = ch;
-      Done = true;
       
-
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
     }
     else
     {
       Msg = "You don't have that.";
-      Done = false;
       
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -1451,8 +1422,6 @@ class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
   bool _keyPressed;
 
-  public override bool Done => _keyPressed;
-
   // We're done on any input 
   public override void Input(char ch) => _keyPressed = true;
 }
@@ -1462,17 +1431,13 @@ class LongMessagerInputer : Inputer
   UserInterface _ui;
   int _row;
   List<string> _wrappedLines;
-  bool _done;
   int _pageCount = 1;
-
-  public override bool Done => _done;
   
   public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)
   {
     _ui = ui;
     _wrappedLines = WrapLines(lines);
 
-    _done = false;
     var page = _wrappedLines.Take(UserInterface.ScreenHeight).ToList();
     ui.WriteLongMessage(page);
     _row = page.Count;
@@ -1517,7 +1482,6 @@ class LongMessagerInputer : Inputer
   {
     if (_row >= _wrappedLines.Count)
     {
-      _done = true;
       _ui.ClearLongMessage();
       _ui.SetInputController(new PlayerCommandController(GS));
     }
@@ -1534,25 +1498,19 @@ class LongMessagerInputer : Inputer
   }
 }
 
-class YesOrNoInputer : Inputer
+class YesOrNoInputer(GameState gs) : Inputer(gs)
 {
-  public YesOrNoInputer(GameState gs) : base(gs) => Done = false;
-
   public override void Input(char ch)
   {
     // Need to eventually handle ESC
     if (ch == 'y')
     {
-      Done = true;
-      
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
     }
     else if (ch == 'n')
-    {
-      Done = true;
-      
+    { 
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -1570,12 +1528,10 @@ class CharSetInputer(GameState gs, HashSet<char> allowed) : Inputer(gs)
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
-      Done = true;
     }
     else if (Allowed.Contains(ch))
     {
       Result = ch;
-      Done = true;
       QueueDeferredAction();
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
@@ -1593,8 +1549,7 @@ class DirectionalInputer : Inputer
   public DirectionalInputer(GameState gs, bool targetSelf = false) : base(gs)
   {
     TargetSelf = targetSelf;
-    Done = false;
-
+    
     string prompt = "Which direction?";
     int width = prompt.Length + 2;
     if (targetSelf)
@@ -1609,8 +1564,6 @@ class DirectionalInputer : Inputer
   {
     if (ch == Constants.ESC)
     {
-      Done = true;
-      
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
     }
@@ -1620,8 +1573,7 @@ class DirectionalInputer : Inputer
       if (dir != (0, 0))
       {
         _result = dir;
-        Done = true;
-
+        
         GS.UIRef().ClosePopup();
         GS.UIRef().SetInputController(new PlayerCommandController(GS));
         QueueDeferredAction();
@@ -1629,7 +1581,6 @@ class DirectionalInputer : Inputer
       else if (TargetSelf && ch == '.')
       {
         _result = (0, 0);
-        Done = true;
         
         GS.UIRef().ClosePopup();
         GS.UIRef().SetInputController(new PlayerCommandController(GS));
@@ -1657,7 +1608,6 @@ class ConeTargeter : Inputer
 
   public ConeTargeter(GameState gs, int range, Loc origin) : base(gs)
   {
-    Done = false;
     GS = gs;
     Range = range;
     Origin = origin;
@@ -1676,7 +1626,6 @@ class ConeTargeter : Inputer
   {
     if (ch == Constants.ESC)
     {
-      Done = true;
       Anim.Expiry = DateTime.MinValue;
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
@@ -1684,7 +1633,6 @@ class ConeTargeter : Inputer
     }
     else if (ch == '\n' || ch == '\r')
     {
-      Done = true;
       Anim.Expiry = DateTime.MinValue;
       QueueDeferredAction();
       return;
