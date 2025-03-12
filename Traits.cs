@@ -2975,7 +2975,13 @@ class TraitFactory
         SourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0
       }
     },
-    { "Allies", (pieces, gameObj) => { var ids = pieces[1].Split(',').Select(ulong.Parse).ToList(); return new AlliesTrait() { IDs = ids }; } },
+    { "Allies", (pieces, gameObj) => 
+      {
+        List<ulong> ids = [];
+        if (pieces[1] != "")
+          ids = [..pieces[1].Split(',').Select(ulong.Parse)]; 
+        return new AlliesTrait() { IDs = ids }; } 
+      },
     { "Ammo", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[3], out DamageType ammoDt);

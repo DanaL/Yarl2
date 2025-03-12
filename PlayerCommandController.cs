@@ -90,6 +90,9 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
           return true;
       }
 
+      if (tile.IsVisibleTrap())
+        return true;
+
       if (gs.ObjDb.ItemsAt(adj).Count > 0)
       {
         return true;
