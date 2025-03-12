@@ -103,10 +103,21 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   {
     Player player = GS.Player;
 
-    if (gs.Player.HasTrait<ConfusedTrait>())
+    foreach (Trait t in gs.Player.Traits)
     {
-      gs.UIRef().AlertPlayer("You are too confused!");
-      return;      
+      if (t is ConfusedTrait)
+      {
+        gs.UIRef().AlertPlayer("You are too confused!");
+        return;
+      }
+
+      // Mainly doing this because as I write this, I'm not sure how I want
+      // to handle occasionally staggering while the player is drunk.
+      if (t is TipsyTrait)
+      {
+        gs.UIRef().AlertPlayer("You need to sober up before you go running through the dungeon!");
+        return;
+      }
     }
 
     Map map = gs.CurrentMap;
