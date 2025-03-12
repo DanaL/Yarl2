@@ -367,8 +367,7 @@ class Aimer : Inputer
   {
     if (ch == Constants.ESC)
     {      
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       ExpireAnimation();
       return;
     }
@@ -381,10 +380,9 @@ class Aimer : Inputer
     }
     else if (ch == '\n' || ch == '\r' || ch == 'f')
     {
-      GS.UIRef().ClosePopup();
-      ExpireAnimation();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      ExpireAnimation();      
       QueueDeferredAction();
+      Close();
 
       return;
     }
@@ -442,8 +440,7 @@ class NumericInputer : Inputer
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));      
+      Close();
     }
     else if (ch == '\n' || ch == '\r')
     {
@@ -659,8 +656,7 @@ class OptionsScreen : Inputer
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if (ch == 'j')
@@ -730,8 +726,7 @@ class WizardCommander : Inputer
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if (ch == Constants.BACKSPACE)
@@ -829,8 +824,7 @@ class Dialoguer : Inputer
 
   void EndConversation(string text)
   {
-    GS.UIRef().ClosePopup();
-    GS.UIRef().SetInputController(new PlayerCommandController(GS));
+    Close();
     GS.UIRef().AlertPlayer(text);
     QueueDeferredAction();    
   }
@@ -1037,8 +1031,7 @@ class LockedDoorMenu : Inputer
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));      
+      Close();   
     }
     else if (Options.Contains(ch))
     {
@@ -1094,8 +1087,7 @@ class LockedDoorMenu : Inputer
         DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
         dig.ReceiveUIResult(res);
         GS.Player.QueueAction(dig);
-        GS.UIRef().ClosePopup();
-        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        Close();
         return;
       }
     }
@@ -1108,8 +1100,7 @@ class LockedDoorMenu : Inputer
     DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
     pickLock.ReceiveUIResult(res);
     GS.Player.QueueAction(pickLock);
-    GS.UIRef().ClosePopup();
-    GS.UIRef().SetInputController(new PlayerCommandController(GS));
+    Close();
   }
 
   void SetUpKnock()
@@ -1125,15 +1116,13 @@ class LockedDoorMenu : Inputer
     }
 
     GS.Player.QueueAction(new UseItemAction(GS, GS.Player) { Choice = slot });
-    GS.UIRef().ClosePopup();
-    GS.UIRef().SetInputController(new PlayerCommandController(GS));
+    Close();
   }
 
   void SetUpBash()
   {
     GS.Player.QueueAction(new BashAction(GS, GS.Player) { Target = Loc });
-    GS.UIRef().ClosePopup();
-    GS.UIRef().SetInputController(new PlayerCommandController(GS));
+    Close();
   }
 
   void SetMenu()
@@ -1396,8 +1385,7 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
   {
     if (ch == Constants.ESC || ch == ' ' || ch == '\n' || ch == '\r')
     {
-      GS.UIRef().CloseMenu();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
     }
     else if (_options.Contains(ch))
     {
@@ -1426,10 +1414,8 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
 
 class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
-  bool _keyPressed;
-
   // We're done on any input 
-  public override void Input(char ch) => _keyPressed = true;
+  public override void Input(char ch) {}
 }
 
 class LongMessagerInputer : Inputer
@@ -1511,14 +1497,12 @@ class YesOrNoInputer(GameState gs) : Inputer(gs)
     // Need to eventually handle ESC
     if (ch == 'y')
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       QueueDeferredAction();
     }
     else if (ch == 'n')
     { 
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
     }
   }
 }
@@ -1532,15 +1516,13 @@ class CharSetInputer(GameState gs, HashSet<char> allowed) : Inputer(gs)
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
     }
     else if (Allowed.Contains(ch))
     {
       Result = ch;
       QueueDeferredAction();
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
     }
   }
 
@@ -1570,8 +1552,7 @@ class DirectionalInputer : Inputer
   {
     if (ch == Constants.ESC)
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
     }
     else
     {
@@ -1580,16 +1561,14 @@ class DirectionalInputer : Inputer
       {
         _result = dir;
         
-        GS.UIRef().ClosePopup();
-        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        Close();
         QueueDeferredAction();
       }
       else if (TargetSelf && ch == '.')
       {
         _result = (0, 0);
         
-        GS.UIRef().ClosePopup();
-        GS.UIRef().SetInputController(new PlayerCommandController(GS));
+        Close();
         QueueDeferredAction();
       }
     }

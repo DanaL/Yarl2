@@ -80,14 +80,12 @@ class ShopMenuInputer : Inputer
   {
     if (ch == Constants.ESC || ch == ' ')
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if ((ch == '\n' || ch == '\r') && TotalInvoice() > 0 && GS.Player.Inventory.Zorkmids >= TotalInvoice())
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       QueueDeferredAction();
       return;
     }
@@ -244,8 +242,7 @@ class InnkeeperInputer : Inputer
 
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ' || ch == 'c')
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if (ch == 'a' && GS.Player.Inventory.Zorkmids < 2)
@@ -256,8 +253,7 @@ class InnkeeperInputer : Inputer
     {
       Selection = "Booze";
       Zorkmids = 2;
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       QueueDeferredAction();
       return;
     }
@@ -269,8 +265,7 @@ class InnkeeperInputer : Inputer
     {      
       Selection = "Rest";
       Zorkmids = 5;
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       QueueDeferredAction();
       return;
     }
@@ -358,8 +353,7 @@ class SmithyInputer : ShopMenuInputer
     string blurb = Blurb;
     if (ch == Constants.ESC || ch == ' ')
     {
-      GS.UIRef().ClosePopup();
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if (menuState == 0 && ch == 'a')
