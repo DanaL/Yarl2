@@ -634,6 +634,12 @@ class ValidTarget(Actor actor) : BehaviourNode
     Actor is NoOne ? PlanStatus.Failure : PlanStatus.Success;  
 }
 
+class IsFrightened : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs) =>
+    mob.HasTrait<FrightenedTrait>() ? PlanStatus.Success : PlanStatus.Failure;
+}
+
 class IsImmobilized : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -647,7 +653,7 @@ class IsImmobilized : BehaviourNode
     }
 
     return PlanStatus.Failure;
-  }  
+  }
 }
 
 class PickRandom(List<BehaviourNode> nodes) : BehaviourNode
@@ -1316,7 +1322,7 @@ class Planner
     plan.Add(new Sequence(indifferentNodes));
 
     // An afraid monster tries to escape
-    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AFRAID), new TryToEscape()]));
+    plan.Add(new Sequence([new IsFrightened(), new TryToEscape()]));
 
     if (!mob.HasTrait<PassiveTrait>())
     {

@@ -1283,7 +1283,7 @@ class FrightenedTrait : TemporaryTrait
       if (trait is ImmunityTrait immunity && immunity.Type == DamageType.Fear)
         return [];
 
-      if (trait is FrightenedTrait frightened)
+      if (trait is FrightenedTrait)
       {
         ExpiresOn += (ulong)gs.Rng.Next(15, 26);
         return [];
@@ -1298,11 +1298,6 @@ class FrightenedTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
     
-    if (target.Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
-    {
-      attitude.SetMax(Mob.AFRAID);
-    }
-
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} frightened!"];
   }
 

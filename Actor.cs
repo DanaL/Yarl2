@@ -80,20 +80,20 @@ abstract class Actor : GameObj, IZLevel
   {
     int baseNoise = 9;
     int modifiers = 0;
-    foreach (Trait t in Traits) 
+    foreach (Trait t in Traits)
     {
       if (t is LightStepTrait)
         baseNoise = 5;
       else if (t is QuietTrait) // Sources of Quiet can stack
         modifiers -= 3;
     }
-    
+
     // If the actor is wearing a shirt that's made of non-mithril metal, it will add
     // to the noisiness. (Only shirts because I feel like a metal helmet wouldn't 
     // be especially loud)
     var armour = Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equipped);
     foreach (var piece in armour)
-    {      
+    {
       ArmourTrait? armourTrait = piece.Traits.OfType<ArmourTrait>().FirstOrDefault();
       // It would actually be an error for this to be null
       if (armourTrait is not null && (armourTrait.Part == ArmourParts.Shirt))
@@ -118,7 +118,7 @@ abstract class Actor : GameObj, IZLevel
     if (Traits.OfType<StressTrait>().FirstOrDefault() is StressTrait stress)
     {
       level = stress.Stress;
-      penalty = stress.Stress switch 
+      penalty = stress.Stress switch
       {
         StressLevel.Skittish => -1,
         StressLevel.Nervous => -2,
@@ -146,11 +146,11 @@ abstract class Actor : GameObj, IZLevel
       else if (t is GrappledTrait grappled)
       {
         Traits.Remove(t);
-      }        
+      }
     }
   }
-  
-  public bool AbleToMove() 
+
+  public bool AbleToMove()
   {
     foreach (var t in Traits)
     {
@@ -168,17 +168,16 @@ abstract class Actor : GameObj, IZLevel
     string msg = "";
 
     if (!Stats.TryGetValue(Attribute.HP, out var currHP))
-        return (0, "", 0);
+      return (0, "", 0);
 
     Traits.RemoveAll(t => t is SleepingTrait);
     if (Stats.TryGetValue(Attribute.MobAttitude, out Stat? attitude))
     {
-      // Soource is the weapon/actual source of damage, not the moral agent
+      // Source is the weapon/actual source of damage, not the moral agent
       // responsible for causing the damage. Perhaps I should include a ref
       // to the attacker, because the monster maybe shouldn't become aggressitve
-      // if the attack doesn't come from the player?
-      if (attitude.Curr != Mob.AFRAID)
-        attitude.SetMax(Mob.AGGRESSIVE);
+      // if the attack doesn't come from the player?      
+      attitude.SetMax(Mob.AGGRESSIVE);
     }
 
     // If we have allies, let them know we've turned hostile
@@ -211,7 +210,7 @@ abstract class Actor : GameObj, IZLevel
 
       foreach (var trait in Traits)
       {
-        if (trait is ImmunityTrait immunity && immunity.Type == dmg.Item2) 
+        if (trait is ImmunityTrait immunity && immunity.Type == dmg.Item2)
         {
           d = 0;
           bonusDamage = 0;
@@ -220,13 +219,13 @@ abstract class Actor : GameObj, IZLevel
         else if (trait is ResistanceTrait resist && resist.Type == dmg.Item2)
         {
           d /= 2;
-          msg = "It seems less effective!";          
+          msg = "It seems less effective!";
         }
       }
-      
+
       if (d > 0)
         total += d;
-    }    
+    }
     total += bonusDamage;
     total = (int)(total * scale);
 
@@ -286,7 +285,7 @@ abstract class Actor : GameObj, IZLevel
     done_dividing:
 
     // Is the monster now afraid?
-    if (Stats.TryGetValue(Attribute.MobAttitude, out attitude) && attitude.Curr != Mob.AFRAID)
+    if (!HasTrait<FrightenedTrait>())
     {
       int maxHP = Stats[Attribute.HP].Max;
       if (this is Mob && !HasTrait<BrainlessTrait>() && currHP.Curr <= maxHP / 2 && currHP.Curr > 0)
@@ -294,20 +293,34 @@ abstract class Actor : GameObj, IZLevel
         float odds = (float)currHP.Curr / maxHP;
         if (gs.Rng.NextDouble() < odds)
         {
-          Stats[Attribute.MobAttitude].SetMax(Mob.AFRAID);          
-          msg += VisibleTo(gs.Player) ? $" {FullName.Capitalize()}" : "A monster";
-          msg += " turns to flee!";
-          
-          if (HasTrait<FullBellyTrait>())
-            EmptyBelly(gs);
-
-          if (Traits.OfType<GrapplingTrait>().FirstOrDefault() is GrapplingTrait gt)
-            ClearGrapple(gt, gs);
+          msg += BecomeFrightened(gs);
         }
       }
     }
-    
+
     return (Stats[Attribute.HP].Curr, msg.Trim(), total);
+  }
+
+  public string BecomeFrightened(GameState gs)
+  {
+    FrightenedTrait frightened = new()
+    {
+      OwnerID = ID,
+      ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(10, 21),
+      DC = int.MaxValue // We want to guarantee it takes effect
+    };
+    frightened.Apply(this, gs);
+
+    if (HasTrait<FullBellyTrait>())
+      EmptyBelly(gs);
+
+    if (Traits.OfType<GrapplingTrait>().FirstOrDefault() is GrapplingTrait gt)
+      ClearGrapple(gt, gs);
+
+    string msg = VisibleTo(gs.Player) ? $" {FullName.Capitalize()}" : "A monster";
+    msg += " turns to flee!";
+
+    return msg;
   }
 
   void ClearGrapple(GrapplingTrait gt, GameState gs)
@@ -482,8 +495,7 @@ class Mob : Actor
   public const int  INACTIVE = 0;
   public const int INDIFFERENT = 1;
   public const int AGGRESSIVE = 2;
-  public const int AFRAID = 4;
-
+  
   public Mob() => _behaviour = new MonsterBehaviour();
 
   public Damage? Dmg { get; set; }
@@ -499,8 +511,7 @@ class Mob : Actor
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
 
-    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) 
-          && !(attitude.Curr == AFRAID || attitude.Curr == AGGRESSIVE))
+    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
     {
         Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);        
     }

@@ -219,7 +219,7 @@ class Traps
           var checkLoc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
           if (gs.ObjDb.Occupant(checkLoc) is Actor monster && monster != actor)
           {
-            if (monster.Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && attitude.Curr != Mob.AFRAID)
+            if (monster.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
             {
               attitude.SetMax(Mob.AGGRESSIVE);
             }
