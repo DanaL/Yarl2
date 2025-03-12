@@ -84,14 +84,16 @@ class ShopMenuInputer : Inputer
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
+      return;
     }
-    else if ((ch == '\n' || ch == '\r') && GS.Player.Inventory.Zorkmids >= TotalInvoice())
+    else if ((ch == '\n' || ch == '\r') && TotalInvoice() > 0 && GS.Player.Inventory.Zorkmids >= TotalInvoice())
     {
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
       Done = true;
       Success = true;
+      return;
     }
     else if (MenuItems.ContainsKey(ch))
     {
@@ -355,6 +357,8 @@ class SmithyInputer : ShopMenuInputer
     string blurb = Blurb;
     if (ch == Constants.ESC || ch == ' ')
     {
+      GS.UIRef().ClosePopup();
+      GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
       Success = false;
       return;
@@ -376,7 +380,6 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 1)
     {
-      GS.Player.QueueAction(new ShoppingCompletedAction(GS, Shopkeeper));
       base.Input(ch);
     }
     else if (menuState == 2)
@@ -397,6 +400,9 @@ class SmithyInputer : ShopMenuInputer
       SingleSelection = true;
       base.Input(ch);
     }
+
+    if (Done)
+      return;
 
     WritePopup(blurb);
   }
@@ -535,9 +541,8 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out menuState) && menuState.Curr == 2)
     {
-      List<ulong> itemIds = MenuItems.Values.Where(i => i.SelectedCount > 0)
-                                            .Select(i => i.Item.ID)
-                                            .ToList();
+      List<ulong> itemIds = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
+                                  .Select(i => i.Item.ID)];
       return new RepairItemUIResult()
       {
         Zorkminds = TotalInvoice(),
@@ -549,9 +554,8 @@ class SmithyInputer : ShopMenuInputer
       return new ShoppingUIResult()
       {
         Zorkminds = TotalInvoice(),
-        Selections = MenuItems.Values.Where(i => i.SelectedCount > 0)
-                                    .Select(i => (i.Slot, i.SelectedCount))
-                                    .ToList()
+        Selections = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
+                                    .Select(i => (i.Slot, i.SelectedCount))]
       };
     }    
   }

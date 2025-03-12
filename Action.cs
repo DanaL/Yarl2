@@ -984,8 +984,7 @@ class ShoppingCompletedAction : Action
   public override double Execute()
   {
     GameState!.Player.Inventory.Zorkmids -= _invoice;
-    GameState!.Player.Inventory.Zorkmids -= _invoice;
-
+    
     string txt = $"You pay {_shopkeeper.FullName} {_invoice} zorkmid";
     if (_invoice > 1)
       txt += "s";
