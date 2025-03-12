@@ -851,7 +851,6 @@ class SpellcastMenu : Inputer
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
-      Success = false;
       return;
     }
     else if (ch == 'j')
@@ -870,7 +869,6 @@ class SpellcastMenu : Inputer
       GS.Player.LastSpellCast = spell;
       HandleSelectedSpell(spell);
       Done = true;
-      Success = false;
       return;
     }
 

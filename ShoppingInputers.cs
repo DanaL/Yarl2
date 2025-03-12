@@ -83,7 +83,6 @@ class ShopMenuInputer : Inputer
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
-      Success = false;
       return;
     }
     else if ((ch == '\n' || ch == '\r') && TotalInvoice() > 0 && GS.Player.Inventory.Zorkmids >= TotalInvoice())
@@ -92,7 +91,6 @@ class ShopMenuInputer : Inputer
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
       Done = true;
-      Success = true;
       return;
     }
     else if (MenuItems.ContainsKey(ch))
@@ -249,7 +247,6 @@ class InnkeeperInputer : Inputer
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ' || ch == 'c')
     {
       Done = true;
-      Success = false;
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       return;
@@ -266,7 +263,6 @@ class InnkeeperInputer : Inputer
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
       Done = true;
-      Success = true;
       return;
     }
     else if (ch == 'b' && GS.Player.Inventory.Zorkmids < 5)
@@ -278,7 +274,6 @@ class InnkeeperInputer : Inputer
       Selection = "Rest";
       Zorkmids = 5;
       Done = true;
-      Success = true;
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       QueueDeferredAction();
@@ -370,7 +365,6 @@ class SmithyInputer : ShopMenuInputer
       GS.UIRef().ClosePopup();
       GS.UIRef().SetInputController(new PlayerCommandController(GS));
       Done = true;
-      Success = false;
       return;
     }
     else if (menuState == 0 && ch == 'a')
@@ -643,7 +637,6 @@ class WitchInputer : Inputer
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
       Done = true;
-      Success = false;
       return;
     }
 
@@ -656,7 +649,6 @@ class WitchInputer : Inputer
       {
         Invoice = price;
         Done = true;
-        Success = true;
         Service = spell;
       }
       else
@@ -671,7 +663,6 @@ class WitchInputer : Inputer
     else if (dialogueState == GIVE_QUEST && ch == 'a')
     {
       Done = true;
-      Success = false;
       return;
     }
     else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
@@ -690,25 +681,21 @@ class WitchInputer : Inputer
     {
       Invoice = 0;
       Done = true;
-      Success = true;
       Service = "magic101";
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
     {
       Done = true;
-      Success = false;
       return;
     }
     else if (dialogueState == START_STATE && ch == 'b')
     {
       Done = true;
-      Success = false;
       return;
     }
     else if (dialogueState == ON_QUEST && ch == 'a')
     {
       Done = true;
-      Success = false;
       return;
     }
 
@@ -875,12 +862,10 @@ class PriestInputer : Inputer
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
       Done = true;
-      Success = false;
     }
     else if (Options.Contains(ch) && ch == 'a')
     {
       Done = true;
-      Success = true;
       Service = "Absolution";
     }
     
