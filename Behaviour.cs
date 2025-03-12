@@ -1778,7 +1778,7 @@ class WitchBehaviour : NPCBehaviour
 
   public override (Action, Inputer?) Chat(Mob actor, GameState gameState)
   {
-    var acc = new WitchInputer(actor, gameState);
+    var acc = new WitchDialogue(actor, gameState);
     var action = new WitchServiceAction(gameState, actor);
     
     return (action, acc);

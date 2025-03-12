@@ -561,7 +561,7 @@ class SmithyInputer : ShopMenuInputer
 }
 
 record SpellInfo(int Price, int ManaCost, string Prereq);
-class WitchInputer : Inputer
+class WitchDialogue : Inputer
 {
   Actor Witch { get; set; } 
   string Service { get; set; } = "";
@@ -603,7 +603,7 @@ class WitchInputer : Inputer
     { "ersatz elevator", new SpellInfo(25, 3, "") }
   };
 
-  public WitchInputer(Actor witch, GameState gs) : base(gs)
+  public WitchDialogue(Actor witch, GameState gs) : base(gs)
   {
     Witch = witch;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
@@ -631,6 +631,7 @@ class WitchInputer : Inputer
 
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
+      Close();
       return;
     }
 
@@ -643,6 +644,8 @@ class WitchInputer : Inputer
       {
         Invoice = price;
         Service = spell;
+        Close();
+        QueueDeferredAction();
       }
       else
       {
@@ -655,6 +658,7 @@ class WitchInputer : Inputer
     }
     else if (dialogueState == GIVE_QUEST && ch == 'a')
     {
+      Close();
       return;
     }
     else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
@@ -670,20 +674,25 @@ class WitchInputer : Inputer
       Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
-    {
+    {    
       Invoice = 0;
       Service = "magic101";
+      Close();
+      QueueDeferredAction();
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
     {
+      Close();
       return;
     }
     else if (dialogueState == START_STATE && ch == 'b')
     {
+      Close();
       return;
     }
     else if (dialogueState == ON_QUEST && ch == 'a')
     {
+      Close();
       return;
     }
 

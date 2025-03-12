@@ -37,6 +37,12 @@ abstract class Inputer(GameState gs)
       GS.Player.QueueAction(DeferredAction);
     }
   }
+
+  protected void Close()
+  {
+    GS.UIRef().ClosePopup();
+    GS.UIRef().SetInputController(new PlayerCommandController(GS));
+  }
   
   public virtual UIResult GetResult()
   {
