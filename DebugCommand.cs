@@ -119,6 +119,11 @@ class DebugCommand(GameState gs)
       _gs.UIRef().AlertPlayer($"Loc: {_gs.Player.Loc}");
       return "";
     }
+    else if (txt == "fog")
+    {
+      FogifyLevel();
+      return "";
+    }
     else if (txt == "turn")
     {
       _gs.UIRef().AlertPlayer($"Turn {_gs.Turn}");
@@ -180,7 +185,20 @@ class DebugCommand(GameState gs)
     }
   }
 
-  private string GiveZorkminds(string amount)
+  void FogifyLevel()
+  {
+    for (int r = 0; r < _gs.CurrentMap.Height; r++)
+    {
+      for (int c = 0; c < _gs.CurrentMap.Width; c++)
+      {
+        Loc loc = new(_gs.CurrDungeonID, _gs.CurrLevel, r, c);
+        Item mist = ItemFactory.Mist(_gs);
+        _gs.ObjDb.SetToLoc(loc, mist);
+      }
+    }
+  }
+
+  string GiveZorkminds(string amount)
   {
     if (uint.TryParse(amount, out uint total))
     {
@@ -195,7 +213,7 @@ class DebugCommand(GameState gs)
     return $"Need a valid amount!";
   }
 
-  private string AddItem(string action, string name)
+  string AddItem(string action, string name)
   {
     bool illusion = false;
     if (name.EndsWith("illusion"))
@@ -250,7 +268,7 @@ class DebugCommand(GameState gs)
                           && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()) .Any())];
   }
 
-  private string AddMonster(string monsterName)
+  string AddMonster(string monsterName)
   {
     var adjSpots = AdjSpots(_gs.Player.Loc);
 

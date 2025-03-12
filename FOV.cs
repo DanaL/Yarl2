@@ -125,7 +125,7 @@ class FieldOfView
         {
           Illumination illum;
           var loc = origin with { Row = r, Col = c};
-          if (IsOpaque(loc, map, objDb, opaqueLocs))
+          if (IsOpaque(loc, origin, map, objDb, opaqueLocs))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();
@@ -167,7 +167,7 @@ class FieldOfView
     if (pt.Row > origin.Row) 
     {
       Loc sqAbove = pt with { Row = pt.Row - 1};
-      bool opaqueAbove = IsOpaque(sqAbove, map, objDb, opaqueLocs);
+      bool opaqueAbove = IsOpaque(sqAbove, origin, map, objDb, opaqueLocs);
       if (!opaqueAbove)
         illum |= Illumination.NE | Illumination.NW;
           
@@ -175,14 +175,14 @@ class FieldOfView
       {
         Loc sqLeft = pt with { Col = pt.Col - 1};
         Loc sqNW = pt with { Row = pt.Row - 1, Col = pt.Col - 1};
-        if (IsOpaque(sqLeft, map, objDb, opaqueLocs) && !IsOpaque(sqNW, map, objDb, opaqueLocs))
+        if (IsOpaque(sqLeft, origin, map, objDb, opaqueLocs) && !IsOpaque(sqNW, origin, map, objDb, opaqueLocs))
           illum |= Illumination.NW;
       }
       else if (opaqueAbove && pt.Col < origin.Col)
       {
         Loc sqRight = pt with { Col = pt.Col + 1};
         Loc sqNE = pt with { Row = pt.Row - 1, Col = pt.Col + 1};
-        if (IsOpaque(sqRight, map, objDb, opaqueLocs) && !IsOpaque(sqNE, map, objDb, opaqueLocs))
+        if (IsOpaque(sqRight, origin, map, objDb, opaqueLocs) && !IsOpaque(sqNE, origin, map, objDb, opaqueLocs))
           illum |= Illumination.NE;
       }
     }
@@ -190,7 +190,7 @@ class FieldOfView
     if (pt.Row < origin.Row)
     {
       Loc locBelow = pt with { Row = pt.Row + 1};
-      bool opaqueBelow = IsOpaque(locBelow, map, objDb, opaqueLocs);
+      bool opaqueBelow = IsOpaque(locBelow, origin, map, objDb, opaqueLocs);
       if (!opaqueBelow)
         illum |= Illumination.SE | Illumination.SW;
 
@@ -198,35 +198,44 @@ class FieldOfView
       {
         Loc sqLeft = pt with { Col = pt.Col - 1};
         Loc sqSW = pt with { Row = pt.Row + 1, Col = pt.Col - 1};
-        if (IsOpaque(sqLeft, map, objDb, opaqueLocs) && !IsOpaque(sqSW, map, objDb, opaqueLocs))
+        if (IsOpaque(sqLeft, origin, map, objDb, opaqueLocs) && !IsOpaque(sqSW, origin, map, objDb, opaqueLocs))
           illum |= Illumination.SW;
       }
       else if (opaqueBelow && pt.Col < origin.Col)
       {
         Loc sqRight = pt with { Col = pt.Col + 1};
         Loc sqSE = pt with { Row = pt.Row + 1, Col = pt.Col + 1};
-        if (IsOpaque(sqRight, map, objDb, opaqueLocs) && !IsOpaque(sqSE, map, objDb, opaqueLocs))
+        if (IsOpaque(sqRight, origin, map, objDb, opaqueLocs) && !IsOpaque(sqSE, origin, map, objDb, opaqueLocs))
            illum |= Illumination.SE;
       }
     }
 
     // We don't have to check for corners here because they should be covered by the above checks
     
-    if (pt.Col > origin.Col && !IsOpaque(pt with { Col = pt.Col - 1}, map, objDb, opaqueLocs))
+    if (pt.Col > origin.Col && !IsOpaque(pt with { Col = pt.Col - 1}, origin, map, objDb, opaqueLocs))
       illum |= Illumination.NW | Illumination.SW;
-    else if (pt.Col < origin.Col && !IsOpaque(pt with { Col = pt.Col + 1}, map, objDb, opaqueLocs))
+    else if (pt.Col < origin.Col && !IsOpaque(pt with { Col = pt.Col + 1}, origin, map, objDb, opaqueLocs))
       illum |= Illumination.NE | Illumination.SE;
  
     return illum;
   }
 
-  static bool IsOpaque(Loc loc, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
+  static bool IsOpaque(Loc loc, Loc origin, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
     if (opaqueLocs.TryGetValue(loc, out bool opacity))
       return opacity;
 
-    opacity = map.TileAt(loc.Row, loc.Col).Opaque() || objDb.ItemsWithTrait<OpaqueTrait>(loc);
-    opaqueLocs.Add(loc, opacity);
+    if (map.TileAt(loc.Row, loc.Col).Opaque())
+    {
+      opacity = true;      
+    }
+
+    int d = Util.Distance(loc, origin);
+    if (d >= objDb.VisibilityAtLocation(loc))
+      opacity = true;
+    
+    if (opacity)
+      opaqueLocs.Add(loc, true);
 
     return opacity;
   }
@@ -239,7 +248,7 @@ class FieldOfView
 
     for (int j = 0; j < 8; j++)
     {
-      var octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
+      Dictionary<Loc, Illumination> octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
       foreach (var sq in octant)
       {
         if (!visible.TryAdd(sq.Key, sq.Value))

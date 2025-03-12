@@ -672,7 +672,7 @@
     "Traits": [
       "Block",
       "Plural",
-      "Opaque"
+      "Opaque#0"
     ]
   },
   {
@@ -684,7 +684,7 @@
     "Traits": [
       "Block",
       "Plural",
-      "Opaque"
+      "Opaque#1"
     ]
   },
   {

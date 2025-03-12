@@ -1366,7 +1366,9 @@ class FullBellyTrait : Trait, IGameEventListener
 
 class OpaqueTrait : Trait
 {
-  public override string AsText() => "Opaque";  
+  public int Visibility { get; set; }
+
+  public override string AsText() => $"Opaque#{Visibility}";
 }
 
 // Simple in that I don't need any extra info like a target to use the effect.
@@ -3151,7 +3153,7 @@ class TraitFactory
       Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) }
     },    
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
-    { "Opaque", (pieces, gameObj) => new OpaqueTrait() },
+    { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },

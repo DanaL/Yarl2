@@ -445,9 +445,10 @@ class Player : Actor
     if (action is null)
       return;
 
-    double result = action.Execute();
-    Energy -= CalcEnergyUsed(result);
     gs.PrepareFieldOfView();
+
+    double result = action.Execute();
+    Energy -= CalcEnergyUsed(result);    
   }
 
   public void HaltTravel() 

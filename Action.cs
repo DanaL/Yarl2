@@ -1773,8 +1773,7 @@ class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
   {
     base.Execute();
 
-
-    var gs = GameState!;
+    GameState gs = GameState!;
 
     Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!);
     if (gs.LastPlayerFoV.Contains(targetLoc))
@@ -1782,12 +1781,16 @@ class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
     
     foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
     {
-      var mist = ItemFactory.Mist(gs);
+      var mist = ItemFactory.Fog(gs);
       var timer = mist.Traits.OfType<CountdownTrait>().First();
       gs.RegisterForEvent(GameEventType.EndOfRound, timer);
       gs.ObjDb.Add(mist);
       gs.ItemDropped(mist, loc);
     }
+
+    // We need to do this here because it changes the player's FOV and we want
+    // to update the display appropriately
+    gs.PrepareFieldOfView();
 
     return 1.0;
   }

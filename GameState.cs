@@ -1688,7 +1688,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (Loc loc in fov)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-      var (glyph, z) = ObjDb.ItemGlyph(loc);
+      var (glyph, z) = ObjDb.ItemGlyph(loc, Player.Loc);
       if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {
         // Remember the terrain tile if there's nothing visible on the square

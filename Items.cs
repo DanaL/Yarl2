@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -30,7 +30,8 @@ enum ItemType
   Food,
   Talisman,
   Reagent,
-  Environment, // I'm implementing things like mist as 'items'
+  Environment,
+  Fog,
   Landscape,
   Statue,
   Illusion
@@ -351,12 +352,27 @@ class ItemFactory
     var mist = new Item()
     {
       Name = "mist",
-      Type = ItemType.Environment,
+      Type = ItemType.Fog,
       Value = 0,
-      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
+      Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
     };
     mist.SetZ(10);
-    mist.Traits.Add(new OpaqueTrait());
+    mist.Traits.Add(new OpaqueTrait() { Visibility = 3 });
+    
+    return mist;
+  }
+
+  public static Item Fog(GameState gs)
+  {
+    var mist = new Item()
+    {
+      Name = "fog",
+      Type = ItemType.Fog,
+      Value = 0,
+      Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
+    };
+    mist.SetZ(10);
+    mist.Traits.Add(new OpaqueTrait() { Visibility = 0 });
     mist.Traits.Add(new CountdownTrait()
     {
       OwnerID = mist.ID,

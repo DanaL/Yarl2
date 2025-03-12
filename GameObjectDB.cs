@@ -170,20 +170,6 @@ class GameObjectDB
   public HashSet<Loc> LocListeners { get; set; } = [];
   public List<ConditionalEvent> ConditionalEvents { get; set; } = [];
 
-  public bool ItemsWithTrait<T>(Loc loc)
-  {
-    if (_itemLocs.TryGetValue(loc, out var items))
-    {
-      foreach (var item in items)
-      {
-        if (item.HasActiveTrait<T>())
-          return true;
-      }
-    }
-
-    return false;
-  }
-
   public Player? FindPlayer()
   {
     foreach (var obj in Objs.Values)
@@ -195,7 +181,7 @@ class GameObjectDB
     return null;
   }
 
-  public (Glyph, int) ItemGlyph(Loc loc)
+  public (Glyph, int) ItemGlyph(Loc loc, Loc playerLoc)
   {
     static bool Disguised(Actor mob)
     {
@@ -222,14 +208,35 @@ class GameObjectDB
     }
     else if (_itemLocs.TryGetValue(loc, out var items))
     {
+      // Some tiles we don't want to end up in remembered locations      
+      int d = Util.Distance(loc, playerLoc);
       foreach (var item in items)
       {
-        if (item.HasTrait<HiddenTrait>())
+        if (item.Type == ItemType.Fog)
           continue;
 
-        if (item.HasTrait<BlockTrait>())
-          return (item.Glyph, item.Z());
-          
+        bool hidden = false;
+        foreach (Trait t in item.Traits)
+        {
+          if (t is BlockTrait)
+            return (item.Glyph, item.Z());
+
+          if (t is HiddenTrait)
+          {
+            hidden = true;
+            break;
+          }
+
+          if (t is OpaqueTrait opaque && d < opaque.Visibility)
+          {
+            hidden = true;            
+            break;
+          }
+        }
+
+        if (hidden)
+          continue;
+
         if (item.Z() > z)
         {
           glyph = item.Glyph;
@@ -434,7 +441,7 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
     
-    return [..stack.Where(i => i.Type != ItemType.Environment)];
+    return [..stack.Where(i => i.Type != ItemType.Environment && i.Type == ItemType.Fog)];
   }
 
   public List<Item> VisibleItemsAt(Loc loc)
@@ -442,14 +449,54 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
     
-    return [..stack.Where(i => i.Type != ItemType.Environment && !i.HasTrait<HiddenTrait>())];
+    return [..stack.Where(i => i.Type != ItemType.Environment && i.Type == ItemType.Fog && !i.HasTrait<HiddenTrait>())];
   }
 
   public List<Item> EnvironmentsAt(Loc loc)
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    return [..stack.Where(i => i.Type == ItemType.Environment)];
+    return [..stack.Where(i => i.Type == ItemType.Environment || i.Type == ItemType.Fog)];
+  }
+
+  public Glyph? FogAtLoc(Loc loc, Loc playerLoc)
+  {
+    int d = Util.Distance(loc, playerLoc);
+    if (_itemLocs.TryGetValue(loc, out var stack))
+    {
+      foreach (Item item in stack)
+      {
+        if (item.Type != ItemType.Fog)
+          continue;
+
+        foreach (Trait t in item.Traits)
+        {
+          if (t is OpaqueTrait opaque && d >= opaque.Visibility)
+            return item.Glyph;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  public int VisibilityAtLocation(Loc loc)
+  {
+    int v = int.MaxValue;
+
+    if (_itemLocs.TryGetValue(loc, out var stack))
+    {
+      foreach (Item item in stack)
+      {
+        foreach (Trait t in item.Traits)
+        {
+          if (t is OpaqueTrait opaque && opaque.Visibility < v)
+            v = opaque.Visibility;
+        }
+      }
+    }
+
+    return v;
   }
 
   public HashSet<Loc> OccupantsOnLevel(int dungeonID, int level) => 

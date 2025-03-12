@@ -565,9 +565,9 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
           continue;
         }
 
-        if (item.Name == "mist")
+        if (item.Type == ItemType.Fog)
         {
-          GameState.UIRef().AlertPlayer("The mist is dispersed!", GameState, item.Loc);
+          GameState.UIRef().AlertPlayer("The fog is dispersed!", GameState, item.Loc);
           GameState.ObjDb.RemoveItemFromGame(item.Loc, item);
           continue;
         }
