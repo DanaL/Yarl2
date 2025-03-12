@@ -442,11 +442,11 @@ class Player : Actor
       action = ActionQ.Dequeue();
     }
     
-    if (action is null)
-      return;
-
     gs.PrepareFieldOfView();
 
+    if (action is null)
+      return;
+    
     double result = action.Execute();
     Energy -= CalcEnergyUsed(result);    
   }
