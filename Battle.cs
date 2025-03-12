@@ -671,16 +671,23 @@ class Battle
 
   static void HandleThief(Actor attacker, Actor target, GameState gs)
   {
-    if (target.Inventory.Zorkmids == 0 || gs.Rng.NextDouble() > 0.2)
+    if (target.Inventory.Zorkmids == 0 || gs.Rng.NextDouble() > 0.25)
       return;
 
     int zorkmids = int.Min(target.Inventory.Zorkmids, gs.Rng.Next(5, 15));
     target.Inventory.Zorkmids -= zorkmids;
     attacker.Inventory.Zorkmids += zorkmids;
 
+    
+
     string targetName = MsgFactory.CalcName(target, gs.Player);
     string thiefName = MsgFactory.CalcName(attacker, gs.Player);
     string s = $"{thiefName.Capitalize()} {Grammar.Conjugate(attacker, "lift")} some coins from {targetName}!";
+
+    // Not exactly *frightened* but this will cause the thief to run away
+    // for a while when after they successfully steal some zorkmids
+    s += attacker.BecomeFrightened(gs);
+
     gs.UIRef().AlertPlayer(s, gs, target.Loc);
   }
 

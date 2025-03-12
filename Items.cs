@@ -353,7 +353,7 @@ class ItemFactory
       Name = "mist",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('*', Colours.LIGHT_GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
     };
     mist.SetZ(10);
     mist.Traits.Add(new OpaqueTrait());
