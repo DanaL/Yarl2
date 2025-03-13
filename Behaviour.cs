@@ -14,11 +14,81 @@ using System.Text;
 namespace Yarl2;
 
 // Behaviour tree stuff
+
 enum PlanStatus { Success, Failure, Running }
 
 interface IPathBuilder
 {
   Stack<Loc> BuildPath(Loc start);
+  bool AtGoal(Loc loc, GameState gs);
+}
+
+class FindNearbyGold(Mob mob, GameState gs) : IPathBuilder
+{
+  Mob Mob { get; set; } = mob;
+  Loc Goal { get; set; } = Loc.Nowhere;
+  GameState GS { get; set; } = gs;
+
+  public Stack<Loc> BuildPath(Loc start)
+  {
+    var fov = FieldOfView.CalcVisible(9, Mob.Loc, GS.MapForLoc(Mob.Loc), GS.ObjDb);
+    PriorityQueue<Loc, int> goldLocs = new();
+
+    foreach (Loc loc in fov.Keys)
+    {
+      foreach (Item item in GS.ObjDb.VisibleItemsAt(loc))
+      {
+        if (item.Name == "zorkmid")
+        {
+          goldLocs.Enqueue(loc, Util.Distance(start, loc));
+          break;
+        }          
+      }
+    }
+
+    while (goldLocs.Count > 0)
+    {
+      Loc loc = goldLocs.Dequeue();
+      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, TravelCosts(Mob), true);
+      if (path.Count > 0)
+        return path;
+    }
+
+    return [];
+  }
+
+  static Dictionary<TileType, int> TravelCosts(Mob mob)
+  {
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.DungeonFloor, 1);
+    costs.Add(TileType.Gravestone, 1);
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.WoodBridge, 1);
+    costs.Add(TileType.MagicMouth, 1);
+    costs.Add(TileType.HiddenMagicMouth, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.OpenDoor, 1);
+    costs.Add(TileType.BrokenDoor, 1);
+    costs.Add(TileType.OpenPortcullis, 1);
+    costs.Add(TileType.FrozenDeepWater, 2);
+    costs.Add(TileType.FrozenWater, 2);
+    costs.Add(TileType.Well, 1);
+    costs.Add(TileType.Upstairs, 1);
+    costs.Add(TileType.Downstairs, 1);
+
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait)
+        costs.Add(TileType.ClosedDoor, 2);
+      if (t is FloatingTrait || t is FlyingTrait)
+        costs.Add(TileType.DeepWater, 1);
+    }
+
+    return costs;
+  }
+
+  public bool AtGoal(Loc loc, GameState _) => loc == Goal;
 }
 
 class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
@@ -41,11 +111,7 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
     return [];
   }
 
-  Loc PickLocInArea(HashSet<Loc> locs)
-  {
-    int i = GS.Rng.Next(locs.Count);
-    return locs.ToList()[i];
-  }
+  public bool AtGoal(Loc loc, GameState gs) => Area.Contains(loc);
 
   static Dictionary<TileType, int> TravelCosts
   {
@@ -75,12 +141,31 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
 
 abstract class BehaviourNode
 {
+  public string Label { get; set; } = "";
+
   public abstract PlanStatus Execute(Mob mob, GameState gs);
+}
+
+class Not(BehaviourNode node) : BehaviourNode
+{
+  BehaviourNode Node { get; set; } = node;
+
+  // This turns PlanStatus.Running into Success, but I'm not sure it makes
+  // sense to call Not() on something which might return Running.
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    PlanStatus result = Node.Execute(mob, gs);
+
+    if (result == PlanStatus.Success)
+      return PlanStatus.Failure;
+  
+    return PlanStatus.Success;
+  }
 }
 
 class Selector(List<BehaviourNode> nodes) : BehaviourNode
 {
-  List<BehaviourNode> Children { get; set; } = nodes;
+  public List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -109,7 +194,7 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
 
 class Sequence(List<BehaviourNode> nodes) : BehaviourNode
 {
-  List<BehaviourNode> Children { get; set; } = nodes;
+  public List<BehaviourNode> Children { get; set; } = nodes;
   int Curr { get; set; } = 0;
 
   public override PlanStatus Execute(Mob mob, GameState gs)
@@ -626,6 +711,56 @@ class CheckMonsterAttitude(int status) : BehaviourNode
   }
 }
 
+class StandingOn(string item) : BehaviourNode
+{
+  string ItemToLookFor { get; set; } = item;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Item item in gs.ObjDb.VisibleItemsAt(mob.Loc))
+    {
+      if (item.Name == ItemToLookFor)
+        return PlanStatus.Success;
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
+class PickupItem(string item) : BehaviourNode
+{
+  string ItemToLookFor { get; set; } = item;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Item item in gs.ObjDb.VisibleItemsAt(mob.Loc))
+    {
+      if (item.Name == ItemToLookFor)
+      {
+        PickupItemAction pickUp = new(gs, mob) { ItemIDs = [ item.ID ]};
+        mob.ExecuteAction(pickUp);
+
+        return PlanStatus.Success;
+      }
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
+// For the moment, I am just considering "in danger" to be "am I standing
+// beside the player?"
+class InDanger : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)  
+  {
+    if (Util.Distance(mob.Loc, gs.Player.Loc) <= 1)
+      return PlanStatus.Success;
+    
+    return PlanStatus.Failure;
+  }
+}
+
 class ValidTarget(Actor actor) : BehaviourNode
 {
   Actor Actor { get; set; } = actor;
@@ -928,6 +1063,63 @@ class JumpToTavern() : BehaviourNode
     gs.RefreshPerformers();
 
     return PlanStatus.Success;
+  }
+}
+
+class FindGoal(IPathBuilder pathBuilder) : BehaviourNode
+{
+  IPathBuilder PathBuilder { get; set; } = pathBuilder;
+  Stack<Loc>? Path { get; set; } = null;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    Path ??= PathBuilder.BuildPath(mob.Loc);
+
+    if (PathBuilder.AtGoal(mob.Loc, gs))
+      return PlanStatus.Success;
+
+    if (Path.Count > 0)
+    {
+      Loc next = Path.Pop();
+
+      // If the mob moved abnormally, they probably need to recalculate their path
+      // Note: there's probably a degenerate case where a mob moving to a specific
+      // loc falls through a pit or something and now their goal is on another 
+      // level. The game doesn't really handle that yet, but hopefully it will 
+      // result in them recalculating their Plan
+      if (Util.Distance(mob.Loc, next) > 1)
+      {
+        Path = null;
+        return PlanStatus.Failure;
+      }
+
+      Tile tile = gs.TileAt(next);
+      if (tile is Door door && !door.Open)
+      {
+        bool result = false;
+        if (mob.HasTrait<IntelligentTrait>())
+        {
+          mob.ExecuteAction(new OpenDoorAction(gs, mob, next));
+          Path.Push(next);          
+        }
+        
+        if (result)
+          return PlanStatus.Running;
+        else
+        {
+          Path = null;
+          return PlanStatus.Failure;
+        }
+      }
+      else
+      {
+        mob.ExecuteAction(new MoveAction(gs, mob, next));
+        return PlanStatus.Running;
+      }      
+    }
+
+    Path = null;
+    return PlanStatus.Failure;
   }
 }
 
@@ -1275,6 +1467,37 @@ class Planner
     }    
   }
 
+  static BehaviourNode CreateGreedyMonster(Mob mob, GameState gs)
+  {
+    Sequence pickUpGold = new([
+      new StandingOn("zorkmid"),
+      new PickupItem("zorkmid")
+    ]);
+    
+    FindNearbyGold goldFinder = new(mob, gs);
+    BehaviourNode seekGold = new FindGoal(goldFinder);
+    Selector huntGold = new([
+      seekGold,
+      pickUpGold
+    ]);
+
+    Sequence gold = new([ new Not(new InDanger()), huntGold]) { Label = "seekgold" };
+
+    // Insert the seek gold node after inactive. The greedy monster will hunt
+    // gold unless it is immediately adjacent to the player.
+    Selector plan = (Selector) CreateMonsterPlan(mob);
+    int i = 0;
+    foreach (BehaviourNode node in plan.Children)
+    {
+      if (node.Label == "inactive")
+        break;
+      ++i;
+    }
+    plan.Children.Insert(i + 1, gold);
+
+    return plan;
+  }
+
   static BehaviourNode CreateMonsterPlan(Mob mob)
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
@@ -1305,10 +1528,10 @@ class Planner
     List<BehaviourNode> plan = [];
 
     // A paralized monster will just pass its turn
-    plan.Add(new Sequence([new IsImmobilized(), new PassTurn()]));
+    plan.Add(new Sequence([new IsImmobilized(), new PassTurn()]) { Label = "immobilized"});
 
     // As will an inactive one
-    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]));
+    plan.Add(new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive"} );
 
     // An indifferent monster might use Passive abilities and/or wander randomly
     // (if not immobile)
@@ -1319,23 +1542,23 @@ class Planner
       indifferentNodes.Add(new PassTurn());
     else
       indifferentNodes.Add(new PickRandom([new PassTurn(), new RandomMove()]));    
-    plan.Add(new Sequence(indifferentNodes));
+    plan.Add(new Sequence(indifferentNodes) { Label = "indifferent" });
 
     // An afraid monster tries to escape
-    plan.Add(new Sequence([new IsFrightened(), new TryToEscape()]));
+    plan.Add(new Sequence([new IsFrightened(), new TryToEscape()]) { Label = "scared" });
 
     if (!mob.HasTrait<PassiveTrait>())
     {
       // Finally, try to attack the player or move toward them.
       if (!mob.HasTrait<ImmobileTrait>())
         actions.Add(new ChaseTarget());
-      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]));
+      plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]) { Label = "aggressive" } );
 
-      plan.Add(new PassTurn());
+      plan.Add(new PassTurn() { Label = "default" });
     }
     else
     {
-      plan.Add(new RandomMove());
+      plan.Add(new RandomMove() { Label = "default" });
     }
     
     return new Selector(plan);
@@ -1480,6 +1703,7 @@ class Planner
       new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),
       new RandomMove(), new PassTurn()]),
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
+    "Greedy" => CreateGreedyMonster(mob, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 

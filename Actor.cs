@@ -617,8 +617,7 @@ class MonsterFactory
       Glyph = glyph,
       Recovery = Util.ToDouble(fields[6])
     };
-    m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
-
+    
     int ac = int.Parse(fields[3]);
     m.Stats.Add(Attribute.AC, new Stat(ac));
     int hp = int.Parse(fields[4]);
@@ -663,6 +662,9 @@ class MonsterFactory
     if (name == "zombie" && rng.Next(100) == 0)
       m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
     
+    if (!m.HasTrait<BehaviourTreeTrait>())
+      m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
+      
     m.Inventory = new Inventory(m.ID, objDb);
 
     return m;
