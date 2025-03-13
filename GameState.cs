@@ -675,7 +675,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     RemovePerformerFromGame(victim);
 
-    foreach (var t in victim.Traits)
+    bool villager = false;
+    foreach (Trait t in victim.Traits)
     {
       if (t is LootTrait lt && Treasure.LootFromTrait(lt, Rng, ObjDb) is Item loot)
       {
@@ -693,9 +694,28 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       {
         RetributionDamage(victim, rt);
       }
+      else if (t is VillagerTrait)
+      {
+        villager = true;  
+      }
 
       if (t is IGameEventListener el)
         RemoveListener(el);
+    }
+
+    if (!villager)
+    {
+      if (victim.Inventory.Zorkmids > 0)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
+        zorkmids.Value = victim.Inventory.Zorkmids;
+        ItemDropped(zorkmids, victim.Loc);
+
+        foreach (Item item in victim.Inventory.Items())
+        {
+          ItemDropped(item, victim.Loc);
+        }        
+      }
     }
 
     if (victim.Traits.OfType<PolymorphedTrait>().FirstOrDefault() is PolymorphedTrait pt)

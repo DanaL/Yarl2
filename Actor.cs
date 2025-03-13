@@ -634,7 +634,7 @@ class MonsterFactory
 
     if (fields[9] != "")
     {
-      foreach (var powerTxt in fields[9].Split(','))
+      foreach (string powerTxt in fields[9].Split(','))
       {
         try
         {
@@ -646,9 +646,9 @@ class MonsterFactory
 
     if (!string.IsNullOrEmpty(fields[10]))
     {
-      foreach (var traitTxt in fields[10].Split(','))
+      foreach (string traitTxt in fields[10].Split(','))
       {
-        var trait = TraitFactory.FromText(traitTxt, m);
+        Trait trait = TraitFactory.FromText(traitTxt, m);
         m.Traits.Add(trait);
 
         if (trait is IGameEventListener listener)
@@ -663,6 +663,8 @@ class MonsterFactory
     if (name == "zombie" && rng.Next(100) == 0)
       m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
     
+    m.Inventory = new Inventory(m.ID, objDb);
+
     return m;
   }
 }
