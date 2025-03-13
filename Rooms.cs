@@ -586,6 +586,46 @@ class Rooms
     }
   }
 
+  public static void KoboldWorshipRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  {
+    List<Loc> floors = [];
+    foreach (var (r, c) in room)
+    {
+      Loc loc = new(dungeonID, level, r, c);
+      if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.BlockersAtLoc(loc))
+      {
+        floors.Add(loc);
+      }
+    }
+
+    int i = rng.Next(floors.Count);
+    Loc effigyLoc = floors[i];
+    floors.RemoveAt(i);
+
+    Item effigy = ItemFactory.Get(ItemNames.STATUE, objDb);
+    effigy.Name = "dragon effigy";
+    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK);
+    effigy.Traits.Add(new FlammableTrait());
+    effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
+    objDb.SetToLoc(effigyLoc, effigy);
+
+    floors = [..floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
+    NameGenerator ng = new(rng, Util.NamesFile);
+    string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
+    factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
+
+    for (int j = 0; j < rng.Next(3, 6); j++)
+    {
+      Actor kobold = MonsterFactory.Get("kobold", objDb, rng);
+
+      i = rng.Next(floors.Count);
+      Loc loc = floors[i];
+      floors.RemoveAt(i);
+
+      objDb.AddNewActor(kobold, loc);
+    }
+  }
+
   public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
   {
     if (factDb.FactCheck("EarlyDenizen") is not SimpleFact ed)

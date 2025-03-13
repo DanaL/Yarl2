@@ -1031,6 +1031,8 @@ class MainDungeonBuilder : DungeonBuilder
       }
     }
 
+    string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
+    bool koboldEffigy = false;
     bool captive = false;
     for (int level = 0; level < levels.Length; level++)
     {
@@ -1085,6 +1087,14 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
       
+      if (level > 0 && level < 5 && !koboldEffigy && denizen == "kobold" /* && rng.NextDouble() < 0.2 */)
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.KoboldWorshipRoom(rooms[roomId], dungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(roomId);
+        koboldEffigy = true;
+      }
+
       if (level > 1 && rng.NextDouble() < 0.2)
       {
         int roomId = rng.Next(rooms.Count);

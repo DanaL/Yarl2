@@ -153,7 +153,7 @@ namespace Yarl2
       _pairs = [.. pairFrequencies.Select(kvp => (kvp.Key, kvp.Value)).OrderByDescending(p => p.Value)];
     }
 
-    private string RandomSyllable(char startsWith)
+    string RandomSyllable(char startsWith)
     {
       var candidates = _pairs.Where(p => p.Item1.StartsWith(startsWith))
                              .OrderByDescending(p => p.Item2)
@@ -191,7 +191,7 @@ namespace Yarl2
 
     public string BossName()
     {
-      StringBuilder sb = new StringBuilder();
+      StringBuilder sb = new();
 
       double roll = _rng.NextDouble();
 

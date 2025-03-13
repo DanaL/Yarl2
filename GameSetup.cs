@@ -724,6 +724,10 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
+      seed = -1030264321;
+      // seed = -1125917800; <- downstairs on level 1 in middle of cabin
+
+
       //seed = 271764606;
       //seed = 9599510;
       //seed = 600926617;
