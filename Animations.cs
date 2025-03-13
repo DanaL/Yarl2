@@ -505,19 +505,12 @@ class PolearmAnimation : Animation
   }
 }
 
-class TorchLightAnimationListener : Animation
+class TorchLightAnimationListener(UserInterface ui, GameState gs) : Animation
 {
-  readonly UserInterface _ui;
-  readonly GameState _gs;
-  DateTime _lastFrame;
+  readonly UserInterface _ui = ui;
+  readonly GameState _gs = gs;
+  DateTime _lastFrame = DateTime.UtcNow;
   List<(int, int)> _flickered = [];
-
-  public TorchLightAnimationListener(UserInterface ui, GameState gs)
-  {
-    _ui = ui;
-    _gs = gs;
-    _lastFrame = DateTime.UtcNow;
-  }
 
   public override void Update()
   {
@@ -526,7 +519,7 @@ class TorchLightAnimationListener : Animation
 
     var dd = DateTime.UtcNow - _lastFrame;
 
-    if (dd.TotalMilliseconds > 500)
+    if (dd.TotalMilliseconds > 750)
     {
       PickFlickeringSqs();
       _lastFrame = DateTime.UtcNow;
@@ -537,18 +530,43 @@ class TorchLightAnimationListener : Animation
 
   private void PickFlickeringSqs()
   {
-    int count = 0;
-    _flickered = [];
-    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    List<(int, int)> opts = [];
+    int torchRadius = _gs.Player.LightRadius();
+    if (torchRadius < 3)
     {
-      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      _flickered = [];
+      return;
+    }
+    int playerRow = _ui.PlayerScreenRow;
+    int playerCol = _ui.PlayerScreenCol;
+    for (int r = playerRow - torchRadius; r <= playerRow + torchRadius; r++)
+    {
+      for (int c = playerCol - torchRadius; c <= playerCol + torchRadius; c++)
       {
-        if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE && _gs.Rng.Next(20) == 0)
+        if (_ui.SqsOnScreen[r, c].Bg == Colours.TORCH_ORANGE)
         {
-          _flickered.Add((r, c));
-          if (++count > 3)
-            return;
+          int d = Util.Distance(playerRow, playerCol, r, c);
+          if (d >= torchRadius - 1)
+            opts.Add((r, c)); 
         }
+      }
+    }
+
+    int max;
+    if (opts.Count < 10)
+      max = 1;
+    else if (opts.Count < 25)
+      max = 2;
+    else
+      max = 3;
+
+    _flickered = [];
+    if (opts.Count > 0)
+    {
+      int amt = opts.Count >= max ? max : opts.Count + 1;      
+      for (int j = 0; j < _gs.Rng.Next(1, amt); j++)
+      {
+        _flickered.Add(opts[_gs.Rng.Next(opts.Count)]);
       }
     }
   }
