@@ -813,7 +813,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (destroyed)
       {
         RemoveByID(item.ID);
-        gs.ObjDb.RemoveItemFromGame(loc, item);
+        gs.ItemDestroyed(item, loc);
       }
     }
 

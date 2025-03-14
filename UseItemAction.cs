@@ -141,7 +141,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     string verb = blockage.Type == ItemType.Statue ? "destroy" : "clear";
     if (digger.AbilityCheck(Attribute.Strength, dc, gs.Rng))
     {
-      gs.ObjDb.RemoveItemFromGame(loc, blockage);
+      gs.ItemDestroyed(blockage, loc);
       string s = $"{digger.FullName.Capitalize()} {Grammar.Conjugate(digger, verb)} {blockage.Name.DefArticle()}.";
       gs.UIRef().AlertPlayer(s);
       if (digger == gs.Player)
@@ -149,7 +149,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
     else
     {
-      string s = $"{digger.FullName.Capitalize()} chip away at the {blockage.Name.DefArticle()}.";
+      string s = $"{digger.FullName.Capitalize()} chop away at the {blockage.Name.DefArticle()}.";
       gs.UIRef().AlertPlayer(s);
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1));

@@ -44,7 +44,7 @@ class MonsterBehaviour : IBehaviour
   {
     foreach (Trait t in actor.Traits)
     {
-      if (t is WorshiperTrait worshipper && gs.Rng.Next(4) == 0)
+      if (t is WorshiperTrait worshipper && gs.Rng.Next(8) == 0)
         return worshipper.Chant;
     }
 

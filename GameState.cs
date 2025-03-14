@@ -106,25 +106,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       fact = FactDb.FactCheck("WitchId") as SimpleFact ?? throw new Exception("WitchId should not be null!");
       ulong witchId = ulong.Parse(fact.Value);
       if (ObjDb.GetObj(witchId) is Mob witch)
-      {        
+      {
         if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
-        {          
+        {
           InvisibleTrait it = new()
           {
             ActorID = witchId,
             Expired = false,
-            ExpiresOn = Turn + (ulong) Rng.Next(500, 1000)
+            ExpiresOn = Turn + (ulong)Rng.Next(500, 1000)
           };
           witch.Traits.Add(it);
           RegisterForEvent(GameEventType.EndOfRound, it);
 
           witch.ClearPlan();
-        }        
+        }
       }
 
       fact = FactDb.FactCheck("AlchemistId") as SimpleFact ?? throw new Exception("AlchemistId should not be null!");
       ulong alchemistId = ulong.Parse(fact.Value);
-      if (ObjDb.GetObj(alchemistId) is Mob alchemist) 
+      if (ObjDb.GetObj(alchemistId) is Mob alchemist)
       {
         ((NPCBehaviour)alchemist.Behaviour).RefreshShop(alchemist, this);
       }
@@ -218,18 +218,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (tile.Type == TileType.Chasm)
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", this, loc);
-      ItemDropped(item, loc with { Level = loc.Level + 1});
+      ItemDropped(item, loc with { Level = loc.Level + 1 });
       return;
     }
 
     ObjDb.SetToLoc(loc, item);
     string msg = ThingTouchesFloor(loc);
     UI.AlertPlayer(msg);
-    
+
     foreach (DamageType effect in tile.TerrainEffects())
     {
       var (s, _) = EffectApplier.Apply(effect, this, item, null);
-      UI.AlertPlayer(s);      
+      UI.AlertPlayer(s);
     }
 
     foreach (Trait t in item.Traits)
@@ -244,7 +244,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     if (tile is IdolAltar idolAltar && item.ID == idolAltar.IdolID)
-    {      
+    {
       Loc wallLoc = idolAltar.Wall;
       if (CurrentMap.TileAt(wallLoc.Row, wallLoc.Col).Type == TileType.DungeonWall)
       {
@@ -252,19 +252,25 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (LastPlayerFoV.Contains(wallLoc))
           UI.AlertPlayer("As the idol touches the altar, a wall slides aside with a rumble.");
         else
-          UI.AlertPlayer("You hear grinding stone.");          
+          UI.AlertPlayer("You hear grinding stone.");
       }
     }
   }
 
   public void ItemDestroyed(Item item, Loc loc)
   {
-    var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     ObjDb.RemoveItemFromGame(loc, item);
 
-    foreach (var listener in item.Traits.OfType<IGameEventListener>())
+    foreach (IGameEventListener listener in item.Traits.OfType<IGameEventListener>())
     {
       RemoveListener(listener);
+    }
+
+    if (item.Name == "dragon effigy")
+    {
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
+      zorkmids.Value = Rng.Next(25, 76);
+      ItemDropped(zorkmids, loc);
     }
   }
 
@@ -303,9 +309,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(tile));
 
     if (tile == TileType.Chasm)
-        ChasmCreated(loc);
+      ChasmCreated(loc);
     else if (tile == TileType.DeepWater)
-        BridgeDestroyedOverWater(loc);
+      BridgeDestroyedOverWater(loc);
   }
 
   public void ApplyDamageEffectToLoc(Loc loc, DamageType damageType)
@@ -348,7 +354,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
           if (item.HasTrait<FlammableTrait>())
           {
-            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!");            
+            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!");
             ItemDestroyed(item, loc);
             fireStarted = true;
           }
@@ -415,7 +421,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 
   void BridgeDestroyedOverWater(Loc loc)
-  {    
+  {
     if (ObjDb.Occupant(loc) is Actor actor)
     {// && !(actoractor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>())
       bool fallsIn = true;
@@ -511,7 +517,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       var candidates = shores.ToList();
       var destination = candidates[Rng.Next(candidates.Count)];
-      ResolveActorMove(actor, actor.Loc, destination);      
+      ResolveActorMove(actor, actor.Loc, destination);
       actor.Loc = destination;
 
       string invMsgs = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
@@ -581,7 +587,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         Map map = dungeon.LevelMaps[landingSpot.Level];
         if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
           return landingSpot;
-        landingSpot = landingSpot with { Level = landingSpot.Level + 1};
+        landingSpot = landingSpot with { Level = landingSpot.Level + 1 };
       }
       while (landingSpot.Level < dungeon.LevelMaps.Count);
 
@@ -600,13 +606,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     landingSpot = CalcFinalLandingSpot(landingSpot);
     int levelsFallen = landingSpot.Level - actor.Loc.Level;
-    
+
     if (featherFalling)
       UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
     else
       UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the chasm!");
 
-    if (actor is Player) 
+    if (actor is Player)
     {
       if (levelsFallen > 1 && !featherFalling)
         UI.AlertPlayer("You plummet a great distance!");
@@ -619,23 +625,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
 
     ResolveActorMove(actor, actor.Loc, landingSpot);
-    
+
     if (actor is Player)
     {
-      RefreshPerformers();     
+      RefreshPerformers();
     }
 
     if (!featherFalling)
     {
       CalculateFallDamage(actor, levelsFallen);
-    }    
+    }
   }
 
   public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
-  {    
+  {
     bool locVisible = LastPlayerFoV.Contains(victim.Loc);
     if (victim is Player)
-    {     
+    {
       // Play any queued explosions in case it was one of the explosions
       // that killed the player
       UI.PlayQueuedExplosions(this);
@@ -649,27 +655,27 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
     else if (victim.HasTrait<MiniBoss5Trait>())
     {
-      FactDb!.Add(new SimpleFact() { Name="Level 5 Boss Killed", Value="true" });
+      FactDb!.Add(new SimpleFact() { Name = "Level 5 Boss Killed", Value = "true" });
     }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
-    {      
-      UI.AlertPlayer(dmt.Message);     
+    {
+      UI.AlertPlayer(dmt.Message);
     }
     else if (locVisible)
     {
-      UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));      
+      UI.AlertPlayer(MsgFactory.MobKilledMessage(victim, attacker, this));
     }
 
     // Was anything listening for the the victims death?
     // Making a copy is the easiest way to deal with the collection being
     // modified by the alert
-    List<(ulong, IGameEventListener)> deathListeners = [..ObjDb.DeathWatchListeners];
+    List<(ulong, IGameEventListener)> deathListeners = [.. ObjDb.DeathWatchListeners];
     foreach (var (targetID, listener) in deathListeners)
     {
-      if (targetID == victim.ID) 
+      if (targetID == victim.ID)
       {
         listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
-        ObjDb.DeathWatchListeners = [..ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
+        ObjDb.DeathWatchListeners = [.. ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
       }
     }
 
@@ -696,7 +702,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
       else if (t is VillagerTrait)
       {
-        villager = true;  
+        villager = true;
       }
 
       if (t is IGameEventListener el)
@@ -714,7 +720,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         foreach (Item item in victim.Inventory.Items())
         {
           ItemDropped(item, victim.Loc);
-        }        
+        }
       }
     }
 
@@ -727,7 +733,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
         if (LastPlayerFoV.Contains(victim.Loc))
         {
-          string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "turn")} back into {originalForm.Name.IndefArticle()}!";          
+          string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "turn")} back into {originalForm.Name.IndefArticle()}!";
           UI.AlertPlayer(s);
           UI.SetPopup(new Popup(s, "", -1, -1));
         }
@@ -761,7 +767,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     ObjDb.RemoveActor(performer);
     Performers.Remove(performer.ID);
-  } 
+  }
 
   void HandleSacrifice(Actor victim, Loc altarLoc)
   {

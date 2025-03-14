@@ -548,10 +548,7 @@ class Mob : Actor
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);
 
   public override void TakeTurn(GameState gs)
-  {
-    if (HasTrait<WorshiperTrait>())
-      Console.WriteLine("fuck off");
-
+  {    
     if (CurrPlan is null)
     {
       string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
