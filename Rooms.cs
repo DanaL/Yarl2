@@ -586,7 +586,7 @@ class Rooms
     }
   }
 
-  public static void KoboldWorshipRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
   {
     List<Loc> floors = [];
     foreach (var (r, c) in room)
@@ -609,11 +609,25 @@ class Rooms
     effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
     objDb.SetToLoc(effigyLoc, effigy);
 
+    List<Loc> adjToEffigy = [];
+    foreach (Loc loc in Util.Adj4Locs(effigyLoc))
+    {
+      if (map.TileAt(loc.Row, loc.Col).Type == TileType.DungeonFloor)
+        adjToEffigy.Add(loc);
+    }
+    if (adjToEffigy.Count > 0)
+    {
+      Loc altarLoc = adjToEffigy[rng.Next(adjToEffigy.Count)];
+      map.SetTile(altarLoc.Row, altarLoc.Col, TileFactory.Get(TileType.StoneAltar));
+    }
+
     floors = [..floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
     NameGenerator ng = new(rng, Util.NamesFile);
     string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
     factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
 
+    List<ulong> koboldIds = [];
+    List<Actor> kobolds = [];
     for (int j = 0; j < rng.Next(3, 6); j++)
     {
       Actor kobold = MonsterFactory.Get("kobold", objDb, rng);
@@ -637,6 +651,18 @@ class Rooms
       floors.RemoveAt(i);
 
       objDb.AddNewActor(kobold, loc);
+
+      koboldIds.Add(kobold.ID);
+      kobolds.Add(kobold);
+    }
+
+    foreach (Actor kobold in kobolds)
+    {
+      AlliesTrait allies = new()
+      {
+        IDs = [.. koboldIds.Where(id => id != kobold.ID)]
+      };
+      kobold.Traits.Add(allies);
     }
 
     string Chant() => rng.Next(4) switch

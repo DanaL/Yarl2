@@ -1511,11 +1511,10 @@ class Planner
       }
     }
 
-    Sequence worship = new([
-      new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)),
-      new WanderInArea(nearbyTiles)
-    ])
-    { Label = "worship" };
+    RepeatWhile worship = new (new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)), new WanderInArea(nearbyTiles))    
+    { 
+      Label = "worship" 
+    };
 
     // Worshipper will move randomly in near the effigy
     Selector plan = (Selector)CreateMonsterPlan(mob);

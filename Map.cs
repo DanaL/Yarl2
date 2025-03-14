@@ -26,7 +26,7 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, ReveealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
-  HFence, VFence, CornerFence, MonsterWall, Lever, CreepyAltar
+  HFence, VFence, CornerFence, MonsterWall, Lever, CreepyAltar, StoneAltar
 }
 
 interface ITriggerable
@@ -201,6 +201,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.ReveealedBridgeCollapseTrap => "bridge collapse trigger",
     TileType.Lever => "a lever",
     TileType.CreepyAltar => "blood-stained altar",
+    TileType.StoneAltar => "stone altar",
     _ => "unknown"
   };
 
@@ -557,65 +558,66 @@ class Lever(TileType type, bool on, Loc gate) : Tile(type)
 
 class TileFactory
 {
-  private static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true, false);
-  private static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true, false);
-  private static readonly Tile DungeonWall = new BasicTile(TileType.DungeonWall, false, true, false);
-  private static readonly Tile StoneWall = new BasicTile(TileType.StoneWall, false, true, false);
-  private static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true, false);
-  private static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false, true);
-  private static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false, true);
-  private static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false, true);
-  private static readonly Tile Grass = new BasicTile(TileType.Grass, true, false, true);
-  private static readonly Tile Sand = new BasicTile(TileType.Sand, true, false, true);
-  private static readonly Tile GreenTree = new BasicTile(TileType.GreenTree, true, false, true);
-  private static readonly Tile YellowTree = new BasicTile(TileType.YellowTree, true, false, true);
-  private static readonly Tile RedTree = new BasicTile(TileType.RedTree, true, false, true);
-  private static readonly Tile OrangeTree = new BasicTile(TileType.OrangeTree, true, false, true);
-  private static readonly Tile Conifer = new BasicTile(TileType.Conifer, true, false, true);
-  private static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true, false);
-  private static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true, false);
-  private static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false, true);
-  private static readonly Tile Water = new BasicTile(TileType.Water, true, false, true, "You splash into the water.");
-  private static readonly Tile HWindow = new BasicTile(TileType.HWindow, false, false, false);
-  private static readonly Tile VWindow = new BasicTile(TileType.VWindow, false, false, false);
-  private static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true, false);
-  private static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false, true);
-  private static readonly Tile Forge = new BasicTile(TileType.Forge, true, false, true);
-  private static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false, true);
-  private static readonly Tile StoneRoad = new BasicTile(TileType.StoneRoad, true, false, true);
-  private static readonly Tile Well = new BasicTile(TileType.Well, true, false, true);
-  private static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
-  private static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
-  private static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
-  private static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
-  private static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
-  private static readonly Tile FrozenDeepWater = new BasicTile(TileType.FrozenDeepWater, true, false, true);
-  private static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
-  private static readonly Tile HiddenTrapDoor = new BasicTile(TileType.HiddenTrapDoor, true, false, true);
-  private static readonly Tile TrapDoor = new BasicTile(TileType.TrapDoor, true, false, true);
-  private static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
-  private static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
-  private static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
-  private static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
-  private static readonly Tile BrokenPortcullis = new BasicTile(TileType.BrokenPortcullis, true, false, true);
-  private static readonly Tile HiddenDartTrap = new BasicTile(TileType.HiddenDartTrap, true, false, true);
-  private static readonly Tile DartTrap = new BasicTile(TileType.DartTrap, true, false, true);
-  private static readonly Tile HiddenPit = new BasicTile(TileType.HiddenPit, true, false, true);
-  private static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
-  private static readonly Tile HiddenWaterTrap = new BasicTile(TileType.HiddenWaterTrap, true, false, true);
-  private static readonly Tile WaterTrap = new BasicTile(TileType.WaterTrap, true, false, true);
-  private static readonly Tile MagicMouth = new BasicTile(TileType.MagicMouth, true, false, true);
-  private static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
-  private static readonly Tile Pool = new BasicTile(TileType.Pool, true, false, true);
-  private static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
-  private static readonly Tile DisturbedGrave = new BasicTile(TileType.DisturbedGrave, true, false, true);
-  private static readonly Tile FakeStairs = new BasicTile(TileType.FakeStairs, true, false, true);
-  private static readonly Tile HiddenSummonsTrap = new BasicTile(TileType.HiddenSummonsTrap, true, false, true);
-  private static readonly Tile RevealedSummonsTrap = new BasicTile(TileType.RevealedSummonsTrap, true, false, true);
-  private static readonly Tile HFence = new BasicTile(TileType.HFence, false, false, true);
-  private static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
-  private static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
-  private static readonly Tile CreepyAltar = new BasicTile(TileType.CreepyAltar, true, false, true);
+  static readonly Tile WorldBorder = new BasicTile(TileType.WorldBorder, false, true, false);
+  static readonly Tile Unknown = new BasicTile(TileType.Unknown, false, true, false);
+  static readonly Tile DungeonWall = new BasicTile(TileType.DungeonWall, false, true, false);
+  static readonly Tile StoneWall = new BasicTile(TileType.StoneWall, false, true, false);
+  static readonly Tile PermWall = new BasicTile(TileType.PermWall, false, true, false);
+  static readonly Tile Floor = new BasicTile(TileType.DungeonFloor, true, false, true);
+  static readonly Tile StoneFloor = new BasicTile(TileType.StoneFloor, true, false, true);
+  static readonly Tile DeepWater = new BasicTile(TileType.DeepWater, false, false, true);
+  static readonly Tile Grass = new BasicTile(TileType.Grass, true, false, true);
+  static readonly Tile Sand = new BasicTile(TileType.Sand, true, false, true);
+  static readonly Tile GreenTree = new BasicTile(TileType.GreenTree, true, false, true);
+  static readonly Tile YellowTree = new BasicTile(TileType.YellowTree, true, false, true);
+  static readonly Tile RedTree = new BasicTile(TileType.RedTree, true, false, true);
+  static readonly Tile OrangeTree = new BasicTile(TileType.OrangeTree, true, false, true);
+  static readonly Tile Conifer = new BasicTile(TileType.Conifer, true, false, true);
+  static readonly Tile Mountain = new BasicTile(TileType.Mountain, false, true, false);
+  static readonly Tile SnowPeak = new BasicTile(TileType.Mountain, false, true, false);
+  static readonly Tile Cloud = new BasicTile(TileType.Cloud, true, false, true);
+  static readonly Tile Water = new BasicTile(TileType.Water, true, false, true, "You splash into the water.");
+  static readonly Tile HWindow = new BasicTile(TileType.HWindow, false, false, false);
+  static readonly Tile VWindow = new BasicTile(TileType.VWindow, false, false, false);
+  static readonly Tile WoodWall = new BasicTile(TileType.WoodWall, false, true, false);
+  static readonly Tile WoodFloor = new BasicTile(TileType.WoodFloor, true, false, true);
+  static readonly Tile Forge = new BasicTile(TileType.Forge, true, false, true);
+  static readonly Tile Dirt = new BasicTile(TileType.Dirt, true, false, true);
+  static readonly Tile StoneRoad = new BasicTile(TileType.StoneRoad, true, false, true);
+  static readonly Tile Well = new BasicTile(TileType.Well, true, false, true);
+  static readonly Tile Bridge = new BasicTile(TileType.Bridge, true, false, true);
+  static readonly Tile WoodBridge = new BasicTile(TileType.WoodBridge, true, false, true);
+  static readonly Tile Chasm = new BasicTile(TileType.Chasm, false, false, true);
+  static readonly Tile CharredGrass = new BasicTile(TileType.CharredGrass, true, false, true);
+  static readonly Tile CharredStump = new BasicTile(TileType.CharredStump, true, false, true);
+  static readonly Tile FrozenDeepWater = new BasicTile(TileType.FrozenDeepWater, true, false, true);
+  static readonly Tile FrozenWater = new BasicTile(TileType.FrozenWater, true, false, true);
+  static readonly Tile HiddenTrapDoor = new BasicTile(TileType.HiddenTrapDoor, true, false, true);
+  static readonly Tile TrapDoor = new BasicTile(TileType.TrapDoor, true, false, true);
+  static readonly Tile SecretDoor = new BasicTile(TileType.SecretDoor, false, true, false);
+  static readonly Tile BrokenDoor = new BasicTile(TileType.BrokenDoor, true, false, true);
+  static readonly Tile TeleportTrap = new BasicTile(TileType.HiddenTeleportTrap, true, false, true);
+  static readonly Tile VisibileTeleportTrap = new BasicTile(TileType.TeleportTrap, true, false, true);
+  static readonly Tile BrokenPortcullis = new BasicTile(TileType.BrokenPortcullis, true, false, true);
+  static readonly Tile HiddenDartTrap = new BasicTile(TileType.HiddenDartTrap, true, false, true);
+  static readonly Tile DartTrap = new BasicTile(TileType.DartTrap, true, false, true);
+  static readonly Tile HiddenPit = new BasicTile(TileType.HiddenPit, true, false, true);
+  static readonly Tile Pit = new BasicTile(TileType.Pit, true, false, true);
+  static readonly Tile HiddenWaterTrap = new BasicTile(TileType.HiddenWaterTrap, true, false, true);
+  static readonly Tile WaterTrap = new BasicTile(TileType.WaterTrap, true, false, true);
+  static readonly Tile MagicMouth = new BasicTile(TileType.MagicMouth, true, false, true);
+  static readonly Tile HiddenMagicMouth = new BasicTile(TileType.HiddenMagicMouth, true, false, true);
+  static readonly Tile Pool = new BasicTile(TileType.Pool, true, false, true);
+  static readonly Tile FrozenPool = new BasicTile(TileType.FrozenPool, true, false, true);
+  static readonly Tile DisturbedGrave = new BasicTile(TileType.DisturbedGrave, true, false, true);
+  static readonly Tile FakeStairs = new BasicTile(TileType.FakeStairs, true, false, true);
+  static readonly Tile HiddenSummonsTrap = new BasicTile(TileType.HiddenSummonsTrap, true, false, true);
+  static readonly Tile RevealedSummonsTrap = new BasicTile(TileType.RevealedSummonsTrap, true, false, true);
+  static readonly Tile HFence = new BasicTile(TileType.HFence, false, false, true);
+  static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
+  static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
+  static readonly Tile CreepyAltar = new BasicTile(TileType.CreepyAltar, true, false, true);
+  static readonly Tile StoneAltar = new BasicTile(TileType.StoneAltar, true, false, true);
   
   public static Tile Get(TileType type) => type switch
   {
@@ -678,6 +680,7 @@ class TileFactory
     TileType.VFence => VFence,
     TileType.CornerFence => CornerFence,
     TileType.CreepyAltar => CreepyAltar,
+    TileType.StoneAltar => StoneAltar,
     _ => Unknown
   };
 }

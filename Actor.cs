@@ -188,6 +188,9 @@ abstract class Actor : GameObj, IZLevel
         if (gs.ObjDb.GetObj(id) is Mob ally && gs.CanSeeLoc(ally, Loc, 6))
         {
           ally.Traits.RemoveAll(t => t is SleepingTrait);
+          ally.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+          string name = MsgFactory.CalcName(ally, gs.Player);
+          gs.UIRef().AlertPlayer($"{name.Capitalize()} becomes angry.", gs, ally.Loc);
         }
       }
     }
