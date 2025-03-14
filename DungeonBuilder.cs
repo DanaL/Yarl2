@@ -544,7 +544,8 @@ class MainDungeonBuilder : DungeonBuilder
       Actor d = MonsterFactory.Get("deep one", objDb, rng);
       d.Traits.Add(new WorshiperTrait() 
       { 
-        Altar = shrineLoc,
+        AltarLoc = shrineLoc,
+        AltarId = 0,
         Chant = CalcChant(rng)
       });
 
@@ -559,7 +560,8 @@ class MainDungeonBuilder : DungeonBuilder
     Actor shaman = MonsterFactory.Get("deep one shaman", objDb, rng);
     shaman.Traits.Add(new WorshiperTrait() 
     { 
-      Altar = shrineLoc,
+      AltarLoc = shrineLoc,
+      AltarId = 0,
       Chant = CalcChant(rng)
     });
     shaman.Stats[Attribute.MobAttitude].SetMax(Mob.INDIFFERENT);

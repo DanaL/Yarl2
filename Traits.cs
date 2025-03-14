@@ -2949,10 +2949,11 @@ class WinterBlessingTrait : BlessingTrait
 
 class WorshiperTrait : Trait
 {
-  public Loc Altar { get; set; }
+  public Loc AltarLoc { get; set; }
+  public ulong AltarId { get; set; }
   public string Chant { get; set; } = "";
 
-  public override string AsText() => $"Worshiper#{Altar}#{Chant}";
+  public override string AsText() => $"Worshiper#{AltarLoc}#{AltarId}#{Chant}";
 }
 
 class TraitFactory
@@ -3302,7 +3303,7 @@ class TraitFactory
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
     { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
-    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { Altar = Loc.FromStr(pieces[1]), Chant = pieces[2] } }    
+    { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
   };
 
   public static Trait FromText(string text, GameObj? container)

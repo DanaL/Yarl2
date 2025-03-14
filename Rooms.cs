@@ -617,6 +617,20 @@ class Rooms
     for (int j = 0; j < rng.Next(3, 6); j++)
     {
       Actor kobold = MonsterFactory.Get("kobold", objDb, rng);
+      kobold.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+
+      foreach (Trait t in kobold.Traits)
+      {
+        if (t is BehaviourTreeTrait btt)
+          btt.Plan = "Worshipper";
+      }      
+      WorshiperTrait worship = new()
+      {
+        AltarLoc = effigyLoc,
+        AltarId = effigy.ID,
+        Chant = Chant()
+      };
+      kobold.Traits.Add(worship);
 
       i = rng.Next(floors.Count);
       Loc loc = floors[i];
@@ -624,6 +638,15 @@ class Rooms
 
       objDb.AddNewActor(kobold, loc);
     }
+
+    string Chant() => rng.Next(4) switch
+    {
+      0 => "Gold! Gold for our dragon god!",
+      1 => $"{dragonName} bless and protect us!",
+      2 => "May your hoard grow ever larger!",
+      _ => $"Glory to {dragonName}!"
+    };
+    
   }
 
   public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
