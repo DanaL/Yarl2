@@ -51,7 +51,8 @@ enum Attribute
   MagicPoints,
   LastBlessing,
   LastGiftTime,
-  ShopInvoice
+  ShopInvoice,
+  GoldSacrificed
 }
 
 class Stat

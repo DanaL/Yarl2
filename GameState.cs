@@ -222,6 +222,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       return;
     }
 
+    if (tile.Type == TileType.StoneAltar && item.Type == ItemType.Zorkmid && loc == Player.Loc)
+    {
+      if (GoldSacrificedToDragon(item, loc))
+        return;      
+    }
+
     ObjDb.SetToLoc(loc, item);
     string msg = ThingTouchesFloor(loc);
     UI.AlertPlayer(msg);
@@ -255,6 +261,29 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           UI.AlertPlayer("You hear grinding stone.");
       }
     }
+  }
+
+  bool GoldSacrificedToDragon(Item item, Loc loc)
+  {
+    bool effigyExists = false;
+    foreach (Loc adj in Util.Adj4Locs(loc))
+    {
+      if (ObjDb.ItemsAt(adj).Where(i => i.Name == "dragon effigy").Any())
+      {
+        effigyExists = true;
+        break;
+      }
+    }
+
+    if (effigyExists)
+    {
+      UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
+      ObjDb.RemoveItemFromGame(loc, item);
+
+      return true;
+    }
+
+    return false;
   }
 
   public void ItemDestroyed(Item item, Loc loc)
