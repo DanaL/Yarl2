@@ -695,6 +695,21 @@ class SetDialogueState(int state) : BehaviourNode
   }
 }
 
+class SetMonsterAttitude(int attitude, string blurb) : BehaviourNode
+{
+  int Attitude { get; set; } = attitude;
+  string Blurb { get; set; } = blurb;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    mob.Stats[Attribute.MobAttitude] = new Stat(Attitude);
+
+    gs.UIRef().AlertPlayer(Blurb, gs, mob.Loc);
+
+    return PlanStatus.Success;
+  }
+}
+
 class CheckMonsterAttitude(int status) : BehaviourNode
 {
   int Status { get; set; } = status;
@@ -706,6 +721,14 @@ class CheckMonsterAttitude(int status) : BehaviourNode
 
     return PlanStatus.Failure;
   }
+}
+
+class ThingExists(ulong id) : BehaviourNode
+{
+  ulong ID { get; set; } = id;
+
+  public override PlanStatus Execute(Mob mob, GameState gs) 
+    => gs.ObjDb.GetObj(ID)is not null ? PlanStatus.Success : PlanStatus.Failure;
 }
 
 class StandingOn(string item) : BehaviourNode
@@ -1511,10 +1534,21 @@ class Planner
       }
     }
 
+    string name = MsgFactory.CalcName(mob, gs.Player).Capitalize();
+    string s = $"{name} gets angry!";
+
+    Sequence checkStatue = new([
+      new Not(new ThingExists(worshipTrait.AltarId)), 
+      new SetMonsterAttitude(Mob.AGGRESSIVE, s)
+    ]);
+
     RepeatWhile worship = new (new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)), new WanderInArea(nearbyTiles))    
     { 
       Label = "worship" 
     };
+
+    Sequence worshipBehaviour = new([checkStatue, worship]);
+
 
     // Worshipper will move randomly in near the effigy
     Selector plan = (Selector)CreateMonsterPlan(mob);
@@ -1527,7 +1561,7 @@ class Planner
     }
 
     plan.Children.RemoveAt(i);
-    plan.Children.Insert(i, worship);
+    plan.Children.Insert(i, worshipBehaviour);
 
     return plan;
   }
