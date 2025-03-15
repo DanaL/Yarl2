@@ -472,7 +472,7 @@ class NumericInputer : Inputer
 
 record HelpEntry(string Title, List<string> Entry);
 
-class HelpScreenInputer : Inputer
+class HelpScreen : Inputer
 {
   static readonly int PageSize = UserInterface.ScreenHeight - 6;
   readonly UserInterface _ui;
@@ -481,7 +481,7 @@ class HelpScreenInputer : Inputer
   readonly int _textAreaWidth;
   int _page = 0;
 
-  public HelpScreenInputer(GameState gs, UserInterface ui) : base(gs)
+  public HelpScreen(GameState gs, UserInterface ui) : base(gs)
   {
     _ui = ui;
     _entries = [];

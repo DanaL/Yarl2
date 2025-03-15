@@ -525,7 +525,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }    
     else if (ch == '?')
     {
-      ui.SetInputController(new HelpScreenInputer(GS, ui));
+      ui.SetInputController(new HelpScreen(GS, ui));
     }
     else if (ch == '=')
     {

@@ -27,7 +27,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
 
-  PerformersStacks Performers { get; set; } = new();
+  PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
   public HashSet<Loc> LastPlayerFoV = [];
@@ -1789,7 +1789,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   }
 }
 
-class PerformersStacks
+class PerformersStack
 {
   List<Actor> performers = [];
 
