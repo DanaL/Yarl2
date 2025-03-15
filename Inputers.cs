@@ -441,11 +441,13 @@ class NumericInputer : Inputer
     if (ch == Constants.ESC)
     {
       Close();
+      return;
     }
     else if (ch == '\n' || ch == '\r')
     {
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
       QueueDeferredAction();
+      return;
     }
     else if (ch == Constants.BACKSPACE && _value.Length > 0)
     {
@@ -1426,7 +1428,7 @@ class LongMessagerInputer : Inputer
   UserInterface _ui;
   int _row;
   List<string> _wrappedLines;
-  int _pageCount = 1;
+  int _pageCount;
   
   public LongMessagerInputer(GameState gs, UserInterface ui, IEnumerable<string> lines) : base(gs)
   {

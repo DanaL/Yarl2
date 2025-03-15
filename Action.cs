@@ -2187,7 +2187,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     string msg;
     List<string> msgs = [];
 
-    var inventory = Actor!.Inventory;
+    Inventory inventory = Actor!.Inventory;
     if (_amount > inventory.Zorkmids)
     {
       _amount = inventory.Zorkmids;
@@ -2200,7 +2200,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     }
     else
     {      
-      var coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
+      Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       coins.Value = _amount;
       GameState.ItemDropped(coins, Actor.Loc);      
       msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor, "drop")} ";
