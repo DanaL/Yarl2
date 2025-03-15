@@ -702,8 +702,12 @@ class SetMonsterAttitude(int attitude, string blurb) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    mob.Stats[Attribute.MobAttitude] = new Stat(Attitude);
+    int curr = mob.Stats[Attribute.MobAttitude].Curr;
 
+    if (curr == Attitude)
+      return PlanStatus.Failure;
+
+    mob.Stats[Attribute.MobAttitude] = new Stat(Attitude);
     gs.UIRef().AlertPlayer(Blurb, gs, mob.Loc);
 
     return PlanStatus.Success;
@@ -1537,20 +1541,19 @@ class Planner
     string name = MsgFactory.CalcName(mob, gs.Player).Capitalize();
     string s = $"{name} gets angry!";
 
-    Sequence checkStatue = new([
-      new Not(new ThingExists(worshipTrait.AltarId)), 
-      new SetMonsterAttitude(Mob.AGGRESSIVE, s)
+    Sequence worshipCondition = new([
+      new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)),
+      new ThingExists(worshipTrait.AltarId)
     ]);
 
-    RepeatWhile worship = new (new Not(new CheckMonsterAttitude(Mob.AGGRESSIVE)), new WanderInArea(nearbyTiles))    
-    { 
-      Label = "worship" 
-    };
-
-    Sequence worshipBehaviour = new([checkStatue, worship]);
-
-
-    // Worshipper will move randomly in near the effigy
+    Selector worshipBehaviour = new ([
+      new RepeatWhile(
+        worshipCondition, 
+        new WanderInArea(nearbyTiles)
+      ),
+      new SetMonsterAttitude(Mob.AGGRESSIVE, s)
+    ]);
+    
     Selector plan = (Selector)CreateMonsterPlan(mob);
 
     int i = 0;

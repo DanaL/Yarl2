@@ -1320,6 +1320,38 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class CastCurse(Loc target, int dc) : Action
+{
+  Loc TargetLoc { get; set; } = target;
+  int DC { get; set; } = dc;
+
+  public override double Execute()
+  {
+    if (GameState!.ObjDb.Occupant(TargetLoc) is not Actor target)
+      return 1.0;
+
+    Actor caster = Actor!;
+
+    string casterName = MsgFactory.CalcName(caster, GameState.Player).Capitalize();
+    string targetName = MsgFactory.CalcName(target, GameState.Player);
+    string s = $"{casterName} {Grammar.Conjugate(caster, "curse")} {targetName}!";
+    GameState.UIRef().AlertPlayer(s, GameState, TargetLoc);
+
+    if (!target.AbilityCheck(Attribute.Will, DC, GameState.Rng))
+    {
+      CurseTrait curse = new();
+      List<string> msgs = curse.Apply(target, GameState);
+      GameState.UIRef().AlertPlayer(string.Join(" ", msgs), GameState, TargetLoc);
+    }
+    else
+    {
+      GameState.UIRef().AlertPlayer("The curse fails to get a grip.", GameState, TargetLoc);
+    }
+
+    return 1.0;
+  }
+}
+
 class SummonAction(Loc target, string summons, int count) : Action()
 {
   readonly Loc _target = target;
@@ -2572,7 +2604,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         GameState.UIRef().AlertPlayer(s);
         energyCost = 1.0;
-        if (item.HasTrait<CursedTrait>())
+        if (item.HasTrait<CursedItemTrait>())
         {
           if (item.Type == ItemType.Ring)
             GameState.UIRef().AlertPlayer("The ring tightens around your finger!");          

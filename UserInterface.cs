@@ -609,6 +609,12 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("RAGE");
       }
+      else if (!statuses.Contains("CURSED") && trait is CurseTrait) 
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "CURSED")];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+        statuses.Add("CURSED");
+      }
       else if (!statuses.Contains("BERZERK") && trait is BerzerkTrait) 
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "BERZERK")];

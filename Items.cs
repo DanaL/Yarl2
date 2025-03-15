@@ -633,7 +633,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   static (EquipingResult, ArmourParts) UnequipItem(Item item)
   {
-  if (item.HasTrait<CursedTrait>())
+  if (item.HasTrait<CursedItemTrait>())
   {
     return (EquipingResult.Cursed, ArmourParts.None);
   }
@@ -878,7 +878,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
       if (item.Equipped)
       {
-        if (item.HasTrait<CursedTrait>())
+        if (item.HasTrait<CursedItemTrait>())
           desc += " *cursed";
 
         if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)

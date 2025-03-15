@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using Microsoft.VisualBasic;
+
 namespace Yarl2;
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -413,9 +415,18 @@ abstract class Actor : GameObj, IZLevel
     int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;
     int roll = rng.Next(20) + 1 + statMod;
 
+    foreach (Trait t in Traits)
+    {
+      if (attr == Attribute.Strength && t is RageTrait rage && rage.Active)
+        roll += rng.Next(1, 7);
+      else if (t is CurseTrait)
+        roll -= 3;
+    }
+    
     if (attr == Attribute.Strength && HasActiveTrait<RageTrait>())
       roll += rng.Next(1, 7);
 
+    
     return roll >= dc;
   }
 
@@ -742,6 +753,12 @@ class Power
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);        
         var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
         return new MissileAttackAction(gs, mob, loc, arrow);
+      case "CastCurse":
+        return new CastCurse(loc, DC) 
+        { 
+          GameState = gs,
+          Actor = mob
+        };
       case "RumBreath":
         return new RumBreathAction(gs, mob, loc, MaxRange);
       case "Nudity":
@@ -752,6 +769,13 @@ class Power
         return new BlinkAction(gs, mob);
       case "SummonKobold":
         return new SummonAction(mob.Loc, "kobold", 1)
+        {
+          GameState = gs,
+          Actor = mob,
+          Quip = Quip
+        };
+      case "SummonCaveLizard":
+        return new SummonAction(mob.Loc, "cave lizard", 1)
         {
           GameState = gs,
           Actor = mob,

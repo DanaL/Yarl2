@@ -54,3 +54,5 @@ frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive
 zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless,Immunity#Poison
 cultist           |@|grey         |darkgrey    |13|15|3| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent
 cult leader       |@|grey         |darkgrey    |13|20|3| 1.0|12|10|SummonCentipede#0#0#0#0#0#4#Attack#Nag'l fh'tagn!,HealAllies#0#0#0#0#0#05#Passive,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent
+cave lizard       |l|green        |darkgreen   |13|20|2| 1.0|10|10|MeleePiercing#1#1#5#1#0#0#Attack|
+kobold soothsayer |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7#0#0#15#10#Attack,SummonCaveLizard#0#0#0#0#0#5#Attack,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent

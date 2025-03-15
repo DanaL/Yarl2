@@ -394,3 +394,9 @@ A magical plant that grows in dungeons. Much coveted by seers.
 #
 penny pincher
 A sneaky-looking goblin wearing a mask and a striped shirt.
+#
+cave lizard
+Smaller than an alligator, but still pretty bitey.
+#
+kobold soothsayer
+A kobold dressed in officiant robes and carrying a donation box.

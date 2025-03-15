@@ -487,8 +487,10 @@ class Battle
     {
       if (t is NauseaTrait)
         totalMod -= 3;
-      if (t is AttackModTrait amt)
+      else if (t is AttackModTrait amt)
         totalMod += amt.Amt;
+      else if (t is CurseTrait)
+        totalMod -= 3;
     }
 
     return totalMod;

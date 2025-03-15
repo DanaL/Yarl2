@@ -545,7 +545,7 @@
     "Glyph": "o,white,grey,black,black",
     "Traits": [
       "Grants#ACMod&-3;Berzerk",
-      "Cursed"
+      "CursedItem"
     ]
   },
   {
@@ -854,7 +854,7 @@
     "Glyph": "o,white,grey,black,black",
     "Traits": [
       "Grants#StatBuff&0&max&HP&-25&item",
-      "Cursed"
+      "CursedItem"
     ]
   },
   {

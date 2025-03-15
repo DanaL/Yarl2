@@ -1504,7 +1504,31 @@ class ArmourTrait : Trait
   public override string AsText() => $"Armour#{Part}#{ArmourMod}#{Bonus}";  
 }
 
-class CursedTrait : Trait 
+class CurseTrait : TemporaryTrait
+{
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    foreach (Trait t in target.Traits)
+    {
+      if (t is CurseTrait curse)
+      {
+        curse.ExpiresOn += (ulong) gs.Rng.Next(75, 126);
+        return [];
+      }
+    }
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);    
+    OwnerID = target.ID;
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(75, 126);
+
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "fall")} under a spell of ill luck!" ];
+  }
+
+  public override string AsText() => $"Curse#{OwnerID}#{ExpiresOn}";
+}
+
+class CursedItemTrait : Trait 
 {
   public override string AsText() => $"Cursed";
 }
@@ -3030,7 +3054,14 @@ class TraitFactory
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
-    { "Cursed", (pieces, gameObj) => new CursedTrait() },
+    { "Curse", (pieces, gameObj) => 
+      new CurseTrait() 
+      { 
+        OwnerID = ulong.Parse(pieces[1]),
+        ExpiresOn = ulong.Parse(pieces[2])
+      }
+    },
+    { "CursedItem", (pieces, gameObj) => new CursedItemTrait() },
     { "Cutpurse", (pieces, gameObj) =>
       {
         ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;

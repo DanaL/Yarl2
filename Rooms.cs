@@ -588,10 +588,11 @@ class Rooms
 
   public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
   {
+    Loc loc;
     List<Loc> floors = [];
     foreach (var (r, c) in room)
     {
-      Loc loc = new(dungeonID, level, r, c);
+      loc = new(dungeonID, level, r, c);
       if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.BlockersAtLoc(loc))
       {
         floors.Add(loc);
@@ -610,10 +611,10 @@ class Rooms
     objDb.SetToLoc(effigyLoc, effigy);
 
     List<Loc> adjToEffigy = [];
-    foreach (Loc loc in Util.Adj4Locs(effigyLoc))
+    foreach (Loc adj in Util.Adj4Locs(effigyLoc))
     {
-      if (map.TileAt(loc.Row, loc.Col).Type == TileType.DungeonFloor)
-        adjToEffigy.Add(loc);
+      if (map.TileAt(adj.Row, adj.Col).Type == TileType.DungeonFloor)
+        adjToEffigy.Add(adj);
     }
     if (adjToEffigy.Count > 0)
     {
@@ -626,6 +627,7 @@ class Rooms
     string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
     factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
 
+    WorshiperTrait worship;
     List<ulong> koboldIds = [];
     List<Actor> kobolds = [];
     for (int j = 0; j < rng.Next(3, 6); j++)
@@ -638,7 +640,7 @@ class Rooms
         if (t is BehaviourTreeTrait btt)
           btt.Plan = "Worshipper";
       }      
-      WorshiperTrait worship = new()
+      worship = new()
       {
         AltarLoc = effigyLoc,
         AltarId = effigy.ID,
@@ -647,7 +649,7 @@ class Rooms
       kobold.Traits.Add(worship);
 
       i = rng.Next(floors.Count);
-      Loc loc = floors[i];
+      loc = floors[i];
       floors.RemoveAt(i);
 
       objDb.AddNewActor(kobold, loc);
@@ -655,6 +657,27 @@ class Rooms
       koboldIds.Add(kobold.ID);
       kobolds.Add(kobold);
     }
+
+    Actor priest = MonsterFactory.Get("kobold soothsayer", objDb, rng);
+    priest.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+    foreach (Trait t in priest.Traits)
+    {
+      if (t is BehaviourTreeTrait btt)
+        btt.Plan = "Worshipper";
+    }      
+    worship = new()
+    {
+      AltarLoc = effigyLoc,
+      AltarId = effigy.ID,
+      Chant = Chant()
+    };
+    priest.Traits.Add(worship);
+
+    i = rng.Next(floors.Count);
+    loc = floors[i];
+    objDb.AddNewActor(priest, loc);
+    koboldIds.Add(priest.ID);
+    kobolds.Add(priest);
 
     foreach (Actor kobold in kobolds)
     {
@@ -664,7 +687,7 @@ class Rooms
       };
       kobold.Traits.Add(allies);
     }
-
+    
     string Chant() => rng.Next(4) switch
     {
       0 => "Gold! Gold for our dragon god!",
