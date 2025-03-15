@@ -263,7 +263,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     }
   }
 
-  bool GoldSacrificedToDragon(Item item, Loc loc)
+  bool GoldSacrificedToDragon(Item zorkmids, Loc loc)
   {
     bool effigyExists = false;
     foreach (Loc adj in Util.Adj4Locs(loc))
@@ -278,7 +278,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (effigyExists)
     {
       UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
-      ObjDb.RemoveItemFromGame(loc, item);
+      ObjDb.RemoveItemFromGame(loc, zorkmids);
+
+      if (Player.Stats.TryGetValue(Attribute.GoldSacrificed, out var stat))
+      {
+        stat.SetMax(stat.Curr + zorkmids.Value);
+      }
+      else
+      {
+        Player.Stats[Attribute.GoldSacrificed] = new Stat(zorkmids.Value);
+      }
 
       return true;
     }
