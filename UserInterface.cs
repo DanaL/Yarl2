@@ -100,14 +100,6 @@ abstract class UserInterface
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, Colours.HILITE);
     else
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
-    
-    if (gs is not null)
-    {
-      if (opts.TorchLightAnimation && !_animations.OfType<TorchLightAnimationListener>().Any())
-        _animations.Add(new TorchLightAnimationListener(this, gs));
-      else if (!opts.TorchLightAnimation && _animations.OfType<TorchLightAnimationListener>().Any())
-        _animations = _animations.Where(a => a is not TorchLightAnimationListener).ToList();
-    }
   }
 
   public void ClearLongMessage()
@@ -1291,9 +1283,7 @@ abstract class UserInterface
     gameState.RefreshPerformers();
 
     _animations.Add(new CloudAnimation(this, gameState));
-    if (opts.TorchLightAnimation) 
-      _animations.Add(new TorchLightAnimationListener(this, gameState));
-
+    
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
     
