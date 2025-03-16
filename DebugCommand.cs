@@ -109,7 +109,8 @@ class DebugCommand(GameState gs)
     {"wand of digging", ItemNames.WAND_DIGGING },
     {"boots of feather falling", ItemNames.FEATHERFALL_BOOTS },
     {"campfire", ItemNames.CAMPFIRE },
-    {"wind fan", ItemNames.WIND_FAN }
+    {"wind fan", ItemNames.WIND_FAN },
+    {"skeleton key", ItemNames.SKELETON_KEY }
   };
 
   public string DoCommand(string txt)

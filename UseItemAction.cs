@@ -423,10 +423,11 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   }
 }
 
-class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
+class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 {
   int Row;
   int Col;
+  Item Tool { get; set; } = tool;
 
   public override double Execute()
   {
@@ -457,8 +458,10 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (rogue)
         dc -= 5;
-      int roll = GameState.Rng.Next(1, 21);
-      if (roll + Actor.Stats[Attribute.Dexterity].Curr > dc)
+      if (Tool.Name == "skeleton key")
+        dc -= 2;
+
+      if (Actor.AbilityCheck(Attribute.Dexterity, dc, GameState.Rng))
       {
         if (tile.Type == TileType.LockedDoor)
         {
@@ -474,6 +477,12 @@ class PickLockAction(GameState gs, Actor actor) : Action(gs, actor)
       else
       {
         ui.AlertPlayer("You fumble at the lock.");
+      }
+
+      if (Tool.HasTrait<FragileTrait>() && GameState.Rng.Next(5) == 0)
+      {        
+        Actor.Inventory.ConsumeItem(Tool, Actor, GameState);
+        GameState.UIRef().AlertPlayer($"{Tool.Name.DefArticle().Capitalize()} breaks!");
       }
     }
 
@@ -551,7 +560,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (item.Name == "pickaxe")
         dir.DeferredAction = new DigAction(GameState, Actor, item);
       else
-        dir.DeferredAction = new PickLockAction(GameState, Actor);
+        dir.DeferredAction = new PickLockAction(GameState, Actor, item);
 
       GameState.UIRef().SetInputController(dir);
       
@@ -637,8 +646,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
           GameState.UIRef().AlertPlayer(s);        
       }
 
-      if (item.HasTrait<ConsumableTrait>())
-        Actor.Inventory.ConsumeItem(item, Actor, GameState.Rng);
+      if (item.HasTrait<ConsumableTrait>()) 
+        Actor.Inventory.ConsumeItem(item, Actor, GameState);
 
       if (Actor is Player)
       {

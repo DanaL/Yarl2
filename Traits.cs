@@ -1251,7 +1251,7 @@ class ScrollTrait : Trait
 // while they move
 class FloatingTrait : Trait
 {
-  public override string AsText() => $"Floating";
+  public override string AsText() => "Floating";
 }
 
 class FlyingTrait : BasicTrait
@@ -1260,6 +1260,11 @@ class FlyingTrait : BasicTrait
   public FlyingTrait(ulong expiry) => ExpiresOn = expiry;
 
   public override string AsText() => $"Flying#{ExpiresOn}";
+}
+
+class FragileTrait : Trait
+{
+  public override string AsText() => "Fragile";
 }
 
 // Later, when I implement the stress mechanics, becoming frightened
@@ -3110,6 +3115,7 @@ class TraitFactory
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
+    { "Fragile", (pieces, gameObj) => new FragileTrait() },
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },

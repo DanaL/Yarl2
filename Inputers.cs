@@ -1020,7 +1020,8 @@ class LockedDoorMenu : Inputer
   List<char> Options { get; set; } = ['F'];
   List<string> MenuItems { get; set; } = [];
   int Row = 0;
-    
+  Item? Tool { get; set; } = null;
+
   public LockedDoorMenu(UserInterface ui, GameState gs, Loc loc) : base(gs)
   {
     UI = ui;
@@ -1098,7 +1099,7 @@ class LockedDoorMenu : Inputer
   void SetUpPickLock()
   {
     Loc playerLoc = GS.Player.Loc;    
-    PickLockAction pickLock = new(GS, GS.Player);
+    PickLockAction pickLock = new(GS, GS.Player, Tool!);
     DirectionUIResult res = new() { Row = Loc.Row - playerLoc.Row, Col = Loc.Col - playerLoc.Col };
     pickLock.ReceiveUIResult(res);
     GS.Player.QueueAction(pickLock);
@@ -1136,8 +1137,11 @@ class LockedDoorMenu : Inputer
     bool pickaxe = false;
     foreach (Item item in GS.Player.Inventory.Items())
     {
-      if (item.Name == "lock pick")
+      if (item.Name == "lock pick" || item.Name == "skeleton key")
+      {
+        Tool = item;
         lockpick = true;
+      }
       else if (item.Name == "scroll of knock")
         knock = true;
       else if (item.Name == "pickaxe")
@@ -1147,7 +1151,7 @@ class LockedDoorMenu : Inputer
     if (lockpick)
     {
       Options.Add('a');
-      MenuItems.Add("a) use lock pick");
+      MenuItems.Add("a) pick lock");
     }
 
     if (knock)

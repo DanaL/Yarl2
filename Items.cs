@@ -71,7 +71,7 @@ class Item : GameObj, IEquatable<Item>
   {
     if (Type != ItemType.Tool)
       return false;
-    if (Name == "lock pick" || Name == "pickaxe")
+    if (Name == "lock pick" || Name == "pickaxe" || Name == "skeleton key")
       return true;
 
     return false;
@@ -198,7 +198,7 @@ enum ItemNames
   POTION_MIND_READING, POTION_OF_LEVITATION, POTION_OBSCURITY, QUARTERSTAFF, RAPIER, RING_OF_ADORNMENT, RING_OF_AGGRESSION,
   RING_OF_FRAILITY, RING_OF_PROTECTION, RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_DISARM, SCROLL_IDENTIFY, SCROLL_KNOCK, 
   SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_RECALL, SCROLL_SCATTERING, SCROLL_TRAP_DETECTION, SCROLL_TREASURE_DETECTION, 
-  SEEWEED, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKULL, SMOULDERING_CHARM, SPEAR, STATUE, 
+  SEEWEED, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD, SKELETON_KEY, SKULL, SMOULDERING_CHARM, SPEAR, STATUE, 
   STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_DIGGING, WAND_FIREBALLS, 
   WAND_FROST, WAND_HEAL_MONSTER, WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, WIND_FAN, ZORKMIDS, 
   ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE
@@ -820,18 +820,19 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return string.Join(' ', msgs).Trim();
   }
 
-  public void ConsumeItem(Item item, Actor actor, Random rng)
+  public void ConsumeItem(Item item, Actor actor, GameState gs)
   {
     // A character with the Scholar background has a chance of not actually consuming a scroll
     // when they read it.
     if (item.HasTrait<ScrollTrait>())
     {
-      double roll = rng.NextDouble();
+      double roll = gs.Rng.NextDouble();
       if (actor is Player player && player.Background == PlayerBackground.Scholar && roll < 0.2)
         return;
     }
     
     RemoveByID(item.ID);
+    gs.ObjDb.RemoveItemFromGame(actor.Loc, item);
   }
 
   public void ShowMenu(UserInterface ui, InventoryOptions options)

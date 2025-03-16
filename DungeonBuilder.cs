@@ -1089,7 +1089,7 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
       
-      if (level > 0 && level < 5 && !koboldEffigy && denizen == "kobold" /* && rng.NextDouble() < 0.2 */)
+      if (level > 0 && level < 5 && !koboldEffigy && denizen == "kobold" && rng.NextDouble() < 0.2)
       {
         int roomId = rng.Next(rooms.Count);
         Rooms.KoboldWorshipRoom(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);

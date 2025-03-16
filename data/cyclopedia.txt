@@ -400,3 +400,6 @@ Smaller than an alligator, but still pretty bitey.
 #
 kobold soothsayer
 A kobold dressed in officiant robes and carrying a donation box.
+#
+skeleton key
+So-called because it can unlock many of the doors in the dungeon, but also because it is made out of bones. It doesn't seem very sturdy.

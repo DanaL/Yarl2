@@ -603,7 +603,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
 
     if (Item is not null && Item.HasTrait<ConsumableTrait>())
     {
-      Actor!.Inventory.ConsumeItem(Item, Actor, GameState.Rng);
+      Actor!.Inventory.ConsumeItem(Item, Actor, GameState);
     }
 
     return 1.0;

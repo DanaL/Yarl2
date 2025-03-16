@@ -313,6 +313,16 @@
     "Traits": []
   },
   {
+    "Name": "SKELETON_KEY",
+    "DescriptiveName": "skeleton key",
+    "Type": "Tool",
+    "Value": 20,
+    "Glyph": ";,white,grey,black,black",
+    "Traits": [
+      "Fragile"
+    ]
+  },
+  {
     "Name": "ZORKMIDS",
     "DescriptiveName": "zorkmid",
     "Type": "Zorkmid",

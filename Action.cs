@@ -2528,7 +2528,7 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
 
       if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
       {
-        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState.Rng);
+        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
       }
     }
 
@@ -2564,7 +2564,7 @@ class IdentifyItemAction(GameState gs, Actor actor, Item? item) : Action(gs, act
 
     if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
     {
-      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState.Rng);
+      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
     }
 
     return 1.0;
