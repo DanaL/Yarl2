@@ -1052,7 +1052,10 @@ abstract class UserInterface
           glyph = rememberedGlyph;
         else
           glyph = GameObjectDB.EMPTY;
-        sqr = new Sqr(glyph.Lit, glyph.BGLit, glyph.Ch);
+
+        if (!gs.LitSqs.TryGetValue(loc, out var bgcolour))
+          bgcolour = glyph.BGLit;
+        sqr = new Sqr(glyph.Lit, bgcolour, glyph.Ch);
       }
     }
     else if (remembered.TryGetValue(loc, out var glyph))

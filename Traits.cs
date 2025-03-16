@@ -3169,8 +3169,7 @@ class TraitFactory
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "LightSource", (pieces, gameObj) => new LightSourceTrait() 
       { 
-        OwnerID = pieces[1] == "owner" ? 
-        gameObj!.ID : ulong.Parse(pieces[1]), 
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
         Radius = int.Parse(pieces[2]),
         Colour = Colours.TextToColour(pieces[3])
       } 

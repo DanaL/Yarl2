@@ -26,8 +26,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
-  public Dictionary<Loc, Illumination> Lit { get; set; } = [];
 
+  public Dictionary<Loc, Colour> LitSqs = [];
+  public List<(Loc, Colour, int)> Lights { get; set; } = [];
+  
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
@@ -1617,9 +1619,20 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   Dictionary<Loc, Illumination> CalcLitLocations(int dungeonID, int level)
   {
+    Dictionary<Loc, Illumination> lit = [];
+    LitSqs = [];
+
+    Colour lightColour = InWilderness ? Colours.BLACK : Colours.TORCH_ORANGE;
+
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
-      int lightRadius = obj.TotalLightRadius();
+      int lightRadius = 0;
+      foreach (var (colour, radius) in obj.Lights())
+      {
+        if (radius > lightRadius)
+          lightRadius = radius;
+        Lights.Add((obj.Loc, colour, radius));
+      }
       
       if (obj.ID == Player.ID)
       {
@@ -1655,13 +1668,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         Dictionary<Loc, Illumination> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
         foreach (var sq in fov)
         {
-          if (!Lit.TryAdd(sq.Key, sq.Value))
-            Lit[sq.Key] |= sq.Value;
+          if (!lit.TryAdd(sq.Key, sq.Value))
+            lit[sq.Key] |= sq.Value;
+          LitSqs[sq.Key] = lightColour;
         }
       }
     }
 
-    return Lit;
+    return lit;
   }
 
   Glyph Hallucination()
@@ -1701,10 +1715,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     // they could come back as not illumination)
     HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
 
+    Dictionary<Loc, Illumination> lit = CalcLitLocations(CurrDungeonID, CurrLevel);
     foreach (var sq in playerFoV)
     {
       Illumination playerIllum = sq.Value;
-      if (Lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
+      if (lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
         fov.Add(sq.Key);
     }
     LastPlayerFoV = fov;
