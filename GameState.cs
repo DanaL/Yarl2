@@ -27,8 +27,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
 
-  public Dictionary<Loc, (Colour, double)> LitSqs = [];
-  public List<(Loc, Colour, int)> Lights { get; set; } = [];
+  public Dictionary<Loc, (Colour, Colour, double)> LitSqs = [];
+  public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
   
   PerformersStack Performers { get; set; } = new();
 
@@ -1625,13 +1625,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       int lightRadius = 0;
-      Colour lightColour = Colours.BLACK;
+      Colour bgLightColour = Colours.BLACK;
+      Colour fgLightColour = Colours.BLACK;
       foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
       {
         if (radius > lightRadius)
           lightRadius = radius;
-        Lights.Add((obj.Loc, bgcolour, radius));
-        lightColour = bgcolour;
+        Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
+        bgLightColour = bgcolour;
+        fgLightColour = fgcolour;
       }
       
       if (obj.ID == Player.ID)
@@ -1659,7 +1661,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (lightRadius == 0)
         {
           lightRadius = 1;
-          lightColour = Colours.TORCH_ORANGE;
+          fgLightColour = Colours.YELLOW;
+          bgLightColour = Colours.TORCH_ORANGE;
         }
       }
 
@@ -1678,7 +1681,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           if (InWilderness) 
           {
             scale = 1.0;
-            lightColour = Colours.BLACK;
+            fgLightColour = Colours.BLACK;
+            bgLightColour = Colours.BLACK;
           }
           else
           {
@@ -1686,7 +1690,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             scale = 1.0 - d * 0.10;            
           }
         
-          LitSqs[sq.Key] = (lightColour, scale);
+          LitSqs[sq.Key] = (fgLightColour, bgLightColour, scale);
         }
       }
     }
