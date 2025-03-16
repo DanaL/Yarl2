@@ -1053,9 +1053,20 @@ abstract class UserInterface
         else
           glyph = GameObjectDB.EMPTY;
 
-        if (!gs.LitSqs.TryGetValue(loc, out var bgcolour))
-          bgcolour = glyph.BGLit;
-        sqr = new Sqr(glyph.Lit, bgcolour, glyph.Ch);
+        Colour fgColour, bgColour;
+        if (gs.LitSqs.TryGetValue(loc, out (Colour Colour, double Scale) lightInfo))
+        {
+          int alpha = int.Max(15, (int)(glyph.Lit.Alpha * lightInfo.Scale));
+          fgColour = glyph.Lit with { Alpha = alpha };
+          alpha = int.Max(15, (int)(lightInfo.Colour.Alpha * lightInfo.Scale));
+          bgColour = lightInfo.Colour with { Alpha = alpha };
+        }
+        else
+        {
+          fgColour = glyph.Lit;
+          bgColour = glyph.BGLit;
+        }
+        sqr = new Sqr(fgColour, bgColour, glyph.Ch);
       }
     }
     else if (remembered.TryGetValue(loc, out var glyph))

@@ -27,7 +27,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
 
-  public Dictionary<Loc, Colour> LitSqs = [];
+  public Dictionary<Loc, (Colour, double)> LitSqs = [];
   public List<(Loc, Colour, int)> Lights { get; set; } = [];
   
   PerformersStack Performers { get; set; } = new();
@@ -1622,8 +1622,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     Dictionary<Loc, Illumination> lit = [];
     LitSqs = [];
 
-    Colour lightColour = InWilderness ? Colours.BLACK : Colours.TORCH_ORANGE;
-
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       int lightRadius = 0;
@@ -1670,7 +1668,24 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         {
           if (!lit.TryAdd(sq.Key, sq.Value))
             lit[sq.Key] |= sq.Value;
-          LitSqs[sq.Key] = lightColour;
+
+          double scale;
+          Colour lightColour;
+          if (InWilderness) 
+          {
+            scale = 1.0;
+            lightColour = Colours.BLACK;
+          }
+          else
+          {
+            int d = Util.Distance(sq.Key, obj.Loc);
+            scale = 1.0 - d * 0.10;
+            //double scale = 1.0 - ((double) (d - 0.75) / lightRadius);
+            //int alpha = int.Min(25, (int)Math.Round(scale * Colours.TORCH_ORANGE.Alpha));
+            lightColour = Colours.TORCH_RED;
+          }
+        
+          LitSqs[sq.Key] = (lightColour, scale);
         }
       }
     }

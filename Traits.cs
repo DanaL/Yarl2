@@ -2792,7 +2792,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
-      item.Traits.Add(new LightSourceTrait() { Radius = 5, Colour = Colours.TORCH_ORANGE });
+      item.Traits.Add(new LightSourceTrait() { Radius = 6, Colour = Colours.TORCH_ORANGE });
 
       return new UseResult(null, true, $"The {item!.Name} sparks to life!");
     }
