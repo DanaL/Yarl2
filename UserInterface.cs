@@ -54,10 +54,11 @@ abstract class UserInterface
   protected List<string>? _longMessage;
   protected Options _options;
 
-  Queue<string> Messages = [];
+  readonly Queue<string> Messages = [];
 
   public Sqr[,] SqsOnScreen;
-  public Sqr[,] ZLayer; // An extra layer of tiles to use for effects like clouds
+  public Sqr[,] ZLayer; // An extra layer of screen tiles that overrides what
+                        // whatever else was calculated to be displayed
 
   public CheatSheetMode CheatSheetMode { get; set; } = CheatSheetMode.Messages;
 
