@@ -141,7 +141,22 @@ abstract class GameObj : IZLevel
     return sb.ToString();
   }
 
-  public virtual int LightRadius()
+  public virtual List<(Colour, int)> Lights()
+  {
+    List<(Colour, int)> lights = [];
+
+    foreach (Trait t in Traits)
+    {
+      if (t is LightSourceTrait ls)
+      {
+        lights.Add((ls.Colour, ls.Radius));
+      }
+    }
+
+    return lights;
+  }
+
+  public virtual int TotalLightRadius()
   {
     int lightRadius = 0;
     foreach (Trait t in Traits)

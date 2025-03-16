@@ -405,7 +405,7 @@ class ItemFactory
     var onFire = new OnFireTrait() { Expired = false, OwnerID = fire.ID, Spreads = true };
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
-    fire.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = fire.ID });
+    fire.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = fire.ID, Colour = Colours.TORCH_ORANGE });
     
     return fire;
   }

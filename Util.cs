@@ -567,8 +567,8 @@ class Util
   {
     TileType.PermWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.StoneWall => new Glyph('░', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.DungeonWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.DungeonFloor => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.DungeonWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.DungeonFloor => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.StoneFloor => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.StoneRoad => new Glyph('·', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.ClosedDoor => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
@@ -599,7 +599,7 @@ class Util
     TileType.WoodWall => new Glyph('░', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.HWindow => new Glyph('-', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.VWindow => new Glyph('|', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.Forge => new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.Forge => new Glyph('^', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
     TileType.Well => new Glyph('o', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Bridge => new Glyph('=', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
@@ -612,44 +612,44 @@ class Util
     TileType.FrozenWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, Colours.LIGHT_GREY),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
-    TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.HiddenTeleportTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
+    TileType.HiddenTeleportTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.TeleportTrap => new Glyph('^', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK, Colours.BLACK),
     TileType.BrokenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.HiddenDartTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.HiddenDartTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.DartTrap => new Glyph('^', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.HiddenWaterTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.HiddenWaterTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.WaterTrap => new Glyph('^', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
     TileType.FireJetTrap =>
-      ((FireJetTrap)tile).Seen ? new Glyph('#', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, Colours.BLACK)
-                               : new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+      ((FireJetTrap)tile).Seen ? new Glyph('#', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK)
+                               : new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.JetTrigger =>
-      ((JetTrigger)tile).Visible ? new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK)
-                                 : new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.MagicMouth => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.HiddenMagicMouth => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+      ((JetTrigger)tile).Visible ? new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK)
+                                 : new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.MagicMouth => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.HiddenMagicMouth => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.Gravestone => new Glyph('\u25AE', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.DisturbedGrave => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-    TileType.BridgeTrigger => new Glyph('•', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
-    TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.BridgeTrigger => new Glyph('•', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
+    TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.ReveealedBridgeCollapseTrap => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.BusinessSign => new Glyph('Þ', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
     TileType.FakeStairs => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
-    TileType.HiddenSummonsTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.HiddenSummonsTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.RevealedSummonsTrap => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
     TileType.HFence => new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.VFence => new Glyph('|', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.CornerFence => new Glyph('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
     TileType.MonsterWall => ((MonsterWall)tile).Glyph,
     TileType.Lever =>
-      ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK)
-                       : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+      ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK)
+                       : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     TileType.CreepyAltar => new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, Colours.BLACK),
-    TileType.StoneAltar => new Glyph('⊓', Colours.GREY, Colours.DARK_GREY, Colours.TORCH_ORANGE, Colours.BLACK),
+    TileType.StoneAltar => new Glyph('⊓', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK)
   };
 

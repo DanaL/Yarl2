@@ -2671,8 +2671,9 @@ class LightSourceTrait : BasicTrait, IOwner
 {
   public ulong OwnerID { get; set; }
   public int Radius { get; set; }
-  
-  public override string AsText() => $"LightSource#{OwnerID}#{Radius}";
+  public Colour Colour { get; set; }
+
+  public override string AsText() => $"LightSource#{OwnerID}#{Radius}#{Colours.ColourToText(Colour)}";
 }
 
 class LightSpellTrait : TemporaryTrait
@@ -2709,7 +2710,8 @@ class LightSpellTrait : TemporaryTrait
     LightSourceTrait lst = new()
     {
       Radius = Radius,
-      OwnerID = target.ID
+      OwnerID = target.ID,
+      Colour = Colours.TORCH_ORANGE
     };
 
     ExpiresOn = gs.Turn + 250;    
@@ -2770,7 +2772,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       }
     }
 
-    item.Traits = item.Traits.Where(t => t is not LightSourceTrait).ToList();
+    item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait)];
 
     return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
   }
@@ -2790,7 +2792,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
-      item.Traits.Add(new LightSourceTrait() { Radius = 5 });
+      item.Traits.Add(new LightSourceTrait() { Radius = 5, Colour = Colours.TORCH_ORANGE });
 
       return new UseResult(null, true, $"The {item!.Name} sparks to life!");
     }
@@ -3165,7 +3167,14 @@ class TraitFactory
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
-    { "LightSource", (pieces, gameObj) => new LightSourceTrait() { OwnerID = pieces[1] == "owner" ? gameObj!.ID :  ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]) } },
+    { "LightSource", (pieces, gameObj) => new LightSourceTrait() 
+      { 
+        OwnerID = pieces[1] == "owner" ? 
+        gameObj!.ID : ulong.Parse(pieces[1]), 
+        Radius = int.Parse(pieces[2]),
+        Colour = Colours.TextToColour(pieces[3])
+      } 
+    },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Likeable", (pieces, gameObj) => new LikeableTrait() },
     { "MageArmour", (pieces, gameObj) =>

@@ -531,7 +531,7 @@ class TorchLightAnimationListener(UserInterface ui, GameState gs) : Animation
   private void PickFlickeringSqs()
   {
     List<(int, int)> opts = [];
-    int torchRadius = _gs.Player.LightRadius();
+    int torchRadius = _gs.Player.TotalLightRadius();
     if (torchRadius < 3)
     {
       _flickered = [];

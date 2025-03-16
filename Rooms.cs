@@ -713,11 +713,10 @@ class Rooms
     Item fire = ItemFactory.Get(ItemNames.CAMPFIRE, objDb);
     objDb.SetToLoc(fireLoc, fire);
 
-    List<Loc> spotsNearFire = room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
+    List<Loc> spotsNearFire = [..room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
                                   .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
-                                .Where(loc => loc != fireLoc && !objDb.Occupied(loc))
-                                .ToList();
-
+                                  .Where(loc => loc != fireLoc && !objDb.Occupied(loc))];
+                               
     for (int j = 0; j < rng.Next(2, 5); j++)
     {
       TreasureQuality quality = rng.Next(4) switch
@@ -804,7 +803,7 @@ class Rooms
     statue.Traits.Add(new LightSourceTrait()
     {
       ExpiresOn = ulong.MaxValue, OwnerID = statue.ID, 
-      Radius = range
+      Radius = range, Colour = Colours.TORCH_ORANGE
     });
     objDb.SetToLoc(statueLoc, statue);
 

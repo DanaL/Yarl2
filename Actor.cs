@@ -51,9 +51,21 @@ abstract class Actor : GameObj, IZLevel
     return DEFAULT_Z;
   }
 
-  public override int LightRadius()
+  public override List<(Colour, int)> Lights()
   {
-    int radius = base.LightRadius();
+    List<(Colour, int)> lights = base.Lights();
+
+    foreach (Item item in Inventory.Items())
+    {
+      lights.AddRange(item.Lights());
+    }
+
+    return lights;
+  }
+
+  public override int TotalLightRadius()
+  {
+    int radius = base.TotalLightRadius();
 
     foreach (var item in Inventory.Items())
     {

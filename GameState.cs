@@ -26,6 +26,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
+  public Dictionary<Loc, Illumination> Lit { get; set; } = [];
 
   PerformersStack Performers { get; set; } = new();
 
@@ -1051,7 +1052,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       int curr = Player.Stats[Attribute.Nerve].Curr;
       if (curr > stresssFloor)
       {
-        int delta = Player.LightRadius() < 2 ? -2 : -1;
+        int delta = Player.TotalLightRadius() < 2 ? -2 : -1;
         Player.Stats[Attribute.Nerve].Change(delta);
       }        
     }
@@ -1614,13 +1615,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
-  Dictionary<Loc, Illumination> LitLocations(int dungeonID, int level)
+  Dictionary<Loc, Illumination> CalcLitLocations(int dungeonID, int level)
   {
-    Dictionary<Loc, Illumination> lit = [];
-
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
-      int lightRadius = obj.LightRadius();
+      int lightRadius = obj.TotalLightRadius();
       
       if (obj.ID == Player.ID)
       {
@@ -1653,16 +1652,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (lightRadius > 0)
       {
-        var fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
+        Dictionary<Loc, Illumination> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
         foreach (var sq in fov)
         {
-          if (!lit.TryAdd(sq.Key, sq.Value))
-            lit[sq.Key] |= sq.Value;
+          if (!Lit.TryAdd(sq.Key, sq.Value))
+            Lit[sq.Key] |= sq.Value;
         }
       }
     }
 
-    return lit;
+    return Lit;
   }
 
   Glyph Hallucination()
@@ -1692,7 +1691,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
-    Dictionary<Loc, Illumination> litLocations = LitLocations(CurrDungeonID, CurrLevel);
+    CalcLitLocations(CurrDungeonID, CurrLevel);
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
     var playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
@@ -1705,7 +1704,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (var sq in playerFoV)
     {
       Illumination playerIllum = sq.Value;
-      if (litLocations.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
+      if (Lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
         fov.Add(sq.Key);
     }
     LastPlayerFoV = fov;
