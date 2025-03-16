@@ -1625,11 +1625,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
       int lightRadius = 0;
+      Colour lightColour = Colours.BLACK;
       foreach (var (colour, radius) in obj.Lights())
       {
         if (radius > lightRadius)
           lightRadius = radius;
         Lights.Add((obj.Loc, colour, radius));
+        lightColour = colour;
       }
       
       if (obj.ID == Player.ID)
@@ -1655,7 +1657,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         }
                 
         if (lightRadius == 0)
+        {
           lightRadius = 1;
+          lightColour = Colours.TORCH_ORANGE;
+        }
       }
 
       if (obj.HasTrait<InPitTrait>())
@@ -1670,7 +1675,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             lit[sq.Key] |= sq.Value;
 
           double scale;
-          Colour lightColour;
           if (InWilderness) 
           {
             scale = 1.0;
@@ -1679,10 +1683,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           else
           {
             int d = Util.Distance(sq.Key, obj.Loc);
-            scale = 1.0 - d * 0.10;
-            //double scale = 1.0 - ((double) (d - 0.75) / lightRadius);
-            //int alpha = int.Min(25, (int)Math.Round(scale * Colours.TORCH_ORANGE.Alpha));
-            lightColour = Colours.TORCH_RED;
+            scale = 1.0 - d * 0.10;            
           }
         
           LitSqs[sq.Key] = (lightColour, scale);

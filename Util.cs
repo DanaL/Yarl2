@@ -60,6 +60,8 @@ class Colours
   public static readonly Colour ICE_BLUE = new(40, 254, 253, 255);
   public static readonly Colour SEARCH_HIGHLIGHT = new(55, 198, 255, 75);
   public static readonly Colour SOPHIE_GREEN = new(138, 195, 171, 255);
+  public static readonly Colour GHOSTLY_AURA = new(0, 71, 49, 100);
+  public static readonly Colour MYSTIC_AURA = new(40, 254, 253, 50);
 
   public static string ColourToText(Colour colour)
   {
@@ -93,6 +95,8 @@ class Colours
     else if (colour == HILITE) return "hilite";
     else if (colour == SOPHIE_GREEN) return "sophiegreen";
     else if (colour == ROOF_TILE) return "rooftile";
+    else if (colour == GHOSTLY_AURA) return "ghostlyaura";
+    else if (colour == MYSTIC_AURA) return "mysticaura";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -129,6 +133,8 @@ class Colours
     "hilite" => HILITE,
     "sophiegreen" => SOPHIE_GREEN,
     "rooftile" => ROOF_TILE,
+    "ghostlyaura" => GHOSTLY_AURA,
+    "mysticaura" => MYSTIC_AURA,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
