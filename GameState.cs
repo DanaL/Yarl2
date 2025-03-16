@@ -1626,12 +1626,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       int lightRadius = 0;
       Colour lightColour = Colours.BLACK;
-      foreach (var (colour, radius) in obj.Lights())
+      foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
       {
         if (radius > lightRadius)
           lightRadius = radius;
-        Lights.Add((obj.Loc, colour, radius));
-        lightColour = colour;
+        Lights.Add((obj.Loc, bgcolour, radius));
+        lightColour = bgcolour;
       }
       
       if (obj.ID == Player.ID)
@@ -1682,7 +1682,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           }
           else
           {
-            int d = Util.Distance(sq.Key, obj.Loc);
+            int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
             scale = 1.0 - d * 0.10;            
           }
         

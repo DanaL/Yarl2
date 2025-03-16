@@ -803,7 +803,7 @@ class Rooms
     statue.Traits.Add(new LightSourceTrait()
     {
       ExpiresOn = ulong.MaxValue, OwnerID = statue.ID, 
-      Radius = range, Colour = Colours.TORCH_ORANGE
+      Radius = range, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE
     });
     objDb.SetToLoc(statueLoc, statue);
 

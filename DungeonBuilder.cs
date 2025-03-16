@@ -1458,7 +1458,7 @@ class MainDungeonBuilder : DungeonBuilder
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "moon_daughter_cleric.txt" });
     cleric.SetBehaviour(new MoonDaughtersClericBehaviour());
     cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "MoonClericPlan" });
-    cleric.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = cleric.ID, Colour = Colours.TORCH_ORANGE });
+    cleric.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = cleric.ID, FgColour = Colours.ICE_BLUE, BgColour = Colours.MYSTIC_AURA });
 
     List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
 

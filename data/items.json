@@ -810,7 +810,7 @@
     "Value": 0,
     "Glyph": "^,brightred,dullred,torchorange,black",
     "Traits": [
-      "LightSource#owner#1#torchorange",
+      "LightSource#owner#1#yellow#torchorange",
       "OnFire#false#owner#max#false",
       "Affixed"
     ]
@@ -1116,7 +1116,7 @@
     "Glyph": "*,iceblue,lightblue,black,black",
     "Traits": [
       "Stackable",
-      "LightSource#owner#1#iceblue"
+      "LightSource#owner#1#iceblue#mysticaura"
     ]
   },
   {

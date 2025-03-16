@@ -2671,9 +2671,10 @@ class LightSourceTrait : BasicTrait, IOwner
 {
   public ulong OwnerID { get; set; }
   public int Radius { get; set; }
-  public Colour Colour { get; set; }
+  public Colour FgColour { get; set; }
+  public Colour BgColour { get; set; }
 
-  public override string AsText() => $"LightSource#{OwnerID}#{Radius}#{Colours.ColourToText(Colour)}";
+  public override string AsText() => $"LightSource#{OwnerID}#{Radius}#{Colours.ColourToText(FgColour)}#{Colours.ColourToText(BgColour)}";
 }
 
 class LightSpellTrait : TemporaryTrait
@@ -2711,7 +2712,8 @@ class LightSpellTrait : TemporaryTrait
     {
       Radius = Radius,
       OwnerID = target.ID,
-      Colour = Colours.TORCH_ORANGE
+      FgColour = Colours.YELLOW,
+      BgColour = Colours.TORCH_ORANGE
     };
 
     ExpiresOn = gs.Turn + 250;    
@@ -2792,7 +2794,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
       
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
-      item.Traits.Add(new LightSourceTrait() { Radius = 6, Colour = Colours.TORCH_ORANGE });
+      item.Traits.Add(new LightSourceTrait() { Radius = 6, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE });
 
       return new UseResult(null, true, $"The {item!.Name} sparks to life!");
     }
@@ -3171,7 +3173,8 @@ class TraitFactory
       { 
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
         Radius = int.Parse(pieces[2]),
-        Colour = Colours.TextToColour(pieces[3])
+        FgColour = Colours.TextToColour(pieces[3]),
+        BgColour = Colours.TextToColour(pieces[4])
       } 
     },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },

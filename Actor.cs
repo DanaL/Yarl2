@@ -49,9 +49,9 @@ abstract class Actor : GameObj, IZLevel
     return DEFAULT_Z;
   }
 
-  public override List<(Colour, int)> Lights()
+  public override List<(Colour, Colour, int)> Lights()
   {
-    List<(Colour, int)> lights = base.Lights();
+    List<(Colour, Colour, int)> lights = base.Lights();
 
     foreach (Item item in Inventory.Items())
     {

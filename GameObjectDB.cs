@@ -141,15 +141,15 @@ abstract class GameObj : IZLevel
     return sb.ToString();
   }
 
-  public virtual List<(Colour, int)> Lights()
+  public virtual List<(Colour, Colour, int)> Lights()
   {
-    List<(Colour, int)> lights = [];
+    List<(Colour, Colour, int)> lights = [];
 
     foreach (Trait t in Traits)
     {
       if (t is LightSourceTrait ls)
       {
-        lights.Add((ls.Colour, ls.Radius));
+        lights.Add((ls.FgColour, ls.BgColour, ls.Radius));
       }
     }
 

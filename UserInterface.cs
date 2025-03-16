@@ -1046,7 +1046,7 @@ abstract class UserInterface
           glyph = GameObjectDB.EMPTY;
 
         Colour fgColour, bgColour;
-        if (gs.LitSqs.TryGetValue(loc, out (Colour Colour, double Scale) lightInfo))
+        if (gs.LitSqs.TryGetValue(loc, out (Colour Colour, double Scale) lightInfo) && (glyph.Ch == '.' || glyph.Ch == '#'))
         {
           int alpha = int.Max(15, (int)(glyph.Lit.Alpha * lightInfo.Scale));
           fgColour = glyph.Lit with { Alpha = alpha };
