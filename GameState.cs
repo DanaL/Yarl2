@@ -1721,7 +1721,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
   {
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
-    CalcLitLocations(CurrDungeonID, CurrLevel);
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
     var playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);

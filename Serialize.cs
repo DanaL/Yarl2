@@ -17,7 +17,7 @@ namespace Yarl2;
 
 record SaveFileInfo(string CharName, string Path);
 record SaveGameInfo(CampaignSaver Campaign, GameStateSave GameStateSave, GameObjDBSave ObjDb, Dictionary<string, ItemIDInfo> IDInfo, List<SqrSave> Preview);
-record SqrSave(string Fg, string Bg, char Ch);
+record SqrSave(int R, int G, int B, int A, int BgR, int BgG, int BgB, int BgA, char Ch);
 
 // When I started working on saving the game, I had a bunch of problems with
 // Json serialize. It particularly seemed to hate that Tile was an abstract
@@ -81,7 +81,9 @@ internal class Serialize
     List<Sqr> sqrs = [];
     foreach (var s in sgi.Preview)
     {
-      sqrs.Add(new Sqr(Colours.TextToColour(s.Fg), Colours.TextToColour(s.Bg), s.Ch));
+      Colour fg = new(s.R, s.G, s.B, s.A);
+      Colour bg = new(s.BgR, s.BgG, s.BgB, s.BgA);
+      sqrs.Add(new Sqr(fg, bg, s.Ch));
     }
 
     return sqrs;
@@ -148,10 +150,13 @@ internal class Serialize
 
     for (int r = midR - 5; r < midR + 6; r++)
     {
-      for (int c=  midC - 5; c < midC + 6; c++)
+      for (int c = midC - 5; c < midC + 6; c++)
       {
         Sqr sqr = ui.SqsOnScreen[r, c];
-        SqrSave s = new(Colours.ColourToText(sqr.Fg), Colours.ColourToText(sqr.Bg), sqr.Ch);
+        SqrSave s = new(
+          sqr.Fg.R, sqr.Fg.G, sqr.Fg.B, sqr.Fg.Alpha,
+          sqr.Bg.R, sqr.Bg.G, sqr.Bg.B, sqr.Bg.Alpha,
+          sqr.Ch);
         sqs.Add(s);
       }
     } 
