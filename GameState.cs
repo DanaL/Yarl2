@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Yarl2;
@@ -1628,13 +1629,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       int lightRadius = 0;
       Colour bgLightColour = Colours.BLACK;
       Colour fgLightColour = Colours.BLACK;
+
+      // If an object (most likely the player) has more than one light source
+      // I'm just going to use the one with the largest radius
       foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
       {
         if (radius > lightRadius)
+        {
           lightRadius = radius;
-        Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
-        bgLightColour = bgcolour;
-        fgLightColour = fgcolour;
+          Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
+          bgLightColour = bgcolour;
+          fgLightColour = fgcolour;
+        }
       }
       
       if (obj.ID == Player.ID)
