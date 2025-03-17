@@ -632,7 +632,7 @@ class Util
     TileType.WoodBridge => new Glyph('=', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.Landmark => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
     TileType.IdolAltar => new Glyph('_', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
-    TileType.Chasm => new Glyph('\u2237', Colours.DARK_GREY, Colours.DARK_GREY, Colours.BLACK, false),
+    TileType.Chasm => new Glyph('\u2237', Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false),
     TileType.CharredGrass => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.CharredStump => new Glyph('╵', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.FrozenDeepWater => new Glyph('}', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
@@ -676,7 +676,7 @@ class Util
       ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true)
                        : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.CreepyAltar => new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false),
-    TileType.StoneAltar => new Glyph('⊓', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
+    TileType.StoneAltar => new Glyph('⊓', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 

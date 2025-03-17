@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Yarl2;
@@ -270,34 +269,51 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
   bool GoldSacrificedToDragon(Item zorkmids, Loc loc)
   {
-    bool effigyExists = false;
+    Loc effigyLoc = Loc.Nowhere;
     foreach (Loc adj in Util.Adj4Locs(loc))
     {
       if (ObjDb.ItemsAt(adj).Where(i => i.Name == "dragon effigy").Any())
       {
-        effigyExists = true;
+        effigyLoc = adj;
         break;
       }
     }
 
-    if (effigyExists)
+    if (effigyLoc == Loc.Nowhere)
+      return false;
+
+    UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
+    ObjDb.RemoveItemFromGame(loc, zorkmids);
+
+    if (Player.Stats.TryGetValue(Attribute.GoldSacrificed, out var donationStat))
     {
-      UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
-      ObjDb.RemoveItemFromGame(loc, zorkmids);
-
-      if (Player.Stats.TryGetValue(Attribute.GoldSacrificed, out var stat))
-      {
-        stat.SetMax(stat.Curr + zorkmids.Value);
-      }
-      else
-      {
-        Player.Stats[Attribute.GoldSacrificed] = new Stat(zorkmids.Value);
-      }
-
-      return true;
+      donationStat.SetMax(donationStat.Curr + zorkmids.Value);
+    }
+    else
+    {
+      Player.Stats[Attribute.GoldSacrificed] = new Stat(zorkmids.Value);
     }
 
-    return false;
+    int cultLevel = 0;
+    if (Player.Stats.TryGetValue(Attribute.KoboldCultLevel, out var cultLevelStat))
+    {
+      cultLevel = cultLevelStat.Curr;
+    }
+      
+    if (Player.Stats[Attribute.GoldSacrificed].Curr > 100 && cultLevel == 0)
+    {
+      UI.AlertPlayer("We appreciate the pledging of your soul and service!");
+
+      foreach (Actor actor in ObjDb.AllActors())
+      {
+        if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
+        {
+          actor.Traits.Add(new FriendlyMonsterTrait());
+        }
+      }
+    }
+
+    return true;
   }
 
   public void ItemDestroyed(Item item, Loc loc)

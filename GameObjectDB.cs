@@ -404,6 +404,15 @@ class GameObjectDB
     return actors;
   }
 
+  public IEnumerable<Actor> AllActors()
+  {
+    foreach (GameObj obj in Objs.Values)
+    {
+      if (obj is Actor actor)
+        yield return actor;
+    }    
+  }
+
   public void AddNewActor(Actor actor, Loc loc)
   {
     actor.Loc = loc;

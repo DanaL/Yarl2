@@ -605,7 +605,7 @@ class Rooms
 
     Item effigy = ItemFactory.Get(ItemNames.STATUE, objDb);
     effigy.Name = "dragon effigy";
-    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, true);
+    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
     effigy.Traits.Add(new FlammableTrait());
     effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
     objDb.SetToLoc(effigyLoc, effigy);

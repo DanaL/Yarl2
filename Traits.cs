@@ -1267,6 +1267,11 @@ class FragileTrait : Trait
   public override string AsText() => "Fragile";
 }
 
+class FriendlyMonsterTrait : Trait
+{
+  public override string AsText() => "FriendlyMonster";
+}
+
 // Later, when I implement the stress mechanics, becoming frightened
 // should icnrease the player's stress
 class FrightenedTrait : TemporaryTrait
@@ -3120,6 +3125,7 @@ class TraitFactory
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
     { "Fragile", (pieces, gameObj) => new FragileTrait() },
+    { "FriendlyMonster", (pieces, gameObj) => new FriendlyMonsterTrait() },
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },

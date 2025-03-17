@@ -1050,7 +1050,7 @@ abstract class UserInterface
           glyph = GameObjectDB.EMPTY;
 
         Colour fgColour, bgColour;
-        if (gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo))
+        if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo))
         {
           double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
           fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
@@ -1376,7 +1376,7 @@ abstract class UserInterface
 
       TimeSpan elapsed = DateTime.UtcNow - refresh;
       int totalMs = (int) elapsed.TotalMilliseconds;
-      if (totalMs >= 50)
+      if (totalMs >= 32)
       {
         SetSqsOnScreen(gameState);
 

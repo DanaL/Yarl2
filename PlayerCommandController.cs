@@ -226,8 +226,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
 
       if (adjTile.PassableByFlight() && !gs.ObjDb.Occupied(adj) && gs.ObjDb.Occupant(adj2) is Actor occ && Battle.PlayerWillAttack(occ))
       {
-        var colour = gs.Player.Inventory.ReadiedWeapon()!.Glyph.Lit;
-        var anim = new PolearmAnimation(gs, colour, gs.Player.Loc, adj2);
+        Colour colour = gs.Player.Inventory.ReadiedWeapon()!.Glyph.Lit;
+        PolearmAnimation anim = new(gs, colour, gs.Player.Loc, adj2);
         gs.UIRef().RegisterAnimation(anim);
 
         gs.Player.QueueAction(new MeleeAttackAction(gs, gs.Player, adj2));

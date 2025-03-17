@@ -1038,15 +1038,8 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
   public override double Execute()
   {
     base.Execute();
-    double result = 0.0;
 
-    var other = GameState!.ObjDb.Occupant(Loc);
-
-    if (other is null)
-    {
-      GameState.UIRef().AlertPlayer("There's no one there!");      
-    }
-    else
+    if (GameState!.ObjDb.Occupant(Loc) is Actor other)
     {
       var (chatAction, acc) = other.Behaviour.Chat((Mob)other, GameState);
 
@@ -1055,14 +1048,19 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
         string s = $"{other.FullName.Capitalize()} turns away from you.";
         GameState.UIRef().AlertPlayer(s);
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
-        result = 1.0;
+        return 1.0;
       }
 
       acc!.DeferredAction = chatAction;
       GameState.UIRef().SetInputController(acc);
-    }
 
-    return result;
+      return 0.0;
+    }
+    else
+    {
+      GameState.UIRef().AlertPlayer("There's no one there!");
+      return 0.0;
+    }
   }
 }
 
@@ -2217,8 +2215,7 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
   {
     double energyCost = 1.0;
     string msg;
-    List<string> msgs = [];
-
+    
     Inventory inventory = Actor!.Inventory;
     if (_amount > inventory.Zorkmids)
     {
@@ -2228,13 +2225,13 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
     if (_amount == 0)
     {
       energyCost = 0.0; // we won't make the player spend an action if they drop nothing
-      msgs.Add("You hold onto your zorkmids.");
+      GameState!.UIRef().AlertPlayer("You hold onto your zorkmids.");      
     }
     else
     {      
       Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, GameState!.ObjDb);
       coins.Value = _amount;
-      GameState.ItemDropped(coins, Actor.Loc);      
+      
       msg = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} {Grammar.Conjugate(Actor, "drop")} ";
       if (_amount == 1)
         msg += "a single zorkmid.";
@@ -2242,25 +2239,23 @@ class DropZorkmidsAction(GameState gs, Actor actor) : Action(gs, actor)
         msg += "all your money!";
       else
         msg += $"{_amount} zorkmids.";
-      msgs.Add(msg);
+      GameState.UIRef().AlertPlayer(msg);
 
+      GameState.ItemDropped(coins, Actor.Loc);
       if (Actor is Player && GameState.TileAt(Actor.Loc).Type == TileType.Well && coins.Value == 1)
       {
-        msgs.Add("The coin disappears into the well and you hear a faint plop.");
+        GameState.UIRef().AlertPlayer("The coin disappears into the well and you hear a faint plop.");
         GameState.ObjDb.RemoveItemFromGame(Actor.Loc, coins);
 
         if (GameState.Rng.Next(100) < 5 && !Actor.HasTrait<AuraOfProtectionTrait>())
         {
-          msgs.Add("A warm glow surrounds you!");
+          GameState.UIRef().AlertPlayer("A warm glow surrounds you!");
           Actor.Traits.Add(new AuraOfProtectionTrait());
         }
       }
 
       inventory.Zorkmids -= _amount;
     }
-
-    foreach (string s in msgs)
-      GameState!.UIRef().AlertPlayer(s);
 
     return energyCost;
   }
