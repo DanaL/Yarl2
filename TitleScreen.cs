@@ -336,13 +336,13 @@ class TitleScreen
           if (visible.ContainsKey(loc))
           {
             Glyph g = objGlyph != GameObjectDB.EMPTY ? objGlyph : Util.TileToGlyph(Map.TileAt(mapR, mapC));
-            sqr = new Sqr(g.Lit, g.BGLit, g.Ch);
+            sqr = new Sqr(g.Lit, g.BG, g.Ch);
             SeenBefore.Add(loc);
           }
           else if (SeenBefore.Contains(loc))
           {
             Glyph g = Util.TileToGlyph(Map.TileAt(mapR, mapC));
-            sqr = new Sqr(g.Unlit, g.BGUnlit, g.Ch);
+            sqr = new Sqr(g.Unlit, g.BG, g.Ch);
           }            
     
           UI.SqsOnScreen[viewR + 11, viewC + 30] = sqr;

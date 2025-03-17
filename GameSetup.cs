@@ -380,7 +380,7 @@ class CampaignCreator(UserInterface ui)
   // This probably belongs in DungeonBuilder
   static void AddGargoyle(Random rng, GameObjectDB objDb, Dungeon dungeon, int level)
   {
-    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK);
+    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true);
     var gargoyle = new Mob()
     {
       Name = "gargoyle",
@@ -409,7 +409,7 @@ class CampaignCreator(UserInterface ui)
     var disguise = new DisguiseTrait()
     {
       Disguise = glyph,
-      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, Colours.BLACK),
+      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
       DisguiseForm = "statue"
     };
     gargoyle.Traits.Add(disguise);

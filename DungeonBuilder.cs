@@ -210,7 +210,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = desc,
       Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
     doc.Traits.Add(new FlammableTrait());
     doc.Traits.Add(new ScrollTrait());
@@ -384,7 +384,7 @@ class MainDungeonBuilder : DungeonBuilder
       Name = "tin locket",
       Type = ItemType.Trinket,
       Value = 1,
-      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
     objDb.Add(trinket);
     objDb.SetToLoc(loc, trinket);
@@ -1449,7 +1449,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = ng.GenerateName(8),
       Appearance = "A cleric whose face is concealed by a deep hood. They are suffused with a faint silver glow.",
-      Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('@', Colours.GREY, Colours.DARK_GREEN, Colours.BLACK, false)
     };
     cleric.Stats[Attribute.HP] = new Stat(50);
     cleric.Traits.Add(new VillagerTrait());
@@ -1485,7 +1485,7 @@ class MainDungeonBuilder : DungeonBuilder
     {
       Name = "Flin Flon",
       Appearance = "A mildly dishevelled gnome with a sparse beard. He's carrying a heavy satchel.",
-      Glyph = new Glyph('G', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('G', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
     flinFlon.Stats[Attribute.HP] = new Stat(50);
     flinFlon.Stats[Attribute.ShopInvoice] = new Stat(0);
@@ -1524,7 +1524,7 @@ class MainDungeonBuilder : DungeonBuilder
       {
         Name = "neatly printed flyer",
         Type = ItemType.Document,
-        Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+        Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
       };
       flyer.Traits.Add(new FlammableTrait());
       flyer.Traits.Add(new ScrollTrait());

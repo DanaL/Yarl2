@@ -4,7 +4,7 @@
     "DescriptiveName": "spear",
     "Type": "Weapon",
     "Value": 10,
-    "Glyph": "),lightbrown,brown,black,black",
+    "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "Versatile#Damage#6#1#Piercing#0#Damage#8#1#Piercing#0",
       "Polearm"
@@ -15,7 +15,7 @@
     "DescriptiveName": "guisarme",
     "Type": "Weapon",
     "Value": 15,
-    "Glyph": "),grey,darkgrey,black,black",
+    "Glyph": "),grey,darkgrey,black,false",
     "Traits": [
       "Damage#8#1#Piercing",
       "Polearm",
@@ -29,7 +29,7 @@
     "DescriptiveName": "quarterstaff",
     "Type": "Weapon",
     "Value": 5,
-    "Glyph": "|,lightbrown,brown,black,black",
+    "Glyph": "|,lightbrown,brown,black,false",
     "Traits": [
       "Damage#6#1#Blunt",
       "Polearm",
@@ -41,7 +41,7 @@
     "DescriptiveName": "dagger",
     "Type": "Weapon",
     "Value": 10,
-    "Glyph": "),white,grey,black,black",
+    "Glyph": "),white,grey,black,false",
     "Traits": [
       "Damage#4#1#Piercing",
       "Stackable",
@@ -55,7 +55,7 @@
     "DescriptiveName": "dagger",
     "Type": "Weapon",
     "Value": 15,
-    "Glyph": "),white,grey,black,black",
+    "Glyph": "),white,grey,black,false",
     "Traits": [
       "Damage#3#1#Piercing",
       "Stackable",
@@ -70,7 +70,7 @@
     "DescriptiveName": "hand axe",
     "Type": "Weapon",
     "Value": 15,
-    "Glyph": "),lightbrown,brown,black,black",
+    "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "Damage#6#1#Slashing",
       "Axe",
@@ -82,7 +82,7 @@
     "DescriptiveName": "pickaxe",
     "Type": "Tool",
     "Value": 15,
-    "Glyph": "),grey,darkgrey,black,black",
+    "Glyph": "),grey,darkgrey,black,false",
     "Traits": [
       "Damage#6#1#Piercing",
       "Axe",
@@ -94,7 +94,7 @@
     "DescriptiveName": "battle axe",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),lightbrown,brown,black,black",
+    "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "Damage#3#3#Slashing",
       "Axe",
@@ -108,7 +108,7 @@
     "DescriptiveName": "greatsword",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Damage#6#2#Slashing",
       "Sword",
@@ -124,7 +124,7 @@
     "DescriptiveName": "claymore",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Sword",
       "Metal#2",
@@ -138,7 +138,7 @@
     "DescriptiveName": "mace",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),lightgrey,grey,black,black",
+    "Glyph": "),lightgrey,grey,black,false",
     "Traits": [
       "Damage#4#2#Blunt",
       "Metal#1",
@@ -150,7 +150,7 @@
     "DescriptiveName": "longsword",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Damage#8#1#Slashing",
       "Sword",
@@ -162,7 +162,7 @@
     "DescriptiveName": "longsword",
     "Type": "Weapon",
     "Value": 25,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Damage#7#1#Slashing",
       "Sword",
@@ -175,7 +175,7 @@
     "DescriptiveName": "shortsword",
     "Type": "Weapon",
     "Value": 15,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Damage#6#1#Slashing",
       "Sword",
@@ -188,7 +188,7 @@
     "DescriptiveName": "rapier",
     "Type": "Weapon",
     "Value": 20,
-    "Glyph": "),white,lightgrey,black,black",
+    "Glyph": "),white,lightgrey,black,false",
     "Traits": [
       "Damage#8#1#Piercing",
       "Finesse",
@@ -202,7 +202,7 @@
     "DescriptiveName": "longbow",
     "Type": "Bow",
     "Value": 30,
-    "Glyph": "),lightbrown,brown,black,black",
+    "Glyph": "),lightbrown,brown,black,false",
     "Traits": [
       "Damage#1#1#Blunt",
       "Ammo#4#1#Piercing#9",
@@ -214,7 +214,7 @@
     "DescriptiveName": "arrow",
     "Type": "Weapon",
     "Value": 2,
-    "Glyph": "-,lightbrown,brown,black,black",
+    "Glyph": "-,lightbrown,brown,black,false",
     "Traits": [
       "Damage#6#1#Piercing",
       "Stackable"
@@ -225,7 +225,7 @@
     "DescriptiveName": "dart",
     "Type": "Weapon",
     "Value": 1,
-    "Glyph": "-,lightgrey,grey,black,black",
+    "Glyph": "-,lightgrey,grey,black,false",
     "Traits": [
       "Damage#3#1#Piercing",
       "Stackable"
@@ -236,7 +236,7 @@
     "DescriptiveName": "firebolt",
     "Type": "Weapon",
     "Value": 0,
-    "Glyph": "-,yellow,yelloworange,black,black",
+    "Glyph": "-,yellow,yelloworange,black,false",
     "Traits": [
       "Damage#5#2#Fire"
     ]
@@ -246,7 +246,7 @@
     "DescriptiveName": "leather armour",
     "Type": "Armour",
     "Value": 20,
-    "Glyph": "[,brown,lightbrown,black,black",
+    "Glyph": "[,brown,lightbrown,black,false",
     "Traits": [
       "Armour#Shirt#1#0"
     ]
@@ -256,7 +256,7 @@
     "DescriptiveName": "studded leather armour",
     "Type": "Armour",
     "Value": 25,
-    "Glyph": "[,brown,lightbrown,black,black",
+    "Glyph": "[,brown,lightbrown,black,false",
     "Traits": [
       "Armour#Shirt#2#0"
     ]
@@ -266,7 +266,7 @@
     "DescriptiveName": "ringmail",
     "Type": "Armour",
     "Value": 45,
-    "Glyph": "[,lightgrey,grey,black,black",
+    "Glyph": "[,lightgrey,grey,black,false",
     "Traits": [
       "Armour#Shirt#3#0",
       "Metal#1"
@@ -277,7 +277,7 @@
     "DescriptiveName": "chainmail",
     "Type": "Armour",
     "Value": 75,
-    "Glyph": "[,lightgrey,grey,black,black",
+    "Glyph": "[,lightgrey,grey,black,false",
     "Traits": [
       "Armour#Shirt#4#0",
       "Metal#1"
@@ -288,7 +288,7 @@
     "DescriptiveName": "helmet",
     "Type": "Armour",
     "Value": 20,
-    "Glyph": "[,white,grey,black,black",
+    "Glyph": "[,white,grey,black,false",
     "Traits": [
       "Armour#Hat#1#0",
       "Metal#1"
@@ -299,7 +299,7 @@
     "DescriptiveName": "shield",
     "Type": "Armour",
     "Value": 20,
-    "Glyph": "[,grey,darkgrey,black,black",
+    "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Shield#1#0"
     ]
@@ -309,7 +309,7 @@
     "DescriptiveName": "lock pick",
     "Type": "Tool",
     "Value": 20,
-    "Glyph": "(,grey,lightgrey,black,black",
+    "Glyph": "(,grey,lightgrey,black,false",
     "Traits": []
   },
   {
@@ -317,7 +317,7 @@
     "DescriptiveName": "skeleton key",
     "Type": "Tool",
     "Value": 20,
-    "Glyph": ";,white,grey,black,black",
+    "Glyph": ";,white,grey,black,false",
     "Traits": [
       "Fragile"
     ]
@@ -327,7 +327,7 @@
     "DescriptiveName": "zorkmid",
     "Type": "Zorkmid",
     "Value": 0,
-    "Glyph": "$,yellow,yelloworange,black,black",
+    "Glyph": "$,yellow,yelloworange,black,false",
     "Traits": [
       "Stackable"
     ]
@@ -337,7 +337,7 @@
     "DescriptiveName": "potion of healing",
     "Type": "Potion",
     "Value": 25,
-    "Glyph": "!,lightblue,blue,black,black",
+    "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "UseSimple#minorheal",
       "Consumable",
@@ -350,7 +350,7 @@
     "DescriptiveName": "potion of mind reading",
     "Type": "Potion",
     "Value": 30,
-    "Glyph": "!,lightblue,blue,black,black",
+    "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "UseSimple#telepathy",
       "Consumable",
@@ -362,7 +362,7 @@
     "DescriptiveName": "potion of fire resistance",
     "Type": "Potion",
     "Value": 15,
-    "Glyph": "!,lightblue,blue,black,black",
+    "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "UseSimple#resistfire",
       "Consumable",
@@ -374,7 +374,7 @@
     "DescriptiveName": "potion of cold resistance",
     "Type": "Potion",
     "Value": 15,
-    "Glyph": "!,lightblue,blue,black,black",
+    "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "UseSimple#resistcold",
       "Consumable",
@@ -386,7 +386,7 @@
     "DescriptiveName": "antidote",
     "Type": "Potion",
     "Value": 20,
-    "Glyph": "!,yellow,yelloworange,black,black",
+    "Glyph": "!,yellow,yelloworange,black,false",
     "Traits": [
       "UseSimple#antidote",
       "Consumable",
@@ -398,7 +398,7 @@
     "DescriptiveName": "scroll of blink",
     "Type": "Scroll",
     "Value": 25,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#blink",
@@ -412,7 +412,7 @@
     "DescriptiveName": "scroll of identify",
     "Type": "Scroll",
     "Value": 10,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#identify",
@@ -426,7 +426,7 @@
     "DescriptiveName": "scroll of knock",
     "Type": "Scroll",
     "Value": 15,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#knock",
@@ -440,7 +440,7 @@
     "DescriptiveName": "scroll of protection",
     "Type": "Scroll",
     "Value": 30,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#protection",
@@ -454,7 +454,7 @@
     "DescriptiveName": "scroll of magic mapping",
     "Type": "Scroll",
     "Value": 20,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#magicmap",
@@ -468,7 +468,7 @@
     "DescriptiveName": "scroll of word of recall",
     "Type": "Scroll",
     "Value": 25,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#recall",
@@ -482,7 +482,7 @@
     "DescriptiveName": "wand of magic missiles",
     "Type": "Wand",
     "Value": 150,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#20#false#magicmissile"
     ]
@@ -492,7 +492,7 @@
     "DescriptiveName": "wand of swap",
     "Type": "Wand",
     "Value": 175,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#15#false#swap"
     ]
@@ -502,7 +502,7 @@
     "DescriptiveName": "wand of heal monster",
     "Type": "Wand",
     "Value": 25,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#35#false#healmonster"
     ]
@@ -512,7 +512,7 @@
     "DescriptiveName": "wand of fireballs",
     "Type": "Wand",
     "Value": 125,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#10#false#fireball"
     ]
@@ -522,7 +522,7 @@
     "DescriptiveName": "wand of frost",
     "Type": "Wand",
     "Value": 125,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#10#false#frost"
     ]
@@ -532,7 +532,7 @@
     "DescriptiveName": "wand of digging",
     "Type": "Wand",
     "Value": 125,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#5#false#digging"
     ]
@@ -542,7 +542,7 @@
     "DescriptiveName": "ring of protection",
     "Type": "Ring",
     "Value": 125,
-    "Glyph": "o,white,grey,black,black",
+    "Glyph": "o,white,grey,black,false",
     "Traits": [
       "Grants#ACMod&1"
     ]
@@ -552,7 +552,7 @@
     "DescriptiveName": "ring of aggression",
     "Type": "Ring",
     "Value": 75,
-    "Glyph": "o,white,grey,black,black",
+    "Glyph": "o,white,grey,black,false",
     "Traits": [
       "Grants#ACMod&-3;Berzerk",
       "CursedItem"
@@ -563,7 +563,7 @@
     "DescriptiveName": "potion of levitation",
     "Type": "Potion",
     "Value": 100,
-    "Glyph": "!,pink,dullred,black,black",
+    "Glyph": "!,pink,dullred,black,false",
     "Traits": [
       "UseSimple#levitation",
       "Consumable",
@@ -575,7 +575,7 @@
     "DescriptiveName": "potion of blindness",
     "Type": "Potion",
     "Value": 15,
-    "Glyph": "!,pink,dullred,black,black",
+    "Glyph": "!,pink,dullred,black,false",
     "Traits": [
       "UseSimple#blindness",
       "Consumable",
@@ -587,7 +587,7 @@
     "DescriptiveName": "skull",
     "Type": "Bone",
     "Value": 0,
-    "Glyph": "(,white,yellow,black,black",
+    "Glyph": "(,white,yellow,black,false",
     "Traits": []
   },
   {
@@ -595,7 +595,7 @@
     "DescriptiveName": "vial of poison",
     "Type": "Potion",
     "Value": 40,
-    "Glyph": "!,limegreen,darkgreen,black,black",
+    "Glyph": "!,limegreen,darkgreen,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#applypoison",
@@ -607,7 +607,7 @@
     "DescriptiveName": "ghostcap mushroom",
     "Type": "Food",
     "Value": 75,
-    "Glyph": "♣,lightgrey,grey,black,black",
+    "Glyph": "♣,lightgrey,grey,black,false",
     "Traits": [
       "Edible",
       "UseSimple#seeinvisible",
@@ -621,7 +621,7 @@
     "DescriptiveName": "apple",
     "Type": "Food",
     "Value": 1,
-    "Glyph": ",,brightred,dullred,black,black",
+    "Glyph": ",,brightred,dullred,black,false",
     "Traits": [
       "Edible",
       "Consumable",
@@ -634,7 +634,7 @@
     "DescriptiveName": "talisman of circumspection",
     "Type": "Talisman",
     "Value": 125,
-    "Glyph": "☥,white,grey,black,black",
+    "Glyph": "☥,white,grey,black,false",
     "Traits": [
       "Grants#Dodge&33"
     ]
@@ -644,7 +644,7 @@
     "DescriptiveName": "blindfold",
     "Type": "Armour",
     "Value": 5,
-    "Glyph": "(,grey,darkgrey,black,black",
+    "Glyph": "(,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Mask#0#0",
       "Grants#Blind&owner&max"
@@ -655,7 +655,7 @@
     "DescriptiveName": "beetle carapace",
     "Type": "Reagent",
     "Value": 25,
-    "Glyph": ",,lightgrey,grey,black,black",
+    "Glyph": ",,lightgrey,grey,black,false",
     "Traits": [
       "Stackable"
     ]
@@ -665,7 +665,7 @@
     "DescriptiveName": "ogre liver",
     "Type": "Reagent",
     "Value": 25,
-    "Glyph": ",,brightred,dullred,black,black",
+    "Glyph": ",,brightred,dullred,black,false",
     "Traits": [
       "Stackable",
       "Edible",
@@ -678,7 +678,7 @@
     "DescriptiveName": "rubble",
     "Type": "Landscape",
     "Value": 0,
-    "Glyph": "%,grey,darkgrey,black,black",
+    "Glyph": "%,grey,darkgrey,black,false",
     "Traits": [
       "Block",
       "Plural",
@@ -690,7 +690,7 @@
     "DescriptiveName": "statue",
     "Type": "Statue",
     "Value": 0,
-    "Glyph": "&,white,grey,black,black",
+    "Glyph": "&,white,grey,black,false",
     "Traits": [
       "Block",
       "Plural",
@@ -702,7 +702,7 @@
     "DescriptiveName": "vial of hill giant essence",
     "Type": "Potion",
     "Value": 150,
-    "Glyph": "!,lightbrown,brown,black,black",
+    "Glyph": "!,lightbrown,brown,black,false",
     "Traits": [
       "SideEffect#100#BoostMaxStat#Constitution#1",
       "Consumable",
@@ -715,7 +715,7 @@
     "DescriptiveName": "vial of fire giant essence",
     "Type": "Potion",
     "Value": 150,
-    "Glyph": "!,brightred,dullred,black,black",
+    "Glyph": "!,brightred,dullred,black,false",
     "Traits": [
       "SideEffect#100#BoostMaxStat#Strength#1",
       "Consumable",
@@ -728,7 +728,7 @@
     "DescriptiveName": "vial of frost giant essence",
     "Type": "Potion",
     "Value": 150,
-    "Glyph": "!,lightblue,blue,black,black",
+    "Glyph": "!,lightblue,blue,black,false",
     "Traits": [
       "SideEffect#100#BoostMaxStat#Strength#1",
       "Consumable",
@@ -741,7 +741,7 @@
     "DescriptiveName": "Gray Mouser's Guide to Stabbing",
     "Type": "Scroll",
     "Value": 100,
-    "Glyph": "♪,white,lightgrey,black,black",
+    "Glyph": "♪,white,lightgrey,black,false",
     "Traits": [
       "Consumable",
       "Flammable",
@@ -755,7 +755,7 @@
     "DescriptiveName": "Groo: the Early Years",
     "Type": "Scroll",
     "Value": 100,
-    "Glyph": "♪,white,lightgrey,black,black",
+    "Glyph": "♪,white,lightgrey,black,false",
     "Traits": [
       "Consumable",
       "Flammable",
@@ -769,7 +769,7 @@
     "DescriptiveName": "Asking About Axing Vol. 2",
     "Type": "Scroll",
     "Value": 100,
-    "Glyph": "♪,white,lightgrey,black,black",
+    "Glyph": "♪,white,lightgrey,black,false",
     "Traits": [
       "Consumable",
       "Flammable",
@@ -783,7 +783,7 @@
     "DescriptiveName": "Hit That Bullseye!",
     "Type": "Scroll",
     "Value": 100,
-    "Glyph": "♪,white,lightgrey,black,black",
+    "Glyph": "♪,white,lightgrey,black,false",
     "Traits": [
       "Consumable",
       "Flammable",
@@ -797,7 +797,7 @@
     "DescriptiveName": "torch",
     "Type": "Tool",
     "Value": 2,
-    "Glyph": "(,lightbrown,brown,black,black",
+    "Glyph": "(,lightbrown,brown,black,false",
     "Traits": [
       "Stackable",
       "Torch#owner#false#750"
@@ -808,7 +808,7 @@
     "DescriptiveName": "campfire",
     "Type": "Tool",
     "Value": 0,
-    "Glyph": "^,brightred,dullred,torchorange,black",
+    "Glyph": "^,brightred,dullred,torchorange,true",
     "Traits": [
       "LightSource#owner#1#yellow#torchorange",
       "OnFire#false#owner#max#false",
@@ -820,7 +820,7 @@
     "DescriptiveName": "Gaston's Badge",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,brightred,dullred,black,black",
+    "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&HP&20&item",
       "Named"
@@ -831,7 +831,7 @@
     "DescriptiveName": "lesser burly charm",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,brightred,dullred,black,black",
+    "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&Strength&3&item"
     ]
@@ -841,7 +841,7 @@
     "DescriptiveName": "lesser health charm",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,lightblue,blue,black,black",
+    "Glyph": "☥,lightblue,blue,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&Constitution&3&item"
     ]
@@ -851,7 +851,7 @@
     "DescriptiveName": "lesser grace charm",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,green,darkgreen,black,black",
+    "Glyph": "☥,green,darkgreen,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&Dexterity&3&item"
     ]
@@ -861,7 +861,7 @@
     "DescriptiveName": "ring of fraility",
     "Type": "Ring",
     "Value": 1,
-    "Glyph": "o,white,grey,black,black",
+    "Glyph": "o,white,grey,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&HP&-25&item",
       "CursedItem"
@@ -872,7 +872,7 @@
     "DescriptiveName": "ring of adornment",
     "Type": "Ring",
     "Value": 50,
-    "Glyph": "o,white,grey,black,black",
+    "Glyph": "o,white,grey,black,false",
     "Traits": [
       "Grants#Likeable"
     ]
@@ -882,7 +882,7 @@
     "DescriptiveName": "anti-snail sandals",
     "Type": "Armour",
     "Value": 65,
-    "Glyph": "[,brown,lightbrown,black,black",
+    "Glyph": "[,brown,lightbrown,black,false",
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#Alacrity&0.35",
@@ -894,7 +894,7 @@
     "DescriptiveName": "boots of feather falling",
     "Type": "Armour",
     "Value": 50,
-    "Glyph": "[,brown,lightbrown,black,black",
+    "Glyph": "[,brown,lightbrown,black,false",
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#FeatherFall&owner&max",
@@ -906,7 +906,7 @@
     "DescriptiveName": "heavy boots",
     "Type": "Armour",
     "Value": 65,
-    "Glyph": "[,grey,darkgrey,black,black",
+    "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Boots#2#0",
       "Grants#Alacrity&-0.2",
@@ -918,7 +918,7 @@
     "DescriptiveName": "boots of water walking",
     "Type": "Armour",
     "Value": 40,
-    "Glyph": "[,lightblue,iceblue,black,black",
+    "Glyph": "[,lightblue,iceblue,black,false",
     "Traits": [
       "Armour#Boots#0#0",
       "Grants#WaterWalking",
@@ -930,7 +930,7 @@
     "DescriptiveName": "golden apple",
     "Type": "Food",
     "Value": 1,
-    "Glyph": ",,yellow,yelloworange,black,black",
+    "Glyph": ",,yellow,yelloworange,black,false",
     "Traits": [
       "Edible",
       "Consumable",
@@ -947,7 +947,7 @@
     "DescriptiveName": "scroll of disarming",
     "Type": "Scroll",
     "Value": 25,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#disarm",
@@ -961,7 +961,7 @@
     "DescriptiveName": "scroll of treasure detection",
     "Type": "Scroll",
     "Value": 15,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#detecttreasure",
@@ -975,7 +975,7 @@
     "DescriptiveName": "scroll of trap detection",
     "Type": "Scroll",
     "Value": 10,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#detecttraps",
@@ -989,7 +989,7 @@
     "DescriptiveName": "flask of booze",
     "Type": "Potion",
     "Value": 1,
-    "Glyph": "!,lightbrown,brown,black,black",
+    "Glyph": "!,lightbrown,brown,black,false",
     "Traits": [
       "Consumable",
       "Stackable",
@@ -1001,7 +1001,7 @@
     "DescriptiveName": "troll's brooch",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,dullred,brown,black,black",
+    "Glyph": "☥,dullred,brown,black,false",
     "Traits": [
       "Grants#Regeneration&1&owner&false&max;Repugnant"
     ]
@@ -1011,7 +1011,7 @@
     "DescriptiveName": "smouldering charm",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,brightred,dullred,black,black",
+    "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
       "Grants#Resistance&Fire;Damage&6&1&Fire"
     ]
@@ -1021,7 +1021,7 @@
     "DescriptiveName": "mithril ore",
     "Type": "Reagent",
     "Value": 25,
-    "Glyph": "*,lightblue,grey,black,black",
+    "Glyph": "*,lightblue,grey,black,false",
     "Traits": [
       "Stackable"
     ]
@@ -1031,7 +1031,7 @@
     "DescriptiveName": "cutpurse crest",
     "Type": "Talisman",
     "Value": 100,
-    "Glyph": "☥,darkgrey,darkgrey,black,black",
+    "Glyph": "☥,darkgrey,darkgrey,black,false",
     "Traits": [
       "Grants#Cutpurse"
     ]
@@ -1041,7 +1041,7 @@
     "DescriptiveName": "wand of slow monster",
     "Type": "Wand",
     "Value": 150,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#10#false#slowmonster"
     ]
@@ -1051,7 +1051,7 @@
     "DescriptiveName": "leather gloves",
     "Type": "Armour",
     "Value": 10,
-    "Glyph": "[,lightbrown,brown,black,black",
+    "Glyph": "[,lightbrown,brown,black,false",
     "Traits": [
       "Armour#Gloves#1#0",
       "Plural"
@@ -1062,7 +1062,7 @@
     "DescriptiveName": "cloak of protection",
     "Type": "Armour",
     "Value": 10,
-    "Glyph": "[,grey,darkgrey,black,black",
+    "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Cloak#2#0"
     ]
@@ -1072,7 +1072,7 @@
     "DescriptiveName": "gauntlets of power",
     "Type": "Armour",
     "Value": 50,
-    "Glyph": "[,grey,darkgrey,black,black",
+    "Glyph": "[,grey,darkgrey,black,false",
     "Traits": [
       "Armour#Gloves#1#0",
       "Plural",
@@ -1084,7 +1084,7 @@
     "DescriptiveName": "potion of heroism",
     "Type": "Potion",
     "Value": 25,
-    "Glyph": "!,limegreen,green,black,black",
+    "Glyph": "!,limegreen,green,black,false",
     "Traits": [
       "UseSimple#heroism",
       "Consumable",
@@ -1096,7 +1096,7 @@
     "DescriptiveName": "wand of summoning",
     "Type": "Wand",
     "Value": 75,
-    "Glyph": "/,lightblue,blue,black,black",
+    "Glyph": "/,lightblue,blue,black,false",
     "Traits": [
       "Wand#20#false#summoning"
     ]
@@ -1106,14 +1106,14 @@
     "DescriptiveName": "generic wand",
     "Type": "Wand",
     "Value": 5,
-    "Glyph": "/,lightbrown,brown,black,black"
+    "Glyph": "/,lightbrown,brown,black,false"
   },
   {
     "Name": "MEDITATION_CRYSTAL",
     "DescriptiveName": "meditation crystal",
     "Type": "Reagent",
     "Value": 10,
-    "Glyph": "*,iceblue,lightblue,black,black",
+    "Glyph": "*,iceblue,lightblue,black,false",
     "Traits": [
       "Stackable",
       "LightSource#owner#1#iceblue#mysticaura"
@@ -1124,7 +1124,7 @@
     "DescriptiveName": "mushroom stew",
     "Type": "Food",
     "Value": 5,
-    "Glyph": ",,lightbrown,brown,black,black",
+    "Glyph": ",,lightbrown,brown,black,false",
     "Traits": [
       "Edible",
       "Consumable",
@@ -1137,7 +1137,7 @@
     "DescriptiveName": "seeweed",
     "Type": "Food",
     "Value": 20,
-    "Glyph": ",,green,darkgreen,black,black",
+    "Glyph": ",,green,darkgreen,black,false",
     "Traits": [
       "Edible",
       "UseSimple#seeinvisible",
@@ -1150,7 +1150,7 @@
     "DescriptiveName": "scroll of scattering",
     "Type": "Scroll",
     "Value": 30,
-    "Glyph": "?,white,grey,black,black",
+    "Glyph": "?,white,grey,black,false",
     "Traits": [
       "Consumable",
       "UseSimple#scatter",
@@ -1164,7 +1164,7 @@
     "DescriptiveName": "Croesus charm",
     "Type": "Talisman",
     "Value": 333,
-    "Glyph": "☥,yellow,yelloworange,black,black",
+    "Glyph": "☥,yellow,yelloworange,black,false",
     "Traits": [
       "Grants#CroesusTouch&owner"
     ]
@@ -1174,7 +1174,7 @@
     "DescriptiveName": "potion of obscurity",
     "Type": "Potion",
     "Value": 40,
-    "Glyph": "!,grey,darkgrey,black,black",
+    "Glyph": "!,grey,darkgrey,black,false",
     "Traits": [
       "UseSimple#nondescript",
       "Consumable",
@@ -1186,7 +1186,7 @@
     "DescriptiveName": "wind fan",
     "Type": "Tool",
     "Value": 25,
-    "Glyph": "),lightblue,blue,black,black",
+    "Glyph": "),lightblue,blue,black,false",
     "Traits": [
       "Consumable",
       "Cast#GustOfWind"

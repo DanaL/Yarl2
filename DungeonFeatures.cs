@@ -344,7 +344,7 @@ class IdolAltarMaker
       switch (rng.Next(3))
       {
         case 0:
-          idol.Glyph = new Glyph('"', Colours.YELLOW, Colours.YELLOW, Colours.BLACK, Colours.BLACK);
+          idol.Glyph = new Glyph('"', Colours.YELLOW, Colours.YELLOW, Colours.BLACK, false);
           idol.Traits.Add(new AdjectiveTrait("golden"));
           idol.Traits.Add(new AdjectiveTrait("crescent-shaped"));
           idol.Traits.Add(new DescriptionTrait("A gold, carved crescent moon, decorated with arcane symbols."));
@@ -353,7 +353,7 @@ class IdolAltarMaker
           break;
         case 1:
           idol.Name = "tree branch";
-          idol.Glyph = new Glyph('"', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK);
+          idol.Glyph = new Glyph('"', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
           idol.Traits.Add(new AdjectiveTrait("strange"));
           idol.Traits.Add(new AdjectiveTrait("rune-carved"));
           idol.Traits.Add(new DescriptionTrait("A branch carved with druidic runes and pictograms."));
@@ -363,7 +363,7 @@ class IdolAltarMaker
           break;
         default:
           idol.Name = "carving";
-          idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK);
+          idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false);
           idol.Traits.Add(new AdjectiveTrait("soapstone"));
           altarDesc = "An altar venerating the leviathan.";
           idol.Traits.Add(new DescriptionTrait("A worn soapstone statue of a sea creature."));
@@ -450,7 +450,7 @@ class CaptiveFeature
     Mob prisoner = new()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
-      Glyph = new Glyph('@', Colours.FAINT_PINK, Colours.PINK, Colours.BLACK, Colours.BLACK),
+      Glyph = new Glyph('@', Colours.FAINT_PINK, Colours.PINK, Colours.BLACK, false),
       Appearance = $"A disheveled, exhausted-looking {s}."
     };
     prisoner.Traits.Add(new VillagerTrait());

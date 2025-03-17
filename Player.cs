@@ -50,7 +50,7 @@ class Player : Actor
     Name = name;
     Recovery = 1.0; // Do I want a 'NaturalRecovery' or such to track cases when
                     // when a Player's recover is bolstered by, like, a Potion of Speed or such?
-    Glyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+    Glyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
   }
 
   public override int Z() => 12;

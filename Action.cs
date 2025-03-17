@@ -1571,7 +1571,7 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
           if (tile.IsTrap())
           {
             ++trapsFound;
-            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, true);
             GameState.CurrentDungeon.RememberedLocs[loc] = g;
             Traps.RevealTrap(tile, GameState, loc);
 
@@ -1724,7 +1724,7 @@ class MirrorImageAction : Action
 
   static Mob MakeDuplciate(GameState gs, Actor src)
   { 
-    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit, src.Glyph.BGLit, src.Glyph.BGUnlit);
+    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit, src.Glyph.BG, src.Glyph.Illuminate);
     
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that
@@ -2760,7 +2760,7 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
     {
       Name = "ray of slowness",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('*', Colours.FADED_PURPLE, Colours.FADED_PURPLE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('*', Colours.FADED_PURPLE, Colours.FADED_PURPLE, Colours.BLACK, false)
     };
     GameState!.ObjDb.Add(ray);
 
@@ -2877,7 +2877,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     {
       Name = "ray of frost",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('*', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
     };
     ray.Traits.Add(new DamageTrait() { DamageDie = 4, NumOfDie = 3, DamageType = DamageType.Cold });
     GameState!.ObjDb.Add(ray);
@@ -2926,7 +2926,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
     {
       Name = "magic missile",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('-', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('-', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
     missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
     GameState!.ObjDb.Add(missile);

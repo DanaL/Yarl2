@@ -36,15 +36,15 @@ class PocketDimension
   {
     Glyph mg = monster.Glyph;
     Map map = new(3, 3);
-    map.SetTile(0, 0, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(0, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(0, 2, new MonsterWall(new Glyph('\\', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(1, 0, new MonsterWall(new Glyph('|', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
+    map.SetTile(0, 0, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(0, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(0, 2, new MonsterWall(new Glyph('\\', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(1, 0, new MonsterWall(new Glyph('|', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
     map.SetTile(1, 1, TileFactory.Get(TileType.DungeonFloor));
-    map.SetTile(1, 2, new MonsterWall(new Glyph('|', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(2, 0, new MonsterWall(new Glyph('\\', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(2, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
-    map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BGLit, mg.BGUnlit), monster.ID));
+    map.SetTile(1, 2, new MonsterWall(new Glyph('|', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(2, 0, new MonsterWall(new Glyph('\\', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(2, 1, new MonsterWall(new Glyph('-', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
+    map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
     Dungeon belly = new(dungeonId, $"You've been swallowed by {monster.Name.IndefArticle()}!");

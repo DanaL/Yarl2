@@ -241,7 +241,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       UI.AlertPlayer(s);
     }
 
-    foreach (Trait t in item.Traits)
+    List<Trait> itemTraits = [..item.Traits];
+    foreach (Trait t in itemTraits)
     {
       if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)
         ApplyDamageEffectToLoc(loc, DamageType.Fire);
@@ -1687,7 +1688,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           else
           {
             int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
-            scale = 1.0 - d * 0.10;            
+            scale = 1.0 - d * 0.125;            
           }
         
           LitSqs[sq.Key] = (fgLightColour, bgLightColour, scale);
@@ -1718,7 +1719,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       _ => Colours.TORCH_YELLOW
     };
 
-    return new Glyph(ch, colour, colour, Colours.BLACK, Colours.BLACK);
+    return new Glyph(ch, colour, colour, Colours.BLACK, false);
   }
 
   public void PrepareFieldOfView()
@@ -1813,7 +1814,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             var belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
             ch = belowTile.Ch;
           }
-          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, Colours.BLACK);
+          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);
         }
       }
 

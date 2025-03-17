@@ -633,7 +633,7 @@ class MonsterFactory
 
     char ch = fields[0].Length == 0 ?  ' ' : fields[0][0];
     var glyph = new Glyph(ch, Colours.TextToColour(fields[1]),
-                                Colours.TextToColour(fields[2]), Colours.BLACK, Colours.BLACK);
+                                Colours.TextToColour(fields[2]), Colours.BLACK, false);
 
     var m = new Mob()
     {
@@ -857,7 +857,7 @@ class NoOne : Actor
     private NoOne()
     {
         Name = "No One";
-        Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK);
+        Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false);
     }
 
     public override Actor PickTarget(GameState gs) => this;

@@ -97,9 +97,9 @@ abstract class UserInterface
   {
     _options = opts;
     if (opts.HighlightPlayer)
-      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, Colours.HILITE);
+      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, false);
     else
-      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
   }
 
   public void ClearLongMessage()
@@ -1046,18 +1046,21 @@ abstract class UserInterface
           glyph = GameObjectDB.EMPTY;
 
         Colour fgColour, bgColour;
-        if (gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo) && (glyph.Ch == '.' || glyph.Ch == '#'))
+        if (gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo))
         {
-          int alpha = int.Max(15, (int)(glyph.Lit.Alpha * lightInfo.Scale));
-          fgColour = glyph.Lit with { Alpha = alpha };
-          alpha = int.Max(15, (int)(lightInfo.BgColour.Alpha * lightInfo.Scale));
-          bgColour = lightInfo.BgColour with { Alpha = alpha };
+          fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
+          int alpha = int.Max(15, (int)(fgColour.Alpha * lightInfo.Scale));
+          fgColour = fgColour with { Alpha = alpha };          
+          bgColour = lightInfo.BgColour;
+          alpha = int.Max(15, (int)(bgColour.Alpha * lightInfo.Scale));
+          bgColour = bgColour with { Alpha = alpha };
         }
         else
         {
           fgColour = glyph.Lit;
-          bgColour = glyph.BGLit;
+          bgColour = glyph.BG;
         }
+
         sqr = new Sqr(fgColour, bgColour, glyph.Ch);
       }
     }
@@ -1066,7 +1069,7 @@ abstract class UserInterface
       if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
         sqr = Constants.ROOF;
       else
-        sqr = new Sqr(glyph.Unlit, glyph.BGUnlit, glyph.Ch);
+        sqr = new Sqr(glyph.Unlit, glyph.BG, glyph.Ch);
     }
     else
     {
@@ -1141,7 +1144,7 @@ abstract class UserInterface
 
     if (ZLayer[PlayerScreenRow, PlayerScreenCol] == Constants.BLANK_SQ)
     {
-      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BGLit, PlayerGlyph.Ch);
+      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BG, PlayerGlyph.Ch);
     }
   }
   

@@ -1111,7 +1111,7 @@ class DialogueInterpreter
     var (fg, bg) = Util.MetallicColour(Metals.Iron);
     Item key = new() { 
       Name = "key", Type = ItemType.Tool, Value = 1,
-      Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph(';', fg, bg, Colours.BLACK, false)
     };
     key.Traits.Add(new MetalTrait() { Type = Metals.Iron });
 
@@ -1187,7 +1187,7 @@ class DialogueInterpreter
           Tile tile = gs.TileAt(loc);
           if (tile.IsTrap())
           {
-            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, Colours.BLACK);
+            Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, true);
             gs.CurrentDungeon.RememberedLocs[loc] = g;
             Traps.RevealTrap(tile, gs, loc);            
           }

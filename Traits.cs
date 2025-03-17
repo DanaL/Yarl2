@@ -1479,7 +1479,7 @@ class AmmoTrait : Trait
       Name = "arrow",
       Type = ItemType.Weapon,
       Value = 0,
-      Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('-', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false)
     };
 
     arrow.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType });

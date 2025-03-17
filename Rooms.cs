@@ -330,7 +330,7 @@ class Vaults
     var (fg, bg) = Util.MetallicColour(material);
     Item key = new() { 
       Name = "key", Type = ItemType.Tool, Value = 1,
-      Glyph = new Glyph(';', fg, bg, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph(';', fg, bg, Colours.BLACK, false)
     };
     key.Traits.Add(new MetalTrait() { Type = material });
     key.Traits.Add(new VaultKeyTrait(new Loc(dungeonID, level, doorRow, doorCol)));
@@ -605,7 +605,7 @@ class Rooms
 
     Item effigy = ItemFactory.Get(ItemNames.STATUE, objDb);
     effigy.Name = "dragon effigy";
-    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK);
+    effigy.Glyph = new('D', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, true);
     effigy.Traits.Add(new FlammableTrait());
     effigy.Traits.Add(new DescriptionTrait("A rustic wood effigy of a roaring dragon."));
     objDb.SetToLoc(effigyLoc, effigy);

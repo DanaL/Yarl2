@@ -42,7 +42,7 @@ class Tutorial(UserInterface ui)
     {
       Name = "Encouraging Note",
       Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
     doc.Traits.Add(new ScrollTrait());
     

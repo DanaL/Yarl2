@@ -19,8 +19,8 @@ namespace Yarl2;
 // Although it does make a nicer parameter to pass around to methods
 record struct Loc(int DungeonID, int Level, int Row, int Col)
 {
-  public static Loc Nowhere = new Loc(-1, -1, -1, -1);
-  public static Loc Zero = new Loc(0, 0, 0, 0);
+  public static Loc Nowhere = new(-1, -1, -1, -1);
+  public static Loc Zero = new(0, 0, 0, 0);
   // A convenient method because this comes up a lot.
   public Loc Move(int RowDelta, int ColDelta)
   {
@@ -38,11 +38,11 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
 
 enum GlyphType { Terrain, Item, Mob }
 
-record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BGLit, Colour BGUnlit)
+record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BG, bool Illuminate)
 {
   public override readonly string ToString()
   {    
-    return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(BGLit)},{Colours.ColourToText(BGUnlit)}";
+    return $"{Ch},{Colours.ColourToText(Lit)},{Colours.ColourToText(Unlit)},{Colours.ColourToText(BG)},{Illuminate}";
   }
 
   public static Glyph TextToGlyph(string text)
@@ -54,7 +54,7 @@ record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BGLit, Colour BGUn
       text = text[1..];
     var p = text.Split(',');
 
-    return new Glyph(ch, Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]), Colours.TextToColour(p[4]));
+    return new Glyph(ch, Colours.TextToColour(p[1]), Colours.TextToColour(p[2]), Colours.TextToColour(p[3]), Convert.ToBoolean(p[4]));
   }
 }
 
@@ -172,7 +172,7 @@ abstract class GameObj : IZLevel
 // Structure to store where items are in the world
 class GameObjectDB
 {
-  public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK, Colours.BLACK);
+  public static readonly Glyph EMPTY = new('\0', Colours.BLACK, Colours.BLACK, Colours.BLACK, false);
 
   public Dictionary<Loc, List<Item>> _itemLocs = [];
   public Dictionary<Loc, ulong> _actorLocs = [];

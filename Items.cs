@@ -315,14 +315,14 @@ class ItemFactory
 
     return material switch
     {
-      "silver ring" => new Glyph('o', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK),
-      "iron ring" => new Glyph('o', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-      "gold ring" => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK),
-      "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
-      "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
-      "jade ring" => new Glyph('o', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
-      "wood ring" => new Glyph('o', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
-      _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, Colours.BLACK)
+      "silver ring" => new Glyph('o', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
+      "iron ring" => new Glyph('o', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+      "gold ring" => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
+      "ruby ring" => new Glyph('o', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
+      "diamond ring" => new Glyph('o', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false),
+      "jade ring" => new Glyph('o', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
+      "wood ring" => new Glyph('o', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
+      _ => new Glyph('o', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
   }
 
@@ -332,18 +332,18 @@ class ItemFactory
 
     return material switch
     {
-      "maple wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
-      "oak wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
-      "birch wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
-      "balsa wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, Colours.BLACK),
-      "glass wand" => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK),
-      "silver wand" => new Glyph('/', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, Colours.BLACK),
-      "tin wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-      "iron wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-      "ebony wand" => new Glyph('/', Colours.DARK_BLUE, Colours.DARK_GREY, Colours.BLACK, Colours.BLACK),
-      "cherrywood wand" => new Glyph('/', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, Colours.BLACK),
-      "jade wand" => new Glyph('/', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, Colours.BLACK),
-      _ => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, Colours.BLACK)
+      "maple wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, false),
+      "oak wand" => new Glyph('/', Colours.BROWN, Colours.DULL_RED, Colours.BLACK, false),
+      "birch wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
+      "balsa wand" => new Glyph('/', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
+      "glass wand" => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false),
+      "silver wand" => new Glyph('/', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false),
+      "tin wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+      "iron wand" => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+      "ebony wand" => new Glyph('/', Colours.DARK_BLUE, Colours.DARK_GREY, Colours.BLACK, false),
+      "cherrywood wand" => new Glyph('/', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
+      "jade wand" => new Glyph('/', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
+      _ => new Glyph('/', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
     };
   }
 
@@ -354,7 +354,7 @@ class ItemFactory
       Name = "mist",
       Type = ItemType.Fog,
       Value = 0,
-      Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
+      Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
     mist.Traits.Add(new OpaqueTrait() { Visibility = 3 });
@@ -369,7 +369,7 @@ class ItemFactory
       Name = "fog",
       Type = ItemType.Fog,
       Value = 0,
-      Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, Colours.DARK_GREY)
+      Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
     mist.Traits.Add(new OpaqueTrait() { Visibility = 0 });
@@ -387,11 +387,11 @@ class ItemFactory
     Glyph glyph;
     var roll = gs.Rng.NextDouble();
     if (roll < 0.333)
-      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, false);
     else if (roll < 0.666)
-      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_RED, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_RED, false);
     else
-      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, Colours.BLACK);
+      glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, false);
 
     var fire = new Item()
     {
@@ -423,7 +423,7 @@ class ItemFactory
       Name = "webs",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK, Colours.BLACK)
+      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK, true)
     };
     web.Traits.Add(new StickyTrait());
     web.Traits.Add(new FlammableTrait());
