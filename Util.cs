@@ -643,7 +643,7 @@ class Util
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
     TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.GREY, Colours.GREY, Colours.BLACK, true),
-    TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
+    TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.HiddenTeleportTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.TeleportTrap => new Glyph('^', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK, false),
     TileType.BrokenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
