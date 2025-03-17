@@ -1619,10 +1619,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
+  readonly Dictionary<Loc, int> _litPool = [];
   Dictionary<Loc, int> CalcLitLocations(Dictionary<Loc, int> playerFoV, int dungeonID, int level)
   {
-    Dictionary<Loc, int> lit = [];
-    LitSqs = [];
+    _litPool.Clear();
+    LitSqs.Clear();
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
@@ -1685,8 +1686,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           if (!playerFoV.TryGetValue(sq.Key, out var pIllum) || (pIllum & sq.Value) == Illumination.None)
             continue;
           
-          if (!lit.TryAdd(sq.Key, sq.Value))
-            lit[sq.Key] |= sq.Value;
+          if (!_litPool.TryAdd(sq.Key, sq.Value))
+            _litPool[sq.Key] |= sq.Value;
 
           double scale;
           if (InWilderness) 
@@ -1715,7 +1716,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
 
-    return lit;
+    return _litPool;
   }
 
   Glyph Hallucination()
@@ -1748,27 +1749,31 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
     Dictionary<Loc, int> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
-    
+
     // if the player is not blind, let them see adj sqs regardless of 
     // illumination status. (If the player is surrounded by a fog cloud or such
     // they could come back as not illumination)
-    HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
+    LastPlayerFoV.Clear();
+    if (!blind)
+    {
+      foreach (Loc loc in Util.Adj8Locs(Player.Loc))
+        LastPlayerFoV.Add(loc);
+    }
 
     Dictionary<Loc, int> lit = CalcLitLocations(playerFoV, CurrDungeonID, CurrLevel);
     foreach (var sq in playerFoV)
     {
       int playerIllum = sq.Value;
       if (lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
-        fov.Add(sq.Key);
+        LastPlayerFoV.Add(sq.Key);
     }
-    LastPlayerFoV = fov;
-
+    
     // Calculate which squares are newly viewed and check if there are
     // monsters in any of them. If so, we alert the Player (mainly to 
     // halt running when a monster comes into view)
     var prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
     RecentlySeenMonsters = [Player.ID];
-    foreach (Loc loc in fov)
+    foreach (Loc loc in LastPlayerFoV)
     {
       if (ObjDb.Occupant(loc) is Actor occ && occ.VisibleTo(Player))
         RecentlySeenMonsters.Add(occ.ID);
@@ -1792,8 +1797,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (hallucinationCount > 0) 
       {
-        var fovLocs = fov.ToList();
-        for (int j = 0; j < hallucinationCount && fovLocs.Count > 0; j++)
+        List<Loc> fovLocs = [..LastPlayerFoV];
+        for (int j = 0; j < hallucinationCount && LastPlayerFoV.Count > 0; j++)
         {
           int i = Rng.Next(fovLocs.Count);
           hallucinations.Add(fovLocs[i]);
@@ -1802,7 +1807,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       }
     }
 
-    foreach (Loc loc in fov)
+    foreach (Loc loc in LastPlayerFoV)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (glyph, z) = ObjDb.ItemGlyph(loc, Player.Loc);
