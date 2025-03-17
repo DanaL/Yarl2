@@ -286,7 +286,7 @@ class TitleScreen
 
     int fov = InDungeon ? 5 : 25;
 
-    Dictionary<Loc, Illumination> visible = FieldOfView.CalcVisible(fov, Player, Map!, ObjDb);
+    Dictionary<Loc, int> visible = FieldOfView.CalcVisible(fov, Player, Map!, ObjDb);
 
     for (int viewR = 0; viewR < viewHeight; viewR++)
     {

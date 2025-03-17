@@ -185,7 +185,7 @@ class CastSparkArc(GameState gs, Actor actor) : CastSpellAction(gs, actor)
       return Loc.Nowhere;
 
     List<Loc> targets = [];
-    Dictionary<Loc, Illumination> visible = FieldOfView.CalcVisible(7, currTarget, gs.CurrentMap, gs.ObjDb);    
+    Dictionary<Loc, int> visible = FieldOfView.CalcVisible(7, currTarget, gs.CurrentMap, gs.ObjDb);    
     foreach (Loc loc in visible.Keys)
     {
       if (visible[loc] != Illumination.Full)

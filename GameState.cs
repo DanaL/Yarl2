@@ -1619,9 +1619,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
-  Dictionary<Loc, Illumination> CalcLitLocations(Dictionary<Loc, Illumination> playerFoV, int dungeonID, int level)
+  Dictionary<Loc, int> CalcLitLocations(Dictionary<Loc, int> playerFoV, int dungeonID, int level)
   {
-    Dictionary<Loc, Illumination> lit = [];
+    Dictionary<Loc, int> lit = [];
     LitSqs = [];
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
@@ -1678,7 +1678,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
       if (lightRadius > 0)
       {
-        Dictionary<Loc, Illumination> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
+        Dictionary<Loc, int> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
         
         foreach (var sq in fov)
         {
@@ -1747,17 +1747,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
-    Dictionary<Loc, Illumination> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
+    Dictionary<Loc, int> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
     
     // if the player is not blind, let them see adj sqs regardless of 
     // illumination status. (If the player is surrounded by a fog cloud or such
     // they could come back as not illumination)
     HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
 
-    Dictionary<Loc, Illumination> lit = CalcLitLocations(playerFoV, CurrDungeonID, CurrLevel);
+    Dictionary<Loc, int> lit = CalcLitLocations(playerFoV, CurrDungeonID, CurrLevel);
     foreach (var sq in playerFoV)
     {
-      Illumination playerIllum = sq.Value;
+      int playerIllum = sq.Value;
       if (lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
         fov.Add(sq.Key);
     }

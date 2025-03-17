@@ -14,14 +14,14 @@
 
 namespace Yarl2;
 
-enum Illumination
+class Illumination
 {
-  None = 0,
-  NE = 0b0001,
-  NW = 0b0010,
-  SE = 0b0100,
-  SW = 0b1000,
-  Full = 0b1111,
+  public const int None = 0;
+  public const int NE = 0b0001;
+  public const int NW = 0b0010;
+  public const int SE = 0b0100;
+  public const int SW = 0b1000;
+  public const int Full = 0b1111;
 }
 
 class Shadow(float start, float end)
@@ -101,9 +101,9 @@ class FieldOfView
     };
   }
 
-  static Dictionary<Loc, Illumination> CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
+  static Dictionary<Loc, int> CalcOctant(int radius, Loc origin, Map map, int octant, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
-    Dictionary<Loc, Illumination> visibleSqs = [];
+    Dictionary<Loc, int> visibleSqs = [];
     bool fullShadow = false;
     var line = new ShadowLine();
 
@@ -123,7 +123,7 @@ class FieldOfView
         var projection = ProjectTile(row, col);
         if (!line.IsInShadow(projection))
         {
-          Illumination illum;
+          int illum;
           var loc = origin with { Row = r, Col = c};
           if (IsOpaque(loc, origin, map, objDb, opaqueLocs))
           {
@@ -161,9 +161,9 @@ class FieldOfView
   // In this case, the @ can see the NW corner of the corner tile. If there is a light source
   // on the other side of the wall, it would be illuminating the SW corner of the corner tile.
   // (And the player wouldn't see it as lit, assuming their own light source is radius 1)
-  static Illumination CalcIllumination(Loc pt, Loc origin, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
+  static int CalcIllumination(Loc pt, Loc origin, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
-    Illumination illum = Illumination.None;
+    int illum = Illumination.None;
     if (pt.Row > origin.Row) 
     {
       Loc sqAbove = pt with { Row = pt.Row - 1};
@@ -240,15 +240,15 @@ class FieldOfView
     return opacity;
   }
 
-  public static Dictionary<Loc, Illumination> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
+  public static Dictionary<Loc, int> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
   {
     Dictionary<Loc, bool> opqueLocs = [];
-    Dictionary<Loc, Illumination> visible = [];
+    Dictionary<Loc, int> visible = [];
     visible.Add(loc, Illumination.Full);
 
     for (int j = 0; j < 8; j++)
     {
-      Dictionary<Loc, Illumination> octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
+      Dictionary<Loc, int> octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
       foreach (var sq in octant)
       {
         if (!visible.TryAdd(sq.Key, sq.Value))
