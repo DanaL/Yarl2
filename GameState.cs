@@ -1618,7 +1618,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     return messages;
   }
 
-  Dictionary<Loc, Illumination> CalcLitLocations(int dungeonID, int level)
+  Dictionary<Loc, Illumination> CalcLitLocations(Dictionary<Loc, Illumination> playerFoV, int dungeonID, int level)
   {
     Dictionary<Loc, Illumination> lit = [];
     LitSqs = [];
@@ -1673,8 +1673,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
       if (lightRadius > 0)
       {
         Dictionary<Loc, Illumination> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
+        
         foreach (var sq in fov)
         {
+          if (!playerFoV.TryGetValue(sq.Key, out var pIllum) || (pIllum & sq.Value) == Illumination.None)
+            continue;
+          
           if (!lit.TryAdd(sq.Key, sq.Value))
             lit[sq.Key] |= sq.Value;
 
@@ -1737,14 +1741,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
-    var playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
+    Dictionary<Loc, Illumination> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
     
     // if the player is not blind, let them see adj sqs regardless of 
     // illumination status. (If the player is surrounded by a fog cloud or such
     // they could come back as not illumination)
     HashSet<Loc> fov = blind ? [] : [ ..Util.Adj8Locs(Player.Loc)];
 
-    Dictionary<Loc, Illumination> lit = CalcLitLocations(CurrDungeonID, CurrLevel);
+    Dictionary<Loc, Illumination> lit = CalcLitLocations(playerFoV, CurrDungeonID, CurrLevel);
     foreach (var sq in playerFoV)
     {
       Illumination playerIllum = sq.Value;
