@@ -41,7 +41,7 @@ class Colours
   public static readonly Colour GREEN = new(144, 238, 144, 255);
   public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
   public static readonly Colour LIME_GREEN = new(191, 255, 0, 255);
-  public static readonly Colour BLUE = new(0, 0, 200, 255);
+  public static readonly Colour BLUE = new(0, 128, 255, 255);
   public static readonly Colour LIGHT_BLUE = new(55, 198, 255, 255);
   public static readonly Colour DARK_BLUE = new(12, 35, 128, 255);
   public static readonly Colour BRIGHT_RED = new(208, 28, 31, 255);

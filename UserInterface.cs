@@ -1036,9 +1036,11 @@ abstract class UserInterface
       else
       {
         Glyph glyph;
+        bool isMob = false;
         if (gs.ObjDb.Occupant(loc) is Actor actor && actor.VisibleTo(gs.Player))
         {
           glyph = actor.Glyph;
+          isMob = true;
         }
         else if (gs.ObjDb.FogAtLoc(loc, gs.Player.Loc) is Glyph fog)
           glyph = fog;
@@ -1050,12 +1052,16 @@ abstract class UserInterface
         Colour fgColour, bgColour;
         if (gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo))
         {
+          double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
           fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
-          int alpha = int.Max(15, (int)(fgColour.Alpha * lightInfo.Scale));
+          int alpha = int.Max(15, (int)(fgColour.Alpha * scale));
           fgColour = fgColour with { Alpha = alpha };          
           bgColour = lightInfo.BgColour;
-          alpha = int.Max(15, (int)(bgColour.Alpha * lightInfo.Scale));
+          alpha = int.Max(15, (int)(bgColour.Alpha * scale));
           bgColour = bgColour with { Alpha = alpha };
+
+          if (isMob)
+            bgColour = glyph.BG;
         }
         else
         {
