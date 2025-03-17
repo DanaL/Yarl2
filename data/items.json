@@ -1191,5 +1191,27 @@
       "Consumable",
       "Cast#GustOfWind"
     ]
+  },
+  {
+    "Name": "BLUE_CRYSTAL",
+    "DescriptiveName": "blue crystal",
+    "Type": "Reagent",
+    "Value": 1,
+    "Glyph": "*,lightblue,blue,black,false",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#2#blue#blueaura"
+    ]
+  },
+  {
+    "Name": "RED_CRYSTAL",
+    "DescriptiveName": "red crystal",
+    "Type": "Reagent",
+    "Value": 1,
+    "Glyph": "*,brightred,dullred,black,false",
+    "Traits": [
+      "Stackable",
+      "LightSource#owner#2#brightred#redaura"
+    ]
   }
 ]

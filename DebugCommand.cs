@@ -110,7 +110,9 @@ class DebugCommand(GameState gs)
     {"boots of feather falling", ItemNames.FEATHERFALL_BOOTS },
     {"campfire", ItemNames.CAMPFIRE },
     {"wind fan", ItemNames.WIND_FAN },
-    {"skeleton key", ItemNames.SKELETON_KEY }
+    {"skeleton key", ItemNames.SKELETON_KEY },
+    {"red crystal", ItemNames.RED_CRYSTAL },
+    {"blue crystal", ItemNames.BLUE_CRYSTAL }
   };
 
   public string DoCommand(string txt)
@@ -220,7 +222,7 @@ class DebugCommand(GameState gs)
     if (name.EndsWith("illusion"))
     {
       illusion = true;
-      name = name.Substring(0, name.LastIndexOf(' '));
+      name = name[..name.LastIndexOf(' ')];
     }
 
     if (ItemMap.TryGetValue(name, out var itemEnum))

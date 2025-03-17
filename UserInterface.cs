@@ -1037,7 +1037,9 @@ abstract class UserInterface
       {
         Glyph glyph;
         if (gs.ObjDb.Occupant(loc) is Actor actor && actor.VisibleTo(gs.Player))
+        {
           glyph = actor.Glyph;
+        }
         else if (gs.ObjDb.FogAtLoc(loc, gs.Player.Loc) is Glyph fog)
           glyph = fog;
         else if (remembered.TryGetValue(loc, out Glyph rememberedGlyph))

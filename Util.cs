@@ -62,6 +62,8 @@ class Colours
   public static readonly Colour SOPHIE_GREEN = new(138, 195, 171, 255);
   public static readonly Colour GHOSTLY_AURA = new(0, 71, 49, 100);
   public static readonly Colour MYSTIC_AURA = new(40, 254, 253, 50);
+  public static readonly Colour RED_AURA = new(208, 28, 31, 75);
+  public static readonly Colour BLUE_AURA = new(0, 0, 200, 75);
 
   public static string ColourToText(Colour colour)
   {
@@ -97,6 +99,8 @@ class Colours
     else if (colour == ROOF_TILE) return "rooftile";
     else if (colour == GHOSTLY_AURA) return "ghostlyaura";
     else if (colour == MYSTIC_AURA) return "mysticaura";
+    else if (colour == BLUE_AURA) return "blueaura";
+    else if (colour == RED_AURA) return "redaura";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -135,6 +139,8 @@ class Colours
     "rooftile" => ROOF_TILE,
     "ghostlyaura" => GHOSTLY_AURA,
     "mysticaura" => MYSTIC_AURA,
+    "blueaura" => BLUE_AURA,
+    "redaura" => RED_AURA,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
@@ -635,8 +641,8 @@ class Util
     TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
-    TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, true),
-    TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, true),
+    TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
+    TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.HiddenTeleportTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.TeleportTrap => new Glyph('^', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK, false),
@@ -656,7 +662,7 @@ class Util
     TileType.Gravestone => new Glyph('\u25AE', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.DisturbedGrave => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.BridgeTrigger => new Glyph('•', Colours.GREY, Colours.GREY, Colours.BLACK, true),
-    TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.YELLOW, Colours.GREY, Colours.BLACK, true),
+    TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.ReveealedBridgeCollapseTrap => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
     TileType.BusinessSign => new Glyph('Þ', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false),
     TileType.FakeStairs => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
