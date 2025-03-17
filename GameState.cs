@@ -1691,7 +1691,16 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
             scale = 1.0 - d * 0.125;            
           }
         
-          LitSqs[sq.Key] = (fgLightColour, bgLightColour, scale);
+          if (sq.Value == Illumination.Full && LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, double Scale) existingLight))
+          {
+            Colour blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
+            Colour blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
+            LitSqs[sq.Key] = (blendedFg, blendedBg, scale);
+          }
+          else
+          {
+            LitSqs[sq.Key] = (fgLightColour, bgLightColour, scale);
+          }
         }
       }
     }

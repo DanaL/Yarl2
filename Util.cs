@@ -138,6 +138,21 @@ class Colours
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
+
+  public static Colour Blend(Colour a, Colour b)
+  {
+    float totalAlpha = a.Alpha + b.Alpha;
+    double scaleA = a.Alpha / totalAlpha;
+    double scaleB = b.Alpha / totalAlpha;
+
+    return new Colour
+    {
+      R = int.Min(255, (int) (a.R * scaleA + b.R * scaleB)),
+      G = int.Min(255, (int) (a.G * scaleA + b.G * scaleB)),
+      B = int.Min(255, (int) (a.B * scaleA + b.B * scaleB)),
+      Alpha = int.Min(255, (int) totalAlpha)
+    };
+  }
 }
 
 enum Metals { NotMetal, Iron, Steel, Bronze, Mithril, Silver }
