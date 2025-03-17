@@ -1376,7 +1376,7 @@ abstract class UserInterface
 
       TimeSpan elapsed = DateTime.UtcNow - refresh;
       int totalMs = (int) elapsed.TotalMilliseconds;
-      if (totalMs >= 16)
+      if (totalMs >= 50)
       {
         SetSqsOnScreen(gameState);
 
@@ -1386,10 +1386,6 @@ abstract class UserInterface
         
         UpdateDisplay(gameState);
         refresh = DateTime.UtcNow;
-      }
-      else
-      {
-        //Delay(5);
       }      
     }
 
