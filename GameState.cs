@@ -303,8 +303,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     if (Player.Stats[Attribute.GoldSacrificed].Curr > 100 && cultLevel == 0)
     {
       UI.AlertPlayer("We appreciate the pledging of your soul and service!");
+      Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
 
-      NameGenerator ng = new(Rng, Util.KoboldNamesFile);
       foreach (Actor actor in ObjDb.AllActors())
       {
         if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
@@ -313,10 +313,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
           if (actor.Name == "kobold")
           {
-            actor.Name = ng.GenerateName(Rng.Next(4, 7)).Capitalize();
-            actor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist.txt" });
-            actor.Traits.Add(new NamedTrait());
-            actor.Appearance = Village.KoboldAppearance(Rng);
+            Kobold.MakeCultist(actor, Rng);
+          }
+          else if (actor.Name == "kobold soothsayer")
+          {
+            Kobold.MakeCultLeader(actor, Rng);
           }
         }
       }

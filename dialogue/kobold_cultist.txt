@@ -6,5 +6,6 @@
     "Being in the cult is pretty great, huh?"
     "Have you been shown the secret handshake yet?"
     "Do you think we go to dragon heaven when we die?"
+    "One of us! One of us!"
   ))
 )

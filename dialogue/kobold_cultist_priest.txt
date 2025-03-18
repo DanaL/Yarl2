@@ -1,0 +1,8 @@
+﻿(say 
+  (pick
+   (
+    "The hunger of #DRAGON_NAME is endless. They need more offerings!"
+    "We have enemies here who would see our faith eliminated."
+    "Beware Moloch's lies!"    
+  ))
+)
