@@ -59,7 +59,7 @@ class Kobold
     return sb.ToString();
   }
 
-  public static void MakeCultist(Actor cultist, Random rng)
+  static void MakeCultist(Actor cultist, Random rng)
   {
     NameGenerator ng = new(rng, Util.KoboldNamesFile);
     cultist.Name = ng.GenerateName(rng.Next(4, 7)).Capitalize();
@@ -75,5 +75,75 @@ class Kobold
     leader.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist_priest.txt" });
     leader.Traits.Add(new NamedTrait());
     leader.Appearance = Appearance(rng);
+  }
+
+  public static bool OfferGold(GameState gs, Item zorkmids, Loc loc)
+  {
+    Loc effigyLoc = Loc.Nowhere;
+    foreach (Loc adj in Util.Adj4Locs(loc))
+    {
+      if (gs.ObjDb.ItemsAt(adj).Where(i => i.Name == "dragon effigy").Any())
+      {
+        effigyLoc = adj;
+        break;
+      }
+    }
+
+    if (effigyLoc == Loc.Nowhere)
+      return false;
+
+    gs.UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
+    gs.ObjDb.RemoveItemFromGame(loc, zorkmids);
+
+    if (gs.Player.Stats.TryGetValue(Attribute.GoldSacrificed, out var donationStat))
+    {
+      donationStat.SetMax(donationStat.Curr + zorkmids.Value);
+    }
+    else
+    {
+      gs.Player.Stats[Attribute.GoldSacrificed] = new Stat(zorkmids.Value);
+    }
+
+    int cultLevel = 0;
+    if (gs.Player.Stats.TryGetValue(Attribute.KoboldCultLevel, out var cultLevelStat))
+    {
+      cultLevel = cultLevelStat.Curr;
+    }
+
+    int goldDonated = gs.Player.Stats[Attribute.GoldSacrificed].Curr;
+
+    if (goldDonated > 100 && cultLevel == 0)
+    {
+      gs.UIRef().AlertPlayer("We appreciate the pledging of your soul and service!");
+      gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
+
+      foreach (Actor actor in gs.ObjDb.AllActors())
+      {
+        if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
+        {
+          actor.Traits.Add(new FriendlyMonsterTrait());
+
+          if (actor.Name == "kobold")
+          {
+            MakeCultist(actor, gs.Rng);
+          }
+          else if (actor.Name == "kobold soothsayer")
+          {
+            MakeCultLeader(actor, gs.Rng);
+          }
+        }
+      }
+
+      return true;
+    }
+
+
+    if (goldDonated > 150 && cultLevel == 1 && gs.Rng.NextDouble() < 0.333)
+    {
+      gs.UIRef().AlertPlayer("My beloved servant!");
+      gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
+    }
+
+    return true;
   }
 }

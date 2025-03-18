@@ -822,6 +822,10 @@ class DialogueInterpreter
           return fact.Value;
         else
           return "";
+      case "KOBOLD_CULT_LEVEL":
+        if (gs.Player.Stats.TryGetValue(Attribute.KoboldCultLevel, out var cultLevel))
+          return cultLevel.Curr;
+        return 0;
       default:
         throw new Exception($"Unknown variable {name}");
     }    

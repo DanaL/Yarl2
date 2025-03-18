@@ -460,11 +460,10 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
 
-    if (!CheckCost(1, 20))
+    if (!CheckCost(1, 0))
       return 0.0;
 
     HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
@@ -523,7 +522,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
     GameState.UIRef().ClosePopup();
     
-    if (!FreeToCast && !CheckCost(1, 20))
+    if (!FreeToCast && !CheckCost(1, 0))
       return 0.0;
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");
@@ -799,6 +798,63 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
   }
 }
 
+class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
+{
+  List<Loc> Affected { get; set; } = [];
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
+    GameState.UIRef().ClosePopup();
+
+    if (!CheckCost(3, 0))
+      return 0.0;
+
+    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
+    ExplosionAnimation blast = new(GameState!)
+    {
+      MainColour = Colours.TORCH_ORANGE,
+      AltColour1 = Colours.TORCH_RED,
+      AltColour2 = Colours.TORCH_YELLOW,
+      Highlight = Colours.WHITE,
+      Centre = Actor!.Loc,
+      Sqs = animLocs,
+      Ch = '*'
+    };
+    blast.Sqs.Add(Actor.Loc);
+    GameState!.UIRef().PlayAnimation(blast, GameState);
+
+    GameState gs = GameState!;
+    List<(int, DamageType)> dmg = [(gs.Rng.Next(1, 9), DamageType.Fire), (gs.Rng.Next(1, 9), DamageType.Fire)];
+    foreach (Loc loc in Affected)
+    {
+      GameState.ApplyDamageEffectToLoc(loc, DamageType.Fire);
+      if (GameState.ObjDb.Occupant(loc) is Actor victim)
+      {
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!";
+        gs.UIRef().AlertPlayer(s, gs, loc);
+        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 3, GameState, null, 1.0);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(victim, "fire", null);
+        }
+      }
+    }
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    if (result is AffectedLocsUIResult affected)
+    {
+      Affected = [.. affected.Affected.Where(l => l != Actor!.Loc)];
+    }
+  }
+}
+
 class SpellcastMenu : Inputer
 {  
   int row;
@@ -950,6 +1006,16 @@ class SpellcastMenu : Inputer
         inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
         {
           DeferredAction = new CastGustOfWindAction(GS, GS.Player, null)
+        };
+        GS.UIRef().SetInputController(inputer);
+        SpellSelection = false;
+        PopupRow = -3;
+        PopupText = "Which direction?";
+        break;
+      case "breathe fire":
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        {
+          DeferredAction = new CastFireBreath(GS, GS.Player)
         };
         GS.UIRef().SetInputController(inputer);
         SpellSelection = false;

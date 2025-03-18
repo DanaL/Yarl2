@@ -195,6 +195,51 @@ class CastTrait : Trait, IUSeable
   public void Used(){ }
 }
 
+class DragonCultBlessingTrait : BlessingTrait
+{
+  const int MP_COST = 3;
+
+  public override List<string> Apply(Actor _, GameState gs)
+  {
+    ACModTrait ac = new() { ArmourMod = 3, SourceId = Constants.DRAGON_GOD_ID };
+    gs.Player.Traits.Add(ac);
+
+    if (!gs.Player.SpellsKnown.Contains("breathe fire"))
+      gs.Player.SpellsKnown.Add("breathe fire");
+
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(MP_COST);
+      mp.Change(MP_COST);
+    }
+    else
+    {
+      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
+    }
+
+    gs.Player.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    gs.Player.SpellsKnown.Remove("breather fire");
+    if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
+    {
+      mp.ChangeMax(-MP_COST);
+    }
+
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+  }
+
+  public override string AsText() => $"DragonCultBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class ChampionBlessingTrait : BlessingTrait
 {  
   public override List<string> Apply(Actor granter, GameState gs)

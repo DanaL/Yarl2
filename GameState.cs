@@ -227,7 +227,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     if (tile.Type == TileType.StoneAltar && item.Type == ItemType.Zorkmid && loc == Player.Loc)
     {
-      if (GoldSacrificedToDragon(item, loc))
+      if (Kobold.OfferGold(this, item, loc))
         return;      
     }
 
@@ -265,65 +265,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           UI.AlertPlayer("You hear grinding stone.");
       }
     }
-  }
-
-  bool GoldSacrificedToDragon(Item zorkmids, Loc loc)
-  {
-    Loc effigyLoc = Loc.Nowhere;
-    foreach (Loc adj in Util.Adj4Locs(loc))
-    {
-      if (ObjDb.ItemsAt(adj).Where(i => i.Name == "dragon effigy").Any())
-      {
-        effigyLoc = adj;
-        break;
-      }
-    }
-
-    if (effigyLoc == Loc.Nowhere)
-      return false;
-
-    UIRef().AlertPlayer("The coins disappear and you hear a pleased growl!");
-    ObjDb.RemoveItemFromGame(loc, zorkmids);
-
-    if (Player.Stats.TryGetValue(Attribute.GoldSacrificed, out var donationStat))
-    {
-      donationStat.SetMax(donationStat.Curr + zorkmids.Value);
-    }
-    else
-    {
-      Player.Stats[Attribute.GoldSacrificed] = new Stat(zorkmids.Value);
-    }
-
-    int cultLevel = 0;
-    if (Player.Stats.TryGetValue(Attribute.KoboldCultLevel, out var cultLevelStat))
-    {
-      cultLevel = cultLevelStat.Curr;
-    }
-      
-    if (Player.Stats[Attribute.GoldSacrificed].Curr > 100 && cultLevel == 0)
-    {
-      UI.AlertPlayer("We appreciate the pledging of your soul and service!");
-      Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
-
-      foreach (Actor actor in ObjDb.AllActors())
-      {
-        if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
-        {
-          actor.Traits.Add(new FriendlyMonsterTrait());
-
-          if (actor.Name == "kobold")
-          {
-            Kobold.MakeCultist(actor, Rng);
-          }
-          else if (actor.Name == "kobold soothsayer")
-          {
-            Kobold.MakeCultLeader(actor, Rng);
-          }
-        }
-      }
-    }
-
-    return true;
   }
 
   public void ItemDestroyed(Item item, Loc loc)

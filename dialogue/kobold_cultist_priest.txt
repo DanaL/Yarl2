@@ -1,8 +1,16 @@
-﻿(say 
-  (pick
-   (
-    "The hunger of #DRAGON_NAME is endless. They need more offerings!"
-    "We have enemies here who would see our faith eliminated."
-    "Beware Moloch's lies!"    
-  ))
+﻿
+(cond 
+  ((= KOBOLD_CULT_LEVEL 1)
+    (say 
+      (pick
+       (
+        "The hunger of #DRAGON_NAME is endless. They need more offerings!"
+        "We have enemies here who would see our faith eliminated."
+        "Beware Moloch's lies!"
+        "Do you need a tax receipt for your offerings?"
+      ))))
+      
+  ((= KOBOLD_CULT_LEVEL 2)
+    (say "Hello!")
+  )
 )

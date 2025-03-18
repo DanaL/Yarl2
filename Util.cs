@@ -192,6 +192,11 @@ class Constants
   public const char BOTTOM_LEFT_CORNER = '┕';
   public const char BOTTOM_RIGHT_CORNER = '┙';
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
+
+  // I need some GameObj IDs for things that don't actually exist in the game
+  // I am kind of assuming here that there will never be enough items generated
+  // in game to conflict with values this high...
+  public const ulong DRAGON_GOD_ID = ulong.MaxValue - 1;
 }
 
 class Util
