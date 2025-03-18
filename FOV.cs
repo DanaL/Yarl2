@@ -124,7 +124,7 @@ class FieldOfView
         if (!line.IsInShadow(projection))
         {
           int illum;
-          var loc = origin with { Row = r, Col = c};
+          Loc loc = origin with { Row = r, Col = c};
           if (IsOpaque(loc, origin, map, objDb, opaqueLocs))
           {
             line.Add(projection);
@@ -219,7 +219,7 @@ class FieldOfView
  
     return illum;
   }
-
+  
   static bool IsOpaque(Loc loc, Loc origin, Map map, GameObjectDB objDb, Dictionary<Loc, bool> opaqueLocs)
   {
     if (opaqueLocs.TryGetValue(loc, out bool opacity))

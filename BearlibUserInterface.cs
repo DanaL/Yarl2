@@ -141,7 +141,7 @@ internal class BLUserInferface : UserInterface, IDisposable
     var (fg, bg, ch) = sq;
     Terminal.BkColor(ToBearLibColour(bg));
     Terminal.Color(ToBearLibColour(fg));
-    Terminal.Put(col, row, ch);    
+    Terminal.Put(col, row, ch);
   }
 
   public override void UpdateDisplay(GameState? gs)

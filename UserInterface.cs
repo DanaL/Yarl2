@@ -1312,11 +1312,7 @@ abstract class UserInterface
         else
           ch = e.Value;
 
-        InputController.Input(ch);
-        //if (opts.KeyRemaps.TryGetValue(e.Value, out var cmd))
-        //  InputBuffer.Enqueue(KeyMapper.CmdToKey(cmd));
-        //else
-        //  InputBuffer.Enqueue(e.Value);        
+        InputController.Input(ch);        
       }
 
       try
@@ -1376,7 +1372,7 @@ abstract class UserInterface
 
       TimeSpan elapsed = DateTime.UtcNow - refresh;
       int totalMs = (int) elapsed.TotalMilliseconds;
-      if (totalMs >= 32)
+      if (totalMs >= 25)
       {
         SetSqsOnScreen(gameState);
 

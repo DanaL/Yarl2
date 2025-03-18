@@ -1045,7 +1045,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
     ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
 
-    //PrepareFieldOfView();
+    PrepareFieldOfView();
 
     if (UI.PauseForResponse)
     {      
