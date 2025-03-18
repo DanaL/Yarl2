@@ -874,6 +874,12 @@ class DialogueInterpreter
       s = s.Replace("#IMPRISONED_BY", imprisonedBy);
     }
 
+    if (s.Contains("#DRAGON_NAME"))
+    {
+      string dragonName = gs.FactDb.FactCheck("DragonFact") is SimpleFact fact ? fact.Value : "";
+      s = s.Replace("#DRAGON_NAME", dragonName);
+    }
+
     s = s.Replace(@"\n", Environment.NewLine);
 
     return s;

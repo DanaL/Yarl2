@@ -36,9 +36,10 @@ interface IDialoguer
   void SelectOption(Mob actor, char opt, GameState gs);
 }
 
-class MonsterBehaviour : IBehaviour
+class MonsterBehaviour : IBehaviour, IDialoguer
 {
   readonly Dictionary<string, ulong> _lastUse = [];
+  List<DialogueOption> Options { get; set; } = [];
 
   public string GetBark(Mob actor, GameState gs)
   {
@@ -51,7 +52,45 @@ class MonsterBehaviour : IBehaviour
     return "";
   }
 
-  public (Action, Inputer?) Chat(Mob actor, GameState gameState) => (new NullAction(), null);
+  public (Action, Inputer?) Chat(Mob actor, GameState gameState)
+  {
+    if (actor.HasTrait<DialogueScriptTrait>())
+    {
+      Dialoguer acc = new(actor, gameState);
+      CloseMenuAction action = new(gameState, 1.0);
+
+      return (action, acc);
+    }
+
+    return (new NullAction(), null);
+  }
+
+  public virtual (string, string, List<(string, char)>) CurrentText(Mob mob, GameState gs)
+  {
+    string scriptFile = mob.Traits.OfType<DialogueScriptTrait>().First().ScriptFile;
+    var dialogue = new DialogueInterpreter();
+
+    var (txt, footer) = dialogue.Run(scriptFile, mob, gs);
+    Options = dialogue.Options;
+    List<(string, char)> opts = [..Options.Select(o => (o.Text, o.Ch))];
+    
+    return (txt, footer, opts);
+  }
+
+  public void SelectOption(Mob mob, char choice, GameState gs)
+  {
+    foreach (DialogueOption opt in Options)
+    {
+      if (opt.Ch == choice)
+      {
+        var dialogue = new DialogueInterpreter();
+        dialogue.Run(opt.Expr, mob, gs);
+        break;
+      }
+    }
+  }
+
+  public void InitDialogue(Mob actor, GameState gs) {}
 }
     
 // Disguised monsters behave differently while they are disguised, but then act like a normal monster

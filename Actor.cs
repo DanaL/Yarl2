@@ -31,7 +31,7 @@ abstract class Actor : GameObj, IZLevel
 
   public double Energy { get; set; } = 0.0;
   public double Recovery { get; set; } = 1.0;
-  public string Appearance { get; set; } = "";
+  public virtual string Appearance { get; set; } = "";
 
   protected IBehaviour _behaviour;
   public IBehaviour Behaviour => _behaviour;
@@ -522,6 +522,21 @@ class Mob : Actor
   
   public Mob() => _behaviour = new MonsterBehaviour();
 
+  public override string Appearance
+  {
+    get
+    {
+      if (base.Appearance == "")
+      {
+        var cyclopedia = Util.LoadCyclopedia();
+        if (cyclopedia.TryGetValue(Name, out var entry))
+          return entry.Text;
+      }
+      
+      return base.Appearance;
+    }
+  }
+  
   public Damage? Dmg { get; set; }
   public override List<Damage> MeleeDamage()
   {

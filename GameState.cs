@@ -309,6 +309,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
         if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
         {
           actor.Traits.Add(new FriendlyMonsterTrait());
+
+          if (actor.Name == "kobold")
+            actor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist.txt" });
         }
       }
     }
