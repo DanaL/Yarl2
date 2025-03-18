@@ -1,0 +1,10 @@
+(say 
+  (pick
+   (
+    "I think my favourte part of #DRAGON_NAME is their tail!"
+    "Adventurer corpses are a great source of gold to donate to #DRAGON_NAME."
+    "Being in the cult is pretty great, huh?"
+    "Have you been shown the secret handshake yet?"
+    "Do you think we go to dragon heaven when we die?"
+  ))
+)

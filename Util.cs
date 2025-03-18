@@ -199,6 +199,7 @@ class Util
   public static double ToDouble(string s) => double.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
 
   public static string NamesFile => ResourcePath.GetDataFilePath("names.txt");
+  public static string KoboldNamesFile => ResourcePath.GetDataFilePath("kobold_names.txt");
 
   public static DirectoryInfo UserDir
   {

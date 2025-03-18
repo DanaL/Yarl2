@@ -61,6 +61,49 @@ class Village
     };
   }
 
+  public static string KoboldAppearance(Random rng)
+  {
+    StringBuilder sb = new();
+
+    int roll = rng.Next(4);
+    if (roll == 0)
+      sb.Append("A kobold ");
+    else if (roll == 1)
+      sb.Append("A young kobold ");
+    else if (roll == 2)
+      sb.Append("An adult kobold ");
+    else
+      sb.Append("An ageing kobold ");
+
+    roll = rng.Next(5);
+    if (roll == 0)
+      sb.Append("with striped scales ");
+    else if (roll == 1)
+      sb.Append("with mottled scales ");
+    else if (roll == 2)
+      sb.Append("with calico scales ");
+    else if (roll == 3)
+      sb.Append("with spotted scales ");
+    else if (roll == 4)
+      sb.Append("with glittering scales ");
+
+    roll = rng.Next(6);
+    if (roll == 0)
+      sb.Append("and an eye-patch.");
+    else if (roll == 1)
+      sb.Append("and a curled tail.");
+    else if (roll == 2)
+      sb.Append("and a missing fang.");
+    else if (roll == 3)
+      sb.Append("and a long tail.");
+    else if (roll == 4)
+      sb.Append("and an angry scar.");
+    else if (roll == 5)
+      sb.Append("and a stubby snout.");
+
+    return sb.ToString();
+  }
+
   static string VillagerAppearance(Random rng)
   {
     string[] species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];

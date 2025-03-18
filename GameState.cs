@@ -304,6 +304,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
     {
       UI.AlertPlayer("We appreciate the pledging of your soul and service!");
 
+      NameGenerator ng = new(Rng, Util.KoboldNamesFile);
       foreach (Actor actor in ObjDb.AllActors())
       {
         if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
@@ -311,7 +312,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
           actor.Traits.Add(new FriendlyMonsterTrait());
 
           if (actor.Name == "kobold")
+          {
+            actor.Name = ng.GenerateName(Rng.Next(4, 7)).Capitalize();
             actor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist.txt" });
+            actor.Traits.Add(new NamedTrait());
+            actor.Appearance = Village.KoboldAppearance(Rng);
+          }
         }
       }
     }
