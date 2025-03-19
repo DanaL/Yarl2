@@ -217,6 +217,10 @@ class DragonCultBlessingTrait : BlessingTrait
       gs.Player.Stats[Attribute.MagicPoints] = new Stat(MP_COST);
     }
 
+    GoldSnifferTrait sniffer = new() { SourceId = Constants.DRAGON_GOD_ID };
+    sniffer.Apply(gs.Player, gs);
+    gs.Player.Traits.Add(sniffer);
+
     gs.Player.Traits.Add(this);
 
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -232,6 +236,14 @@ class DragonCultBlessingTrait : BlessingTrait
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var mp))
     {
       mp.ChangeMax(-MP_COST);
+    }
+
+    foreach (Trait t in gs.Player.Traits)
+    {
+      if (t is TemporaryTrait temp && temp.SourceId == SourceId)
+      {
+        temp.Remove(gs);
+      }
     }
 
     gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
@@ -1888,6 +1900,67 @@ class LeaveDungeonTrait : Trait, IGameEventListener
   }
 }
 
+class GoldSnifferTrait : TemporaryTrait, IGameEventListener
+{
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    OwnerID = target.ID;
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (eventType == GameEventType.EndOfRound && gs.Turn > ExpiresOn)
+    {
+      Remove(gs);
+    }
+    else
+    {
+      if (gs.ObjDb.GetObj(OwnerID) is not Actor actor)
+      {
+        Remove(gs);
+        return;
+      }
+      
+      bool zorkmidsFound = false;
+      Map map = gs.MapForActor(actor);
+      for (int r = actor.Loc.Row - 5; r <= actor.Loc.Row + 5; r++)
+      {
+        for (int c = actor.Loc.Col - 5; c <= actor.Loc.Col + 5; c++)
+        {
+          if (!map.InBounds(r, c))
+            continue;
+
+          Loc sq = actor.Loc with { Row = r, Col = c };
+          bool zorkmidsAt = false;
+          foreach (Item item in gs.ObjDb.ItemsAt(sq))
+          {
+            if (item.Type == ItemType.Zorkmid)
+            {
+              zorkmidsAt = true;
+              break;
+            }
+          }
+
+          if (zorkmidsAt && (!gs.CurrentDungeon.RememberedLocs.TryGetValue(sq, out var glyph) || glyph.Ch != '$'))
+          {
+            zorkmidsFound = true;
+            gs.CurrentDungeon.RememberedLocs[sq] = new('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false);
+          }
+        }
+      }
+
+      if (zorkmidsFound)
+      {
+        gs.UIRef().AlertPlayer("Your nose twitches and you smell gold!");
+      }      
+    }
+  }
+
+  public override string AsText() => $"GoldSniffer#{OwnerID}#{SourceId}";
+}
+
 class GoodMagicLootTrait : LootTrait
 {
   public override string AsText() => "GoodMagicLoot";
@@ -3153,6 +3226,13 @@ class TraitFactory
           return new DodgeTrait() { Rate = int.Parse(pieces[1]), SourceId = sourceId };
       }
     },
+    { "DragonCultBlessing", (pieces, gameObj) => new DragonCultBlessingTrait()
+      { 
+        SourceId = ulong.Parse(pieces[1]),
+        ExpiresOn = ulong.Parse(pieces[2]),
+        OwnerID = ulong.Parse(pieces[3])
+      }
+    },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
@@ -3181,7 +3261,13 @@ class TraitFactory
         AcidDie = int.Parse(pieces[2]),
         AcidDice = int.Parse(pieces[3])
       }
-    },    
+    },
+    { "GoldSniffer", (pieces, gameObj) => new GoldSnifferTrait() 
+      { 
+        OwnerID = ulong.Parse(pieces[1]),
+        SourceId = ulong.Parse(pieces[2])
+      } 
+    },
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
       string[] grantedTraits = [.. pieces[1].Split(';').Select(s => s.Replace('&', '#'))];
