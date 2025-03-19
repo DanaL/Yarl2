@@ -137,6 +137,17 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.HP].Reset();
       return "";
     }
+    else if (txt == "genocide")
+    {
+      List<Actor> toRremove = [.. _gs.ObjDb.AllActors().Where(a => a is not Player && a.Loc.Level == _gs.CurrLevel)];
+      foreach (Actor a in toRremove)
+      {
+        _gs.ObjDb.RemoveActor(a);
+      }
+      _gs.RefreshPerformers();
+
+      return "";
+    }
     else if (txt == "pit")
     {
       List<Loc> adj = AdjSpots(_gs.Player.Loc);
@@ -145,14 +156,7 @@ class DebugCommand(GameState gs)
       _gs.PrepareFieldOfView();
       return "";
     }
-    else if (txt == "lorem")
-    {
-      string s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
-      s += "Here is some test text that should be long enough to push the text across three lines.";
-      _gs.UIRef().AlertPlayer(s);
-      return "";
-    }
-
+   
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
       return "Debug commands are formated: add/give/drop <obj name>";
