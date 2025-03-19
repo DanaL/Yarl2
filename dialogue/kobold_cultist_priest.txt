@@ -10,7 +10,20 @@
         "Do you need a tax receipt for your offerings?"
       ))))
       
-  ((= KOBOLD_CULT_LEVEL 2)
-    (say "Servant! #DRAGON_NAME requires your service. There is an enemy of the faith who must be defeated.")
+  ((and (= KOBOLD_CULT_LEVEL 2) (= DIALOGUE_STATE 0))
+    (
+      (say "Servant! #DRAGON_NAME requires your service. There is an enemy of the faith who must be defeated.")
+      (option "What needs to be done?" (set DIALOGUE_STATE 1))
+     )
+  )
+
+  ((and (= KOBOLD_CULT_LEVEL 2) (= DIALOGUE_STATE 1))
+    (
+      (dragon-cult-quest)
+    )
+  )
+
+  ((and (= KOBOLD_CULT_LEVEL 2) (= DIALOGUE_STATE 2))
+    (say "Have you killed that guy yet?")
   )
 )

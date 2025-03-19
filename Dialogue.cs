@@ -24,7 +24,7 @@ enum TokenType
   OPTION, SPEND, END, 
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
-  SHOP_MENU, SHOP_SELECTION,
+  SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST,
   EOF
 }
 
@@ -135,6 +135,7 @@ class ScriptScanner(string src)
       "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
       "shop-menu" => TokenType.SHOP_MENU,
       "shop-selection" => TokenType.SHOP_SELECTION,
+      "dragon-cult-quest" => TokenType.DRAGON_CULT_QUEST,
       _ => TokenType.IDENTIFIER
     };
 
@@ -239,6 +240,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
+      TokenType.DRAGON_CULT_QUEST => StartDragonCultQuest(),
       _ => ListExpr(),
     };
   }
@@ -360,6 +362,14 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptWinterBlessing();
+  }
+
+  ScriptStartDragonCultQuest StartDragonCultQuest()
+  {
+    Consume(TokenType.DRAGON_CULT_QUEST);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptStartDragonCultQuest();
   }
 
   ScriptSpend SpendExpr()
@@ -690,6 +700,7 @@ class ScriptReaverBlessing : ScriptExpr {}
 class ScriptEmberBlessing : ScriptExpr {}
 class ScriptTricksterBlessing : ScriptExpr {}
 class ScriptWinterBlessing : ScriptExpr {}
+class ScriptStartDragonCultQuest : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -997,6 +1008,10 @@ class DialogueInterpreter
     else if (Expr is ScriptOffer offer)
     {
       EvalOffer(offer, mob, gs);
+    }
+    else if (Expr is ScriptStartDragonCultQuest)
+    {
+      EvalStartDragonCultQuest(mob, gs);
     }
 
     return result;
@@ -1506,6 +1521,17 @@ class DialogueInterpreter
     gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
     
     throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  void EvalStartDragonCultQuest(Actor mob, GameState gs)
+  {
+    var (ogreName, ogreLevel) = Kobold.CreateQuest(gs);
+
+    string dragonName = gs.FactDb.FactCheck("DragonFact") is SimpleFact fact ? fact.Value : "";
+    Sb.Append($"There's an ogre named [BRIGHTRED {ogreName}] who's been hanging out on level [ICEBLUE {Util.NumToWord(ogreLevel + 1)}]. A real jerk! He bullies kobolds and doesn't respect {dragonName} at all.");
+    Sb.Append("\n\nIf you can teach him the error of his ways, you will be much esteemed in the eyes of our scaley overlord.");
+
+    mob.Stats[Attribute.DialogueState] = new Stat(2);
   }
 }
 

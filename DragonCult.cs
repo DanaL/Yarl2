@@ -10,6 +10,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Yarl2;
@@ -159,5 +160,31 @@ class Kobold
     }
 
     return true;
+  }
+
+  public static (string, int) CreateQuest(GameState gs)
+  {
+    NameGenerator ng = new(gs.Rng, Util.KoboldNamesFile);
+    string ogreName = ng.GenerateName(gs.Rng.Next(5, 8)).Capitalize();
+
+    Actor ogre = MonsterFactory.Get("ogre", gs.ObjDb, gs.Rng);
+    ogre.Name = ogreName;
+    ogre.Traits.Add(new NamedTrait());
+    ogre.Glyph = ogre.Glyph with { Lit = Colours.LIGHT_BLUE, Unlit = Colours.BLUE };
+
+    // Let's guarantee the quest boss always drops an ogre liver
+    foreach (Trait t in ogre.Traits)
+    {
+      if (t is DropTrait drop)
+        drop.Chance = 100;
+    }
+
+    int level = gs.CurrLevel + gs.Rng.Next(1, 3);
+    Map map = gs.CurrentDungeon.LevelMaps[level];
+    List<Loc> locs = map.ClearFloors(gs.CurrDungeonID, level, gs.ObjDb);
+    Loc ogreLoc = locs[gs.Rng.Next(locs.Count)];
+    gs.ObjDb.AddNewActor(ogre, ogreLoc);
+
+    return (ogreName, level);
   }
 }
