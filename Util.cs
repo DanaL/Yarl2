@@ -1075,8 +1075,8 @@ class UnknownMonsterException(string name) : Exception
 // differences would really stink up FOV.cs
 class ConeCalculator
 {
-  public static List<Loc> Affected(int range, Loc origin, Loc target, Map map, GameObjectDB objDb)
-  {
+  public static List<Loc> Affected(int range, Loc origin, Loc target, Map map, GameObjectDB objDb, HashSet<DamageType> damageTypes)
+  {  
     HashSet<Loc> affected = [];
 
     // even if the target is closer, the cone always covers the full range
@@ -1095,12 +1095,12 @@ class ConeCalculator
 
     while (octantA != octantB)
     {
-      affected = [..affected.Union(CalcOctant(range, origin, map, octantA, objDb))];
+      affected = [..affected.Union(CalcOctant(range, origin, map, octantA, objDb, damageTypes))];
       --octantA;
       if (octantA < 0)
         octantA = 7;
     }
-    affected = [..affected.Union(CalcOctant(range, origin, map, octantB, objDb))];
+    affected = [..affected.Union(CalcOctant(range, origin, map, octantB, objDb, damageTypes))];
     double angleA = Util.AngleBetweenLocs(origin, beamA);
     double angleB = Util.AngleBetweenLocs(origin, beamB);
 
@@ -1177,7 +1177,7 @@ class ConeCalculator
     };
   }
 
-  static HashSet<Loc> CalcOctant(int range, Loc origin, Map map, int octant, GameObjectDB objDb)
+  static HashSet<Loc> CalcOctant(int range, Loc origin, Map map, int octant, GameObjectDB objDb, HashSet<DamageType> damageTypes)
   {
     HashSet<Loc> affected = [];
     bool fullShadow = false;
@@ -1207,7 +1207,7 @@ class ConeCalculator
             line.Add(projection);
             fullShadow = line.IsFullShadow();
           }
-          else if (!map.TileAt(r, c).PassableByFlight() || objDb.BlockersAtLoc(loc))
+          else if (!Affected(map.TileAt(r, c), loc, objDb, damageTypes))
           {
             line.Add(projection);
             fullShadow = line.IsFullShadow();
@@ -1224,6 +1224,27 @@ class ConeCalculator
     }
 
     return affected;
+  }
+
+  static bool Affected(Tile tile, Loc loc, GameObjectDB objDb, HashSet<DamageType> damageTypes)
+  {
+    if (!tile.PassableByFlight())
+      return false;
+
+    bool blocker = false;
+    foreach (Item b in objDb.BlockersAtLoc(loc))
+    {
+      if (damageTypes.Contains(DamageType.Fire) && b.HasTrait<FlammableTrait>())
+        continue;
+
+      blocker = true;
+      break;
+    }
+
+    if (blocker)
+      return false;
+      
+    return true;
   }
 }
 

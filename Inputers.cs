@@ -1598,9 +1598,12 @@ class ConeTargeter : Inputer
   int Range { get; set; }
   Loc Origin { get; set; }
   Loc Target { get; set; }
+
+  public HashSet<DamageType> IncludeDamagedBy { get; set; } = [];
+
   ConeAnimation Anim { get; set; }
 
-  public ConeTargeter(GameState gs, int range, Loc origin) : base(gs)
+  public ConeTargeter(GameState gs, int range, Loc origin, HashSet<DamageType> damageTypes) : base(gs)
   {
     GS = gs;
     Range = range;
@@ -1609,7 +1612,8 @@ class ConeTargeter : Inputer
 
     UserInterface ui = gs.UIRef();
 
-    Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range);
+    Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range, damageTypes);
+
     ui.RegisterAnimation(Anim);
 
     if (gs.Options.ShowHints)
@@ -1646,7 +1650,7 @@ class ConeTargeter : Inputer
 
     return new AffectedLocsUIResult()
     {
-      Affected = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb)
+      Affected = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb, IncludeDamagedBy)
     };
   }
 }
