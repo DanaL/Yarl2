@@ -1902,6 +1902,8 @@ class LeaveDungeonTrait : Trait, IGameEventListener
 
 class GoldSnifferTrait : TemporaryTrait, IGameEventListener
 {
+  const int RANGE = 10;
+
   public override List<string> Apply(Actor target, GameState gs)
   {
     OwnerID = target.ID;
@@ -1925,9 +1927,9 @@ class GoldSnifferTrait : TemporaryTrait, IGameEventListener
       
       bool zorkmidsFound = false;
       Map map = gs.MapForActor(actor);
-      for (int r = actor.Loc.Row - 5; r <= actor.Loc.Row + 5; r++)
+      for (int r = actor.Loc.Row - RANGE; r <= actor.Loc.Row + RANGE; r++)
       {
-        for (int c = actor.Loc.Col - 5; c <= actor.Loc.Col + 5; c++)
+        for (int c = actor.Loc.Col - RANGE; c <= actor.Loc.Col + RANGE; c++)
         {
           if (!map.InBounds(r, c))
             continue;

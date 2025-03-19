@@ -425,7 +425,7 @@ class ItemFactory
       Name = "webs",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK, true)
+      Glyph = new Glyph(':', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
     };
     web.Traits.Add(new StickyTrait());
     web.Traits.Add(new FlammableTrait());
