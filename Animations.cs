@@ -84,13 +84,14 @@ class ArrowAnimation : Animation
   }
 }
 
-class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int range) : Animation
+class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int range, HashSet<DamageType> damageTypes) : Animation
 {
   UserInterface UI { get; set; } = ui;
   GameState GS { get; set; } = gs;
   Loc Origin { get; set; } = origin;
   public Loc Target { get; set; } = target;
   int Range { get; set; } = range;
+  HashSet<DamageType> DamageTypes { get; set; } = damageTypes;
 
   public override void Update()
   {
@@ -98,7 +99,7 @@ class ConeAnimation(UserInterface ui, GameState gs, Loc origin, Loc target, int 
       return;
 
     Map map = GS.Campaign.Dungeons[Origin.DungeonID].LevelMaps[Origin.Level];
-    List<Loc> included = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb);
+    List<Loc> included = ConeCalculator.Affected(Range, Origin, Target, map, GS.ObjDb, DamageTypes);
 
     foreach (Loc loc in included)
     {

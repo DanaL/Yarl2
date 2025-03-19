@@ -1609,7 +1609,8 @@ class ConeTargeter : Inputer
     Range = range;
     Origin = origin;
     Target = origin with { Row = origin.Row - 1 };
-
+    IncludeDamagedBy = damageTypes;
+    
     UserInterface ui = gs.UIRef();
 
     Anim = new ConeAnimation(GS.UIRef(), GS, Origin, Target, Range, damageTypes);

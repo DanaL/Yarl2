@@ -295,7 +295,19 @@ class GameObjectDB
     return EMPTY;
   }
 
-  public bool BlockersAtLoc(Loc loc)
+  public IEnumerable<Item> BlockersAtLoc(Loc loc)
+  {
+    if (_itemLocs.TryGetValue(loc, out var items))
+    {
+      foreach (Item item in items)
+      {
+        if (item.HasTrait<BlockTrait>())
+          yield return item;
+      }
+    }
+  }
+
+  public bool AreBlockersAtLoc(Loc loc)
   {
     if (_itemLocs.TryGetValue(loc, out var items))
     {

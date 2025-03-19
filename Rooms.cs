@@ -593,7 +593,7 @@ class Rooms
     foreach (var (r, c) in room)
     {
       loc = new(dungeonID, level, r, c);
-      if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.BlockersAtLoc(loc))
+      if (!objDb.Occupied(loc) && !objDb.HazardsAtLoc(loc) && !objDb.AreBlockersAtLoc(loc))
       {
         floors.Add(loc);
       }
@@ -932,7 +932,7 @@ class Rooms
     }
 
     // Add some monsters
-    itemSpots = itemSpots.Where(loc => !objDb.BlockersAtLoc(loc) && !objDb.Occupied(loc)).ToList();
+    itemSpots = itemSpots.Where(loc => !objDb.AreBlockersAtLoc(loc) && !objDb.Occupied(loc)).ToList();
     
     for (int j = 0; j < 3; j++)
     {

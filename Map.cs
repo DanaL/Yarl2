@@ -743,7 +743,7 @@ class Map : ICloneable
         if (tile.Type != TileType.DungeonFloor)
           continue;
         Loc loc = new(dungeonId, level, r, c);
-        if (objDb.Occupied(loc) || objDb.BlockersAtLoc(loc) || objDb.HazardsAtLoc(loc))
+        if (objDb.Occupied(loc) || objDb.AreBlockersAtLoc(loc) || objDb.HazardsAtLoc(loc))
           continue;
         floors.Add(loc);
       }

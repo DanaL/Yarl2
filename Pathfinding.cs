@@ -293,7 +293,7 @@ class AStar
         TileType tileType = map.TileAt(adj.Row, adj.Col).Type;
         if (!travelCost.TryGetValue(tileType, out int travel))
           continue;
-        else if (objDb.BlockersAtLoc(adj))
+        else if (objDb.AreBlockersAtLoc(adj))
           continue;
         
         int newCost = costs[curr] + travel;

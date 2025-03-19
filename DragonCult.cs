@@ -137,11 +137,24 @@ class Kobold
       return true;
     }
 
-
     if (goldDonated > 150 && cultLevel == 1 && gs.Rng.NextDouble() < 0.333)
     {
       gs.UIRef().AlertPlayer("My beloved servant!");
       gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
+    }
+
+    if (cultLevel >= 1 && zorkmids.Value >= 25 && !gs.Player.HasActiveTrait<DragonCultBlessingTrait>())
+    {
+      gs.UIRef().AlertPlayer("Savour this taste of the power of dragonkind!");
+      gs.UIRef().SetPopup(new Popup("Savour this taste of the power of dragonkind!", "", -1, -1));
+
+      DragonCultBlessingTrait cultBlessing = new() 
+      { 
+        SourceId = Constants.DRAGON_GOD_ID, ExpiresOn = gs.Turn + 2000, 
+        OwnerID = gs.Player.ID 
+      };
+
+      cultBlessing.Apply(gs.Player, gs);
     }
 
     return true;

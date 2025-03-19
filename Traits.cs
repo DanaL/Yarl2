@@ -214,7 +214,7 @@ class DragonCultBlessingTrait : BlessingTrait
     }
     else
     {
-      gs.Player.Stats[Attribute.MagicPoints] = new Stat(2);
+      gs.Player.Stats[Attribute.MagicPoints] = new Stat(MP_COST);
     }
 
     gs.Player.Traits.Add(this);

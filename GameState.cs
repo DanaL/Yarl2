@@ -1046,7 +1046,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Random rng
 
         if (map.TileAt(r, c).Type != TileType.DungeonFloor)
           continue;
-        if (ObjDb.Occupied(loc) || ObjDb.BlockersAtLoc(loc))
+        if (ObjDb.Occupied(loc) || ObjDb.AreBlockersAtLoc(loc))
           continue;
 
         // This prevents a monster from being spawned on top of a campfire, lol

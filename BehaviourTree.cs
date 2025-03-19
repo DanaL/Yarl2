@@ -573,7 +573,7 @@ class WanderInArea(HashSet<Loc> area) : BehaviourNode
   {
     Tile tile = map.TileAt(loc.Row, loc.Col);
 
-    return tile.Passable() && !gs.ObjDb.Occupied(loc) && !gs.ObjDb.BlockersAtLoc(loc);
+    return tile.Passable() && !gs.ObjDb.Occupied(loc) && !gs.ObjDb.AreBlockersAtLoc(loc);
   }
 
   public override PlanStatus Execute(Mob mob, GameState gs)

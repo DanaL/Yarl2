@@ -325,7 +325,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
     // its full range.
     var (fullR, fullC) = Util.ExtendLine(Actor.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col, Range);
     Loc actualTarget = Target with { Row = fullR, Col = fullC };
-    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb);
+    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb, []);
     affected.Insert(0, Actor.Loc);
     var explosion = new ExplosionAnimation(GameState!)
     {
@@ -379,7 +379,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     // its full range.
     var (fullR, fullC) = Util.ExtendLine(Actor.Loc.Row, Actor.Loc.Col, Target.Row, Target.Col, Range);
     Loc actualTarget = Target with { Row = fullR, Col = fullC };
-    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb);
+    List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb, []);
     affected.Insert(0, Actor.Loc);
     var explosion = new ExplosionAnimation(GameState!)
     {
@@ -2983,7 +2983,7 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
     Tile tile = GameState!.TileAt(loc);
     if (!(tile.Passable() || tile.PassableByFlight()))
       return false;
-    if (GameState.ObjDb.BlockersAtLoc(loc))
+    if (GameState.ObjDb.AreBlockersAtLoc(loc))
       return false;
 
     return true;
@@ -3191,7 +3191,7 @@ class UseSpellItemAction(GameState gs, Actor actor, string spell, Item? item) : 
     switch (Spell)
     {
       case "gust of wind":
-        ConeTargeter cone = new(GameState!, 5, player.Loc)
+        ConeTargeter cone = new(GameState!, 5, player.Loc, [])
         {
           DeferredAction = new CastGustOfWindAction(GameState, player, Item) { FreeToCast = true }
         };

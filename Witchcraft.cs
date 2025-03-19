@@ -20,6 +20,7 @@ class Spells
       case "phase door":
       case "cone of cold":
       case "gust of wind":
+      case "breathe fire":
         return true;
       default:
         return false;
@@ -645,7 +646,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
         broken = CheckForItemDamage(item, landingLoc, gs);
         break;
       }
-      else if (gs.ObjDb.BlockersAtLoc(loc))
+      else if (gs.ObjDb.AreBlockersAtLoc(loc))
       {
         Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
         msg = $"{itemName} {verb} {blocker.Name.IndefArticle()}.";
@@ -731,7 +732,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
 
         break;
       }
-      else if (gs.ObjDb.BlockersAtLoc(loc))
+      else if (gs.ObjDb.AreBlockersAtLoc(loc))
       {
         Item blocker = gs.ObjDb.ItemsAt(loc).Where(i => i.HasTrait<BlockTrait>()).First();
         msg = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "collide")} with {blocker.Name.IndefArticle()}.";
@@ -815,9 +816,9 @@ class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
     ExplosionAnimation blast = new(GameState!)
     {
-      MainColour = Colours.TORCH_ORANGE,
-      AltColour1 = Colours.TORCH_RED,
-      AltColour2 = Colours.TORCH_YELLOW,
+      MainColour = Colours.BRIGHT_RED,
+      AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,
       Highlight = Colours.WHITE,
       Centre = Actor!.Loc,
       Sqs = animLocs,
@@ -993,7 +994,7 @@ class SpellcastMenu : Inputer
         GS.UIRef().ClosePopup();
         break;
       case "cone of cold":
-        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc, [])
         {
           DeferredAction = new CastConeOfCold(GS, GS.Player)
         };
@@ -1003,7 +1004,7 @@ class SpellcastMenu : Inputer
         PopupText = "Which direction?";
         break;
       case "gust of wind":
-        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc, [])
         {
           DeferredAction = new CastGustOfWindAction(GS, GS.Player, null)
         };
@@ -1013,9 +1014,9 @@ class SpellcastMenu : Inputer
         PopupText = "Which direction?";
         break;
       case "breathe fire":
-        inputer = new ConeTargeter(GS, 5, GS.Player.Loc)
+        inputer = new ConeTargeter(GS, 5, GS.Player.Loc, [ DamageType.Fire ])
         {
-          DeferredAction = new CastFireBreath(GS, GS.Player)
+          DeferredAction = new CastFireBreath(GS, GS.Player),
         };
         GS.UIRef().SetInputController(inputer);
         SpellSelection = false;

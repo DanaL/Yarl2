@@ -325,7 +325,7 @@ class MainDungeonBuilder : DungeonBuilder
   static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Random rng)
   {
     var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
-    List<Loc> openFloors = sqs.Where(l => !objDb.BlockersAtLoc(l)).ToList();
+    List<Loc> openFloors = sqs.Where(l => !objDb.AreBlockersAtLoc(l)).ToList();
     if (openFloors.Count == 0)
       return;
     Loc loc = openFloors[rng.Next(openFloors.Count)];
