@@ -238,7 +238,8 @@ class DragonCultBlessingTrait : BlessingTrait
       mp.ChangeMax(-MP_COST);
     }
 
-    foreach (Trait t in gs.Player.Traits)
+    List<Trait> playerTraits = [.. gs.Player.Traits];
+    foreach (Trait t in playerTraits)
     {
       if (t is TemporaryTrait temp && temp.SourceId == SourceId)
       {

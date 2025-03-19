@@ -151,7 +151,7 @@ class Kobold
       DragonCultBlessingTrait cultBlessing = new() 
       { 
         SourceId = Constants.DRAGON_GOD_ID, ExpiresOn = gs.Turn + 2000, 
-        OwnerID = gs.Player.ID 
+        OwnerID = gs.Player.ID
       };
 
       cultBlessing.Apply(gs.Player, gs);
