@@ -116,7 +116,7 @@ class Battle
       bonusDamage += mdb.Curr;
 
     string txt = $"{ammo.FullName.DefArticle().Capitalize()} hits {target.FullName}!";
-    gs.UIRef().AlertPlayer(txt);    
+    gs.UIRef().AlertPlayer(txt, gs, target.Loc);    
     var (hpLeft, dmgMsg, _) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);    
@@ -149,7 +149,7 @@ class Battle
     };
 
     foreach (string s in poison.Apply(victim, gs))
-      gs.UIRef().AlertPlayer(s);    
+      gs.UIRef().AlertPlayer(s, gs, victim.Loc);    
   }
 
   static void CheckAttackTraits(Actor target, GameState gs, GameObj obj, int dmgDone)

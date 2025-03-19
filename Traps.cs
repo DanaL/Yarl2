@@ -123,7 +123,7 @@ class Traps
 
       if (trapSqVisible)
       {
-        gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!");
+        gs.UIRef().AlertPlayer($"A dart flies at {actor.FullName}!", gs, loc);
         RevealTrap(tile, gs, loc);
       }
 
@@ -147,7 +147,7 @@ class Traps
       {
         gs.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));        
         if (trapSqVisible)
-          gs.UIRef().AlertPlayer("Click.");
+          gs.UIRef().AlertPlayer("Click.", gs, loc);
       }
     }
     else if (!flying && tile.Type == TileType.JetTrigger)
