@@ -45,6 +45,7 @@ class Colours
   public static readonly Colour LIGHT_BLUE = new(55, 198, 255, 255);
   public static readonly Colour DARK_BLUE = new(12, 35, 128, 255);
   public static readonly Colour BRIGHT_RED = new(208, 28, 31, 255);
+  public static readonly Colour SOFT_RED = new(190, 65, 65, 255);
   public static readonly Colour DULL_RED = new(129, 12, 12, 255);
   public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
   public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
@@ -83,6 +84,7 @@ class Colours
     else if (colour == LIGHT_BLUE) return "lightblue";
     else if (colour == DARK_BLUE) return "darkblue";
     else if (colour == BRIGHT_RED) return "brightred";
+    else if (colour == SOFT_RED) return "softred";
     else if (colour == DULL_RED) return "dullred";
     else if (colour == TORCH_ORANGE) return "torchorange";
     else if (colour == TORCH_RED) return "torchred";
@@ -121,8 +123,9 @@ class Colours
     "limegreen" => LIME_GREEN,
     "blue" => BLUE,
     "lightblue" => LIGHT_BLUE,
-    "darkblue" => DARK_BLUE,
+    "darkblue" => DARK_BLUE,    
     "brightred" => BRIGHT_RED,
+    "softred" => SOFT_RED,
     "dullred" => DULL_RED,
     "torchorange" => TORCH_ORANGE,
     "torchred" => TORCH_RED,

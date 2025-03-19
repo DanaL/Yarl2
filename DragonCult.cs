@@ -66,6 +66,7 @@ class Kobold
     cultist.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist.txt" });
     cultist.Traits.Add(new NamedTrait());
     cultist.Appearance = Appearance(rng);
+    cultist.Glyph = cultist.Glyph with { Lit = Colours.SOFT_RED };
   }
 
   public static void MakeCultLeader(Actor leader, Random rng)
@@ -140,10 +141,10 @@ class Kobold
     if (goldDonated > 150 && cultLevel == 1 && gs.Rng.NextDouble() < 0.333)
     {
       gs.UIRef().AlertPlayer("My beloved servant!");
-      gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
+      gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(2);
     }
 
-    if (cultLevel >= 1 && zorkmids.Value >= 25 && !gs.Player.HasActiveTrait<DragonCultBlessingTrait>())
+    if (cultLevel >= 2 && zorkmids.Value >= 25 && !gs.Player.HasActiveTrait<DragonCultBlessingTrait>())
     {
       gs.UIRef().AlertPlayer("Savour this taste of the power of dragonkind!");
       gs.UIRef().SetPopup(new Popup("Savour this taste of the power of dragonkind!", "", -1, -1));

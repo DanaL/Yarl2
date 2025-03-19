@@ -11,6 +11,6 @@
       ))))
       
   ((= KOBOLD_CULT_LEVEL 2)
-    (say "Hello!")
+    (say "Servant! #DRAGON_NAME requires your service. There is an enemy of the faith who must be defeated.")
   )
 )
