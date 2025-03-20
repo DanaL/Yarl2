@@ -545,6 +545,14 @@ class Mob : Actor
     return dmgs;
   }
 
+  public void SetAttitude(int attitude)
+  {
+    if (attitude == AGGRESSIVE && HasTrait<FriendlyMonsterTrait>())
+      return;
+
+    Stats[Attribute.MobAttitude] = new Stat(attitude);
+  }
+
   public override void HearNoise(int volume, int sourceRow, int sourceColumn, GameState gs)
   {
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
@@ -582,6 +590,8 @@ class Mob : Actor
   }
 
   public string GetBark(GameState gs) => _behaviour.GetBark(this, gs);
+
+  public void ResetPlan() => CurrPlan = null;
 
   public override void TakeTurn(GameState gs)
   {    

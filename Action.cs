@@ -263,12 +263,7 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
         if (GameState.ObjDb.Occupant(loc) is Mob mob && mob.Stats.ContainsKey(Attribute.MobAttitude))
         {
           mob.Traits = [.. mob.Traits.Where(t => t is not SleepingTrait)];
-
-          if (!mob.HasTrait<WorshiperTrait>())
-          {
-            Stat attittude = mob.Stats[Attribute.MobAttitude];
-            mob.Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
-          }
+          mob.SetAttitude(Mob.AGGRESSIVE);
         }
       }
     }

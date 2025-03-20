@@ -59,23 +59,30 @@ class Kobold
     return sb.ToString();
   }
 
-  static void MakeCultist(Actor cultist, Rng rng)
+  static void MakeCultist(Mob cultist, Rng rng)
   {
     NameGenerator ng = new(rng, Util.KoboldNamesFile);
     cultist.Name = ng.GenerateName(rng.Next(4, 7)).Capitalize();
     cultist.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist.txt" });
     cultist.Traits.Add(new NamedTrait());
+    cultist.Traits.Add(new FriendlyMonsterTrait());
     cultist.Appearance = Appearance(rng);
+    cultist.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+    cultist.ResetPlan();
+
     cultist.Glyph = cultist.Glyph with { Lit = Colours.SOFT_RED };
   }
 
-  public static void MakeCultLeader(Actor leader, Rng rng)
+  public static void MakeCultLeader(Mob leader, Rng rng)
   {
     NameGenerator ng = new(rng, Util.KoboldNamesFile);
     leader.Name = ng.GenerateName(rng.Next(4, 7)).Capitalize();
     leader.Traits.Add(new DialogueScriptTrait() { ScriptFile = "kobold_cultist_priest.txt" });
     leader.Traits.Add(new NamedTrait());
+    leader.Traits.Add(new FriendlyMonsterTrait());
     leader.Appearance = Appearance(rng);
+    leader.Stats[Attribute.MobAttitude] = new Stat(Mob.INDIFFERENT);
+    leader.ResetPlan();
   }
 
   public static bool OfferGold(GameState gs, Item zorkmids, Loc loc)
@@ -118,19 +125,17 @@ class Kobold
       gs.UIRef().AlertPlayer("We appreciate the pledging of your soul and service!");
       gs.Player.Stats[Attribute.KoboldCultLevel] = new Stat(1);
 
-      foreach (Actor actor in gs.ObjDb.AllActors())
+      foreach (Mob cultist in gs.ObjDb.AllActors().Where(a => a is Mob).Cast<Mob>())
       {
-        if (actor.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
-        {
-          actor.Traits.Add(new FriendlyMonsterTrait());
-
-          if (actor.Name == "kobold")
+        if (cultist.Traits.OfType<WorshiperTrait>().FirstOrDefault() is WorshiperTrait wt && wt.AltarLoc == effigyLoc)
+        {          
+          if (cultist.Name == "kobold")
           {
-            MakeCultist(actor, gs.Rng);
+            MakeCultist(cultist, gs.Rng);
           }
-          else if (actor.Name == "kobold soothsayer")
+          else if (cultist.Name == "kobold soothsayer")
           {
-            MakeCultLeader(actor, gs.Rng);
+            MakeCultLeader(cultist, gs.Rng);
           }
         }
       }

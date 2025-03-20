@@ -217,12 +217,9 @@ class Traps
             continue;
           
           var checkLoc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
-          if (gs.ObjDb.Occupant(checkLoc) is Actor monster && monster != actor)
+          if (gs.ObjDb.Occupant(checkLoc) is Mob monster && monster != actor)
           {
-            if (monster.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
-            {
-              attitude.SetMax(Mob.AGGRESSIVE);
-            }
+            monster.SetAttitude(Mob.AGGRESSIVE);
 
             var sleeping = monster.Traits.FirstOrDefault(t => t is SleepingTrait);
             if (sleeping is not null)
