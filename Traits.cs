@@ -2734,6 +2734,27 @@ class SeeInvisibleTrait : TemporaryTrait
   public override string AsText() => $"SeeInvisible#{OwnerID}#{ExpiresOn}";
 }
 
+class SetAttributeTriggerTrait : Trait, IGameEventListener
+{
+  public Attribute Attribute { get; set; }
+  public int Value { get; set; }
+  public bool Expired { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+  public bool Listening => true;
+  public ulong ObjId => SourceId;
+  public GameEventType EventType => GameEventType.Death;
+
+  public override string AsText() => $"SetAttributeTrigger#{Attribute}#{Value}#{SourceId}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (eventType != GameEventType.Death)
+      return;
+
+    gs.Player.Stats[Attribute] = new Stat(Value);
+  }
+}
+
 class InvisibleTrait : BasicTrait, IGameEventListener
 {
   public ulong ActorID { get; set; }
@@ -3147,12 +3168,12 @@ class TraitFactory
         SourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0
       }
     },
-    { "Allies", (pieces, gameObj) => 
+    { "Allies", (pieces, gameObj) =>
       {
         List<ulong> ids = [];
         if (pieces[1] != "")
-          ids = [..pieces[1].Split(',').Select(ulong.Parse)]; 
-        return new AlliesTrait() { IDs = ids }; } 
+          ids = [..pieces[1].Split(',').Select(ulong.Parse)];
+        return new AlliesTrait() { IDs = ids }; }
       },
     { "Ammo", (pieces, gameObj) =>
       {
@@ -3201,9 +3222,9 @@ class TraitFactory
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
-    { "Curse", (pieces, gameObj) => 
-      new CurseTrait() 
-      { 
+    { "Curse", (pieces, gameObj) =>
+      new CurseTrait()
+      {
         OwnerID = ulong.Parse(pieces[1]),
         ExpiresOn = ulong.Parse(pieces[2])
       }
@@ -3244,7 +3265,7 @@ class TraitFactory
     },
     { "DoorKey", (pieces, gameObj) => new DoorKeyTrait() { DCMod = int.Parse(pieces[1])} },
     { "DragonCultBlessing", (pieces, gameObj) => new DragonCultBlessingTrait()
-      { 
+      {
         SourceId = ulong.Parse(pieces[1]),
         ExpiresOn = ulong.Parse(pieces[2]),
         OwnerID = ulong.Parse(pieces[3])
@@ -3279,11 +3300,11 @@ class TraitFactory
         AcidDice = int.Parse(pieces[3])
       }
     },
-    { "GoldSniffer", (pieces, gameObj) => new GoldSnifferTrait() 
-      { 
+    { "GoldSniffer", (pieces, gameObj) => new GoldSnifferTrait()
+      {
         OwnerID = ulong.Parse(pieces[1]),
         SourceId = ulong.Parse(pieces[2])
-      } 
+      }
     },
     { "GoodMagicLoot", (pieces, gameObj) => new GoodMagicLootTrait() },
     { "Grants", (pieces, gameObj) => {
@@ -3323,13 +3344,13 @@ class TraitFactory
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
-    { "LightSource", (pieces, gameObj) => new LightSourceTrait() 
-      { 
-        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]), 
+    { "LightSource", (pieces, gameObj) => new LightSourceTrait()
+      {
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Radius = int.Parse(pieces[2]),
         FgColour = Colours.TextToColour(pieces[3]),
         BgColour = Colours.TextToColour(pieces[4])
-      } 
+      }
     },
     { "LightStep", (pieces, gameObj) => new LightStepTrait() },
     { "Likeable", (pieces, gameObj) => new LikeableTrait() },
@@ -3347,20 +3368,20 @@ class TraitFactory
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Strength = int.Parse(pieces[2])
       }
-    },    
+    },
     { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
-    { "NumberList", (pieces, gameObj) => 
-      new NumberListTrait() 
-      { 
-        Name = pieces[1], 
-        Items = pieces[2] == "" ? [] : [..pieces[2].Split(',').Select(int.Parse)] 
-      } 
+    { "NumberList", (pieces, gameObj) =>
+      new NumberListTrait()
+      {
+        Name = pieces[1],
+        Items = pieces[2] == "" ? [] : [..pieces[2].Split(',').Select(int.Parse)]
+      }
     },
     { "OnFire", (pieces, gameObj) => new OnFireTrait()
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
       Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) }
-    },    
+    },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
@@ -3385,7 +3406,7 @@ class TraitFactory
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },
     { "Readable", (pieces, gameObj) => new ReadableTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
-    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },    
+    { "ReaverBlessing", (pieces, gameObj) => new ReaverBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Recall", (pieces, gameObj) => new RecallTrait() { ExpiresOn = ulong.Parse(pieces[1]), Expired = bool.Parse(pieces[2]) } },
     { "Regeneration", (pieces, gameObj) => {
       ulong sourceId = pieces.Length > 5 ? ulong.Parse(pieces[5]) : 0;
@@ -3429,6 +3450,17 @@ class TraitFactory
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "SetAttributeTrigger", (pieces, gameObj) => 
+      {
+        Enum.TryParse(pieces[1], out Attribute attr);
+        return new SetAttributeTriggerTrait()
+        {
+          Attribute = attr,
+          Value = int.Parse(pieces[2]),
+          SourceId = ulong.Parse(pieces[3])
+        }; 
+      }
+    },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },
     { "Shunned", (pieces, gameObj) => new ShunnedTrait() },
     { "SilverAllergy", (pieces, gameObj) => new SilverAllergyTrait() },

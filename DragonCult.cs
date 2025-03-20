@@ -174,6 +174,15 @@ class Kobold
     Actor ogre = MonsterFactory.Get("ogre", gs.ObjDb, gs.Rng);
     ogre.Name = ogreName;
     ogre.Traits.Add(new NamedTrait());
+    SetAttributeTriggerTrait trigger = new()
+    {
+      Attribute = Attribute.KoboldCultLevel,
+      Value = 3,
+      SourceId = ogre.ID
+    };
+    ogre.Traits.Add(trigger);
+    gs.RegisterForEvent(GameEventType.Death, trigger, ogre.ID);
+
     ogre.Glyph = ogre.Glyph with { Lit = Colours.LIGHT_BLUE, Unlit = Colours.BLUE };
 
     // Let's guarantee the quest boss always drops an ogre liver
