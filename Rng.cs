@@ -95,7 +95,6 @@ public class Rng
     // Get 53 random bits for the mantissa (standard double precision)
     ulong value = _next() >> 11;
 
-    // Convert to double in [0,1) range by dividing by 2^53
     return value * (1.0 / (1UL << 53));
   }
 }

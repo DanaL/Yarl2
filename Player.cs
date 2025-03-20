@@ -448,7 +448,10 @@ class Player : Actor
     gs.PrepareFieldOfView();
 
     double result = action.Execute();
-    Energy -= CalcEnergyUsed(result);    
+    Energy -= CalcEnergyUsed(result);
+
+    if (result > 0.0)
+      gs.PrepareFieldOfView();
   }
 
   public void HaltTravel() 

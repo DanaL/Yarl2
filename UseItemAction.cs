@@ -458,8 +458,12 @@ class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
       if (rogue)
         dc -= 5;
-      if (Tool.Name == "skeleton key")
-        dc -= 2;
+
+      foreach (Trait t in Tool.Traits)
+      {
+        if (t is DoorKeyTrait dkt)
+          dc += dkt.DCMod;
+      }
 
       if (Actor.AbilityCheck(Attribute.Dexterity, dc, GameState.Rng))
       {
@@ -557,7 +561,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState!.ClearMenu();
       
       DirectionalInputer dir = new(GameState, true);
-      if (item.Name == "pickaxe")
+      if (item.HasTrait<DiggingToolTrait>())
         dir.DeferredAction = new DigAction(GameState, Actor, item);
       else
         dir.DeferredAction = new PickLockAction(GameState, Actor, item);

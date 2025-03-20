@@ -499,11 +499,23 @@ class DialogueScriptTrait : Trait
   public override string AsText() => $"DialogueScript#{ScriptFile}";
 }
 
+class DiggingToolTrait : Trait
+{
+  public override string AsText() => "DiggingTool";
+}
+
 class DodgeTrait : Trait
 {
   public int Rate { get; set; }
 
   public override string AsText() => $"Dodge#{Rate}#{SourceId}";
+}
+
+class DoorKeyTrait : Trait
+{
+  public int DCMod { get; set; }
+
+  public override string AsText() => $"DoorKey#{DCMod}";
 }
 
 class FinesseTrait : Trait
@@ -3219,6 +3231,7 @@ class TraitFactory
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
+    { "DiggingTool", (pieces, gameObj) => new DiggingToolTrait() },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
@@ -3229,6 +3242,7 @@ class TraitFactory
           return new DodgeTrait() { Rate = int.Parse(pieces[1]), SourceId = sourceId };
       }
     },
+    { "DoorKey", (pieces, gameObj) => new DoorKeyTrait() { DCMod = int.Parse(pieces[1])} },
     { "DragonCultBlessing", (pieces, gameObj) => new DragonCultBlessingTrait()
       { 
         SourceId = ulong.Parse(pieces[1]),

@@ -1528,7 +1528,7 @@ class DialogueInterpreter
     var (ogreName, ogreLevel) = Kobold.CreateQuest(gs);
 
     string dragonName = gs.FactDb.FactCheck("DragonFact") is SimpleFact fact ? fact.Value : "";
-    Sb.Append($"There's an ogre named [BRIGHTRED {ogreName}] who's been hanging out on level [ICEBLUE {Util.NumToWord(ogreLevel + 1)}]. A real jerk! He bullies kobolds and doesn't respect {dragonName} at all.");
+    Sb.Append($"There's an ogre named [BRIGHTRED {ogreName}] who's been hanging out on [ICEBLUE level {Util.NumToWord(ogreLevel + 1)}]. A real jerk! He bullies kobolds and doesn't respect {dragonName} at all.");
     Sb.Append("\n\nIf you can teach him the error of his ways, you will be much esteemed in the eyes of our scaley overlord.");
 
     mob.Stats[Attribute.DialogueState] = new Stat(2);

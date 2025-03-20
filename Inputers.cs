@@ -1083,7 +1083,7 @@ class LockedDoorMenu : Inputer
   {
     foreach (Item item in GS.Player.Inventory.Items())
     {
-      if (item.Name == "pickaxe")
+      if (item.HasTrait<DiggingToolTrait>())
       {
         Loc playerLoc = GS.Player.Loc;        
         DigAction dig = new(GS, GS.Player, item);
@@ -1137,14 +1137,14 @@ class LockedDoorMenu : Inputer
     bool pickaxe = false;
     foreach (Item item in GS.Player.Inventory.Items())
     {
-      if (item.Name == "lock pick" || item.Name == "skeleton key")
+      if (item.HasTrait<DoorKeyTrait>())
       {
         Tool = item;
         lockpick = true;
       }
       else if (item.Name == "scroll of knock")
         knock = true;
-      else if (item.Name == "pickaxe")
+      else if (item.HasTrait<DiggingToolTrait>())
         pickaxe = true;
     }
 

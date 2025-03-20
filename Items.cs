@@ -69,10 +69,13 @@ class Item : GameObj, IEquatable<Item>
 
   public bool IsUseableTool()
   {
-    if (Type != ItemType.Tool)
-      return false;
-    if (Name == "lock pick" || Name == "pickaxe" || Name == "skeleton key")
-      return true;
+    foreach (Trait t in Traits)
+    {
+      if (t is DiggingToolTrait)
+        return true;
+      else if (t is DoorKeyTrait)
+        return true;
+    }
 
     return false;
   }

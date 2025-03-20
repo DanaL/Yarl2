@@ -86,7 +86,8 @@
     "Traits": [
       "Damage#6#1#Piercing",
       "Axe",
-      "Metal#1"
+      "Metal#1",
+      "DiggingTool"
     ]
   },
   {
@@ -310,7 +311,9 @@
     "Type": "Tool",
     "Value": 20,
     "Glyph": "(,grey,lightgrey,black,false",
-    "Traits": []
+    "Traits": [
+      "DoorKey#0"
+    ]
   },
   {
     "Name": "SKELETON_KEY",
@@ -319,7 +322,8 @@
     "Value": 20,
     "Glyph": ";,white,grey,black,false",
     "Traits": [
-      "Fragile"
+      "Fragile",
+      "DoorKey#-2"
     ]
   },
   {
