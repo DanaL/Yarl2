@@ -14,9 +14,8 @@ using System.Text;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng, int seed)
+class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 {
-  public int Seed { get; init; } = seed;
   public Rng Rng { get; set; } = rng;
   public Options Options { get; set; } = opts;
   public Player Player { get; set; } = p;

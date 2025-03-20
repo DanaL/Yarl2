@@ -22,6 +22,13 @@ public class Rng
 {
   readonly ulong[] s = new ulong[4];
 
+  public static Rng FromState(ulong[] state) => new()
+  {
+    State = state
+  };
+
+  protected Rng() { }
+
   public Rng(int seed)
   {
     ulong ulSeed = (ulong)(uint)seed;

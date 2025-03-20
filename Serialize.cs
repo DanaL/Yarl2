@@ -72,7 +72,7 @@ internal class Serialize
 
   public static List<Sqr> FetchSavePreview(string path)
   {    
-    var bytes = File.ReadAllBytes(path);
+    byte[] bytes = File.ReadAllBytes(path);
     var sgi = JsonSerializer.Deserialize<SaveGameInfo>(bytes);
 
     if (sgi is null)
@@ -172,25 +172,20 @@ class GameStateSave
   public int CurrLevel { get; set; }
   public int CurrDungeonID { get; set; }
   public ulong Turn { get; set; }
-  public int Seed { get; set; }
+  public ulong[] Seed { get; set; } = [];
 
-  public static GameStateSave Shrink(GameState gs)
+  public static GameStateSave Shrink(GameState gs) => new()
   {
-    var gss = new GameStateSave()
-    {
-      CurrDungeonID = gs.CurrDungeonID,
-      CurrLevel = gs.CurrLevel,
-      Turn = gs.Turn,
-      Seed = gs.Seed
-    };
-
-    return gss;
-  }
+    CurrDungeonID = gs.CurrDungeonID,
+    CurrLevel = gs.CurrLevel,
+    Turn = gs.Turn,
+    Seed = gs.Rng.State
+  };
 
   public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
   {
-    var rng = new Rng(gss.Seed);
-    GameState gs = new(null!, camp, opt, ui, rng, gss.Seed)
+    Rng rng = Rng.FromState(gss.Seed);
+    GameState gs = new(null!, camp, opt, ui, rng)
     {
       CurrDungeonID = gss.CurrDungeonID,
       CurrLevel = gss.CurrLevel,

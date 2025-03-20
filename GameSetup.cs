@@ -745,7 +745,7 @@ class CampaignCreator(UserInterface ui)
       int startRow, startCol;
       (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);
       player.Loc = new Loc(0, 0, startRow, startCol);
-      GameState gameState = new(player, campaign, options, UI, rng, seed)
+      GameState gameState = new(player, campaign, options, UI, rng)
       {
         ObjDb = objDb,
         Turn = 1

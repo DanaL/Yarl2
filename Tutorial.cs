@@ -117,7 +117,7 @@ class Tutorial(UserInterface ui)
     Player player = TutorialPlayer(objDb);
     Campaign campaign = Campaign();
 
-    GameState gameState = new(player, campaign, options, UI, rng, seed)
+    GameState gameState = new(player, campaign, options, UI, rng)
     {
       ObjDb = objDb,
       Turn = 1,
