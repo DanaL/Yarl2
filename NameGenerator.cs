@@ -17,30 +17,30 @@ namespace Yarl2
 {
   class NameGenerator
   {
-    private Random _rng;
-    private List<(char, int)> _starts;
-    private List<(string, int)> _pairs;
+    Rng _rng;
+    List<(char, int)> _starts;
+    List<(string, int)> _pairs;
 
-    private string[] _ranks = [ "king", "queen", "viscount", "marquess", "baron", "lord", "lady",
-            "sovereign", "vizier", "duke", "grand duke", "archduke", "prince", "princess", "earl",
-            "despot", "count", "countess", "baroness", "elder", "justice", "judge", "tyrant" ];
-    private string[] _adjectives = [ "seeker", "ruler", "conqueror", "reaver", "saviour", "friend",
-            "patron", "protector", "beloved"];
-    private string[] _domains = [ "mists", "the heavens", "spring", "summer", "fall", "winter", "wisdom",
-            "faith", "faith", "peace", "the west", "the north", "the south", "the skies", "the stars",
-            "the provinces", "the faithful", "autmun rains", "the fearful" ];
-    private string[] _titles = [ "strong", "mighty", "unbowed", "forgotten", "cursed", "twice cursed",
-            "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen",
-            "faithful", "beautiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
+    string[] _ranks = [ "king", "queen", "viscount", "marquess", "baron", "lord", "lady",
+        "sovereign", "vizier", "duke", "grand duke", "archduke", "prince", "princess", "earl",
+        "despot", "count", "countess", "baroness", "elder", "justice", "judge", "tyrant" ];
+    string[] _adjectives = [ "seeker", "ruler", "conqueror", "reaver", "saviour", "friend",
+        "patron", "protector", "beloved"];
+    string[] _domains = [ "mists", "the heavens", "spring", "summer", "fall", "winter", "wisdom",
+        "faith", "faith", "peace", "the west", "the north", "the south", "the skies", "the stars",
+        "the provinces", "the faithful", "autmun rains", "the fearful" ];
+    string[] _titles = [ "strong", "mighty", "unbowed", "forgotten", "cursed", "twice cursed",
+         "thrice cursed", "beloved", "praised", "glorious", "sorrowful", "vengeful", "redeemer", "fallen",
+         "faithful", "beautiful", "radiant", "awful", "terrible", "wise", "just", "reaver" ];
 
-    private string[] _villainPrefix = ["black", "salty", "mini-boss", "snarling", "stinky", "big", "little", 
-            "ugly", "fishy", "one eye", "iron jaw", "merciless", "drooling", "haunted"];
-    private string[] _villainSuffix = ["the feared", "the terrible", "the cruel", "the drunk", "the vile",
-            "the weasel", "the wolf", "the shadow", "the fox", "the butcher", "the blade", "the axe",
-            "the shark", "the mad"];
+    string[] _villainPrefix = ["black", "salty", "mini-boss", "snarling", "stinky", "big", "little", 
+         "ugly", "fishy", "one eye", "iron jaw", "merciless", "drooling", "haunted"];
+    string[] _villainSuffix = ["the feared", "the terrible", "the cruel", "the drunk", "the vile",
+         "the weasel", "the wolf", "the shadow", "the fox", "the butcher", "the blade", "the axe",
+         "the shark", "the mad"];
 
     // TODO: replace with something less lame...
-    public static string TownName(Random rng)
+    public static string TownName(Rng rng)
     {
       string[] prefixes = [
           "Upper", "Lower", "North", "South", "East", "West",
@@ -91,7 +91,7 @@ namespace Yarl2
       return name;
     }
 
-    public static string GenerateTavernName(Random rng)
+    public static string GenerateTavernName(Rng rng)
   {
     string[] adjectives = 
       [
@@ -125,7 +125,7 @@ namespace Yarl2
       };
     }
 
-    public NameGenerator(Random rng, string sourceFile)
+    public NameGenerator(Rng rng, string sourceFile)
     {
       _rng = rng;
       var names = File.ReadAllLines(sourceFile)

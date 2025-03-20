@@ -30,7 +30,7 @@ class MonsterDeck
   public List<string> Monsters { get; set; } = [];
   public Queue<int> Indexes { get; set; } = [];
 
-  public void Reshuffle(Random rng)
+  public void Reshuffle(Rng rng)
   {
     List<int> indexes = [];
     for (int i = 0; i < Monsters.Count; i++)
@@ -87,7 +87,7 @@ class DeckBuilder
     return deck;
   }
 
-  public static List<MonsterDeck> MakeDecks(string earlyMainOccupant, VillainType villain, Random rng)
+  public static List<MonsterDeck> MakeDecks(string earlyMainOccupant, VillainType villain, Rng rng)
   {    
     List<MonsterDeck> decks = [];
 

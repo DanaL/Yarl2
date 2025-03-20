@@ -170,7 +170,7 @@ class TitleScreen
 
   void Fight(Loc loc)
   {
-    Random rng = new();
+    Rng rng = new(DateTime.UtcNow.GetHashCode());
 
     if (FightRound > 0)
     {
@@ -200,7 +200,7 @@ class TitleScreen
 
   bool DrawWildernessMap()
   {
-    Random rng = new();
+    Rng rng = new(DateTime.UtcNow.GetHashCode());
     var wildernessGenerator = new Wilderness(rng, 65);
     Map = wildernessGenerator.DrawLevel();
 
@@ -358,7 +358,7 @@ class TitleScreen
   void BuildLittleDungeon()
   {
     SeenBefore = [];
-    Random rng = new();
+    Rng rng = new(DateTime.UtcNow.GetHashCode());
     DungeonMap mapper = new(rng);
     Map = mapper.DrawLevel(50, 50);
 

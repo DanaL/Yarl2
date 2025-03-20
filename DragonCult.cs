@@ -10,14 +10,13 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Yarl2;
 
 class Kobold
 {
-  static string Appearance(Random rng)
+  static string Appearance(Rng rng)
   {
     StringBuilder sb = new();
 
@@ -60,7 +59,7 @@ class Kobold
     return sb.ToString();
   }
 
-  static void MakeCultist(Actor cultist, Random rng)
+  static void MakeCultist(Actor cultist, Rng rng)
   {
     NameGenerator ng = new(rng, Util.KoboldNamesFile);
     cultist.Name = ng.GenerateName(rng.Next(4, 7)).Capitalize();
@@ -70,7 +69,7 @@ class Kobold
     cultist.Glyph = cultist.Glyph with { Lit = Colours.SOFT_RED };
   }
 
-  public static void MakeCultLeader(Actor leader, Random rng)
+  public static void MakeCultLeader(Actor leader, Rng rng)
   {
     NameGenerator ng = new(rng, Util.KoboldNamesFile);
     leader.Name = ng.GenerateName(rng.Next(4, 7)).Capitalize();

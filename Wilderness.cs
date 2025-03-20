@@ -11,9 +11,9 @@
 
 namespace Yarl2;
 
-internal class Wilderness(Random rng, int length)
+internal class Wilderness(Rng rng, int length)
 {
-  readonly Random Rng = rng;
+  readonly Rng Rng = rng;
   readonly int Length = length;
   readonly int ConiferousAmount = rng.NextDouble() < 0.5 ? 10 : 30;
 
@@ -22,7 +22,7 @@ internal class Wilderness(Random rng, int length)
   // Guess I should deal with the southern hemisphere if possible :P
   // And/or randomize the latitude of the dungeon if I want to be silly
   // I don't yet have winter trees
-  public static TileType PickTree(Random rng, int coniferChance)
+  public static TileType PickTree(Rng rng, int coniferChance)
   {
     if (rng.Next(100) < coniferChance)
       return TileType.Conifer;
@@ -188,7 +188,7 @@ internal class Wilderness(Random rng, int length)
     return (tree, grass);
   }
 
-  Map CAizeTerrain(Map map, Random rng)
+  Map CAizeTerrain(Map map, Rng rng)
   {
     var next = (Map)map.Clone();
     for (int r = 1; r < Length - 1; r++)
@@ -209,7 +209,7 @@ internal class Wilderness(Random rng, int length)
   // Run a sort of cellular automata ule over the trees
   // and grass to clump them together.
   // Two generations seems to make a nice mix .
-  Map TweakTreesAndGrass(Map map, Random rng)
+  Map TweakTreesAndGrass(Map map, Rng rng)
   {
     map = CAizeTerrain(map, rng);
     map = CAizeTerrain(map, rng);

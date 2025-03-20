@@ -18,7 +18,7 @@ namespace Yarl2;
 
 class Village
 {
-  static Loc RandomOutdoorLoc(Map map, Town town, Random rng)
+  static Loc RandomOutdoorLoc(Map map, Town town, Rng rng)
   {
     List<(int, int)> sqs = [];
     for (int r = town.Row; r < town.Row + town.Height; r++)
@@ -45,7 +45,7 @@ class Village
     return new Loc(0, 0, sq.Item1, sq.Item2);
   }
 
-  static (Colour, Colour) VillagerColour(Random rng)
+  static (Colour, Colour) VillagerColour(Rng rng)
   {
     var roll = rng.Next(8);
     return roll switch
@@ -61,7 +61,7 @@ class Village
     };
   }
 
-  static string VillagerAppearance(Random rng)
+  static string VillagerAppearance(Rng rng)
   {
     string[] species = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
     string[] eyes = ["bright", "deep", "dark", "sad", "distant", "piercing", "clear", "clouded", "watery", "cold", "twinkling"];
@@ -94,7 +94,7 @@ class Village
     return appearance.ToString();
   }
 
-  static Mob BaseVillager(NameGenerator ng, Random rng)
+  static Mob BaseVillager(NameGenerator ng, Rng rng)
   {
     var (lit, unlit) = VillagerColour(rng);
     Mob mob = new()
@@ -111,7 +111,7 @@ class Village
 
   // Pick a location inside a building (based on it being a floor screen) 
   // which isn't adjacent to the door
-  static Loc LocForVillager(Map map, HashSet<Loc> sqs, Random rng)
+  static Loc LocForVillager(Map map, HashSet<Loc> sqs, Rng rng)
   {
     List<Loc> locs = [];
 
@@ -139,7 +139,7 @@ class Village
     return locs[rng.Next(locs.Count)];
   }
 
-  static Mob GenerateInnkeeper(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  static Mob GenerateInnkeeper(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob innkeeper = BaseVillager(ng, rng);
     innkeeper.SetBehaviour(new InnkeeperBehaviour());
@@ -160,7 +160,7 @@ class Village
     return innkeeper;
   }
 
-  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  static Mob GeneratePriest(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob cleric = BaseVillager(ng, rng);
     cleric.Traits.Add(new DialogueScriptTrait() { ScriptFile = "priest.txt" });
@@ -197,7 +197,7 @@ class Village
     return cleric;
   }
 
-  static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  static Mob GenerateGrocer(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob grocer = BaseVillager(ng, rng);
     
@@ -242,7 +242,7 @@ class Village
     return grocer;
   }
 
-  static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  static Mob GenerateSmith(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob smith = BaseVillager(ng, rng);
     
@@ -280,7 +280,7 @@ class Village
     return smith;
   }
 
-  static int PickUnoccuppiedCottage(Town town, Random rng)
+  static int PickUnoccuppiedCottage(Town town, Rng rng)
   {
     List<int> available = [];
     for (int i = 0; i < town.Homes.Count; i++) 
@@ -299,7 +299,7 @@ class Village
     }
   }
 
-  static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Random rng)
+  static Mob GenerateMayor(Map map, Town town, NameGenerator ng, Rng rng)
   {
     Mob mayor = BaseVillager(ng, rng);
     mayor.Traits.Add(new DialogueScriptTrait() { ScriptFile = "mayor.txt" });
@@ -313,7 +313,7 @@ class Village
     return mayor;
   }
 
-  static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Random rng)
+  static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
   {
     Mob veteran = BaseVillager(ng, rng);
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
@@ -337,7 +337,7 @@ class Village
     return veteran;
   }
 
-  static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Random rng)
+  static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Rng rng)
   {
     Mob villager = BaseVillager(ng, rng);
     villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
@@ -351,7 +351,7 @@ class Village
     return villager;
   }
 
-  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Random rng)
+  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Rng rng)
   {
     Mob widower = BaseVillager(ng, rng);
     widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
@@ -366,7 +366,7 @@ class Village
     return widower;
   }
 
-  static void GenerateWitches(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
+  static void GenerateWitches(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<Loc> startLocs = [];
     foreach (Loc loc in town.WitchesCottage)
@@ -454,7 +454,7 @@ class Village
     }
   }
 
-  static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Random rng)
+  static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Rng rng)
   {
     int roll = rng.Next(4);
     var (colourDesc, colour) = roll switch
@@ -498,7 +498,7 @@ class Village
     return pup;
   }
 
-  public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Random rng)
+  public static void Populate(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     NameGenerator ng = new(rng, Util.NamesFile);
 

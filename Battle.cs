@@ -38,7 +38,7 @@ class Battle
   // regardless. (So even if you have a very high AC lowly monsters still have
   // a small chance of hitting you -- I'm simulating this by returning 100, 
   // which should beat any AC in the game)
-  static int AttackRoll(Random rng) 
+  static int AttackRoll(Rng rng) 
   {
     int a = rng.Next(1, 21);
     int b = rng.Next(1, 21);
@@ -48,7 +48,7 @@ class Battle
     return (a + b) / 2;
   } 
 
-  static (int, DamageType) DamageRoll(Damage dmg, Random rng)
+  static (int, DamageType) DamageRoll(Damage dmg, Rng rng)
   {
     int total = 0;
     for (int r = 0; r < dmg.NumOfDie; r++)
@@ -854,7 +854,7 @@ class Battle
 
   // A poison source that is just coated in poison (like a poison dart) has a 
   // chance of the poison wearing out during an attack so check for that here.
-  static void CheckCoatedPoison(GameObj obj, Random rng)
+  static void CheckCoatedPoison(GameObj obj, Rng rng)
   {
     if (obj.HasTrait<PoisonCoatedTrait>() && rng.NextDouble() < 0.2)
     {

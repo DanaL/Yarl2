@@ -83,10 +83,10 @@ class PlayerCreator
   }
 
   // If I use this enough, move it to Utils?
-  static int Roll3d6(Random rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
-  static int StatRoll(Random rng) => Util.StatRollToMod(Roll3d6(rng));
+  static int Roll3d6(Rng rng) => rng.Next(1, 7) + rng.Next(1, 7) + rng.Next(1, 7);
+  static int StatRoll(Rng rng) => Util.StatRollToMod(Roll3d6(rng));
 
-  static Dictionary<Attribute, Stat> RollStats(PlayerLineage lineage, PlayerBackground background, Random rng)
+  static Dictionary<Attribute, Stat> RollStats(PlayerLineage lineage, PlayerBackground background, Rng rng)
   {
     // First, set the basic stats
     var stats = new Dictionary<Attribute, Stat>()
@@ -168,7 +168,7 @@ class PlayerCreator
     }
   }
 
-  static void StartingGearForScholar(Player player, GameObjectDB objDb, Random rng)
+  static void StartingGearForScholar(Player player, GameObjectDB objDb, Rng rng)
   {
     Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
     dagger.Equipped = true;
@@ -190,7 +190,7 @@ class PlayerCreator
     player.Inventory.Add(money, player.ID);
   }
 
-  public static void SetStartingGear(Player player, GameObjectDB objDb, Random rng)
+  public static void SetStartingGear(Player player, GameObjectDB objDb, Rng rng)
   {
     if (player.Background == PlayerBackground.Scholar)
     {
@@ -265,7 +265,7 @@ class PlayerCreator
     player.Inventory.Add(money, player.ID);
   }
 
-  public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Random rng)
+  public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Rng rng)
   {
     var lineage = PickLineage(ui);
     var background = PickBackground(ui);

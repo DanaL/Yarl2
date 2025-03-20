@@ -47,7 +47,7 @@ class NullDecoration : Decoration
 
 class Decorations
 {  
-  public static List<Decoration> GenDecorations(FactDb factDb, Random rng)
+  public static List<Decoration> GenDecorations(FactDb factDb, Rng rng)
   {
     List<Decoration> decorations = [];
     RulerInfo rulerInfo = factDb.Ruler;
@@ -65,7 +65,7 @@ class Decorations
     return decorations.Where(d => d is not NullDecoration).ToList();
   }
 
-  static Decoration StatueForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  static Decoration StatueForEvent(Fact fact, RulerInfo rulerInfo, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -79,7 +79,7 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration JournalForEvent1(Fact fact, FactDb factDb, Random rng)
+  static Decoration JournalForEvent1(Fact fact, FactDb factDb, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -93,10 +93,10 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration JournalForPlague(Disaster plague, FactDb factDb, Random rng)
+  static Decoration JournalForPlague(Disaster plague, FactDb factDb, Rng rng)
   {
     StringBuilder sb = new();
-    NameGenerator ng = new NameGenerator(rng, Util.NamesFile);
+    NameGenerator ng = new(rng, Util.NamesFile);
     // When more historical facts and such are generated I can have the text
     // be like "After the Battle of Blah Blah, there was a brief respite of
     // prosperity before they were struck by the plague of..."
@@ -136,7 +136,7 @@ class Decorations
     return new Decoration(DecorationType.ScholarJournal, sb.ToString());
   }
 
-  static Decoration JournalForEvent2(Fact fact, FactDb factDb, Random rng)
+  static Decoration JournalForEvent2(Fact fact, FactDb factDb, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -146,7 +146,7 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration JournalForEvent3(Fact fact, FactDb factDb, Random rng)
+  static Decoration JournalForEvent3(Fact fact, FactDb factDb, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -156,7 +156,7 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration MosaicForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  static Decoration MosaicForEvent(Fact fact, RulerInfo rulerInfo, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -170,7 +170,7 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration FrescoeForEvent(Fact fact, RulerInfo rulerInfo, Random rng)
+  static Decoration FrescoeForEvent(Fact fact, RulerInfo rulerInfo, Rng rng)
   {
     if (fact is Invasion invasion)
     {
@@ -184,19 +184,19 @@ class Decorations
     return Decoration.Null;
   }
 
-  static Decoration InvasionJournal(Invasion invasion, FactDb factDb, Random rng)
+  static Decoration InvasionJournal(Invasion invasion, FactDb factDb, Rng rng)
   {
     if (factDb.Nations.Count == 0 || rng.NextDouble() < 0.2)
       factDb.Add(History.GenNation(rng));
 
     string nation = factDb.Nations[rng.Next(factDb.Nations.Count)].Name;
-    NameGenerator ng = new NameGenerator(rng, Util.NamesFile);
+    NameGenerator ng = new(rng, Util.NamesFile);
     string text = $@"My dear {ng.GenerateName(rng.Next(8, 12)).Capitalize()}, I am here in this dank place researching the invasion by {invasion.Invader}, having been lead here after discovering an old codex in a library in {nation} I will...";
 
     return new Decoration(DecorationType.ScholarJournal, text);
   }
 
-  static Decoration InvasionJournal2(Invasion invasion, FactDb factDb, Random rng)
+  static Decoration InvasionJournal2(Invasion invasion, FactDb factDb, Rng rng)
   {
     string desc;
     if (invasion.Successful)
@@ -207,7 +207,7 @@ class Decorations
     return new Decoration(DecorationType.ScholarJournal, desc);
   }
 
-  static Decoration InvasionJournal3(Invasion invasion, FactDb factDb, Random rng)
+  static Decoration InvasionJournal3(Invasion invasion, FactDb factDb, Rng rng)
   {
     RulerInfo rulerInfo = factDb.Ruler;
     string desc;
@@ -256,7 +256,7 @@ class Decorations
     }    
   }
 
-  static Decoration InvasionMosaic(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  static Decoration InvasionMosaic(Invasion invasion, RulerInfo rulerInfo, Rng rng)
   {
     var roll = rng.NextDouble();
     string desc;
@@ -268,7 +268,7 @@ class Decorations
     return new Decoration(DecorationType.Mosaic, desc);
   }
 
-  static Decoration InvasionFrescoe(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  static Decoration InvasionFrescoe(Invasion invasion, RulerInfo rulerInfo, Rng rng)
   {
     string desc;
     double roll = rng.NextDouble();
@@ -282,7 +282,7 @@ class Decorations
     return new Decoration(DecorationType.Fresco, desc);
   }
 
-  static Decoration InvasionStatue(Invasion invasion, RulerInfo rulerInfo, Random rng)
+  static Decoration InvasionStatue(Invasion invasion, RulerInfo rulerInfo, Rng rng)
   {
     string desc = "";
 
@@ -328,7 +328,7 @@ class Decorations
 
 class IdolAltarMaker
 { 
-  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng, int level)
+  public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng, int level)
   {
     Map altarLevel = levels[level];
     Tile sacredSq;
@@ -397,7 +397,7 @@ class IdolAltarMaker
 
 class CaptiveFeature
 {
-  public static void Create(int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
+  public static void Create(int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     var cells = DungeonBuilder.PotentialClosets(map);
     if (cells.Count == 0)
@@ -439,7 +439,7 @@ class CaptiveFeature
     MakePrisoner(cellR, cellC, dungeonId, level, map, objDb, factDb, rng);
   }
 
-  static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
+  static void MakePrisoner(int cellRow, int cellCol, int dungeonId, int level, Map map, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     
     Loc cell = new(dungeonId, level, cellRow, cellCol);
@@ -498,7 +498,7 @@ class CaptiveFeature
     return walls;
   }
 
-  static void SetCreepyAltar(Loc cell, Map map, Random rng)
+  static void SetCreepyAltar(Loc cell, Map map, Rng rng)
   {
     List<Loc> sqsNearCell = [];
     for (int r = cell.Row - 4; r <= cell.Row + 4; r++)
@@ -524,7 +524,7 @@ class CaptiveFeature
     }
   }
 
-  static string SetCaptors(Loc cell, Map map, GameObjectDB objDb, FactDb factDb, Random rng)
+  static string SetCaptors(Loc cell, Map map, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     string captors;
     if (cell.Level < 5)
@@ -686,7 +686,7 @@ class TunnelCarver
     return tunnel;
   }
 
-  static List<(int, int)> TryToDrawTunnel(Map map, int r, int c, Random rng)
+  static List<(int, int)> TryToDrawTunnel(Map map, int r, int c, Rng rng)
   {    
     // Try upwards
     int dr = -1;
@@ -731,7 +731,7 @@ class TunnelCarver
     return [];
   }
 
-  static void DecorateTunnel(int dungeonID, int level, List<(int, int)> tunnel, GameObjectDB objDb, Random rng)
+  static void DecorateTunnel(int dungeonID, int level, List<(int, int)> tunnel, GameObjectDB objDb, Rng rng)
   {
     // We want to have at least one rubble-blocked square
     int i = rng.Next(tunnel.Count);
@@ -772,7 +772,7 @@ class TunnelCarver
     }
   }
 
-  public static void MakeCollapsedTunnel(int dungeonID, int level, Map map, GameObjectDB objDb, Random rng)
+  public static void MakeCollapsedTunnel(int dungeonID, int level, Map map, GameObjectDB objDb, Rng rng)
   {
      List<(int, int)> candidates = FindStartCandidates(map);
     

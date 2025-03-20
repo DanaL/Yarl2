@@ -420,7 +420,7 @@ abstract class Actor : GameObj, IZLevel
   public abstract Loc PickRangedTargetLoc(GameState gamestate);
   public abstract void TakeTurn(GameState gs);
 
-  public bool AbilityCheck(Attribute attr, int dc, Random rng)
+  public bool AbilityCheck(Attribute attr, int dc, Rng rng)
   {
     int statMod = Stats.TryGetValue(attr, out var stat) ? stat.Curr : 0;
     int roll = rng.Next(20) + 1 + statMod;
@@ -636,7 +636,7 @@ class MonsterFactory
     }
   }
 
-  public static Actor Get(string name, GameObjectDB objDb, Random rng)
+  public static Actor Get(string name, GameObjectDB objDb, Rng rng)
   {
     if (_catalog.Count == 0)
       LoadCatalog();

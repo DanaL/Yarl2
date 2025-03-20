@@ -42,7 +42,7 @@ class Vaults
     return (-1, -1);
   }
 
-  public static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
+  public static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     if (level == 0)
     {
@@ -83,7 +83,7 @@ class Vaults
     }
   }
 
-  static (int, int) PickVaultTriggerLoc(Map map, int row, int col, int height, int width, HashSet<(int, int)> vault, Random rng)
+  static (int, int) PickVaultTriggerLoc(Map map, int row, int col, int height, int width, HashSet<(int, int)> vault, Rng rng)
   {
     int startRow = int.Max(row - 10, 1);
     int endRow = int.Min(row + 10, height);
@@ -112,7 +112,7 @@ class Vaults
     return (triggerRow, triggerCol);
   }
 
-  static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
+  static void VandalizedVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.BrokenPortcullis));
     RulerInfo rulerInfo = factDb.Ruler;
@@ -177,7 +177,7 @@ class Vaults
     }
   }
 
-  static Landmark GetTombDecoration(Random rng, FactDb factDb)
+  static Landmark GetTombDecoration(Rng rng, FactDb factDb)
   {
     RulerInfo rulerInfo = factDb.Ruler;
     string s = rulerInfo.Type switch
@@ -201,7 +201,7 @@ class Vaults
     return landmark;
   }
 
-  static Landmark GetTombMarker(NameGenerator ng, Random rng, FactDb factDb)
+  static Landmark GetTombMarker(NameGenerator ng, Rng rng, FactDb factDb)
   {
     RulerInfo rulerInfo = factDb.Ruler;
     string rulerName = $"{rulerInfo.Title} {rulerInfo.Name}";
@@ -251,7 +251,7 @@ class Vaults
     return new Landmark(sb.ToString());
   } 
 
-  static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Random rng, GameObjectDB objDb, FactDb factDb)
+  static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
     List<Loc> locs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
@@ -314,7 +314,7 @@ class Vaults
     }
   }
 
-  static void SetVaultDoorKey(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Random rng, GameObjectDB objDb)
+  static void SetVaultDoorKey(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> room, Rng rng, GameObjectDB objDb)
   {
     Metals material;
     int roll = rng.Next(10);
@@ -354,7 +354,7 @@ class Vaults
     objDb.SetToLoc(keyLoc, key);
   }
 
-  static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, GameObjectDB objDb, Random rng)
+  static void SetPortcullis(Map map, int dungeonID, int level, HashSet<(int, int)> room, int doorRow, int doorCol, GameObjectDB objDb, Rng rng)
   {
     int triggerRow, triggerCol;
     (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, map.Height, map.Width, room, rng);
@@ -464,7 +464,7 @@ class Rooms
     }
   }
 
-  static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, GameObjectDB objDb, Random rng)
+  static HashSet<Loc> DetermineBridges(Map map, int dungeonID, int level, ChasmRoomInfo info, GameObjectDB objDb, Rng rng)
   {
     HashSet<Loc> bridges = [];
 
@@ -498,7 +498,7 @@ class Rooms
     return bridges;
   }
 
-  public static void ChasmTrapRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  public static void ChasmTrapRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
     Map mapBelow = levels[level + 1];
@@ -533,7 +533,7 @@ class Rooms
     }
   }
 
-  public static void TriggerChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  public static void TriggerChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
     Map mapBelow = levels[level + 1];
@@ -560,7 +560,7 @@ class Rooms
     objDb.SetToLoc(treasureLoc, treasure);
   }
 
-  public static void BasicChasmRoom(Map[] levels, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
+  public static void BasicChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
     Map mapBelow = levels[level + 1];
@@ -586,7 +586,7 @@ class Rooms
     }
   }
 
-  public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  public static void KoboldWorshipRoom(Map map, List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     Loc loc;
     List<Loc> floors = [];
@@ -698,7 +698,7 @@ class Rooms
     
   }
 
-  public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     if (factDb.FactCheck("EarlyDenizen") is not SimpleFact ed)
       // This is an error condition but I don't think worth calling an expection over
@@ -760,7 +760,7 @@ class Rooms
     }
   }
 
-  public static void Orchard(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  public static void Orchard(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     int minRow = int.MaxValue, maxRow = 0;
     int minCol = int.MaxValue, maxCol = 0;
@@ -842,7 +842,7 @@ class Rooms
     return walls;
   }
 
-  public static void MakeMinedChamber(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Random rng)
+  public static void MakeMinedChamber(Map map, List<(int, int)> room, int dungeonId, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     // Find good squares to be mined.
     HashSet<(int, int)> outerWalls = [];
@@ -959,7 +959,7 @@ class Rooms
     }
   }
 
-  public static void MarkGraves(Map map, string epitaph, Random rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
+  public static void MarkGraves(Map map, string epitaph, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
     NameGenerator ng = new(rng, Util.NamesFile);
 

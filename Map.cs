@@ -717,7 +717,7 @@ class Map : ICloneable
   // should build up a list of random floors and pick from among them instead of randomly
   // trying squares. (And remove from list when I SetTile())...
   // Potential infinite loop alert D:
-  public (int, int) RandomTile(TileType type, Random rng)
+  public (int, int) RandomTile(TileType type, Rng rng)
   {
     do
     {
@@ -930,7 +930,7 @@ class CACave
     return next;
   }
 
-  public static bool[,] GetCave(int height, int width, Random rng)
+  public static bool[,] GetCave(int height, int width, Rng rng)
   {
     var template = new bool[height, width];
 

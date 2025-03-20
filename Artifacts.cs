@@ -20,7 +20,7 @@ class Artifacts
     return ItemFactory.Get(ItemNames.LONGSWORD, objDb);
   }
 
-  static string History(FactDb factDb, Random rng)
+  static string History(FactDb factDb, Rng rng)
   {
     List<string> deities = [ "the Moon Daughters", "Huntokar", "the Crimson King" ];
 
@@ -44,7 +44,7 @@ class Artifacts
     return sb.ToString();
   }
 
-  static Item ArtifactSword(Item sword, FactDb factDb, Random rng)
+  static Item ArtifactSword(Item sword, FactDb factDb, Rng rng)
   {
     // add three nice features
     for (int i = 0; i < 3; i++)
@@ -95,7 +95,7 @@ class Artifacts
     return sword;
   }
 
-  public static Item GenArtifact(GameObjectDB objDb, FactDb factDb, Random rng)
+  public static Item GenArtifact(GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     Item item = BaseItem(objDb);
 

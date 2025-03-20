@@ -111,7 +111,7 @@ class Tutorial(UserInterface ui)
   public GameState? Setup(Options options)
   {
     int seed = 4;
-    Random rng = new(seed);
+    Rng rng = new(seed);
     GameObjectDB objDb = new();
 
     Player player = TutorialPlayer(objDb);

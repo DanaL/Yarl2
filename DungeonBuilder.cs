@@ -72,7 +72,7 @@ class MainDungeonBuilder : DungeonBuilder
 {
   int _dungeonID;
 
-  void SetStairs(Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Random rng)
+  void SetStairs(Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Rng rng)
   {
     List<List<(int, int)>> floors = [];
 
@@ -115,7 +115,7 @@ class MainDungeonBuilder : DungeonBuilder
   // the stairs between floors will be at the same location. (Ie., if 
   // the down stairs on level 3 is at 34,60 then the stairs up from 
   // level 4 should be at 34,60 too)
-  void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Random rng)
+  void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Rng rng)
   {
     // find the pairs of floor squares shared between the two levels
     List<(int, int)> shared = [];
@@ -145,7 +145,7 @@ class MainDungeonBuilder : DungeonBuilder
     nextLevel.SetTile(pick.Item1, pick.Item2, up);
   }
 
-  static void PlaceFresco(Map map, int height, int width, string frescoText, Random rng)
+  static void PlaceFresco(Map map, int height, int width, string frescoText, Rng rng)
   {
     List<(int, int)> candidateSqs = [];
     // We're looking for any floor square that's adjacent to wall
@@ -179,7 +179,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Random rng)
+  void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Rng rng)
   {
     // Any floor will do...
     List<(int, int)> candidateSqs = [];
@@ -227,7 +227,7 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.SetToLoc(loc, doc);
   }
 
-  void DecorateDungeon(Map[] levels, int dungeonId, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Random rng)
+  void DecorateDungeon(Map[] levels, int dungeonId, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     bool ValidStatueSq(Map map, int r, int c)
     {
@@ -322,7 +322,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Random rng)
+  static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Rng rng)
   {
     var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
     List<Loc> openFloors = sqs.Where(l => !objDb.AreBlockersAtLoc(l)).ToList();
@@ -352,7 +352,7 @@ class MainDungeonBuilder : DungeonBuilder
     Console.WriteLine($"Illusion at {loc}");
   }
 
-  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Random rng)
+  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Rng rng)
   {
     var sq = level.RandomTile(TileType.DungeonFloor, rng);
     var loc = new Loc(_dungeonID, levelNum, sq.Item1, sq.Item2);
@@ -429,7 +429,7 @@ class MainDungeonBuilder : DungeonBuilder
     return sqs;
   }
 
-  string DeepOneShrineDesc(Random rng)
+  string DeepOneShrineDesc(Rng rng)
   {
     var sb = new StringBuilder();
     sb.Append("A shrine depicting ");
@@ -487,9 +487,9 @@ class MainDungeonBuilder : DungeonBuilder
 
   // Add a deep one shrine near the river that was generated on the map, if
   // possible
-  void DeepOneShrine(Map map, int dungeonID, int level, GameObjectDB objDb, Random rng)
+  void DeepOneShrine(Map map, int dungeonID, int level, GameObjectDB objDb, Rng rng)
   {
-    static string CalcChant(Random rng)
+    static string CalcChant(Rng rng)
     {
       int roll = rng.Next(4);
 
@@ -729,7 +729,7 @@ class MainDungeonBuilder : DungeonBuilder
     return corners;
   }
 
-  static void SetTraps(Map map, int dungeonID, int level, int dungeonDepth, Random rng)
+  static void SetTraps(Map map, int dungeonID, int level, int dungeonDepth, Rng rng)
   {
     int[] trapOpts;
     if (level == 0)
@@ -799,7 +799,7 @@ class MainDungeonBuilder : DungeonBuilder
     return count == 4;
   }
 
-  static void FireJetTrap(Map map, Loc cornerLoc, string dir, Random rng)
+  static void FireJetTrap(Map map, Loc cornerLoc, string dir, Rng rng)
   {
     (int, int) deltaH, deltaV;
     Dir horizontalDir, verticalDir;
@@ -876,7 +876,7 @@ class MainDungeonBuilder : DungeonBuilder
     map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
   }
 
-  static void PutSecretDoorsInHallways(Map map, Random rng)
+  static void PutSecretDoorsInHallways(Map map, Rng rng)
   {
     List<(int, int)> candidates = [];
     for (int r = 0; r < map.Height; r++)
@@ -950,7 +950,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void PlaceLevelFiveGate(int dungeonId, Map map, Map level6Map, Random rng, FactDb factDb, GameObjectDB objDb)
+  void PlaceLevelFiveGate(int dungeonId, Map map, Map level6Map, Rng rng, FactDb factDb, GameObjectDB objDb)
   {
     List<(int, int, Dir)> candidates = [];
 
@@ -1019,7 +1019,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Random rng)
+  static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng)
   {    
     int graveyardOnLevel = -1;
     string plagueDesc = "";
@@ -1175,7 +1175,7 @@ class MainDungeonBuilder : DungeonBuilder
     return false;
   }
 
-  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Random rng, GameObjectDB objDb, FactDb factDb)
+  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     Dictionary<TileType, int> passable = [];
     passable.Add(TileType.Grass, 1);
@@ -1259,7 +1259,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void FindShortcutLoc(Map map, Loc exit, Random rng)
+  static void FindShortcutLoc(Map map, Loc exit, Rng rng)
   {
     List<(int, int)> opts = [];
     for (int r = 1; r < map.Height - 1; r++)
@@ -1295,7 +1295,7 @@ class MainDungeonBuilder : DungeonBuilder
   // At the moment, I am just adding a potion of levitation on the stairs up side,
   // but I can imagine other solutions to the level being split by a river (adding
   // another set of stairs, etc)
-  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Random rng)
+  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     HashSet<(int, int)> contiguous = [];
     Queue<(int, int)> q = new();
@@ -1327,7 +1327,7 @@ class MainDungeonBuilder : DungeonBuilder
 
   // If a river/chasm cuts the up stairs off from the down stairs, drop
   // a potion of levitation on the level so the player isn't trapped.
-  static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Random rng)
+  static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     List<(int, int)> upStairs = [];
     List<(int, int)> downStairs = [];
@@ -1367,7 +1367,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void AddGoodItemToLevel(Map map, int dungeonId, int level, Random rng, GameObjectDB objDb)
+  static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
   {
     List<Loc> opts = [];
     for (int r = 0; r < map.Height; r++)
@@ -1387,7 +1387,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Random rng)
+  void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     if (level > 0)
     {
@@ -1429,7 +1429,7 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void MoonDaughterCleric(Map[] levels, int dungeonId, Random rng, GameObjectDB objDb)
+  static void MoonDaughterCleric(Map[] levels, int dungeonId, Rng rng, GameObjectDB objDb)
   {
     int level = -1;
     for (int j = 2; j < levels.Length; j++)
@@ -1466,7 +1466,7 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.AddNewActor(cleric, startLoc);
   }
 
-  static void GnomeMerchant(Map[] levels, int dungeonId, Random rng, GameObjectDB objDb)
+  static void GnomeMerchant(Map[] levels, int dungeonId, Rng rng, GameObjectDB objDb)
   {
     int level = -1;
     for (int j = 2; j < levels.Length; j++)
@@ -1542,8 +1542,7 @@ class MainDungeonBuilder : DungeonBuilder
   }
 
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
-        FactDb factDb, GameObjectDB objDb, Random rng, List<MonsterDeck> monsterDecks,
-        Map wildernessMap)
+        FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
   {
     static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
     {

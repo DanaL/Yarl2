@@ -88,7 +88,7 @@ class TownBuilder
     return [.. rotated];
   }
 
-  void DrawBuilding(Map map, int row, int col, int townRow, int townCol, Template t, BuildingType building, Random rng)
+  void DrawBuilding(Map map, int row, int col, int townRow, int townCol, Template t, BuildingType building, Rng rng)
   {
     bool isWood = rng.NextDouble() < 0.7;
     HashSet<(int, int)> sqs = [];
@@ -188,7 +188,7 @@ class TownBuilder
     }
   }
 
-  static void InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Random rng)
+  static void InstallSign(Map map, BuildingType building, HashSet<(int, int)> sqs, Rng rng)
   {
     foreach (var (r, c) in sqs)
     {
@@ -277,7 +277,7 @@ class TownBuilder
     return true;
   }
 
-  bool CheckAlongCol(Map map, int startRow, int startCol, int townRow, int townCol, int delta, Template t, BuildingType building, Random rng)
+  bool CheckAlongCol(Map map, int startRow, int startCol, int townRow, int townCol, int delta, Template t, BuildingType building, Rng rng)
   {
     int height = t.Height;
 
@@ -311,7 +311,7 @@ class TownBuilder
     return false;
   }
 
-  bool CheckAlongRow(Map map, int startRow, int startCol, int townRow, int townCol, int delta, Template t, BuildingType building, Random rng)
+  bool CheckAlongRow(Map map, int startRow, int startCol, int townRow, int townCol, int delta, Template t, BuildingType building, Rng rng)
   {
     int width = t.Width;
 
@@ -349,7 +349,7 @@ class TownBuilder
   // cut-and-paste-y. But I'll likely eventually rewrite the 
   // town generation and building placement. This is just a 
   // "get something working" first pass at it"
-  void PlaceTavern(Map map, int townRow, int townCol, Random rng)
+  void PlaceTavern(Map map, int townRow, int townCol, Rng rng)
   {
     List<int> options = [1, 2, 3, 4];
     options.Shuffle(rng);
@@ -436,7 +436,7 @@ class TownBuilder
     }
   }
 
-  bool PlaceBuilding(Map map, int townRow, int townCol, Template t, BuildingType building, Random rng)
+  bool PlaceBuilding(Map map, int townRow, int townCol, Template t, BuildingType building, Rng rng)
   {
     List<int> options = [1, 2, 3, 4];
     options.Shuffle(rng);
@@ -545,7 +545,7 @@ class TownBuilder
     return true;
   }
 
-  void PlaceBuildings(Map map, int townRow, int townCol, Random rng)
+  void PlaceBuildings(Map map, int townRow, int townCol, Rng rng)
   {
     // Step 1, get rid of most but not all the trees in the town and replace them with grass
     for (int r = townRow; r < townRow + TOWN_HEIGHT; r++)
@@ -609,7 +609,7 @@ class TownBuilder
   //
   // This can maybe be replaced by a Dijkstra Map with a building's door as the start and
   // the down square as the goal?
-  void DrawPathsInTown(Map map, Random rng, int townRow, int townCol)
+  void DrawPathsInTown(Map map, Rng rng, int townRow, int townCol)
   {
     HashSet<(int, int)> doors = [];
 
@@ -673,7 +673,7 @@ class TownBuilder
     }
   }
 
-  public void AddWell(Map map, Random rng)
+  public void AddWell(Map map, Rng rng)
   {
     List<Loc> locs = [];
     foreach (Loc loc in Town.TownSquare)
@@ -721,7 +721,7 @@ class TownBuilder
     return blocked;
   }
 
-  bool DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Random rng)
+  bool DrawWitchesCottage(Map map, int r, int c, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Rng rng)
   {
     DrawBuilding(map, r, c, townCentreRow, townCentreCol, template, BuildingType.WitchesCottage, rng);
 
@@ -835,7 +835,7 @@ class TownBuilder
     return true;
   }
 
-  void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Random rng)
+  void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Rng rng)
   {
     // Find candidate spots for the witches' cottage
     List<(int, int)> candidates = [];
@@ -942,7 +942,7 @@ class TownBuilder
       CalcBuilding(home);
   }
 
-  public Map DrawnTown(Map map, Random rng)
+  public Map DrawnTown(Map map, Rng rng)
   {
     int rows = 0, width = 0;
     List<char> sqs = [];

@@ -12,11 +12,11 @@
 namespace Yarl2;
 
 // Generate dungeon levels! I drew a lot upon Bob Nystrom's blog and Roguelike Basin
-class DungeonMap(Random rng)
+class DungeonMap(Rng rng)
 {
-  readonly Random _rng = rng;
+  readonly Rng _rng = rng;
 
-  static Tile PickDoor(Random rng) =>
+  static Tile PickDoor(Rng rng) =>
     TileFactory.Get(rng.Next(4) == 0 ? TileType.LockedDoor : TileType.ClosedDoor);
   
   static bool IsDoor(Tile tile) => 
@@ -626,7 +626,7 @@ class DungeonMap(Random rng)
     while (!done);
   }
 
-  static (int, int) DeltaFromDir(Dir dir, Random rng) => dir switch
+  static (int, int) DeltaFromDir(Dir dir, Rng rng) => dir switch
   {
     Dir.South => (rng.Next(3, 6), rng.Next(-2, 3)),
     Dir.North => (rng.Next(-5, -4), rng.Next(-2, 3)),
@@ -634,7 +634,7 @@ class DungeonMap(Random rng)
     _ => (rng.Next(-2, 3), rng.Next(-5, -4))
   };
 
-  static Dir ChangeRiverDir(Dir dir, Dir origDir, Random rng)
+  static Dir ChangeRiverDir(Dir dir, Dir origDir, Rng rng)
   {
     List<Dir> dirs = dir switch
     {
@@ -651,7 +651,7 @@ class DungeonMap(Random rng)
 
   // Draw a river on the map. River being a flow of some sort: water, lava,
   // or a chasm
-  public static void AddRiver(Map map, int width, int height, TileType riverTile, Random rng)
+  public static void AddRiver(Map map, int width, int height, TileType riverTile, Rng rng)
   {
     // pick starting wall
     int roll = rng.Next(4);
@@ -732,7 +732,7 @@ class DungeonMap(Random rng)
     AddBridges(map, height, width, riverTile, rng);
   }
 
-  static void AddBridges(Map map, int height, int width, TileType riverTile, Random rng)
+  static void AddBridges(Map map, int height, int width, TileType riverTile, Rng rng)
   {
     // Look at me using a ~closure~!!
     int Passable(Tile tile)
@@ -803,7 +803,7 @@ class DungeonMap(Random rng)
     return distances.Select(d => (d.Item1, d.Item2)).ToList();
   }
 
-  static void WidenRiver(Map map, int row, int col, TileType riverTile, Random rng)
+  static void WidenRiver(Map map, int row, int col, TileType riverTile, Rng rng)
   {
     var above = (row - 1, col);
     var below = (row + 1, col);
@@ -846,7 +846,7 @@ class DungeonMap(Random rng)
     }
   }
 
-  static void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, Random rng)
+  static void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, Rng rng)
   {
     for (int j = 0; j < pts.Count - 1; j++)
     {
@@ -861,7 +861,7 @@ class DungeonMap(Random rng)
 
   // If there are rooms who share a border, connect some of them to hopefully
   // make the dungeon map a little more loopy
-  static void ConnectRooms(Map map, List<Room> rooms, Random rng)
+  static void ConnectRooms(Map map, List<Room> rooms, Rng rng)
   {
     static bool ConnectionCandidate(Map map, int row, int col)
     {
@@ -924,7 +924,7 @@ class DungeonMap(Random rng)
 
   // Okay, so we still have two separate regions after other tweaks so I'm just 
   // going to draw a straight tunnel between the two regions
-  static void BruteForceJoinRegions(Map map, HashSet<(int, int)> a, HashSet<(int, int)> b, Random rng)
+  static void BruteForceJoinRegions(Map map, HashSet<(int, int)> a, HashSet<(int, int)> b, Rng rng)
   {    
     List<(int, int)> smaller, larger;
     if (a.Count > b.Count)

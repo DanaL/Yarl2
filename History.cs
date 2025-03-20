@@ -195,9 +195,9 @@ class RulerInfo : Fact
 // based on them. Text is different for villager knowledge or historical artifact
 // and whether or not the ruler was loved
 
-class History(Random rng)
+class History(Rng rng)
 {
-  readonly NameGenerator _nameGen = new NameGenerator(rng, Util.NamesFile);
+  readonly NameGenerator _nameGen = new(rng, Util.NamesFile);
 
   static readonly string[] _adjectives = [
     "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
@@ -223,7 +223,7 @@ class History(Random rng)
     "Upper",
     "Lower" ];
 
-  string CometDesc(Random rng)
+  string CometDesc(Rng rng)
   {
     switch (rng.Next(3))
     {
@@ -237,7 +237,7 @@ class History(Random rng)
     }
   }
 
-  public static Nation GenNation(Random rng)
+  public static Nation GenNation(Rng rng)
   {
     NameGenerator ng = new(rng, ResourcePath.GetDataFilePath("countries.txt"));
     string name = ng.GenerateName(rng.Next(5, 12)).Capitalize();
@@ -254,7 +254,7 @@ class History(Random rng)
     };
   }
 
-  Fact GenDisaster(Random rng)
+  Fact GenDisaster(Rng rng)
   {
     int roll = rng.Next(3);
     DisasterType type = roll switch
@@ -293,7 +293,7 @@ class History(Random rng)
     };
   }
 
-  Fact GenInvasion(FactDb factDb, Random rng)
+  Fact GenInvasion(FactDb factDb, Rng rng)
   {
     InvaderType type;
     string invader;
@@ -335,7 +335,7 @@ class History(Random rng)
     };
   }
 
-  public FactDb GenerateHistory(Random rng)
+  public FactDb GenerateHistory(Rng rng)
   {
     NameGenerator nameGen = new(rng, Util.NamesFile);
 

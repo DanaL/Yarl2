@@ -68,7 +68,7 @@ class Treasure
     ItemNames.VIAL_OF_POISON,
     ItemNames.WIND_FAN
   ];
-  public static Item? LootFromTrait(LootTrait trait, Random rng, GameObjectDB objDb)
+  public static Item? LootFromTrait(LootTrait trait, Rng rng, GameObjectDB objDb)
   {
     if (trait is PoorLootTrait)
     {
@@ -96,7 +96,7 @@ class Treasure
     return null;
   }
 
-  public static Item GetTalisam(Random rng, GameObjectDB objDb)
+  public static Item GetTalisam(Rng rng, GameObjectDB objDb)
   {
     int roll = rng.Next(7);
     return roll switch
@@ -111,7 +111,7 @@ class Treasure
     };
   }
 
-  public static Item GoodMagicItem(Random rng, GameObjectDB objDb)
+  public static Item GoodMagicItem(Rng rng, GameObjectDB objDb)
   {
     int roll = rng.Next(25);
     return roll switch
@@ -144,7 +144,7 @@ class Treasure
     };
   }
 
-  public static List<Item> PoorTreasure(int numOfItems, Random rng, GameObjectDB objDb)
+  public static List<Item> PoorTreasure(int numOfItems, Rng rng, GameObjectDB objDb)
   {
     List<Item> loot = [];
 
@@ -157,7 +157,7 @@ class Treasure
     return loot;
   }
 
-  static void AddObjectToLevel(Item item, GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
+  static void AddObjectToLevel(Item item, GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
   {
     // I'm generating this list for every item placed, which is pretty dumb
     List<Loc> candidates = [];
@@ -184,7 +184,7 @@ class Treasure
     objDb.SetToLoc(loc, item);
   }
 
-  public static Item ItemByQuality(TreasureQuality quality, GameObjectDB objDb, Random rng)
+  public static Item ItemByQuality(TreasureQuality quality, GameObjectDB objDb, Rng rng)
   {
     var name = quality switch
     {
@@ -196,7 +196,7 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
-  public static Item MinorGift(GameObjectDB objDb, Random rng) => rng.Next(8) switch
+  public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(8) switch
   {
     0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
     1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
@@ -208,7 +208,7 @@ class Treasure
     _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
   };
 
-  static Item GenerateItem(ItemNames name, GameObjectDB objDb, Random rng)
+  static Item GenerateItem(ItemNames name, GameObjectDB objDb, Rng rng)
   {
     Item zorkmids;
     switch (name) 
@@ -230,7 +230,7 @@ class Treasure
     } 
   }
 
-  public static List<Item> GraveContents(GameState gs, int level, Random rng) 
+  public static List<Item> GraveContents(GameState gs, int level, Rng rng) 
   {
     GameObjectDB objDb = gs.ObjDb;
     List<Item> items = [];
@@ -295,7 +295,7 @@ class Treasure
     return items;
   }
 
-  static void AddConsumables(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
+  static void AddConsumables(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
   {
     int n = rng.Next(2, 5);
     while (n > 0)
@@ -307,7 +307,7 @@ class Treasure
     }
   }
 
-  public static void AddTreasureToDungeonLevel(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Random rng)
+  public static void AddTreasureToDungeonLevel(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
   {
     if (levelNum == 0) 
     {

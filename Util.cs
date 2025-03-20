@@ -787,7 +787,7 @@ class Util
 
 static class ListUtils
 {
-  public static void Shuffle<T>(this IList<T> list, Random rng)
+  public static void Shuffle<T>(this IList<T> list, Rng rng)
   {
     int n = list.Count;
     while (n > 1)

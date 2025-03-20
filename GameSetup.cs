@@ -145,7 +145,7 @@ class CampaignCreator(UserInterface ui)
     return playerName;    
   }
 
-  static void SetItemIDInfo(Random rng)
+  static void SetItemIDInfo(Rng rng)
   {
     List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "jade", "cherrywood", "tin", "glass", "iron", "silver", "balsa"];
 
@@ -218,7 +218,7 @@ class CampaignCreator(UserInterface ui)
     };
   }
 
-  static (int, int) PickStartLoc(Map map, Town town, GameObjectDB objDb, Random rng)
+  static (int, int) PickStartLoc(Map map, Town town, GameObjectDB objDb, Rng rng)
   {
     List<(int, int)> opts = [];
 
@@ -289,7 +289,7 @@ class CampaignCreator(UserInterface ui)
       return int.MaxValue;
   }
 
-  static (int, int) RandomSqInTown(Map map, Town town, Random rng)
+  static (int, int) RandomSqInTown(Map map, Town town, Rng rng)
   {
     List<(int, int)> opts = [];
     for (int r = town.Row; r < town.Row + town.Height; r++)
@@ -305,7 +305,7 @@ class CampaignCreator(UserInterface ui)
     return opts[rng.Next(opts.Count)];
   }
 
-  static public void DrawRoad(Map map, int overWorldWidth, (int, int) entrance, Town town, TileType roadTile, bool drawComplete, Random rng)
+  static public void DrawRoad(Map map, int overWorldWidth, (int, int) entrance, Town town, TileType roadTile, bool drawComplete, Rng rng)
   {
     DijkstraMap dmap = new(map, [], overWorldWidth, overWorldWidth, true);
     (int, int) townSq = RandomSqInTown(map, town, rng);
@@ -337,7 +337,7 @@ class CampaignCreator(UserInterface ui)
 
   // I want to pick a square that nestled into the mountains, so we'll pick
   // a square surrounded by at least 3 mountains
-  static (int, int) PickDungeonEntrance(Map map, HashSet<(int, int)> region, Town town, Random rng)
+  static (int, int) PickDungeonEntrance(Map map, HashSet<(int, int)> region, Town town, Rng rng)
   {
     int tcRow = town.Row + town.Height / 2;
     int tcCol = town.Col + town.Width / 2;
@@ -378,7 +378,7 @@ class CampaignCreator(UserInterface ui)
   }
 
   // This probably belongs in DungeonBuilder
-  static void AddGargoyle(Random rng, GameObjectDB objDb, Dungeon dungeon, int level)
+  static void AddGargoyle(Rng rng, GameObjectDB objDb, Dungeon dungeon, int level)
   {
     var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true);
     var gargoyle = new Mob()
@@ -430,7 +430,7 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
-  static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Random rng)
+  static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
   {
     int bossLevelNum = 4;
     Map bossLevel = dungeon.LevelMaps[bossLevelNum];
@@ -479,7 +479,7 @@ class CampaignCreator(UserInterface ui)
   // This is very temporary/early code since eventually dungeons will need to
   // know how to populate themselves (or receive a populator class of some 
   // sort) because monsters will spawn as the player explores
-  private static void PopulateDungeon(Random rng, GameObjectDB objDb, FactDb factDb, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
+  private static void PopulateDungeon(Rng rng, GameObjectDB objDb, FactDb factDb, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
   {
     // Temp: generate monster decks and populate the first two levels of the dungeon.
     // I'll actually want to save the decks for reuse as random monsters are added
@@ -513,7 +513,7 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
-  static (Campaign, int, int) BeginNewCampaign(Random rng, GameObjectDB objDb)
+  static (Campaign, int, int) BeginNewCampaign(Rng rng, GameObjectDB objDb)
   {
     Campaign campaign;
     Dungeon wilderness;
@@ -724,7 +724,6 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = -1816398299;
       //seed = -1030264321;
       // seed = -1125917800; <- downstairs on level 1 in middle of cabin
 
@@ -736,7 +735,7 @@ class CampaignCreator(UserInterface ui)
       // seed =  2034329865; // <-- crashes trying to place witches cottage
 
       Console.WriteLine($"Seed: {seed}");
-      var rng = new Random(seed);
+      Rng rng = new(seed);
       var objDb = new GameObjectDB();
       SetItemIDInfo(rng);
 
