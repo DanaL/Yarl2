@@ -199,7 +199,7 @@ class Kobold
     gs.ObjDb.AddNewActor(ogre, ogreLoc);
 
     gs.FactDb.Add(new SimpleFact() { Name = "Dragon Cult Enemy", Value = ogreName });
-    gs.FactDb.Add(new SimpleFact() { Name = "Dragon Cult Enemy Level", Value = level.ToString() });
+    gs.FactDb.Add(new SimpleFact() { Name = "Dragon Cult Enemy Level", Value = (level + 1).ToString() });
 
     return (ogreName, level);
   }

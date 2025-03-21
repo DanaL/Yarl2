@@ -26,4 +26,8 @@
   ((and (= KOBOLD_CULT_LEVEL 2) (= DIALOGUE_STATE 2))
     (say "#DRAGON_CULT_ENEMY dwells on level #DRAGON_CULT_ENEMY_LEVEL. Seek out this enemy of our faith!")
   )  
+
+  ((= KOBOLD_CULT_LEVEL 3)
+    (say "Wow, way to kill that guy!")
+  )
 )

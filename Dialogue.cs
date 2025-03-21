@@ -895,18 +895,18 @@ class DialogueInterpreter
       s = s.Replace("#DRAGON_NAME", dragonName);
     }
 
-    if (s.Contains("#DRAGON_CULT_ENEMY"))
-    {
-      string enemy = gs.FactDb.FactCheck("Dragon Cult Enemy") is SimpleFact fact ? fact.Value : "";
-      s = s.Replace("#DRAGON_CULT_ENEMY", enemy);
-    }
-
     if (s.Contains("#DRAGON_CULT_ENEMY_LEVEL"))
     {
       string lvl = gs.FactDb.FactCheck("Dragon Cult Enemy Level") is SimpleFact fact ? fact.Value : "";
       s = s.Replace("#DRAGON_CULT_ENEMY_LEVEL", lvl);
     }
 
+    if (s.Contains("#DRAGON_CULT_ENEMY"))
+    {
+      string enemy = gs.FactDb.FactCheck("Dragon Cult Enemy") is SimpleFact fact ? fact.Value : "";
+      s = s.Replace("#DRAGON_CULT_ENEMY", enemy);
+    }
+    
     s = s.Replace(@"\n", Environment.NewLine);
 
     return s;
