@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 class Traps
@@ -189,24 +191,7 @@ class Traps
       RevealTrap(tile, gs, loc);
 
       List<string> msgs = [];
-      if (gs.LastPlayerFoV.Contains(loc))
-      {
-       msgs.Add(gs.Rng.Next(3) switch
-        {
-          0 => "A magic mouth shouts, \"Get a load of this guy!\"",
-          1 => "A magic mouth shouts, \"Hey we got an adventurer over here!\"",
-          _ => "A magic mouth shrieks!"
-        }); 
-      }
-      else
-      {        
-        msgs.Add(gs.Rng.Next(3) switch
-        {
-          0 => "Something shouts, \"Get a load of this guy!\"",
-          1 => "Something shouts, \"Hey we got an adventurer over here!\"",
-          _ => "You hear a shriek!"
-        });
-      }
+      msgs.Add(MagicMouthNoise(actor, gs, gs.Rng));
       
       // Wake up nearby monsters within 10 squares      
       for (int r = loc.Row - 10; r <= loc.Row + 10; r++)
@@ -280,6 +265,35 @@ class Traps
         gs.UIRef().AlertPlayer("There is a flash of light and smoke and monsters appear!");
       }      
     }
+  }
+
+  static string MagicMouthNoise(Actor actor, GameState gs, Rng rng)
+  {
+    if (actor is Player)
+    {
+      return rng.Next(3) switch
+      {
+        0 => "A magic mouth shouts, \"Get a load of this guy!\"",
+        1 => "A magic mouth shouts, \"Hey we got an adventurer over here!\"",
+        _ => "A magic mouth shrieks!"
+      };
+    }
+
+    string quote;
+    if (actor.HasTrait<NamedTrait>())
+      quote = "Hey watch where you step!";
+    else
+      quote = $"Well well well, if it isn't {actor.Name.IndefArticle()}!";
+
+    bool visible = gs.LastPlayerFoV.Contains(actor.Loc);
+
+    if (rng.Next(3) == 0)
+      return visible ? "A magic mouth shrieks!" : "You hear a shriek!";
+
+    string msg = gs.LastPlayerFoV.Contains(actor.Loc) ? "A magic mouth shouts, " : "Something shouts, ";    
+    msg += '"' + quote + '"';
+
+    return msg;
   }
 
   public static void RevealTrap(Tile tile, GameState gs, Loc loc)

@@ -198,6 +198,9 @@ class Kobold
     Loc ogreLoc = locs[gs.Rng.Next(locs.Count)];
     gs.ObjDb.AddNewActor(ogre, ogreLoc);
 
+    gs.FactDb.Add(new SimpleFact() { Name = "Dragon Cult Enemy", Value = ogreName });
+    gs.FactDb.Add(new SimpleFact() { Name = "Dragon Cult Enemy Level", Value = level.ToString() });
+
     return (ogreName, level);
   }
 }
