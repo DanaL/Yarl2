@@ -1034,7 +1034,8 @@ class LockedDoorMenu : Inputer
   {
     if (ch == Constants.ESC)
     {
-      Close();   
+      Close();
+      return;
     }
     else if (Options.Contains(ch))
     {
