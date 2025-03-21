@@ -257,8 +257,7 @@ class BarkAnimation : Animation
   readonly Actor _actor;
   readonly string _bark;
   readonly UserInterface _ui;
-
-  // Duration in milliseconds
+ 
   public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
   {
     _gs = gs;
@@ -321,6 +320,12 @@ class BarkAnimation : Animation
   {
     Loc loc = _actor.Loc;
     Loc playerLoc = _gs.Player.Loc;
+
+    if (_gs.ObjDb.GetObj(_actor.ID) is null)
+    {
+      Expiry = DateTime.MinValue;
+      return;
+    }
 
     // I thought about having part of the message appear on screen even if the
     // speaker is off screen, but didn't want to deal with the extra 
