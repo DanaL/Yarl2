@@ -38,7 +38,7 @@ class Tutorial(UserInterface ui)
 
     player.Inventory = new Inventory(player.ID, objDb);
 
-    var doc = new Item()
+    Item doc = new()
     {
       Name = "Encouraging Note",
       Type = ItemType.Document,

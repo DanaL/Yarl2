@@ -571,9 +571,16 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       return 0.0;
     }
 
-    bool torch = item.HasTrait<TorchTrait>();
-    bool written = item.HasTrait<ScrollTrait>();
-    bool vaultKey = item.HasTrait<VaultKeyTrait>();
+    bool torch = false, written = false, vaultKey = false;
+    foreach (Trait t in item.Traits)
+    {
+      if (t is TorchTrait)
+        torch = true;
+      if (t is ScrollTrait)
+        written = true;
+      if (t is VaultKeyTrait)
+        vaultKey = true;
+    }
 
     GameState!.ClearMenu();
 

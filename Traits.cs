@@ -880,6 +880,11 @@ class StickyTrait : BasicTrait
   public override string AsText() => "Sticky";
 }
 
+class StoneTabletTrait : Trait
+{
+  public override string AsText() => "StoneTablet";
+}
+
 class StressTrait : Trait 
 {
   public StressLevel Stress { get; set; }
@@ -3489,6 +3494,7 @@ class TraitFactory
       return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
+    { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait() },
     { "Stress", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out StressLevel stress);

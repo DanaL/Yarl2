@@ -368,4 +368,24 @@ class History(Rng rng)
 
     return factDb;
   }
+
+  public static Item SealTablet(GameObjectDB objDb)
+  {
+    Item tablet = new()
+    {
+      Name = "broken tablet",
+      Type = ItemType.Document,
+      Glyph = new Glyph('▊', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
+    };
+    tablet.Traits.Add(new StoneTabletTrait());
+    
+    var rt = new ReadableTrait("𐌂𐌘𐌌𐌒𐌇")
+    {
+      OwnerID = tablet.ID
+    };
+    tablet.Traits.Add(rt);
+    objDb.Add(tablet);
+
+    return tablet;
+  }
 }

@@ -127,6 +127,13 @@ class DebugCommand(GameState gs)
       FogifyLevel();
       return "";
     }
+    else if (txt == "tablet")
+    {
+      Item tablet = History.SealTablet(_gs.ObjDb);
+      _gs.ObjDb.SetToLoc(_gs.Player.Loc, tablet);
+      _gs.UIRef().AlertPlayer("ԶԹԺՊ");
+      return "";
+    }
     else if (txt == "turn")
     {
       _gs.UIRef().AlertPlayer($"Turn {_gs.Turn}");
