@@ -372,6 +372,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     TileType.Portcullis => "The portcullis is closed.",
     TileType.VaultDoor => "Metal doors bar your path!",
     TileType.LockedDoor => "The door is locked!",
+    TileType.DungeonWall => "",
     _ => "You cannot go that way!"
   };
 }
