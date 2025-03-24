@@ -113,6 +113,20 @@ class DeckBuilder
       decks.Add(deck);
     }
 
+    for (int lvl = 11; lvl <= 20; lvl++)
+    {
+      MonsterDeck deck = ReadDeck("deeplevel", lvl);
+
+      if (villain == VillainType.FieryDemon)
+      {
+        deck.Monsters.Add("flame beetle");
+        deck.Monsters.Add("flame beetle");
+      }
+
+      deck.Reshuffle(rng);
+      decks.Add(deck);
+    }
+
     return decks;
   }
 }
