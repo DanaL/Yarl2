@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+﻿// Yarl2 - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -128,7 +128,7 @@ class DebugCommand(GameState gs)
       return "";
     }
     else if (txt == "tablet")
-    {
+    {      
       Item tablet = History.SealTablet(_gs.ObjDb);
       _gs.ObjDb.SetToLoc(_gs.Player.Loc, tablet);
       return "";

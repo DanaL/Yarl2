@@ -377,21 +377,28 @@ class History(Rng rng)
       Type = ItemType.Document,
       Glyph = new Glyph('▪', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
     };
-    
-    
-    string txt = @"
-   ╭────────────────╮
-   │ ՓլՈ ԿՈՄ թԺթԺ   |
-   |  ՄՓ լՓ լՓպՈ    │
-   | պՈՄԺ ՍեթՓպ     |
-   │  պՓ լԺwԺ ե     │
-   ╰\/\\//\\/\/\/\/\╯
 
-   ╭/\\/\//\\\/\/\/\╮
-   │   ձՈՄՍԽտԺ      │
-   │   ՓԿե լՓ       |
-   |     պԺԿԺլԺ     │
-   ╰────────────────╯ 
+    string txt = @"
+  Part of a broken tablet:
+   ┍────────────────┑
+   ┇                │
+   │ ՓլՈ ԿՈՄ թԺթԺ   |
+   ┇  ՄՓ լՓ լՓպՈ    │
+   | պՈՄԺ ՍեթՓպ     |
+   │  պՓ լԺwԺ ե     ┇
+   ┇                │
+   \\/\\/\__/\/\__/\/
+  ";
+
+    txt = @"
+  Part of a broken tablet:
+   //\\/\//\\_/\/\/\
+   ┇                │
+   │   ձՈՄՍԽտԺ      ┇
+   ┇   ՓԿե լՓ       |
+   |     պԺԿԺլԺ     │ 
+   │                │
+   ┕────────────────┙
     ";
 
     var rt = new ReadableTrait(txt)
