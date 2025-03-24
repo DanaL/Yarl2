@@ -880,9 +880,24 @@ class StickyTrait : BasicTrait
   public override string AsText() => "Sticky";
 }
 
-class StoneTabletTrait : Trait
+class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
 {
-  public override string AsText() => "StoneTablet";
+  public ulong OwnerID { get; set; }
+  readonly string _text = text;
+  public override string AsText() => $"StoneTablet#{_text.Replace("\n", "<br/>")}#{OwnerID}";
+  
+  public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
+  {
+    Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
+    List<string> lines = [.._text.Split('\n')];
+    gs.UIRef().SetPopup(new Hint(lines, 3));
+
+    Action action = new CloseMenuAction(gs, 1.0);
+    
+    return new UseResult(action, false);
+  }
+
+  public void Used() {}
 }
 
 class StressTrait : Trait 
@@ -3494,7 +3509,7 @@ class TraitFactory
       return new StatDebuffTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr, Amt = int.Parse(pieces[4]) };
     }},
     { "Sticky", (pieces, gameObj) => new StickyTrait() },
-    { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait() },
+    { "StoneTablet", (pieces, gameObj) => new StoneTabletTrait(pieces[1].Replace("<br/>", "\n")) { OwnerID = ulong.Parse(pieces[2]) } },
     { "Stress", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out StressLevel stress);

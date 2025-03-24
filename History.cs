@@ -375,16 +375,33 @@ class History(Rng rng)
     {
       Name = "broken tablet",
       Type = ItemType.Document,
-      Glyph = new Glyph('▊', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
+      Glyph = new Glyph('▪', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
     };
-    tablet.Traits.Add(new StoneTabletTrait());
     
-    var rt = new ReadableTrait("𐌂𐌘𐌌𐌒𐌇")
+    
+    string txt = @"
+   ╭────────────────╮
+   │ ՓլՈ ԿՈՄ թԺթԺ   |
+   |  ՄՓ լՓ լՓպՈ    │
+   | պՈՄԺ ՍեթՓպ     |
+   │  պՓ լԺwԺ ե     │
+   ╰\/\\//\\/\/\/\/\╯
+
+   ╭/\\/\//\\\/\/\/\╮
+   │   ձՈՄՍԽտԺ      │
+   │   ՓԿե լՓ       |
+   |     պԺԿԺլԺ     │
+   ╰────────────────╯ 
+    ";
+
+    var rt = new ReadableTrait(txt)
     {
       OwnerID = tablet.ID
     };
     tablet.Traits.Add(rt);
     objDb.Add(tablet);
+
+    tablet.Traits.Add(new StoneTabletTrait(txt) { OwnerID = tablet.ID });
 
     return tablet;
   }

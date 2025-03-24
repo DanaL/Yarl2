@@ -131,7 +131,6 @@ class DebugCommand(GameState gs)
     {
       Item tablet = History.SealTablet(_gs.ObjDb);
       _gs.ObjDb.SetToLoc(_gs.Player.Loc, tablet);
-      _gs.UIRef().AlertPlayer("ՓլՈ ԿՈՄ թԺթԺ ՄՓ լՓ լՓպՈ պՈՄԺ ՍեթՓպ պՓ լԺwԺ ե ձՈՄՍԽտԺ ՓԿե լՓ պԺԿԺլԺ");
       return "";
     }
     else if (txt == "turn")
