@@ -615,7 +615,7 @@ class CampaignCreator(UserInterface ui)
         List<MonsterDeck> monsterDecks = DeckBuilder.MakeDecks(earlyMainOccupant, factDb.Villain, rng);
         
         MainDungeonBuilder builder = new();
-        var mainDungeon = builder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 20,
+        Dungeon mainDungeon = builder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 20,
           entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
         PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
@@ -724,6 +724,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
+      seed = 1689758119;
       //seed = 1094463020;
 
       Console.WriteLine($"Seed: {seed}");

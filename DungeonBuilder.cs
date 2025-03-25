@@ -1638,6 +1638,8 @@ class MainDungeonBuilder : DungeonBuilder
       }  
     }
 
+    LightPuzzleSetup.FindPotential(levels[8]);
+
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 

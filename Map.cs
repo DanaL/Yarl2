@@ -945,7 +945,6 @@ class CACave
     for (int j = 0; j < 4; j++)
     {
       template = Iteration(template, height, width);
-
     }
 
     return template;

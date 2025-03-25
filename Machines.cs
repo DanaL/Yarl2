@@ -1,0 +1,96 @@
+﻿// Yarl2 - A roguelike computer RPG
+// Written in 2024 by Dana Larose <ywg.dana@gmail.com>
+//
+// To the extent possible under law, the author(s) have dedicated all copyright
+// and related and neighboring rights to this software to the public domain
+// worldwide. This software is distributed without any warranty.
+//
+// You should have received a copy of the CC0 Public Domain Dedication along 
+// with this software. If not, 
+// see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+namespace Yarl2;
+
+// Code for more complicated level features. Borrowing the term 'Machine' from
+// brogue, who iirc used it for the more complex mechanisms on a level
+
+class LightPuzzleSetup
+{
+  static char TileToChar(Tile tile) => tile.Type switch
+  {
+    TileType.PermWall => '#',
+    TileType.DungeonWall => '#',
+    TileType.DungeonFloor or TileType.Sand => '.',
+    TileType.ClosedDoor or TileType.LockedDoor => '+',
+    TileType.Mountain or TileType.SnowPeak => '^',
+    TileType.Grass => ',',
+    TileType.GreenTree => 'T',
+    TileType.RedTree => 'T',
+    TileType.OrangeTree => 'T',
+    TileType.YellowTree => 'T',
+    TileType.DeepWater => '~',
+    TileType.WoodBridge => '=',
+    TileType.Upstairs => '<',
+    TileType.Downstairs => '>',
+    _ => ' '
+  };
+
+  public static void FindPotential(Map map)
+  {
+    map.Dump();
+    List<List<(int, int)>> rooms = map.FindRooms();
+
+    foreach (var room in rooms)
+    {
+      int lowR = int.MaxValue, highR = 0, lowC = int.MaxValue, highC = 0;
+      List<(int, int)> exits = [];
+
+      foreach (var (r, c) in room)
+      {
+        if (r < lowR) lowR = r;
+        if (r > highR) highR = r;
+        if (c < lowC) lowC = c;
+        if (c > highC) highC = c;
+      }
+
+      foreach (var (r, c) in room)
+      {
+        if (r == lowR)
+        {
+
+        }
+        else if (r == highR)
+        {
+        }
+        else if (c == lowC)
+        {
+        }
+        else if (c == highC)
+        {
+        }
+      }
+
+      for (int r =  lowR; r <= highR; r++)
+      {
+        for (int c = lowC; c <= highC; c++)
+        {
+          Console.Write(TileToChar(map.TileAt(r, c)));
+        }
+        Console.WriteLine();
+      }
+
+      Console.WriteLine();
+    }
+  }
+
+  static bool IsExit(Tile tile) => tile.Type switch
+  {
+    TileType.ClosedDoor => true,
+    TileType.LockedDoor => true,
+    TileType.OpenDoor => true,
+    TileType.Portcullis => true,
+    TileType.OpenPortcullis => true,
+    TileType.DungeonFloor => true,
+    _ => false
+  };
+}
