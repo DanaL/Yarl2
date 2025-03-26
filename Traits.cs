@@ -504,6 +504,13 @@ class DiggingToolTrait : Trait
   public override string AsText() => "DiggingTool";
 }
 
+class DirectionTrait : Trait
+{
+  public Dir Dir { get; set; } = Dir.None;
+
+  public override string AsText() => $"Direction#{Dir}";
+}
+
 class DodgeTrait : Trait
 {
   public int Rate { get; set; }
@@ -3274,6 +3281,12 @@ class TraitFactory
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "DiggingTool", (pieces, gameObj) => new DiggingToolTrait() },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
+    { "Direction", (pieces, gameObj) =>
+      {
+        Enum.TryParse(pieces[1], out Dir dir);
+        return new DirectionTrait() { Dir = dir };
+      }
+    },
     { "Displacement", (pieces, gameObj) => new DisplacementTrait() },
     { "Divider", (pieces, gameObj) => new DividerTrait() },
     { "Dodge", (pieces, gameObj) =>
