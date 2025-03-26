@@ -1753,6 +1753,14 @@ class PassiveTrait : Trait
   public override string AsText() => $"Passive";
 }
 
+class BoolTrait : Trait
+{
+  public string Name { get; set; } = "";
+  public bool Value { get; set; }
+
+  public override string AsText() => $"Bool#{Name}#{Value}";
+}
+
 class BoostMaxStatTrait : TemporaryTrait
 {
   public Attribute Stat {  get; set; }
@@ -3319,6 +3327,7 @@ class TraitFactory
       }
     },
     { "Block", (pieces, gameObj) => new BlockTrait() },
+    { "Bool", (pieces, gameObj) => new BoolTrait() { Name = pieces[1], Value = bool.Parse(pieces[2]) }},
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);
       return new BoostMaxStatTrait() { Stat = attr, Amount = int.Parse(pieces[2])}; }},
