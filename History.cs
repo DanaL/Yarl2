@@ -375,7 +375,7 @@ class History(Rng rng)
     {
       Name = "broken tablet",
       Type = ItemType.Document,
-      Glyph = new Glyph('▪', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
+      Glyph = new Glyph('▫', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
     };
 
     string txt = @"

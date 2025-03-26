@@ -22,6 +22,10 @@ class LightPuzzleSetup
     TileType.DungeonWall => '#',
     TileType.DungeonFloor or TileType.Sand => '.',
     TileType.ClosedDoor or TileType.LockedDoor => '+',
+    TileType.SecretDoor => '+',
+    TileType.VaultDoor => '|',
+    TileType.OpenPortcullis => '|',
+    TileType.Portcullis => '|',
     TileType.Mountain or TileType.SnowPeak => '^',
     TileType.Grass => ',',
     TileType.GreenTree => 'T',
@@ -38,12 +42,13 @@ class LightPuzzleSetup
   public static void FindPotential(Map map)
   {
     map.Dump();
-    List<List<(int, int)>> rooms = map.FindRooms();
+    List<HashSet<(int, int)>> rooms = [.. map.FindRooms()
+                                             .Select(r => new HashSet<(int, int)>(r))];
 
     foreach (var room in rooms)
     {
       int lowR = int.MaxValue, highR = 0, lowC = int.MaxValue, highC = 0;
-      List<(int, int)> exits = [];
+      HashSet<(int, int, Dir)> exits = [];
 
       foreach (var (r, c) in room)
       {
@@ -55,30 +60,29 @@ class LightPuzzleSetup
 
       foreach (var (r, c) in room)
       {
-        if (r == lowR)
-        {
-
-        }
-        else if (r == highR)
-        {
-        }
-        else if (c == lowC)
-        {
-        }
-        else if (c == highC)
-        {
-        }
+        if (r == lowR && IsExit(map.TileAt(r - 1, c)))
+          exits.Add((r - 1, c, Dir.North));
+        else if (r == highR && IsExit(map.TileAt(r + 1, c)))
+          exits.Add((r + 1, c, Dir.South));
+        else if (c == lowC && IsExit(map.TileAt(r, c - 1)))
+          exits.Add((r, c - 1, Dir.West));
+        else if (c == highC && IsExit(map.TileAt(r, c + 1)))
+          exits.Add((r, c + 1, Dir.East));        
       }
 
-      for (int r =  lowR; r <= highR; r++)
+      for (int r = lowR - 1; r <= highR + 1; r++)
       {
-        for (int c = lowC; c <= highC; c++)
-        {
+        for (int c = lowC - 1; c <= highC + 1; c++)
+        {          
           Console.Write(TileToChar(map.TileAt(r, c)));
         }
         Console.WriteLine();
       }
-
+      foreach (var e in exits)
+      {
+        Console.Write(e);
+      }
+      Console.WriteLine();
       Console.WriteLine();
     }
   }
@@ -88,6 +92,8 @@ class LightPuzzleSetup
     TileType.ClosedDoor => true,
     TileType.LockedDoor => true,
     TileType.OpenDoor => true,
+    TileType.SecretDoor => true,
+    TileType.VaultDoor => true,
     TileType.Portcullis => true,
     TileType.OpenPortcullis => true,
     TileType.DungeonFloor => true,

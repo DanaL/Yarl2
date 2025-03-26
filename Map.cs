@@ -880,6 +880,9 @@ class Map : ICloneable
           TileType.WoodBridge => '=',
           TileType.Upstairs => '<',
           TileType.Downstairs => '>',
+          TileType.VaultDoor => '|',
+          TileType.OpenPortcullis => '|',
+          TileType.Portcullis => '|',
           _ => ' '
         };
         Console.Write(ch);
