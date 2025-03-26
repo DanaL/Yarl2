@@ -129,7 +129,7 @@ class DebugCommand(GameState gs)
     }
     else if (txt == "photon")
     {
-      Item photon = ItemFactory.Photon(_gs);
+      Item photon = ItemFactory.Photon(_gs, gs.Player.ID);
       _gs.ObjDb.SetToLoc(_gs.Player.Loc, photon);
       return "";
     }
@@ -184,6 +184,9 @@ class DebugCommand(GameState gs)
       case "give":
       case "drop":
         return AddItem(parts[0].ToLower(), parts[1]);
+      case "lamp":
+        MakeLamp(_gs, parts[1].Capitalize());
+        return "";
       case "zorkmids":
       case "$":
         return GiveZorkminds(parts[1]);
@@ -215,6 +218,14 @@ class DebugCommand(GameState gs)
         _gs.ObjDb.SetToLoc(loc, mist);
       }
     }
+  }
+
+  void MakeLamp(GameState gs, string dirStr)
+  {
+    Enum.TryParse(dirStr, out Dir dir);
+    Item lamp = ItemFactory.Lamp(gs.ObjDb, dir);
+
+    _gs.ObjDb.SetToLoc(_gs.Player.Loc, lamp);
   }
 
   string GiveZorkminds(string amount)

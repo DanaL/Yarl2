@@ -2852,6 +2852,95 @@ class CroesusTouchTrait : Trait
   public override string AsText() => $"CroesusTouch#{SourceId}";
 }
 
+class LightBeamTrait : Trait, IGameEventListener
+{
+  public bool Expired { get; set; }
+  public bool Listening => true;
+  public ulong ObjId => SourceId;
+  public GameEventType EventType => GameEventType.EndOfRound;
+
+  public List<ulong> Photons { get; set; } = [];
+
+  public override string AsText() => $"LightBeam#{SourceId}#{string.Join(',', Photons)}";
+
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(SourceId) is not Item lamp)
+    {
+      gs.StopListening(EventType, this);
+      return;
+    }
+
+    Dir dir = Dir.None;
+    if (lamp.Traits.OfType<DirectionTrait>().FirstOrDefault() is DirectionTrait dt)
+    {
+      dir = dt.Dir;
+    }
+
+    List<Loc> locs = FollowPath(gs, lamp.Loc, dir);
+
+    HashSet<ulong> foundPhotons = [];
+    foreach (Loc sq in locs)
+    {
+      bool photonFound = false;
+      foreach (Item item in gs.ObjDb.ItemsAt(sq))
+      {
+        if (item.Traits.OfType<LightSourceTrait>().FirstOrDefault() is LightSourceTrait lst && 
+            lst.OwnerID == lamp.ID)
+        {
+          foundPhotons.Add(item.ID);
+          photonFound = true;
+        }
+      }
+
+      if (!photonFound)
+      {
+        Item photon = ItemFactory.Photon(gs, lamp.ID);
+        gs.ObjDb.SetToLoc(sq, photon);
+        foundPhotons.Add(photon.ID);
+      }
+    }
+
+    foreach (ulong photonId in Photons)
+    {
+      if (!foundPhotons.Contains(photonId) && gs.ObjDb.GetObj(photonId) is Item photon)
+      {
+        gs.ObjDb.RemoveItemFromGame(photon.Loc, photon);
+      }
+    }
+
+    Photons = [.. foundPhotons];
+  }
+
+  List<Loc> FollowPath(GameState gs, Loc start, Dir dir)
+  {
+    List<Loc> locs = [];
+    Loc curr = start;
+    while (true)
+    {
+      curr = Move(curr, dir);
+      if (!gs.TileAt(curr).PassableByFlight())
+        break;
+      if (gs.ObjDb.AreBlockersAtLoc(curr))
+        break;
+      locs.Add(curr);
+
+      // TODO: change direction when light beam hits mirror
+    }
+
+    return locs;
+  }
+
+  Loc Move(Loc curr, Dir dir) => dir switch
+  {    
+    Dir.North => curr with { Row = curr.Row - 1},
+    Dir.South => curr with { Row = curr.Row + 1 },
+    Dir.East => curr with { Col = curr.Col + 1 },
+    Dir.West => curr with { Col = curr.Col - 1 },
+    _ => curr
+  };
+}
+
 // A light source that doesn't have fuel/burn out on its own.
 class LightSourceTrait : BasicTrait, IOwner
 {
@@ -3377,6 +3466,12 @@ class TraitFactory
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "LightBeam", (pieces, gameObj) => new LightBeamTrait()
+      {
+        SourceId = ulong.Parse(pieces[1]),
+        Photons = pieces[2] == "" ? [] : [..pieces[2].Split(',').Select(ulong.Parse)]
+      }
+    },
     { "LightSource", (pieces, gameObj) => new LightSourceTrait()
       {
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),

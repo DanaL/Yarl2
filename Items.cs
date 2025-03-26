@@ -387,7 +387,37 @@ class ItemFactory
     return mist;
   }
 
-  public static Item Photon(GameState gs)
+  public static Item Lamp(GameObjectDB objDb, Dir dir)
+  {
+    char ch = dir switch
+    {
+      Dir.North => '◓',
+      Dir.South => '◒',
+      Dir.West => '◐',
+      Dir.East => '◑',
+      _ => '◠'
+    };
+
+    Item lamp = new()
+    {
+      Name = "lamp",
+      Type = ItemType.Environment,
+      Value = 0,
+      Glyph = new(ch, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
+    };
+    
+    lamp.Traits.Add(new DirectionTrait() { Dir = dir });
+
+    LightBeamTrait beam = new() { SourceId = lamp.ID };
+    lamp.Traits.Add(beam);
+
+    objDb.Add(lamp);
+    objDb.EndOfRoundListeners.Add(beam);
+
+    return lamp;
+  }
+
+  public static Item Photon(GameState gs, ulong ownerID)
   {
     Item photon = new()
     {
@@ -400,8 +430,10 @@ class ItemFactory
 
     photon.Traits.Add(new LightSourceTrait() 
     {
-      Radius = 0, OwnerID = photon.ID, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_YELLOW
+      Radius = 0, OwnerID = ownerID, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_YELLOW
     });
+
+    gs.ObjDb.Add(photon);
 
     return photon;
   }
