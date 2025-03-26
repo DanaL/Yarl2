@@ -3005,7 +3005,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
           torchLoc = owner.Loc;
         }
 
-        string msg = $"{item.Name.IndefArticle().Capitalize()} burnts out.";
+        string msg = $"{item.Name.IndefArticle().Capitalize()} burns out.";
         gs.UIRef().AlertPlayer(msg, gs, torchLoc);
         gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       }
