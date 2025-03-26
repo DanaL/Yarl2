@@ -34,7 +34,8 @@ enum ItemType
   Fog,
   Landscape,
   Statue,
-  Illusion
+  Illusion,
+  Mirror
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -401,12 +402,13 @@ class ItemFactory
     Item lamp = new()
     {
       Name = "lamp",
-      Type = ItemType.Environment,
+      Type = ItemType.Tool,
       Value = 0,
       Glyph = new(ch, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
     
     lamp.Traits.Add(new DirectionTrait() { Dir = dir });
+    lamp.Traits.Add(new AffixedTrait());
 
     LightBeamTrait beam = new() { SourceId = lamp.ID };
     lamp.Traits.Add(beam);
@@ -415,6 +417,23 @@ class ItemFactory
     objDb.EndOfRoundListeners.Add(beam);
 
     return lamp;
+  }
+
+  public static Item Mirror(GameObjectDB objDb, bool left)
+  {
+    char ch = left ? '\\' : '/';
+    Item mirror = new()
+    {
+      Name = "mirror",
+      Type = ItemType.Mirror,
+      Value = 0,
+      Glyph = new(ch, Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
+    };
+    mirror.Traits.Add(new BoolTrait() { Name = "Tilt", Value = left });
+
+    objDb.Add(mirror);
+
+    return mirror;
   }
 
   public static Item Photon(GameState gs, ulong ownerID)

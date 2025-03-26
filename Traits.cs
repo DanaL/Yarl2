@@ -2922,18 +2922,51 @@ class LightBeamTrait : Trait, IGameEventListener
 
   List<Loc> FollowPath(GameState gs, Loc start, Dir dir)
   {
+    HashSet<Loc> visited = [];
     List<Loc> locs = [];
     Loc curr = start;
     while (true)
-    {
+    {      
       curr = Move(curr, dir);
+      // Prevent infinite loops from players aligning mirrors in a loop. 
+      // Someone's gonna try it...
+      if (visited.Contains(curr))
+        break;
+
       if (!gs.TileAt(curr).PassableByFlight())
         break;
       if (gs.ObjDb.AreBlockersAtLoc(curr))
         break;
       locs.Add(curr);
 
-      // TODO: change direction when light beam hits mirror
+      foreach (Item item in gs.ObjDb.ItemsAt(curr).Where(i => i.Type == ItemType.Mirror))
+      {
+        if (item.Traits.OfType<BoolTrait>().FirstOrDefault() is BoolTrait tilt)
+        {
+          if (tilt.Value && dir == Dir.South)
+            dir = Dir.East;
+          else if (tilt.Value && dir == Dir.North)
+            dir = Dir.West;
+          else if (tilt.Value && dir == Dir.West)
+            dir = Dir.South;
+          else if (tilt.Value && dir == Dir.East)
+            dir = Dir.North;
+          else if (!tilt.Value && dir == Dir.South)
+            dir = Dir.West;
+          else if (!tilt.Value && dir == Dir.North)
+            dir = Dir.East;
+          else if (!tilt.Value && dir == Dir.West)
+            dir = Dir.South;
+          else if (!tilt.Value && dir == Dir.East)
+            dir = Dir.North;
+        }
+
+        // What's the correct behaviour if there's more than one mirror at a 
+        // location?  ¯\(ツ)/¯
+        break;
+      }
+
+      visited.Add(curr);
     }
 
     return locs;

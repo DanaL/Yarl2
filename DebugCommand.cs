@@ -187,6 +187,9 @@ class DebugCommand(GameState gs)
       case "lamp":
         MakeLamp(_gs, parts[1].Capitalize());
         return "";
+      case "mirror":
+        MakeMirror(_gs, parts[1]);
+        return "";
       case "zorkmids":
       case "$":
         return GiveZorkminds(parts[1]);
@@ -220,11 +223,17 @@ class DebugCommand(GameState gs)
     }
   }
 
+  void MakeMirror(GameState gs, string dirStr)
+  {
+    bool left = dirStr == "left";
+    Item mirror = ItemFactory.Mirror(gs.ObjDb, left);
+    _gs.ObjDb.SetToLoc(_gs.Player.Loc, mirror);
+  }
+
   void MakeLamp(GameState gs, string dirStr)
   {
     Enum.TryParse(dirStr, out Dir dir);
     Item lamp = ItemFactory.Lamp(gs.ObjDb, dir);
-
     _gs.ObjDb.SetToLoc(_gs.Player.Loc, lamp);
   }
 
