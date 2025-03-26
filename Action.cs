@@ -1443,8 +1443,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
       {
         if (item.HasTrait<HiddenTrait>())
         {
-          item.Traits = item.Traits.Where(t => t is not HiddenTrait).ToList();
-
+          item.Traits = [..item.Traits.Where(t => t is not HiddenTrait)];
           ui.AlertPlayer($"You find {item.FullName.IndefArticle()}!");
         }        
       }

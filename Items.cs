@@ -387,6 +387,25 @@ class ItemFactory
     return mist;
   }
 
+  public static Item Photon(GameState gs)
+  {
+    Item photon = new()
+    {
+      Name = "photon",
+      Type = ItemType.Environment,
+      Value = 0,
+      Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    photon.SetZ(-100);
+
+    photon.Traits.Add(new LightSourceTrait() 
+    {
+      Radius = 0, OwnerID = photon.ID, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_YELLOW
+    });
+
+    return photon;
+  }
+
   public static Item Fire(GameState gs)
   {
     Glyph glyph;
@@ -398,7 +417,7 @@ class ItemFactory
     else
       glyph = new Glyph('\u22CF', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, false);
 
-    var fire = new Item()
+    Item fire = new()
     {
       Name = "fire",
       Type = ItemType.Environment,

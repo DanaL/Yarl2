@@ -1593,7 +1593,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
-      int lightRadius = 0;
+      int lightRadius = -1;
       Colour bgLightColour = Colours.BLACK;
       Colour fgLightColour = Colours.BLACK;
 
@@ -1632,7 +1632,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
           lightRadius = int.Max(lightRadius, daylight);
         }
                 
-        if (lightRadius == 0)
+        if (lightRadius == -1)
         {
           lightRadius = 1;
           fgLightColour = Colours.YELLOW;
@@ -1643,7 +1643,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       if (obj.HasTrait<InPitTrait>())
         lightRadius = int.Min(lightRadius, 1);
 
-      if (lightRadius > 0)
+      if (lightRadius > -1)
       {
         Dictionary<Loc, int> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
         
