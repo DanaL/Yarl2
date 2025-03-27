@@ -374,7 +374,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       return;
     }
 
-    DirectionalInputer dir = new(GS) { DeferredAction = new OpenDoorAction(GS, GS.Player) };
+    DirectionalInputer dir = new(GS) { DeferredAction = new SelectActionAction(GS, GS.Player) };
     ui.SetInputController(dir);
   }
 

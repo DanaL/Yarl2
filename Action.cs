@@ -1028,6 +1028,30 @@ abstract class DirectionalAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
+class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    Tile tile = GameState!.TileAt(Loc);
+    if (GameState.ObjDb.Occupied(Loc))
+    {
+      Actor!.QueueAction(new ChatAction(GameState, Actor) { Loc = Loc });
+    }
+    else if (tile.Type == TileType.OpenDoor)
+    {
+      Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
+    }
+    else if (tile.Type == TileType.ClosedDoor)
+    {
+      Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
+    }
+
+    return 0.0;
+  }
+}
+
 class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 {  
   public override double Execute()
