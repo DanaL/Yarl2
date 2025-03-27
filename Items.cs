@@ -35,7 +35,7 @@ enum ItemType
   Landscape,
   Statue,
   Illusion,
-  Mirror
+  Device
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -425,7 +425,7 @@ class ItemFactory
     Item mirror = new()
     {
       Name = "mirror",
-      Type = ItemType.Mirror,
+      Type = ItemType.Device,
       Value = 0,
       Glyph = new(ch, Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
     };

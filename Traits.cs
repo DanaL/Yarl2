@@ -2939,7 +2939,7 @@ class LightBeamTrait : Trait, IGameEventListener
         break;
       locs.Add(curr);
 
-      foreach (Item item in gs.ObjDb.ItemsAt(curr).Where(i => i.Type == ItemType.Mirror))
+      foreach (Item item in gs.ObjDb.ItemsAt(curr).Where(i => i.Type == ItemType.Device))
       {
         if (item.Traits.OfType<BoolTrait>().FirstOrDefault() is BoolTrait tilt)
         {
@@ -2948,9 +2948,9 @@ class LightBeamTrait : Trait, IGameEventListener
           else if (tilt.Value && dir == Dir.North)
             dir = Dir.West;
           else if (tilt.Value && dir == Dir.West)
-            dir = Dir.South;
-          else if (tilt.Value && dir == Dir.East)
             dir = Dir.North;
+          else if (tilt.Value && dir == Dir.East)
+            dir = Dir.South;
           else if (!tilt.Value && dir == Dir.South)
             dir = Dir.West;
           else if (!tilt.Value && dir == Dir.North)

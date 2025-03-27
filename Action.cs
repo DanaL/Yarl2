@@ -1181,6 +1181,50 @@ class OpenDoorAction : DirectionalAction
   }
 }
 
+class DeviceInteractionAction : DirectionalAction
+{
+  public DeviceInteractionAction(GameState gs, Actor actor) : base(gs, actor) => GameState = gs;
+  public DeviceInteractionAction(GameState gs, Actor actor, Loc loc) : base(gs, actor)
+  {
+    Loc = loc;
+    GameState = gs;
+  }
+
+  public override double Execute()
+  {
+    base.Execute();
+    
+    Item? device = null;
+    foreach (Item item in GameState!.ObjDb.ItemsAt(Loc))
+    {
+      if (item.Type == ItemType.Device)
+      {
+        device = item;
+        break;
+      }
+    }
+
+    if (device is not null)
+    {
+      foreach (Trait t in device.Traits)
+      {
+        if (t is BoolTrait b && b.Name == "Tilt")
+        {
+          b.Value = !b.Value;
+          GameState.UIRef().AlertPlayer("You tilt the mirror.");
+
+          // Assuming a mirror here...
+          device.Glyph = device.Glyph with { Ch = b.Value ? '\\' : '/' };
+
+          return 1.0;
+        }
+      }  
+    }
+
+    return 0.0;
+  }
+}
+
 // Some monsters, when grappling, automatically deal damage to their victim
 class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmgDice) : Action(gs, actor)
 {

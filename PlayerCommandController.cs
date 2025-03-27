@@ -10,6 +10,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.ComponentModel;
+
 namespace Yarl2;
 
 class PlayerCommandController(GameState gs) : Inputer(gs)
@@ -358,19 +360,35 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       }
     }
 
-    if (singleClosedDoor != Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 0)
+    Loc singleDevice = Loc.Nowhere;
+    int deviceCount = 0;
+    foreach (Loc adj in Util.Adj8Locs(GS.Player.Loc))
+    {
+      if (GS.ObjDb.ItemsAt(adj).Where(i => i.Type == ItemType.Device).Any())
+      {
+        ++deviceCount;
+        singleDevice = adj;
+      }
+    }
+
+    if (singleClosedDoor != Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 0)
     {
       GS.Player.QueueAction(new OpenDoorAction(GS, GS.Player) { Loc = singleClosedDoor });
       return;
     }
-    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor != Loc.Nowhere && occupiedCount == 0)
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor != Loc.Nowhere && occupiedCount == 0 && deviceCount == 0)
     {
       GS.Player.QueueAction(new CloseDoorAction(GS, GS.Player) { Loc = singleOpenDoor });
       return;
     }
-    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 1)
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 1 && deviceCount == 0)
     {
       GS.Player.QueueAction(new ChatAction(GS, GS.Player) { Loc = singleNPC });
+      return;
+    }
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 1)
+    {
+      GS.Player.QueueAction(new DeviceInteractionAction(GS, GS.Player) { Loc = singleDevice });
       return;
     }
 
