@@ -342,6 +342,42 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }    
   }
 
+  void ProcessInteractCmd(UserInterface ui)
+  {
+    Loc singleClosedDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.ClosedDoor);
+    Loc singleOpenDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.OpenDoor);
+    
+    Loc singleNPC = Loc.Nowhere;
+    int occupiedCount = 0;
+    foreach (Loc adj in Util.Adj8Locs(GS.Player.Loc))
+    {
+      if (GS.ObjDb.Occupied(adj))
+      {
+        ++occupiedCount;
+        singleNPC = adj;
+      }
+    }
+
+    if (singleClosedDoor != Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 0)
+    {
+      GS.Player.QueueAction(new OpenDoorAction(GS, GS.Player) { Loc = singleClosedDoor });
+      return;
+    }
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor != Loc.Nowhere && occupiedCount == 0)
+    {
+      GS.Player.QueueAction(new CloseDoorAction(GS, GS.Player) { Loc = singleOpenDoor });
+      return;
+    }
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 1)
+    {
+      GS.Player.QueueAction(new ChatAction(GS, GS.Player) { Loc = singleNPC });
+      return;
+    }
+
+    DirectionalInputer dir = new(GS) { DeferredAction = new OpenDoorAction(GS, GS.Player) };
+    ui.SetInputController(dir);
+  }
+
   public override void Input(char ch)
   {
     GS.Player.HaltTravel();
@@ -434,14 +470,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'o')
     {
-      Loc singleDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.ClosedDoor);
-      if (singleDoor != Loc.Nowhere)
-        GS.Player.QueueAction(new OpenDoorAction(GS, GS.Player) { Loc = singleDoor });
-      else
-      {
-        DirectionalInputer dir = new(GS) { DeferredAction = new OpenDoorAction(GS, GS.Player) };
-        ui.SetInputController(dir);
-      }
+      ProcessInteractCmd(ui);
     }
     else if (ch == 'Q')
     {
