@@ -1045,7 +1045,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     }
     else if (tile.Type == TileType.ClosedDoor)
     {
-      Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
+      Actor!.QueueAction(new OpenDoorAction(GameState, Actor) { Loc = Loc });
     }
 
     return 0.0;
