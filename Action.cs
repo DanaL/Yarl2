@@ -1039,6 +1039,10 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     {
       Actor!.QueueAction(new ChatAction(GameState, Actor) { Loc = Loc });
     }
+    else if (GameState.ObjDb.ItemsAt(Loc).Where(i => i.Type == ItemType.Device).Any())
+    {
+      Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
+    }
     else if (tile.Type == TileType.OpenDoor)
     {
       Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
