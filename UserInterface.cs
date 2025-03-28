@@ -481,7 +481,7 @@ abstract class UserInterface
     } 
   }
 
-  int FindSplit(string txt)
+  static int FindSplit(string txt)
   {
     int start = int.Min(txt.Length - 1, SideBarWidth);
     for (int j = start; j > 0; j--)
@@ -746,7 +746,7 @@ abstract class UserInterface
     var tileText = Tile.TileDesc(tile.Type).Capitalize();
     foreach (var item in gs.ObjDb.EnvironmentsAt(gs.Player.Loc))
     {
-      if (item.Type == ItemType.Environment)
+      if (item.Type == ItemType.Environment && item.Name != "photon")
       {
         var g = item.Glyph;
         tileSq = new Sqr(g.Lit, Colours.BLACK, g.Ch);
