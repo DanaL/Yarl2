@@ -362,6 +362,11 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
 
     Loc singleDevice = Loc.Nowhere;
     int deviceCount = 0;
+    if (GS.ObjDb.ItemsAt(GS.Player.Loc).Where(i => i.Type == ItemType.Device).Any())
+    {
+      ++deviceCount;
+      singleDevice = GS.Player.Loc;
+    }
     foreach (Loc adj in Util.Adj8Locs(GS.Player.Loc))
     {
       if (GS.ObjDb.ItemsAt(adj).Where(i => i.Type == ItemType.Device).Any())
@@ -392,7 +397,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       return;
     }
 
-    DirectionalInputer dir = new(GS) { DeferredAction = new SelectActionAction(GS, GS.Player) };
+    DirectionalInputer dir = new(GS, true) { DeferredAction = new SelectActionAction(GS, GS.Player) };
     ui.SetInputController(dir);
   }
 

@@ -1035,18 +1035,19 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     base.Execute();
 
     Tile tile = GameState!.TileAt(Loc);
+   
+    if (GameState.ObjDb.ItemsAt(Loc).Where(i => i.Type == ItemType.Device).Any())
+    {
+      Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
+    }
     if (GameState.ObjDb.Occupied(Loc))
     {
       Actor!.QueueAction(new ChatAction(GameState, Actor) { Loc = Loc });
     }
-    else if (GameState.ObjDb.ItemsAt(Loc).Where(i => i.Type == ItemType.Device).Any())
-    {
-      Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
-    }
     else if (tile.Type == TileType.OpenDoor)
     {
       Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
-    }
+    }    
     else if (tile.Type == TileType.ClosedDoor)
     {
       Actor!.QueueAction(new OpenDoorAction(GameState, Actor) { Loc = Loc });
@@ -1064,7 +1065,14 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
   {
     base.Execute();
 
-    if (GameState!.ObjDb.Occupant(Loc) is Actor other)
+    Actor? other = GameState!.ObjDb.Occupant(Loc);
+
+    if (other is Player)
+    {
+      GameState.UIRef().AlertPlayer("Hmm talking to yourself?");
+      return 0.0;
+    }
+    else if (other is not null)
     {
       var (chatAction, acc) = other.Behaviour.Chat((Mob)other, GameState);
 
