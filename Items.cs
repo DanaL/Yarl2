@@ -402,7 +402,7 @@ class ItemFactory
     Item lamp = new()
     {
       Name = "lamp",
-      Type = ItemType.Tool,
+      Type = ItemType.Device,
       Value = 0,
       Glyph = new(ch, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };

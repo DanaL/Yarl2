@@ -1052,6 +1052,8 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
       Actor!.QueueAction(new OpenDoorAction(GameState, Actor) { Loc = Loc });
     }
 
+    GameState.UIRef().AlertPlayer("There's nothing to interact with there.");
+
     return 0.0;
   }
 }
@@ -1220,6 +1222,31 @@ class DeviceInteractionAction : DirectionalAction
           // Assuming a mirror here...
           device.Glyph = device.Glyph with { Ch = b.Value ? '\\' : '/' };
 
+          return 1.0;
+        }
+        else if (t is DirectionTrait d)
+        {
+          GameState.UIRef().AlertPlayer("You rotate the lamp.");
+          switch (d.Dir)
+          {
+            case Dir.North:
+              d.Dir = Dir.East;
+              device.Glyph = device.Glyph with { Ch = '◑' };
+              break;
+            case Dir.East:            
+              d.Dir = Dir.South;
+              device.Glyph = device.Glyph with { Ch = '◒' };
+              break;
+            case Dir.South:
+              d.Dir = Dir.West;
+              device.Glyph = device.Glyph with { Ch = '◐' };
+              break;
+            case Dir.West:
+              d.Dir = Dir.North;
+              device.Glyph = device.Glyph with { Ch = '◓' };
+              break;
+          }
+          
           return 1.0;
         }
       }  
