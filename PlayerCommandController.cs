@@ -422,14 +422,17 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'c')
     {
-      Loc singleDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.OpenDoor);
-
-      if (singleDoor != Loc.Nowhere)
-        GS.Player.QueueAction(new CloseDoorAction(GS, GS.Player) { Loc = singleDoor });
+      if (GS.Player.SpellsKnown.Count == 0)
+      {
+        ui.SetPopup(new Popup("You don't know any spells!", "", -1, -1));
+      }
+      else if (!SpellcastingPrereqs())
+      {
+        ui.SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
+      }
       else
       {
-        DirectionalInputer dir = new(GS) { DeferredAction = new CloseDoorAction(GS, GS.Player)};
-        ui.SetInputController(dir);
+        ui.SetInputController(new SpellcastMenu(GS));
       }
     }
     else if (ch == 'C')
@@ -532,22 +535,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else if (ch == 'x')
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));
-    }
-    else if (ch == 'z')
-    {
-      if (GS.Player.SpellsKnown.Count == 0)
-      {
-        ui.SetPopup(new Popup("You don't know any spells!", "", -1, -1));
-      }
-      else if (!SpellcastingPrereqs())
-      {
-        ui.SetPopup(new Popup("You must have a casting focus prepared, like a wand or staff!", "", -1, -1));
-      }
-      else
-      {
-        ui.SetInputController(new SpellcastMenu(GS));
-      }
-    }
+    }   
     else if (ch == ',')
     {
       PickupCommand(GS, ui);

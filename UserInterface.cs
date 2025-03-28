@@ -1025,7 +1025,7 @@ abstract class UserInterface
   }
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Sqr zsqr)
-  {    
+  {
     Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
     {
@@ -1055,8 +1055,12 @@ abstract class UserInterface
           double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
           fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
           int alpha = int.Max(15, (int)(fgColour.Alpha * scale));
-          fgColour = fgColour with { Alpha = alpha };          
-          bgColour = lightInfo.BgColour;
+          fgColour = fgColour with { Alpha = alpha };
+
+          bgColour = glyph.BG;
+          if (bgColour == Colours.BLACK)
+            bgColour = lightInfo.BgColour;
+          
           alpha = int.Max(15, (int)(bgColour.Alpha * scale));
           bgColour = bgColour with { Alpha = alpha };
 
@@ -1100,12 +1104,11 @@ abstract class UserInterface
     {
       for (int c = 0; c < ViewWidth; c++)
       {
-        // replace w/ LocToScrLoc?
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
         
-        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-        var sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
+        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
+        Sqr sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
          
         SqsOnScreen[r, c] = sqr;
       }

@@ -1787,7 +1787,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
           glyph = Hallucination();
         }
         else if (tile.Type != TileType.Chasm)
-        {
+        {         
           glyph = Util.TileToGlyph(tile);
         }
         else
