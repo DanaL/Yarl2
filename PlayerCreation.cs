@@ -185,7 +185,7 @@ class PlayerCreator
 
     // Scholars start off with less money because they are still paying off
     // their student loans
-    var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(10, 26);
     player.Inventory.Add(money, player.ID);
   }
@@ -260,15 +260,15 @@ class PlayerCreator
       player.Inventory.Add(ItemFactory.Get(ItemNames.TORCH, objDb), player.ID);
     }
 
-    var money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+    Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
     money.Value = rng.Next(25, 51);
     player.Inventory.Add(money, player.ID);
   }
 
   public static Player NewPlayer(string playerName, GameObjectDB objDb, int startRow, int startCol, UserInterface ui, Rng rng)
   {
-    var lineage = PickLineage(ui);
-    var background = PickBackground(ui);
+    PlayerLineage lineage = PickLineage(ui);
+    PlayerBackground background = PickBackground(ui);
 
     Player player = new(playerName)
     {
@@ -285,6 +285,14 @@ class PlayerCreator
 
     SetInitialAbilities(player);
     SetStartingGear(player, objDb, rng);
+
+    // Humans start with a little more money than the others
+    if (lineage == PlayerLineage.Human)
+    {
+      Item money = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      money.Value = 20;
+      player.Inventory.Add(money, player.ID);
+    }
 
     player.CalcHP();
     
