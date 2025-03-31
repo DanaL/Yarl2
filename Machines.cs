@@ -42,10 +42,10 @@ class LightPuzzleSetup
   public static void FindPotential(Map map)
   {
     map.Dump();
-    List<HashSet<(int, int)>> rooms = [.. map.FindRooms()
-                                             .Select(r => new HashSet<(int, int)>(r))];
-
-    foreach (var room in rooms)
+    List<HashSet<(int, int)>> roomsTiles = [.. map.FindRooms()
+                                                 .Select(r => new HashSet<(int, int)>(r))];
+    List<RoomInfo> rooms = [];
+    foreach (HashSet<(int, int)> room in roomsTiles)
     {
       int lowR = int.MaxValue, highR = 0, lowC = int.MaxValue, highC = 0;
       HashSet<(int, int, Dir)> exits = [];
@@ -70,6 +70,8 @@ class LightPuzzleSetup
           exits.Add((r, c + 1, Dir.East));        
       }
 
+      rooms.Add(new() { Sqs = room, Exits = exits });
+
       for (int r = lowR - 1; r <= highR + 1; r++)
       {
         for (int c = lowC - 1; c <= highC + 1; c++)
@@ -87,6 +89,37 @@ class LightPuzzleSetup
     }
   }
 
+  static void FollowPathFromExit(int r, int c, Dir dir, Map map, List<RoomInfo> rooms)
+  {
+    List<(int, int)> path = [];
+
+    while (true)
+    {
+      (r, c) = Move(r, c, dir);
+      Tile tile = map.TileAt(r, c);
+      if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
+        break;
+      path.Add((r, c));
+    }
+
+    static (int, int) Move(int r, int c, Dir dir) => dir switch
+    {    
+      Dir.North => (r - 1, c),
+      Dir.South => (r + 1, c),
+      Dir.East => (r, c + 1),
+      Dir.West => (r, c - 1),
+      _ => (r, c)
+    };
+  }
+  
+  static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
+  {
+    foreach ((int, int, Dir) exit in room.Exits)
+    {
+      
+    }
+  }
+
   static bool IsExit(Tile tile) => tile.Type switch
   {
     TileType.ClosedDoor => true,
@@ -99,4 +132,10 @@ class LightPuzzleSetup
     TileType.DungeonFloor => true,
     _ => false
   };
+}
+
+class RoomInfo
+{
+  public HashSet<(int, int)> Sqs { get; set; } = [];
+  public HashSet<(int, int, Dir)> Exits { get; set; } = [];
 }
