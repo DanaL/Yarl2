@@ -87,6 +87,11 @@ class LightPuzzleSetup
       Console.WriteLine();
       Console.WriteLine();
     }
+
+    foreach (RoomInfo room in rooms)
+    {
+      FindRoutesFromRoom(room, map, rooms);
+    }
   }
 
   static void FollowPathFromExit(int r, int c, Dir dir, Map map, List<RoomInfo> rooms)
@@ -95,12 +100,22 @@ class LightPuzzleSetup
 
     while (true)
     {
-      (r, c) = Move(r, c, dir);
-      Tile tile = map.TileAt(r, c);
+      var (nr, nc) = Move(r, c, dir);
+      Tile tile = map.TileAt(nr, nc);
       if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
+      {
+        List<Dir> turns = FindTurns(r, c, dir, map);
         break;
-      path.Add((r, c));
+      }
+      else
+      {
+        path.Add((nr, nc));
+      }
+
+      (r, c) = (nr, nc);
     }
+
+    Console.WriteLine(path);
 
     static (int, int) Move(int r, int c, Dir dir) => dir switch
     {    
@@ -110,13 +125,57 @@ class LightPuzzleSetup
       Dir.West => (r, c - 1),
       _ => (r, c)
     };
+
+    static List<Dir> FindTurns(int r, int c, Dir dir, Map map)
+    {
+      List<Dir> turns = [];
+
+      switch (dir)
+      {
+        case Dir.North:
+        case Dir.South:
+          if (Passable(r, c - 1, map))
+            turns.Add(Dir.West);
+          else if (Passable(r, c + 1, map))
+            turns.Add(Dir.East);
+          break;
+        case Dir.East:
+        case Dir.West:
+          if (Passable(r - 1, c, map))
+            turns.Add(Dir.North);
+          else if (Passable(r + 1, c, map))
+            turns.Add(Dir.South);
+          break;
+      }
+
+      return turns;
+    }
+
+    static bool Passable(int r, int c, Map map)
+    {
+      Tile tile = map.TileAt(r, c);
+      if (tile.PassableByFlight())
+        return true;
+
+      switch (tile.Type)
+      {
+        case TileType.ClosedDoor:
+        case TileType.LockedDoor:
+        case TileType.SecretDoor:
+        case TileType.VaultDoor:
+        case TileType.Portcullis:
+          return true;
+      }
+
+      return false;
+    }
   }
   
   static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
     foreach ((int, int, Dir) exit in room.Exits)
     {
-      
+      FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, rooms);
     }
   }
 
