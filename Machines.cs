@@ -94,10 +94,8 @@ class LightPuzzleSetup
     }
   }
 
-  static void FollowPathFromExit(int r, int c, Dir dir, Map map, List<RoomInfo> rooms)
+  static void FollowPathFromExit(int r, int c, Dir dir, Map map, List<(int, int)> path, List<RoomInfo> rooms)
   {
-    List<(int, int)> path = [];
-
     while (true)
     {
       var (nr, nc) = Move(r, c, dir);
@@ -105,7 +103,14 @@ class LightPuzzleSetup
       if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
       {
         List<Dir> turns = FindTurns(r, c, dir, map);
-        break;
+        foreach (Dir nd in turns)
+          FollowPathFromExit(r, c, nd, map, [.. path], rooms);
+        return;
+      }
+      else if (SqrInRoom(nr, nc, rooms))
+      {
+        Console.WriteLine("End of route!");
+        return;
       }
       else
       {
@@ -169,13 +174,26 @@ class LightPuzzleSetup
 
       return false;
     }
+
+    static bool SqrInRoom(int r, int c, List<RoomInfo> rooms)
+    {
+      (int, int) sq = (r, c);
+
+      foreach (RoomInfo room in rooms)
+      {
+        if (room.Sqs.Contains(sq))
+          return true;
+      }
+
+      return false;
+    }
   }
   
   static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
     foreach ((int, int, Dir) exit in room.Exits)
     {
-      FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, rooms);
+      FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, [], rooms);
     }
   }
 
