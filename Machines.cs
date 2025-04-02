@@ -94,31 +94,40 @@ class LightPuzzleSetup
     }
   }
 
-  static void FollowPathFromExit(int r, int c, Dir dir, Map map, List<(int, int)> path, List<RoomInfo> rooms)
+  static void FollowPathFromExit(int r, int c, Dir dir, Map map, HashSet<(int, int)> path, List<RoomInfo> rooms)
   {
     while (true)
     {
       var (nr, nc) = Move(r, c, dir);
       Tile tile = map.TileAt(nr, nc);
+
+      if (nr == 4 && nc == 32)
+        Console.WriteLine();
+
+      if (path.Contains((nr, nc)))
+      {
+        Console.WriteLine($"  Loop! {nr}, {nc} {dir}! {path.Count}");
+        return;
+      }
+
+      List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
+      foreach (Dir nd in sidePassages)
+      {
+        Console.WriteLine($"  Side tunnel! {nr}, {nc} {nd}! {path.Count}");
+        HashSet<(int, int)> nextPath = [.. path];
+        nextPath.Add((nr, nc));
+        FollowPathFromExit(nr, nc, nd, map, nextPath, rooms);
+      }
+
       if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
       {
-        List<Dir> turns = FindTurns(r, c, dir, map);
-
-        if (turns.Count > 1)
-          Console.WriteLine();
-        foreach (Dir nd in turns) 
-        {
-          List<(int, int)> nextPath = [.. path];
-          nextPath.Add((nr, nc));
-          FollowPathFromExit(r, c, nd, map, nextPath, rooms);
-        }
-        return;
+        break;
       }
       else if (SqrInRoom(nr, nc, rooms))
       {
         Tile endTile = map.TileAt(nr, nc);
-        Console.WriteLine($" end of route at {nr}, {nc}! {path.Count}");
-        return;
+        Console.WriteLine($"  End of route at {nr}, {nc}! {path.Count}");
+        break;
       }
       
       (r, c) = (nr, nc);
@@ -133,29 +142,29 @@ class LightPuzzleSetup
       _ => (r, c)
     };
 
-    static List<Dir> FindTurns(int r, int c, Dir dir, Map map)
+    static List<Dir> SidePassages(int r, int c, Dir dir, Map map)
     {
-      List<Dir> turns = [];
+      List<Dir> passages = [];
 
       switch (dir)
       {
         case Dir.North:
         case Dir.South:
           if (Passable(r, c - 1, map))
-            turns.Add(Dir.West);
+            passages.Add(Dir.West);
           if (Passable(r, c + 1, map))
-            turns.Add(Dir.East);
+            passages.Add(Dir.East);
           break;
         case Dir.East:
         case Dir.West:
           if (Passable(r - 1, c, map))
-            turns.Add(Dir.North);
+            passages.Add(Dir.North);
           if (Passable(r + 1, c, map))
-            turns.Add(Dir.South);
+            passages.Add(Dir.South);
           break;
       }
 
-      return turns;
+      return passages;
     }
 
     static bool Passable(int r, int c, Map map)
@@ -189,11 +198,12 @@ class LightPuzzleSetup
   
   static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
+    Console.WriteLine("=========================================");
+    map.Dump();
+
     foreach ((int, int, Dir) exit in room.Exits)
     {
-      Console.Write($"Start {exit}");
-      if (exit.Item1 == 10 && exit.Item2 == 9)
-        Console.WriteLine();
+      Console.WriteLine($"Start {exit}");      
       FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, [], rooms);
     }
   }
