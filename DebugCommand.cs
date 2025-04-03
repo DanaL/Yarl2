@@ -127,12 +127,6 @@ class DebugCommand(GameState gs)
       FogifyLevel();
       return "";
     }
-    else if (txt == "photon")
-    {
-      Item photon = ItemFactory.Photon(_gs, gs.Player.ID);
-      _gs.ObjDb.SetToLoc(_gs.Player.Loc, photon);
-      return "";
-    }
     else if (txt == "tablet")
     {      
       Item tablet = History.SealTablet(_gs.ObjDb);
