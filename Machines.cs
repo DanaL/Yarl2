@@ -101,8 +101,15 @@ class LightPuzzleSetup
       var (nr, nc) = Move(r, c, dir);
       Tile tile = map.TileAt(nr, nc);
 
-      if (nr == 4 && nc == 32)
-        Console.WriteLine();
+      // if (nr == 14 && nc == 34)
+      //   Console.WriteLine();
+
+      if (SqrInRoom(nr, nc, rooms) && path.Count > 2)
+      {
+        Tile endTile = map.TileAt(nr, nc);
+        Console.WriteLine($"  End of route at {nr}, {nc}! {path.Count}");
+        break;
+      }
 
       if (path.Contains((nr, nc)))
       {
@@ -121,12 +128,6 @@ class LightPuzzleSetup
 
       if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
       {
-        break;
-      }
-      else if (SqrInRoom(nr, nc, rooms))
-      {
-        Tile endTile = map.TileAt(nr, nc);
-        Console.WriteLine($"  End of route at {nr}, {nc}! {path.Count}");
         break;
       }
       
@@ -198,9 +199,6 @@ class LightPuzzleSetup
   
   static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
-    Console.WriteLine("=========================================");
-    map.Dump();
-
     foreach ((int, int, Dir) exit in room.Exits)
     {
       Console.WriteLine($"Start {exit}");      
