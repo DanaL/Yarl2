@@ -88,42 +88,43 @@ class LightPuzzleSetup
       Console.WriteLine();
     }
 
+    List<PathInfo> paths = [];
     foreach (RoomInfo room in rooms)
     {
-      FindRoutesFromRoom(room, map, rooms);
+      if (room.Sqs.Count == 49)
+        Console.WriteLine();
+
+      var p = FindRoutesFromRoom(room, map, rooms);
+      paths.AddRange(p);
     }
   }
 
-  static void FollowPathFromExit(int r, int c, Dir dir, Map map, HashSet<(int, int)> path, List<RoomInfo> rooms)
+  static List<PathInfo> FollowPathFromExit(int r, int c, Dir dir, Map map, PathInfo path, List<RoomInfo> rooms)
   {
+    List<PathInfo> paths = [];
     while (true)
     {
       var (nr, nc) = Move(r, c, dir);
       Tile tile = map.TileAt(nr, nc);
 
-      // if (nr == 14 && nc == 34)
-      //   Console.WriteLine();
-
-      if (SqrInRoom(nr, nc, rooms) && path.Count > 2)
+      if (SqrInRoom(nr, nc, rooms) && path.Corners.Count >= 2)
       {
-        Tile endTile = map.TileAt(nr, nc);
-        Console.WriteLine($"  End of route at {nr}, {nc}! {path.Count}");
+        path.End = (nr, nc);
+        paths.Add(path);
         break;
       }
 
-      if (path.Contains((nr, nc)))
+      if (path.Corners.Contains((nr, nc)))
       {
-        Console.WriteLine($"  Loop! {nr}, {nc} {dir}! {path.Count}");
-        return;
+        break;
       }
 
       List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
       foreach (Dir nd in sidePassages)
       {
-        Console.WriteLine($"  Side tunnel! {nr}, {nc} {nd}! {path.Count}");
-        HashSet<(int, int)> nextPath = [.. path];
-        nextPath.Add((nr, nc));
-        FollowPathFromExit(nr, nc, nd, map, nextPath, rooms);
+        PathInfo nextPath = PathInfo.Copy(path);
+        nextPath.Corners.Add((nr, nc));
+        paths.AddRange(FollowPathFromExit(nr, nc, nd, map, nextPath, rooms));
       }
 
       if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
@@ -133,6 +134,8 @@ class LightPuzzleSetup
       
       (r, c) = (nr, nc);
     }
+
+    return paths;
 
     static (int, int) Move(int r, int c, Dir dir) => dir switch
     {    
@@ -197,13 +200,18 @@ class LightPuzzleSetup
     }
   }
   
-  static void FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
+  static List<PathInfo> FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
+    List<PathInfo> paths = [];
+
     foreach ((int, int, Dir) exit in room.Exits)
     {
-      Console.WriteLine($"Start {exit}");      
-      FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, [], rooms);
+      Console.WriteLine($"Start {exit}");
+      PathInfo path = new((exit.Item1, exit.Item2));
+      paths.AddRange(FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, path, rooms));
     }
+
+    return paths;
   }
 
   static bool IsExit(Tile tile) => tile.Type switch
@@ -218,6 +226,23 @@ class LightPuzzleSetup
     TileType.DungeonFloor => true,
     _ => false
   };
+}
+
+record PathInfo((int, int) Start)
+{
+  public HashSet<(int, int)> Corners { get; set; } = [];
+  public (int, int) End;
+
+  public static PathInfo Copy(PathInfo other)
+  {
+    PathInfo copy = new(other.Start)
+    {
+      Corners = [.. other.Corners],
+      End = other.End
+    };
+
+    return copy;
+  }
 }
 
 class RoomInfo
