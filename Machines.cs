@@ -102,116 +102,134 @@ class LightPuzzleSetup
   static List<PathInfo> FollowPathFromExit(int r, int c, Dir dir, Map map, PathInfo path, List<RoomInfo> rooms)
   {
     List<PathInfo> paths = [];
-    while (true)
-    {
-      var (nr, nc) = Move(r, c, dir);
-      Tile tile = map.TileAt(nr, nc);
-
-      if (SqrInRoom(nr, nc, rooms) && path.Corners.Count >= 2)
-      {
-        path.End = (nr, nc);
-        paths.Add(path);
-        break;
-      }
-
-      if (path.Corners.Contains((nr, nc)))
-      {
-        break;
-      }
-
-      List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
-      foreach (Dir nd in sidePassages)
-      {
-        PathInfo nextPath = PathInfo.Copy(path);
-        nextPath.Corners.Add((nr, nc));
-        paths.AddRange(FollowPathFromExit(nr, nc, nd, map, nextPath, rooms));
-      }
-
-      if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
-      {
-        break;
-      }
-      
-      (r, c) = (nr, nc);
-    }
+    
 
     return paths;
 
-    static (int, int) Move(int r, int c, Dir dir) => dir switch
-    {    
-      Dir.North => (r - 1, c),
-      Dir.South => (r + 1, c),
-      Dir.East => (r, c + 1),
-      Dir.West => (r, c - 1),
-      _ => (r, c)
-    };
-
-    static List<Dir> SidePassages(int r, int c, Dir dir, Map map)
-    {
-      List<Dir> passages = [];
-
-      switch (dir)
-      {
-        case Dir.North:
-        case Dir.South:
-          if (Passable(r, c - 1, map))
-            passages.Add(Dir.West);
-          if (Passable(r, c + 1, map))
-            passages.Add(Dir.East);
-          break;
-        case Dir.East:
-        case Dir.West:
-          if (Passable(r - 1, c, map))
-            passages.Add(Dir.North);
-          if (Passable(r + 1, c, map))
-            passages.Add(Dir.South);
-          break;
-      }
-
-      return passages;
-    }
-
-    static bool Passable(int r, int c, Map map)
-    {
-      Tile tile = map.TileAt(r, c);
-      if (tile.PassableByFlight())
-        return true;
-
-      return tile.Type switch
-      {
-        TileType.ClosedDoor or TileType.LockedDoor or 
-        TileType.SecretDoor or TileType.VaultDoor or 
-        TileType.Portcullis => true,
-        _ => false,
-      };
-    }
-
-    static bool SqrInRoom(int r, int c, List<RoomInfo> rooms)
-    {
-      (int, int) sq = (r, c);
-
-      foreach (RoomInfo room in rooms)
-      {
-        if (room.Sqs.Contains(sq))
-          return true;
-      }
-
-      return false;
-    }
+    
   }
   
   static List<PathInfo> FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
-    List<PathInfo> paths = [];
-
+    List<PathInfo> allPaths = [];
+    
     foreach ((int, int, Dir) exit in room.Exits)
     {
-      Console.WriteLine($"Start {exit}");
-      PathInfo path = new((exit.Item1, exit.Item2));
-      paths.AddRange(FollowPathFromExit(exit.Item1, exit.Item2, exit.Item3, map, path, rooms));
+      HashSet<(int, int)> visited = [];
+      Queue<PathInfo> q = [];
+      q.Enqueue(new PathInfo((exit.Item1, exit.Item2)));
+      Dir dir = exit.Item3;
+
+      while (q.Count > 0)
+      {
+        PathInfo curr = q.Dequeue();
+
+        var (r, c) = curr.Start;
+
+        ////////////////////////
+        while (true)
+        {
+          if (visited.Contains((r, c)))
+            break;
+          visited.Add((r, c));
+
+          var (nr, nc) = Move(r, c, dir);
+          Tile tile = map.TileAt(nr, nc);
+
+          if (SqrInRoom(nr, nc, rooms) && curr.Corners.Count >= 2)
+          {
+            curr.End = (nr, nc);
+            allPaths.Add(curr);
+            break;
+          }
+
+          if (curr.Corners.Contains((nr, nc)))
+          {
+            break;
+          }
+
+          List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
+          foreach (Dir nd in sidePassages)
+          {
+            PathInfo nextPath = PathInfo.Copy(curr);            
+            nextPath.Corners.Add((nr, nc));
+            q.Enqueue(nextPath);
+          }
+
+          if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
+          {
+            break;
+          }
+          
+          (r, c) = (nr, nc);
+        }
+        ////////////////////////
+      }
     }
 
-    return paths;
+    return allPaths;
+  }
+
+  static (int, int) Move(int r, int c, Dir dir) => dir switch
+  {    
+    Dir.North => (r - 1, c),
+    Dir.South => (r + 1, c),
+    Dir.East => (r, c + 1),
+    Dir.West => (r, c - 1),
+    _ => (r, c)
+  };
+
+  static List<Dir> SidePassages(int r, int c, Dir dir, Map map)
+  {
+    List<Dir> passages = [];
+
+    switch (dir)
+    {
+      case Dir.North:
+      case Dir.South:
+        if (Passable(r, c - 1, map))
+          passages.Add(Dir.West);
+        if (Passable(r, c + 1, map))
+          passages.Add(Dir.East);
+        break;
+      case Dir.East:
+      case Dir.West:
+        if (Passable(r - 1, c, map))
+          passages.Add(Dir.North);
+        if (Passable(r + 1, c, map))
+          passages.Add(Dir.South);
+        break;
+    }
+
+    return passages;
+  }
+
+  static bool Passable(int r, int c, Map map)
+  {
+    Tile tile = map.TileAt(r, c);
+    if (tile.PassableByFlight())
+      return true;
+
+    return tile.Type switch
+    {
+      TileType.ClosedDoor or TileType.LockedDoor or 
+      TileType.SecretDoor or TileType.VaultDoor or 
+      TileType.Portcullis => true,
+      _ => false,
+    };
+  }
+
+  static bool SqrInRoom(int r, int c, List<RoomInfo> rooms)
+  {
+    (int, int) sq = (r, c);
+
+    foreach (RoomInfo room in rooms)
+    {
+      if (room.Sqs.Contains(sq))
+        return true;
+    }
+
+    return false;
   }
 
   static bool IsExit(Tile tile) => tile.Type switch
