@@ -98,16 +98,6 @@ class LightPuzzleSetup
       paths.AddRange(p);
     }
   }
-
-  static List<PathInfo> FollowPathFromExit(int r, int c, Dir dir, Map map, PathInfo path, List<RoomInfo> rooms)
-  {
-    List<PathInfo> paths = [];
-    
-
-    return paths;
-
-    
-  }
   
   static List<PathInfo> FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
   {
@@ -116,34 +106,36 @@ class LightPuzzleSetup
     foreach ((int, int, Dir) exit in room.Exits)
     {
       HashSet<(int, int)> visited = [];
-      Queue<PathInfo> q = [];
-      q.Enqueue(new PathInfo((exit.Item1, exit.Item2)));
-      Dir dir = exit.Item3;
-
+      Queue<PathSearchNode> q = [];
+      q.Enqueue(new PathSearchNode(new PathInfo((exit.Item1, exit.Item2)), exit.Item1, exit.Item2, exit.Item3));
+      
       while (q.Count > 0)
       {
-        PathInfo curr = q.Dequeue();
-
-        var (r, c) = curr.Start;
+        PathSearchNode curr = q.Dequeue();
+        Dir dir = curr.Dir;
+        int r = curr.Row;
+        int c = curr.Col;
 
         ////////////////////////
         while (true)
         {
-          if (visited.Contains((r, c)))
-            break;
           visited.Add((r, c));
 
           var (nr, nc) = Move(r, c, dir);
+
           Tile tile = map.TileAt(nr, nc);
 
-          if (SqrInRoom(nr, nc, rooms) && curr.Corners.Count >= 2)
+          if (SqrInRoom(nr, nc, rooms) && curr.Path.Corners.Count >= 2)
           {
-            curr.End = (nr, nc);
-            allPaths.Add(curr);
+            curr.Path.End = (nr, nc);
+            allPaths.Add(curr.Path);
+
+            // Maybe I only add items to visited when we reach an end??
+            
             break;
           }
 
-          if (curr.Corners.Contains((nr, nc)))
+          if (curr.Path.Corners.Contains((nr, nc)))
           {
             break;
           }
@@ -151,9 +143,9 @@ class LightPuzzleSetup
           List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
           foreach (Dir nd in sidePassages)
           {
-            PathInfo nextPath = PathInfo.Copy(curr);            
+            PathInfo nextPath = PathInfo.Copy(curr.Path);            
             nextPath.Corners.Add((nr, nc));
-            q.Enqueue(nextPath);
+            q.Enqueue(new PathSearchNode(nextPath, nr, nc, nd));
           }
 
           if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
@@ -245,6 +237,8 @@ class LightPuzzleSetup
     _ => false
   };
 }
+
+record PathSearchNode(PathInfo Path, int Row, int Col, Dir Dir);
 
 record PathInfo((int, int) Start)
 {
