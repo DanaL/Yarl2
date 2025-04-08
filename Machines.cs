@@ -24,20 +24,17 @@ class LightPuzzleSetup
   {
     string[] mapText = [ 
        "####################",
-       "#############......#",
-       "#############......#",
-       "#############.######",
-       "#############.######",
-       "#.....#######.######",
-       "#.....#######.######",
-       "#.............######",
-       "#############.######",
-       "#############.######",
-       "#############.######",
-       "#########..........#",
-       "#########..........#",
-       "#########..........#",
-       "####################",
+       "#####.....##########",
+       "#####.....##########",       
+       "#######.############",
+       "#######.############",
+       "#######.############",
+       "#..##.....##########",
+       "#..##.....####....##",
+       "#..##.....####....##",
+       "#.................##",
+       "#..##.....##########",
+       "####################"
     ];
 
     Map map = new(mapText[0].Length, mapText.Length);
@@ -127,10 +124,7 @@ class LightPuzzleSetup
 
     List<PathInfo> paths = [];
     foreach (RoomInfo room in rooms)
-    {
-      if (room.Sqs.Count == 49)
-        Console.WriteLine();
-
+    {      
       var p = FindRoutesFromRoom(room, map, rooms);
       paths.AddRange(p);
     }
@@ -176,7 +170,13 @@ class LightPuzzleSetup
             break;
           }
 
+          // I think this will be redundant
           if (curr.Path.Corners.Contains((nr, nc)))
+          {
+            break;
+          }
+
+          if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
           {
             break;
           }
@@ -189,11 +189,6 @@ class LightPuzzleSetup
             q.Enqueue(new PathSearchNode(nextPath, nr, nc, nd));
           }
 
-          if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
-          {
-            break;
-          }
-          
           (r, c) = (nr, nc);
         }
         ////////////////////////
