@@ -16,6 +16,8 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
+LightPuzzleSetup.Test();
+
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);

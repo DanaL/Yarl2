@@ -16,6 +16,43 @@ namespace Yarl2;
 
 class LightPuzzleSetup
 {
+  const int NOT_IN_ROOM = 0;
+  const int TERMINUS = 1;
+  const int IN_ROOM = 2;
+
+  public static void Test()
+  {
+    string[] mapText = [ 
+       "####################",
+       "#############......#",
+       "#############......#",
+       "#############.######",
+       "#############.######",
+       "#.....#######.######",
+       "#.....#######.######",
+       "#.............######",
+       "#############.######",
+       "#############.######",
+       "#############.######",
+       "#########..........#",
+       "#########..........#",
+       "#########..........#",
+       "####################",
+    ];
+
+    Map map = new(mapText[0].Length, mapText.Length);
+    for (int r = 0; r < mapText.Length; r++)
+    {
+      for (int c = 0; c < mapText[r].Length; c++)
+      {
+        TileType type = mapText[r][c] == '#' ? TileType.DungeonWall : TileType.DungeonFloor;
+        map.SetTile(r, c, TileFactory.Get(type));
+      }
+    }
+
+    FindPotential(map);
+  }
+
   static char TileToChar(Tile tile) => tile.Type switch
   {
     TileType.PermWall => '#',
@@ -119,19 +156,19 @@ class LightPuzzleSetup
         ////////////////////////
         while (true)
         {
-          visited.Add((r, c));
-
           var (nr, nc) = Move(r, c, dir);
+          visited.Add((nr, nc));
 
           Tile tile = map.TileAt(nr, nc);
 
-          if (SqrInRoom(nr, nc, rooms) && curr.Path.Corners.Count >= 2)
+          int inRoom = SqrInRoom(nr, nc, rooms);
+          if (inRoom == TERMINUS || (inRoom == IN_ROOM && curr.Path.Corners.Count >= 2))
           {
             curr.Path.End = (nr, nc);
             allPaths.Add(curr.Path);
 
             // Maybe I only add items to visited when we reach an end??
-            
+
             break;
           }
 
@@ -211,17 +248,17 @@ class LightPuzzleSetup
     };
   }
 
-  static bool SqrInRoom(int r, int c, List<RoomInfo> rooms)
+  static int SqrInRoom(int r, int c, List<RoomInfo> rooms)
   {
     (int, int) sq = (r, c);
 
     foreach (RoomInfo room in rooms)
     {
       if (room.Sqs.Contains(sq))
-        return true;
+        return room.Exits.Count < 2 ? TERMINUS : IN_ROOM;
     }
 
-    return false;
+    return NOT_IN_ROOM;
   }
 
   static bool IsExit(Tile tile) => tile.Type switch
