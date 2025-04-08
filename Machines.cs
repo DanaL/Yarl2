@@ -149,6 +149,7 @@ class LightPuzzleSetup
       while (q.Count > 0)
       {
         PathSearchNode curr = q.Dequeue();
+        HashSet<(int, int)> onPath = [];
         Dir dir = curr.Dir;
         int r = curr.Row;
         int c = curr.Col;
@@ -157,7 +158,11 @@ class LightPuzzleSetup
         while (true)
         {
           var (nr, nc) = Move(r, c, dir);
-          visited.Add((nr, nc));
+
+          if (visited.Contains((nr, nc)))
+            break;
+            
+          onPath.Add((nr, nc));
 
           Tile tile = map.TileAt(nr, nc);
 
@@ -166,8 +171,7 @@ class LightPuzzleSetup
           {
             curr.Path.End = (nr, nc);
             allPaths.Add(curr.Path);
-
-            // Maybe I only add items to visited when we reach an end??
+            visited.UnionWith(onPath);
 
             break;
           }
