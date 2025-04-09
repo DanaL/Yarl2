@@ -16,6 +16,8 @@ namespace Yarl2;
 
 class LightPuzzleSetup
 {
+  const int MAX_CORNER_COUNT = 8;
+
   public static void Test()
   {
     string[] mapText = [ 
@@ -46,32 +48,15 @@ class LightPuzzleSetup
     FindPotential(map);
   }
 
-  static char TileToChar(Tile tile) => tile.Type switch
+  public static void Create(Map map, List<PathInfo> paths, GameObjectDB objDb, int dungeonId, int level, Rng rng)
   {
-    TileType.PermWall => '#',
-    TileType.DungeonWall => '#',
-    TileType.DungeonFloor or TileType.Sand => '.',
-    TileType.ClosedDoor or TileType.LockedDoor => '+',
-    TileType.SecretDoor => '+',
-    TileType.VaultDoor => '|',
-    TileType.OpenPortcullis => '|',
-    TileType.Portcullis => '|',
-    TileType.Mountain or TileType.SnowPeak => '^',
-    TileType.Grass => ',',
-    TileType.GreenTree => 'T',
-    TileType.RedTree => 'T',
-    TileType.OrangeTree => 'T',
-    TileType.YellowTree => 'T',
-    TileType.DeepWater => '~',
-    TileType.WoodBridge => '=',
-    TileType.Upstairs => '<',
-    TileType.Downstairs => '>',
-    _ => ' '
-  };
+    PathInfo path = paths[rng.Next(paths.Count)];
 
-  public static void FindPotential(Map map)
+    Console.WriteLine(paths.Count);
+  }
+
+  public static List<PathInfo> FindPotential(Map map)
   {
-    map.Dump();
     List<HashSet<(int, int)>> roomsTiles = [.. map.FindRooms()
                                                  .Select(r => new HashSet<(int, int)>(r))];
     List<RoomInfo> rooms = [];
@@ -100,22 +85,7 @@ class LightPuzzleSetup
           exits.Add((r, c + 1, Dir.East));        
       }
 
-      rooms.Add(new() { Sqs = room, Exits = exits });
-
-      for (int r = lowR - 1; r <= highR + 1; r++)
-      {
-        for (int c = lowC - 1; c <= highC + 1; c++)
-        {          
-          Console.Write(TileToChar(map.TileAt(r, c)));
-        }
-        Console.WriteLine();
-      }
-      foreach (var e in exits)
-      {
-        Console.Write(e);
-      }
-      Console.WriteLine();
-      Console.WriteLine();
+      rooms.Add(new() { Sqs = room, Exits = exits });     
     }
 
     List<PathInfo> paths = [];
@@ -124,6 +94,8 @@ class LightPuzzleSetup
       var p = FindRoutesFromRoom(room, map, rooms);
       paths.AddRange(p);
     }
+
+    return paths;
   }
   
   static List<PathInfo> FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
@@ -139,13 +111,18 @@ class LightPuzzleSetup
       while (q.Count > 0)
       {
         PathSearchNode curr = q.Dequeue();
+        if (curr.Path.Corners.Count > MAX_CORNER_COUNT)
+        {
+          continue;
+        }
+
         HashSet<(int, int)> onPath = [];
         Dir dir = curr.Dir;
         int r = curr.Row;
         int c = curr.Col;
 
         while (true)
-        {
+        {         
           var (nr, nc) = Move(r, c, dir);
 
           if (visited.Contains((nr, nc)))
