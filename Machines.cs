@@ -16,10 +16,6 @@ namespace Yarl2;
 
 class LightPuzzleSetup
 {
-  const int NOT_IN_ROOM = 0;
-  const int TERMINUS = 1;
-  const int IN_ROOM = 2;
-
   public static void Test()
   {
     string[] mapText = [ 
@@ -148,7 +144,6 @@ class LightPuzzleSetup
         int r = curr.Row;
         int c = curr.Col;
 
-        ////////////////////////
         while (true)
         {
           var (nr, nc) = Move(r, c, dir);
@@ -160,19 +155,13 @@ class LightPuzzleSetup
 
           Tile tile = map.TileAt(nr, nc);
 
-          int inRoom = SqrInRoom(nr, nc, rooms);
-          if (inRoom == TERMINUS || (inRoom == IN_ROOM && curr.Path.Corners.Count >= 2))
+          var (roomId, terminus) = SqrInRoom(nr, nc, rooms);
+          if (terminus || (roomId > -1 && curr.Path.Corners.Count >= 2))
           {
             curr.Path.End = (nr, nc);
             allPaths.Add(curr.Path);
             visited.UnionWith(onPath);
-
-            break;
-          }
-
-          // I think this will be redundant
-          if (curr.Path.Corners.Contains((nr, nc)))
-          {
+            visited.UnionWith(rooms[roomId].Sqs);
             break;
           }
 
@@ -191,7 +180,6 @@ class LightPuzzleSetup
 
           (r, c) = (nr, nc);
         }
-        ////////////////////////
       }
     }
 
@@ -247,17 +235,17 @@ class LightPuzzleSetup
     };
   }
 
-  static int SqrInRoom(int r, int c, List<RoomInfo> rooms)
+  static (int, bool) SqrInRoom(int r, int c, List<RoomInfo> rooms)
   {
     (int, int) sq = (r, c);
 
-    foreach (RoomInfo room in rooms)
+    for (int j = 0; j < rooms.Count; j++)
     {
-      if (room.Sqs.Contains(sq))
-        return room.Exits.Count < 2 ? TERMINUS : IN_ROOM;
+      if (rooms[j].Sqs.Contains(sq))
+        return (j, rooms[j].Exits.Count < 2);
     }
-
-    return NOT_IN_ROOM;
+ 
+    return (-1, false);
   }
 
   static bool IsExit(Tile tile) => tile.Type switch
