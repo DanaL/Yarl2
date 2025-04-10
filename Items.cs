@@ -419,6 +419,23 @@ class ItemFactory
     return lamp;
   }
 
+  public static Item BeamTarget(GameObjectDB objDb)
+  {
+    Item target = new()
+    {
+      Name = "stone block",
+      Type = ItemType.Device,
+      Value = 0,
+      Glyph = new('☆', Colours.YELLOW, Colours.DARK_GREY, Colours.BLACK, false)
+    };
+    target.Traits.Add(new AffixedTrait());
+    target.Traits.Add(new BlockTrait());
+
+    objDb.Add(target);
+
+    return target;
+  }
+
   public static Item Mirror(GameObjectDB objDb, bool left)
   {
     char ch = left ? '\\' : '/';

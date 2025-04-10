@@ -51,8 +51,32 @@ class LightPuzzleSetup
   public static void Create(Map map, List<PathInfo> paths, GameObjectDB objDb, int dungeonId, int level, Rng rng)
   {
     PathInfo path = paths[rng.Next(paths.Count)];
+    
+    Dir dir = rng.Next(4) switch
+    {
+      0 => Dir.North,
+      1 => Dir.South,
+      2 => Dir.East,
+      _ => Dir.West
+    };
+    Item lamp = ItemFactory.Lamp(objDb, dir);
 
-    Console.WriteLine(paths.Count);
+    List<(int, int)> lampOpts = [.. path.StartRoom
+                                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor
+                                               && (sq.Item1 == path.Start.Item1 || sq.Item2 == path.Start.Item2))];
+
+    (int, int) lampSq = lampOpts[rng.Next(lampOpts.Count)];
+    Loc lampLoc = new(dungeonId, level, lampSq.Item1, lampSq.Item2);
+
+    objDb.SetToLoc(lampLoc, lamp);
+
+    Item target = ItemFactory.BeamTarget(objDb);
+    List<(int, int)> targetOpts = [.. path.EndRoom
+                                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor
+                                               && (sq.Item1 == path.End.Item1 || sq.Item2 == path.End.Item2))];
+    (int, int) targetSq = targetOpts[rng.Next(targetOpts.Count)];    
+    Loc targetLoc = new(dungeonId, level, targetSq.Item1, targetSq.Item2);
+    objDb.SetToLoc(targetLoc, target);
   }
 
   public static List<PathInfo> FindPotential(Map map)
@@ -136,6 +160,8 @@ class LightPuzzleSetup
           if (terminus || (roomId > -1 && curr.Path.Corners.Count >= 2))
           {
             curr.Path.End = (nr, nc);
+            curr.Path.StartRoom = [.. room.Sqs];
+            curr.Path.EndRoom = [.. rooms[roomId].Sqs];
             allPaths.Add(curr.Path);
             visited.UnionWith(onPath);
             visited.UnionWith(rooms[roomId].Sqs);
@@ -245,13 +271,17 @@ record PathSearchNode(PathInfo Path, int Row, int Col, Dir Dir);
 
 record PathInfo((int, int) Start)
 {
-  public HashSet<(int, int)> Corners { get; set; } = [];
+  public HashSet<(int, int)> StartRoom { get; set; } = [];
+  public HashSet<(int, int)> EndRoom { get; set; } = [];
+  public List<(int, int)> Corners { get; set; } = [];
   public (int, int) End;
 
   public static PathInfo Copy(PathInfo other)
   {
     PathInfo copy = new(other.Start)
     {
+      StartRoom = [.. other.StartRoom],
+      EndRoom = [.. other.EndRoom],
       Corners = [.. other.Corners],
       End = other.End
     };
