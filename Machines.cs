@@ -56,7 +56,7 @@ class LightPuzzleSetup
   }
 
   public static List<PathInfo> FindPotential(Map map)
-  {
+  {    
     List<HashSet<(int, int)>> roomsTiles = [.. map.FindRooms()
                                                  .Select(r => new HashSet<(int, int)>(r))];
     List<RoomInfo> rooms = [];
@@ -90,7 +90,7 @@ class LightPuzzleSetup
 
     List<PathInfo> paths = [];
     foreach (RoomInfo room in rooms)
-    {      
+    {
       var p = FindRoutesFromRoom(room, map, rooms);
       paths.AddRange(p);
     }
@@ -144,12 +144,14 @@ class LightPuzzleSetup
 
           if (tile.Type == TileType.PermWall || tile.Type == TileType.DungeonWall)
           {
+            visited.UnionWith(onPath);
             break;
           }
 
           List<Dir> sidePassages = SidePassages(nr, nc, dir, map);
           foreach (Dir nd in sidePassages)
           {
+            visited.UnionWith(onPath);
             PathInfo nextPath = PathInfo.Copy(curr.Path);            
             nextPath.Corners.Add((nr, nc));
             q.Enqueue(new PathSearchNode(nextPath, nr, nc, nd));

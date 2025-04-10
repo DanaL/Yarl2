@@ -1638,8 +1638,10 @@ class MainDungeonBuilder : DungeonBuilder
       }  
     }
 
-    List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[8]);
-    LightPuzzleSetup.Create(levels[8], paths, objDb, _dungeonID, 8, rng);
+    int l = 0;
+    levels[l].Dump();
+    List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[l]);
+    LightPuzzleSetup.Create(levels[l], paths, objDb, _dungeonID, l, rng);
 
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
