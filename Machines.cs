@@ -108,6 +108,16 @@ class LightPuzzleSetup
     
     Loc targetLoc = new(dungeonId, level, targetSq.Item1, targetSq.Item2);
     objDb.SetToLoc(targetLoc, target);
+
+    List<Loc> clearLocs = map.ClearFloors(dungeonId, level, objDb);
+    for (int j = 0; j < path.Corners.Count; j++)
+    {
+      int mId = rng.Next(clearLocs.Count);
+      Loc loc = clearLocs[mId];
+      Item mirror = ItemFactory.Mirror(objDb, rng.Next(2) == 0);
+      objDb.SetToLoc(loc, mirror);
+      clearLocs.RemoveAt(mId);
+    }
   }
 
   public static List<PathInfo> FindPotential(Map map)
