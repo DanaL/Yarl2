@@ -426,7 +426,7 @@ class ItemFactory
       Name = "stone block",
       Type = ItemType.Device,
       Value = 0,
-      Glyph = new('☆', Colours.YELLOW, Colours.DARK_GREY, Colours.BLACK, false)
+      Glyph = new('☆', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.DARK_GREY, false)
     };
     target.Traits.Add(new AffixedTrait());
     target.Traits.Add(new BlockTrait());
