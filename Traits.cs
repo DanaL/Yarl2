@@ -1097,6 +1097,16 @@ class PolymorphedTrait : Trait
   public override string AsText() => $"Polymorphed#{OriginalId}";
 }
 
+class QuestItem1 : Trait
+{
+  public override string AsText() => "QuestItem1";
+}
+
+class QuestItem2 : Trait
+{
+  public override string AsText() => "QuestItem2";
+}
+
 class RustedTrait : Trait
 {
   public Rust Amount { get; set; }
@@ -3597,6 +3607,8 @@ class TraitFactory
     { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
     { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = ulong.Parse(pieces[1])} },
+    { "QuestItem1", (pieces, gameObj) => new QuestItem1() },
+    { "QuestItem2", (pieces, gameObj) => new QuestItem2() },
     { "Rage", (pieces, gameObj) => new RageTrait(gameObj as Actor
         ?? throw new ArgumentException("gameObj must be an Actor for RageTrait")) },
     { "Reach", (pieces, gameObj) => new ReachTrait() },

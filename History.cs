@@ -383,7 +383,10 @@ class History(Rng rng)
       \\/\\/\__/\/\__/\/
       ";
 
-    return SealingTablet(objDb, txt);
+    Item tablet = SealingTablet(objDb, txt);
+    tablet.Traits.Add(new QuestItem1());
+
+    return tablet;
   }
 
   public static Item SealingTablet2(GameObjectDB objDb)
@@ -399,7 +402,10 @@ class History(Rng rng)
       ┕────────────────┙
         ";
 
-    return SealingTablet(objDb, txt);
+    Item tablet = SealingTablet(objDb, txt);
+    tablet.Traits.Add(new QuestItem2());
+
+    return tablet;
   }
 
   static Item SealingTablet(GameObjectDB objDb, string txt)
