@@ -61,20 +61,51 @@ class LightPuzzleSetup
     };
     Item lamp = ItemFactory.Lamp(objDb, dir);
 
-    List<(int, int)> lampOpts = [.. path.StartRoom
-                                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor
-                                               && (sq.Item1 == path.Start.Item1 || sq.Item2 == path.Start.Item2))];
-
-    (int, int) lampSq = lampOpts[rng.Next(lampOpts.Count)];
+    (int, int) lampSq;
+    if (path.Corners.Count > 0)
+    {
+      (int, int) firstCorner = path.Corners[0];
+      List<(int, int)> lampOpts = [];
+      foreach ((int, int) sq in path.StartRoom)
+      {
+        if (map.TileAt(sq).Type != TileType.DungeonFloor)
+          continue;
+        if (sq.Item1 == path.Start.Item1 && sq.Item1 == firstCorner.Item1)
+          lampOpts.Add(sq);
+        else if (sq.Item2 == path.Start.Item2 && sq.Item2 == firstCorner.Item2)
+          lampOpts.Add(sq);
+      }      
+      lampSq = lampOpts[rng.Next(lampOpts.Count)];                                                
+    }
+    else
+    {
+      lampSq = path.Start;
+    }
     Loc lampLoc = new(dungeonId, level, lampSq.Item1, lampSq.Item2);
-
     objDb.SetToLoc(lampLoc, lamp);
 
     Item target = ItemFactory.BeamTarget(objDb);
-    List<(int, int)> targetOpts = [.. path.EndRoom
-                                        .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor
-                                               && (sq.Item1 == path.End.Item1 || sq.Item2 == path.End.Item2))];
-    (int, int) targetSq = targetOpts[rng.Next(targetOpts.Count)];    
+    (int, int) targetSq;
+    if (path.Corners.Count > 0)
+    {
+      (int, int) lastCorner = path.Corners.Last();
+      List<(int, int)> targetOpts = [];
+      foreach ((int, int) sq in path.EndRoom)
+      {
+        if (map.TileAt(sq).Type != TileType.DungeonFloor)
+          continue;
+        if (sq.Item1 == path.End.Item1 && sq.Item1 == lastCorner.Item1)
+          targetOpts.Add(sq);
+        else if (sq.Item2 == path.End.Item2 && sq.Item2 == lastCorner.Item2)
+          targetOpts.Add(sq);
+      }      
+      targetSq = targetOpts[rng.Next(targetOpts.Count)];                                                
+    }
+    else
+    {
+      targetSq = path.Start;
+    }
+    
     Loc targetLoc = new(dungeonId, level, targetSq.Item1, targetSq.Item2);
     objDb.SetToLoc(targetLoc, target);
   }
