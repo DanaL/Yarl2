@@ -2920,6 +2920,23 @@ class LightBeamTrait : Trait, IGameEventListener
     Photons = [.. foundPhotons];
   }
 
+  static void DestroyBlock(GameState gs, Item block)
+  {
+    string msg;
+    if (gs.LastPlayerFoV.Contains(block.Loc))
+      msg = "Exposted to the light, the stone block crumbles to dust!";
+    else
+      msg = "You hear a loud crack, almost an explosion.";
+    
+    gs.UIRef().AlertPlayer(msg);
+    gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+    
+    Item tablet = History.SealingTablet1(gs.ObjDb);
+    gs.ObjDb.SetToLoc(block.Loc, tablet);
+    
+    gs.ObjDb.RemoveItemFromGame(block.Loc, block);
+  }
+
   List<Loc> FollowPath(GameState gs, Loc start, Dir dir)
   {
     HashSet<Loc> visited = [];
@@ -2932,6 +2949,14 @@ class LightBeamTrait : Trait, IGameEventListener
       // Someone's gonna try it...
       if (visited.Contains(curr))
         break;
+
+      foreach (Item item in gs.ObjDb.ItemsAt(curr))
+      {
+        if (item.Name == "stone block")
+        {
+          DestroyBlock(gs, item);
+        }
+      }
 
       if (!gs.TileAt(curr).PassableByFlight())
         break;

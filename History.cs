@@ -369,7 +369,40 @@ class History(Rng rng)
     return factDb;
   }
 
-  public static Item SealTablet(GameObjectDB objDb)
+  public static Item SealingTablet1(GameObjectDB objDb)
+  {
+    string txt = @"
+    Part of a broken tablet:
+      ┍────────────────┑
+      ┇                │
+      │ ՓլՈ ԿՈՄ թԺթԺ   |
+      ┇  ՄՓ լՓ լՓպՈ    │
+      | պՈՄԺ ՍեթՓպ     |
+      │  պՓ լԺwԺ ե     ┇
+      ┇                │
+      \\/\\/\__/\/\__/\/
+      ";
+
+    return SealingTablet(objDb, txt);
+  }
+
+  public static Item SealingTablet2(GameObjectDB objDb)
+  {
+    string txt = @"
+    Part of a broken tablet:
+      //\\/\//\\_/\/\/\
+      ┇                │
+      │   ձՈՄՍԽտԺ      ┇
+      ┇   ՓԿե լՓ       |
+      |     պԺԿԺլԺ     │ 
+      │                │
+      ┕────────────────┙
+        ";
+
+    return SealingTablet(objDb, txt);
+  }
+
+  static Item SealingTablet(GameObjectDB objDb, string txt)
   {
     Item tablet = new()
     {
@@ -377,29 +410,6 @@ class History(Rng rng)
       Type = ItemType.Document,
       Glyph = new Glyph('▫', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
     };
-
-    string txt = @"
-  Part of a broken tablet:
-   ┍────────────────┑
-   ┇                │
-   │ ՓլՈ ԿՈՄ թԺթԺ   |
-   ┇  ՄՓ լՓ լՓպՈ    │
-   | պՈՄԺ ՍեթՓպ     |
-   │  պՓ լԺwԺ ե     ┇
-   ┇                │
-   \\/\\/\__/\/\__/\/
-  ";
-
-    txt = @"
-  Part of a broken tablet:
-   //\\/\//\\_/\/\/\
-   ┇                │
-   │   ձՈՄՍԽտԺ      ┇
-   ┇   ՓԿե լՓ       |
-   |     պԺԿԺլԺ     │ 
-   │                │
-   ┕────────────────┙
-    ";
 
     var rt = new ReadableTrait(txt)
     {
