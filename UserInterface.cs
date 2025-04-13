@@ -1296,7 +1296,8 @@ abstract class UserInterface
     Options opts = gameState.Options;
     gameState.RefreshPerformers();
 
-    _animations.Add(new CloudAnimation(this, gameState));
+    //_animations.Add(new CloudAnimation(this, gameState));
+    _animations.Add(new RainAnimation(this, gameState));
     
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;

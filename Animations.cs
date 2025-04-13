@@ -511,6 +511,43 @@ class PolearmAnimation : Animation
   }
 }
 
+class RainAnimation(UserInterface ui, GameState gs) : Animation
+{
+  readonly UserInterface UI = ui;
+  readonly GameState GS = gs;
+  DateTime LastFrame { get; set;} = DateTime.UtcNow;
+  HashSet<(int, int)> Sqs = [];
+
+  void PickSqs()
+  {
+    Sqs = [];
+    for (int i = 0; i < UserInterface.ViewHeight * UserInterface.ViewWidth / 5; i++)
+    {
+      int row = GS.Rng.Next(UserInterface.ViewHeight);
+      int col = GS.Rng.Next(UserInterface.ViewWidth);
+      Sqs.Add((row, col));
+    }
+  }
+
+  public override void Update()
+  {
+    if (!GS.InWilderness)
+      return;
+
+    TimeSpan dd = DateTime.UtcNow - LastFrame;
+
+    if (Sqs.Count == 0 || dd.TotalMilliseconds > 400) 
+    {
+      PickSqs();
+      LastFrame = DateTime.UtcNow;
+    }
+    
+    Sqr rain = new(Colours.DARK_BLUE, Colours.BLACK, '/');
+    foreach (var (r, c) in Sqs)
+      UI.SqsOnScreen[r, c] = rain; 
+  }
+}
+
 class CloudAnimation(UserInterface ui, GameState gs) : Animation
 {
   readonly UserInterface _ui = ui;
