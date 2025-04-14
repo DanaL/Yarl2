@@ -154,24 +154,25 @@ class LightPuzzleSetup
     }
 
     List<PathInfo> paths = [];
-    foreach (RoomInfo room in rooms)
+    for (int r = 0; r < rooms.Count; r++)    
     {
-      var p = FindRoutesFromRoom(room, map, rooms);
+      var p = FindRoutesFromRoom(r, map, rooms);
       paths.AddRange(p);
     }
 
     return paths;
   }
   
-  static List<PathInfo> FindRoutesFromRoom(RoomInfo room, Map map, List<RoomInfo> rooms)
+  static List<PathInfo> FindRoutesFromRoom(int startRoomId, Map map, List<RoomInfo> rooms)
   {
+    RoomInfo room = rooms[startRoomId];
     List<PathInfo> allPaths = [];
     
     foreach ((int, int, Dir) exit in room.Exits)
     {
       HashSet<(int, int)> visited = [];
       Queue<PathSearchNode> q = [];
-      q.Enqueue(new PathSearchNode(new PathInfo((exit.Item1, exit.Item2)), exit.Item1, exit.Item2, exit.Item3));
+      q.Enqueue(new PathSearchNode(new PathInfo((exit.Item1, exit.Item2)) { StartRoomID = startRoomId }, exit.Item1, exit.Item2, exit.Item3));
       
       while (q.Count > 0)
       {
@@ -200,9 +201,13 @@ class LightPuzzleSetup
           var (roomId, terminus) = SqrInRoom(nr, nc, rooms);
           if (terminus || (roomId > -1 && curr.Path.Corners.Count >= 2))
           {
+            // Bit boring to have the target be in the same room as the lamp
+            if (roomId == startRoomId)
+              break;
             curr.Path.End = (nr, nc);
             curr.Path.StartRoom = [.. room.Sqs];
             curr.Path.EndRoom = [.. rooms[roomId].Sqs];
+            curr.Path.EndRoomID = roomId;
             allPaths.Add(curr.Path);
             visited.UnionWith(onPath);
             visited.UnionWith(rooms[roomId].Sqs);
@@ -312,6 +317,8 @@ record PathSearchNode(PathInfo Path, int Row, int Col, Dir Dir);
 
 record PathInfo((int, int) Start)
 {
+  public int StartRoomID { get; set; }
+  public int EndRoomID { get; set; } = -1;
   public HashSet<(int, int)> StartRoom { get; set; } = [];
   public HashSet<(int, int)> EndRoom { get; set; } = [];
   public List<(int, int)> Corners { get; set; } = [];
