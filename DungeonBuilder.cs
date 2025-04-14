@@ -1639,7 +1639,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     int l = 0;
-    levels[l].Dump();
     List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[l]);
     LightPuzzleSetup.Create(levels[l], paths, objDb, _dungeonID, l, rng);
 

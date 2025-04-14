@@ -525,6 +525,10 @@ class RainAnimation(UserInterface ui, GameState gs) : Animation
     {
       int row = GS.Rng.Next(UserInterface.ViewHeight);
       int col = GS.Rng.Next(UserInterface.ViewWidth);
+
+      if (row == UI.PlayerScreenRow && col == UI.PlayerScreenCol)
+        continue;
+        
       Sqs.Add((row, col));
     }
   }
