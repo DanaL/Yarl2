@@ -857,7 +857,7 @@ static class StringUtils
   {
     if (owner is Player)
       return "your " + s;
-    else if (owner.Name.EndsWith("s"))
+    else if (owner.Name.EndsWith('s'))
       return $"{owner.FullName}' {s}";
     else
       return $"{owner.FullName}'s {s}";

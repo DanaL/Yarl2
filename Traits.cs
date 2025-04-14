@@ -3169,15 +3169,17 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       {
         Loc torchLoc = item.Loc;
 
+        string msg = $"{item.Name.IndefArticle().Capitalize()} burns out.";
+
         if (item.ContainedBy > 0 && gs.ObjDb.GetObj(item.ContainedBy) is Actor owner)
         {
           // I don't think owner should ever be null, barring a bug
           // but this placates the warning in VS/VS Code
           owner.Inventory.Remove(item.Slot, 1);
           torchLoc = owner.Loc;
+          msg = $"{item.Name.Possessive(owner).Capitalize()} burns out.";
         }
-
-        string msg = $"{item.Name.IndefArticle().Capitalize()} burns out.";
+        
         gs.UIRef().AlertPlayer(msg, gs, torchLoc);
         gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       }
