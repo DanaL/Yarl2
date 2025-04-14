@@ -191,6 +191,9 @@ A charm emblazoned with a kettle bell.
 lesser health charm
 A charm emblazoned with a heart.
 #
+lesser grace charm
+A charm emblazoned with a juggling jester.
+#
 ring of fraility
 The ring draws away your life and vigour while you wear it. But where does that energy go?
 #
@@ -403,3 +406,6 @@ A kobold dressed in officiant robes and carrying a donation box.
 #
 skeleton key
 So-called because it can unlock many of the doors in the dungeon, but also because it is made out of bones. It doesn't seem very sturdy.
+#
+potion of cold resistance
+A potion brewed from magically enhanced hot peppers. Originally intended as a condiment, its inventor quickly discovered it also staved off frost and cold.
