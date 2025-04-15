@@ -574,6 +574,8 @@ class WitchDialogue : Inputer
   const int ON_QUEST = 4;
   const int QUEST_ITEM_FOUND = 5;
   const int QUEST_DONE = 6;
+  const int TABLET1 = 7;
+  const int TRANSLATE_TABLET_1 = 8;
 
   bool PlayerHasCrystal 
   {  
@@ -604,21 +606,35 @@ class WitchDialogue : Inputer
     Witch = witch;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
-    if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
+    if (HasQuestItem1() && GS.FactDb.FactCheck("Tablet1Translated") is null)
     {
-      
+      Witch.Stats[Attribute.DialogueState] = new Stat(TABLET1);
+    }
+    else if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
+    {
       if (fact.Value == "begun" && !PlayerHasCrystal)
       {
-        Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
+        Witch.Stats[Attribute.DialogueState] = new Stat(ON_QUEST);
       }
       else if (fact.Value == "begun" && PlayerHasCrystal)
       {
-        Witch.Stats[Attribute.DialogueState].SetMax(QUEST_ITEM_FOUND);
+        Witch.Stats[Attribute.DialogueState] = new Stat(QUEST_ITEM_FOUND);
       }
     }
     
     SetDialogueText();
     WritePopup();
+  }
+
+  bool HasQuestItem1()
+  {
+    foreach (Item item in GS.Player.Inventory.Items())
+    {
+      if (item.HasTrait<QuestItem1>())
+        return true;
+    }
+
+    return false;
   }
 
   public override void Input(char ch)
@@ -651,7 +667,7 @@ class WitchDialogue : Inputer
       }
       
       return;
-    }
+    }    
     else if (dialogueState == GIVE_QUEST && ch == 'a')
     {
       Close();
@@ -670,7 +686,7 @@ class WitchDialogue : Inputer
       Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
     }
     else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
-    {    
+    {
       Invoice = 0;
       Service = "magic101";
       Close();
@@ -691,7 +707,22 @@ class WitchDialogue : Inputer
       Close();
       return;
     }
-
+    else if (dialogueState == TABLET1 && ch == 'a')
+    {
+      GS.FactDb.Add(new SimpleFact() { Name = "Tablet1Translated", Value = "True" });
+      Witch.Stats[Attribute.DialogueState] = new Stat(TRANSLATE_TABLET_1);
+    }    
+    else if (dialogueState == TABLET1 && ch == 'b')
+    {
+      Close();
+      return;
+    }
+    else if (dialogueState == TRANSLATE_TABLET_1 && ch == 'a')
+    {
+      Close();
+      return;
+    }
+    
     SetDialogueText();
     WritePopup();
   }
@@ -766,7 +797,18 @@ class WitchDialogue : Inputer
     {
       case BUY_SPELLS:        
         Blurb = "Hmm, here is what I can teach you.\n\n";
-        SetSpellMenu();        
+        SetSpellMenu();
+        break;
+      case TABLET1:
+        Blurb = "That tablet you carry -- may I take a look at it?";
+        Blurb += $"\n\na) Show {Witch.Name.Capitalize()} the tablet";
+        Blurb += "\nb) Farewell";
+        break;
+      case TRANSLATE_TABLET_1:
+        Blurb = "These runes are an ancient language but I think I can read them. It appears to be part ";
+        Blurb += "of a warding or binding spell of immense power. If you find the other half of the tablet I can ";
+        Blurb += "probably recreate the spell!";
+        Blurb += "\n\na) Farewell";
         break;
       case GIVE_QUEST:
         SetupQuest();
