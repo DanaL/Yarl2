@@ -2913,8 +2913,14 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
   public override double Execute()
   {
     base.Execute();
-    
-    List<Loc> pts = Trajectory(Actor!.Loc, false);
+
+    Loc casterLoc = Actor!.Loc;
+    if (Util.Distance(casterLoc, Target) < 6)
+    {
+      (int, int) endPt = Util.ExtendLine(casterLoc.Row, casterLoc.Col, Target.Row, Target.Col, 6);
+      Target = casterLoc with { Row = endPt.Item1, Col = endPt.Item2 };
+    }
+    List<Loc> pts = [.. Trajectory(Actor!.Loc, false).Take(7)];
 
     BeamAnimation anim = new(GameState!, pts, Colours.LIGHT_BROWN, Colours.WHITE);
 
@@ -2924,6 +2930,7 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
     if (Actor is Player)
       ui.AlertPlayer("You hear a zap and the faint, ghostly humming of unseen dwarven miners!");
 
+    bool stop = false;
     foreach (Loc loc in pts)
     {
       if (!GameState.CurrentMap.InBounds(loc.Row, loc.Col))
@@ -2931,6 +2938,9 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
       Tile tile = GameState.TileAt(loc);
       switch (tile.Type)
       {
+        case TileType.PermWall:
+          stop = true;
+          break;
         case TileType.DungeonWall:
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
           break;
@@ -2941,6 +2951,9 @@ class DigRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, ac
           GameState.CurrentMap.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Dirt));
           break;
       }
+
+      if (stop)
+        break;
 
       var blockages = GameState.ObjDb.ItemsAt(loc).Where(i => i.Type == ItemType.Landscape);
       foreach (Item block in blockages)
@@ -3360,7 +3373,7 @@ class UseWandAction(GameState gs, Actor actor, WandTrait wand, ulong wandId) : A
         gs.UIRef().SetInputController(inputer);
         break;
       case "digging":
-        inputer = new Aimer(GameState!, player.Loc, 10)
+        inputer = new Aimer(GameState!, player.Loc, 6)
         {
           DeferredAction = new DigRayAction(GameState!, player, _wand)
         };
