@@ -1638,9 +1638,19 @@ class MainDungeonBuilder : DungeonBuilder
       }  
     }
 
-    int l = 0;
-    List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[l]);
-    LightPuzzleSetup.Create(levels[l], paths, objDb, _dungeonID, l, rng);
+    // Kind of assuming one of levels 7, 8, or 9 will have a valid placement
+    List<int> puzzleLevels = [7, 8, 9];
+    puzzleLevels.Shuffle(rng);
+    foreach (int level in puzzleLevels)
+    {
+      List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[level]);
+      if (paths.Count != 0)
+      {
+        LightPuzzleSetup.Create(levels[level], paths, objDb, _dungeonID, level, rng);
+        factDb.Add(new SimpleFact() { Name = "QuestPuzzle1", Value = level.ToString() });
+        break;
+      }
+    }
 
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
