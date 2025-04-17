@@ -1242,9 +1242,9 @@ abstract class UserInterface
     Blit();
   }
 
-  void DrawGravestone(GameState gameState, string message)
+  void DrawGravestone(GameState gameState, List<string> messages)
   {
-    string[] text =
+    List<string> text =
       [
         "       ",
            "         __________________",
@@ -1265,13 +1265,20 @@ abstract class UserInterface
 
     string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
-    text[7] = $@"    |{message.PadLeft((22 + message.Length) / 2).PadRight(26)}|          |    |";
+    text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
     text[8] = $@"    |       on level {depth}        |          |____|";
+
+    if (messages.Count > 1)
+    {
+      string s = $@"    |{messages[1].PadLeft((22 + messages[1].Length) / 2),-26}|          |    |";
+      text.Insert(8, s);
+    }
+   
     ClosePopup();
     CheatSheetMode = CheatSheetMode.Messages;
     SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
     ClearSqsOnScreen();
-    for (int r = 0; r < text.Length; r++)
+    for (int r = 0; r < text.Count; r++)
     {
       string row = text[r];
       for (int c = 0; c < row.Length; c++)
@@ -1359,12 +1366,14 @@ abstract class UserInterface
       }
       catch (PlayerKilledException pke)
       {
-        string s = $"Oh noes you've been killed by {pke.Message} :(";
+        string s = $"Oh noes you've been killed by {pke.Messages[0]} :(";
+        if (gameState.Player.HasTrait<ParalyzedTrait>())
+          pke.Messages.Add("while paralyzed");
         SetPopup(new Popup(s, "", -1, - 1));
         WriteAlerts();
         BlockFoResponse(gameState);
 
-        DrawGravestone(gameState, pke.Message);        
+        DrawGravestone(gameState, pke.Messages);        
         Reset();
         return RunningState.GameOver;
       }

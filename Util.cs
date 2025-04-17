@@ -1089,7 +1089,10 @@ class MapUtils
 class QuitGameException : Exception { }
 class SaveGameException : Exception { }
 class GameNotLoadedException : Exception { }
-class PlayerKilledException(string message) : Exception(message) { }
+class PlayerKilledException : Exception 
+{ 
+  public List<string> Messages { get; set; } = [];
+}
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }

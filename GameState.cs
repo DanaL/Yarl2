@@ -655,7 +655,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       // that killed the player
       UI.PlayQueuedExplosions(this);
 
-      throw new PlayerKilledException(killedBy);
+      PlayerKilledException pke = new();
+      pke.Messages.Add(killedBy);
+      throw pke;
     }
     else if (victim.HasTrait<FinalBossTrait>())
     {
