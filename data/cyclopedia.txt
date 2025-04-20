@@ -116,6 +116,9 @@ A large fungus that shrieks loudly when a creature is nearby. Its ecology is a m
 shortsword
 A great choice for a warrior on a budget, and popular with new adventurer college graduates.
 #
+longsword
+A blade for warriors who prefer versatility, or perhaps are indecisive. You may use it with a shield but will deal more damage if you do not.
+#
 greatsword
 An imposing, heavy sword for a fighter all-in on offense.
 #
