@@ -619,7 +619,10 @@ class Rooms
     if (adjToEffigy.Count > 0)
     {
       Loc altarLoc = adjToEffigy[rng.Next(adjToEffigy.Count)];
-      map.SetTile(altarLoc.Row, altarLoc.Col, TileFactory.Get(TileType.StoneAltar));
+      Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+      altar.Traits.Add(new KoboldAltarTrait());
+
+      objDb.SetToLoc(altarLoc, altar);
     }
 
     floors = [..floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];

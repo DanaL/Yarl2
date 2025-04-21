@@ -237,10 +237,12 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
     }
 
-    if (tile.Type == TileType.StoneAltar && item.Type == ItemType.Zorkmid && loc == Player.Loc)
+    foreach (Item altar in ObjDb.ItemsAt(loc).Where(a => a.Type == ItemType.Altar))
     {
-      if (Kobold.OfferGold(this, item, loc))
-        return;      
+      if (altar.HasTrait<KoboldAltarTrait>() && loc == Player.Loc && Kobold.OfferGold(this, item, loc))
+      {
+        return;
+      }
     }
 
     ObjDb.SetToLoc(loc, item);

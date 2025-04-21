@@ -1217,5 +1217,15 @@
       "Stackable",
       "LightSource#owner#2#brightred#redaura"
     ]
+  },
+  {
+    "Name": "STONE_ALTAR",
+    "DescriptiveName": "stone altar",
+    "Type": "Altar",
+    "Value": 0,
+    "Glyph": "⊓,grey,darkgrey,black,false",
+    "Traits": [
+      "Affixed"
+    ]
   }
 ]

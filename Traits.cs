@@ -1289,6 +1289,11 @@ class KnockBackTrait : Trait
   public override string AsText() => "KnockBack";
 }
 
+class KoboldAltarTrait : Trait
+{
+  public override string AsText() => "KoboldAltar";
+}
+
 class ReachTrait : Trait
 {
   public override string AsText() => "Reach";
@@ -3542,6 +3547,7 @@ class TraitFactory
       }
     },
     { "KnockBack", (pieces, gameObj) => new KnockBackTrait() },
+    { "KoboldAltar", (pieces, gameObj) => new KoboldAltarTrait() },
     { "Lame", (pieces, gameObj) =>  new LameTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "LeaveDungeon", (pieces, gameObj) => new LeaveDungeonTrait() { SourceId = ulong.Parse(pieces[1]) }},
     { "Levitation", (pieces, gameObj) => new LevitationTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
