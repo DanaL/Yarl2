@@ -921,7 +921,6 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
     costs.Add(TileType.OpenDoor, 1);
     costs.Add(TileType.BrokenDoor, 1);
     costs.Add(TileType.OpenPortcullis, 1);
-    costs.Add(TileType.CreepyAltar, 1);
     costs.Add(TileType.Pool, 1);
     costs.Add(TileType.FrozenDeepWater, 2);
     costs.Add(TileType.FrozenWater, 2);
@@ -1232,7 +1231,6 @@ class FindUpStairs : BehaviourNode
     costs.Add(TileType.OpenDoor, 1);
     costs.Add(TileType.BrokenDoor, 1);
     costs.Add(TileType.OpenPortcullis, 1);
-    costs.Add(TileType.CreepyAltar, 1);
     costs.Add(TileType.Pool, 1);
     costs.Add(TileType.FrozenDeepWater, 2);
     costs.Add(TileType.FrozenWater, 2);

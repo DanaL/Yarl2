@@ -26,7 +26,7 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, ReveealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
-  HFence, VFence, CornerFence, MonsterWall, Lever, CreepyAltar
+  HFence, VFence, CornerFence, MonsterWall, Lever
 }
 
 interface ITriggerable
@@ -200,7 +200,6 @@ abstract class Tile(TileType type) : IZLevel
     TileType.RevealedSummonsTrap => "monster summon trap",
     TileType.ReveealedBridgeCollapseTrap => "bridge collapse trigger",
     TileType.Lever => "a lever",
-    TileType.CreepyAltar => "blood-stained altar",
     _ => "unknown"
   };
 
@@ -615,8 +614,7 @@ class TileFactory
   static readonly Tile HFence = new BasicTile(TileType.HFence, false, false, true);
   static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
   static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
-  static readonly Tile CreepyAltar = new BasicTile(TileType.CreepyAltar, true, false, true);
-  
+    
   public static Tile Get(TileType type) => type switch
   {
     TileType.WorldBorder => WorldBorder,
@@ -677,7 +675,6 @@ class TileFactory
     TileType.HFence => HFence,
     TileType.VFence => VFence,
     TileType.CornerFence => CornerFence,
-    TileType.CreepyAltar => CreepyAltar,
     _ => Unknown
   };
 }
