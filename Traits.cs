@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 record UseResult(Action? ReplacementAction, bool Successful = true, string Message = "");
@@ -2456,6 +2458,18 @@ class StatBuffTrait : TemporaryTrait
     return player ? "You feel different!" : "";
   }
 
+  void SetPlayerHP(Player player)
+  {
+    int hpDelta = player.Stats[Attribute.HP].Max - player.Stats[Attribute.HP].Curr;
+    player.CalcHP();
+
+    int maxHp = player.Stats[Attribute.HP].Max - hpDelta;
+    if (maxHp < 1)
+      maxHp = 1;
+
+    player.Stats[Attribute.HP].SetCurr(maxHp);
+  }
+
   public override List<string> Apply(Actor target, GameState gs)
   {
     // If the buffs share the same source, just increase the expires on rather
@@ -2469,11 +2483,20 @@ class StatBuffTrait : TemporaryTrait
     
     OwnerID = target.ID;
     target.Stats[Attr].ChangeMax(Amt);
-    target.Stats[Attr].Change(Amt);
-
+    if (Attr != Attribute.HP)
+    {
+      target.Stats[Attr].Change(Amt);
+    }
+    
     target.Traits.Add(this);
+
+    // If a buff affects HP or Con, recalculate HP. But we don't want to allow
+    // at-will healing by equipping or unequipping an item like the lesser 
+    // health charm.
     if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
-      player.CalcHP();
+    {
+      SetPlayerHP(player);
+    } 
 
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
@@ -2502,19 +2525,18 @@ class StatBuffTrait : TemporaryTrait
   {    
     target.Stats[Attr].ChangeMax(-Amt);
     target.Stats[Attr].Change(-Amt);
-    
     target.Traits.Remove(trait);
     
-    if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
-      player.CalcHP();
-
-    if (target is Player)
+    if (target is Player player)
     {
+      if (Attr == Attribute.HP || Attr == Attribute.Constitution)
+        SetPlayerHP(player);
+
       if (Attr == Attribute.HP)
         return "You feel more frail.";
       else
         return $"Your {Attr} returns to normal.";
-    }
+      }
 
     return "";    
   }
