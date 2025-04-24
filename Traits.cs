@@ -2454,6 +2454,8 @@ class StatBuffTrait : TemporaryTrait
     {
       return Amt >= 0 ? "You feel more agile!" : "You feel klutzy!";
     }
+    else if (Attr == Attribute.Constitution && player)
+      return Amt >= 0 ? "You feel healthier!" : "You feel frail!";
 
     return player ? "You feel different!" : "";
   }
