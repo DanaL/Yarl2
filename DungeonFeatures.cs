@@ -469,7 +469,7 @@ class CaptiveFeature
     // Were the captors going to sacrifice the prisoner?
     if (captors == "cultists" || rng.NextDouble() < 0.2)
     {
-      SetCreepyAltar(cell, map, rng);
+      SetCreepyAltar(cell, objDb, map, rng);
       prisoner.Traits.Add(new DialogueScriptTrait() { ScriptFile = "prisoner1.txt" });
     }
     else
@@ -498,7 +498,7 @@ class CaptiveFeature
     return walls;
   }
 
-  static void SetCreepyAltar(Loc cell, Map map, Rng rng)
+  static void SetCreepyAltar(Loc cell, GameObjectDB objDb, Map map, Rng rng)
   {
     List<Loc> sqsNearCell = [];
     for (int r = cell.Row - 4; r <= cell.Row + 4; r++)
@@ -520,7 +520,10 @@ class CaptiveFeature
     if (sqsNearCell.Count > 0)
     {
       Loc altarLoc = sqsNearCell[rng.Next(sqsNearCell.Count)];
-      map.SetTile(altarLoc.Row, altarLoc.Col, TileFactory.Get(TileType.CreepyAltar));
+      Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+      altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
+      altar.Traits.Add(new MolochAltarTrait());
+      objDb.SetToLoc(altarLoc, altar);
     }
   }
 

@@ -684,7 +684,6 @@ class Util
     TileType.Lever =>
       ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true)
                        : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
-    TileType.CreepyAltar => new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false),    
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 

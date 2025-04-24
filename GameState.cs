@@ -782,10 +782,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    Tile tile = TileAt(victim.Loc);
-    if (tile.Type == TileType.CreepyAltar)
+    foreach (Item item in ObjDb.ItemsAt(victim.Loc))
     {
-      HandleSacrifice(victim, victim.Loc);
+      if (item.HasTrait<MolochAltarTrait>())
+      {        
+        HandleSacrifice(victim, victim.Loc);
+        break;
+      }      
     }
   }
 
@@ -1365,29 +1368,35 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       UIRef().SetPopup(new Popup(tile.StepMessage, "", 6, -1));
     }
-    else if (tile.Type == TileType.CreepyAltar)
+
+    foreach (Item item in ObjDb.ItemsAt(loc))
     {
-      string s, t;
-      if (Player.HasTrait<CorruptionTrait>())
+      if (item.HasTrait<MolochAltarTrait>())
       {
-        (s, t) = Rng.Next(3) switch
+        string s, t;
+        if (Player.HasTrait<CorruptionTrait>())
         {
-          0 => ("\nMy hunger is endless, my servant.\n", "A low growl"),
-          _ => ("\nHave you returned with blood and souls?\n", "A voice in your mind")
-        };
-      }
-      else
-      {
-        (s, t) = Rng.Next(4) switch
+          (s, t) = Rng.Next(3) switch
+          {
+            0 => ("\nMy hunger is endless, my servant.\n", "A low growl"),
+            _ => ("\nHave you returned with blood and souls?\n", "A voice in your mind")
+          };
+        }
+        else
         {
-          0 => ("\nI yearn for blood. Bring me a sacrifice.\n", "A raspy whisper"),
-          1 => ("\nBring me souls!\n", "A low growl"),
-          2 => ("\nI would trade you flesh for power!\n", "A seductive murmur"),
-          _ => ("\nI can grant you power! But you must proffer blood.\n", "A seductive murmur")
-        };
-      }
-      
-      UI.SetPopup(new Popup(s, t, 6, -1));
+          (s, t) = Rng.Next(4) switch
+          {
+            0 => ("\nI yearn for blood. Bring me a sacrifice.\n", "A raspy whisper"),
+            1 => ("\nBring me souls!\n", "A low growl"),
+            2 => ("\nI would trade you flesh for power!\n", "A seductive murmur"),
+            _ => ("\nI can grant you power! But you must proffer blood.\n", "A seductive murmur")
+          };
+        }
+        
+        UI.SetPopup(new Popup(s, t, 6, -1));
+
+        break;
+      }      
     }
 
     Dictionary<Item, int> items = [];

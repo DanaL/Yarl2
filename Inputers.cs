@@ -150,7 +150,6 @@ class Examiner : Inputer
             case TileType.Well:
             case TileType.GateTrigger:
             case TileType.Lever:
-            case TileType.CreepyAltar:
             case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
               pq.Enqueue(loc, Distance(GS.Player.Loc, loc));

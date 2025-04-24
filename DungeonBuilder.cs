@@ -1145,8 +1145,12 @@ class MainDungeonBuilder : DungeonBuilder
           floors.Add((r, c));
         }
  
-        (int, int) altar = floors[rng.Next(floors.Count)];
-        levels[level].SetTile(altar, TileFactory.Get(TileType.CreepyAltar));
+        (int, int) altarSq = floors[rng.Next(floors.Count)];
+        Loc altarLoc = new(dungeonId, level, altarSq.Item1, altarSq.Item2);
+        Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+        altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
+        altar.Traits.Add(new MolochAltarTrait());
+        objDb.SetToLoc(altarLoc, altar);
       }
     }
 

@@ -1052,6 +1052,11 @@ class MiniBoss5Trait : Trait
   public override string AsText() => "MiniBoss5";
 }
 
+class MolochAltarTrait : Trait
+{
+  public override string AsText() => "MolochAltar";
+}
+
 class OwnsItemTrait : Trait
 {
   public ulong ItemID { get; set; }
@@ -3573,6 +3578,7 @@ class TraitFactory
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
+    { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
