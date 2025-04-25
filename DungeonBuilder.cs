@@ -1035,7 +1035,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
     bool koboldEffigy = false;
-    bool captive = false;
+    bool captive = false;    
     for (int level = 0; level < levels.Length; level++)
     {
       List<List<(int, int)>> rooms = levels[level].FindRooms();
@@ -1150,6 +1150,17 @@ class MainDungeonBuilder : DungeonBuilder
         Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
         altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
         altar.Traits.Add(new MolochAltarTrait());
+        objDb.SetToLoc(altarLoc, altar);
+      }
+
+      if (rng.NextDouble() < 0.3333)
+      {
+        int roomId = rng.Next(rooms.Count);
+        List<(int, int)> room = rooms[roomId];
+        (int, int) altarSq = room[rng.Next(room.Count)];
+        Loc altarLoc = new(dungeonId, level, altarSq.Item1, altarSq.Item2);
+        Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+        altar.Traits.Add(new AdjectiveTrait("descreated"));
         objDb.SetToLoc(altarLoc, altar);
       }
     }

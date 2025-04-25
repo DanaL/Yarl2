@@ -2460,7 +2460,7 @@ class StatBuffTrait : TemporaryTrait
     return player ? "You feel different!" : "";
   }
 
-  void SetPlayerHP(Player player)
+  static void SetPlayerHP(Player player)
   {
     int hpDelta = player.Stats[Attribute.HP].Max - player.Stats[Attribute.HP].Curr;
     player.CalcHP();
