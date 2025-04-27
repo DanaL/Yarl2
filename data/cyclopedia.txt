@@ -412,3 +412,6 @@ So-called because it can unlock many of the doors in the dungeon, but also becau
 #
 potion of cold resistance
 A potion brewed from magically enhanced hot peppers. Originally intended as a condiment, its inventor quickly discovered it also staved off frost and cold.
+#
+vial of holy water
+Water blessed in a holy ritual. It has cleansing properties.

@@ -112,7 +112,8 @@ class DebugCommand(GameState gs)
     {"wind fan", ItemNames.WIND_FAN },
     {"skeleton key", ItemNames.SKELETON_KEY },
     {"red crystal", ItemNames.RED_CRYSTAL },
-    {"blue crystal", ItemNames.BLUE_CRYSTAL }
+    {"blue crystal", ItemNames.BLUE_CRYSTAL },
+    {"holy water", ItemNames.HOLY_WATER }
   };
 
   public string DoCommand(string txt)

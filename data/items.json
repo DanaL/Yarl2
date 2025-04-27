@@ -1227,5 +1227,17 @@
     "Traits": [
       "Affixed"
     ]
+  },
+  {
+    "Name": "HOLY_WATER",
+    "DescriptiveName": "vial of holy water",
+    "Type": "Potion",
+    "Value": 25,
+    "Glyph": "!,white,white,black,false",
+    "Traits": [
+      "Consumable",
+      "Stackable",
+      "CanApply"
+    ]
   }
 ]
