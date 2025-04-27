@@ -249,7 +249,7 @@ class Examiner : Inputer
       Item item = items[0];
       string title = item.Name.IndefArticle().Capitalize();
       string details = "";
-      if (item.Type == ItemType.Statue && item.HasTrait<DescriptionTrait>())
+      if ((item.Type == ItemType.Statue || item.Type == ItemType.Altar) && item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;
       else if (_cyclopedia.TryGetValue(item.Name, out var v))
         details = v.Text;

@@ -1153,14 +1153,17 @@ class MainDungeonBuilder : DungeonBuilder
         objDb.SetToLoc(altarLoc, altar);
       }
 
-      if (rng.NextDouble() < 0.3333)
+      if (rng.NextDouble() < 3.3333)
       {
         int roomId = rng.Next(rooms.Count);
         List<(int, int)> room = rooms[roomId];
         (int, int) altarSq = room[rng.Next(room.Count)];
         Loc altarLoc = new(dungeonId, level, altarSq.Item1, altarSq.Item2);
         Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
-        altar.Traits.Add(new AdjectiveTrait("descreated"));
+        altar.Traits.Add(new AdjectiveTrait("desecrated"));
+
+        string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
+        altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
         objDb.SetToLoc(altarLoc, altar);
       }
     }
