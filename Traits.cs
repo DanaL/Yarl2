@@ -1281,6 +1281,11 @@ class ViciousTrait : Trait
   public override string AsText() => $"Vicious#{Scale}";
 }
 
+class CleansingTrait : Trait
+{
+  public override string AsText() => "Cleansing";
+}
+
 class CleaveTrait : Trait
 {
   public override string AsText() => "Cleave";
@@ -3441,6 +3446,7 @@ class TraitFactory
     { "Carries", (pieces, gameObj) => new CarriesTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Cast", (pieces, gameObj) => new CastTrait() { Spell = pieces[1] }},
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "Cleansing", (pieces, gamObj) => new CleansingTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
     { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },

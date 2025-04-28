@@ -77,6 +77,8 @@ class Item : GameObj, IEquatable<Item>
         return true;
       else if (t is DoorKeyTrait)
         return true;
+      else if (t is CleansingTrait)
+        return true;
     }
 
     return false;

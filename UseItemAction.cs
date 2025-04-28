@@ -423,6 +423,33 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   }
 }
 
+class CleansingAction(GameState gs, Actor actor, Item source) : Action(gs, actor)
+{
+  int Row;
+  int Col;
+  Item Source { get; set; } = source;
+
+  public override double Execute()
+  {
+    Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+
+    if (Source.HasTrait<ConsumableTrait>())
+    {
+      Actor!.Inventory.RemoveByID(Source.ID);
+      GameState!.ObjDb.RemoveItemFromGame(loc, Source);
+    }
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result) 
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
 class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 {
   int Row;
@@ -563,6 +590,8 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       DirectionalInputer dir = new(GameState, true);
       if (item.HasTrait<DiggingToolTrait>())
         dir.DeferredAction = new DigAction(GameState, Actor, item);
+      else if (item.HasTrait<CleansingTrait>())
+        dir.DeferredAction = new CleansingAction(GameState, Actor, item);
       else
         dir.DeferredAction = new PickLockAction(GameState, Actor, item);
 
