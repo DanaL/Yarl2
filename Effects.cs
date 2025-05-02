@@ -168,17 +168,60 @@ class EffectApplier
   }
 
   public static (string, bool) Apply(DamageType damageType, GameState gs, GameObj receiver, Actor? owner)
-  {    
-    switch (damageType)
+  {
+    return damageType switch
     {
-      case DamageType.Wet:
-        return (ApplyWet(gs, receiver, owner), false);
-      case DamageType.Rust:
-        return (ApplyRust(gs, receiver, owner), false);
-      case DamageType.Fire:
-        return ApplyFire(gs, receiver, owner);
-      default:
-        return ("", false);
-    }    
+      DamageType.Wet => (ApplyWet(gs, receiver, owner), false),
+      DamageType.Rust => (ApplyRust(gs, receiver, owner), false),
+      DamageType.Fire => ApplyFire(gs, receiver, owner),
+      _ => ("", false),
+    };
+  }
+
+  static void CleansePlayer(GameState gs)
+  {
+    gs.UIRef().AlertPlayer("You douse yourself in holy water and feel slightly cleaner.");
+  }
+
+  static void CleanseUndead(GameState gs, Actor victim, Item? source)
+  {
+    int dmg = gs.Rng.Next(8) + gs.Rng.Next(8) + 1;
+    List<(int, DamageType)> holy = [(dmg, DamageType.Holy)];
+
+    string s = $"{MsgFactory.CalcName(victim, gs.Player).Capitalize()} is burned";
+    s += source is not null ? $" by {source.FullName.DefArticle()}!" : "!";
+
+    gs.UIRef().AlertPlayer(s, gs, victim.Loc);
+
+    var (hpLeft, _, _) = victim.ReceiveDmg(holy, 0, gs, null, 1.0);
+    if (hpLeft < 1)
+    {
+      gs.ActorKilled(victim, "cleansing", null);
+    }
+  }
+
+  public static void CleanseLoc(GameState gs, Loc loc, Item? source)
+  {
+    if (gs.ObjDb.Occupant(loc) is Actor actor)
+    {
+      if (actor is Player player)
+      {
+        CleansePlayer(gs);
+        return;
+      }
+      else if (actor.HasTrait<UndeadTrait>())
+      {
+        CleanseUndead(gs, actor, source);
+        return;
+      }
+    }
+
+    foreach (Item item in gs.ObjDb.ItemsAt(loc))
+    {
+      if (item.HasTrait<DesecratedTrait>())
+      {
+        return;
+      }
+    }
   }
 }

@@ -26,7 +26,8 @@ enum DamageType
   Confusion,
   Fear,
   Wet,
-  Rust
+  Rust,
+  Holy
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);
@@ -874,9 +875,6 @@ class Battle
   public static List<string> HandleTipsy(Actor imbiber, GameState gs)
   {
     List<string> messages = [];
-
-    
-
     TipsyTrait? tipsy = imbiber.Traits.OfType<TipsyTrait>()
                                      .FirstOrDefault();
 

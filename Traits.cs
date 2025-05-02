@@ -494,6 +494,11 @@ class DescriptionTrait(string text) : Trait
   public override string AsText() => $"Description#{Text}";
 }
 
+class DesecratedTrait : Trait
+{
+  public override string AsText() => "Desecrated";
+}
+
 class DialogueScriptTrait : Trait
 {
   public string ScriptFile { get; set; } = "";
@@ -3484,8 +3489,9 @@ class TraitFactory
         };
       }
     },
-    { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
+    { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
+    { "Desecrated", (pieces, gameObj) => new DesecratedTrait() },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "DiggingTool", (pieces, gameObj) => new DiggingToolTrait() },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},

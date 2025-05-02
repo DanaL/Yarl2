@@ -11,6 +11,7 @@
 
 // Herein is the code for building the main dungeon of the game
 
+using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -1161,7 +1162,7 @@ class MainDungeonBuilder : DungeonBuilder
         Loc altarLoc = new(dungeonId, level, altarSq.Item1, altarSq.Item2);
         Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
         altar.Traits.Add(new AdjectiveTrait("desecrated"));
-
+        altar.Traits.Add(new DesecratedTrait());
         string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
         altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
         objDb.SetToLoc(altarLoc, altar);
