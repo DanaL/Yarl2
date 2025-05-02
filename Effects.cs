@@ -200,6 +200,23 @@ class EffectApplier
     }
   }
 
+  public static void CleanseDesecratedItem(GameState gs, Item target, Loc loc)
+  {
+    foreach (Trait t in target.Traits)
+    {
+      if (t is AdjectiveTrait adj && adj.Adj == "desecrated")
+      {
+        adj.Adj = "holy";
+        break;
+      }
+    }
+
+    target.Traits = [.. target.Traits.Where(t => t is not DesecratedTrait && t is not DescriptionTrait)];
+    target.Traits.Add(new DescriptionTrait("An altar dedicated by Hunktokar."));
+
+    gs.UIRef().AlertPlayer("The altar glows with a holy light and is cleansed!", gs, loc);
+  }
+
   public static void CleanseLoc(GameState gs, Loc loc, Item? source)
   {
     if (gs.ObjDb.Occupant(loc) is Actor actor)
@@ -218,8 +235,9 @@ class EffectApplier
 
     foreach (Item item in gs.ObjDb.ItemsAt(loc))
     {
-      if (item.HasTrait<DesecratedTrait>())
+      if (item.Type == ItemType.Altar && item.HasTrait<DesecratedTrait>())
       {
+        CleanseDesecratedItem(gs, item, loc);
         return;
       }
     }
