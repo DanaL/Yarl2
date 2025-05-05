@@ -348,7 +348,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       }
       else
       {
-        ui.AlertPlayer(BlockedMessage(tile));
+        ui.AlertPlayer(BlockedMessage(tile), GameState, Loc);
       }
       
       // If the player is blind, remember what tile they bumped into
