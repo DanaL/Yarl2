@@ -390,6 +390,11 @@ class HiddenTrait : Trait
   public override string AsText() => $"Hidden";
 }
 
+class HolyTrait : Trait
+{
+  public override string AsText() => $"Holy";
+}
+
 // Trait for mobs who won't wander too far (normally) from
 // a particular location
 class HomebodyTrait : Trait
@@ -3568,6 +3573,7 @@ class TraitFactory
       }
     },
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
+    { "Holy", (pieces, gameObj) => new HolyTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceId = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
     { "Immobile", (pieces, gameObj) => new ImmobileTrait() },

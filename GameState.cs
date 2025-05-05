@@ -224,6 +224,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     return true;
   }
 
+  void SacrificeGoldToHuntokar(int amount, Loc loc)
+  {
+    if (amount >= 25)
+    {
+      string s = "Your sacrifice is accepted...and you are healed!";
+      UI.AlertPlayer(s, this, loc);
+      UI.SetPopup(new Popup(s, "", -1, -1));
+
+      Player.Stats[Attribute.HP].Change(25);
+    }
+    else
+    {
+      UI.AlertPlayer("Your parsimony has been noted.", this, loc);
+      UI.SetPopup(new Popup("Your parsimony has been noted.", "", -1, -1));
+    }
+  }
+
   public void ItemDropped(Item item, Loc loc)
   {
     item.ContainedBy = 0;
@@ -241,6 +258,11 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (altar.HasTrait<KoboldAltarTrait>() && loc == Player.Loc && Kobold.OfferGold(this, item, loc))
       {
+        return;
+      }
+      else if (altar.HasTrait<HolyTrait>() && loc == Player.Loc)
+      {
+        SacrificeGoldToHuntokar(item.Value, loc);
         return;
       }
     }

@@ -200,7 +200,7 @@ class EffectApplier
     }
   }
 
-  public static void CleanseDesecratedItem(GameState gs, Item target, Loc loc)
+  public static void CleanseDesecratedAltar(GameState gs, Item target, Loc loc)
   {
     foreach (Trait t in target.Traits)
     {
@@ -214,6 +214,8 @@ class EffectApplier
     target.Traits = [.. target.Traits.Where(t => t is not DesecratedTrait && t is not DescriptionTrait)];
     target.Traits.Add(new DescriptionTrait("An altar dedicated by Hunktokar."));
 
+    target.Traits.Add(new HolyTrait());
+    
     gs.UIRef().AlertPlayer("The altar glows with a holy light and is cleansed!", gs, loc);
   }
 
@@ -237,7 +239,7 @@ class EffectApplier
     {
       if (item.Type == ItemType.Altar && item.HasTrait<DesecratedTrait>())
       {
-        CleanseDesecratedItem(gs, item, loc);
+        CleanseDesecratedAltar(gs, item, loc);
         return;
       }
     }
