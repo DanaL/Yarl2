@@ -9,9 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-// Herein is the code for building the main dungeon of the game
-
-using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -67,13 +64,37 @@ abstract class DungeonBuilder
 
     return closets;
   }
-}
 
-class MainDungeonBuilder : DungeonBuilder
-{
-  int _dungeonID;
+  protected static void PutSecretDoorsInHallways(Map map, Rng rng)
+  {
+    List<(int, int)> candidates = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        {
+          int adjFloors = Util.Adj8Sqs(r, c)
+                              .Select(map.TileAt)
+                              .Where(t => t.Type == TileType.DungeonFloor).Count();
+          if (adjFloors == 2)
+            candidates.Add((r, c));
+        }
+      }
+    }
 
-  void SetStairs(Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Rng rng)
+    if (candidates.Count > 0)
+    {
+      int numtoAdd = rng.Next(1, 4);
+      for (int j = 0; j < numtoAdd; j++)
+      {
+        (int, int) sq = candidates[rng.Next(candidates.Count)];
+        map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
+      }
+    }
+  }
+
+  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Rng rng)
   {
     List<List<(int, int)>> floors = [];
 
@@ -97,18 +118,18 @@ class MainDungeonBuilder : DungeonBuilder
       Destination = new Loc(0, 0, entrance.Item1, entrance.Item2)
     };
     levels[0].SetTile(ExitLoc, exitStairs);
-    
+
     for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
       // The stairs from level 5 to level 6 are created in
       // PlaceLevelFiveGate()
       if (lvl == 4)
         continue;
-        
-      CreateStairway(levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+
+      CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, rng);
 
       if (rng.NextDouble() < 0.1)
-         CreateStairway(levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+        CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, rng);
     }
   }
 
@@ -116,7 +137,7 @@ class MainDungeonBuilder : DungeonBuilder
   // the stairs between floors will be at the same location. (Ie., if 
   // the down stairs on level 3 is at 34,60 then the stairs up from 
   // level 4 should be at 34,60 too)
-  void CreateStairway(Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Rng rng)
+  static void CreateStairway(int dungeonId, Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Rng rng)
   {
     // find the pairs of floor squares shared between the two levels
     List<(int, int)> shared = [];
@@ -135,16 +156,52 @@ class MainDungeonBuilder : DungeonBuilder
 
     var down = new Downstairs("")
     {
-      Destination = new Loc(_dungeonID, currentLevelNum + 1, pick.Item1, pick.Item2)
+      Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2)
     };
     currentLevel.SetTile(pick.Item1, pick.Item2, down);
 
     var up = new Upstairs("")
     {
-      Destination = new Loc(_dungeonID, currentLevelNum, pick.Item1, pick.Item2)
+      Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2)
     };
     nextLevel.SetTile(pick.Item1, pick.Item2, up);
   }
+}
+
+class InitialDungeonBuilder(int dungeonID, (int, int) entrance) : DungeonBuilder
+{
+  const int HEIGHT = 30;
+  const int WIDTH = 70;
+  int DungeonId { get; set; } = dungeonID;
+  (int, int) Entrance { get; set; } = entrance;
+
+  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
+  {
+    int numOfLevels = rng.Next(5, 8);
+
+    Dungeon dungeon = new(DungeonId, arrivalMessage);
+    DungeonMap mapper = new(rng);
+    Map[] levels = new Map[numOfLevels];
+
+    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
+    {
+      levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
+      dungeon.AddMap(levels[levelNum]);
+
+      // Sometimes add a secret door or two in hallways
+      if (rng.Next(2) == 0)
+        PutSecretDoorsInHallways(levels[levelNum], rng);
+    }
+
+    SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
+
+    return dungeon;
+  } 
+}
+
+class MainDungeonBuilder : DungeonBuilder
+{
+  int _dungeonID;
 
   static void PlaceFresco(Map map, int height, int width, string frescoText, Rng rng)
   {
@@ -877,35 +934,6 @@ class MainDungeonBuilder : DungeonBuilder
     map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
   }
 
-  static void PutSecretDoorsInHallways(Map map, Rng rng)
-  {
-    List<(int, int)> candidates = [];
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
-        {
-          int adjFloors = Util.Adj8Sqs(r, c)
-                              .Select(map.TileAt)
-                              .Where(t => t.Type == TileType.DungeonFloor).Count();
-          if (adjFloors == 2)
-            candidates.Add((r, c));
-        }
-      }
-    }
-
-    if (candidates.Count > 0)
-    {
-      int numtoAdd = rng.Next(1, 4);
-      for (int j = 0; j < numtoAdd; j++)
-      {
-        (int, int) sq = candidates[rng.Next(candidates.Count)];
-        map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
-      }      
-    }
-  }
-
   // Dir is the direction of the floor space adjacent to where the 
   // portcullis would go
   static (bool, Dir) ValidSpotForGatedStairs(Map map, Map level6Map, int r, int c)
@@ -1623,7 +1651,7 @@ class MainDungeonBuilder : DungeonBuilder
         PutSecretDoorsInHallways(levels[levelNum], rng);
     }
 
-    SetStairs(levels, h, w, numOfLevels, entrance, rng);
+    //SetStairs(levels, h, w, numOfLevels, entrance, rng);
 
     foreach (int level in riverAdded)
       RiverQoLCheck(levels[level], id, level, objDb, rng);
