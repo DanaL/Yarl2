@@ -168,20 +168,23 @@ abstract class DungeonBuilder
   }
 }
 
-class InitialDungeonBuilder(int dungeonID, (int, int) entrance) : DungeonBuilder
+class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
 {
   const int HEIGHT = 30;
   const int WIDTH = 70;
   int DungeonId { get; set; } = dungeonID;
   (int, int) Entrance { get; set; } = entrance;
+  string MainOccupant { get; set; } = mainOccupant;
 
-  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
+  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng, Map wildernessMap)
   {
     int numOfLevels = rng.Next(5, 8);
 
     Dungeon dungeon = new(DungeonId, arrivalMessage);
     DungeonMap mapper = new(rng);
     Map[] levels = new Map[numOfLevels];
+
+    List<MonsterDeck> monsterDecks = DeckBuilder.MakeDecks(MainOccupant, factDb.Villain, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {

@@ -612,9 +612,8 @@ class CampaignCreator(UserInterface ui)
 
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
-        List<MonsterDeck> monsterDecks = DeckBuilder.MakeDecks(earlyMainOccupant, factDb.Villain, rng);
         
-        InitialDungeonBuilder db = new(1, entrance);
+        InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, monsterDecks, wildernessMap);
 
         // MainDungeonBuilder builder = new();
