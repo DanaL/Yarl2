@@ -614,19 +614,22 @@ class CampaignCreator(UserInterface ui)
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
         List<MonsterDeck> monsterDecks = DeckBuilder.MakeDecks(earlyMainOccupant, factDb.Villain, rng);
         
-        MainDungeonBuilder builder = new();
-        Dungeon mainDungeon = builder.Generate(1, "Musty smells. A distant clang. Danger.", 30, 70, 20,
-          entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
+        InitialDungeonBuilder db = new(1, entrance);
+        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, monsterDecks, wildernessMap);
 
-        SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
+        // MainDungeonBuilder builder = new();
+        // Dungeon mainDungeon = builder.Generate(1, , 30, 70, 20,
+        //   entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
+        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
 
-        mainDungeon.MonsterDecks = monsterDecks;
-        campaign.AddDungeon(mainDungeon);
+        // SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
+
+        firstDungeon.MonsterDecks = monsterDecks;
+        campaign.AddDungeon(firstDungeon);
 
         Portal portal = new("You stand before a looming portal.")
         {
-          Destination = new Loc(1, 0, builder.ExitLoc.Item1, builder.ExitLoc.Item2)
+          Destination = new Loc(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2)
         };
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);
