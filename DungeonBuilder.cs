@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Yarl2;
@@ -63,6 +64,36 @@ abstract class DungeonBuilder
     }
 
     return closets;
+  }
+
+  protected static void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
+  {
+    for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)
+    {
+      for (int j = 0; j < rng.Next(8, 13); j++)
+      {
+        int monsterLvl = lvl;
+        if (lvl > 0 && rng.NextDouble() > 0.8)
+        {
+          monsterLvl = rng.Next(lvl);
+        }
+
+        MonsterDeck deck = dungeon.MonsterDecks[monsterLvl];
+        (int, int) sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
+        Loc loc = new(dungeon.ID, lvl, sq.Item1, sq.Item2);
+        if (deck.Indexes.Count == 0)
+          deck.Reshuffle(rng);
+        string m = deck.Monsters[deck.Indexes.Dequeue()];
+
+        // Some monsters are a bit special and take a bit of extra work
+        Actor monster = MonsterFactory.Get(m, objDb, rng);
+        monster.Loc = loc;
+        if (rng.NextDouble() < 0.8)
+          monster.Traits.Add(new SleepingTrait());
+        objDb.Add(monster);
+        objDb.AddToLoc(loc, monster);
+      }
+    }
   }
 
   protected static void PutSecretDoorsInHallways(Map map, Rng rng)
@@ -184,7 +215,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     DungeonMap mapper = new(rng);
     Map[] levels = new Map[numOfLevels];
 
-    List<MonsterDeck> monsterDecks = DeckBuilder.MakeDecks(MainOccupant, factDb.Villain, rng);
+    dungeon.MonsterDecks = DeckBuilder.ReadDeck(MainOccupant, rng);
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
@@ -198,6 +229,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
 
+    PopulateDungeon(dungeon, rng, objDb);
+    
     return dungeon;
   } 
 }

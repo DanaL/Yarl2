@@ -476,43 +476,6 @@ class CampaignCreator(UserInterface ui)
     }   
   }
 
-  // This is very temporary/early code since eventually dungeons will need to
-  // know how to populate themselves (or receive a populator class of some 
-  // sort) because monsters will spawn as the player explores
-  private static void PopulateDungeon(Rng rng, GameObjectDB objDb, FactDb factDb, Dungeon dungeon, int maxDepth, List<MonsterDeck> monsterDecks)
-  {
-    // Temp: generate monster decks and populate the first two levels of the dungeon.
-    // I'll actually want to save the decks for reuse as random monsters are added
-    // in, but I'm not sure where they should live. I guess maybe in the Map structure,
-    // which has really come to represent a dungeon level
-    for (int lvl = 0; lvl < maxDepth; lvl++)
-    {
-      for (int j = 0; j < rng.Next(8, 13); j++)
-      {
-        int monsterLvl = lvl;
-        if (lvl > 0 && rng.NextDouble() > 0.8)
-        {
-          monsterLvl = rng.Next(lvl);
-        }
-
-        var deck = monsterDecks[monsterLvl];
-        var sq = dungeon.LevelMaps[lvl].RandomTile(TileType.DungeonFloor, rng);
-        var loc = new Loc(dungeon.ID, lvl, sq.Item1, sq.Item2);
-        if (deck.Indexes.Count == 0)
-          deck.Reshuffle(rng);
-        string m = deck.Monsters[deck.Indexes.Dequeue()];
-
-        // Some monsters are a bit special and take a bit of extra work
-        Actor monster = MonsterFactory.Get(m, objDb, rng);
-        monster.Loc = loc;
-        if (rng.NextDouble() < 0.8)
-          monster.Traits.Add(new SleepingTrait());
-        objDb.Add(monster);
-        objDb.AddToLoc(loc, monster);
-      }
-    }
-  }
-
   static (Campaign, int, int) BeginNewCampaign(Rng rng, GameObjectDB objDb)
   {
     Campaign campaign;
@@ -614,16 +577,8 @@ class CampaignCreator(UserInterface ui)
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
         
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
-        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, monsterDecks, wildernessMap);
+        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
 
-        // MainDungeonBuilder builder = new();
-        // Dungeon mainDungeon = builder.Generate(1, , 30, 70, 20,
-        //   entrance, factDb, objDb, rng, monsterDecks, wildernessMap);
-        //PopulateDungeon(rng, objDb, factDb, mainDungeon, 5, monsterDecks);
-
-        // SetLevel5MiniBoss(mainDungeon, objDb, factDb, earlyMainOccupant, rng);
-
-        firstDungeon.MonsterDecks = monsterDecks;
         campaign.AddDungeon(firstDungeon);
 
         Portal portal = new("You stand before a looming portal.")

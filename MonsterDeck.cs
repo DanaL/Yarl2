@@ -57,76 +57,36 @@ class MonsterDeck
 
 class DeckBuilder
 {  
-  // The upper levels won't really follow theme, but we will choose a preference 
-  // for goblin dominated or kobold dominated
-
-  static MonsterDeck ReadDeck(string deckname, int level)
+  public static List<MonsterDeck> ReadDeck(string deckname, Rng rng)
   {
-    MonsterDeck deck = new();
+    List<MonsterDeck> decks = [];
    
     // Someday in the future I'll need to check for invalid data files...
-    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath($"{deckname}.txt"));
-    int j = 0;
-    while (j < lines.Length && !lines[j].Equals($"LEVEL {level}", StringComparison.CurrentCultureIgnoreCase))
+    int j = -1;
+    foreach (string line in  File.ReadAllLines(ResourcePath.GetDataFilePath($"{deckname}.txt")))
     {
-      ++j;
-    }
-    ++j;
-
-    string[] monsters = lines[j].Split(',');
-    foreach (string m in monsters)
-    {
-      int k = m.Trim().LastIndexOf(' ');
-      string monster = m[..k];
-      if (!int.TryParse(m[k..], out int count))
-        count = 1;
-      for (int i = 0; i < count; ++i)
-        deck.Monsters.Add(monster);
-    }
-    
-    return deck;
-  }
-
-  public static List<MonsterDeck> MakeDecks(string earlyMainOccupant, VillainType villain, Rng rng)
-  {    
-    List<MonsterDeck> decks = [];
-
-    // Sorry, I just think of dungeon levels as 1-indexed instead of 0-indexed
-    for (int lvl = 1; lvl <= 5; lvl++)
-    {
-      MonsterDeck deck = ReadDeck(earlyMainOccupant, lvl);
-      deck.Reshuffle(rng);
-      decks.Add(deck);
-    }
-
-    for (int lvl = 6; lvl <= 10; lvl++)
-    {
-      MonsterDeck deck = ReadDeck("midlevel", lvl);
-
-      if (villain == VillainType.FieryDemon)
+      if (line.StartsWith("LEVEL "))
       {
-        deck.Monsters.Add("flame beetle");
-        deck.Monsters.Add("flame beetle");
+        ++j;
+        decks.Add(new MonsterDeck());
       }
-      
-      deck.Reshuffle(rng);
-      decks.Add(deck);
-    }
-
-    for (int lvl = 11; lvl <= 20; lvl++)
-    {
-      MonsterDeck deck = ReadDeck("deeplevel", lvl);
-
-      if (villain == VillainType.FieryDemon)
+      else
       {
-        deck.Monsters.Add("flame beetle");
-        deck.Monsters.Add("flame beetle");
+        string[] monsters = line.Split(',');
+        foreach (string m in monsters)
+        {
+          int k = m.Trim().LastIndexOf(' ');
+          string monster = m[..k];
+          if (!int.TryParse(m[k..], out int count))
+            count = 1;
+          for (int i = 0; i < count; ++i)
+            decks[j].Monsters.Add(monster);
+        }
       }
-
-      deck.Reshuffle(rng);
-      decks.Add(deck);
     }
 
+    foreach (MonsterDeck deck in decks)
+      deck.Reshuffle(rng);
     return decks;
   }
 }
