@@ -521,7 +521,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
 
-     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
+    for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
       Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], DungeonId, levelNum, rng);
       SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
@@ -539,8 +539,65 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     PopulateDungeon(dungeon, rng, objDb);
 
+    int fallenAdventurer = rng.Next(1, numOfLevels);
+    AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, rng);
+
     return dungeon;
-  } 
+  }
+
+  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, Rng rng)
+  {
+    (int, int) sq = level.RandomTile(TileType.DungeonFloor, rng);
+    Loc loc = new(DungeonId, levelNum, sq.Item1, sq.Item2);
+
+    for (int j = 0; j < 3; j++)
+    {
+      Item torch = ItemFactory.Get(ItemNames.TORCH, objDb);
+      objDb.SetToLoc(loc, torch);
+    }
+    if (rng.NextDouble() < 0.25)
+    {
+      Item poh = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
+      objDb.SetToLoc(loc, poh);
+    }
+    if (rng.NextDouble() < 0.25)
+    {
+      Item antidote = ItemFactory.Get(ItemNames.ANTIDOTE, objDb);
+      objDb.SetToLoc(loc, antidote);
+    }
+    if (rng.NextDouble() < 0.25)
+    {
+      Item blink = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
+      objDb.SetToLoc(loc, blink);
+    }
+
+    // add trinket
+    Item trinket = new()
+    {
+      Name = "tin locket",
+      Type = ItemType.Trinket,
+      Value = 1,
+      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
+    };
+    objDb.Add(trinket);
+    objDb.SetToLoc(loc, trinket);
+
+    string text = "Scratched into the stone: if only I'd managed to level up.";
+    Landmark tile = new(text);
+    level.SetTile(sq, tile);
+
+    // Generate an actor for the fallen adventurer so I can store their 
+    // name and such in the objDb. Maybe sometimes they'll be an actual
+    // ghost?
+    NameGenerator ng = new(rng, Util.NamesFile);
+    Mob adventurer = new()
+    {
+      Name = ng.GenerateName(rng.Next(5, 12))
+    };
+    adventurer.Traits.Add(new FallenAdventurerTrait());
+    adventurer.Traits.Add(new OwnsItemTrait() { ItemID = trinket.ID });
+    objDb.Add(adventurer);
+  }
 }
 
 class MainDungeonBuilder : DungeonBuilder
@@ -703,65 +760,6 @@ class MainDungeonBuilder : DungeonBuilder
         PlaceDocument(levels[level], level, height, width, decoration.Desc, objDb, rng);
       }
     }
-
-    int fallenAdventurer = rng.Next(1, numOfLevels);
-    AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
-
-   
-  }
-
-  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Rng rng)
-  {
-    var sq = level.RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(_dungeonID, levelNum, sq.Item1, sq.Item2);
-
-    for (int j = 0; j < 3; j++)
-    {
-      var torch = ItemFactory.Get(ItemNames.TORCH, objDb);
-      objDb.SetToLoc(loc, torch);
-    }
-    if (rng.NextDouble() < 0.25)
-    {
-      var poh = ItemFactory.Get(ItemNames.POTION_HEALING, objDb);
-      objDb.SetToLoc(loc, poh);
-    }
-    if (rng.NextDouble() < 0.25)
-    {
-      var antidote = ItemFactory.Get(ItemNames.ANTIDOTE, objDb);
-      objDb.SetToLoc(loc, antidote);
-    }
-    if (rng.NextDouble() < 0.25)
-    {
-      var blink = ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb);
-      objDb.SetToLoc(loc, blink);
-    }
-
-    // add trinket
-    var trinket = new Item()
-    {
-      Name = "tin locket",
-      Type = ItemType.Trinket,
-      Value = 1,
-      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
-    };
-    objDb.Add(trinket);
-    objDb.SetToLoc(loc, trinket);
-
-    string text = "Scratched into the stone: if only I'd managed to level up.";
-    var tile = new Landmark(text);
-    level.SetTile(sq, tile);
-
-    // Generate an actor for the fallen adventurer so I can store their 
-    // name and such in the objDb. Maybe sometimes they'll be an actual
-    // ghost?
-    var ng = new NameGenerator(rng, Util.NamesFile);
-    var adventurer = new Mob()
-    {
-      Name = ng.GenerateName(rng.Next(5, 12))
-    };
-    adventurer.Traits.Add(new FallenAdventurerTrait());
-    adventurer.Traits.Add(new OwnsItemTrait() { ItemID = trinket.ID });
-    objDb.Add(adventurer);
   }
 
   static List<(int, int)> FloorsNearSq(Map map, int row, int col, int d)
