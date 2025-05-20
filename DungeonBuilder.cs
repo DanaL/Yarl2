@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Yarl2;
@@ -197,6 +196,299 @@ abstract class DungeonBuilder
     };
     nextLevel.SetTile(pick.Item1, pick.Item2, up);
   }
+
+  static  bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;
+
+  static bool IsNWCorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row, col - 1).Type))
+      return false;
+    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static bool IsNECorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;    
+    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row, col + 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static bool IsSWCorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
+      return false;    
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row, col - 1).Type))
+      return false;
+    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static bool IsSECorner(Map map, int row, int col)
+  {
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;
+    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
+      return false;    
+    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
+      return false;
+    if (!IsWall(map.TileAt(row, col + 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col).Type))
+      return false;
+    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
+      return false;
+      
+    return true;
+  }
+
+  static List<(Loc, string)> FindCorners(Map map, int dungeonID, int level)
+  {
+    List<(Loc, string)> corners = [];
+
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        TileType tile = map.TileAt(r, c).Type;
+
+        if (tile != TileType.DungeonFloor)
+          continue;
+
+        if (IsNWCorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "nw"));
+        else if (IsNECorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "ne"));
+        else if (IsSWCorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "sw"));
+        else if (IsSECorner(map, r, c))
+          corners.Add((new Loc(dungeonID, level, r, c), "se"));
+      }
+    }
+
+    return corners;
+  }
+
+  protected static void SetTraps(Map map, int dungeonID, int level, int dungeonDepth, Rng rng)
+  {
+    int[] trapOpts;
+    if (level == 0)
+      trapOpts = [3, 6, 7];      
+    else if (level == dungeonDepth - 1)
+      trapOpts = [0, 1, 2, 3, 4, 6, 7]; // no trap doors on bottom level
+    else
+      trapOpts = [0, 1, 2, 3, 4, 5, 6, 7];
+   
+    (int, int) sq;
+    int numOfTraps = rng.Next(1, 6);
+    for (int j = 0 ; j < numOfTraps; j++)
+    {
+      int trap = trapOpts[rng.Next(trapOpts.Length)];
+      switch (trap)
+      {
+        case 0:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
+          break;
+        case 1:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
+          break;
+        case 2:
+          List<(Loc, string)> corners = FindCorners(map, dungeonID, level);
+          (Loc corner, string dir) = corners[rng.Next(corners.Count)];
+          FireJetTrap(map, corner, dir, rng);
+          break;
+        case 3:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
+          break;
+        case 4:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
+          break;
+        case 5:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
+          break;
+        case 6:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
+          break;
+        case 7:
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
+          if (level == 0)
+            Console.WriteLine($"Summons trap: {sq}");          
+          map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
+          break;
+      }
+    }
+  }
+
+  static bool CanPlaceJetTrigger(Map map, (int, int) corner, (int, int) delta)
+  {
+    (int, int) loc = corner;
+    int count = 0;
+
+    while (map.InBounds(loc) && map.TileAt(loc).Type == TileType.DungeonFloor && count < 4)
+    {
+      ++count;
+      loc = (loc.Item1 + delta.Item1, loc.Item2 + delta.Item2);
+    }
+
+    return count == 4;
+  }
+
+  static void FireJetTrap(Map map, Loc cornerLoc, string dir, Rng rng)
+  {
+    (int, int) deltaH, deltaV;
+    Dir horizontalDir, verticalDir;
+    switch (dir)
+    {
+      case "nw":
+        deltaH = (0, 1);
+        deltaV = (1, 0);
+        horizontalDir = Dir.East;
+        verticalDir = Dir.South;
+        break;
+      case "ne":
+        deltaH = (0, -1);
+        deltaV = (0, 1);
+        horizontalDir = Dir.West;
+        verticalDir = Dir.South;
+        break;
+      case "sw":
+        deltaH = (0, 1);
+        deltaV = (-1, 0);
+        horizontalDir = Dir.East;
+        verticalDir = Dir.North;
+        break;
+      default:
+        deltaH = (0, -1);
+        deltaV = (-1, 0);
+        horizontalDir = Dir.West;
+        verticalDir = Dir.North;
+        break;
+    }
+
+    bool horizontalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaH);
+    bool verticalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaV);
+
+    if (!horizontalValid && !verticalValid)
+      return;
+
+    Loc jetLoc;
+    Loc triggerLoc;
+    Dir jetDir;
+    if (horizontalValid && verticalValid)
+    {
+      if (rng.NextDouble() < 0.5)
+      {
+        // horizontal
+        jetDir = horizontalDir;
+        jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
+        triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+      }
+      else
+      {
+        // vertical
+        jetDir = verticalDir;
+        jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
+        triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+      }
+    }
+    else if (horizontalValid)
+    {
+      jetDir = horizontalDir;
+      jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
+      triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+    }
+    else
+    {
+      jetDir = verticalDir;
+      jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
+      triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+    }
+
+    Tile fireJet = new FireJetTrap(false, jetDir);
+    map.SetTile(jetLoc.Row, jetLoc.Col, fireJet);
+    Tile trigger = new JetTrigger(jetLoc, false);
+    map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
+  }
+
+  protected static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Rng rng)
+  {
+    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
+    List<Loc> openFloors = sqs.Where(l => !objDb.AreBlockersAtLoc(l)).ToList();
+    if (openFloors.Count == 0)
+      return;
+    Loc loc = openFloors[rng.Next(openFloors.Count)];
+    Tile trap = rng.Next(3) switch
+    {
+      0 => TileFactory.Get(TileType.HiddenDartTrap),
+      1 => TileFactory.Get(TileType.HiddenTrapDoor),
+      _ => TileFactory.Get(TileType.HiddenWaterTrap)
+    };
+    map.SetTile(loc.Row, loc.Col, trap);
+
+    ItemNames itemName = rng.Next(7) switch
+    {
+      0 => ItemNames.ZORKMIDS,
+      1 => ItemNames.POTION_HEALING,
+      2 => ItemNames.SCROLL_BLINK,
+      3 => ItemNames.LONGSWORD,
+      4 => ItemNames.FLASK_OF_BOOZE,
+      5 => ItemNames.WAND_MAGIC_MISSILES,
+      _ => ItemNames.SCROLL_PROTECTION
+    };
+    Item bait = ItemFactory.Illusion(itemName, objDb);
+    objDb.SetToLoc(loc, bait);
+  }
 }
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -229,8 +521,24 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
 
+     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
+    {
+      Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], DungeonId, levelNum, rng);
+      SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
+
+      // Maybe add an illusion/trap
+      if (levelNum < numOfLevels - 1)
+      {
+        // We don't want to make these tooooooo common
+        if (rng.NextDouble() > 0.1)
+          continue;
+
+        AddBaitIllusion(levels[levelNum], DungeonId, levelNum, objDb, rng);
+      }
+    }
+
     PopulateDungeon(dungeon, rng, objDb);
-    
+
     return dungeon;
   } 
 }
@@ -399,51 +707,7 @@ class MainDungeonBuilder : DungeonBuilder
     int fallenAdventurer = rng.Next(1, numOfLevels);
     AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
 
-    for (int levelNum = 0; levelNum < levels.Length; levelNum++)
-    {
-      Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], _dungeonID, levelNum, rng);
-      SetTraps(levels[levelNum], _dungeonID, levelNum, numOfLevels, rng);
-
-      // Maybe add an illusion/trap
-      if (levelNum < numOfLevels - 1)
-      {
-        // We don't want to make these tooooooo common
-        if (rng.NextDouble() > 0.1)
-          continue;
-
-        AddBaitIllusion(levels[levelNum], dungeonId, levelNum, objDb, rng);
-      }
-    }
-  }
-
-  static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Rng rng)
-  {
-    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
-    List<Loc> openFloors = sqs.Where(l => !objDb.AreBlockersAtLoc(l)).ToList();
-    if (openFloors.Count == 0)
-      return;
-    Loc loc = openFloors[rng.Next(openFloors.Count)];
-    Tile trap = rng.Next(3) switch
-    {
-      0 => TileFactory.Get(TileType.HiddenDartTrap),
-      1 => TileFactory.Get(TileType.HiddenTrapDoor),
-      _ => TileFactory.Get(TileType.HiddenWaterTrap)
-    };
-    map.SetTile(loc.Row, loc.Col, trap);
-
-    ItemNames itemName = rng.Next(7) switch
-    {
-      0 => ItemNames.ZORKMIDS,
-      1 => ItemNames.POTION_HEALING,
-      2 => ItemNames.SCROLL_BLINK,
-      3 => ItemNames.LONGSWORD,
-      4 => ItemNames.FLASK_OF_BOOZE,
-      5 => ItemNames.WAND_MAGIC_MISSILES,
-      _ => ItemNames.SCROLL_PROTECTION
-    };
-    Item bait = ItemFactory.Illusion(itemName, objDb);
-    objDb.SetToLoc(loc, bait);
-    Console.WriteLine($"Illusion at {loc}");
+   
   }
 
   void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Rng rng)
@@ -701,273 +965,6 @@ class MainDungeonBuilder : DungeonBuilder
         objDb.SetToLoc(itemLoc, loot);
       }
     }
-  }
-
-  static  bool IsWall(TileType type)
-  {
-    return type == TileType.DungeonWall || type == TileType.PermWall;
-  }
-
-  static bool IsNWCorner(Map map, int row, int col)
-  {
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row - 1, col).Type))
-      return false;
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row, col - 1).Type))
-      return false;
-    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
-      return false;
-    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
-      return false;
-      
-    return true;
-  }
-
-  static bool IsNECorner(Map map, int row, int col)
-  {
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row - 1, col).Type))
-      return false;
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;    
-    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row, col + 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
-      return false;
-    if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
-      return false;
-      
-    return true;
-  }
-
-  static bool IsSWCorner(Map map, int row, int col)
-  {
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
-      return false;    
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row, col - 1).Type))
-      return false;
-    if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
-      return false;
-      
-    return true;
-  }
-
-  static bool IsSECorner(Map map, int row, int col)
-  {
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;
-    if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;    
-    if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
-      return false;
-    if (!IsWall(map.TileAt(row, col + 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col - 1).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col).Type))
-      return false;
-    if (!IsWall(map.TileAt(row + 1, col + 1).Type))
-      return false;
-      
-    return true;
-  }
-
-  static List<(Loc, string)> FindCorners(Map map, int dungeonID, int level)
-  {
-    List<(Loc, string)> corners = [];
-
-    for (int r = 1; r < map.Height - 1; r++)
-    {
-      for (int c = 1; c < map.Width - 1; c++)
-      {
-        TileType tile = map.TileAt(r, c).Type;
-
-        if (tile != TileType.DungeonFloor)
-          continue;
-
-        if (IsNWCorner(map, r, c))
-          corners.Add((new Loc(dungeonID, level, r, c), "nw"));
-        else if (IsNECorner(map, r, c))
-          corners.Add((new Loc(dungeonID, level, r, c), "ne"));
-        else if (IsSWCorner(map, r, c))
-          corners.Add((new Loc(dungeonID, level, r, c), "sw"));
-        else if (IsSECorner(map, r, c))
-          corners.Add((new Loc(dungeonID, level, r, c), "se"));
-      }
-    }
-
-    return corners;
-  }
-
-  static void SetTraps(Map map, int dungeonID, int level, int dungeonDepth, Rng rng)
-  {
-    int[] trapOpts;
-    if (level == 0)
-      trapOpts = [3, 6, 7];      
-    else if (level == dungeonDepth - 1)
-      trapOpts = [0, 1, 2, 3, 4, 6, 7]; // no trap doors on bottom level
-    else
-      trapOpts = [0, 1, 2, 3, 4, 5, 6, 7];
-   
-    (int, int) sq;
-    int numOfTraps = rng.Next(1, 6);
-    for (int j = 0 ; j < numOfTraps; j++)
-    {
-      int trap = trapOpts[rng.Next(trapOpts.Length)];
-      switch (trap)
-      {
-        case 0:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenTeleportTrap));
-          break;
-        case 1:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenDartTrap));
-          break;
-        case 2:
-          List<(Loc, string)> corners = FindCorners(map, dungeonID, level);
-          (Loc corner, string dir) = corners[rng.Next(corners.Count)];
-          FireJetTrap(map, corner, dir, rng);
-          break;
-        case 3:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenPit));
-          break;
-        case 4:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenWaterTrap));
-          break;
-        case 5:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenTrapDoor));
-          break;
-        case 6:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
-          break;
-        case 7:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          if (level == 0)
-            Console.WriteLine($"Summons trap: {sq}");          
-          map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
-          break;
-      }
-    }
-  }
-
-  static bool CanPlaceJetTrigger(Map map, (int, int) corner, (int, int) delta)
-  {
-    (int, int) loc = corner;
-    int count = 0;
-
-    while (map.InBounds(loc) && map.TileAt(loc).Type == TileType.DungeonFloor && count < 4)
-    {
-      ++count;
-      loc = (loc.Item1 + delta.Item1, loc.Item2 + delta.Item2);
-    }
-
-    return count == 4;
-  }
-
-  static void FireJetTrap(Map map, Loc cornerLoc, string dir, Rng rng)
-  {
-    (int, int) deltaH, deltaV;
-    Dir horizontalDir, verticalDir;
-    switch (dir)
-    {
-      case "nw":
-        deltaH = (0, 1);
-        deltaV = (1, 0);
-        horizontalDir = Dir.East;
-        verticalDir = Dir.South;
-        break;
-      case "ne":
-        deltaH = (0, -1);
-        deltaV = (0, 1);
-        horizontalDir = Dir.West;
-        verticalDir = Dir.South;
-        break;
-      case "sw":
-        deltaH = (0, 1);
-        deltaV = (-1, 0);
-        horizontalDir = Dir.East;
-        verticalDir = Dir.North;
-        break;
-      default:
-        deltaH = (0, -1);
-        deltaV = (-1, 0);
-        horizontalDir = Dir.West;
-        verticalDir = Dir.North;
-        break;
-    }
-
-    bool horizontalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaH);
-    bool verticalValid = CanPlaceJetTrigger(map, (cornerLoc.Row, cornerLoc.Col), deltaV);
-
-    if (!horizontalValid && !verticalValid)
-      return;
-
-    Loc jetLoc;
-    Loc triggerLoc;
-    Dir jetDir;
-    if (horizontalValid && verticalValid)
-    {
-      if (rng.NextDouble() < 0.5)
-      {
-        // horizontal
-        jetDir = horizontalDir;
-        jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
-        triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
-      }
-      else
-      {
-        // vertical
-        jetDir = verticalDir;
-        jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
-        triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
-      }
-    }
-    else if (horizontalValid)
-    {
-      jetDir = horizontalDir;
-      jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
-      triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
-    }
-    else
-    {
-      jetDir = verticalDir;
-      jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
-      triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
-    }
-
-    Tile fireJet = new FireJetTrap(false, jetDir);
-    map.SetTile(jetLoc.Row, jetLoc.Col, fireJet);
-    Tile trigger = new JetTrigger(jetLoc, false);
-    map.SetTile(triggerLoc.Row, triggerLoc.Col, trigger);
   }
 
   // Dir is the direction of the floor space adjacent to where the 
