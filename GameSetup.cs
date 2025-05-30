@@ -312,7 +312,7 @@ class CampaignCreator(UserInterface ui)
     Tile tt = map.TileAt(townSq);
 
     dmap.Generate(CostForRoadBuilding, (townSq.Item1, townSq.Item2), 257);
-    var road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
+    List<(int, int)> road = dmap.ShortestPath(entrance.Item1, entrance.Item2);
 
     double draw = 1.0;
     double delta = 2.0 / road.Count;
@@ -686,7 +686,7 @@ class CampaignCreator(UserInterface ui)
       
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);
-      var objDb = new GameObjectDB();
+      GameObjectDB objDb = new();
       SetItemIDInfo(rng);
 
       Player player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, UI, rng);

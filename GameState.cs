@@ -176,8 +176,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public Tile TileAt(Loc loc)
   {
-    var d = Campaign!.Dungeons[loc.DungeonID];
-    var map = d.LevelMaps[loc.Level];
+    Dungeon d = Campaign!.Dungeons[loc.DungeonID];
+    Map map = d.LevelMaps[loc.Level];
 
     return map.InBounds(loc.Row, loc.Col)
                 ? map.TileAt(loc.Row, loc.Col)
@@ -203,8 +203,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
   {
-    var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    var fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
+    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    Dictionary<Loc, int> fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
 
     return fov.ContainsKey(loc) && fov[loc] != Illumination.None;
   }
@@ -214,7 +214,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (a.DungeonID != b.DungeonID || a.Level != b.Level)
       return false;
 
-    var map = Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
+    Map map = Campaign.Dungeons[a.DungeonID].LevelMaps[a.Level];
     foreach (var sq in Util.Bresenham(a.Row, a.Col, b.Row, b.Col))
     {
       if (!map.InBounds(sq) || map.TileAt(sq).Opaque())
@@ -495,7 +495,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ChasmCreated(Loc loc)
   {
-    var landingSpot = loc with { Level = loc.Level + 1 };
+    Loc landingSpot = loc with { Level = loc.Level + 1 };
 
     if (ObjDb.Occupant(loc) is Actor actor && !(actor.HasActiveTrait<FlyingTrait>() || actor.HasActiveTrait<FloatingTrait>()))
     {

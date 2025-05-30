@@ -36,7 +36,7 @@ class MonsterDeck
     for (int i = 0; i < Monsters.Count; i++)
       indexes.Add(i);
     indexes.Shuffle(rng);
-    Indexes = new Queue<int>(indexes);
+    Indexes = new(indexes);
   }
 
   public override string ToString()
