@@ -701,7 +701,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.VictoryScreen(victim.FullName, this);
       throw new VictoryException();
     }
-    else if (victim.HasTrait<MiniBoss5Trait>())
+    else if (victim.HasTrait<FirstBossTrait>())
     {
       FactDb!.Add(new SimpleFact() { Name = "First Boss Killed", Value = "true" });
     }

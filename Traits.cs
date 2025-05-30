@@ -1059,9 +1059,9 @@ class GrantsTrait : Trait
   }
 }
 
-class MiniBoss5Trait : Trait
+class FirstBossTrait : Trait
 {
-  public override string AsText() => "MiniBoss5";
+  public override string AsText() => "FirstBoss";
 }
 
 class MolochAltarTrait : Trait
@@ -3619,7 +3619,7 @@ class TraitFactory
     },
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
-    { "MiniBoss5", (pieces, gameObj) => new MiniBoss5Trait() },
+    { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
     { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
