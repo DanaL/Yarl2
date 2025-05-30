@@ -101,7 +101,8 @@ class Village
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
       Appearance = VillagerAppearance(rng),
-      Glyph = new Glyph('@', lit, unlit, Colours.BLACK, false)
+      Glyph = new Glyph('@', lit, unlit, Colours.BLACK, false),
+      Recovery = 0.75
     };
     mob.Traits.Add(new VillagerTrait());
     mob.Traits.Add(new NamedTrait());
