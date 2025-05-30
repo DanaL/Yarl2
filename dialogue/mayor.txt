@@ -1,4 +1,34 @@
-﻿(cond 
+﻿(cond
+  ; Mayor has not yet met the player
+  (
+    (= MAIN_QUEST_STATUS 0)
+    (
+      (
+			  (say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid. I have every confidence you'll do better than that last fellow! Poor sot... And before you venture into danger, why not spend some zorkmids in our shops and tavern?")
+			  (give MINOR_GIFT "Here, take this with you!")
+			  (set MAIN_QUEST_STATUS 1)				
+		  )
+    )
+  )
+
+  (
+    (= MAIN_QUEST_STATUS 1)
+    (
+      (say (
+        pick ("How are your adventures going?" 
+              "Thank goodness it isn't an election year." 
+              "This looming doom is terrible for tourism. Adventurers aside, of course."
+              "These #EARLY_DENIZEN have been causing more and more problems."
+              "Please find the ruins and defeat #FIRST_BOSS. #TOWN_NAME is counting on you!"
+              "We tried diplomacy but #FIRST_BOSS is very disagreeable."
+              "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
+              "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
+              "#TOWN_NAME has many amenities for dungeon delvers!"
+              "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
+        )))
+    )
+  )
+
 	; If we've spoken to the player before
 	(
 		(= MET_PLAYER true)

@@ -278,6 +278,7 @@ class PlayerCreator
       Energy = 1.0
     };
     player.Stats = RollStats(player.Lineage, player.Background, rng);
+    player.Stats[Attribute.MainQuestState] = new Stat(0);
 
     player.Inventory = new Inventory(player.ID, objDb);
 

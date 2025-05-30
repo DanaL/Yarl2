@@ -430,9 +430,9 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
-  static void SetLevel5MiniBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
+  static void SetFirstBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
   {
-    int bossLevelNum = 4;
+    int bossLevelNum = dungeon.LevelMaps.Count - 1;
     Map bossLevel = dungeon.LevelMaps[bossLevelNum];
 
     if (earlyDenizen == "kobold")
@@ -443,7 +443,7 @@ class CampaignCreator(UserInterface ui)
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
       var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);
-      factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Kobold Regional Manager" });
+      factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Kobold Regional Manager" });
 
       List<Loc> options = [];
       // Where shall we put the pet dragon?
@@ -472,7 +472,7 @@ class CampaignCreator(UserInterface ui)
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
       var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(gg, loc);
-      factDb.Add(new SimpleFact() { Name = "Level 5 Boss", Value = "the Great Goblin" });
+      factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Great Goblin" });
     }   
   }
 
@@ -517,8 +517,8 @@ class CampaignCreator(UserInterface ui)
         campaign.AddDungeon(wilderness);
 
         // find the 'hidden valleys' that may be among the mountains
-        var regionFinder = new RegionFinder(new WildernessPassable());
-        var regions = regionFinder.Find(wildernessMap, false, 0, TileType.Unknown);
+        RegionFinder regionFinder = new(new WildernessPassable());
+        Dictionary<int, HashSet<(int, int)>> regions = regionFinder.Find(wildernessMap, false, 0, TileType.Unknown);
 
         // I'm assuming the largest area is the one we want to place the dungeon entrance in
         int largest = 0;
@@ -569,7 +569,7 @@ class CampaignCreator(UserInterface ui)
           }
         }
 
-        var history = new History(rng);
+        History history = new(rng);
         FactDb factDb = history.GenerateHistory(rng);
         campaign.FactDb = factDb;
 
@@ -578,6 +578,8 @@ class CampaignCreator(UserInterface ui)
         
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
+
+        SetFirstBoss(firstDungeon, objDb, factDb, earlyMainOccupant, rng);
 
         campaign.AddDungeon(firstDungeon);
 

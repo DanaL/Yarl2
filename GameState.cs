@@ -703,7 +703,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     }
     else if (victim.HasTrait<MiniBoss5Trait>())
     {
-      FactDb!.Add(new SimpleFact() { Name = "Level 5 Boss Killed", Value = "true" });
+      FactDb!.Add(new SimpleFact() { Name = "First Boss Killed", Value = "true" });
     }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {

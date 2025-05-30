@@ -6,7 +6,7 @@
 // worldwide. This software is distributed without any warranty.
 //
 // You should have received a copy of the CC0 Public Domain Dedication along 
-// with this software. If not, f
+// with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
@@ -807,16 +807,12 @@ class DialogueInterpreter
         if (gs.ObjDb.GetObj(trinketId) is Item item)        
           return item.Name;        
         return "";
-      case "LEVEL_FIVE_KEY_GIVEN":
-        if (gs.FactDb.FactCheck("Level 5 Key Given") is SimpleFact f && f.Value == "true")
-          return true;
-        return false;
-      case "LEVEL_FIVE_BOSS":
-        if (gs.FactDb.FactCheck("Level 5 Boss") is SimpleFact f2)
+      case "FIRST_BOSS":
+        if (gs.FactDb.FactCheck("First Boss") is SimpleFact f2)
           return f2.Value;
         return "";
-      case "LEVEL_FIVE_BOSS_KILLED":
-        if (gs.FactDb.FactCheck("Level 5 Boss Killed") is SimpleFact)
+      case "FIRST_BOSS_KILLED":
+        if (gs.FactDb.FactCheck("First Boss Killed") is SimpleFact)
           return true;
         return false;
       case "DUNGEON_DIR":
@@ -837,6 +833,8 @@ class DialogueInterpreter
         if (gs.Player.Stats.TryGetValue(Attribute.KoboldCultLevel, out var cultLevel))
           return cultLevel.Curr;
         return 0;
+      case "MAIN_QUEST_STATUS":
+        return gs.Player.Stats[Attribute.MainQuestState].Curr;
       default:
         throw new Exception($"Unknown variable {name}");
     }    
@@ -907,6 +905,12 @@ class DialogueInterpreter
       s = s.Replace("#DRAGON_CULT_ENEMY", enemy);
     }
     
+    if (s.Contains("#FIRST_BOSS"))
+    {
+      string firstBoss = gs.FactDb.FactCheck("First Boss") is SimpleFact fact ? fact.Value : "";
+      s = s.Replace("#FIRST_BOSS", firstBoss);
+    }
+
     s = s.Replace(@"\n", Environment.NewLine);
 
     return s;
@@ -1123,17 +1127,12 @@ class DialogueInterpreter
         else
           mob.Stats.Add(Attribute.DialogueState, new Stat(number.Value));
         break;
-      case "LEVEL_FIVE_KEY_GIVEN":
+      case "MAIN_QUEST_STATUS":
         result = Eval(set.Value, mob, gs);
-        if (result is not ScriptBool boolVal)
-          throw new Exception("Expected number value for setting LEVEL_FIVE_KEY_GIVEN");
+        if (result is not ScriptNumber qsNumber)
+          throw new Exception("Expected number value for setting MAIN_QUEST_STATUS");
 
-        string setValue =  boolVal.Value ? "true" : "false";
-
-        if (gs.FactDb.FactCheck("Level 5 Key Given") is SimpleFact key5)
-          key5.Value = setValue;
-
-        gs.FactDb.Add(new SimpleFact() { Name = "Level 5 Key Given", Value = setValue });        
+        gs.Player.Stats[Attribute.MainQuestState] = new Stat(qsNumber.Value);
         break;
       case "LAST_GIFT_TIME":
         mob.Stats[Attribute.LastGiftTime] = new Stat((int)gs.Turn % int.MaxValue);

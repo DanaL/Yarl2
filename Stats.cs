@@ -53,7 +53,8 @@ enum Attribute
   LastGiftTime,
   ShopInvoice,
   GoldSacrificed,
-  KoboldCultLevel
+  KoboldCultLevel,
+  MainQuestState
 }
 
 class Stat
