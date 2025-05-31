@@ -703,7 +703,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     }
     else if (victim.HasTrait<FirstBossTrait>())
     {
-      FactDb!.Add(new SimpleFact() { Name = "First Boss Killed", Value = "true" });
+      Player.Stats[Attribute.MainQuestState] = new Stat(Constants.MQ_FIRST_BOSS_BEAT);
     }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {
