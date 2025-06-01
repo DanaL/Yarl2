@@ -504,6 +504,127 @@ abstract class DungeonBuilder
     Item bait = ItemFactory.Illusion(itemName, objDb);
     objDb.SetToLoc(loc, bait);
   }
+
+  // At the moment, I am just adding a potion of levitation on the stairs up side,
+  // but I can imagine other solutions to the level being split by a river (adding
+  // another set of stairs, etc)
+  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    HashSet<(int, int)> contiguous = [];
+    Queue<(int, int)> q = new();
+    q.Enqueue((r, c));
+    contiguous.Add((r, c));
+
+    while (q.Count > 0)
+    {
+      var (row, col) = q.Dequeue();
+      foreach (var sq in Util.Adj4Sqs(row, col))
+      {
+        if (contiguous.Contains(sq))
+          continue;
+
+        TileType type = map.TileAt(sq).Type;
+        if (type == TileType.DungeonFloor || type == TileType.ClosedDoor)
+        {
+          contiguous.Add(sq);
+          q.Enqueue(sq);
+        }
+      }
+    }
+
+    List<Loc> opts = contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2)).ToList();
+    Loc loc = opts[rng.Next(opts.Count)];
+    Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
+    objDb.SetToLoc(loc, potion);
+  }
+
+  // If a river/chasm cuts the up stairs off from the down stairs, drop
+  // a potion of levitation on the level so the player isn't trapped.
+  static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    List<(int, int)> upStairs = [];
+    List<(int, int)> downStairs = [];
+
+    for (int r = 1; r < map.Height -1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.Upstairs)
+          upStairs.Add((r, c));
+        if (map.TileAt(r, c).Type == TileType.Downstairs)
+          downStairs.Add((r, c));
+      }
+    }
+
+    Dictionary<TileType, int> passable = [];
+    passable.Add(TileType.DungeonFloor, 1);
+    passable.Add(TileType.ClosedDoor, 1);
+    passable.Add(TileType.Upstairs, 1);
+    passable.Add(TileType.Downstairs, 1);
+    passable.Add(TileType.WoodBridge, 1);
+    passable.Add(TileType.SecretDoor, 1);
+    
+    foreach (var (ur, uc) in upStairs)
+    {
+      Loc start = new(0, 0, ur, uc);
+      foreach (var (dr, dc) in downStairs)
+      {
+        Loc goal = new(0, 0, dr, dc);
+        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
+        if (path.Count == 0)
+        {
+          AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
+          return;
+        }
+      }
+    }
+  }
+
+  protected static void AddRivers(Map[] levels, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
+  {
+    // Add rivers/chasms and traps to some of the levels
+    List<int> riverAdded = [];
+    for (int levelNum = 0; levelNum < levels.Length; levelNum++)
+    {
+      if (rng.Next(4) == 0)
+      {
+        TileType riverTile;
+        if (levelNum < levels.Length - 1 && rng.Next(3) == 0)
+          riverTile = TileType.Chasm;
+        else
+          riverTile = TileType.DeepWater;        
+        DungeonMap.AddRiver(levels[levelNum], width + 1, height + 1, riverTile, rng);
+
+        // When making a chasm, we want to turn any walls below chasms on the 
+        // floor below into floors. 
+        if (riverTile == TileType.Chasm)
+        {
+          for (int r = 1; r < height; r++)
+          {
+            for (int c = 1; c < width; c++)
+            {
+              var pt = (r, c);              
+              if (ReplaceChasm(levels[levelNum], pt) && levels[levelNum + 1].IsTile(pt, TileType.DungeonWall))
+              {
+                levels[levelNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
+              }
+            }
+          }
+        }
+
+        riverAdded.Add(levelNum);
+      }
+    }
+
+    foreach (int level in riverAdded)
+      RiverQoLCheck(levels[level], dungeonId, level, objDb, rng);
+
+    static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
+    {
+      TileType.Chasm or TileType.Bridge or TileType.WoodBridge => true,
+      _ => false,
+    };
+  }
 }
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -533,6 +654,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       if (rng.Next(2) == 0)
         PutSecretDoorsInHallways(levels[levelNum], rng);
     }
+
+    AddRivers(levels, HEIGHT, WIDTH, DungeonId, objDb, rng);
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
 
@@ -1158,81 +1281,6 @@ class MainDungeonBuilder : DungeonBuilder
     return false;
   }
 
-  // At the moment, I am just adding a potion of levitation on the stairs up side,
-  // but I can imagine other solutions to the level being split by a river (adding
-  // another set of stairs, etc)
-  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Rng rng)
-  {
-    HashSet<(int, int)> contiguous = [];
-    Queue<(int, int)> q = new();
-    q.Enqueue((r, c));
-    contiguous.Add((r, c));
-
-    while (q.Count > 0)
-    {
-      var (row, col) = q.Dequeue();
-      foreach (var sq in Util.Adj4Sqs(row, col))
-      {
-        if (contiguous.Contains(sq))
-          continue;
-
-        TileType type = map.TileAt(sq).Type;
-        if (type == TileType.DungeonFloor || type == TileType.ClosedDoor)
-        {
-          contiguous.Add(sq);
-          q.Enqueue(sq);
-        }
-      }
-    }
-
-    List<Loc> opts = contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2)).ToList();
-    Loc loc = opts[rng.Next(opts.Count)];
-    Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
-    objDb.SetToLoc(loc, potion);
-  }
-
-  // If a river/chasm cuts the up stairs off from the down stairs, drop
-  // a potion of levitation on the level so the player isn't trapped.
-  static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
-  {
-    List<(int, int)> upStairs = [];
-    List<(int, int)> downStairs = [];
-
-    for (int r = 1; r < map.Height -1; r++)
-    {
-      for (int c = 1; c < map.Width - 1; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.Upstairs)
-          upStairs.Add((r, c));
-        if (map.TileAt(r, c).Type == TileType.Downstairs)
-          downStairs.Add((r, c));
-      }
-    }
-
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.DungeonFloor, 1);
-    passable.Add(TileType.ClosedDoor, 1);
-    passable.Add(TileType.Upstairs, 1);
-    passable.Add(TileType.Downstairs, 1);
-    passable.Add(TileType.WoodBridge, 1);
-    passable.Add(TileType.SecretDoor, 1);
-    
-    foreach (var (ur, uc) in upStairs)
-    {
-      Loc start = new(0, 0, ur, uc);
-      foreach (var (dr, dc) in downStairs)
-      {
-        Loc goal = new(0, 0, dr, dc);
-        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
-        if (path.Count == 0)
-        {
-          AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
-          return;
-        }
-      }
-    }
-  }
-
   void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     if (level > 0)
@@ -1390,11 +1438,7 @@ class MainDungeonBuilder : DungeonBuilder
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
   {
-    static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
-    {
-      TileType.Chasm or TileType.Bridge or TileType.WoodBridge => true,
-      _ => false,
-    };
+    
 
     _dungeonID = id;
     var dungeon = new Dungeon(id, arrivalMessage);
@@ -1407,53 +1451,7 @@ class MainDungeonBuilder : DungeonBuilder
       dungeon.AddMap(levels[levelNum]);      
     }
 
-    // Add rivers/chasms and traps to some of the levels
-    List<int> riverAdded = [];
-    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
-    {
-      if (rng.Next(4) == 0)
-      {
-        TileType riverTile;
-        if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
-          riverTile = TileType.Chasm;
-        else
-          riverTile = TileType.DeepWater;        
-        DungeonMap.AddRiver(levels[levelNum], w + 1, h + 1, riverTile, rng);
-
-        // When making a chasm, we want to turn any walls below chasms on the 
-        // floor below into floors. 
-        if (riverTile == TileType.Chasm)
-        {
-          for (int r = 1; r < h; r++)
-          {
-            for (int c = 1; c < w; c++)
-            {
-              var pt = (r, c);              
-              if (ReplaceChasm(levels[levelNum], pt) && levels[levelNum + 1].IsTile(pt, TileType.DungeonWall))
-              {
-                levels[levelNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
-              }
-            }
-          }
-        }
-
-        if (riverTile == TileType.DeepWater)
-        {
-          DecorateRiver(levels[levelNum], monsterDecks, _dungeonID, levelNum, objDb, rng);
-        }
-
-        riverAdded.Add(levelNum);
-      }
-
-      // Sometimes add a secret door or two in hallways
-      if (rng.Next(2) == 0)
-        PutSecretDoorsInHallways(levels[levelNum], rng);
-    }
-
     //SetStairs(levels, h, w, numOfLevels, entrance, rng);
-
-    foreach (int level in riverAdded)
-      RiverQoLCheck(levels[level], id, level, objDb, rng);
 
     AddRooms(_dungeonID, levels, objDb, factDb, rng);
     
