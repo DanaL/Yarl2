@@ -151,11 +151,6 @@ abstract class DungeonBuilder
 
     for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
-      // The stairs from level 5 to level 6 are created in
-      // PlaceLevelFiveGate()
-      if (lvl == 4)
-        continue;
-
       CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, rng);
 
       if (rng.NextDouble() < 0.1)
@@ -965,120 +960,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  // Dir is the direction of the floor space adjacent to where the 
-  // portcullis would go
-  static (bool, Dir) ValidSpotForGatedStairs(Map map, Map level6Map, int r, int c)
-  {
-    int walls = 0;
-    int floors = 0;
-    List<TileType> tiles = [];
-    for (int dr = - 1; dr < 2; dr++)
-    {
-      for (int dc = - 1; dc < 2; dc++)
-      {
-        TileType tile = map.TileAt(r + dr, c + dc).Type;
-        tiles.Add(tile);
-        if (tile == TileType.DungeonWall)
-          ++walls;
-        if (tile == TileType.DungeonFloor)
-          ++floors;
-      }
-    }
-
-    if (walls != 6 || floors != 3)
-      return (false, Dir.None);
-    
-    TileType df = TileType.DungeonFloor;
-
-    if (tiles[0] == df && tiles[1] == df && tiles[2] == df && CheckBelow(r + 1, c))
-      return (true, Dir.North);
-
-    if (tiles[0] == df && tiles[3] == df && tiles[6] == df && CheckBelow(r, c + 1))
-      return (true, Dir.West);
-
-    if (tiles[2] == df && tiles[5] == df && tiles[8] == df && CheckBelow(r, c - 1))
-      return (true, Dir.East);
-
-    if (tiles[6] == df && tiles[7] == df && tiles[8] == df && CheckBelow(r - 1, c))
-      return (true, Dir.South);
-
-    return (false, Dir.None);
-
-    bool CheckBelow(int r, int c)
-    {
-      return level6Map.TileAt(r, c).Type == TileType.DungeonFloor;
-    }
-  }
-
-  void PlaceLevelFiveGate(int dungeonId, Map map, Map level6Map, Rng rng, FactDb factDb, GameObjectDB objDb)
-  {
-    List<(int, int, Dir)> candidates = [];
-
-    // We're looking for a spot to make a gate/portcullis like:
-    //
-    //  ###.
-    //  #>ǁ.
-    //  ###.
-    //
-    for (int r = 1; r < map.Height - 1; r += 2)
-    {
-      for (int c = 1; c < map.Width - 1; c += 2)
-      {
-        var (valid, dir) = ValidSpotForGatedStairs(map, level6Map, r, c);
-        if (valid)
-          candidates.Add((r, c, dir));          
-      }
-    }
-
-    // Gotta throw an exception if there were no candidates
-    var (sr, sc, sdir) = candidates[rng.Next(candidates.Count)];
-
-    Tile door = new VaultDoor(false, Metals.Iron);    
-    map.SetTile(sr, sc, door);
-    Loc doorLoc = new(dungeonId, 4, sr, sc);
-    factDb.Add(new LocationFact() { Desc = "Level 5 Gate Loc", Loc = doorLoc });
-
-    (int, int) stairsLoc;
-    switch (sdir)
-    {
-      case Dir.North:
-        stairsLoc = (sr + 1, sc);
-        SetStairs(sr + 1, sc, map, level6Map);
-        break;
-      case Dir.South:
-        stairsLoc = (sr - 1, sc);
-        SetStairs(sr - 1, sc, map, level6Map);
-        break;
-      case Dir.East:
-        stairsLoc = (sr, sc - 1);
-        SetStairs(sr, sc - 1, map, level6Map);
-        break;
-      default: // West
-        stairsLoc = (sr, sc + 1);
-        SetStairs(sr, sc + 1, map, level6Map);
-        break;
-    }
-
-    // Replace the walls surround the stairs with permanent walls so players
-    // can short-circuit the quest and dig around the portcullis
-    foreach (var (r, c) in Util.Adj8Sqs(stairsLoc.Item1, stairsLoc.Item2))
-    {
-      if (map.TileAt(r, c).Type == TileType.DungeonWall)
-      {
-        map.SetTile(r, c, TileFactory.Get(TileType.PermWall));
-      }
-    }
-
-    void SetStairs(int r, int c, Map map5, Map map6)
-    {
-      Downstairs down = new("") { Destination = new Loc(_dungeonID, 5, r, c) };
-      map5.SetTile(r, c, down);
-
-      Upstairs up = new("") { Destination = new Loc(_dungeonID, 4, r, c) };
-      map6.SetTile(r, c, up);
-    }
-  }
-
   static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng)
   {    
     int graveyardOnLevel = -1;
@@ -1251,123 +1132,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     return false;
-  }
-
-  static void PlaceShortCut(Map wildernessMap, Map levelMap, (int, int) entrance, Rng rng, GameObjectDB objDb, FactDb factDb)
-  {
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.Grass, 1);
-    passable.Add(TileType.Dirt, 1);
-    passable.Add(TileType.Sand, 1);
-    passable.Add(TileType.RedTree, 1);
-    passable.Add(TileType.GreenTree, 1);
-    passable.Add(TileType.YellowTree, 1);
-    passable.Add(TileType.OrangeTree, 1);
-    passable.Add(TileType.Conifer, 1);
-    passable.Add(TileType.Water, 1);
-    passable.Add(TileType.StoneRoad, 1);
-    passable.Add(TileType.ClosedDoor, 1);
-
-    HashSet<(int, int)> candidates = [];
-    for (int r = -6; r <= 6; r++)
-    {
-      for (int c = -6; c <= 6; c++)
-      {        
-        if (r >= -2 && r <= 2 && c >= -2 && c <= 2)
-          continue;
-        int row = entrance.Item1 + r;
-        int col = entrance.Item2 + c;
-        if (!wildernessMap.InBounds(row, col))
-          continue;
-        TileType type = wildernessMap.TileAt(row, col).Type;
-        if (type != TileType.Mountain && type != TileType.SnowPeak)
-          continue;
-
-        bool adjToOpen = false;
-        int mountains = 0;
-        foreach (var adj in Util.Adj8Sqs(row, col))
-        {
-          Tile adjTile = wildernessMap.TileAt(adj);
-          if (adjTile.Passable())
-          {
-            adjToOpen = true;
-          }
-          else if (adjTile.Type == TileType.Mountain) 
-          {
-            ++mountains;
-          }
-        }
-        if (adjToOpen && mountains > 2)
-          candidates.Add((row, col));
-      }
-    }
-
-    // I want to make sure there's a path from the portal to the town, so just 
-    // any door as the goal for pathfinding
-    Loc goal = Loc.Nowhere;   
-    bool found = false;
-    for (int r = 25; r < wildernessMap.Height - 25 && !found; r++)
-    {
-      for (int c = 25; c < wildernessMap.Width - 25 && !found; c++)
-      {
-        if (wildernessMap.TileAt(r,c ).Type == TileType.ClosedDoor) 
-        {
-          goal = new(0, 0, r, c);
-          found = true;
-        }
-      }
-    }
-    
-    List<(int, int)> opts = [.. candidates];
-    while (opts.Count > 0)
-    {
-      int i = rng.Next(opts.Count);      
-      (int, int) sq = opts[rng.Next(opts.Count)];
-      Loc loc = new(0, 0, sq.Item1, sq.Item2);
-      var path = AStar.FindPath(objDb, wildernessMap, loc, goal, passable, false);
-      if (path.Count > 0)
-      {
-        Tile p = new Portcullis(false);
-        wildernessMap.SetTile(sq, p);
-        FindShortcutLoc(levelMap, loc, rng);
-        break;
-      }
-    
-      opts.RemoveAt(i);      
-    }
-  }
-
-  static void FindShortcutLoc(Map map, Loc exit, Rng rng)
-  {
-    List<(int, int)> opts = [];
-    for (int r = 1; r < map.Height - 1; r++)
-    {
-      for (int c = 1; c < map.Width - 1; c++)
-      {
-        TileType type = map.TileAt(r, c).Type;
-        if (type != TileType.DungeonWall)
-          continue;
-        int walls = 0;
-        int floors = 0;
-        foreach (var sq in Util.Adj8Sqs(r, c))
-        {
-          if (map.TileAt(sq).Type == TileType.DungeonFloor)
-            ++floors;
-          if (map.TileAt(sq).Type == TileType.DungeonWall)
-            ++walls;
-        }
-
-        if (walls == 5 && floors == 3)
-          opts.Add((r, c));
-      }
-    }
-
-    if (opts.Count > 0)
-    {
-      (int, int) sq = opts[rng.Next(opts.Count)];
-      Tile shortcut = new Shortcut() { Destination = exit };
-      map.SetTile(sq, shortcut);
-    }
   }
 
   // At the moment, I am just adding a potion of levitation on the stairs up side,
@@ -1733,9 +1497,6 @@ class MainDungeonBuilder : DungeonBuilder
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
-    PlaceLevelFiveGate(id, levels[4], levels[5], rng, factDb, objDb);
-    PlaceShortCut(wildernessMap,levels[4], entrance, rng, objDb, factDb);
-    
     // Add a couple of guaranteed good items to dungeon
     AddGoodItemToLevel(levels[1], id, 1, rng, objDb);
     AddGoodItemToLevel(levels[3], id, 3, rng, objDb);
