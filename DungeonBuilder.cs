@@ -65,6 +65,26 @@ abstract class DungeonBuilder
     return closets;
   }
 
+  protected static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
+  {
+    List<Loc> opts = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Passable())
+          opts.Add(new Loc(dungeonId, level, r, c));
+      }
+    }
+
+    if (opts.Count > 0)
+    {
+      Loc loc = opts[rng.Next(opts.Count)];
+      Item item = Treasure.GetTalisam(rng, objDb);
+      objDb.SetToLoc(loc, item);
+    }
+  }
+
   protected static void PopulateDungeon(Dungeon dungeon, Rng rng, GameObjectDB objDb)
   {
     for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)
@@ -533,6 +553,10 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     }
 
     PopulateDungeon(dungeon, rng, objDb);
+
+    // Add a couple of guaranteed good items to dungeon
+    AddGoodItemToLevel(levels[1], DungeonId, 1, rng, objDb);
+    AddGoodItemToLevel(levels[3], DungeonId, 3, rng, objDb);
 
     int fallenAdventurer = rng.Next(1, numOfLevels);
     AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, rng);
@@ -1209,26 +1233,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
-  {
-    List<Loc> opts = [];
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        if (map.TileAt(r, c).Passable())
-          opts.Add(new Loc(dungeonId, level, r, c));
-      }
-    }
-
-    if (opts.Count > 0)
-    {
-      Loc loc = opts[rng.Next(opts.Count)];
-      Item item = Treasure.GetTalisam(rng, objDb);
-      objDb.SetToLoc(loc, item);
-    }
-  }
-
   void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     if (level > 0)
@@ -1496,10 +1500,6 @@ class MainDungeonBuilder : DungeonBuilder
 
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
-
-    // Add a couple of guaranteed good items to dungeon
-    AddGoodItemToLevel(levels[1], id, 1, rng, objDb);
-    AddGoodItemToLevel(levels[3], id, 3, rng, objDb);
 
     GnomeMerchant(levels, id, rng, objDb);
     MoonDaughterCleric(levels, id, rng, objDb);
