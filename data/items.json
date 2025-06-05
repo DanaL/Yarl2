@@ -595,6 +595,14 @@
     "Traits": []
   },
   {
+    "Name": "BONE",
+    "DescriptiveName": "bone",
+    "Type": "Bone",
+    "Value": 0,
+    "Glyph": "(,white,yellow,black,false",
+    "Traits": []
+  },
+  {
     "Name": "VIAL_OF_POISON",
     "DescriptiveName": "vial of poison",
     "Type": "Potion",

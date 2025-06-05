@@ -415,3 +415,6 @@ A potion brewed from magically enhanced hot peppers. Originally intended as a co
 #
 vial of holy water
 Water blessed in a holy ritual. It has cleansing properties.
+#
+bone
+A femur? Or maybe a tibia?
