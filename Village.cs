@@ -492,8 +492,9 @@ class Village
       Glyph = new Glyph('d', colour, colour, Colours.BLACK, false),
       Loc = RandomOutdoorLoc(map, town, rng)
     };
-    pup.SetBehaviour(new VillagePupBehaviour());
+
     pup.Traits.Add(new VillagerTrait());
+    pup.SetBehaviour(new VillagePupBehaviour());    
     pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
     factDb.Add(new SimpleFact() { Name = "PupId", Value = pup.ID.ToString() });

@@ -19,32 +19,33 @@ interface IPathBuilder
   bool AtGoal(Loc loc, GameState gs);
 }
 
-class FindNearbyGold(Mob mob, GameState gs) : IPathBuilder
+class FindNearbyItem(Mob mob, GameState gs, string name) : IPathBuilder
 {
   Mob Mob { get; set; } = mob;
   Loc Goal { get; set; } = Loc.Nowhere;
   GameState GS { get; set; } = gs;
+  string ItemName { get; set; } = name;
 
   public Stack<Loc> BuildPath(Loc start)
   {
     var fov = FieldOfView.CalcVisible(9, Mob.Loc, GS.MapForLoc(Mob.Loc), GS.ObjDb);
-    PriorityQueue<Loc, int> goldLocs = new();
+    PriorityQueue<Loc, int> itemLocs = new();
 
     foreach (Loc loc in fov.Keys)
     {
       foreach (Item item in GS.ObjDb.VisibleItemsAt(loc))
       {
-        if (item.Name == "zorkmid")
+        if (item.Name == ItemName)
         {
-          goldLocs.Enqueue(loc, Util.Distance(start, loc));
+          itemLocs.Enqueue(loc, Util.Distance(start, loc));
           break;
         }
       }
     }
 
-    while (goldLocs.Count > 0)
+    while (itemLocs.Count > 0)
     {
-      Loc loc = goldLocs.Dequeue();
+      Loc loc = itemLocs.Dequeue();
       Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, TravelCosts(Mob), true);
       if (path.Count > 0)
         return path;
@@ -64,6 +65,12 @@ class FindNearbyGold(Mob mob, GameState gs) : IPathBuilder
     costs.Add(TileType.HiddenMagicMouth, 1);
     costs.Add(TileType.Dirt, 1);
     costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.RedTree, 1);
+    costs.Add(TileType.YellowTree, 1);
+    costs.Add(TileType.OrangeTree, 1);
+    costs.Add(TileType.Conifer, 1);
+    costs.Add(TileType.Sand, 1);
+    costs.Add(TileType.Grass, 1);
     costs.Add(TileType.OpenDoor, 1);
     costs.Add(TileType.BrokenDoor, 1);
     costs.Add(TileType.OpenPortcullis, 1);
@@ -605,6 +612,22 @@ class InArea(HashSet<Loc> sqs) : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs) =>
     Locations.Contains(mob.Loc) ? PlanStatus.Success : PlanStatus.Failure;
+}
+
+class HasItem(string name) : BehaviourNode
+{
+  string ItemName { get; set; } = name;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Item item in mob.Inventory.Items())
+    {
+      if (item.Name == ItemName)
+        return PlanStatus.Success;
+    }
+
+    return PlanStatus.Failure;
+  }
 }
 
 class IsDaytime : BehaviourNode
@@ -1496,7 +1519,7 @@ class Planner
       new PickupItem("zorkmid")
     ]);
 
-    FindNearbyGold goldFinder = new(mob, gs);
+    FindNearbyItem goldFinder = new(mob, gs, "zorkmid");
     BehaviourNode seekGold = new FindGoal(goldFinder);
     Selector huntGold = new([
       seekGold,
@@ -1523,7 +1546,7 @@ class Planner
   static BehaviourNode CreateWorshipperPlan(Mob mob, GameState gs)
   {
     WorshiperTrait worshipTrait = mob.Traits.OfType<WorshiperTrait>().First();
-    
+
     Loc altarLoc = worshipTrait.AltarLoc;
     HashSet<Loc> nearbyTiles = [];
     for (int r = altarLoc.Row - 3; r <= altarLoc.Row + 3; r++)
@@ -1544,18 +1567,18 @@ class Planner
       new ThingExists(worshipTrait.AltarId)
     ]);
 
-    Selector worshipBehaviour = new ([
+    Selector worshipBehaviour = new([
       new RepeatWhile(
-        worshipCondition, 
+        worshipCondition,
         new WanderInArea(nearbyTiles)
       ),
       new SetMonsterAttitude(Mob.AGGRESSIVE, s)
     ]);
-    
+
     Selector plan = (Selector)CreateMonsterPlan(mob);
 
     int i = 0;
-    for ( ; i < plan.Children.Count; i++)
+    for (; i < plan.Children.Count; i++)
     {
       if (plan.Children[i].Label == "indifferent")
         break;
@@ -1704,7 +1727,7 @@ class Planner
     return WanderInHome(gs.Town.Homes[homeId], gs);
   }
 
-  static BehaviourNode Pup(GameState gs)
+  static BehaviourNode Pup(Mob mob,GameState gs)
   {
     HashSet<Loc> townSqs = [];
 
@@ -1716,7 +1739,35 @@ class Planner
       }
     }
 
-    return new WanderInArea(townSqs);
+    Sequence pickupBone = new([
+      new StandingOn("bone"),
+      new PickupItem("bone")
+    ]);
+
+    FindNearbyItem boneFinder = new(mob, gs, "bone");
+    BehaviourNode seekBone = new FindGoal(boneFinder);
+    Selector fetchBone = new([
+      seekBone,
+      pickupBone
+    ]);
+
+    Sequence gold = new([new Not(new InDanger()), fetchBone]) { Label = "fetchbone" };
+
+    // Insert the seek gold node after inactive. The greedy monster will hunt
+    // gold unless it is immediately adjacent to the player.
+    Selector plan = (Selector)CreateMonsterPlan(mob);
+    int i = 0;
+    foreach (BehaviourNode node in plan.Children)
+    {
+      if (node.Label == "inactive")
+        break;
+      ++i;
+    }
+    plan.Children.Insert(i + 1, gold);
+
+    return plan;
+
+    //return new WanderInArea(townSqs);
   }
 
   static BehaviourNode WitchPlan(Mob witch, GameState gs)
@@ -1766,7 +1817,7 @@ class Planner
     "WitchPlan" => WitchPlan(mob, gs),
     "AlchemistPlan" => AlchemistPlan(mob, gs),
     "BarHoundPlan" => WanderInHome(gs.Town.Tavern, gs),
-    "PupPlan" => Pup(gs),
+    "PupPlan" => Pup(mob, gs),
     "SimpleRandomPlan" => new Selector([new RandomMove(), new PassTurn()]),
     "MoonClericPlan" => new Selector([
       new Sequence([new CheckDialogueState(1), new DiceRoll(250), new MoveLevel()]),

@@ -113,7 +113,8 @@ class DebugCommand(GameState gs)
     {"skeleton key", ItemNames.SKELETON_KEY },
     {"red crystal", ItemNames.RED_CRYSTAL },
     {"blue crystal", ItemNames.BLUE_CRYSTAL },
-    {"holy water", ItemNames.HOLY_WATER }
+    {"holy water", ItemNames.HOLY_WATER },
+    {"bone", ItemNames.BONE }
   };
 
   public string DoCommand(string txt)
@@ -266,6 +267,11 @@ class DebugCommand(GameState gs)
         item = ItemFactory.Get(itemEnum, _gs.ObjDb);
       }
 
+      if (name == "bone")
+      {
+        item.Traits.Add(new AdjectiveTrait("old"));
+      }
+      
       if (name == "rubble" || name == "boulder")
       {
         var adjSpots = AdjSpots(_gs.Player.Loc);
@@ -273,11 +279,11 @@ class DebugCommand(GameState gs)
           return "No open spot to add item";
 
         loc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-        _gs.ObjDb.SetToLoc(loc, item);        
-      }        
+        _gs.ObjDb.SetToLoc(loc, item);
+      }
       else if (action == "give" && !illusion)
         _gs.Player.Inventory.Add(item, _gs.Player.ID);
-      else       
+      else
         _gs.ObjDb.SetToLoc(loc, item);
 
       _gs.PrepareFieldOfView();

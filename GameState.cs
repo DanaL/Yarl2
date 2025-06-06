@@ -277,7 +277,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.AlertPlayer(s);
     }
 
-    List<Trait> itemTraits = [..item.Traits];
+    List<Trait> itemTraits = [.. item.Traits];
     foreach (Trait t in itemTraits)
     {
       if (t is DamageTrait dt && dt.DamageType == DamageType.Fire)

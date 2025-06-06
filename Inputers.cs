@@ -247,7 +247,7 @@ class Examiner : Inputer
     if (items.Count > 0)
     {
       Item item = items[0];
-      string title = item.Name.IndefArticle().Capitalize();
+      string title = item.FullName.IndefArticle().Capitalize();
       string details = "";
       if ((item.Type == ItemType.Statue || item.Type == ItemType.Altar) && item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;

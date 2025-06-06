@@ -116,11 +116,11 @@ class DisguisedMonsterBehaviour : MonsterBehaviour
   //}
 }
 
-class VillagePupBehaviour : IBehaviour
+class VillagePupBehaviour : NPCBehaviour
 {  
-  public string GetBark(Mob actor, GameState gs) => "";
+  public override string GetBark(Mob actor, GameState gs) => "";
 
-  public (Action, Inputer) Chat(Mob animal, GameState gs)
+  public override (Action, Inputer) Chat(Mob animal, GameState gs)
   {
     var sb = new StringBuilder(animal.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
