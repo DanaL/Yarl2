@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 enum PlanStatus { Success, Failure, Running }
@@ -776,6 +774,26 @@ class StandingOn(string item) : BehaviourNode
   }
 }
 
+class DropItem(string item) : BehaviourNode
+{
+  string ItemToLookFor { get; set; } = item;
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    foreach (Item item in mob.Inventory.Items())
+    {
+      if (item.Name == ItemToLookFor)
+      {
+        DropItemAction drop = new(gs, mob) { Choice = item.Slot };
+        mob.ExecuteAction(drop);
+        return PlanStatus.Success;
+      }
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
 class PickupItem(string item) : BehaviourNode
 {
   string ItemToLookFor { get; set; } = item;
@@ -1275,6 +1293,59 @@ class FindUpStairs : BehaviourNode
   }
 }
 
+class SeekPlayerAStar : BehaviourNode
+{
+  static Dictionary<TileType, int> TravelCosts(Mob mob)
+  {
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.Bridge, 1);
+    costs.Add(TileType.WoodBridge, 1);
+    costs.Add(TileType.Dirt, 1);
+    costs.Add(TileType.GreenTree, 1);
+    costs.Add(TileType.OrangeTree, 1);
+    costs.Add(TileType.RedTree, 1);
+    costs.Add(TileType.YellowTree, 1);
+    costs.Add(TileType.Well, 1);
+    costs.Add(TileType.Water, 2);
+    costs.Add(TileType.Grass, 1);
+    costs.Add(TileType.Sand, 1);
+
+    foreach (Trait t in mob.Traits)
+    {
+      if (t is IntelligentTrait)
+        costs.Add(TileType.ClosedDoor, 2);
+      if (t is FloatingTrait || t is FlyingTrait)
+        costs.Add(TileType.DeepWater, 1);
+    }
+
+    return costs;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {    
+    if (Util.Distance(mob.Loc, gs.Player.Loc) <= 1)
+      return PlanStatus.Success;
+
+    Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, gs.Player.Loc, TravelCosts(mob), true);
+
+    if (path.Count == 0)
+      return PlanStatus.Failure;
+
+    Loc loc = path.Pop();
+
+    // We still check if the tile is passable because, say, a door might be
+    // closed after the current dijkstra map is calculated and before it is
+    // refreshed      
+    if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
+    {
+      mob.ExecuteAction(new MoveAction(gs, mob, loc));
+      return PlanStatus.Running;
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
 class ChaseTarget : BehaviourNode
 {
   static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
@@ -1741,10 +1812,7 @@ class Planner
       }
     }
 
-    Sequence idleCondition = new([
-     new CheckMonsterAttitude(0),
-     new WanderInArea(townSqs)
-   ]);
+    RepeatWhile idleCondition = new RepeatWhile(new CheckMonsterAttitude(0), new WanderInArea(townSqs));
 
     Sequence pickupBone = new([
       new StandingOn("bone"),
@@ -1755,7 +1823,13 @@ class Planner
     BehaviourNode seekBone = new FindGoal(boneFinder);    
     Sequence fetchBone = new([new CheckMonsterAttitude(1), new Selector([seekBone, pickupBone]), new SetMonsterAttitude(2, "Arf!")]);
 
-    Selector plan = new([idleCondition, fetchBone]);
+    string blurb = $"{mob.FullName.Capitalize()} wags its tail.";
+    Sequence deliverBone = new([
+      new CheckMonsterAttitude(2), 
+      new Sequence([ new SeekPlayerAStar(), new DropItem("bone"), new SetMonsterAttitude(0, blurb)])
+    ]);
+
+    Selector plan = new([idleCondition, fetchBone, deliverBone]);
 
     return plan;
   }

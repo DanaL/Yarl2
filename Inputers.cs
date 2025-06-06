@@ -1290,7 +1290,7 @@ class InventoryDetails : Inputer
     {
       case 'd':
         GS.UIRef().SetInputController(new PlayerCommandController(GS));
-        GS.Player.QueueAction(new DropItemAction(GS, GS.Player) { Choice = item.Slot });        
+        GS.Player.QueueAction(new DropItemAction(GS, GS.Player) { Choice = item.Slot });
         break;
       case 'a':
         GS.UIRef().SetInputController(new PlayerCommandController(GS));

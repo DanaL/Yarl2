@@ -498,6 +498,7 @@ class Village
     pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
     pup.Stats[Attribute.MobAttitude] = new Stat(0);
+    pup.Inventory = new Inventory(pup.ID, objDb);
 
     factDb.Add(new SimpleFact() { Name = "PupId", Value = pup.ID.ToString() });
 

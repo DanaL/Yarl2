@@ -558,7 +558,7 @@ class Mob : Actor
     int threshold = volume - Util.Distance(sourceRow, sourceColumn, Loc.Row, Loc.Col);
     bool heard = gs.Rng.Next(11) <= threshold;
 
-    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<WorshiperTrait>())
+    if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<WorshiperTrait>() && !HasTrait<VillagerTrait>())
     {
         Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);        
     }
@@ -595,9 +595,6 @@ class Mob : Actor
 
   public override void TakeTurn(GameState gs)
   {
-    if (Name == "friendly hound")
-      Console.WriteLine();
-
     if (CurrPlan is null)
     {
       string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
