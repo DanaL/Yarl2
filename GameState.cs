@@ -301,6 +301,17 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
           UI.AlertPlayer("You hear grinding stone.");
       }
     }
+
+    // Special case to handle playing fetch with the village pup; it seemed like a lot of
+    // code for something that might not have other use cases
+    if (InWilderness && item.Name == "bone")
+    {
+      ulong pupId = FactDb.FactCheck("PupId") is SimpleFact pupFact ? ulong.Parse(pupFact.Value) : 0;
+      if (ObjDb.GetObj(pupId) is Actor pup && CanSeeLoc(pup, loc, 7))
+      {
+        pup.Stats[Attribute.MobAttitude] = new Stat(1);
+      }
+    }
   }
 
   public void ItemDestroyed(Item item, Loc loc)

@@ -455,7 +455,7 @@ class Village
     }
   }
 
-  static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, Rng rng)
+  static Mob GeneratePuppy(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     int roll = rng.Next(4);
     var (colourDesc, colour) = roll switch
@@ -496,6 +496,8 @@ class Village
     pup.Traits.Add(new VillagerTrait());
     pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
+    factDb.Add(new SimpleFact() { Name = "PupId", Value = pup.ID.ToString() });
+
     return pup;
   }
 
@@ -522,7 +524,7 @@ class Village
     objDb.AddToLoc(innkeeper.Loc, innkeeper);
     factDb.Add(new SimpleFact() { Name = "TavernName", Value = NameGenerator.GenerateTavernName(rng) });
 
-    Mob pup = GeneratePuppy(map, town, objDb, rng);
+    Mob pup = GeneratePuppy(map, town, objDb, factDb, rng);
     objDb.Add(pup);
     objDb.AddToLoc(pup.Loc, pup);
 
