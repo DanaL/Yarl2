@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 record UseResult(Action? ReplacementAction, bool Successful = true, string Message = "");
@@ -983,7 +981,7 @@ class FeatherFallTrait : TemporaryTrait
 
   public override string AsText() => $"FeatherFall#{OwnerID}#{ExpiresOn}";
 }
-
+ 
 class FinalBossTrait : Trait
 {
   public override string AsText() => "FinalBoss";
@@ -3713,7 +3711,7 @@ class TraitFactory
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
-    { "SetAttributeTrigger", (pieces, gameObj) => 
+    { "SetAttributeTrigger", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out Attribute attr);
         return new SetAttributeTriggerTrait()
@@ -3721,7 +3719,7 @@ class TraitFactory
           Attribute = attr,
           Value = int.Parse(pieces[2]),
           SourceId = ulong.Parse(pieces[3])
-        }; 
+        };
       }
     },
     { "SideEffect", (pieces, gameObj) => new SideEffectTrait() { Odds = int.Parse(pieces[1]), Effect = string.Join('#', pieces[2..] ) } },

@@ -91,7 +91,7 @@ interface IGameEventListener
 
 abstract class GameObj : IZLevel
 {
-  private static ulong IDSeed = 2;
+  static ulong IDSeed = 2;
   public string Name { get; set; } = "";
   public virtual string FullName => Name;
   public virtual Glyph Glyph { get; set; }
