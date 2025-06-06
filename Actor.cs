@@ -594,7 +594,10 @@ class Mob : Actor
   public void ResetPlan() => CurrPlan = null;
 
   public override void TakeTurn(GameState gs)
-  {    
+  {
+    if (Name == "friendly hound")
+      Console.WriteLine();
+
     if (CurrPlan is null)
     {
       string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;

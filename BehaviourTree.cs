@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 enum PlanStatus { Success, Failure, Running }
@@ -1739,35 +1741,23 @@ class Planner
       }
     }
 
+    Sequence idleCondition = new([
+     new CheckMonsterAttitude(0),
+     new WanderInArea(townSqs)
+   ]);
+
     Sequence pickupBone = new([
       new StandingOn("bone"),
       new PickupItem("bone")
     ]);
 
     FindNearbyItem boneFinder = new(mob, gs, "bone");
-    BehaviourNode seekBone = new FindGoal(boneFinder);
-    Selector fetchBone = new([
-      seekBone,
-      pickupBone
-    ]);
+    BehaviourNode seekBone = new FindGoal(boneFinder);    
+    Sequence fetchBone = new([new CheckMonsterAttitude(1), new Selector([seekBone, pickupBone]), new SetMonsterAttitude(2, "Arf!")]);
 
-    Sequence gold = new([new Not(new InDanger()), fetchBone]) { Label = "fetchbone" };
-
-    // Insert the seek gold node after inactive. The greedy monster will hunt
-    // gold unless it is immediately adjacent to the player.
-    Selector plan = (Selector)CreateMonsterPlan(mob);
-    int i = 0;
-    foreach (BehaviourNode node in plan.Children)
-    {
-      if (node.Label == "inactive")
-        break;
-      ++i;
-    }
-    plan.Children.Insert(i + 1, gold);
+    Selector plan = new([idleCondition, fetchBone]);
 
     return plan;
-
-    //return new WanderInArea(townSqs);
   }
 
   static BehaviourNode WitchPlan(Mob witch, GameState gs)

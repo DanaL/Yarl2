@@ -497,6 +497,8 @@ class Village
     pup.SetBehaviour(new VillagePupBehaviour());    
     pup.Traits.Add(new BehaviourTreeTrait() { Plan = "PupPlan" });
 
+    pup.Stats[Attribute.MobAttitude] = new Stat(0);
+
     factDb.Add(new SimpleFact() { Name = "PupId", Value = pup.ID.ToString() });
 
     return pup;
