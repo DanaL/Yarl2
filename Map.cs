@@ -947,3 +947,89 @@ class CACave
     return template;
   }
 }
+
+// Tower/mansion style map I'll use Binary Space Partitioning to build
+class Tower(int height, int width, int minLength)
+{
+  const int VERTICAL = 0;
+  const int HORIZONTAL = 1;
+
+  int Height { get; set; } = height;
+  int Width { get; set; } = width;
+  int MinLength { get; set; } = minLength;
+
+  void Partition(bool[,] map, int tr, int lc, int br, int rc, Rng rng)
+  {
+    List<int> options = [];
+    if (br - tr > MinLength)
+      options.Add(HORIZONTAL);
+    if (rc - lc > MinLength)
+      options.Add(VERTICAL);
+
+    // We're done recursing
+    if (options.Count == 0)
+      return;
+
+    int choice = options[rng.Next(options.Count)];
+
+    if (choice == VERTICAL)
+    {
+      int a = int.Min(lc + MinLength, Width - 1), b = int.Max(0, rc - MinLength);
+      int col;
+      if (a == b)
+        col = a;
+      else
+        col = rng.Next(int.Min(a, b), int.Max(a, b));
+      
+      for (int r = tr; r <= br; r++)
+      {
+        map[r, col] = true;
+      }
+
+      Partition(map, tr, lc, br, col, rng);
+      Partition(map, tr, col + 1, br, rc, rng);
+    }
+    else 
+    {
+      int a = int.Min(tr + MinLength, Height - 1), b = int.Max(0, br - MinLength);
+      int row;
+      if (a == b)
+        row = a;
+      else
+        row = rng.Next(int.Min(a, b), int.Max(a, b));
+
+      for (int c = lc; c <= rc; c++)
+      {
+        map[row, c] = true;
+      }
+
+      Partition(map, tr, lc, row, rc, rng);
+      Partition(map, row + 1, lc, br, rc, rng);
+    }
+  }
+
+  void Dump(bool[,] map)
+  {
+    for (int r = 0; r < Height; r++)
+    {
+      for (int c = 0; c < Width; c++)
+      {
+        char ch = map[r, c] ? '#' : '.';
+        Console.Write(ch);
+      }
+      Console.WriteLine();
+    }
+  }
+
+  public bool[,] Build(Rng rng)
+  {
+    // False == floor, true == wall
+    var map = new bool[Height, Width];
+
+    Partition(map, 1, 1, Height - 2, Width - 2, rng);
+
+    Dump(map);
+
+    return map;
+  }
+}
