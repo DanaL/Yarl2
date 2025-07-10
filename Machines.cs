@@ -122,7 +122,7 @@ class LightPuzzleSetup
 
   public static List<PathInfo> FindPotential(Map map)
   {    
-    List<HashSet<(int, int)>> roomsTiles = [.. map.FindRooms()
+    List<HashSet<(int, int)>> roomsTiles = [.. map.FindRooms(9)
                                                  .Select(r => new HashSet<(int, int)>(r))];
     List<RoomInfo> rooms = [];
     foreach (HashSet<(int, int)> room in roomsTiles)

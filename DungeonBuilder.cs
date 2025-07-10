@@ -1126,7 +1126,7 @@ class MainDungeonBuilder : DungeonBuilder
     bool captive = false;    
     for (int level = 0; level < levels.Length; level++)
     {
-      List<List<(int, int)>> rooms = levels[level].FindRooms();
+      List<List<(int, int)>> rooms = levels[level].FindRooms(9);
       if (rooms.Count == 0)
         continue;
 

@@ -771,7 +771,7 @@ class Map : ICloneable
 
   // Find rooms -- flood fill to find areas on map that are rooms,
   // ie contiguous floor squares at least 9x9 and no longer than 16x16
-  public List<List<(int, int)>> FindRooms()
+  public List<List<(int, int)>> FindRooms(int minSize)
   {
     List<List<(int, int)>> rooms = [];
     var visited = new bool[Height, Width];
@@ -787,7 +787,7 @@ class Map : ICloneable
           List<(int r, int c)> floors = [];
           RoomFloodFill(r, c, visited, floors);
 
-          if (floors.Count > 9 && floors.Count <= 256)
+          if (floors.Count > minSize && floors.Count <= 256)
           {
             // I'm not actually checking/rejecting long, narrow rooms (like
             // say a 2x6 room) but the dungeon generator doesn't generally
@@ -860,6 +860,56 @@ class Map : ICloneable
       {
         char ch = Tiles[row * Width + col].Type switch
         {
+          TileType.WorldBorder => ' ',
+          TileType.PermWall => '#',
+          TileType.DungeonWall => '#',
+          TileType.DungeonFloor or TileType.Sand => '.',
+          TileType.ClosedDoor or TileType.LockedDoor => '+',
+          TileType.Mountain or TileType.SnowPeak => '^',
+          TileType.Grass => ',',
+          TileType.GreenTree => 'T',
+          TileType.RedTree => 'T',
+          TileType.OrangeTree => 'T',
+          TileType.YellowTree => 'T',
+          TileType.DeepWater => '~',
+          TileType.WoodBridge => '=',
+          TileType.Upstairs => '<',
+          TileType.Downstairs => '>',
+          TileType.VaultDoor => '|',
+          TileType.OpenPortcullis => '|',
+          TileType.Portcullis => '|',
+          _ => ' '
+        };
+        Console.Write(ch);
+      }
+      Console.WriteLine();
+    }
+  }
+
+  public void DumpMarkRooms(List<List<(int,int)>> rooms)
+  {
+    HashSet<(int, int)> floors = new();
+    foreach (List<(int, int)> room in rooms)
+    {
+      foreach ((int r, int c) in room)
+      {
+        floors.Add((r, c));
+      }
+    }
+
+    for (int row = 0; row < Height; row++)
+    {
+      for (int col = 0; col < Width; col++)
+      {
+        if (floors.Contains((row, col)))
+        {
+          Console.Write('*');
+          continue;
+        }
+
+        char ch = Tiles[row * Width + col].Type switch
+        {
+          TileType.WorldBorder => ' ',
           TileType.PermWall => '#',
           TileType.DungeonWall => '#',
           TileType.DungeonFloor or TileType.Sand => '.',
@@ -1021,14 +1071,147 @@ class Tower(int height, int width, int minLength)
     }
   }
 
+  static void EraseExteriorRoom(Map map, HashSet<(int, int)> room)
+  {
+    foreach (var sq in room)
+    {
+      map.SetTile(sq, TileFactory.Get(TileType.WorldBorder));
+
+      if (sq.Item1 == 2)
+        map.SetTile(1, sq.Item2, TileFactory.Get(TileType.WorldBorder));
+      if (sq.Item1 == map.Height - 3)
+        map.SetTile(map.Height - 2, sq.Item2, TileFactory.Get(TileType.WorldBorder));
+      if (sq.Item2 == 2)
+        map.SetTile(sq.Item1, 1, TileFactory.Get(TileType.WorldBorder));
+      if (sq.Item2 == map.Width - 3)
+        map.SetTile(sq.Item1, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
+    }
+  }
+
+  static void TweakMap(Map map, Dictionary<int, HashSet<(int, int)>> regions, Rng rng)
+  {
+    List<int> corners = [];
+    List<int> exterior = [];
+    List<int> intertor = [];
+
+    foreach (int region in regions.Keys)
+    {
+      bool north = NorthExterior(map, regions[region]);
+      bool south = SouthExterior(map, regions[region]);
+      bool west = WestExterior(map, regions[region]);
+      bool east = EastExterior(map, regions[region]);
+
+      if (north || south)
+      {
+        if (east || west)
+          corners.Add(region);
+        else
+          exterior.Add(region);
+      }
+      else if (west || east)
+      {
+        exterior.Add(region);
+      }
+      else
+      {
+        intertor.Add(region);
+      }
+    }
+
+    foreach (int roomId in corners)
+    {
+      EraseExteriorRoom(map, regions[roomId]);
+    }
+
+    map.SetTile(1, 1, TileFactory.Get(TileType.WorldBorder));
+    map.SetTile(1, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
+    map.SetTile(map.Height - 2, 1, TileFactory.Get(TileType.WorldBorder));
+    map.SetTile(map.Height - 2, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
+
+    bool NorthExterior(Map map, HashSet<(int, int)> region)
+    {
+      foreach ((int r, _) in region)
+      {
+        if (r == 2)
+          return true;
+      }
+
+      return false;
+    }
+
+    bool SouthExterior(Map map, HashSet<(int, int)> region)
+    {
+      foreach ((int r, _) in region)
+      {
+        if (r == map.Height - 3)
+          return true;
+      }
+
+      return false;
+    }
+
+    bool WestExterior(Map map, HashSet<(int, int)> region)
+    {
+      foreach ((_, int c) in region)
+      {
+        if (c == 2)
+          return true;
+      }
+
+      return false;
+    }
+
+    bool EastExterior(Map map, HashSet<(int, int)> region)
+    {
+      foreach ((_, int c) in region)
+      {
+        if (c == map.Width - 3)
+          return true;
+      }
+
+      return false;
+    }
+  }
+
   public bool[,] Build(Rng rng)
   {
     // False == floor, true == wall
     var map = new bool[Height, Width];
+    for (int r = 0; r < Height; r++)
+    {
+      map[r, 0] = true; 
+      map[r, Width - 1] = true;
+    }
+    for (int c = 0; c < Width; c++)
+    {
+      map[0, c] = true;
+      map[Height - 1, c] = true;
+    }
 
     Partition(map, 1, 1, Height - 2, Width - 2, rng);
 
-    Dump(map);
+    Map tower = new(Width + 2, Height + 2);
+    for (int r = 0; r < Height + 2; r++)
+    {
+      for (int c = 0; c < Width + 2; c++)
+      {
+        if (r == 0 ||  c == 0)
+          tower.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
+        else if (r == Height + 1 || c == Width + 1)
+          tower.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
+        else if (map[r - 1, c - 1])
+          tower.SetTile(r, c, TileFactory.Get(TileType.DungeonWall));
+        else
+          tower.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));        
+      }
+    }
+
+    RegionFinder rf = new(new DungeonPassable());
+    Dictionary<int, HashSet<(int, int)>> regions = rf.Find(tower, false, 0, TileType.DungeonFloor);
+
+    TweakMap(tower, regions, rng);
+
+    tower.Dump();
 
     return map;
   }
