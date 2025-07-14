@@ -1071,101 +1071,104 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  static void EraseExteriorRoom(Map map, HashSet<(int, int)> room)
+  static void EraseExteriorRoom(Map map, Room room, List<Room> rooms)
   {
-    foreach (var sq in room)
+    List<Room> otherRooms = [.. rooms.Where(r => r != room)];
+    foreach ((int r, int c) in room.Sqs)
     {
-      map.SetTile(sq, TileFactory.Get(TileType.WorldBorder));
+      map.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
+    }
+    foreach ((int r, int c) in room.Perimeter)
+    {
+      if (!SharedWall(r, c, otherRooms))
+        map.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
+    }
 
-      if (sq.Item1 == 2)
-        map.SetTile(1, sq.Item2, TileFactory.Get(TileType.WorldBorder));
-      if (sq.Item1 == map.Height - 3)
-        map.SetTile(map.Height - 2, sq.Item2, TileFactory.Get(TileType.WorldBorder));
-      if (sq.Item2 == 2)
-        map.SetTile(sq.Item1, 1, TileFactory.Get(TileType.WorldBorder));
-      if (sq.Item2 == map.Width - 3)
-        map.SetTile(sq.Item1, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
+    static bool SharedWall(int r, int c, List<Room> others)
+    {
+      foreach (Room room in others)
+      {
+        if (room.Perimeter.Contains((r, c)))
+          return true;
+      }
+
+      return false;
     }
   }
 
-  static void TweakMap(Map map, Dictionary<int, HashSet<(int, int)>> regions, Rng rng)
+  static void TweakMap(Map map, List<Room> rooms, Rng rng)
   {
-    List<int> corners = [];
-    List<int> exterior = [];
-    List<int> intertor = [];
+    List<Room> corners = [];
+    List<Room> exterior = [];
+    List<Room> intertor = [];
 
-    foreach (int region in regions.Keys)
+    foreach (Room room in rooms)
     {
-      bool north = NorthExterior(map, regions[region]);
-      bool south = SouthExterior(map, regions[region]);
-      bool west = WestExterior(map, regions[region]);
-      bool east = EastExterior(map, regions[region]);
+      bool north = NorthExterior(map, room.Perimeter);
+      bool south = SouthExterior(map, room.Perimeter);
+      bool west = WestExterior(map, room.Perimeter);
+      bool east = EastExterior(map, room.Perimeter);
 
       if (north || south)
       {
         if (east || west)
-          corners.Add(region);
+          corners.Add(room);
         else
-          exterior.Add(region);
+          exterior.Add(room);
       }
       else if (west || east)
       {
-        exterior.Add(region);
+        exterior.Add(room);
       }
       else
       {
-        intertor.Add(region);
+        intertor.Add(room);
       }
     }
 
-    foreach (int roomId in corners)
+    foreach (Room room in corners)
     {
-      EraseExteriorRoom(map, regions[roomId]);
+      EraseExteriorRoom(map, room, rooms);
     }
 
-    map.SetTile(1, 1, TileFactory.Get(TileType.WorldBorder));
-    map.SetTile(1, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
-    map.SetTile(map.Height - 2, 1, TileFactory.Get(TileType.WorldBorder));
-    map.SetTile(map.Height - 2, map.Width - 2, TileFactory.Get(TileType.WorldBorder));
-
-    bool NorthExterior(Map map, HashSet<(int, int)> region)
+    bool NorthExterior(Map map, HashSet<(int, int)> perimeter)
     {
-      foreach ((int r, _) in region)
+      foreach ((int r, _) in perimeter)
       {
-        if (r == 2)
+        if (r == 1)
           return true;
       }
 
       return false;
     }
 
-    bool SouthExterior(Map map, HashSet<(int, int)> region)
+    bool SouthExterior(Map map, HashSet<(int, int)> perimeter)
     {
-      foreach ((int r, _) in region)
+      foreach ((int r, _) in perimeter)
       {
-        if (r == map.Height - 3)
+        if (r == map.Height - 2)
           return true;
       }
 
       return false;
     }
 
-    bool WestExterior(Map map, HashSet<(int, int)> region)
+    bool WestExterior(Map map, HashSet<(int, int)> perimeter)
     {
-      foreach ((_, int c) in region)
+      foreach ((_, int c) in perimeter)
       {
-        if (c == 2)
+        if (c == 1)
           return true;
       }
 
       return false;
     }
 
-    bool EastExterior(Map map, HashSet<(int, int)> region)
+    bool EastExterior(Map map, HashSet<(int, int)> perimeter)
     {
-      foreach ((_, int c) in region)
+      foreach ((_, int c) in perimeter)
       {
-        if (c == map.Width - 3)
+        if (c == map.Width - 2)
           return true;
       }
 
@@ -1209,7 +1212,25 @@ class Tower(int height, int width, int minLength)
     RegionFinder rf = new(new DungeonPassable());
     Dictionary<int, HashSet<(int, int)>> regions = rf.Find(tower, false, 0, TileType.DungeonFloor);
 
-    TweakMap(tower, regions, rng);
+    // Convert the hashset of floor tiles to Room objects
+    List<Room> rooms = [];    
+    foreach (var room in regions.Values)
+    {
+      Room r = new() { Sqs = room };
+
+      foreach ((int row, int col) in room)
+      {
+        foreach (var sq in Util.Adj8Sqs(row, col))
+        {
+          if (tower.TileAt(sq).Type == TileType.DungeonWall)
+            r.Perimeter.Add(sq);
+        }
+      }
+
+      rooms.Add(r);
+    }
+
+    TweakMap(tower, rooms, rng);
 
     tower.Dump();
 

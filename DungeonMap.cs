@@ -116,7 +116,7 @@ class DungeonMap(Rng rng)
 
       var room = new Room(sqs, shape);
       rooms.Add(room);
-      perimeters = perimeters.Union(room.Permieter).ToHashSet();
+      perimeters = perimeters.Union(room.Perimeter).ToHashSet();
 
       foreach (var sq in sqs)
       {
@@ -474,7 +474,7 @@ class DungeonMap(Rng rng)
       List<(int, int)> connectors;
       var perimeters = new HashSet<(int, int)>();
       foreach (var room in rooms)
-        perimeters = perimeters.Union(room.Permieter).ToHashSet();
+        perimeters = perimeters.Union(room.Perimeter).ToHashSet();
 
       bool done = false;
       do
@@ -890,7 +890,7 @@ class DungeonMap(Rng rng)
       {
         if (j == k)
           continue;
-        var sqs = rooms[j].Permieter.Intersect(rooms[k].Permieter).ToHashSet();
+        var sqs = rooms[j].Perimeter.Intersect(rooms[k].Perimeter).ToHashSet();
 
         if (sqs.Count == 0)
           continue;
@@ -1005,7 +1005,7 @@ class DungeonMap(Rng rng)
         // Draw in the room perimeters
         foreach (var room in rooms)
         {
-          foreach (var sq in room.Permieter)
+          foreach (var sq in room.Perimeter)
           {
             if (map.InBounds(sq.Item1, sq.Item2))
               map.SetTile(sq.Item1, sq.Item2, TileFactory.Get(TileType.DungeonWall));
@@ -1067,12 +1067,18 @@ class Room
 {
   public RoomShapes Shape { get; set; }
   public HashSet<(int, int)> Sqs { get; set; }
-  public HashSet<(int, int)> Permieter { get; set; }
+  public HashSet<(int, int)> Perimeter { get; set; }
+
+  public Room()
+  {
+    Sqs = [];
+    Perimeter = [];
+  }
 
   public Room(IEnumerable<(int, int)> sqs, RoomShapes shape)
   {
     Shape = shape;
-    Sqs = new HashSet<(int, int)>(sqs);
+    Sqs = [.. sqs];
 
     int minRow = int.MaxValue, maxRow = 0;
     int minCol = int.MaxValue, maxCol = 0;
@@ -1093,28 +1099,28 @@ class Room
     minCol = minCol == 0 ? minCol : (minCol - 1);
     maxCol += 1;
 
-    Permieter = [];
+    Perimeter = [];
     for (int r = minRow; r <= maxRow; r++)
     {
       for (int c = minCol; c <= maxCol; c++)
       {
         if (!Sqs.Contains((r, c)))
-          Permieter.Add((r, c));
+          Perimeter.Add((r, c));
       }
     }
   }
 
   public bool Overlaps(Room other)
   {
-    return Permieter.Intersect(other.Permieter).Any() ||
-        Permieter.Intersect(other.Sqs).Any();
+    return Perimeter.Intersect(other.Perimeter).Any() ||
+        Perimeter.Intersect(other.Sqs).Any();
   }
 
   public List<(int, int)> CalcDoorCandidates()
   {
     List<(int, int)> candidates = [];
 
-    foreach (var (dr, dc) in Permieter)
+    foreach (var (dr, dc) in Perimeter)
     {
       foreach (var n in Util.Adj4)
       {
