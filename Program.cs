@@ -16,7 +16,10 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
-var r = new Rng(DateTime.UtcNow.GetHashCode());
+var rs = DateTime.UtcNow.GetHashCode();
+Console.WriteLine(rs);
+var r = new Rng(rs);
+
 var tower = new Tower(25, 41, 5);
 var map = tower.Build(r);
 

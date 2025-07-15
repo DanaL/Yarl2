@@ -1084,6 +1084,8 @@ class Tower(int height, int width, int minLength)
         map.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
     }
 
+    rooms.Remove(room);
+
     static bool SharedWall(int r, int c, List<Room> others)
     {
       foreach (Room room in others)
@@ -1104,9 +1106,9 @@ class Tower(int height, int width, int minLength)
 
     foreach (Room room in rooms)
     {
-      bool north = NorthExterior(map, room.Perimeter);
+      bool north = NorthExterior(room.Perimeter);
       bool south = SouthExterior(map, room.Perimeter);
-      bool west = WestExterior(map, room.Perimeter);
+      bool west = WestExterior(room.Perimeter);
       bool east = EastExterior(map, room.Perimeter);
 
       if (north || south)
@@ -1131,7 +1133,20 @@ class Tower(int height, int width, int minLength)
       EraseExteriorRoom(map, room, rooms);
     }
 
-    bool NorthExterior(Map map, HashSet<(int, int)> perimeter)
+    int exteriorToRemove = rng.Next(1, 4);
+    List<int> exteriorIndexes = [.. Enumerable.Range(0, exterior.Count)];
+    while (exteriorIndexes.Count > 0 && exteriorToRemove > 0)
+    {
+      int j = rng.Next(exteriorIndexes.Count);
+
+      Room room = exterior[j];
+      EraseExteriorRoom(map, room, rooms);
+
+      --exteriorToRemove;
+      exteriorIndexes.RemoveAt(j);
+    }
+
+    bool NorthExterior(HashSet<(int, int)> perimeter)
     {
       foreach ((int r, _) in perimeter)
       {
@@ -1153,7 +1168,7 @@ class Tower(int height, int width, int minLength)
       return false;
     }
 
-    bool WestExterior(Map map, HashSet<(int, int)> perimeter)
+    bool WestExterior(HashSet<(int, int)> perimeter)
     {
       foreach ((_, int c) in perimeter)
       {
