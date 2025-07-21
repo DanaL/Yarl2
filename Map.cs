@@ -1058,6 +1058,32 @@ class Tower(int height, int width, int minLength)
     }
   }
 
+  static List<Room> FindRooms(Map map)
+  {
+    RegionFinder rf = new(new DungeonPassable());
+    Dictionary<int, HashSet<(int, int)>> regions = rf.Find(map, false, 0, TileType.DungeonFloor);
+
+    // Convert the hashset of floor tiles to Room objects
+    List<Room> rooms = [];
+    foreach (var room in regions.Values)
+    {
+      Room r = new() { Sqs = room };
+
+      foreach ((int row, int col) in room)
+      {
+        foreach (var sq in Util.Adj8Sqs(row, col))
+        {
+          if (map.TileAt(sq).Type == TileType.DungeonWall)
+            r.Perimeter.Add(sq);
+        }
+      }
+
+      rooms.Add(r);
+    }
+
+    return rooms;
+  }
+
   void Dump(bool[,] map)
   {
     for (int r = 0; r < Height; r++)
@@ -1084,7 +1110,7 @@ class Tower(int height, int width, int minLength)
       {
        // We want to look for shared walls where there are floor sqs either
        // north and south or east and west.
-       if (AdjWall(map, row, col))
+       if (DoorCandidate(map, row, col))
         {
           walls.Add((row, col));
         }
@@ -1104,16 +1130,16 @@ class Tower(int height, int width, int minLength)
     {
       map.SetTile(row, col, TileFactory.Get(TileType.DungeonFloor));
     }
+  }
 
-    static bool AdjWall(Map map, int row, int col)
-    {
-      if (map.TileAt(row - 1, col).Type == TileType.DungeonFloor && map.TileAt(row + 1, col).Type == TileType.DungeonFloor)
-        return true;
-      if (map.TileAt(row, col - 1).Type == TileType.DungeonFloor && map.TileAt(row, col + 1).Type == TileType.DungeonFloor)
-        return true;
+  static bool DoorCandidate(Map map, int row, int col)
+  {
+    if (map.TileAt(row - 1, col).Type == TileType.DungeonFloor && map.TileAt(row + 1, col).Type == TileType.DungeonFloor)
+      return true;
+    if (map.TileAt(row, col - 1).Type == TileType.DungeonFloor && map.TileAt(row, col + 1).Type == TileType.DungeonFloor)
+      return true;
 
-      return false;
-    }
+    return false;
   }
 
   static void EraseExteriorRoom(Map map, Room room, List<Room> rooms)
@@ -1140,6 +1166,69 @@ class Tower(int height, int width, int minLength)
       }
 
       return false;
+    }
+  }
+
+  static void SetDoors(Map map, Rng rng)
+  {
+    map.Dump();
+
+    // Just rebuilding the set of rooms here. It seemed simpler than trying to
+    // merge Room objects when we are merged interior rooms and I can't imagine
+    // the inefficiency will be even noticable.
+    List<Room> rooms = FindRooms(map);
+
+    for (int roomId = 0; roomId < rooms.Count; roomId++)
+    {
+      List<Room> adjRooms = [];
+
+      for (int otherId = roomId + 1 ; otherId < rooms.Count; otherId++)
+      {
+        foreach ((int r, int c) in rooms[roomId].Perimeter.Intersect(rooms[otherId].Perimeter))
+        {
+          if (DoorCandidate(map, r, c))
+          {
+            adjRooms.Add(rooms[roomId]);
+            break;
+          }
+        }
+      }
+
+      if (adjRooms.Count == 0)
+      {
+        // if there were no adjacent rooms, the room is a dud like:
+        //
+        //       ##########
+        //       #........#
+        //       #........#
+        //   ##############
+        //   #...#
+        //   #...#
+        //   #####
+        //
+        // I'll just fill them in with walls
+
+        continue;
+      }
+
+      int toJoin = rng.Next(1, adjRooms.Count + 1);
+      for (int j = 0; j < toJoin; j++)
+      {
+        int i = rng.Next(adjRooms.Count);
+        Room other = adjRooms[i];
+        adjRooms.RemoveAt(i);
+        List<(int r, int c)> doorable = [];
+        List<(int r, int c)> shared = [.. rooms[roomId].Perimeter.Intersect(other.Perimeter)];
+        foreach ((int r, int c) in shared)
+        {
+          if (DoorCandidate(map, r, c))
+            doorable.Add((r, c));
+        }
+
+        (int dr, int dc) = doorable[rng.Next(doorable.Count)];
+        TileType tile = rng.NextDouble() <= 0.25 ? TileType.ClosedDoor : TileType.LockedDoor;
+        map.SetTile(dc, dr, TileFactory.Get(tile));
+      }
     }
   }
 
@@ -1202,6 +1291,8 @@ class Tower(int height, int width, int minLength)
       MergeAdjacentRooms(map, rooms[m], rooms, rng);
     }
 
+    SetDoors(map, rng);
+
     bool NorthExterior(HashSet<(int, int)> perimeter)
     {
       foreach ((int r, _) in perimeter)
@@ -1253,7 +1344,7 @@ class Tower(int height, int width, int minLength)
     var map = new bool[Height, Width];
     for (int r = 0; r < Height; r++)
     {
-      map[r, 0] = true; 
+      map[r, 0] = true;
       map[r, Width - 1] = true;
     }
     for (int c = 0; c < Width; c++)
@@ -1269,37 +1360,18 @@ class Tower(int height, int width, int minLength)
     {
       for (int c = 0; c < Width + 2; c++)
       {
-        if (r == 0 ||  c == 0)
+        if (r == 0 || c == 0)
           tower.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
         else if (r == Height + 1 || c == Width + 1)
           tower.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
         else if (map[r - 1, c - 1])
           tower.SetTile(r, c, TileFactory.Get(TileType.DungeonWall));
         else
-          tower.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));        
+          tower.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
       }
     }
 
-    RegionFinder rf = new(new DungeonPassable());
-    Dictionary<int, HashSet<(int, int)>> regions = rf.Find(tower, false, 0, TileType.DungeonFloor);
-
-    // Convert the hashset of floor tiles to Room objects
-    List<Room> rooms = [];    
-    foreach (var room in regions.Values)
-    {
-      Room r = new() { Sqs = room };
-
-      foreach ((int row, int col) in room)
-      {
-        foreach (var sq in Util.Adj8Sqs(row, col))
-        {
-          if (tower.TileAt(sq).Type == TileType.DungeonWall)
-            r.Perimeter.Add(sq);
-        }
-      }
-
-      rooms.Add(r);
-    }
+    List<Room> rooms = FindRooms(tower);
 
     TweakMap(tower, rooms, rng);
 
