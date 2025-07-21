@@ -1071,6 +1071,51 @@ class Tower(int height, int width, int minLength)
     }
   }
 
+  static void MergeAdjacentRooms(Map map, Room room, List<Room> rooms, Rng rng)
+  {
+    List<List<(int, int)>> adjWalls = [];
+    foreach (Room r in rooms)
+    {
+      if (r == room)
+        continue;
+
+      List<(int, int)> walls = [];
+      foreach ((int row, int col) in room.Perimeter.Intersect(r.Perimeter))
+      {
+       // We want to look for shared walls where there are floor sqs either
+       // north and south or east and west.
+       if (AdjWall(map, row, col))
+        {
+          walls.Add((row, col));
+        }
+      }
+
+      if (walls.Count > 0)
+      {
+        adjWalls.Add(walls);
+      }
+    }
+
+    if (adjWalls.Count == 0)
+      return;
+
+    int i = rng.Next(adjWalls.Count);
+    foreach ((int row, int col) in adjWalls[i])
+    {
+      map.SetTile(row, col, TileFactory.Get(TileType.DungeonFloor));
+    }
+
+    static bool AdjWall(Map map, int row, int col)
+    {
+      if (map.TileAt(row - 1, col).Type == TileType.DungeonFloor && map.TileAt(row + 1, col).Type == TileType.DungeonFloor)
+        return true;
+      if (map.TileAt(row, col - 1).Type == TileType.DungeonFloor && map.TileAt(row, col + 1).Type == TileType.DungeonFloor)
+        return true;
+
+      return false;
+    }
+  }
+
   static void EraseExteriorRoom(Map map, Room room, List<Room> rooms)
   {
     List<Room> otherRooms = [.. rooms.Where(r => r != room)];
@@ -1102,7 +1147,7 @@ class Tower(int height, int width, int minLength)
   {
     List<Room> corners = [];
     List<Room> exterior = [];
-    List<Room> intertor = [];
+    List<Room> interior = [];
 
     foreach (Room room in rooms)
     {
@@ -1124,7 +1169,7 @@ class Tower(int height, int width, int minLength)
       }
       else
       {
-        intertor.Add(room);
+        interior.Add(room);
       }
     }
 
@@ -1144,6 +1189,17 @@ class Tower(int height, int width, int minLength)
 
       --exteriorToRemove;
       exteriorIndexes.RemoveAt(j);
+    }
+
+    map.Dump();
+
+    int toMerge = int.Min(rng.Next(8, 12), interior.Count);
+    List<int> indexes = [.. Enumerable.Range(0, interior.Count)];
+    indexes.Shuffle(rng);
+    for (int j = 0; j < toMerge; j++)
+    {
+      int m = indexes[j];
+      MergeAdjacentRooms(map, rooms[m], rooms, rng);
     }
 
     bool NorthExterior(HashSet<(int, int)> perimeter)
