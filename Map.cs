@@ -1188,7 +1188,7 @@ class Tower(int height, int width, int minLength)
         {
           if (DoorCandidate(map, r, c))
           {
-            adjRooms.Add(rooms[roomId]);
+            adjRooms.Add(rooms[otherId]);
             break;
           }
         }
@@ -1227,7 +1227,8 @@ class Tower(int height, int width, int minLength)
 
         (int dr, int dc) = doorable[rng.Next(doorable.Count)];
         TileType tile = rng.NextDouble() <= 0.25 ? TileType.ClosedDoor : TileType.LockedDoor;
-        map.SetTile(dc, dr, TileFactory.Get(tile));
+
+        map.SetTile(dr, dc, TileFactory.Get(tile));
       }
     }
   }
