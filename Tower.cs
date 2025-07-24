@@ -407,6 +407,38 @@ class Tower(int height, int width, int minLength)
     }
   }
 
+  Map GenerateOutline(Map map)
+  {
+    Map outline = new(map.Width, map.Height);
+
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.WorldBorder)
+        {
+          outline.SetTile(r, c, TileFactory.Get(TileType.WorldBorder));
+          continue;
+        }
+
+        bool isEdge = false;
+        foreach (var sq in Util.Adj8Sqs(r, c))
+        {
+          if (map.TileAt(sq).Type == TileType.WorldBorder)
+          {
+            isEdge = true;
+            break;
+          }
+        }
+
+        TileType type = isEdge ? TileType.DungeonWall : TileType.DungeonFloor;
+        outline.SetTile(r, c, TileFactory.Get(type));
+      }
+    }
+
+    return outline;
+  }
+
   public bool[,] Build(Rng rng)
   {
     // False == floor, true == wall
@@ -445,6 +477,9 @@ class Tower(int height, int width, int minLength)
     TweakMap(tower, rooms, rng);
 
     tower.Dump();
+
+    Map outline = GenerateOutline(tower);
+    outline.Dump();
 
     return map;
   }
