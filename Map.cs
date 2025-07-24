@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Collections.Generic;
+
 namespace Yarl2;
 
 enum TileType
@@ -1169,6 +1171,35 @@ class Tower(int height, int width, int minLength)
     }
   }
 
+  static Room MergeRooms(Room a, Room b)
+  {
+    Room r = new()
+    {
+      Sqs = [.. a.Sqs.Union(b.Sqs)]
+    };
+
+    foreach ((int row, int col) in a.Perimeter.Union(b.Perimeter))
+    {
+      if (OutsideWall(row, col))
+        r.Perimeter.Add((row, col));
+      else
+        r.Sqs.Add((row, col));      
+    }
+
+    return r;
+
+    bool OutsideWall(int row, int col)
+    {
+      foreach (var sq in Util.Adj8Sqs(row, col))
+      {
+        if (!(a.Sqs.Contains(sq) || b.Sqs.Contains(sq) || a.Perimeter.Contains(sq) || b.Perimeter.Contains(sq)))
+          return true;
+      }
+
+      return false;
+    }
+  }
+
   static void SetDoors(Map map, Rng rng)
   {
     map.Dump();
@@ -1176,19 +1207,33 @@ class Tower(int height, int width, int minLength)
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
     // the inefficiency will be even noticable.
-    List<Room> rooms = FindRooms(map);
-
-    for (int roomId = 0; roomId < rooms.Count; roomId++)
+    Dictionary<int, Room> rooms = [];
+    int i = 0;
+    foreach (Room r in FindRooms(map))
     {
-      List<Room> adjRooms = [];
+      rooms[i++] = r;
+    }
 
-      for (int otherId = roomId + 1 ; otherId < rooms.Count; otherId++)
+    List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
+    roomIds.Shuffle(rng);
+
+    while (roomIds.Count > 1)
+    {      
+      int j = roomIds[0];
+      Room room = rooms[j];
+
+      // Find the adjacent rooms
+      List<int> adjRooms = [];
+      foreach (int otherId in roomIds)
       {
-        foreach ((int r, int c) in rooms[roomId].Perimeter.Intersect(rooms[otherId].Perimeter))
+        if (otherId == j)
+          continue;
+
+        foreach ((int r, int c) in room.Perimeter.Intersect(rooms[otherId].Perimeter))
         {
           if (DoorCandidate(map, r, c))
           {
-            adjRooms.Add(rooms[otherId]);
+            adjRooms.Add(otherId);
             break;
           }
         }
@@ -1206,19 +1251,25 @@ class Tower(int height, int width, int minLength)
         //   #...#
         //   #####
         //
-        // I'll just fill them in with walls
+        // I'll just fill them in with walls?
+
+        rooms.Remove(j);
+        roomIds.Remove(j);
 
         continue;
       }
 
-      int toJoin = rng.Next(1, adjRooms.Count + 1);
-      for (int j = 0; j < toJoin; j++)
+      adjRooms.Shuffle(rng);
+
+      int toMerge = rng.Next(1, adjRooms.Count + 1);
+      for (int k = 0; k < toMerge; k++)
       {
-        int i = rng.Next(adjRooms.Count);
-        Room other = adjRooms[i];
-        adjRooms.RemoveAt(i);
+        int otherId = adjRooms[k];
+        Room other = rooms[otherId];
+
+        // place the door
         List<(int r, int c)> doorable = [];
-        List<(int r, int c)> shared = [.. rooms[roomId].Perimeter.Intersect(other.Perimeter)];
+        List<(int r, int c)> shared = [.. room.Perimeter.Intersect(other.Perimeter)];
         foreach ((int r, int c) in shared)
         {
           if (DoorCandidate(map, r, c))
@@ -1229,7 +1280,13 @@ class Tower(int height, int width, int minLength)
         TileType tile = rng.NextDouble() <= 0.25 ? TileType.ClosedDoor : TileType.LockedDoor;
 
         map.SetTile(dr, dc, TileFactory.Get(tile));
+
+        room = MergeRooms(room, other);
+        rooms.Remove(otherId);
+        roomIds.Remove(otherId);
       }
+
+      rooms[j] = room;
     }
   }
 
