@@ -407,7 +407,109 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  Map GenerateOutline(Map map)
+  static void DrawWallFromCorner(Map map, int row, int col, Rng rng)
+  {
+    List<(int, int)> floors = [];
+    foreach (var sq in Util.Adj4Sqs(row, col))
+    {
+      if (map.TileAt(sq).Type == TileType.DungeonFloor)
+        floors.Add((sq.Item1, sq.Item2));
+    }
+
+    if (floors.Count > 1 && rng.NextDouble() < 0.5)
+    {
+      floors.RemoveAt(rng.Next(0, 2));
+    }
+
+    foreach (var sq in floors)
+    {
+      var floor = (sq.Item1, sq.Item2);
+      List<(int, int)> wall = [];
+      (int, int) delta = (sq.Item1 - row, sq.Item2 - col);
+
+      bool validWall = true;
+      while (map.TileAt(floor).Type == TileType.DungeonFloor)
+      {
+        if (!ValidWallPlacement(floor.Item1, floor.Item2, delta.Item1, delta.Item2))
+        {
+          validWall = false;
+          break;
+        }
+
+        wall.Add(floor);
+        floor = (floor.Item1 + delta.Item1, floor.Item2 + delta.Item2);
+      }
+
+      if (validWall)
+      {
+        foreach (var wallTile in wall)
+        {
+          map.SetTile(wallTile, TileFactory.Get(TileType.DungeonWall));
+        }
+      }      
+    }
+
+    bool ValidWallPlacement(int row, int col, int deltaR, int deltaC)
+    {
+      if (deltaR != 0)
+      {
+        if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
+          return false;
+        if (map.TileAt(row, col + 1).Type != TileType.DungeonFloor)
+          return false;
+      }
+      else
+      {
+        if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
+          return false;
+        if (map.TileAt(row + 1, col).Type != TileType.DungeonFloor)
+          return false;
+      }
+
+      return true;
+    }
+  }
+
+  static Map RedrawInterior(Map outline, Rng rng)
+  {
+    // First, we want to find the interior corners.
+    // I think all the interior corners will be squares that have two
+    // adjacent floors?
+    List<(int, int)> corners = [];
+    for (int r = 0; r < outline.Height; r++)
+    {
+      for (int c = 0; c < outline.Width; c++)
+      {
+        if (IsCorner(r, c))
+          corners.Add((r, c));
+      }
+    }
+
+    Map map = (Map) outline.Clone();
+    foreach ((int row, int col) in corners)
+    {
+      DrawWallFromCorner(map, row, col, rng);
+    }
+
+    return map;
+
+    bool IsCorner(int row, int col)
+    {
+      if (outline.TileAt(row, col).Type != TileType.DungeonWall)
+        return false;
+
+      int i = 0;
+      foreach (var sq in Util.Adj4Sqs(row, col))
+      {
+        if (outline.TileAt(sq).Type == TileType.DungeonFloor)
+          ++i;
+      }
+
+      return i == 2;
+    }
+  }
+
+  static Map GenerateOutline(Map map)
   {
     Map outline = new(map.Width, map.Height);
 
@@ -480,6 +582,9 @@ class Tower(int height, int width, int minLength)
 
     Map outline = GenerateOutline(tower);
     outline.Dump();
+
+    var nextFloor = RedrawInterior(outline, rng);
+    nextFloor.Dump();
 
     return map;
   }
