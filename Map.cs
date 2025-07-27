@@ -888,7 +888,7 @@ class Map : ICloneable
 
   public void DumpMarkRooms(List<List<(int,int)>> rooms)
   {
-    HashSet<(int, int)> floors = new();
+    HashSet<(int, int)> floors = [];
     foreach (List<(int, int)> room in rooms)
     {
       foreach ((int r, int c) in room)

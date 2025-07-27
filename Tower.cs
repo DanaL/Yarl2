@@ -213,8 +213,6 @@ class Tower(int height, int width, int minLength)
 
   static void SetDoors(Map map, Rng rng)
   {
-    map.Dump();
-
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
     // the inefficiency will be even noticable.
@@ -301,7 +299,7 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  static void TweakMap(Map map, List<Room> rooms, Rng rng)
+  static void TweakExterior(Map map, List<Room> rooms, Rng rng)
   {
     List<Room> corners = [];
     List<Room> exterior = [];
@@ -348,8 +346,68 @@ class Tower(int height, int width, int minLength)
       --exteriorToRemove;
       exteriorIndexes.RemoveAt(j);
     }
+  }
 
-    map.Dump();
+  static bool NorthExterior(HashSet<(int, int)> perimeter)
+  {
+    foreach ((int r, _) in perimeter)
+    {
+      if (r == 1)
+        return true;
+    }
+
+    return false;
+  }
+
+  static bool SouthExterior(Map map, HashSet<(int, int)> perimeter)
+  {
+    foreach ((int r, _) in perimeter)
+    {
+      if (r == map.Height - 2)
+        return true;
+    }
+
+    return false;
+  }
+
+  static bool WestExterior(HashSet<(int, int)> perimeter)
+  {
+    foreach ((_, int c) in perimeter)
+    {
+      if (c == 1)
+        return true;
+    }
+
+    return false;
+  }
+
+  static bool EastExterior(Map map, HashSet<(int, int)> perimeter)
+  {
+    foreach ((_, int c) in perimeter)
+    {
+      if (c == map.Width - 2)
+        return true;
+    }
+
+    return false;
+  }
+
+  static void TweakInterior(Map map, List<Room> rooms, Rng rng)
+  {
+    List<Room> interior = [];
+
+    foreach (Room room in rooms)
+    {
+      bool north = NorthExterior(room.Perimeter);
+      bool south = SouthExterior(map, room.Perimeter);
+      bool west = WestExterior(room.Perimeter);
+      bool east = EastExterior(map, room.Perimeter);
+
+      if (north || south || west || east)
+        continue;
+
+      interior.Add(room);
+    }
 
     int toMerge = int.Min(rng.Next(8, 12), interior.Count);
     List<int> indexes = [.. Enumerable.Range(0, interior.Count)];
@@ -361,50 +419,6 @@ class Tower(int height, int width, int minLength)
     }
 
     SetDoors(map, rng);
-
-    bool NorthExterior(HashSet<(int, int)> perimeter)
-    {
-      foreach ((int r, _) in perimeter)
-      {
-        if (r == 1)
-          return true;
-      }
-
-      return false;
-    }
-
-    bool SouthExterior(Map map, HashSet<(int, int)> perimeter)
-    {
-      foreach ((int r, _) in perimeter)
-      {
-        if (r == map.Height - 2)
-          return true;
-      }
-
-      return false;
-    }
-
-    bool WestExterior(HashSet<(int, int)> perimeter)
-    {
-      foreach ((_, int c) in perimeter)
-      {
-        if (c == 1)
-          return true;
-      }
-
-      return false;
-    }
-
-    bool EastExterior(Map map, HashSet<(int, int)> perimeter)
-    {
-      foreach ((_, int c) in perimeter)
-      {
-        if (c == map.Width - 2)
-          return true;
-      }
-
-      return false;
-    }
   }
 
   static void DrawWallFromCorner(Map map, int row, int col, Rng rng)
@@ -446,7 +460,7 @@ class Tower(int height, int width, int minLength)
         {
           map.SetTile(wallTile, TileFactory.Get(TileType.DungeonWall));
         }
-      }      
+      }
     }
 
     bool ValidWallPlacement(int row, int col, int deltaR, int deltaC)
@@ -470,7 +484,7 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  static Map RedrawInterior(Map outline, Rng rng)
+  Map RedrawInterior(Map outline, Rng rng)
   {
     // First, we want to find the interior corners.
     // I think all the interior corners will be squares that have two
@@ -490,6 +504,56 @@ class Tower(int height, int width, int minLength)
     {
       DrawWallFromCorner(map, row, col, rng);
     }
+
+    RegionFinder rf = new(new DungeonPassable());
+    Dictionary<int, HashSet<(int, int)>> rooms =  rf.Find(map, false, 0, TileType.DungeonFloor);
+
+    foreach (int roomId in rooms.Keys)
+    {
+      HashSet<(int, int)> room = rooms[roomId];
+
+      int tr = map.Height, lc = map.Width, br = 0, rc = 0;
+      foreach ((int row, int col) in room)
+      {
+        if (row < tr)
+          tr = row;
+        if (row > br)
+          br = row;
+        if (col < lc)
+          lc = col;
+        if (col > rc)
+          rc = col;
+      }
+
+      int height = br - tr + 1;
+      int width = rc - lc + 1;
+      bool[,] roomMap = new bool[height + 2, width + 2];
+      for (int r = 0; r < height + 2; r++)
+      {
+        roomMap[r, 0] = true;
+        roomMap[r, width + 1] = true;
+      }
+      for (int c = 0; c < width + 2; c++)
+      {
+        roomMap[0, c] = true;
+        roomMap[height + 1, c] = true;
+      }
+
+      Partition(roomMap, 0, 0, height, width, rng);
+
+      // Copy the partitioned room back into the map
+      for (int r = 0; r < height + 2; r++)
+      {
+        for (int c = 0; c < width + 2; c++)
+        {
+          if (roomMap[r, c])
+            map.SetTile(r + tr - 1, c + lc - 1, TileFactory.Get(TileType.DungeonWall));
+        }
+      }
+    }
+
+    List<Room> rms = FindRooms(map);
+    TweakInterior(map, rms, rng);
 
     return map;
 
@@ -575,9 +639,8 @@ class Tower(int height, int width, int minLength)
     }
 
     List<Room> rooms = FindRooms(tower);
-
-    TweakMap(tower, rooms, rng);
-
+    TweakExterior(tower, rooms, rng);
+    TweakInterior(tower, rooms, rng);
     tower.Dump();
 
     Map outline = GenerateOutline(tower);
@@ -585,6 +648,9 @@ class Tower(int height, int width, int minLength)
 
     var nextFloor = RedrawInterior(outline, rng);
     nextFloor.Dump();
+
+    var nnextFloor = RedrawInterior(outline, rng);
+    nnextFloor.Dump();
 
     return map;
   }
