@@ -605,7 +605,7 @@ class Tower(int height, int width, int minLength)
     return outline;
   }
 
-  public bool[,] Build(Rng rng)
+  Map Build(Rng rng)
   {
     // False == floor, true == wall
     var map = new bool[Height, Width];
@@ -652,6 +652,68 @@ class Tower(int height, int width, int minLength)
     var nnextFloor = RedrawInterior(outline, rng);
     nnextFloor.Dump();
 
-    return map;
+    return tower;
+  }
+
+  static bool ValidSpotForTower(int row, int col, Map tower, Map wilderness, Town town)
+  {
+    for (int r = 0; r < tower.Height; r++)
+    {
+      for (int c = 0; c < tower.Width; c++)
+      {
+        int sqr = r + row, sqc = c + col;
+        if (sqr >= town.Row && sqr <= town.Row + town.Height && sqc >= town.Col && sqc <= town.Col + town.Width)
+          return false;
+        Loc loc = new(0, 0, sqr, sqc);
+        if (town.WitchesYard.Contains(loc) || town.WitchesCottage.Contains(loc) || town.WitchesGarden.Contains(loc))
+          return false;
+
+        Tile tile = wilderness.TileAt(row + r, col + c);
+        switch (tile.Type)
+        {
+          case TileType.DeepWater:
+          case TileType.Dirt:
+          case TileType.StoneRoad:
+          case TileType.Bridge:
+          case TileType.Portal:
+            return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public void BuildTower(Map wilderness, Town town, Rng rng)
+  {
+    Map firstFloor = Build(rng);
+
+    Random rn = new Random();
+
+    // Find a place for the tower
+    List<(int, int)> options = [];
+    for (int r = 3; r < wilderness.Height - Height - 3; r += 3)
+    {
+      for (int c = 3; c < wilderness.Width - Width - 3; c += 3)
+      {
+        if (ValidSpotForTower(r, c, firstFloor, wilderness, town))
+        {
+          options.Add((r, c));
+        }
+      }
+    }
+
+    //(int row, int col) = options[rng.Next(options.Count)];
+    (int row, int col) = options[rn.Next(options.Count)];
+    for (int r = 0; r < firstFloor.Height; r++)
+    {
+      for (int c = 0; c < firstFloor.Width; c++)
+      {
+        Tile tile = firstFloor.TileAt(r, c);
+        if (tile.Type == TileType.WorldBorder)
+          continue;
+        wilderness.SetTile(row + r, col + c, tile);
+      }
+    }
   }
 }

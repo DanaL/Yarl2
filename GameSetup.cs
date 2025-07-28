@@ -601,6 +601,9 @@ class CampaignCreator(UserInterface ui)
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
         campaign.Town = town;
 
+        var tower = new Tower(21, 36, 5);
+        tower.BuildTower(wildernessMap, town, rng);
+
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {
@@ -683,7 +686,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = 1624094452;
+      //seed = 1624094452;
 
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);

@@ -16,13 +16,6 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
-var rs = DateTime.UtcNow.GetHashCode();
-Console.WriteLine(rs);
-var r = new Rng(267144058);
-
-var tower = new Tower(25, 41, 5);
-var map = tower.Build(r);
-
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);

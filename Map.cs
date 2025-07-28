@@ -24,7 +24,7 @@ enum TileType
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
-  BridgeTrigger, HiddenBridgeCollapseTrap, ReveealedBridgeCollapseTrap, Shortcut, 
+  BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever
 }
@@ -95,7 +95,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Pit => true,
     TileType.WaterTrap => true,
     TileType.RevealedSummonsTrap => true,
-    TileType.ReveealedBridgeCollapseTrap => true,
+    TileType.RevealedBridgeCollapseTrap => true,
     TileType.MagicMouth => true,    
     _ => false
   };
@@ -116,7 +116,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.MagicMouth => true,
     TileType.HiddenMagicMouth => true,
     TileType.HiddenBridgeCollapseTrap => true,
-    TileType.ReveealedBridgeCollapseTrap => true,
+    TileType.RevealedBridgeCollapseTrap => true,
     TileType.HiddenSummonsTrap => true,
     TileType.RevealedSummonsTrap => true,
     _ => false
@@ -198,7 +198,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.VFence => "fence",
     TileType.CornerFence => "fence",
     TileType.RevealedSummonsTrap => "monster summon trap",
-    TileType.ReveealedBridgeCollapseTrap => "bridge collapse trigger",
+    TileType.RevealedBridgeCollapseTrap => "bridge collapse trigger",
     TileType.Lever => "a lever",
     _ => "unknown"
   };
@@ -436,7 +436,7 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
 
   public override string ToString() => $"{(int)Type};{Triggered};{string.Join('|', BridgeTiles)}";
 
-  public void Reveal() => Type = TileType.ReveealedBridgeCollapseTrap;
+  public void Reveal() => Type = TileType.RevealedBridgeCollapseTrap;
 
   public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {

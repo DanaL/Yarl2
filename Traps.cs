@@ -338,8 +338,8 @@ class Traps
     TileType.HiddenMagicMouth => TileType.MagicMouth,
     TileType.HiddenSummonsTrap => TileType.RevealedSummonsTrap,
     TileType.RevealedSummonsTrap => TileType.RevealedSummonsTrap,
-    TileType.HiddenBridgeCollapseTrap => TileType.ReveealedBridgeCollapseTrap,
-    TileType.ReveealedBridgeCollapseTrap => TileType.ReveealedBridgeCollapseTrap,
+    TileType.HiddenBridgeCollapseTrap => TileType.RevealedBridgeCollapseTrap,
+    TileType.RevealedBridgeCollapseTrap => TileType.RevealedBridgeCollapseTrap,
     _ => throw new Exception("RevealedTrapType() shouldn't be called on a non-trap square")
   };
 

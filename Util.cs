@@ -678,7 +678,7 @@ class Util
     TileType.DisturbedGrave => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.BridgeTrigger => new Glyph('•', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.HiddenBridgeCollapseTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
-    TileType.ReveealedBridgeCollapseTrap => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
+    TileType.RevealedBridgeCollapseTrap => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
     TileType.BusinessSign => new Glyph('Þ', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false),
     TileType.FakeStairs => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
     TileType.HiddenSummonsTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
