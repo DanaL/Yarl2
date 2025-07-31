@@ -775,7 +775,7 @@ class WitchDialogue : Inputer
       var (dungeon, dungeonExit) = WitchQuest.GenerateDungeon(GS, entrance);
       GS.FactDb.Add(new LocationFact() { Desc = "KylieQuestEntrance", Loc = entrance });
 
-      var stairs = new Downstairs("")
+      Downstairs stairs = new("")
       {
         Destination = dungeonExit
       };

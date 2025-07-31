@@ -706,7 +706,11 @@ class Tower(int height, int width, int minLength)
     {
       wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
     }
-    wilderness.SetTile(row, col, TileFactory.Get(TileType.OrangeTree));
+    Upstairs entrance = new("")
+    {
+      Destination = new Loc(0, 0, 0, 0)
+    };
+    wilderness.SetTile(row, col, entrance);
     
     (int doorRow, int doorCol) = rng.Next(4) switch
     {
@@ -716,6 +720,7 @@ class Tower(int height, int width, int minLength)
       _ => (row, col - 1)
     };
     // This will eventually be a fancy, magically locked door
-    wilderness.SetTile(doorRow, doorCol, TileFactory.Get(TileType.ClosedDoor));
+    Portcullis p = new(false);
+    wilderness.SetTile(doorRow, doorCol, p);
   }
 }
