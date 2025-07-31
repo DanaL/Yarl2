@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Text.Json.Serialization.Metadata;
-
 namespace Yarl2;
 
 // Tower/mansion style map I'll use Binary Space Partitioning to build
@@ -659,31 +657,31 @@ class Tower(int height, int width, int minLength)
 
   static bool ValidSpotForTower(int row, int col, Map tower, Map wilderness, Town town)
   {
-    for (int r = 0; r < tower.Height; r++)
+    if (!OpenSq(row, col))
+      return false;
+      
+    foreach (var adj in Util.Adj8Sqs(row, col))
     {
-      for (int c = 0; c < tower.Width; c++)
-      {
-        int sqr = r + row, sqc = c + col;
-        if (sqr >= town.Row && sqr <= town.Row + town.Height && sqc >= town.Col && sqc <= town.Col + town.Width)
-          return false;
-        Loc loc = new(0, 0, sqr, sqc);
-        if (town.WitchesYard.Contains(loc) || town.WitchesCottage.Contains(loc) || town.WitchesGarden.Contains(loc))
-          return false;
-
-        Tile tile = wilderness.TileAt(row + r, col + c);
-        switch (tile.Type)
-        {
-          case TileType.DeepWater:
-          case TileType.Dirt:
-          case TileType.StoneRoad:
-          case TileType.Bridge:
-          case TileType.Portal:
-            return false;
-        }
-      }
+      if (!OpenSq(adj.Item1, adj.Item2))
+        return false;
     }
 
     return true;
+
+    bool OpenSq(int row, int col)
+    {
+      if (row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width)
+          return false;
+
+      Tile tile = wilderness.TileAt(row, col);
+      return tile.Type switch
+      {
+        TileType.DeepWater or TileType.Dirt or TileType.StoneRoad
+          or TileType.Bridge or TileType.Portal 
+          or TileType.Mountain or TileType.SnowPeak => false,
+        _ => true,
+      };
+    }
   }
 
   public void BuildTower(Map wilderness, Town town, Rng rng)
@@ -692,9 +690,9 @@ class Tower(int height, int width, int minLength)
 
     // Find a place for the tower
     List<(int, int)> options = [];
-    for (int r = 3; r < wilderness.Height - Height - 3; r += 3)
+    for (int r = 3; r < wilderness.Height - Height - 3; r++)
     {
-      for (int c = 3; c < wilderness.Width - Width - 3; c += 3)
+      for (int c = 3; c < wilderness.Width - Width - 3; c++)
       {
         if (ValidSpotForTower(r, c, firstFloor, wilderness, town))
         {
@@ -703,88 +701,21 @@ class Tower(int height, int width, int minLength)
       }
     }
 
-    // Pick where to place the tower entrance
-    List<(int, int)> outerWalls = [];
     (int row, int col) = options[rng.Next(options.Count)];
-    for (int r = 0; r < firstFloor.Height; r++)
+    foreach (var sq in Util.Adj8Sqs(row, col))
     {
-      for (int c = 0; c < firstFloor.Width; c++)
-      {
-        Tile tile = firstFloor.TileAt(r, c);
-        if (tile.Type == TileType.WorldBorder)
-          continue;
-
-        if (OuterWall(firstFloor, r, c))
-        {
-          wilderness.SetTile(row + r, col + c, TileFactory.Get(TileType.PermWall));
-          outerWalls.Add((row + r, col + c));
-        }
-        else
-        {
-          wilderness.SetTile(row + r, col + c, tile);
-        }
-      }
+      wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
     }
-
-    List<(int, int, int, int)> doorCandidates = [];
-    foreach ((int r, int c) in outerWalls)
+    wilderness.SetTile(row, col, TileFactory.Get(TileType.OrangeTree));
+    
+    (int doorRow, int doorCol) = rng.Next(4) switch
     {
-      if (IsValidDoor(wilderness, r, c, r, c + 1))
-        doorCandidates.Add((r, c, r, c + 1));
-      else if (IsValidDoor(wilderness, r, c, r, c - 1))
-        doorCandidates.Add((r, c, r, c - 1));
-      else if (IsValidDoor(wilderness, r, c, r - 1, c))
-        doorCandidates.Add((r, c, r - 1, c));
-      else if (IsValidDoor(wilderness, r, c, r + 1, c))
-        doorCandidates.Add((r, c, r + 1, c));
-    }
-
-    // These will eventually be fancy, magically locked doors
-    var doorSpots = doorCandidates[rng.Next(doorCandidates.Count)];
-    wilderness.SetTile(doorSpots.Item1, doorSpots.Item2, TileFactory.Get(TileType.ClosedDoor));
-    wilderness.SetTile(doorSpots.Item3, doorSpots.Item4, TileFactory.Get(TileType.ClosedDoor));
-
-    static bool IsValidDoor(Map map, int r1, int c1, int r2, int c2)
-    {
-      Tile tile1 = map.TileAt(r1, c1);
-      Tile tile2 = map.TileAt(r2, c2);
-
-      if (tile2.Type != TileType.PermWall)
-        return false;
-
-      if (OpenSqForDoor(map, r1 - 1, c1) && OpenSqForDoor(map, r1 + 1, c1) && OpenSqForDoor(map, r2 - 1, c2) && OpenSqForDoor(map, r2 + 1, c2))
-        return true;
-
-      if (OpenSqForDoor(map, r1, c1 - 1) && OpenSqForDoor(map, r1, c1 + 1) && OpenSqForDoor(map, r2, c2 - 1) && OpenSqForDoor(map, r2, c2 + 1))
-        return true;
-
-      return false;
-    }
-
-    static bool OpenSqForDoor(Map map, int row, int col)
-    {
-      TileType type = map.TileAt(row, col).Type;
-      return type switch
-      {
-        TileType.Grass or TileType.Sand or TileType.GreenTree or TileType.YellowTree
-          or TileType.RedTree or TileType.OrangeTree or TileType.Conifer
-          or TileType.Dirt or TileType.DungeonFloor => true,
-        _ => false,
-      };
-    }
-
-    static bool OuterWall(Map tower, int row, int col)
-    {
-      if (tower.TileAt(row, col).Type != TileType.DungeonWall)
-        return false;
-
-      foreach (var sq in Util.Adj4Sqs(row, col))
-      {
-        if (tower.TileAt(sq).Type == TileType.WorldBorder)
-          return true;
-      }
-
-      return false;
-    }
+      0 => (row - 1, col),
+      1 => (row + 1, col),
+      2 => (row, col + 1),
+      _ => (row, col - 1)
+    };
+    // This will eventually be a fancy, magically locked door
+    wilderness.SetTile(doorRow, doorCol, TileFactory.Get(TileType.ClosedDoor));
   }
 }
