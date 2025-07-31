@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text.Json.Serialization.Metadata;
+
 namespace Yarl2;
 
 // Tower/mansion style map I'll use Binary Space Partitioning to build
@@ -688,8 +690,6 @@ class Tower(int height, int width, int minLength)
   {
     Map firstFloor = Build(rng);
 
-    Random rn = new Random();
-
     // Find a place for the tower
     List<(int, int)> options = [];
     for (int r = 3; r < wilderness.Height - Height - 3; r += 3)
@@ -703,8 +703,9 @@ class Tower(int height, int width, int minLength)
       }
     }
 
+    List<(int, int)> outerWalls = [];
     //(int row, int col) = options[rng.Next(options.Count)];
-    (int row, int col) = options[rn.Next(options.Count)];
+    (int row, int col) = options[rng.Next(options.Count)];
     for (int r = 0; r < firstFloor.Height; r++)
     {
       for (int c = 0; c < firstFloor.Width; c++)
@@ -712,8 +713,26 @@ class Tower(int height, int width, int minLength)
         Tile tile = firstFloor.TileAt(r, c);
         if (tile.Type == TileType.WorldBorder)
           continue;
-        wilderness.SetTile(row + r, col + c, tile);
+
+        if (OuterWall(firstFloor, r, c))
+          wilderness.SetTile(row + r, col + c, TileFactory.Get(TileType.PermWall));
+        else
+          wilderness.SetTile(row + r, col + c, tile);
       }
+    }
+
+    static bool OuterWall(Map tower, int row, int col)
+    {
+      if (tower.TileAt(row, col).Type == TileType.DungeonWall)
+        return false;
+
+      foreach (var sq in Util.Adj4Sqs(row, col))
+      {
+        if (tower.TileAt(sq).Type == TileType.WorldBorder)
+          return true;
+      }
+
+      return false;
     }
   }
 }
