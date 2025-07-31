@@ -703,8 +703,8 @@ class Tower(int height, int width, int minLength)
       }
     }
 
+    // Pick where to place the tower entrance
     List<(int, int)> outerWalls = [];
-    //(int row, int col) = options[rng.Next(options.Count)];
     (int row, int col) = options[rng.Next(options.Count)];
     for (int r = 0; r < firstFloor.Height; r++)
     {
@@ -715,15 +715,67 @@ class Tower(int height, int width, int minLength)
           continue;
 
         if (OuterWall(firstFloor, r, c))
+        {
           wilderness.SetTile(row + r, col + c, TileFactory.Get(TileType.PermWall));
+          outerWalls.Add((row + r, col + c));
+        }
         else
+        {
           wilderness.SetTile(row + r, col + c, tile);
+        }
       }
+    }
+
+    List<(int, int, int, int)> doorCandidates = [];
+    foreach ((int r, int c) in outerWalls)
+    {
+      if (IsValidDoor(wilderness, r, c, r, c + 1))
+        doorCandidates.Add((r, c, r, c + 1));
+      else if (IsValidDoor(wilderness, r, c, r, c - 1))
+        doorCandidates.Add((r, c, r, c - 1));
+      else if (IsValidDoor(wilderness, r, c, r - 1, c))
+        doorCandidates.Add((r, c, r - 1, c));
+      else if (IsValidDoor(wilderness, r, c, r + 1, c))
+        doorCandidates.Add((r, c, r + 1, c));
+    }
+
+    // These will eventually be fancy, magically locked doors
+    var doorSpots = doorCandidates[rng.Next(doorCandidates.Count)];
+    wilderness.SetTile(doorSpots.Item1, doorSpots.Item2, TileFactory.Get(TileType.ClosedDoor));
+    wilderness.SetTile(doorSpots.Item3, doorSpots.Item4, TileFactory.Get(TileType.ClosedDoor));
+
+    static bool IsValidDoor(Map map, int r1, int c1, int r2, int c2)
+    {
+      Tile tile1 = map.TileAt(r1, c1);
+      Tile tile2 = map.TileAt(r2, c2);
+
+      if (tile2.Type != TileType.PermWall)
+        return false;
+
+      if (OpenSqForDoor(map, r1 - 1, c1) && OpenSqForDoor(map, r1 + 1, c1) && OpenSqForDoor(map, r2 - 1, c2) && OpenSqForDoor(map, r2 + 1, c2))
+        return true;
+
+      if (OpenSqForDoor(map, r1, c1 - 1) && OpenSqForDoor(map, r1, c1 + 1) && OpenSqForDoor(map, r2, c2 - 1) && OpenSqForDoor(map, r2, c2 + 1))
+        return true;
+
+      return false;
+    }
+
+    static bool OpenSqForDoor(Map map, int row, int col)
+    {
+      TileType type = map.TileAt(row, col).Type;
+      return type switch
+      {
+        TileType.Grass or TileType.Sand or TileType.GreenTree or TileType.YellowTree
+          or TileType.RedTree or TileType.OrangeTree or TileType.Conifer
+          or TileType.Dirt or TileType.DungeonFloor => true,
+        _ => false,
+      };
     }
 
     static bool OuterWall(Map tower, int row, int col)
     {
-      if (tower.TileAt(row, col).Type == TileType.DungeonWall)
+      if (tower.TileAt(row, col).Type != TileType.DungeonWall)
         return false;
 
       foreach (var sq in Util.Adj4Sqs(row, col))
