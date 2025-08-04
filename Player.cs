@@ -124,7 +124,7 @@ class Player : Actor
 
   public void CalcHP()
   {
-    int baseHP = 10;
+    int baseHP = 150;
     if (Lineage == PlayerLineage.Orc)
       baseHP += 5;
     if (Background == PlayerBackground.Warrior)

@@ -1151,8 +1151,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (deck.Indexes.Count == 0)
       deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
-        
-    return MonsterFactory.Get(m, ObjDb, Rng);    
+
+    return MonsterFactory.Get("kobold", ObjDb, Rng);    
+    //return MonsterFactory.Get(m, ObjDb, Rng);
   }
 
   public string RandomMonster(int dungeonId)
@@ -1165,8 +1166,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     Dungeon dungeon = Campaign.Dungeons[dungeonId];
     MonsterDeck deck = dungeon.MonsterDecks[Rng.Next(dungeon.MonsterDecks.Count)];
-    
-    return deck.Monsters[Rng.Next(deck.Monsters.Count)];
+
+    return "kobold";
+    //return deck.Monsters[Rng.Next(deck.Monsters.Count)];
   }
 
   public void SetDMaps(Loc loc)
