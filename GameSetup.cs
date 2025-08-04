@@ -602,7 +602,7 @@ class CampaignCreator(UserInterface ui)
         campaign.Town = town;
 
         var tower = new Tower(21, 36, 5);
-        tower.BuildTower(wildernessMap, town, rng);
+        tower.BuildTower(wildernessMap, town, objDb, rng);
 
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)

@@ -684,7 +684,7 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  public void BuildTower(Map wilderness, Town town, Rng rng)
+  public void BuildTower(Map wilderness, Town town, GameObjectDB objDb, Rng rng)
   {
     Map firstFloor = Build(rng);
 
@@ -711,7 +711,7 @@ class Tower(int height, int width, int minLength)
       Destination = new Loc(0, 0, 0, 0)
     };
     wilderness.SetTile(row, col, entrance);
-    
+
     (int doorRow, int doorCol) = rng.Next(4) switch
     {
       0 => (row - 1, col),
@@ -722,5 +722,10 @@ class Tower(int height, int width, int minLength)
     // This will eventually be a fancy, magically locked door
     Portcullis p = new(false);
     wilderness.SetTile(doorRow, doorCol, p);
+
+    (int dr, int dc) = (doorRow - row, doorCol - col);
+    Loc msgLoc = new(0, 0, doorRow + dr, doorCol + dc);
+    PlayerAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
+    objDb.ConditionalEvents.Add(pal);
   }
 }
