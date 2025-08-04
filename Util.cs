@@ -1306,7 +1306,7 @@ public static class ResourcePath
     return FindResourcePath("dialogue", filename);
   }
 
-  private static string FindResourcePath(string folder, string filename)
+  static string FindResourcePath(string folder, string filename)
   {
     string path = Path.Combine(folder, filename);
     if (File.Exists(path))

@@ -173,7 +173,7 @@ namespace Yarl2
       return candidates[j].Item1;
     }
 
-    private char RandomStart()
+    char RandomStart()
     {
       var total = _starts.Select(p => p.Item2).Sum();
       var x = _rng.Next(total);

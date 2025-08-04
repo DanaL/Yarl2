@@ -602,7 +602,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
     _cloudFinished = false;
   }
 
-  private void DrawCloud()
+  void DrawCloud()
   {
     for (int r = 0; r < 3; r++)
     {

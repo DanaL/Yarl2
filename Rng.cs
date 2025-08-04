@@ -49,10 +49,7 @@ public class Rng
     }
   }
 
-  private static ulong RotateLeft(ulong x, int k)
-  {
-    return (x << k) | (x >> (64 - k));
-  }
+  static ulong RotateLeft(ulong x, int k) => (x << k) | (x >> (64 - k));
 
   ulong _next()
   {

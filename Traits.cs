@@ -3391,7 +3391,7 @@ class WorshiperTrait : Trait
 
 class TraitFactory
 {
-  private static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
+  static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
     { "ACMod", (pieces, gameObj) =>

@@ -159,7 +159,7 @@ class ScriptScanner(string src)
     AddToken(TokenType.STRING, value);
   }
 
-  private void Number()
+  void Number()
   {
     while (true)
     {
@@ -187,7 +187,7 @@ class ScriptScanner(string src)
   static bool IsAlpha(char c) => char.IsLetter(c) || c == '_' || c == '-';
   static bool IsDigit(char c) => char.IsAsciiDigit(c);
 
-  private bool Match(char expected)
+  bool Match(char expected)
   {
     if (IsAtEnd())
       return false;

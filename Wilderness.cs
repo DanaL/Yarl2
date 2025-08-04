@@ -17,7 +17,7 @@ internal class Wilderness(Rng rng, int length)
   readonly int Length = length;
   readonly int ConiferousAmount = rng.NextDouble() < 0.5 ? 10 : 30;
 
-  private int Fuzz() => Rng.Next(-50, 51);
+  int Fuzz() => Rng.Next(-50, 51);
 
   // Guess I should deal with the southern hemisphere if possible :P
   // And/or randomize the latitude of the dungeon if I want to be silly

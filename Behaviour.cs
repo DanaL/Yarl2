@@ -21,7 +21,7 @@ namespace Yarl2;
 
 class NullBehaviour : IBehaviour
 {
-  private static readonly NullBehaviour instance = new();
+  static readonly NullBehaviour instance = new();
   public static NullBehaviour Instance() => instance;
 
   public (Action, Inputer?) Chat(Mob actor, GameState gameState) => throw new NotImplementedException();

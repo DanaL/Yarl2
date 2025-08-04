@@ -876,10 +876,10 @@ class Power
 
 class NoOne : Actor
 {
-    private static NoOne? _instance;
+    static NoOne? _instance;
     public static NoOne Instance() => _instance ??= new NoOne();
 
-    private NoOne()
+    NoOne()
     {
         Name = "No One";
         Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false);

@@ -353,7 +353,7 @@ class VaultDoor(bool open, Metals material) : Tile(TileType.VaultDoor)
 
 class Portal(string stepMessage) : Tile(TileType.Portal)
 {
-  private readonly string _stepMessage = stepMessage;
+  readonly string _stepMessage = stepMessage;
   public Loc Destination { get; set; }
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
@@ -397,7 +397,7 @@ class Downstairs : Portal
 
 class Landmark(string stepMessage) : Tile(TileType.Landmark)
 {
-  private readonly string _stepMessage = stepMessage;
+  readonly string _stepMessage = stepMessage;
   public override bool Passable() => true;
   public override bool PassableByFlight() => true;
   public override bool Opaque() => false;
