@@ -1247,81 +1247,6 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.AddNewActor(cleric, startLoc);
   }
 
-  static void GnomeMerchant(Map[] levels, int dungeonId, Rng rng, GameObjectDB objDb)
-  {
-    int level = -1;
-    for (int j = 2; j < levels.Length; j++)
-    {
-      if (rng.NextDouble() <= 0.20)
-      {
-        level = j;
-        break;        
-      }
-    }
-
-    if (level == -1)
-      return;
-
-    Mob flinFlon = new()
-    {
-      Name = "Flin Flon",
-      Appearance = "A mildly dishevelled gnome with a sparse beard. He's carrying a heavy satchel.",
-      Glyph = new Glyph('G', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
-    };
-    flinFlon.Stats[Attribute.HP] = new Stat(50);
-    flinFlon.Stats[Attribute.ShopInvoice] = new Stat(0);
-    flinFlon.Traits.Add(new VillagerTrait());
-    flinFlon.Traits.Add(new NamedTrait());
-    flinFlon.Traits.Add(new IntelligentTrait());
-    flinFlon.Traits.Add(new DialogueScriptTrait() { ScriptFile = "gnome_merchant.txt" });
-    flinFlon.SetBehaviour(new GnomeMerchantBehaviour());
-    flinFlon.Traits.Add(new BehaviourTreeTrait() { Plan = "SimpleRandomPlan" });
-    flinFlon.Traits.Add(new NumberListTrait() { Name = "ShopSelections", Items = [] });
-    LeaveDungeonTrait ldt = new() { SourceId = flinFlon.ID };
-    objDb.EndOfRoundListeners.Add(ldt);
-    flinFlon.Traits.Add(ldt);
-
-    flinFlon.Inventory = new Inventory(flinFlon.ID, objDb);
-    int numItems = rng.Next(3, 6);
-    while (numItems > 0)
-    {
-      Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
-      if (item.Type == ItemType.Zorkmid)
-        continue;
-      flinFlon.Inventory.Add(item, flinFlon.ID);
-
-      --numItems;
-    }
-     
-    List<Loc> floors = levels[level].ClearFloors(dungeonId, level, objDb);
-
-    Loc startLoc = floors[rng.Next(floors.Count)];
-    objDb.AddNewActor(flinFlon, startLoc);
-
-    floors = [..floors.Where(l => Util.Distance(startLoc, l) >= 10)];
-    for (int j = 0; j < 3; j++)
-    {
-      Item flyer = new()
-      {
-        Name = "neatly printed flyer",
-        Type = ItemType.Document,
-        Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
-      };
-      flyer.Traits.Add(new FlammableTrait());
-      flyer.Traits.Add(new ScrollTrait());
-      objDb.Add(flyer);
-      
-      string txt = "Flin Flon's Supplies and Mercantile!\n\nCome find us for a selection of discounted adventuring gear you may literally not survive without!!\n\nSale! Sale! Sale!";
-      ReadableTrait rt = new(txt) { OwnerID = flyer.ID };
-      flyer.Traits.Add(rt);
-
-      int i = rng.Next(floors.Count);
-      Loc loc = floors[i];
-      floors.RemoveAt(i);
-      objDb.SetToLoc(loc, flyer);
-    }
-  }
-
   public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
   {
@@ -1386,7 +1311,6 @@ class MainDungeonBuilder : DungeonBuilder
     int altarLevel = rng.Next(0, numOfLevels);
     IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
 
-    GnomeMerchant(levels, id, rng, objDb);
     MoonDaughterCleric(levels, id, rng, objDb);
 
     return dungeon;
