@@ -990,12 +990,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     ++Turn;
 
-    // During the day, in the wilderness, the player regenerates HP
-    var (hour, _) = CurrTime();
-    if (InWilderness && Turn % 7 == 0 && hour >= 6 && hour <= 21)
+    // I'm still not sure if I'm going to HP regeneration inside the dungeon
+    if (Turn % 11 == 0)
     {
       Player.Stats[Attribute.HP].Change(1);
     }
+
+    //// During the day, in the wilderness, the player regenerates HP
+    //var (hour, _) = CurrTime();
+    //if (InWilderness && Turn % 7 == 0 && hour >= 6 && hour <= 21)
+    //{
+    //  Player.Stats[Attribute.HP].Change(1);
+    //}
 
     if (Turn % 17 == 0 && Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
     {
