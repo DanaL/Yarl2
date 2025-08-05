@@ -430,52 +430,6 @@ class CampaignCreator(UserInterface ui)
     }
   }
 
-  static void SetFirstBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
-  {
-    int bossLevelNum = dungeon.LevelMaps.Count - 1;
-    Map bossLevel = dungeon.LevelMaps[bossLevelNum];
-
-    if (earlyDenizen == "kobold")
-    {
-      Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
-      ks.Name = "the Kobold Regional Manager";
-      ks.Traits.Add(new NamedTrait());
-      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
-      objDb.AddNewActor(ks, loc);
-      factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Kobold Regional Manager" });
-
-      List<Loc> options = [];
-      // Where shall we put the pet dragon?
-      for (int r = -2; r <= 2; r++)
-      {
-        for (int  c = -2; c <= 2; c++)
-        {
-          if (!bossLevel.InBounds(loc.Row + r, loc.Col + c))
-            continue;
-          Loc opt = loc with { Row = loc.Row + r, Col = loc.Col + c };
-          if (bossLevel.TileAt(opt.Row, opt.Col).Passable() && !objDb.Occupied(opt))
-            options.Add(opt);
-        }
-      }
-      if (options.Count > 0)
-      {
-        // I guess if there's no spot for the dragon then the supervisor doesn't have a pet :O
-        Loc wyrmLoc = options[rng.Next(options.Count)];
-        Actor wyrm = MonsterFactory.Get("wyrmling", objDb, rng);
-        objDb.AddNewActor(wyrm, wyrmLoc);
-      }
-    }
-    else if (earlyDenizen == "goblin")
-    {
-      Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
-      var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
-      objDb.AddNewActor(gg, loc);
-      factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Great Goblin" });
-    }   
-  }
-
   static (Campaign, int, int) BeginNewCampaign(Rng rng, GameObjectDB objDb)
   {
     Campaign campaign;
@@ -578,8 +532,6 @@ class CampaignCreator(UserInterface ui)
         
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
-
-        SetFirstBoss(firstDungeon, objDb, factDb, earlyMainOccupant, rng);
 
         campaign.AddDungeon(firstDungeon);
 
