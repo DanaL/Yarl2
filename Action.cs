@@ -1047,13 +1047,15 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     else if (tile.Type == TileType.OpenDoor)
     {
       Actor!.QueueAction(new CloseDoorAction(GameState, Actor) { Loc = Loc });
-    }    
+    }
     else if (tile.Type == TileType.ClosedDoor)
     {
       Actor!.QueueAction(new OpenDoorAction(GameState, Actor) { Loc = Loc });
     }
-
-    GameState.UIRef().AlertPlayer("There's nothing to interact with there.");
+    else
+    {
+      GameState.UIRef().AlertPlayer("There's nothing to interact with there.");
+    }
 
     return 0.0;
   }
