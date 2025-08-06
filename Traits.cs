@@ -2981,15 +2981,12 @@ class LightBeamTrait : Trait, IGameEventListener
   {
     string msg;
     if (gs.LastPlayerFoV.Contains(block.Loc))
-      msg = "Exposted to the light, the stone block crumbles to dust!";
+      msg = "Exposed to the light, the stone block crumbles to dust!";
     else
-      msg = "You hear a loud crack and clattering of stones.";
+      msg = "You hear a loud crack and the clattering of stones.";
     
     gs.UIRef().AlertPlayer(msg);
     gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
-    
-    Item tablet = History.SealingTablet1(gs.ObjDb);
-    gs.ObjDb.SetToLoc(block.Loc, tablet);
     
     gs.ObjDb.RemoveItemFromGame(block.Loc, block);
 

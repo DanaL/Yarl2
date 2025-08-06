@@ -147,6 +147,11 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
     objDb.SetToLoc(loc, statue);
 
+    Item tablet = History.SealingTablet1(objDb);
+    List<Loc> locs = [.. Util.Adj8Locs(loc)];
+    Loc tabetLoc = locs[rng.Next(locs.Count)];
+    objDb.SetToLoc(tabetLoc, tablet);
+
     int startRow = int.Min(stairsLoc.Row, roomCenterRow);
     for (int r = startRow; r < startRow + 8; r++)    
       cellar.SetTile(r, roomCenterCol, TileFactory.Get(TileType.DungeonFloor));

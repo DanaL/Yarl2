@@ -426,13 +426,14 @@ class ItemFactory
     Item target = new()
     {
       Name = "stone block",
-      Type = ItemType.Device,
+      Type = ItemType.Statue,
       Value = 0,
       Glyph = new('☆', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.DARK_GREY, false)
     };
     target.Traits.Add(new AffixedTrait());
     target.Traits.Add(new BlockTrait());
-
+    target.Traits.Add(new DescriptionTrait("A massive basalt block, ice-cold to the touch."));
+    
     objDb.Add(target);
 
     return target;
