@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -70,12 +72,29 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     if (factDb.FactCheck("EarlyDenizen") is SimpleFact earlyOcc)
     {
-      SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
+      //SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
     }
+
+    SetPuzzle(dungeon, objDb, factDb, rng);
 
     GnomeMerchant(levels, DungeonId, rng, objDb);
 
     return dungeon;
+  }
+
+  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    int puzzleLevel = dungeon.LevelMaps.Count - 1;
+    Map map = dungeon.LevelMaps[puzzleLevel];
+    List<PathInfo> paths = LightPuzzleSetup.FindPotential(map);
+
+    // If there are no valid paths I'll probably want to redraw the bottom level
+
+    if (paths.Count != 0)
+    {
+      LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, puzzleLevel, rng);
+      factDb.Add(new SimpleFact() { Name = "QuestPuzzle1", Value = puzzleLevel.ToString() });
+    }
   }
 
   static void SetBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
