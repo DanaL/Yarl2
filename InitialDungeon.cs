@@ -140,22 +140,37 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       }
     }
 
+    Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+    statue.Traits.Add(new DescriptionTrait("A statue of a greater demon covered in cracks, from which red light streams."));
+    statue.Traits.Add(new LightSourceTrait() { FgColour = Colours.BRIGHT_RED, BgColour = Colours.RED_AURA, Radius = 1, OwnerID = statue.ID });
+    int levelNum = stairsLoc.Level + 1;
+    Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
+    objDb.SetToLoc(loc, statue);
+
     int startRow = int.Min(stairsLoc.Row, roomCenterRow);
     for (int r = startRow; r < startRow + 8; r++)    
       cellar.SetTile(r, roomCenterCol, TileFactory.Get(TileType.DungeonFloor));
     if (roomCenterRow <  stairsLoc.Row)
     {
       cellar.SetTile(stairsLoc.Row - 2, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row - 2, roomCenterCol - 1);
       cellar.SetTile(stairsLoc.Row - 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row - 2, roomCenterCol + 1);      
       cellar.SetTile(stairsLoc.Row - 4, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row - 4, roomCenterCol - 1);
       cellar.SetTile(stairsLoc.Row - 4, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row - 4, roomCenterCol + 1);
     }
     else
     {
       cellar.SetTile(stairsLoc.Row + 2, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
-      cellar.SetTile(stairsLoc.Row + 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row + 2, roomCenterCol - 1);
+      cellar.SetTile(stairsLoc.Row + 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));      
+      SetStatue(stairsLoc.Row + 2, roomCenterCol + 1);
       cellar.SetTile(stairsLoc.Row + 4, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row + 5, roomCenterCol - 1);
       cellar.SetTile(stairsLoc.Row + 4, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      SetStatue(stairsLoc.Row + 4, roomCenterCol + 1);
     }
 
     int startCol = int.Min(stairsLoc.Col, roomCenterCol);
@@ -166,7 +181,15 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     cellar.SetTile(stairsLoc.Row, stairsLoc.Col, upStairs);
 
     dungeon.AddMap(cellar);
-    cellar.Dump();
+    
+    void SetStatue(int row, int col)
+    {
+      Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+      statue.Traits.Add(new DescriptionTrait("A statue depicting a demonic form."));
+      int levelNum = stairsLoc.Level + 1;
+      Loc loc = new(dungeon.ID, levelNum, row, col);
+      objDb.SetToLoc(loc, statue);
+    }
   }
 
   static void SetBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
