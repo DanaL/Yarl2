@@ -3265,7 +3265,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
 
     if (Actor is Player) 
     {
-      GameState.UIRef().AlertPlayer("Aroint thee!");
+      GameState.UIRef().AlertPlayer("\"Aroint thee!\"");
     }
     else if (GameState.LastPlayerFoV.Contains(Actor.Loc))
     {
