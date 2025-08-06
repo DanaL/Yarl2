@@ -2983,7 +2983,7 @@ class LightBeamTrait : Trait, IGameEventListener
     if (gs.LastPlayerFoV.Contains(block.Loc))
       msg = "Exposted to the light, the stone block crumbles to dust!";
     else
-      msg = "You hear a loud crack, almost an explosion.";
+      msg = "You hear a loud crack and clattering of stones.";
     
     gs.UIRef().AlertPlayer(msg);
     gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
@@ -2992,6 +2992,13 @@ class LightBeamTrait : Trait, IGameEventListener
     gs.ObjDb.SetToLoc(block.Loc, tablet);
     
     gs.ObjDb.RemoveItemFromGame(block.Loc, block);
+
+    Loc dest = block.Loc with { Level = block.Loc.Level + 1 };
+    Downstairs stairs = new("")
+    {
+      Destination = dest
+    };
+    gs.CurrentMap.SetTile(block.Loc.Row, block.Loc.Col, stairs);
   }
 
   List<Loc> FollowPath(GameState gs, Loc start, Dir dir)

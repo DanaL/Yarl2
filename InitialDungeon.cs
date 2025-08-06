@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -84,7 +82,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     return dungeon;
   }
 
-  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
+  void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     int puzzleLevel = dungeon.LevelMaps.Count - 1;
     Map map = dungeon.LevelMaps[puzzleLevel];
@@ -94,9 +92,81 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     if (paths.Count != 0)
     {
-      LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, puzzleLevel, rng);
+      Loc targetLoc = LightPuzzleSetup.Create(map, paths, objDb, dungeon.ID, puzzleLevel, rng);
       factDb.Add(new SimpleFact() { Name = "QuestPuzzle1", Value = puzzleLevel.ToString() });
+
+      CreateCellar(targetLoc, dungeon, objDb, rng);
     }
+  }
+
+  static void CreateCellar(Loc stairsLoc, Dungeon dungeon, GameObjectDB objDb, Rng rng)
+  {
+    // Generate the cellar level
+    Map cellar = new(WIDTH, HEIGHT)
+    {
+      DiggableFloor = false
+    };
+
+    for (int r = 0; r < HEIGHT; r++)
+    {
+      for (int c = 0; c < WIDTH; c++)
+      {
+        cellar.SetTile(r, c, TileFactory.Get(TileType.PermWall));
+      }
+    }
+
+    List<(int, int)> roomOpts = [];
+    List<(int, int)> centers = [(-8, -8), (-8, 8), (8, -8), (8, 8)];
+    foreach ((int r, int c) in centers)
+    {
+      int dr = stairsLoc.Row + r;
+      int dc = stairsLoc.Col + c;
+
+      if (dr - 3 < 0 || dr + 3 >= HEIGHT || dc - 3 < 0 || dc + 3 >= WIDTH)
+        continue;
+      roomOpts.Add((dr, dc));
+    }
+
+    // I don't think this can actually happen??
+    if (roomOpts.Count == 0)
+      throw new Exception("Unable to build cellar room in Initial dungeon");
+
+    (int roomCenterRow, int roomCenterCol) = roomOpts[rng.Next(roomOpts.Count)];
+    for (int r = roomCenterRow - 2; r <= roomCenterRow + 2; r++)
+    {
+      for (int c = roomCenterCol - 2; c <= roomCenterCol + 2; c++)
+      {
+        cellar.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+      }
+    }
+
+    int startRow = int.Min(stairsLoc.Row, roomCenterRow);
+    for (int r = startRow; r < startRow + 8; r++)    
+      cellar.SetTile(r, roomCenterCol, TileFactory.Get(TileType.DungeonFloor));
+    if (roomCenterRow <  stairsLoc.Row)
+    {
+      cellar.SetTile(stairsLoc.Row - 2, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row - 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row - 4, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row - 4, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+    }
+    else
+    {
+      cellar.SetTile(stairsLoc.Row + 2, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row + 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row + 4, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
+      cellar.SetTile(stairsLoc.Row + 4, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
+    }
+
+    int startCol = int.Min(stairsLoc.Col, roomCenterCol);
+    for (int c = startCol; c < startCol + 8; c++)
+      cellar.SetTile(stairsLoc.Row, c, TileFactory.Get(TileType.DungeonFloor));
+
+    Upstairs upStairs = new("") { Destination = stairsLoc };
+    cellar.SetTile(stairsLoc.Row, stairsLoc.Col, upStairs);
+
+    dungeon.AddMap(cellar);
+    cellar.Dump();
   }
 
   static void SetBoss(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, string earlyDenizen, Rng rng)
@@ -204,7 +274,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     int level = -1;
     for (int j = 2; j < levels.Length; j++)
     {
-      if (rng.NextDouble() <= 0.20)
+      if (rng.NextDouble() <= 1.20)
       {
         level = j;
         break;

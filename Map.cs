@@ -701,7 +701,7 @@ class Map : ICloneable
   {
     Width = width;
     Height = height;
-    Tiles = Enumerable.Repeat(TileFactory.Get(type), Width * Height).ToArray();
+    Tiles = [.. Enumerable.Repeat(TileFactory.Get(type), Width * Height)];
   }
 
   public bool IsTile((int, int) pt, TileType type) => InBounds(pt) && TileAt(pt).Type == type;

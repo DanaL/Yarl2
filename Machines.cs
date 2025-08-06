@@ -48,7 +48,7 @@ class LightPuzzleSetup
     FindPotential(map);
   }
 
-  public static void Create(Map map, List<PathInfo> paths, GameObjectDB objDb, int dungeonId, int level, Rng rng)
+  public static Loc Create(Map map, List<PathInfo> paths, GameObjectDB objDb, int dungeonId, int level, Rng rng)
   {
     PathInfo path = paths[rng.Next(paths.Count)];
     
@@ -118,6 +118,8 @@ class LightPuzzleSetup
       objDb.SetToLoc(loc, mirror);
       clearLocs.RemoveAt(mId);
     }
+
+    return targetLoc;
   }
 
   public static List<PathInfo> FindPotential(Map map)
