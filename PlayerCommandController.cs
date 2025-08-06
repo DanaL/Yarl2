@@ -346,7 +346,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
   {
     Loc singleClosedDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.ClosedDoor);
     Loc singleOpenDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.OpenDoor);
-    
+    Loc singleLockedDoor = SingleAdjTile(GS, GS.Player.Loc, TileType.LockedDoor);
+
     Loc singleNPC = Loc.Nowhere;
     int occupiedCount = 0;
     foreach (Loc adj in Util.Adj8Locs(GS.Player.Loc))
@@ -379,17 +380,23 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       GS.Player.QueueAction(new OpenDoorAction(GS, GS.Player) { Loc = singleClosedDoor });
       return;
     }
-    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor != Loc.Nowhere && occupiedCount == 0 && deviceCount == 0)
+    else if (singleLockedDoor != Loc.Nowhere && singleOpenDoor == Loc.Nowhere && singleClosedDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 0)
+    {
+      LockedDoorMenu menu = new(ui, GS, singleLockedDoor);
+      ui.SetInputController(menu);
+      return;
+    }
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor != Loc.Nowhere && singleLockedDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 0)
     {
       GS.Player.QueueAction(new CloseDoorAction(GS, GS.Player) { Loc = singleOpenDoor });
       return;
     }
-    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 1 && deviceCount == 0)
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && singleLockedDoor == Loc.Nowhere && occupiedCount == 1 && deviceCount == 0)
     {
       GS.Player.QueueAction(new ChatAction(GS, GS.Player) { Loc = singleNPC });
       return;
     }
-    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 1)
+    else if (singleClosedDoor == Loc.Nowhere && singleOpenDoor == Loc.Nowhere && singleLockedDoor == Loc.Nowhere && occupiedCount == 0 && deviceCount == 1)
     {
       GS.Player.QueueAction(new DeviceInteractionAction(GS, GS.Player) { Loc = singleDevice });
       return;
