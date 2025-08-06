@@ -157,8 +157,9 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
   }
 
   static void DigInPit(Loc loc, GameState gs, Actor digger)
-  {
-    if (loc.Level == gs.CurrentDungeon.LevelMaps.Count - 1) {      
+  {    
+    if (!gs.CurrentMap.DiggableFloor) 
+    {
       gs.UIRef().AlertPlayer("The floor is too hard to dig here.");
       gs.UIRef().SetPopup(new Popup("The floor is too hard to dig here.", "", -1, -1));
     }

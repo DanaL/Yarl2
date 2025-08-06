@@ -417,6 +417,7 @@ internal class MapSaver
   List<string>? SpecialTiles { get; set; }
   [JsonInclude]
   public List<string> Alerts { get; set; } = [];
+  public bool DiggableFloor { get; set; }
 
   public static MapSaver Shrink(Map map)
   {  
@@ -425,7 +426,8 @@ internal class MapSaver
       Height = map.Height,
       Width = map.Width,
       Tiles = new int[map.Tiles.Length],
-      SpecialTiles = [],   
+      SpecialTiles = [],
+      DiggableFloor = map.DiggableFloor
     };
 
     for (int j = 0; j < map.Tiles.Length; j++)
@@ -583,7 +585,10 @@ internal class MapSaver
 
   public static Map Inflate(MapSaver sm)
   {
-      var map = new Map(sm.Width, sm.Height);
+    Map map = new(sm.Width, sm.Height)
+    {
+      DiggableFloor = sm.DiggableFloor
+    };
 
     if (sm.Tiles is null || sm.SpecialTiles is null)
       throw new Exception("Invalid save game data!");

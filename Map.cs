@@ -687,6 +687,8 @@ class Map : ICloneable
   public Tile[] Tiles;
   public List<string> Alerts = [];
 
+  public bool DiggableFloor { get; set; } = true;
+
   public Map(int width, int height)
   {
     Width = width;

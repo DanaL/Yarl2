@@ -41,6 +41,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         PutSecretDoorsInHallways(levels[levelNum], rng);
     }
 
+    dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
+
     AddRivers(levels, HEIGHT, WIDTH, DungeonId, objDb, rng);
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
