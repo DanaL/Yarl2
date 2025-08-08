@@ -82,7 +82,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     return dungeon;
   }
 
-  void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
+  static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     int puzzleLevel = dungeon.LevelMaps.Count - 1;
     Map map = dungeon.LevelMaps[puzzleLevel];

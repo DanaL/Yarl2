@@ -385,6 +385,11 @@ class History(Rng rng)
 
     Item tablet = SealingTablet(objDb, txt);
     tablet.Traits.Add(new QuestItem1());
+    tablet.Traits.Add(new OnPickupTrait()
+    {
+      Clear = true,
+      Event = "SetAttributeTrigger#MainQuestState#3#0"
+    });
 
     return tablet;
   }

@@ -296,7 +296,7 @@ class PlayerCreator
     }
 
     player.CalcHP();
-    
+
     return player;
   }
 }
