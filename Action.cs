@@ -1397,11 +1397,20 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
           ui.AlertPlayer(s);
       }
 
-      // Clear the 'in a pit' flag when an item is picked up
-      if (item.HasTrait<InPitTrait>())
+      List<Trait> toClear = [];
+      foreach (Trait t in item.Traits)
       {
-        item.Traits = item.Traits.Where(t => t is not InPitTrait).ToList();
+        if (t is InPitTrait)
+          toClear.Add(t);
+        else if (t is OnPickupTrait opt)
+        {
+          opt.Apply(Actor, GameState);
+          if (opt.Clear)
+            toClear.Add(t);
+        }
       }
+      foreach (Trait t in toClear)
+        item.Traits.Remove(t);
 
       anythingPickedUp = true;
       ui.AlertPlayer(pickupMsg);

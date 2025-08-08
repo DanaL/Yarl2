@@ -1593,7 +1593,7 @@ class SideEffectTrait : Trait
     if (gs.Rng.Next(1, 101) > Odds)
       return [];
 
-    var trait = (TemporaryTrait) TraitFactory.FromText(Effect, target);
+    var trait = (TemporaryTrait)TraitFactory.FromText(Effect, target);
     return trait.Apply(target, gs);
   }
 }
@@ -2392,6 +2392,23 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class OnPickupTrait : Trait
+{
+  public string Event { get; set; } = "";
+  public bool Clear { get; set; }
+
+  public void Apply(Actor target, GameState gs)
+  {
+    if (TraitFactory.FromText(Event, target) is IGameEventListener el)
+    {
+      string s = AsText();
+      el.EventAlert(GameEventType.NoEvent, gs, target.Loc);
+    }
+  }
+
+  public override string AsText() => $"OnPickup#{Clear}#{Event}";
+}
+
 class RelationshipTrait : Trait
 {
   public ulong Person1ID { get; set; }
@@ -2838,13 +2855,8 @@ class SetAttributeTriggerTrait : Trait, IGameEventListener
 
   public override string AsText() => $"SetAttributeTrigger#{Attribute}#{Value}#{SourceId}";
 
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
-  {
-    if (eventType != GameEventType.Death)
-      return;
-
+  public void EventAlert(GameEventType eventType, GameState gs, Loc loc) =>
     gs.Player.Stats[Attribute] = new Stat(Value);
-  }
 }
 
 class InvisibleTrait : BasicTrait, IGameEventListener
@@ -3644,6 +3656,12 @@ class TraitFactory
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
       Lifetime = pieces[3] == "max" ? int.MaxValue :  int.Parse(pieces[3]) , Spreads = bool.Parse(pieces[4]) }
+    },
+    { "OnPickup", (pieces, gameObj) => new OnPickupTrait()
+      {
+        Clear = bool.Parse(pieces[1]),
+        Event = string.Join('#', pieces[2..] )
+      }
     },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
