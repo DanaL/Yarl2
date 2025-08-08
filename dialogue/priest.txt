@@ -6,8 +6,8 @@
           ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
             "Have you heard the good word about Huntokar?" 
             "It's said in ancient days the elves of old would grow magic fruit in their secret orchards."
-            "A new hero must arise, take up the mantle, and deliver our town from the hordes."
-            "Long ago a darkness arose deep underground. It's a ruin now but was once a mighty kingdom."
+            "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
+            "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
             "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
           )
         )
@@ -18,8 +18,8 @@
         (pick
           ("It is my duty to look after the spiritual well-being of #TOWN_NAME." 
           "Have you heard the good word about Huntokar?"
-          "A new hero must arise, take up the mantle, and deliver our town from the hordes."
-          "Long ago a darkness arose deep underground. It's a ruin now but was once a mighty kingdom."
+          "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
+          "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
           )
         )
