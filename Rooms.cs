@@ -369,8 +369,66 @@ class Vaults
   }
 }
 
+record RoomCorners(int UpperRow, int LeftCol, int LowerRow, int RightCol);
+
 class Rooms
 {
+  public static RoomCorners IsRectangle(Map map, List<(int, int)> room)
+  {
+    int upperRow = int.MaxValue, leftCol = int.MaxValue, lowerRow = 0, rightCol = 0;
+
+    foreach ((int r, int c) in room)
+    {
+      if (r < upperRow)
+        upperRow = r;
+      if (r > lowerRow)
+        lowerRow = r;
+      if (c < leftCol)
+        leftCol = c;
+      if (c > rightCol)
+        rightCol = c;
+    }
+
+    for (int r = upperRow; r <= lowerRow; r++)
+    {
+      for (int c = leftCol; c <= rightCol; c++)
+      {
+        if (map.TileAt(r, c).Type != TileType.DungeonFloor)
+          return new(-1, -1, -1, -1);
+      }
+    }
+
+    return new(upperRow, leftCol, lowerRow, rightCol);
+  }
+
+  public static void RoomInRoom(Map map, RoomCorners corners, Rng rng)
+  {    
+    HashSet<(int, int)> innerWalls = [];
+    for (int c = corners.LeftCol + 1; c < corners.RightCol; c++)
+    {
+      map.SetTile(corners.UpperRow + 1, c, TileFactory.Get(TileType.DungeonWall));
+      innerWalls.Add((corners.UpperRow + 1, c));
+      map.SetTile(corners.LowerRow - 1, c, TileFactory.Get(TileType.DungeonWall));
+      innerWalls.Add((corners.LowerRow - 1, c));
+    }
+
+    for (int r = corners.UpperRow + 1; r < corners.LowerRow; r++)
+    {
+      map.SetTile(r, corners.LeftCol + 1, TileFactory.Get(TileType.DungeonWall));
+      innerWalls.Add((r, corners.LeftCol + 1));
+      map.SetTile(r, corners.RightCol - 1, TileFactory.Get(TileType.DungeonWall));
+      innerWalls.Add((r, corners.RightCol - 1));
+    }
+
+    innerWalls.Remove((corners.UpperRow + 1, corners.LeftCol + 1));
+    innerWalls.Remove((corners.LowerRow - 1, corners.LeftCol + 1));
+    innerWalls.Remove((corners.UpperRow + 1, corners.RightCol - 1));
+    innerWalls.Remove((corners.LowerRow - 1, corners.RightCol - 1));
+
+    var doorSq = innerWalls.ToList()[rng.Next(innerWalls.Count)];
+    map.SetTile(doorSq, TileFactory.Get(TileType.LockedDoor));
+  }
+
   public static bool PotentialVault(Map map, List<(int, int)> room)
   {
     if (room.Count > 75)
@@ -390,7 +448,7 @@ class Rooms
       foreach (var adj in Util.Adj8Sqs(r, c))
       {
         Tile adjTile = map.TileAt(adj);
-        TileType adjType = adjTile.Type;  
+        TileType adjType = adjTile.Type;
         if (!room.Contains(adj) && (adjTile.Passable() || adjType == TileType.ClosedDoor || adjType == TileType.LockedDoor))
           exits.Add(adj);
       }
@@ -407,7 +465,7 @@ class Rooms
     HashSet<TileType> others = [];
 
     foreach (var (r, c) in room)
-    {    
+    {
       List<(int, int)> adjSqs = Util.Adj4Sqs(r, c).ToList();
       bool isPerimeter = adjSqs.Any(sq => !room.Contains(sq));
       if (isPerimeter)
@@ -436,8 +494,8 @@ class Rooms
       }
     }
 
-    List<(int, int)> islandSqs 
-      = room.Where(sq => !chasmSqs.Contains(sq) 
+    List<(int, int)> islandSqs
+      = room.Where(sq => !chasmSqs.Contains(sq)
             && map.TileAt(sq.Item1, sq.Item2).Type != TileType.Upstairs
             && map.TileAt(sq.Item1, sq.Item2).Type != TileType.Downstairs)
                                      .ToList();
@@ -460,7 +518,7 @@ class Rooms
         map.SetTile(r, c, TileFactory.Get(TileType.Chasm));
         if (mapBelow.TileAt(r, c).Type == TileType.DungeonWall)
           mapBelow.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-      }      
+      }
     }
   }
 
@@ -481,7 +539,7 @@ class Rooms
 
     foreach (var (r, c) in info.Exits)
     {
-      Loc startLoc = new(dungeonID, level, r, c);      
+      Loc startLoc = new(dungeonID, level, r, c);
       Loc goalLoc = new(dungeonID, level, goalSq.Item1, goalSq.Item2);
       Stack<Loc> path = AStar.FindPath(objDb, map, startLoc, goalLoc, passable, false);
       if (path.Count > 0)
@@ -568,7 +626,7 @@ class Rooms
     ChasmRoomInfo info = ChasmRoomInfo(map, room);
     if (info.ChasmSqs.Count == 0 || info.IslandSqs.Count == 0)
       return;
-      
+
     MakeChasm(map, mapBelow, info.ChasmSqs);
     HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, objDb, rng);
     foreach (Loc bridge in bridges)
@@ -625,7 +683,7 @@ class Rooms
       objDb.SetToLoc(altarLoc, altar);
     }
 
-    floors = [..floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
+    floors = [.. floors.Where(loc => Util.Distance(loc, effigyLoc) < 4)];
     NameGenerator ng = new(rng, Util.NamesFile);
     string dragonName = ng.GenerateName(rng.Next(8, 13)).Capitalize();
     factDb.Add(new SimpleFact() { Name = "DragonFact", Value = dragonName });
@@ -642,7 +700,7 @@ class Rooms
       {
         if (t is BehaviourTreeTrait btt)
           btt.Plan = "Worshipper";
-      }      
+      }
       worship = new()
       {
         AltarLoc = effigyLoc,
@@ -667,7 +725,7 @@ class Rooms
     {
       if (t is BehaviourTreeTrait btt)
         btt.Plan = "Worshipper";
-    }      
+    }
     worship = new()
     {
       AltarLoc = effigyLoc,
@@ -690,7 +748,7 @@ class Rooms
       };
       kobold.Traits.Add(allies);
     }
-    
+
     string Chant() => rng.Next(4) switch
     {
       0 => "Gold! Gold for our dragon god!",
@@ -698,7 +756,7 @@ class Rooms
       2 => "May your hoard grow ever larger!",
       _ => $"Glory to {dragonName}!"
     };
-    
+
   }
 
   public static void CampRoom(List<(int, int)> room, int dungeonID, int level, FactDb factDb, GameObjectDB objDb, Rng rng)
@@ -719,7 +777,7 @@ class Rooms
     List<Loc> spotsNearFire = [..room.Where(sq => Util.Distance(sq.Item1, sq.Item2, fireSq.Item1, fireSq.Item2) <= 3)
                                   .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
                                   .Where(loc => loc != fireLoc && !objDb.Occupied(loc))];
-                               
+
     for (int j = 0; j < rng.Next(2, 5); j++)
     {
       TreasureQuality quality = rng.Next(4) switch
@@ -739,10 +797,10 @@ class Rooms
     {
       boss = MonsterFactory.Get("kobold foreman", objDb, rng);
       boss.Name = ng.BossName();
-      boss.Traits.Add(new NamedTrait());      
+      boss.Traits.Add(new NamedTrait());
     }
     else // goblins
-    {      
+    {
       boss = MonsterFactory.Get("hobgoblin", objDb, rng);
       boss.Name = ng.BossName();
       boss.Traits.Add(new NamedTrait());
@@ -805,8 +863,11 @@ class Rooms
 
     statue.Traits.Add(new LightSourceTrait()
     {
-      ExpiresOn = ulong.MaxValue, OwnerID = statue.ID, 
-      Radius = range, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE
+      ExpiresOn = ulong.MaxValue,
+      OwnerID = statue.ID,
+      Radius = range,
+      FgColour = Colours.YELLOW,
+      BgColour = Colours.TORCH_ORANGE
     });
     objDb.SetToLoc(statueLoc, statue);
 
@@ -820,8 +881,8 @@ class Rooms
 
     AuraMessageTrait auraMsg = new()
     {
-      ObjId= statue.ID,
-      Radius= range,
+      ObjId = statue.ID,
+      Radius = range,
       Message = "A feeling of peace washes over you."
     };
     statue.Traits.Add(auraMsg);
@@ -850,7 +911,7 @@ class Rooms
     // Find good squares to be mined.
     HashSet<(int, int)> outerWalls = [];
     foreach (var sq in room)
-    {      
+    {
       HashSet<(int, int)> adjWalls = [];
       foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
       {
@@ -870,7 +931,7 @@ class Rooms
       }
 
       if (adjWalls.Count >= 3)
-        outerWalls = outerWalls.Union(adjWalls).ToHashSet();      
+        outerWalls = outerWalls.Union(adjWalls).ToHashSet();
     }
 
     List<(int, int)> opts = [];
@@ -891,8 +952,8 @@ class Rooms
           if (adjTile == TileType.DungeonWall && rng.NextDouble() <= 0.2 && AdjWalls(map, adj.Item1, adj.Item2) >= 6)
             map.SetTile(adj, TileFactory.Get(TileType.DungeonFloor));
           else if (adjTile == TileType.DungeonFloor && rng.NextDouble() <= 0.1)
-             map.SetTile(adj, TileFactory.Get(TileType.DungeonWall));
-        }        
+            map.SetTile(adj, TileFactory.Get(TileType.DungeonWall));
+        }
       }
     }
 
@@ -936,7 +997,7 @@ class Rooms
 
     // Add some monsters
     itemSpots = itemSpots.Where(loc => !objDb.AreBlockersAtLoc(loc) && !objDb.Occupied(loc)).ToList();
-    
+
     for (int j = 0; j < 3; j++)
     {
       if (itemSpots.Count > 0 && rng.NextDouble() < 0.2)
@@ -947,7 +1008,7 @@ class Rooms
         itemSpots.RemoveAt(i);
       }
     }
-    
+
     if (itemSpots.Count > 0 && rng.NextDouble() < 0.2)
     {
       int i = rng.Next(itemSpots.Count);
@@ -1008,6 +1069,6 @@ class Rooms
       Actor crypt = MonsterFactory.Get("haunted crypt", objDb, rng);
       objDb.AddNewActor(crypt, cryptLoc);
       map.Alerts.Add("A shiver runs up your spine.");
-    }    
+    }
   }
 }

@@ -37,6 +37,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       // Sometimes add a secret door or two in hallways
       if (rng.Next(2) == 0)
         PutSecretDoorsInHallways(levels[levelNum], rng);
+
+      AddRooms(levels[levelNum], objDb, rng);
     }
 
     dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
@@ -80,6 +82,22 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     GnomeMerchant(levels, DungeonId, rng, objDb);
 
     return dungeon;
+  }
+
+  static void AddRooms(Map map, GameObjectDB objDb, Rng rng)
+  {
+    List<List<(int, int)>> rooms = map.FindRooms(9);
+
+    foreach (var room in rooms)
+    {
+      RoomCorners corners = Rooms.IsRectangle(map, room);
+
+      if (corners.LowerRow - corners.UpperRow >= 5 && corners.RightCol - corners.LeftCol >= 5)
+      {
+        Rooms.RoomInRoom(map, corners, rng);
+        return;
+      }
+    }   
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
