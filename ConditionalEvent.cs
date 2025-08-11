@@ -17,6 +17,24 @@ abstract class ConditionalEvent
   
   public abstract bool CondtionMet(GameState gs);
   public abstract void Fire(GameState gs);
+  public abstract string AsText();
+
+  public static ConditionalEvent FromText(string txt)
+  {
+    string[] pieces = txt.Split(Constants.SEPARATOR);
+
+    if (pieces.Length == 0)
+      throw new Exception("Invalid ConditionalEvent serialization");
+
+    return pieces[0] switch
+    {
+      "CanSeeLoc" => new CanSeeLoc(Loc.FromStr(pieces[1]), pieces[2]),
+      "SetQuestStateAtLoc" => new SetQuestStateAtLoc(Loc.FromStr(pieces[1]), int.Parse(pieces[2])),
+      "PlayerHasLitTorch" => new PlayerHasLitTorch(),
+      "MessageAtLoc" => new MessageAtLoc(Loc.FromStr(pieces[1]), pieces[2]),
+      _ => throw new Exception("Invalid ConditionalEvent serialization")
+    };
+  }
 }
 
 class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
@@ -31,6 +49,8 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
     gs.UIRef().SetPopup(new Popup(Msg, "", -2, -1));
     gs.UIRef().PauseForResponse = true;
   }
+
+  public override string AsText() => $"CanSeeLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Msg}";
 }
 
 class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
@@ -46,7 +66,9 @@ class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
     // don't want to accidentally move progress backwards later on
     if (gs.Player.Stats[Attribute.MainQuestState].Curr < QuestState)
       gs.Player.Stats[Attribute.MainQuestState] = new Stat(QuestState);
-  }    
+  }
+
+  public override string AsText() => $"SetQuestStateAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{QuestState}";
 }
 
 class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
@@ -61,6 +83,8 @@ class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
     gs.UIRef().SetPopup(new Popup(Msg, "", -2, -1));
     gs.UIRef().PauseForResponse = true;
   }
+
+  public override string AsText() => $"MessageAtLoc{Constants.SEPARATOR}{Loc}{Constants.SEPARATOR}{Msg}";
 }
 
 // Used in the tutorial
@@ -93,7 +117,9 @@ class PlayerHasLitTorch : ConditionalEvent
     gs.UIRef().CheatSheetMode = CheatSheetMode.MvMixed;
     gs.UIRef().SetPopup(new Popup(txt, "", -2, -1));
     gs.UIRef().PauseForResponse = true;
-  }  
+  }
+
+  public override string AsText() => "PlayerHasLitTorch";
 }
 
 class FullyEquipped(Loc loc) : ConditionalEvent
@@ -105,10 +131,9 @@ class FullyEquipped(Loc loc) : ConditionalEvent
   {
     if (gs.Player.Loc == Loc)
     {
-      HashSet<ulong> equippedItems = gs.Player.Inventory.Items()
+      HashSet<ulong> equippedItems = [.. gs.Player.Inventory.Items()
                                        .Where(i => i.Equipped)
-                                       .Select(i => i.ID)
-                                       .ToHashSet();
+                                       .Select(i => i.ID)];
       foreach (var id in IDs)
       {
         if (!equippedItems.Contains(id))
@@ -125,4 +150,6 @@ class FullyEquipped(Loc loc) : ConditionalEvent
     gs.UIRef().SetPopup(new Popup(txt, "", -1, -1));
     gs.UIRef().PauseForResponse = true;
   }
+
+  public override string AsText() => throw new NotImplementedException();
 }

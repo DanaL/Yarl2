@@ -629,6 +629,8 @@ class GameObjDBSave
   List<string> Objects { get; set; } = [];
   [JsonInclude]
   public HashSet<Loc> LocListeners { get; set; } = [];
+  [JsonInclude]
+  public List<string> ConditionalEvents { get; set; } = [];
 
   static string StatsToText(Dictionary<Attribute, Stat> stats)
   {
@@ -889,6 +891,11 @@ class GameObjDBSave
       }
     }
 
+    foreach (ConditionalEvent ce in objDb.ConditionalEvents)
+    {
+      sidb.ConditionalEvents.Add(ce.AsText());
+    }
+
     return sidb;
   }
 
@@ -915,6 +922,11 @@ class GameObjDBSave
     objDb.LocListeners = sidb.LocListeners;
 
     GameObj.SetSeed(maxID + 1);
+
+    foreach (string ce in sidb.ConditionalEvents)
+    {
+      objDb.ConditionalEvents.Add(ConditionalEvent.FromText(ce));
+    }
 
     return objDb;
   }
