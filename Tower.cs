@@ -725,7 +725,7 @@ class Tower(int height, int width, int minLength)
 
     (int dr, int dc) = (doorRow - row, doorCol - col);
     Loc msgLoc = new(0, 0, doorRow + dr, doorCol + dc);
-    PlayerAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
+    MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
     objDb.ConditionalEvents.Add(pal);
   }
 }

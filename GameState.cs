@@ -1037,7 +1037,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (ce.CondtionMet(this))
       {
-        ce.Fire(UI);
+        ce.Fire(this);
         ce.Complete = true;
       }
     }

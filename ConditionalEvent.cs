@@ -16,7 +16,7 @@ abstract class ConditionalEvent
   public bool Complete { get; set; }
   
   public abstract bool CondtionMet(GameState gs);
-  public abstract void Fire(UserInterface ui);
+  public abstract void Fire(GameState gs);
 }
 
 class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
@@ -29,14 +29,14 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
     return gs.LastPlayerFoV.Contains(Loc);
   }
 
-  public override void Fire(UserInterface ui)
+  public override void Fire(GameState gs)
   {
-    ui.SetPopup(new Popup(Msg, "", -2, -1));
-    ui.PauseForResponse = true;
+    gs.UIRef().SetPopup(new Popup(Msg, "", -2, -1));
+    gs.UIRef().PauseForResponse = true;
   }
 }
 
-class PlayerAtLoc(Loc loc, string msg) : ConditionalEvent
+class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
 {
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
@@ -46,10 +46,10 @@ class PlayerAtLoc(Loc loc, string msg) : ConditionalEvent
     return gs.Player.Loc == Loc;
   }
 
-  public override void Fire(UserInterface ui)
+  public override void Fire(GameState gs)
   {
-    ui.SetPopup(new Popup(Msg, "", -2, -1));
-    ui.PauseForResponse = true;
+    gs.UIRef().SetPopup(new Popup(Msg, "", -2, -1));
+    gs.UIRef().PauseForResponse = true;
   }
 }
 
@@ -67,7 +67,7 @@ class PlayerHasLitTorch : ConditionalEvent
     return false;
   }
 
-  public override void Fire(UserInterface ui)
+  public override void Fire(GameState gs)
   {
     string txt = @"Great! Now you have some light and can see a little more of your surroundings.
 
@@ -80,9 +80,9 @@ class PlayerHasLitTorch : ConditionalEvent
     [LIGHTBLUE Within the tutorial, tap ENTER or SPACE to dismiss pop-ups.]    
     ";
 
-    ui.CheatSheetMode = CheatSheetMode.MvMixed;
-    ui.SetPopup(new Popup(txt, "", -2, -1));
-    ui.PauseForResponse = true;
+    gs.UIRef().CheatSheetMode = CheatSheetMode.MvMixed;
+    gs.UIRef().SetPopup(new Popup(txt, "", -2, -1));
+    gs.UIRef().PauseForResponse = true;
   }  
 }
 
@@ -109,10 +109,10 @@ class FullyEquipped(Loc loc) : ConditionalEvent
     return false;
   }
 
-  public override void Fire(UserInterface ui)
+  public override void Fire(GameState gs)
   {
     string txt = @"Make sure both your armour and weapon are equipped before venturing further!";
-    ui.SetPopup(new Popup(txt, "", -1, -1));
-    ui.PauseForResponse = true;
+    gs.UIRef().SetPopup(new Popup(txt, "", -1, -1));
+    gs.UIRef().PauseForResponse = true;
   }
 }

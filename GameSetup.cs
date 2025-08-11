@@ -547,7 +547,7 @@ class CampaignCreator(UserInterface ui)
           Desc = "Dungeon Entrance"
         });
 
-        PlayerAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
+        MessageAtLoc pal = new(entranceLoc, "A portal looms before you! Danger lurks within -- when you feel prepared you can enter via the [LIGHTBLUE >] command!");
         objDb.ConditionalEvents.Add(pal);
 
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
@@ -638,8 +638,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = 28622622;
-
+      
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);
       GameObjectDB objDb = new();
