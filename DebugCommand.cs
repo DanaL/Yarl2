@@ -146,7 +146,7 @@ class DebugCommand(GameState gs)
       {
         _gs.ObjDb.RemoveActor(a);
       }
-      _gs.RefreshPerformers();
+      _gs.FlushPerformers();
 
       return "";
     }

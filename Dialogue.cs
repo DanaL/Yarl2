@@ -1260,7 +1260,7 @@ class DialogueInterpreter
         gs.ActorEntersLevel(gs.Player, 0, 0);
         Loc start = gs.Player.Loc;
         gs.ResolveActorMove(gs.Player, start, entrance.Loc);
-        gs.RefreshPerformers();
+        gs.FlushPerformers();
         gs.PrepareFieldOfView();        
       }
 

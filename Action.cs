@@ -117,7 +117,7 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
       GameState.ResolveActorMove(victim, start, entry);
       victim.Loc = entry;
 
-      GameState.RefreshPerformers();
+      GameState.FlushPerformers();
       GameState.PrepareFieldOfView();
 
       if (belly.ArrivalMessage != "")

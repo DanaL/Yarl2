@@ -371,13 +371,13 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     return Loc.Nowhere;
   }
 
-  void DoElevate(Loc dest, string msg, GameState gs)
+  static void DoElevate(Loc dest, string msg, GameState gs)
   {
     gs.UIRef().AlertPlayer(msg);
     Loc start = gs.Player.Loc;
     gs.ActorEntersLevel(gs.Player, dest.DungeonID, dest.Level);
     gs.ResolveActorMove(gs.Player, start, dest);
-    gs.RefreshPerformers();
+    gs.FlushPerformers();
     gs.PrepareFieldOfView();    
   }
 

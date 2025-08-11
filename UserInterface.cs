@@ -1301,8 +1301,7 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
-    gameState.RefreshPerformers();
-
+    
     _animations.Add(new CloudAnimation(this, gameState));
     //_animations.Add(new RainAnimation(this, gameState));
     

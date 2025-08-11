@@ -685,7 +685,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (actor is Player)
     {
-      RefreshPerformers();
+      FlushPerformers();
     }
 
     if (!featherFalling)
@@ -937,7 +937,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
   public void PushPerformer(Actor actor) => Performers.Push(actor);
   public void FlushPerformers() => Performers.Flush();
   
-  public void RefreshPerformers()
+  void RefreshPerformers()
   {
     Performers.Flush();
     foreach (Actor actor in ObjDb.GetPerformers(CurrDungeonID, CurrLevel))
@@ -1281,7 +1281,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       
       CalculateFallDamage(actor, 1);
 
-      RefreshPerformers();
+      FlushPerformers();
     }
     else
     {

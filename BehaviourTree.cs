@@ -1126,7 +1126,7 @@ class JumpToTavern() : BehaviourNode
     Loc dest = opts[gs.Rng.Next(opts.Count)];
     gs.ResolveActorMove(mob, mob.Loc, dest);
     mob.ExecuteAction(new PassAction());
-    gs.RefreshPerformers();
+    gs.FlushPerformers();
 
     return PlanStatus.Success;
   }
