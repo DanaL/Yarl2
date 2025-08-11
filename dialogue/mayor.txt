@@ -1,71 +1,40 @@
-﻿(cond
-  ; Mayor has not yet met the player
-  (
-    (= MAIN_QUEST_STATUS 0)
+﻿(cond 
+  ( (= MET_PLAYER false)
     (
-      (
-			  (say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid. I have every confidence you'll do better than that last fellow! Poor sot... And before you venture into danger, why not spend some zorkmids in our shops and tavern?")
-			  (give MINOR_GIFT "Here, take this with you!")
-			  (set MAIN_QUEST_STATUS 1)				
-		  )
-    )
-  )
-
-  (
-    (= MAIN_QUEST_STATUS 1)
-    (
-      (say (
-        pick ("How are your adventures going?" 
-              "Thank goodness it isn't an election year." 
-              "This looming doom is terrible for tourism. Adventurers aside, of course."
-              "These #EARLY_DENIZEN have been causing more and more problems."
-              "Please find the ruins and defeat #FIRST_BOSS. #TOWN_NAME is counting on you!"
-              "We tried diplomacy but #FIRST_BOSS is very disagreeable."
-              "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
-              "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
-              "#TOWN_NAME has many amenities for dungeon delvers!"
-              "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
-        )))
-    )
-  )
-
-	; If we've spoken to the player before
-	(
-		(= MET_PLAYER true)
-		(
-      (cond
-        ((and (> PLAYER_DEPTH 4) (!= LEVEL_FIVE_BOSS_KILLED true) (!= LEVEL_FIVE_KEY_GIVEN true)) 
-            (say "Oh! I see you've reached level 5 of the dungeon! Well done! You may have noticed there's a gate blocking the way deeper. The key was left with me by a previous adventurer, but I feel it would be irresponsible to give it to you until you've proven yourself.\n\nDefeat #LEVEL_FIVE_BOSS and it's yours!"))
-        ((and (> PLAYER_DEPTH 4) (= LEVEL_FIVE_BOSS_KILLED true) (!= LEVEL_FIVE_KEY_GIVEN true)) 
-          ((say "Marvelous, #LEVEL_FIVE_BOSS is dead! They were the bane of many a past adventurer. You've done #TOWN_NAME a great service!") 
-            (set LEVEL_FIVE_KEY_GIVEN true)
-            (give LEVEL_FIVE_KEY "This will unlock the path to go even deeper."))
-        )
-        (
-          (= LEVEL_FIVE_KEY_GIVEN true)
-          (say "You've done wonderfully so far! I feel there could be a key to the city in your future!")
-        )
-        (else
-                  (say (
-                  pick ("How are your adventures going?" 
-                        "Thank goodness it isn't an election year." 
-                        "This looming doom is terrible for tourism. Adventurers aside, of course."
-                        "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
-                        "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
-                        "#TOWN_NAME has many amenities for dungeon delvers!"
-                        "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
-                  )))
-        )
-      )
-		)
-	)
-
-	; Otherwise
-	(else
-		(
 			(say "Welcome to #TOWN_NAME! It's heartwarming to see another adventurer coming to our aid. I have every confidence you'll do better than that last fellow! Poor sot... And before you venture into danger, why not spend some zorkmids in our shops and tavern?")
 			(give MINOR_GIFT "Here, take this with you!")
 			(set MET_PLAYER true)				
 		)
-	)
+  )
+
+  (else
+    (cond
+      ( (= MAIN_QUEST_STATUS 0)
+        (
+          (say (
+            pick ("How are your adventures going?" 
+                  "Thank goodness it isn't an election year." 
+                  "This looming doom is terrible for tourism. Adventurers aside, of course."
+                  "These #EARLY_DENIZEN have been causing more and more problems."
+                  "Please find the ruins and defeat #FIRST_BOSS. #TOWN_NAME is counting on you!"
+                  "We tried diplomacy but #FIRST_BOSS is very disagreeable."
+                  "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
+                  "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
+                  "#TOWN_NAME has many amenities for dungeon delvers!"
+                  "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
+            )))
+        )
+      )
+
+      ( (= MAIN_QUEST_STATUS 1)
+        (say (
+          pick ("They say the ruins used to be beautiful underground kingdom."
+                "Level 3? You've made it further than that last guy!"
+                "Don't push yourself too hard. Adventurer burnout is a common problem."
+                "You've probably earned a little break and an ale at the tavern."
+                "You might consider spending some of your spoils on new gear in our helpful shops."
+          )))
+      )
+    )
+  )
 )
