@@ -628,7 +628,8 @@ abstract class PortalAction : Action
       }
     }
 
-    GameState.RefreshPerformers();
+    //GameState.RefreshPerformers();
+    GameState.FlushPerformers();
     GameState.PrepareFieldOfView();
 
     if (start.DungeonID != portal.Destination.DungeonID)
@@ -652,6 +653,9 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
       GameState!.UIRef().AlertPlayer("You cannot go down here.");
     }
 
+    // Bit of a kludge: because we change current level in the UsePortal() 
+    // call, the list of performers is rebuilt and the actors all get their
+    // energy recharged, but this happens 
     return 1.0;
   }
 }

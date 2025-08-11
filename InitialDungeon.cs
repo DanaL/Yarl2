@@ -81,6 +81,16 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     GnomeMerchant(levels, DungeonId, rng, objDb);
 
+    // Update the main quest state when the player steps on the up stairs of 
+    // the 3rd level. (This will mess up if the player somehow never actually 
+    // steps on the upstairs...)
+    foreach (var sq in levels[2].SqsOfType(TileType.Upstairs))
+    {
+      Loc loc = new(DungeonId, 2, sq.Item1, sq.Item2);
+      SetQuestStateAtLoc ce = new(loc, 1);
+      objDb.ConditionalEvents.Add(ce);
+    }
+    
     return dungeon;
   }
 

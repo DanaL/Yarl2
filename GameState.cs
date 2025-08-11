@@ -935,7 +935,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
   }
 
   public void PushPerformer(Actor actor) => Performers.Push(actor);
-
+  public void FlushPerformers() => Performers.Flush();
+  
   public void RefreshPerformers()
   {
     Performers.Flush();
@@ -948,18 +949,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
       if (actor.Energy >= 1.0)
         Performers.Push(actor);
-    }    
+    }
   }
 
   public Actor? NextPerformer()
   {
     if (Performers.Count == 0)
-    {      
+    {
       EndOfTurn();
       RefreshPerformers();
     }
 
-    Actor? next = null;    
+    Actor? next = null;
     if (Performers.Pop() is Actor a)
     {
       next = a;

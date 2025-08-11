@@ -24,10 +24,7 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet(GameState gs)
-  {
-    return gs.LastPlayerFoV.Contains(Loc);
-  }
+  public override bool CondtionMet(GameState gs) => gs.LastPlayerFoV.Contains(Loc);
 
   public override void Fire(GameState gs)
   {
@@ -36,15 +33,28 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
   }
 }
 
+class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
+{
+  Loc Loc { get; set; } = loc;
+  int QuestState { get; set; } = questState;
+
+  public override bool CondtionMet(GameState gs) => gs.Player.Loc == Loc;
+
+  public override void Fire(GameState gs)
+  {
+    // The quest state should alaways go up. If the player skips a trigger we
+    // don't want to accidentally move progress backwards later on
+    if (gs.Player.Stats[Attribute.MainQuestState].Curr < QuestState)
+      gs.Player.Stats[Attribute.MainQuestState] = new Stat(QuestState);
+  }    
+}
+
 class MessageAtLoc(Loc loc, string msg) : ConditionalEvent
 {
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet(GameState gs)
-  {
-    return gs.Player.Loc == Loc;
-  }
+  public override bool CondtionMet(GameState gs) => gs.Player.Loc == Loc;
 
   public override void Fire(GameState gs)
   {
