@@ -576,6 +576,8 @@ class WitchDialogue : Inputer
   const int QUEST_DONE = 6;
   const int TABLET1 = 7;
   const int TRANSLATE_TABLET_1 = 8;
+  const int AFTER_FIRST_DUNGEON_TABLET = 9;
+  const int AFTER_FIRST_DUNGEON_NO_TABLET = 10;
 
   bool PlayerHasCrystal 
   {  
@@ -606,10 +608,14 @@ class WitchDialogue : Inputer
     Witch = witch;
     Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
 
-    if (HasQuestItem1() && GS.FactDb.FactCheck("Tablet1Translated") is null)
+    if (gs.MainQuestState == 2 && HasQuestItem1())
     {
-      Witch.Stats[Attribute.DialogueState] = new Stat(TABLET1);
+      Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_TABLET);
     }
+    else if (gs.MainQuestState == 2 && !HasQuestItem1())
+    {
+      Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_NO_TABLET);
+    }    
     else if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
     {
       if (fact.Value == "begun" && !PlayerHasCrystal)
@@ -799,6 +805,7 @@ class WitchDialogue : Inputer
         Blurb = "Hmm, here is what I can teach you.\n\n";
         SetSpellMenu();
         break;
+      case AFTER_FIRST_DUNGEON_TABLET:
       case TABLET1:
         Blurb = "That tablet you carry -- may I take a look at it?";
         Blurb += $"\n\na) Show {Witch.Name.Capitalize()} the tablet";
