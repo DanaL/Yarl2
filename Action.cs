@@ -1127,8 +1127,7 @@ class CloseDoorAction : DirectionalAction
       {
         ui.AlertPlayer("There is something in the way.");
       }
-
-      if (d.Open)
+      else if (d.Open)
       {
         d.Open = false;
         result = 1.0;
