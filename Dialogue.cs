@@ -834,7 +834,7 @@ class DialogueInterpreter
           return cultLevel.Curr;
         return 0;
       case "MAIN_QUEST_STATUS":
-        return gs.Player.Stats[Attribute.MainQuestState].Curr;
+        return gs.MainQuestState;
       default:
         throw new Exception($"Unknown variable {name}");
     }    

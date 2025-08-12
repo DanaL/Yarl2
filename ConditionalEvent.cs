@@ -64,7 +64,7 @@ class SetQuestStateAtLoc(Loc loc, int questState) : ConditionalEvent
   {
     // The quest state should alaways go up. If the player skips a trigger we
     // don't want to accidentally move progress backwards later on
-    if (gs.Player.Stats[Attribute.MainQuestState].Curr < QuestState)
+    if (gs.MainQuestState < QuestState)
       gs.Player.Stats[Attribute.MainQuestState] = new Stat(QuestState);
   }
 

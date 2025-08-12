@@ -57,6 +57,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
   public void ClearMenu() => UI.CloseMenu();
   public UserInterface UIRef() => UI;
 
+  public int MainQuestState => Player.Stats[Attribute.MainQuestState].Curr;
+
   public void ActorEntersLevel(Actor actor, int dungeon, int level)
   {
     CurrLevel = level;
