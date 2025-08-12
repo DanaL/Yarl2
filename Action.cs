@@ -1114,22 +1114,23 @@ class CloseDoorAction : DirectionalAction
     base.Execute();
     double result = 0.0;
     UserInterface ui = GameState!.UIRef();
-    Tile door = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
+    Tile tile = GameState!.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
-    if (door is Door d)
+    if (tile is Door door)
     {
-      var gs = GameState!;
-      if (gs.ObjDb.Occupied(Loc))
+      if (GameState.ObjDb.Occupied(Loc))
       {
-        ui.AlertPlayer("There is someone in the way.");
+        if (Actor is Player)
+          ui.AlertPlayer("There is someone in the way.");
       }
-      else if (gs.ObjDb.ItemsAt(Loc).Count > 0)
+      else if (GameState.ObjDb.ItemsAt(Loc).Count > 0)
       {
-        ui.AlertPlayer("There is something in the way.");
+        if (Actor is Player)
+          ui.AlertPlayer("There is something in the way.");
       }
-      else if (d.Open)
+      else if (door.Open)
       {
-        d.Open = false;
+        door.Open = false;
         result = 1.0;
         ui.AlertPlayer(MsgFactory.DoorMessage(Actor!, Loc, "close", GameState!));
       }
@@ -1140,7 +1141,7 @@ class CloseDoorAction : DirectionalAction
     }
     else if (Actor is Player)
     {
-      string s = door.Type == TileType.BrokenDoor ? "The door is broken!" : "There's no door there!";
+      string s = tile.Type == TileType.BrokenDoor ? "The door is broken!" : "There's no door there!";
       ui.AlertPlayer(s);
     }
 

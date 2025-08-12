@@ -1473,6 +1473,11 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
       else if (prevTile is Door prevDoor && prevDoor.Open)
       {
         action = new CloseDoorAction(gs, mob, PrevLoc);
+
+        // This prevents the mob from infinitely attempting to close the 
+        // door, but I need an actual way to detect the action failed
+        // and abort the current plan.
+        PrevLoc = mob.Loc;
       }
       else
       {
