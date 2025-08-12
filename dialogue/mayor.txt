@@ -35,6 +35,14 @@
                 "You might consider spending some of your spoils on new gear in our helpful shops."
           )))
       )
+
+      ( (= MAIN_QUEST_STATUS 2)
+        (say (
+          pick ("A mysterious, ominous statue?! I don't like the sound of that."
+                "I deal with by-laws and tourism! Maybe talk to our pastor or the witches about glowing statues?"
+                "Of course, I wonder if this statue could become a tourist attraction."                
+          )))
+      )
     )
   )
 )
