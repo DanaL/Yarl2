@@ -62,9 +62,13 @@ class MonsterBehaviour : IBehaviour, IDialoguer
       return (action, acc);
     }
 
-    string s = $"{actor.FullName.Capitalize()} isn't interested in conversation.";
+    string s = gameState.Rng.Next(3) switch
+    {
+      0 => $"{actor.FullName.Capitalize()} isn't here to chit-chat.",
+      1 => $"{actor.FullName.Capitalize()} is curiously laconic.",
+      _ => $"{actor.FullName.Capitalize()} isn't interested in conversation."
+    };
     gameState.UIRef().AlertPlayer(s);
-    //GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
 
     return (new NullAction(), null);
   }
