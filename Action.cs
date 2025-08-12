@@ -1083,10 +1083,7 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
       var (chatAction, acc) = other.Behaviour.Chat((Mob)other, GameState);
 
       if (chatAction is NullAction)
-      {
-        string s = $"{other.FullName.Capitalize()} turns away from you.";
-        GameState.UIRef().AlertPlayer(s);
-        GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      {        
         return 1.0;
       }
 

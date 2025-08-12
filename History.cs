@@ -388,7 +388,7 @@ class History(Rng rng)
     tablet.Traits.Add(new OnPickupTrait()
     {
       Clear = true,
-      Event = "SetAttributeTrigger#MainQuestState#3#0"
+      Event = "SetAttributeTrigger#MainQuestState#2#0"
     });
 
     return tablet;

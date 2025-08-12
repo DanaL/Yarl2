@@ -66,8 +66,7 @@ abstract class UserInterface
 
   IPopup? _popup = null;
   IPopup? _confirm = null;
-  public bool ActivePopup => _popup != null;
-
+  
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
   protected bool HistoryUpdated = false;
@@ -316,7 +315,7 @@ abstract class UserInterface
     _popup = null;
     _confirm = null;
   }
-  public void CloseConfirmation() => _confirm = null;
+  public bool ActivePopup => _popup != null;
 
   public void PlayQueuedExplosions(GameState gs)
   {

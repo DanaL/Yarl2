@@ -62,6 +62,10 @@ class MonsterBehaviour : IBehaviour, IDialoguer
       return (action, acc);
     }
 
+    string s = $"{actor.FullName.Capitalize()} isn't interested in conversation.";
+    gameState.UIRef().AlertPlayer(s);
+    //GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
     return (new NullAction(), null);
   }
 
@@ -684,6 +688,15 @@ class NPCBehaviour : IBehaviour, IDialoguer
     }
 
     Dialoguer acc = new(actor, gameState);
+
+    // If no popup was created, it's probably a problem where I didn't 
+    // calculate dialogue correctly, but this will handle it somewhat
+    // gracefully
+    if (!gameState.UIRef().ActivePopup)
+    {
+      return (new NullAction(), new PauseForMoreInputer(gameState));
+    }
+
     CloseMenuAction action = new(gameState, 1.0);
 
     return (action, acc);
