@@ -282,7 +282,7 @@ class CastIllume(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   {
     base.Execute();
     
-    if (!CheckCost(2, 20))
+    if (!CheckCost(1, 20))
       return 0.0;
 
     LightSpellTrait ls = new();
