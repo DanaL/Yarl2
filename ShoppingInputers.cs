@@ -48,10 +48,10 @@ class ShopMenuInputer : Inputer
   {
     double markup;
     if (Shopkeeper.Stats.TryGetValue(Attribute.Markup, out var markUpStat))
-      markup = markUpStat.Curr / 100.0;      
+      markup = markUpStat.Curr / 100.0;
     else
       markup = 1.0;
-    
+
     if (GS.Player.HasTrait<LikeableTrait>())
       markup -= 0.33;
     if (GS.Player.HasTrait<RepugnantTrait>())
@@ -70,7 +70,7 @@ class ShopMenuInputer : Inputer
     double markup = CalcMarkup();
     foreach (var (item, count) in items)
     {
-      int price = (int) (item!.Value * markup);
+      int price = (int)(item!.Value * markup);
       menuItems.Add(ch++, new ShopMenuItem(item!.Slot, item, count, price));
     }
 
@@ -220,7 +220,7 @@ class ShopMenuInputer : Inputer
 
   protected virtual void WritePopup(string blurb)
   {
-    string inventoryScreen = MenuScreen(blurb);  
+    string inventoryScreen = MenuScreen(blurb);
 
     GS.UIRef().SetPopup(new Popup(inventoryScreen, Shopkeeper.FullName, -1, -1));
   }
@@ -235,7 +235,7 @@ class InnkeeperInputer : Inputer
 
   public InnkeeperInputer(Actor shopkeeper, GameState gs) : base(gs)
   {
-    Shopkeeper = shopkeeper;    
+    Shopkeeper = shopkeeper;
     WritePopup();
   }
 
@@ -265,7 +265,7 @@ class InnkeeperInputer : Inputer
       InsufficentFunds = true;
     }
     else if (ch == 'b')
-    {      
+    {
       Selection = "Rest";
       Zorkmids = 5;
       Close();
@@ -289,9 +289,9 @@ class InnkeeperInputer : Inputer
 
   protected void WritePopup()
   {
-    SimpleFact tavernName = GS.FactDb.FactCheck("TavernName") as SimpleFact 
+    SimpleFact tavernName = GS.FactDb.FactCheck("TavernName") as SimpleFact
                                       ?? throw new Exception("Should never not be a tavern name");
-     var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
+    var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\nWelcome to [LIGHTBLUE ");
     sb.Append(tavernName.Value);
     sb.Append("]!\n\n");
@@ -300,7 +300,7 @@ class InnkeeperInputer : Inputer
     sb.Append("a) Purchase a flagon of booze. [YELLOW $]2\n");
     sb.Append("b) Rent a bed and rest. [YELLOW $]5\n");
     sb.Append("c) Farewell.");
-    
+
     if (InsufficentFunds)
       sb.Append("\n[BRIGHTRED You don't have enough money!]");
 
@@ -319,9 +319,9 @@ class SmithyInputer : ShopMenuInputer
   bool _offerRepair;
   bool _offerUpgrade;
   char _itemToEnchant;
-  
+
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
-  {    
+  {
     _offerRepair = false;
     _offerUpgrade = false;
     foreach (Item item in GS.Player.Inventory.Items())
@@ -336,7 +336,7 @@ class SmithyInputer : ShopMenuInputer
     // Menu state:
     // 0 - Offer choice of shop/repair/upgrade
     // 1 - Shopping
-    if (_offerRepair || _offerUpgrade) 
+    if (_offerRepair || _offerUpgrade)
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(0);
     else
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(1);
@@ -366,7 +366,7 @@ class SmithyInputer : ShopMenuInputer
     else if (menuState == 0 && ch == 'b')
     {
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(2);
-      MenuItems = RepairMenu();      
+      MenuItems = RepairMenu();
     }
     else if (menuState == 0 && ch == 'c')
     {
@@ -388,7 +388,7 @@ class SmithyInputer : ShopMenuInputer
       GS.Player.QueueAction(new UpgradeItemAction(GS, Shopkeeper));
       _itemToEnchant = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
-      MenuItems = ReagentMenu();      
+      MenuItems = ReagentMenu();
     }
     else if (menuState == 4)
     {
@@ -431,7 +431,7 @@ class SmithyInputer : ShopMenuInputer
         continue;
       if (item.HasTrait<RustedTrait>())
         continue;
-      
+
       menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 0));
     }
 
@@ -439,11 +439,11 @@ class SmithyInputer : ShopMenuInputer
   }
 
   Dictionary<char, ShopMenuItem> RepairMenu()
-  {    
+  {
     double markup = CalcMarkup();
     Dictionary<char, ShopMenuItem> menuItems = [];
     int slot = 0;
-    
+
     foreach (Item item in GS.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
       if (item.Traits.OfType<RustedTrait>().FirstOrDefault() is not RustedTrait rust)
@@ -552,20 +552,21 @@ class SmithyInputer : ShopMenuInputer
         Selections = [.. MenuItems.Values.Where(i => i.SelectedCount > 0)
                                     .Select(i => (i.Slot, i.SelectedCount))]
       };
-    }    
+    }
   }
 }
 
 record SpellInfo(int Price, int ManaCost, string Prereq);
 class WitchDialogue : Inputer
 {
-  Actor Witch { get; set; } 
+  Actor Witch { get; set; }
   string Service { get; set; } = "";
   Dictionary<char, string> Options { get; set; } = [];
   string Blurb { get; set; } = "";
   int Invoice { get; set; } = 0;
 
   int DialogueState => Witch.Stats[Attribute.DialogueState].Curr;
+  int MenuState => Witch.Stats[Attribute.NPCMenuState].Curr;
   int PlayerMana => GS.Player.Stats.TryGetValue(Attribute.MagicPoints, out Stat? mana) ? mana.Max : 0;
 
   const int START_STATE = 0;
@@ -579,18 +580,23 @@ class WitchDialogue : Inputer
   const int AFTER_FIRST_DUNGEON_TABLET = 9;
   const int AFTER_FIRST_DUNGEON_NO_TABLET = 10;
 
-  bool PlayerHasCrystal 
-  {  
+  const int NO_OPTIONS = 0;
+  const int LEARN_SPELLS = 1;
+  const int LEARN_MAGIC_101 = 2;
+  const int SPELL_MENU = 3;
+
+  bool PlayerHasCrystal
+  {
     get
     {
       foreach (Item item in GS.Player.Inventory.Items())
       {
         if (item.Name == "meditation crystal")
-          return true;        
+          return true;
       }
 
       return false;
-    } 
+    }
   }
 
   readonly Dictionary<string, SpellInfo> Spells = new()
@@ -606,7 +612,8 @@ class WitchDialogue : Inputer
   public WitchDialogue(Actor witch, GameState gs) : base(gs)
   {
     Witch = witch;
-    Witch.Stats[Attribute.DialogueState].SetMax(START_STATE);
+    Witch.Stats[Attribute.DialogueState] = new Stat(START_STATE);
+    Witch.Stats[Attribute.NPCMenuState] = new Stat(NO_OPTIONS);
 
     if (gs.MainQuestState == 2 && HasQuestItem1())
     {
@@ -615,7 +622,7 @@ class WitchDialogue : Inputer
     else if (gs.MainQuestState == 2 && !HasQuestItem1())
     {
       Witch.Stats[Attribute.DialogueState] = new Stat(AFTER_FIRST_DUNGEON_NO_TABLET);
-    }    
+    }
     else if (GS.FactDb.FactCheck("KylieQuest") is SimpleFact fact)
     {
       if (fact.Value == "begun" && !PlayerHasCrystal)
@@ -627,7 +634,7 @@ class WitchDialogue : Inputer
         Witch.Stats[Attribute.DialogueState] = new Stat(QUEST_ITEM_FOUND);
       }
     }
-    
+
     SetDialogueText();
     WritePopup();
   }
@@ -653,88 +660,105 @@ class WitchDialogue : Inputer
       return;
     }
 
-    if (dialogueState == BUY_SPELLS && Options.ContainsKey(ch))
+    if (Options.TryGetValue(ch, out var opt))
     {
-      string spell = Options[ch];
-      int price = Spells[spell].Price;
-
-      if (GS.Player.Inventory.Zorkmids >= price)
+      switch (opt)
       {
-        Invoice = price;
-        Service = spell;
+        case "learn spells":
+          Witch.Stats[Attribute.DialogueState] = new Stat(BUY_SPELLS);
+          break;
+        case "farewell":
+          GS.UIRef().AlertPlayer("Farewell.");
+          Close();
+          return;
+      }
+    }
+    
+    /*
+      if (dialogueState == BUY_SPELLS && Options.ContainsKey(ch))
+      {
+        string spell = Options[ch];
+        int price = Spells[spell].Price;
+
+        if (GS.Player.Inventory.Zorkmids >= price)
+        {
+          Invoice = price;
+          Service = spell;
+          Close();
+          QueueDeferredAction();
+        }
+        else
+        {
+          SetDialogueText();
+          Blurb += "\n[BRIGHTRED You can't afford that!]\n";
+          WritePopup();
+        }
+
+        return;
+      }
+      else if (dialogueState == GIVE_QUEST && ch == 'a')
+      {
+        Close();
+        return;
+      }
+      else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
+      }
+      else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'b')
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
+      }
+      else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
+      {
+        Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
+      }
+      else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
+      {
+        Invoice = 0;
+        Service = "magic101";
         Close();
         QueueDeferredAction();
       }
-      else
+      else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
       {
-        SetDialogueText();
-        Blurb += "\n[BRIGHTRED You can't afford that!]\n";
-        WritePopup();
+        Close();
+        return;
       }
-      
-      return;
-    }    
-    else if (dialogueState == GIVE_QUEST && ch == 'a')
-    {
-      Close();
-      return;
-    }
-    else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
-    {
-      Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
-    }
-    else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'b')
-    {
-      Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
-    }
-    else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
-    {
-      Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
-    }
-    else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
-    {
-      Invoice = 0;
-      Service = "magic101";
-      Close();
-      QueueDeferredAction();
-    }
-    else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
-    {
-      Close();
-      return;
-    }
-    else if (dialogueState == START_STATE && ch == 'b')
-    {
-      Close();
-      return;
-    }
-    else if (dialogueState == ON_QUEST && ch == 'a')
-    {
-      Close();
-      return;
-    }
-    else if (dialogueState == TABLET1 && ch == 'a')
-    {
-      GS.FactDb.Add(new SimpleFact() { Name = "Tablet1Translated", Value = "True" });
-      Witch.Stats[Attribute.DialogueState] = new Stat(TRANSLATE_TABLET_1);
-    }    
-    else if (dialogueState == TABLET1 && ch == 'b')
-    {
-      Close();
-      return;
-    }
-    else if (dialogueState == TRANSLATE_TABLET_1 && ch == 'a')
-    {
-      Close();
-      return;
-    }
-    
+      else if (dialogueState == START_STATE && ch == 'b')
+      {
+        Close();
+        return;
+      }
+      else if (dialogueState == ON_QUEST && ch == 'a')
+      {
+        Close();
+        return;
+      }
+      else if (dialogueState == TABLET1 && ch == 'a')
+      {
+        GS.FactDb.Add(new SimpleFact() { Name = "Tablet1Translated", Value = "True" });
+        Witch.Stats[Attribute.DialogueState] = new Stat(TRANSLATE_TABLET_1);
+      }
+      else if (dialogueState == TABLET1 && ch == 'b')
+      {
+        Close();
+        return;
+      }
+      else if (dialogueState == TRANSLATE_TABLET_1 && ch == 'a')
+      {
+        Close();
+        return;
+      }
+      */
+
     SetDialogueText();
     WritePopup();
   }
 
   void SetSpellMenu()
   {
+    char ch;
     Options = [];
     int opt = 'a';
 
@@ -748,7 +772,7 @@ class WitchDialogue : Inputer
       SpellInfo si = Spells[spell];
       if (si.ManaCost <= PlayerMana && (si.Prereq == "" || GS.Player.SpellsKnown.Contains(si.Prereq)))
       {
-        char ch = (char)opt++;
+        ch = (char)opt++;
         Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{si.Price}\n";
         Options.Add(ch, spell);
         ++available;
@@ -763,6 +787,10 @@ class WitchDialogue : Inputer
       Blurb += "\nThere's nothing I can teach you right now.\n";
     if (notYetAvailable > 0)
       Blurb += "\nThere are more spells I can impart when you are more powerful!\n";
+
+    ch = (char)opt;
+    Blurb += $"\n{ch}) Farewell";
+    Options.Add(ch, "farewell");
   }
 
   void SetupQuest()
@@ -794,16 +822,16 @@ class WitchDialogue : Inputer
       Blurb += "\n\na) Farewell";
 
       Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
-    }    
+    }
   }
 
   void SetDialogueText()
   {
     switch (DialogueState)
     {
-      case BUY_SPELLS:        
+      case BUY_SPELLS:
         Blurb = "Hmm, here is what I can teach you.\n\n";
-        SetSpellMenu();
+        Witch.Stats[Attribute.NPCMenuState] = new Stat(SPELL_MENU);        
         break;
       case AFTER_FIRST_DUNGEON_TABLET:
       case TABLET1:
@@ -822,8 +850,7 @@ class WitchDialogue : Inputer
         break;
       case QUEST_ITEM_FOUND:
         Blurb = "Great! You found one! Are you ready to learn some magic?";
-        Blurb += "\n\na) Learn to cast spells";
-        Blurb += "\nb) Farewell";
+        Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_SPELLS);
         break;
       case ON_QUEST:
         Loc questLoc = Loc.Nowhere;
@@ -835,7 +862,7 @@ class WitchDialogue : Inputer
         Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
         Blurb += "\n\na) Farewell";
         break;
-       default:
+      default:
         Options = [];
         if (PlayerMana > 0)
         {
@@ -847,8 +874,7 @@ class WitchDialogue : Inputer
             3 => "Have you considered joining the Adventurers' Union?",
             _ => "You can't put undead to sleep with magic!"
           };
-          Blurb += "\n\na) Learn some spells";
-          Blurb += "\nb) Farewell";
+          Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_SPELLS);
         }
         else
         {
@@ -856,21 +882,57 @@ class WitchDialogue : Inputer
             Blurb = "Need to learn the basics, huh? I used to TA Magic 101.";
           else
             Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumaturgy.";
-          Blurb += "\n\na) Learn how to cast spells.";
-          Blurb += "\nb) Farewell";
+          Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_MAGIC_101);
         }
-        Options.Add('a', "");
-        Options.Add('b', "");
+        break;
+    }
+
+    SetupMenu();
+    //Blurb += "\n\na) Learn to cast spells";
+    //Blurb += "\nb) Farewell";
+
+    // Blurb += "\n\na) Learn how to cast spells.";
+    // Blurb += "\nb) Farewell";
+
+    // Blurb += "\n\na) Learn some spells";
+    // Blurb += "\nb) Farewell";
+
+  }
+
+  void SetupMenu()
+  {
+    Options.Clear();
+
+    switch (MenuState)
+    {
+      case LEARN_SPELLS:
+        Blurb += "\n\na) Study some spells";
+        Blurb += "\nb) Farewell";
+        Options.Add('a', "learn spells");
+        Options.Add('b', "farewell");
+        break;
+      case LEARN_MAGIC_101:
+        Blurb += "\n\na) Learn to cast spells";
+        Blurb += "\nb) Farewell";
+        Options.Add('a', "magic101");
+        Options.Add('b', "farewell");
+        break;
+      case NO_OPTIONS:
+        Blurb += "\na) Farewell";
+        Options.Add('a', "farewell");
+        break;
+      case SPELL_MENU:
+        SetSpellMenu();
         break;
     }
   }
 
   protected void WritePopup()
   {
-    var sb = new StringBuilder(Witch.Appearance.Capitalize());
+    StringBuilder sb = new(Witch.Appearance.Capitalize());
     sb.Append("\n\n");
     sb.Append(Blurb);
-    
+
     GS.UIRef().SetPopup(new Popup(sb.ToString(), Witch.FullName, -1, -1));
   }
 
@@ -895,7 +957,7 @@ class PriestInputer : Inputer
   {
     Priest = priest;
     Blurb = blurb;
-    
+
     WritePopup(blurb);
   }
 
@@ -910,7 +972,7 @@ class PriestInputer : Inputer
       Service = "Absolution";
       return;
     }
-    
+
     WritePopup(Blurb);
   }
 
@@ -927,7 +989,7 @@ class PriestInputer : Inputer
       sb.Append("a) Absolution. [YELLOW $]50\n");
       Options.Add('a');
     }
-    else 
+    else
     {
       sb.Append("Ah child, Huntokar would expect a donation of at least 50 zorkmids for this service.\n");
     }
@@ -959,7 +1021,7 @@ class RepairItemUIResult : UIResult
 
 class UpgradeItemUIResult : UIResult
 {
-  public char ItemSlot {  get; set; }
+  public char ItemSlot { get; set; }
   public char ReagentSLot { get; set; }
   public int Zorkminds { get; set; } = 0;
 }
