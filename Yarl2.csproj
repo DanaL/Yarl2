@@ -9,14 +9,16 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RuntimeIdentifiers>osx-x64;osx-arm64;win-x64</RuntimeIdentifiers>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="sdl\**" />
+    <EmbeddedResource Remove="sdl\**" />
+    <None Remove="sdl\**" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DaceKonn.BearLibNET" Version="2.1.1-alpha" />
     <PackageReference Include="Raylib-cs" Version="7.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-      <Folder Include="sdl" />
-    </ItemGroup>
 
     <!-- Windows-specific settings -->
 <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">

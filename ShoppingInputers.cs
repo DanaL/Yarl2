@@ -582,8 +582,9 @@ class WitchDialogue : Inputer
 
   const int NO_OPTIONS = 0;
   const int LEARN_SPELLS = 1;
-  const int LEARN_MAGIC_101 = 2;
-  const int SPELL_MENU = 3;
+  const int START_KYLIE_QUEST = 2;
+  const int LEARN_MAGIC_101 = 3;
+  const int SPELL_MENU = 4;
 
   bool PlayerHasCrystal
   {
@@ -651,9 +652,7 @@ class WitchDialogue : Inputer
   }
 
   public override void Input(char ch)
-  {
-    int dialogueState = Witch.Stats[Attribute.DialogueState].Curr;
-
+  {    
     if (ch == Constants.ESC || ch == '\n' || ch == '\r' || ch == ' ')
     {
       Close();
@@ -667,9 +666,21 @@ class WitchDialogue : Inputer
         case "learn spells":
           Witch.Stats[Attribute.DialogueState] = new Stat(BUY_SPELLS);
           break;
+        case "start kylie quest":
+          Witch.Stats[Attribute.DialogueState] = new Stat(GIVE_QUEST);
+          break;
+        case "magic101":
+          Invoice = 0;
+          Service = "magic101";
+          Close();
+          QueueDeferredAction();
+          return;
         case "farewell":
           GS.UIRef().AlertPlayer("Farewell.");
           Close();
+          return;
+        default:
+          PurchaseSpell(opt);
           return;
       }
     }
@@ -756,6 +767,25 @@ class WitchDialogue : Inputer
     WritePopup();
   }
 
+  void PurchaseSpell(string spell)
+  {
+    int price = Spells[spell].Price;
+
+    if (GS.Player.Inventory.Zorkmids >= price)
+    {
+      Invoice = price;
+      Service = spell;
+      Close();
+      QueueDeferredAction();
+    }
+    else
+    {
+      SetDialogueText();
+      Blurb += "\n[BRIGHTRED You can't afford that!]\n";
+      WritePopup();
+    }
+  }
+
   void SetSpellMenu()
   {
     char ch;
@@ -764,6 +794,8 @@ class WitchDialogue : Inputer
 
     int available = 0;
     int notYetAvailable = 0;
+
+    string menuText = "";
     foreach (string spell in Spells.Keys)
     {
       if (GS.Player.SpellsKnown.Contains(spell))
@@ -773,7 +805,7 @@ class WitchDialogue : Inputer
       if (si.ManaCost <= PlayerMana && (si.Prereq == "" || GS.Player.SpellsKnown.Contains(si.Prereq)))
       {
         ch = (char)opt++;
-        Blurb += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{si.Price}\n";
+        menuText += $"{ch}) {spell.CapitalizeWords()} - [YELLOW $]{si.Price}\n";
         Options.Add(ch, spell);
         ++available;
       }
@@ -784,7 +816,15 @@ class WitchDialogue : Inputer
     }
 
     if (available == 0)
-      Blurb += "\nThere's nothing I can teach you right now.\n";
+    {
+      Blurb = "There's nothing I can teach you right now.\n";
+    }
+    else
+    {
+      Blurb = "Hmm, here is what I can teach you.\n\n";
+      Blurb += menuText;
+    }
+
     if (notYetAvailable > 0)
       Blurb += "\nThere are more spells I can impart when you are more powerful!\n";
 
@@ -797,8 +837,7 @@ class WitchDialogue : Inputer
   {
     if (GS.Player.Stats[Attribute.Depth].Curr == 0)
     {
-      Blurb = "I feel like you should see a little more of the world before you delve into the arcane arts. Magic benefits from the wisdom of experience.";
-      Blurb += "\n\na) Farewell";
+      Blurb = "I feel like you should see a little more of the world before you delve into the arcane arts. Magic benefits from the wisdom of experience.";      
     }
     else
     {
@@ -819,18 +858,18 @@ class WitchDialogue : Inputer
       string entranceDir = Util.RelativeDir(Witch.Loc, entrance);
       Blurb = "Hmm, you're going to need a meditation crystal to get into the correct mindset for learning magic. ";
       Blurb += $"I'm fresh out, but you should be able to find one in a cave to the [ICEBLUE {entranceDir}]. Retrieve it, and we can get started on the curriculum!";
-      Blurb += "\n\na) Farewell";
-
+      
       Witch.Stats[Attribute.DialogueState].SetMax(ON_QUEST);
     }
+
+    Witch.Stats[Attribute.NPCMenuState] = new Stat(NO_OPTIONS);
   }
 
   void SetDialogueText()
   {
     switch (DialogueState)
     {
-      case BUY_SPELLS:
-        Blurb = "Hmm, here is what I can teach you.\n\n";
+      case BUY_SPELLS:        
         Witch.Stats[Attribute.NPCMenuState] = new Stat(SPELL_MENU);        
         break;
       case AFTER_FIRST_DUNGEON_TABLET:
@@ -850,7 +889,7 @@ class WitchDialogue : Inputer
         break;
       case QUEST_ITEM_FOUND:
         Blurb = "Great! You found one! Are you ready to learn some magic?";
-        Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_SPELLS);
+        Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_MAGIC_101);
         break;
       case ON_QUEST:
         Loc questLoc = Loc.Nowhere;
@@ -860,7 +899,6 @@ class WitchDialogue : Inputer
         string entranceDir = Util.RelativeDir(Witch.Loc, questLoc);
         Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
         Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
-        Blurb += "\n\na) Farewell";
         break;
       default:
         Options = [];
@@ -882,21 +920,12 @@ class WitchDialogue : Inputer
             Blurb = "Need to learn the basics, huh? I used to TA Magic 101.";
           else
             Blurb = "Oh, anyone can learn magic. Don't listen to Big Thaumaturgy.";
-          Witch.Stats[Attribute.NPCMenuState] = new Stat(LEARN_MAGIC_101);
+          Witch.Stats[Attribute.NPCMenuState] = new Stat(START_KYLIE_QUEST);
         }
         break;
     }
 
     SetupMenu();
-    //Blurb += "\n\na) Learn to cast spells";
-    //Blurb += "\nb) Farewell";
-
-    // Blurb += "\n\na) Learn how to cast spells.";
-    // Blurb += "\nb) Farewell";
-
-    // Blurb += "\n\na) Learn some spells";
-    // Blurb += "\nb) Farewell";
-
   }
 
   void SetupMenu()
@@ -911,14 +940,20 @@ class WitchDialogue : Inputer
         Options.Add('a', "learn spells");
         Options.Add('b', "farewell");
         break;
-      case LEARN_MAGIC_101:
+      case START_KYLIE_QUEST:
         Blurb += "\n\na) Learn to cast spells";
+        Blurb += "\nb) Farewell";
+        Options.Add('a', "start kylie quest");
+        Options.Add('b', "farewell");
+        break;
+      case LEARN_MAGIC_101:
+        Blurb += "\n\na) Begin the course";
         Blurb += "\nb) Farewell";
         Options.Add('a', "magic101");
         Options.Add('b', "farewell");
         break;
       case NO_OPTIONS:
-        Blurb += "\na) Farewell";
+        Blurb += "\n\na) Farewell";
         Options.Add('a', "farewell");
         break;
       case SPELL_MENU:
