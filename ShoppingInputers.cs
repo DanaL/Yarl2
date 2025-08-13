@@ -575,16 +575,16 @@ class WitchDialogue : Inputer
   const int ON_QUEST = 4;
   const int QUEST_ITEM_FOUND = 5;
   const int QUEST_DONE = 6;
-  const int TABLET1 = 7;
-  const int TRANSLATE_TABLET_1 = 8;
-  const int AFTER_FIRST_DUNGEON_TABLET = 9;
-  const int AFTER_FIRST_DUNGEON_NO_TABLET = 10;
+  const int AFTER_FIRST_DUNGEON_TABLET = 7;
+  const int AFTER_FIRST_DUNGEON_NO_TABLET = 8;
+  const int SORCERESS_HISTORY = 9;
 
   const int NO_OPTIONS = 0;
   const int LEARN_SPELLS = 1;
   const int START_KYLIE_QUEST = 2;
   const int LEARN_MAGIC_101 = 3;
   const int SPELL_MENU = 4;
+  const int SHOW_TABLET = 5;
 
   bool PlayerHasCrystal
   {
@@ -679,90 +679,15 @@ class WitchDialogue : Inputer
           GS.UIRef().AlertPlayer("Farewell.");
           Close();
           return;
+        case "show tablet":
+          Witch.Stats[Attribute.DialogueState] = new Stat(SORCERESS_HISTORY);
+          break;
         default:
           PurchaseSpell(opt);
           return;
       }
     }
     
-    /*
-      if (dialogueState == BUY_SPELLS && Options.ContainsKey(ch))
-      {
-        string spell = Options[ch];
-        int price = Spells[spell].Price;
-
-        if (GS.Player.Inventory.Zorkmids >= price)
-        {
-          Invoice = price;
-          Service = spell;
-          Close();
-          QueueDeferredAction();
-        }
-        else
-        {
-          SetDialogueText();
-          Blurb += "\n[BRIGHTRED You can't afford that!]\n";
-          WritePopup();
-        }
-
-        return;
-      }
-      else if (dialogueState == GIVE_QUEST && ch == 'a')
-      {
-        Close();
-        return;
-      }
-      else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'a')
-      {
-        Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
-      }
-      else if (dialogueState == START_STATE && PlayerMana > 0 && ch == 'b')
-      {
-        Witch.Stats[Attribute.DialogueState].SetMax(BUY_SPELLS);
-      }
-      else if (dialogueState == START_STATE && PlayerMana == 0 && ch == 'a')
-      {
-        Witch.Stats[Attribute.DialogueState].SetMax(GIVE_QUEST);
-      }
-      else if (dialogueState == QUEST_ITEM_FOUND && ch == 'a')
-      {
-        Invoice = 0;
-        Service = "magic101";
-        Close();
-        QueueDeferredAction();
-      }
-      else if (dialogueState == QUEST_ITEM_FOUND && ch == 'b')
-      {
-        Close();
-        return;
-      }
-      else if (dialogueState == START_STATE && ch == 'b')
-      {
-        Close();
-        return;
-      }
-      else if (dialogueState == ON_QUEST && ch == 'a')
-      {
-        Close();
-        return;
-      }
-      else if (dialogueState == TABLET1 && ch == 'a')
-      {
-        GS.FactDb.Add(new SimpleFact() { Name = "Tablet1Translated", Value = "True" });
-        Witch.Stats[Attribute.DialogueState] = new Stat(TRANSLATE_TABLET_1);
-      }
-      else if (dialogueState == TABLET1 && ch == 'b')
-      {
-        Close();
-        return;
-      }
-      else if (dialogueState == TRANSLATE_TABLET_1 && ch == 'a')
-      {
-        Close();
-        return;
-      }
-      */
-
     SetDialogueText();
     WritePopup();
   }
@@ -873,16 +798,8 @@ class WitchDialogue : Inputer
         Witch.Stats[Attribute.NPCMenuState] = new Stat(SPELL_MENU);        
         break;
       case AFTER_FIRST_DUNGEON_TABLET:
-      case TABLET1:
         Blurb = "That tablet you carry -- may I take a look at it?";
-        Blurb += $"\n\na) Show {Witch.Name.Capitalize()} the tablet";
-        Blurb += "\nb) Farewell";
-        break;
-      case TRANSLATE_TABLET_1:
-        Blurb = "These runes are an ancient language but I think I can read them. It appears to be part ";
-        Blurb += "of a warding or binding spell of immense power. If you find the other half of the tablet I can ";
-        Blurb += "probably recreate the spell!";
-        Blurb += "\n\na) Farewell";
+        Witch.Stats[Attribute.NPCMenuState] = new Stat(SHOW_TABLET);        
         break;
       case GIVE_QUEST:
         SetupQuest();
@@ -899,6 +816,12 @@ class WitchDialogue : Inputer
         string entranceDir = Util.RelativeDir(Witch.Loc, questLoc);
         Blurb = "We won't be able to make much progress on your lessons without that crystal. ";
         Blurb += $"You should be able to find it in that cave off to the [ICEBLUE {entranceDir}]!";
+        break;
+      case SORCERESS_HISTORY:
+        Blurb = "Long ago, a mighty sorceress sealed away a terrible demon and now it appears her binding magic weakens.\n";
+        Blurb += "However, it's written that she anticipated this and left instructions on how to renew her arcane fetters.\n";
+        Blurb += "The tablet you brought back contains a magic word that will grant access to her tower. I suggest you explore\n";
+        Blurb += "it and see what can be learned of her spell.\n";
         break;
       default:
         Options = [];
@@ -958,6 +881,12 @@ class WitchDialogue : Inputer
         break;
       case SPELL_MENU:
         SetSpellMenu();
+        break;
+      case SHOW_TABLET:
+        Blurb += $"\n\na) Show {Witch.Name.Capitalize()} the tablet";
+        Blurb += "\nb) Farewell";
+        Options.Add('a', "show tablet");
+        Options.Add('b', "farewell");
         break;
     }
   }
