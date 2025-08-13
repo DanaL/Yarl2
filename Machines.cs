@@ -193,9 +193,12 @@ class LightPuzzleSetup
         {         
           var (nr, nc) = Move(r, c, dir);
 
+          if (!map.InBounds(nr, nc))
+            break;
+
           if (visited.Contains((nr, nc)))
             break;
-            
+
           onPath.Add((nr, nc));
 
           Tile tile = map.TileAt(nr, nc);
