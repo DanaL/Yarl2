@@ -1068,7 +1068,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
 class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   string Phrase { get; set; } = "";
-  static readonly char[] trimChars = ['.', '!', '?', ',', ';', ':', '-', ' '];
+  static readonly char[] trimChars = ['.', '!', '?', ',', ';', ':', '-', ')', '(', ' '];
 
   public override double Execute()
   {
