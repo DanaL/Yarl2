@@ -106,6 +106,7 @@ internal class BLUserInferface : UserInterface, IDisposable
             '4' => '$',
             '2' => '@',
             '/' => '?',
+            '1' => '!',
             _ => char.ToUpper(value)
           };
         }
