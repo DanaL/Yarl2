@@ -442,7 +442,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'C')
     {
-      DirectionalInputer dir = new(GS) { DeferredAction = new ChatAction(GS, GS.Player) };
+      DirectionalInputer dir = new(GS, true) { DeferredAction = new ChatAction(GS, GS.Player) };
       ui.SetInputController(dir);
     }
     else if (ch == 'd')

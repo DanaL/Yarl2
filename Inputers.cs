@@ -466,6 +466,8 @@ class TextInputer : Inputer
     int width = int.Max(Buffer.Length + 2, 25);    
     GS.UIRef().SetPopup(new Popup($"{Prompt}\n{Buffer}", "", -1, -1, width));
   }
+
+  public override UIResult GetResult() => new StringUIResult() { Text = Buffer };
 }
 
 class NumericInputer : Inputer

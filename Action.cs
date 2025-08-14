@@ -1065,6 +1065,39 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
   }
 }
 
+class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  string Phrase { get; set; } = "";
+  static readonly char[] trimChars = ['.', '!', '?', ',', ';', ':', '-', ' '];
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    if (Phrase.Length > 0)
+    {
+      Phrase = Phrase.TrimEnd(trimChars);
+    }
+
+    if (string.Compare(Phrase, "fuck", StringComparison.InvariantCultureIgnoreCase) == 0)
+    {
+      GameState!.UIRef().SetPopup(new Popup("If you are feeling frustrated, you can access Help via the [ICEBLUE ?] command. And you can toggle the commands cheatsheet via [ICEBLUE /].", "", -1, -1));
+    }
+    else
+    {
+      GameState!.UIRef().SetPopup(new Popup($"You say '{Phrase}' out loud, but nothing seems to happen.", "", -1, -1));
+    }
+    
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result) 
+  { 
+    if (result is StringUIResult s)
+      Phrase = s.Text;
+  }
+}
+
 class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 {  
   public override double Execute()
@@ -1075,7 +1108,12 @@ class ChatAction(GameState gs, Actor actor) : DirectionalAction(gs, actor)
 
     if (other is Player)
     {
-      GameState.UIRef().AlertPlayer("Hmm talking to yourself?");
+      TextInputer ti = new(GameState, "What do you say?")
+      {
+        DeferredAction = new SayAloudAction(GameState, other)
+      };
+      GameState.UIRef().SetInputController(ti);
+
       return 0.0;
     }
     else if (other is not null)
