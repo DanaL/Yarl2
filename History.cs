@@ -369,6 +369,15 @@ class History(Rng rng)
     return factDb;
   }
 
+  public static string MagicWord(Rng rng) => rng.Next(5) switch
+  {
+    0 => "ZELGO MER",
+    1 => "DAIYEN FOOELS",
+    2 => "ELBIB YLOH",
+    3 => "ELAM EBOW",
+    _ => "VELOX NEB"
+  };
+
   public static Item SealingTablet1(GameObjectDB objDb)
   {
     string txt = @"
