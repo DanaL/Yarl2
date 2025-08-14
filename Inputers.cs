@@ -424,6 +424,50 @@ class Aimer : Inputer
   }
 }
 
+class TextInputer : Inputer
+{
+  string Buffer { get; set; } = "";  
+  string Prompt { get; set; } = "";
+
+  public TextInputer(GameState gs, string prompt) : base(gs)
+  {
+    Prompt = prompt;
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Close();
+      return;
+    }
+    else if (ch == Constants.BACKSPACE)
+    {
+      if (Buffer.Length > 0)
+        Buffer = Buffer[..^1];      
+    }
+    else if (ch == '\n' || ch == '\r')
+    {
+      Close();
+      QueueDeferredAction();
+      return;
+    }
+    else
+    {
+      Buffer += ch;      
+    }
+
+    WritePopup();
+  }
+
+  void WritePopup()
+  {
+    int width = int.Max(Buffer.Length + 2, 25);    
+    GS.UIRef().SetPopup(new Popup($"{Prompt}\n{Buffer}", "", -1, -1, width));
+  }
+}
+
 class NumericInputer : Inputer
 {
   readonly string _prompt;
@@ -1687,6 +1731,11 @@ class MenuUIResult : UIResult
 class NumericUIResult : UIResult
 {
   public int Amount { get; set; }
+}
+
+class StringUIResult : UIResult
+{
+  public string Text { get; set; } = "";
 }
 
 class CharUIResult : UIResult
