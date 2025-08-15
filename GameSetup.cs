@@ -445,7 +445,7 @@ class CampaignCreator(UserInterface ui)
       {
         campaign = new Campaign();
         wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
-        var wildernessGenerator = new Wilderness(rng, wildernessWidth);
+        Wilderness wildernessGenerator = new(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
 
         // Redraw map if there aren't enough mountains
@@ -553,8 +553,7 @@ class CampaignCreator(UserInterface ui)
         Village.Populate(wildernessMap, town, objDb, factDb, rng);
         campaign.Town = town;
 
-        var tower = new Tower(21, 36, 5);
-        tower.BuildTower(wildernessMap, town, objDb, factDb, rng);
+        SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
 
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)

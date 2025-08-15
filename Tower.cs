@@ -608,7 +608,7 @@ class Tower(int height, int width, int minLength)
   Map Build(Rng rng)
   {
     // False == floor, true == wall
-    var map = new bool[Height, Width];
+    bool[,] map = new bool[Height, Width];
     for (int r = 0; r < Height; r++)
     {
       map[r, 0] = true;
@@ -641,8 +641,8 @@ class Tower(int height, int width, int minLength)
     List<Room> rooms = FindRooms(tower);
     TweakExterior(tower, rooms, rng);
     TweakInterior(tower, rooms, rng);
-    tower.Dump();
 
+    /*
     Map outline = GenerateOutline(tower);
     outline.Dump();
 
@@ -651,87 +651,25 @@ class Tower(int height, int width, int minLength)
 
     var nnextFloor = RedrawInterior(outline, rng);
     nnextFloor.Dump();
-
+    */
+    
     return tower;
   }
 
-  static bool ValidSpotForTower(int row, int col, Map tower, Map wilderness, Town town)
+  public Dungeon BuildTower(Map wilderness, Town town, GameObjectDB objDb, Campaign campaign, Rng rng)
   {
-    if (!OpenSq(row, col))
-      return false;
-      
-    foreach (var adj in Util.Adj8Sqs(row, col))
-    {
-      if (!OpenSq(adj.Item1, adj.Item2))
-        return false;
-    }
-
-    return true;
-
-    bool OpenSq(int row, int col)
-    {
-      if (row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width)
-          return false;
-
-      Tile tile = wilderness.TileAt(row, col);
-      return tile.Type switch
-      {
-        TileType.DeepWater or TileType.Dirt or TileType.StoneRoad
-          or TileType.Bridge or TileType.Portal 
-          or TileType.Mountain or TileType.SnowPeak => false,
-        _ => true,
-      };
-    }
-  }
-
-  public void BuildTower(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
-  {
+    int dungeonId = campaign.Dungeons.Keys.Max() + 1;
     Map firstFloor = Build(rng);
-
-    // Find a place for the tower
-    List<(int, int)> options = [];
-    for (int r = 3; r < wilderness.Height - Height - 3; r++)
-    {
-      for (int c = 3; c < wilderness.Width - Width - 3; c++)
-      {
-        if (ValidSpotForTower(r, c, firstFloor, wilderness, town))
-        {
-          options.Add((r, c));
-        }
-      }
-    }
-
-    (int row, int col) = options[rng.Next(options.Count)];
-    foreach (var sq in Util.Adj8Sqs(row, col))
-    {
-      wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
-    }
-    Upstairs entrance = new("")
-    {
-      Destination = new Loc(0, 0, 0, 0)
-    };
-    wilderness.SetTile(row, col, entrance);
-
-    (int doorRow, int doorCol) = rng.Next(4) switch
-    {
-      0 => (row - 1, col),
-      1 => (row + 1, col),
-      2 => (row, col + 1),
-      _ => (row, col - 1)
-    };
-    // This will eventually be a fancy, magically locked door
-    Portcullis p = new(false);
-    wilderness.SetTile(doorRow, doorCol, p);
-    LocationFact lf = new()
-    {
-      Loc = new Loc(0, 0, doorRow, doorCol),
-      Desc = "Tower Gate"
-    };
-    factDb.Add(lf);
     
-    (int dr, int dc) = (doorRow - row, doorCol - col);
-    Loc msgLoc = new(0, 0, doorRow + dr, doorCol + dc);
-    MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
-    objDb.ConditionalEvents.Add(pal);
+    Dungeon towerDungeon = new(dungeonId, "Ancient halls that smell of dust and magic.");
+    MonsterDeck deck = new();
+    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
+    towerDungeon.MonsterDecks.Add(deck);
+
+    List<Map> floors = [firstFloor];
+    
+    towerDungeon.AddMap(firstFloor);
+
+    return towerDungeon;
   }
 }

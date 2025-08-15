@@ -11,8 +11,100 @@
 
 namespace Yarl2;
 
+class SorceressQuest
+{
+  static bool IsValidSpotForTower(int row, int col, Map wilderness, Town town)
+  {
+    if (!OpenSq(row, col))
+      return false;
+      
+    foreach (var adj in Util.Adj8Sqs(row, col))
+    {
+      if (!OpenSq(adj.Item1, adj.Item2))
+        return false;
+    }
+
+    return true;
+
+    bool OpenSq(int row, int col)
+    {
+      if (row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width)
+          return false;
+
+      Tile tile = wilderness.TileAt(row, col);
+      return tile.Type switch
+      {
+        TileType.DeepWater or TileType.Dirt or TileType.StoneRoad
+          or TileType.Bridge or TileType.Portal 
+          or TileType.Mountain or TileType.SnowPeak => false,
+        _ => true,
+      };
+    }
+  }
+
+  public static bool Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
+  {
+    int height = 21, width = 36;
+
+    // First, pick a spot in the wilderness for the tower and draw it
+    // Find a place for the tower
+    List<(int, int)> options = [];
+    for (int r = 3; r < wilderness.Height - height - 3; r++)
+    {
+      for (int c = 3; c < wilderness.Width - width - 3; c++)
+      {
+        if (IsValidSpotForTower(r, c, wilderness, town))
+        {
+          options.Add((r, c));
+        }
+      }
+    }
+
+    (int row, int col) = options[rng.Next(options.Count)];
+    foreach (var sq in Util.Adj8Sqs(row, col))
+    {
+      wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
+    }
+
+    Loc towerStairs = new(0, 0, row, col);
+
+    (int doorRow, int doorCol) = rng.Next(4) switch
+    {
+      0 => (row - 1, col),
+      1 => (row + 1, col),
+      2 => (row, col + 1),
+      _ => (row, col - 1)
+    };
+    
+    Portcullis p = new(false);
+    wilderness.SetTile(doorRow, doorCol, p);
+    LocationFact lf = new()
+    {
+      Loc = new Loc(0, 0, doorRow, doorCol),
+      Desc = "Tower Gate"
+    };
+    campaign.FactDb!.Add(lf);
+
+    (int dr, int dc) = (doorRow - row, doorCol - col);
+    Loc msgLoc = new(0, 0, doorRow + dr, doorCol + dc);
+    MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
+    objDb.ConditionalEvents.Add(pal);
+
+    Tower tower = new(height, width, 5);
+    tower.BuildTower(wilderness, town, objDb, campaign, rng);
+
+    Upstairs entrance = new("")
+    {
+      Destination = new Loc(0, 0, 0, 0)
+    };
+    wilderness.SetTile(row, col, entrance);
+
+    return true;
+  }
+}
+
 class WitchQuest
-{  
+{
   public static Loc QuestEntrance(GameState gs)
   {
     static bool ProbablyOpen(Map map, int r, int c)
@@ -70,7 +162,7 @@ class WitchQuest
 
         Tile tile = wilderness.TileAt(r, c);
         if (tile.Type == TileType.Mountain && ProbablyOpen(wilderness, r, c))
-          mountains.Add(new Loc(0, 0, r, c));      
+          mountains.Add(new Loc(0, 0, r, c));
         else if (tile.Type == TileType.Grass || tile.IsTree())
           others.Add(new Loc(0, 0, r, c));
       }
@@ -175,7 +267,7 @@ class WitchQuest
     int caveWidth = 40;
     bool[,] cave = CACave.GetCave(caveHeight, caveWidth, gs.Rng);
     Map map = new(caveWidth + 2, caveHeight + 2, TileType.PermWall);
-  
+
     List<(int, int)> floors = [];
     for (int r = 0; r < caveHeight; r++)
     {
@@ -222,7 +314,7 @@ class WitchQuest
     loc = new Loc(id, 0, sq.Item1, sq.Item2);
     Item crystal = ItemFactory.Get(ItemNames.MEDITATION_CRYSTAL, gs.ObjDb);
     gs.ObjDb.SetToLoc(loc, crystal);
- 
+
     // Add a few monsters to the cave
     int numOfMonsters = gs.Rng.Next(3, 6);
     for (int j = 0; j < numOfMonsters; j++)
@@ -238,7 +330,7 @@ class WitchQuest
       sq = floors[gs.Rng.Next(floors.Count)];
       loc = new Loc(id, 0, sq.Item1, sq.Item2);
 
-      gs.ObjDb.AddNewActor(m, loc);      
+      gs.ObjDb.AddNewActor(m, loc);
     }
 
     // Add in a 'boss' monster
