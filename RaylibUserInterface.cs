@@ -95,7 +95,7 @@ class RaylibUserInterface : UserInterface
     TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
     double ms = delta.TotalMilliseconds;
 
-    if (ms < 150)
+    if (ms < 95)
       return new GameEvent(GameEventType.NoEvent, '\0');;
 
     if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))

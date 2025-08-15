@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
+
 using System.Text;
 
 namespace Yarl2;
@@ -1332,7 +1334,7 @@ abstract class UserInterface
           if (actor.Energy >= 1.0)
             gameState.PushPerformer(actor);
         }
-
+        
         WriteAlerts();
       }
       catch (SaveGameException)
@@ -1386,12 +1388,13 @@ abstract class UserInterface
       if (totalMs >= 25)
       {
         SetSqsOnScreen(gameState);
-
+        
         foreach (var l in _animations)
           l.Update();
         _animations = [.. _animations.Where(a => a.Expiry > DateTime.UtcNow)];
         
         UpdateDisplay(gameState);
+        
         refresh = DateTime.UtcNow;
       }      
     }
