@@ -43,15 +43,13 @@ class SorceressQuest
   }
 
   public static bool Setup(Map wilderness, Town town, GameObjectDB objDb, FactDb factDb, Campaign campaign, Rng rng)
-  {
-    int height = 21, width = 36;
-
+  {    
     // First, pick a spot in the wilderness for the tower and draw it
     // Find a place for the tower
     List<(int, int)> options = [];
-    for (int r = 3; r < wilderness.Height - height - 3; r++)
+    for (int r = 3; r < wilderness.Height - 13; r++)
     {
-      for (int c = 3; c < wilderness.Width - width - 3; c++)
+      for (int c = 3; c < wilderness.Width - 13; c++)
       {
         if (IsValidSpotForTower(r, c, wilderness, town))
         {
@@ -90,8 +88,10 @@ class SorceressQuest
     MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
     objDb.ConditionalEvents.Add(pal);
 
-    Tower tower = new(height, width, 5);
-    tower.BuildTower(wilderness, town, objDb, campaign, rng);
+    Tower towerBuilder = new(21, 36, 5);
+    int dungeonId = campaign.Dungeons.Keys.Max() + 1;
+    SorceressDungeonBuilder sdb = new(dungeonId, 21, 36);
+    Dungeon sorceressTower = sdb.Generate(doorRow, doorCol);
 
     Upstairs entrance = new("")
     {

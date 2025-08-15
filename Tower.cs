@@ -656,20 +656,14 @@ class Tower(int height, int width, int minLength)
     return tower;
   }
 
-  public Dungeon BuildTower(Map wilderness, Town town, GameObjectDB objDb, Campaign campaign, Rng rng)
+  public List<Map> BuildTowerLevels(int numOfFloors, Rng rng)
   {
-    int dungeonId = campaign.Dungeons.Keys.Max() + 1;
+    List<Map> floors = [];
+
     Map firstFloor = Build(rng);
+    floors.Add(firstFloor);
     
-    Dungeon towerDungeon = new(dungeonId, "Ancient halls that smell of dust and magic.");
-    MonsterDeck deck = new();
-    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
-    towerDungeon.MonsterDecks.Add(deck);
 
-    List<Map> floors = [firstFloor];
-    
-    towerDungeon.AddMap(firstFloor);
-
-    return towerDungeon;
+    return floors;
   }
 }
