@@ -1044,7 +1044,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     {
       Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
     }
-    if (GameState.ObjDb.Occupied(Loc))
+    else if (GameState.ObjDb.Occupied(Loc))
     {
       Actor!.QueueAction(new ChatAction(GameState, Actor) { Loc = Loc });
     }
