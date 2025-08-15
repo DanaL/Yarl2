@@ -1079,16 +1079,45 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
       Phrase = Phrase.TrimEnd(trimChars);
     }
 
+    Loc towerGate = Loc.Nowhere;
+    if (GameState!.FactDb.FactCheck("Tower Gate") is LocationFact lf)
+    {
+      towerGate = lf.Loc;
+    }
+
     if (string.Compare(Phrase, "fuck", StringComparison.InvariantCultureIgnoreCase) == 0)
     {
-      GameState!.UIRef().SetPopup(new Popup("If you are feeling frustrated, you can access Help via the [ICEBLUE ?] command. And you can toggle the commands cheatsheet via [ICEBLUE /].", "", -1, -1));
+      GameState.UIRef().SetPopup(new Popup("If you are feeling frustrated, you can access Help via the [ICEBLUE ?] command. And you can toggle the commands cheatsheet via [ICEBLUE /].", "", -1, -1));
+    }
+    else if (OpenTower(towerGate))
+    {
+      string s = $"As you chant '{Phrase}', the runes on the tower gate flare brightly then fade away. The iron portcullis then shudders, turns to dust, and disappears!";
+      GameState!.UIRef().SetPopup(new Popup(s, "", -1, -1));
+      GameState.CurrentMap.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));    
     }
     else
     {
       GameState!.UIRef().SetPopup(new Popup($"You say '{Phrase}' out loud, but nothing seems to happen.", "", -1, -1));
     }
-    
+
     return 1.0;
+
+    bool OpenTower(Loc towerGate)
+    {
+      if (GameState!.FactDb.FactCheck("SorceressPassword") is SimpleFact sf)
+      {
+        if (string.Compare(Phrase, sf.Value, StringComparison.InvariantCultureIgnoreCase) != 0)
+          return false;
+      }
+      
+      foreach (Loc loc in Util.Adj8Locs(GameState.Player.Loc))
+      {
+        if (loc == towerGate)
+          return true;
+      }
+      
+      return false;
+    }
   }
 
   public override void ReceiveUIResult(UIResult result) 
