@@ -651,6 +651,7 @@ class Tower(int height, int width, int minLength)
     List<Map> floors = [];
 
     Map firstFloor = Build(rng);
+    firstFloor.DiggableFloor = false;
     floors.Add(firstFloor);
 
     Map outline = GenerateOutline(firstFloor);

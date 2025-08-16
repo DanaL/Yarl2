@@ -1249,16 +1249,18 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     // Find candidates for the landing spot. We'll look for tiles that are 
     // reachable from the stairs up (to avoid situations where the player 
     // lands in a locked vault, etc) and are unoccupied.
-    Map lowerLevel = CurrentDungeon.LevelMaps[trapdoorLoc.Level + 1];
+    int levelDelta = CurrentDungeon.Descending ? 1 : -1;
+    Map lowerLevel = CurrentDungeon.LevelMaps[trapdoorLoc.Level + levelDelta];
+    TileType egressStairs = CurrentDungeon.Descending ? TileType.Upstairs : TileType.Downstairs;
     Loc stairs = Loc.Nowhere;
     bool found = false;
     for (int r = 0; r < lowerLevel.Height; r++)
     {
       for (int c = 0; !found && c < lowerLevel.Width; c++)
       {
-        if (lowerLevel.TileAt(r, c).Type == TileType.Upstairs)
+        if (lowerLevel.TileAt(r, c).Type == egressStairs)
         {
-          stairs = new(CurrDungeonID, trapdoorLoc.Level + 1, r, c);
+          stairs = new(CurrDungeonID, trapdoorLoc.Level + levelDelta, r, c);
           found = true;
           break;
         }
