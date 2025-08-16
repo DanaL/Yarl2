@@ -765,9 +765,13 @@ abstract class UserInterface
       var mins = time.Item2.ToString().PadLeft(2, '0');
       WriteLine($"│ Outside {time.Item1}:{mins}", ViewHeight - bottomOffset, ViewWidth, SideBarWidth, Colours.WHITE);
     }
-    else
+    else if (gs.CurrentDungeon.Descending)
     {
       WriteLine($"│ Depth: {gs.CurrLevel + 1}", ViewHeight - bottomOffset, ViewWidth, SideBarWidth, Colours.WHITE);
+    }
+    else
+    {
+      WriteLine($"│ Floor: {gs.CurrLevel + 1}", ViewHeight - bottomOffset, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
     if (gs.Options.ShowTurns)
