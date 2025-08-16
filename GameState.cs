@@ -252,7 +252,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (tile.Type == TileType.Chasm)
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", this, loc);
-      ItemDropped(item, loc with { Level = loc.Level + 1 });
+      int delta = CurrentDungeon.Descending ? 1 : -1;
+      ItemDropped(item, loc with { Level = loc.Level + delta });
       return;
     }
 
@@ -641,14 +642,19 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     Loc CalcFinalLandingSpot(Loc landingSpot)
     {
       Dungeon dungeon = Campaign.Dungeons[landingSpot.DungeonID];
-      do
+      int delta = dungeon.Descending ? 1 : -1;
+      while (true)
       {
         Map map = dungeon.LevelMaps[landingSpot.Level];
         if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
           return landingSpot;
-        landingSpot = landingSpot with { Level = landingSpot.Level + 1 };
+        landingSpot = landingSpot with { Level = landingSpot.Level + delta };
+
+        if (dungeon.Descending && landingSpot.Level == dungeon.LevelMaps.Count)
+          break;
+        else if (!dungeon.Descending && landingSpot.Level == 0)
+          break;
       }
-      while (landingSpot.Level < dungeon.LevelMaps.Count);
 
       // Possibly I should just throw an exception here? This would be an error
       // condition, most likely in level generation
@@ -664,7 +670,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     bool featherFalling = actor.HasTrait<FeatherFallTrait>();
 
     landingSpot = CalcFinalLandingSpot(landingSpot);
-    int levelsFallen = landingSpot.Level - actor.Loc.Level;
+    int levelsFallen = Math.Abs(landingSpot.Level - actor.Loc.Level);
 
     if (featherFalling)
       UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "drift")} downward into the darkness.");
