@@ -302,50 +302,85 @@ class CastErsatzElevator(GameState gs, Actor actor) : CastSpellAction(gs, actor)
   public override double Execute()
   {
     base.Execute();
-    
+
     GameState!.UIRef().SetInputController(new PlayerCommandController(GameState));
 
     if (!CheckCost(3, 25))
       return 0.0;
 
-    GameState gs = GameState!;
-    int maxDungeonLevel = gs.CurrentDungeon.LevelMaps.Count - 1;
+    bool desc = GameState.CurrentDungeon.Descending;
 
-    if (GameState!.InWilderness || (gs.Player.Loc.Level == maxDungeonLevel && Dir == '>'))
+    if (GameState.InWilderness || AtEndOfDungeon())
     {
-      gs.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState.UIRef().AlertPlayer("Your spell fizzles!");
       GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
-    }    
-    else if (gs.Player.Loc.Level == 0 && Dir == '<')
+
+      return 1.0;
+    }
+
+    // Exiting the dungeon will bring you to the portal entrance in the wilderness
+    if (desc && Dir == '<' && GameState.Player.Loc.Level == 0)
     {
-      // Exiting the dungeon will bring you to the portal entrance in the wilderness
-      FactDb factDb = gs.Campaign.FactDb!;
+      FactDb factDb = GameState.Campaign.FactDb!;
       if (factDb.FactCheck("Dungeon Entrance") is LocationFact entrance)
       {
-        DoElevate(entrance.Loc, "You rise up through the ceiling!", gs);
+        DoElevate(entrance.Loc, "You rise up through the ceiling!", GameState);
       }
+
+      return 1.0;
+    }
+    else if (!desc && Dir == '>' && GameState.Player.Loc.Level == 0)
+    {
+      FactDb factDb = GameState.Campaign.FactDb!;
+      if (factDb.FactCheck("Dungeon Entrance") is LocationFact entrance)
+      {
+        DoElevate(entrance.Loc, "You sink through the floor!", GameState);
+      }
+
+      return 1.0;
+    }
+    
+    Loc dest = PickDestLoc(GameState, desc);
+    if (dest == Loc.Nowhere)
+    {
+      GameState.UIRef().AlertPlayer("Your spell fizzles!");
+      GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
     }
     else
     {
-      Loc dest = PickDestLoc(gs);
-      if (dest == Loc.Nowhere)
-      {
-        gs.UIRef().AlertPlayer("Your spell fizzles!");
-        GameState.UIRef().SetPopup(new Popup("Your spell fizzles!", "", -1, -1));
-      }
+      string s;
+      if ((desc && Dir == '>') || (!desc && Dir == '<'))
+        s = "You sink through the floor!";
       else
-      {
-        string s = Dir == '>' ? "You sink through the floor!" : "You rise up through the ceiling!";
-        DoElevate(dest, s, gs);
-      }
+        s = "You rise up through the ceiling!";
+      DoElevate(dest, s, GameState);
     }
 
     return 1.0;
+
+    bool AtEndOfDungeon()
+    {
+      int maxDungeonLevel = GameState!.CurrentDungeon.LevelMaps.Count - 1;
+
+      // Regular dungeon
+      if (GameState.CurrentDungeon.Descending && Dir == '>' && GameState.Player.Loc.Level == maxDungeonLevel)
+        return true;
+
+      // Tower-style ascending dungeon
+      if (!GameState.CurrentDungeon.Descending && Dir == '<' && GameState.Player.Loc.Level == maxDungeonLevel)
+        return true;
+
+      return false;
+    }
   }
 
-  Loc PickDestLoc(GameState gs)
+  Loc PickDestLoc(GameState gs, bool desc)
   {
-    int delta = Dir == '>' ? 1 : -1;
+    int delta;
+    if (desc && Dir == '>' || (!desc && Dir == '<'))
+      delta = 1;
+    else
+      delta = -1;
     Loc dest = gs.Player.Loc with { Level = gs.Player.Loc.Level + delta };
     
     if (gs.LocOpen(dest) || gs.TileAt(dest).Type == TileType.Chasm)
