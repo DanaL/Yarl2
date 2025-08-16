@@ -146,7 +146,7 @@ abstract class DungeonBuilder
     }
   }
 
-  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, Rng rng)
+  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, Rng rng)
   {
     List<List<(int, int)>> floors = [];
 
@@ -165,18 +165,24 @@ abstract class DungeonBuilder
 
     // so first set the exit stairs
     ExitLoc = floors[0][rng.Next(floors[0].Count)];
-    var exitStairs = new Upstairs("")
+    Tile exitStairs;
+    if (desc)
     {
-      Destination = new Loc(0, 0, entrance.Item1, entrance.Item2)
-    };
+      exitStairs = new Upstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
+    }
+    else
+    {
+      exitStairs = new Downstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
+    }
+
     levels[0].SetTile(ExitLoc, exitStairs);
 
     for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
     {
-      CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+      CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
 
       if (rng.NextDouble() < 0.1)
-        CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, rng);
+        CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
     }
   }
 
@@ -184,7 +190,7 @@ abstract class DungeonBuilder
   // the stairs between floors will be at the same location. (Ie., if 
   // the down stairs on level 3 is at 34,60 then the stairs up from 
   // level 4 should be at 34,60 too)
-  static void CreateStairway(int dungeonId, Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, Rng rng)
+  static void CreateStairway(int dungeonId, Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, bool desc, Rng rng)
   {
     // find the pairs of floor squares shared between the two levels
     List<(int, int)> shared = [];
@@ -199,19 +205,24 @@ abstract class DungeonBuilder
       }
     }
 
-    var pick = shared[rng.Next(shared.Count)];
+    (int, int) pick = shared[rng.Next(shared.Count)];
+    Downstairs down = new("");
+    Upstairs up = new("");
 
-    var down = new Downstairs("")
+    if (desc)
     {
-      Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2)
-    };
-    currentLevel.SetTile(pick.Item1, pick.Item2, down);
-
-    var up = new Upstairs("")
+      down.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
+      up.Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+      currentLevel.SetTile(pick.Item1, pick.Item2, down);
+      nextLevel.SetTile(pick.Item1, pick.Item2, up);
+    }
+    else
     {
-      Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2)
-    };
-    nextLevel.SetTile(pick.Item1, pick.Item2, up);
+      down.Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+      up.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
+      currentLevel.SetTile(pick.Item1, pick.Item2, up);
+      nextLevel.SetTile(pick.Item1, pick.Item2, down);
+    }
   }
 
   static  bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;
@@ -1253,7 +1264,7 @@ class MainDungeonBuilder : DungeonBuilder
     
 
     _dungeonID = id;
-    var dungeon = new Dungeon(id, arrivalMessage);
+    var dungeon = new Dungeon(id, arrivalMessage, true);
     var mapper = new DungeonMap(rng);
     Map[] levels = new Map[numOfLevels];
 

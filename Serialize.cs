@@ -346,6 +346,7 @@ internal class DungeonSaver
 {
   public int ID { get; set; }
   public string? ArrivalMessage { get; set; }
+  public bool Descending { get; set; }
 
   [JsonInclude]
   public List<string> RememberedLocs;
@@ -366,8 +367,9 @@ internal class DungeonSaver
     {
       ID = dungeon.ID,
       ArrivalMessage = dungeon.ArrivalMessage,
+      Descending = dungeon.Descending,
       RememberedLocs = [],
-      MonsterDecks = dungeon.MonsterDecks.Select(deck => deck.ToString()).ToList()
+      MonsterDecks = [.. dungeon.MonsterDecks.Select(deck => deck.ToString())]
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -386,7 +388,7 @@ internal class DungeonSaver
 
   public static Dungeon Inflate(DungeonSaver sd)
   {
-    Dungeon d = new(sd.ID, sd.ArrivalMessage ?? "");
+    Dungeon d = new(sd.ID, sd.ArrivalMessage ?? "", sd.Descending);
     
     foreach (string s in sd.RememberedLocs)
     {

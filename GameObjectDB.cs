@@ -605,13 +605,14 @@ class GameObjectDB
 }
 
 // A structure to store info about a dungeon
-class Dungeon(int ID, string arrivalMessage)
+class Dungeon(int ID, string arrivalMessage, bool desc)
 {
   public int ID { get; init; } = ID;
   public Dictionary<Loc, Glyph> RememberedLocs = [];
   public Dictionary<int, Map> LevelMaps = [];
   public string ArrivalMessage { get; } = arrivalMessage;
   public List<MonsterDeck> MonsterDecks { get; set; } = [];
+  public bool Descending { get; set; } = desc;
 
   public void AddMap(Map map)
   {

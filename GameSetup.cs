@@ -444,7 +444,7 @@ class CampaignCreator(UserInterface ui)
       try
       {
         campaign = new Campaign();
-        wilderness = new Dungeon(0, "You draw a deep breath of fresh air.");
+        wilderness = new Dungeon(0, "You draw a deep breath of fresh air.", true);
         Wilderness wildernessGenerator = new(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
 

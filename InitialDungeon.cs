@@ -23,7 +23,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   {
     int numOfLevels = rng.Next(5, 8);
 
-    Dungeon dungeon = new(DungeonId, arrivalMessage);
+    Dungeon dungeon = new(DungeonId, arrivalMessage, true);
     DungeonMap mapper = new(rng);
     Map[] levels = new Map[numOfLevels];
 
@@ -45,7 +45,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     AddRivers(levels, HEIGHT, WIDTH, DungeonId, objDb, rng);
 
-    SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, rng);
+    SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, dungeon.Descending, rng);
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {

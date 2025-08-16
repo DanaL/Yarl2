@@ -100,9 +100,9 @@ class Tutorial(UserInterface ui)
     }
     
     Campaign campaign = new();
-    Dungeon dungeon = new(1, "");
+    Dungeon dungeon = new(1, "", true);
     dungeon.AddMap(tutorialMap);
-    campaign.AddDungeon(new Dungeon(0, ""));
+    campaign.AddDungeon(new Dungeon(0, "", true));
     campaign.AddDungeon(dungeon);
 
     return campaign;

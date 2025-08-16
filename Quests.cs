@@ -64,8 +64,6 @@ class SorceressQuest
       wilderness.SetTile(sq, TileFactory.Get(TileType.PermWall));
     }
 
-    Loc towerStairs = new(0, 0, row, col);
-
     (int doorRow, int doorCol) = rng.Next(4) switch
     {
       0 => (row - 1, col),
@@ -90,7 +88,7 @@ class SorceressQuest
 
     int dungeonId = campaign.Dungeons.Keys.Max() + 1;
     SorceressDungeonBuilder sdb = new(dungeonId, 21, 36);
-    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(doorRow, doorCol, rng);
+    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, rng);
 
     Upstairs entrance = new("")
     {
@@ -99,7 +97,7 @@ class SorceressQuest
     wilderness.SetTile(row, col, entrance);
 
     campaign.AddDungeon(sorceressTower);
-    
+
     return true;
   }
 }
@@ -259,7 +257,7 @@ class WitchQuest
   public static (Dungeon, Loc) GenerateDungeon(GameState gs, Loc entrance)
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
-    Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.");
+    Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.", true);
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     dungeon.MonsterDecks.Add(deck);
