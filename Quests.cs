@@ -88,17 +88,18 @@ class SorceressQuest
     MessageAtLoc pal = new(msgLoc, "A portcullis scored with glowing, arcane runes bars the entrance to this tower.");
     objDb.ConditionalEvents.Add(pal);
 
-    Tower towerBuilder = new(21, 36, 5);
     int dungeonId = campaign.Dungeons.Keys.Max() + 1;
     SorceressDungeonBuilder sdb = new(dungeonId, 21, 36);
-    Dungeon sorceressTower = sdb.Generate(doorRow, doorCol);
+    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(doorRow, doorCol, rng);
 
     Upstairs entrance = new("")
     {
-      Destination = new Loc(0, 0, 0, 0)
+      Destination = towerExit
     };
     wilderness.SetTile(row, col, entrance);
 
+    campaign.AddDungeon(sorceressTower);
+    
     return true;
   }
 }

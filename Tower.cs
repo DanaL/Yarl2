@@ -11,7 +11,8 @@
 
 namespace Yarl2;
 
-// Tower/mansion style map I'll use Binary Space Partitioning to build
+// Generate levels for Tower/mansion style dungeons. I'll use Binary Space 
+// Partitioning to build them.
 class Tower(int height, int width, int minLength)
 {
   const int VERTICAL = 0;
@@ -641,28 +642,23 @@ class Tower(int height, int width, int minLength)
     List<Room> rooms = FindRooms(tower);
     TweakExterior(tower, rooms, rng);
     TweakInterior(tower, rooms, rng);
-
-    /*
-    Map outline = GenerateOutline(tower);
-    outline.Dump();
-
-    var nextFloor = RedrawInterior(outline, rng);
-    nextFloor.Dump();
-
-    var nnextFloor = RedrawInterior(outline, rng);
-    nnextFloor.Dump();
-    */
     
     return tower;
   }
 
-  public List<Map> BuildTowerLevels(int numOfFloors, Rng rng)
+  public List<Map> BuildLevels(int numOfFloors, Rng rng)
   {
     List<Map> floors = [];
 
     Map firstFloor = Build(rng);
     floors.Add(firstFloor);
-    
+
+    Map outline = GenerateOutline(firstFloor);
+    for (int j = 0; j < numOfFloors - 1; j++)
+    {
+      Map map = RedrawInterior(outline, rng);
+      floors.Add(map);
+    }
 
     return floors;
   }
