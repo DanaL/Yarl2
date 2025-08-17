@@ -738,7 +738,7 @@ class TownBuilder
     // The witches also get a well
     List<(int, int)> opts = [];
     (int, int) frontDoor = (-1, -1);
-    for (int dr = 0; dr < 15; dr++) 
+    for (int dr = 0; dr < 15; dr++)
     {
       for (int dc = 0; dc < 15; dc++)
       {
@@ -781,27 +781,27 @@ class TownBuilder
     if (gate != 2)
       map.SetTile(gr + 1, gc, TileFactory.Get(TileType.VFence));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 1, gc + 1));
-    map.SetTile(gr + 1, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 1, gc + 1, TileFactory.Get(Plot()));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 1));
-    map.SetTile(gr + 1, gc + 2, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 1, gc + 2, TileFactory.Get(Plot()));
     if (gate != 3)
       map.SetTile(gr + 1, gc + 3, TileFactory.Get(TileType.VFence));
 
     if (gate != 4)
       map.SetTile(gr + 2, gc, TileFactory.Get(TileType.VFence));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 1));
-    map.SetTile(gr + 2, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 2, gc + 1, TileFactory.Get(Plot()));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 2, gc + 2));
-    map.SetTile(gr + 2, gc + 2, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 2, gc + 2, TileFactory.Get(Plot()));
     if (gate != 5)
       map.SetTile(gr + 2, gc + 3, TileFactory.Get(TileType.VFence));
 
     if (gate != 6)
       map.SetTile(gr + 3, gc, TileFactory.Get(TileType.VFence));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 3, gc + 1));
-    map.SetTile(gr + 3, gc + 1, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 3, gc + 1, TileFactory.Get(Plot()));
     Town.WitchesGarden.Add(new Loc(0, 0, gr + 3, gc + 2));
-    map.SetTile(gr + 3, gc + 2, TileFactory.Get(TileType.Dirt));
+    map.SetTile(gr + 3, gc + 2, TileFactory.Get(Plot()));
     if (gate != 7)
       map.SetTile(gr + 3, gc + 3, TileFactory.Get(TileType.VFence));
 
@@ -840,6 +840,8 @@ class TownBuilder
     }
 
     return true;
+
+    TileType Plot() => rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Crops;
   }
 
   void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Rng rng)
