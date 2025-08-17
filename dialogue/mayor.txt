@@ -17,11 +17,11 @@
                   "This looming doom is terrible for tourism. Adventurers aside, of course."
                   "These #EARLY_DENIZEN have been causing more and more problems."
                   "Please find the ruins and defeat #FIRST_BOSS. #TOWN_NAME is counting on you!"
-                  "We tried diplomacy but #FIRST_BOSS is very disagreeable."
+                  "I tried sending tax collectors into the dungeon but they were all eaten."
                   "Unlike some other destinations, #TOWN_NAME does not tax treasure you bring out of the dungeon!"
                   "Many adventurers like to pay their respects at the local temple. Can't hurt having the gods on your side, am I right?"
                   "#TOWN_NAME has many amenities for dungeon delvers!"
-                  "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."
+                  "Do you need some magical aid? Go and see Kylie and Sophie, who live just outside of town."                  
             )))
         )
       )
@@ -31,12 +31,13 @@
           pick ("They say the ruins used to be beautiful underground kingdom."
                 "Level 3? You've made it further than that last guy!"
                 "Don't push yourself too hard. Adventurer burnout is a common problem."
+                "Constant #EARLY_DENIZEN raids are no way to build a tourism industry!"
                 "You've probably earned a little break and an ale at the tavern."
                 "You might consider spending some of your spoils on new gear in our helpful shops."
           )))
       )
 
-      ( (= MAIN_QUEST_STATUS 2)
+      ( (>= MAIN_QUEST_STATUS 2)
         (say (
           pick ("A mysterious, ominous statue?! I don't like the sound of that."
                 "I deal with by-laws and tourism! Maybe talk to our pastor or the witches about glowing statues?"
