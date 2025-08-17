@@ -1247,5 +1247,16 @@
       "Stackable",
       "Cleansing"
     ]
+  },
+  {
+    "Name": "COLUMN",
+    "DescriptiveName": "column",
+    "Type": "Column",
+    "Value": 0,
+    "Glyph": "∎,grey,darkgrey,black,false",
+    "Traits": [
+      "Block",
+      "Opaque#0"
+    ]
   }
 ]

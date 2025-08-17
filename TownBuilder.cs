@@ -35,7 +35,7 @@ class Town
   public HashSet<int> TakenHomes { get; set; } = [];
   public HashSet<Loc> TownSquare { get; set; } = [];
   public HashSet<Loc> WitchesCottage { get; set; } = [];
-  public HashSet<Loc> WitchesGarden { get; set; }= [];
+  public HashSet<Loc> WitchesGarden { get; set; } = [];
   public HashSet<Loc> WitchesYard { get; set; } = [];
 
   public HashSet<Loc> Roofs { get; set; } = [];
@@ -44,6 +44,13 @@ class Town
   public int Col { get; set; }
   public int Height { get; set; }
   public int Width { get; set; }
+
+  public bool InTown(Loc loc)
+  {
+    if (loc.Row >= Row && loc.Row <= Row + Height && loc.Col >= Col && loc.Col <= Col + Width)
+      return true;
+    return false;
+  }
 }
 
 class TownBuilder

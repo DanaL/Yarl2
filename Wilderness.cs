@@ -29,7 +29,7 @@ internal class Wilderness(Rng rng, int length)
 
     bool fallColours = false;
     int day = DateTime.UtcNow.DayOfYear;
-    if (day > 320) 
+    if (day > 320)
     {
       fallColours = true;
     }
@@ -42,7 +42,7 @@ internal class Wilderness(Rng rng, int length)
 
     if (fallColours)
     {
-      return rng.Next(3) switch 
+      return rng.Next(3) switch
       {
         0 => TileType.OrangeTree,
         1 => TileType.RedTree,
@@ -464,5 +464,65 @@ internal class Wilderness(Rng rng, int length)
     }
 
     return map;
+  }
+
+  public static void PlaceStoneRing(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    // We need a 7 x 7 spot that is not in town (or witch's cottage) and all 
+    // passable tiles and I think no water tiles.
+    List<(int, int)> options = [];
+    for (int r = 5; r < map.Height - 7; r++)
+    {
+      for (int c = 5; c < map.Width - 7; c++)
+      {
+        if (IsValidSpotForRing(r, c))
+        {
+          options.Add((r, c));
+        }
+      }      
+    }
+
+    (int row, int col) = options[rng.Next(options.Count)];
+    SetColumn(row, col + 3);
+    SetColumn(row + 1, col + 1);
+    SetColumn(row + 1, col + 5);
+    SetColumn(row + 3, col);
+    SetColumn(row + 3, col + 6);
+    SetColumn(row + 5, col + 1);
+    SetColumn(row + 5, col + 5);
+    SetColumn(row + 6, col + 3);
+    map.SetTile(row + 3, col + 3, TileFactory.Get(TileType.Dirt));
+    factDb.Add(new LocationFact() { Desc = "Stone ring centre", Loc = new(0, 0, row + 3, col + 3) });
+    
+    void SetColumn(int row, int col)
+    {
+      Item column = ItemFactory.Get(ItemNames.COLUMN, objDb);
+      column.Traits.Add(new DescriptionTrait("an ancient, weathered column"));
+      objDb.SetToLoc(new Loc(0, 0, row, col), column);
+    }
+
+    bool IsValidSpotForRing(int row, int col)
+    {
+      for (int r = 0; r < 7; r++)
+      {
+        for (int c = 0; c < 7; c++)
+        {
+          Tile tile = map.TileAt(row + r, col + c);
+          if (!tile.Passable())
+            return false;
+          if (tile.Type == TileType.DeepWater || tile.Type == TileType.Water)
+            return false;
+
+          Loc loc = new(0, 0, row + r, col + c);
+          if (town.WitchesYard.Contains(loc) || town.WitchesGarden.Contains(loc))
+            return false;
+
+          if (town.InTown(loc))
+            return false;
+        }
+      }
+
+      return true;
+    }
   }
 }
