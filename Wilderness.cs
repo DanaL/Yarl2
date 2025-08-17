@@ -479,10 +479,21 @@ internal class Wilderness(Rng rng, int length)
         {
           options.Add((r, c));
         }
+      }
+    }
+
+
+    (int row, int col) = options[rng.Next(options.Count)];
+
+    for (int r = 0; r < 7; r++)
+    {
+      for (int c = 0; c < 7; c++)
+      {
+        if (rng.NextDouble() < 0.6)
+          map.SetTile(row + r, col + c, TileFactory.Get(TileType.StoneRoad));
       }      
     }
 
-    (int row, int col) = options[rng.Next(options.Count)];
     SetColumn(row, col + 3);
     SetColumn(row + 1, col + 1);
     SetColumn(row + 1, col + 5);
@@ -491,9 +502,9 @@ internal class Wilderness(Rng rng, int length)
     SetColumn(row + 5, col + 1);
     SetColumn(row + 5, col + 5);
     SetColumn(row + 6, col + 3);
-    map.SetTile(row + 3, col + 3, TileFactory.Get(TileType.Dirt));
+    map.SetTile(row + 3, col + 3, TileFactory.Get(TileType.StoneFloor));
     factDb.Add(new LocationFact() { Desc = "Stone ring centre", Loc = new(0, 0, row + 3, col + 3) });
-    
+
     void SetColumn(int row, int col)
     {
       Item column = ItemFactory.Get(ItemNames.COLUMN, objDb);
