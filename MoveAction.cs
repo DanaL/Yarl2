@@ -52,28 +52,21 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     // Is something blocking your egress from your loc?
     if (gs.ObjDb.ItemsAt(Loc).Any(item => item.HasTrait<BlockTrait>()))
     {
+      string msg;
       Item blockage = gs.ObjDb.ItemsAt(Loc).Where(item => item.HasTrait<BlockTrait>()).First();
-      if (blockage.Type == ItemType.Statue)
+      if (blockage.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait desc)
       {
-        string msg;
-        if (blockage.Traits.OfType<DescriptionTrait>().FirstOrDefault() is DescriptionTrait desc)
-          msg = desc.Text;
-        else
-          msg = $"{Grammar.Possessive(actor).Capitalize()} way is blocked by a statue.";
-
-        if (actor is Player)
-          gs.UIRef().SetPopup(new Popup(msg, "a statue", -1, -1));
-        ui.AlertPlayer(msg);
+        msg = $"{Grammar.Possessive(actor).Capitalize()} way is blocked by {desc.Text}.";
       }
       else
       {
-        string msg = $"{Grammar.Possessive(actor).Capitalize()} way is blocked by ";
-        if (blockage.HasTrait<PluralTrait>())
-          msg += $"some {blockage.Name}!";
-        else
-          msg += $"{blockage.Name.IndefArticle()}!";
-        ui.AlertPlayer(msg);
+        string name = blockage.HasTrait<PluralTrait>() ? $"some {blockage.Name}" : blockage.Name.IndefArticle();      
+        msg = $"{Grammar.Possessive(actor).Capitalize()} way is blocked by {name}.";
       }
+
+      if (actor is Player)
+        gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
+      ui.AlertPlayer(msg);
 
       return true;
     }
