@@ -372,7 +372,10 @@ class CampaignCreator(UserInterface ui)
     if (options.Count == 0)
       throw new CouldNotPlaceDungeonEntranceException();
 
-    var entrance = options[rng.Next(options.Count / 4)];
+    // The dividing by 4 thing is to try to bias the selection toward locations
+    // further from town.
+    int x = options.Count > 20 ? options.Count / 4 : options.Count;
+    (int, int, int) entrance = options[rng.Next(x)];
 
     return (entrance.Item1, entrance.Item2);
   }
@@ -641,7 +644,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = -1602928679;
+      seed = 1421591728;
 
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);

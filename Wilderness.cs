@@ -474,6 +474,7 @@ internal class Wilderness(Rng rng, int length)
     {
       // No valley so we'll need to carve one
       Console.WriteLine("no valley");
+      return;
     }
     List<(int, int)> valley = [..valleys[rng.Next(valleys.Count)]];
 
