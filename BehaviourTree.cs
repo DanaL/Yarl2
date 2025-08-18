@@ -980,6 +980,7 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
     costs.Add(TileType.WoodBridge, 1);
     costs.Add(TileType.Water, 3);
     costs.Add(TileType.Sand, 1);
+    costs.Add(TileType.Crops, 1);
 
     foreach (Trait t in mob.Traits)
     {
