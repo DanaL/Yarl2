@@ -562,7 +562,7 @@ class CampaignCreator(UserInterface ui)
         Wilderness.CarveBurriedValley(wildernessMap, smallRegions, town, objDb, factDb, rng);
 
         Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
-        
+
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {
@@ -645,8 +645,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = 1421591728;
-
+      
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);
       GameObjectDB objDb = new();

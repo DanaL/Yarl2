@@ -572,7 +572,8 @@ internal class Wilderness(Rng rng, int length)
     }
     else
     {
-      valley = [];
+      // I don't think this should happen? Leaving the exception in for now just in case
+      throw new Exception("No valleys at all!");
     }
 
     return valley;
@@ -586,9 +587,7 @@ internal class Wilderness(Rng rng, int length)
 
     if (valleys.Count == 0)
     {
-      // The wilderness wasn't generated with any pocket valleys. There are
-      // two situations here: 1) no pockets in the mountains or 2) there 
-      // weren't enough mountins created for a valley to exist.
+      // The wilderness wasn't generated with any pocket valleys. 
       valley = FixMountainsForValley(map, town, rng);
     }
     else
@@ -652,9 +651,10 @@ internal class Wilderness(Rng rng, int length)
         break;
       }
     }
-    int min = int.Min(3, carved.Count);
-    int max = int.Max(8, carved.Count);
-    int numOfRubble = rng.Next(min, max);
+
+    int numOfRubble = int.Min(3, carved.Count);
+    if (carved.Count > numOfRubble)
+      numOfRubble = rng.Next(numOfRubble, carved.Count);
     List<int> indexes = [.. Enumerable.Range(0, carved.Count)];
     indexes.Shuffle(rng);
     for (int j = 0; j < numOfRubble; j++)
@@ -710,7 +710,6 @@ internal class Wilderness(Rng rng, int length)
         }
       }
     }
-
 
     (int row, int col) = options[rng.Next(options.Count)];
 
