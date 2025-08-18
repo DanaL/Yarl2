@@ -466,6 +466,117 @@ internal class Wilderness(Rng rng, int length)
     return map;
   }
 
+  public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    List<HashSet<(int, int)>> valleys = [..regions.Where(r => IsValley(r))];
+
+    if (valleys.Count == 0)
+    {
+      // No valley so we'll need to carve one
+      Console.WriteLine("no valley");
+    }
+    List<(int, int)> valley = [..valleys[rng.Next(valleys.Count)]];
+
+    (int sr, int sc) = valley[rng.Next(valley.Count)];
+    map.SetTile(sr, sc, TileFactory.Get(TileType.RedTree));
+
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.Grass, 3);
+    costs.Add(TileType.Sand, 3);
+    costs.Add(TileType.Water, 3);
+    costs.Add(TileType.GreenTree, 3);
+    costs.Add(TileType.YellowTree, 3);
+    costs.Add(TileType.RedTree, 3);
+    costs.Add(TileType.OrangeTree, 3);
+    costs.Add(TileType.Conifer, 3);
+    costs.Add(TileType.Dirt, 3);
+    costs.Add(TileType.ClosedDoor, 3);
+    costs.Add(TileType.Bridge, 3);
+    costs.Add(TileType.Mountain, 1);
+    costs.Add(TileType.SnowPeak, 1);
+
+    Loc start = new(0, 0, sr, sc);
+    // Pick a target loc in town
+    List<Loc> townSqs = [];
+    foreach (var sq in town.TownSquare)
+    {
+      switch (map.TileAt(sq.Row, sq.Col).Type)
+      {
+        case TileType.Grass:
+        case TileType.Dirt:
+        case TileType.Well:
+          townSqs.Add(sq);
+          break;
+      }
+    }
+    Loc goal = townSqs[rng.Next(townSqs.Count)];
+
+    List<Loc> carved = [];
+    Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, costs, false);
+    while (path.Count > 0)
+    {
+      Loc loc = path.Pop();
+      if (valley.Contains((loc.Row, loc.Col)))
+        continue;
+
+      Tile tile = map.TileAt(loc.Row, loc.Col);
+      if (tile.Type == TileType.Water)
+      {
+        continue;
+      }
+      else if (tile.Type == TileType.Mountain || tile.Type == TileType.SnowPeak)
+      {
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Dirt));
+        carved.Add(loc);
+      }
+      else
+      {
+        break;
+      }
+    }
+    int min = int.Min(3, carved.Count);
+    int max = int.Max(8, carved.Count);
+    int numOfRubble = rng.Next(min, max);
+    List<int> indexes = [.. Enumerable.Range(0, carved.Count)];
+    indexes.Shuffle(rng);
+    for (int j = 0; j < numOfRubble; j++)
+    {
+      Loc loc = carved[indexes[j]];
+      Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
+      objDb.SetToLoc(loc, rubble);
+    }
+
+    // Valleys can be bordered by deep water, but we need to have at least
+      // one mountain
+      bool IsValley(HashSet<(int, int)> potential)
+    {
+      bool mountain = false;
+      foreach ((int r, int c) in potential)
+      {
+        foreach (var sq in Util.Adj8Sqs(r, c))
+        {
+          if (potential.Contains(sq))
+            continue;
+          
+          TileType tile = map.TileAt(sq).Type;
+          switch (tile)
+          {
+            case TileType.Mountain:
+            case TileType.SnowPeak:
+              mountain = true;
+              break;
+            case TileType.DeepWater:
+              break;
+            default:
+              return false;
+          }        
+        }        
+      }
+
+      return mountain;
+    }
+  }
+
   public static void PlaceStoneRing(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     // We need a 7 x 7 spot that is not in town (or witch's cottage) and all 
@@ -491,7 +602,7 @@ internal class Wilderness(Rng rng, int length)
       {
         if (rng.NextDouble() < 0.6)
           map.SetTile(row + r, col + c, TileFactory.Get(TileType.StoneRoad));
-      }      
+      }
     }
 
     SetColumn(row, col + 3);
