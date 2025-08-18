@@ -421,7 +421,14 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
         if (g != GameObjectDB.EMPTY)
           ch = g.Ch;
       }
-      
+
+      // This gives a chance to reveal an illusory wall while searching if the 
+      // player is paying attention
+      if (tile.Type == TileType.IllusoryWall && _gs.Rng.NextDouble() < 0.25)
+      {
+        ch = '.';
+      }
+
       Sqr sqr = _gs.Rng.NextDouble() < 0.1 
                   ? new Sqr(glyph.Lit, AltColour, ch)
                   : new Sqr(glyph.Lit, Colour, ch);

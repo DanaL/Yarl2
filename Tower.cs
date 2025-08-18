@@ -212,7 +212,7 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  static void SetDoors(Map map, Rng rng)
+  static void SetDoors(Map map, int level, Rng rng)
   {
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
@@ -287,10 +287,14 @@ class Tower(int height, int width, int minLength)
         }
 
         (int dr, int dc) = doorable[rng.Next(doorable.Count)];
-        TileType tile = rng.NextDouble() <= 0.25 ? TileType.ClosedDoor : TileType.LockedDoor;
+        TileType tile;
+        if (level < 3 || (level >= 3 && rng.NextDouble() < 0.85))
+          tile = rng.NextDouble() <= 0.50 ? TileType.ClosedDoor : TileType.LockedDoor;
+        else        
+          tile = TileType.IllusoryWall;
 
         map.SetTile(dr, dc, TileFactory.Get(tile));
-
+ 
         room = MergeRooms(room, other);
         rooms.Remove(otherId);
         roomIds.Remove(otherId);
@@ -393,7 +397,7 @@ class Tower(int height, int width, int minLength)
     return false;
   }
 
-  static void TweakInterior(Map map, List<Room> rooms, Rng rng)
+  static void TweakInterior(Map map, List<Room> rooms, int level, Rng rng)
   {
     List<Room> interior = [];
 
@@ -419,7 +423,7 @@ class Tower(int height, int width, int minLength)
       MergeAdjacentRooms(map, rooms[m], rooms, rng);
     }
 
-    SetDoors(map, rng);
+    SetDoors(map, level, rng);
   }
 
   static void DrawWallFromCorner(Map map, int row, int col, Rng rng)
@@ -485,7 +489,7 @@ class Tower(int height, int width, int minLength)
     }
   }
 
-  Map RedrawInterior(Map outline, Rng rng)
+  Map RedrawInterior(Map outline, int level, Rng rng)
   {
     // First, we want to find the interior corners.
     // I think all the interior corners will be squares that have two
@@ -554,7 +558,7 @@ class Tower(int height, int width, int minLength)
     }
 
     List<Room> rms = FindRooms(map);
-    TweakInterior(map, rms, rng);
+    TweakInterior(map, rms, level, rng);
 
     return map;
 
@@ -606,7 +610,7 @@ class Tower(int height, int width, int minLength)
     return outline;
   }
 
-  Map Build(Rng rng)
+  Map Build(int level, Rng rng)
   {
     // False == floor, true == wall
     bool[,] map = new bool[Height, Width];
@@ -641,7 +645,7 @@ class Tower(int height, int width, int minLength)
 
     List<Room> rooms = FindRooms(tower);
     TweakExterior(tower, rooms, rng);
-    TweakInterior(tower, rooms, rng);
+    TweakInterior(tower, rooms, level, rng);
     
     return tower;
   }
@@ -650,14 +654,14 @@ class Tower(int height, int width, int minLength)
   {
     List<Map> floors = [];
 
-    Map firstFloor = Build(rng);
+    Map firstFloor = Build(0, rng);
     firstFloor.DiggableFloor = false;
     floors.Add(firstFloor);
 
     Map outline = GenerateOutline(firstFloor);
     for (int j = 0; j < numOfFloors - 1; j++)
     {
-      Map map = RedrawInterior(outline, rng);
+      Map map = RedrawInterior(outline, j + 1, rng);
       floors.Add(map);
     }
 

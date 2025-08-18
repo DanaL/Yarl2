@@ -26,7 +26,7 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
-  HFence, VFence, CornerFence, MonsterWall, Lever, Crops
+  HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall
 }
 
 interface ITriggerable
@@ -130,6 +130,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.DungeonWall => "a wall",
     TileType.StoneWall => "a wall",
     TileType.WoodWall => "a wall",
+    TileType.IllusoryWall => "a wall",
     TileType.DungeonFloor => "stone floor",
     TileType.StoneFloor => "stone floor",
     TileType.WoodFloor => "wood floor",
@@ -616,6 +617,7 @@ class TileFactory
   static readonly Tile VFence = new BasicTile(TileType.VFence, false, false, true);
   static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
   static readonly Tile Crops = new BasicTile(TileType.Crops, true, false, true);
+  static readonly Tile IllusoryWall = new BasicTile(TileType.IllusoryWall, true, true, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -678,6 +680,7 @@ class TileFactory
     TileType.VFence => VFence,
     TileType.CornerFence => CornerFence,
     TileType.Crops => Crops,
+    TileType.IllusoryWall => IllusoryWall,
     _ => Unknown
   };
 }
@@ -883,6 +886,7 @@ class Map : ICloneable
           TileType.VaultDoor => '|',
           TileType.OpenPortcullis => '|',
           TileType.Portcullis => '|',
+          TileType.IllusoryWall => '?',
           _ => ' '
         };
         Console.Write(ch);
