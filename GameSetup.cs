@@ -557,11 +557,12 @@ class CampaignCreator(UserInterface ui)
         campaign.Town = town;
 
         SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
-        Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
-
+        
         HashSet<(int, int)>[] smallRegions = [.. regions.Values.Where(r => r.Count <= 30)];
         Wilderness.CarveBurriedValley(wildernessMap, smallRegions, town, objDb, factDb, rng);
 
+        Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
+        
         (startR, startC) = PickStartLoc(wildernessMap, town, objDb, rng);
         if (startR == -1 || startC == -1)
         {

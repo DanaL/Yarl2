@@ -902,6 +902,13 @@ class WildernessPassable : IPassable
   };
 }
 
+class ConfigurablePassable : IPassable
+{
+  public HashSet<TileType> Passable = [];
+
+  bool IPassable.Passable(TileType type) => Passable.Contains(type);
+}
+
 // Class that will divide a map into disjoint regions. Useful for making sure
 // a dungeon level is fully connected, or for finding 'hidden valleys' in 
 // the wilderness map

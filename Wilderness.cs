@@ -466,25 +466,142 @@ internal class Wilderness(Rng rng, int length)
     return map;
   }
 
+  static List<(int, int)> AddMontainRange(Map map, Town town, Rng rng)
+  {
+    // Find candidate spots for the mountain range
+    List<(int, int)> candidates = [];
+    for (int r = 3; r < map.Height - 10; r++)
+    {
+      for (int c = 3; c < map.Width - 10; c++)
+      {
+        if (ValidSpot(r, c))
+          candidates.Add((r, c));
+      }
+    }
+
+    bool[,] template = {
+      { false, false, false, false, false, false, false, false, false, false},
+      { false, false, false, false, false, false, false, false, false, false},
+      { false, true, true, true, true, true, true, true, true, false},
+      { false, true, true, true, true, true, true, true, true, false},
+      { false, true, true, true, false, false, true, true, true, false},
+      { false, true, true, true, false, false, true, true, true, false},
+      { false, true, true, true, true, true, true, true, true, false},
+      { false, true, true, true, true, true, true, true, true, false},
+      { false, false, false, false, false, false, false, false, false, false},
+      { false, false, false, false, false, false, false, false, false, false},
+    };
+
+    for (int c = 0; c < 10; c++)
+    {
+      if (rng.NextDouble() < 0.25)
+        template[0, c] = true;
+      if (rng.NextDouble() < 0.25)
+        template[1, c] = true;
+      if (rng.NextDouble() < 0.25)
+        template[8, c] = true;
+      if (rng.NextDouble() < 0.25)
+        template[9, c] = true;
+    }
+    for (int r = 2; r <= 7; r++)
+    {
+      if (rng.NextDouble() < 0.25)
+        template[r, 0] = true;
+      if (rng.NextDouble() < 0.25)
+        template[r, 9] = true;
+    }
+
+    (int row, int col) = candidates[rng.Next(candidates.Count)];
+    for (int r = 0; r < 10; r++)
+    {
+      for (int c = 0; c < 10; c++)
+      {
+        if (template[r, c])
+        {
+          map.SetTile(row + r, col + c, TileFactory.Get(TileType.Mountain));
+        }
+      }
+    }
+
+    List<(int, int)> valley = [ (row + 4, col + 4), (row + 4, col + 5), (row + 5, col + 4), (row + 5, col + 5)];
+    
+    return valley;
+
+    bool ValidSpot(int row, int col)
+    {
+      for (int r = 0; r < 8; r++)
+      {
+        for (int c = 0; c < 8; c++)
+        {
+          Loc loc = new(0, 0, row + r, col + c);
+          if (town.WitchesYard.Contains(loc) || town.WitchesGarden.Contains(loc))
+            return false;
+          if (town.InTown(loc))
+            return false;
+
+          Tile tile = map.TileAt(loc.Row, loc.Col);
+          switch (tile.Type)
+          {
+            case TileType.StoneRoad:
+            case TileType.Portcullis:
+            case TileType.StoneWall:
+            case TileType.Dirt:
+            case TileType.DeepWater:
+              return false;
+          }
+        }
+      }
+      return true;
+    }
+  }
+
+  static List<(int, int)> FixMountainsForValley(Map map, Town town, Rng rng)
+  {
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.Mountain);
+    passable.Passable.Add(TileType.SnowPeak);
+
+    RegionFinder regionFinder = new(passable);
+    Dictionary<int, HashSet<(int, int)>> regions = regionFinder.Find(map, false, 0, TileType.Unknown);
+    List<HashSet<(int, int)>> mountainous = [.. regions.Values.Where(r => r.Count > 25)];
+
+    List<(int, int)> valley;
+    if (mountainous.Count == 0)
+    {
+      valley = AddMontainRange(map, town, rng);
+    }
+    else
+    {
+      valley = [];
+    }
+
+    return valley;
+  }
+
   public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    List<HashSet<(int, int)>> valleys = [..regions.Where(r => IsValley(r))];
+    List<HashSet<(int, int)>> valleys = [.. regions.Where(r => IsValley(r))];
+
+    List<(int, int)> valley;
 
     if (valleys.Count == 0)
     {
-      // No valley so we'll need to carve one
-      Console.WriteLine("no valley");
-      return;
+      // The wilderness wasn't generated with any pocket valleys. There are
+      // two situations here: 1) no pockets in the mountains or 2) there 
+      // weren't enough mountins created for a valley to exist.
+      valley = FixMountainsForValley(map, town, rng);
     }
-    List<(int, int)> valley = [..valleys[rng.Next(valleys.Count)]];
-
+    else
+    {
+      valley = [.. valleys[rng.Next(valleys.Count)]];
+    }
     (int sr, int sc) = valley[rng.Next(valley.Count)];
     map.SetTile(sr, sc, TileFactory.Get(TileType.RedTree));
 
     Dictionary<TileType, int> costs = [];
     costs.Add(TileType.Grass, 3);
     costs.Add(TileType.Sand, 3);
-    costs.Add(TileType.Water, 3);
+    costs.Add(TileType.Water, 4);
     costs.Add(TileType.GreenTree, 3);
     costs.Add(TileType.YellowTree, 3);
     costs.Add(TileType.RedTree, 3);
@@ -548,8 +665,8 @@ internal class Wilderness(Rng rng, int length)
     }
 
     // Valleys can be bordered by deep water, but we need to have at least
-      // one mountain
-      bool IsValley(HashSet<(int, int)> potential)
+    // one mountain
+    bool IsValley(HashSet<(int, int)> potential)
     {
       bool mountain = false;
       foreach ((int r, int c) in potential)
@@ -558,7 +675,7 @@ internal class Wilderness(Rng rng, int length)
         {
           if (potential.Contains(sq))
             continue;
-          
+
           TileType tile = map.TileAt(sq).Type;
           switch (tile)
           {
@@ -570,8 +687,8 @@ internal class Wilderness(Rng rng, int length)
               break;
             default:
               return false;
-          }        
-        }        
+          }
+        }
       }
 
       return mountain;
