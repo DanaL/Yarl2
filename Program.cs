@@ -16,6 +16,13 @@ using Yarl2;
 
 var options = Options.LoadOptions();
 
+int s = DateTime.UtcNow.GetHashCode();
+Console.WriteLine(s);
+Rng rng = new(s);
+RLLevelMaker levelMaker = new();
+levelMaker.MakeLevel(rng);
+
+
 UserInterface display;
 if (options.Display == "Bearlib")
   display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);

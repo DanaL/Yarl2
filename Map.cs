@@ -869,7 +869,7 @@ class Map : ICloneable
         char ch = Tiles[row * Width + col].Type switch
         {
           TileType.WorldBorder => ' ',
-          TileType.PermWall => '#',
+          TileType.PermWall => '*',
           TileType.DungeonWall => '#',
           TileType.DungeonFloor or TileType.Sand => '.',
           TileType.ClosedDoor or TileType.LockedDoor => '+',
