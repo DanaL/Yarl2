@@ -54,9 +54,10 @@ class RLLevelMaker
     int numOfRooms = rng.Next(8, 11);
     Dictionary<int, RLRoom> rooms = [];
 
+    HashSet<int> usedCells = [];
     for (int i = 0; i < numOfRooms; i++)
     {
-      PlaceRoom(map, rng);      
+      PlaceRoom(map, usedCells, rng);      
     }
     map.Dump();
 
@@ -64,9 +65,9 @@ class RLLevelMaker
   }
 
   static readonly int[] roomWidths = [3, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 15];
-  static RLRoom PlaceRoom(Map map, Rng rng)
+  static RLRoom PlaceRoom(Map map, HashSet<int> usedCells, Rng rng)
   {
-    List<int> cells = [.. Enumerable.Range(0, 12)];
+    List<int> cells = [.. Enumerable.Range(0, 12).Where(c => !usedCells.Contains(c))];
     cells.Shuffle(rng);
 
     int h = rng.Next(3, 7);
@@ -89,6 +90,8 @@ class RLLevelMaker
             map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
           }
         }
+
+        usedCells.Add(cell);
 
         return new(row, col, h, w); ;
       }
