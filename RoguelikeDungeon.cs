@@ -11,7 +11,7 @@
 
 namespace Yarl2;
 
-record RLRoom(int Row, int Col, int Height, int Width);
+record RLRoom(int Row, int Col, int Height, int Width, int Cell);
 
 class RLLevelMaker
 {
@@ -22,7 +22,11 @@ class RLLevelMaker
 
   public Map MakeLevel(Rng rng)
   {
-    Map map = new(WIDTH, HEIGHT, TileType.DungeonWall);
+    // I'm initializing the map with sand and peppering some walls here and 
+    // there throughout hoping that when it comes time to use pathfinding to
+    // draw the halls, the alg will route around walls making for a bit more
+    // twisty passages.
+    Map map = new(WIDTH, HEIGHT, TileType.Sand);
 
     for (int c = 0; c < WIDTH; c++)
     {
@@ -34,6 +38,13 @@ class RLLevelMaker
     {
       map.SetTile(r, 0, TileFactory.Get(TileType.PermWall));
       map.SetTile(r, WIDTH - 1, TileFactory.Get(TileType.PermWall));
+    }
+
+    for (int i = 0; i < 125; i++)
+    {
+      int r = rng.Next(1, HEIGHT - 1);
+      int c = rng.Next(1, WIDTH - 1);      
+      map.SetTile(r, c, TileFactory.Get(TileType.DungeonWall));      
     }
 
     // Debug temp
@@ -57,8 +68,10 @@ class RLLevelMaker
     HashSet<int> usedCells = [];
     for (int i = 0; i < numOfRooms; i++)
     {
-      PlaceRoom(map, usedCells, rng);      
+      RLRoom room = PlaceRoom(map, usedCells, rng);
+      rooms.Add(room.Cell, room);
     }
+
     map.Dump();
 
     return map;
@@ -75,8 +88,8 @@ class RLLevelMaker
 
     foreach (int cell in cells)
     {
-      int rr = rng.Next(0, CELL_HEIGHT - h);
-      int rc = rng.Next(0, CELL_WIDTH - w);
+      int rr = rng.Next(0, CELL_HEIGHT - h - 1);
+      int rc = rng.Next(0, CELL_WIDTH - w - 1);
       
       (int or, int oc) = OffSet(cell);
       int row = or + rr + 1, col = oc + rc + 1; // + 1 because outer walls are permanent
@@ -93,11 +106,11 @@ class RLLevelMaker
 
         usedCells.Add(cell);
 
-        return new(row, col, h, w); ;
+        return new(row, col, h, w, cell);
       }
     }
 
-    return new(0, 0, 0, 0);
+    return new(0, 0, 0, 0, -1);
 
     bool CanPlace(int row, int col, int h, int w)
     {
@@ -105,7 +118,7 @@ class RLLevelMaker
       {
         for (int c = col; c < col + w; c++)
         {
-          if (map.TileAt(r, c).Type != TileType.DungeonWall)
+          if (map.TileAt(r, c).Type == TileType.DungeonFloor)
             return false;
         }
       }
@@ -117,17 +130,17 @@ class RLLevelMaker
     (int, int) OffSet(int cell)  => cell switch
     {
       0 => (0, 0),
-      1 => (0, 17),
-      2 => (0, 34),
-      3 => (0, 51),
-      4 => (10, 0),
-      5 => (10, 17),
-      6 => (10, 34),
-      7 => (10, 51),
+      1 => (0, 18),
+      2 => (0, 36),
+      3 => (0, 52),
+      4 => (11, 0),
+      5 => (11, 18),
+      6 => (11, 36),
+      7 => (11, 52),
       8 => (21, 0),
-      9 => (21, 17),
-      10 => (21, 34),
-      _ => (21, 51)
+      9 => (21, 18),
+      10 => (21, 36),
+      _ => (21, 52)
     };
   }
 }
