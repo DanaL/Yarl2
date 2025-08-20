@@ -36,6 +36,21 @@ class RLLevelMaker
       map.SetTile(r, WIDTH - 1, TileFactory.Get(TileType.PermWall));
     }
 
+    // Debug temp
+    for (int c = 1; c < WIDTH - 1; c++)
+    {
+      map.SetTile(10, c, TileFactory.Get(TileType.DeepWater));
+      map.SetTile(20, c, TileFactory.Get(TileType.DeepWater));      
+    }
+
+    for (int r = 1; r < HEIGHT - 1; r++)
+    {
+      map.SetTile(r, 18, TileFactory.Get(TileType.DeepWater));
+      map.SetTile(r, 36, TileFactory.Get(TileType.DeepWater));
+      map.SetTile(r, 52, TileFactory.Get(TileType.DeepWater));
+    }
+    // Debug temp
+
     int numOfRooms = rng.Next(8, 11);
     Dictionary<int, RLRoom> rooms = [];
 

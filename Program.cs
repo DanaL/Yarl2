@@ -18,7 +18,7 @@ var options = Options.LoadOptions();
 
 int s = DateTime.UtcNow.GetHashCode();
 Console.WriteLine(s);
-Rng rng = new(s);
+Rng rng = new(-562711020);
 RLLevelMaker levelMaker = new();
 levelMaker.MakeLevel(rng);
 
