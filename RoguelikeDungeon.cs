@@ -47,21 +47,6 @@ class RLLevelMaker
       map.SetTile(r, c, TileFactory.Get(TileType.DungeonWall));      
     }
 
-    // Debug temp
-    // for (int c = 1; c < WIDTH - 1; c++)
-    // {
-    //   map.SetTile(10, c, TileFactory.Get(TileType.DeepWater));
-    //   map.SetTile(20, c, TileFactory.Get(TileType.DeepWater));      
-    // }
-
-    // for (int r = 1; r < HEIGHT - 1; r++)
-    // {
-    //   map.SetTile(r, 18, TileFactory.Get(TileType.DeepWater));
-    //   map.SetTile(r, 36, TileFactory.Get(TileType.DeepWater));
-    //   map.SetTile(r, 52, TileFactory.Get(TileType.DeepWater));
-    // }
-    // Debug temp
-
     int numOfRooms = rng.Next(8, 11);
     Dictionary<int, RLRoom> rooms = [];
 
@@ -125,11 +110,23 @@ class RLLevelMaker
     {
       Loc loc = path.Pop();
       TileType curr = map.TileAt(loc.Row, loc.Col).Type;
+
+      // We've reached a door so we can stop, and we don't want to 
+      // erase the door
+      if (curr == TileType.ClosedDoor)
+      {
+        prev = curr;
+        continue;
+      }
+
       Tile toDraw;
-      if (curr == TileType.DungeonWall && prev == TileType.DungeonFloor)
+      if (curr == TileType.DungeonWall && prev == TileType.Sand)
+        toDraw = new Door(TileType.ClosedDoor, false);
+      else if (curr == TileType.DungeonWall && prev == TileType.DungeonFloor)
         toDraw = new Door(TileType.ClosedDoor, false);
       else
         toDraw = TileFactory.Get(TileType.DungeonFloor);
+      prev = curr;
       map.SetTile(loc.Row, loc.Col, toDraw);
     }
   }
@@ -138,6 +135,9 @@ class RLLevelMaker
   {
     List<int> roomIds = [.. usedCells];
     roomIds.Shuffle(rng);
+    roomIds = [3, 7, 0, 1, 2, 6, 10, 9];
+
+
     List<HashSet<int>> joinedRooms = [];
     foreach (int cell in roomIds)
     {
@@ -155,16 +155,21 @@ class RLLevelMaker
           continue;
 
         DrawHallway(rooms, map, roomId, adjId);
+
+        // Merge the sets
+        var roomSet = joinedRooms.Where(s => s.Contains(roomId)).First();
+        var adjSet = joinedRooms.Where(s => s.Contains(adjId)).First();
+        joinedRooms.Remove(roomSet);
+        joinedRooms.Remove(adjSet);
+        HashSet<int> unioned = [..roomSet.Union(adjSet)];
+        joinedRooms.Add(unioned);
+
         break;
       }
-
-      if (roomIds.Count <= 6)
-        break;
     }
     //var foo = AdjRooms(9, usedCells);
 
-    DrawHallway(rooms, map, 2, 1);
-    DrawHallway(rooms, map, 1, 0);
+
     // int[,] grid = new int[HEIGHT, WIDTH];
     // for (int r = 0; r < HEIGHT; r++)
     // {
