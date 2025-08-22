@@ -48,18 +48,18 @@ class RLLevelMaker
     }
 
     // Debug temp
-    for (int c = 1; c < WIDTH - 1; c++)
-    {
-      map.SetTile(10, c, TileFactory.Get(TileType.DeepWater));
-      map.SetTile(20, c, TileFactory.Get(TileType.DeepWater));      
-    }
+    // for (int c = 1; c < WIDTH - 1; c++)
+    // {
+    //   map.SetTile(10, c, TileFactory.Get(TileType.DeepWater));
+    //   map.SetTile(20, c, TileFactory.Get(TileType.DeepWater));      
+    // }
 
-    for (int r = 1; r < HEIGHT - 1; r++)
-    {
-      map.SetTile(r, 18, TileFactory.Get(TileType.DeepWater));
-      map.SetTile(r, 36, TileFactory.Get(TileType.DeepWater));
-      map.SetTile(r, 52, TileFactory.Get(TileType.DeepWater));
-    }
+    // for (int r = 1; r < HEIGHT - 1; r++)
+    // {
+    //   map.SetTile(r, 18, TileFactory.Get(TileType.DeepWater));
+    //   map.SetTile(r, 36, TileFactory.Get(TileType.DeepWater));
+    //   map.SetTile(r, 52, TileFactory.Get(TileType.DeepWater));
+    // }
     // Debug temp
 
     int numOfRooms = rng.Next(8, 11);
@@ -74,7 +74,118 @@ class RLLevelMaker
 
     map.Dump();
 
+    JoinRooms(rooms, map, usedCells, rng);
+
+    map.Dump();
+
     return map;
+  }
+
+
+  static List<int> AdjRooms(int cell, HashSet<int> usedCells)
+  {
+    List<int> adj = [];
+
+    int row = cell / 4;
+    int col = cell % 4;
+
+    foreach ((int dr, int dc) in Util.Adj8)
+    {
+      int adjR = row + dr;
+      int adjC = col + dc;
+
+      if (adjR < 0 || adjC < 0 || adjR > 2 || adjC > 3)
+        continue;
+      int i = adjR * 4 + adjC;
+      if (usedCells.Contains(i))
+        adj.Add(i);
+    }
+
+    return adj;
+  }
+
+  static readonly Dictionary<TileType, int> hallwayCosts = new() {
+    { TileType.DungeonFloor, 1},
+    { TileType.Sand, 0},
+    { TileType.DungeonWall, 3}
+  };
+  static void DrawHallway(Dictionary<int, RLRoom> rooms, Map map, int startId, int endId)
+  {
+    RLRoom start = rooms[startId];
+    RLRoom end = rooms[endId];
+    int startR = start.Row + start.Height / 2, startC = start.Col + start.Width / 2;
+    int endR = end.Row + end.Height / 2, endC = end.Col + end.Width / 2;
+
+    Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, new(0, 0, startR, startC),
+        new(0, 0, endR, endC), hallwayCosts, false);
+    while (path.Count > 0)
+    {
+      Loc loc = path.Pop();
+      map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+    }
+  }
+
+  static void JoinRooms(Dictionary<int, RLRoom> rooms, Map map, HashSet<int> usedCells, Rng rng)
+  {
+    List<int> roomIds = [.. usedCells];
+    roomIds.Shuffle(rng);
+    List<HashSet<int>> joinedRooms = [];
+    foreach (int cell in roomIds)
+    {
+      joinedRooms.Add([cell]);
+    }
+
+    while (joinedRooms.Count > 1)
+    {
+      int roomId = roomIds[0];
+      roomIds.RemoveAt(0);
+
+      foreach (int adjId in AdjRooms(roomId, usedCells))
+      {
+        if (AlreadyJoined(roomId, adjId))
+          continue;
+
+        DrawHallway(rooms, map, roomId, adjId);
+        break;
+      }
+
+      if (roomIds.Count <= 6)
+        break;
+    }
+    //var foo = AdjRooms(9, usedCells);
+
+    DrawHallway(rooms, map, 2, 1);
+    DrawHallway(rooms, map, 1, 0);
+    // int[,] grid = new int[HEIGHT, WIDTH];
+    // for (int r = 0; r < HEIGHT; r++)
+    // {
+    //   for (int c = 0; c < WIDTH; c++)
+    //   {
+    //     grid[r, c] = int.MaxValue;
+    //   }
+    // }
+
+    // foreach (RLRoom room in rooms)
+    // {
+    //   for (int r = 0; r < room.Height; r++)
+    //   {
+    //     for (int c = 0; c < room.Width; c++)
+    //     {
+    //       grid[room.Row + r, room.Col + c] = room.Cell;
+    //     }
+    //   }
+    // }
+
+    bool AlreadyJoined(int room, int other)
+    {
+      foreach (var set in joinedRooms)
+      {
+        if (set.Contains(room) && set.Contains(other))
+          return true;
+      }
+
+      return false;
+    }
   }
 
   static readonly int[] roomWidths = [3, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 15];
@@ -96,13 +207,28 @@ class RLLevelMaker
 
       if (CanPlace(row, col, h, w))
       {
-        for (int r = row; r < row + h; r++)
+        for (int c = col - 1; c <= col + w; c++)
         {
-          for (int c = col; c < col + w; c++)
-          {
-            map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-          }
+          if (map.TileAt(row - 1, c).Type == TileType.Sand)
+            map.SetTile(row - 1, c, TileFactory.Get(TileType.DungeonWall));
+          if (map.TileAt(row + h, c).Type == TileType.Sand)
+            map.SetTile(row + h, c, TileFactory.Get(TileType.DungeonWall));
         }
+        for (int r = row - 1; r <= row + h; r++)
+        {
+          if (map.TileAt(r, col - 1).Type == TileType.Sand)
+            map.SetTile(r, col - 1, TileFactory.Get(TileType.DungeonWall));
+          if (map.TileAt(r, col + w).Type == TileType.Sand)
+            map.SetTile(r, col + w, TileFactory.Get(TileType.DungeonWall)); 
+        }
+        
+        for (int r = row; r < row + h; r++)
+          {
+            for (int c = col; c < col + w; c++)
+            {
+              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+            }
+          }
 
         usedCells.Add(cell);
 
@@ -160,4 +286,3 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     return (dungeon, Loc.Nowhere);
   }
 }
-
