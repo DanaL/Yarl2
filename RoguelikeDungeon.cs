@@ -127,6 +127,7 @@ class RLLevelMaker
       else
         toDraw = TileFactory.Get(TileType.DungeonFloor);
       prev = curr;
+
       map.SetTile(loc.Row, loc.Col, toDraw);
     }
   }
