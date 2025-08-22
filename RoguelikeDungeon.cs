@@ -106,6 +106,7 @@ class RLLevelMaker
 
   static readonly Dictionary<TileType, int> hallwayCosts = new() {
     { TileType.DungeonFloor, 1},
+    { TileType.ClosedDoor, 1},
     { TileType.Sand, 0},
     { TileType.DungeonWall, 3}
   };
@@ -118,10 +119,18 @@ class RLLevelMaker
 
     Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, new(0, 0, startR, startC),
         new(0, 0, endR, endC), hallwayCosts, false);
+
+    TileType prev = TileType.DungeonFloor;
     while (path.Count > 0)
     {
       Loc loc = path.Pop();
-      map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+      TileType curr = map.TileAt(loc.Row, loc.Col).Type;
+      Tile toDraw;
+      if (curr == TileType.DungeonWall && prev == TileType.DungeonFloor)
+        toDraw = new Door(TileType.ClosedDoor, false);
+      else
+        toDraw = TileFactory.Get(TileType.DungeonFloor);
+      map.SetTile(loc.Row, loc.Col, toDraw);
     }
   }
 
