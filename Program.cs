@@ -17,7 +17,6 @@ using Yarl2;
 var options = Options.LoadOptions();
 
 int s = DateTime.UtcNow.GetHashCode();
-
 s = 1477818045;
 Console.WriteLine(s);
 // s = -562711020;

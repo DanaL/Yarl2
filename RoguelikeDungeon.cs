@@ -51,11 +51,27 @@ class RLLevelMaker
     Dictionary<int, RLRoom> rooms = [];
 
     HashSet<int> usedCells = [];
-    for (int i = 0; i < numOfRooms; i++)
-    {
-      RLRoom room = PlaceRoom(map, usedCells, rng);
-      rooms.Add(room.Cell, room);
-    }
+    // for (int i = 0; i < numOfRooms; i++)
+    // {
+    //   RLRoom room = PlaceRoom(map, usedCells, rng);
+    //   rooms.Add(room.Cell, room);
+    // }
+    var (_, room) = TryPlacingInCell(0, map, usedCells, rng);
+    rooms.Add(0, room);
+    (_, room) = TryPlacingInCell(4, map, usedCells, rng);
+    rooms.Add(4, room);
+    (_, room) = TryPlacingInCell(8, map, usedCells, rng);
+    rooms.Add(8, room);
+    (_, room) = TryPlacingInCell(9, map, usedCells, rng);
+    rooms.Add(9, room);
+    (_, room) = TryPlacingInCell(2, map, usedCells, rng);
+    rooms.Add(2, room);
+    (_, room) = TryPlacingInCell(3, map, usedCells, rng);
+    rooms.Add(3, room);
+    (_, room) = TryPlacingInCell(7, map, usedCells, rng);
+    rooms.Add(7, room);
+    (_, room) = TryPlacingInCell(11, map, usedCells, rng);
+    rooms.Add(11, room);
 
     map.Dump();
 
@@ -65,7 +81,6 @@ class RLLevelMaker
 
     return map;
   }
-
 
   static List<int> AdjRooms(int cell, HashSet<int> usedCells)
   {
@@ -136,25 +151,23 @@ class RLLevelMaker
   {
     List<int> roomIds = [.. usedCells];
     roomIds.Shuffle(rng);
-    roomIds = [3, 7, 0, 1, 2, 6, 10, 9];
-
-
+    
     List<HashSet<int>> joinedRooms = [];
     foreach (int cell in roomIds)
     {
       joinedRooms.Add([cell]);
     }
 
-    while (joinedRooms.Count > 1)
+    while (joinedRooms.Count > 1 && roomIds.Count > 0)
     {
       int roomId = roomIds[0];
       roomIds.RemoveAt(0);
 
-      foreach (int adjId in AdjRooms(roomId, usedCells))
-      {
-        if (AlreadyJoined(roomId, adjId))
-          continue;
-
+      List<int> adjRooms = [.. AdjRooms(roomId, usedCells).Where(r => !AlreadyJoined(roomId, r))];
+      if (adjRooms.Count > 0)
+      {        
+        int adjId = adjRooms[rng.Next(adjRooms.Count)];
+       
         DrawHallway(rooms, map, roomId, adjId);
 
         // Merge the sets
@@ -162,35 +175,11 @@ class RLLevelMaker
         var adjSet = joinedRooms.Where(s => s.Contains(adjId)).First();
         joinedRooms.Remove(roomSet);
         joinedRooms.Remove(adjSet);
-        HashSet<int> unioned = [..roomSet.Union(adjSet)];
+        HashSet<int> unioned = [.. roomSet.Union(adjSet)];
         joinedRooms.Add(unioned);
-
-        break;
       }
     }
-    //var foo = AdjRooms(9, usedCells);
-
-
-    // int[,] grid = new int[HEIGHT, WIDTH];
-    // for (int r = 0; r < HEIGHT; r++)
-    // {
-    //   for (int c = 0; c < WIDTH; c++)
-    //   {
-    //     grid[r, c] = int.MaxValue;
-    //   }
-    // }
-
-    // foreach (RLRoom room in rooms)
-    // {
-    //   for (int r = 0; r < room.Height; r++)
-    //   {
-    //     for (int c = 0; c < room.Width; c++)
-    //     {
-    //       grid[room.Row + r, room.Col + c] = room.Cell;
-    //     }
-    //   }
-    // }
-
+   
     bool AlreadyJoined(int room, int other)
     {
       foreach (var set in joinedRooms)
@@ -204,54 +193,48 @@ class RLLevelMaker
   }
 
   static readonly int[] roomWidths = [3, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 15];
-  static RLRoom PlaceRoom(Map map, HashSet<int> usedCells, Rng rng)
+  static (bool, RLRoom) TryPlacingInCell(int cell, Map map, HashSet<int> usedCells, Rng rng)
   {
-    List<int> cells = [.. Enumerable.Range(0, 12).Where(c => !usedCells.Contains(c))];
-    cells.Shuffle(rng);
-
     int h = rng.Next(3, 7);
     int w = roomWidths[rng.Next(roomWidths.Length)];
 
-    foreach (int cell in cells)
+    int rr = rng.Next(0, CELL_HEIGHT - h - 1);
+    int rc = rng.Next(0, CELL_WIDTH - w - 1);
+
+    (int or, int oc) = OffSet(cell);
+    int row = or + rr + 1, col = oc + rc + 1; // + 1 because outer walls are permanent
+
+    if (CanPlace(row, col, h, w))
     {
-      int rr = rng.Next(0, CELL_HEIGHT - h - 1);
-      int rc = rng.Next(0, CELL_WIDTH - w - 1);
-      
-      (int or, int oc) = OffSet(cell);
-      int row = or + rr + 1, col = oc + rc + 1; // + 1 because outer walls are permanent
-
-      if (CanPlace(row, col, h, w))
+      for (int c = col - 1; c <= col + w; c++)
       {
-        for (int c = col - 1; c <= col + w; c++)
-        {
-          if (map.TileAt(row - 1, c).Type == TileType.Sand)
-            map.SetTile(row - 1, c, TileFactory.Get(TileType.DungeonWall));
-          if (map.TileAt(row + h, c).Type == TileType.Sand)
-            map.SetTile(row + h, c, TileFactory.Get(TileType.DungeonWall));
-        }
-        for (int r = row - 1; r <= row + h; r++)
-        {
-          if (map.TileAt(r, col - 1).Type == TileType.Sand)
-            map.SetTile(r, col - 1, TileFactory.Get(TileType.DungeonWall));
-          if (map.TileAt(r, col + w).Type == TileType.Sand)
-            map.SetTile(r, col + w, TileFactory.Get(TileType.DungeonWall)); 
-        }
-        
-        for (int r = row; r < row + h; r++)
-          {
-            for (int c = col; c < col + w; c++)
-            {
-              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-            }
-          }
-
-        usedCells.Add(cell);
-
-        return new(row, col, h, w, cell);
+        if (map.TileAt(row - 1, c).Type == TileType.Sand)
+          map.SetTile(row - 1, c, TileFactory.Get(TileType.DungeonWall));
+        if (map.TileAt(row + h, c).Type == TileType.Sand)
+          map.SetTile(row + h, c, TileFactory.Get(TileType.DungeonWall));
       }
-    }
+      for (int r = row - 1; r <= row + h; r++)
+      {
+        if (map.TileAt(r, col - 1).Type == TileType.Sand)
+          map.SetTile(r, col - 1, TileFactory.Get(TileType.DungeonWall));
+        if (map.TileAt(r, col + w).Type == TileType.Sand)
+          map.SetTile(r, col + w, TileFactory.Get(TileType.DungeonWall));
+      }
 
-    return new(0, 0, 0, 0, -1);
+      for (int r = row; r < row + h; r++)
+      {
+        for (int c = col; c < col + w; c++)
+        {
+          map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+        }
+      }
+
+      usedCells.Add(cell);
+
+      return (true, new(row, col, h, w, cell));
+    }
+    
+    return (false, new(-1, -1, -1, -1, cell));
 
     bool CanPlace(int row, int col, int h, int w)
     {
@@ -268,7 +251,7 @@ class RLLevelMaker
     }
 
     // kinda dumb but clear...
-    (int, int) OffSet(int cell)  => cell switch
+    (int, int) OffSet(int cell) => cell switch
     {
       0 => (0, 0),
       1 => (0, 18),
@@ -283,6 +266,21 @@ class RLLevelMaker
       10 => (21, 36),
       _ => (21, 52)
     };
+  }
+  
+  static RLRoom PlaceRoom(Map map, HashSet<int> usedCells, Rng rng)
+  {
+    List<int> cells = [.. Enumerable.Range(0, 12).Where(c => !usedCells.Contains(c))];
+    cells.Shuffle(rng);
+
+    foreach (int cell in cells)
+    {
+      (bool placed, RLRoom room) = TryPlacingInCell(cell, map, usedCells, rng);
+      if (placed)
+        return room;
+    }
+
+    return new(0, 0, 0, 0, -1);
   }
 }
 
