@@ -645,7 +645,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      
+      seed = -1360134958; // Generates mountains with no valleys
       Console.WriteLine($"Seed: {seed}");
       Rng rng = new(seed);
       GameObjectDB objDb = new();

@@ -555,6 +555,38 @@ internal class Wilderness(Rng rng, int length)
     }
   }
 
+  static List<(int, int)> CreateValleyInRange(Map map, HashSet<(int, int)> range)
+  {
+    foreach (var sq in range)
+    {
+      if (OnlyMountainsAdj(sq.Item1, sq.Item2))
+      {
+        List<(int, int)> valley = [sq];
+        foreach (var adj in Util.Adj4Sqs(sq.Item1, sq.Item2))
+        {
+          if (OnlyMountainsAdj(adj.Item1, adj.Item2))
+            valley.Add(adj);
+        }
+
+        return valley;
+      }
+    }
+
+    return [];
+
+    bool OnlyMountainsAdj(int r, int c)
+    {
+      foreach (var sq in Util.Adj8Sqs(r, c))
+      {
+        TileType tt = map.TileAt(sq.Item1, sq.Item2).Type;
+        if (!(tt == TileType.Mountain || tt == TileType.SnowPeak))
+          return false;
+      }
+
+      return true;
+    }
+  }
+
   static List<(int, int)> FixMountainsForValley(Map map, Town town, Rng rng)
   {
     ConfigurablePassable passable = new();
@@ -565,18 +597,20 @@ internal class Wilderness(Rng rng, int length)
     Dictionary<int, HashSet<(int, int)>> regions = regionFinder.Find(map, false, 0, TileType.Unknown);
     List<HashSet<(int, int)>> mountainous = [.. regions.Values.Where(r => r.Count > 25)];
 
-    List<(int, int)> valley;
     if (mountainous.Count == 0)
     {
-      valley = AddMontainRange(map, town, rng);
-    }
-    else
-    {
-      // I don't think this should happen? Leaving the exception in for now just in case
-      throw new Exception("No valleys at all!");
+      return AddMontainRange(map, town, rng);
     }
 
-    return valley;
+    foreach (HashSet<(int, int)> range in mountainous)
+    {
+      List<(int, int)> valley = CreateValleyInRange(map, mountainous[0]);
+      if (valley.Count > 0)
+        return valley;
+    }
+
+    map.Dump();
+    throw new Exception("No valleys at all!");
   }
 
   public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
