@@ -632,19 +632,19 @@ internal class Wilderness(Rng rng, int length)
     map.SetTile(sr, sc, TileFactory.Get(TileType.RedTree));
 
     Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.Grass, 3);
-    costs.Add(TileType.Sand, 3);
+    costs.Add(TileType.Grass, 2);
+    costs.Add(TileType.Sand, 2);
     costs.Add(TileType.Water, 4);
-    costs.Add(TileType.GreenTree, 3);
-    costs.Add(TileType.YellowTree, 3);
-    costs.Add(TileType.RedTree, 3);
-    costs.Add(TileType.OrangeTree, 3);
-    costs.Add(TileType.Conifer, 3);
-    costs.Add(TileType.Dirt, 3);
+    costs.Add(TileType.GreenTree, 2);
+    costs.Add(TileType.YellowTree, 2);
+    costs.Add(TileType.RedTree, 2);
+    costs.Add(TileType.OrangeTree, 2);
+    costs.Add(TileType.Conifer, 2);
+    costs.Add(TileType.Dirt, 2);
     costs.Add(TileType.ClosedDoor, 3);
     costs.Add(TileType.Bridge, 3);
-    costs.Add(TileType.Mountain, 1);
-    costs.Add(TileType.SnowPeak, 1);
+    costs.Add(TileType.Mountain, 3);
+    costs.Add(TileType.SnowPeak, 3);
 
     Loc start = new(0, 0, sr, sc);
     // Pick a target loc in town
