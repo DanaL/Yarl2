@@ -51,28 +51,12 @@ class RLLevelMaker
     Dictionary<int, RLRoom> rooms = [];
 
     HashSet<int> usedCells = [];
-    // for (int i = 0; i < numOfRooms; i++)
-    // {
-    //   RLRoom room = PlaceRoom(map, usedCells, rng);
-    //   rooms.Add(room.Cell, room);
-    // }
-    var (_, room) = TryPlacingInCell(0, map, usedCells, rng);
-    rooms.Add(0, room);
-    (_, room) = TryPlacingInCell(4, map, usedCells, rng);
-    rooms.Add(4, room);
-    (_, room) = TryPlacingInCell(8, map, usedCells, rng);
-    rooms.Add(8, room);
-    (_, room) = TryPlacingInCell(9, map, usedCells, rng);
-    rooms.Add(9, room);
-    (_, room) = TryPlacingInCell(2, map, usedCells, rng);
-    rooms.Add(2, room);
-    (_, room) = TryPlacingInCell(3, map, usedCells, rng);
-    rooms.Add(3, room);
-    (_, room) = TryPlacingInCell(7, map, usedCells, rng);
-    rooms.Add(7, room);
-    (_, room) = TryPlacingInCell(11, map, usedCells, rng);
-    rooms.Add(11, room);
-
+    for (int i = 0; i < numOfRooms; i++)
+    {
+      RLRoom room = PlaceRoom(map, usedCells, rng);
+      rooms.Add(room.Cell, room);
+    }
+   
     map.Dump();
 
     JoinRooms(rooms, map, usedCells, rng);
@@ -158,7 +142,31 @@ class RLLevelMaker
       map.Dump();
       // We still need to join more rooms 
       JoinDistantRooms(rooms, map, joinedRooms, usedCells, rng);
-    }    
+    }
+
+    // Finally, try to join a few more rooms to hopefully add a looping path
+    // or two in the map
+    CreateLoops(rooms, map, usedCells, rng);
+  }
+
+  static void CreateLoops(Dictionary<int, RLRoom> rooms, Map map, HashSet<int> usedCells, Rng rng)
+  {
+    List<int> roomIds = [.. usedCells];
+    roomIds.Shuffle(rng);
+    int connected = 0;
+    while (connected < 3)
+    {
+      int roomA = roomIds[0];
+      roomIds.Remove(roomA);
+      int roomB = roomIds[0];
+      roomIds.Remove(roomB);
+
+      DrawHallway(rooms, map, roomA, roomB);
+      ++connected;
+
+      if (rng.NextDouble() < 0.4)
+        break;
+    }
   }
 
   static void JoinAdjacentRooms(Dictionary<int, RLRoom> rooms, Map map, List<HashSet<int>> joinedRooms, HashSet<int> usedCells, Rng rng)
