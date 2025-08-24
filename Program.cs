@@ -22,7 +22,7 @@ Console.WriteLine(s);
 // s = -562711020;
 Rng rng = new(s);
 RLLevelMaker levelMaker = new();
-levelMaker.MakeLevel(rng);
+RLLevelMaker.MakeLevel(rng);
 
 
 UserInterface display;

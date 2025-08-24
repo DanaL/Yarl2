@@ -20,7 +20,7 @@ class RLLevelMaker
   const int CELL_WIDTH = 17;
   const int CELL_HEIGHT = 9;
 
-  public Map MakeLevel(Rng rng)
+  public static Map MakeLevel(Rng rng)
   {
     // I'm initializing the map with sand and peppering some walls here and 
     // there throughout hoping that when it comes time to use pathfinding to
@@ -106,8 +106,8 @@ class RLLevelMaker
 
   static readonly Dictionary<TileType, int> hallwayCosts = new() {
     { TileType.DungeonFloor, 1},
-    { TileType.ClosedDoor, 1},
-    { TileType.Sand, 0},
+    { TileType.ClosedDoor, 0},
+    { TileType.Sand, 1},
     { TileType.DungeonWall, 3}
   };
   static void DrawHallway(Dictionary<int, RLRoom> rooms, Map map, int startId, int endId)
@@ -149,25 +149,38 @@ class RLLevelMaker
 
   static void JoinRooms(Dictionary<int, RLRoom> rooms, Map map, HashSet<int> usedCells, Rng rng)
   {
-    List<int> roomIds = [.. usedCells];
-    roomIds.Shuffle(rng);
-    
     List<HashSet<int>> joinedRooms = [];
+
+    JoinAdjacentRooms(rooms, map, joinedRooms, usedCells, rng);
+
+    if (joinedRooms.Count > 1)
+    {
+      map.Dump();
+      // We still need to join more rooms 
+      JoinDistantRooms(rooms, map, joinedRooms, usedCells, rng);
+    }    
+  }
+
+  static void JoinAdjacentRooms(Dictionary<int, RLRoom> rooms, Map map, List<HashSet<int>> joinedRooms, HashSet<int> usedCells, Rng rng)
+  {
+    List<int> roomIds = [.. usedCells];
     foreach (int cell in roomIds)
     {
       joinedRooms.Add([cell]);
     }
+
+    roomIds.Shuffle(rng);
 
     while (joinedRooms.Count > 1 && roomIds.Count > 0)
     {
       int roomId = roomIds[0];
       roomIds.RemoveAt(0);
 
-      List<int> adjRooms = [.. AdjRooms(roomId, usedCells).Where(r => !AlreadyJoined(roomId, r))];
+      List<int> adjRooms = [.. AdjRooms(roomId, usedCells).Where(r => !AlreadyJoined(roomId, r, joinedRooms))];
       if (adjRooms.Count > 0)
-      {        
+      {
         int adjId = adjRooms[rng.Next(adjRooms.Count)];
-       
+
         DrawHallway(rooms, map, roomId, adjId);
 
         // Merge the sets
@@ -179,17 +192,82 @@ class RLLevelMaker
         joinedRooms.Add(unioned);
       }
     }
-   
-    bool AlreadyJoined(int room, int other)
-    {
-      foreach (var set in joinedRooms)
-      {
-        if (set.Contains(room) && set.Contains(other))
-          return true;
-      }
+  }
 
-      return false;
+  static void JoinDistantRooms(Dictionary<int, RLRoom> rooms, Map map, List<HashSet<int>> joinedRooms, HashSet<int> usedCells, Rng rng)
+  {
+    List<int> roomIds = [.. usedCells];
+    roomIds.Shuffle(rng);
+
+    while (joinedRooms.Count > 1 && roomIds.Count > 0)
+    {
+      int roomId = roomIds[0];
+      roomIds.RemoveAt(0);
+
+      int r = roomId / 4;
+      int c = roomId % 4;
+      bool joined = false;
+      foreach ((int dr, int dc) in DirsToSearch(roomId))
+      {
+        int sr = r + dr;
+        int sc = c + dc;
+        while (sr >= 0 && sr < 4 && sc >= 0 && sc < 4)
+        {
+          int otherId = sr * 4 + sc;
+
+          // Stop looking if we hit an adjacent room
+          if (AlreadyJoined(roomId, otherId, joinedRooms))
+            break;
+
+          if (usedCells.Contains(otherId))
+          {
+            DrawHallway(rooms, map, roomId, otherId);
+
+            // Merge the sets
+            var roomSet = joinedRooms.Where(s => s.Contains(roomId)).First();
+            var adjSet = joinedRooms.Where(s => s.Contains(otherId)).First();
+            joinedRooms.Remove(roomSet);
+            joinedRooms.Remove(adjSet);
+            HashSet<int> unioned = [.. roomSet.Union(adjSet)];
+            joinedRooms.Add(unioned);
+
+            joined = true;
+
+            break;
+          }
+
+          if (joined)
+            break;
+
+          sr += dr;
+          sc += dc;
+        }
+      }
     }
+
+    static List<(int, int)> DirsToSearch(int roomId) => roomId switch
+    {
+      0 => [(1, 0), (0, 1)],
+      1 or 2 => [(1, 0), (0, -1), (0, 1)],
+      3 => [(1, 0), (0, -1)],
+      4 => [(1, 0), (-1, 0), (0, 1)],
+      5 or 6 => [(1, 0), (-1, 0), (0, 1), (0, -1)],
+      7 => [(1, 0), (-1, 0), (0, -1)],
+      8 => [(-1, 0), (0, 1)],
+      9 or 10 => [(-1, 0), (0, -1), (0, 1)],
+      _ => [(-1, 0), (0, -1)]
+    };
+  }
+
+  static bool AlreadyJoined(int room, int other, List<HashSet<int>> joinedRooms)
+  {
+    foreach (var set in joinedRooms)
+    {
+      if (set.Contains(room) && set.Contains(other))
+        return true;
+    }
+
+    return false;
   }
 
   static readonly int[] roomWidths = [3, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 15];

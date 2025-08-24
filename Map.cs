@@ -872,7 +872,7 @@ class Map : ICloneable
           TileType.PermWall => '*',
           TileType.DungeonWall => '#',
           TileType.DungeonFloor => '.',
-          TileType.Sand => '.',
+          TileType.Sand => ' ',
           TileType.ClosedDoor or TileType.LockedDoor => '+',
           TileType.Mountain or TileType.SnowPeak => '^',
           TileType.Grass => ',',
