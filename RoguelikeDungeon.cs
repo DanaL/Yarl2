@@ -57,11 +57,16 @@ class RLLevelMaker
       rooms.Add(room.Cell, room);
     }
    
-    map.Dump();
-
     JoinRooms(rooms, map, usedCells, rng);
 
-    map.Dump();
+    for (int r = 0; r < HEIGHT; r++)
+    {
+      for (int c = 0; c < WIDTH; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.Sand)
+          map.SetTile(r, c, TileFactory.Get(TileType.DungeonWall));
+      }
+    }
 
     return map;
   }
@@ -139,8 +144,6 @@ class RLLevelMaker
 
     if (joinedRooms.Count > 1)
     {
-      map.Dump();
-      // We still need to join more rooms 
       JoinDistantRooms(rooms, map, joinedRooms, usedCells, rng);
     }
 
@@ -381,6 +384,35 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["creeping coins"]);
     dungeon.MonsterDecks.Add(deck);
+
+    // FOr rogue-esque levels, the stairs can go anywhere. Ie., the dungeon
+    // levels don't stack neatly like in my other dungeon types. So I'm not
+    // going to use the DungeonBuilder class's SetStairs method()
+    Loc prevLoc = new(0, 0, entranceRow, entranceCol);
+    List<Map> levels = [];
+    Portal? prevDownstairs = null;
+    for (int j = 0; j < rng.Next(5, 8); j++)
+    {
+      Map map = RLLevelMaker.MakeLevel(rng);
+
+      List<(int, int)> floors = map.SqsOfType(TileType.DungeonFloor);
+      Upstairs  upstairs = new("") { Destination = prevLoc };
+      int i = rng.Next(floors.Count);
+      (int ur, int uc) = floors[i];
+      map.SetTile(ur, uc, upstairs);
+      floors.RemoveAt(i);
+
+      if (prevDownstairs is not null)
+        prevDownstairs.Destination = new(DungeonId, j, ur, uc);
+
+      Downstairs downstairs = new("");
+      (int dr, int dc) = floors[rng.Next(floors.Count)];
+      map.SetTile(dr, dc, downstairs);
+      prevLoc = new(DungeonId, j, dr, dc);
+      prevDownstairs = downstairs;
+      
+      levels.Add(map);
+    }
 
     return (dungeon, Loc.Nowhere);
   }
