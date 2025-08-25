@@ -388,32 +388,39 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     // FOr rogue-esque levels, the stairs can go anywhere. Ie., the dungeon
     // levels don't stack neatly like in my other dungeon types. So I'm not
     // going to use the DungeonBuilder class's SetStairs method()
+    Loc entranceStairs = Loc.Nowhere;
     Loc prevLoc = new(0, 0, entranceRow, entranceCol);
-    List<Map> levels = [];
     Portal? prevDownstairs = null;
-    for (int j = 0; j < rng.Next(5, 8); j++)
+    for (int lvl = 0; lvl < rng.Next(5, 8); lvl++)
     {
       Map map = RLLevelMaker.MakeLevel(rng);
 
       List<(int, int)> floors = map.SqsOfType(TileType.DungeonFloor);
-      Upstairs  upstairs = new("") { Destination = prevLoc };
+      Upstairs upstairs = new("") { Destination = prevLoc };
       int i = rng.Next(floors.Count);
       (int ur, int uc) = floors[i];
       map.SetTile(ur, uc, upstairs);
       floors.RemoveAt(i);
 
       if (prevDownstairs is not null)
-        prevDownstairs.Destination = new(DungeonId, j, ur, uc);
+      {
+        prevDownstairs.Destination = new(DungeonId, lvl, ur, uc);
+      }
+
+      if (lvl == 0)
+      {
+        entranceStairs = new(DungeonId, 0, ur, uc);
+      }
 
       Downstairs downstairs = new("");
       (int dr, int dc) = floors[rng.Next(floors.Count)];
       map.SetTile(dr, dc, downstairs);
-      prevLoc = new(DungeonId, j, dr, dc);
+      prevLoc = new(DungeonId, lvl, dr, dc);
       prevDownstairs = downstairs;
-      
-      levels.Add(map);
+
+      dungeon.AddMap(map);
     }
 
-    return (dungeon, Loc.Nowhere);
+    return (dungeon, entranceStairs);
   }
 }

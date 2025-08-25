@@ -629,7 +629,7 @@ internal class Wilderness(Rng rng, int length)
       valley = [.. valleys[rng.Next(valleys.Count)]];
     }
     (int sr, int sc) = valley[rng.Next(valley.Count)];
-    map.SetTile(sr, sc, TileFactory.Get(TileType.RedTree));
+    factDb.Add(new LocationFact() { Desc = "RLEntrance", Loc = new(0, 0, sr, sc) });
 
     Dictionary<TileType, int> costs = [];
     costs.Add(TileType.Grass, 2);

@@ -560,6 +560,17 @@ class CampaignCreator(UserInterface ui)
         
         HashSet<(int, int)>[] smallRegions = [.. regions.Values.Where(r => r.Count <= 30)];
         Wilderness.CarveBurriedValley(wildernessMap, smallRegions, town, objDb, factDb, rng);
+        if (factDb.FactCheck("RLEntrance") is LocationFact rle)
+        {
+          RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
+          (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, rng);
+          Downstairs rlEntrance = new("") { Destination = stairsLoc };
+          wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
+          campaign.AddDungeon(rld);
+          
+          // It would be a redo-the-wilderness if we couldn't make the valley/
+          // find a place for the entrance
+        }
 
         Wilderness.PlaceStoneRing(wildernessMap, town, objDb, factDb, rng);
 
