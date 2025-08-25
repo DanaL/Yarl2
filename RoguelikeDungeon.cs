@@ -391,7 +391,8 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     Loc entranceStairs = Loc.Nowhere;
     Loc prevLoc = new(0, 0, entranceRow, entranceCol);
     Portal? prevDownstairs = null;
-    for (int lvl = 0; lvl < rng.Next(5, 8); lvl++)
+    int maxLevels = rng.Next(5, 8);
+    for (int lvl = 0; lvl < maxLevels; lvl++)
     {
       Map map = RLLevelMaker.MakeLevel(rng);
 
@@ -412,11 +413,14 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
         entranceStairs = new(DungeonId, 0, ur, uc);
       }
 
-      Downstairs downstairs = new("");
-      (int dr, int dc) = floors[rng.Next(floors.Count)];
-      map.SetTile(dr, dc, downstairs);
-      prevLoc = new(DungeonId, lvl, dr, dc);
-      prevDownstairs = downstairs;
+      if (lvl < maxLevels - 1)
+      {
+        Downstairs downstairs = new("");
+        (int dr, int dc) = floors[rng.Next(floors.Count)];
+        map.SetTile(dr, dc, downstairs);
+        prevLoc = new(DungeonId, lvl, dr, dc);
+        prevDownstairs = downstairs;
+      }
 
       dungeon.AddMap(map);
     }
