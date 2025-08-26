@@ -869,7 +869,7 @@ class Map : ICloneable
         char ch = Tiles[row * Width + col].Type switch
         {
           TileType.WorldBorder => ' ',
-          TileType.PermWall => '*',
+          TileType.PermWall => '#',
           TileType.DungeonWall => '#',
           TileType.DungeonFloor => '.',
           TileType.Sand => ' ',
@@ -1001,7 +1001,7 @@ class CACave
       }
     }
 
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 5; j++)
     {
       template = Iteration(template, height, width);
     }
