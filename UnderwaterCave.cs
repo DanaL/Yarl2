@@ -19,7 +19,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
   public Dungeon Generate(int entranceRow, int entranceCol, Rng rng)
   {
-    Dungeon cave = new(DungeonId, "A mooist, clammy cave. From the distance comes the sound of dripping water.", true);
+    Dungeon cave = new(DungeonId, "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
 
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
