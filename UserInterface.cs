@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Diagnostics;
-
 using System.Text;
 
 namespace Yarl2;
@@ -350,30 +348,31 @@ abstract class UserInterface
   void WriteCommandCheatSheet()
   {
     List<(Colour, string)> w;
-    WriteLine("Commands:", ScreenHeight - 5, 0, ScreenWidth, Colours.WHITE);
+    WriteLine("Commands:", ScreenHeight - 6, 0, ScreenWidth, Colours.WHITE);
     w = [(Colours.LIGHT_BLUE, " a"), (Colours.LIGHT_GREY, ": use item  "), (Colours.LIGHT_BLUE, "c"), (Colours.LIGHT_GREY, ": close door  "),
       (Colours.LIGHT_BLUE, "C"), (Colours.LIGHT_GREY, ": chat  "), (Colours.LIGHT_BLUE, "d"), (Colours.LIGHT_GREY, ": drop item  "),
       (Colours.LIGHT_BLUE, "e"), (Colours.LIGHT_GREY, ": equip/unequip item")];
     //s = "a - Use item  c - close door  C - chat  d - drop item  e - equip/unequip item"; 
-    WriteText(w, ScreenHeight - 4, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
 
     w = [(Colours.LIGHT_BLUE, " f"), (Colours.LIGHT_GREY, ": fire bow  "), (Colours.LIGHT_BLUE, "F"), (Colours.LIGHT_GREY, ": bash door  "),
       (Colours.LIGHT_BLUE, "i"), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, "M"), (Colours.LIGHT_GREY, ": view map  "),
       (Colours.LIGHT_BLUE, "o"), (Colours.LIGHT_GREY, ": open door  ")
     ];
-    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 4, 0, ScreenWidth);
 
     w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit "),
       (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine "),
       (Colours.LIGHT_BLUE, "z"), (Colours.LIGHT_GREY, ": cast spell "),
       (Colours.LIGHT_BLUE, ","), (Colours.LIGHT_GREY, ": pickup item")
     ];
-    WriteText(w, ScreenHeight - 2, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
 
     w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
-      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs  "),
-      (Colours.LIGHT_BLUE, "*"), (Colours.LIGHT_GREY, ": message history  "),
-      (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];   
+      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")];   
+    WriteText(w, ScreenHeight - 2, 0, ScreenHeight);
+
+    w = [(Colours.LIGHT_BLUE, " *"), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];
     WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
   } 
 

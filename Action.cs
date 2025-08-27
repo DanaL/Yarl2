@@ -9,6 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 class ActionResult
@@ -3238,6 +3241,61 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
   }
 
   public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
+}
+
+class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
+{
+  bool Up { get; set; } = up;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    int nextLevelNum = GameState!.CurrLevel;
+    if (GameState!.CurrentDungeon.Descending && Up)
+      nextLevelNum -= 1;
+    else if (GameState.CurrentDungeon.Descending && !Up)
+      nextLevelNum += 1;
+    else if (!GameState.CurrentDungeon.Descending && Up)
+      nextLevelNum += 1;
+    else
+      nextLevelNum -= 1;
+
+    if (Up && (nextLevelNum < 0 || nextLevelNum == GameState.CurrentDungeon.LevelMaps.Count))
+    {
+      GameState!.UIRef().AlertPlayer("You cannot swim any further upward here.");
+
+      return 0.0;
+    }
+    else if (!Up && (nextLevelNum < 0 || nextLevelNum == GameState.CurrentDungeon.LevelMaps.Count))
+    {
+      GameState!.UIRef().AlertPlayer("You cannot swim any deeper here.");
+
+      return 0.0;
+    }
+
+    Map nextLevel = GameState.CurrentDungeon.LevelMaps[nextLevelNum];
+    Loc nextLoc = GameState.Player.Loc with { Level = nextLevelNum };
+    Tile nextTile = nextLevel.TileAt(nextLoc.Row, nextLoc.Col);
+    if (!nextLevel.TileAt(nextLoc.Row, nextLoc.Col).Passable() && nextTile.Type != TileType.Underwater)
+    {
+      string txt = Up ? "further upward" : "deeper";
+      GameState.UIRef().AlertPlayer($"You cannot swim {txt} here.");
+
+      return 0.0;
+    }
+
+    if (Up)
+      GameState.UIRef().AlertPlayer("You swim upwards.");
+    else
+      GameState.UIRef().AlertPlayer("You swim into the depths.");
+
+    GameState.ActorEntersLevel(GameState.Player, nextLoc.DungeonID, nextLoc.Level);
+    GameState.ResolveActorMove(GameState.Player, GameState.Player.Loc, nextLoc);
+    GameState.FlushPerformers();
+
+    return 1.0;
+  }
 }
 
 class CastHealMonster(GameState gs, Actor actor, Trait src) : Action(gs, actor)

@@ -547,7 +547,10 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == '>')
     {
-      GS.Player.QueueAction(new DownstairsAction(GS));
+      Action action = GS.CurrentMap.Submerged || GS.TileAt(GS.Player.Loc).Type == TileType.Lake
+        ? new SwimAction(GS, GS.Player, false)
+        : new DownstairsAction(GS);
+      GS.Player.QueueAction(action);
     }
     else if (ch == '<')
     {

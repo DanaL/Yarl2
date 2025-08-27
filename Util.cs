@@ -694,6 +694,7 @@ class Util
     TileType.IllusoryWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.Lake => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, false),
     TileType.FrozenLake => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
+    TileType.Underwater => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 

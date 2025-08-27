@@ -26,7 +26,8 @@ enum TileType
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
   BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, Shortcut, 
   ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
-  HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall
+  HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
+  Underwater
 }
 
 interface ITriggerable
@@ -204,6 +205,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Crops => "crops",
     TileType.Lake => "water",
     TileType.FrozenLake => "ice",
+    TileType.Underwater => "water",
     _ => "unknown"
   };
 
@@ -216,6 +218,7 @@ abstract class Tile(TileType type) : IZLevel
       case TileType.Water:
       case TileType.DeepWater:
       case TileType.Lake:
+      case TileType.Underwater:
         flags.Add(DamageType.Wet);
         break;
     }
@@ -623,6 +626,7 @@ class TileFactory
   static readonly Tile IllusoryWall = new BasicTile(TileType.IllusoryWall, true, true, true);
   static readonly Tile Lake = new BasicTile(TileType.Lake, false, false, true);
   static readonly Tile FrozenLake = new BasicTile(TileType.FrozenLake, true, false, true);
+  static readonly Tile Underwater = new BasicTile(TileType.Underwater, false, false, false);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -688,6 +692,7 @@ class TileFactory
     TileType.IllusoryWall => IllusoryWall,
     TileType.Lake => Lake,
     TileType.FrozenLake => FrozenLake,
+    TileType.Underwater => Underwater,
     _ => Unknown
   };
 }
@@ -701,6 +706,7 @@ class Map : ICloneable
   public List<string> Alerts = [];
 
   public bool DiggableFloor { get; set; } = true;
+  public bool Submerged { get; set; } = false;
 
   public Map(int width, int height)
   {
@@ -956,9 +962,12 @@ class Map : ICloneable
 
   public object Clone()
   {
-    var temp = new Map(Width, Height);
+    Map temp = new(Width, Height);
     if (Tiles is not null)
       temp.Tiles = (Tile[])Tiles.Clone();
+
+    temp.DiggableFloor = DiggableFloor;
+    temp.Submerged = Submerged;
 
     return temp;
   }

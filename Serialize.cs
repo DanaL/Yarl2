@@ -420,6 +420,7 @@ internal class MapSaver
   [JsonInclude]
   public List<string> Alerts { get; set; } = [];
   public bool DiggableFloor { get; set; }
+  public bool Submerged { get; set; }
 
   public static MapSaver Shrink(Map map)
   {  
@@ -429,7 +430,8 @@ internal class MapSaver
       Width = map.Width,
       Tiles = new int[map.Tiles.Length],
       SpecialTiles = [],
-      DiggableFloor = map.DiggableFloor
+      DiggableFloor = map.DiggableFloor,
+      Submerged = map.Submerged
     };
 
     for (int j = 0; j < map.Tiles.Length; j++)
@@ -589,7 +591,8 @@ internal class MapSaver
   {
     Map map = new(sm.Width, sm.Height)
     {
-      DiggableFloor = sm.DiggableFloor
+      DiggableFloor = sm.DiggableFloor,
+      Submerged = sm.Submerged
     };
 
     if (sm.Tiles is null || sm.SpecialTiles is null)

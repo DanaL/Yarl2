@@ -17,33 +17,35 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   int Width { get; set; } = width + 2;
   int DungeonId { get; set; } = dungeonId;
 
-  public Dungeon Generate(int entranceRow, int entranceCol, Rng rng)
+  Map MidLevel(Rng rng)
   {
-    Dungeon cave = new(DungeonId, "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
+    Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
+    bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
+    for (int r = 0; r < Height - 2; r++)
+    {
+      for (int c = 0; c < Width - 2; c++)
+      {
+        TileType tile = floors[r, c] ? TileType.Underwater : TileType.DungeonWall;
+        map.SetTile(r + 1, c + 1, TileFactory.Get(tile));
+      }
+    }
 
-    MonsterDeck deck = new();
-    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
-    cave.MonsterDecks.Add(deck);
+    map.Dump();
 
+    return map;
+  }
+
+  Map TopLevel(int entranceRow, int entranceCol, Rng rng)
+  {
     Map topLevel = new(Width, Height, TileType.PermWall);
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
     for (int r = 0; r < Height - 2; r++)
     {
       for (int c = 0; c < Width - 2; c++)
       {
-        TileType tile = TileType.DungeonWall;
-        if (floors[r, c])
-        {
-          tile = TileType.DungeonFloor;
-        }
+        TileType tile = floors[r, c] ? TileType.Lake : TileType.DungeonWall;
         topLevel.SetTile(r + 1, c + 1, TileFactory.Get(tile));
       }
-    }
-    
-    List<(int, int)> surface = topLevel.SqsOfType(TileType.DungeonFloor);
-    foreach (var sq in surface)
-    {
-      topLevel.SetTile(sq, TileFactory.Get(TileType.Lake));
     }
 
     // Make an island somewhere in the cave and turn the rest of the squares
@@ -72,8 +74,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     }
 
     List<Loc> floorLocs = [];
-    surface.Shuffle(rng);
-    foreach ((int Row, int Col) sq in surface)
+    foreach ((int Row, int Col) sq in topLevel.SqsOfType(TileType.Lake))
     {
       if (IslandFits(sq.Row, sq.Col, island))
       {
@@ -92,17 +93,13 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       }
     }
 
-    cave.AddMap(topLevel);
-
-    topLevel.Dump();
-
     Loc exit = floorLocs[rng.Next(floorLocs.Count)];
     ExitLoc = (exit.Row, exit.Col);
 
     Upstairs stairs = new("") { Destination = new(0, 0, entranceRow, entranceCol) };
     topLevel.SetTile(exit.Row, exit.Col, stairs);
 
-    return cave;
+    return topLevel;
 
     bool IslandFits(int cr, int cc, bool[,] island)
     {
@@ -119,5 +116,24 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
       return true;
     }
+  }
+
+  public Dungeon Generate(int entranceRow, int entranceCol, Rng rng)
+  {
+    Dungeon cave = new(DungeonId, "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
+
+    MonsterDeck deck = new();
+    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
+    cave.MonsterDecks.Add(deck);
+       
+    Map topLevel = TopLevel(entranceRow, entranceCol, rng);
+    cave.AddMap(topLevel);
+
+    Map midLevel = MidLevel(rng);
+    cave.AddMap(midLevel);
+
+    return cave;
+
+    
   }
 }

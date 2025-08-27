@@ -1353,13 +1353,15 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       ActorFallsIntoWater(actor, dest);
     }
+    else if (map.Submerged)
+    {
+      string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
+      UI.AlertPlayer(msg);
+    }
     else if (tile.Type == TileType.Lake && !(flying || waterWalking))
     {
-      string invMsgs = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
-      // if (invMsgs.Length > 0)
-      // {
-      //   messages.Add(invMsgs);
-      // }
+      string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
+      UI.AlertPlayer(msg);
     }
   }
 
