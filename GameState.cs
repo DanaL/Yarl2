@@ -575,7 +575,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (shores.Count > 0)
     {
-      var candidates = shores.ToList();
+      List<Loc> candidates = [.. shores];
       var destination = candidates[Rng.Next(candidates.Count)];
       ResolveActorMove(actor, actor.Loc, destination);
       actor.Loc = destination;
@@ -1347,13 +1347,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     // seperate moethods, or actually pass the object in
     if (!flying)
     {
-      string s = ThingTouchesFloor(dest); UI.AlertPlayer(s);
+      string s = ThingTouchesFloor(dest);
+      UI.AlertPlayer(s);
     }
-    
+
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);
-    }      
+    }
     else if (tile.Type == TileType.Chasm && !flying)
     {
       Loc landingSpot = dest with { Level = dest.Level + 1 };
@@ -1362,6 +1363,14 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     else if (tile.Type == TileType.DeepWater && !(flying || waterWalking))
     {
       ActorFallsIntoWater(actor, dest);
+    }
+    else if (tile.Type == TileType.Lake && !(flying || waterWalking))
+    {
+      string invMsgs = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
+      // if (invMsgs.Length > 0)
+      // {
+      //   messages.Add(invMsgs);
+      // }
     }
   }
 

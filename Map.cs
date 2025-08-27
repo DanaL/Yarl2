@@ -16,7 +16,7 @@ enum TileType
   Unknown, WorldBorder, PermWall, DungeonWall, DungeonFloor, StoneFloor,
   StoneWall, ClosedDoor, OpenDoor, LockedDoor, BrokenDoor, HWindow, VWindow,
   DeepWater, Water, FrozenDeepWater, FrozenWater, Sand, Grass, Mountain,
-  GreenTree, OrangeTree, RedTree, YellowTree, Conifer,
+  GreenTree, OrangeTree, RedTree, YellowTree, Conifer, Lake, FrozenLake,
   SnowPeak, Portal, Upstairs, Downstairs, Cloud, WoodWall, WoodFloor, Forge,
   Dirt, StoneRoad, Well, Bridge, WoodBridge, Pool, FrozenPool,
   Landmark, Chasm, CharredGrass, CharredStump, Portcullis, OpenPortcullis,
@@ -202,6 +202,8 @@ abstract class Tile(TileType type) : IZLevel
     TileType.RevealedBridgeCollapseTrap => "bridge collapse trigger",
     TileType.Lever => "a lever",
     TileType.Crops => "crops",
+    TileType.Lake => "water",
+    TileType.FrozenLake => "ice",
     _ => "unknown"
   };
 
@@ -213,6 +215,7 @@ abstract class Tile(TileType type) : IZLevel
     {
       case TileType.Water:
       case TileType.DeepWater:
+      case TileType.Lake:
         flags.Add(DamageType.Wet);
         break;
     }
@@ -618,6 +621,8 @@ class TileFactory
   static readonly Tile CornerFence = new BasicTile(TileType.CornerFence, false, false, true);
   static readonly Tile Crops = new BasicTile(TileType.Crops, true, false, true);
   static readonly Tile IllusoryWall = new BasicTile(TileType.IllusoryWall, true, true, true);
+  static readonly Tile Lake = new BasicTile(TileType.Lake, false, false, true);
+  static readonly Tile FrozenLake = new BasicTile(TileType.FrozenLake, true, false, true);
 
   public static Tile Get(TileType type) => type switch
   {
@@ -681,6 +686,8 @@ class TileFactory
     TileType.CornerFence => CornerFence,
     TileType.Crops => Crops,
     TileType.IllusoryWall => IllusoryWall,
+    TileType.Lake => Lake,
+    TileType.FrozenLake => FrozenLake,
     _ => Unknown
   };
 }

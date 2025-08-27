@@ -43,7 +43,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     List<(int, int)> surface = topLevel.SqsOfType(TileType.DungeonFloor);
     foreach (var sq in surface)
     {
-      topLevel.SetTile(sq, TileFactory.Get(TileType.DeepWater));
+      topLevel.SetTile(sq, TileFactory.Get(TileType.Lake));
     }
 
     // Make an island somewhere in the cave and turn the rest of the squares
@@ -112,7 +112,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
         {
           if (!topLevel.InBounds(cr + r, cc + c))
             return false;
-          if (island[r + 2, c + 2] && topLevel.TileAt(cr + r, cc + c).Type != TileType.DeepWater)
+          if (island[r + 2, c + 2] && topLevel.TileAt(cr + r, cc + c).Type != TileType.Lake)
             return false;
         }
       }

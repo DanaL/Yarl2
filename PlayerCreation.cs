@@ -279,7 +279,7 @@ class PlayerCreator
     };
     player.Stats = RollStats(player.Lineage, player.Background, rng);
     player.Stats[Attribute.MainQuestState] = new Stat(0);
-
+    player.Traits.Add(new SwimmerTrait());
     player.Inventory = new Inventory(player.ID, objDb);
 
     objDb.Add(player);

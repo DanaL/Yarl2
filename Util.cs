@@ -692,6 +692,8 @@ class Util
       ((Lever)tile).On ? new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true)
                        : new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.IllusoryWall => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+    TileType.Lake => new Glyph('}', Colours.BLUE, Colours.DARK_BLUE, Colours.BLACK, false),
+    TileType.FrozenLake => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 

@@ -20,28 +20,39 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
   
   public static bool CanMoveTo(Actor actor, Map map, Loc loc)
   {
-    static bool CanFly(Actor actor)
+    bool canFly = false;
+    bool canSwim = false;
+    bool waterWalking = false;
+    bool confused = false;
+    bool tipsy = false;
+
+    foreach (Trait t in actor.Traits)
     {
-      return actor.HasActiveTrait<FlyingTrait>() ||
-                actor.HasActiveTrait<FloatingTrait>();
+      if (t is FlyingTrait ft && ft.Active)
+        canFly = true;
+      else if (t is FloatingTrait flt && flt.Active)
+        canFly = true;
+      else if (t is SwimmerTrait)
+        canSwim = true;
+      else if (t is WaterWalkingTrait)
+        waterWalking = true;
+      else if (t is TipsyTrait)
+        tipsy = true;
+      else if (t is ConfusedTrait)
+        confused = true;
     }
 
-    var tile = map.TileAt(loc.Row, loc.Col);
+    Tile tile = map.TileAt(loc.Row, loc.Col);
     if (tile.Passable())
       return true;
-    else if (CanFly(actor) && tile.PassableByFlight())
+    else if (canFly && tile.PassableByFlight())
+      return true;
+    else if (canSwim && tile.Type == TileType.Lake)
       return true;
     else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
     {
-      foreach (Trait t in actor.Traits)
-      {
-        if (t is WaterWalkingTrait)
-          return true;
-        if (t is ConfusedTrait)
-          return true;
-        if (t is TipsyTrait)
-          return true;
-      }
+      if (waterWalking || confused || tipsy)
+        return true;
     }
 
     return false;

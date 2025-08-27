@@ -1129,6 +1129,11 @@ class RustedTrait : Trait
   public override string AsText() => $"Rusted#{(int)Amount}";
 }
 
+class SwimmerTrait : Trait
+{
+  public override string AsText() => "Swimmer";  
+}
+
 class SwordTrait : Trait
 {
   public override string AsText() => "Sword";
@@ -3786,6 +3791,7 @@ class TraitFactory
         Origin = Loc.FromStr(pieces[3])
       }
     },
+    { "Swimmer", (pieces, gameObj) => new SwimmerTrait() },
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
