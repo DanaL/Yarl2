@@ -30,7 +30,29 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       }
     }
 
-    map.Dump();
+    return map;
+  }
+
+  Map BottomLevel(Rng rng)
+  {
+    Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
+    bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
+    for (int r = 0; r < Height - 2; r++)
+    {
+      for (int c = 0; c < Width - 2; c++)
+      {
+        TileType tile = floors[r, c] ? TileType.DungeonFloor : TileType.DungeonWall;
+        map.SetTile(r + 1, c + 1, TileFactory.Get(tile));
+      }
+    }
+
+    List<(int, int)> floorSqs = map.SqsOfType(TileType.DungeonFloor);
+    floorSqs.Shuffle(rng);
+    for (int j = 0; j < floorSqs.Count / 10; j++)
+    {
+      map.SetTile(floorSqs[0], TileFactory.Get(TileType.Kelp));
+      floorSqs.RemoveAt(0);
+    }
 
     return map;
   }
@@ -126,11 +148,9 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     cave.MonsterDecks.Add(deck);
        
-    Map topLevel = TopLevel(entranceRow, entranceCol, rng);
-    cave.AddMap(topLevel);
-
-    Map midLevel = MidLevel(rng);
-    cave.AddMap(midLevel);
+    cave.AddMap(TopLevel(entranceRow, entranceCol, rng));
+    cave.AddMap(MidLevel(rng));
+    cave.AddMap(BottomLevel(rng));
 
     return cave;
 

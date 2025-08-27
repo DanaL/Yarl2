@@ -627,6 +627,7 @@ class Util
     TileType.Sand => new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
     TileType.Grass => new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
     TileType.Crops => new Glyph('γ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
+    TileType.Kelp => new Glyph('γ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
     TileType.GreenTree => new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
     TileType.YellowTree => new Glyph('ϙ', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
     TileType.RedTree => new Glyph('ϙ', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),
