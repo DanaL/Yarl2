@@ -382,6 +382,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     var tile = TileAt(loc);
     bool fireStarted = false;
 
+    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+
     switch (damageType)
     {
       case DamageType.Fire:
@@ -391,22 +393,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
         if (tile.Type == TileType.FrozenWater)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Water));
-          //UI.AlertPlayer(new Message("The ice melts!", loc), "You hear a hiss!", this);
           UI.AlertPlayer("The ice melts!");
         }
         else if (tile.Type == TileType.FrozenDeepWater)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
           UI.AlertPlayer("The ice melts!");
           BridgeDestroyedOverWater(loc);
         }
         else if (tile.Type == TileType.FrozenPool)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pool));
+          UI.AlertPlayer("The ice melts!");
+        }
+        else if (tile.Type == TileType.FrozenLake)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Lake));
           UI.AlertPlayer("The ice melts!");
         }
 
@@ -425,21 +428,23 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
         if (tile.Type == TileType.Water)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenWater));
           UI.AlertPlayer("The water freezes!");
         }
         else if (tile.Type == TileType.DeepWater)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenDeepWater));
           UI.AlertPlayer("The water freezes!");
         }
         else if (tile.Type == TileType.Pool)
         {
-          var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenPool));
           UI.AlertPlayer("The pool freezes!");
+        }
+        else if (tile.Type == TileType.Lake)
+        {
+          map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.FrozenLake));
+          UI.AlertPlayer("The water freezes!");
         }
         break;
       default:
@@ -451,7 +456,6 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       var fire = ItemFactory.Fire(this);
       ObjDb.SetToLoc(loc, fire);
 
-      var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
       if (tile.Type == TileType.Grass)
       {
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.CharredGrass));

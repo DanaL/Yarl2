@@ -154,8 +154,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     }
 
-    Tile currTile = gs.TileAt(actor.Loc);
-    if (currTile.Type == TileType.FrozenDeepWater || currTile.Type == TileType.FrozenWater)
+    TileType tile = gs.TileAt(actor.Loc).Type;
+    if (tile == TileType.FrozenDeepWater || tile == TileType.FrozenWater || tile == TileType.FrozenLake)
     {
       int slipDC = actor.HasTrait<TipsyTrait>() ? 15 : 11;
       // For slippery tiles, the actor needs to succeed on a dex check before moving, unless 
@@ -171,6 +171,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       else
       {
         ui.AlertPlayer(MsgFactory.SlipOnIceMessage(actor, actor.Loc, gs));
+        return true;
       }
     }
 
