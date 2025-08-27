@@ -67,22 +67,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (dungeon == 1 && actor is Player)
     {
       int maxDepth = Player.Stats[Attribute.Depth].Max;
-
-      // When a player enters a level they've never been to, 
-      // they regard 1/3 of lost hp
-      if (level + 1 > maxDepth) 
-      {
-        Player.Stats[Attribute.Depth].SetMax(level + 1);
-
-        Stat hpStat = Player.Stats[Attribute.HP];
-        int hpDiff = hpStat.Max - hpStat.Curr;
-        if (hpDiff > 0)
-        {
-          hpDiff /= 3;
-          hpStat.Change(hpDiff > 0 ? hpDiff : 1);
-        }
-      }
-
+            
       // When the player reaches certain details for the first time, raise
       // their nerve.
       // Or maybe I should do it 50/level?
