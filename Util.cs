@@ -65,7 +65,8 @@ class Colours
   public static readonly Colour MYSTIC_AURA = new(40, 254, 253, 50);
   public static readonly Colour RED_AURA = new(208, 28, 31, 75);
   public static readonly Colour BLUE_AURA = new(0, 0, 200, 75);
-
+  public static readonly Colour UNDERWATER = new(0, 118, 190, 50);
+  
   public static string ColourToText(Colour colour)
   {
     if (colour == WHITE) return "white";
@@ -103,6 +104,7 @@ class Colours
     else if (colour == MYSTIC_AURA) return "mysticaura";
     else if (colour == BLUE_AURA) return "blueaura";
     else if (colour == RED_AURA) return "redaura";
+    else if (colour == UNDERWATER) return "underwater";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -144,6 +146,7 @@ class Colours
     "mysticaura" => MYSTIC_AURA,
     "blueaura" => BLUE_AURA,
     "redaura" => RED_AURA,
+    "underwater" => UNDERWATER,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };

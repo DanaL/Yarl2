@@ -1712,7 +1712,13 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
           lightRadius = int.Max(lightRadius, daylight);
         }
-                
+        else if (CurrentMap.Submerged)
+        {
+          lightRadius = 3;
+          fgLightColour = Colours.UNDERWATER;
+          bgLightColour = Colours.UNDERWATER;
+        }
+
         if (lightRadius == -1)
         {
           lightRadius = 1;
