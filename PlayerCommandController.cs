@@ -554,7 +554,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == '<')
     {
-      GS.Player.QueueAction(new UpstairsAction(GS));
+      Action action = GS.CurrentMap.Submerged ? new SwimAction(GS, GS.Player, true) : new UpstairsAction(GS);
+      GS.Player.QueueAction(action);      
     }
     else if (ch == '*')
     {

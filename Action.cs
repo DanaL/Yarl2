@@ -3277,7 +3277,7 @@ class SwimAction(GameState gs, Actor actor, bool up) : Action(gs, actor)
     Map nextLevel = GameState.CurrentDungeon.LevelMaps[nextLevelNum];
     Loc nextLoc = GameState.Player.Loc with { Level = nextLevelNum };
     Tile nextTile = nextLevel.TileAt(nextLoc.Row, nextLoc.Col);
-    if (!nextLevel.TileAt(nextLoc.Row, nextLoc.Col).Passable() && nextTile.Type != TileType.Underwater)
+    if (!nextLevel.TileAt(nextLoc.Row, nextLoc.Col).Passable() && !(nextTile.Type == TileType.Underwater || nextTile.Type == TileType.Lake))
     {
       string txt = Up ? "further upward" : "deeper";
       GameState.UIRef().AlertPlayer($"You cannot swim {txt} here.");
