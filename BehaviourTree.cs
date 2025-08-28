@@ -1049,6 +1049,7 @@ class RandomMove : BehaviourNode
       action.Quip = bark;
 
     mob.ExecuteAction(action);
+
     return PlanStatus.Success;
   }
 
@@ -1085,6 +1086,7 @@ class RandomMove : BehaviourNode
       action.Quip = bark;
 
     mob.ExecuteAction(action);
+
     return PlanStatus.Success;
   }
 

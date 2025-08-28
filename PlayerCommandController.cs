@@ -494,10 +494,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'M')
     {
-      if (GS.InWilderness)
-        ui.AlertPlayer("Not in the wilderness.");
-      else
-        ui.DisplayMapView(GS);
+      ui.DisplayMapView(GS);
     }
     else if (ch == 'o')
     {

@@ -201,6 +201,8 @@ class Constants
   public const char BOTTOM_RIGHT_CORNER = '┙';
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
 
+  public const int WILDERNESS_WIDTH = 129;
+
   public static int MQ_START_OF_GAME = 0;
   public static int MQ_FIRST_QUEST_GIVEN = 1;
   public static int MQ_FIRST_BOSS_BEAT = 2;

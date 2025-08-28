@@ -657,10 +657,10 @@ class MonsterFactory
     var fields = template.Split('|').Select(f => f.Trim()).ToArray();
 
     char ch = fields[0].Length == 0 ?  ' ' : fields[0][0];
-    var glyph = new Glyph(ch, Colours.TextToColour(fields[1]),
-                                Colours.TextToColour(fields[2]), Colours.BLACK, false);
+    Glyph glyph = new(ch, Colours.TextToColour(fields[1]),
+                           Colours.TextToColour(fields[2]), Colours.BLACK, false);
 
-    var m = new Mob()
+    Mob m = new()
     {
       Name = name,
       Glyph = glyph,

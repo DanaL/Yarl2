@@ -440,7 +440,7 @@ class CampaignCreator(UserInterface ui)
     Map wildernessMap;
     Town town;
     int startR, startC;
-    int wildernessWidth = 129;
+    int wildernessWidth = Constants.WILDERNESS_WIDTH;
 
     do
     {
@@ -464,7 +464,7 @@ class CampaignCreator(UserInterface ui)
         if (mountains < 20)
           continue;
 
-        var tb = new TownBuilder();
+        TownBuilder tb = new();
         wildernessMap = tb.DrawnTown(wildernessMap, rng);
         town = tb.Town;
         town.Name = NameGenerator.TownName(rng);

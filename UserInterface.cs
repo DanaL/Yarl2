@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
 using System.Text;
 
 namespace Yarl2;
@@ -47,7 +48,7 @@ abstract class UserInterface
   protected abstract void WriteSq(int row, int col, Sqr sq);
   protected abstract void ClearScreen();
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
-  
+
   protected int FontSize;
   public int PlayerScreenRow { get; protected set; }
   public int PlayerScreenCol { get; protected set; }
@@ -66,7 +67,7 @@ abstract class UserInterface
 
   IPopup? _popup = null;
   IPopup? _confirm = null;
-  
+
   public List<MsgHistory> MessageHistory = [];
   protected readonly int MaxHistory = 50;
   protected bool HistoryUpdated = false;
@@ -168,7 +169,7 @@ abstract class UserInterface
       if (locs.Count > 0)
       {
         var loc = locs[gs.Rng.Next(locs.Count)];
-        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);        
+        gs.ObjDb.ActorMoved(villager, villager.Loc, loc);
       }
     }
 
@@ -182,7 +183,7 @@ abstract class UserInterface
     ClearLongMessage();
 
     var town = gs.Campaign.Town!;
-    
+
     int minRow = int.MaxValue, minCol = int.MaxValue, maxRow = 0, maxCol = 0;
     foreach (var loc in town.TownSquare)
     {
@@ -195,7 +196,7 @@ abstract class UserInterface
       if (loc.Col > maxCol)
         maxCol = loc.Col;
     }
-    
+
     int playerRow = (minRow + maxRow) / 2;
     int playerCol = (minCol + maxCol) / 2;
     var playerLoc = new Loc(0, 0, playerRow, playerCol);
@@ -211,11 +212,11 @@ abstract class UserInterface
       }
     }
 
-    Animation? bark = null;    
+    Animation? bark = null;
     GameEvent e;
     do
     {
-      ClearScreen(); 
+      ClearScreen();
       ClearSqsOnScreen();
 
       int screenR = 6;
@@ -240,7 +241,7 @@ abstract class UserInterface
             var tile = gs.TileAt(new Loc(0, 0, r, c));
             glyph = Util.TileToGlyph(tile);
           }
-        
+
           var sqr = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
           SqsOnScreen[screenR, screenC++] = sqr;
         }
@@ -250,7 +251,7 @@ abstract class UserInterface
 
       if (bark is not null && bark.Expiry > DateTime.UtcNow)
       {
-        bark.Update();        
+        bark.Update();
       }
       else if (villagers.Count > 0)
       {
@@ -274,7 +275,7 @@ abstract class UserInterface
             cheer = "We'll be safe now!";
         }
 
-        bark = new BarkAnimation(gs, 2000, v, cheer);        
+        bark = new BarkAnimation(gs, 2000, v, cheer);
       }
 
       for (int r = 0; r < ViewHeight; r++)
@@ -294,7 +295,7 @@ abstract class UserInterface
       sb.Append(town.Name);
       sb.Append(" and receive the accoldates of the townsfolk.");
 
-      lineNum = WriteParagraph(sb.ToString(), lineNum + 1);    
+      lineNum = WriteParagraph(sb.ToString(), lineNum + 1);
       var para2 = "The darkness has been lifted from the region and the village will soon begin again to prosper. Yet after resting for a time and enjoying the villagers' gratitude and hospitality, the yearning for adventure begins to overtake you.";
       lineNum = WriteParagraph(para2, lineNum + 1);
       var para3 = "You've heard, for instance, tales of a fabled dungeon in whose depths lies the legendary Amulet of Yender...";
@@ -302,7 +303,7 @@ abstract class UserInterface
       WriteParagraph("Press any key to exit.", lineNum + 1);
 
       Blit();
-    
+
       e = PollForEvent();
       Delay();
     }
@@ -342,7 +343,7 @@ abstract class UserInterface
     }
   }
 
-  protected void WritePopUp() =>  _popup?.Draw(this);
+  protected void WritePopUp() => _popup?.Draw(this);
   protected void WriteConfirmation() => _confirm?.Draw(this);
 
   void WriteCommandCheatSheet()
@@ -369,16 +370,16 @@ abstract class UserInterface
     WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
 
     w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
-      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")];   
+      (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")];
     WriteText(w, ScreenHeight - 2, 0, ScreenHeight);
 
     w = [(Colours.LIGHT_BLUE, " *"), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];
     WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
-  } 
+  }
 
   void WriteMessages()
   {
-    Queue<(Colour, string)> buffer = [];    
+    Queue<(Colour, string)> buffer = [];
     int j = 0;
     Colour colour = Colours.WHITE;
     while (j < 5 && j < MessageHistory.Count)
@@ -397,10 +398,10 @@ abstract class UserInterface
             break;
         }
         pieces.Add((colour, s[..c].Trim()));
-        s = s[c..];        
+        s = s[c..];
       }
       pieces.Add((colour, s.Trim()));
-      
+
       pieces.Reverse();
       foreach (var p in pieces)
         buffer.Enqueue(p);
@@ -453,13 +454,13 @@ abstract class UserInterface
       WriteCommandCheatSheet();
       return;
     }
-    else if (CheatSheetMode == CheatSheetMode.Movement) 
+    else if (CheatSheetMode == CheatSheetMode.Movement)
     {
       WriteMovementCheatSheet();
       return;
     }
 
-    if (MessageHistory.Count > 0) 
+    if (MessageHistory.Count > 0)
     {
       WriteMessages();
     }
@@ -478,7 +479,7 @@ abstract class UserInterface
         continue;
       WriteLine(piece.Item2, lineNum, col, piece.Item2.Length, piece.Item1);
       col += piece.Item2.Length;
-    } 
+    }
   }
 
   static int FindSplit(string txt)
@@ -552,7 +553,7 @@ abstract class UserInterface
 
     List<(Colour, string)> zorkmidLine = [(Colours.WHITE, "│  "), (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];
     row = WriteSideBarLine(zorkmidLine, row);
-    
+
     string blank = "│".PadRight(ViewWidth);
     WriteLine(blank, row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
@@ -596,19 +597,19 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("NAUSEOUS");
       }
-      else if (!statuses.Contains("RAGE") && trait is RageTrait rage && rage.Active) 
+      else if (!statuses.Contains("RAGE") && trait is RageTrait rage && rage.Active)
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "RAGE")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("RAGE");
       }
-      else if (!statuses.Contains("CURSED") && trait is CurseTrait) 
+      else if (!statuses.Contains("CURSED") && trait is CurseTrait)
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "CURSED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("CURSED");
       }
-      else if (!statuses.Contains("BERZERK") && trait is BerzerkTrait) 
+      else if (!statuses.Contains("BERZERK") && trait is BerzerkTrait)
       {
         List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "BERZERK")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
@@ -627,7 +628,7 @@ abstract class UserInterface
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("PROTECTION");
       }
-      else if (trait is ResistanceTrait resist) 
+      else if (trait is ResistanceTrait resist)
       {
         List<(Colour, string)> statusLine;
         switch (resist.Type)
@@ -646,7 +647,7 @@ abstract class UserInterface
       }
       else if (trait is StressTrait st)
       {
-        Colour colour = st.Stress switch 
+        Colour colour = st.Stress switch
         {
           StressLevel.Hystrical => Colours.BRIGHT_RED,
           StressLevel.Paranoid => Colours.BRIGHT_RED,
@@ -688,7 +689,7 @@ abstract class UserInterface
       statuses.Add("LIMPING");
     }
     if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
-    {      
+    {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PURPLE, "TELEPATHIC")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("TELEPATHIC");
@@ -739,7 +740,7 @@ abstract class UserInterface
         statuses.Add("WEAKENED");
       }
     }
-    
+
     var tile = gs.TileAt(gs.Player.Loc);
     var glyph = Util.TileToGlyph(tile);
     var tileSq = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
@@ -860,7 +861,7 @@ abstract class UserInterface
     do
     {
       e = PollForEvent();
-    
+
       UpdateDisplay(gs);
       Delay();
     }
@@ -870,7 +871,7 @@ abstract class UserInterface
   // Block until the character hits ESC, space, or enter. (To prevent a user
   // from dismissing popups and such while typing fast)
   public void BlockFoResponse(GameState gs)
-  {    
+  {
     while (true)
     {
       char ch = GetKeyInput();
@@ -880,7 +881,7 @@ abstract class UserInterface
       SetSqsOnScreen(gs);
       UpdateDisplay(gs);
       Delay();
-    }    
+    }
   }
 
   public void BlockingPopup(GameState gs)
@@ -957,9 +958,9 @@ abstract class UserInterface
 
     do
     {
-      _confirm = new Popup(txt, "", ViewHeight / 2 - 2,  ScreenWidth / 2);
+      _confirm = new Popup(txt, "", ViewHeight / 2 - 2, ScreenWidth / 2);
       _popup?.SetDefaultTextColour(Colours.DARK_GREY);
-      
+
       UpdateDisplay(gs);
 
       e = PollForEvent();
@@ -972,7 +973,7 @@ abstract class UserInterface
       {
         throw new QuitGameException();
       }
-      else 
+      else
       {
         ch = e.Value;
       }
@@ -980,7 +981,7 @@ abstract class UserInterface
     while (!(ch == 'y' || ch == 'n'));
 
     _popup?.SetDefaultTextColour(Colours.WHITE);
-    
+
     return ch == 'y';
   }
 
@@ -991,7 +992,7 @@ abstract class UserInterface
 
     do
     {
-      int width = int.Max(prompt.Length + 4, result.Length + 2);    
+      int width = int.Max(prompt.Length + 4, result.Length + 2);
       SetPopup(new Popup($"{prompt}\n{result}", "", -1, -1, width));
       UpdateDisplay(null);
       e = PollForEvent();
@@ -1064,7 +1065,7 @@ abstract class UserInterface
           bgColour = glyph.BG;
           if (bgColour == Colours.BLACK)
             bgColour = lightInfo.BgColour;
-          
+
           alpha = int.Max(15, (int)(bgColour.Alpha * scale));
           bgColour = bgColour with { Alpha = alpha };
 
@@ -1110,7 +1111,7 @@ abstract class UserInterface
     Dungeon dungeon = gs.CurrentDungeon;
     int playerRow = gs.Player.Loc.Row;
     int playerCol = gs.Player.Loc.Col;
-    
+
     int rowOffset = playerRow - PlayerScreenRow;
     int colOffset = playerCol - PlayerScreenCol;
 
@@ -1120,10 +1121,10 @@ abstract class UserInterface
       {
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
-        
+
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
         Sqr sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
-         
+
         SqsOnScreen[r, c] = sqr;
       }
     }
@@ -1172,7 +1173,7 @@ abstract class UserInterface
       SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BG, PlayerGlyph.Ch);
     }
   }
-  
+
   public (int, int) LocToScrLoc(int row, int col, int playerRow, int playerCol)
   {
     int rowOffset = playerRow - PlayerScreenRow;
@@ -1201,26 +1202,25 @@ abstract class UserInterface
     }
   }
 
-  public void DisplayMapView(GameState gs)
+  static Sqr[,] CalcDungeonMap(GameState gs)
   {
-    var dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
-    var remembered = dungeon.RememberedLocs;
+    Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
+    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
 
-    var blank = new Sqr(Colours.BLACK, Colours.BLACK, ' ');
     Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
     for (int r = 0; r < ScreenHeight; r++)
     {
-      for (int c= 0; c < ScreenWidth; c++)
+      for (int c = 0; c < ScreenWidth; c++)
       {
-        var loc = new Loc(gs.CurrDungeonID, gs.CurrLevel, r, c);
-        var sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : blank;
+        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
+        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
 
         // We'll make the stairs more prominent on the map so they stand out 
         // better to the player
         if (sq.Ch == '>' || sq.Ch == '<')
           sq = sq with { Fg = Colours.WHITE };
 
-        sqs[r, c] = sq;                  
+        sqs[r, c] = sq;
       }
     }
 
@@ -1228,11 +1228,142 @@ abstract class UserInterface
     int playerCol = gs.Player.Loc.Col;
     sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
 
+    return sqs;
+  }
+
+  static Sqr[,] CalcWildernessMap(GameState gs)
+  {
+    Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
+    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
+
+    Sqr[,] wilderness = new Sqr[Constants.WILDERNESS_WIDTH / 2, Constants.WILDERNESS_WIDTH / 2];
+    int wr = 0, wc;
+    for (int r = 1; r < Constants.WILDERNESS_WIDTH - 1; r += 2)
+    {
+      wc = 0;
+
+      for (int c = 1; c < Constants.WILDERNESS_WIDTH - 1; c += 2)
+      { 
+        Sqr sq1 = remembered.TryGetValue(new(0, 0, r, c), out var g1) ? new Sqr(g1.Unlit, Colours.BLACK, g1.Ch) : Constants.BLANK_SQ;
+        Sqr sq2 = remembered.TryGetValue(new(0, 0, r, c + 1), out var g2) ? new Sqr(g2.Unlit, Colours.BLACK, g2.Ch) : Constants.BLANK_SQ;
+        Sqr sq3 = remembered.TryGetValue(new(0, 0, r + 1, c), out var g3) ? new Sqr(g3.Unlit, Colours.BLACK, g3.Ch) : Constants.BLANK_SQ;
+        Sqr sq4 = remembered.TryGetValue(new(0, 0, r + 1, c + 1), out var g4) ? new Sqr(g4.Unlit, Colours.BLACK, g4.Ch) : Constants.BLANK_SQ;
+
+        Sqr winner = PickSqr([sq1, sq2, sq3, sq4]);
+        wilderness[wr, wc++] = winner;
+      }
+
+      ++wr;
+    }
+
+    int halfHeight = ScreenHeight / 2;
+    int playerRow = gs.Player.Loc.Row / 2;
+    int startRow = int.Max(0, playerRow - halfHeight);
+    if (ScreenHeight - startRow <= halfHeight)
+      startRow -= halfHeight;
+    
+    int halfWidth = ScreenWidth / 2;
+    int playerCol = gs.Player.Loc.Col / 2;
+    int startCol = int.Max(0, playerCol - halfWidth);
+    if (ScreenWidth - startCol <= halfWidth)
+      startCol -= halfWidth;
+    
+    Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
+    // Initialize with BLANK_SQ
+    for (int r = 0; r < ScreenHeight; r++)
+    {
+      for (int c = 0; c < ScreenWidth; c++)
+      {
+        sqs[r, c] = Constants.BLANK_SQ;
+      }
+    }
+
+    for (int r = startRow; r < startRow + ScreenHeight; r++)
+    {
+      for (int c = startCol; c < startCol + Constants.WILDERNESS_WIDTH / 2 - 1; c++)
+      {
+        sqs[r - startRow, c - startCol] = wilderness[r, c];
+      }
+    }
+    sqs[playerRow, playerCol] = new(Colours.WHITE, Colours.BLACK, '@');
+
+    return sqs;
+
+    static Sqr PickSqr(List<Sqr> sqs)
+    {
+      Dictionary<Sqr, int> counts = [];
+      foreach (Sqr s in sqs)
+      {
+        if (s.Ch == 'Ո' || s.Ch == '>' || s.Ch == '<')
+          return new(Colours.WHITE, Colours.BLACK, s.Ch);
+
+        if (counts.TryGetValue(s, out int value))
+          counts[s] = ++value;
+        else
+          counts[s] = 1;
+      }
+
+      // If one square is most common, select it
+      int count = 0;
+      Sqr? commonSqr = null;
+      bool tie = false;
+      foreach (KeyValuePair<Sqr, int> kvp in counts)
+      {
+        if (kvp.Value > count)
+        {
+          count = kvp.Value;
+          commonSqr = kvp.Key;
+          tie = false;
+        }
+        else if (kvp.Value == count)
+        {
+          tie = true;
+        }
+      }
+
+      if (!tie && commonSqr != null)
+        return commonSqr;
+
+      List<Sqr> popular = [];
+      foreach (KeyValuePair<Sqr, int> kvp in counts)
+      {
+        if (kvp.Value == count)
+          popular.Add(kvp.Key);
+      }
+
+      int topRank = -1;
+      foreach (Sqr s in popular)
+      {
+        int rank = s.Ch switch
+        {
+          '\u039B' => 5,
+          '=' => 4,
+          'ϙ' or '▲' => 3,
+          '}' => 2,
+          '.' => 1,
+          _ => 0
+        };
+
+        if (rank >  topRank)
+        {
+          commonSqr = s;
+          topRank = rank;
+        }
+      }
+
+      return Constants.BLANK_SQ;
+    }
+  }
+
+  public void DisplayMapView(GameState gs)
+  {
+    Sqr[,] sqs = gs.InWilderness ? CalcWildernessMap(gs) : CalcDungeonMap(gs);
+
     GameEvent e;
     do
     {
       e = PollForEvent();
-    
+
       DrawFullScreen(sqs);
       Delay();
     }
@@ -1268,13 +1399,13 @@ abstract class UserInterface
           @"     /                        \|    |       __",
           @"    |       killed by:         |___|       /  \",
           @"    |                          |         |     |",
-          @"    |                          |         |_____|",   
+          @"    |                          |         |_____|",
           @"    |                          |      ___",
           @"    |                          |     /   \",
           @"    |                          |    |     |",
           @"    |                          |    |     |",
           @"    *       *         *        |*  _*__)__|_",
-          @"____)/\_____(\__/____\(/_______\)/_|(/____"   
+          @"____)/\_____(\__/____\(/_______\)/_|(/____"
         ];
 
     string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
@@ -1287,7 +1418,7 @@ abstract class UserInterface
       string s = $@"    |{messages[1].PadLeft((22 + messages[1].Length) / 2),-26}|          |    |";
       text.Insert(8, s);
     }
-   
+
     ClosePopup();
     CheatSheetMode = CheatSheetMode.Messages;
     SqsOnScreen = new Sqr[ScreenHeight, ScreenWidth];
@@ -1301,7 +1432,7 @@ abstract class UserInterface
         SqsOnScreen[r + 1, c + 1] = s;
       }
     }
-    
+
     BlockForInput(gameState);
   }
 
@@ -1315,13 +1446,13 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
-    
+
     _animations.Add(new CloudAnimation(this, gameState));
     //_animations.Add(new RainAnimation(this, gameState));
-    
+
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
-    
+
     while (true)
     {
       var e = PollForEvent();
@@ -1336,7 +1467,7 @@ abstract class UserInterface
         else
           ch = e.Value;
 
-        InputController.Input(ch);        
+        InputController.Input(ch);
       }
 
       try
@@ -1347,7 +1478,7 @@ abstract class UserInterface
           if (actor.Energy >= 1.0)
             gameState.PushPerformer(actor);
         }
-        
+
         WriteAlerts();
       }
       catch (SaveGameException)
@@ -1382,34 +1513,34 @@ abstract class UserInterface
         string s = $"Oh noes you've been killed by {pke.Messages[0]} :(";
         if (gameState.Player.HasTrait<ParalyzedTrait>())
           pke.Messages.Add("while paralyzed");
-        SetPopup(new Popup(s, "", -1, - 1));
+        SetPopup(new Popup(s, "", -1, -1));
         WriteAlerts();
         BlockFoResponse(gameState);
 
-        DrawGravestone(gameState, pke.Messages);        
+        DrawGravestone(gameState, pke.Messages);
         Reset();
         return RunningState.GameOver;
       }
-      catch (VictoryException) 
+      catch (VictoryException)
       {
         Reset();
         return RunningState.GameOver;
       }
 
       TimeSpan elapsed = DateTime.UtcNow - refresh;
-      int totalMs = (int) elapsed.TotalMilliseconds;
+      int totalMs = (int)elapsed.TotalMilliseconds;
       if (totalMs >= 25)
       {
         SetSqsOnScreen(gameState);
-        
+
         foreach (var l in _animations)
           l.Update();
         _animations = [.. _animations.Where(a => a.Expiry > DateTime.UtcNow)];
-        
+
         UpdateDisplay(gameState);
-        
+
         refresh = DateTime.UtcNow;
-      }      
+      }
     }
 
     return RunningState.Quitting;

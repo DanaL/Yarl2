@@ -644,8 +644,8 @@ class TownBuilder
     if (Town.TownSquare.Count == 0)
       return;
 
-    var centre = Town.TownSquare.ToList()[j];
-    var dmap = new DijkstraMap(map, [], 129, 129, true);
+    Loc centre = Town.TownSquare.ToList()[j];
+    DijkstraMap dmap = new(map, [], Constants.WILDERNESS_WIDTH, Constants.WILDERNESS_WIDTH, true);
     dmap.Generate(DijkstraMap.CostWithDoors, (centre.Row, centre.Col), TOWN_WIDTH);
 
     foreach (var doorstep in doors)
