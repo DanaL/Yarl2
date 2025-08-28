@@ -79,6 +79,12 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     return 1;
   }
 
+  public static int CostForSwimming(Tile tile) => tile.Type switch
+  {
+    TileType.Water or TileType.DeepWater or TileType.Underwater or TileType.Lake => 1,
+    _ => int.MaxValue,
+  };
+
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
   // slightly more expensive)
@@ -88,7 +94,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   {
     _dijkstraMap = new int[Height, Width];
     AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
-    
+
     for (int r = 0; r < Height; r++)
     {
       for (int c = 0; c < Width; c++)
@@ -125,7 +131,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
         cost += extraCost;
       if (cost > IMPASSABLE)
         continue;
-      
+
       int cheapestNeighbour = int.MaxValue;
       foreach (var n in calcAdjSqs(sq.Item1, sq.Item2))
       {

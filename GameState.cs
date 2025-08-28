@@ -36,6 +36,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
   DijkstraMap? DMap { get; set; }
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
+  DijkstraMap? DMapSwimming { get; set; }
+
   public DijkstraMap? GetDMap(string map = "")
   {
     if (DMap is null || DMapDoors is null || DMapFlight is null)
@@ -45,6 +47,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       "doors" => DMapDoors,
       "flying" => DMapFlight,
+      "swim" => DMapSwimming,
       _ => DMap
     };
   }
@@ -1197,7 +1200,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
     {
-      extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;      
+      extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
     }
     DMap = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
@@ -1208,6 +1211,9 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     DMapFlight = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
+
+    DMapSwimming = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
+    DMapSwimming.Generate(DijkstraMap.CostForSwimming, (loc.Row, loc.Col), 25);
   }
 
   // At the moment I can't use ResolveActorMove because it calls
