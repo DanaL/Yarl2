@@ -1083,9 +1083,19 @@ abstract class UserInterface
     else if (remembered.TryGetValue(loc, out var glyph))
     {
       if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
+      {
         sqr = Constants.ROOF;
+      }
+      else if (gs.CurrentMap.Submerged)
+      {
+        Colour bg = Colours.UNDERWATER with { Alpha = Colours.UNDERWATER.Alpha - 10 };
+        Colour fg = glyph.Unlit with { Alpha = glyph.Unlit.Alpha / 2 };
+        sqr = new Sqr(fg, bg, glyph.Ch);
+      }
       else
+      {
         sqr = new Sqr(glyph.Unlit, glyph.BG, glyph.Ch);
+      }
     }
     else
     {
@@ -1097,7 +1107,7 @@ abstract class UserInterface
 
   void SetSqsOnScreen(GameState gs)
   {
-    var dungeon = gs.CurrentDungeon;
+    Dungeon dungeon = gs.CurrentDungeon;
     int playerRow = gs.Player.Loc.Row;
     int playerCol = gs.Player.Loc.Col;
     
