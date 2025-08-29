@@ -535,13 +535,11 @@ class CampaignCreator(UserInterface ui)
         
         //InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         //Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
-        UnderwaterCaveDungeon caveBuilder = new(1, 30, 70);
-        Dungeon cave = caveBuilder.Generate(entrance.Item1, entrance.Item2, objDb, rng);
-        campaign.AddDungeon(cave);
+        (int exitRow, int exitCol) = UnderwaterCave.SetupUnderwaterCave(campaign, entrance.Item1, entrance.Item2, objDb, rng);
 
         Portal portal = new("You stand before a looming portal.")
         {
-          Destination = new Loc(1, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2)
+          Destination = new Loc(1, 0, exitRow, exitCol)
         };
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);

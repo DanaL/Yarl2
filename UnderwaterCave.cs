@@ -11,6 +11,40 @@
 
 namespace Yarl2;
 
+class UnderwaterCave
+{
+  public static (int, int) SetupUnderwaterCave(Campaign campaign, int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
+  {
+    UnderwaterCaveDungeon caveBuilder = new(1, 30, 70);
+    Dungeon cave = caveBuilder.Generate(entranceRow, entranceCol, objDb, rng);
+    campaign.AddDungeon(cave);
+
+    int dungeonExitRow = caveBuilder.ExitLoc.Item1;
+    int dungeonExitCol = caveBuilder.ExitLoc.Item2;
+
+    Dungeon temple = new(campaign.Dungeons.Count, "", true);
+    campaign.AddDungeon(temple);
+    Map templeMap = RLLevelMaker.MakeLevel(rng);
+    temple.AddMap(templeMap);
+    List<(int, int)> floors = templeMap.SqsOfType(TileType.DungeonFloor);
+    (int, int) sq = floors[rng.Next(floors.Count)];
+    Loc templeEntrance = new(temple.ID, 0, sq.Item1, sq.Item2);
+
+    Upstairs upstairs = new("") { Destination = templeEntrance };
+
+    Map bottomCave = cave.LevelMaps[cave.LevelMaps.Count - 1];
+    floors = bottomCave.SqsOfType(TileType.DungeonFloor);
+    sq = floors[rng.Next(floors.Count)];
+    Loc caveExit = new(cave.ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
+    Downstairs downstairs = new("") { Destination = caveExit };
+
+    templeMap.SetTile(templeEntrance.Row, templeEntrance.Col, downstairs);
+    bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
+
+    return (dungeonExitRow, dungeonExitCol);
+  }
+}
+
 class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuilder
 {
   int Height { get; set; } = height + 2;
@@ -165,13 +199,13 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     cave.MonsterDecks.Add(deck);
-       
+
     cave.AddMap(TopLevel(entranceRow, entranceCol, objDb, rng));
     cave.AddMap(MidLevel(objDb, rng));
     cave.AddMap(BottomLevel(objDb, rng));
 
     return cave;
 
-    
+
   }
 }
