@@ -692,6 +692,85 @@ class HelpScreen : Inputer
   }
 }
 
+class MapView : Inputer
+{
+  public MapView(GameState gs) : base(gs) => DrawMap();
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC || ch == ' ')
+    {
+      Close();
+      return;
+    }
+  }
+
+  static Sqr[,] CalcWildernessMap(GameState gs)
+  {
+    Dungeon dungeon = gs.Campaign.Dungeons[0];
+    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
+
+    Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
+    for (int r = 0; r < UserInterface.ScreenHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ScreenWidth; c++)
+      {
+        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
+        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
+
+        // We'll make the stairs more prominent on the map so they stand out 
+        // better to the player
+        if (sq.Ch == '>' || sq.Ch == '<' || sq.Ch == 'Ո')
+          sq = sq with { Fg = Colours.WHITE };
+
+        sqs[r, c] = sq;
+      }
+    }
+
+    //int playerRow = gs.Player.Loc.Row;
+    //int playerCol = gs.Player.Loc.Col;
+    //sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+
+    return sqs;
+  }
+
+  static Sqr[,] CalcDungeonMap(GameState gs)
+  {
+    Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
+    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
+
+    Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
+    for (int r = 0; r < UserInterface.ScreenHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ScreenWidth; c++)
+      {
+        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
+        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
+
+        // We'll make the stairs more prominent on the map so they stand out 
+        // better to the player
+        if (sq.Ch == '>' || sq.Ch == '<')
+          sq = sq with { Fg = Colours.WHITE };
+
+        sqs[r, c] = sq;
+      }
+    }
+
+    int playerRow = gs.Player.Loc.Row;
+    int playerCol = gs.Player.Loc.Col;
+    sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+
+    return sqs;
+  }
+
+  void DrawMap()
+  {
+    Sqr[,] sqrs = CalcWildernessMap(GS);
+
+    GS.UIRef().SetPopup(new FullScreenPopup(sqrs));
+  }
+}
+
 class OptionsScreen : Inputer
 {
   int row = 0;

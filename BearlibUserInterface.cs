@@ -134,10 +134,10 @@ internal class BLUserInferface : UserInterface, IDisposable
     Terminal.Print(col, lineNum, message.PadRight(width));
   }
 
-  protected override void ClearScreen() => Terminal.Clear();
+  public override void ClearScreen() => Terminal.Clear();
   protected override void Blit() => Terminal.Refresh();
 
-  protected override void WriteSq(int row, int col, Sqr sq)
+  public override void WriteSq(int row, int col, Sqr sq)
   {
     var (fg, bg, ch) = sq;
     Terminal.BkColor(ToBearLibColour(bg));

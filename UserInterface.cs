@@ -43,10 +43,10 @@ abstract class UserInterface
   public abstract void UpdateDisplay(GameState? gs);
   public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour);
   public abstract void WriteLine(string message, int lineNum, int col, int width, Colour textColour, Colour bgColour);
+  public abstract void WriteSq(int row, int col, Sqr sq);
+  public abstract void ClearScreen();
 
-  protected abstract GameEvent PollForEvent();
-  protected abstract void WriteSq(int row, int col, Sqr sq);
-  protected abstract void ClearScreen();
+  protected abstract GameEvent PollForEvent();  
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
@@ -1190,7 +1190,6 @@ abstract class UserInterface
     return (screenRow + rowOffset, screenCol + colOffset);
   }
 
-
   void ClearZLayer()
   {
     for (int r = 0; r < ViewHeight; r++)
@@ -1200,191 +1199,6 @@ abstract class UserInterface
         ZLayer[r, c] = Constants.BLANK_SQ;
       }
     }
-  }
-
-  static Sqr[,] CalcDungeonMap(GameState gs)
-  {
-    Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
-    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
-
-    Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
-    for (int r = 0; r < ScreenHeight; r++)
-    {
-      for (int c = 0; c < ScreenWidth; c++)
-      {
-        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
-        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
-
-        // We'll make the stairs more prominent on the map so they stand out 
-        // better to the player
-        if (sq.Ch == '>' || sq.Ch == '<')
-          sq = sq with { Fg = Colours.WHITE };
-
-        sqs[r, c] = sq;
-      }
-    }
-
-    int playerRow = gs.Player.Loc.Row;
-    int playerCol = gs.Player.Loc.Col;
-    sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
-
-    return sqs;
-  }
-
-  static Sqr[,] CalcWildernessMap(GameState gs)
-  {
-    Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
-    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
-
-    Sqr[,] wilderness = new Sqr[Constants.WILDERNESS_WIDTH / 2, Constants.WILDERNESS_WIDTH / 2];
-    int wr = 0, wc;
-    for (int r = 1; r < Constants.WILDERNESS_WIDTH - 1; r += 2)
-    {
-      wc = 0;
-
-      for (int c = 1; c < Constants.WILDERNESS_WIDTH - 1; c += 2)
-      { 
-        Sqr sq1 = remembered.TryGetValue(new(0, 0, r, c), out var g1) ? new Sqr(g1.Unlit, Colours.BLACK, g1.Ch) : Constants.BLANK_SQ;
-        Sqr sq2 = remembered.TryGetValue(new(0, 0, r, c + 1), out var g2) ? new Sqr(g2.Unlit, Colours.BLACK, g2.Ch) : Constants.BLANK_SQ;
-        Sqr sq3 = remembered.TryGetValue(new(0, 0, r + 1, c), out var g3) ? new Sqr(g3.Unlit, Colours.BLACK, g3.Ch) : Constants.BLANK_SQ;
-        Sqr sq4 = remembered.TryGetValue(new(0, 0, r + 1, c + 1), out var g4) ? new Sqr(g4.Unlit, Colours.BLACK, g4.Ch) : Constants.BLANK_SQ;
-
-        Sqr winner = PickSqr([sq1, sq2, sq3, sq4]);
-        wilderness[wr, wc++] = winner;
-      }
-
-      ++wr;
-    }
-
-    int halfHeight = ScreenHeight / 2;
-    int playerRow = gs.Player.Loc.Row / 2;
-    int startRow = int.Max(0, playerRow - halfHeight);
-    if (ScreenHeight - startRow <= halfHeight)
-      startRow -= halfHeight;
-    
-    int halfWidth = ScreenWidth / 2;
-    int playerCol = gs.Player.Loc.Col / 2;
-    int startCol = int.Max(0, playerCol - halfWidth);
-    if (ScreenWidth - startCol <= halfWidth)
-      startCol -= halfWidth;
-    
-    Sqr[,] sqs = new Sqr[ScreenHeight, ScreenWidth];
-    // Initialize with BLANK_SQ
-    for (int r = 0; r < ScreenHeight; r++)
-    {
-      for (int c = 0; c < ScreenWidth; c++)
-      {
-        sqs[r, c] = Constants.BLANK_SQ;
-      }
-    }
-
-    for (int r = startRow; r < startRow + ScreenHeight; r++)
-    {
-      for (int c = startCol; c < startCol + Constants.WILDERNESS_WIDTH / 2 - 1; c++)
-      {
-        sqs[r - startRow, c - startCol] = wilderness[r, c];
-      }
-    }
-    sqs[playerRow, playerCol] = new(Colours.WHITE, Colours.BLACK, '@');
-
-    return sqs;
-
-    static Sqr PickSqr(List<Sqr> sqs)
-    {
-      Dictionary<Sqr, int> counts = [];
-      foreach (Sqr s in sqs)
-      {
-        if (s.Ch == 'Ո' || s.Ch == '>' || s.Ch == '<')
-          return new(Colours.WHITE, Colours.BLACK, s.Ch);
-
-        if (counts.TryGetValue(s, out int value))
-          counts[s] = ++value;
-        else
-          counts[s] = 1;
-      }
-
-      // If one square is most common, select it
-      int count = 0;
-      Sqr? commonSqr = null;
-      bool tie = false;
-      foreach (KeyValuePair<Sqr, int> kvp in counts)
-      {
-        if (kvp.Value > count)
-        {
-          count = kvp.Value;
-          commonSqr = kvp.Key;
-          tie = false;
-        }
-        else if (kvp.Value == count)
-        {
-          tie = true;
-        }
-      }
-
-      if (!tie && commonSqr != null)
-        return commonSqr;
-
-      List<Sqr> popular = [];
-      foreach (KeyValuePair<Sqr, int> kvp in counts)
-      {
-        if (kvp.Value == count)
-          popular.Add(kvp.Key);
-      }
-
-      int topRank = -1;
-      foreach (Sqr s in popular)
-      {
-        int rank = s.Ch switch
-        {
-          '\u039B' => 5,
-          '=' => 4,
-          'ϙ' or '▲' => 3,
-          '}' => 2,
-          '.' => 1,
-          _ => 0
-        };
-
-        if (rank >  topRank)
-        {
-          commonSqr = s;
-          topRank = rank;
-        }
-      }
-
-      return Constants.BLANK_SQ;
-    }
-  }
-
-  public void DisplayMapView(GameState gs)
-  {
-    Sqr[,] sqs = gs.InWilderness ? CalcWildernessMap(gs) : CalcDungeonMap(gs);
-
-    GameEvent e;
-    do
-    {
-      e = PollForEvent();
-
-      DrawFullScreen(sqs);
-      Delay();
-    }
-    while (e.Type == GameEventType.NoEvent);
-  }
-
-  void DrawFullScreen(Sqr[,] sqs)
-  {
-    ClearScreen();
-
-    var height = sqs.GetLength(0);
-    var width = sqs.GetLength(1);
-    for (int r = 0; r < height; r++)
-    {
-      for (int c = 0; c < width; c++)
-      {
-        WriteSq(r, c, sqs[r, c]);
-      }
-    }
-
-    Blit();
   }
 
   void DrawGravestone(GameState gameState, List<string> messages)

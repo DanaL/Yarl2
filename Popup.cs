@@ -316,4 +316,25 @@ class Hint(List<string> text, int row) : IPopup
   }  
 }
 
-  
+class FullScreenPopup(Sqr[,] sqrs) : IPopup
+{
+  Sqr[,] Sqrs { get; set; } = sqrs;
+
+  public void Draw(UserInterface ui)
+  {
+    int height = int.Min(UserInterface.ScreenHeight, Sqrs.GetLength(0));
+    int width = int.Min(UserInterface.ScreenWidth, Sqrs.GetLength(1));
+
+    ui.ClearScreen();
+
+    for (int r = 0; r < height; r++)
+    {
+      for (int c = 0; c < width; c++)
+      {
+        ui.WriteSq(r, c, Sqrs[r, c]);
+      }
+    }
+  }
+
+  public void SetDefaultTextColour(Colour colour) { }
+}

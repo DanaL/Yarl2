@@ -182,7 +182,7 @@ class RaylibUserInterface : UserInterface
     DrawTextEx(_font, message, position, _fontHeight, 0, ToRaylibColor(textColour));
   }
 
-  protected override void WriteSq(int row, int col, Sqr sq)
+  public override void WriteSq(int row, int col, Sqr sq)
   {
     Vector2 position = new(col * (FontSize / 2), row * FontSize);
     DrawRectangle((int) position.X, (int) position.Y, FontSize / 2, FontSize, ToRaylibColor(sq.Bg));
@@ -190,7 +190,7 @@ class RaylibUserInterface : UserInterface
     DrawTextEx(_font, sq.Ch.ToString(), position, FontSize, 0, ToRaylibColor(sq.Fg));
   }
 
-  protected override void ClearScreen() => ClearBackground(Color.Black);
+  public override void ClearScreen() => ClearBackground(Color.Black);
   protected override void Blit() => EndDrawing();
 
   public override void UpdateDisplay(GameState? gs)

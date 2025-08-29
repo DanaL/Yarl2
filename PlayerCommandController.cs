@@ -494,7 +494,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'M')
     {
-      ui.DisplayMapView(GS);
+      ui.SetInputController(new MapView(GS));
     }
     else if (ch == 'o')
     {
