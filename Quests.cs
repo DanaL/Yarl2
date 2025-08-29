@@ -206,58 +206,10 @@ class WitchQuest
     throw new Exception("I couldn't find a spot for the Witch Quest!");
   }
 
-  static void JoinCaves(Map map, GameState gs)
-  {
-    RegionFinder regionFinder = new(new DungeonPassable());
-    var regions = regionFinder.Find(map, true, 4, TileType.DungeonWall);
-
-    if (regions.Count == 1)
-      return;
-
-    int sqs = 0;
-    int largest = -1;
-    foreach (int k in regions.Keys)
-    {
-      if (regions[k].Count > sqs)
-      {
-        largest = k;
-        sqs = regions[k].Count;
-      }
-    }
-
-    Dictionary<TileType, int> travelCost = new() {
-      { TileType.DungeonWall, 2 },
-      { TileType.DungeonFloor, 1 }
-    };
-    List<int> caves = [.. regions.Keys];
-    caves.Remove(largest);
-    HashSet<(int, int)> mainCave = regions[largest];
-    List<(int, int)> mainSqs = [.. mainCave];
-    foreach (int i in caves)
-    {
-      List<(int, int)> cave = [.. regions[i]];
-      var startSq = cave[gs.Rng.Next(cave.Count)];
-      Loc start = new(0, 0, startSq.Item1, startSq.Item2);
-      var endSqr = mainSqs[gs.Rng.Next(mainSqs.Count)];
-      Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
-
-      Stack<Loc> path = AStar.FindPath(gs.ObjDb, map, start, end, travelCost, false);
-      while (path.Count > 0)
-      {
-        var sq = path.Pop();
-        map.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.DungeonFloor));
-        // We don't have to draw the full path generated. We can stop when we 
-        // cross regions
-        if (mainCave.Contains((sq.Row, sq.Col)))
-          break;
-      }
-    }
-  }
-
   public static (Dungeon, Loc) GenerateDungeon(GameState gs, Loc entrance)
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
-    Dungeon dungeon = new(id, "You shudder not from cold, but from sensing something unnatural within this cave.", true);
+    Dungeon dungeon = new(id, "You shudder. Not from cold, but from sensing something unnatural within this cave.", true);
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     dungeon.MonsterDecks.Add(deck);
@@ -282,7 +234,7 @@ class WitchQuest
       }
     }
 
-    JoinCaves(map, gs);
+    CACave.JoinCaves(map, gs.Rng, gs.ObjDb, new DungeonPassable(), TileType.DungeonFloor, TileType.DungeonWall, TileType.DungeonWall);
 
     int i = gs.Rng.Next(floors.Count);
     var exitSq = floors[i];

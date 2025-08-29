@@ -17,7 +17,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
   int Width { get; set; } = width + 2;
   int DungeonId { get; set; } = dungeonId;
 
-  Map MidLevel(Rng rng)
+  Map MidLevel(GameObjectDB objDb, Rng rng)
   {
     Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
@@ -30,10 +30,16 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       }
     }
 
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.Underwater);
+    CACave.JoinCaves(map, rng, objDb, passable, TileType.Underwater, TileType.DungeonWall, TileType.DungeonWall);
+
+    map.Dump();
+
     return map;
   }
 
-  Map BottomLevel(Rng rng)
+  Map BottomLevel(GameObjectDB objDb, Rng rng)
   {
     Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
@@ -46,6 +52,10 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       }
     }
 
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.DungeonFloor);
+    CACave.JoinCaves(map, rng, objDb, passable, TileType.DungeonFloor, TileType.DungeonWall, TileType.DungeonWall);
+
     List<(int, int)> floorSqs = map.SqsOfType(TileType.DungeonFloor);
     floorSqs.Shuffle(rng);
     for (int j = 0; j < floorSqs.Count / 10; j++)
@@ -54,10 +64,12 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       floorSqs.RemoveAt(0);
     }
 
+    map.Dump();
+
     return map;
   }
 
-  Map TopLevel(int entranceRow, int entranceCol, Rng rng)
+  Map TopLevel(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
     Map topLevel = new(Width, Height, TileType.PermWall);
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
@@ -69,6 +81,10 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
         topLevel.SetTile(r + 1, c + 1, TileFactory.Get(tile));
       }
     }
+
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.Lake);
+    CACave.JoinCaves(topLevel, rng, objDb, passable, TileType.Lake, TileType.DungeonWall, TileType.DungeonWall);
 
     // Make an island somewhere in the cave and turn the rest of the squares
     // to water tiles
@@ -121,6 +137,8 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     Upstairs stairs = new("") { Destination = new(0, 0, entranceRow, entranceCol) };
     topLevel.SetTile(exit.Row, exit.Col, stairs);
 
+    topLevel.Dump();
+
     return topLevel;
 
     bool IslandFits(int cr, int cc, bool[,] island)
@@ -140,7 +158,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     }
   }
 
-  public Dungeon Generate(int entranceRow, int entranceCol, Rng rng)
+  public Dungeon Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
     Dungeon cave = new(DungeonId, "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
 
@@ -148,9 +166,9 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
     cave.MonsterDecks.Add(deck);
        
-    cave.AddMap(TopLevel(entranceRow, entranceCol, rng));
-    cave.AddMap(MidLevel(rng));
-    cave.AddMap(BottomLevel(rng));
+    cave.AddMap(TopLevel(entranceRow, entranceCol, objDb, rng));
+    cave.AddMap(MidLevel(objDb, rng));
+    cave.AddMap(BottomLevel(objDb, rng));
 
     return cave;
 

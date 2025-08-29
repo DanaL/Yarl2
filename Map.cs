@@ -899,6 +899,7 @@ class Map : ICloneable
           TileType.YellowTree => 'T',
           TileType.DeepWater => '~',
           TileType.Water => '~',
+          TileType.Lake => '~',
           TileType.WoodBridge => '=',
           TileType.Upstairs => '<',
           TileType.Downstairs => '>',
@@ -1026,5 +1027,51 @@ class CACave
     }
 
     return template;
+  }
+
+  public static void JoinCaves(Map map, Rng rng, GameObjectDB objDb, IPassable passable, TileType open, TileType closed, TileType fillTile)
+  {
+    RegionFinder regionFinder = new(passable);
+    Dictionary<int, HashSet<(int, int)>> regions = regionFinder.Find(map, true, 4, fillTile);
+
+    if (regions.Count == 1)
+      return;
+
+    int sqs = 0;
+    int largest = -1;
+    foreach (int k in regions.Keys)
+    {
+      if (regions[k].Count > sqs)
+      {
+        largest = k;
+        sqs = regions[k].Count;
+      }
+    }
+
+    Dictionary<TileType, int> travelCost = new() { { open, 1 }, { closed, 2} };
+    
+    List<int> caves = [.. regions.Keys];
+    caves.Remove(largest);
+    HashSet<(int, int)> mainCave = regions[largest];
+    List<(int, int)> mainSqs = [.. mainCave];
+    foreach (int i in caves)
+    {
+      List<(int, int)> cave = [.. regions[i]];
+      (int, int) startSq = cave[rng.Next(cave.Count)];
+      Loc start = new(0, 0, startSq.Item1, startSq.Item2);
+      (int, int) endSqr = mainSqs[rng.Next(mainSqs.Count)];
+      Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
+
+      Stack<Loc> path = AStar.FindPath(objDb, map, start, end, travelCost, false);
+      while (path.Count > 0)
+      {
+        Loc sq = path.Pop();
+        map.SetTile(sq.Row, sq.Col, TileFactory.Get(open));
+        // We don't have to draw the full path generated. We can stop when we 
+        // cross regions
+        if (mainCave.Contains((sq.Row, sq.Col)))
+          break;
+      }
+    }
   }
 }
