@@ -705,67 +705,49 @@ class MapView : Inputer
     }
   }
 
-  static Sqr[,] CalcWildernessMap(GameState gs)
-  {
-    Dungeon dungeon = gs.Campaign.Dungeons[0];
-    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
-
-    Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
-    for (int r = 0; r < UserInterface.ScreenHeight; r++)
-    {
-      for (int c = 0; c < UserInterface.ScreenWidth; c++)
-      {
-        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
-        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
-
-        // We'll make the stairs more prominent on the map so they stand out 
-        // better to the player
-        if (sq.Ch == '>' || sq.Ch == '<' || sq.Ch == 'Ո')
-          sq = sq with { Fg = Colours.WHITE };
-
-        sqs[r, c] = sq;
-      }
-    }
-
-    //int playerRow = gs.Player.Loc.Row;
-    //int playerCol = gs.Player.Loc.Col;
-    //sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
-
-    return sqs;
-  }
-
-  static Sqr[,] CalcDungeonMap(GameState gs)
+  static Sqr[,] CalcMap(GameState gs)
   {
     Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
     Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
 
+    int halfHeight = UserInterface.ScreenHeight / 2;
+    int halfWidth = UserInterface.ScreenWidth / 2;
+    int playerRow = gs.Player.Loc.Row;
+    int playerCol = gs.Player.Loc.Col;
+    int startRow = int.Max(0, playerRow - halfHeight);
+    if (playerRow + halfHeight > gs.CurrentMap.Height)
+      startRow -= playerRow + halfHeight - gs.CurrentMap.Height;
+    int startCol = int.Max(0, playerCol - halfWidth);
+    if (playerCol + halfWidth > gs.CurrentMap.Width)
+      startCol -= playerCol + halfWidth - gs.CurrentMap.Width;
+
     Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     for (int r = 0; r < UserInterface.ScreenHeight; r++)
     {
       for (int c = 0; c < UserInterface.ScreenWidth; c++)
       {
-        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, r, c);
+        int mapRow = startRow + r, mapCol = startCol + c;
+        Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
         Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
 
-        // We'll make the stairs more prominent on the map so they stand out 
-        // better to the player
-        if (sq.Ch == '>' || sq.Ch == '<')
+        if (mapRow == playerRow && mapCol == playerCol)
+          sq = new(Colours.WHITE, Colours.BLACK, '@');
+        else if (sq.Ch == '>' || sq.Ch == '<' || sq.Ch == 'Ո')
           sq = sq with { Fg = Colours.WHITE };
 
         sqs[r, c] = sq;
       }
     }
 
-    int playerRow = gs.Player.Loc.Row;
-    int playerCol = gs.Player.Loc.Col;
-    sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
+    
+    //sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
 
     return sqs;
   }
 
   void DrawMap()
   {
-    Sqr[,] sqrs = CalcWildernessMap(GS);
+    Sqr[,] sqrs = CalcMap(GS);
 
     GS.UIRef().SetPopup(new FullScreenPopup(sqrs));
   }
