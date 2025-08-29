@@ -695,31 +695,92 @@ class HelpScreen : Inputer
 class MapView : Inputer
 {
   public MapView(GameState gs) : base(gs) => DrawMap();
+  int OffSetRow { get; set; } = 0;
+  int OffSetCol { get; set; } = 0;
+  int HalfHeight { get; set; } = UserInterface.ScreenHeight / 2;
+  int HalfWidth { get; set; } = UserInterface.ScreenWidth / 2;
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || ch == ' ')
+    if (ch == Constants.ESC || ch == ' ' || ch == 'q')
     {
       Close();
       return;
     }
+
+    switch (ch)
+    {
+      case 'j':
+        OffSetRow += 5;
+        break;
+      case 'k':
+        OffSetRow -= 5;
+        break;
+      case 'h':
+        OffSetCol -= 5;
+        break;
+      case 'l':
+        OffSetCol += 5;
+        break;
+      case 'y':
+        OffSetRow -= 5;
+        OffSetCol -= 5;
+        break;
+      case 'u':
+        OffSetRow -= 5;
+        OffSetCol += 5;
+        break;
+      case 'b':
+        OffSetRow += 5;
+        OffSetCol -= 5;
+        break;
+      case 'n':
+        OffSetRow += 5;
+        OffSetCol += 5;
+        break;
+    }
+
+    DrawMap();
   }
 
-  static Sqr[,] CalcMap(GameState gs)
+  Sqr[,] CalcMap(GameState gs)
   {
     Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
     Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
 
-    int halfHeight = UserInterface.ScreenHeight / 2;
-    int halfWidth = UserInterface.ScreenWidth / 2;
-    int playerRow = gs.Player.Loc.Row;
-    int playerCol = gs.Player.Loc.Col;
-    int startRow = int.Max(0, playerRow - halfHeight);
-    if (playerRow + halfHeight > gs.CurrentMap.Height)
-      startRow -= playerRow + halfHeight - gs.CurrentMap.Height;
-    int startCol = int.Max(0, playerCol - halfWidth);
-    if (playerCol + halfWidth > gs.CurrentMap.Width)
-      startCol -= playerCol + halfWidth - gs.CurrentMap.Width;
+    if (gs.CurrentMap.Width < UserInterface.ScreenWidth)
+      OffSetCol = 0;
+    if (gs.CurrentMap.Height < UserInterface.ScreenHeight)
+      OffSetRow = 0;
+
+    int row = gs.Player.Loc.Row + OffSetRow;
+    int col = gs.Player.Loc.Col + OffSetCol;
+    
+    int startRow = row - HalfHeight;
+    if (startRow < 0)
+    {
+      OffSetRow -= startRow;
+      startRow = 0;
+    }
+    if (row + HalfHeight > gs.CurrentMap.Height)
+    {
+      int d = row + HalfHeight - gs.CurrentMap.Height;
+      OffSetRow -= d;
+      startRow -= d;
+    }
+
+    int startCol = col - HalfWidth;
+    if (startCol < 0)
+    {
+      OffSetCol -= startCol;
+      startCol = 0;
+    }
+    if (col + HalfWidth > gs.CurrentMap.Width)
+    {
+      int d = col + HalfWidth - gs.CurrentMap.Width;
+      OffSetCol -= d;
+      startCol -= d;
+    }
 
     Sqr[,] sqs = new Sqr[UserInterface.ScreenHeight, UserInterface.ScreenWidth];
     for (int r = 0; r < UserInterface.ScreenHeight; r++)
@@ -730,7 +791,7 @@ class MapView : Inputer
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
         Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
 
-        if (mapRow == playerRow && mapCol == playerCol)
+        if (mapRow == gs.Player.Loc.Row && mapCol == gs.Player.Loc.Col)
           sq = new(Colours.WHITE, Colours.BLACK, '@');
         else if (sq.Ch == '>' || sq.Ch == '<' || sq.Ch == 'Ո')
           sq = sq with { Fg = Colours.WHITE };

@@ -319,7 +319,7 @@ class Hint(List<string> text, int row) : IPopup
 class FullScreenPopup(Sqr[,] sqrs) : IPopup
 {
   Sqr[,] Sqrs { get; set; } = sqrs;
-
+  
   public void Draw(UserInterface ui)
   {
     int height = int.Min(UserInterface.ScreenHeight, Sqrs.GetLength(0));
