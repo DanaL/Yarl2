@@ -789,8 +789,20 @@ class MapView : Inputer
       {
         int mapRow = startRow + r, mapCol = startCol + c;
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-        Sqr sq = remembered.TryGetValue(loc, out var g) ? new Sqr(g.Unlit, Colours.BLACK, g.Ch) : Constants.BLANK_SQ;
 
+        Sqr sq;
+        if (remembered.TryGetValue(loc, out var g))
+        {
+          // Probably overthinking things but for the wilderness map I prefer
+          // the lit tiles and for dungeons the unlit
+          Colour fg = gs.InWilderness ? g.Lit : g.Unlit;
+          sq = new(fg, Colours.BLACK, g.Ch);
+        }
+        else
+        {
+          sq = Constants.BLANK_SQ;
+        }
+        
         if (mapRow == gs.Player.Loc.Row && mapCol == gs.Player.Loc.Col)
           sq = new(Colours.WHITE, Colours.BLACK, '@');
         else if (sq.Ch == '>' || sq.Ch == '<' || sq.Ch == 'Ո')
@@ -799,9 +811,6 @@ class MapView : Inputer
         sqs[r, c] = sq;
       }
     }
-
-    
-    //sqs[playerRow, playerCol] = new Sqr(Colours.WHITE, Colours.BLACK, '@');
 
     return sqs;
   }
