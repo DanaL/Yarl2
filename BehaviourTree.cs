@@ -1801,6 +1801,32 @@ class Planner
     return new WanderInArea(sqs);
   }
 
+  static BehaviourNode BasicWander(Mob mob, GameState gs)
+  {
+    HashSet<Loc> locs = [];
+    Map map = gs.MapForLoc(mob.Loc);
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        switch (map.TileAt(r, c).Type)
+        {
+          case TileType.DungeonFloor:
+          case TileType.IllusoryWall:
+          case TileType.Upstairs:
+          case TileType.Downstairs:
+          case TileType.OpenDoor:
+          case TileType.ClosedDoor:
+          case TileType.BrokenDoor:        
+            locs.Add(mob.Loc with { Row = r, Col = c });
+            break;
+        }
+      }
+    }
+
+    return new WanderInArea(locs);
+  }
+
   static BehaviourNode BasicVillager(Mob mob, GameState gs)
   {
     int homeId = mob.Stats[Attribute.HomeID].Curr;
@@ -1897,6 +1923,7 @@ class Planner
     "BasicIllusionPlan" => new Selector([new ChaseTarget(), new RandomMove()]),
     "Greedy" => CreateGreedyMonster(mob, gs),
     "Worshipper" => CreateWorshipperPlan(mob, gs),
+    "BasicWander" => BasicWander(mob, gs),
     _ => throw new Exception($"Unknown Behaviour Tree plan: {plan}")
   };
 

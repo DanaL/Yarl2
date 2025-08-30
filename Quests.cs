@@ -13,11 +13,34 @@ namespace Yarl2;
 
 class SorceressQuest
 {
+  static void SetupSorceress(Map map, int level, int dungeonId, GameObjectDB objDb, Rng rng)
+  {
+    Mob sorceress = new()
+    {
+      Name = "the Sorceress",
+      Appearance = "Faint vision of a stern-looking mage ",
+      Glyph = new Glyph('@', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
+    };
+    sorceress.Stats[Attribute.HP] = new Stat(50);
+    sorceress.Traits.Add(new VillagerTrait());
+    sorceress.Traits.Add(new NamedTrait());
+    sorceress.Traits.Add(new IntelligentTrait());
+    sorceress.Traits.Add(new DialogueScriptTrait() { ScriptFile = "sorceress.txt" });
+    sorceress.SetBehaviour(new NPCBehaviour());
+    sorceress.Traits.Add(new BehaviourTreeTrait() { Plan = "BasicWander" });
+    sorceress.Traits.Add(new LightSourceTrait() { Radius = 1, OwnerID = sorceress.ID, FgColour = Colours.ICE_BLUE, BgColour = Colours.BLUE_AURA });
+
+    List<(int, int)> sqsOfType = map.SqsOfType(TileType.DungeonFloor);
+    (int, int) sq = sqsOfType[rng.Next(sqsOfType.Count)];
+    Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
+    objDb.AddNewActor(sorceress, loc);
+  }
+
   static bool IsValidSpotForTower(int row, int col, Map wilderness, Town town)
   {
     if (!OpenSq(row, col))
       return false;
-      
+
     foreach (var adj in Util.Adj8Sqs(row, col))
     {
       if (!OpenSq(adj.Item1, adj.Item2))
@@ -29,13 +52,13 @@ class SorceressQuest
     bool OpenSq(int row, int col)
     {
       if (row >= town.Row && row <= town.Row + town.Height && col >= town.Col && col <= town.Col + town.Width)
-          return false;
+        return false;
 
       Tile tile = wilderness.TileAt(row, col);
       return tile.Type switch
       {
         TileType.DeepWater or TileType.Dirt or TileType.StoneRoad
-          or TileType.Bridge or TileType.Portal 
+          or TileType.Bridge or TileType.Portal
           or TileType.Mountain or TileType.SnowPeak => false,
         _ => true,
       };
@@ -95,6 +118,10 @@ class SorceressQuest
       Destination = towerExit
     };
     wilderness.SetTile(row, col, entrance);
+
+    int tl = sorceressTower.LevelMaps.Count - 1;
+    Map topLevel = sorceressTower.LevelMaps[tl];
+    SetupSorceress(topLevel, tl, dungeonId, objDb, rng);
 
     campaign.AddDungeon(sorceressTower);
 

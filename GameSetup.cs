@@ -533,13 +533,14 @@ class CampaignCreator(UserInterface ui)
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
         
-        //InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
-        //Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
-        (int exitRow, int exitCol) = UnderwaterCave.SetupUnderwaterCave(campaign, entrance.Item1, entrance.Item2, objDb, rng);
+        InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
+        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
+        campaign.AddDungeon(firstDungeon);
+       // (int exitRow, int exitCol) = UnderwaterCave.SetupUnderwaterCave(campaign, entrance.Item1, entrance.Item2, objDb, rng);
 
         Portal portal = new("You stand before a looming portal.")
         {
-          Destination = new Loc(1, 0, exitRow, exitCol)
+          Destination = new Loc(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2)
         };
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
         wildernessMap.SetTile(entrance, portal);
@@ -655,7 +656,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = 130909370;
+      // seed = -1243725127;
       Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);
