@@ -156,6 +156,8 @@ class ScriptScanner(string src)
     Advance();
 
     string? value = Source.Substring(Start + 1, Current - Start - 2);
+    value = value.Replace("\n", "").Replace("\\n", "\n");
+
     AddToken(TokenType.STRING, value);
   }
 
