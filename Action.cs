@@ -9,9 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 class ActionResult
@@ -3557,6 +3554,132 @@ sealed class PassAction : Action
 
     return 1.0;
   }      
+}
+
+class HighlightLocAction : Action
+{
+  Loc Loc { get; set; }
+
+  readonly Dictionary<string, Util.CyclopediaEntry> _cyclopedia = Util.LoadCyclopedia();
+
+  public HighlightLocAction(GameState gs, Actor actor) : base(gs, actor)
+  {
+
+  }
+
+  public override double Execute()
+  {
+    var (r, c) = GameState!.UIRef().LocToScrLoc(Loc.Row, Loc.Col, Actor!.Loc.Row, Actor.Loc.Col);
+
+    LocDetails details = LocInfo(Loc);
+    GameState.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, details.Ch);
+    GameState.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
+    GameState.LastPlayerFoV.Add(Loc);
+    
+    return 0.0;
+  }
+
+  LocDetails LocInfo(Loc loc)
+  {
+    string name;
+    string desc = "I have no further info about this object. This is probably Dana's fault.";
+
+    if (GameState!.ObjDb.Occupant(loc) is Actor actor)
+    {
+      if (actor is Player)
+      {
+        name = actor.Name;
+        desc = "You. A stalwart, rugged adventurer (probably). Keen for danger and glory. Currently alive.";
+      }
+      else if (actor.HasTrait<VillagerTrait>())
+      {
+        name = actor.FullName.Capitalize();
+        desc = "A villager.";
+      }
+      else
+      {
+        name = actor.Name.IndefArticle().Capitalize();
+        if (_cyclopedia.TryGetValue(actor.Name, out var v))
+          desc = v.Text;
+      }
+
+      string extraInfo = "";
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is PoisonedTrait)
+          extraInfo += "[GREEN Poisoned]. ";
+        else if (t is ConfusedTrait)
+          extraInfo += "[YELLOW Confused]. ";
+        else if (t is SleepingTrait)
+          extraInfo += "[PINK Sleeping]. ";
+        else if (t is TipsyTrait)
+          extraInfo += "[PINK Tipsy]. ";
+        else if (t is FrightenedTrait)
+          extraInfo += "[YELLOW Frightened]. ";
+      }
+
+      if (actor.Stats.TryGetValue(Attribute.MobAttitude, out var attitude))
+      {
+        if (attitude.Curr == Mob.INDIFFERENT)
+          extraInfo += "[WHITE Indifferent]. ";
+        else if (attitude.Curr == Mob.INACTIVE)
+          extraInfo += "[WHITE Inactive]. ";
+      }
+
+      extraInfo = extraInfo.Trim();
+      if (extraInfo.Length > 0)
+      {
+        desc += "\n\n" + extraInfo;
+      }
+
+      return new LocDetails(name, desc, actor.Glyph.Ch);
+    }
+
+    List<Item> items = GameState!.ObjDb.ItemsAt(loc);
+    if (items.Count > 0)
+    {
+      Item item = items[0];
+      string title = item.FullName.IndefArticle().Capitalize();
+      string details = "";
+      if (item.HasTrait<DescriptionTrait>())
+        details = item.Traits.OfType<DescriptionTrait>().First().Text;
+      else if (_cyclopedia.TryGetValue(item.Name, out var v))
+        details = v.Text;
+
+      return new LocDetails(title, details, item.Glyph.Ch);
+    }
+
+    List<Item> env = GameState!.ObjDb.EnvironmentsAt(loc);
+    if (env.Count > 0)
+    {
+      Item item = env[0];
+      string title = item.Name.Capitalize();
+      string details = "";
+      if (_cyclopedia.TryGetValue(item.Name, out var v))
+      {
+        title = v.Title;
+        details = v.Text;
+      }
+
+      return new LocDetails(title, details, item.Glyph.Ch);
+    }
+
+    Tile tile = GameState!.TileAt(loc);
+    name = tile.Type.ToString().ToLower();
+    if (_cyclopedia.TryGetValue(name, out var v2))
+    {
+      name = v2.Title;
+      desc = v2.Text;
+    }
+
+    return new LocDetails(name.Capitalize(), desc, Util.TileToGlyph(tile).Ch);
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    if (result is LocUIResult locResult)
+      Loc = locResult.Loc;
+  }
 }
 
 class CloseMenuAction : Action

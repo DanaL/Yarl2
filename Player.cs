@@ -410,8 +410,6 @@ class Player : Actor
     Action? action = null;
     UserInterface ui = gs.UIRef();
 
-    gs.PrepareFieldOfView();
-
     bool passTurn = false;
     foreach (Trait t in Traits)
     {
@@ -443,9 +441,11 @@ class Player : Actor
     {
       action = ActionQ.Dequeue();
     }
-    
+
     if (action is null)
+    {    
       return;
+    }
 
     double result = action.Execute();
     Energy -= CalcEnergyUsed(result);

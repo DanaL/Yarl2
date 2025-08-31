@@ -66,7 +66,8 @@ class Colours
   public static readonly Colour RED_AURA = new(208, 28, 31, 75);
   public static readonly Colour BLUE_AURA = new(0, 0, 200, 75);
   public static readonly Colour UNDERWATER = new(0, 118, 190, 50);
-  
+  public static readonly Colour EXAMINE = ICE_BLUE with { Alpha = 175 };
+
   public static string ColourToText(Colour colour)
   {
     if (colour == WHITE) return "white";
