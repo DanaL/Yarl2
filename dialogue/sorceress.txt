@@ -1,3 +1,13 @@
-(say "The wards binding Moloch grow weak? I knew I shouldn't have used that stale toe of frog. But apothecary was such a long walk away.\n\n
-        Seek out the Candle of Binding, the Abjuration Bell, and here I shall give you my own tome of magic. 
-        With these three artifacts you may renew the shackles holding the Foul One. Destroy His visage and seek His prison in the darkness beyond it.")
+(cond 
+  ( (<= MAIN_QUEST_STATUS 2)
+    ((say "The wards binding Moloch grow weak? I knew I shouldn't have used that stale toe of frog. But the apothecary was such a long walk away.\n\n
+            Seek out the [lightpurple Candle of Binding], the [lightpurple Abjuration Bell], and here I shall give you my own tome of magic. 
+            With these three artifacts you may renew the shackles holding the Foul One. Destroy His visage and seek His prison in the darkness beyond it.")
+      (set MAIN_QUEST_STATUS 3)
+      (give SORCERESS_TOME "Please don't read my diary entries.")
+    )
+  )
+  (else
+    (say "Yo, yo did you find those artifacts?")
+  )
+)

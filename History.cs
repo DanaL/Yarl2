@@ -202,9 +202,9 @@ class History(Rng rng)
   static readonly string[] _adjectives = [
     "blue", "red", "crawling", "winter", "burning", "summer", "slow", "biting", "pale", "rasping",
     "glowing", "wet", "moist", "dry", "silent", "yellow", "second", "third" ];
-  static readonly string[] _adjectives2 = [ "blue", "red", "crawling", "winter", "burning", "summer", 
+  static readonly string[] _adjectives2 = [ "blue", "red", "crawling", "winter", "burning", "summer",
     "silent", "second", "third" ];
-    
+
 
   static readonly string[] _nationModifiers = [
     "the Kingdom of",
@@ -249,7 +249,7 @@ class History(Rng rng)
 
     return new Nation()
     {
-      Name = name,      
+      Name = name,
       Desc = _nationModifiers[rng.Next(_nationModifiers.Length)]
     };
   }
@@ -264,7 +264,7 @@ class History(Rng rng)
       _ => DisasterType.Comet
     };
 
-    string desc = "";    
+    string desc = "";
     switch (type)
     {
       case DisasterType.Plague:
@@ -342,7 +342,7 @@ class History(Rng rng)
     var type = rng.Next(2) switch
     {
       0 => OGRulerType.ElfLord,
-      _ => OGRulerType.DwarfLord,     
+      _ => OGRulerType.DwarfLord,
     };
     var name = nameGen.GenerateName(rng.Next(5, 10)).Capitalize();
     RulerInfo ruler = new()
@@ -355,8 +355,8 @@ class History(Rng rng)
     };
 
     FactDb factDb = new(ruler);
-    
-    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;    
+
+    factDb.Villain = rng.NextDouble() < 0.5 ? VillainType.FieryDemon : VillainType.Necromancer;
     factDb.VillainName = nameGen.GenerateName(rng.Next(8, 13));
 
     factDb.Add(GenNation(rng));
@@ -431,15 +431,31 @@ class History(Rng rng)
       Glyph = new Glyph('▫', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false)
     };
 
-    var rt = new ReadableTrait(txt)
-    {
-      OwnerID = tablet.ID
-    };
+    ReadableTrait rt = new(txt) { OwnerID = tablet.ID };
     tablet.Traits.Add(rt);
-    objDb.Add(tablet);
-
     tablet.Traits.Add(new StoneTabletTrait(txt) { OwnerID = tablet.ID });
 
+    objDb.Add(tablet);
+
     return tablet;
+  }
+  
+  public static Item SorceressTome(GameObjectDB objDb)
+  {
+    Item tome = new()
+    {
+      Name = "Sorceress' Tome",
+      Type = ItemType.Document,
+      Glyph = new Glyph('♪', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false)
+    };
+
+    ReadableTrait rt = new("lorem ipsum") { OwnerID = tome.ID };
+    tome.Traits.Add(rt);
+    DescriptionTrait dt = new("A leather-bound tome with an arcane symbol emblazoned on the cover.");
+    tome.Traits.Add(dt);
+
+    objDb.Add(tome);
+
+    return tome;
   }
 }

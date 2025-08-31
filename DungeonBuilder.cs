@@ -766,9 +766,8 @@ class MainDungeonBuilder : DungeonBuilder
       if (decoration.Type == DecorationType.Statue)
       {
         // Prevent a statue from blocking a hallway
-        var candidates = Enumerable.Range(0, floorTiles.Count)
-                          .Where(i => ValidStatueSq(levels[level], floorTiles[i].Item1, floorTiles[i].Item2))
-                          .ToList();
+        List<int> candidates = [.. Enumerable.Range(0, floorTiles.Count)
+                          .Where(i => ValidStatueSq(levels[level], floorTiles[i].Item1, floorTiles[i].Item2))];                         
         if (candidates.Count == 0)
           continue;
 

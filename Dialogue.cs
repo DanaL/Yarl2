@@ -1144,24 +1144,6 @@ class DialogueInterpreter
     }
   }
 
-  static Item LevelFiveKey(GameState gs)
-  {
-    var (fg, bg) = Util.MetallicColour(Metals.Iron);
-    Item key = new() { 
-      Name = "key", Type = ItemType.Tool, Value = 1,
-      Glyph = new Glyph(';', fg, bg, Colours.BLACK, false)
-    };
-    key.Traits.Add(new MetalTrait() { Type = Metals.Iron });
-
-    if (gs.FactDb.FactCheck("Level 5 Gate Loc") is LocationFact loc)
-    {
-      key.Traits.Add(new VaultKeyTrait(loc.Loc));
-    }
-    gs.ObjDb.Add(key);
-
-    return key;
-  }
-
   void EvalGive(ScriptGive gift, Actor mob, GameState gs)
   {
     if (gift.Gift == "BOON_MAP")
@@ -1307,7 +1289,7 @@ class DialogueInterpreter
     Item item = gift.Gift switch
     {
       "MINOR_GIFT" => Treasure.MinorGift(gs.ObjDb, gs.Rng),
-      "LEVEL_FIVE_KEY" => LevelFiveKey(gs),
+      "SORCERESS_TOME" => History.SorceressTome(gs.ObjDb),
       _ => throw new Exception($"Unknown variable: {gift.Gift}"),
     };
 
