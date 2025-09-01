@@ -562,7 +562,7 @@ class CampaignCreator(UserInterface ui)
         if (factDb.FactCheck("RLEntrance") is LocationFact rle)
         {
           RoguelikeDungeonBuilder rlb = new(campaign.Dungeons.Count);
-          (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, rng);
+          (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, objDb, rng);
           Downstairs rlEntrance = new("") { Destination = stairsLoc };
           wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
           campaign.AddDungeon(rld);

@@ -377,7 +377,25 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 {
   int DungeonId { get; set; } = dungeonId;
 
-  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, Rng rng)
+  void SetBell(Map map, int levelNum, GameObjectDB objDb, Rng rng)
+  {
+    Item bell = new()
+    {
+      Name = "Bell of Abjuration",
+      Type = ItemType.Tool,
+      Glyph = new Glyph('(', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.BLACK, false)
+    };
+    bell.Traits.Add(new DescriptionTrait("A brass bell of exquisite manufacture."));
+    bell.Traits.Add(new ArtifactTrait());
+
+    List<(int, int)> floorSqs = map.SqsOfType(TileType.DungeonFloor);
+    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
+    Loc bellLoc = new(DungeonId, levelNum, r, c);
+    objDb.Add(bell);
+    objDb.SetToLoc(bellLoc, bell);
+  }
+
+  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
     Dungeon dungeon = new(DungeonId, "", true);
 
@@ -424,6 +442,10 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
       dungeon.AddMap(map);
     }
+
+    int bottomLevel = dungeon.LevelMaps.Count - 1;
+    Map bottomFloor = dungeon.LevelMaps[bottomLevel];
+    SetBell(bottomFloor, bottomLevel, objDb, rng);
 
     return (dungeon, entranceStairs);
   }
