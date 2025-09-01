@@ -165,7 +165,21 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.MainQuestState] = new Stat(2);
       return "";
     }
-   
+    else if (txt == "quest2")
+    {
+      _gs.Player.Stats[Attribute.MainQuestState] = new Stat(3);
+
+      Loc towerGate = Loc.Nowhere;
+      if (_gs.FactDb.FactCheck("Tower Gate") is LocationFact lf)
+      {
+        towerGate = lf.Loc;
+      }
+
+      Map wilderness = _gs.Campaign.Dungeons[0].LevelMaps[0];
+      wilderness.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));
+      return "";  
+    }
+
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
       return "Debug commands are formated: add/give/drop <obj name>";

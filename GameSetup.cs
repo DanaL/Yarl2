@@ -657,6 +657,7 @@ class CampaignCreator(UserInterface ui)
       
       int seed = DateTime.UtcNow.GetHashCode();
       // seed = -1243725127;
+      // seed = -1686359388;
       Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);

@@ -123,6 +123,29 @@ class SorceressQuest
     Map topLevel = sorceressTower.LevelMaps[tl];
     SetupSorceress(topLevel, tl, dungeonId, objDb, rng);
 
+    Item diary1 = new()
+    {
+      Name = "exerpt of a memoir",
+      Type = ItemType.Document,
+      Glyph = new Glyph('♪', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false)
+    };
+    string magicWord = History.MagicWord(rng);
+    factDb.Add(new SimpleFact() { Name = "MDTemplePassword", Value = magicWord });
+    string txt = $"...and so I borrowed -- well, borrowed without permission -- the Candle from the Moon Daughter's hidden temple. I did return it when I was finished! It wasn't even that hard to find. You just stand in the centre of Moonstone Ring on a clear night and speak: {magicWord}.";
+    diary1.Traits.Add(new ReadableTrait(txt) { OwnerID = diary1.ID });
+    diary1.Traits.Add(new DescriptionTrait("A hastily scrawled document with many passages crossed out and rewritten."));
+    List<(int, int)> floorSqs = sorceressTower.LevelMaps[tl - 1].SqsOfType(TileType.DungeonFloor);
+    (int drow, int dcol) = floorSqs[rng.Next(floorSqs.Count)];
+    Loc diaryLoc = new(dungeonId, tl - 1, drow, dcol);
+    objDb.Add(diary1);
+    objDb.SetToLoc(diaryLoc, diary1);
+
+    Landmark landmark = new("Written 100 times on a chalkboard: I will not borrow my mistress' favourite Bell and lose it in an ancient dungeon in a hidden valley.");
+    floorSqs = sorceressTower.LevelMaps[tl - 2].SqsOfType(TileType.DungeonFloor);
+    (int lmRow, int lmCol) = floorSqs[rng.Next(floorSqs.Count)];
+    sorceressTower.LevelMaps[tl - 2].SetTile(lmRow, lmCol, landmark);
+
+    //  map.SetTile(sq, tile);
     campaign.AddDungeon(sorceressTower);
 
     return true;
