@@ -13,14 +13,31 @@ namespace Yarl2;
 
 class UnderwaterCave
 {
-  public static (int, int) SetupUnderwaterCave(Campaign campaign, int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
+  static void SetCandleOfBinding(int dungeonId, List<(int, int)> floorSqs, GameObjectDB objDb, Rng rng)
   {
-    UnderwaterCaveDungeon caveBuilder = new(1, 30, 70);
+    Item candle = new()
+    {
+      Name = "Candle of Binding",
+      Type = ItemType.Tool,
+      Glyph = new Glyph('(', Colours.WHITE, Colours.GREY, Colours.BLACK, false)
+    };
+    candle.Traits.Add(new DescriptionTrait("An ornate candle carved with symbols of the Moon Daughter."));
+    candle.Traits.Add(new ArtifactTrait());
+
+    (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
+    Loc candleLoc = new(dungeonId, 0, r, c);
+    objDb.Add(candle);
+    objDb.SetToLoc(candleLoc, candle);
+  }
+
+  public static void SetupUnderwaterCave(Campaign campaign, int entranceRow, int entranceCol, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    UnderwaterCaveDungeon caveBuilder = new(campaign.Dungeons.Count, 30, 70);
     Dungeon cave = caveBuilder.Generate(entranceRow, entranceCol, objDb, rng);
     campaign.AddDungeon(cave);
 
-    int dungeonExitRow = caveBuilder.ExitLoc.Item1;
-    int dungeonExitCol = caveBuilder.ExitLoc.Item2;
+    Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
+    factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
 
     Dungeon temple = new(campaign.Dungeons.Count, "", true);
     campaign.AddDungeon(temple);
@@ -36,12 +53,13 @@ class UnderwaterCave
     floors = bottomCave.SqsOfType(TileType.DungeonFloor);
     sq = floors[rng.Next(floors.Count)];
     Loc caveExit = new(cave.ID, cave.LevelMaps.Count - 1, sq.Item1, sq.Item2);
+    floors.Remove(sq);
     Downstairs downstairs = new("") { Destination = caveExit };
 
     templeMap.SetTile(templeEntrance.Row, templeEntrance.Col, downstairs);
     bottomCave.SetTile(caveExit.Row, caveExit.Col, upstairs);
 
-    return (dungeonExitRow, dungeonExitCol);
+    SetCandleOfBinding(temple.ID, floors, objDb, rng);
   }
 }
 

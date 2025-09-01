@@ -1093,7 +1093,22 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       string s = $"As you chant '{Phrase}', the runes on the tower gate flare brightly then fade away. The iron portcullis then shudders, turns to dust, and disappears!";
       GameState!.UIRef().SetPopup(new Popup(s, "", -1, -1));
-      GameState.CurrentMap.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));    
+      GameState.CurrentMap.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));
+    }
+    else if (TransportToCave(GameState.FactDb))
+    {
+      Loc caveEntrance = Loc.Nowhere;
+      if (GameState.FactDb.FactCheck("UnderwaterCaveEntrance") is LocationFact celf)
+        caveEntrance = celf.Loc;
+
+      GameState.ActorEntersLevel(GameState.Player, caveEntrance.DungeonID, caveEntrance.Level);
+      Loc start = GameState.Player.Loc;
+      GameState.Player.Loc = caveEntrance;
+      gs.ResolveActorMove(GameState.Player, start, caveEntrance);
+      gs.FlushPerformers();
+      
+      string s = $"You call out '{Phrase}'! Your stomach lurches and you find yourself somewhere else!";
+      GameState!.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
     else
     {
@@ -1101,6 +1116,22 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     return 1.0;
+
+    bool TransportToCave(FactDb factDb)
+    {
+      if (factDb.FactCheck("Stone ring centre") is not LocationFact src || GameState.Player.Loc != src.Loc)
+      {
+        return false;
+      }
+
+      if (GameState!.FactDb.FactCheck("MDTemplePassword") is SimpleFact pwd)
+      {
+        if (string.Compare(Phrase, pwd.Value, StringComparison.InvariantCultureIgnoreCase) != 0)
+          return false;
+      }
+
+      return true;
+    }
 
     bool OpenTower(Loc towerGate)
     {

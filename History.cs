@@ -453,6 +453,7 @@ class History(Rng rng)
     tome.Traits.Add(rt);
     DescriptionTrait dt = new("A leather-bound tome with an arcane symbol emblazoned on the cover.");
     tome.Traits.Add(dt);
+    tome.Traits.Add(new ArtifactTrait());
 
     objDb.Add(tome);
 

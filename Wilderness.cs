@@ -729,7 +729,7 @@ internal class Wilderness(Rng rng, int length)
     }
   }
 
-  public static void PlaceStoneRing(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static Loc PlaceStoneRing(Map map, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     // We need a 7 x 7 spot that is not in town (or witch's cottage) and all 
     // passable tiles and I think no water tiles.
@@ -765,8 +765,11 @@ internal class Wilderness(Rng rng, int length)
     SetColumn(row + 5, col + 5);
     SetColumn(row + 6, col + 3);
     map.SetTile(row + 3, col + 3, TileFactory.Get(TileType.StoneFloor));
-    factDb.Add(new LocationFact() { Desc = "Stone ring centre", Loc = new(0, 0, row + 3, col + 3) });
+    Loc centreLoc = new(0, 0, row + 3, col + 3);
+    factDb.Add(new LocationFact() { Desc = "Stone ring centre", Loc = centreLoc });
 
+    return centreLoc;
+    
     void SetColumn(int row, int col)
     {
       Item column = ItemFactory.Get(ItemNames.COLUMN, objDb);

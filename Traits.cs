@@ -87,6 +87,11 @@ class AffixedTrait : Trait
   public override string AsText() => $"Affixed";
 }
 
+class ArtifactTrait : Trait
+{
+  public override string AsText() => $"Artifact";
+}
+
 class AttackModTrait : Trait
 {
   public int Amt { get; set; }
@@ -3447,6 +3452,7 @@ class TraitFactory
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }
     },
+    { "Artifact", (pieces, gameObj) => new ArtifactTrait() },
     { "AttackMod", (pieces, gameObj) => new AttackModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) } },
     { "AttackVerb", (pieces, gameObj) => new AttackVerbTrait(pieces[1])},
     { "AuraMessage", (pieces, gameObj) => new AuraMessageTrait() { ObjId = ulong.Parse(pieces[1]), Radius = int.Parse(pieces[2]), Message = pieces[3] } },
