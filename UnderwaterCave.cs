@@ -41,9 +41,8 @@ class UnderwaterCave
 
     Dungeon temple = new(campaign.Dungeons.Count, "", true);
     campaign.AddDungeon(temple);
-    Map templeMap = RLLevelMaker.MakeLevel(rng);
+    (Map templeMap, List<(int, int)> floors) = RLLevelMaker.MakeLevel(rng);
     temple.AddMap(templeMap);
-    List<(int, int)> floors = templeMap.SqsOfType(TileType.DungeonFloor);
     (int, int) sq = floors[rng.Next(floors.Count)];
     Loc templeEntrance = new(temple.ID, 0, sq.Item1, sq.Item2);
 

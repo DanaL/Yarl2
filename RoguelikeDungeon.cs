@@ -20,13 +20,14 @@ class RLLevelMaker
   const int CELL_WIDTH = 17;
   const int CELL_HEIGHT = 9;
 
-  public static Map MakeLevel(Rng rng)
+  public static (Map, List<(int, int)>) MakeLevel(Rng rng)
   {
     // I'm initializing the map with sand and peppering some walls here and 
     // there throughout hoping that when it comes time to use pathfinding to
     // draw the halls, the alg will route around walls making for a bit more
     // twisty passages.
     Map map = new(WIDTH, HEIGHT, TileType.Sand);
+    HashSet<(int, int)> roomSqs = [];
 
     for (int c = 0; c < WIDTH; c++)
     {
@@ -55,6 +56,14 @@ class RLLevelMaker
     {
       RLRoom room = PlaceRoom(map, usedCells, rng);
       rooms.Add(room.Cell, room);
+
+      for (int r = room.Row; r < room.Row + room.Height; r++)
+      {
+        for (int c = room.Col; c < room.Col + room.Width; c++)
+        {
+          roomSqs.Add((r, c));
+        }
+      }
     }
    
     JoinRooms(rooms, map, usedCells, rng);
@@ -68,7 +77,7 @@ class RLLevelMaker
       }
     }
 
-    return map;
+    return (map, [.. roomSqs]);
   }
 
   static List<int> AdjRooms(int cell, HashSet<int> usedCells)
@@ -377,7 +386,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 {
   int DungeonId { get; set; } = dungeonId;
 
-  void SetBell(Map map, int levelNum, GameObjectDB objDb, Rng rng)
+  void SetBell(List<(int, int)> floorSqs, int levelNum, GameObjectDB objDb, Rng rng)
   {
     Item bell = new()
     {
@@ -388,7 +397,6 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     bell.Traits.Add(new DescriptionTrait("A brass bell of exquisite manufacture."));
     bell.Traits.Add(new ArtifactTrait());
 
-    List<(int, int)> floorSqs = map.SqsOfType(TileType.DungeonFloor);
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc bellLoc = new(DungeonId, levelNum, r, c);
     objDb.Add(bell);
@@ -405,21 +413,20 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
     // FOr rogue-esque levels, the stairs can go anywhere. Ie., the dungeon
     // levels don't stack neatly like in my other dungeon types. So I'm not
-    // going to use the DungeonBuilder class's SetStairs method()
+    // using the DungeonBuilder class's SetStairs method()
     Loc entranceStairs = Loc.Nowhere;
     Loc prevLoc = new(0, 0, entranceRow, entranceCol);
     Portal? prevDownstairs = null;
     int maxLevels = rng.Next(5, 8);
     for (int lvl = 0; lvl < maxLevels; lvl++)
     {
-      Map map = RLLevelMaker.MakeLevel(rng);
+      (Map map, List<(int, int)> roomSqs) = RLLevelMaker.MakeLevel(rng);
 
-      List<(int, int)> floors = map.SqsOfType(TileType.DungeonFloor);
       Upstairs upstairs = new("") { Destination = prevLoc };
-      int i = rng.Next(floors.Count);
-      (int ur, int uc) = floors[i];
+      int i = rng.Next(roomSqs.Count);
+      (int ur, int uc) = roomSqs[i];
       map.SetTile(ur, uc, upstairs);
-      floors.RemoveAt(i);
+      roomSqs.RemoveAt(i);
 
       if (prevDownstairs is not null)
       {
@@ -434,18 +441,20 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
       if (lvl < maxLevels - 1)
       {
         Downstairs downstairs = new("");
-        (int dr, int dc) = floors[rng.Next(floors.Count)];
+        i = rng.Next(roomSqs.Count);
+        (int dr, int dc) = roomSqs[i];
+        roomSqs.RemoveAt(i);
         map.SetTile(dr, dc, downstairs);
         prevLoc = new(DungeonId, lvl, dr, dc);
         prevDownstairs = downstairs;
       }
+      else
+      {
+        SetBell(roomSqs, lvl, objDb, rng);
+      }
 
       dungeon.AddMap(map);
     }
-
-    int bottomLevel = dungeon.LevelMaps.Count - 1;
-    Map bottomFloor = dungeon.LevelMaps[bottomLevel];
-    SetBell(bottomFloor, bottomLevel, objDb, rng);
 
     return (dungeon, entranceStairs);
   }
