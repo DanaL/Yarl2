@@ -347,6 +347,7 @@ internal class DungeonSaver
   public int ID { get; set; }
   public string? ArrivalMessage { get; set; }
   public bool Descending { get; set; }
+  public string ExitLoc { get; set; } = "";
 
   [JsonInclude]
   public List<string> RememberedLocs;
@@ -363,13 +364,14 @@ internal class DungeonSaver
 
   public static DungeonSaver Shrink(Dungeon dungeon)
   {
-    var sd = new DungeonSaver()
+    DungeonSaver sd = new()
     {
       ID = dungeon.ID,
       ArrivalMessage = dungeon.ArrivalMessage,
       Descending = dungeon.Descending,
       RememberedLocs = [],
-      MonsterDecks = [.. dungeon.MonsterDecks.Select(deck => deck.ToString())]
+      MonsterDecks = [.. dungeon.MonsterDecks.Select(deck => deck.ToString())],
+      ExitLoc = dungeon.ExitLoc.ToString()
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -388,8 +390,11 @@ internal class DungeonSaver
 
   public static Dungeon Inflate(DungeonSaver sd)
   {
-    Dungeon d = new(sd.ID, sd.ArrivalMessage ?? "", sd.Descending);
-    
+    Dungeon d = new(sd.ID, sd.ArrivalMessage ?? "", sd.Descending)
+    {
+      ExitLoc = Loc.FromStr(sd.ExitLoc)
+    };
+
     foreach (string s in sd.RememberedLocs)
     {
       var pieces = s.Split(Constants.SEPARATOR);

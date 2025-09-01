@@ -613,7 +613,8 @@ class Dungeon(int ID, string arrivalMessage, bool desc)
   public string ArrivalMessage { get; } = arrivalMessage;
   public List<MonsterDeck> MonsterDecks { get; set; } = [];
   public bool Descending { get; set; } = desc;
-
+  public Loc ExitLoc { get; set; }
+  
   public void AddMap(Map map)
   {
     int id = LevelMaps.Count == 0 ? 0 : LevelMaps.Keys.Max() + 1;

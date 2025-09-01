@@ -2200,7 +2200,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
     base.Execute();
 
     var player = GameState!.Player;
-    if (player.HasTrait<RecallTrait>() || player.Loc.DungeonID == 0)
+    if (player.HasTrait<RecallTrait>() || GameState.InWilderness)
     {
       GameState!.UIRef().AlertPlayer("You shudder for a moment.");
       return 1.0;

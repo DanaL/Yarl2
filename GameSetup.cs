@@ -533,15 +533,18 @@ class CampaignCreator(UserInterface ui)
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
         
+        Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
+
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
+        firstDungeon.ExitLoc = entranceLoc;
         campaign.AddDungeon(firstDungeon);
        
         Portal portal = new("You stand before a looming portal.")
         {
           Destination = new Loc(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2)
         };
-        Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
+        
         wildernessMap.SetTile(entrance, portal);
         factDb.Add(new LocationFact()
         {
@@ -565,6 +568,7 @@ class CampaignCreator(UserInterface ui)
           (Dungeon rld, Loc stairsLoc) = rlb.Generate(rle.Loc.Row, rle.Loc.Col, objDb, rng);
           Downstairs rlEntrance = new("") { Destination = stairsLoc };
           wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
+          rld.ExitLoc = rle.Loc;
           campaign.AddDungeon(rld);
           
           // It would be a redo-the-wilderness if we couldn't make the valley/

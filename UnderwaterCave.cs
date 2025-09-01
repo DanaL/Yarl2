@@ -34,12 +34,17 @@ class UnderwaterCave
   {
     UnderwaterCaveDungeon caveBuilder = new(campaign.Dungeons.Count, 30, 70);
     Dungeon cave = caveBuilder.Generate(entranceRow, entranceCol, objDb, rng);
+    cave.ExitLoc = new(0, 0, entranceRow, entranceCol);
+
     campaign.AddDungeon(cave);
 
     Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
     factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
 
-    Dungeon temple = new(campaign.Dungeons.Count, "", true);
+    Dungeon temple = new(campaign.Dungeons.Count, "", true)
+    {
+      ExitLoc = new(0, 0, entranceRow, entranceCol)
+    };
     campaign.AddDungeon(temple);
     (Map templeMap, List<(int, int)> floors) = RLLevelMaker.MakeLevel(rng);
     temple.AddMap(templeMap);

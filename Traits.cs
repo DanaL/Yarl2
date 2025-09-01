@@ -2779,7 +2779,7 @@ class RecallTrait : BasicTrait, IGameEventListener
 
     Expired = true;
 
-    var player = gs.Player;
+    Player player = gs.Player;
     player.Traits.Remove(this);
 
     // We can get the entrance to the main dungeon via the History
@@ -2789,23 +2789,20 @@ class RecallTrait : BasicTrait, IGameEventListener
     if (gs.Campaign is null || gs.Campaign.FactDb is null)
       throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
 
-    if (player.Loc.DungeonID == 0)
+    if (gs.InWilderness)
     {
       gs.UIRef().AlertPlayer("You sudenly teleport exactly 1 cm to the left.");
       return;
     }
 
-    LocationFact? entrance = (LocationFact?)gs.Campaign.FactDb.FactCheck("Dungeon Entrance");
-    if (entrance is not null)
-    {
-      gs.ActorEntersLevel(player, 0, 0);
-      var start = player.Loc;
-      player.Loc = entrance.Loc;
-      gs.ResolveActorMove(player, start, entrance.Loc);
-      gs.FlushPerformers();
-      gs.PrepareFieldOfView();
-      gs.UIRef().AlertPlayer("A wave of vertigo...");
-    }
+    Loc exitPoint = gs.CurrentDungeon.ExitLoc;
+    gs.ActorEntersLevel(player, 0, 0);
+    Loc start = player.Loc;
+    player.Loc = exitPoint;
+    gs.ResolveActorMove(player, start, exitPoint);
+    gs.FlushPerformers();
+    gs.PrepareFieldOfView();
+    gs.UIRef().AlertPlayer("A wave of vertigo...");
   }
 }
 
