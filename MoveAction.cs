@@ -47,7 +47,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (canFly && tile.PassableByFlight())
       return true;
-    else if (canSwim && (tile.Type == TileType.Lake || tile.Type == TileType.Underwater))
+    else if (canSwim && tile.Type == TileType.Lake)
       return true;
     else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
     {
@@ -229,7 +229,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
   {
     UserInterface ui = GameState!.UIRef();
     Player player = GameState!.Player;
-    Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
 
     if (Actor!.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
     {
@@ -250,7 +249,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
     else if (GameState!.ObjDb.Occupied(Loc) && GameState.ObjDb.Occupant(Loc)!.ID != Actor.ID)
     {
       Actor? occ = GameState.ObjDb.Occupant(Loc);
-      
       if (occ is not null && occ.Behaviour is VillagePupBehaviour)
       {
         string msg;
@@ -293,7 +291,9 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       }
     }
     else if (!CanMoveTo(player, GameState.CurrentMap, Loc))
-    {      
+    {
+      Tile tile = GameState.CurrentMap.TileAt(Loc.Row, Loc.Col);
+    
       if (_bumpToOpen && tile.Type == TileType.ClosedDoor)
       {
         player.QueueAction(new OpenDoorAction(GameState, Actor, Loc));
@@ -326,7 +326,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         }
 
         return 0.0;
-      }      
+      }
       else if (tile.Type == TileType.Chasm)
       {
         if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
@@ -360,25 +360,6 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       // so that it displays on screen
       if (player.HasTrait<BlindTrait>())
         GameState.RememberLoc(Loc, tile);
-    }
-    else if (tile.Type == TileType.Lake && GameState.TileAt(Actor.Loc).Type != TileType.Lake)
-    {
-      if (GameState.CurrentDungeon.RememberedLocs.ContainsKey(Loc))
-      {
-        ui.SetPopup(new Popup("Really jump into the water? (y/n)", "", -1, -1));
-        YesOrNoInputer yn = new(GameState)
-        {
-          DeferredAction = new MoveAction(GameState, player, Loc)
-        };
-        ui.SetInputController(yn);
-      }
-      else
-      {
-        GameState.RememberLoc(Loc, tile);
-        player.QueueAction(new MoveAction(GameState, player, Loc));
-      }
-
-      return 0.0;
     }
     else
     {

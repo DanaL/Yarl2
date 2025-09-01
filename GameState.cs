@@ -1408,6 +1408,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
         else
           return ("are", $"{item.Value} zorkmids");
       }
+      else if (item.HasTrait<ArtifactTrait>())
+      {
+        return ("is", $"{item.FullName.DefArticle()}");
+      }
       else if (count != 1)
       {
         return ("are", $"{count} {item.FullName.Pluralize()}");
@@ -1468,7 +1472,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (items.Count == 2)
     {
-      var keys = items.Keys.ToList();
+      List<Item> keys = [.. items.Keys];
 
       var (v, str) = ItemText(keys[0], items[keys[0]]);
       sb.Append(" There ");
@@ -1494,6 +1498,10 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
           sb.Append($" There is a lone zorkmid here.");
         else
           sb.Append($" There are {item.Value} zorkmids here!");
+      }
+      else if (item.HasTrait<ArtifactTrait>())
+      {
+        sb.Append($" {item.FullName.DefArticle().Capitalize()} is here.");
       }
       else if (item.HasTrait<PluralTrait>())
       {
