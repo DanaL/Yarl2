@@ -177,7 +177,25 @@ class DebugCommand(GameState gs)
 
       Map wilderness = _gs.Campaign.Dungeons[0].LevelMaps[0];
       wilderness.SetTile(towerGate.Row, towerGate.Col, TileFactory.Get(TileType.StoneFloor));
-      return "";  
+      return "";
+    }
+    else if (txt == "unlock")
+    {
+      for (int r = 0; r < _gs.CurrentMap.Height; r++)
+      {
+        for (int c = 0; c < _gs.CurrentMap.Width; c++)
+        {
+          if (_gs.CurrentMap.TileAt(r, c).Type == TileType.LockedDoor)
+          {
+            Door door = new(TileType.ClosedDoor, false);
+            _gs.CurrentMap.SetTile(r, c, door);
+          }
+        }
+      }
+
+      _gs.UIRef().AlertPlayer("Click.");
+
+      return "";
     }
 
     var parts = txt.Split(' ', 2);
