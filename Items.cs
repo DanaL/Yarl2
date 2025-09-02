@@ -76,9 +76,7 @@ class Item : GameObj, IEquatable<Item>
       else if (t is DoorKeyTrait)
         return true;
       else if (t is CleansingTrait)
-        return true;
-      else if (t is AbjurationBellTrait)
-        return true;
+        return true;      
     }
 
     return false;
@@ -389,6 +387,32 @@ class ItemFactory
     });
 
     return mist;
+  }
+
+  // An item for when I want a light source on the map that I don't want the
+  // player to be able to interact with.
+  public static Item VirtualLight(Colour fg, Colour bg, GameState gs)
+  {
+    Item light = new()
+    {
+      Name = "light",
+      Type = ItemType.Environment,
+      Value = 0,
+      Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    light.SetZ(-100);
+    
+    light.Traits.Add(new LightSourceTrait()
+    {
+      Radius = 1,
+      OwnerID = light.ID,
+      FgColour = fg,
+      BgColour = bg
+    });
+
+    gs.ObjDb.Add(light);
+
+    return light;
   }
 
   public static Item Lamp(GameObjectDB objDb, Dir dir)

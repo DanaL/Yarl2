@@ -592,11 +592,17 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       
       DirectionalInputer dir = new(GameState, true);
       if (item.HasTrait<DiggingToolTrait>())
+      {
         dir.DeferredAction = new DigAction(GameState, Actor, item);
+      }
       else if (item.HasTrait<CleansingTrait>())
+      {
         dir.DeferredAction = new CleansingAction(GameState, Actor, item);
+      }
       else
+      {
         dir.DeferredAction = new PickLockAction(GameState, Actor, item);
+      }
 
       GameState.UIRef().SetInputController(dir);
       
@@ -661,13 +667,11 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
         GameState.UIRef().AlertPlayer(s);
       }
 
-      bool success = false;
       foreach (IUSeable trait in useableTraits)
       {
         UseResult useResult = trait.Use(Actor, GameState, Actor.Loc.Row, Actor.Loc.Col, item);
         GameState.UIRef().AlertPlayer(useResult.Message);
-        success = useResult.Successful;
-
+        
         if (useResult.ReplacementAction is not null)
         {
           energyCost = 0.0;

@@ -390,12 +390,13 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
   {
     Item bell = new()
     {
-      Name = "Bell of Abjuration",
+      Name = "Abjuration Bell",
       Type = ItemType.Tool,
       Glyph = new Glyph('(', Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.BLACK, false)
     };
     bell.Traits.Add(new DescriptionTrait("A brass bell of exquisite manufacture."));
     bell.Traits.Add(new ArtifactTrait());
+    bell.Traits.Add(new AbjurationBellTrait());
 
     (int r, int c) = floorSqs[rng.Next(floorSqs.Count)];
     Loc bellLoc = new(DungeonId, levelNum, r, c);

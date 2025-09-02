@@ -747,7 +747,7 @@ abstract class UserInterface
     var tileText = Tile.TileDesc(tile.Type).Capitalize();
     foreach (var item in gs.ObjDb.EnvironmentsAt(gs.Player.Loc))
     {
-      if (item.Type == ItemType.Environment && item.Name != "photon")
+      if (item.Type == ItemType.Environment && item.Name != "light" && item.Name != "photon")
       {
         var g = item.Glyph;
         tileSq = new Sqr(g.Lit, Colours.BLACK, g.Ch);

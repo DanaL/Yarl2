@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text;
+
 namespace Yarl2;
 
 record UseResult(Action? ReplacementAction, bool Successful = true, string Message = "");
@@ -411,6 +413,47 @@ class HomebodyTrait : Trait
 class MosquitoTrait : Trait
 {
   public override string AsText() => "Mosquito";
+}
+
+class AbjurationBellTrait : Trait, IUSeable
+{
+  public override string AsText() => "AbjurationBell";
+
+  public UseResult Use(Actor caster, GameState gs, int row, int col, Item? item)
+  {    
+    Action action = new CloseMenuAction(gs, 1.0);
+
+    StringBuilder sb = new();
+    sb.AppendLine("The Abjuration Bell rings out a clarion tone!");
+
+    foreach (Loc adj in Util.Adj8Locs(caster.Loc))
+    {
+      List<Item> items = gs.ObjDb.ItemsAt(adj);
+      if (items.Where(i => i.HasTrait<DemonVisageTrait>()).FirstOrDefault() is Item demonVisage)
+      {
+        sb.Append("\nThe demonic statue flares with red light, then explodes!");
+
+        gs.ObjDb.RemoveItemFromGame(adj, demonVisage);
+
+        Downstairs stairs = new("") { Destination =  adj };
+        gs.CurrentMap.SetTile(adj.Row, adj.Col, stairs);
+
+        Item light = ItemFactory.VirtualLight(Colours.BRIGHT_RED, Colours.DULL_RED, gs);
+        gs.ObjDb.SetToLoc(adj, light);
+
+        MessageAtLoc pal = new(adj, "[DULLRED An eerie red glow emanates from the depths beyond the stairs...]");
+        gs.ObjDb.ConditionalEvents.Add(pal);
+
+        break;
+      }
+    }
+
+    gs.UIRef().SetPopup(new Popup(sb.ToString(), "", -1, -1, 35));
+
+    return new UseResult(action, false);
+  }
+
+  public void Used() { }
 }
 
 class AcidSplashTrait : Trait
@@ -910,7 +953,6 @@ class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
   
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item)
   {
-    Item? doc = gs.ObjDb.GetObj(OwnerID) as Item;
     List<string> lines = [.._text.Split('\n')];
     gs.UIRef().SetPopup(new Hint(lines, 3));
 
@@ -1694,6 +1736,11 @@ class DeathMessageTrait : BasicTrait
 {
   public string Message { get; set; } = "";
   public override string AsText() => $"DeathMessage#{Message}";
+}
+
+class DemonVisageTrait : Trait
+{
+  public override string AsText() => "DemonVisage";
 }
 
 class DisguiseTrait : BasicTrait
@@ -3416,6 +3463,7 @@ class TraitFactory
 {
   static readonly Dictionary<string, Func<string[], GameObj?, Trait>> traitFactories = new()
   {
+    { "AbjurationBell", (pieces, gameObj) => new AbjurationBellTrait() },
     { "AcidSplash", (pieces, gameObj) => new AcidSplashTrait() },
     { "ACMod", (pieces, gameObj) =>
       {
@@ -3517,6 +3565,7 @@ class TraitFactory
       }
     },
     { "DeathMessage", (pieces, gameObj) => new DeathMessageTrait() { Message = pieces[1] } },
+    { "DemonVisage", (pieces, gameObj) => new DemonVisageTrait() },
     { "Description", (pieces, gameObj) => new DescriptionTrait(pieces[1]) },
     { "Desecrated", (pieces, gameObj) => new DesecratedTrait() },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
@@ -3642,7 +3691,7 @@ class TraitFactory
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
-    { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
+    { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },    
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },

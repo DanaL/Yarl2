@@ -380,13 +380,13 @@ class GameObjectDB
   {
     List<GameObj> objs = [];
 
-    foreach (var loc in _actorLocs.Keys)
+    foreach (Loc loc in _actorLocs.Keys)
     {
       if (loc.DungeonID == dungeonID && loc.Level == level)
         objs.Add(Objs[_actorLocs[loc]]);
     }
 
-    foreach (var loc in _itemLocs.Keys)
+    foreach (Loc loc in _itemLocs.Keys)
     {
       if (loc.DungeonID == dungeonID && loc.Level == level && _itemLocs.TryGetValue(loc, out var itemStack) && itemStack.Count > 0) 
       {
