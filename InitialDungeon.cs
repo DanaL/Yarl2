@@ -129,15 +129,18 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
   static void CreateCellar(Loc stairsLoc, Dungeon dungeon, GameObjectDB objDb, Rng rng)
   {
+    int cellarHeight = HEIGHT + 2;
+    int cellarWidth = WIDTH + 2;
+
     // Generate the cellar level
-    Map cellar = new(WIDTH, HEIGHT)
+    Map cellar = new(cellarWidth, cellarHeight)
     {
       DiggableFloor = false
     };
 
-    for (int r = 0; r < HEIGHT; r++)
+    for (int r = 0; r < cellarHeight; r++)
     {
-      for (int c = 0; c < WIDTH; c++)
+      for (int c = 0; c < cellarWidth; c++)
       {
         cellar.SetTile(r, c, TileFactory.Get(TileType.PermWall));
       }
@@ -150,7 +153,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       int dr = stairsLoc.Row + r;
       int dc = stairsLoc.Col + c;
 
-      if (dr - 3 < 0 || dr + 3 >= HEIGHT || dc - 3 < 0 || dc + 3 >= WIDTH)
+      if (dr - 3 < 0 || dr + 3 >= cellarHeight || dc - 3 < 0 || dc + 3 >= cellarWidth)
         continue;
       roomOpts.Add((dr, dc));
     }

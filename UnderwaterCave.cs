@@ -90,8 +90,6 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
     passable.Passable.Add(TileType.Underwater);
     CACave.JoinCaves(map, rng, objDb, passable, TileType.Underwater, TileType.DungeonWall, TileType.DungeonWall);
 
-    map.Dump();
-
     return map;
   }
 
@@ -119,8 +117,6 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
       map.SetTile(floorSqs[0], TileFactory.Get(TileType.Kelp));
       floorSqs.RemoveAt(0);
     }
-
-    map.Dump();
 
     return map;
   }
@@ -192,8 +188,6 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
     Upstairs stairs = new("") { Destination = new(0, 0, entranceRow, entranceCol) };
     topLevel.SetTile(exit.Row, exit.Col, stairs);
-
-    topLevel.Dump();
 
     return topLevel;
 

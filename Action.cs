@@ -1104,8 +1104,8 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
       GameState.ActorEntersLevel(GameState.Player, caveEntrance.DungeonID, caveEntrance.Level);
       Loc start = GameState.Player.Loc;
       GameState.Player.Loc = caveEntrance;
-      gs.ResolveActorMove(GameState.Player, start, caveEntrance);
-      gs.FlushPerformers();
+      GameState.ResolveActorMove(GameState.Player, start, caveEntrance);
+      GameState.FlushPerformers();
       
       string s = $"You call out '{Phrase}'! Your stomach lurches and you find yourself somewhere else!";
       GameState!.UIRef().SetPopup(new Popup(s, "", -1, -1));
