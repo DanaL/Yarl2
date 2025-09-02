@@ -53,10 +53,7 @@ class Item : GameObj, IEquatable<Item>
   int _z = DEFAULT_Z;
 
   public void SetZ(int z) => _z = z;
-  public override int Z()
-  {
-    return _z;
-  }
+  public override int Z() => _z;
 
   public bool Equipable() => Type switch
   {
@@ -79,6 +76,8 @@ class Item : GameObj, IEquatable<Item>
       else if (t is DoorKeyTrait)
         return true;
       else if (t is CleansingTrait)
+        return true;
+      else if (t is AbjurationBellTrait)
         return true;
     }
 
@@ -968,10 +967,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         if (item.HasTrait<PluralTrait>())
           desc = $"some {item.FullName}";
+        else if (item.HasTrait<ArtifactTrait>())
+          desc = item.FullName.DefArticle();
         else if (count > 1)
           desc = $"{count} {item.FullName.Pluralize()}";
         else if (item.HasTrait<NamedTrait>())
-          desc = item.FullName;        
+          desc = item.FullName;
         else
           desc = item.FullName.IndefArticle();
       }
