@@ -43,7 +43,17 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
 
-    AddRivers(levels, HEIGHT, WIDTH, DungeonId, objDb, rng);
+    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
+    {
+      // Maybe add a river/chasm to the level?
+      if (rng.Next(4) == 0)
+      {
+        if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
+          AddRiverToLevel(TileType.Chasm, levels[levelNum], levels[levelNum + 1], levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+        else
+          AddRiverToLevel(TileType.DeepWater, levels[levelNum], null, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+      }
+    }
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, dungeon.Descending, rng);
 

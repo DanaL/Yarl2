@@ -651,15 +651,14 @@ class DungeonMap(Rng rng)
 
   // Draw a river on the map. River being a flow of some sort: water, lava,
   // or a chasm
-  public static void AddRiver(Map map, int width, int height, TileType riverTile, Rng rng)
+  public static void CreateRiver(Map map, int width, int height, TileType riverTile, Rng rng)
   {
     // pick starting wall
     int roll = rng.Next(4);
     List<(int, int, Dir)> pts = [];
 
     Dir dir, origDir;
-    int row, col;
-    roll = 2;
+    int row, col;    
     if (roll == 0)
     {
       // start on north wall

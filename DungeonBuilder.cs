@@ -545,7 +545,7 @@ abstract class DungeonBuilder
       }
     }
 
-    List<Loc> opts = contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2)).ToList();
+    List<Loc> opts = [.. contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2))];
     Loc loc = opts[rng.Next(opts.Count)];
     Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
     objDb.SetToLoc(loc, potion);
@@ -593,44 +593,28 @@ abstract class DungeonBuilder
     }
   }
 
-  protected static void AddRivers(Map[] levels, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
+  protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
   {
-    // Add rivers/chasms and traps to some of the levels
-    List<int> riverAdded = [];
-    for (int levelNum = 0; levelNum < levels.Length; levelNum++)
-    {
-      if (rng.Next(4) == 0)
-      {
-        TileType riverTile;
-        if (levelNum < levels.Length - 1 && rng.Next(3) == 0)
-          riverTile = TileType.Chasm;
-        else
-          riverTile = TileType.DeepWater;        
-        DungeonMap.AddRiver(levels[levelNum], width + 1, height + 1, riverTile, rng);
+    DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, rng);
 
-        // When making a chasm, we want to turn any walls below chasms on the 
-        // floor below into floors. 
-        if (riverTile == TileType.Chasm)
+    // When making a chasm, we want to turn any walls below chasms on the 
+    // floor below into floors. 
+    if (riverTile == TileType.Chasm && mapBelow is not null)
+    {
+      for (int r = 1; r < height; r++)
+      {
+        for (int c = 1; c < width; c++)
         {
-          for (int r = 1; r < height; r++)
+          var pt = (r, c);
+          if (ReplaceChasm(map, pt) && mapBelow.IsTile(pt, TileType.DungeonWall))
           {
-            for (int c = 1; c < width; c++)
-            {
-              var pt = (r, c);              
-              if (ReplaceChasm(levels[levelNum], pt) && levels[levelNum + 1].IsTile(pt, TileType.DungeonWall))
-              {
-                levels[levelNum + 1].SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
-              }
-            }
+            mapBelow.SetTile(pt, TileFactory.Get(TileType.DungeonFloor));
           }
         }
-
-        riverAdded.Add(levelNum);
       }
     }
 
-    foreach (int level in riverAdded)
-      RiverQoLCheck(levels[level], dungeonId, level, objDb, rng);
+    RiverQoLCheck(map, dungeonId, levelNum, objDb, rng);
 
     static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
     {
