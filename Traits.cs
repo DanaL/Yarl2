@@ -847,8 +847,7 @@ class AppleProducerTrait : Trait, IGameEventListener, IOwner
       }
     }
 
-    List<Loc> trees = locs.Where(l => gs.TileAt(l).IsTree())
-                          .ToList();
+    List<Loc> trees = [.. locs.Where(l => gs.TileAt(l).IsTree())];
     if (trees.Count == 0)
       return;
 
@@ -914,7 +913,7 @@ class RestingTrait : TemporaryTrait
     if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Player player)
     {
       Remove(gs);
-      player.Traits = player.Traits.Where(t => t is not RestingTrait).ToList();
+      player.Traits = [.. player.Traits.Where(t => t is not RestingTrait)];
     }
   }
 
@@ -2596,9 +2595,7 @@ class StatBuffTrait : TemporaryTrait
   {  
     if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
     {
-      var statBuffs = actor.Traits.OfType<StatBuffTrait>()
-                                  .Where(t => t.SourceId == SourceId)
-                                  .ToList();
+      List<StatBuffTrait> statBuffs = [.. actor.Traits.OfType<StatBuffTrait>().Where(t => t.SourceId == SourceId)];
       foreach (StatBuffTrait buff in statBuffs)
       {
         string s = RemoveBuff(actor, buff);

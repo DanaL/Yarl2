@@ -65,11 +65,11 @@ class Artifacts
       switch (roll)
       {
         case 0:
-          sword.Traits = sword.Traits.Where(t => t is not MetalTrait).ToList();
+          sword.Traits = [.. sword.Traits.Where(t => t is not MetalTrait)];
           sword.Traits.Add(new MetalTrait() { Type = Metals.Silver });
           break;
         case 1:
-          sword.Traits = sword.Traits.Where(t => t is not MetalTrait).ToList();
+          sword.Traits = [.. sword.Traits.Where(t => t is not MetalTrait)];
           sword.Traits.Add(new MetalTrait() { Type = Metals.Mithril });
           break;
         case 2:

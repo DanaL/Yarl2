@@ -345,7 +345,7 @@ class GameObjectDB
       EndOfRoundListeners.Remove((IGameEventListener)t);            
     }
 
-    var toRemove = DeathWatchListeners.Where(dw => dw.Item1 == actor.ID).ToList();
+    List<(ulong, IGameEventListener)> toRemove = [.. DeathWatchListeners.Where(dw => dw.Item1 == actor.ID)];
     foreach (var dwl in toRemove)
       DeathWatchListeners.Remove(dwl);
 
@@ -562,7 +562,7 @@ class GameObjectDB
       EndOfRoundListeners.Remove((IGameEventListener)t);            
     }
 
-    var toRemove = DeathWatchListeners.Where(dw => dw.Item1 == item.ID).ToList();
+    List<(ulong, IGameEventListener)> toRemove = [.. DeathWatchListeners.Where(dw => dw.Item1 == item.ID)];
     foreach (var dwl in toRemove)
       DeathWatchListeners.Remove(dwl);
   }

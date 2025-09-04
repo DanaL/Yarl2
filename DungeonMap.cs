@@ -60,7 +60,7 @@ class DungeonMap(Rng rng)
       height = radius * 2 + 3;
       width = radius * 2 + 3;
 
-      sqs = Util.BresenhamCircle(height / 2, width / 2, radius).ToList();
+      sqs = [.. Util.BresenhamCircle(height / 2, width / 2, radius)];
 
       // Now turn all the squares inside the circle into floors
       for (int r = 1; r < height - 1; r++)
@@ -94,7 +94,7 @@ class DungeonMap(Rng rng)
       var col = _rng.Next(1, map.Width - rw - 1);
       if (col % 2 == 0)
         col += 1;
-      sqs = sqs.Select(s => (s.Item1 + row, s.Item2 + col)).ToList();
+      sqs = [.. sqs.Select(s => (s.Item1 + row, s.Item2 + col))];
       bool overlap = false;
       foreach (var sq in sqs)
       {
@@ -156,9 +156,9 @@ class DungeonMap(Rng rng)
   static List<(int, int)> MazeNeighbours(Map map, int row, int col, TileType type, int d)
   {
     (int, int)[] adj = [(-d, 0), (d, 0), (0, d), (0, -d)];
-    return adj.Select(n => (row + n.Item1, col + n.Item2))
+    return [.. adj.Select(n => (row + n.Item1, col + n.Item2))
                          .Where(n => map.InBounds(n.Item1, n.Item2))
-                         .Where(n => map.TileAt(n.Item1, n.Item2).Type == type).ToList();
+                         .Where(n => map.TileAt(n.Item1, n.Item2).Type == type)];
   }
 
   static int AdjFloors(Map map, int row, int col)
@@ -299,9 +299,7 @@ class DungeonMap(Rng rng)
   // maps before the situation came up.
   void AddDoorToRectRoom(Map map, Room room)
   {
-    var candidates = room.CalcDoorCandidates()
-                         .Where(d => ValidDoor(map, d.Item1, d.Item2))
-                         .ToList();
+    List<(int, int)> candidates = [.. room.CalcDoorCandidates().Where(d => ValidDoor(map, d.Item1, d.Item2))];
 
     if (candidates.Count == 0)
     {
@@ -644,7 +642,7 @@ class DungeonMap(Rng rng)
       _ => [Dir.East, Dir.East, Dir.East, Dir.North, Dir.South]
     };
 
-    dirs = dirs.Where(d => d != origDir).ToList();
+    dirs = [.. dirs.Where(d => d != origDir)];
 
     return dirs[rng.Next(dirs.Count)];
   }
@@ -799,7 +797,7 @@ class DungeonMap(Rng rng)
       }
     }
 
-    return distances.Select(d => (d.Item1, d.Item2)).ToList();
+    return [.. distances.Select(d => (d.Item1, d.Item2))];
   }
 
   static void WidenRiver(Map map, int row, int col, TileType riverTile, Rng rng)
@@ -910,7 +908,7 @@ class DungeonMap(Rng rng)
         if (reject)
           continue;
 
-        var candidates = sqs.Where(s => ConnectionCandidate(map, s.Item1, s.Item2)).ToList();
+        List<(int, int)> candidates = [.. sqs.Where(s => ConnectionCandidate(map, s.Item1, s.Item2))];
         if (candidates.Count > 0)
         {
           var passage = candidates[rng.Next(candidates.Count)];
@@ -928,13 +926,13 @@ class DungeonMap(Rng rng)
     List<(int, int)> smaller, larger;
     if (a.Count > b.Count)
     {
-      larger = a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
-      smaller = b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+      larger = [.. a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
+      smaller = [.. b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
     }
     else
     {
-      larger = b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
-      smaller = a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor).ToList();
+      larger = [.. b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
+      smaller = [.. a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
     }
 
     bool done = false;

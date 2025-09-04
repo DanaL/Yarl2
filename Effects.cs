@@ -79,7 +79,7 @@ class EffectApplier
     else if (rusted.Amount == Rust.Rusted)
     {
       // An already rusted item becomes corroded
-      item.Traits = item.Traits.Where(t => !(t is AdjectiveTrait adj && adj.Adj == "Rusted")).ToList();
+      item.Traits = [.. item.Traits.Where(t => !(t is AdjectiveTrait adj && adj.Adj == "Rusted"))];
       item.Traits.Add(new AdjectiveTrait("Corroded"));
       rusted.Amount = Rust.Corroded;
     }

@@ -269,7 +269,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 
     FindPath(startRow, startCol, 0, [ (startRow, startCol) ]);
 
-    return bestPath.Skip(1).ToList();
+    return [.. bestPath.Skip(1)];
   }
 }
 

@@ -187,9 +187,9 @@ class Battle
       if (trait is CorrosiveTrait)
       {
         
-        List<Item> metalItems = target.Inventory
+        List<Item> metalItems = [.. target.Inventory
                                       .Items()
-                                      .Where(i => i.CanCorrode() && i.Equipped).ToList();
+                                      .Where(i => i.CanCorrode() && i.Equipped)];
 
         if (metalItems.Count > 0)
         {
@@ -206,9 +206,7 @@ class Battle
 
   static void Spawn(Actor actor, GameState gs)
   {
-    List<Loc> options = Util.Adj8Locs(actor.Loc)
-                            .Where(loc => gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))
-                            .ToList();
+    List<Loc> options = [.. Util.Adj8Locs(actor.Loc).Where(loc => gs.TileAt(loc).Passable() && !gs.ObjDb.Occupied(loc))];
     if (options.Count > 0)
     {
       Loc loc = options[gs.Rng.Next(options.Count)];
@@ -767,7 +765,7 @@ class Battle
 
     if (options.Count > 0)
     {
-      var sq = options.ToList()[gs.Rng.Next(options.Count)];
+      Loc sq = options.ToList()[gs.Rng.Next(options.Count)];
       gs.ResolveActorMove(target, target.Loc, sq);
       target.Loc = sq;
 

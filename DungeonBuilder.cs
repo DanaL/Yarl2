@@ -492,7 +492,7 @@ abstract class DungeonBuilder
   protected static void AddBaitIllusion(Map map, int dungeonId, int levelNum, GameObjectDB objDb, Rng rng)
   {
     var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
-    List<Loc> openFloors = sqs.Where(l => !objDb.AreBlockersAtLoc(l)).ToList();
+    List<Loc> openFloors = [.. sqs.Where(l => !objDb.AreBlockersAtLoc(l))];
     if (openFloors.Count == 0)
       return;
     Loc loc = openFloors[rng.Next(openFloors.Count)];
@@ -902,16 +902,14 @@ class MainDungeonBuilder : DungeonBuilder
       // can't place the shrine
       return;
 
-    var floors = candidates.ToList();
+    List<(int, int)> floors = [.. candidates];
     var loc = floors[rng.Next(floors.Count)];
 
     Tile shrine = new Landmark(DeepOneShrineDesc(rng));
     map.SetTile(loc, shrine);
     Loc shrineLoc = new(dungeonID, level, loc.Item1, loc.Item2);
 
-    List<Loc> deepOneLocs = floors.Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))
-                                  .Where(l => Util.Distance(shrineLoc, l) <= 3)
-                                  .ToList();
+    List<Loc> deepOneLocs = [.. floors.Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2)).Where(l => Util.Distance(shrineLoc, l) <= 3)];
     
     int numOfDeepOnes = int.Min(rng.Next(3) + 2, deepOneLocs.Count);
     List<Actor> deepOnes = [];
@@ -954,9 +952,7 @@ class MainDungeonBuilder : DungeonBuilder
 
     foreach (Actor deepOne in deepOnes)
     {
-      List<ulong> allies = deepOnes.Select(k => k.ID)
-                                   .Where(id => id != deepOne.ID)
-                                   .ToList();
+      List<ulong> allies = [.. deepOnes.Select(k => k.ID).Where(id => id != deepOne.ID)];
       deepOne.Traits.Add(new AlliesTrait() { IDs = allies });
       deepOne.Stats[Attribute.MobAttitude].SetMax(Mob.INDIFFERENT);
     }
@@ -980,7 +976,7 @@ class MainDungeonBuilder : DungeonBuilder
       foreach (Item loot in Treasure.PoorTreasure(4, rng, objDb))
       {
         loot.Traits.Add(new OwnedTrait() { 
-          OwnerIDs = deepOnes.Select(d => d.ID).ToList()
+          OwnerIDs = [.. deepOnes.Select(d => d.ID)]
         });
         Loc itemLoc = nearbyLocs[rng.Next(nearbyLocs.Count)];
         objDb.SetToLoc(itemLoc, loot);

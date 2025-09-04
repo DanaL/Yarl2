@@ -62,7 +62,7 @@ class Decorations
       decorations.Add(JournalForEvent3(fact, factDb, rng));      
     }
 
-    return decorations.Where(d => d is not NullDecoration).ToList();
+    return [.. decorations.Where(d => d is not NullDecoration)];
   }
 
   static Decoration StatueForEvent(Fact fact, RulerInfo rulerInfo, Rng rng)

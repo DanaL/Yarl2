@@ -569,7 +569,7 @@ class TownBuilder
     // Next place the tavern; it's the largest building and the hardest to find a spot for
     PlaceTavern(map, townRow, townCol, rng);
 
-    var cottages = Templates.Keys.Where(k => k.StartsWith("cottage")).ToList();
+    List<string> cottages = [.. Templates.Keys.Where(k => k.StartsWith("cottage"))];
 
     // create the town's market
     var j = cottages[rng.Next(cottages.Count)];
@@ -578,7 +578,7 @@ class TownBuilder
     // next, the smithy
     j = cottages[rng.Next(cottages.Count)];
     PlaceBuilding(map, townRow, townCol, Templates[j], BuildingType.Smithy, rng);
-    var smithySqs = Town.Smithy.ToList();
+    List<Loc> smithySqs = [.. Town.Smithy];
 
     if (smithySqs.Count == 0)
       throw new PlacingBuldingException();

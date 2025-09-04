@@ -576,9 +576,7 @@ class HelpScreen : Inputer
     List<string> lines;
     if (entry.Entry.Count > PageSize)
     {
-      lines = entry.Entry.Skip(_page * PageSize)
-                         .Take(PageSize)
-                         .ToList();
+      lines = [.. entry.Entry.Skip(_page * PageSize).Take(PageSize)];
       lines.Add("");
       lines.Add($"- SPACE for next page ({_page + 1} of {CurrPageCount}) -".PadLeft(_textAreaWidth / 2 + 4));
     }
@@ -1518,7 +1516,7 @@ class LongMessagerInputer : Inputer
     _ui = ui;
     _wrappedLines = WrapLines(lines);
 
-    var page = _wrappedLines.Take(UserInterface.ScreenHeight).ToList();
+    List<string> page = [.. _wrappedLines.Take(UserInterface.ScreenHeight)];
     ui.WriteLongMessage(page);
     _row = page.Count;
   }
@@ -1567,8 +1565,8 @@ class LongMessagerInputer : Inputer
     }
     else
     {
-      var page = _wrappedLines.Skip(_row).Take(UserInterface.ScreenHeight - 1).ToList();
-      var txt = $"~ page {++_pageCount} ~";
+      List<string> page = [.. _wrappedLines.Skip(_row).Take(UserInterface.ScreenHeight - 1)];
+      string txt = $"~ page {++_pageCount} ~";
       txt = txt.PadLeft(UserInterface.ScreenWidth / 2 - txt.Length + txt.Length / 2, ' ');
       page.Insert(0, txt);
 

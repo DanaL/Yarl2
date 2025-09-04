@@ -145,7 +145,7 @@ class Village
     Mob innkeeper = BaseVillager(ng, rng);
     innkeeper.SetBehaviour(new InnkeeperBehaviour());
     innkeeper.Traits.Add(new BehaviourTreeTrait() { Plan = "BarHoundPlan" });
-    var tavernSqs = town.Tavern.ToList();
+    List<Loc> tavernSqs = [.. town.Tavern];
     do
     {
       Loc loc = tavernSqs[rng.Next(tavernSqs.Count)];
@@ -322,7 +322,7 @@ class Village
     veteran.SetBehaviour(new NPCBehaviour());
     veteran.Traits.Add(new BehaviourTreeTrait() { Plan = "BarHoundPlan" });
 
-    var tavernSqs = town.Tavern.ToList();
+    List<Loc> tavernSqs = [.. town.Tavern];
     do
     {
       Loc loc = tavernSqs[rng.Next(tavernSqs.Count)];

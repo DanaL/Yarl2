@@ -842,7 +842,7 @@ class InnkeeperServiceAction : Action
       {
         GameState.StopListening(GameEventType.EndOfRound, t);
       }
-      GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not PoisonedTrait).ToList();
+      GameState.Player.Traits = [.. GameState.Player.Traits.Where(t => t is not PoisonedTrait)];
 
       // Leet's be nice an extinguish the player's torch for them if they 
       // forget to do it before they rest.
@@ -893,7 +893,7 @@ class PriestServiceAction : Action
       GameState.UIRef().AlertPlayer("You feel cleansed.");
       GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
 
-      GameState.Player.Traits = GameState.Player.Traits.Where(t => t is not ShunnedTrait).ToList();
+      GameState.Player.Traits = [.. GameState.Player.Traits.Where(t => t is not ShunnedTrait)];
     }
 
     return 1.0;
@@ -1574,9 +1574,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
     if (gs.TileAt(_target).Passable() && !gs.ObjDb.Occupied(_target))
       return _target;
 
-    var locs = Util.Adj8Locs(_target)
-                   .Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))
-                   .ToList();
+    List<Loc> locs = [.. Util.Adj8Locs(_target).Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))];
     if (locs.Count == 0)
       return Loc.Nowhere;
     else
@@ -2056,8 +2054,7 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
       Loc targetLoc = Actor.PickRangedTargetLoc(GameState);
       if (GameState.ObjDb.Occupant(targetLoc) is Actor victim)
       {
-        var clothes = victim.Inventory.Items()
-                                      .Where(i => i.Type == ItemType.Armour && i.Equipped).ToList();
+        List<Item> clothes = [.. victim.Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equipped)];
         if (clothes.Count == 0)
           return 1.0;
 
@@ -2970,7 +2967,7 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
     };
     GameState!.ObjDb.Add(ray);
 
-    List<Loc> pts = Trajectory(Actor!.Loc, true).Skip(1).ToList();
+    List<Loc> pts = [.. Trajectory(Actor!.Loc, true).Skip(1)];
     var anim = new BeamAnimation(GameState!, pts, Colours.FADED_PURPLE, Colours.BLACK);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 

@@ -424,11 +424,11 @@ class CampaignCreator(UserInterface ui)
     var loc = new Loc(dungeon.ID, level, sq.Item1, sq.Item2);
     objDb.AddNewActor(gargoyle, loc);
 
-    var adj = Util.Adj4Locs(loc).ToList();
+    List<Loc> adj = Util.Adj4Locs(loc).ToList();
     if (adj.Count > 0)
     {
       var pedestalLoc = adj[rng.Next(adj.Count)];
-      var pedetal = new Landmark("A stone pedestal.");
+      Landmark pedetal = new("A stone pedestal.");
       dungeon.LevelMaps[level].SetTile(pedestalLoc.Row, pedestalLoc.Col, pedetal);
     }
   }

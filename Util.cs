@@ -333,7 +333,7 @@ class Util
 
   public static Loc RandomAdjLoc(Loc loc, GameState gs)
   {
-    var adj = Adj8Locs(loc).ToList();
+    List<Loc> adj = [.. Adj8Locs(loc)];
 
     return adj[gs.Rng.Next(adj.Count)];
   }

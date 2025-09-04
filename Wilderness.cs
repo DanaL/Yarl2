@@ -72,7 +72,7 @@ internal class Wilderness(Rng rng, int length)
       if (!map.InBounds(nextRow, nextCol))
         break;
 
-      var nextSegment = Util.Bresenham(row, col, nextRow, nextCol);
+      List<(int, int)> nextSegment = Util.Bresenham(row, col, nextRow, nextCol);
       bool riverCrossing = false;
       foreach (var pt in nextSegment)
       {
@@ -134,7 +134,7 @@ internal class Wilderness(Rng rng, int length)
   // Try to draw up to three rivers on the map
   void DrawRivers(Map map)
   {
-    var opts = new List<int>() { 0, 1, 2 };
+    List<int> opts = [0, 1, 2];
     opts.Shuffle(Rng);
 
     int third = Length / 3;
@@ -275,6 +275,7 @@ internal class Wilderness(Rng rng, int length)
       }
     }
   }
+
   void DiamondStep(int[,] grid, int r, int c, int width)
   {
     int avg = (grid[r, c]
@@ -283,7 +284,7 @@ internal class Wilderness(Rng rng, int length)
                     + grid[(r + width - 1), c + width - 1]) / 4;
 
 
-    var f = Fuzz();
+    int f = Fuzz();
     grid[r + width / 2, +c + width / 2] = avg + f;
   }
 

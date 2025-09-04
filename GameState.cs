@@ -191,7 +191,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     return true;
   }
 
-  public bool CanSeeLoc(Actor viewer, Loc loc, int radius)
+  public bool CanSeeLoc(Loc loc, int radius)
   {
     Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
     Dictionary<Loc, int> fov = FieldOfView.CalcVisible(radius, loc, map, ObjDb);
@@ -298,7 +298,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (InWilderness && item.Name == "bone")
     {
       ulong pupId = FactDb.FactCheck("PupId") is SimpleFact pupFact ? ulong.Parse(pupFact.Value) : 0;
-      if (ObjDb.GetObj(pupId) is Actor pup && CanSeeLoc(pup, loc, 7))
+      if (ObjDb.GetObj(pupId) is Actor pup && CanSeeLoc(loc, 7))
       {
         pup.Stats[Attribute.MobAttitude] = new Stat(1);
       }
@@ -1032,7 +1032,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);
     }
-    ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => !l.Expired).ToList();
+    ObjDb.EndOfRoundListeners = [.. ObjDb.EndOfRoundListeners.Where(l => !l.Expired)];
 
     foreach (var ce in ObjDb.ConditionalEvents)
     {
@@ -1046,7 +1046,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
     if (!UI.InTutorial)
       CheckForStress();
 
-    ObjDb.ConditionalEvents = ObjDb.ConditionalEvents.Where(ce => !ce.Complete).ToList();
+    ObjDb.ConditionalEvents = [.. ObjDb.ConditionalEvents.Where(ce => !ce.Complete)];
 
     PrepareFieldOfView();
 
@@ -1124,7 +1124,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
 
     // prefer spawning the monster where the player can't see it
-    List<Loc> outOfSight = openLoc.Where(l => !LastPlayerFoV.Contains(l)).ToList();
+    List<Loc> outOfSight = [.. openLoc.Where(l => !LastPlayerFoV.Contains(l))];
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
     
@@ -1422,8 +1422,8 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    var map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
-    var sb = new StringBuilder();
+    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    StringBuilder sb = new();
     Tile tile = map.TileAt(loc.Row, loc.Col);
     sb.Append(tile.StepMessage);
     if (tile.Type == TileType.BusinessSign)
@@ -1646,7 +1646,7 @@ class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void RemoveListenersBySourceId(ulong srcId)
   {
-    ObjDb.EndOfRoundListeners = ObjDb.EndOfRoundListeners.Where(l => l.SourceId != srcId).ToList();
+    ObjDb.EndOfRoundListeners = [.. ObjDb.EndOfRoundListeners.Where(l => l.SourceId != srcId)];
   }
 
   // Remove listener from all events it might be listening for,

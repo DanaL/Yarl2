@@ -191,9 +191,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         gs.ItemDropped(item, loc);
       }
 
-      List<Loc> locOpts = Util.Adj8Locs(loc)
-                              .Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))
-                              .ToList();
+      List<Loc> locOpts = [.. Util.Adj8Locs(loc).Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))];
       if (locOpts.Count > 0)
       {
         Loc spookLoc = locOpts[gs.Rng.Next(locOpts.Count)];
@@ -625,7 +623,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
     if (vaultKey)
       return UseVaultKey(item);
 
-    var useableTraits = item.Traits.Where(t => t is IUSeable).ToList();
+    List<Trait> useableTraits = [.. item.Traits.Where(t => t is IUSeable)];
     if (useableTraits.Count != 0 || item.HasTrait<CanApplyTrait>())
     {
       if (written)
@@ -646,7 +644,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (torch)
       {
         Actor.Inventory.RemoveByID(item.ID);        
-        item.Traits = item.Traits.Where(t => t is not StackableTrait).ToList();
+        item.Traits = [.. item.Traits.Where(t => t is not StackableTrait)];
         Actor.Inventory.Add(item, Actor.ID);
       }
 

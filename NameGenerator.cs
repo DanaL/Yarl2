@@ -128,8 +128,7 @@ namespace Yarl2
     public NameGenerator(Rng rng, string sourceFile)
     {
       _rng = rng;
-      var names = File.ReadAllLines(sourceFile)
-                      .Select(n => n.ToLower()).ToList();
+      List<string> names = [.. File.ReadAllLines(sourceFile).Select(n => n.ToLower())];
 
       Dictionary<char, int> starts = [];
       Dictionary<string, int> pairFrequencies = [];

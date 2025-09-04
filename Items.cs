@@ -614,7 +614,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public (Item?, int) ItemAt(char slot)
   {
-    var inSlot = _items.Where(i => i.Item1 == slot).ToList();
+    List<(char, ulong)> inSlot = [.. _items.Where(i => i.Item1 == slot)];
     var item = _objDb.GetObj(inSlot.First().Item2) as Item;
 
     return (item, inSlot.Count);

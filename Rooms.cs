@@ -145,7 +145,7 @@ class Vaults
       }
     }
 
-    List<(int, int)> sqs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).ToList();
+    List<(int, int)> sqs = [.. vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)];
     if (sqs.Count == 0)
       return; // I can't imagine this actually ever happening
         
@@ -159,9 +159,7 @@ class Vaults
     statue.Glyph = statue.Glyph with { Ch = ch };
     objDb.SetToLoc(statueLoc, statue);
 
-    List<(int, int)> adj = Util.Adj4Sqs(loc.Item1, loc.Item2)
-                               .Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
-                               .ToList();
+    List<(int, int)> adj = [.. Util.Adj4Sqs(loc.Item1, loc.Item2).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)];
     if (adj.Count == 0) 
       return; // I also can't imagine this actually happing
     (int, int) landmarkSq = adj[rng.Next(adj.Count)];
@@ -254,8 +252,7 @@ class Vaults
   static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
-    List<Loc> locs = vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor)
-                          .Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2)).ToList();
+    List<Loc> locs = [.. vault.Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Select(sq => new Loc(dungeonID, level, sq.Item1, sq.Item2))];
 
     void SetItem(TreasureQuality quality)
     {
@@ -283,7 +280,7 @@ class Vaults
     }
 
     // place the marker on the other side of the door
-    var adj = Util.Adj4Sqs(doorRow, doorCol).Where(sq => vault.Contains(sq)).ToList();
+    List<(int, int)> adj = [.. Util.Adj4Sqs(doorRow, doorCol).Where(vault.Contains)];
     if (adj.Count > 0)
     {
       Tile marker = GetTombMarker(ng, rng, factDb);
@@ -466,7 +463,7 @@ class Rooms
 
     foreach (var (r, c) in room)
     {
-      List<(int, int)> adjSqs = Util.Adj4Sqs(r, c).ToList();
+      List<(int, int)> adjSqs = [.. Util.Adj4Sqs(r, c)];
       bool isPerimeter = adjSqs.Any(sq => !room.Contains(sq));
       if (isPerimeter)
       {
@@ -495,10 +492,9 @@ class Rooms
     }
 
     List<(int, int)> islandSqs
-      = room.Where(sq => !chasmSqs.Contains(sq)
+      = [.. room.Where(sq => !chasmSqs.Contains(sq)
             && map.TileAt(sq.Item1, sq.Item2).Type != TileType.Upstairs
-            && map.TileAt(sq.Item1, sq.Item2).Type != TileType.Downstairs)
-                                     .ToList();
+            && map.TileAt(sq.Item1, sq.Item2).Type != TileType.Downstairs)];
 
     return new ChasmRoomInfo()
     {
@@ -996,7 +992,7 @@ class Rooms
     }
 
     // Add some monsters
-    itemSpots = itemSpots.Where(loc => !objDb.AreBlockersAtLoc(loc) && !objDb.Occupied(loc)).ToList();
+    itemSpots = [.. itemSpots.Where(loc => !objDb.AreBlockersAtLoc(loc) && !objDb.Occupied(loc))];
 
     for (int j = 0; j < 3; j++)
     {
