@@ -1062,13 +1062,6 @@ class MainDungeonBuilder : DungeonBuilder
         koboldEffigy = true;
       }
 
-      if (level > 1 && rng.NextDouble() < 0.2)
-      {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.CampRoom(rooms[roomId], dungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
-      }
-
       if (level == graveyardOnLevel)
       {
         int roomId = rng.Next(rooms.Count);

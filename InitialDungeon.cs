@@ -37,10 +37,10 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       // Sometimes add a secret door or two in hallways
       if (rng.Next(2) == 0)
         PutSecretDoorsInHallways(levels[levelNum], rng);
-
-      AddRooms(levels[levelNum], objDb, rng);
     }
 
+    AddRooms(levels, objDb, factDb, rng);
+      
     dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
 
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
@@ -104,20 +104,45 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     return dungeon;
   }
 
-  static void AddRooms(Map map, GameObjectDB objDb, Rng rng)
+  void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    List<List<(int, int)>> rooms = map.FindRooms(9);
-
-    foreach (var room in rooms)
+    // Can we create any rooms-within-rooms?
+    for (int level = 0; level < levelMaps.Length; level++)
     {
-      RoomCorners corners = Rooms.IsRectangle(map, room);
-
-      if (corners.LowerRow - corners.UpperRow >= 5 && corners.RightCol - corners.LeftCol >= 5)
+      Map map = levelMaps[level];
+      List<List<(int, int)>> rooms = map.FindRooms(9);
+      List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
+      roomIds.Shuffle(rng);
+      
+      foreach (int id in roomIds)
       {
-        Rooms.RoomInRoom(map, corners, rng);
-        return;
+        RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
+        if (corners.LowerRow - corners.UpperRow >= 5 && corners.RightCol - corners.LeftCol >= 5)
+        {
+          Rooms.RoomInRoom(map, corners, rng);
+
+          List<(int, int)> nonFloors = [];
+          foreach (var sq in rooms[id])
+          {
+            if (map.TileAt(sq).Type != TileType.DungeonFloor)
+              nonFloors.Add(sq);
+          }
+          foreach (var sq in nonFloors)
+          {
+            rooms[id].Remove(sq);
+          }
+
+          break;
+        }       
       }
-    }   
+
+      if (level > 0 && rng.NextDouble() < 0.25)
+      {
+        int roomId = rng.Next(roomIds.Count);
+        Rooms.CampRoom(rooms[roomId], DungeonId, level, factDb, objDb, rng);
+        roomIds.Remove(roomId);
+      }
+    }
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
