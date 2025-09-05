@@ -1077,6 +1077,8 @@ class GrantsTrait : Trait
       }
     }
 
+    // I can't remember why I am calling this hear D: Perhaps because of
+    // traits that grant things like flying or water walking??
     if (obj is Actor actor2)
       gs.ResolveActorMove(actor2, actor2.Loc, actor2.Loc);
 

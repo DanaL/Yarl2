@@ -35,7 +35,7 @@ class PlayerCreator
       " in Elf Grade School.               and poison, and accrue stress more",
       "                                    slowly when exploring dungeons."
     ];
-    var options = new HashSet<char>() { '1', '2', '3', '4' };
+    HashSet<char> options = [ '1', '2', '3', '4'  ];
     char choice = ui.FullScreenMenu(menu, options, null);
 
     return choice switch
@@ -71,7 +71,7 @@ class PlayerCreator
       " translate directly to adventuring."
     ];
 
-    var options = new HashSet<char>() { '1', '2', '3' };
+    HashSet<char> options = ['1', '2', '3'];
     char choice = ui.FullScreenMenu(menu, options, null);
 
     return choice switch
@@ -170,13 +170,15 @@ class PlayerCreator
 
   static void StartingGearForScholar(Player player, GameObjectDB objDb, Rng rng)
   {
+    char slot;
+
     Item dagger = ItemFactory.Get(ItemNames.DAGGER, objDb);
-    dagger.Equipped = true;
-    player.Inventory.Add(dagger, player.ID);
+    slot = player.Inventory.Add(dagger, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
 
     Item focus = ItemFactory.Get(ItemNames.GENERIC_WAND, objDb);
-    focus.Equipped = true;
-    player.Inventory.Add(focus, player.ID);
+    slot = player.Inventory.Add(focus, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
 
     for (int i = 0; i < rng.Next(3, 6); i++)
     {
@@ -198,9 +200,9 @@ class PlayerCreator
       return;
     }
 
-    var leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
+    char slot;
+    Item leather = ItemFactory.Get(ItemNames.LEATHER_ARMOUR, objDb);
     leather.Traits.Add(new AdjectiveTrait("battered"));
-    leather.Equipped = true;
     leather.Slot = 'b';
 
     Item startWeapon;
@@ -209,36 +211,39 @@ class PlayerCreator
     {
       case PlayerLineage.Orc:
         startWeapon = ItemFactory.Get(ItemNames.SHORTSHORD, objDb);
-        player.Inventory.Add(leather, player.ID);
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
         player.Stats.Add(Attribute.SwordUse, new Stat(100));
         break;
       case PlayerLineage.Dwarf:
         startWeapon = ItemFactory.Get(ItemNames.HAND_AXE, objDb);
-        var studded = ItemFactory.Get(ItemNames.RINGMAIL, objDb);
-        studded.Equipped = true;
+        Item studded = ItemFactory.Get(ItemNames.RINGMAIL, objDb);
         studded.Slot = 'b';
-        player.Inventory.Add(studded, player.ID);
-        var helmet = ItemFactory.Get(ItemNames.HELMET, objDb);
-        helmet.Equipped = true;
+        slot = player.Inventory.Add(studded, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
+        Item helmet = ItemFactory.Get(ItemNames.HELMET, objDb);
         helmet.Slot = 'c';
-        player.Inventory.Add(helmet, player.ID);
+        slot = player.Inventory.Add(helmet, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
         player.Stats.Add(Attribute.AxeUse, new Stat(100));
         break;
       case PlayerLineage.Elf:
         startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
-        var bow = ItemFactory.Get(ItemNames.LONGBOW, objDb);
-        bow.Equipped = true;
+        Item bow = ItemFactory.Get(ItemNames.LONGBOW, objDb);
         bow.Slot = 'b';
-        player.Inventory.Add(bow, player.ID);
+        slot = player.Inventory.Add(bow, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
         player.Stats.Add(Attribute.BowUse, new Stat(100));
         player.Stats.Add(Attribute.FinesseUse, new Stat(100));
         leather.Slot = 'c';
-        player.Inventory.Add(leather, player.ID);        
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
         break;
       default:
         startWeapon = ItemFactory.Get(ItemNames.SPEAR, objDb);
-        startWeapon.Traits.Add(new AdjectiveTrait("old"));        
-        player.Inventory.Add(leather, player.ID);
+        startWeapon.Traits.Add(new AdjectiveTrait("old"));
+        slot = player.Inventory.Add(leather, player.ID);
+        player.Inventory.ToggleEquipStatus(slot);
         player.Stats.Add(Attribute.PolearmsUse, new Stat(100));
         break;
     }
@@ -246,13 +251,13 @@ class PlayerCreator
     if (player.Background == PlayerBackground.Skullduggery)
     {
       startWeapon = ItemFactory.Get(ItemNames.DAGGER, objDb);
-      if (!player.Stats.ContainsKey(Attribute.FinesseUse)) 
+      if (!player.Stats.ContainsKey(Attribute.FinesseUse))
         player.Stats.Add(Attribute.FinesseUse, new Stat(100));
     }
 
-    startWeapon.Equipped = true;
     startWeapon.Slot = 'a';
-    player.Inventory.Add(startWeapon, player.ID);
+    slot = player.Inventory.Add(startWeapon, player.ID);
+    player.Inventory.ToggleEquipStatus(slot);
 
     // Everyone gets 3 to 5 torches to start with
     for (int i = 0; i < rng.Next(3, 6); i++)

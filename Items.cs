@@ -188,7 +188,6 @@ class Item : GameObj, IEquatable<Item>
   }
 
   public static bool operator!=(Item? a, Item? b) => !(a == b);
-
 }
 
 enum ItemNames
