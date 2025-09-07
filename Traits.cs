@@ -2553,7 +2553,8 @@ class StatBuffTrait : TemporaryTrait
     int hpDelta = player.Stats[Attribute.HP].Max - player.Stats[Attribute.HP].Curr;
     player.CalcHP();
 
-    int maxHp = player.Stats[Attribute.HP].Max - hpDelta;
+    int m = player.Stats[Attribute.HP].Max;
+    int maxHp = int.Min(m, m - hpDelta);
     if (maxHp < 1)
       maxHp = 1;
 
@@ -2610,9 +2611,15 @@ class StatBuffTrait : TemporaryTrait
   }
 
   string RemoveBuff(Actor target, Trait trait)
-  {    
+  {
+    int currAmt = target.Stats[Attr].Curr;
+
     target.Stats[Attr].ChangeMax(-Amt);
-    target.Stats[Attr].Change(-Amt);
+    if (Attr != Attribute.HP)
+    {
+      target.Stats[Attr].Change(-Amt);
+    }
+    
     target.Traits.Remove(trait);
     
     if (target is Player player)
