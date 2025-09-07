@@ -21,7 +21,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   Player? _player { get; set;  }
   public void SetPlayer(Player p) => _player = p;
-  public Player Player => _player is not null ? _player : throw new Exception("Player not set");
+  public Player Player => _player ?? throw new Exception("Player not set");
   
   public int CurrLevel { get; set; }
   public int CurrDungeonID { get; set; }
