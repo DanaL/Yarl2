@@ -185,7 +185,7 @@ class GameStateSave
   public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
   {
     Rng rng = Rng.FromState(gss.Seed);
-    GameState gs = new(null!, camp, opt, ui, rng)
+    GameState gs = new(camp, opt, ui, rng)
     {
       CurrDungeonID = gss.CurrDungeonID,
       CurrLevel = gss.CurrLevel,

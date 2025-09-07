@@ -14,11 +14,15 @@ using System.Text;
 namespace Yarl2;
 
 // The queue of actors to act will likely need to go here.
-class GameState(Player p, Campaign c, Options opts, UserInterface ui, Rng rng)
+class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 {
   public Rng Rng { get; set; } = rng;
   public Options Options { get; set; } = opts;
-  public Player Player { get; set; } = p;
+
+  Player? _player { get; set;  }
+  public void SetPlayer(Player p) => _player = p;
+  public Player Player => _player is not null ? _player : throw new Exception("Player not set");
+  
   public int CurrLevel { get; set; }
   public int CurrDungeonID { get; set; }
   public Campaign Campaign { get; set; } = c;

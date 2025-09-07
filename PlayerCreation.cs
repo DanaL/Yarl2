@@ -280,7 +280,8 @@ class PlayerCreator
       Loc = new Loc(0, 0, startRow, startCol),
       Lineage = lineage,
       Background = background,
-      Energy = 1.0
+      Energy = 1.0,
+      ID = 1
     };
     player.Stats = RollStats(player.Lineage, player.Background, rng);
     player.Stats[Attribute.MainQuestState] = new Stat(0);

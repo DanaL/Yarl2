@@ -46,7 +46,7 @@ class Tutorial(UserInterface ui)
     };
     doc.Traits.Add(new ScrollTrait());
     
-    var rt = new ReadableTrait("Dungeon delving can be tough, and it may take you many tries to beat the game so don't get discouraged and have fun!")
+    ReadableTrait rt = new("Dungeon delving can be tough, and it may take you many tries to beat the game so don't get discouraged and have fun!")
     {
       OwnerID = doc.ID
     };
@@ -114,10 +114,8 @@ class Tutorial(UserInterface ui)
     Rng rng = new(seed);
     GameObjectDB objDb = new();
 
-    Player player = TutorialPlayer(objDb);
     Campaign campaign = Campaign();
-
-    GameState gameState = new(player, campaign, options, UI, rng)
+    GameState gameState = new(campaign, options, UI, rng)
     {
       ObjDb = objDb,
       Turn = 1,
@@ -125,6 +123,9 @@ class Tutorial(UserInterface ui)
       CurrDungeonID = 1,
       CurrLevel = 0
     };
+
+    Player player = TutorialPlayer(objDb);
+    gameState.SetPlayer(player);
 
     gameState.ObjDb.AddNewActor(player, new Loc(1, 0, 1, 6));
     gameState.PrepareFieldOfView();

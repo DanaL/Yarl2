@@ -111,7 +111,8 @@ class GameLoader(UserInterface ui)
         throw new GameNotLoadedException();
 
       GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
-      gameState.Player = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+      Player p = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
+      gameState.SetPlayer(p);
       gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
@@ -667,18 +668,21 @@ class CampaignCreator(UserInterface ui)
       GameObjectDB objDb = new();
       SetItemIDInfo(rng);
 
-      Player player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, UI, rng);
-      UI.ClearLongMessage();
       Campaign campaign;
       int startRow, startCol;
-      (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);
-      player.Loc = new Loc(0, 0, startRow, startCol);
-      GameState gameState = new(player, campaign, options, UI, rng)
+      (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);      
+      GameState gameState = new(campaign, options, UI, rng)
       {
         ObjDb = objDb,
         Turn = 1
       };
 
+      Player player = PlayerCreator.NewPlayer(playerName, objDb, 0, 0, UI, rng);
+      player.Loc = new Loc(0, 0, startRow, startCol);
+      gameState.SetPlayer(player);
+
+      UI.ClearLongMessage();
+      
       string welcomeText = "An adventure begins!\n\nHaving recently graduated from one of the top fourteen Adventurer Colleges in ";
       welcomeText += $"Yendor, you've ventured to the remote town of {gameState.Town.Name}, ";
       welcomeText += "having heard that a growing darkness imperils its people. What better venue for a new adventurer to earn fame, glory, and gold!";
