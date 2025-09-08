@@ -278,7 +278,11 @@ class LightPuzzleSetup
 
   static bool Passable(int r, int c, Map map)
   {
-    Tile tile = map.TileAt(r, c);
+    if (!map.InBounds(r, c))
+      return false;
+      
+    Tile  tile = map.TileAt(r, c);
+    
     if (tile.PassableByFlight())
       return true;
 
