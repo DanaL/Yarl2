@@ -1039,7 +1039,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     base.Execute();
 
     Tile tile = GameState!.TileAt(Loc);
-   
+
     if (GameState.ObjDb.ItemsAt(Loc).Where(i => i.Type == ItemType.Device).Any())
     {
       Actor!.QueueAction(new DeviceInteractionAction(GameState, Actor) { Loc = Loc });
@@ -1055,6 +1055,10 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     else if (tile.Type == TileType.ClosedDoor)
     {
       Actor!.QueueAction(new OpenDoorAction(GameState, Actor) { Loc = Loc });
+    }
+    else if (tile.Type == TileType.BrokenDoor)
+    {
+      GameState.UIRef().AlertPlayer("The door is broken.");
     }
     else
     {
