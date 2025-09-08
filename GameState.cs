@@ -1163,8 +1163,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       deck.Reshuffle(Rng);
     string m = deck.Monsters[deck.Indexes.Dequeue()];
 
-    return MonsterFactory.Get("kobold", ObjDb, Rng);    
-    //return MonsterFactory.Get(m, ObjDb, Rng);
+    return MonsterFactory.Get(m, ObjDb, Rng);
   }
 
   public string RandomMonster(int dungeonId)

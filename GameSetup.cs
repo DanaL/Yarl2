@@ -537,7 +537,7 @@ class CampaignCreator(UserInterface ui)
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
 
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
-        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng, wildernessMap);
+        Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng);
         firstDungeon.ExitLoc = entranceLoc;
         campaign.AddDungeon(firstDungeon);
        

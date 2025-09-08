@@ -103,7 +103,6 @@ abstract class DungeonBuilder
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
-        m = "kobold";
         
         // Some monsters are a bit special and take a bit of extra work
         //Actor monster = MonsterFactory.Get(m, objDb, rng);

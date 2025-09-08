@@ -19,7 +19,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
 
-  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng, Map wildernessMap)
+  public Dungeon Generate(string arrivalMessage, FactDb factDb, GameObjectDB objDb, Rng rng)
   {
     int numOfLevels = rng.Next(5, 8);
 
