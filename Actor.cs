@@ -210,10 +210,13 @@ abstract class Actor : GameObj, IZLevel
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;
     bool fireDamage = false;
+    bool coldDamage = false;
     foreach (var dmg in damages)
     {
       if (dmg.Item2 == DamageType.Fire)
         fireDamage = true;
+      else if (dmg.Item2 == DamageType.Cold)
+        coldDamage = true;
 
       int d = dmg.Item1;
       if (dmg.Item2 == DamageType.Blunt && HasActiveTrait<ResistBluntTrait>())
@@ -256,6 +259,15 @@ abstract class Actor : GameObj, IZLevel
       if (s != "")
         msg += $" {s}";
     }
+
+    Animation anim;
+    if (fireDamage)
+      anim = new SqAnimation(gs, Loc, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);      
+    else if (coldDamage)
+      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.ICE_BLUE, '*');      
+    else
+      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.FX_RED, Glyph.Ch);      
+    gs.UIRef().RegisterAnimation(anim);
 
     AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();
     if (aura is not null)

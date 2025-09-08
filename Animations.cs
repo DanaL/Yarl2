@@ -348,9 +348,7 @@ class BarkAnimation : Animation
   }
 }
 
-// Simple animation to draw one character at a location. WIth a bit of work, I
-// can probably merge HitAnimation into this, but HitAnimation actually 
-// preceded this
+// Simple animation to draw one character at a location.
 class SqAnimation : Animation
 {
   public bool IgnoreFoV { get; set; } = false;
@@ -457,36 +455,6 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
     }
 
     _lastFrame = DateTime.UtcNow;
-  }
-}
-
-class HitAnimation : Animation
-{
-  readonly GameState _gs;
-  Colour _colour;
-  readonly ulong _victimID;
-
-  public HitAnimation(ulong victimID, GameState gs, Colour colour)
-  {
-    _gs = gs;
-    _colour = colour;
-    _victimID = victimID;
-    Expiry = DateTime.UtcNow.AddMilliseconds(400);
-  }
-
-  public override void Update()
-  {
-    if (_gs.ObjDb.GetObj(_victimID) is Actor victim)
-    {
-      var ui = _gs.UIRef();
-      var (scrR, scrC) = ui.LocToScrLoc(victim.Loc.Row, victim.Loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
-
-      if (scrR >= 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC >= 0 && scrC < ui.SqsOnScreen.GetLength(1))
-      {
-        Sqr sq = ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = _colour };
-        ui.SqsOnScreen[scrR, scrC] = sq;
-      }
-    }
   }
 }
 

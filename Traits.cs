@@ -471,7 +471,7 @@ class AcidSplashTrait : Trait
         int roll = gs.Rng.Next(4) + 1;
         var (hpLeftAfterAcid, acidMsg, _) = victim.ReceiveDmg([(roll, DamageType.Acid)], 0, gs, null, 1.0);
 
-        HitAnimation hitAnim = new(victim.ID, gs, Colours.DARK_GREEN);
+        SqAnimation hitAnim = new(gs, victim.Loc, Colours.WHITE, Colours.DARK_GREEN, victim.Glyph.Ch);
         gs.UIRef().RegisterAnimation(hitAnim);
         
         if (hpLeftAfterAcid < 1)

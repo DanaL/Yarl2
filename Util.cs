@@ -200,6 +200,7 @@ class Constants
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
   public const char BOTTOM_RIGHT_CORNER = '┙';
+  public const char FIRE_CHAR = '\u22CF';
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
 
   public const int WILDERNESS_WIDTH = 129;

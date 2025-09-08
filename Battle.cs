@@ -300,9 +300,6 @@ class Battle
       gs.ActorKilled(target, killerName, attacker);
     }
 
-    HitAnimation hitAnim = new(target.ID, gs, Colours.FX_RED);
-    gs.UIRef().RegisterAnimation(hitAnim);
-
     // This looks convoluted but the target's collection of traits can be modified
     // if the attacker is killed by the acidSplash or fireRebuke (for example, if
     // the attacker had been grappling the target)
