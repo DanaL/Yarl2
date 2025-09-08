@@ -223,18 +223,18 @@ abstract class Actor : GameObj, IZLevel
       else if (dmg.Item2 == DamageType.Slashing && HasActiveTrait<ResistSlashingTrait>())
         d /= 2;
 
-      foreach (var trait in Traits)
+      foreach (Trait trait in Traits)
       {
         if (trait is ImmunityTrait immunity && immunity.Type == dmg.Item2)
         {
           d = 0;
           bonusDamage = 0;
-          msg = "It is seems ineffectual!";
+          msg = MsgFactory.CalcResistanceMessage(immunity.Type, true);
         }
         else if (trait is ResistanceTrait resist && resist.Type == dmg.Item2)
         {
           d /= 2;
-          msg = "It seems less effective!";
+          msg = MsgFactory.CalcResistanceMessage(resist.Type, false);
         }
       }
 

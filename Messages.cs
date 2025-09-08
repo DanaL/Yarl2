@@ -165,4 +165,15 @@ class MsgFactory
     else
       return "Something makes a death-rattle!";
   }
+
+  public static string CalcResistanceMessage(DamageType dmgType, bool immune)
+  {
+    string txt = immune ? "ineffectual!" : "less effective";
+    string ds = dmgType.ToString().ToLower();
+    return dmgType switch
+    {
+      DamageType.Acid or DamageType.Poison or DamageType.Cold or DamageType.Fire or DamageType.Electricity => $"The {ds} seems {txt}.",
+      _ => $"It seems {txt}.",
+    };
+  }
 }
