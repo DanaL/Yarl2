@@ -1058,7 +1058,7 @@ class SelectActionAction(GameState gs, Actor actor) : DirectionalAction(gs, acto
     }
     else if (tile.Type == TileType.BrokenDoor)
     {
-      GameState.UIRef().AlertPlayer("The door is broken.");
+      GameState.UIRef().AlertPlayer("That door is broken.");
     }
     else
     {

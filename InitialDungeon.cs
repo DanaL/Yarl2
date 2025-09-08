@@ -142,6 +142,13 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         Rooms.CampRoom(rooms[roomId], DungeonId, level, factDb, objDb, rng);
         roomIds.Remove(roomId);
       }
+
+      if (factDb.Ruler.Type == OGRulerType.ElfLord && rng.NextDouble() < 0.15)
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.Orchard(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(roomId);
+      }
     }
   }
 

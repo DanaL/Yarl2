@@ -1069,13 +1069,6 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }
 
-      if (factDb.Ruler.Type == OGRulerType.ElfLord && rng.NextDouble() < 0.15)
-      {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.Orchard(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
-      }
-
       if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)      
       {
         int roomId = rng.Next(rooms.Count);
