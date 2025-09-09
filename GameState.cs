@@ -70,11 +70,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   {
     CurrLevel = level;
     CurrDungeonID = dungeon;
+    int maxDepth = Player.Stats[Attribute.Depth].Max;
+
+    if (!InWilderness && level + 1 > maxDepth)
+    {
+      Player.Stats[Attribute.Depth] = new Stat(level + 1);
+    }
 
     if (dungeon == 1 && actor is Player)
-    {
-      int maxDepth = Player.Stats[Attribute.Depth].Max;
-            
+    {    
       // When the player reaches certain details for the first time, raise
       // their nerve.
       // Or maybe I should do it 50/level?
