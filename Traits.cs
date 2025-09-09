@@ -1869,40 +1869,25 @@ class BoostMaxStatTrait : TemporaryTrait
 
     List<string> msgs = [];
 
-    // For max HP, we'll only change max if curr == max
-    // Note: not taking into account lowering a stat, if that's a thing that might happen
-    if (Stat == Attribute.HP)
+    statValue.ChangeMax(Amount);
+    statValue.Change(Amount);
+    string s = Stat switch
     {
-      if (target.Stats[Stat].Curr == target.Stats[Stat].Max) 
-      {
-        statValue.ChangeMax(Amount);
-        statValue.Change(Amount);
-        msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!");
-      }      
-    }
-    else if (Stat == Attribute.Constitution)
-    {
-      statValue.ChangeMax(Amount);
-      statValue.Change(Amount);
-      target.Stats[Attribute.HP].ChangeMax(Amount * 5);
-      msgs.Add($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} healthier!");
-    }
-    else
-    {
-      statValue.ChangeMax(Amount);
-      statValue.Change(Amount);
-      string s = Stat switch
-      {
-        Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
-        Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",
-        Attribute.FinesseUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept with light weapons!",
-        Attribute.SwordUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at swordplay!",
-        Attribute.AxeUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at axe-work!",
-        Attribute.BowUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more skilled with bows!",
-        _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
-      };
-      msgs.Add(s);
-    }
+      Attribute.BaseHP => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!",
+      Attribute.HP => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more healthier!",
+      Attribute.Constitution => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more robust!",
+      Attribute.Strength => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} stronger!",
+      Attribute.Dexterity => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more agile!",
+      Attribute.FinesseUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept with light weapons!",
+      Attribute.SwordUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at swordplay!",
+      Attribute.AxeUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more adept at axe-work!",
+      Attribute.BowUse => $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} more skilled with bows!",
+      _ => $"{Grammar.Possessive(target).Capitalize()} max {Stat} has changed!"
+    };
+    msgs.Add(s);
+
+    if (Stat == Attribute.Constitution || Stat == Attribute.BaseHP)
+      target.CalcHP();
 
     return msgs;
   }
@@ -3814,20 +3799,21 @@ class TraitFactory
     { "Stabby", (pieces, gameObj) => new StabbyTrait() },
     { "Stackable", (pieces, gameObj) => new StackableTrait() },
     { "StatBuff", (pieces, gameObj) =>
-    {
-      Enum.TryParse(pieces[3], out Attribute attr);
-      ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
-      ulong s;
-      if (pieces[5] == "item" && gameObj is not null)
-        s = gameObj.ID;
-      else
-        s = ulong.Parse(pieces[5]);
-      return new StatBuffTrait()
       {
-        OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr,
-        Amt = int.Parse(pieces[4]), SourceId = s
-      };
-    } },
+        Enum.TryParse(pieces[3], out Attribute attr);
+        ulong expires = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
+        ulong s;
+        if (pieces[5] == "item" && gameObj is not null)
+          s = gameObj.ID;
+        else
+          s = ulong.Parse(pieces[5]);
+        return new StatBuffTrait()
+        {
+          OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr,
+          Amt = int.Parse(pieces[4]), SourceId = s
+        };
+      } 
+    },
     { "StatDebuff", (pieces, gameObj) =>
     {
       Enum.TryParse(pieces[3], out Attribute attr);

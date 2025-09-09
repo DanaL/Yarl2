@@ -25,7 +25,8 @@ class Tutorial(UserInterface ui)
       { Attribute.Piety, new Stat(0) },
       { Attribute.Will, new Stat(0) },
       { Attribute.Depth, new Stat(0) },
-      { Attribute.HP, new Stat(1) }
+      { Attribute.HP, new Stat(1) },
+      { Attribute.BaseHP, new Stat(10) }
     };
 
     Player player = new("Max Damage")

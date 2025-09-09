@@ -122,9 +122,9 @@ class Player : Actor
     }
   }
 
-  public void CalcHP()
+  public override void CalcHP()
   {
-    int baseHP = 10;
+    int baseHP = Stats[Attribute.BaseHP].Curr;
     if (Lineage == PlayerLineage.Orc)
       baseHP += 5;
     if (Background == PlayerBackground.Warrior)
@@ -135,7 +135,7 @@ class Player : Actor
       baseHP += con.Max >= 0 ? con.Max * 5 : con.Max;
     }
 
-    foreach (var t in Traits)
+    foreach (Trait t in Traits)
     {
       if (t is StatBuffTrait sbt && sbt.Attr == Attribute.HP)
         baseHP += sbt.Amt;

@@ -262,11 +262,11 @@ abstract class Actor : GameObj, IZLevel
 
     Animation anim;
     if (fireDamage)
-      anim = new SqAnimation(gs, Loc, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);      
+      anim = new SqAnimation(gs, Loc, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);
     else if (coldDamage)
-      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.ICE_BLUE, '*');      
+      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.ICE_BLUE, '*');
     else
-      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.FX_RED, Glyph.Ch);      
+      anim = new SqAnimation(gs, Loc, Colours.WHITE, Colours.FX_RED, Glyph.Ch);
     gs.UIRef().RegisterAnimation(anim);
 
     AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();
@@ -419,9 +419,9 @@ abstract class Actor : GameObj, IZLevel
       var half = Stats[Attribute.HP].Curr - hp;
       Stats[Attribute.HP].Curr = hp;
       other.Stats[Attribute.HP].SetMax(half);
-      
+
       gs.UIRef().AlertPlayer($"{Name.DefArticle().Capitalize()} divides into two!!");
-      gs.ObjDb.AddNewActor(other, spot);      
+      gs.ObjDb.AddNewActor(other, spot);
     }
   }
 
@@ -431,6 +431,7 @@ abstract class Actor : GameObj, IZLevel
   public abstract Loc PickTargetLoc(GameState gamestate);
   public abstract Loc PickRangedTargetLoc(GameState gamestate);
   public abstract void TakeTurn(GameState gs);
+  public abstract void CalcHP();
 
   public bool AbilityCheck(Attribute attr, int dc, Rng rng)
   {
@@ -444,11 +445,11 @@ abstract class Actor : GameObj, IZLevel
       else if (t is CurseTrait)
         roll -= 3;
     }
-    
+
     if (attr == Attribute.Strength && HasActiveTrait<RageTrait>())
       roll += rng.Next(1, 7);
 
-    
+
     return roll >= dc;
   }
 
@@ -471,7 +472,7 @@ abstract class Actor : GameObj, IZLevel
     if (gameState.CanSeeLoc(other.Loc, 6))
     {
       Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
-      
+
       return $"{FullName.Capitalize()} gets angry!";
     }
 
@@ -489,7 +490,7 @@ abstract class Actor : GameObj, IZLevel
       if (t is SeeInvisibleTrait || t is TelepathyTrait)
       {
         seeInvisible = true;
-        break;  
+        break;
       }
     }
     if (HasTrait<InvisibleTrait>() && !seeInvisible)
@@ -499,7 +500,7 @@ abstract class Actor : GameObj, IZLevel
   }
 
   protected double CalcEnergyUsed(double baseCost)
-  {    
+  {
     // Maybe I should come up with a formal/better way to differentiate 
     // between real in-game actions and things like opening inventory or
     // looking athelp, etc?
@@ -528,10 +529,10 @@ class Mob : Actor
   BehaviourNode? CurrPlan { get; set; } = null;
   public void ClearPlan() => CurrPlan = null;
 
-  public const int  INACTIVE = 0;
+  public const int INACTIVE = 0;
   public const int INDIFFERENT = 1;
   public const int AGGRESSIVE = 2;
-  
+
   public Mob() => _behaviour = new MonsterBehaviour();
 
   public override string Appearance
@@ -544,11 +545,11 @@ class Mob : Actor
         if (cyclopedia.TryGetValue(Name, out var entry))
           return entry.Text;
       }
-      
+
       return base.Appearance;
     }
   }
-  
+
   public Damage? Dmg { get; set; }
   public override List<Damage> MeleeDamage()
   {
@@ -572,9 +573,9 @@ class Mob : Actor
 
     if (Stats.TryGetValue(Attribute.MobAttitude, out var attitude) && !HasTrait<WorshiperTrait>() && !HasTrait<VillagerTrait>())
     {
-        Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);        
+      Stats[Attribute.MobAttitude].SetMax(AGGRESSIVE);
     }
-        
+
     if (heard && HasTrait<SleepingTrait>())
     {
       if (gs.LastPlayerFoV.Contains(Loc))
@@ -582,6 +583,8 @@ class Mob : Actor
       Traits.RemoveAll(t => t is SleepingTrait);
     }
   }
+
+  public override void CalcHP() { }
 
   public override int TotalMissileAttackModifier(Item weapon)
   {
@@ -618,13 +621,13 @@ class Mob : Actor
       CurrPlan = null;
       ExecuteAction(new PassAction());
     }
-    
-    gs.PrepareFieldOfView(); 
+
+    gs.PrepareFieldOfView();
   }
 
   // At the moment, monsters will pick the player, but I'm working toward
   // changing thawt
-  public override Actor PickTarget(GameState gs) 
+  public override Actor PickTarget(GameState gs)
   {
     if (gs.Player.HasTrait<NondescriptTrait>())
       return NoOne.Instance();
@@ -670,7 +673,7 @@ class MonsterFactory
 
     var fields = template.Split('|').Select(f => f.Trim()).ToArray();
 
-    char ch = fields[0].Length == 0 ?  ' ' : fields[0][0];
+    char ch = fields[0].Length == 0 ? ' ' : fields[0][0];
     Glyph glyph = new(ch, Colours.TextToColour(fields[1]),
                            Colours.TextToColour(fields[2]), Colours.BLACK, false);
 
@@ -680,13 +683,13 @@ class MonsterFactory
       Glyph = glyph,
       Recovery = Util.ToDouble(fields[6])
     };
-    
+
     int ac = int.Parse(fields[3]);
     m.Stats.Add(Attribute.AC, new Stat(ac));
     int hp = int.Parse(fields[4]);
     m.Stats.Add(Attribute.HP, new Stat(hp));
     int attBonus = int.Parse(fields[5]);
-    m.Stats.Add(Attribute.AttackBonus, new Stat(attBonus));    
+    m.Stats.Add(Attribute.AttackBonus, new Stat(attBonus));
     int str = Util.StatRollToMod(int.Parse(fields[7]));
     m.Stats.Add(Attribute.Strength, new Stat(str));
     int dex = Util.StatRollToMod(int.Parse(fields[8]));
@@ -715,7 +718,7 @@ class MonsterFactory
 
         if (trait is IGameEventListener listener)
         {
-          objDb.EndOfRoundListeners.Add(listener);                     
+          objDb.EndOfRoundListeners.Add(listener);
         }
       }
     }
@@ -724,10 +727,10 @@ class MonsterFactory
     // into the game
     if (name == "zombie" && rng.Next(100) == 0)
       m.Traits.Add(new DeathMessageTrait() { Message = "Is this the end of Zombie Shakespeare?" });
-    
+
     if (!m.HasTrait<BehaviourTreeTrait>())
       m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
-      
+
     m.Inventory = new Inventory(m.ID, objDb);
 
     return m;
@@ -747,11 +750,11 @@ class Power
   public ulong Cooldown { get; set; }
   public PowerType Type { get; set; }
   public string Quip { get; set; } = "";
-    
+
   public static Power FromText(string txt)
   {
     string[] pieces = txt.Split('#');
-    
+
     Enum.TryParse(pieces[7], out PowerType type);
     string quip = pieces.Length > 8 ? pieces[8] : "";
 
@@ -770,7 +773,7 @@ class Power
   }
 
   public override string ToString() => $"{Name}#{MinRange}#{MaxRange}#{DmgDie}#{NumOfDice}#{DC}#{Cooldown}#{Type}#{Quip}";
-  
+
   public Action Action(Mob mob, GameState gs, Loc loc)
   {
     string txt;
@@ -799,12 +802,12 @@ class Power
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);
         return new MeleeAttackAction(gs, mob, loc);
       case "MissilePiercing":
-        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);        
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);
         var arrow = ItemFactory.Get(ItemNames.ARROW, gs.ObjDb);
         return new MissileAttackAction(gs, mob, loc, arrow);
       case "CastCurse":
-        return new CastCurse(loc, DC) 
-        { 
+        return new CastCurse(loc, DC)
+        {
           GameState = gs,
           Actor = mob
         };
@@ -881,26 +884,27 @@ class Power
       case "Shriek":
         return new ShriekAction(gs, mob, MaxRange);
       case "Gulp":
-        return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);      
+        return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);
       default:
         return new PassAction();
-    }    
+    }
   }
 }
 
 class NoOne : Actor
 {
-    static NoOne? _instance;
-    public static NoOne Instance() => _instance ??= new NoOne();
+  static NoOne? _instance;
+  public static NoOne Instance() => _instance ??= new NoOne();
 
-    NoOne()
-    {
-        Name = "No One";
-        Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false);
-    }
+  NoOne()
+  {
+    Name = "No One";
+    Glyph = new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false);
+  }
 
-    public override Actor PickTarget(GameState gs) => this;
-    public override Loc PickTargetLoc(GameState gamestate) => Loc;
-    public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
-    public override void TakeTurn(GameState gs) { }
+  public override Actor PickTarget(GameState gs) => this;
+  public override Loc PickTargetLoc(GameState gamestate) => Loc;
+  public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
+  public override void TakeTurn(GameState gs) { }
+  public override void CalcHP() { }
 }
