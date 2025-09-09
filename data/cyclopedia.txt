@@ -131,6 +131,9 @@ Essential gear for staving off the darkness.
 potion of healing
 Heals 4-16 hp.
 #
+potion of hardiness
+Makes you permanently stronger by raising your max HP.
+#
 antidote
 Cures poison.
 #
