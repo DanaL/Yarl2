@@ -406,7 +406,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
   public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
-    Dungeon dungeon = new(DungeonId, "", true);
+    Dungeon dungeon = new(DungeonId, "a Hidden Dungeon", "", true);
 
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["creeping coins"]);

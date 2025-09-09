@@ -605,7 +605,7 @@ class GameObjectDB
 }
 
 // A structure to store info about a dungeon
-class Dungeon(int ID, string arrivalMessage, bool desc)
+class Dungeon(int ID, string name, string arrivalMessage, bool desc)
 {
   public int ID { get; init; } = ID;
   public Dictionary<Loc, Glyph> RememberedLocs = [];
@@ -614,7 +614,8 @@ class Dungeon(int ID, string arrivalMessage, bool desc)
   public List<MonsterDeck> MonsterDecks { get; set; } = [];
   public bool Descending { get; set; } = desc;
   public Loc ExitLoc { get; set; }
-  
+  public string Name { get; set; } = name;
+
   public void AddMap(Map map)
   {
     int id = LevelMaps.Count == 0 ? 0 : LevelMaps.Keys.Max() + 1;

@@ -19,7 +19,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
   public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, Rng rng)
   {
-    Dungeon towerDungeon = new(DungeonId, "Ancient halls that smell of dust and magic.", false);
+    Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false);
 
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);

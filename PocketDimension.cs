@@ -47,7 +47,7 @@ class PocketDimension
     map.SetTile(2, 2, new MonsterWall(new Glyph('/', mg.Lit, mg.Unlit, mg.BG, mg.Illuminate), monster.ID));
 
     int dungeonId = TempDungeonId(gs);
-    Dungeon belly = new(dungeonId, $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
+    Dungeon belly = new(dungeonId, "a Pocket Dimension", $"You've been swallowed by {monster.Name.IndefArticle()}!", true);
     belly.AddMap(map);
 
 

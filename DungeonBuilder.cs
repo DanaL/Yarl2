@@ -1222,13 +1222,11 @@ class MainDungeonBuilder : DungeonBuilder
     objDb.AddNewActor(cleric, startLoc);
   }
 
-  public Dungeon Generate(int id, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
+  public Dungeon Generate(int id, string name, string arrivalMessage, int h, int w, int numOfLevels, (int, int) entrance, 
         FactDb factDb, GameObjectDB objDb, Rng rng, List<MonsterDeck> monsterDecks, Map wildernessMap)
-  {
-    
-
+  {    
     _dungeonID = id;
-    var dungeon = new Dungeon(id, arrivalMessage, true);
+    var dungeon = new Dungeon(id, name, arrivalMessage, true);
     var mapper = new DungeonMap(rng);
     Map[] levels = new Map[numOfLevels];
 

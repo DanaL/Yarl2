@@ -260,7 +260,7 @@ class WitchQuest
   public static (Dungeon, Loc) GenerateDungeon(GameState gs, Loc entrance)
   {
     int id = gs.Campaign.Dungeons.Keys.Max() + 1;
-    Dungeon dungeon = new(id, "You shudder. Not from cold, but from sensing something unnatural within this cave.", true);
+    Dungeon dungeon = new(id, "a Mysterious Cave", "You shudder. Not from cold, but from sensing something unnatural within this cave.", true);
     dungeon.ExitLoc = entrance;
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);

@@ -1224,7 +1224,13 @@ abstract class UserInterface
     string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
     text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
-    text[8] = $@"    |       on level {depth}        |          |____|";
+
+    string dn = $"in {gameState.CurrentDungeon.Name}";
+    int x = (26 - dn.Length) / 2;
+    dn = dn.PadLeft(26 - x, ' ');
+    dn = dn.PadRight(26, ' ');
+    text[8] = $@"    |{dn}|          |____|";
+    //text[8] = $@"    |       on level {depth}        |          |____|";
 
     if (messages.Count > 1)
     {

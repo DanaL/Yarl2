@@ -41,7 +41,7 @@ class UnderwaterCave
     Loc caveEntrance = new(cave.ID, 0, caveBuilder.ExitLoc.Item1, caveBuilder.ExitLoc.Item2);
     factDb.Add(new LocationFact() { Desc = "UnderwaterCaveEntrance", Loc = caveEntrance });
 
-    Dungeon temple = new(campaign.Dungeons.Count, "", true)
+    Dungeon temple = new(campaign.Dungeons.Count, "a Dusty Temple", "", true)
     {
       ExitLoc = new(0, 0, entranceRow, entranceCol)
     };
@@ -210,7 +210,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
   public Dungeon Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
-    Dungeon cave = new(DungeonId, "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
+    Dungeon cave = new(DungeonId, "a Flooded Cavern", "A moist, clammy cave. From the distance comes the sound of dripping water.", true);
 
     MonsterDeck deck = new();
     deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
