@@ -87,6 +87,11 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       //SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
     }
 
+    // The idol 'puzzle' gives a guaranteed Potion of Hardiness, but I think 
+    // I'd like to have a few different mini-puzzles for variety
+    int altarLevel = rng.Next(0, numOfLevels);
+    IdolAltarMaker.MakeAltar(DungeonId, levels, objDb, factDb, rng, altarLevel);
+
     SetPuzzle(dungeon, objDb, factDb, rng);
 
     GnomeMerchant(levels, DungeonId, rng, objDb);

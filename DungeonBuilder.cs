@@ -1283,9 +1283,6 @@ class MainDungeonBuilder : DungeonBuilder
       }
     }
 
-    int altarLevel = rng.Next(0, numOfLevels);
-    IdolAltarMaker.MakeAltar(id, levels, objDb, factDb, rng, altarLevel);
-
     MoonDaughterCleric(levels, id, rng, objDb);
 
     return dungeon;

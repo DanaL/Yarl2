@@ -383,6 +383,9 @@ class IdolAltarMaker
       Item prize = Artifacts.GenArtifact(objDb, factDb, rng);
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
       objDb.SetToLoc(prizeLoc, prize);
+      
+      Item potion = ItemFactory.Get(ItemNames.POTION_HARDINESS, objDb);
+      objDb.SetToLoc(prizeLoc, potion);
 
       Tile altar = new IdolAltar(altarDesc)
       {
