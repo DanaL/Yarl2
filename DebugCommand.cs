@@ -52,7 +52,7 @@ class DebugCommand(GameState gs)
     {"scroll of knock", ItemNames.SCROLL_KNOCK},
     {"scroll of magic mapping", ItemNames.SCROLL_MAGIC_MAP},
     {"scroll of protection", ItemNames.SCROLL_PROTECTION},
-    {"scroll of recall", ItemNames.SCROLL_RECALL},
+    {"scroll of escape", ItemNames.SCROLL_ESCAPE},
     {"scroll of scattering", ItemNames.SCROLL_SCATTERING},
     {"scroll of treasure detection", ItemNames.SCROLL_TREASURE_DETECTION},
     {"scroll of trap detection", ItemNames.SCROLL_TRAP_DETECTION},

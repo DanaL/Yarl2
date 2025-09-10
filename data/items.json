@@ -484,8 +484,8 @@
     ]
   },
   {
-    "Name": "SCROLL_RECALL",
-    "DescriptiveName": "scroll of word of recall",
+    "Name": "SCROLL_ESCAPE",
+    "DescriptiveName": "scroll of escape",
     "Type": "Scroll",
     "Value": 25,
     "Glyph": "?,white,grey,black,false",

@@ -37,7 +37,7 @@ class Treasure
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
       ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
-      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_RECALL, 
+      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_ESCAPE, 
       ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.HELMET, 
       ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
@@ -65,7 +65,7 @@ class Treasure
     ItemNames.SCROLL_KNOCK,
     ItemNames.SCROLL_MAGIC_MAP,
     ItemNames.SCROLL_PROTECTION,
-    ItemNames.SCROLL_RECALL,
+    ItemNames.SCROLL_ESCAPE,
     ItemNames.SCROLL_SCATTERING,
     ItemNames.SCROLL_TRAP_DETECTION,
     ItemNames.SCROLL_TREASURE_DETECTION,
@@ -247,7 +247,7 @@ class Treasure
     switch (rng.Next(30))
     {
       case 0:
-        items.Add(ItemFactory.Get(ItemNames.SCROLL_RECALL, objDb));
+        items.Add(ItemFactory.Get(ItemNames.SCROLL_ESCAPE, objDb));
         break;
       case 1:
         Item axe = ItemFactory.Get(ItemNames.HAND_AXE, objDb);

@@ -1605,7 +1605,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                         new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200})),
     "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 
                         new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200})),
-    "recall" => new UseResult(new WordOfRecallAction(gs)),
+    "recall" => new UseResult(new EscapeDungeonAction(gs)),
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait() 
                                   { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) })),
     "knock" => new UseResult(new KnockAction(gs, user)),
@@ -2827,6 +2827,12 @@ class RecallTrait : BasicTrait, IGameEventListener
     if (gs.Campaign is null || gs.Campaign.FactDb is null)
       throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
 
+    int zorkmids = player.Inventory.Zorkmids;
+    player.Inventory.Zorkmids = 0;
+    Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+    coins.Value = zorkmids;
+    gs.ItemDropped(coins, player.Loc);
+
     if (gs.InWilderness)
     {
       gs.UIRef().AlertPlayer("You sudenly teleport exactly 1 cm to the left.");
@@ -2840,7 +2846,12 @@ class RecallTrait : BasicTrait, IGameEventListener
     gs.ResolveActorMove(player, start, exitPoint);
     gs.FlushPerformers();
     gs.PrepareFieldOfView();
-    gs.UIRef().AlertPlayer("A wave of vertigo...");
+
+    string msg = "A wave of vertigo...";
+    if (zorkmids > 0)
+      msg += " Your purse feels lighter!";
+
+    gs.UIRef().AlertPlayer(msg);
   }
 }
 

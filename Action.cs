@@ -2194,7 +2194,7 @@ class WebAction : Action
   }
 }
 
-class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
+class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
 {
   public override double Execute()
   {
@@ -2207,7 +2207,7 @@ class WordOfRecallAction(GameState gs) : Action(gs, gs.Player)
       return 1.0;
     }
 
-    ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(10, 21);
+    ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(2, 5);
     var recall = new RecallTrait()
     {
       ExpiresOn = happensOn,
