@@ -148,7 +148,7 @@ class CampaignCreator(UserInterface ui)
 
   static void SetItemIDInfo(Rng rng)
   {
-    List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "jade", "cherrywood", "tin", "glass", "iron", "silver", "balsa"];
+    List<string> wandMaterials = ["maple", "oak", "birch", "ebony", "jade", "cherrywood", "tin", "glass", "iron", "silver", "balsa", "golden"];
 
     Item.IDInfo = [];
 

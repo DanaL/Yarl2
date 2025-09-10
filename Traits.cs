@@ -2876,7 +2876,7 @@ class RecallTrait : BasicTrait, IGameEventListener
     }
     foreach (Item item in itemsDropped)
     {
-      msg += $" Your {item.FullName} falls off!";
+      msg += $" Your {item.FullName} falls to the floor!";
     }
 
     gs.UIRef().AlertPlayer(msg);
