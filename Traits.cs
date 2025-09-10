@@ -2612,8 +2612,10 @@ class StatBuffTrait : TemporaryTrait
       if (Attr == Attribute.HP || Attr == Attribute.Constitution)
         SetPlayerHP(player);
 
-      if (Attr == Attribute.HP)
+      if (Attr == Attribute.HP && Amt < 0)
         return "Some of your vitality returns.";
+      else if (Attr == Attribute.HP && Amt >= 0)
+        return "You feel less sturdy.";
       else
         return $"Your {Attr} returns to normal.";
       }
