@@ -1725,7 +1725,7 @@ class CurseTrait : TemporaryTrait
 
 class CursedItemTrait : Trait 
 {
-  public override string AsText() => $"Cursed";
+  public override string AsText() => $"CursedItem";
 }
 
 class CutpurseTrait : Trait

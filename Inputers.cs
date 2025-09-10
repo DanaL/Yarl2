@@ -1308,11 +1308,20 @@ class InventoryDetails : Inputer
       string title = item.FullName.Capitalize();
       string desc = "";
       if (item.Traits.OfType<DescriptionTrait>().SingleOrDefault() is { Text: var text })
+      {
         desc = text;
+      }
       else if (Item.IDInfo.TryGetValue(item.Name, out ItemIDInfo? info) && !info.Known)
-        desc = "An item of unknown utility. You have not identified it yet.";
+      {
+        desc = "An item of unknown utility. You have not identified it yet.";        
+      }
       else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
+      {
         desc = entry.Text;
+
+        if (item.HasTrait<CursedItemTrait>())
+          desc += "\n\nIt is [brightred cursed]!";
+      }
 
       int width = Math.Max(desc.Length, title.Length + 1);
 
