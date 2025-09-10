@@ -1230,7 +1230,10 @@ abstract class UserInterface
     dn = dn.PadLeft(26 - x, ' ');
     dn = dn.PadRight(26, ' ');
     text[8] = $@"    |{dn}|          |____|";
-    //text[8] = $@"    |       on level {depth}        |          |____|";
+    
+    string lvlTxt = $"on level {gameState.CurrLevel + 1}";
+    lvlTxt =  $@"    |{lvlTxt.PadLeft((22 + lvlTxt.Length) / 2),-26}|                ";
+    text.Insert(9, lvlTxt);
 
     if (messages.Count > 1)
     {
