@@ -348,6 +348,42 @@ class BarkAnimation : Animation
   }
 }
 
+// This is basically SqAnimation but it actually checks the target's
+// current location instead of being on a fixed Loc
+class HitAnimation : Animation
+{
+  GameState GS { get; set; }
+  Colour FgColour { get; set; }
+  Colour BgColour { get; set; }
+  Actor Actor { get; set; }
+  char Ch {  get; set; }
+
+  public HitAnimation(GameState gs, Actor actor, Colour fg, Colour bg, char ch)
+  {
+    GS = gs;
+    Actor = actor;
+    FgColour = fg;
+    BgColour = bg;
+    Expiry = DateTime.UtcNow.AddMilliseconds(250);
+    Ch = ch;
+  }
+
+  public override void Update()
+  {
+    UserInterface ui = GS.UIRef();
+    var (scrR, scrC) = ui.LocToScrLoc(Actor.Loc.Row, Actor.Loc.Col, GS.Player.Loc.Row, GS.Player.Loc.Col);
+
+    if (!GS.LastPlayerFoV.Contains(Actor.Loc))
+      return;
+
+    if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
+    {
+      Sqr sq = new(FgColour, BgColour, Ch);
+      ui.SqsOnScreen[scrR, scrC] = sq;
+    }
+  }
+}
+
 // Simple animation to draw one character at a location.
 class SqAnimation : Animation
 {
