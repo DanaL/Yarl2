@@ -292,9 +292,13 @@ class ItemFactory
       if (item.Type == ItemType.Ring)
         item.Glyph = GlyphForRing(item.Name);
 
-      if (Item.IDInfo.TryGetValue(item.Name, out var idInfo) && (idInfo.Desc.StartsWith("gold ") || idInfo.Desc.StartsWith("golden ")))
+      if (Item.IDInfo.TryGetValue(item.Name, out var idInfo))
       {
-        item.Traits.Add(new MetalTrait() { SourceId = item.ID, Type = Metals.Gold });
+        string desc = idInfo.Desc;
+        if (desc.StartsWith("gold ") || desc.StartsWith("golden "))
+          item.Traits.Add(new MetalTrait() { SourceId = item.ID, Type = Metals.Gold });
+        else if (desc.StartsWith("iron "))
+          item.Traits.Add(new MetalTrait() { SourceId = item.ID, Type = Metals.Iron });
       }
       
       foreach (Trait t in item.Traits)
