@@ -168,7 +168,7 @@ class Colours
   }
 }
 
-enum Metals { NotMetal, Iron, Steel, Bronze, Mithril, Silver }
+enum Metals { NotMetal, Iron, Steel, Bronze, Mithril, Silver, Gold }
 
 static class MetalsExtensions
 {
@@ -176,7 +176,7 @@ static class MetalsExtensions
   {
     Metals.Iron => true,
     Metals.Steel => true,
-    Metals.Bronze => true,
+    Metals.Bronze => true,    
     _ => false
   };
 }

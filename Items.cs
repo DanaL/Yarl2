@@ -291,6 +291,11 @@ class ItemFactory
         item.Glyph = GlyphForWand(item.Name);
       if (item.Type == ItemType.Ring)
         item.Glyph = GlyphForRing(item.Name);
+
+      if (Item.IDInfo.TryGetValue(item.Name, out var idInfo) && idInfo.Desc.StartsWith("gold "))
+      {
+        item.Traits.Add(new MetalTrait() { SourceId = item.ID, Type = Metals.Gold });
+      }
       
       foreach (Trait t in item.Traits)
       {

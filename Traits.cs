@@ -2613,7 +2613,7 @@ class StatBuffTrait : TemporaryTrait
         SetPlayerHP(player);
 
       if (Attr == Attribute.HP)
-        return "You feel more frail.";
+        return "Some of your vitality returns.";
       else
         return $"Your {Attr} returns to normal.";
       }
@@ -2827,16 +2827,38 @@ class RecallTrait : BasicTrait, IGameEventListener
     if (gs.Campaign is null || gs.Campaign.FactDb is null)
       throw new Exception("Checking for dungeon entrance fact: Campaign and History should never be null");
 
+    if (gs.InWilderness)
+    {
+      gs.UIRef().AlertPlayer("You sudenly teleport exactly 1 cm to the left.");
+      return;
+    }
+
     int zorkmids = player.Inventory.Zorkmids;
     player.Inventory.Zorkmids = 0;
     Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
     coins.Value = zorkmids;
     gs.ItemDropped(coins, player.Loc);
 
-    if (gs.InWilderness)
+    List<Item> itemsDropped = [];
+    foreach (Item item in player.Inventory.Items())
     {
-      gs.UIRef().AlertPlayer("You sudenly teleport exactly 1 cm to the left.");
-      return;
+      if (item.Traits.OfType<MetalTrait>().FirstOrDefault() is MetalTrait mt && mt.Type == Metals.Gold)
+      {
+        player.Inventory.RemoveByID(item.ID);
+        itemsDropped.Add(item);
+
+        if (item.Equipped)
+        {
+          foreach (GrantsTrait granted in item.Traits.OfType<GrantsTrait>())
+          {
+            granted.Remove(player, gs, item);
+          }
+        }
+
+        item.Equipped = false;
+
+        gs.ItemDropped(item, player.Loc);
+      }
     }
 
     Loc exitPoint = gs.CurrentDungeon.ExitLoc;
@@ -2849,7 +2871,13 @@ class RecallTrait : BasicTrait, IGameEventListener
 
     string msg = "A wave of vertigo...";
     if (zorkmids > 0)
+    {
       msg += " Your purse feels lighter!";
+    }
+    foreach (Item item in itemsDropped)
+    {
+      msg += $" Your {item.FullName} falls off!";
+    }
 
     gs.UIRef().AlertPlayer(msg);
   }
