@@ -434,7 +434,10 @@ class GameObjectDB
 
   public void Add(GameObj obj) => Objs[obj.ID] = obj;
 
-  public void AddToLoc(Loc loc, Actor actor) => _actorLocs[loc] = actor.ID;
+  public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
+
+  public void AddToLoc(Loc loc, Actor actor) => _actorLocs[loc] = actor.ID;  
+  public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
   
   public void SetToLoc(Loc loc, Item item)
   {
@@ -566,9 +569,6 @@ class GameObjectDB
     foreach (var dwl in toRemove)
       DeathWatchListeners.Remove(dwl);
   }
-
-  public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
-  public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
 
   public void ActorMoved(Actor a, Loc from, Loc to)
   {

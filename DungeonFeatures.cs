@@ -336,8 +336,7 @@ class IdolAltarMaker
     if (closets.Count > 0)
     {
       var (closetR, closetC, altarR, altarC, wallR, wallC) = closets[rng.Next(closets.Count)];
-      Console.WriteLine($"Altar: {altarR}, {altarC}");
-
+      
       Item idol = new() { Name = "idol", Type = ItemType.Trinket, Value = 10};
       string altarDesc;
 
@@ -380,10 +379,11 @@ class IdolAltarMaker
       objDb.Add(idol);
       objDb.SetToLoc(idolLoc, idol);
 
-      Item prize = Artifacts.GenArtifact(objDb, factDb, rng);
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
-      objDb.SetToLoc(prizeLoc, prize);
       
+      Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
+      objDb.SetToLoc(prizeLoc, mithril);
+
       Item potion = ItemFactory.Get(ItemNames.POTION_HARDINESS, objDb);
       objDb.SetToLoc(prizeLoc, potion);
 
@@ -394,6 +394,13 @@ class IdolAltarMaker
       };
       levels[level].SetTile(altarR, altarC, altar);
       levels[level].SetTile(closetR, closetC, sacredSq);
+
+      if (rng.Next(3) == 0)
+      {
+        string s = rng.NextDouble() <= 0.5 ? "shadow" : "ghoul";
+        Actor monster = MonsterFactory.Get(s, objDb, rng);
+        objDb.AddNewActor(monster, prizeLoc);
+      }
     }
   }
 }
