@@ -541,10 +541,12 @@ class Util
         if (locs.Contains(adj))
           continue;
         Tile tile = gs.TileAt(adj);
+        if (gs.ObjDb.AreBlockersAtLoc(adj))
+          continue;
         if (tile.Passable() || tile.PassableByFlight() || exceptions.Contains(tile.Type))
-        {
-          q.Enqueue(adj);
-        }
+          {
+            q.Enqueue(adj);
+          }
       }
     }
 
