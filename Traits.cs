@@ -2471,7 +2471,8 @@ class RetributionTrait : Trait
   public DamageType Type {  get; set; }
   public int DmgDie { get; set; }
   public int NumOfDice {get; set; }
-  public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}";
+  public int Radius { get; set; }
+  public override string AsText() => $"Retribution#{Type}#{DmgDie}#{NumOfDice}#{Radius}";
 }
 
 class ShunnedTrait : Trait
@@ -3812,7 +3813,7 @@ class TraitFactory
     { "Retribution", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out DamageType dt);
-        return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]) };
+        return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]), Radius = int.Parse(pieces[4]) };
       }
     },
     { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },

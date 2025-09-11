@@ -887,45 +887,34 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   void RetributionDamage(Actor src, RetributionTrait retribution)
   {
-    string dmgDesc = retribution.Type.ToString().ToLower();    
-    string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")} in a blast of {dmgDesc}!";
+    string dmgDesc = retribution.Type.ToString().ToLower();
+    string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")}";
+    if (dmgDesc == "cold" || dmgDesc == "fire")
+      dmgDesc += $" in a blast of {dmgDesc}!";
+    dmgDesc += "!";
+
     UI.AlertPlayer(txt, this, src.Loc);
     
     int dmg = 0;
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
-    HashSet<Loc> pts = [src.Loc];
-    foreach (Loc adj in Util.Adj8Locs(src.Loc))
-      pts.Add(adj);
-
+    HashSet<Loc> pts = Util.FloodFill(this, src.Loc, retribution.Radius, []);
+    
     Animation anim;
     switch (retribution.Type)
     {  
       case DamageType.Cold:
-        anim = new ExplosionAnimation(this)
-        {
-          MainColour = Colours.LIGHT_BLUE,
-          AltColour1 = Colours.ICE_BLUE,
-          AltColour2 = Colours.BLUE,
-          Highlight = Colours.WHITE,
-          Centre = src.Loc,
-          Sqs = pts
-        };
-        UI.PlayAnimation(anim, this);
+        anim = new ExplosionAnimation(this) { MainColour = Colours.LIGHT_BLUE, AltColour1 = Colours.ICE_BLUE, AltColour2 = Colours.BLUE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
         break;
       case DamageType.Fire:
-        anim = new ExplosionAnimation(this)
-        {
-          MainColour = Colours.BRIGHT_RED,
-          AltColour1 = Colours.YELLOW,
-          AltColour2 = Colours.YELLOW_ORANGE,
-          Highlight = Colours.WHITE,
-          Centre = src.Loc,
-          Sqs = pts
-        };
-        UI.PlayAnimation(anim, this);
+        anim = new ExplosionAnimation(this) { MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW, AltColour2 = Colours.YELLOW_ORANGE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
+        break;
+      default:
+        anim = new ExplosionAnimation(this) { MainColour = Colours.GREY, AltColour1 = Colours.LIGHT_GREY, AltColour2 = Colours.BROWN, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
+        
         break;
     }
+    UI.PlayAnimation(anim, this);
 
     foreach (Loc adj in Util.Adj8Locs(src.Loc))
     {

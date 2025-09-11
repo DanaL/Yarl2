@@ -15,7 +15,7 @@ giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0#0
 goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#0#0#0#2#AttackMelee,Slashing#1#1#5#1#0#0#Attack|Intelligent
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,ResistBlunt,Immunity#Confusion,Brainless
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless
-chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1,Brainless
+chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless
 sticky ooze       |b|yelloworange |torchorange |12|25|3| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Grappler#18,Brainless,Divider
 ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy
 centipede         |c|green        |darkgreen   |13|10|3| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10
@@ -29,7 +29,7 @@ screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|ConfusingScre
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Corrosive
-will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#8#1#0#0#Attack|LightSource#owner#2#yellow#torchorange,Retribution#Fire#8#1,Flying
+will-o-wisp       |ώ|yellow       |yelloworange|15|25|3| 1.0|10|10|DrainTorch#2#6#0#0#0#3#Attack,MeleeFire#1#1#8#1#0#0#Attack|LightSource#owner#2#yellow#torchorange,Retribution#Fire#8#1#1,Flying
 troll             |T|limegreen    |darkgreen   |13|40|8| 1.0|18|10|MeleeSlashing#1#1#8#2#0#0#Attack|Regeneration#3#owner#false#max,Intelligent,Heavy
 creeping coins    |$|yellow       |yelloworange|14|25|6| 1.0|14|12|MeleePiercing#1#1#4#2#0#0#Attack|Poisoner#14#2#15,CoinsLoot#20#30,Brainless
 phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic#1#1#5#2#0#0#Attack|Invisible#owner#false#max,SilverAllergy,Undead,Flying,Immunity#Poison
@@ -58,4 +58,4 @@ cave lizard       |l|green        |darkgreen   |13|20|2| 1.0|10|10|MeleePiercing
 kobold soothsayer |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7#0#0#15#10#Attack,SummonCaveLizard#0#0#0#0#0#5#Attack,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent
 faint spirit      |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1#5#2#0#0#Attack|Undead,Immunity#Poison,LightSource#owner#2#iceblue#mysticaura
 angler fish       |»|grey         |darkgrey    |13|10|2| 1.0|10|10||Swimmer,Passive,LightSource#owner#2#torchyellow#torchyellow
-gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.55|10|10||Floating,Brainless,Retribution#Blunt#6#4
+gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.55|10|10||Floating,Brainless,Retribution#Blunt#6#4#2
