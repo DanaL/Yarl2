@@ -118,7 +118,7 @@ class GameLoader(UserInterface ui)
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
       //File.Delete(path);
-      
+
       return gameState;
     }
     catch (QuitGameException)

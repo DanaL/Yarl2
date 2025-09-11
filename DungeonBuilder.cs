@@ -65,6 +65,82 @@ abstract class DungeonBuilder
     return closets;
   }
 
+  // If a river/chasm cuts the up stairs off from the down stairs, drop
+  // a potion of levitation on the level so the player isn't trapped.
+  protected static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    List<(int, int)> upStairs = [];
+    List<(int, int)> downStairs = [];
+
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.Upstairs)
+          upStairs.Add((r, c));
+        if (map.TileAt(r, c).Type == TileType.Downstairs)
+          downStairs.Add((r, c));
+      }
+    }
+
+    Dictionary<TileType, int> passable = [];
+    passable.Add(TileType.DungeonFloor, 1);
+    passable.Add(TileType.ClosedDoor, 1);
+    passable.Add(TileType.LockedDoor, 1);
+    passable.Add(TileType.Upstairs, 1);
+    passable.Add(TileType.Downstairs, 1);
+    passable.Add(TileType.WoodBridge, 1);
+    passable.Add(TileType.SecretDoor, 1);
+
+    foreach (var (ur, uc) in upStairs)
+    {
+      Loc start = new(0, 0, ur, uc);
+      foreach (var (dr, dc) in downStairs)
+      {
+        Loc goal = new(0, 0, dr, dc);
+        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
+        if (path.Count == 0)
+        {
+          AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
+          return;
+        }
+      }
+    }
+  }
+
+  // At the moment, I am just adding a potion of levitation on the stairs up side,
+  // but I can imagine other solutions to the level being split by a river (adding
+  // another set of stairs, etc)
+  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    HashSet<(int, int)> contiguous = [];
+    Queue<(int, int)> q = new();
+    q.Enqueue((r, c));
+    contiguous.Add((r, c));
+
+    while (q.Count > 0)
+    {
+      var (row, col) = q.Dequeue();
+      foreach (var sq in Util.Adj4Sqs(row, col))
+      {
+        if (contiguous.Contains(sq))
+          continue;
+
+        TileType type = map.TileAt(sq).Type;
+        if (type == TileType.DungeonFloor || type == TileType.ClosedDoor)
+        {
+          contiguous.Add(sq);
+          q.Enqueue(sq);
+        }
+      }
+    }
+
+    List<Loc> opts = [.. contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2))];
+    Loc loc = opts[rng.Next(opts.Count)];
+    Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
+    objDb.SetToLoc(loc, potion);
+  }
+
   protected static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
   {
     List<Loc> opts = [];
@@ -516,82 +592,7 @@ abstract class DungeonBuilder
     Item bait = ItemFactory.Illusion(itemName, objDb);
     objDb.SetToLoc(loc, bait);
   }
-
-  // At the moment, I am just adding a potion of levitation on the stairs up side,
-  // but I can imagine other solutions to the level being split by a river (adding
-  // another set of stairs, etc)
-  static void AddRiverCrossing(Map map, int r, int c, int dungeonId, int level, GameObjectDB objDb, Rng rng)
-  {
-    HashSet<(int, int)> contiguous = [];
-    Queue<(int, int)> q = new();
-    q.Enqueue((r, c));
-    contiguous.Add((r, c));
-
-    while (q.Count > 0)
-    {
-      var (row, col) = q.Dequeue();
-      foreach (var sq in Util.Adj4Sqs(row, col))
-      {
-        if (contiguous.Contains(sq))
-          continue;
-
-        TileType type = map.TileAt(sq).Type;
-        if (type == TileType.DungeonFloor || type == TileType.ClosedDoor)
-        {
-          contiguous.Add(sq);
-          q.Enqueue(sq);
-        }
-      }
-    }
-
-    List<Loc> opts = [.. contiguous.Select(s => new Loc(dungeonId, level, s.Item1, s.Item2))];
-    Loc loc = opts[rng.Next(opts.Count)];
-    Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
-    objDb.SetToLoc(loc, potion);
-  }
-
-  // If a river/chasm cuts the up stairs off from the down stairs, drop
-  // a potion of levitation on the level so the player isn't trapped.
-  static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
-  {
-    List<(int, int)> upStairs = [];
-    List<(int, int)> downStairs = [];
-
-    for (int r = 1; r < map.Height -1; r++)
-    {
-      for (int c = 1; c < map.Width - 1; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.Upstairs)
-          upStairs.Add((r, c));
-        if (map.TileAt(r, c).Type == TileType.Downstairs)
-          downStairs.Add((r, c));
-      }
-    }
-
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.DungeonFloor, 1);
-    passable.Add(TileType.ClosedDoor, 1);
-    passable.Add(TileType.Upstairs, 1);
-    passable.Add(TileType.Downstairs, 1);
-    passable.Add(TileType.WoodBridge, 1);
-    passable.Add(TileType.SecretDoor, 1);
-    
-    foreach (var (ur, uc) in upStairs)
-    {
-      Loc start = new(0, 0, ur, uc);
-      foreach (var (dr, dc) in downStairs)
-      {
-        Loc goal = new(0, 0, dr, dc);
-        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
-        if (path.Count == 0)
-        {
-          AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
-          return;
-        }
-      }
-    }
-  }
-
+  
   protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
   {
     DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, rng);
@@ -612,8 +613,6 @@ abstract class DungeonBuilder
         }
       }
     }
-
-    RiverQoLCheck(map, dungeonId, levelNum, objDb, rng);
 
     static bool ReplaceChasm(Map map, (int, int) pt) => map.TileAt(pt).Type switch
     {

@@ -43,19 +43,31 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       
     dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
 
+    List<int> riverLevels = [];
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
     {
       // Maybe add a river/chasm to the level?
       if (rng.Next(4) == 0)
       {
+        Map? nextLevel = null;
+        TileType riverType = TileType.DeepWater;
         if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
-          AddRiverToLevel(TileType.Chasm, levels[levelNum], levels[levelNum + 1], levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
-        else
-          AddRiverToLevel(TileType.DeepWater, levels[levelNum], null, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+        {
+          riverType = TileType.Chasm;
+          nextLevel = levels[levelNum + 1];
+        }
+
+        AddRiverToLevel(riverType, levels[levelNum], nextLevel, levelNum, HEIGHT, WIDTH, DungeonId, objDb, rng);
+        riverLevels.Add(levelNum);
       }
     }
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, dungeon.Descending, rng);
+
+    foreach (int levelNum in riverLevels)
+    {
+      RiverQoLCheck(levels[levelNum], DungeonId, levelNum, objDb, rng);
+    }
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
