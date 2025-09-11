@@ -186,8 +186,7 @@ abstract class DungeonBuilder
         monster.Loc = loc;
         if (rng.NextDouble() < 0.8)
           monster.Traits.Add(new SleepingTrait());
-        objDb.Add(monster);
-        objDb.AddToLoc(loc, monster);
+        objDb.AddNewActor(monster, loc);        
       }
     }
   }

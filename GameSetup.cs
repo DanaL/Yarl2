@@ -113,7 +113,7 @@ class GameLoader(UserInterface ui)
       GameState? gameState = Serialize.LoadSaveGame(path, options, UI);
       Player p = gameState.ObjDb.FindPlayer() ?? throw new Exception("No player :O");
       gameState.SetPlayer(p);
-      gameState.ObjDb.AddToLoc(gameState.Player.Loc, gameState.Player);
+      gameState.ObjDb.SetActorToLoc(gameState.Player.Loc, gameState.Player.ID);
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
@@ -694,7 +694,7 @@ class CampaignCreator(UserInterface ui)
       welcomeText += "Press [ICEBLUE /] to toggle between recent messages and command/movement key cheat sheets.";
       UI.SetPopup(new Popup(welcomeText, "", -2, -1));
     
-      gameState.ObjDb.AddToLoc(player.Loc, player);
+      gameState.ObjDb.SetActorToLoc(player.Loc, player.ID);
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 

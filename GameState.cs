@@ -1138,8 +1138,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     
     Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
     monster.Loc = spawnPoint;
-    ObjDb.Add(monster);
-    ObjDb.AddToLoc(spawnPoint, monster);
+    ObjDb.AddNewActor(monster, spawnPoint);
   }
 
   public Actor? LevelAppropriateMonster(int dungeonId, int level)

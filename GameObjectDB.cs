@@ -429,14 +429,13 @@ class GameObjectDB
   {
     actor.Loc = loc;
     Add(actor);
-    AddToLoc(loc, actor);
+    SetActorToLoc(loc, actor.ID);
   }
 
   public void Add(GameObj obj) => Objs[obj.ID] = obj;
 
   public void ClearActorLoc(Loc loc) => _actorLocs.Remove(loc);
 
-  public void AddToLoc(Loc loc, Actor actor) => _actorLocs[loc] = actor.ID;  
   public void SetActorToLoc(Loc loc, ulong id) => _actorLocs[loc] = id;
   
   public void SetToLoc(Loc loc, Item item)

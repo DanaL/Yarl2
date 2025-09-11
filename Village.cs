@@ -406,8 +406,7 @@ class Village
     kylie.Loc = startLocs[i];
     startLocs.RemoveAt(i);
     kylie.SetBehaviour(new WitchBehaviour());
-    objDb.Add(kylie);
-    objDb.AddToLoc(kylie.Loc, kylie);
+    objDb.AddNewActor(kylie, kylie.Loc);
 
     Mob sophie = new()
     {
@@ -424,9 +423,8 @@ class Village
 
     sophie.Loc = startLocs[rng.Next(startLocs.Count)];
     sophie.SetBehaviour(new AlchemistBehaviour());
-    objDb.Add(sophie);
-    objDb.AddToLoc(sophie.Loc, sophie);
-
+    objDb.AddNewActor(sophie, sophie.Loc);
+    
     sophie.Inventory = new Inventory(sophie.ID, objDb);
     // Set initial inventory for Sophie
     for (int j = 0; j < rng.Next(1, 4); j++)    
@@ -510,39 +508,31 @@ class Village
     NameGenerator ng = new(rng, Util.NamesFile);
 
     Mob cleric = GeneratePriest(map, town, ng, objDb, rng);
-    objDb.Add(cleric);
-    objDb.AddToLoc(cleric.Loc, cleric);
+    objDb.AddNewActor(cleric, cleric.Loc);
 
     Mob smith = GenerateSmith(map, town, ng, objDb, rng);
-    objDb.Add(smith);
-    objDb.AddToLoc(smith.Loc, smith);
+    objDb.AddNewActor(smith, smith.Loc);
     factDb.Add(new SimpleFact() { Name = "SmithId", Value = smith.ID.ToString() });
 
     Mob grocer = GenerateGrocer(map, town, ng, objDb, rng);
-    objDb.Add(grocer);
-    objDb.AddToLoc(grocer.Loc, grocer);
+    objDb.AddNewActor(grocer, grocer.Loc);
     factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
 
     Mob innkeeper = GenerateInnkeeper(map, town, ng, objDb, rng);
-    objDb.Add(innkeeper);
-    objDb.AddToLoc(innkeeper.Loc, innkeeper);
+    objDb.AddNewActor(innkeeper, innkeeper.Loc);
     factDb.Add(new SimpleFact() { Name = "TavernName", Value = NameGenerator.GenerateTavernName(rng) });
 
     Mob pup = GeneratePuppy(map, town, objDb, factDb, rng);
-    objDb.Add(pup);
-    objDb.AddToLoc(pup.Loc, pup);
+    objDb.AddNewActor(pup, pup.Loc);
 
     Mob mayor = GenerateMayor(map, town, ng, rng);
-    objDb.Add(mayor);
-    objDb.AddToLoc(mayor.Loc, mayor);
+    objDb.AddNewActor(mayor, mayor.Loc);
 
     Mob v1 = GenerateVillager1(map, town, ng, rng);
-    objDb.Add(v1);
-    objDb.AddToLoc(v1.Loc, v1);
+    objDb.AddNewActor(v1, v1.Loc);
 
     Mob vet = GenerateVeteran(map, town, ng, objDb, rng);
-    objDb.Add(vet);
-    objDb.AddToLoc(vet.Loc, vet);
+    objDb.AddNewActor(vet, vet.Loc);
 
     GenerateWitches(map, town, objDb, factDb, rng);
 
@@ -562,9 +552,8 @@ class Village
       // be a random chance of happening since we'll have several fallen 
       // adventurers over many levels and not ALL of them will have had 
       // relationships with villagers)
-      var widower = GenerateWidower(map, town, ng, rng);
-      objDb.Add(widower);
-      objDb.AddToLoc(widower.Loc, widower);
+      Mob widower = GenerateWidower(map, town, ng, rng);
+      objDb.AddNewActor(widower, widower.Loc);
       widower.Traits.Add(new RelationshipTrait() { Person1ID = widower.ID, Person2ID = fallenAdventurerID, Label = "romantic" });
     }    
   }

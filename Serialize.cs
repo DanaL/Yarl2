@@ -907,7 +907,7 @@ class GameObjDBSave
 
   public static GameObjectDB Inflate(GameObjDBSave sidb)
   {
-    var objDb = new GameObjectDB();
+    GameObjectDB objDb = new();
 
     ulong maxID = 0;
     foreach (var line in sidb.Objects)
@@ -921,7 +921,7 @@ class GameObjDBSave
         if (obj is Item item)
           objDb.SetToLoc(obj.Loc, item);
         else
-          objDb.AddToLoc(obj.Loc, (Actor)obj);
+          objDb.SetActorToLoc(obj.Loc, obj.ID);
       }
     }
 

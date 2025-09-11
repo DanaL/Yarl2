@@ -2131,7 +2131,7 @@ class EntangleAction(GameState gs, Actor caster) : Action(gs, caster)
         Actor vines = MonsterFactory.Get("vines", GameState.ObjDb, GameState.Rng);
         vines.Loc = loc;
         GameState.ObjDb.Add(vines);
-        GameState.ObjDb.AddToLoc(loc, vines);
+        GameState.ObjDb.SetActorToLoc(loc, vines.ID);
       }
     }
 

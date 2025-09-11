@@ -242,9 +242,7 @@ class Traps
         Actor? monster = gs.LevelAppropriateMonster(spawnLoc.DungeonID, spawnLoc.Level);
         if (monster is not null)
         {          
-          monster.Loc = spawnLoc;
-          gs.ObjDb.Add(monster);
-          gs.ObjDb.AddToLoc(spawnLoc, monster);
+          gs.ObjDb.AddNewActor(monster, spawnLoc);
           
           SqAnimation anim = new(gs, spawnLoc, Colours.LIGHT_BLUE, Colours.BLACK, '*');
           gs.UIRef().RegisterAnimation(anim);
