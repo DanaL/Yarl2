@@ -91,6 +91,12 @@ class MsgFactory
     return sb.ToString();
   }
 
+  public static string KillerName(GameObj victim, Player player)
+  {
+    string name = CalcName(victim, player, 0, true);
+    return name == "something" ? "???" : name.IndefArticle();
+  }
+
   public static string SlipOnIceMessage(Actor actor, Loc loc, GameState gs)
   {
     bool canSeeLoc = gs.LastPlayerFoV.Contains(loc);

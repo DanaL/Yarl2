@@ -292,12 +292,7 @@ class Battle
   {
     if (hpLeft < 1)
     {
-      string killerName = MsgFactory.CalcName(attacker, gs.Player, 0, true);
-      if (killerName == "something")
-        killerName = "???";
-      else
-        killerName = killerName.IndefArticle();
-      gs.ActorKilled(target, killerName, attacker);
+      gs.ActorKilled(target, MsgFactory.KillerName(attacker, gs.Player), attacker);
     }
 
     // This looks convoluted but the target's collection of traits can be modified

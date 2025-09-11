@@ -890,8 +890,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     string dmgDesc = retribution.Type.ToString().ToLower();
     string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")}";
     if (dmgDesc == "cold" || dmgDesc == "fire")
-      dmgDesc += $" in a blast of {dmgDesc}!";
-    dmgDesc += "!";
+      txt += $" in a blast of {dmgDesc}!";
+    txt += "!";
 
     UI.AlertPlayer(txt, this, src.Loc);
     
@@ -899,35 +899,28 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
     HashSet<Loc> pts = Util.FloodFill(this, src.Loc, retribution.Radius, []);
-    
-    Animation anim;
-    switch (retribution.Type)
-    {  
-      case DamageType.Cold:
-        anim = new ExplosionAnimation(this) { MainColour = Colours.LIGHT_BLUE, AltColour1 = Colours.ICE_BLUE, AltColour2 = Colours.BLUE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
-        break;
-      case DamageType.Fire:
-        anim = new ExplosionAnimation(this) { MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW, AltColour2 = Colours.YELLOW_ORANGE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
-        break;
-      default:
-        anim = new ExplosionAnimation(this) { MainColour = Colours.GREY, AltColour1 = Colours.LIGHT_GREY, AltColour2 = Colours.BROWN, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts };
-        
-        break;
-    }
+    Animation anim = retribution.Type switch
+    {
+      DamageType.Cold => new ExplosionAnimation(this) { MainColour = Colours.LIGHT_BLUE, AltColour1 = Colours.ICE_BLUE, AltColour2 = Colours.BLUE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts },
+      DamageType.Fire => new ExplosionAnimation(this) { MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW, AltColour2 = Colours.YELLOW_ORANGE, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts },
+      _ => new ExplosionAnimation(this) { MainColour = Colours.GREY, AltColour1 = Colours.LIGHT_GREY, AltColour2 = Colours.BROWN, Highlight = Colours.WHITE, Centre = src.Loc, Sqs = pts },
+    };
     UI.PlayAnimation(anim, this);
 
-    foreach (Loc adj in Util.Adj8Locs(src.Loc))
+    foreach (Loc pt in pts)
     {
-      if (ObjDb.Occupant(adj) is Actor actor)
+      if (ObjDb.Occupant(pt) is Actor actor)
       {
         UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");        
         var (hpLeft, msg, _) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null, 1.0);
         UI.AlertPlayer(msg);
 
         if (hpLeft < 1)
-          ActorKilled(actor, dmgDesc, null);
+        {
+          ActorKilled(actor, MsgFactory.KillerName(src, Player), src);          
+        }
       }
-      ApplyDamageEffectToLoc(adj, retribution.Type);
+      ApplyDamageEffectToLoc(pt, retribution.Type);
     }
   }
 
