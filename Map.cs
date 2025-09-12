@@ -555,6 +555,8 @@ class Lever(TileType type, bool on, Loc gate) : Tile(type)
   {
     if (gs.TileAt(Gate) is Portcullis portcullis)
     {
+      gs.UIRef().AlertPlayer("You pull the level.");
+
       On = !On;
       portcullis.Trigger();      
       gs.Noise(Gate.Row, Gate.Col, 7);
