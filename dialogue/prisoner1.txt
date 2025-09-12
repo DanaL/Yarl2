@@ -5,7 +5,7 @@
 	)
 	((= DIALOGUE_STATE 1)
 		(
-      (say "Thank you! I'd been captured by #IMPRISONED_BY. I think they meant to sacrifice me!")
+      (say "Thank you! I'd been captured by #IMPRISONED_BY. I think they meant to sacrifice me!\n\nPlease allow me to reward you and grant you a boon!")
       (option "A boon of Strength"  ((give BOON_STR "May you have the might of giants!") (set DIALOGUE_STATE 2)))
 			(option "A boon of Dexterity" ((give BOON_DEX "May you be quick as a fox!") (set DIALOGUE_STATE 2)))
       (option "A boon of Health"    ((give BOON_CON "May you be stout as an ox!") (set DIALOGUE_STATE 2)))
