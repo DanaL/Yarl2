@@ -364,7 +364,7 @@ class IdolAltarMaker
           idol.Name = "carving";
           idol.Glyph = new Glyph('"', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false);
           idol.Traits.Add(new AdjectiveTrait("soapstone"));
-          altarDesc = "An altar venerating the leviathan.";
+          altarDesc = "An altar venerating the Leviathan.";
           idol.Traits.Add(new DescriptionTrait("A worn soapstone statue of a sea creature."));
           sacredSq = TileFactory.Get(TileType.Pool);
           break;

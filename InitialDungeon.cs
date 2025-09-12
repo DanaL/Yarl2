@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Text.RegularExpressions;
+
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -123,6 +125,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
+    bool captive = false;
+
     // Can we create any rooms-within-rooms?
     for (int level = 0; level < levelMaps.Length; level++)
     {
@@ -153,6 +157,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         }       
       }
 
+      // These aren't rooms but decorations/features
       if (level > 0 && rng.NextDouble() < 0.25)
       {
         int roomId = rng.Next(roomIds.Count);
@@ -166,7 +171,61 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         Rooms.Orchard(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
       }
+
+      // Not technically a room but...
+      if (level > 0 && rng.NextDouble() < 0.2 && !captive)
+      {
+        captive = true;
+        CaptiveFeature.Create(DungeonId, level, levelMaps[level], objDb, factDb, rng);
+      }
+      else if (rng.NextDouble() < 0.15)
+      {
+        // If there's no prisoner on the level, give a small chance of there
+        // being a blood-stained altar. (Mainly because I don't want to bother
+        // checking against the possibility of two altars)
+        List<(int, int)> floors = [];
+        foreach (var (r, c) in levelMaps[level].SqsOfType(TileType.DungeonFloor))
+        {
+          if (AdjWalls(levelMaps[level], r, c) >= 3)
+            continue;
+          floors.Add((r, c));
+        }
+
+        (int, int) altarSq = floors[rng.Next(floors.Count)];
+        Loc altarLoc = new(DungeonId, level, altarSq.Item1, altarSq.Item2);
+        Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+        altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
+        altar.Traits.Add(new MolochAltarTrait());
+        objDb.SetToLoc(altarLoc, altar);
+      }
+
+      if (rng.NextDouble() < 3.3333)
+      {
+        int roomId = rng.Next(rooms.Count);
+        List<(int, int)> room = rooms[roomId];
+        (int, int) altarSq = room[rng.Next(room.Count)];
+        Loc altarLoc = new(DungeonId, level, altarSq.Item1, altarSq.Item2);
+        Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
+        altar.Traits.Add(new AdjectiveTrait("desecrated"));
+        altar.Traits.Add(new DesecratedTrait());
+        string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
+        altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
+        objDb.SetToLoc(altarLoc, altar);
+      }
     }
+  }
+
+  static int AdjWalls(Map map, int r, int c)
+  {
+    int walls = 0;
+    foreach (var sq in Util.Adj8Sqs(r, c))
+    {
+      Tile tile = map.TileAt(sq);
+      if (tile.Type == TileType.DungeonWall || tile.Type == TileType.PermWall || tile.Type == TileType.WorldBorder)
+        ++walls;
+    }
+
+    return walls;
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
