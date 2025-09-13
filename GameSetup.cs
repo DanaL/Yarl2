@@ -662,7 +662,7 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = -819958527;
+      seed = 1808536976;
       Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);
@@ -678,8 +678,7 @@ class CampaignCreator(UserInterface ui)
         Turn = 1
       };
 
-      Player player = PlayerCreator.NewPlayer(playerName, gameState, 0, 0, UI, rng);
-      player.Loc = new Loc(0, 0, startRow, startCol);
+      Player player = PlayerCreator.NewPlayer(playerName, gameState, startRow, startCol, UI, rng);
       gameState.SetPlayer(player);
 
       UI.ClearLongMessage();

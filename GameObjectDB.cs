@@ -580,10 +580,12 @@ class GameObjectDB
   {
     List<Actor> performers = [];
 
-    foreach (var loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
-    {      
+    foreach (Loc loc in _actorLocs.Keys.Where(k => k.DungeonID == dungeonID && k.Level == level))
+    {
       if (Objs[_actorLocs[loc]] is Actor actor)
+      {
         performers.Add(actor);
+      }
     }
 
     return performers;
