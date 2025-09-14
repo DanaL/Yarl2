@@ -134,7 +134,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       List<List<(int, int)>> rooms = map.FindRooms(9);
       List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
       roomIds.Shuffle(rng);
-      
+
       foreach (int id in roomIds)
       {
         RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
@@ -154,7 +154,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
           }
 
           break;
-        }       
+        }
       }
 
       // These aren't rooms but decorations/features
@@ -211,6 +211,11 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
         altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
         objDb.SetToLoc(altarLoc, altar);
+      }
+
+      if (level >= 2 && rng.Next(5) == 0)
+      {
+        PlaceMistyPortal(levelMaps[level], rng);
       }
     }
   }

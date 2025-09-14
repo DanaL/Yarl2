@@ -1334,6 +1334,19 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.AlertPlayer(s);
     }
 
+    if (actor is Player && tile.Type == TileType.MistyPortal)
+    {
+      Loc exitPoint = CurrentDungeon.ExitLoc;
+      ActorEntersLevel(Player, 0, 0);
+      Player.Loc = exitPoint;
+      ResolveActorMove(Player, start, exitPoint);
+      FlushPerformers();
+      PrepareFieldOfView();
+
+      UI.AlertPlayer("You step into the misty portal and become momentarily disoeriented.");
+      UI.SetPopup(new Popup("You step into the misty portal and become momentarily disoeriented.", "", -1, -1));
+    }
+    
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);

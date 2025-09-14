@@ -191,9 +191,49 @@ abstract class DungeonBuilder
     }
   }
 
+  protected static void PlaceMistyPortal(Map map, Rng rng)
+  {
+    List<(int, int)> floors = FindHallWayFloors(map);
+
+    if (floors.Count == 0)
+      return;
+
+    (int, int) floor = floors[rng.Next(floors.Count)];
+
+    List<(int, int)> adjWalls = [];
+    foreach (var sq in Util.Adj4Sqs(floor.Item1, floor.Item2))
+    {
+      if (map.TileAt(sq).Type == TileType.DungeonWall)
+        adjWalls.Add(sq);
+    }
+    adjWalls.Shuffle(rng);
+    map.SetTile(adjWalls[0], TileFactory.Get(TileType.MistyPortal));
+  }
+
+  static List<(int, int)> FindHallWayFloors(Map map)
+  {
+    List<(int, int)> floors = [];
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        {
+          int adjFloors = Util.Adj8Sqs(r, c)
+                              .Select(map.TileAt)
+                              .Where(t => t.Type == TileType.DungeonFloor).Count();
+          if (adjFloors == 2)
+            floors.Add((r, c));
+        }
+      }
+    }
+
+    return floors;
+  }
+
   protected static void PutSecretDoorsInHallways(Map map, Rng rng)
   {
-    List<(int, int)> candidates = [];
+    List<(int, int)> candidates = FindHallWayFloors(map);
     for (int r = 0; r < map.Height; r++)
     {
       for (int c = 0; c < map.Width; c++)
