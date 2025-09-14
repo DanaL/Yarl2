@@ -54,7 +54,7 @@ class DebugCommand(GameState gs)
     {"scroll of protection", ItemNames.SCROLL_PROTECTION},
     {"scroll of escape", ItemNames.SCROLL_ESCAPE},
     {"scroll of scattering", ItemNames.SCROLL_SCATTERING},
-    {"scroll of treasure detection", ItemNames.SCROLL_TREASURE_DETECTION},
+    {"scroll of treasure finding", ItemNames.SCROLL_TREASURE_DETECTION},
     {"scroll of trap detection", ItemNames.SCROLL_TRAP_DETECTION},
     {"wand of magic missiles", ItemNames.WAND_MAGIC_MISSILES},
     {"wand of swap", ItemNames.WAND_SWAP},

@@ -986,7 +986,7 @@
   },
   {
     "Name": "SCROLL_TREASURE_DETECTION",
-    "DescriptiveName": "scroll of treasure detection",
+    "DescriptiveName": "scroll of treasure finding",
     "Type": "Scroll",
     "Value": 15,
     "Glyph": "?,white,grey,black,false",

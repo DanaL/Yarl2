@@ -224,6 +224,9 @@ Creates a shimmering aura that will shield you from damage for a time.
 scroll of identify
 Learn what an unidentified item does.
 #
+scroll of treasure finding
+Some wizards were too impatient for sightseeing and invented these scrolls to speed their adventures along.
+#
 zorkmid
 Cash money, the currency of the realm.
 #
