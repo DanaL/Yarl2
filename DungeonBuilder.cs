@@ -193,21 +193,34 @@ abstract class DungeonBuilder
 
   protected static void PlaceMistyPortal(Map map, Rng rng)
   {
-    List<(int, int)> floors = FindHallWayFloors(map);
+    HashSet<(int, int)> candidates = [];
+    foreach (var sq in map.SqsOfType(TileType.DungeonWall))
+    {
+      if (PortalCandidate(map, sq.Item1, sq.Item2))
+        candidates.Add(sq);
+    } 
 
-    if (floors.Count == 0)
+    if (candidates.Count == 0)
       return;
 
-    (int, int) floor = floors[rng.Next(floors.Count)];
+    List<(int, int)> v = [.. candidates];
+    var mp = v[rng.Next(v.Count)];
+    map.SetTile(mp, TileFactory.Get(TileType.MistyPortal));
 
-    List<(int, int)> adjWalls = [];
-    foreach (var sq in Util.Adj4Sqs(floor.Item1, floor.Item2))
+    static bool PortalCandidate(Map map, int row, int col)
     {
-      if (map.TileAt(sq).Type == TileType.DungeonWall)
-        adjWalls.Add(sq);
+      int adjWalls = 0;
+      int adjFloors = 0;
+      foreach (var sq in Util.Adj8Sqs(row, col))
+      {
+        if (map.TileAt(sq).Type == TileType.DungeonFloor)
+          ++adjFloors;
+        if (map.TileAt(sq).Type == TileType.DungeonWall)
+          ++adjWalls;
+      }
+
+      return adjFloors == 3 && adjWalls == 5;
     }
-    adjWalls.Shuffle(rng);
-    map.SetTile(adjWalls[0], TileFactory.Get(TileType.MistyPortal));
   }
 
   static List<(int, int)> FindHallWayFloors(Map map)
