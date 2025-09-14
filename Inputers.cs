@@ -150,6 +150,7 @@ class Examiner : Inputer
             case TileType.Lever:
             case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
+            case TileType.MistyPortal:
               pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
               break;
           }

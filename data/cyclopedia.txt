@@ -424,3 +424,6 @@ A femur? Or maybe a tibia?
 #
 gas spore
 It's probably just a floating fungi that only looks like a beholder. Definitely. For sure.
+#
+mistyportal|Misty Portal
+A stone archway filled with swirling, sparkling mists.

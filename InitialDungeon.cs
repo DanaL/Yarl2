@@ -213,7 +213,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         objDb.SetToLoc(altarLoc, altar);
       }
 
-      if (level >= 0 && rng.Next(5) >= 0)
+      if (level >= 2 && rng.Next(5) == 0)
       {
         PlaceMistyPortal(levelMaps[level], rng);
       }
