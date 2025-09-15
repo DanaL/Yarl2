@@ -2295,7 +2295,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
     {
       Actor.ClearAnchors(GameState!);
       
-      var landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];      
+      Loc landingSpot = sqs[GameState!.Rng.Next(sqs.Count)];
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, landingSpot, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
       GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, start, Colours.WHITE, Colours.LIGHT_PURPLE, '*'));
 

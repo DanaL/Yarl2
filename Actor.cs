@@ -610,18 +610,25 @@ class Mob : Actor
 
   public override void TakeTurn(GameState gs)
   {
-    if (CurrPlan is null)
+    if (ActionQ.Count > 0)
     {
-      string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
-      CurrPlan = Planner.GetPlan(planName, this, gs);
+      ExecuteAction(ActionQ.Dequeue());
     }
-
-    if (CurrPlan.Execute(this, gs) == PlanStatus.Failure)
+    else
     {
-      CurrPlan = null;
-      ExecuteAction(new PassAction());
-    }
+      if (CurrPlan is null)
+      {
+        string planName = Traits.OfType<BehaviourTreeTrait>().First().Plan;
+        CurrPlan = Planner.GetPlan(planName, this, gs);
+      }
 
+      if (CurrPlan.Execute(this, gs) == PlanStatus.Failure)
+      {
+        CurrPlan = null;
+        ExecuteAction(new PassAction());
+      }
+    }
+    
     gs.PrepareFieldOfView();
   }
 
