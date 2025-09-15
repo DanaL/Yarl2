@@ -1450,7 +1450,7 @@ class DialogueInterpreter
         switch (blessing)
         {
           case 1:
-            Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's will shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
+            Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
             break;
           case 2:
             Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));    
@@ -1469,7 +1469,7 @@ class DialogueInterpreter
     }
     else
     {
-      Sb.Append("\n\nYou go forth with Huntokar's blessing and protection!");
+      Sb.Append("\n\nYou go forth with Huntokar's blessing and aid. Seek out and defeat the evil that is plauging our town!");
     }
   }
 
