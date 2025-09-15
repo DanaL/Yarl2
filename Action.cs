@@ -2068,6 +2068,11 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
         GameState.ItemDropped(item, victim.Loc);
         s = $"{item.FullName.Possessive(victim).Capitalize()} falls off!";
 
+        foreach (GrantsTrait trait in item.Traits.OfType<GrantsTrait>())
+        {
+          trait.Remove(victim, GameState, item);
+        }
+
         if (GameState.LastPlayerFoV.Contains(victim.Loc))
           ui.AlertPlayer(s);
         if (victim is Player)
