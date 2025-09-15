@@ -1460,6 +1460,8 @@ class InventoryDetails : Inputer
         items.Add($"this vicious weapon deals [BRIGHTRED extra damage]");
       if (trait is RustedTrait)
         items.Add("it is [DULLRED rusty], but can be repaired");
+      if (trait is PoisonCoatedTrait)
+        items.Add("it is coated in [DARKGREEN poison]");
     }
 
     if (items.Count == 0)
