@@ -600,18 +600,50 @@ class Rooms
     HashSet<Loc> bridges = DetermineBridges(map, dungeonID, level, info, objDb, rng);
 
     (int, int) triggerSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
-    BridgeTrigger trigger = new()
+
+    // Check to see if there is a clear path to throw an item from an entrance
+    // to the trigger. If there isn't, we'll drop a potion of levitation somewhere.
+    bool triggerSet = false;
+    foreach (var exit in info.Exits)
     {
-      BridgeTiles = bridges
-    };
-    map.SetTile(triggerSq.Item1, triggerSq.Item2, trigger);
-    objDb.LocListeners.Add(new Loc(dungeonID, level, triggerSq.Item1, triggerSq.Item2));
+      bool blocked = false;
+      List<(int, int)> path = Util.Bresenham(exit.Item1, exit.Item2, triggerSq.Item1, triggerSq.Item2);
+
+      foreach (var (r, c) in path)
+      {
+        Tile tile = map.TileAt(r, c);
+        if (!(tile.PassableByFlight() || tile.Type == TileType.ClosedDoor || tile.Type == TileType.SecretDoor))
+        {
+          blocked = true;
+          break;
+        }
+      }
+
+      if (!blocked)
+      {
+        // we can set the trigger
+        BridgeTrigger trigger = new() { BridgeTiles = bridges };
+        map.SetTile(triggerSq.Item1, triggerSq.Item2, trigger);
+        objDb.LocListeners.Add(new Loc(dungeonID, level, triggerSq.Item1, triggerSq.Item2));
+        triggerSet = true;
+        break;
+      }      
+    }
+
+    if (!triggerSet)
+    {
+      List<(int, int)> floors = [.. map.SqsOfType(TileType.DungeonFloor).Where(sq => !info.IslandSqs.Contains(sq))];
+      var sq = floors[rng.Next(floors.Count)];
+      Loc potionLoc = new(dungeonID, level, sq.Item1, sq.Item2);
+      Item potion = ItemFactory.Get(ItemNames.POTION_OF_LEVITATION, objDb);
+      objDb.SetToLoc(potionLoc, potion);
+    }
 
     (int, int) treasureSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
     Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
     TreasureQuality quality = level < 2 ? TreasureQuality.Uncommon : TreasureQuality.Good;
     Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
-    objDb.SetToLoc(treasureLoc, treasure);
+    objDb.SetToLoc(treasureLoc, treasure);    
   }
 
   public static void BasicChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)

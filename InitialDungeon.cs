@@ -173,13 +173,38 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         HashSet<(int, int)> vault = [.. rooms[vaultId]];
         var (doorR, doorC) = Vaults.FindExit(map, vault);        
         roomIds.Remove(vaultId);
-
+        
         // We could have found a false vault. Likely a spot separate from
         // the rest of the dungoen by a river or chasm
         if (doorR >= 0 && doorC >= 0)
         {
           Vaults.CreateVault(map, DungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
         }
+      }
+
+      if (level < levelMaps.Length - 1 && rng.NextDouble() < 0.2)
+      {
+        int roomId = rng.Next(rooms.Count);
+
+        if (level == 0 && IsEntranceHall(levelMaps[level], rooms[roomId]))
+        {
+          continue;
+        }
+
+        switch (rng.Next(4))
+        {
+          case 0:
+            Rooms.ChasmTrapRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            break;
+          case 1:
+            Rooms.TriggerChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            break;
+          default:
+            Rooms.BasicChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            break;
+        }
+
+        roomIds.Remove(roomId);
       }
 
       // These aren't rooms but decorations/features

@@ -108,6 +108,17 @@ abstract class DungeonBuilder
     }
   }
 
+  protected static bool IsEntranceHall(Map map, List<(int, int)> sqs)
+  {
+    foreach (var sq in sqs)
+    {
+      if (map.TileAt(sq).Type == TileType.Upstairs)
+        return true;
+    }
+
+    return false;
+  }
+
   // At the moment, I am just adding a potion of levitation on the stairs up side,
   // but I can imagine other solutions to the level being split by a river (adding
   // another set of stairs, etc)
@@ -1127,17 +1138,6 @@ class MainDungeonBuilder : DungeonBuilder
         rooms.RemoveAt(roomId);
       }      
     }
-  }
-
-  static bool IsEntranceHall(Map map, List<(int, int)> sqs)
-  {
-    foreach (var sq in sqs)
-    {
-      if (map.TileAt(sq).Type == TileType.Upstairs)      
-        return true;      
-    }
-
-    return false;
   }
 
   void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
