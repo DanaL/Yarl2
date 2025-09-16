@@ -127,6 +127,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   {
     bool captive = false;
 
+    string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
+
     // Can we create any rooms-within-rooms?
     for (int level = 0; level < levelMaps.Length; level++)
     {
@@ -134,6 +136,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       List<List<(int, int)>> rooms = map.FindRooms(9);
       List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
       roomIds.Shuffle(rng);
+      List<int> potentialVaults = [];
 
       foreach (int id in roomIds)
       {
@@ -154,6 +157,28 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
           }
 
           break;
+        }
+
+        for (var i = 0; i < rooms.Count; i++)
+        {
+          if (Rooms.PotentialVault(map, rooms[i]))
+            potentialVaults.Add(i);
+        }
+
+      }
+
+      if (potentialVaults.Count > 0 && rng.NextDouble() < 0.2)
+      {
+        int vaultId = potentialVaults[rng.Next(potentialVaults.Count)];
+        HashSet<(int, int)> vault = [.. rooms[vaultId]];
+        var (doorR, doorC) = Vaults.FindExit(map, vault);        
+        roomIds.Remove(vaultId);
+
+        // We could have found a false vault. Likely a spot separate from
+        // the rest of the dungoen by a river or chasm
+        if (doorR >= 0 && doorC >= 0)
+        {
+          Vaults.CreateVault(map, DungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
         }
       }
 

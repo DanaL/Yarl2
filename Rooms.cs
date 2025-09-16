@@ -124,7 +124,7 @@ class Vaults
     double roll = rng.NextDouble();
     if (roll < 0.5)
     {
-      statueDesc = "Broken remains of a statue.";
+      statueDesc = "the broken remains of a statue.";
       ch = '&';
       skullType = "";
     }
@@ -228,7 +228,7 @@ class Vaults
       6 => "died from natural causes",
       7 => "disappeared",
       8 => "died from the family curse",
-      9 => "murdered by rebels",
+      9 => "was murdered by rebels",
       _ => "we don't talk about"
     };
 
