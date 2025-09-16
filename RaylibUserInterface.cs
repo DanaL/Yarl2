@@ -56,6 +56,8 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent()
   {
+    Thread.Sleep(1);
+
     if (WindowShouldClose())
     {
       _lastKeyTime = DateTime.UtcNow;

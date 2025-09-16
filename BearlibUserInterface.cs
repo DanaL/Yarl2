@@ -86,6 +86,8 @@ internal class BLUserInferface : UserInterface, IDisposable
 
   protected override GameEvent PollForEvent()
   {
+    Thread.Sleep(1);
+
     if (Terminal.HasInput())
     {
       int key = Terminal.Read();
