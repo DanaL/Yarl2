@@ -585,6 +585,12 @@ class Rooms
       bait.Value = rng.Next(20, 51);
       objDb.SetToLoc(triggerLoc, bait);
     }
+
+    if (rng.Next(5) == 0)
+    {
+      Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
+      objDb.SetToLoc(triggerLoc, ore);
+    }
   }
 
   public static void TriggerChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
@@ -643,7 +649,13 @@ class Rooms
     Loc treasureLoc = new(dungeonID, level, treasureSq.Item1, treasureSq.Item2);
     TreasureQuality quality = level < 2 ? TreasureQuality.Uncommon : TreasureQuality.Good;
     Item treasure = Treasure.ItemByQuality(quality, objDb, rng);
-    objDb.SetToLoc(treasureLoc, treasure);    
+    objDb.SetToLoc(treasureLoc, treasure);
+
+    if (rng.Next(5) == 0)
+    {
+      Item ore = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
+      objDb.SetToLoc(treasureLoc, ore);
+    }
   }
 
   public static void BasicChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
