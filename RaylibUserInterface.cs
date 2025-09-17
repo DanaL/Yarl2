@@ -56,7 +56,7 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent()
   {
-    Thread.Sleep(1);
+    Thread.Sleep(2);
 
     if (WindowShouldClose())
     {
@@ -97,7 +97,7 @@ class RaylibUserInterface : UserInterface
     TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
     double ms = delta.TotalMilliseconds;
 
-    if (ms < 130  )
+    if (ms < 125)
       return new GameEvent(GameEventType.NoEvent, '\0');;
 
     if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))
