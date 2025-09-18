@@ -249,7 +249,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         objDb.SetToLoc(altarLoc, altar);
       }
 
-      if (rng.NextDouble() < 3.3333)
+      if (rng.Next(4) == 0)
       {
         int roomId = rng.Next(rooms.Count);
         List<(int, int)> room = rooms[roomId];

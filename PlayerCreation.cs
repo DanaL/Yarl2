@@ -93,13 +93,13 @@ class PlayerCreator
     {
       { Attribute.Strength, new Stat(StatRoll(rng)) },
       { Attribute.Constitution, new Stat(StatRoll(rng)) },
-      { Attribute.Dexterity, new Stat(StatRoll(rng)) },
-      { Attribute.Piety, new Stat(StatRoll(rng)) },
+      { Attribute.Dexterity, new Stat(StatRoll(rng)) },      
       { Attribute.Will, new Stat(StatRoll(rng)) },
       { Attribute.Depth, new Stat(0) },
       { Attribute.Nerve, new Stat(1250) },
       { Attribute.LastBlessing, new Stat(0) },
-      { Attribute.BaseHP, new Stat(10) }
+      { Attribute.BaseHP, new Stat(10) },
+      { Attribute.Piety, new Stat(0) }
     };
 
     int roll;

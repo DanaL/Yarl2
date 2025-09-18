@@ -212,10 +212,13 @@ class EffectApplier
     }
 
     target.Traits = [.. target.Traits.Where(t => t is not DesecratedTrait && t is not DescriptionTrait)];
-    target.Traits.Add(new DescriptionTrait("An altar dedicated by Hunktokar."));
-
+    target.Traits.Add(new DescriptionTrait("An altar consecrated to Hunktokar."));
+    target.Traits.Add(new LightSourceTrait() { Radius = 1, FgColour = Colours.YELLOW, BgColour = Colours.HOLY_AURA, ExpiresOn = ulong.MaxValue, OwnerID = target.ID });
     target.Traits.Add(new HolyTrait());
-    
+    target.Glyph = target.Glyph with { Lit = Colours.WHITE, Unlit = Colours.DARK_GREY };
+
+    gs.Player.Stats[Attribute.Piety].ChangeMax(1);
+
     gs.UIRef().AlertPlayer("The altar glows with a holy light and is cleansed!", gs, loc);
   }
 
