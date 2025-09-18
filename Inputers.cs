@@ -933,43 +933,37 @@ class Dialoguer : Inputer
         _currOptions.Add(key);
 
         string optionPrefix = $"{key}) ";
+        sb.Append(optionPrefix);
+
+        // This is kind of dumb because the text being sent to the popup will
+        // be parsed again, but I want if an option is more than one line, that
+        // it will be tabbed over like:
+        //
+        // a) This option extends across two lines
+        //    and the rest of the text is here.
+        //
+        // But to avoid duplicating the scanning and wrapping, I'd need to 
+        // create something like an Options List and then I'm going down the
+        // the road of inventing a mini markup language...
+        LineScanner ls = new(text);
+        List<(Colour, string)> words = ls.Scan();
+
         int availableWidth = _popupWidth - optionPrefix.Length;
-        string remainingText = text;
-        bool isFirstLine = true;
-
-        while (remainingText.Length > availableWidth)
+        foreach ((Colour c, string w) in words)
         {
-          int splitPoint = availableWidth;
-          while (splitPoint > 0 && remainingText[splitPoint - 1] != ' ')
+          if (w.Length < availableWidth)
           {
-            splitPoint--;
-          }
-
-          if (splitPoint == 0)
-          {
-            splitPoint = availableWidth;
-          }
-
-          if (isFirstLine)
-          {
-            sb.AppendLine(optionPrefix + remainingText[..splitPoint].TrimEnd());
-            isFirstLine = false;
+            sb.Append($"[{Colours.ColourToText(c)} {w}]");
+            availableWidth -= w.Length;
           }
           else
           {
-            sb.AppendLine($"\t{remainingText[..splitPoint].TrimEnd()}");
+            sb.AppendLine();
+            sb.Append($"\t[{Colours.ColourToText(c)} {w}]");
+            availableWidth = _popupWidth - optionPrefix.Length;
           }
-
-          remainingText = remainingText[splitPoint..].TrimStart();
         }
-
-        if (remainingText.Length > 0)
-        {
-          if (isFirstLine)
-            sb.AppendLine(optionPrefix + remainingText);
-          else
-            sb.AppendLine($"\t{remainingText}");
-        }
+        sb.AppendLine();
       }
 
       _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');

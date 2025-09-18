@@ -1466,6 +1466,8 @@ class DialogueInterpreter
             break;
         }
       }
+
+      Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptWinterBlessing()));
     }
     else
     {
