@@ -826,6 +826,8 @@ class DialogueInterpreter
         return Util.RelativeDir(mob.Loc, dungoenLoc);
       case "ORCHARD_EXISTS":
         return gs.FactDb.FactCheck("OrchardExists") is SimpleFact;
+      case "PLAYER_PIETY":
+        return gs.Player.Stats[Attribute.Piety].Max;
       case "MAGIC101":
         return gs.Player.Stats.ContainsKey(Attribute.MagicPoints);
       case "IMPRISONED_BY":

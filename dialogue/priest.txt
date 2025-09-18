@@ -1,5 +1,11 @@
 ﻿(
   (cond
+    ((= PLAYER_PIETY 0) (say "Greetings, child. "))
+    ((= PLAYER_PIETY 1) (say "Greetings, [GREEN Seeker]. "))
+    (else (say "Greetings, oh [BLUE righteous faithful]. "))
+  )
+  
+  (cond
     ((= ORCHARD_EXISTS true) 
       (say
         (pick
