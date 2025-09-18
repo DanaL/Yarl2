@@ -177,6 +177,7 @@ class Village
       Items = [1, 2, 3 + rng.Next(3)]
     };
     cleric.Traits.Add(nlt);
+    cleric.Stats[Attribute.ShopMenu] = new Stat(-9999);
 
     int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
     foreach (Loc loc in town.Shrine)

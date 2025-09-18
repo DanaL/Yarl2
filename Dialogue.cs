@@ -702,6 +702,7 @@ class ScriptReaverBlessing : ScriptExpr {}
 class ScriptEmberBlessing : ScriptExpr {}
 class ScriptTricksterBlessing : ScriptExpr {}
 class ScriptWinterBlessing : ScriptExpr {}
+class ScriptBuyHolyWater : ScriptExpr {}
 class ScriptStartDragonCultQuest : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
@@ -717,6 +718,7 @@ class DialogueInterpreter
   StringBuilder Sb { get; set; } = new();
   StringBuilder Footer { get; set; } = new();
   public DialogueInterpreter() { }
+  static readonly int HOLY_WATER_PRICE = 20;
 
   public (string, string) Run(string filename, Actor mob, GameState gs)
   {
@@ -1014,6 +1016,10 @@ class DialogueInterpreter
     else if (Expr is ScriptWinterBlessing)
     {
       EvalWinterBlessing(mob, gs);
+    }
+    else if (Expr is ScriptBuyHolyWater)
+    {
+      EvalBuyHolyWater(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1467,7 +1473,12 @@ class DialogueInterpreter
         }
       }
 
-      Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptWinterBlessing()));
+      int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
+      int currTurn = (int)(gs.Turn % int.MaxValue);
+      if (gs.Player.Inventory.Zorkmids >= HOLY_WATER_PRICE && currTurn - lastHWPurchase > 1750)
+      {
+        Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptBuyHolyWater()));
+      }
     }
     else
     {
@@ -1518,6 +1529,16 @@ class DialogueInterpreter
     gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
     
     throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalBuyHolyWater(Actor mob, GameState gs)
+  {
+    gs.Player.Inventory.Zorkmids -= HOLY_WATER_PRICE;
+    mob.Stats[Attribute.ShopMenu] = new Stat((int)(gs.Turn % int.MaxValue));
+    Item hw = ItemFactory.Get(ItemNames.HOLY_WATER, gs.ObjDb);
+    gs.Player.AddToInventory(hw, gs);
+
+    throw new ConversationEnded("Use this wisely. It will take me some time to prepare more.");
   }
 
   void EvalStartDragonCultQuest(Actor mob, GameState gs)
