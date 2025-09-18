@@ -107,6 +107,7 @@ class Colours
     else if (colour == BLUE_AURA) return "blueaura";
     else if (colour == RED_AURA) return "redaura";
     else if (colour == UNDERWATER) return "underwater";
+    else if (colour == HOLY_AURA) return "holyaura";
     else if (colour == NULL) return "null";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
@@ -149,6 +150,7 @@ class Colours
     "blueaura" => BLUE_AURA,
     "redaura" => RED_AURA,
     "underwater" => UNDERWATER,
+    "holyaura" => HOLY_AURA,
     "null" => NULL,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
