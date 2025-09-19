@@ -36,7 +36,7 @@ abstract class Action
   {
     if (!string.IsNullOrEmpty(Quip) && Actor is not null && GameState is not null)
     {
-      var bark = new BarkAnimation(GameState, QuipDuration, Actor, Quip);
+      BarkAnimation bark = new(GameState, QuipDuration, Actor, Quip);
       GameState.UIRef().RegisterAnimation(bark);      
     }
 

@@ -245,6 +245,36 @@ class EffectApplier
         CleanseDesecratedAltar(gs, item, loc);
         return;
       }
+      else if (item.Type == ItemType.Altar && item.HasTrait<MolochAltarTrait>())
+      {
+        Loc impLoc = Loc.Nowhere;
+
+        if (!gs.ObjDb.Occupied(loc))
+        {
+          impLoc = loc;
+        }
+        else
+        {
+          List<Loc> locs = [.. Util.Adj8Locs(loc).Where(l => gs.TileAt(l).Passable() && !gs.ObjDb.Occupied(l))];
+          if (locs.Count > 0)
+            impLoc = locs[gs.Rng.Next(locs.Count)];
+        }
+
+        if (impLoc == Loc.Nowhere)
+        {
+          gs.UIRef().AlertPlayer("The holy water sizzles and you hear an angry roar!", gs, loc);
+          return;
+        }
+
+        Actor imp = MonsterFactory.Get("imp", gs.ObjDb, gs.Rng);
+        imp.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+        gs.ObjDb.AddNewActor(imp, loc);
+
+        gs.UIRef().SetPopup(new Popup("\n\t\t\t\t[BRIGHTRED HOW DARE YOU!]\n", "An angry voice shouts, the floor shakes", -1, -1));
+        gs.UIRef().AlertPlayer("A cloud of sulfurous gas forms over the altar and from it an imp emerges!", gs, loc);
+
+        return;
+      }
     }
 
     Tile tile = gs.TileAt(loc);

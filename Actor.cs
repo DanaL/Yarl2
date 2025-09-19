@@ -869,7 +869,10 @@ class Power
 
         string summons = undead[gs.Rng.Next(undead.Count)];
 
-        return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob };
+        return new SummonAction(mob.Loc, summons, 1) { GameState = gs, Actor = mob, Quip = Quip };
+      case "SummonBats":
+        int batCount = gs.Rng.Next(1, 4);
+        return new SummonAction(gs.Player.Loc, "dire bat", batCount) { GameState = gs, Actor = mob, Quip = Quip };
       case "Web":
         return new WebAction(gs, loc);
       case "FireBolt":
