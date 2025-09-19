@@ -430,3 +430,6 @@ It's probably just a floating fungi that only looks like a beholder. Definitely.
 #
 mistyportal|Misty Portal
 A stone archway filled with swirling, sparkling mists.
+#
+skull
+Likely the remains of some unfortunate adventurer.

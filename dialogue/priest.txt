@@ -16,6 +16,7 @@
             "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
             "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
             "Huntokar grants mightier blessings to loyal followers."
+            "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
           )
         )
       )
@@ -29,6 +30,7 @@
           "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
           "Huntokar grants mightier blessings to loyal followers."
+          "Huntokar weeps for those whose bones lay in the depths without having proper funerary rites."
           )
         )
       )

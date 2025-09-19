@@ -704,6 +704,7 @@ class ScriptTricksterBlessing : ScriptExpr {}
 class ScriptWinterBlessing : ScriptExpr {}
 class ScriptBuyHolyWater : ScriptExpr {}
 class ScriptStartDragonCultQuest : ScriptExpr {}
+class ScriptTurnInSkull : ScriptExpr {}
 
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
@@ -1022,6 +1023,10 @@ class DialogueInterpreter
     else if (Expr is ScriptBuyHolyWater)
     {
       EvalBuyHolyWater(mob, gs);
+    }
+    else if (Expr is ScriptTurnInSkull)
+    {
+      EvalTurnInSkull(mob, gs);
     }
     else if (Expr is ScriptSpend spend)
     {
@@ -1468,6 +1473,11 @@ class DialogueInterpreter
       {
         Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptBuyHolyWater()));
       }
+
+      if (gs.Player.Inventory.Items().Where(i => i.Name == "skull").Any())
+      {
+        Options.Add(new DialogueOption("That [ICEBLUE skull]: please allow me to give those remains a proper burial!", opt++, new ScriptTurnInSkull()));
+      }
     }
     else
     {
@@ -1518,6 +1528,20 @@ class DialogueInterpreter
     gs.Player.Stats[Attribute.LastBlessing].SetMax(5);
     
     throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalTurnInSkull(Actor mob, GameState gs)
+  {
+    List<Item> skulls = [.. gs.Player.Inventory.Items().Where(i => i.Name == "skull")];
+    if (skulls.Count > 0)
+    {
+      Item skull = skulls[0];
+      gs.Player.Inventory.RemoveByID(skull.ID);
+      gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, skull);
+      gs.Player.Stats[Attribute.Piety].ChangeMax(1);
+    }
+
+    throw new ConversationEnded("I'll see to it that these remains are sancitified and given a proper burial.");
   }
 
   static void EvalBuyHolyWater(Actor mob, GameState gs)
