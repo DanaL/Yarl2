@@ -246,5 +246,24 @@ class EffectApplier
         return;
       }
     }
+
+    Tile tile = gs.TileAt(loc);
+    switch (tile.Type)
+    {
+      case TileType.Water:
+      case TileType.DeepWater:
+      case TileType.Underwater:
+      case TileType.Pool:
+        gs.UIRef().AlertPlayer("The holy water dilutes into the water.", gs, loc);
+        break;
+      case TileType.StoneFloor:
+      case TileType.DungeonFloor:
+      case TileType.WoodFloor:
+        gs.UIRef().AlertPlayer("You pour the holy water on the floor, to no effect.", gs, loc);
+        break;
+      default:
+        gs.UIRef().AlertPlayer("You pour the holy water on the ground, to no effect.", gs, loc);
+        break;
+    }  
   }
 }
