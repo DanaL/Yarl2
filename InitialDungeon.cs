@@ -247,8 +247,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         altar.Traits.Add(new MolochAltarTrait());
         objDb.SetToLoc(altarLoc, altar);
       }
-
-      
+            
       if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
         int roomId = rng.Next(rooms.Count);

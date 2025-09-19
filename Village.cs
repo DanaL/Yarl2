@@ -170,13 +170,7 @@ class Village
     cleric.SetBehaviour(new PriestBehaviour());
     cleric.Traits.Add(new BehaviourTreeTrait() { Plan = "PriestPlan" });
     
-    cleric.Stats[Attribute.InventoryRefresh] = new Stat(1);
-    NumberListTrait nlt = new()
-    {
-      Name = "Blessings",
-      Items = [1, 2, 3 + rng.Next(3)]
-    };
-    cleric.Traits.Add(nlt);
+    cleric.Stats[Attribute.InventoryRefresh] = new Stat(1);    
     cleric.Stats[Attribute.ShopMenu] = new Stat(-9999);
 
     int minR = int.MaxValue, maxR = 0, minC = int.MaxValue, maxC = 0;
