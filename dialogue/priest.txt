@@ -15,6 +15,7 @@
             "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
             "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
             "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
+            "Huntokar grants mightier blessings to loyal followers."
           )
         )
       )
@@ -27,6 +28,7 @@
           "I feel in my bones that the [BRIGHTRED old evil] begins to stir once more."
           "Long ago, the ruins were a mighty kindgom. But then a great evil arose deep underground."
           "Adventurers defeated the evil but it appears to be waking again, endangering #TOWN_NAME."
+          "Huntokar grants mightier blessings to loyal followers."
           )
         )
       )

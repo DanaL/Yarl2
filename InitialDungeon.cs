@@ -126,8 +126,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     bool captive = false;
-
     string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
+    double chanceOfDesecratedAltar = 0.25;
 
     // Can we create any rooms-within-rooms?
     for (int level = 0; level < levelMaps.Length; level++)
@@ -137,7 +137,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
       roomIds.Shuffle(rng);
       List<int> potentialVaults = [];
-
+      
       foreach (int id in roomIds)
       {
         RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
@@ -164,7 +164,6 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
           if (Rooms.PotentialVault(map, rooms[i]))
             potentialVaults.Add(i);
         }
-
       }
 
       if (potentialVaults.Count > 0 && rng.NextDouble() < 0.2)
@@ -249,7 +248,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         objDb.SetToLoc(altarLoc, altar);
       }
 
-      if (rng.Next(4) == 0)
+      
+      if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
         int roomId = rng.Next(rooms.Count);
         List<(int, int)> room = rooms[roomId];
@@ -261,6 +261,11 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         string fluid = rng.NextDouble() < 0.5 ? "blood" : "excrement";
         altar.Traits.Add(new DescriptionTrait($"This altar, once holy, has been desecrated by vile symbols drawn in {fluid}."));
         objDb.SetToLoc(altarLoc, altar);
+        chanceOfDesecratedAltar = 0.25;
+      }
+      else
+      {
+        chanceOfDesecratedAltar += 0.1;
       }
 
       if (level >= 2 && rng.Next(5) == 0)
