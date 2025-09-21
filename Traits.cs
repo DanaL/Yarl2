@@ -263,12 +263,14 @@ class DragonCultBlessingTrait : BlessingTrait
 class ChampionBlessingTrait : BlessingTrait
 {  
   public override List<string> Apply(Actor granter, GameState gs)
-  {    
-    ACModTrait ac = new() { ArmourMod = 2, SourceId = granter.ID };
+  {
+    int piety = gs.Player.Stats[Attribute.Piety].Max;
+
+    ACModTrait ac = new() { ArmourMod = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
-    AuraOfProtectionTrait prot = new() { HP = 25, SourceId = granter.ID };
+    AuraOfProtectionTrait prot = new() { HP = 10 + piety * 5, SourceId = granter.ID };
     prot.Apply(gs.Player, gs);
-    AttackModTrait amt = new() { Amt = 3, SourceId = granter.ID };
+    AttackModTrait amt = new() { Amt = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(amt);
 
     gs.Player.Traits.Add(this);
@@ -2777,13 +2779,15 @@ class ReaverBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
   {    
-    MeleeDamageModTrait dmg = new() { Amt = 5, SourceId = granter.ID };
+    int piety = gs.Player.Stats[Attribute.Piety].Max;
+
+    MeleeDamageModTrait dmg = new() { Amt = 2 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
     // Do I want this to be will? Or should I make it whichever is higher:
     // will or strength (kind of like Chr vs Str intimidation checks in 5e)
     int will = gs.Player.Stats[Attribute.Will].Curr;
-    FrighteningTrait fright = new() { DC = 10 + will, SourceId = granter.ID };
+    FrighteningTrait fright = new() { DC = 10 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(fright);
         
     gs.Player.Traits.Add(this);
