@@ -687,7 +687,7 @@ class Util
       ((JetTrigger)tile).Visible ? new Glyph('^', Colours.YELLOW, Colours.GREY, Colours.BLACK, false)
                                  : new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.MagicMouth => new Glyph('^', Colours.WHITE, Colours.GREY, Colours.BLACK, true),
-    TileType.HiddenMagicMouth => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, false),
+    TileType.HiddenMagicMouth => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.Gravestone => new Glyph('\u25AE', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.DisturbedGrave => new Glyph('|', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
     TileType.BridgeTrigger => new Glyph('•', Colours.GREY, Colours.GREY, Colours.BLACK, true),
