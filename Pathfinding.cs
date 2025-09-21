@@ -38,6 +38,10 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     if (!tile.Passable())
       return int.MaxValue;
 
+    // A monster will step on a magic mouth but will avoid them if reasonable
+    if (tile.Type == TileType.MagicMouth)
+      return 2;
+      
     if (tile.IsVisibleTrap())
       return int.MaxValue;
 
@@ -55,7 +59,13 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     // JetTriggers aren't triggered by flight but they aren't covered
     // in IsVisibleTrap(). I can't remember if that's intentional or an
     // an oversight...
+    //
+    // Monsters also won't necessarily avoid Magic Mouths
     TileType t = tile.Type;
+
+    if (t == TileType.MagicMouth)
+      return 2;
+
     if (tile.IsVisibleTrap() && !(t == TileType.Pit || t == TileType.TrapDoor))
       return int.MaxValue;
 
@@ -124,7 +134,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 
       if (visited.Contains(sq))
         continue;
-      var tile = Map.TileAt(sq.Item1, sq.Item2);
+      Tile tile = Map.TileAt(sq.Item1, sq.Item2);
 
       int cost = calcCost(tile);
       if (ExtraCosts.TryGetValue(sq, out int extraCost))
