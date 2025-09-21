@@ -77,6 +77,10 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     if (tile.Type == TileType.ClosedDoor)
       return 2;
 
+    // A monster will step on a magic mouth but will avoid them if reasonable
+    if (tile.Type == TileType.MagicMouth)
+      return 2;
+      
     if (!tile.Passable())
       return int.MaxValue;
 
