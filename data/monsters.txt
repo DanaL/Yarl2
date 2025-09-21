@@ -58,5 +58,5 @@ cave lizard       |l|green        |darkgreen   |13|20|2| 1.0|10|10|MeleePiercing
 kobold soothsayer |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7#0#0#15#10#Attack,SummonCaveLizard#0#0#0#0#0#5#Attack,MeleeSlashing#1#1#5#2#0#0#Attack|Intelligent
 faint spirit      |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1#5#2#0#0#Attack|Undead,Immunity#Poison,LightSource#owner#2#iceblue#mysticaura
 angler fish       |»|grey         |darkgrey    |13|10|2| 1.0|10|10||Swimmer,Passive,LightSource#owner#2#torchyellow#torchyellow
-gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.55|10|10||Floating,Brainless,Retribution#Blunt#6#4#2
+gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.75|10|10||Floating,Brainless,Retribution#Blunt#6#4#2
 imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent,PoorLoot
