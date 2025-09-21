@@ -1450,14 +1450,14 @@ class DialogueInterpreter
   void EvalBlessings(Actor mob, GameState gs)
   {
     bool blessed = gs.Player.HasTrait<BlessingTrait>();
-    
+    char opt = 'a';
+
     if (!blessed)
     {
-      ((NPCBehaviour) mob.Behaviour).RefreshShop(mob, gs);
+      ((NPCBehaviour)mob.Behaviour).RefreshShop(mob, gs);
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
-      char opt = 'a';
-
+      
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
       Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
 
@@ -1465,23 +1465,23 @@ class DialogueInterpreter
         Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
 
       //Options.Add(new DialogueOption("The [ICEBLUE Blessing of Embers]: Huntokar will surround you in holy fire and immolate evil you face!", opt++, new ScriptEmberBlessing()));
-      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));
-      
-      int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
-      int currTurn = (int)(gs.Turn % int.MaxValue);
-      if (gs.Player.Inventory.Zorkmids >= HOLY_WATER_PRICE && currTurn - lastHWPurchase > 1750)
-      {
-        Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptBuyHolyWater()));
-      }
-
-      if (gs.Player.Inventory.Items().Where(i => i.Name == "skull").Any())
-      {
-        Options.Add(new DialogueOption("That [ICEBLUE skull]: please allow me to give those remains a proper burial!", opt++, new ScriptTurnInSkull()));
-      }
+      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Trickster]: Draw upon Huntokars's mischevious aspects and elude your foes!", opt++, new ScriptTricksterBlessing()));      
     }
     else
     {
       Sb.Append("\n\nYou go forth with Huntokar's blessing and aid. Seek out and defeat the evil that is plauging our town!");
+    }
+    
+    int lastHWPurchase = mob.Stats[Attribute.ShopMenu].Curr;
+    int currTurn = (int)(gs.Turn % int.MaxValue);
+    if (gs.Player.Inventory.Zorkmids >= HOLY_WATER_PRICE && currTurn - lastHWPurchase > 1750)
+    {
+      Options.Add(new DialogueOption("Buy [ICEBLUE Holy Water] for a small donation - [YELLOW $]20", opt++, new ScriptBuyHolyWater()));
+    }
+
+    if (gs.Player.Inventory.Items().Where(i => i.Name == "skull").Any())
+    {
+      Options.Add(new DialogueOption("That [ICEBLUE skull]: please allow me to give those remains a proper burial!", opt++, new ScriptTurnInSkull()));
     }
   }
 
