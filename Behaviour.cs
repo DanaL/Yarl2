@@ -447,8 +447,8 @@ class SmithBehaviour : NPCBehaviour
       return (new NullAction(), new PauseForMoreInputer(gs));
     }
 
-    var acc = new SmithyInputer(actor, Blurb(gs), gs);
-    var action = new ShoppingCompletedAction(gs, actor);
+    SmithyInputer acc = new(actor, Blurb(gs), gs);
+    ShoppingCompletedAction action = new(gs, actor);
 
     return (action, acc);
   }

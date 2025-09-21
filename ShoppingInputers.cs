@@ -379,19 +379,19 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 2)
     {
-      GS.Player.QueueAction(new RepairItemAction(GS, Shopkeeper));
+      DeferredAction = new RepairItemAction(GS, Shopkeeper);
       blurb = "What would you like repaired?";
       base.Input(ch);
     }
     else if (menuState == 3 && MenuItems.ContainsKey(ch))
     {
-      GS.Player.QueueAction(new UpgradeItemAction(GS, Shopkeeper));
       _itemToEnchant = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
       MenuItems = ReagentMenu();
     }
     else if (menuState == 4)
     {
+      DeferredAction = new UpgradeItemAction(GS, Shopkeeper);
       SingleSelection = true;
       base.Input(ch);
     }
@@ -531,7 +531,7 @@ class SmithyInputer : ShopMenuInputer
       {
         Zorkminds = TotalInvoice(),
         ItemSlot = _itemToEnchant,
-        ReagentSLot = reagent
+        ReagentSlot = reagent
       };
     }
     else if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out menuState) && menuState.Curr == 2)
@@ -1013,7 +1013,7 @@ class RepairItemUIResult : UIResult
 class UpgradeItemUIResult : UIResult
 {
   public char ItemSlot { get; set; }
-  public char ReagentSLot { get; set; }
+  public char ReagentSlot { get; set; }
   public int Zorkminds { get; set; } = 0;
 }
 

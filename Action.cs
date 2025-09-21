@@ -747,7 +747,7 @@ class UpgradeItemAction : Action
     var upgradeResult = (UpgradeItemUIResult)result;
     Total = upgradeResult.Zorkminds;
     ItemSlot = upgradeResult.ItemSlot;
-    ReagentSlot = upgradeResult.ReagentSLot;
+    ReagentSlot = upgradeResult.ReagentSlot;
   }
 }
 
