@@ -168,9 +168,10 @@ class AuraOfProtectionTrait : TemporaryTrait
   public override string AsText() => $"AuraOfProtection#{HP}";
 }
 
-abstract class BlessingTrait : TemporaryTrait 
+abstract class BlessingTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "Your blessing fades.";
+  public abstract string Description(Actor owner);
 }
 
 // For items that can be used by the Apply command but don't need to
@@ -205,6 +206,8 @@ class CastTrait : Trait, IUSeable
 class DragonCultBlessingTrait : BlessingTrait
 {
   const int MP_COST = 3;
+
+  public override string Description(Actor owner) => "Dragon cult clessing";
 
   public override List<string> Apply(Actor _, GameState gs)
   {
@@ -261,7 +264,7 @@ class DragonCultBlessingTrait : BlessingTrait
 }
 
 class ChampionBlessingTrait : BlessingTrait
-{  
+{
   public override List<string> Apply(Actor granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
@@ -284,10 +287,45 @@ class ChampionBlessingTrait : BlessingTrait
   {
     base.Remove(gs);
 
-    gs.Player.Traits = [..gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+    gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
   }
 
   public override string AsText() => $"ChampionBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+
+  public override string Description(Actor owner)
+  {
+    string s = "You have the Champion Blessing. It grants";
+
+    AuraOfProtectionTrait? prot = owner.Traits.OfType<AuraOfProtectionTrait>()
+                              .Where(t => t.SourceId == SourceId)
+                              .FirstOrDefault();
+
+    ACModTrait? acMod = owner.Traits.OfType<ACModTrait>()
+                              .Where(t => t.SourceId == SourceId)
+                              .FirstOrDefault();
+    if (acMod is not null)
+    {
+      s += $" a +{acMod.ArmourMod} AC bonus";
+    }
+
+    AttackModTrait? am = owner.Traits.OfType<AttackModTrait>()
+                              .Where(t => t.SourceId == SourceId)
+                              .FirstOrDefault();
+    if (am is not null)
+    {
+      s += prot is null ? " and " : ", ";
+      s += $"a +{am.Amt} attack bonus";
+    }
+
+    if (prot is not null)
+    {
+      s += ", and a ward against damage";
+    }
+
+    s += ".";
+
+    return s;
+  }
 }
 
 class SwallowedTrait : Trait, IGameEventListener
@@ -750,20 +788,24 @@ class EmberBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
   {
-    ResistanceTrait resist = new() 
+    ResistanceTrait resist = new()
     {
-      SourceId = granter.ID, OwnerID = gs.Player.ID, 
-      ExpiresOn = ExpiresOn, Type = DamageType.Fire 
+      SourceId = granter.ID,
+      OwnerID = gs.Player.ID,
+      ExpiresOn = ExpiresOn,
+      Type = DamageType.Fire
     };
     // I'm not calling the Apply() method here because I don't want a separate listener
     // registered for the ResistanceTrait. This trait will be removed when 
     // EmberBlessingTrait is removed.
     gs.Player.Traits.Add(resist);
 
-    DamageTrait dt = new() 
-    { 
-      SourceId = granter.ID, DamageType = DamageType.Fire,
-      DamageDie = 6, NumOfDie = 1
+    DamageTrait dt = new()
+    {
+      SourceId = granter.ID,
+      DamageType = DamageType.Fire,
+      DamageDie = 6,
+      NumOfDie = 1
     };
     gs.Player.Traits.Add(dt);
 
@@ -785,6 +827,8 @@ class EmberBlessingTrait : BlessingTrait
   }
 
   public override string AsText() => $"EmberBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+  
+  public override string Description(Actor owner) => "Ember blessing";
 }
 
 class PoorLootTrait : LootTrait
@@ -2778,18 +2822,15 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 class ReaverBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
-  {    
+  {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
 
     MeleeDamageModTrait dmg = new() { Amt = 2 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(dmg);
 
-    // Do I want this to be will? Or should I make it whichever is higher:
-    // will or strength (kind of like Chr vs Str intimidation checks in 5e)
-    int will = gs.Player.Stats[Attribute.Will].Curr;
     FrighteningTrait fright = new() { DC = 10 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(fright);
-        
+
     gs.Player.Traits.Add(this);
 
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -2805,6 +2846,28 @@ class ReaverBlessingTrait : BlessingTrait
   }
 
   public override string AsText() => $"ReaverBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+
+  public override string Description(Actor owner)
+  {
+    string s = "You have the Reaver Blessing. It grants";
+
+    MeleeDamageModTrait? dmg = owner.Traits.OfType<MeleeDamageModTrait>()
+                                           .Where(t => t.SourceId == SourceId)
+                                           .FirstOrDefault();
+    if (dmg is not null)
+    {
+      s += $" a +{dmg.Amt} bonus to melee damage";
+    }
+
+    if (owner.Traits.OfType<FrighteningTrait>().Where(t => t.SourceId == SourceId).Any())
+    {
+      s += " and you may frighten your foes";
+    }
+
+    s += ".";
+
+    return s;
+  }
 }
 
 // I am making the assumption it will only be the Player who uses Recall.
@@ -3382,6 +3445,8 @@ class TricksterBlessingTrait : BlessingTrait
   }
 
   public override string AsText() => $"TricksterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+
+  public override string Description(Actor owner) => "Trickster blessing";
 }
 
 class UndeadTrait : Trait
@@ -3485,6 +3550,8 @@ class WinterBlessingTrait : BlessingTrait
   }
 
   public override string AsText() => $"WinterBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+
+  public override string Description(Actor owner) => "Winter blessing";
 }
 
 class WorshiperTrait : Trait

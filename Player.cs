@@ -310,13 +310,14 @@ class Player : Actor
 
     HashSet<string> traitsToShow = [];
     double alacrity = 0;
-    bool blessed = false;
     int acmod = 0;
     int attackMod = 0;
     int meleeDmgMod = 0;
     bool quiet = false;
     bool fireDmg = false;
     bool fireRebuke = false;
+    BlessingTrait? blessing = null;
+
     foreach (Trait trait in Traits)
     {
       if (trait is RageTrait)
@@ -335,8 +336,8 @@ class Player : Actor
         traitsToShow.Add("You have feather fall");
       else if (trait is FrighteningTrait)
         traitsToShow.Add("You can frighten your foes");
-      else if (trait is BlessingTrait)
-        blessed = true;
+      else if (trait is BlessingTrait bt)
+        blessing = bt;
       else if (trait is ACModTrait acm)
         acmod += acm.ArmourMod;
       else if (trait is AttackModTrait attm)
@@ -373,9 +374,6 @@ class Player : Actor
     else if (meleeDmgMod > 0)
       traitsToShow.Add("You deal more damage in melee");
 
-    if (blessed)
-      traitsToShow.Add("You are blessed");
-
     if (quiet)
       traitsToShow.Add("You are quiet");
 
@@ -401,6 +399,12 @@ class Player : Actor
       lines.Add("You have yet to venture into the Dungeon.");
     else
       lines.Add($"You have ventured as deep as level {Stats[Attribute.Depth].Max}.");
+
+    if (blessing is not null)
+    {
+      lines.Add("");
+      lines.Add(blessing.Description(this));
+    }
 
     return lines;
   }
@@ -429,7 +433,7 @@ class Player : Actor
         break;
       }
 
-      if (t is RestingTrait) 
+      if (t is RestingTrait)
       {
         passTurn = true;
         action = new PassAction(gs, this);
@@ -443,7 +447,7 @@ class Player : Actor
     }
 
     if (action is null)
-    {    
+    {
       return;
     }
 
