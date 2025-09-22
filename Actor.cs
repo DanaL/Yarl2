@@ -262,11 +262,18 @@ abstract class Actor : GameObj, IZLevel
 
     Animation anim;
     if (fireDamage)
+    {
       anim = new HitAnimation(gs, this, Colours.BRIGHT_RED, Colours.TORCH_YELLOW, Constants.FIRE_CHAR);
+    }
     else if (coldDamage)
+    {
       anim = new HitAnimation(gs, this, Colours.WHITE, Colours.ICE_BLUE, '*');
+    }
     else
-      anim = new HitAnimation(gs, this, Colours.WHITE, Colours.FX_RED, Glyph.Ch);
+    {
+      char ch = VisibleTo(gs.Player) ? Glyph.Ch : ' ';
+      anim = new HitAnimation(gs, this, Colours.WHITE, Colours.FX_RED, ch);
+    }
     gs.UIRef().RegisterAnimation(anim);
 
     AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();
