@@ -8,25 +8,28 @@
       (set DIALOGUE_STATE 0)
     )
   )
-  (else 
-    (
-      ; first, select the blurb
-      (cond
+
+  
+  (else ( 
+    
+    ; first, select the blurb
+    (cond
         ((= MET_PLAYER false) 
           ( 
             (say "I used to be an adventurer like you! Sure the top floors of the dungeon are all #EARLY_DENIZEN and rats, but then things get a lot worse.")
             (set MET_PLAYER true)
           )
         )
-        ( 
-        else
+        (else
           (cond
             ((= PLAYER_DEPTH 0) (say "Stock up on torches and maybe a flagon of whiskey before you head into the depths."))
+            
             ((<= PLAYER_DEPTH 2) (say (pick (
                                           "Some free advice: grind around on the first few floors and save up enough for your retirement like I did."
                                           "If you're luck, some future adventurer will haul your bones back for a proper burial."
-                                          )
-            ))
+                                          )))
+            )
+
             (else (say "You've been HOW deep? The horrors that await you..."))
           )
         )
@@ -41,7 +44,6 @@
             (option "Buy #NPC_NAME a drink. ([YELLOW $]2)" ((spend 2) (set DIALOGUE_STATE 1)))
           )
         )
-      )
-    )
-  )
+      )  
+  ))
 )
