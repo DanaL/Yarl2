@@ -153,11 +153,7 @@ internal class BLUserInferface : UserInterface, IDisposable
 
     if (_longMessage != null)
     {
-      Terminal.Color(ToBearLibColour(Colours.WHITE));
-      for (int row = 0; row < _longMessage.Count; row++)
-      {
-        Terminal.Print(0, row, _longMessage[row]);
-      }
+      WriteLongMessage(_longMessage);
     }
     else
     {

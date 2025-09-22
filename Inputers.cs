@@ -520,7 +520,7 @@ class HelpScreen : Inputer
       help.Add("|".PadLeft(menuWidth + 1));
 
     WriteHelpEntry(help);
-    _ui.WriteLongMessage(help);
+    _ui.SetLongMessage(help);
   }
 
   List<string> SplitLine(string line)
@@ -1523,7 +1523,7 @@ class LongMessagerInputer : Inputer
     _wrappedLines = WrapLines(lines);
 
     List<string> page = [.. _wrappedLines.Take(UserInterface.ScreenHeight)];
-    ui.WriteLongMessage(page);
+    ui.SetLongMessage(page);
     _row = page.Count;
   }
 
@@ -1576,7 +1576,7 @@ class LongMessagerInputer : Inputer
       txt = txt.PadLeft(UserInterface.ScreenWidth / 2 - txt.Length + txt.Length / 2, ' ');
       page.Insert(0, txt);
 
-      _ui.WriteLongMessage(page);
+      _ui.SetLongMessage(page);
       _row += page.Count;
     }
   }

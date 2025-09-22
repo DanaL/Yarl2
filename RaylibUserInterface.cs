@@ -202,10 +202,7 @@ class RaylibUserInterface : UserInterface
 
     if (_longMessage is not null)
     {
-      for (int j = 0; j < _longMessage.Count; j++)
-      {
-        WriteLine(_longMessage[j], j, 0, ScreenWidth, Colours.WHITE);
-      }
+      WriteLongMessage(_longMessage);
       WritePopUp();
     }
     else

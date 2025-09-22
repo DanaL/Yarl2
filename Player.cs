@@ -288,7 +288,7 @@ class Player : Actor
   {
     List<string> lines = [];
 
-    lines.Add($"{Name}, {CharDesc()}");
+    lines.Add($"[GREEN {Name}], {CharDesc()}");
     lines.Add("");
     lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Will: {PrintStat(Attribute.Will)}");
     lines.Add("");

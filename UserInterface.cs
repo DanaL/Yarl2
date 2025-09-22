@@ -345,6 +345,16 @@ abstract class UserInterface
   protected void WritePopUp() => _popup?.Draw(this);
   protected void WriteConfirmation() => _confirm?.Draw(this);
 
+  protected void WriteLongMessage(List<string> msg)
+  {
+    for (int row = 0; row < msg.Count; row++)
+    {
+      LineScanner ls = new(msg[row]);
+      List<(Colour, string)> words = ls.Scan();
+      WriteText(words, row, 0);
+    }
+  }
+
   void WriteCommandCheatSheet()
   {
     List<(Colour, string)> w;
@@ -353,27 +363,27 @@ abstract class UserInterface
       (Colours.LIGHT_BLUE, "C"), (Colours.LIGHT_GREY, ": chat  "), (Colours.LIGHT_BLUE, "d"), (Colours.LIGHT_GREY, ": drop item  "),
       (Colours.LIGHT_BLUE, "e"), (Colours.LIGHT_GREY, ": equip/unequip item")];
     //s = "a - Use item  c - close door  C - chat  d - drop item  e - equip/unequip item"; 
-    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 5, 0);
 
     w = [(Colours.LIGHT_BLUE, " f"), (Colours.LIGHT_GREY, ": fire bow  "), (Colours.LIGHT_BLUE, "F"), (Colours.LIGHT_GREY, ": bash door  "),
       (Colours.LIGHT_BLUE, "i"), (Colours.LIGHT_GREY, ": view inventory  "), (Colours.LIGHT_BLUE, "M"), (Colours.LIGHT_GREY, ": view map  "),
       (Colours.LIGHT_BLUE, "o"), (Colours.LIGHT_GREY, ": open door  ")
     ];
-    WriteText(w, ScreenHeight - 4, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 4, 0);
 
     w = [(Colours.LIGHT_BLUE, " S"), (Colours.LIGHT_GREY, ": save game  "), (Colours.LIGHT_BLUE, "Q"), (Colours.LIGHT_GREY, ": quit "),
       (Colours.LIGHT_BLUE, "t"), (Colours.LIGHT_GREY, ": throw item "), (Colours.LIGHT_BLUE, "x"), (Colours.LIGHT_GREY, ": examine "),
       (Colours.LIGHT_BLUE, "z"), (Colours.LIGHT_GREY, ": cast spell "),
       (Colours.LIGHT_BLUE, ","), (Colours.LIGHT_GREY, ": pickup item")
     ];
-    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 3, 0);
 
     w = [(Colours.LIGHT_BLUE, " @"), (Colours.LIGHT_GREY, ": character info  "), (Colours.LIGHT_BLUE, "<"),
       (Colours.LIGHT_GREY, " or "), (Colours.LIGHT_BLUE, ">"), (Colours.LIGHT_GREY, ": use stairs, or swim up or down  ")];
-    WriteText(w, ScreenHeight - 2, 0, ScreenHeight);
+    WriteText(w, ScreenHeight - 2, 0);
 
     w = [(Colours.LIGHT_BLUE, " *"), (Colours.LIGHT_GREY, ": message history  "), (Colours.LIGHT_BLUE, "="), (Colours.LIGHT_GREY, ": options")];
-    WriteText(w, ScreenHeight - 1, 0, ScreenHeight);
+    WriteText(w, ScreenHeight - 1, 0);
   }
 
   void WriteMessages()
@@ -424,11 +434,11 @@ abstract class UserInterface
     List<(Colour, string)> w;
 
     w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
-    WriteText(w, ScreenHeight - 5, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 5, 0);
     WriteLine(@"                  \ | /      SHIFT-mv key will move you in", ScreenHeight - 4, 0, ScreenWidth, Colours.WHITE);
     w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l"),
       (Colours.WHITE, "      that direction until interrupted")];
-    WriteText(w, ScreenHeight - 3, 0, ScreenWidth);
+    WriteText(w, ScreenHeight - 3, 0);
     WriteLine(@"                  / | \", ScreenHeight - 2, 0, ScreenWidth, Colours.WHITE);
     WriteLine(@"                 b  j  n", ScreenHeight - 1, 0, ScreenWidth, Colours.LIGHT_BLUE);
   }
@@ -438,10 +448,10 @@ abstract class UserInterface
     List<(Colour, string)> w;
 
     w = [(Colours.WHITE, "Movement keys:   "), (Colours.LIGHT_BLUE, "y  k  u")];
-    WriteText(w, ScreenHeight - 5, ScreenWidth - 26, ScreenWidth);
+    WriteText(w, ScreenHeight - 5, ScreenWidth - 26);
     WriteLine(@"                  \ | /      ", ScreenHeight - 4, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
     w = [(Colours.LIGHT_BLUE, "                h"), (Colours.WHITE, " - @ - "), (Colours.LIGHT_BLUE, "l")];
-    WriteText(w, ScreenHeight - 3, ScreenWidth - 26, ScreenWidth);
+    WriteText(w, ScreenHeight - 3, ScreenWidth - 26);
     WriteLine(@"                  / | \", ScreenHeight - 2, ScreenWidth - 26, ScreenWidth, Colours.WHITE);
     WriteLine(@"                 b  j  n", ScreenHeight - 1, ScreenWidth - 26, ScreenWidth, Colours.LIGHT_BLUE);
   }
@@ -470,7 +480,7 @@ abstract class UserInterface
     }
   }
 
-  public void WriteText(List<(Colour, string)> pieces, int lineNum, int col, int width)
+  public void WriteText(List<(Colour, string)> pieces, int lineNum, int col)
   {
     foreach (var piece in pieces)
     {
@@ -499,7 +509,7 @@ abstract class UserInterface
 
     if (lineWidth < SideBarWidth)
     {
-      WriteText(line, row++, ViewWidth, SideBarWidth);
+      WriteText(line, row++, ViewWidth);
     }
     else
     {
@@ -522,8 +532,8 @@ abstract class UserInterface
           string part1 = piece.Item2[..pos];
           string part2 = "│  " + piece.Item2[pos..];
           pieces.Add((piece.Item1, part1));
-          WriteText(pieces, row++, ViewWidth, SideBarWidth);
-          WriteText([(piece.Item1, part2)], row++, ViewWidth, SideBarWidth);
+          WriteText(pieces, row++, ViewWidth);
+          WriteText([(piece.Item1, part2)], row++, ViewWidth);
           width = 0;
           pieces = [];
         }
@@ -834,7 +844,7 @@ abstract class UserInterface
       MessageHistory.RemoveAt(MaxHistory);
   }
 
-  public void WriteLongMessage(List<string> message) => _longMessage = message;
+  public void SetLongMessage(List<string> message) => _longMessage = message;
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
   public void CloseMenu() => MenuRows = [];
 
@@ -901,7 +911,7 @@ abstract class UserInterface
 
     do
     {
-      WriteLongMessage(menu);
+      SetLongMessage(menu);
       UpdateDisplay(gs);
       e = PollForEvent();
 
@@ -1313,7 +1323,7 @@ abstract class UserInterface
           Serialize.WriteSaveGame(gameState, this);
           success = true;
 
-          WriteLongMessage([" Be seeing you..."]);
+          SetLongMessage([" Be seeing you..."]);
           BlockForInput(gameState);
         }
         catch (Exception ex)

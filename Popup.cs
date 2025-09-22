@@ -62,8 +62,7 @@ class LineScanner(string line)
         break;
       default:
         ScanWord();
-        break;
-      
+        break;      
     }
   }
 
@@ -229,7 +228,7 @@ class Popup : IPopup
       int padding = Width - actualWidth;
       if (padding > 0)
         line.Add((DefaultTextColour, "│".PadLeft(padding, ' ')));
-      ui.WriteText(line, row++, col, Width);
+      ui.WriteText(line, row++, col);
       line = [(DefaultTextColour, "│ ")];
       currWidth = 0;
     }
@@ -311,7 +310,7 @@ class Hint(List<string> text, int row) : IPopup
     int row = Row;
     foreach (string s in Text)
     {
-      ui.WriteText([(DefaultTextColour, s)], row++, col, s.Length);
+      ui.WriteText([(DefaultTextColour, s)], row++, col);
     }
   }  
 }
