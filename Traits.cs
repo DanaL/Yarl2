@@ -305,7 +305,7 @@ class ChampionBlessingTrait : BlessingTrait
                               .FirstOrDefault();
     if (acMod is not null)
     {
-      s += $" a +{acMod.ArmourMod} AC bonus";
+      s += $" a [lightblue +{acMod.ArmourMod}] AC bonus";
     }
 
     AttackModTrait? am = owner.Traits.OfType<AttackModTrait>()
@@ -314,12 +314,12 @@ class ChampionBlessingTrait : BlessingTrait
     if (am is not null)
     {
       s += prot is null ? " and " : ", ";
-      s += $"a +{am.Amt} attack bonus";
+      s += $"a [lightblue +{am.Amt}] attack bonus";
     }
 
     if (prot is not null)
     {
-      s += ", and a ward against damage";
+      s += ", and a [lightblue ward] against damage";
     }
 
     s += ".";
@@ -2856,12 +2856,12 @@ class ReaverBlessingTrait : BlessingTrait
                                            .FirstOrDefault();
     if (dmg is not null)
     {
-      s += $" a +{dmg.Amt} bonus to melee damage";
+      s += $" a [lightblue +{dmg.Amt}] bonus to melee damage";
     }
 
     if (owner.Traits.OfType<FrighteningTrait>().Where(t => t.SourceId == SourceId).Any())
     {
-      s += " and you may frighten your foes";
+      s += " and your attacks may [brightred frighten] your foes";
     }
 
     s += ".";
