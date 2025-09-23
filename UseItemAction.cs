@@ -652,7 +652,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       if (item.HasTrait<EdibleTrait>())
       {
         string s;
-        if (item.Name == "apple" && Actor is Player)
+        if ((item.Name == "apple" || item.Name == "hearty soup") && Actor is Player)
           s = "Delicious!";
         else
           s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "eat")} {item.FullName.DefArticle()}.";

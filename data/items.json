@@ -1161,6 +1161,19 @@
     ]
   },
   {
+    "Name": "HEARTY_SOUP",
+    "DescriptiveName": "hearty soup",
+    "Type": "Food",
+    "Value": 5,
+    "Glyph": ",,yelloworange,lightbrown,black,false",
+    "Traits": [
+      "Edible",
+      "Consumable",
+      "Stackable",
+      "UseSimple#curedisease"
+    ]
+  },
+  {
     "Name": "SEEWEED",
     "DescriptiveName": "seeweed",
     "Type": "Food",

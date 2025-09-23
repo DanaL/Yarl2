@@ -1643,6 +1643,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
+    "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),    
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1)),

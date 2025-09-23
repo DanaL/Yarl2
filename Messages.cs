@@ -31,6 +31,10 @@ class Grammar
       return "are";
     else if (verb == "is")
       return verb;
+    else if (verb == "have" && player)
+      return verb;
+    else if (verb == "have")
+      return "has";
 
     if (subject is Player || subject.HasTrait<PluralTrait>())
       return verb;

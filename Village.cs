@@ -426,6 +426,8 @@ class Village
       sophie.Inventory.Add(SophieItem(ItemNames.POTION_HEALING), sophie.ID);    
     for (int j = 0; j < rng.Next(1, 4); j++)
       sophie.Inventory.Add(ItemFactory.Get(ItemNames.MUSHROOM_STEW, objDb), sophie.ID);
+    for (int j = 0; j < rng.Next(1, 3); j++)
+      sophie.Inventory.Add(ItemFactory.Get(ItemNames.HEARTY_SOUP, objDb), sophie.ID);
     if (rng.NextDouble() < 0.33)
       sophie.Inventory.Add(SophieItem(ItemNames.POTION_HEROISM), sophie.ID);    
     if (rng.NextDouble() < 0.33)

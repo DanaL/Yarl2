@@ -2331,6 +2331,29 @@ class AntidoteAction(GameState gs, Actor target) : Action(gs, target)
   }
 }
 
+class CureDisease(GameState gs, Actor target) : Action(gs, target)
+{
+  public override double Execute()
+  {
+    bool wasIll = false;
+    List<DiseasedTrait> diseases = [.. Actor!.Traits.OfType<DiseasedTrait>()];
+    foreach (DiseasedTrait disease in diseases)
+    {
+      disease.Remove(gs);
+      Actor.Traits.Remove(disease);
+      wasIll = true;
+    }
+
+    if (wasIll)
+    {
+      string msg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "have")} been cured!";
+      GameState!.UIRef().AlertPlayer(msg);
+    }
+
+    return 1.0;
+  }
+}
+
 class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
 {
   public override double Execute()

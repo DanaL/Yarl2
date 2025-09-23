@@ -439,3 +439,6 @@ A minor demon. Pretty low on the demonic org chart, but annoying nonetheless.
 #
 goblin outcast
 A goblin shunned by others for being a plague bearer.
+#
+hearty soup
+Not only is it delicious, but the perfect thing to eat when you come down with Dungeon Flu.
