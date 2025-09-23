@@ -597,8 +597,9 @@ class TownBuilder
 
     // there's only one shrine in the town. Maybe in the future I'll implement
     // religious rivalries
-    string temple = rng.Next(2) == 0 ? "shrine 1" : "shrine 2";
-    PlaceBuilding(map, townRow, townCol, Templates[temple], BuildingType.Shrine, rng);
+    List<string> shrines = [.. Templates.Keys.Where(k => k.StartsWith("shrine"))];
+    string shrine = shrines[rng.Next(shrines.Count)];
+    PlaceBuilding(map, townRow, townCol, Templates[shrine], BuildingType.Shrine, rng);
 
     // place the cottages/homes
     for (int i = 0; i < 6; i++)
