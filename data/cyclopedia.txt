@@ -442,3 +442,6 @@ A goblin shunned by others for being a plague bearer.
 #
 hearty soup
 Not only is it delicious, but the perfect thing to eat when you come down with Dungeon Flu.
+#
+kobold bully
+Bigger and meaner than a regular kobold.
