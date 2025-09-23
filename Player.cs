@@ -267,7 +267,7 @@ class Player : Actor
     int max = Stats[attr].Max;
 
     if (val != max)
-      return $"{Fmt(val)} ({Fmt(max)})";
+      return $"{Fmt(val)} [DARKGREY ({Fmt(max)})]";
     else
       return Fmt(val);
   }
@@ -290,7 +290,7 @@ class Player : Actor
 
     lines.Add($"[GREEN {Name}], {CharDesc()}");
     lines.Add("");
-    lines.Add($"Str: {PrintStat(Attribute.Strength)}  Con: {PrintStat(Attribute.Constitution)}  Dex: {PrintStat(Attribute.Dexterity)}  Will: {PrintStat(Attribute.Will)}");
+    lines.Add($"Str: {PrintStat(Attribute.Strength)}\t\tCon: {PrintStat(Attribute.Constitution)}\t\tDex: {PrintStat(Attribute.Dexterity)}\t\tWill: {PrintStat(Attribute.Will)}");
     lines.Add("");
 
     if (Stats.TryGetValue(Attribute.SwordUse, out Stat? stat))
