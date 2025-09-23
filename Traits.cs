@@ -294,7 +294,7 @@ class ChampionBlessingTrait : BlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = "You have the Champion Blessing. It grants";
+    string s = "You have the [iceblue Champion Blessing]. It grants";
 
     AuraOfProtectionTrait? prot = owner.Traits.OfType<AuraOfProtectionTrait>()
                               .Where(t => t.SourceId == SourceId)
@@ -2849,7 +2849,7 @@ class ReaverBlessingTrait : BlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = "You have the Reaver Blessing. It grants";
+    string s = "You have the [iceblue Reaver Blessing]. It grants";
 
     MeleeDamageModTrait? dmg = owner.Traits.OfType<MeleeDamageModTrait>()
                                            .Where(t => t.SourceId == SourceId)
