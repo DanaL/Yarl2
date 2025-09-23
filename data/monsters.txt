@@ -4,6 +4,7 @@ wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying
 goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|PoorLoot,Intelligent
+goblin outcast    |g|limegreen    |darkgreen   |12|25|2| 1.0|12|10|MeleePiercing#1#1#8#1#0#0#Attack|PoorLoot,Intelligent,Infectious#13
 goblin archer     |g|blue         |darkblue    |12|15|2| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,PoorLoot
 penny pincher     |g|yellow       |yelloworange|16|15|2| 1.2|10|15|MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,Thief,BehaviourTree#Greedy
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent,PoorLoot

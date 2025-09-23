@@ -137,12 +137,23 @@ class Battle
       CheckCoatedPoison(ammo, gs.Rng);
   }
 
+  static void CheckForInfection(int infectionDC, ulong sourceId, Actor victim, GameState gs)
+  {    
+    if (victim.AbilityCheck(Attribute.Constitution, infectionDC, gs.Rng))
+      return;
+
+    DiseasedTrait disease = new() { SourceId = sourceId };
+
+    foreach (string s in disease.Apply(victim, gs))
+      gs.UIRef().AlertPlayer(s, gs, victim.Loc);
+  }
+
   static void ApplyPoison(PoisonerTrait source, Actor victim, GameState gs)
   {
     int duration = source.Duration + gs.Rng.Next(-5, 6);
     if (duration < 0)
       duration = 1;
-    var poison = new PoisonedTrait()
+    PoisonedTrait poison = new()
     {
       DC = source.DC,
       Strength = source.Strength,
@@ -162,6 +173,11 @@ class Battle
       {
         ApplyPoison(poison, target, gs);
         poisoner = true;
+      }
+
+      if (trait is InfectiousTrait infect)
+      {
+        CheckForInfection(infect.DC, obj.ID, target, gs);
       }
 
       if (trait is WeakenTrait weaken)

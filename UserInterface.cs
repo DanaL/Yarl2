@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Diagnostics;
 using System.Text;
 
 namespace Yarl2;
@@ -739,6 +740,12 @@ abstract class UserInterface
       List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.YELLOW, "BLESSED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("YELLOW");
+    }
+    if (!statuses.Contains("DISEASED") && gs.Player.HasTrait<DiseasedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.LIME_GREEN, "DISEASED")];
+      row = WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("DISEASED");
     }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {

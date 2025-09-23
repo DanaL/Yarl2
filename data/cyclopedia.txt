@@ -436,3 +436,6 @@ Likely the remains of some unfortunate adventurer.
 #
 imp
 A minor demon. Pretty low on the demonic org chart, but annoying nonetheless.
+#
+goblin outcast
+A goblin shunned by others for being a plague bearer.

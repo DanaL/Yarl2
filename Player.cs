@@ -132,7 +132,7 @@ class Player : Actor
 
     if (Stats.TryGetValue(Attribute.Constitution, out var con))
     {
-      baseHP += con.Max >= 0 ? con.Max * 5 : con.Max;
+      baseHP += con.Max >= 0 ? con.Curr * 5 : con.Curr;
     }
 
     foreach (Trait t in Traits)

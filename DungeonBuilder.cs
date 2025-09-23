@@ -1061,7 +1061,6 @@ class MainDungeonBuilder : DungeonBuilder
 
     string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
     bool koboldEffigy = false;
-    bool captive = false;    
     for (int level = 0; level < levels.Length; level++)
     {
       List<List<(int, int)>> rooms = levels[level].FindRooms(9);

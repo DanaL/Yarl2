@@ -693,6 +693,12 @@ class InPitTrait : Trait
   public override string AsText() => "InPit";
 }
 
+class InfectiousTrait : Trait
+{
+  public int DC { get; set; }
+  public override string AsText() => $"Infectious#{DC}";
+}
+
 // For monsters who are smart enough to do things like jump into
 // teleport traps when fleeing. (Maybe I can replace the Door Move
 // strategy with this trait?)
@@ -1799,6 +1805,52 @@ class DisguiseTrait : BasicTrait
   public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}";
 }
 
+class DiseasedTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => "You feel healthy again.";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    foreach (Trait t in target.Traits)
+    {
+      if (t is DiseasedTrait disease)
+      {
+        disease.ExpiresOn += (ulong) gs.Rng.Next(50, 101);
+        return [];
+      }
+    }
+
+    StatDebuffTrait str = new() { OwnerID = target.ID, SourceId = SourceId, DC = int.MaxValue, ExpiresOn = uint.MaxValue, Attr = Attribute.Strength, Amt = -2 };
+    str.Apply(target, gs);
+    StatDebuffTrait con = new() { OwnerID = target.ID, SourceId = SourceId, DC = int.MaxValue, ExpiresOn = uint.MaxValue, Attr = Attribute.Constitution, Amt = -2 };
+    con.Apply(target, gs);
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);    
+    OwnerID = target.ID;
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(100, 151);
+
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} diseased!" ];
+  }
+
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    if (gs.ObjDb.GetObj(OwnerID) is GameObj obj)
+    {
+      List<TemporaryTrait> debuffs = [..obj.Traits.OfType<TemporaryTrait>().Where(t => t.SourceId == SourceId)];
+      foreach (TemporaryTrait debuff in debuffs)
+      {
+        if (debuff.OwnerID == OwnerID && debuff.SourceId == SourceId)
+          debuff.Remove(gs);
+      }
+    }
+  }
+
+  public override string AsText() => $"Diseased#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class DisplacementTrait : Trait
 {
   public override string AsText() => $"Displacement";
@@ -2729,22 +2781,27 @@ class StatDebuffTrait : TemporaryTrait
     return [ CalcMessage(target) ];
   }
 
-  string Remove(Actor victim)
-  {    
+  public override void Remove(GameState gs)
+  {
+    base.Remove(gs);
+
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor victim)
+    {
+      return;
+    }
+
     victim.Stats[Attr].Change(-Amt);
     victim.Traits.Remove(this);
     
     if (victim is Player)
     {
-      return $"Your {Attr} returns to normal.";
+      gs.UIRef().AlertPlayer($"Your {Attr} returns to normal.");      
     }
 
-     if (victim is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
+    if (victim is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
     {
       player.CalcHP();
     }
-
-    return "";
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2752,12 +2809,7 @@ class StatDebuffTrait : TemporaryTrait
     if (gs.Turn > ExpiresOn)
     {
       gs.StopListening(GameEventType.EndOfRound, this);
-
-      if (gs.ObjDb.GetObj(OwnerID) is Actor victim)
-      {
-        string txt = Remove(victim);
-        gs.UIRef().AlertPlayer(txt);
-      }
+      Remove(gs);
     }
   }
 }
@@ -3674,6 +3726,7 @@ class TraitFactory
     { "Desecrated", (pieces, gameObj) => new DesecratedTrait() },
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "DiggingTool", (pieces, gameObj) => new DiggingToolTrait() },
+    { "Diseased", (pieces, gameObj) => new DiseasedTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
     { "Direction", (pieces, gameObj) =>
       {
@@ -3757,6 +3810,7 @@ class TraitFactory
       ulong expiresOn = pieces.Length > 2 ? ulong.Parse(pieces[2]) : ulong.MaxValue;
       return new ImmunityTrait() { Type = dt, ExpiresOn = expiresOn }; }},
     { "Impale", (pieces, gameObj) => new ImpaleTrait() },
+    { "Infectious", (pieces, gameObj) => new InfectiousTrait() { DC = int.Parse(pieces[1]) } },
     { "InPit", (pieces, gameObj) => new InPitTrait() },
     { "Intelligent", (pieces, gameObj) => new IntelligentTrait() },
     { "Invincible", (pieces, gameObj) => new InvincibleTrait() },
