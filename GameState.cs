@@ -1334,10 +1334,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (actor is Player && tile.Type == TileType.MistyPortal)
     {
-      Loc exitPoint = CurrentDungeon.ExitLoc;
+      Loc exitPoint = CurrentDungeon.ExitLoc;      
+      ResolveActorMove(Player, Player.Loc, exitPoint);
       ActorEntersLevel(Player, 0, 0);
-      Player.Loc = exitPoint;
-      ResolveActorMove(Player, start, exitPoint);
       FlushPerformers();
       PrepareFieldOfView();
 

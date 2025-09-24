@@ -445,3 +445,6 @@ Not only is it delicious, but the perfect thing to eat when you come down with D
 #
 kobold bully
 Bigger and meaner than a regular kobold.
+#
+kobold knight
+To qualify for knighthood in kobold society, one just needs to have found some armour that fits.
