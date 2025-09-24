@@ -779,11 +779,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, ObjDb);
         zorkmids.Value = victim.Inventory.Zorkmids;
         ItemDropped(zorkmids, victim.Loc);
-
-        foreach (Item item in victim.Inventory.Items())
-        {
-          ItemDropped(item, victim.Loc);
-        }
       }
 
       foreach (Item item in victim.Inventory.Items())
