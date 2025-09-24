@@ -353,7 +353,19 @@ class DebugCommand(GameState gs)
     try
     {
       var spawnLoc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-      var monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
+
+      Actor monster;
+
+      if (monsterName == "Bob")
+      {
+        monster = MonsterFactory.Get("ogre", _gs.ObjDb, _gs.Rng);
+        monster.Name = "Bob";
+        monster.Traits.Add(new NamedTrait());
+      }
+      else
+      {
+        monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
+      }
 
       _gs.ObjDb.AddNewActor(monster, spawnLoc);
 
