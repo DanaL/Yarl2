@@ -181,14 +181,6 @@ class CanApplyTrait : Trait
   public override string AsText() => "CanApply";
 }
 
-class CarriesTrait : LootTrait
-{
-  public string ItemName { get; set; } = "";
-  public int Chance { get; set; }
-
-  public override string AsText() => $"Carries#{ItemName}#{Chance}";
-}
-
 class CastTrait : Trait, IUSeable
 {
   public string Spell { get; set; } = "";
@@ -3675,7 +3667,6 @@ class TraitFactory
     { "Bow", (pieces, gameObj) => new BowTrait() },
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
-    { "Carries", (pieces, gameObj) => new CarriesTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Cast", (pieces, gameObj) => new CastTrait() { Spell = pieces[1] }},
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleansing", (pieces, gamObj) => new CleansingTrait() },

@@ -75,14 +75,7 @@ class Treasure
 
   public static Item? LootFromTrait(LootTrait trait, Rng rng, GameObjectDB objDb)
   {
-    if (trait is CarriesTrait carries)
-    {
-      if (rng.Next(100) < carries.Chance && Enum.TryParse(carries.ItemName.ToUpper(), out ItemNames itemName))
-      {
-        return ItemFactory.Get(itemName, objDb);
-      }
-    }
-    else if (trait is GoodMagicLootTrait)
+    if (trait is GoodMagicLootTrait)
     {
       return GoodMagicItem(rng, objDb);
     }
