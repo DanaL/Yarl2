@@ -781,6 +781,11 @@ class MonsterFactory
           Item item = Treasure.PoorTreasure(1, rng, objDb)[0];
           m.AddToInventory(item, null);
         }
+        else if (itemTemplate == "GoodMagic")
+        {
+          Item item = Treasure.GoodMagicItem(rng, objDb);
+          m.AddToInventory(item, null);
+        }
         else
         {
           string[] pieces = itemTemplate.Split('#');

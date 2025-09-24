@@ -75,11 +75,7 @@ class Treasure
 
   public static Item? LootFromTrait(LootTrait trait, Rng rng, GameObjectDB objDb)
   {
-    if (trait is GoodMagicLootTrait)
-    {
-      return GoodMagicItem(rng, objDb);
-    }
-    else if (trait is CoinsLootTrait coins)
+    if (trait is CoinsLootTrait coins)
     {
       var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
       zorkmids.Value = rng.Next(coins.Min, coins.Max + 1);

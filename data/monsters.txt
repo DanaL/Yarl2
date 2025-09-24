@@ -39,13 +39,13 @@ phantom           |p|iceblue      |lightblue   |15|20|5| 1.0|10|14|MeleeNecrotic
 dire goat         |q|lightgrey    |grey        |13|25|6| 1.0|13|10|MeleeBlunt#1#1#4#2#0#0#Attack|KnockBack,AttackVerb#Butt|
 shrieker          |F|brightred    |dullred     |10|25|0| 1.0|10|10|Shriek#0#10#0#0#0#3#Passive|Plant,Immunity#Confusion,Immobile,Brainless|
 ghoul             |z|pink         |faintpink   |13|25|5| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|NauseousAura#owner#10,Undead|
-haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive|Undead,Immunity#Confusion,Construct,Immobile,GoodMagicLoot,Immunity#Poison|
+haunted crypt     |▮|iceblue      |lightblue   |14|50|0| 1.0|10|10|SummonUndead#0#0#0#0#0#25#Passive|Undead,Immunity#Confusion,Construct,Immobile,Immunity#Poison|GoodMagic
 giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Drop#beetle_carapace#33|
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying|
 displacer beast   |f|grey         |darkgrey    |14|25|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Displacement|
-the Great Goblin  |g|lightpurple  |purple      |16|50|6| 1.0|14|14|FearsomeBellow#0#2#0#0#15#12#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|KnockBack,Intelligent,FirstBoss,Named,GoodMagicLoot|
+the Great Goblin  |g|lightpurple  |purple      |16|50|6| 1.0|14|14|FearsomeBellow#0#2#0#0#15#12#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|KnockBack,Intelligent,FirstBoss,Named|GoodMagic
 wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#10#1#15#5#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Heavy|
-kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,FirstBoss,Named,GoodMagicLoot|
+kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,FirstBoss,Named|GoodMagic
 test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#1#1#15#5#Attack|Immobile|
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashing#1#1#4#1#0#0#Attack|Immobile|
 rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|Mosquito|
