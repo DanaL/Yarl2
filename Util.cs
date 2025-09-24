@@ -768,7 +768,7 @@ class Util
   {
     if (gs.LastPlayerFoV.Contains(actor.Loc))
       return true;
-    else if (gs.Player.HasActiveTrait<TelepathyTrait>() && Util.Distance(gs.Player.Loc, actor.Loc) <= Constants.TELEPATHY_RANGE)
+    else if (gs.Player.HasActiveTrait<TelepathyTrait>() && Distance(gs.Player.Loc, actor.Loc) <= Constants.TELEPATHY_RANGE)
       return true;
     else if (gs.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swalloewd)
       return swalloewd.SwallowerID == actor.ID;

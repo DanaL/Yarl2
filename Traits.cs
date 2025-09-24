@@ -1522,7 +1522,8 @@ class FrightenedTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(15, 26);
     
-    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} frightened!"];
+    string targetName = target.VisibleTo(gs.Player) ? target.FullName.Capitalize() : "Something";
+    return [$"{targetName} {Grammar.Conjugate(target, "become")} frightened!"];
   }
 
   public void Remove(Actor victim, GameState gs)
@@ -1530,7 +1531,7 @@ class FrightenedTrait : TemporaryTrait
     victim.Traits.Remove(this);
     Expired = true;
     string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "shake")} off {Grammar.Possessive(victim)} fear!";
-    if (gs.LastPlayerFoV.Contains(victim.Loc))
+    if (victim.VisibleTo(gs.Player) && gs.LastPlayerFoV.Contains(victim.Loc))
       gs.UIRef().AlertPlayer(msg);
     gs.StopListening(GameEventType.EndOfRound, this);
 
