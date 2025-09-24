@@ -776,20 +776,28 @@ class MonsterFactory
     {
       foreach (string itemTemplate in fields[11].Split(','))
       {
-        string[] pieces = itemTemplate.Split('#');
-        Enum.TryParse(pieces[0], out ItemNames itemName);
-        int itemCount = int.Parse(pieces[1]);
-        int odds = int.Parse(pieces[2]);
-        bool equiped = bool.Parse(pieces[3]);
-
-        if (rng.Next(100) < odds)
+        if (itemTemplate == "PoorLoot")
         {
-          for (int j = 0; j < itemCount; j++)
+          Item item = Treasure.PoorTreasure(1, rng, objDb)[0];
+          m.AddToInventory(item, null);
+        }
+        else
+        {
+          string[] pieces = itemTemplate.Split('#');
+          Enum.TryParse(pieces[0], out ItemNames itemName);
+          int itemCount = int.Parse(pieces[1]);
+          int odds = int.Parse(pieces[2]);
+          bool equiped = bool.Parse(pieces[3]);
+
+          if (rng.Next(100) < odds)
           {
-            Item item = ItemFactory.Get(itemName, objDb);
-            char slot = m.AddToInventory(item, null!);
-            if (equiped)            
-              m.Inventory.ToggleEquipStatus(slot);
+            for (int j = 0; j < itemCount; j++)
+            {
+              Item item = ItemFactory.Get(itemName, objDb);
+              char slot = m.AddToInventory(item, null);
+              if (equiped)
+                m.Inventory.ToggleEquipStatus(slot);
+            }
           }
         }
       }

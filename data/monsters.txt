@@ -3,14 +3,14 @@ zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#
 wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack||
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack||
 dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying|
-goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|PoorLoot,Intelligent|
-goblin outcast    |g|limegreen    |darkgreen   |12|25|2| 1.0|12|10|MeleePiercing#1#1#8#1#0#0#Attack|PoorLoot,Intelligent,Infectious#13|
+goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|PoorLoot
+goblin outcast    |g|limegreen    |darkgreen   |12|25|2| 1.0|12|10|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Infectious#13|PoorLoot
 goblin archer     |g|blue         |darkblue    |12|15|2| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,PoorLoot|
 penny pincher     |g|yellow       |yelloworange|16|15|2| 1.2|10|15|MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,Thief,BehaviourTree#Greedy|
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent,PoorLoot|
-kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|PoorLoot,Intelligent|
-kobold bully      |k|brown        |dullred     |12|25|2| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|PoorLoot,Intelligent|
-kobold knight     |k|grey         |darkgrey    |12|25|3| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|PoorLoot,Intelligent|RINGMAIL#1#50#true
+kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|PoorLoot
+kobold bully      |k|brown        |dullred     |12|25|2| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot
+kobold knight     |k|grey         |darkgrey    |12|25|3| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot,RINGMAIL#1#50#true
 nilbog            |g|lightblue    |blue        |14|20|3| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#7#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|
 kobold foreman    |k|yelloworange |dullred     |13|30|3| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Attack#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent|
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10||Plant,Plural,Immunity#Confusion,Brainless,Immobile|
@@ -50,7 +50,7 @@ test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashing#1#1#4#1#0#0#Attack|Immobile|
 rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|Mosquito|
 python            |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crush#1#1#4#1#0#0#Attack,MeleeBlunt#1#1#6#1#0#0#Attack|Grappler#15|
-rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,PoorLoot|
+rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
 flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1#dullred#torchred|
 giant toad        |t|green        |darkgreen   |13|25|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy|
 frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive|
@@ -62,4 +62,4 @@ kobold soothsayer |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7
 faint spirit      |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1#5#2#0#0#Attack|Undead,Immunity#Poison,LightSource#owner#2#iceblue#mysticaura|
 angler fish       |»|grey         |darkgrey    |13|10|2| 1.0|10|10||Swimmer,Passive,LightSource#owner#2#torchyellow#torchyellow|
 gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.75|10|10||Floating,Brainless,Retribution#Blunt#6#4#2|
-imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent,PoorLoot|
+imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent|PoorLoot

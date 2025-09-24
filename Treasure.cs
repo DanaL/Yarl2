@@ -75,12 +75,7 @@ class Treasure
 
   public static Item? LootFromTrait(LootTrait trait, Rng rng, GameObjectDB objDb)
   {
-    if (trait is PoorLootTrait)
-    {
-      var loot = PoorTreasure(1, rng, objDb);
-      return loot[0];
-    }
-    else if (trait is CarriesTrait carries)
+    if (trait is CarriesTrait carries)
     {
       if (rng.Next(100) < carries.Chance && Enum.TryParse(carries.ItemName.ToUpper(), out ItemNames itemName))
       {

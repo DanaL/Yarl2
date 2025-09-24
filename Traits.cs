@@ -837,11 +837,6 @@ class EmberBlessingTrait : BlessingTrait
   public override string Description(Actor owner) => "Ember blessing";
 }
 
-class PoorLootTrait : LootTrait
-{
-  public override string AsText() => "PoorLoot";
-}
-
 class PrisonerTrait : TemporaryTrait
 {
   public Loc Cell { get; set; }
@@ -3896,7 +3891,6 @@ class TraitFactory
     { "Poisoner", (pieces, gameObj) => new PoisonerTrait() { DC = int.Parse(pieces[1]), Strength = int.Parse(pieces[2]), Duration = int.Parse(pieces[3]) } },
     { "Polearm", (pieces, gameObj) => new PolearmTrait() },
     { "Polymorphed", (pieces, gameObj) => new PolymorphedTrait() { OriginalId = ulong.Parse(pieces[1]) } },
-    { "PoorLoot", (pieces, gameObj) => new PoorLootTrait() },
     { "Prisoner", (pieces, gameObj) => new PrisonerTrait() { SourceId = ulong.Parse(pieces[1]), Cell = Loc.FromStr(pieces[2]) } },
     { "Quiet", (pieces, gameObj) => new QuietTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "QuestItem1", (pieces, gameObj) => new QuestItem1() },
