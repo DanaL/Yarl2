@@ -715,18 +715,7 @@ class Battle
       if (t is RobbedTrait)
         return;
       else if (t is IntelligentTrait)
-        intelligent = true;
-      else if (t is LootTrait lt)
-      {
-        loot = Treasure.LootFromTrait(lt, gs.Rng, gs.ObjDb);
-        if (loot is not null)
-        {
-          gs.UIRef().AlertPlayer($"You lift {ItemDesc(loot)} from {target.FullName}!");
-          target.Traits.Add(new RobbedTrait());
-          attacker.Inventory.Add(loot, attacker.ID);
-          return;
-        }
-      }
+        intelligent = true;      
     }
 
     if (!intelligent)

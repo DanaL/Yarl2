@@ -73,18 +73,6 @@ class Treasure
     ItemNames.WIND_FAN
   ];
 
-  public static Item? LootFromTrait(LootTrait trait, Rng rng, GameObjectDB objDb)
-  {
-    if (trait is CoinsLootTrait coins)
-    {
-      var zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-      zorkmids.Value = rng.Next(coins.Min, coins.Max + 1);
-      return zorkmids;
-    }
-
-    return null;
-  }
-
   public static Item GetTalisam(Rng rng, GameObjectDB objDb)
   {
     int roll = rng.Next(7);

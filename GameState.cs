@@ -751,11 +751,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     bool villager = false;
     foreach (Trait t in victim.Traits)
     {
-      if (t is LootTrait lt && Treasure.LootFromTrait(lt, Rng, ObjDb) is Item loot)
-      {
-        ItemDropped(loot, victim.Loc);
-      }
-      else if (t is DropTrait d)
+      if (t is DropTrait d)
       {
         if (Rng.Next(100) < d.Chance && Enum.TryParse(d.ItemName.ToUpper(), out ItemNames itemName))
         {

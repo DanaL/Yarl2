@@ -69,8 +69,6 @@ abstract class BasicTrait : Trait
   public override string AsText() => $"{ExpiresOn}";
 }
 
-abstract class LootTrait : Trait { }
-
 class AdjectiveTrait(string adj) : Trait
 {
   public string Adj { get; set; } = adj;
@@ -762,14 +760,6 @@ class BowTrait : Trait
 class BrainlessTrait : Trait
 {
   public override string AsText() => "Brainless";
-}
-
-class CoinsLootTrait : LootTrait
-{
-  public int Min { get; set; }
-  public int Max { get; set; }
-
-  public override string AsText() => $"CoinsLoot#{Min}#{Max}";
 }
 
 class CudgelTrait : Trait
@@ -3666,7 +3656,6 @@ class TraitFactory
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleansing", (pieces, gamObj) => new CleansingTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
-    { "CoinsLoot", (pieces, gameObj) => new CoinsLootTrait() { Min = int.Parse(pieces[1]), Max = int.Parse(pieces[2])} },
     { "Confused", (pieces, gameObj) => new ConfusedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "Construct", (pieces, gameObj) => new ConstructTrait() },
     { "Consumable", (pieces, gameObj) => new ConsumableTrait() },

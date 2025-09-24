@@ -786,6 +786,12 @@ class MonsterFactory
           Item item = Treasure.GoodMagicItem(rng, objDb);
           m.AddToInventory(item, null);
         }
+        else if (itemTemplate.StartsWith("Coins"))
+        {
+          string[] pieces = itemTemplate.Split('#');
+          int zorkmids = rng.Next(int.Parse(pieces[1]), int.Parse(pieces[2]) + 1);
+          m.Inventory.Zorkmids = zorkmids;
+        }
         else
         {
           string[] pieces = itemTemplate.Split('#');
