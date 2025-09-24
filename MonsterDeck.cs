@@ -71,10 +71,10 @@ class DeckBuilder
         decks.Add(new MonsterDeck());
       }
       else
-      {
+      {        
         string[] monsters = line.Split(',');
         foreach (string m in monsters)
-        {
+        {          
           int k = m.Trim().LastIndexOf(' ');
           string monster = m[..k];
           if (!int.TryParse(m[k..], out int count))

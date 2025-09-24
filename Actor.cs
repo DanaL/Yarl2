@@ -460,10 +460,10 @@ abstract class Actor : GameObj, IZLevel
     return roll >= dc;
   }
 
-  public char AddToInventory(Item item, GameState gs)
+  public char AddToInventory(Item item, GameState? gs)
   {
     char slot = Inventory.Add(item, ID);
-    if (slot == '\0')
+    if (gs is not null && slot == '\0')
     {
       gs.ItemDropped(item, Loc);
       gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} falls to the ground.", gs, Loc);
@@ -603,7 +603,40 @@ class Mob : Actor
     return Stats.TryGetValue(Attribute.AttackBonus, out var ab) ? ab.Curr : 0;
   }
 
-  public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
+  //public override int AC => Stats.TryGetValue(Attribute.AC, out var ac) ? ac.Curr : base.AC;
+
+  public override int AC
+  {
+    get
+    {
+      int ac = Stats.TryGetValue(Attribute.AC, out var baseAC) ? baseAC.Curr : base.AC;
+
+      int armour = 0;
+      foreach (char slot in Inventory.UsedSlots())
+      {
+        var (item, _) = Inventory.ItemAt(slot);
+        if (item is not null && item.Equipped)
+        {
+          armour += item.Traits.OfType<ArmourTrait>()
+                               .Select(t => t.ArmourMod + t.Bonus)
+                               .Sum();
+          armour += item.Traits.OfType<ACModTrait>()
+                               .Select(t => t.ArmourMod)
+                               .Sum();
+        }
+      }
+
+      foreach (Trait t in Traits)
+      {
+        if (t is ACModTrait acMod)
+          ac += acMod.ArmourMod;
+        if (t is MageArmourTrait ma)
+          ac += 3;
+      }
+
+      return ac + armour;
+    }
+  }
 
   public void ExecuteAction(Action action)
   {
@@ -737,6 +770,31 @@ class MonsterFactory
       }
     }
 
+    m.Inventory = new Inventory(m.ID, objDb);
+
+    if (!string.IsNullOrEmpty(fields[11]))
+    {
+      foreach (string itemTemplate in fields[11].Split(','))
+      {
+        string[] pieces = itemTemplate.Split('#');
+        Enum.TryParse(pieces[0], out ItemNames itemName);
+        int itemCount = int.Parse(pieces[1]);
+        int odds = int.Parse(pieces[2]);
+        bool equiped = bool.Parse(pieces[3]);
+
+        if (rng.Next(100) < odds)
+        {
+          for (int j = 0; j < itemCount; j++)
+          {
+            Item item = ItemFactory.Get(itemName, objDb);
+            char slot = m.AddToInventory(item, null!);
+            if (equiped)            
+              m.Inventory.ToggleEquipStatus(slot);
+          }
+        }
+      }
+    }
+
     // Yes, I will write code just to insert a joke/Simpsons reference
     // into the game
     if (name == "zombie" && rng.Next(100) == 0)
@@ -744,8 +802,6 @@ class MonsterFactory
 
     if (!m.HasTrait<BehaviourTreeTrait>())
       m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
-
-    m.Inventory = new Inventory(m.ID, objDb);
 
     return m;
   }

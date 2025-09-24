@@ -1,14 +1,14 @@
 LEVEL 1
 kobold 8,giant rat 3,dire bat 2,skeleton 2,zombie 2,floating eye 1,chilled jelly 1,shrieker 1,rot grub 1,gas spore 1
 LEVEL 2
-kobold 4,skeleton 2,zombie 2,dire bat 2,floating eye 1,centipede 2,chilled jelly 1,shrieker 1,rot grub 1,rum gremlin 1,sticky ooze 1,gas spore 1, kobold bully 1
+kobold 4,skeleton 2,zombie 2,dire bat 2,floating eye 1,centipede 2,chilled jelly 1,shrieker 1,rot grub 1,rum gremlin 1,sticky ooze 1,gas spore 1,kobold bully 1
 LEVEL 3
-kobold foreman 2,jelly 1,floating eye 1,will-o-wisp 1,phantom 1,chilled jelly 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,sticky ooze 1,gas spore 1, kobold bully 1
+kobold foreman 2,jelly 1,floating eye 1,will-o-wisp 1,phantom 1,chilled jelly 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,sticky ooze 1,gas spore 1,kobold bully 1
 LEVEL 4
-giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 1,drow warrior 1,creeping coins 1,will-o-wisp 1,phantom 1,chilled jelly 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1, kobold bully 2
+giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 1,drow warrior 1,creeping coins 1,will-o-wisp 1,phantom 1,chilled jelly 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1,kobold bully 2
 LEVEL 5
-giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1, kobold bully 2
+giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1,kobold bully 2
 LEVEL 6
-giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1, kobold bully 2
+giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1,kobold bully 2
 LEVEL 7
-giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1, kobold bully 2
+giant spider 1,screech bat 1,cloaker 2,owlbear 1,duergar soldier 2,drow warrior 2,will-o-wisp 1,creeping coins 1,phantom 1,shrieker 1,rot grub 1,python 1,rum gremlin 1,giant beetle 1,dire goat 1,sticky ooze 1,gas spore 1,kobold bully 2

@@ -687,8 +687,6 @@ class Battle
     target.Inventory.Zorkmids -= zorkmids;
     attacker.Inventory.Zorkmids += zorkmids;
 
-    
-
     string targetName = MsgFactory.CalcName(target, gs.Player);
     string thiefName = MsgFactory.CalcName(attacker, gs.Player);
     string s = $"{thiefName.Capitalize()} {Grammar.Conjugate(attacker, "lift")} some coins from {targetName}!";

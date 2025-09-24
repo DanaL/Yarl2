@@ -789,6 +789,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           ItemDropped(item, victim.Loc);
         }
       }
+
+      foreach (Item item in victim.Inventory.Items())
+      {
+        item.Slot = '\0';
+        item.Equipped = false;
+        ItemDropped(item, victim.Loc);
+      }
     }
 
     if (victim.Traits.OfType<PolymorphedTrait>().FirstOrDefault() is PolymorphedTrait pt)
