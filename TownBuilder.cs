@@ -849,9 +849,9 @@ class TownBuilder
   {
     // Find candidate spots for the witches' cottage
     List<(int, int)> candidates = [];
-    for (int r = 3; r < map.Height - 16; r++)
+    for (int r = 3; r < map.Height - 18; r++)
     {
-      for (int c = 3; c < map.Width - 16; c++)
+      for (int c = 3; c < map.Width - 18; c++)
       {
         if (Util.Distance(r, c, townCentreRow, townCentreCol) >= 65)
           candidates.Add((r, c));
