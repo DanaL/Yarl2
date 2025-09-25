@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Collections.Generic;
+
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -61,6 +63,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         riverLevels.Add(levelNum);
       }
     }
+
+    TidyOrphanedDoors(DungeonId, levels, objDb, rng);
 
     SetStairs(DungeonId, levels, HEIGHT, WIDTH, numOfLevels, Entrance, dungeon.Descending, rng);
 

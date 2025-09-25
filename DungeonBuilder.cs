@@ -152,6 +152,39 @@ abstract class DungeonBuilder
     objDb.SetToLoc(loc, potion);
   }
 
+  // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
+  //
+  //  #....
+  //  #..+.
+  //  ###..
+  protected static void TidyOrphanedDoors(int dungeonId, Map[] levels, GameObjectDB objDb, Rng rng)
+  {
+    for (int levelNum = 0; levelNum < levels.Length; levelNum++)
+    {
+      if (rng.Next(4) == 0)
+        TunnelCarver.MakeCollapsedTunnel(dungeonId, levelNum, levels[levelNum], objDb, rng);
+
+      // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
+      //
+      //  #....
+      //  #..+.
+      //  ###..
+      for (int r = 0; r < levels[levelNum].Height; r++)
+      {
+        for (int c = 0; c < levels[levelNum].Width; c++)
+        {
+          Map map = levels[levelNum];
+          if (map.TileAt(r, c).Type == TileType.ClosedDoor)
+          {
+            int adjFloors = Util.Adj4Sqs(r, c).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Count();
+            if (adjFloors >= 4)
+              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+          }
+        }
+      }
+    }
+  }
+
   protected static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
   {
     List<Loc> opts = [];
@@ -1232,36 +1265,9 @@ class MainDungeonBuilder : DungeonBuilder
       dungeon.AddMap(levels[levelNum]);      
     }
 
-    //SetStairs(levels, h, w, numOfLevels, entrance, rng);
-
     AddRooms(_dungeonID, levels, objDb, factDb, rng);
     
     DecorateDungeon(levels, _dungeonID, h, w, numOfLevels, factDb, objDb, rng);
-
-    for (int levelNum = 0; levelNum < numOfLevels; levelNum++)    
-    {    
-      if (rng.Next(4) == 0)
-        TunnelCarver.MakeCollapsedTunnel(id, levelNum, levels[levelNum], objDb, rng);
-
-      // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
-      //
-      //  #....
-      //  #..+.
-      //  ###..
-      for (int r = 0; r < levels[levelNum].Height; r++)
-      {
-        for (int c = 0;  c < levels[levelNum].Width; c++)
-        {
-          Map map = levels[levelNum];
-          if (map.TileAt(r, c).Type == TileType.ClosedDoor)
-          {
-            int adjFloors = Util.Adj4Sqs(r, c).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Count();
-            if (adjFloors >= 4)
-               map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-          }
-        }
-      }  
-    }
 
     // Kind of assuming one of levels 7, 8, or 9 will have a valid placement
     List<int> puzzleLevels = [7, 8, 9];
