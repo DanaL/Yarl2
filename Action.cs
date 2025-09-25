@@ -2175,7 +2175,7 @@ class WebAction : Action
 
   public override double Execute()
   {
-    var w = ItemFactory.Web();
+    Item w = ItemFactory.Web();
     GameState!.ObjDb.Add(w);
     GameState.ItemDropped(w, Target);
 
@@ -2575,11 +2575,11 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
         }
       }
 
-      var anim = new ThrownMissileAnimation(GameState!, ammo.Glyph, pts, ammo);
+      ThrownMissileAnimation anim = new(GameState!, ammo.Glyph, pts, ammo);
       GameState!.UIRef().PlayAnimation(anim, GameState);
 
-      var landingPt = pts.Last();
-      GameState.ItemDropped(ammo, landingPt);
+      Loc landingPt = pts.Last();
+      GameState.ItemDropped(ammo, landingPt, true);
       ammo.Equipped = false;
     }
 

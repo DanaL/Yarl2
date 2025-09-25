@@ -2450,9 +2450,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
   public void Extinguish(Item fireSrc, GameState gs)
   {
     gs.UIRef().AlertPlayer("The fire burns out.");
-    gs.ObjDb.RemoveItemFromGame(fireSrc.Loc, fireSrc);
     gs.ItemDestroyed(fireSrc, fireSrc.Loc);
-
     Expired = true;
   }
 
@@ -2497,7 +2495,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
       // The fire might spread!
       if (Spreads && Lifetime > 1)
       {
-        foreach (var sq in Util.Adj4Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
+        foreach (var sq in Util.Adj8Sqs(fireSrc.Loc.Row, fireSrc.Loc.Col))
         {
           var adj = fireSrc.Loc with { Row = sq.Item1, Col = sq.Item2 };
           gs.ApplyDamageEffectToLoc(adj, DamageType.Fire);

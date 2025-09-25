@@ -239,7 +239,32 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
-  public void ItemDropped(Item item, Loc loc)
+  void MakePuddleOfBooze(Loc loc)
+  {
+    HashSet<Loc> tiles = [loc];
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      if (Rng.Next(3) == 0)
+        tiles.Add(loc);
+      foreach (Loc aadj in Util.Adj8Locs(adj))
+      {
+        if (Rng.Next(6) == 0)
+          tiles.Add(aadj);
+      }
+    }
+
+    foreach (Loc puddleLoc in tiles)
+    {
+      if (!TileAt(puddleLoc).PassableByFlight())
+        continue;
+
+      Item booze = ItemFactory.PuddleOfBooze();
+      ObjDb.Add(booze);
+      ItemDropped(booze, puddleLoc);
+    }
+  }
+
+  public void ItemDropped(Item item, Loc loc, bool thrown = false)
   {
     item.ContainedBy = 0;
 
@@ -264,6 +289,14 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         SacrificeGoldToHuntokar(item.Value, loc);
         return;
       }
+    }
+
+    if (thrown && item.Name == "flask of booze")
+    {
+      ObjDb.RemoveItemFromGame(item.Loc, item);
+      UI.AlertPlayer("The bottle shatters!", this, loc);
+      MakePuddleOfBooze(loc);
+      return;
     }
 
     ObjDb.SetToLoc(loc, item);

@@ -237,7 +237,7 @@ class ItemFactory
   {
     string jsonPath = ResourcePath.GetDataFilePath("items.json");
     string json = File.ReadAllText(jsonPath);
-    var items = JsonSerializer.Deserialize<List<JsonItem>>(json) 
+    var items = JsonSerializer.Deserialize<List<JsonItem>>(json)
       ?? throw new Exception("Missing or corrupt items definition file!");
     Dictionary<ItemNames, ItemTemplate> templates = [];
     foreach (JsonItem item in items)
@@ -282,7 +282,7 @@ class ItemFactory
   {
     Item item;
 
-    if (Items.TryGetValue(name, out var template)) 
+    if (Items.TryGetValue(name, out var template))
     {
       item = FromTemplate(template);
       objDB.Add(item);
@@ -300,12 +300,12 @@ class ItemFactory
         else if (desc.StartsWith("iron "))
           item.Traits.Add(new MetalTrait() { SourceId = item.ID, Type = Metals.Iron });
       }
-      
+
       foreach (Trait t in item.Traits)
       {
         if (t is IGameEventListener listener && t.Active)
         {
-          objDB.EndOfRoundListeners.Add(listener);          
+          objDB.EndOfRoundListeners.Add(listener);
         }
       }
 
@@ -321,7 +321,7 @@ class ItemFactory
     item.Traits = [];
     item.Type = ItemType.Illusion;
 
-    return item;    
+    return item;
   }
 
   static Glyph GlyphForRing(string name)
@@ -373,7 +373,7 @@ class ItemFactory
     };
     mist.SetZ(10);
     mist.Traits.Add(new OpaqueTrait() { Visibility = 3 });
-    
+
     return mist;
   }
 
@@ -409,7 +409,7 @@ class ItemFactory
       Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
     };
     light.SetZ(-100);
-    
+
     light.Traits.Add(new LightSourceTrait()
     {
       Radius = 1,
@@ -441,7 +441,7 @@ class ItemFactory
       Value = 0,
       Glyph = new(ch, Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
-    
+
     lamp.Traits.Add(new DirectionTrait() { Dir = dir });
     lamp.Traits.Add(new AffixedTrait());
 
@@ -466,7 +466,7 @@ class ItemFactory
     target.Traits.Add(new AffixedTrait());
     target.Traits.Add(new BlockTrait());
     target.Traits.Add(new DescriptionTrait("A massive basalt block, ice-cold to the touch."));
-    
+
     objDb.Add(target);
 
     return target;
@@ -500,9 +500,12 @@ class ItemFactory
     };
     photon.SetZ(-100);
 
-    photon.Traits.Add(new LightSourceTrait() 
+    photon.Traits.Add(new LightSourceTrait()
     {
-      Radius = 0, OwnerID = ownerID, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_YELLOW
+      Radius = 0,
+      OwnerID = ownerID,
+      FgColour = Colours.YELLOW,
+      BgColour = Colours.TORCH_YELLOW
     });
 
     gs.ObjDb.Add(photon);
@@ -526,27 +529,25 @@ class ItemFactory
       Name = "fire",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = glyph,      
+      Glyph = glyph,
     };
     fire.SetZ(7);
     gs.ObjDb.Add(fire);
     var onFire = new OnFireTrait() { Expired = false, OwnerID = fire.ID, Spreads = true };
     gs.RegisterForEvent(GameEventType.EndOfRound, onFire);
     fire.Traits.Add(onFire);
-    fire.Traits.Add(new LightSourceTrait() 
-    { 
-      Radius = 1, 
-      OwnerID = fire.ID, 
-      FgColour = Colours.YELLOW, 
-      BgColour = Colours.TORCH_ORANGE
+    fire.Traits.Add(new LightSourceTrait()
+    {
+      Radius = 1, OwnerID = fire.ID,
+      FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE
     });
-    
+
     return fire;
   }
 
   public static Item Web()
   {
-    var web = new Item()
+    Item web = new()
     {
       Name = "webs",
       Type = ItemType.Environment,
@@ -556,6 +557,18 @@ class ItemFactory
     web.Traits.Add(new StickyTrait());
     web.Traits.Add(new FlammableTrait());
     return web;
+  }
+
+  public static Item PuddleOfBooze()
+  {
+    Item booze = new()
+    {
+      Name = "puddle of booze", Type = ItemType.Environment, Value = 0,
+      Glyph = new Glyph('~', Colours.WHITE, Colours.GREY, Colours.LIGHT_BROWN, false)
+    };
+    booze.Traits.Add(new FlammableTrait());
+
+    return booze;
   }
 }
 

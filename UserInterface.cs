@@ -767,7 +767,7 @@ abstract class UserInterface
       {
         var g = item.Glyph;
         tileSq = new Sqr(g.Lit, Colours.BLACK, g.Ch);
-        tileText = $"Some {item.Name}";
+        tileText = $"{item.Name.Capitalize()}";
         break;
       }
     }
