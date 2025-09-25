@@ -1516,7 +1516,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         item.Traits.Remove(t);
 
       anythingPickedUp = true;
-      ui.AlertPlayer(pickupMsg);
+      ui.AlertPlayer(pickupMsg, GameState, Actor.Loc);
     }
 
     if (!anythingPickedUp)
