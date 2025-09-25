@@ -106,10 +106,7 @@ abstract class GameObj : IZLevel
 
   public static ulong NextID => IDSeed++;
 
-  public virtual int Z()
-  {
-    return 0;
-  }
+  public virtual int Z() => 0;
 
   public bool HasActiveTrait<T>() => Traits.Where(t => t.Active)
                                      .OfType<T>().Any();

@@ -566,6 +566,7 @@ class ItemFactory
       Name = "puddle of booze", Type = ItemType.Environment, Value = 0,
       Glyph = new Glyph('~', Colours.WHITE, Colours.GREY, Colours.LIGHT_BROWN, false)
     };
+    booze.SetZ(1);
     booze.Traits.Add(new FlammableTrait());
 
     return booze;
