@@ -244,12 +244,14 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     HashSet<Loc> tiles = [loc];
     foreach (Loc adj in Util.Adj8Locs(loc))
     {
-      if (Rng.Next(3) == 0)
-        tiles.Add(loc);
-      foreach (Loc aadj in Util.Adj8Locs(adj))
+      if (Rng.Next(3) < 2)
       {
-        if (Rng.Next(6) == 0)
-          tiles.Add(aadj);
+        tiles.Add(adj);
+        foreach (Loc aadj in Util.Adj8Locs(adj))
+        {
+          if (Rng.Next(6) == 0)
+            tiles.Add(aadj);
+        }
       }
     }
 
