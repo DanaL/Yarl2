@@ -3365,7 +3365,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       }
     }
 
-    item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait)];
+    item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait && t is not FlammableTrait)];
 
     return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
   }
@@ -3386,7 +3386,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
       
       item!.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 1, DamageType = DamageType.Fire });
       item.Traits.Add(new LightSourceTrait() { Radius = 5, FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE });
-
+      item.Traits.Add(new FlammableTrait());
+      
       return new UseResult(null, $"The {item!.Name} sparks to life!");
     }
     else
