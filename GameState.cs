@@ -1789,6 +1789,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           if (!_litPool.TryAdd(sq.Key, sq.Value))
             _litPool[sq.Key] |= sq.Value;
 
+          if (sq.Key == new Loc(1, 4, 15, 42))
+          {
+            int lv = _litPool[sq.Key];
+            Console.WriteLine();
+          }
+
           double scale;
           if (InWilderness) 
           {
