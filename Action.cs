@@ -3258,6 +3258,10 @@ abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
 
 class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor)
 {
+  // We'll display different messages if the swapping is from magic or just
+  // asking an NPC to swap places.
+  public bool Mundane { get; set; } = false;
+
   readonly Trait _source = src;
   Loc _target;
 
@@ -3284,7 +3288,12 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
       else
       {
         GameState.SwapActors(Actor!, victim);
-        GameState.UIRef().AlertPlayer("Bamf!");
+        string msg = "Bamf!";
+        if (Mundane)
+        {
+          msg = $"{MsgFactory.CalcName(victim, GameState.Player).Capitalize()} {Grammar.Conjugate(victim, "step")} aside to let {MsgFactory.CalcName(Actor, GameState.Player)} pass.";
+        }
+        GameState.UIRef().AlertPlayer(msg);
       }      
     }
     else

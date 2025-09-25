@@ -324,7 +324,7 @@ class GameObjectDB
     {
       foreach (Item item in items)
       {
-        if (item.Name == "campfire")
+        if (item.Name == "campfire" || item.HasTrait<OnFireTrait>())
           return true;
       }
     }

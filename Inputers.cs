@@ -853,6 +853,7 @@ class Dialoguer : Inputer
   readonly IDialoguer _dialogue;
   HashSet<char> _currOptions = [];
   char _exitOpt = '\0';
+  char _swapPlaceOpt = '\0';
   readonly int _popupWidth = 60;
 
   public Dialoguer(Mob interlocutor, GameState gs) : base(gs)
@@ -870,11 +871,19 @@ class Dialoguer : Inputer
     WritePopup();
   }
 
+  public override UIResult GetResult() => new LocUIResult() { Loc = _interlocutor.Loc };
+
   public override void Input(char ch)
   {
     if (ch == Constants.ESC || ch == _exitOpt || ch == ' ')
     {
       EndConversation("Farewell.");
+      return;
+    }
+
+    if (ch == _swapPlaceOpt)
+    {
+      AskToSwapPlaces();
       return;
     }
 
@@ -898,6 +907,22 @@ class Dialoguer : Inputer
     catch (ConversationEnded ce)
     {
       EndConversation(ce.Message);
+    }
+  }
+
+  void AskToSwapPlaces()
+  {
+    Tile tile = GS.TileAt(GS.Player.Loc);
+    if (!tile.Passable() || GS.ObjDb.HazardsAtLoc(GS.Player.Loc))
+    {
+      EndConversation($"\"I'll stay where I am, thank you.\"");
+    }
+    else
+    {
+      // The trait passed in here is a dummy trait for the constructor
+      SwapWithMobAction swap = new(GS, GS.Player, new DisplacementTrait()) { Mundane = true };
+      DeferredAction = swap;
+      EndConversation($"\"Okay, okay.\"");
     }
   }
 
@@ -966,6 +991,15 @@ class Dialoguer : Inputer
         sb.AppendLine();
       }
 
+      if (!GS.InWilderness)
+      {
+        // If we're in a dungeon, provide option to ask to swap places, 
+        // otherwise the NPC might leave you blocked
+        _swapPlaceOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
+        opts.Add(("swap", _swapPlaceOpt));
+        sb.AppendLine($"{_swapPlaceOpt}) Pardon me. [GREY (Ask to swap places)]");
+      }
+
       _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
       sb.AppendLine($"{_exitOpt}) Farewell.");
 
@@ -1016,7 +1050,7 @@ class PickupMenu : Inputer
   }
 
   public override UIResult GetResult()
-  {
+  {    
     LongListResult result = new();
     foreach (char c in Choices)
     {
