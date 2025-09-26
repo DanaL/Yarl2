@@ -1454,7 +1454,6 @@ class DialogueInterpreter
 
     if (!blessed)
     {
-      ((NPCBehaviour)mob.Behaviour).RefreshShop(mob, gs);
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
       
