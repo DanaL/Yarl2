@@ -30,7 +30,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
 
-  public Dictionary<Loc, (Colour, Colour, double)> LitSqs = [];
+  public Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
   public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
   
   PerformersStack Performers { get; set; } = new();
@@ -1770,7 +1770,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         {
           lightRadius = 1;
           fgLightColour = Colours.YELLOW;
-          bgLightColour = Colours.TORCH_ORANGE;
+          bgLightColour = Colours.PLAYER_LIGHT;
         }
       }
 
@@ -1789,12 +1789,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           if (!_litPool.TryAdd(sq.Key, sq.Value))
             _litPool[sq.Key] |= sq.Value;
 
-          if (sq.Key == new Loc(1, 4, 15, 42))
-          {
-            int lv = _litPool[sq.Key];
-            Console.WriteLine();
-          }
-
           double scale;
           if (InWilderness) 
           {
@@ -1805,18 +1799,41 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           else
           {
             int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
-            scale = 1.0 - d * 0.125;            
+            scale = double.Max(0.15, 1.0 - d * 0.125);
           }
-        
-          if (sq.Value == Illumination.Full && LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, double Scale) existingLight))
+
+          if (sq.Value == Illumination.Full && LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existingLight))
           {
-            Colour blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
-            Colour blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
-            LitSqs[sq.Key] = (blendedFg, blendedBg, scale);
+            Colour blendedFg, blendedBg;
+
+            // The player gets a 1-radius 'light' if they have no torch light
+            // but we don't want to blend that as a light source with a 
+            // "real" light.
+            if (existingLight.Bg == Colours.PLAYER_LIGHT)
+            {
+              blendedFg = fgLightColour;
+              blendedBg = bgLightColour;
+            }
+            else if (bgLightColour == Colours.PLAYER_LIGHT)
+            {
+              blendedFg = existingLight.Fg;
+              blendedBg = existingLight.Bg;
+            }
+            else
+            {
+              blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
+              blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
+            }
+
+            int fga = int.Min(255, existingLight.FgAlpha + (int)(blendedFg.Alpha * scale));
+            int bga = int.Min(125, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
+            LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
           }
           else
           {
-            LitSqs[sq.Key] = (fgLightColour, bgLightColour, scale);
+            int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
+            int bga = int.Min(125, (int)(bgLightColour.Alpha * scale));
+            LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
           }
         }
       }

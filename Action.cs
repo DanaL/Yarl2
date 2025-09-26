@@ -2339,7 +2339,7 @@ class CureDisease(GameState gs, Actor target) : Action(gs, target)
     List<DiseasedTrait> diseases = [.. Actor!.Traits.OfType<DiseasedTrait>()];
     foreach (DiseasedTrait disease in diseases)
     {
-      disease.Remove(gs);
+      disease.Remove(GameState!);
       Actor.Traits.Remove(disease);
       wasIll = true;
     }

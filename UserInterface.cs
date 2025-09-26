@@ -1071,19 +1071,17 @@ abstract class UserInterface
           glyph = GameObjectDB.EMPTY;
 
         Colour fgColour, bgColour;
-        if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, double Scale) lightInfo))
+        if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
         {
-          double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
+          //double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
           fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
-          int alpha = int.Max(15, (int)(fgColour.Alpha * scale));
-          fgColour = fgColour with { Alpha = alpha };
-
+          fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
+                    
           bgColour = glyph.BG;
           if (bgColour == Colours.BLACK)
             bgColour = lightInfo.BgColour;
 
-          alpha = int.Max(15, (int)(bgColour.Alpha * scale));
-          bgColour = bgColour with { Alpha = alpha };
+          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
 
           if (isMob)
             bgColour = glyph.BG;

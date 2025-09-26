@@ -50,6 +50,7 @@ class Colours
   public static readonly Colour TORCH_ORANGE = new(255, 159, 0, 50);
   public static readonly Colour TORCH_RED = new(208, 28, 31, 25);
   public static readonly Colour TORCH_YELLOW = new(255, 255, 53, 50);
+  public static readonly Colour PLAYER_LIGHT = new(255, 255, 52, 45);
   public static readonly Colour FX_RED = new(128, 00, 00, 175);
   public static readonly Colour FAR_BELOW = new(55, 198, 255, 50);
   public static readonly Colour HILITE = new(255, 255, 53, 128);
@@ -92,6 +93,7 @@ class Colours
     else if (colour == TORCH_ORANGE) return "torchorange";
     else if (colour == TORCH_RED) return "torchred";
     else if (colour == TORCH_YELLOW) return "torchyellow";
+    else if (colour == PLAYER_LIGHT) return "playerlight";
     else if (colour == FAR_BELOW) return "farbelow";
     else if (colour == LIGHT_PURPLE) return "lightpurple";
     else if (colour == FADED_PURPLE) return "fadedpurple";
@@ -135,6 +137,7 @@ class Colours
     "torchorange" => TORCH_ORANGE,
     "torchred" => TORCH_RED,
     "torchyellow" => TORCH_YELLOW,
+    "playerlight" => PLAYER_LIGHT,
     "farbelow" => FAR_BELOW,
     "lightpurple" => LIGHT_PURPLE,
     "fadedpurple" => FADED_PURPLE,
