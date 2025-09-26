@@ -356,9 +356,7 @@ class Vaults
     int triggerRow, triggerCol;
     (triggerRow, triggerCol) = PickVaultTriggerLoc(map, doorRow, doorCol, map.Height, map.Width, room, rng);
     if (triggerRow != -1 && triggerCol != -1)
-    {
-      Console.WriteLine($"Vault!! {level}");
-      
+    {      
       map.SetTile(doorRow, doorCol, new Portcullis(false));
       objDb.LocListeners.Add(new(dungeonID, level, triggerRow, triggerCol));
       map.SetTile(triggerRow, triggerCol, new GateTrigger(new Loc(dungeonID, level, doorRow, doorCol)));

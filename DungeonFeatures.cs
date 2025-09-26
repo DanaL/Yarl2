@@ -132,7 +132,6 @@ class Decorations
 
     sb.Append(" It is to investigate this matter I have come to this place. Surely any remnants of the illness have long since faded to nothing?");
 
-    Console.WriteLine(sb.ToString());
     return new Decoration(DecorationType.ScholarJournal, sb.ToString());
   }
 

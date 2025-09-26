@@ -98,19 +98,6 @@ class Tower(int height, int width, int minLength)
     return rooms;
   }
 
-  void Dump(bool[,] map)
-  {
-    for (int r = 0; r < Height; r++)
-    {
-      for (int c = 0; c < Width; c++)
-      {
-        char ch = map[r, c] ? '#' : '.';
-        Console.Write(ch);
-      }
-      Console.WriteLine();
-    }
-  }
-
   static void MergeAdjacentRooms(Map map, Room room, List<Room> rooms, Rng rng)
   {
     List<List<(int, int)>> adjWalls = [];

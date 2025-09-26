@@ -87,11 +87,6 @@ class Artifacts
 
     sword.Traits.Add(new DescriptionTrait(History(factDb, rng)));
 
-    // foreach (HistoricalFigure hf in history.Facts.OfType<HistoricalFigure>())
-    // {
-    //   Console.WriteLine($"{hf.Name}, {hf.Title}");
-    // }
-
     return sword;
   }
 

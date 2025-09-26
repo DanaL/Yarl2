@@ -782,7 +782,6 @@ class WitchDialogue : Inputer
       GS.FactDb.Add(new SimpleFact() { Name = "KylieQuest", Value = "begun" });
 
       Loc entrance = WitchQuest.QuestEntrance(GS);
-      Console.WriteLine(entrance);
       var (dungeon, dungeonExit) = WitchQuest.GenerateDungeon(GS, entrance);
       GS.FactDb.Add(new LocationFact() { Desc = "KylieQuestEntrance", Loc = entrance });
 

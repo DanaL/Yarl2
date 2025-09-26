@@ -560,9 +560,7 @@ abstract class DungeonBuilder
           map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
           break;
         case 7:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);
-          if (level == 0)
-            Console.WriteLine($"Summons trap: {sq}");          
+          sq = map.RandomTile(TileType.DungeonFloor, rng);       
           map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
           break;
       }
