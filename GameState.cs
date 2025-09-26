@@ -1752,38 +1752,26 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           scale = double.Max(0.15, 1.0 - d * 0.125);
         }
 
-        if (LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existingLight))
-        {
-          Colour blendedFg, blendedBg;
-
-          // The player gets a 1-radius 'light' if they have no torch light
-          // but we don't want to blend that as a light source with a 
-          // "real" light.
-          if (existingLight.Bg == Colours.PLAYER_LIGHT)
-          {
-            blendedFg = fgLightColour;
-            blendedBg = bgLightColour;
-          }
-          else if (bgLightColour == Colours.PLAYER_LIGHT)
-          {
-            blendedFg = existingLight.Fg;
-            blendedBg = existingLight.Bg;
-          }
-          else
-          {
-            blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
-            blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
-          }
-
-          int fga = int.Min(255, existingLight.FgAlpha + (int)(blendedFg.Alpha * scale));
-          int bga = int.Min(100, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
-          LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
-        }
-        else
+        LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existing);
+        if (existing.Fg == Constants.NO_COLOUR || existing.Bg == Colours.PLAYER_LIGHT)
         {
           int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
           int bga = int.Min(100, (int)(bgLightColour.Alpha * scale));
           LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
+        }
+        else if (bgLightColour == Colours.PLAYER_LIGHT)
+        {
+          int fga = int.Min(255, (int)(existing.Fg.Alpha * scale));
+          int bga = int.Min(100, (int)(existing.Bg.Alpha * scale));
+          LitSqs[sq.Key] = (existing.Fg, existing.Bg, fga, bga);          
+        }
+        else
+        {
+          Colour blendedFg = Colours.Blend(fgLightColour, existing.Fg);
+          Colour blendedBg = Colours.Blend(bgLightColour, existing.Bg);
+          int fga = int.Min(255, existing.FgAlpha + (int)(blendedFg.Alpha * scale));
+          int bga = int.Min(100, existing.BgAlpha + (int)(blendedBg.Alpha * scale));
+          LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
         }
       }
     }
