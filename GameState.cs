@@ -19,10 +19,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public Rng Rng { get; set; } = rng;
   public Options Options { get; set; } = opts;
 
-  Player? _player { get; set;  }
+  Player? _player { get; set; }
   public void SetPlayer(Player p) => _player = p;
   public Player Player => _player ?? throw new Exception("Player not set");
-  
+
   public int CurrLevel { get; set; }
   public int CurrDungeonID { get; set; }
   public Campaign Campaign { get; set; } = c;
@@ -32,7 +32,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
   public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
-  
+
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
@@ -78,7 +78,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     if (dungeon == 1 && actor is Player)
-    {    
+    {
       // When the player reaches certain details for the first time, raise
       // their nerve.
       // Or maybe I should do it 50/level?
@@ -859,10 +859,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     foreach (Item item in ObjDb.ItemsAt(victim.Loc))
     {
       if (item.HasTrait<MolochAltarTrait>())
-      {        
+      {
         HandleSacrifice(victim, victim.Loc);
         break;
-      }      
+      }
     }
   }
 
@@ -886,7 +886,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       {
         rejected = true;
         break;
-      }        
+      }
       else if (t is BrainlessTrait)
       {
         rejected = true;
@@ -902,7 +902,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     // So long as the player is adjacent to the altar, they'll get the credit
     // for the sacrifice
-    bool playerAdj = false;;
+    bool playerAdj = false; ;
     foreach (Loc adj in Util.Adj8Locs(altarLoc))
     {
       if (adj == Player.Loc)
@@ -915,7 +915,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     if (!playerAdj)
       return;
 
-    InfernalBoons.Sacrifice(this, altarLoc);    
+    InfernalBoons.Sacrifice(this, altarLoc);
   }
 
   void RetributionDamage(Actor src, RetributionTrait retribution)
@@ -927,7 +927,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     txt += "!";
 
     UI.AlertPlayer(txt, this, src.Loc);
-    
+
     int dmg = 0;
     for (int i = 0; i < retribution.NumOfDice; i++)
       dmg += Rng.Next(retribution.DmgDie) + 1;
@@ -944,13 +944,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (ObjDb.Occupant(pt) is Actor actor)
       {
-        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");        
+        UI.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} caught in the blast!");
         var (hpLeft, msg, _) = actor.ReceiveDmg([(dmg, retribution.Type)], 0, this, null, 1.0);
         UI.AlertPlayer(msg);
 
         if (hpLeft < 1)
         {
-          ActorKilled(actor, MsgFactory.KillerName(src, Player), src);          
+          ActorKilled(actor, MsgFactory.KillerName(src, Player), src);
         }
       }
       ApplyDamageEffectToLoc(pt, retribution.Type);
@@ -959,7 +959,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void PushPerformer(Actor actor) => Performers.Push(actor);
   public void FlushPerformers() => Performers.Flush();
-  
+
   void RefreshPerformers()
   {
     Performers.Flush();
@@ -1050,7 +1050,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         listeners.Add(listener);
       }
     }
-    
+
     foreach (var listener in listeners)
     {
       listener.EventAlert(GameEventType.EndOfRound, this, Loc.Nowhere);
@@ -1065,7 +1065,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         ce.Complete = true;
       }
     }
-    
+
     if (!UI.InTutorial)
       CheckForStress();
 
@@ -1074,7 +1074,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     PrepareFieldOfView();
 
     if (UI.PauseForResponse)
-    {      
+    {
       UI.BlockFoResponse(this);
       UI.PauseForResponse = false;
       UI.ClosePopup();
@@ -1098,7 +1098,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         return;
 
       // limit how stressed the player will get depending on how deep we are
-      int stresssFloor = CurrLevel switch 
+      int stresssFloor = CurrLevel switch
       {
         0 or 1 or 2 => 601,
         3 or 4 or 5 => 301,
@@ -1110,7 +1110,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       {
         int delta = Player.TotalLightRadius() < 2 ? -2 : -1;
         Player.Stats[Attribute.Nerve].Change(delta);
-      }        
+      }
     }
 
     Player.CalcStress();
@@ -1150,7 +1150,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     List<Loc> outOfSight = [.. openLoc.Where(l => !LastPlayerFoV.Contains(l))];
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
-    
+
     Loc spawnPoint = openLoc[Rng.Next(openLoc.Count)];
     monster.Loc = spawnPoint;
     ObjDb.AddNewActor(monster, spawnPoint);
@@ -1175,7 +1175,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     monsterLevel = int.Min(monsterLevel, dungeon.MonsterDecks.Count - 1);
     if (monsterLevel == -1 || monsterLevel >= dungeon.MonsterDecks.Count)
       return null;
-    
+
     MonsterDeck deck = dungeon.MonsterDecks[monsterLevel];
     if (deck.Indexes.Count == 0)
       deck.Reshuffle(Rng);
@@ -1302,9 +1302,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       {
         ActorEntersLevel(actor, landingSpot.DungeonID, landingSpot.Level);
       }
-      
-      ResolveActorMove(actor, actor.Loc, landingSpot);      
-      
+
+      ResolveActorMove(actor, actor.Loc, landingSpot);
+
       CalculateFallDamage(actor, 1);
 
       FlushPerformers();
@@ -1325,7 +1325,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       fallDamage += Rng.Next(1, 7);
     }
 
-    LameTrait lame = new() { OwnerID = actor.ID, ExpiresOn = Turn + (ulong) Rng.Next(100, 151) };
+    LameTrait lame = new() { OwnerID = actor.ID, ExpiresOn = Turn + (ulong)Rng.Next(100, 151) };
     lame.Apply(actor, this);
 
     var (hpLeft, _, _) = actor.ReceiveDmg([(fallDamage, DamageType.Blunt)], 0, this, null, 1.0);
@@ -1337,7 +1337,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
     {
       string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
-      UI.AlertPlayer(s);        
+      UI.AlertPlayer(s);
     }
   }
 
@@ -1369,7 +1369,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (actor is Player && tile.Type == TileType.MistyPortal)
     {
-      Loc exitPoint = CurrentDungeon.ExitLoc;      
+      Loc exitPoint = CurrentDungeon.ExitLoc;
       ResolveActorMove(Player, Player.Loc, exitPoint);
       ActorEntersLevel(Player, 0, 0);
       FlushPerformers();
@@ -1378,7 +1378,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.AlertPlayer("You step into the misty portal and become momentarily disoeriented.");
       UI.SetPopup(new Popup("You step into the misty portal and become momentarily disoeriented.", "", -1, -1));
     }
-    
+
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);
@@ -1487,11 +1487,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
             _ => ("\nI can grant you power! But you must proffer blood.\n", "A seductive murmur")
           };
         }
-        
+
         UI.SetPopup(new Popup(s, t, 6, -1));
 
         break;
-      }      
+      }
     }
 
     Dictionary<Item, int> items = [];
@@ -1586,7 +1586,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         visited.Add(n);
 
         var tile = map.TileAt(n.Row, n.Col);
-        if (!tile.PassableByFlight()) 
+        if (!tile.PassableByFlight())
         {
           if (inclusive)
             affected.Add(n);
@@ -1721,120 +1721,72 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(dungeonID, level))
     {
-      int lightRadius = -1;
-      Colour bgLightColour = Colours.BLACK;
-      Colour fgLightColour = Colours.BLACK;
-
-      // If an object (most likely the player) has more than one light source
-      // I'm just going to use the one with the largest radius
-      foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
-      {
-        if (radius > lightRadius)
-        {
-          lightRadius = radius;
-          Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
-          bgLightColour = bgcolour;
-          fgLightColour = fgcolour;
-        }
-      }
-      
-      if (obj.ID == Player.ID)
-      {
-        if (InWilderness)
-        {
-          var (hour, _) = CurrTime();
-          int daylight;
-          if (hour >= 6 && hour <= 19)
-            daylight = Player.MAX_VISION_RADIUS;
-          else if (hour >= 20 && hour <= 21)
-            daylight = 7;
-          else if (hour >= 21 && hour <= 23)
-            daylight = 3;
-          else if (hour < 4)
-            daylight = 2;
-          else if (hour == 4)
-            daylight = 3;
-          else
-            daylight = 7;
-
-          lightRadius = int.Max(lightRadius, daylight);
-        }
-        else if (CurrentMap.Submerged)
-        {
-          lightRadius = 3;
-          fgLightColour = Colours.UNDERWATER;
-          bgLightColour = Colours.UNDERWATER;
-        }
-
-        if (lightRadius == -1)
-        {
-          lightRadius = 1;
-          fgLightColour = Colours.YELLOW;
-          bgLightColour = Colours.PLAYER_LIGHT;
-        }
-      }
+      (int lightRadius, Colour fgLightColour, Colour bgLightColour) = FindLight(obj);
 
       if (obj.HasTrait<InPitTrait>())
         lightRadius = int.Min(lightRadius, 1);
 
-      if (lightRadius > -1)
+      if (lightRadius < 0)
+        continue;
+
+      Dictionary<Loc, int> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
+
+      foreach (var sq in fov)
       {
-        Dictionary<Loc, int> fov = FieldOfView.CalcVisible(lightRadius, obj.Loc, CurrentMap, ObjDb);
-        
-        foreach (var sq in fov)
+        if (!playerFoV.TryGetValue(sq.Key, out var pIllum) || (pIllum & sq.Value) == Illumination.None)
+          continue;
+
+        if (!_litPool.TryAdd(sq.Key, sq.Value))
+          _litPool[sq.Key] |= sq.Value;
+
+        double scale;
+        if (InWilderness)
         {
-          if (!playerFoV.TryGetValue(sq.Key, out var pIllum) || (pIllum & sq.Value) == Illumination.None)
-            continue;
-          
-          if (!_litPool.TryAdd(sq.Key, sq.Value))
-            _litPool[sq.Key] |= sq.Value;
+          scale = 1.0;
+          fgLightColour = Colours.BLACK;
+          bgLightColour = Colours.BLACK;
+        }
+        else
+        {
+          int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
+          scale = double.Max(0.15, 1.0 - d * 0.125);
+        }
 
-          double scale;
-          if (InWilderness) 
+        if (sq.Key == new Loc(1, 4, 15, 43))
+          Console.WriteLine();
+
+        if (LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existingLight))
+        {
+          Colour blendedFg, blendedBg;
+
+          // The player gets a 1-radius 'light' if they have no torch light
+          // but we don't want to blend that as a light source with a 
+          // "real" light.
+          if (existingLight.Bg == Colours.PLAYER_LIGHT)
           {
-            scale = 1.0;
-            fgLightColour = Colours.BLACK;
-            bgLightColour = Colours.BLACK;
+            blendedFg = fgLightColour;
+            blendedBg = bgLightColour;
+          }
+          else if (bgLightColour == Colours.PLAYER_LIGHT)
+          {
+            blendedFg = existingLight.Fg;
+            blendedBg = existingLight.Bg;
           }
           else
           {
-            int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
-            scale = double.Max(0.15, 1.0 - d * 0.125);
+            blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
+            blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
           }
 
-          if (sq.Value == Illumination.Full && LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existingLight))
-          {
-            Colour blendedFg, blendedBg;
-
-            // The player gets a 1-radius 'light' if they have no torch light
-            // but we don't want to blend that as a light source with a 
-            // "real" light.
-            if (existingLight.Bg == Colours.PLAYER_LIGHT)
-            {
-              blendedFg = fgLightColour;
-              blendedBg = bgLightColour;
-            }
-            else if (bgLightColour == Colours.PLAYER_LIGHT)
-            {
-              blendedFg = existingLight.Fg;
-              blendedBg = existingLight.Bg;
-            }
-            else
-            {
-              blendedFg = Colours.Blend(fgLightColour, existingLight.Fg);
-              blendedBg = Colours.Blend(bgLightColour, existingLight.Bg);
-            }
-
-            int fga = int.Min(255, existingLight.FgAlpha + (int)(blendedFg.Alpha * scale));
-            int bga = int.Min(125, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
-            LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
-          }
-          else
-          {
-            int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
-            int bga = int.Min(125, (int)(bgLightColour.Alpha * scale));
-            LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
-          }
+          int fga = int.Min(255, existingLight.FgAlpha + (int)(blendedFg.Alpha * scale));
+          int bga = int.Min(125, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
+          LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
+        }
+        else
+        {
+          int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
+          int bga = int.Min(125, (int)(bgLightColour.Alpha * scale));
+          LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
         }
       }
     }
@@ -1842,13 +1794,71 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return _litPool;
   }
 
+  (int, Colour, Colour) FindLight(GameObj obj)
+  {
+    int lightRadius = -1;
+    Colour bgLightColour = Colours.BLACK;
+    Colour fgLightColour = Colours.BLACK;
+
+    // If an object (most likely the player) has more than one light source
+    // I'm just going to use the one with the largest radius
+    foreach (var (fgcolour, bgcolour, radius) in obj.Lights())
+    {
+      if (radius > lightRadius)
+      {
+        lightRadius = radius;
+        Lights.Add((obj.Loc, fgcolour, bgcolour, radius));
+        bgLightColour = bgcolour;
+        fgLightColour = fgcolour;
+      }
+    }
+
+    if (obj.ID == Player.ID)
+    {
+      if (InWilderness)
+      {
+        var (hour, _) = CurrTime();
+        int daylight;
+        if (hour >= 6 && hour <= 19)
+          daylight = Player.MAX_VISION_RADIUS;
+        else if (hour >= 20 && hour <= 21)
+          daylight = 7;
+        else if (hour >= 21 && hour <= 23)
+          daylight = 3;
+        else if (hour < 4)
+          daylight = 2;
+        else if (hour == 4)
+          daylight = 3;
+        else
+          daylight = 7;
+
+        lightRadius = int.Max(lightRadius, daylight);
+      }
+      else if (CurrentMap.Submerged)
+      {
+        lightRadius = 3;
+        fgLightColour = Colours.UNDERWATER;
+        bgLightColour = Colours.UNDERWATER;
+      }
+
+      if (lightRadius == -1)
+      {
+        lightRadius = 1;
+        fgLightColour = Colours.YELLOW;
+        bgLightColour = Colours.PLAYER_LIGHT;
+      }
+    }
+
+    return (lightRadius, fgLightColour, bgLightColour);
+  }
+
   Glyph Hallucination()
   {
-    char ch = (char)(Rng.Next(2) == 0 ? 
-      Rng.Next('A', 'Z' + 1) : 
+    char ch = (char)(Rng.Next(2) == 0 ?
+      Rng.Next('A', 'Z' + 1) :
       Rng.Next('a', 'z' + 1));
 
-    Colour colour = Rng.Next(10) switch 
+    Colour colour = Rng.Next(10) switch
     {
       0 => Colours.WHITE,
       1 => Colours.GREEN,
@@ -1890,7 +1900,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
         LastPlayerFoV.Add(sq.Key);
     }
-    
+
     // Calculate which squares are newly viewed and check if there are
     // monsters in any of them. If so, we alert the Player (mainly to 
     // halt running when a monster comes into view)
@@ -1918,9 +1928,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       else if (stress.Stress == StressLevel.Hystrical)
         hallucinationCount = Rng.Next(2, 6);
 
-      if (hallucinationCount > 0) 
+      if (hallucinationCount > 0)
       {
-        List<Loc> fovLocs = [..LastPlayerFoV];
+        List<Loc> fovLocs = [.. LastPlayerFoV];
         for (int j = 0; j < hallucinationCount && LastPlayerFoV.Count > 0; j++)
         {
           int i = Rng.Next(fovLocs.Count);
@@ -1944,7 +1954,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           glyph = Hallucination();
         }
         else if (tile.Type != TileType.Chasm)
-        {         
+        {
           glyph = Util.TileToGlyph(tile);
         }
         else
@@ -1976,14 +1986,14 @@ class PerformersStack
 
   public int Count => performers.Count;
   public void Push(Actor a) => performers.Add(a);
-  
+
   public void Flush()
   {
     foreach (Actor a in performers)
     {
       a.Energy = 0.0;
     }
-    
+
     performers = [];
   }
 
