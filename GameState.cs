@@ -1752,9 +1752,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           scale = double.Max(0.15, 1.0 - d * 0.125);
         }
 
-        if (sq.Key == new Loc(1, 4, 15, 43))
-          Console.WriteLine();
-
         if (LitSqs.TryGetValue(sq.Key, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) existingLight))
         {
           Colour blendedFg, blendedBg;
@@ -1779,13 +1776,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           }
 
           int fga = int.Min(255, existingLight.FgAlpha + (int)(blendedFg.Alpha * scale));
-          int bga = int.Min(125, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
+          int bga = int.Min(100, existingLight.BgAlpha + (int)(blendedBg.Alpha * scale));
           LitSqs[sq.Key] = (blendedFg, blendedBg, fga, bga);
         }
         else
         {
           int fga = int.Min(255, (int)(fgLightColour.Alpha * scale));
-          int bga = int.Min(125, (int)(bgLightColour.Alpha * scale));
+          int bga = int.Min(100, (int)(bgLightColour.Alpha * scale));
           LitSqs[sq.Key] = (fgLightColour, bgLightColour, fga, bga);
         }
       }
