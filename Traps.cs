@@ -99,8 +99,9 @@ class Traps
       {
         gs.UIRef().AlertPlayer("Your stomach lurches!");
         RevealTrap(tile, gs, loc);
+        if (gs.ObjDb.ItemGlyphAt(loc) == GameObjectDB.EMPTY)
+          gs.CurrentDungeon.RememberedLocs[loc] = Util.TileToGlyph(gs.TileAt(loc));
       }
-        
       else if (trapSqVisible)
       {
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} disappears!");
