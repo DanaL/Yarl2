@@ -326,7 +326,7 @@ class Decorations
 }
 
 class IdolAltarMaker
-{ 
+{
   public static void MakeAltar(int dungeonID, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng, int level)
   {
     Map altarLevel = levels[level];
@@ -335,8 +335,8 @@ class IdolAltarMaker
     if (closets.Count > 0)
     {
       var (closetR, closetC, altarR, altarC, wallR, wallC) = closets[rng.Next(closets.Count)];
-      
-      Item idol = new() { Name = "idol", Type = ItemType.Trinket, Value = 10};
+
+      Item idol = new() { Name = "idol", Type = ItemType.Trinket, Value = 10 };
       string altarDesc;
 
       switch (rng.Next(3))
@@ -379,12 +379,12 @@ class IdolAltarMaker
       objDb.SetToLoc(idolLoc, idol);
 
       Loc prizeLoc = new(dungeonID, level, closetR, closetC);
-      
-      Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);
-      objDb.SetToLoc(prizeLoc, mithril);
 
-      Item potion = ItemFactory.Get(ItemNames.POTION_HARDINESS, objDb);
-      objDb.SetToLoc(prizeLoc, potion);
+      Item prize = PickPrize(objDb, rng);
+      objDb.SetToLoc(prizeLoc, prize);
+
+      prize = PickPrize(objDb, rng);
+      objDb.SetToLoc(prizeLoc, prize);
 
       Tile altar = new IdolAltar(altarDesc)
       {
@@ -401,6 +401,15 @@ class IdolAltarMaker
         objDb.AddNewActor(monster, prizeLoc);
       }
     }
+
+    Item PickPrize(GameObjectDB objDb, Rng rng) => rng.Next(5) switch
+    {
+      0 => ItemFactory.Get(ItemNames.POTION_HARDINESS, objDb),
+      1 => ItemFactory.Get(ItemNames.HILL_GIANT_ESSENCE, objDb),
+      2 => ItemFactory.Get(ItemNames.FIRE_GIANT_ESSENCE, objDb),
+      3 => ItemFactory.Get(ItemNames.FROST_GIANT_ESSENCE, objDb),
+      _ => ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb)
+    };
   }
 }
 

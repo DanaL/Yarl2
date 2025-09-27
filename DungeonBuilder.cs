@@ -161,14 +161,6 @@ abstract class DungeonBuilder
   {
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
-      if (rng.Next(4) == 0)
-        TunnelCarver.MakeCollapsedTunnel(dungeonId, levelNum, levels[levelNum], objDb, rng);
-
-      // Tidy up useless doors. Sometimes chasm generate will result in orphaned doors like:
-      //
-      //  #....
-      //  #..+.
-      //  ###..
       for (int r = 0; r < levels[levelNum].Height; r++)
       {
         for (int c = 0; c < levels[levelNum].Width; c++)
