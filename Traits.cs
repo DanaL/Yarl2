@@ -2449,7 +2449,7 @@ class OnFireTrait : BasicTrait, IGameEventListener, IOwner
 
   public void Extinguish(Item fireSrc, GameState gs)
   {
-    gs.UIRef().AlertPlayer("The fire burns out.");
+    gs.UIRef().AlertPlayer("The fire burns out.", gs, fireSrc.Loc);
     gs.ItemDestroyed(fireSrc, fireSrc.Loc);
     Expired = true;
   }
