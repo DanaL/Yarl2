@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Collections.Generic;
-
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -87,6 +85,9 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
         AddBaitIllusion(levels[levelNum], DungeonId, levelNum, objDb, rng);
       }
+
+      if (rng.Next(4) == 0)
+        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, levels[levelNum], objDb, rng);
     }
 
     PopulateDungeon(dungeon, rng, objDb);
