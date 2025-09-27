@@ -118,6 +118,10 @@ class Examiner : Inputer
 
           pq.Enqueue(loc, distance);
         }
+        else if (GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Count() > 0)
+        {
+          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
+        }
         else if (GS.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
           pq.Enqueue(loc, Distance(GS.Player.Loc, loc));

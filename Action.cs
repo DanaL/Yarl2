@@ -3631,10 +3631,7 @@ class HighlightLocAction : Action
 
   readonly Dictionary<string, Util.CyclopediaEntry> _cyclopedia = Util.LoadCyclopedia();
 
-  public HighlightLocAction(GameState gs, Actor actor) : base(gs, actor)
-  {
-
-  }
+  public HighlightLocAction(GameState gs, Actor actor) : base(gs, actor) { }
 
   public override double Execute()
   {
@@ -3704,11 +3701,16 @@ class HighlightLocAction : Action
       return new LocDetails(name, desc, actor.Glyph.Ch);
     }
 
-    List<Item> items = GameState!.ObjDb.ItemsAt(loc);
+    List<Item> items = [.. GameState!.ObjDb.VisibleItemsAt(loc).OrderByDescending(i => i.HasTrait<BlockTrait>())];    
     if (items.Count > 0)
-    {
+    { 
       Item item = items[0];
-      string title = item.FullName.IndefArticle().Capitalize();
+      string title = item.FullName;
+      if (item.HasTrait<PluralTrait>())
+        title = title.Capitalize();
+      else
+        title = title.IndefArticle().Capitalize();
+        
       string details = "";
       if (item.HasTrait<DescriptionTrait>())
         details = item.Traits.OfType<DescriptionTrait>().First().Text;

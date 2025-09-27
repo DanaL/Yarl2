@@ -448,3 +448,6 @@ Bigger and meaner than a regular kobold.
 #
 kobold knight
 To qualify for knighthood in kobold society, one just needs to have found some armour that fits.
+#
+rubble
+Debris left by a cave-in. You'll have to bust out a shovel and pickaxe if you want to clear it.
