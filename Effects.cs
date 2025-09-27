@@ -224,19 +224,9 @@ class EffectApplier
 
   public static void CleanseLoc(GameState gs, Loc loc, Item? source)
   {
-    if (gs.ObjDb.Occupant(loc) is Actor actor)
-    {
-      if (actor is Player player)
-      {
-        CleansePlayer(gs);
-        return;
-      }
-      else if (actor.HasTrait<UndeadTrait>())
-      {
-        CleanseUndead(gs, actor, source);
-        return;
-      }
-    }
+    // Check for a desecrated altar first, so if a player is standing on one
+    // we'll target it before the player. (But likewise if a monster is 
+    // standing on items, target the monster before the items)
 
     foreach (Item item in gs.ObjDb.ItemsAt(loc))
     {
@@ -277,6 +267,20 @@ class EffectApplier
       }
     }
 
+    if (gs.ObjDb.Occupant(loc) is Actor actor)
+    {
+      if (actor is Player player)
+      {
+        CleansePlayer(gs);
+        return;
+      }
+      else if (actor.HasTrait<UndeadTrait>())
+      {
+        CleanseUndead(gs, actor, source);
+        return;
+      }
+    }
+    
     Tile tile = gs.TileAt(loc);
     switch (tile.Type)
     {
