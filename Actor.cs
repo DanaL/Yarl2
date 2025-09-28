@@ -162,16 +162,25 @@ abstract class Actor : GameObj, IZLevel
     }
   }
 
-  public bool AbleToMove()
+  public bool AbleToMove(GameObjectDB objDb)
   {
+    bool teflon = false;
     foreach (var t in Traits)
     {
       if (t is ParalyzedTrait)
         return false;
       if (t is GrappledTrait)
         return false;
+      if (t is TelepathyTrait)
+        teflon = true;
     }
 
+    foreach (Item env in objDb.EnvironmentsAt(Loc))
+    {
+      if (env.HasTrait<StickyTrait>() && !teflon)
+        return false;
+    }
+ 
     return true;
   }
 

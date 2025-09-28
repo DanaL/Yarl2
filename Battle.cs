@@ -528,7 +528,7 @@ class Battle
 
     if (roll >= target.AC)
     {
-      if (target.HasTrait<DodgeTrait>() && target.AbleToMove() && !target.HasTrait<InPitTrait>())
+      if (target.HasTrait<DodgeTrait>() && target.AbleToMove(gs.ObjDb) && !target.HasTrait<InPitTrait>())
       {
         int dodgeChance = target.Traits.OfType<DodgeTrait>().First().Rate;
         int dodgeRoll = gs.Rng.Next(100);
@@ -542,7 +542,7 @@ class Battle
         }        
       }
 
-      if (target.HasTrait<DisplacementTrait>() && target.AbleToMove())
+      if (target.HasTrait<DisplacementTrait>() && target.AbleToMove(gs.ObjDb))
       {        
         int displaceRoll = gs.Rng.Next(100);
         if (displaceRoll <= 33 && HandleDisplacement(attacker, target, gs))

@@ -94,7 +94,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
     // Check for webs
     foreach (var env in gs.ObjDb.EnvironmentsAt(actor.Loc))
     {
-      var web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
+      StickyTrait? web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
       if (web is not null && !actor.HasTrait<TeflonTrait>())
       {
         bool strCheck = actor.AbilityCheck(Attribute.Strength, web.DC, gs.Rng);
