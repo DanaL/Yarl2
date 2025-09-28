@@ -47,7 +47,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     else if (canFly && tile.PassableByFlight())
       return true;
-    else if (canSwim && tile.Type == TileType.Lake)
+    else if (canSwim && (tile.Type == TileType.Lake || tile.Type == TileType.Underwater))
       return true;
     else if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Chasm)
     {
