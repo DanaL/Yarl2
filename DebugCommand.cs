@@ -116,7 +116,8 @@ class DebugCommand(GameState gs)
     {"blue crystal", ItemNames.BLUE_CRYSTAL },
     {"holy water", ItemNames.HOLY_WATER },
     {"bone", ItemNames.BONE },
-    {"skull", ItemNames.SKULL }
+    {"skull", ItemNames.SKULL },
+    {"axes book", ItemNames.GUIDE_AXES }
   };
 
   public string DoCommand(string txt)

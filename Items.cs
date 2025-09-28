@@ -108,6 +108,7 @@ class Item : GameObj, IEquatable<Item>
 
     List<string> adjs = [];
     int bonus = 0;
+    bool isBook = false;
     foreach (Trait trait in Traits)
     {
       if (trait is AdjectiveTrait adj)
@@ -118,6 +119,8 @@ class Item : GameObj, IEquatable<Item>
         bonus = wb.Bonus;
       else if (trait is MetalTrait metal && Type == ItemType.Tool)
         adjs.Add(metal.Type.ToString().ToLower());
+      else if (trait is BookTrait)
+        isBook = true;
     }
 
     string adjectives = string.Join(", ", adjs);
@@ -126,6 +129,10 @@ class Item : GameObj, IEquatable<Item>
       fullname += $" +{bonus}";
     else if (bonus < 0)
       fullname += $" {bonus}";
+
+    if (isBook)
+      fullname += " copy of";
+
     fullname += " " + name;
     
     var traitDescs = Traits.Where(t => t is IDesc id)

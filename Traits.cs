@@ -1931,9 +1931,14 @@ class BoolTrait : Trait
   public override string AsText() => $"Bool#{Name}#{Value}";
 }
 
+class BookTrait : Trait
+{
+  public override string AsText() => $"Book";
+}
+
 class BoostMaxStatTrait : TemporaryTrait
 {
-  public Attribute Stat {  get; set; }
+  public Attribute Stat { get; set; }
   public int Amount { get; set; }
 
   public override List<string> Apply(Actor target, GameState gs)
@@ -3643,6 +3648,7 @@ class TraitFactory
       }
     },
     { "Block", (pieces, gameObj) => new BlockTrait() },
+    { "Book", (pieces, gameObj) => new BookTrait() },
     { "Bool", (pieces, gameObj) => new BoolTrait() { Name = pieces[1], Value = bool.Parse(pieces[2]) }},
     { "BoostMaxStat", (pieces, gameObj) => {
       Enum.TryParse(pieces[1], out Attribute attr);

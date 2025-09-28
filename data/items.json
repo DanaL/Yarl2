@@ -775,7 +775,8 @@
       "Flammable",
       "Stackable",
       "SideEffect#100#BoostMaxStat#FinesseUse#100",
-      "CanApply"
+      "CanApply",
+      "Book"
     ]
   },
   {
@@ -789,7 +790,8 @@
       "Flammable",
       "Stackable",
       "SideEffect#100#BoostMaxStat#SwordUse#100",
-      "CanApply"
+      "CanApply",
+      "Book"
     ]
   },
   {
@@ -803,7 +805,8 @@
       "Flammable",
       "Stackable",
       "SideEffect#100#BoostMaxStat#AxeUse#100",
-      "CanApply"
+      "CanApply",
+      "Book"
     ]
   },
   {
@@ -817,7 +820,8 @@
       "Flammable",
       "Stackable",
       "SideEffect#100#BoostMaxStat#BowUse#100",
-      "CanApply"
+      "CanApply",
+      "Book"
     ]
   },
   {
