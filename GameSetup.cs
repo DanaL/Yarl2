@@ -665,6 +665,7 @@ class CampaignCreator(UserInterface ui)
       Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);
+      // seed = -1338258933;
       GameObjectDB objDb = new();
       SetItemIDInfo(rng);
 

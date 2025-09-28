@@ -84,8 +84,9 @@ internal class BLUserInferface : UserInterface, IDisposable
     KeyToChar.Add((int)TKCodes.InputEvents.TK_EQUALS, '=');
   }
 
-  protected override GameEvent PollForEvent()
+  protected override GameEvent PollForEvent(bool pause = true)
   {
+    if (pause)
     Thread.Sleep(2);
 
     if (Terminal.HasInput())

@@ -29,7 +29,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public GameObjectDB ObjDb { get; set; } = new GameObjectDB();
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
-
+  public bool PlayerAFK { get; set; } = false; // Player is resting at inn, or paralyzed
+  
   public Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
   public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
 

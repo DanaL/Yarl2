@@ -943,6 +943,7 @@ class RestingTrait : TemporaryTrait
     {
       Remove(gs);
       player.Traits = [.. player.Traits.Where(t => t is not RestingTrait)];
+      gs.PlayerAFK = false;
     }
   }
 
@@ -951,6 +952,7 @@ class RestingTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = target.ID;
+    gs.PlayerAFK = true;
 
     return [];
   }

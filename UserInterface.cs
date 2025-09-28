@@ -46,7 +46,7 @@ abstract class UserInterface
   public abstract void WriteSq(int row, int col, Sqr sq);
   public abstract void ClearScreen();
 
-  protected abstract GameEvent PollForEvent();  
+  protected abstract GameEvent PollForEvent(bool pause = true);  
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
@@ -1292,7 +1292,7 @@ abstract class UserInterface
 
     while (true)
     {
-      var e = PollForEvent();
+      var e = PollForEvent(!gameState.PlayerAFK);
       if (e.Type == GameEventType.Quiting)
         break;
 

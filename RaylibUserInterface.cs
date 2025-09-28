@@ -54,9 +54,10 @@ class RaylibUserInterface : UserInterface
     SetWindowPosition(100, 0);
   }
 
-  protected override GameEvent PollForEvent()
+  protected override GameEvent PollForEvent(bool pause = true)
   {
-    Thread.Sleep(2);
+    if (pause)
+      Thread.Sleep(2);
 
     if (WindowShouldClose())
     {
