@@ -649,7 +649,7 @@ class DungeonMap(Rng rng)
 
   // Draw a river on the map. River being a flow of some sort: water, lava,
   // or a chasm
-  public static void CreateRiver(Map map, int width, int height, TileType riverTile, Rng rng)
+  public static void CreateRiver(Map map, int width, int height, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     // pick starting wall
     int roll = rng.Next(4);
@@ -724,7 +724,7 @@ class DungeonMap(Rng rng)
       dir = ChangeRiverDir(dir, origDir, rng);
     }
 
-    DrawRiver(map, pts, riverTile, rng);
+    DrawRiver(map, pts, riverTile, dungeonId, level, objDb, rng);
 
     AddBridges(map, height, width, riverTile, rng);
   }
@@ -800,27 +800,27 @@ class DungeonMap(Rng rng)
     return [.. distances.Select(d => (d.Item1, d.Item2))];
   }
 
-  static void WidenRiver(Map map, int row, int col, TileType riverTile, Rng rng)
+  static void WidenRiver(Map map, int row, int col, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
-    var above = (row - 1, col);
-    var below = (row + 1, col);
-    var left = (row, col - 1);
-    var right = (row, col + 1);
+    (int Row, int Col) above = (row - 1, col);
+    (int Row, int Col) below = (row + 1, col);
+    (int Row, int Col) left = (row, col - 1);
+    (int Row, int Col) right = (row, col + 1);
 
     if (!map.IsTile(above, riverTile) && !map.IsTile(below, riverTile))
     {
       if (map.InBounds(above))
       {
         map.SetTile(above, TileFactory.Get(riverTile));
-        above = (above.Item1 - 1, above.Item2);
-        if (map.InBounds(above) && rng.NextDouble() < 0.33)
+        above = (above.Row - 1, above.Col);
+        if (map.InBounds(above) && rng.NextDouble() < 0.33 && NoItems(above.Row, above.Col))
           map.SetTile(above, TileFactory.Get(riverTile));
       }
       if (map.InBounds(below))
       {
         map.SetTile(below, TileFactory.Get(riverTile));
-        below = (below.Item1 + 1, below.Item2);
-        if (map.InBounds(below) && rng.NextDouble() < 0.33)
+        below = (below.Row + 1, below.Col);
+        if (map.InBounds(below) && rng.NextDouble() < 0.33 && NoItems(below.Row, below.Col))
           map.SetTile(below, TileFactory.Get(riverTile));
       }
     }
@@ -829,29 +829,35 @@ class DungeonMap(Rng rng)
       if (map.InBounds(left))
       {
         map.SetTile(left, TileFactory.Get(riverTile));
-        left = (left.Item1, left.Item2 - 1);
-        if (map.InBounds(left) && rng.NextDouble() < 0.33)
+        left = (left.Row, left.Col - 1);
+        if (map.InBounds(left) && rng.NextDouble() < 0.33 && NoItems(left.Row, left.Col))
           map.SetTile(left, TileFactory.Get(riverTile));
       }
       if (map.InBounds(right))
       {
         map.SetTile(right, TileFactory.Get(riverTile));
-        right = (right.Item1, right.Item2 + 1);
-        if (map.InBounds(right) && rng.NextDouble() < 0.33)
+        right = (right.Row, right.Col + 1);
+        if (map.InBounds(right) && rng.NextDouble() < 0.33 && NoItems(right.Row, right.Col))
           map.SetTile(right, TileFactory.Get(riverTile));
       }
     }
+
+    bool NoItems(int r, int c) => objDb.ItemsAt(new Loc(dungeonId, level, r, c)).Count == 0;
   }
 
-  static void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, Rng rng)
+  // Skip any points that have items on them so that we don't remove the 
+  // the floor from beneath items that are places on the level in earler 
+  // steps of dungeon creation
+  static void DrawRiver(Map map, List<(int, int, Dir)> pts, TileType riverTile, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     for (int j = 0; j < pts.Count - 1; j++)
     {
       var river = Util.Bresenham(pts[j].Item1, pts[j].Item2, pts[j + 1].Item1, pts[j + 1].Item2);
-      foreach (var w in river)
+      foreach ((int r, int c) in river)
       {
-        map.SetTile(w, TileFactory.Get(riverTile));
-        WidenRiver(map, w.Item1, w.Item2, riverTile, rng);
+        if (objDb.ItemsAt(new Loc(dungeonId, level, r, c)).Count == 0)
+          map.SetTile(r, c, TileFactory.Get(riverTile));
+        WidenRiver(map, r, c, riverTile, dungeonId, level, objDb, rng);
       }
     }
   }
