@@ -842,7 +842,7 @@ class DungeonMap(Rng rng)
       }
     }
 
-    bool NoItems(int r, int c) => objDb.ItemsAt(new Loc(dungeonId, level, r, c)).Count == 0;
+    bool NoItems(int r, int c) => !objDb.AnyItemsAt(new Loc(dungeonId, level, r, c));
   }
 
   // Skip any points that have items on them so that we don't remove the 
@@ -855,7 +855,7 @@ class DungeonMap(Rng rng)
       var river = Util.Bresenham(pts[j].Item1, pts[j].Item2, pts[j + 1].Item1, pts[j + 1].Item2);
       foreach ((int r, int c) in river)
       {
-        if (objDb.ItemsAt(new Loc(dungeonId, level, r, c)).Count == 0)
+        if (!objDb.AnyItemsAt(new Loc(dungeonId, level, r, c)))
           map.SetTile(r, c, TileFactory.Get(riverTile));
         WidenRiver(map, r, c, riverTile, dungeonId, level, objDb, rng);
       }

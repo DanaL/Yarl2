@@ -463,10 +463,9 @@ class GameObjectDB
   }
 
   // This is really just used for restoring an itemdb from serialization
-  public void AddStack(Loc loc, List<Item> stack)
-  {
-    _itemLocs[loc] = stack;
-  }
+  public void AddStack(Loc loc, List<Item> stack) => _itemLocs[loc] = stack;
+
+  public bool AnyItemsAt(Loc loc) => _itemLocs.TryGetValue(loc, out var stack) && stack.Count > 0;
 
   // It's probably dangerous/bad practice to return the list of items
   // so other parts of the game can manipulate it directly, but hey
@@ -475,8 +474,8 @@ class GameObjectDB
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    
-    return [..stack.Where(i => i.Type != ItemType.Environment && i.Type != ItemType.Fog)];
+
+    return [.. stack.Where(i => i.Type != ItemType.Environment && i.Type != ItemType.Fog)];
   }
 
   public List<Item> VisibleItemsAt(Loc loc)
