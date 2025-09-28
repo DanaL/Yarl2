@@ -836,13 +836,14 @@ class InnkeeperServiceAction : Action
       GameState!.Player.Inventory.Zorkmids -= Invoice;
       GameState.Player.Stats[Attribute.HP].Reset();
       GameState.Player.Stats[Attribute.Nerve].Change(500);
-      
+
       // Resting at an inn cures poison. It's part of room service.
-      foreach (var t in GameState.Player.Traits.OfType<PoisonedTrait>())
+      List<TemporaryTrait> toRemove = [.. GameState.Player.Traits.OfType<TemporaryTrait>()
+                                                  .Where(t => t is PoisonedTrait || t is BlessingTrait)];
+      foreach (TemporaryTrait t in toRemove)
       {
-        GameState.StopListening(GameEventType.EndOfRound, t);
+        t.Remove(GameState);
       }
-      GameState.Player.Traits = [.. GameState.Player.Traits.Where(t => t is not PoisonedTrait)];
 
       // Leet's be nice an extinguish the player's torch for them if they 
       // forget to do it before they rest.
