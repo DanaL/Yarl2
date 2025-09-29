@@ -454,3 +454,6 @@ Debris left by a cave-in. You'll have to bust out a shovel and pickaxe if you wa
 #
 drow warrior
 A elf from an underground empire. They aren't usually friendly to surface folk.
+#
+mud golem
+An under-baked clay golem.

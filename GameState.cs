@@ -797,7 +797,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else if (t is RetributionTrait rt)
       {
-        RetributionDamage(victim, rt);
+        HandleRetribution(victim, rt);
       }
       else if (t is VillagerTrait)
       {
@@ -919,8 +919,36 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     InfernalBoons.Sacrifice(this, altarLoc);
   }
 
-  void RetributionDamage(Actor src, RetributionTrait retribution)
+  void HandleMudExplosion(Actor src)
   {
+    UI.AlertPlayer($"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "collapse")} into a puddle mud!");
+
+    List<Loc> sqs = [src.Loc];
+    foreach (Loc adj in Util.Adj8Locs(src.Loc))
+    {
+      if (Rng.Next(3) < 2)
+        sqs.Add(adj);
+    }
+
+    foreach (Loc loc in sqs)
+    {
+      if (!TileAt(loc).Passable())
+        continue;
+      Item mud = ItemFactory.PuddleOfMud();
+      ObjDb.Add(mud);
+      ItemDropped(mud, loc);
+    }
+  }
+
+  void HandleRetribution(Actor src, RetributionTrait retribution)
+  {
+    if (retribution.Type == DamageType.Mud)
+    {
+      HandleMudExplosion(src);
+
+      return;
+    }
+
     string dmgDesc = retribution.Type.ToString().ToLower();
     string txt = $"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "explode")}";
     if (dmgDesc == "cold" || dmgDesc == "fire")

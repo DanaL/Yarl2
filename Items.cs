@@ -545,8 +545,10 @@ class ItemFactory
     fire.Traits.Add(onFire);
     fire.Traits.Add(new LightSourceTrait()
     {
-      Radius = 1, OwnerID = fire.ID,
-      FgColour = Colours.YELLOW, BgColour = Colours.TORCH_ORANGE
+      Radius = 1,
+      OwnerID = fire.ID,
+      FgColour = Colours.YELLOW,
+      BgColour = Colours.TORCH_ORANGE
     });
 
     return fire;
@@ -570,13 +572,27 @@ class ItemFactory
   {
     Item booze = new()
     {
-      Name = "puddle of booze", Type = ItemType.Environment, Value = 0,
+      Name = "puddle of booze",
+      Type = ItemType.Environment,
+      Value = 0,
       Glyph = new Glyph('~', Colours.WHITE, Colours.GREY, Colours.LIGHT_BROWN, false)
     };
     booze.SetZ(1);
     booze.Traits.Add(new FlammableTrait());
 
     return booze;
+  }
+  
+  public static Item PuddleOfMud()
+  {
+    Item mud = new()
+    {
+      Name = "mud", Type = ItemType.Environment, Value = 0,
+      Glyph = new Glyph('.', Colours.WHITE, Colours.GREY, Colours.LIGHT_BROWN, false)
+    };
+    mud.SetZ(1);
+    
+    return mud;
   }
 }
 

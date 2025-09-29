@@ -36,8 +36,6 @@ record struct Loc(int DungeonID, int Level, int Row, int Col)
   }
 }
 
-enum GlyphType { Terrain, Item, Mob }
-
 record struct Glyph(char Ch, Colour Lit, Colour Unlit, Colour BG, bool Illuminate)
 {
   public override readonly string ToString()

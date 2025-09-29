@@ -51,7 +51,7 @@ evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashing
 rot grub          |w|white        |grey        |10| 8|3| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack|Mosquito|
 python            |S|grey         |darkgrey    |13|20|4| 1.0|14|12|Crush#1#1#4#1#0#0#Attack,MeleeBlunt#1#1#6#1#0#0#Attack|Grappler#15|
 rum gremlin       |i|lightbrown   |brown       |13|20|4| 1.0|10|10|RumBreath#0#4#0#0#0#5#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
-flame beetle      |a|brightred    |dullred     |15|20|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1#dullred#torchred|
+flame beetle      |a|brightred    |dullred     |15|30|3| 1.0|12|12|MeleeFire#1#1#6#1#0#0#Attack|Drop#beetle_carapace#33,Immunity#Fire,LightSource#owner#1#dullred#torchred|
 giant toad        |t|green        |darkgreen   |13|30|3| 1.0|10|10|Gulp#1#1#6#1#13#0#Attack|Heavy|
 frog              |t|limegreen    |darkgreen   |10| 1|1| 1.0|10|10||Passive|
 zombie frog       |t|grey         |darkgrey    |11|10|2| 1.0|10|10|MeleeNecrotic#1#1#4#1#0#0#Attack|Undead,Brainless,Immunity#Poison|
@@ -63,3 +63,4 @@ faint spirit      |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1
 angler fish       |»|grey         |darkgrey    |13|10|2| 1.0|10|10||Swimmer,Passive,LightSource#owner#2#torchyellow#torchyellow|
 gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.75|10|10||Floating,Brainless,Retribution#Blunt#6#4#2|
 imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent|PoorLoot
+mud golem         |G|lightbrown   |brown       |14|40|3| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless|

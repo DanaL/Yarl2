@@ -27,7 +27,8 @@ enum DamageType
   Fear,
   Wet,
   Rust,
-  Holy
+  Holy,
+  Mud
 }
 
 record struct Damage(int Die, int NumOfDie, DamageType Type);

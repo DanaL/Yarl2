@@ -91,9 +91,17 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       return true;
     }
     
-    // Check for webs
+    // Check for environment hazards that might block the character 
+    // (webs, mud, etc). 
     foreach (Item env in gs.ObjDb.EnvironmentsAt(actor.Loc))
     {
+      if (env.Name == "mud" && gs.Rng.NextDouble() <= 0.6 && !(actor.HasTrait<FlyingTrait>() || actor.HasTrait<FloatingTrait>()))
+      {
+        string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck in mud!";
+        ui.AlertPlayer(txt, gs, actor.Loc);
+        return true;
+      }
+
       StickyTrait? web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
       if (web is not null && !actor.HasTrait<TeflonTrait>())
       {
@@ -101,13 +109,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         if (!strCheck)
         {
           string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} stuck to {env.Name.DefArticle()}!";
-          ui.AlertPlayer(txt);
+          ui.AlertPlayer(txt, gs, actor.Loc);
           return true;
         }
         else
         {
           var txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "tear")} through {env.Name.DefArticle()}.";
-          ui.AlertPlayer(txt);
+          ui.AlertPlayer(txt, gs, actor.Loc);
           gs.ObjDb.RemoveItemFromGame(env.Loc, env);
         }
       }
