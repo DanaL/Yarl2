@@ -111,7 +111,7 @@ class SorceressQuest
 
     int dungeonId = campaign.Dungeons.Keys.Max() + 1;
     SorceressDungeonBuilder sdb = new(dungeonId, 21, 36);
-    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, rng);
+    (Dungeon sorceressTower, Loc towerExit) = sdb.Generate(row, col, objDb, rng);
     sorceressTower.ExitLoc = new(0, 0, row, col);
     
     Upstairs entrance = new("")

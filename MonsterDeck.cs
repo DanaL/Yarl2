@@ -87,6 +87,7 @@ class DeckBuilder
 
     foreach (MonsterDeck deck in decks)
       deck.Reshuffle(rng);
+      
     return decks;
   }
 }

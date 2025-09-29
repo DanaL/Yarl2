@@ -17,13 +17,12 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   int Width { get; set; } = width;
   int DungeonId { get; set; } = dungeonId;
 
-  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, Rng rng)
+  public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
-    Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false);
-
-    MonsterDeck deck = new();
-    deck.Monsters.AddRange(["skeleton", "skeleton", "zombie", "zombie", "dire bat"]);
-    towerDungeon.MonsterDecks.Add(deck);
+    Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false)
+    {
+      MonsterDecks = DeckBuilder.ReadDeck("tower", rng)
+    };
 
     Tower towerBuilder = new(Height, Width, 5);
     Map[] floors = [..towerBuilder.BuildLevels(5, rng)];
@@ -47,6 +46,9 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         }
       }
     }
+
+    PopulateDungeon(towerDungeon, rng, objDb);
+
     return (towerDungeon, entrance);
   }
 }

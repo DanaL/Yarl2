@@ -529,7 +529,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     {
       Name = "Flin Flon",
       Appearance = "A mildly dishevelled gnome with a sparse beard. He's carrying a heavy satchel.",
-      Glyph = new Glyph('G', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
+      Glyph = new Glyph('@', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
     flinFlon.Stats[Attribute.HP] = new Stat(50);
     flinFlon.Stats[Attribute.ShopInvoice] = new Stat(0);
