@@ -1072,19 +1072,26 @@ abstract class UserInterface
 
         Colour fgColour, bgColour;
         if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
-        {
+        {          
           //double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
           fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
           fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
-                    
-          bgColour = glyph.BG;
-          if (bgColour == Colours.BLACK)
-            bgColour = lightInfo.BgColour;
-
-          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
 
           if (isMob)
+          {
             bgColour = glyph.BG;
+          }
+          else if (glyph.BG == Colours.BLACK)
+          {
+            bgColour = lightInfo.BgColour;
+            bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
+          }
+          else
+          {
+            // The background actually has a colour, use the Foreground alpha
+            // to make sure it stands out.
+            bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
+          }
         }
         else
         {
