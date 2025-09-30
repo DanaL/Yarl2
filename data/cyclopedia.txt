@@ -460,3 +460,6 @@ An under-baked clay golem.
 #
 clay golem
 A popular form of golem made by wizards who didn't have the time or patience to carve one from stone.
+#
+lard golem
+Wizard colleges needed something to do with grease from their cafeterias. Waste not, want not.

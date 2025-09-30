@@ -925,9 +925,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     InfernalBoons.Sacrifice(this, altarLoc);
   }
 
-  void HandleMudExplosion(Actor src)
+  void HandleDissolveToPuddle(Actor src, DamageType dmgType, string name)
   {
-    UI.AlertPlayer($"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "collapse")} into a puddle mud!");
+    UI.AlertPlayer($"{src.FullName.Capitalize()} {Grammar.Conjugate(src, "collapse")} into a puddle of {name}!");
 
     List<Loc> sqs = [src.Loc];
     foreach (Loc adj in Util.Adj8Locs(src.Loc))
@@ -940,17 +940,23 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (!TileAt(loc).Passable())
         continue;
-      Item mud = ItemFactory.PuddleOfMud();
-      ObjDb.Add(mud);
-      ItemDropped(mud, loc);
+
+      Item puddle = dmgType switch
+      {
+        DamageType.Grease => ItemFactory.PuddleOfGrease(),
+        _ => ItemFactory.PuddleOfMud()
+      };
+
+      ObjDb.Add(puddle);
+      ItemDropped(puddle, loc);
     }
   }
-
+  
   void HandleRetribution(Actor src, RetributionTrait retribution)
   {
-    if (retribution.Type == DamageType.Mud)
+    if (retribution.Type == DamageType.Mud || retribution.Type == DamageType.Grease)
     {
-      HandleMudExplosion(src);
+      HandleDissolveToPuddle(src, retribution.Type, retribution.Type.ToString().ToLower());
 
       return;
     }

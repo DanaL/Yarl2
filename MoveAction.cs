@@ -102,6 +102,13 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         return true;
       }
 
+      if (env.Name == "grease" && gs.Rng.NextDouble() <= 0.6 && !(actor.HasTrait<FlyingTrait>() || actor.HasTrait<FloatingTrait>()))
+      {
+        string txt = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "slip")} in grease!";
+        ui.AlertPlayer(txt, gs, actor.Loc);
+        return true;
+      }
+
       StickyTrait? web = env.Traits.OfType<StickyTrait>().FirstOrDefault();
       if (web is not null && !actor.HasTrait<TeflonTrait>())
       {

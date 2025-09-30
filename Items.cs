@@ -582,17 +582,32 @@ class ItemFactory
 
     return booze;
   }
-  
+
   public static Item PuddleOfMud()
   {
     Item mud = new()
     {
-      Name = "mud", Type = ItemType.Environment, Value = 0,
+      Name = "mud",
+      Type = ItemType.Environment,
+      Value = 0,
       Glyph = new Glyph('.', Colours.WHITE, Colours.GREY, Colours.LIGHT_BROWN, false)
     };
     mud.SetZ(1);
-    
+
     return mud;
+  }
+  
+  public static Item PuddleOfGrease()
+  {
+    Item grease = new()
+    {
+      Name = "grease", Type = ItemType.Environment, Value = 0,
+      Glyph = new Glyph('.', Colours.DARK_GREY, Colours.BLACK, Colours.CREAM, false)
+    };
+    grease.SetZ(1);
+    grease.Traits.Add(new FlammableTrait());
+
+    return grease;
   }
 }
 
