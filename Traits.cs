@@ -1782,8 +1782,9 @@ class DisguiseTrait : BasicTrait
   public Glyph Disguise {  get; set; }
   public Glyph TrueForm { get; set; }
   public string DisguiseForm { get; set; } = "";
+  public bool Disguised { get; set; } = false;
 
-  public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}";
+  public override string AsText() => $"Disguise#{Disguise}#{TrueForm}#{DisguiseForm}#{Disguised}";
 }
 
 class DiseasedTrait : TemporaryTrait
@@ -3704,7 +3705,12 @@ class TraitFactory
     { "DialogueScript", (pieces, gameObj) => new DialogueScriptTrait() { ScriptFile = pieces[1] } },
     { "DiggingTool", (pieces, gameObj) => new DiggingToolTrait() },
     { "Diseased", (pieces, gameObj) => new DiseasedTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
-    { "Disguise", (pieces, gameObj) =>  new DisguiseTrait() { Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]), DisguiseForm = pieces[3] }},
+    { "Disguise", (pieces, gameObj) =>  new DisguiseTrait()
+      {
+        Disguise = Glyph.TextToGlyph(pieces[1]), TrueForm = Glyph.TextToGlyph(pieces[2]),
+        DisguiseForm = pieces[3], Disguised = bool.Parse(pieces[4])
+      }
+    },
     { "Direction", (pieces, gameObj) =>
       {
         Enum.TryParse(pieces[1], out Dir dir);
@@ -3825,7 +3831,7 @@ class TraitFactory
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
     { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
-    { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },    
+    { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },
     { "Nausea", (pieces, gameObj) => new NauseaTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
@@ -3954,7 +3960,7 @@ class TraitFactory
           OwnerID = ulong.Parse(pieces[1]), ExpiresOn = expires, Attr = attr,
           Amt = int.Parse(pieces[4]), SourceId = s
         };
-      } 
+      }
     },
     { "StatDebuff", (pieces, gameObj) =>
     {

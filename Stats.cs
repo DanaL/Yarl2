@@ -36,7 +36,6 @@ enum Attribute
   DialogueState,
   NPCMenuState,
   Markup,
-  InDisguise,
   MonsterForm,
   ArcheryBonus,
   AxeUse,

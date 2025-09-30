@@ -195,11 +195,10 @@ class GameObjectDB
   {
     static bool Disguised(Actor mob)
     {
-      if (!mob.HasActiveTrait<DisguiseTrait>())
-        return false;
-
-      if (mob.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
-        return true;
+      if (mob.Traits.OfType<DisguiseTrait>().FirstOrDefault() is DisguiseTrait disguise)
+      {
+        return disguise.Disguised;
+      }
 
       return false;
     }

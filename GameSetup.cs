@@ -381,59 +381,6 @@ class CampaignCreator(UserInterface ui)
     return (entrance.Item1, entrance.Item2);
   }
 
-  // This probably belongs in DungeonBuilder
-  static void AddGargoyle(Rng rng, GameObjectDB objDb, Dungeon dungeon, int level)
-  {
-    var glyph = new Glyph('&', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true);
-    var gargoyle = new Mob()
-    {
-      Name = "gargoyle",
-      Recovery = 1.0,
-      Glyph = glyph
-    };
-    gargoyle.SetBehaviour(new DisguisedMonsterBehaviour());
-
-    gargoyle.Stats.Add(Attribute.HP, new Stat(40));
-    gargoyle.Stats.Add(Attribute.AttackBonus, new Stat(4));
-    gargoyle.Stats.Add(Attribute.AC, new Stat(15));
-    gargoyle.Stats.Add(Attribute.Strength, new Stat(1));
-    gargoyle.Stats.Add(Attribute.Dexterity, new Stat(1));
-
-    //gargoyle.Actions.Add(new MobMeleeTrait()
-    //{
-    //  MinRange = 1,
-    //  MaxRange = 1,
-    //  DamageDie = 5,
-    //  DamageDice = 2,
-    //  DamageType = DamageType.Blunt
-    //});
-
-    gargoyle.Stats[Attribute.InDisguise] = new Stat(1);
-
-    var disguise = new DisguiseTrait()
-    {
-      Disguise = glyph,
-      TrueForm = new Glyph('G', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
-      DisguiseForm = "statue"
-    };
-    gargoyle.Traits.Add(disguise);
-    gargoyle.Traits.Add(new FlyingTrait());
-    gargoyle.Traits.Add(new ResistPiercingTrait());
-    gargoyle.Traits.Add(new ResistSlashingTrait());
-
-    var sq = dungeon.LevelMaps[level].RandomTile(TileType.DungeonFloor, rng);
-    var loc = new Loc(dungeon.ID, level, sq.Item1, sq.Item2);
-    objDb.AddNewActor(gargoyle, loc);
-
-    List<Loc> adj = Util.Adj4Locs(loc).ToList();
-    if (adj.Count > 0)
-    {
-      var pedestalLoc = adj[rng.Next(adj.Count)];
-      Landmark pedetal = new("A stone pedestal.");
-      dungeon.LevelMaps[level].SetTile(pedestalLoc.Row, pedestalLoc.Col, pedetal);
-    }
-  }
-
   static (Campaign, int, int) BeginNewCampaign(Rng rng, GameObjectDB objDb)
   {
     Campaign campaign;

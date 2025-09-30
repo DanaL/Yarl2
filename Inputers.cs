@@ -249,7 +249,7 @@ class Aimer : Inputer
 
         if (GS.ObjDb.Occupant(loc) is Actor occ)
         {
-          if (occ.HasActiveTrait<DisguiseTrait>() && occ.Stats.TryGetValue(Attribute.InDisguise, out var stat) && stat.Curr == 1)
+          if (occ.Traits.OfType<DisguiseTrait>().FirstOrDefault() is DisguiseTrait disguise && disguise.Disguised)
             continue;
 
           // Bit of a hackey way to determine if something is visible, but this will cover monsters
