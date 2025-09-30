@@ -426,32 +426,38 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         if (tile.Type == TileType.FrozenWater)
         {
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Water));
-          UI.AlertPlayer("The ice melts!");
+          UI.AlertPlayer("The ice melts!", this, loc);
         }
         else if (tile.Type == TileType.FrozenDeepWater)
         {
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DeepWater));
-          UI.AlertPlayer("The ice melts!");
+          UI.AlertPlayer("The ice melts!", this, loc);
           BridgeDestroyedOverWater(loc);
         }
         else if (tile.Type == TileType.FrozenPool)
         {
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Pool));
-          UI.AlertPlayer("The ice melts!");
+          UI.AlertPlayer("The ice melts!", this, loc);
         }
         else if (tile.Type == TileType.FrozenLake)
         {
           map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Lake));
-          UI.AlertPlayer("The ice melts!");
+          UI.AlertPlayer("The ice melts!", this, loc);
         }
 
         foreach (var item in items)
         {
           if (item.HasTrait<FlammableTrait>())
           {
-            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!");
+            UI.AlertPlayer($"{item.FullName.DefArticle().Capitalize()} burns up!", this, loc);
             ItemDestroyed(item, loc);
             fireStarted = true;
+          }
+
+          if (item.Name == "mud")
+          {
+            UI.AlertPlayer("The mud dries up.", this, loc);
+            ItemDestroyed(item, loc);
           }
         }
         break;
