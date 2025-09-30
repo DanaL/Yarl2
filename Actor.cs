@@ -505,6 +505,28 @@ abstract class Actor : GameObj, IZLevel
     return "";
   }
 
+  // Which glyph to display, from the perspective of 'this' looking at other
+  public Glyph? GlyphSeen(Actor other, bool playerTelepathic, bool playerSeeInvisible)
+  {
+    if (ID == other.ID)
+      return Glyph;
+
+    Glyph glyph = other.Glyph;
+    bool invisible = false;
+    foreach (Trait t in other.Traits)
+    {
+      if (playerTelepathic && t is DisguiseTrait disguise)
+        glyph = disguise.TrueForm;
+      else if (t is InvisibleTrait)
+        invisible = true;
+    }
+
+    if (invisible && !(playerSeeInvisible || playerSeeInvisible))
+      return null;
+
+    return glyph;
+  }
+
   public bool VisibleTo(Actor other)
   {
     if (ID == other.ID)
@@ -842,6 +864,38 @@ class MonsterFactory
       m.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
     return m;
+  }
+
+  // I didn't put mimics in the monster data file because they're going they
+  // need to be placed and configred specifcally anyhow.
+  public static Actor Mimic()
+  {
+    Glyph doorGlyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+
+    Mob mimic = new() { Name = "mimic", Recovery = 1.0, Glyph = doorGlyph };
+    mimic.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
+
+    mimic.Stats.Add(Attribute.HP, new Stat(40));
+    mimic.Stats.Add(Attribute.AttackBonus, new Stat(3));
+    mimic.Stats.Add(Attribute.AC, new Stat(15));
+    mimic.Stats.Add(Attribute.Strength, new Stat(1));
+    mimic.Stats.Add(Attribute.Dexterity, new Stat(0));
+
+    mimic.Powers.Add(Power.FromText("MeleeBlunt#1#1#6#2#0#0#Attack"));
+    mimic.Traits.Add(new GrapplerTrait() { DC = 18 });
+
+    mimic.Traits.Add(new ImmobileTrait());
+
+    DisguiseTrait disguise = new()
+    {
+      Disguise = doorGlyph,
+      TrueForm = new Glyph('m', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
+      DisguiseForm = "closed door",
+      Disguised = true
+    };
+    mimic.Traits.Add(disguise);
+
+    return mimic;
   }
 }
 

@@ -363,6 +363,10 @@ class DebugCommand(GameState gs)
         monster.Name = "Bob";
         monster.Traits.Add(new NamedTrait());
       }
+      else if (monsterName == "mimic")
+      {
+        monster = MonsterFactory.Mimic();
+      }
       else
       {
         monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);

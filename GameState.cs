@@ -1930,7 +1930,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     // Calculate which squares are newly viewed and check if there are
     // monsters in any of them. If so, we alert the Player (mainly to 
     // halt running when a monster comes into view)
-    var prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
+    HashSet<ulong> prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
     RecentlySeenMonsters = [Player.ID];
     foreach (Loc loc in LastPlayerFoV)
     {
@@ -1970,6 +1970,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (glyph, z) = ObjDb.ItemGlyph(loc, Player.Loc);
+
+      if (glyph.Ch == 'g')
+        Console.WriteLine();
+        
       if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {
         // Remember the terrain tile if there's nothing visible on the square
@@ -1994,7 +1998,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           }
           else
           {
-            var belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
+            Glyph belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
             ch = belowTile.Ch;
           }
           glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);

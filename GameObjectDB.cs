@@ -193,14 +193,14 @@ class GameObjectDB
 
   public (Glyph, int) ItemGlyph(Loc loc, Loc playerLoc)
   {
-    static bool Disguised(Actor mob)
+    static (bool, Glyph) Disguised(Actor mob)
     {
       if (mob.Traits.OfType<DisguiseTrait>().FirstOrDefault() is DisguiseTrait disguise)
       {
-        return disguise.Disguised;
+        return (disguise.Disguised, disguise.TrueForm);
       }
 
-      return false;
+      return (false, EMPTY);
     }
 
     int z = 0;
@@ -208,8 +208,9 @@ class GameObjectDB
 
     // If there is a Mob disguised as an item, we'll return that glyph
     if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor mob)
-    {
-      if (Disguised(mob))
+    { 
+      var (disguised, trueGlyph) = Disguised(mob);
+      if (disguised)
       {
         glyph = mob.Glyph;
         z = mob.Z();
