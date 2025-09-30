@@ -457,3 +457,6 @@ A elf from an underground empire. They aren't usually friendly to surface folk.
 #
 mud golem
 An under-baked clay golem.
+#
+clay golem
+A popular form of golem made by wizards who didn't have the time or patience to carve one from stone.

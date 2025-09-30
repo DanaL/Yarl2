@@ -2917,7 +2917,6 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   {
     base.Execute();
     
-    
     // Fireball shoots toward the target and then explodes, but its path 
     // may be interrupted
     List<Loc> pts = [];

@@ -216,6 +216,15 @@ abstract class Actor : GameObj, IZLevel
       }
     }
 
+    if (Name == "mud golem" && this is not Player)
+    {
+      gs.ObjDb.RemoveActor(this);
+      Actor clayGolem = MonsterFactory.Get("clay golem", gs.ObjDb, gs.Rng);
+      gs.ObjDb.AddNewActor(clayGolem, Loc);
+      gs.UIRef().AlertPlayer("The mud golem becomes fully baked!", gs, Loc);
+      return (999, "", 0);
+    }
+    
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;
     bool fireDamage = false;
