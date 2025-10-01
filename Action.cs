@@ -3625,13 +3625,11 @@ sealed class PassAction : Action
   }      
 }
 
-class HighlightLocAction : Action
+class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   Loc Loc { get; set; }
 
   readonly Dictionary<string, Util.CyclopediaEntry> _cyclopedia = Util.LoadCyclopedia();
-
-  public HighlightLocAction(GameState gs, Actor actor) : base(gs, actor) { }
 
   public override double Execute()
   {
@@ -3656,6 +3654,13 @@ class HighlightLocAction : Action
       {
         name = actor.Name;
         desc = "You. A stalwart, rugged adventurer (probably). Keen for danger and glory. Currently alive.";
+      }
+      else if (actor.IsDisguised())
+      {
+        DisguiseTrait dt = actor.Traits.OfType<DisguiseTrait>().First();
+        name = dt.DisguiseForm;
+        if (_cyclopedia.TryGetValue(name, out var v))
+          desc = v.Text;
       }
       else if (actor.HasTrait<VillagerTrait>())
       {

@@ -720,12 +720,14 @@ class Util
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
+  // At some point it will probably become to slow to reload the entire 
+  // dictionary from disk everytime I access it...
   public record CyclopediaEntry(string Title, string Text);
   public static Dictionary<string, CyclopediaEntry> LoadCyclopedia()
   {
     Dictionary<string, CyclopediaEntry> cyclopedia = [];
 
-    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("cyclopedia.txt"));
+    string[] lines = File.ReadAllLines(ResourcePath.GetDataFilePath("cyclopedia.txt"));
 
     for (int j = 0; j < lines.Length; j += 3)
     {
@@ -752,6 +754,13 @@ class Util
     return cyclopedia;
   }
 
+  public static bool CyclopediaEntryExists(string title)
+  {
+    var cyclopedia = LoadCyclopedia();
+
+    return cyclopedia.ContainsKey(title);
+  }
+
   public static (Colour, Colour) MetallicColour(Metals metal) => metal switch
   {
     Metals.NotMetal => (Colours.BLACK, Colours.BLACK), // should this be an error condition?
@@ -774,9 +783,14 @@ class Util
 
   public static bool AwareOfActor(Actor actor, GameState gs)
   {
-    if (gs.LastPlayerFoV.Contains(actor.Loc))
+    bool telepathic = gs.Player.HasActiveTrait<TelepathyTrait>();
+    int distance = Distance(gs.Player.Loc, actor.Loc);
+
+    if (telepathic && distance <= Constants.TELEPATHY_RANGE)
       return true;
-    else if (gs.Player.HasActiveTrait<TelepathyTrait>() && Distance(gs.Player.Loc, actor.Loc) <= Constants.TELEPATHY_RANGE)
+    else if (actor.IsDisguised())
+      return false;
+    else if (gs.LastPlayerFoV.Contains(actor.Loc))
       return true;
     else if (gs.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swalloewd)
       return swalloewd.SwallowerID == actor.ID;

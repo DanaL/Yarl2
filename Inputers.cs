@@ -105,9 +105,10 @@ class Examiner : Inputer
         if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
           continue;
 
-        if (GS.ObjDb.Occupant(loc) is Actor actor && Util.AwareOfActor(actor, GS))
+        int distance = Distance(GS.Player.Loc, loc);
+        Actor? occupant = GS.ObjDb.Occupant(loc);
+        if (occupant is not null && AwareOfActor(occupant, GS))
         {
-          int distance = Distance(GS.Player.Loc, loc);
           if (loc == GS.Player.Loc)
           {
             _currTarget = _targets.Count - 1;
@@ -118,17 +119,24 @@ class Examiner : Inputer
 
           pq.Enqueue(loc, distance);
         }
-        else if (GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Count() > 0)
+        else if (occupant is not null && occupant.IsDisguised())
         {
-          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
+          string form = occupant.Traits.OfType<DisguiseTrait>()
+                                       .First().DisguiseForm;
+          if (CyclopediaEntryExists(form))
+            pq.Enqueue(loc, distance);
+        }
+        else if (GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Any())
+        {
+          pq.Enqueue(loc, distance);
         }
         else if (GS.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
+          pq.Enqueue(loc, distance);
         }
         else if (GS.ObjDb.EnvironmentsAt(loc).Count > 0)
         {
-          pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
+          pq.Enqueue(loc, distance);
         }
         else
         {
@@ -155,7 +163,7 @@ class Examiner : Inputer
             case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
             case TileType.MistyPortal:
-              pq.Enqueue(loc, Distance(GS.Player.Loc, loc));
+              pq.Enqueue(loc, distance);
               break;
           }
         }
