@@ -881,9 +881,8 @@ class MonsterFactory
   // need to be placed and configred specifcally anyhow.
   public static Actor Mimic()
   {
-    //Glyph doorGlyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
-    Glyph doorGlyph = new('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
-
+    Glyph doorGlyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+    
     Mob mimic = new() { Name = "mimic", Recovery = 1.0, Glyph = doorGlyph };
     mimic.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
 
@@ -902,7 +901,7 @@ class MonsterFactory
     {
       Disguise = doorGlyph,
       TrueForm = new Glyph('m', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
-      DisguiseForm = "torch",
+      DisguiseForm = "closed door",
       Disguised = true
     };
     mimic.Traits.Add(disguise);

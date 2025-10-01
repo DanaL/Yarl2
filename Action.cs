@@ -1657,15 +1657,27 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
     int dc;
     foreach (Loc loc in sqsToSearch)
     {
+      if (gs.ObjDb.Occupant(loc) is Actor actor && actor.IsDisguised())
+      {
+        dc = rogue ? 13 : 15;
+        if (gs.Rng.Next(1, 21) >+ dc)
+        {
+          var disguise = actor.Traits.OfType<DisguiseTrait>().First();
+          ui.AlertPlayer($"Wait! That {disguise.DisguiseForm} is actually {actor.Name.IndefArticle()}!");
+          disguise.Disguised = false;
+          actor.Glyph = disguise.TrueForm;
+        }
+      }
+      
       // I'm not going to roll to find secret items. I'm not sure I should
       // even bother for traps/secret doors
       foreach (Item item in gs.ObjDb.ItemsAt(loc))
       {
         if (item.HasTrait<HiddenTrait>())
         {
-          item.Traits = [..item.Traits.Where(t => t is not HiddenTrait)];
+          item.Traits = [.. item.Traits.Where(t => t is not HiddenTrait)];
           ui.AlertPlayer($"You find {item.FullName.IndefArticle()}!");
-        }        
+        }
       }
 
       Tile tile = gs.TileAt(loc);
@@ -1745,8 +1757,6 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
           }
           
           break;
-        // Eventually I probably want to add searching for gargoyles, mimics, 
-        // invisible monsters, etc
       }      
     }
 
