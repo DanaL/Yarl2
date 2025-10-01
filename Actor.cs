@@ -521,7 +521,7 @@ abstract class Actor : GameObj, IZLevel
         invisible = true;
     }
 
-    if (invisible && !(playerSeeInvisible || playerSeeInvisible))
+    if (invisible && !(playerSeeInvisible || playerTelepathic))
       return null;
 
     return glyph;

@@ -1165,47 +1165,52 @@ abstract class UserInterface
       // If the player has telepathy, find any nearby monsters and display them
       // plus the squares adjacent to them
       int range = int.Max(ViewHeight / 2, ViewWidth / 2);
+
+      // We need to track which mobs we've already drawn otherwise we could
+      // display a mimic/disguised monster via telepathy and then overwrite
+      // them as an item if they are adj to another monster seen by teleapthy
+      HashSet<Loc> mobsSeen = [];
       foreach (Actor mob in gs.ObjDb.ActorsWithin(gs.Player.Loc, range))
       {
-        if (mob == gs.Player)
+        if (mob == gs.Player || mob.HasTrait<BrainlessTrait>())
           continue;
 
-        bool brainless = false;
-        Glyph mobGlyph = mob.Glyph;
-        foreach (Trait t in mob.Traits)
-        {
-          if (t is BrainlessTrait)
-          {
-            brainless = true;
-            break;
-          }
-          else if (t is DisguiseTrait disguise)
-            mobGlyph = disguise.TrueForm;
-        }
-        
-        if (brainless)
-          continue;
-
-        List<Loc> viewed = [mob.Loc];
+        List<Loc> viewed = [.. Util.Adj8Locs(mob.Loc).Where(adj => !gs.LastPlayerFoV.Contains(adj))];
         if (!gs.LastPlayerFoV.Contains(mob.Loc))
-          viewed.AddRange(Util.Adj8Locs(mob.Loc));
+          viewed.Add(mob.Loc);
 
         foreach (Loc loc in viewed)
         {
-          if (gs.LastPlayerFoV.Contains(loc) && !mob.HasTrait<InvisibleTrait>())
+          if (mobsSeen.Contains(loc))
             continue;
 
-          int screenRow = loc.Row - rowOffset;
-          int screenCol = loc.Col - colOffset;
-          if (screenRow >= 0 && screenRow < ViewHeight && screenCol >= 0 && screenCol < ViewWidth)
+          Glyph g;
+          if (gs.ObjDb.Occupant(loc) is Actor actor)
           {
-            Glyph g = loc == mob.Loc ? mobGlyph : gs.ObjDb.ItemGlyphAt(loc);
-            if (g == GameObjectDB.EMPTY)
-              g = Util.TileToGlyph(gs.TileAt(loc));
-
-            Sqr sqr = new(Colours.LIGHT_GREY, Colours.FADED_PURPLE, g.Ch);
-            SqsOnScreen[screenRow, screenCol] = sqr;
+            g = gs.Player.GlyphSeen(actor, true, playerSeeInvisible) ?? GameObjectDB.EMPTY;
+            mobsSeen.Add(loc);
           }
+          else
+          {
+            g = gs.ObjDb.ItemGlyphAt(loc);
+          }
+
+          if (g == GameObjectDB.EMPTY)
+            g = Util.TileToGlyph(gs.TileAt(loc));
+
+          SetTelepathySqr(loc.Row, loc.Col, g.Ch);
+        }
+      }
+
+      void SetTelepathySqr(int row, int col, char ch)
+      {
+        int screenRow = row - rowOffset;
+        int screenCol = col - colOffset;
+
+        if (screenRow >= 0 && screenRow < ViewHeight && screenCol >= 0 && screenCol < ViewWidth)
+        {
+          Sqr sqr = new(Colours.LIGHT_GREY, Colours.FADED_PURPLE, ch);
+          SqsOnScreen[screenRow, screenCol] = sqr;
         }
       }
     }
