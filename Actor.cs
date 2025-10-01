@@ -88,6 +88,17 @@ abstract class Actor : GameObj, IZLevel
 
   public void QueueAction(Action action) => ActionQ.Enqueue(action);
 
+  public bool IsDisguised()
+  {
+    foreach (Trait t in Traits)
+    {
+      if (t is DisguiseTrait disguise && disguise.Disguised)
+        return true;
+    }
+    
+    return false;
+  }
+
   public int GetMovementNoise()
   {
     int baseNoise = 9;

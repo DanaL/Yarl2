@@ -282,22 +282,29 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
         }
       }
       else if (occ is not null && !Battle.PlayerWillAttack(occ))
-      {        
+      {
         if (GameState.Options.BumpToChat)
         {
-          ChatAction chat = new (GameState, GameState.Player) { Loc = Loc };
+          ChatAction chat = new(GameState, GameState.Player) { Loc = Loc };
           GameState.Player.QueueAction(chat);
         }
         else
         {
           ui.AlertPlayer($"You don't want to attack {occ.FullName}!");
         }
-        
+
         return 0.0;
       }
       else if (occ is not null && Actor.HasTrait<FrightenedTrait>())
       {
         ui.AlertPlayer("You are too frightened to attack!");
+      }
+      else if (occ is not null && occ.IsDisguised() && GameState.LastPlayerFoV.Contains(occ.Loc))
+      {
+        DisguiseTrait dt = occ.Traits.OfType<DisguiseTrait>().First();
+        ui.AlertPlayer($"Wait! That {dt.DisguiseForm} is actually {occ.Name.IndefArticle()}!");
+        occ.Glyph = dt.TrueForm;
+        dt.Disguised = false;
       }
       else
       {
