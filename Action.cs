@@ -54,6 +54,14 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
   {
     base.Execute();
 
+    if (Actor!.IsDisguised())
+    {
+      var disguise = Actor.Traits.OfType<DisguiseTrait>().First();
+      GameState!.UIRef().AlertPlayer($"Wait! That {disguise.DisguiseForm} is actually {actor.Name.IndefArticle()}!", GameState, Actor.Loc);
+      disguise.Disguised = false;
+      Actor.Glyph = disguise.TrueForm;
+    }
+
     double result;
     if (GameState!.ObjDb.Occupant(Target) is Actor target)
     {
@@ -218,6 +226,60 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   }
 
   public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
+}
+
+class AssumeDisguiseAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    string disguiseForm;
+    Glyph glyph;
+    switch (GameState!.Rng.Next(8))
+    {
+      case 0:
+        disguiseForm = "chainmail";        
+        glyph = new Glyph(']', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false);
+        break;
+      case 1:
+        disguiseForm = "torch";
+        glyph = new Glyph('(', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+        break;
+      case 2:
+        disguiseForm = "potion of healing";
+        glyph = new Glyph('!', Colours.LIGHT_BLUE, Colours.BLUE, Colours.BLACK, false);
+        break;
+      case 3:
+        disguiseForm = "scroll of blink";
+        glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, false);
+        break;
+      case 4:
+        disguiseForm = "scroll of magic mapping";
+        glyph = new Glyph('?', Colours.WHITE, Colours.GREY, Colours.BLACK, false);
+        break;
+      case 5:
+        disguiseForm = "flask of booze";
+        glyph = new Glyph('!', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
+        break;
+      case 6:
+        disguiseForm = "claymore";
+        glyph = new Glyph(')', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false);
+        break;
+      default:
+        disguiseForm = "zorkmid";
+        glyph = new Glyph('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false);
+        break;
+    }
+
+    DisguiseTrait disguise = Actor!.Traits.OfType<DisguiseTrait>().First();
+    disguise.Disguised = true;
+    disguise.DisguiseForm = disguiseForm;
+    disguise.Disguise = glyph;
+    Actor.Glyph = glyph;
+
+    return 1.0;
+  }
 }
 
 class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : Action(gs, actor)
@@ -3668,8 +3730,8 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
       else if (actor.IsDisguised())
       {
         DisguiseTrait dt = actor.Traits.OfType<DisguiseTrait>().First();
-        name = dt.DisguiseForm;
-        if (_cyclopedia.TryGetValue(name, out var v))
+        name = dt.DisguiseForm.IndefArticle().Capitalize();
+        if (_cyclopedia.TryGetValue(dt.DisguiseForm, out var v))
           desc = v.Text;
       }
       else if (actor.HasTrait<VillagerTrait>())

@@ -175,7 +175,8 @@ class Selector(List<BehaviourNode> nodes) : BehaviourNode
   {
     while (Curr < Children.Count)
     {
-      PlanStatus status = Children[Curr].Execute(mob, gs);
+      BehaviourNode node = Children[Curr];
+      PlanStatus status = node.Execute(mob, gs);
       if (status == PlanStatus.Running)
       {
         return status;
@@ -852,6 +853,60 @@ class IsImmobilized : BehaviourNode
         return PlanStatus.Success;
       else if (t is SleepingTrait)
         return PlanStatus.Success;
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
+class IsDisguised : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (mob.Traits.OfType<DisguiseTrait>().FirstOrDefault() is DisguiseTrait dt && dt.Disguised)
+      return PlanStatus.Success;
+
+    return PlanStatus.Failure;
+  }
+}
+
+class AssumeDisguise : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    mob.ExecuteAction(new AssumeDisguiseAction(gs, mob));
+
+    return PlanStatus.Success;
+  }
+}
+
+class PickWithOdds : BehaviourNode
+{
+  List<(int, BehaviourNode)> Nodes { get; set; }
+  int Max { get; set; }
+
+  public PickWithOdds(List<(BehaviourNode, int)> nodes)
+  {
+    Nodes = [];
+    int x = 0;
+
+    foreach (var (node, n) in nodes)
+    {
+      x += n;
+      Nodes.Add((x, node));
+    }
+
+    Max = x;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    int x = gs.Rng.Next(1, Max + 1);
+
+    foreach ((int n, BehaviourNode node) in Nodes)
+    {
+      if (x <= n)
+        return node.Execute(mob, gs);
     }
 
     return PlanStatus.Failure;
@@ -1671,6 +1726,43 @@ class Planner
     return plan;
   }
 
+  static BehaviourNode CreateMimicPlan(Mob mimic)
+  {    
+    List<BehaviourNode> actions = [];
+    List<BehaviourNode> passive = [];
+    foreach (Power p in mimic.Powers)
+    {
+      // Ugh a few of the powers have slightly more complicated ways of
+      // calculating if they are available to use so I am doing them as 
+      // subclasses of UsePower. If I get too many of them and this gets gross,
+      // I'll have to come up with something cleaner. An actual factory or such?
+      BehaviourNode up = p.Name switch
+      {
+        "Gulp" => new GulpPower(p),
+        "Crush" => new CrushPower(p),
+        "HealAllies" => new HealAlliesPower(p),
+        _ => new UsePower(p)
+      };
+
+      actions.Add(up);
+      if (p.Type == PowerType.Passive)
+        passive.Add(up);
+    }
+
+    List<BehaviourNode> plan = [
+      new Sequence([new IsImmobilized(), new PassTurn()]) { Label = "immobilized" },
+      new Sequence([new CheckMonsterAttitude(Mob.INACTIVE), new PassTurn()]) { Label = "inactive" },
+      new Sequence([new IsFrightened(), new TryToEscape()]) { Label = "scared" }
+    ];
+
+    plan.Add(new Sequence([new IsDisguised(), new Selector([ new Selector(actions), new PassTurn()])]) { Label = "disguised" });
+    plan.Add(new Selector([new Selector(actions), 
+      new PickWithOdds([(new ChaseTarget(), 5), (new AssumeDisguise(), 2)]), 
+      new PassTurn()]) { Label = "revealed" });
+
+    return new Selector(plan);
+  }
+
   static BehaviourNode CreateMonsterPlan(Mob mob)
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
@@ -1700,7 +1792,7 @@ class Planner
 
     List<BehaviourNode> plan = [];
 
-    // A paralized monster will just pass its turn
+    // A paralyzed monster will just pass its turn
     plan.Add(new Sequence([new IsImmobilized(), new PassTurn()]) { Label = "immobilized" });
 
     // As will an inactive one
@@ -1908,6 +2000,7 @@ class Planner
     "MayorPlan" => CreateMayorPlan(mob, gs),
     "SmithPlan" => CreateSmithPlan(mob, gs),
     "MonsterPlan" => CreateMonsterPlan(mob),
+    "MimicPlan" => CreateMimicPlan(mob),
     "PrisonerPlan" => CreatePrisonerPlan(mob),
     "PriestPlan" => WanderInHome(gs.Town.Shrine, gs),
     "GrocerPlan" => WanderInHome(gs.Town.Market, gs),

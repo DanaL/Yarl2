@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Xml.Linq;
-
 namespace Yarl2;
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -913,13 +911,14 @@ class MonsterFactory
     Glyph doorGlyph = new('+', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false);
     
     Mob mimic = new() { Name = "mimic", Recovery = 1.0, Glyph = doorGlyph };
-    mimic.Traits.Add(new BehaviourTreeTrait() { Plan = "MonsterPlan" });
+    mimic.Traits.Add(new BehaviourTreeTrait() { Plan = "MimicPlan" });
 
     mimic.Stats.Add(Attribute.HP, new Stat(40));
     mimic.Stats.Add(Attribute.AttackBonus, new Stat(3));
     mimic.Stats.Add(Attribute.AC, new Stat(15));
     mimic.Stats.Add(Attribute.Strength, new Stat(1));
     mimic.Stats.Add(Attribute.Dexterity, new Stat(0));
+    mimic.Stats.Add(Attribute.MobAttitude, new Stat(Mob.INDIFFERENT));
 
     mimic.Powers.Add(Power.FromText("MeleeBlunt#1#1#6#2#0#0#Attack"));
     mimic.Traits.Add(new GrapplerTrait() { DC = 18 });
