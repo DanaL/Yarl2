@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Xml.Linq;
+
 namespace Yarl2;
 
 // Actor should really be an abstract class but abstract classes seemed
@@ -77,7 +79,26 @@ abstract class Actor : GameObj, IZLevel
     return radius;
   }
 
-  public override string FullName => HasTrait<NamedTrait>() ? Name.Capitalize() : Name.DefArticle();
+  public override string FullName
+  {
+    get 
+    { 
+      bool named = false;
+      DisguiseTrait? disguised = null;
+
+      foreach (Trait t in Traits)
+      {
+        if (t is NamedTrait)
+          named = true;
+        else if (t is DisguiseTrait dt && dt.Disguised)
+          disguised = dt;
+      }
+
+      string txt = disguised is null ? Name : disguised.DisguiseForm;
+
+      return named ? txt.Capitalize() : txt.DefArticle();
+     }
+  }
 
   public virtual int TotalMissileAttackModifier(Item weapon) => 0;
   public virtual int TotalSpellAttackModifier() => 0;

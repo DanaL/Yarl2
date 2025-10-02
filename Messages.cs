@@ -81,10 +81,19 @@ class MsgFactory
     }
     else if (gobj is Actor actor)
     {
-      if (actor.VisibleTo(player))
+      if (actor.IsDisguised())
+      {
+        DisguiseTrait dt = actor.Traits.OfType<DisguiseTrait>().First();
+        sb.Append(noArticle ? dt.DisguiseForm : dt.DisguiseForm.DefArticle());
+      }
+      else if (actor.VisibleTo(player))
+      {
         sb.Append(noArticle ? gobj.Name : gobj.FullName);
+      }
       else
+      {
         sb.Append("something");
+      }
     }
     else
     {
@@ -129,7 +138,7 @@ class MsgFactory
       return $"You hear a door {verb}.";
   }
 
-  public static string HitMessage(Actor attacker, Actor target, string verb, GameState gs)
+  public static string HitMessage(GameObj attacker, Actor target, string verb, GameState gs)
   {
     bool canSeeTarget = Util.AwareOfActor(target, gs);
     
