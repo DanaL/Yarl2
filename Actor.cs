@@ -267,7 +267,7 @@ abstract class Actor : GameObj, IZLevel
     total += bonusDamage;
     total = (int)(total * scale);
 
-    if (fireDamage && Name == "mud golem" && this is not Player)
+    if (total > 0 && fireDamage && Name == "mud golem" && this is not Player)
     {
       gs.ObjDb.RemoveActor(this);
       Actor clayGolem = MonsterFactory.Get("clay golem", gs.ObjDb, gs.Rng);
@@ -276,7 +276,7 @@ abstract class Actor : GameObj, IZLevel
       return (999, "", 0);
     }
 
-    if (IsDisguised())
+    if (total > 0 && IsDisguised())
     {
       DisguiseTrait dt = Traits.OfType<DisguiseTrait>().First();
       gs.UIRef().AlertPlayer($"Wait! That {dt.DisguiseForm} is actually {Name.IndefArticle()}!", gs, Loc);
