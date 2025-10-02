@@ -227,23 +227,6 @@ abstract class Actor : GameObj, IZLevel
       }
     }
 
-    if (Name == "mud golem" && this is not Player)
-    {
-      gs.ObjDb.RemoveActor(this);
-      Actor clayGolem = MonsterFactory.Get("clay golem", gs.ObjDb, gs.Rng);
-      gs.ObjDb.AddNewActor(clayGolem, Loc);
-      gs.UIRef().AlertPlayer("The mud golem becomes fully baked!", gs, Loc);
-      return (999, "", 0);
-    }
-
-    if (IsDisguised())
-    {
-      DisguiseTrait dt = Traits.OfType<DisguiseTrait>().First();
-      gs.UIRef().AlertPlayer($"Wait! That {dt.DisguiseForm} is actually {Name.IndefArticle()}!", gs, Loc);
-      Glyph = dt.TrueForm;
-      dt.Disguised = false;
-    }
-    
     // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
     int total = 0;
     bool fireDamage = false;
@@ -283,6 +266,23 @@ abstract class Actor : GameObj, IZLevel
     }
     total += bonusDamage;
     total = (int)(total * scale);
+
+    if (fireDamage && Name == "mud golem" && this is not Player)
+    {
+      gs.ObjDb.RemoveActor(this);
+      Actor clayGolem = MonsterFactory.Get("clay golem", gs.ObjDb, gs.Rng);
+      gs.ObjDb.AddNewActor(clayGolem, Loc);
+      gs.UIRef().AlertPlayer("The mud golem becomes fully baked!", gs, Loc);
+      return (999, "", 0);
+    }
+
+    if (IsDisguised())
+    {
+      DisguiseTrait dt = Traits.OfType<DisguiseTrait>().First();
+      gs.UIRef().AlertPlayer($"Wait! That {dt.DisguiseForm} is actually {Name.IndefArticle()}!", gs, Loc);
+      Glyph = dt.TrueForm;
+      dt.Disguised = false;
+    }
 
     if (HasTrait<SilverAllergyTrait>() && src is Item weapon && weapon.MetalType() == Metals.Silver)
     {
