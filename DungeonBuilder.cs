@@ -259,35 +259,21 @@ abstract class DungeonBuilder
     }
   }
 
-  static List<(int, int)> FindHallWayFloors(Map map)
+  // Turn some doors into secret doors and add perhaps add soom secret  
+  // door in hallways
+  protected static void AddSecretDoors(Map map, Rng rng)
   {
-    List<(int, int)> floors = [];
+    List<(int, int)> candidates = [];
     for (int r = 0; r < map.Height; r++)
     {
       for (int c = 0; c < map.Width; c++)
       {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        TileType tt = map.TileAt(r, c).Type;
+        if ((tt == TileType.ClosedDoor || tt == TileType.LockedDoor) && rng.Next(10) == 0)
         {
-          int adjFloors = Util.Adj8Sqs(r, c)
-                              .Select(map.TileAt)
-                              .Where(t => t.Type == TileType.DungeonFloor).Count();
-          if (adjFloors == 2)
-            floors.Add((r, c));
+          map.SetTile(r, c, TileFactory.Get(TileType.SecretDoor));
         }
-      }
-    }
-
-    return floors;
-  }
-
-  protected static void PutSecretDoorsInHallways(Map map, Rng rng)
-  {
-    List<(int, int)> candidates = FindHallWayFloors(map);
-    for (int r = 0; r < map.Height; r++)
-    {
-      for (int c = 0; c < map.Width; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
+        else if (tt == TileType.DungeonFloor)
         {
           int adjFloors = Util.Adj8Sqs(r, c)
                               .Select(map.TileAt)
@@ -298,10 +284,10 @@ abstract class DungeonBuilder
       }
     }
 
-    if (candidates.Count > 0)
+    if (rng.Next(2) == 0 && candidates.Count > 0)
     {
-      int numtoAdd = rng.Next(1, 4);
-      for (int j = 0; j < numtoAdd; j++)
+      int numToAdd = rng.Next(1, 4);
+      for (int j = 0; j < numToAdd; j++)
       {
         (int, int) sq = candidates[rng.Next(candidates.Count)];
         map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));

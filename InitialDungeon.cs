@@ -34,9 +34,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       levels[levelNum] = mapper.DrawLevel(WIDTH, HEIGHT);
       dungeon.AddMap(levels[levelNum]);
 
-      // Sometimes add a secret door or two in hallways
-      if (rng.Next(2) == 0)
-        PutSecretDoorsInHallways(levels[levelNum], rng);
+      AddSecretDoors(levels[levelNum], rng);
     }
 
     AddRooms(levels, objDb, factDb, rng);
