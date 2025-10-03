@@ -1,0 +1,24 @@
+(cond ((= DIALOGUE_STATE 1)
+      (sell-menu))
+
+  (else
+    (
+      (cond
+        ((= MET_PLAYER false)
+          ((say "Well met! I buy items from adventurers and sell them as collectibles in the big cities. Much safer than adventuring myself!")
+            (set MET_PLAYER true)
+          )
+        )
+        (else
+          (say (pick (
+            "Buy low, sell high -- that's the real secret to fame and fortune"
+            "Do you have anything new to show me?"
+            "Ah, my favourite supplier! How are your adventures going?"
+          )))
+        )
+      )
+
+      (option "Show #NPC_NAME what you have to sell." (set DIALOGUE_STATE 1))
+    )
+  )
+)

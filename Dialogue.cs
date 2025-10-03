@@ -24,7 +24,7 @@ enum TokenType
   OPTION, SPEND, END, 
   BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
-  SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST,
+  SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
   EOF
 }
 
@@ -134,6 +134,7 @@ class ScriptScanner(string src)
       "trickster-blessing" => TokenType.GRANT_TRICKSTER_BLESSSING,
       "winter-blessing" => TokenType.GRANT_WINTER_BLESSING,
       "shop-menu" => TokenType.SHOP_MENU,
+      "sell-menu" => TokenType.SELL_MENU,
       "shop-selection" => TokenType.SHOP_SELECTION,
       "dragon-cult-quest" => TokenType.DRAGON_CULT_QUEST,
       _ => TokenType.IDENTIFIER
@@ -239,6 +240,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
       TokenType.GRANT_WINTER_BLESSING => GrantWinterBlessing(),
       TokenType.SHOP_MENU => ShopMenuExpr(),
+      TokenType.SELL_MENU => SellMenuExpr(),
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
@@ -316,6 +318,14 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptShopMenu();
+  } 
+
+  ScriptSellMenu SellMenuExpr()
+  {
+    Consume(TokenType.SELL_MENU);
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptSellMenu();
   } 
 
   ScriptBlessings BlessingsExpr()
@@ -685,8 +695,9 @@ class ScriptOption(string text, ScriptExpr expr) : ScriptExpr
   public ScriptExpr Expr { get; set; } = expr;  
 }
 
-class ScriptBlessings : ScriptExpr {}
-class ScriptShopMenu : ScriptExpr {}
+class ScriptBlessings : ScriptExpr { }
+class ScriptShopMenu : ScriptExpr { }
+class ScriptSellMenu : ScriptExpr { }
 class ScriptShopSelection(char opt) : ScriptExpr 
 {
   public char Choice { get; set; } = opt;
@@ -974,7 +985,7 @@ class DialogueInterpreter
     else if (Expr is ScriptGive gift)
     {
       EvalGive(gift, mob, gs);
-    }    
+    }
     else if (Expr is ScriptSet set)
     {
       EvalSet(set, mob, gs);
@@ -995,6 +1006,10 @@ class DialogueInterpreter
     else if (Expr is ScriptShopMenu)
     {
       EvalShopMenu(mob, gs);
+    }
+    else if (Expr is ScriptSellMenu)
+    {
+      EvalSellMenu(mob, gs);
     }
     else if (Expr is ScriptShopSelection selection)
     {
@@ -1399,6 +1414,52 @@ class DialogueInterpreter
   {
     int purse = gs.Player.Inventory.Zorkmids;
     gs.Player.Inventory.Zorkmids = int.Max(0, purse - amount);
+  }
+
+  void EvalSellMenu(Actor mob, GameState gs)
+  {
+    Sb.Append($"Let's see what you're willing to part ways with! My budget is [YELLOW $]{mob.Inventory.Zorkmids}.");
+
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+
+    int bill = 0;
+    char opt = 'a';
+    foreach (Item item in gs.Player.Inventory.Items())
+    {
+      if (item.Equipped)
+        continue;
+      if (item.Name == "torch" || item.Name == "skull" || item.Name == "bone")
+        continue;
+
+      string s = $"{item.FullName.IndefArticle()} - [YELLOW $]{item.Value / 2}";
+      if (selections.Items.Contains(opt - 'a')) 
+      {
+        s += " [GREEN *]";
+        bill += item.Value / 2;
+      }
+      Options.Add(new DialogueOption(s, opt, new ScriptShopSelection(opt)));
+      ++opt;
+    }
+
+    if (Options.Count == 0)
+    {
+      Sb.Append("\n\nHmm you don't have anything I'm interested in at the moment.");
+    }
+
+    mob.Stats[Attribute.ShopInvoice] = new Stat(bill);
+    
+    if (bill > 0)
+    {
+      Footer.Append("\nI would give you: [YELLOW $]");
+      Footer.Append(bill);
+
+      if (bill <= mob.Inventory.Zorkmids)
+        Footer.Append("\n\n(Enter to accept)");
+      else
+        Footer.Append("\n\n[BRIGHTRED That's more than I can afford, I'm afraid!]");
+    }
   }
 
   void EvalShopMenu(Actor mob, GameState gs)

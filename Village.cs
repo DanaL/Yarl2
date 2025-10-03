@@ -333,13 +333,41 @@ class Village
     return veteran;
   }
 
+  static Mob GeneratePeddlar(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
+  {
+    Mob peddler = BaseVillager(ng, rng);
+    peddler.Traits.Add(new DialogueScriptTrait() { ScriptFile = "peddler.txt" });
+
+    peddler.SetBehaviour(new PeddlerBehaviour());
+    peddler.Traits.Add(new BehaviourTreeTrait() { Plan = "BarHoundPlan" });
+    peddler.Traits.Add(new NumberListTrait() { Name = "ShopSelections", Items = [] });
+
+    List<Loc> tavernSqs = [.. town.Tavern];
+    tavernSqs.Shuffle(rng);
+    foreach (Loc loc in tavernSqs)
+    {
+      Tile tile = map.TileAt(loc.Row, loc.Col);
+      if ((tile.Type == TileType.WoodFloor || tile.Type == TileType.StoneFloor) && !objDb.Occupied(loc))
+      {
+        peddler.Loc = loc;
+        break;
+      }
+    }
+
+    peddler.Inventory.Zorkmids = rng.Next(50, 101);
+    peddler.Stats[Attribute.ShopMenu] = new Stat(0);
+    peddler.Stats[Attribute.DialogueState] = new Stat(0);
+
+    return peddler;
+  }
+
   static Mob GenerateVillager1(Map map, Town town, NameGenerator ng, Rng rng)
   {
     Mob villager = BaseVillager(ng, rng);
     villager.Traits.Add(new DialogueScriptTrait() { ScriptFile = "villager1.txt" });
     villager.Traits.Add(new BehaviourTreeTrait() { Plan = "BasicVillagerPlan" });
 
-    int homeID  = PickUnoccuppiedCottage(town, rng);
+    int homeID = PickUnoccuppiedCottage(town, rng);
     villager.Loc = LocForVillager(map, town.Homes[homeID], rng);
     villager.Stats.Add(Attribute.HomeID, new Stat(homeID));
     villager.SetBehaviour(new NPCBehaviour());
@@ -530,6 +558,9 @@ class Village
 
     Mob vet = GenerateVeteran(map, town, ng, objDb, rng);
     objDb.AddNewActor(vet, vet.Loc);
+
+    Mob peddler = GeneratePeddlar(map, town, ng, objDb, rng);
+    objDb.AddNewActor(peddler, peddler.Loc);
 
     GenerateWitches(map, town, objDb, factDb, rng);
 

@@ -548,6 +548,7 @@ class GameObjectDB
   {
     if (_itemLocs.TryGetValue(loc, out var value))
       _itemLocs[loc] = [.. value.Where(i => i.ID != item.ID)];
+      
     Objs.Remove(item.ID);
 
     if (_itemLocs.TryGetValue(item.Loc, out var items))
