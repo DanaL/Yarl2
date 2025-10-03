@@ -80,8 +80,8 @@ class MonsterBehaviour : IBehaviour, IDialoguer
 
     var (txt, footer) = dialogue.Run(scriptFile, mob, gs);
     Options = dialogue.Options;
-    List<(string, char)> opts = [..Options.Select(o => (o.Text, o.Ch))];
-    
+    List<(string, char)> opts = [.. Options.Select(o => (o.Text, o.Ch))];
+
     return (txt, footer, opts);
   }
 
@@ -98,30 +98,7 @@ class MonsterBehaviour : IBehaviour, IDialoguer
     }
   }
 
-  public void InitDialogue(Mob actor, GameState gs) {}
-}
-    
-// Disguised monsters behave differently while they are disguised, but then act like a normal monster
-// so it just seemed simple (or easy...) to extend MonsterBevaviour
-class DisguisedMonsterBehaviour : MonsterBehaviour
-{
-  //public override Action CalcAction(Mob actor, GameState gs)
-  //{
-  //  bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
-  //  if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
-  //    return new PassAction();
-
-  //  if (disguised)
-  //  {
-  //    var disguise = actor.Traits.OfType<DisguiseTrait>().First();
-  //    string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
-  //    gs.UIRef().AlertPlayer(txt);
-  //    actor.Glyph = disguise.TrueForm;
-  //    actor.Stats[Attribute.InDisguise].SetMax(0);
-  //  }
-
-  //  return base.CalcAction(actor, gs);
-  //}
+  public void InitDialogue(Mob actor, GameState gs) { }
 }
 
 class VillagePupBehaviour : NPCBehaviour
