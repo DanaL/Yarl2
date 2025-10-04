@@ -15,12 +15,12 @@ using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2;
 
-internal class BLUserInferface : UserInterface, IDisposable
+internal class BLUserInterface : UserInterface, IDisposable
 {
   readonly Dictionary<int, char> KeyToChar = [];
   Dictionary<Colour, Color> _colours = [];
 
-  public BLUserInferface(string windowTitle, Options opt) : base(opt)
+  public BLUserInterface(string windowTitle, Options opt) : base(opt)
   {
     FontSize = opt.FontSize;
     SetUpKeyToCharMap();
@@ -87,7 +87,7 @@ internal class BLUserInferface : UserInterface, IDisposable
   protected override GameEvent PollForEvent(bool pause = true)
   {
     if (pause)
-    Thread.Sleep(2);
+      Thread.Sleep(2);
 
     if (Terminal.HasInput())
     {
