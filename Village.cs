@@ -45,20 +45,25 @@ class Village
     return new Loc(0, 0, sq.Item1, sq.Item2);
   }
 
-  static (Colour, Colour) VillagerColour(Rng rng)
+  static (Colour, Colour) VillagerColour(Rng rng, HashSet<Colour>? skipColours = null)
   {
-    var roll = rng.Next(8);
-    return roll switch
+    (Colour, Colour)[] colours = [
+      (Colours.WHITE, Colours.LIGHT_GREY), (Colours.YELLOW, Colours.YELLOW_ORANGE),
+      (Colours.YELLOW_ORANGE, Colours.TORCH_YELLOW), (Colours.BRIGHT_RED, Colours.DULL_RED),
+      (Colours.GREEN, Colours.DARK_GREEN), (Colours.LIGHT_BLUE, Colours.BLUE),
+      (Colours.PINK, Colours.DULL_RED), (Colours.LIGHT_BROWN, Colours.BROWN),
+      (Colours.CREAM, Colours.LIGHT_GREY), (Colours.LIGHT_PURPLE, Colours.PURPLE),
+      (Colours.ICE_BLUE, Colours.BLUE)
+    ];
+
+    if (skipColours is not null)
     {
-      0 => (Colours.WHITE, Colours.LIGHT_GREY),
-      1 => (Colours.YELLOW, Colours.YELLOW_ORANGE),
-      2 => (Colours.YELLOW_ORANGE, Colours.TORCH_YELLOW),
-      3 => (Colours.BRIGHT_RED, Colours.DULL_RED),
-      4 => (Colours.GREEN, Colours.DARK_GREEN),
-      5 => (Colours.LIGHT_BLUE, Colours.BLUE),
-      6 => (Colours.PINK, Colours.DULL_RED),
-      _ => (Colours.LIGHT_BROWN, Colours.BROWN)
-    };
+      colours = [.. colours.Where(c => !skipColours.Contains(c.Item1))];
+    }
+
+    colours.Shuffle(rng);
+
+    return colours[rng.Next(colours.Length)];
   }
 
   static string VillagerAppearance(Rng rng)
@@ -94,9 +99,9 @@ class Village
     return appearance.ToString();
   }
 
-  static Mob BaseVillager(NameGenerator ng, Rng rng)
+  static Mob BaseVillager(NameGenerator ng, Rng rng, HashSet<Colour>? skipColours = null)
   {
-    var (lit, unlit) = VillagerColour(rng);
+    var (lit, unlit) = VillagerColour(rng, skipColours);
     Mob mob = new()
     {
       Name = ng.GenerateName(rng.Next(5, 9)),
@@ -309,9 +314,9 @@ class Village
     return mayor;
   }
 
-  static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
+  static Mob GenerateVeteran(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng, HashSet<Colour> skipColours)
   {
-    Mob veteran = BaseVillager(ng, rng);
+    Mob veteran = BaseVillager(ng, rng, skipColours);
     veteran.Traits.Add(new DialogueScriptTrait() { ScriptFile = "veteran.txt" });
 
     veteran.SetBehaviour(new NPCBehaviour());
@@ -333,9 +338,9 @@ class Village
     return veteran;
   }
 
-  static Mob GeneratePeddlar(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng)
+  static Mob GeneratePeddlar(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng, HashSet<Colour> skipColours)
   {
-    Mob peddler = BaseVillager(ng, rng);
+    Mob peddler = BaseVillager(ng, rng, skipColours);
     peddler.Traits.Add(new DialogueScriptTrait() { ScriptFile = "peddler.txt" });
 
     peddler.SetBehaviour(new PeddlerBehaviour());
@@ -543,9 +548,14 @@ class Village
     objDb.AddNewActor(grocer, grocer.Loc);
     factDb.Add(new SimpleFact() { Name = "GrocerId", Value = grocer.ID.ToString() });
 
+    // For QoL, I wanted to make sure the NPCs in the bar are generated with
+    // different colours 
+    HashSet<Colour> barflyColours = []; 
+
     Mob innkeeper = GenerateInnkeeper(map, town, ng, objDb, rng);
     objDb.AddNewActor(innkeeper, innkeeper.Loc);
     factDb.Add(new SimpleFact() { Name = "TavernName", Value = NameGenerator.GenerateTavernName(rng) });
+    barflyColours.Add(innkeeper.Glyph.Lit);
 
     Mob pup = GeneratePuppy(map, town, objDb, factDb, rng);
     objDb.AddNewActor(pup, pup.Loc);
@@ -556,10 +566,10 @@ class Village
     Mob v1 = GenerateVillager1(map, town, ng, rng);
     objDb.AddNewActor(v1, v1.Loc);
 
-    Mob vet = GenerateVeteran(map, town, ng, objDb, rng);
+    Mob vet = GenerateVeteran(map, town, ng, objDb, rng, barflyColours);
     objDb.AddNewActor(vet, vet.Loc);
 
-    Mob peddler = GeneratePeddlar(map, town, ng, objDb, rng);
+    Mob peddler = GeneratePeddlar(map, town, ng, objDb, rng, barflyColours);
     objDb.AddNewActor(peddler, peddler.Loc);
 
     GenerateWitches(map, town, objDb, factDb, rng);

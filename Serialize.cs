@@ -716,7 +716,7 @@ class GameObjDBSave
   static Mob InflateMob(string txt, GameObjectDB objDb)
   {
     var fields = txt.Split(Constants.SEPARATOR);
-    var mob = new Mob()
+    Mob mob = new()
     {
       ID = ulong.Parse(fields[2]),
       Name = fields[1],
