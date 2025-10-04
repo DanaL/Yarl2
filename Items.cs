@@ -1119,6 +1119,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public virtual void RestoreFromText(string txt)
   {
+    if (txt == "")
+      return;
+      
     foreach (var i in txt.Split(','))
     {
       char slot = i[0];

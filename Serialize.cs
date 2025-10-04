@@ -695,7 +695,7 @@ class GameObjDBSave
     p.Stats = StatsFromText(fields[7]);
     p.Recovery = Util.ToDouble(fields[9]);
 
-    if (fields[12] != "")
+    if (fields[12] != "" || fields[10] != "")
     {
       p.Inventory = new Inventory(p.ID, objDb)
       {
@@ -745,7 +745,7 @@ class GameObjDBSave
     
     mob.Stats = StatsFromText(fields[6]);
 
-    if (fields[11] != "")
+    if (fields[11] != "" || fields[9] != "")
     {
       mob.Inventory = new Inventory(mob.ID, objDb)
       {
@@ -851,7 +851,7 @@ class GameObjDBSave
       }
       else if (obj is Mob mob)
       {
-        var sb = new StringBuilder("Mob:");
+        StringBuilder sb = new("Mob:");
         sb.Append(mob.Behaviour.GetType().Name);
         sb.Append(Constants.SEPARATOR);
         sb.Append(obj.ToString());
