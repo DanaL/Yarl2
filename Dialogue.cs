@@ -1420,9 +1420,9 @@ class DialogueInterpreter
   {
     Sb.Append($"Let's see what you're willing to part ways with! My budget is [YELLOW $]{mob.Inventory.Zorkmids}.");
 
-    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+    NumberListTrait selections = mob.Traits
+      .OfType<NumberListTrait>()
+      .First(t => t.Name == "ShopSelections");
 
     int bill = 0;
     char opt = 'a';
@@ -1434,12 +1434,12 @@ class DialogueInterpreter
         continue;
 
       string s = $"{item.FullName.IndefArticle()} - [YELLOW $]{item.Value / 2}";
-      if (selections.Items.Contains(opt - 'a')) 
+      if (selections.Items.Contains(item.Slot - 'a')) 
       {
         s += " [GREEN *]";
         bill += item.Value / 2;
       }
-      Options.Add(new DialogueOption(s, opt, new ScriptShopSelection(opt)));
+      Options.Add(new DialogueOption(s, opt, new ScriptShopSelection(item.Slot)));
       ++opt;
     }
 

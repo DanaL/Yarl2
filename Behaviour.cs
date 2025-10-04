@@ -162,8 +162,7 @@ class PeddlerBehaviour : NPCBehaviour
   public override void InitDialogue(Mob mob, GameState gs)
   {
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+      .First(t => t.Name == "ShopSelections");
     selections.Items = [];
     mob.Stats[Attribute.ShopInvoice] = new Stat(0);
     mob.Stats[Attribute.DialogueState] = new Stat(0);
@@ -171,23 +170,23 @@ class PeddlerBehaviour : NPCBehaviour
 
   public override bool ConfirmChoices(Actor npc, GameState gs)
   {
-    NumberListTrait selections = npc.Traits.OfType<NumberListTrait>()
-                                           .Where(t => t.Name == "ShopSelections")
-                                           .First();
+    NumberListTrait nlt = npc.Traits.OfType<NumberListTrait>()
+      .First(t => t.Name == "ShopSelections");
+    HashSet<int> selections = [..nlt.Items.Select(i => i + 'a')];
+    nlt.Items = [];
 
-    if (selections.Items.Count == 0 || npc.Stats[Attribute.ShopInvoice].Curr > npc.Inventory.Zorkmids)
+    if (selections.Count == 0 || npc.Stats[Attribute.ShopInvoice].Curr > npc.Inventory.Zorkmids)
     {
       return false;
     }
 
-    List<Item> inventory = gs.Player.Inventory.Items();
     List<ulong> purchases = [];
-    for (int i = 0; i < inventory.Count; i++)
+    foreach (Item item in gs.Player.Inventory.Items())
     {
-      if (selections.Items.Contains(i))
-        purchases.Add(inventory[i].ID);
+      if (selections.Contains(item.Slot))
+        purchases.Add(item.ID);
     }
-
+    
     foreach (ulong id in purchases)
     {
       Item item = gs.Player.Inventory.RemoveByID(id)!;
@@ -195,10 +194,9 @@ class PeddlerBehaviour : NPCBehaviour
     }
 
     npc.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
-
+    gs.Player.Inventory.Zorkmids += npc.Stats[Attribute.ShopInvoice].Curr;
+    
     gs.UIRef().AlertPlayer($"{npc.FullName} collects your items and hands you your gold.");
-
-    selections.Items = [];
 
     return true;
   }
