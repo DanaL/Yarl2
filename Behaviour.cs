@@ -198,6 +198,8 @@ class PeddlerBehaviour : NPCBehaviour
 
     gs.UIRef().AlertPlayer($"{npc.FullName} collects your items and hands you your gold.");
 
+    npc.Stats[Attribute.LastVisit] = new Stat((int)gs.Turn % int.MaxValue);
+    
     return true;
   }
 }

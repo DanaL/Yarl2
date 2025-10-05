@@ -338,7 +338,7 @@ class Village
     return veteran;
   }
 
-  static Mob GeneratePeddlar(Map map, Town town, NameGenerator ng, GameObjectDB objDb, Rng rng, HashSet<Colour> skipColours)
+  static Mob GeneratePeddlar(Map map, Town town, NameGenerator ng, GameObjectDB objDb, FactDb factDb, Rng rng, HashSet<Colour> skipColours)
   {
     Mob peddler = BaseVillager(ng, rng, skipColours);
     peddler.Traits.Add(new DialogueScriptTrait() { ScriptFile = "peddler.txt" });
@@ -360,8 +360,10 @@ class Village
     }
 
     peddler.Inventory.Zorkmids = rng.Next(50, 101);
-    peddler.Stats[Attribute.ShopMenu] = new Stat(0);
+    peddler.Stats[Attribute.LastVisit] = new Stat(0);
     peddler.Stats[Attribute.DialogueState] = new Stat(0);
+
+    factDb.Add(new SimpleFact() { Name = "PeddlerId", Value = peddler.ID.ToString() });
 
     return peddler;
   }
@@ -569,7 +571,7 @@ class Village
     Mob vet = GenerateVeteran(map, town, ng, objDb, rng, barflyColours);
     objDb.AddNewActor(vet, vet.Loc);
 
-    Mob peddler = GeneratePeddlar(map, town, ng, objDb, rng, barflyColours);
+    Mob peddler = GeneratePeddlar(map, town, ng, objDb, factDb, rng, barflyColours);
     objDb.AddNewActor(peddler, peddler.Loc);
 
     GenerateWitches(map, town, objDb, factDb, rng);

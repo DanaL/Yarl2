@@ -42,8 +42,8 @@ enum Attribute
   BowUse,
   CudgelUse,
   FinesseUse,
-  PolearmsUse, 
-  SwordUse,  
+  PolearmsUse,
+  SwordUse,
   MetPlayer,
   ShopMenu,
   MobAttitude,
@@ -55,7 +55,8 @@ enum Attribute
   ShopInvoice,
   GoldSacrificed,
   KoboldCultLevel,
-  MainQuestState
+  MainQuestState,
+  LastVisit
 }
 
 class Stat
