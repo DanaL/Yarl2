@@ -165,8 +165,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       {
         List<Loc> tavernSqs = [.. Town.Tavern.Where(l => TileAt(l).Type == TileType.WoodFloor && !ObjDb.Occupied(l))];
         tavernSqs.Shuffle(Rng);
-        Loc loc = tavernSqs[Rng.Next(tavernSqs.Count)];
-        ObjDb.SetActorToLoc(loc, peddler.ID);
+        peddler.Loc = tavernSqs[Rng.Next(tavernSqs.Count)];
+        ObjDb.SetActorToLoc(peddler.Loc, peddler.ID);
 
         if (peddler.Inventory.Zorkmids < 50)
         {

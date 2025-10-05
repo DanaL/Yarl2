@@ -278,13 +278,21 @@ class InnkeeperInputer : Inputer
 
   string Blurb()
   {
-    return GS.Rng.Next(4) switch
+    List<string> voiceLines = [
+      "Come to sooth your dusty throat? We've got just your poison!", "What'll it be?",
+      "They say good tips lead to good karma!", "Ah! A brave adventurer come to rest their weary feet!"
+    ];
+
+    SimpleFact fact = GS.FactDb.FactCheck("PeddlerId") as SimpleFact ?? throw new Exception("PeddlerId should not be null!");
+    ulong peddlerId = ulong.Parse(fact.Value);
+    if (GS.ObjDb.GetObj(peddlerId) is Mob peddler && peddler.Loc.DungeonID != 0)
     {
-      0 => "Come to sooth your dusty throat? We've got just your poison!",
-      1 => "What'll it be?",
-      2 => "They say good tips lead to good karma!",
-      _ => "Ah! A brave adventurer come to rest their weary feet!"
-    };
+      voiceLines.Add($"{peddler.FullName} is off on the road, peddling his wares elsewhere. I'm sure he'll back.");
+    }
+
+    voiceLines.Shuffle(GS.Rng);
+
+    return voiceLines[GS.Rng.Next(voiceLines.Count)];
   }
 
   protected void WritePopup()
