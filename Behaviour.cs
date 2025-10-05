@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -195,7 +195,7 @@ class PeddlerBehaviour : NPCBehaviour
 
     npc.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
     gs.Player.Inventory.Zorkmids += npc.Stats[Attribute.ShopInvoice].Curr;
-    
+
     gs.UIRef().AlertPlayer($"{npc.FullName} collects your items and hands you your gold.");
 
     return true;
