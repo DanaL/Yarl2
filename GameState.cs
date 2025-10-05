@@ -1327,15 +1327,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     b.Loc = startA;
     ObjDb.SetActorToLoc(startA, b.ID);
-
-    if (a is Player && startB.DungeonID > 0)
-    {
-      SetDMaps(startB);
-    }
-    else if (b is Player && startA.DungeonID > 0)
-    {
-      SetDMaps(startA);
-    }
   }
 
   public Loc FallIntoTrapdoor(Actor actor, Loc trapdoorLoc)

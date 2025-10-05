@@ -455,7 +455,12 @@ class Player : Actor
     Energy -= CalcEnergyUsed(result);
 
     if (result > 0.0)
+    {
       gs.PrepareFieldOfView();
+
+      if (!gs.InWilderness)
+        gs.SetDMaps(Loc);
+    }
   }
 
   public void HaltTravel() 
