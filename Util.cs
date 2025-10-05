@@ -16,7 +16,7 @@ namespace Yarl2;
 
 enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted, LocChanged }
 record struct GameEvent(GameEventType Type, char Value);
-record Sqr(Colour Fg, Colour Bg, char Ch);
+record struct Sqr(Colour Fg, Colour Bg, char Ch);
 
 enum Dir { North, South, East, West, None }
 
