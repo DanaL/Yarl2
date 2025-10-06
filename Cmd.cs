@@ -12,7 +12,7 @@
 namespace Yarl2;
 
 // A lot of the code for processing user commands lives in the various
-// Action sbuclasses, but some of the code is usied more more than 
+// Action sbuclasses, but some of the code is used in more than 
 // one place, and I didn't want to keep shoving stuff into GameState.
 
 class Cmd
