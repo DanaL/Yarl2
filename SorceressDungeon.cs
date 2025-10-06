@@ -49,6 +49,25 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
     PopulateDungeon(towerDungeon, rng, objDb);
 
+    // Sometimes replace a door with a mimic. Just the sort of thing a wizard
+    // would do
+    for (int lvl = 0; lvl < towerDungeon.LevelMaps.Count; lvl++)
+    {
+      if (rng.Next(10) > 0)
+        continue;
+
+      Map map = towerDungeon.LevelMaps[lvl];
+      List<(int, int)> doors = [.. map.SqsOfType(TileType.ClosedDoor).Concat(map.SqsOfType(TileType.OpenDoor))];
+      if (doors.Count == 0)
+        continue;
+
+      (int mr, int mc) = doors[rng.Next(doors.Count)];
+      map.SetTile(mr, mc, TileFactory.Get(TileType.DungeonFloor));
+
+      Actor mimic = MonsterFactory.Mimic();
+      objDb.AddNewActor(mimic, new Loc(DungeonId, lvl, mr, mc));
+    }
+    
     return (towerDungeon, entrance);
   }
 }
