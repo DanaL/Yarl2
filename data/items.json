@@ -1020,7 +1020,7 @@
     "Name": "FLASK_OF_BOOZE",
     "DescriptiveName": "flask of booze",
     "Type": "Potion",
-    "Value": 1,
+    "Value": 2,
     "Glyph": "!,lightbrown,brown,black,false",
     "Traits": [
       "Consumable",

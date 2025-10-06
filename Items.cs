@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -1119,6 +1119,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public virtual void RestoreFromText(string txt)
   {
+    if (txt == "")
+      return;
+      
     foreach (var i in txt.Split(','))
     {
       char slot = i[0];

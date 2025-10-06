@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -16,7 +16,7 @@ namespace Yarl2;
 
 enum GameEventType { Quiting, KeyInput, EndOfRound, NoEvent, Death, MobSpotted, LocChanged }
 record struct GameEvent(GameEventType Type, char Value);
-record Sqr(Colour Fg, Colour Bg, char Ch);
+record struct Sqr(Colour Fg, Colour Bg, char Ch);
 
 enum Dir { North, South, East, West, None }
 

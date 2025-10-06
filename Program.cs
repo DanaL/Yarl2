@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -18,7 +18,7 @@ var options = Options.LoadOptions();
 
 UserInterface display;
 if (options.Display == "Bearlib")
-  display = new BLUserInferface($"Dana's Delve {Constants.VERSION} + Bearlib", options);
+  display = new BLUserInterface($"Dana's Delve {Constants.VERSION} + Bearlib", options);
 else
   display = new RaylibUserInterface($"Dana's Delve {Constants.VERSION} + Raylib", options);
 

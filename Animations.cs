@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -422,27 +422,38 @@ class SqAnimation : Animation
 
 record HighlightSqr(int Row, int Col, Sqr Sqr, Loc Loc, Glyph Glyph, DateTime Expiry);
 
-class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tilesOnly = true) : Animation
+class MagicMapAnimation : Animation
 {
   public Colour Colour { get; set; } = Colours.FAINT_PINK;
   public Colour AltColour { get; set; } = Colours.LIGHT_PURPLE;
-  bool TilesOnly { get; set; } = tilesOnly;
-  readonly GameState _gs = gs;
-  readonly Dungeon _dungeon = dungeon;
-  readonly UserInterface _ui = gs.UIRef();
-  readonly List<Loc> _locs = locs;
+  bool TilesOnly { get; set; }
+  readonly GameState _gs;
+  readonly Dungeon _dungeon;
+  readonly UserInterface _ui;
+  readonly List<Loc> _locs;
   int _index = 0;
   DateTime _lastFrame = DateTime.UtcNow;
   readonly Queue<HighlightSqr> _sqsToMark = [];
   const double _delay = 250;
 
+  public MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tilesOnly = true)
+  {
+    _gs = gs;
+    _ui = gs.UIRef();
+    _locs = locs;
+    _dungeon = dungeon;
+    TilesOnly = tilesOnly;
+
+    gs.PlayerAFK = true;
+  }
+
   public override void Update()
-  {    
+  {
     var dd = DateTime.UtcNow - _lastFrame;
     if (dd.TotalMilliseconds < 15)
       return;
 
-    int next = int.Min(_index + 25, _locs.Count);      
+    int next = int.Min(_index + 25, _locs.Count);
     while (_index < next)
     {
       Loc loc = _locs[_index];
@@ -463,10 +474,10 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
         ch = '.';
       }
 
-      Sqr sqr = _gs.Rng.NextDouble() < 0.1 
+      Sqr sqr = _gs.Rng.NextDouble() < 0.1
                   ? new Sqr(glyph.Lit, AltColour, ch)
                   : new Sqr(glyph.Lit, Colour, ch);
-      
+
       var (scrR, scrC) = _ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
       _sqsToMark.Enqueue(new HighlightSqr(scrR, scrC, sqr, loc, glyph, DateTime.UtcNow.AddMilliseconds(_delay)));
 
@@ -486,7 +497,10 @@ class MagicMapAnimation(GameState gs, Dungeon dungeon, List<Loc> locs, bool tile
     if (_index >= _locs.Count)
     {
       if (_sqsToMark.Count == 0)
+      {
+        _gs.PlayerAFK = false;
         Expiry = DateTime.UtcNow;
+      }
       return;
     }
 

@@ -1,5 +1,5 @@
 
-// Yarl2 - A roguelike computer RPG
+// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -190,7 +190,7 @@ class Vaults
       _ => rng.Next(3) switch
       {
         0 => "A stone craving of a noble dwarf laying in state.",
-        1 => "A stone carving of subterranean city.",
+        1 => "A stone carving of a subterranean city.",
         _ => "A stone carving of a dwarven smith at work."
       },
     };

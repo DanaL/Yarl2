@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -548,6 +548,7 @@ class GameObjectDB
   {
     if (_itemLocs.TryGetValue(loc, out var value))
       _itemLocs[loc] = [.. value.Where(i => i.ID != item.ID)];
+
     Objs.Remove(item.ID);
 
     if (_itemLocs.TryGetValue(item.Loc, out var items))

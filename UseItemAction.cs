@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -645,7 +645,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         Actor.Inventory.RemoveByID(item.ID);        
         item.Traits = [.. item.Traits.Where(t => t is not StackableTrait)];
-        Actor.Inventory.Add(item, Actor.ID);
+        Cmd.AddItemToInventory(Actor, item, GameState);
       }
 
       double energyCost = 1.0;

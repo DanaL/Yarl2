@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -15,12 +15,12 @@ using TKCodes = BearLibNET.TKCodes;
 
 namespace Yarl2;
 
-internal class BLUserInferface : UserInterface, IDisposable
+internal class BLUserInterface : UserInterface, IDisposable
 {
   readonly Dictionary<int, char> KeyToChar = [];
   Dictionary<Colour, Color> _colours = [];
 
-  public BLUserInferface(string windowTitle, Options opt) : base(opt)
+  public BLUserInterface(string windowTitle, Options opt) : base(opt)
   {
     FontSize = opt.FontSize;
     SetUpKeyToCharMap();
@@ -87,7 +87,7 @@ internal class BLUserInferface : UserInterface, IDisposable
   protected override GameEvent PollForEvent(bool pause = true)
   {
     if (pause)
-    Thread.Sleep(2);
+      Thread.Sleep(2);
 
     if (Terminal.HasInput())
     {

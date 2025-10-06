@@ -1,4 +1,4 @@
-﻿// Yarl2 - A roguelike computer RPG
+﻿// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -80,8 +80,8 @@ class MonsterBehaviour : IBehaviour, IDialoguer
 
     var (txt, footer) = dialogue.Run(scriptFile, mob, gs);
     Options = dialogue.Options;
-    List<(string, char)> opts = [..Options.Select(o => (o.Text, o.Ch))];
-    
+    List<(string, char)> opts = [.. Options.Select(o => (o.Text, o.Ch))];
+
     return (txt, footer, opts);
   }
 
@@ -98,30 +98,7 @@ class MonsterBehaviour : IBehaviour, IDialoguer
     }
   }
 
-  public void InitDialogue(Mob actor, GameState gs) {}
-}
-    
-// Disguised monsters behave differently while they are disguised, but then act like a normal monster
-// so it just seemed simple (or easy...) to extend MonsterBevaviour
-class DisguisedMonsterBehaviour : MonsterBehaviour
-{
-  //public override Action CalcAction(Mob actor, GameState gs)
-  //{
-  //  bool disguised = actor.Stats[Attribute.InDisguise].Curr == 1;
-  //  if (disguised && Util.Distance(actor.Loc, gs.Player.Loc) > 1)
-  //    return new PassAction();
-
-  //  if (disguised)
-  //  {
-  //    var disguise = actor.Traits.OfType<DisguiseTrait>().First();
-  //    string txt = $"The {disguise.DisguiseForm} was really {actor.Name.IndefArticle()}!";
-  //    gs.UIRef().AlertPlayer(txt);
-  //    actor.Glyph = disguise.TrueForm;
-  //    actor.Stats[Attribute.InDisguise].SetMax(0);
-  //  }
-
-  //  return base.CalcAction(actor, gs);
-  //}
+  public void InitDialogue(Mob actor, GameState gs) { }
 }
 
 class VillagePupBehaviour : NPCBehaviour
@@ -180,6 +157,53 @@ class MoonDaughtersClericBehaviour : NPCBehaviour
   }
 }
 
+class PeddlerBehaviour : NPCBehaviour
+{
+  public override void InitDialogue(Mob mob, GameState gs)
+  {
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+      .First(t => t.Name == "ShopSelections");
+    selections.Items = [];
+    mob.Stats[Attribute.ShopInvoice] = new Stat(0);
+    mob.Stats[Attribute.DialogueState] = new Stat(0);
+  }
+
+  public override bool ConfirmChoices(Actor npc, GameState gs)
+  {
+    NumberListTrait nlt = npc.Traits.OfType<NumberListTrait>()
+      .First(t => t.Name == "ShopSelections");
+    HashSet<int> selections = [..nlt.Items.Select(i => i + 'a')];
+    nlt.Items = [];
+
+    if (selections.Count == 0 || npc.Stats[Attribute.ShopInvoice].Curr > npc.Inventory.Zorkmids)
+    {
+      return false;
+    }
+
+    List<ulong> purchases = [];
+    foreach (Item item in gs.Player.Inventory.Items())
+    {
+      if (selections.Contains(item.Slot))
+        purchases.Add(item.ID);
+    }
+    
+    foreach (ulong id in purchases)
+    {
+      Item item = gs.Player.Inventory.RemoveByID(id)!;
+      gs.ObjDb.RemoveItemFromGame(gs.Player.Loc, item);
+    }
+
+    npc.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
+    gs.Player.Inventory.Zorkmids += npc.Stats[Attribute.ShopInvoice].Curr;
+
+    gs.UIRef().AlertPlayer($"{npc.FullName} collects your items and hands you your gold.");
+
+    npc.Stats[Attribute.LastVisit] = new Stat((int)gs.Turn % int.MaxValue);
+    
+    return true;
+  }
+}
+
 class GnomeMerchantBehaviour : NPCBehaviour
 {
   DateTime _lastBark = new(1900, 1, 1);
@@ -194,7 +218,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
   }
 
   public override string GetBark(Mob actor, GameState gs)
-  {    
+  {
     if ((DateTime.UtcNow - _lastBark).TotalSeconds > 13)
     {
       _lastBark = DateTime.UtcNow;
@@ -205,7 +229,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
         2 => "The customer is always something, something...",
         _ => "Everything must go!"
       };
-      
+
     }
 
     return "";
@@ -239,7 +263,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
     gs.Player.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
 
     gs.UIRef().AlertPlayer($"You hand over your money and {npc.FullName} gives you your goods.");
-    
+
     selections.Items = [];
 
     return true;

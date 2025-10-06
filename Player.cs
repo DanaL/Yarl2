@@ -1,5 +1,5 @@
 ﻿
-// Yarl2 - A roguelike computer RPG
+// Deleve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -455,7 +455,12 @@ class Player : Actor
     Energy -= CalcEnergyUsed(result);
 
     if (result > 0.0)
+    {
       gs.PrepareFieldOfView();
+
+      if (!gs.InWilderness)
+        gs.SetDMaps(Loc);
+    }
   }
 
   public void HaltTravel() 

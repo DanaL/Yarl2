@@ -1,4 +1,4 @@
-// Yarl2 - A roguelike computer RPG
+// Delve - A roguelike computer RPG
 // Written in 2024 by Dana Larose <ywg.dana@gmail.com>
 //
 // To the extent possible under law, the author(s) have dedicated all copyright
@@ -42,8 +42,8 @@ enum Attribute
   BowUse,
   CudgelUse,
   FinesseUse,
-  PolearmsUse, 
-  SwordUse,  
+  PolearmsUse,
+  SwordUse,
   MetPlayer,
   ShopMenu,
   MobAttitude,
@@ -55,7 +55,8 @@ enum Attribute
   ShopInvoice,
   GoldSacrificed,
   KoboldCultLevel,
-  MainQuestState
+  MainQuestState,
+  LastVisit
 }
 
 class Stat
