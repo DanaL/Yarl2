@@ -1067,10 +1067,14 @@ class Power
       case "SummonBats":
         int batCount = gs.Rng.Next(1, 4);
         return new SummonAction(gs.Player.Loc, "dire bat", batCount) { GameState = gs, Actor = mob, Quip = Quip };
+      case "MinorSummon":
+        return new MinorSummonAction(gs, mob);
       case "Web":
         return new WebAction(gs, loc);
       case "FireBolt":
         return new FireboltAction(gs, mob, loc);
+      case "MagicMissile":
+        return new MagicMissleAction(gs, mob, null) { DamageDie = DmgDie, NumOfDie = NumOfDice, Target = gs.Player.Loc };
       case "MirrorImage":
         return new MirrorImageAction(gs, mob, loc);
       case "ConfusingScream":

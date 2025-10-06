@@ -1621,6 +1621,26 @@ class CastCurse(Loc target, int dc) : Action
   }
 }
 
+class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  string RandomMonster(Rng rng)
+  {
+    string[] opts = ["screen bat", "rust monster", "ghoul", "fire beetle", "dire goat", "skeleton"];
+    return opts[rng.Next(opts.Length)];
+  }
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} summons some monsters!", GameState, Actor.Loc);
+
+    int numToSummon = GameState.Rng.Next(2, 4);
+
+    return 1.0;
+  }
+}
+
 class SummonAction(Loc target, string summons, int count) : Action()
 {
   readonly Loc _target = target;
@@ -3226,10 +3246,13 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
   }
 }
 
-class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, actor)
+class MagicMissleAction(GameState gs, Actor actor, Trait? src) : TargetedAction(gs, actor)
 {
-  readonly Trait _source = src;
+  Trait? Source { get; set; } = src;
   
+  public int DamageDie { get; set; } = 6;
+  public int NumOfDie { get; set; } = 2;
+
   public override double Execute()
   {
     base.Execute();
@@ -3238,9 +3261,9 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
     {
       Name = "magic missile",
       Type = ItemType.Weapon,
-      Glyph = new Glyph('-', Colours.YELLOW_ORANGE, Colours.YELLOW_ORANGE, Colours.BLACK, false)
+      Glyph = new Glyph('-', Colours.LIGHT_BLUE, Colours.LIGHT_BLUE, Colours.BLACK, false)
     };
-    missile.Traits.Add(new DamageTrait() { DamageDie = 6, NumOfDie = 2, DamageType = DamageType.Force });
+    missile.Traits.Add(new DamageTrait() { DamageDie = DamageDie, NumOfDie = NumOfDie, DamageType = DamageType.Force });
     GameState!.ObjDb.Add(missile);
 
     List<Loc> pts = [];
@@ -3255,7 +3278,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
         // I didn't want magic missile to be auto-hit like in D&D, but I'll give it a nice
         // attack bonus
         int attackMod = 5;
-        bool attackSuccessful = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE));        
+        bool attackSuccessful = Battle.MagicAttack(Actor!, occ, GameState, missile, attackMod, new ArrowAnimation(GameState!, pts, Colours.LIGHT_BLUE));        
         if (attackSuccessful)
         {
           pts = [];
@@ -3272,17 +3295,17 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
       }
     }
    
-    if (_source is WandTrait wand)
+    if (Source is WandTrait wand)
     {
       Item.IDInfo["wand of magic missiles"] = Item.IDInfo["wand of magic missiles"] with { Known = true };
       wand.Used();
     }
-    else if (_source is IUSeable useable) 
+    else if (Source is IUSeable useable) 
     {
       useable.Used();
     }
 
-    var anim = new ArrowAnimation(GameState!, pts, Colours.YELLOW_ORANGE);
+    ArrowAnimation anim = new(GameState!, pts, Colours.LIGHT_BLUE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
     GameState!.UIRef().AlertPlayer("Pew pew pew!");
 
@@ -3292,7 +3315,7 @@ class MagicMissleAction(GameState gs, Actor actor, Trait src) : TargetedAction(g
 
 abstract class TargetedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  protected Loc Target { get; set; }
+  public Loc Target { get; set; }
 
   // As in, clear of obstacles, not opacity
   bool ClearTileAt(Loc loc)

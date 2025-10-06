@@ -66,3 +66,4 @@ imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1
 mud golem         |G|lightbrown   |brown       |14|40|3| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless,Construct|
 clay golem        |G|brightred    |brown       |15|60|3| 1.0|12|10|MeleeBlunt#1#1#12#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless,Construct|
 lard golem        |G|cream        |lightbrown  |15|45|3| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Grease#0#0#0,Brainless,Construct|
+phantom summoner  |p|iceblue      |blue        |16|50|4| 1.0|10|10|MinorSummon#0#0#0#0#0#5#Attack,MagicMissile#3#6#5#3#0#2#Attack,Slashing#1#1#5#1#0#0#Attack|Intelligent|
