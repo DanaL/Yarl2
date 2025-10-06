@@ -1479,15 +1479,12 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
     UserInterface ui = GameState!.UIRef();
     ui.ClosePopup();
     
-    List<Item> itemStack = GameState.ObjDb.ItemsAt(Actor!.Loc);
-    Inventory inv = Actor.Inventory;
-
     int webDC = 0;
     string webName = "";
     // First, is there anything preventing the actor from picking items up off
     // the floor? (At the moment it's just webs in the game, but a 
     // Sword-in-the-Stone situation might be neat)
-    foreach (Item env in GameState.ObjDb.EnvironmentsAt(Actor.Loc))
+    foreach (Item env in GameState.ObjDb.EnvironmentsAt(Actor!.Loc))
     {
       if (env.Traits.OfType<StickyTrait>().FirstOrDefault() is StickyTrait web)
       {
@@ -1496,10 +1493,11 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
       }
     }
 
+    Inventory inv = Actor.Inventory;
     bool anythingPickedUp = false;
     foreach (ulong id in ItemIDs)
     {
-      Item item = itemStack.Where(i => i.ID == id).First();
+      Item item = GameState.ObjDb.GetObj(id) as Item ?? throw new Exception($"Item ID {id} does not exist");
 
       if (item.HasTrait<AffixedTrait>())
       {
@@ -1521,29 +1519,23 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         }
       }
 
-      bool freeSlot = inv.UsedSlots().Length < 26;
-      if (!freeSlot)
-      {
-        ui.AlertPlayer("There's no room left in your inventory!");
-        break;
-      }
+      gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
 
-      int count = 0;
+      bool success = Cmd.AddItemToInventory(Actor, item, GameState);
+      if (!success)
+        continue;
+
+      int count = 1;
       if (item.HasTrait<StackableTrait>())
       {
-        foreach (Item pickedUp in itemStack.Where(i => i == item))
+        foreach (Item stackedItem in GameState.ObjDb.ItemsAt(Actor.Loc).Where(i => i == item))
         {
-          GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, pickedUp);
-          inv.Add(pickedUp, Actor.ID);
+          Cmd.AddItemToInventory(Actor, stackedItem, GameState);
+          gs.ObjDb.RemoveItemFromLoc(stackedItem.Loc, stackedItem);
           ++count;
         }
       }
-      else
-      {
-        GameState.ObjDb.RemoveItemFromLoc(Actor.Loc, item);
-        inv.Add(item, Actor.ID);
-      }
-
+      
       string pickupMsg = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "pick")} up ";
       if (item.Type == ItemType.Zorkmid && item.Value == 1)
         pickupMsg += "a zorkmid.";

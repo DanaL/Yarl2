@@ -23,22 +23,21 @@ class Cmd
 
     if (item.Type == ItemType.Zorkmid)
     {
-      inv.Zorkmids += item.Value;
+      inv.Add(item, actor.ID);
       gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       return true;
     }
-
-    bool freeSlot = inv.UsedSlots().Length < 26;
-    if (!freeSlot)
+    
+    char slot = inv.Add(item, actor.ID);
+    if (slot == '\0')
     {
       gs.UIRef().AlertPlayer("There's no room left in your inventory!");
-      gs.UIRef().AlertPlayer($"{item.FullName.Capitalize()} drops to the ground.");
+      gs.UIRef().AlertPlayer($"{item.FullName.DefArticle().Capitalize()} drops to the ground.");
       item.Equipped = false;
       gs.ItemDropped(item, actor.Loc);
+
       return false;
     }
-
-    inv.Add(item, actor.ID);
 
     return true;
   }
