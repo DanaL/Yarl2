@@ -645,7 +645,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       {
         Actor.Inventory.RemoveByID(item.ID);        
         item.Traits = [.. item.Traits.Where(t => t is not StackableTrait)];
-        Actor.Inventory.Add(item, Actor.ID);
+        Cmd.AddItemToInventory(Actor, item, GameState);
       }
 
       double energyCost = 1.0;
