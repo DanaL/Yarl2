@@ -190,7 +190,7 @@ class Vaults
       _ => rng.Next(3) switch
       {
         0 => "A stone craving of a noble dwarf laying in state.",
-        1 => "A stone carving of subterranean city.",
+        1 => "A stone carving of a subterranean city.",
         _ => "A stone carving of a dwarven smith at work."
       },
     };
