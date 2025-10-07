@@ -1689,30 +1689,28 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
 
     GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} summons some monsters!", GameState, Actor.Loc);
 
+    Actor m1 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+    m1.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+    Actor m2 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+    m2.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+    Actor m3 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+    m3.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+
     int animDuration = 750;
     int numToSummon = GameState.Rng.Next(2, 4);
     // First try to find a spot for the silly summon animation
     Loc left = PickAnimSpot(Actor.Loc);
     if (left != Loc.Nowhere)
     {
-      Actor m1 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
-      m1.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
-      GameState.ObjDb.AddNewActor(m1, left);
-      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, left, Colours.ICE_BLUE, Colours.BLACK, m1.Glyph.Ch, animDuration));
+      AddMonster(m1, left, GameState);
 
       Loc secondLoc = left with { Col = left.Col + 2 };
-      Actor m2 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
-      m2.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
-      GameState.ObjDb.AddNewActor(m2, secondLoc);
-      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, secondLoc, Colours.ICE_BLUE, Colours.BLACK, m2.Glyph.Ch, animDuration));
-
+      AddMonster(m2, secondLoc, GameState);
+      
       Loc thirdLoc = left with { Col = left.Col + 1 };
       if (numToSummon == 3)
       {
-        Actor m3 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
-        m3.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
-        GameState.ObjDb.AddNewActor(m3, thirdLoc);
-        GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, thirdLoc, Colours.ICE_BLUE, Colours.BLACK, m3.Glyph.Ch, animDuration));
+        AddMonster(m3, thirdLoc, GameState);
       }
       else
       {
@@ -1720,12 +1718,56 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
       }
 
       SetBarkAnim(GameState, Actor.Loc, left, animDuration);
-    }
-    else
-    {
 
+      return 1.0;
     }
-    
+
+    Map map = GameState.CurrentMap;
+    List<Loc> nearby = [];
+    // We couldn't do the animation so just try to find three open locations nearby to plunk the monsters into
+    for (int r = Actor.Loc.Row - 2; r <= Actor.Loc.Row + 3; r++)
+    {
+      for (int c = Actor.Loc.Col - 2; c <= Actor.Loc.Col + 3; c++)
+      {
+        Loc loc = Actor.Loc with { Row = r, Col = c };
+        if (map.InBounds(r, c) && map.TileAt(r, c).Passable() && !GameState.ObjDb.Occupied(loc))
+          nearby.Add(loc);
+      }     
+    }
+    nearby.Shuffle(GameState.Rng);
+
+    if (nearby.Count == 0)
+    {
+      GameState!.UIRef().AlertPlayer($"...but the spell fizzles!", GameState, Actor.Loc);
+      return 1.0;
+    }
+
+    if (nearby.Count > 0)
+    {
+      Loc loc = nearby[0];
+      nearby.RemoveAt(0);
+      AddMonster(m1, loc, GameState);
+    }
+
+    if (nearby.Count > 0)
+    {
+      Loc loc = nearby[0];
+      nearby.RemoveAt(0);
+      AddMonster(m2, loc, GameState);
+    }
+  
+    if (numToSummon == 3 && nearby.Count > 0)
+    {
+      Loc loc = nearby[0];
+      AddMonster(m3, loc, GameState);
+    }
+
+    void AddMonster(Actor m, Loc loc, GameState gs)
+    {
+      gs.ObjDb.AddNewActor(m, loc);
+      gs.UIRef().RegisterAnimation(new SqAnimation(gs, loc, Colours.ICE_BLUE, Colours.BLACK, m.Glyph.Ch, animDuration));
+    }
+
     return 1.0;
   }
 }
