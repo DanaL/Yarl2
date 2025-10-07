@@ -1629,6 +1629,35 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
     return opts[rng.Next(opts.Length)];
   }
 
+  Loc AnimAvailable(Loc centre)
+  {
+    List<Loc> opts = [];
+
+    Map map = GameState!.CurrentMap;
+    GameObjectDB objDb = GameState.ObjDb;
+    for (int c = centre.Col - 1; c <= centre.Col + 3; c++)
+    {
+      if (CheckLoc(centre.Row - 2, c))
+        opts.Add(centre with { Row = centre.Row - 2, Col = c });
+      if (CheckLoc(centre.Row + 2, c))
+        opts.Add(centre with { Row = centre.Row + 2, Col = c });
+    }
+
+    return opts.Count > 0 ? opts[GameState.Rng.Next(opts.Count)] : Loc.Nowhere;
+
+    bool CheckLoc(int row, int col)
+    {
+      if (!(map.InBounds(row, col) && map.TileAt(row, col).Passable() && !objDb.Occupied(centre with { Row = row, Col = col })))
+        return false;
+      if (!(map.InBounds(row, col + 1) && map.TileAt(row, col + 1).Passable() && !objDb.Occupied(centre with { Row = row, Col = col + 1 })))
+        return false;
+      if (!(map.InBounds(row, col + 2) && map.TileAt(row, col + 2).Passable() && !objDb.Occupied(centre with { Row = row, Col = col + 2 })))
+        return false;
+
+      return true;
+    }
+  }
+
   public override double Execute()
   {
     base.Execute();
@@ -1636,7 +1665,17 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
     GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} summons some monsters!", GameState, Actor.Loc);
 
     int numToSummon = GameState.Rng.Next(2, 4);
+    // First try to find a spot for the silly summon animation
+    Loc left = AnimAvailable(Actor.Loc);
+    if (left != Loc.Nowhere)
+    {
 
+    }
+    else
+    {
+
+    }
+    
     return 1.0;
   }
 }
