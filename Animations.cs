@@ -388,20 +388,21 @@ class HitAnimation : Animation
 class SqAnimation : Animation
 {
   public bool IgnoreFoV { get; set; } = false;
+  
   readonly GameState _gs;
   Loc _loc;
   Colour _fgColour;
   Colour _bgColour;
   readonly char _ch;
 
-  public SqAnimation(GameState gs, Loc loc, Colour fg, Colour bg, char ch)
+  public SqAnimation(GameState gs, Loc loc, Colour fg, Colour bg, char ch, int duration = 250)
   {
     _gs = gs;
     _loc = loc;
     _fgColour = fg;
     _bgColour = bg;
     _ch = ch;
-    Expiry = DateTime.UtcNow.AddMilliseconds(250);
+    Expiry = DateTime.UtcNow.AddMilliseconds(duration);
   }
 
   public override void Update()

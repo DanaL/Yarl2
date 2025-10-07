@@ -1625,11 +1625,11 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   string RandomMonster(Rng rng)
   {
-    string[] opts = ["screen bat", "rust monster", "ghoul", "fire beetle", "dire goat", "skeleton"];
+    string[] opts = ["screech bat", "rust monster", "ghoul", "flame beetle", "dire goat", "skeleton"];
     return opts[rng.Next(opts.Length)];
   }
 
-  Loc AnimAvailable(Loc centre)
+  Loc PickAnimSpot(Loc centre)
   {
     List<Loc> opts = [];
 
@@ -1638,7 +1638,7 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
     for (int c = centre.Col - 1; c <= centre.Col + 3; c++)
     {
       if (CheckLoc(centre.Row - 2, c))
-        opts.Add(centre with { Row = centre.Row - 2, Col = c });
+        opts.Add(centre with { Row = centre.Row - 2, Col = c });      
       if (CheckLoc(centre.Row + 2, c))
         opts.Add(centre with { Row = centre.Row + 2, Col = c });
     }
@@ -1658,18 +1658,68 @@ class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
     }
   }
 
+  void SetBarkAnim(GameState gs, Loc speaker, Loc left, int duration)
+  {
+    SqAnimation anim;
+    if (speaker.Row > left.Row)
+    {
+      if (speaker.Col < left.Col)
+        anim = new(gs, speaker with { Row = speaker.Row - 1, Col = speaker.Col + 1 }, Colours.WHITE, Colours.BLACK, '/', duration);
+      else if (speaker.Col > left.Col)
+        anim = new(gs, speaker with { Row = speaker.Row - 1, Col = speaker.Col - 1}, Colours.WHITE, Colours.BLACK, '\\', duration);
+      else
+        anim = new(gs, speaker with { Row = speaker.Row - 1, Col = speaker.Col }, Colours.WHITE, Colours.BLACK, '|', duration);
+    }
+    else
+    {
+      if (speaker.Col < left.Col)
+        anim = new(gs, speaker with { Row = speaker.Row + 1, Col = speaker.Col + 1 }, Colours.WHITE, Colours.BLACK, '\\', duration);
+      else if (speaker.Col > left.Col)
+        anim = new(gs, speaker with { Row = speaker.Row + 1, Col = speaker.Col - 1 }, Colours.WHITE, Colours.BLACK, '/', duration);
+      else
+        anim = new(gs, speaker with { Row = speaker.Row + 1, Col = speaker.Col }, Colours.WHITE, Colours.BLACK, '|', duration);
+    }
+
+    gs.UIRef().RegisterAnimation(anim);
+  }
+
   public override double Execute()
   {
     base.Execute();
 
     GameState!.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} summons some monsters!", GameState, Actor.Loc);
 
+    int animDuration = 750;
     int numToSummon = GameState.Rng.Next(2, 4);
     // First try to find a spot for the silly summon animation
-    Loc left = AnimAvailable(Actor.Loc);
+    Loc left = PickAnimSpot(Actor.Loc);
     if (left != Loc.Nowhere)
     {
+      Actor m1 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+      m1.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+      GameState.ObjDb.AddNewActor(m1, left);
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, left, Colours.ICE_BLUE, Colours.BLACK, m1.Glyph.Ch, animDuration));
 
+      Loc secondLoc = left with { Col = left.Col + 2 };
+      Actor m2 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+      m2.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+      GameState.ObjDb.AddNewActor(m2, secondLoc);
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, secondLoc, Colours.ICE_BLUE, Colours.BLACK, m2.Glyph.Ch, animDuration));
+
+      Loc thirdLoc = left with { Col = left.Col + 1 };
+      if (numToSummon == 3)
+      {
+        Actor m3 = MonsterFactory.Get(RandomMonster(GameState.Rng), GameState.ObjDb, GameState.Rng);
+        m3.Stats[Attribute.MobAttitude] = new Stat(Mob.AGGRESSIVE);
+        GameState.ObjDb.AddNewActor(m3, thirdLoc);
+        GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, thirdLoc, Colours.ICE_BLUE, Colours.BLACK, m3.Glyph.Ch, animDuration));
+      }
+      else
+      {
+        GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, thirdLoc, Colours.ICE_BLUE, Colours.BLACK, ' ', animDuration));
+      }
+
+      SetBarkAnim(GameState, Actor.Loc, left, animDuration);
     }
     else
     {
