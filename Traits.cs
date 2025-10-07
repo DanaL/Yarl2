@@ -2007,7 +2007,9 @@ class ConfusedTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
-    
+
+    gs.UIRef().RegisterAnimation(new HitAnimation(gs, target, Colours.WHITE, Colours.FAINT_PINK, '?'));
+
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"];
   }
 
