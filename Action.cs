@@ -355,7 +355,10 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
       if (GameState.ObjDb.Occupant(loc) is Actor occ)
       {
         var effect = (TemporaryTrait) TraitFactory.FromText(EffectTemplate, occ);
-        effect.Apply(occ, GameState);
+        List<string> msgs = effect.Apply(occ, GameState);
+        string s = string.Join(' ', msgs).Trim();
+
+        GameState.UIRef().AlertPlayer(s, GameState, loc);
       }
     }
 

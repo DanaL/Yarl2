@@ -2010,7 +2010,8 @@ class ConfusedTrait : TemporaryTrait
 
     gs.UIRef().RegisterAnimation(new HitAnimation(gs, target, Colours.WHITE, Colours.FAINT_PINK, '?'));
 
-    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"];
+    return gs.LastPlayerFoV.Contains(target.Loc) 
+       ? [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"] : [];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
