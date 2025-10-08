@@ -147,6 +147,19 @@ abstract class BehaviourNode
   public string Label { get; set; } = "";
 
   public abstract PlanStatus Execute(Mob mob, GameState gs);
+
+  protected static bool ClearShot(GameState gs, Loc origin, Loc target)
+  {
+    List<Loc> trajectory = Util.Trajectory(origin, target);
+    foreach (var loc in trajectory)
+    {
+      var tile = gs.TileAt(loc);
+      if (!(tile.Passable() || tile.PassableByFlight()))
+        return false;
+    }
+
+    return true;
+  }
 }
 
 class Not(BehaviourNode node) : BehaviourNode
@@ -282,19 +295,6 @@ class RepeatWhile(BehaviourNode condition, BehaviourNode child) : BehaviourNode
 class UsePower(Power power) : BehaviourNode
 {
   protected Power Power { get; set; } = power;
-
-  protected static bool ClearShot(GameState gs, Loc origin, Loc target)
-  {
-    List<Loc> trajectory = Util.Trajectory(origin, target);
-    foreach (var loc in trajectory)
-    {
-      var tile = gs.TileAt(loc);
-      if (!(tile.Passable() || tile.PassableByFlight()))
-        return false;
-    }
-
-    return true;
-  }
 
   protected virtual bool Available(Mob mob, GameState gs)
   {
@@ -1048,6 +1048,79 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
     return costs;
   }
 
+}
+
+// A behaviour where the monster will keep its distance, but which I mean
+// it will find the longest range of its attack abilities and if its distance
+// from the player is less than that, move further away. (With an additional
+// check if it can see the player) The intention is that this node is executed
+// if none of the monster's powers are available (ie., its firebolt is on
+// cooldown or something)
+class KeepDistance : BehaviourNode
+{
+  static bool BadSquare(GameState gs, Loc loc)
+  {
+    foreach (Item item in gs.ObjDb.ItemsAt(loc))
+    {
+      foreach (Trait t in item.Traits)
+      {
+        if (t is BlockTrait)
+          return true;
+        if (t is OnFireTrait)
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  static PlanStatus Move(Mob mob, int distanceFromPlayer, GameState gs, bool flying)
+  {
+    List<Loc> opts = [];
+    foreach (Loc adj in Util.Adj8Locs(mob.Loc))
+    {
+      if (BadSquare(gs, adj))
+        continue;
+
+      if (Util.Distance(adj, gs.Player.Loc) <= distanceFromPlayer)
+        continue;
+
+      Tile tile = gs.TileAt(adj);
+      if (gs.ObjDb.Occupied(adj))
+        continue;      
+      if (tile.Passable())
+        opts.Add(adj);
+      else if (flying && tile.PassableByFlight())
+        opts.Add(adj);
+    }
+
+    if (opts.Count == 0)
+      return PlanStatus.Failure;
+
+    Loc loc = opts[gs.Rng.Next(opts.Count)];
+    Action action = new MoveAction(gs, mob, loc);
+
+    mob.ExecuteAction(action);
+
+    return PlanStatus.Success;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    int maxRange = mob.Powers.Where(p => p.Type == PowerType.Attack).Max(p => p.MaxRange);
+
+    if (!gs.Player.VisibleTo(mob) || !ClearShot(gs, mob.Loc, gs.Player.Loc))
+      return PlanStatus.Failure;
+
+    bool flying = mob.HasTrait<FlyingTrait>() || mob.HasTrait<FloatingTrait>();
+    int d = Util.Distance(mob.Loc, gs.Player.Loc);
+    if (d < maxRange)
+    {
+      return Move(mob, d, gs, flying);
+    }
+
+    return PlanStatus.Failure;
+  }
 }
 
 class RandomMove : BehaviourNode
@@ -1816,7 +1889,10 @@ class Planner
     {
       // Finally, try to attack the player or move toward them.
       if (!mob.HasTrait<ImmobileTrait>())
+      {
+        actions.Add(new KeepDistance());
         actions.Add(new ChaseTarget());
+      }
       plan.Add(new Sequence([new CheckMonsterAttitude(Mob.AGGRESSIVE), new Selector(actions)]) { Label = "aggressive" });
 
       plan.Add(new PassTurn() { Label = "default" });
