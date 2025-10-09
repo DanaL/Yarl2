@@ -472,3 +472,9 @@ Heat and sulfur emanate from this small canine. Flames lick across its coat, and
 #
 hellhound
 Even demons love dogs and keep them as pets! Firebreathing, snarling pets.
+#
+killer bee
+Much like a normal bee, except the size of a dog. And inexplicably angry.
+#
+invisible stalker
+A minor demon typically summoned by a wizard or diabolist to assassinate their enemies.

@@ -70,3 +70,4 @@ phantom summoner  |p|iceblue      |blue        |16|50|5| 1.0|10|10|MinorSummon#0
 hellhound pup     |d|dullred      |brown       |14|30|6| 1.0|10|10|FireBreath#0#4#5#3#15#5#Attack,MeleePiercing#1#1#10#1#0#0#Attack|Resistance#Fire|
 hellhound         |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#5#6#3#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Immunity#Fire|
 killer bee        |I|yelloworange |brown       |17|12|6| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying,Poisoner#13#2#20|
+invisible stalker |i|grey         |darkgrey    |15|40|5| 1.0|10|14|MeleeBlunt#1#1#4#3#0#0#Attack|Invisible#owner#false#max,Flying|
