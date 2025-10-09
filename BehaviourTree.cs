@@ -1107,7 +1107,9 @@ class KeepDistance : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    int maxRange = mob.Powers.Where(p => p.Type == PowerType.Attack).Max(p => p.MaxRange);
+    int maxRange = 1;
+    if (mob.Powers.Count > 0)
+      maxRange = mob.Powers.Where(p => p.Type == PowerType.Attack).Max(p => p.MaxRange);
 
     if (!gs.Player.VisibleTo(mob) || !ClearShot(gs, mob.Loc, gs.Player.Loc))
       return PlanStatus.Failure;
