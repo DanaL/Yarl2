@@ -62,9 +62,10 @@ kobold soothsayer |k|lightblue    |blue        |13|25|2| 1.0|12|10|CastCurse#1#7
 faint spirit      |p|green        |darkgreen   |14|20|2| 1.0|10|14|MeleeCold#1#1#5#2#0#0#Attack|Undead,Immunity#Poison,LightSource#owner#2#iceblue#mysticaura|
 angler fish       |»|grey         |darkgrey    |13|10|2| 1.0|10|10||Swimmer,Passive,LightSource#owner#2#torchyellow#torchyellow|
 gas spore         |e|darkgreen    |darkgrey    |11|20|0|0.75|10|10||Floating,Brainless,Retribution#Blunt#6#4#2|
-imp               |i|brightred    |dullred     |13|35|5| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent|PoorLoot
+imp               |i|brightred    |dullred     |13|35|3| 1.0|10|10|MeleeFire#1#1#6#2#0#0#Attack,SummonBats#0#0#0#0#0#4#Attack#Destroy them my pretties!,Blink#0#0#0#0#0#11#Movement|Intelligent|PoorLoot
 mud golem         |G|lightbrown   |brown       |14|40|5| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless,Construct|
 clay golem        |G|brightred    |brown       |15|60|5| 1.0|12|10|MeleeBlunt#1#1#12#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Mud#0#0#0,Brainless,Construct|
 lard golem        |G|cream        |lightbrown  |15|45|5| 1.0|12|10|MeleeBlunt#1#1#10#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Grease#0#0#0,Brainless,Construct|
+phantom summoner  |p|iceblue      |blue        |16|50|5| 1.0|10|10|MinorSummon#0#0#0#0#0#12#Attack,MagicMissile#3#6#5#2#0#2#Attack,MeleeSlashing#1#1#5#1#0#0#Attack|Intelligent|
 hellhound pup     |d|dullred      |brown       |14|30|6| 1.0|10|10|FireBreath#0#4#5#3#15#5#Attack,MeleePiercing#1#1#10#1#0#0#Attack|Resistance#Fire|
 hellhound         |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#5#6#3#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Immunity#Fire|

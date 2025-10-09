@@ -309,6 +309,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   {
     int cellarHeight = HEIGHT + 2;
     int cellarWidth = WIDTH + 2;
+    int levelNum = stairsLoc.Level + 1;
 
     // Generate the cellar level
     Map cellar = new(cellarWidth, cellarHeight)
@@ -340,24 +341,31 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     if (roomOpts.Count == 0)
       throw new Exception("Unable to build cellar room in Initial dungeon");
 
+    List<Loc> floors = [];
     (int roomCenterRow, int roomCenterCol) = roomOpts[rng.Next(roomOpts.Count)];
     for (int r = roomCenterRow - 2; r <= roomCenterRow + 2; r++)
     {
       for (int c = roomCenterCol - 2; c <= roomCenterCol + 2; c++)
       {
         cellar.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+        floors.Add(new Loc(dungeon.ID, levelNum, r, c));
       }
     }
-
+    
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
     statue.Traits.Add(new DescriptionTrait("A statue of a greater demon covered in cracks, from which red light streams."));
     statue.Traits.Add(new LightSourceTrait() { FgColour = Colours.BRIGHT_RED, BgColour = Colours.RED_AURA, Radius = 1, OwnerID = statue.ID });
     statue.Traits.Add(new DemonVisageTrait());
 
-    int levelNum = stairsLoc.Level + 1;
     Loc loc = new(dungeon.ID, levelNum, roomCenterRow, roomCenterCol);
     objDb.SetToLoc(loc, statue);
 
+    floors.Remove(loc);
+    floors.Shuffle(rng);
+    Loc hellHoundLoc = floors[0];
+    Actor hh = MonsterFactory.Get("hellhound pup", objDb, rng);
+    objDb.AddNewActor(hh, hellHoundLoc);
+    
     Item tablet = History.SealingTablet1(objDb);
     List<Loc> locs = [.. Util.Adj8Locs(loc)];
     Loc tabetLoc = locs[rng.Next(locs.Count)];
@@ -384,7 +392,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       cellar.SetTile(stairsLoc.Row + 2, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));      
       SetStatue(stairsLoc.Row + 2, roomCenterCol + 1);
       cellar.SetTile(stairsLoc.Row + 4, roomCenterCol - 1, TileFactory.Get(TileType.DungeonFloor));
-      SetStatue(stairsLoc.Row + 5, roomCenterCol - 1);
+      SetStatue(stairsLoc.Row + 4, roomCenterCol - 1);
       cellar.SetTile(stairsLoc.Row + 4, roomCenterCol + 1, TileFactory.Get(TileType.DungeonFloor));
       SetStatue(stairsLoc.Row + 4, roomCenterCol + 1);
     }
