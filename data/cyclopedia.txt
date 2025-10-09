@@ -478,3 +478,6 @@ Much like a normal bee, except the size of a dog. And inexplicably angry.
 #
 invisible stalker
 A minor demon typically summoned by a wizard or diabolist to assassinate their enemies.
+#
+wraith
+A malignant ghost whose mortal form is visible as a faint outline of pale luminescence. Its touch numbs limbs and mind.

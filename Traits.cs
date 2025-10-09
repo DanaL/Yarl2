@@ -2303,6 +2303,45 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
   }
 }
 
+class NumbedTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => "Your numbness fades.";
+  public override string AsText() => $"Numbed#{SourceId}#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    if (target.HasTrait<NumbedTrait>())
+    {
+      ExpiresOn += (ulong)gs.Rng.Next(10, 21);
+      return [];
+    }
+
+    target.Traits.Add(this);
+    OwnerID = target.ID;
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
+
+    target.Recovery -= 0.25;
+
+    AttackModTrait attackMod = new() { Amt = -5, SourceId = SourceId };
+    target.Traits.Add(attackMod);
+
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} numb!" ];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
+    {
+      Remove(gs);
+
+      victim.Recovery += 0.25;
+
+      victim.Traits = [..victim.Traits.Where(t => t.SourceId != SourceId)];
+    }    
+  }
+}
+
 class NumberListTrait : Trait
 {
   public string Name { get; set; } = "";
@@ -2310,6 +2349,12 @@ class NumberListTrait : Trait
 
   public override string AsText() => $"NumberList#{Name}#{string.Join(',', Items)}";
 }
+
+class NumbsTrait : Trait
+{
+  public override string AsText() => "Numbs";
+}
+
 
 // Trait for items who have a specific owner, mainly so I can alert them when,
 // say, the player picks them up, etc
@@ -3845,6 +3890,14 @@ class TraitFactory
       }
     },
     { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    {
+      "Numbed", (pieces, gameObj) => new NumbedTrait()
+      {
+        SourceId = ulong.Parse(pieces[1]),
+        OwnerID = ulong.Parse(pieces[1]),
+        ExpiresOn = ulong.Parse(pieces[3])
+      }
+    },
     { "NumberList", (pieces, gameObj) =>
       new NumberListTrait()
       {
@@ -3852,6 +3905,7 @@ class TraitFactory
         Items = pieces[2] == "" ? [] : [..pieces[2].Split(',').Select(int.Parse)]
       }
     },
+    { "Numbs", (pieces, gameObj) => new NumbsTrait() },
     { "OnFire", (pieces, gameObj) => new OnFireTrait()
     {
       Expired = bool.Parse(pieces[1]), OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),

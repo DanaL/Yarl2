@@ -583,6 +583,13 @@ class Battle
           gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);          
         }
 
+        if (t is NumbsTrait)
+        {
+          NumbedTrait numbed = new() { SourceId = attacker.ID };
+          var msgs = numbed.Apply(target, gs);
+          gs.UIRef().AlertPlayer(string.Join(" ", msgs).Trim(), gs, target.Loc);
+        }
+
         if (t is GrapplerTrait gt)
           grappler = gt;
 

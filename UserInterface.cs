@@ -698,6 +698,12 @@ abstract class UserInterface
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("LIMPING");
     }
+    if (!statuses.Contains("NUMBED") && gs.Player.HasTrait<NumbedTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREY, "NUMBED")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("NUMBED");
+    }
     if (!statuses.Contains("TELEPATHIC") && gs.Player.HasActiveTrait<TelepathyTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.PURPLE, "TELEPATHIC")];
