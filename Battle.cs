@@ -572,7 +572,8 @@ class Battle
      
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
-      
+
+      List<string> messages = [];
       GrapplerTrait? grappler = null;
       bool thief = false;
       foreach (Trait t in attacker.Traits)
@@ -580,14 +581,14 @@ class Battle
         if (t is KnockBackTrait)
         {
           string msg = ResolveKnockBack(attacker, target, gs);
-          gs.UIRef().AlertPlayer(msg, gs, attacker.Loc);          
+          messages.Add(msg);
         }
 
         if (t is NumbsTrait)
         {
           NumbedTrait numbed = new() { SourceId = attacker.ID };
           var msgs = numbed.Apply(target, gs);
-          gs.UIRef().AlertPlayer(string.Join(" ", msgs).Trim(), gs, target.Loc);
+          messages.AddRange(msgs);          
         }
 
         if (t is GrapplerTrait gt)
@@ -608,7 +609,9 @@ class Battle
 
         if (t is FrighteningTrait ft && !swallowed)
         {
-          HandleFrightening(target, gs, ft);
+          FrightenedTrait frightened = new() { DC = ft.DC, ExpiresOn = gs.Turn + 25 };
+          List<string> msgs = frightened.Apply(target, gs);
+          messages.AddRange(msgs);
         }
       }
 
@@ -619,6 +622,11 @@ class Battle
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
       ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
+
+      if (messages.Count > 0)
+      {        
+          gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
+      }
 
       // Handling this here just so messages resulting from it happen after messages from ResolveMeleeHIt()
       if (thief)
@@ -673,18 +681,6 @@ class Battle
     }
 
     return false;
-  }
-
-  static void HandleFrightening(Actor target, GameState gs, FrighteningTrait fright)
-  {
-    FrightenedTrait frightened = new() { DC = fright.DC, ExpiresOn = gs.Turn + 25 };
-    List<string> msgs = frightened.Apply(target, gs);
-
-    UserInterface ui = gs.UIRef();
-    foreach (string msg in msgs)
-    {
-      ui.AlertPlayer(msg, gs, target.Loc);
-    }
   }
 
   static void HandleThief(Actor attacker, Actor target, GameState gs)
