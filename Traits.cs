@@ -3894,7 +3894,7 @@ class TraitFactory
       "Numbed", (pieces, gameObj) => new NumbedTrait()
       {
         SourceId = ulong.Parse(pieces[1]),
-        OwnerID = ulong.Parse(pieces[1]),
+        OwnerID = ulong.Parse(pieces[2]),
         ExpiresOn = ulong.Parse(pieces[3])
       }
     },
