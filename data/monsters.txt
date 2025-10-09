@@ -69,3 +69,4 @@ lard golem        |G|cream        |lightbrown  |15|45|5| 1.0|12|10|MeleeBlunt#1#
 phantom summoner  |p|iceblue      |blue        |16|50|5| 1.0|10|10|MinorSummon#0#0#0#0#0#12#Attack,MagicMissile#3#6#5#2#0#2#Attack,MeleeSlashing#1#1#5#1#0#0#Attack|Intelligent|
 hellhound pup     |d|dullred      |brown       |14|30|6| 1.0|10|10|FireBreath#0#4#5#3#15#5#Attack,MeleePiercing#1#1#10#1#0#0#Attack|Resistance#Fire|
 hellhound         |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#5#6#3#15#5#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Immunity#Fire|
+killer bee        |I|yelloworange |brown       |17|12|6| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying,Poisoner#13#2#20|
