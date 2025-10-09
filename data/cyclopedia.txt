@@ -466,3 +466,9 @@ Wizard colleges needed something to do with grease from their cafeterias. Waste 
 #
 phantom summoner
 Sorcerous apprenticeships tend to be quite dangerous, and so apprenctices account for a higher proportion of ghosts than the general population. They often remember some of the spells they knew in life.
+#
+hellhound pup
+Heat and sulfur emanate from this small canine. Flames lick across its coat, and yet it's oddly cute.
+#
+hellhound
+Even demons love dogs and keep them as pets! Firebreathing, snarling pets.
