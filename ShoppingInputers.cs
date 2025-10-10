@@ -133,7 +133,7 @@ class ShopMenuInputer : Inputer
     sb.Append(".\n\n");
     sb.Append(blurb);
     sb.Append("\n\n");
-
+    
     if (MenuItems.Count == 0 && noInventory == "")
     {
       sb.Append("I'm afraid my shelves are a bit bare at the moment.\n");
@@ -331,6 +331,7 @@ class SmithyInputer : ShopMenuInputer
   bool _offerRepair;
   bool _offerUpgrade;
   char _reagent;
+  HashSet<char> opts { get; set; } = [];
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {
@@ -363,26 +364,36 @@ class SmithyInputer : ShopMenuInputer
       menuState = menu.Curr;
     else
       menuState = 0;
-
+    
     string blurb = Blurb;
     if (ch == Constants.ESC || ch == ' ')
     {
       Close();
       return;
     }
-    else if (menuState == 0 && ch == 'a')
+
+    if (!(ch == '\n' || opts.Contains(ch)))
+    {
+      WritePopup(Blurb);
+      return;
+    }
+
+    if (menuState == 0 && ch == 'a')
     {
       MenuItems = MenuFromInventory(Shopkeeper);
+      opts = [.. MenuItems.Select(i => i.Key)];
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(1);
     }
     else if (menuState == 0 && ch == 'b')
     {
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(2);
+      opts = [.. MenuItems.Select(i => i.Key)];
       MenuItems = RepairMenu();
     }
     else if (menuState == 0 && ch == 'c')
     {
       Shopkeeper.Stats[Attribute.ShopMenu] = new Stat(3);
+      opts = [.. MenuItems.Select(i => i.Key)];
       MenuItems = ReagentMenu();
     }
     else if (menuState == 1)
@@ -400,6 +411,7 @@ class SmithyInputer : ShopMenuInputer
       _reagent = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
       MenuItems = UpgradeMenu();
+      opts = [.. MenuItems.Select(i => i.Key)];
     }
     else if (menuState == 4)
     {
@@ -501,31 +513,42 @@ class SmithyInputer : ShopMenuInputer
       sb.Append(Blurb);
       sb.Append("\n\n");
 
+      opts = new(['a']);
       sb.Append("a) Do some shopping.\n");
       if (_offerRepair)
+      {
         sb.Append("b) Repair gear.\n");
+        opts.Add('b');
+      }
       if (_offerUpgrade)
+      {
         sb.Append("c) Try to enchant an item.\n");
+        opts.Add('c');
+      }
 
       dialogueText = sb.ToString();
     }
     else if (menuState == 1)
     {
       dialogueText = MenuScreen(Blurb);
+      opts = [.. MenuItems.Select(i => i.Key)];
     }
     else if (menuState == 2)
     {
       dialogueText = MenuScreen("What would you like repaired?");
+      opts = [.. MenuItems.Select(i => i.Key)];
     }
     else if (menuState == 3)
     {
       dialogueText = MenuScreen("What reagent shall we use?");
+      opts = [.. MenuItems.Select(i => i.Key)];
     }
     else if (menuState == 4)
     {
       var (item, _) = GS.Player.Inventory.ItemAt(_reagent);
       string txt = $"I can use your [ICEBLUE {item!.FullName}] to enchant:";
       dialogueText = MenuScreen(txt, "Hmm...you have no items I can upgrade with that.\n");
+      opts = [.. MenuItems.Select(i => i.Key)];
     }
     else
     {
