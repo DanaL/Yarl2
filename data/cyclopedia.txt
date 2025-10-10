@@ -227,6 +227,9 @@ Learn what an unidentified item does.
 scroll of treasure finding
 Some wizards were too impatient for sightseeing and invented these scrolls to speed their adventures along.
 #
+scroll of blink
+A short range teleport spell. Often handy for getting you out of immediate danger.
+#
 zorkmid
 Cash money, the currency of the realm.
 #
