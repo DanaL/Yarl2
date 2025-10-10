@@ -133,12 +133,12 @@ class Vaults
       switch (rulerInfo.Type)
       {
         case OGRulerType.ElfLord:
-          statueDesc = "a graffitied, defaced statue of an elf.";
+          statueDesc = "a graffitied, defaced statue of an elf";
           ch = '@';
           skullType = "elf";
           break;
         default:
-          statueDesc = "a graffitied, defaced statue of a dwarf.";
+          statueDesc = "a graffitied, defaced statue of a dwarf";
           ch = 'h';
           skullType = "dwarf";
           break;
