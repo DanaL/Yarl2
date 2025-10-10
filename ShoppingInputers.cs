@@ -127,16 +127,20 @@ class ShopMenuInputer : Inputer
 
   protected int TotalInvoice() => MenuItems.Values.Select(mi => mi.SelectedCount * mi.Price).Sum();
 
-  protected virtual string MenuScreen(string blurb)
+  protected virtual string MenuScreen(string blurb, string noInventory = "")
   {
     var sb = new StringBuilder(Shopkeeper.Appearance.IndefArticle().Capitalize());
     sb.Append(".\n\n");
     sb.Append(blurb);
     sb.Append("\n\n");
 
-    if (MenuItems.Count == 0)
+    if (MenuItems.Count == 0 && noInventory == "")
     {
-      sb.Append("I'm afraid my shelves are a bit bare at the moment.");
+      sb.Append("I'm afraid my shelves are a bit bare at the moment.\n");
+    }
+    else if (MenuItems.Count == 0)
+    {
+      sb.Append(noInventory);
     }
     else
     {
@@ -326,7 +330,7 @@ class SmithyInputer : ShopMenuInputer
 {
   bool _offerRepair;
   bool _offerUpgrade;
-  char _itemToEnchant;
+  char _reagent;
 
   public SmithyInputer(Actor shopkeeper, string blurb, GameState gs) : base(shopkeeper, blurb, gs)
   {
@@ -378,8 +382,8 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 0 && ch == 'c')
     {
-      Shopkeeper.Stats[Attribute.ShopMenu].SetMax(3);
-      MenuItems = UpgradeMenu();
+      Shopkeeper.Stats[Attribute.ShopMenu] = new Stat(3);
+      MenuItems = ReagentMenu();
     }
     else if (menuState == 1)
     {
@@ -393,9 +397,9 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 3 && MenuItems.ContainsKey(ch))
     {
-      _itemToEnchant = ch;
+      _reagent = ch;
       Shopkeeper.Stats[Attribute.ShopMenu].SetMax(4);
-      MenuItems = ReagentMenu();
+      MenuItems = UpgradeMenu();
     }
     else if (menuState == 4)
     {
@@ -414,15 +418,13 @@ class SmithyInputer : ShopMenuInputer
   {
     Dictionary<char, ShopMenuItem> menuItems = [];
 
-    double markup = CalcMarkup();
     var reagents = GS.Player.Inventory.Items()
                             .Where(i => i.Type == ItemType.Reagent)
                             .OrderBy(i => i.Slot);
     foreach (Item item in reagents)
-    {
-      int price = (int)(50 * markup);
+    {      
       if (!menuItems.ContainsKey(item.Slot))
-        menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
+        menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 0));
     }
 
     return menuItems;
@@ -430,6 +432,8 @@ class SmithyInputer : ShopMenuInputer
 
   Dictionary<char, ShopMenuItem> UpgradeMenu()
   {
+    var (reagent, _) = GS.Player.Inventory.ItemAt(_reagent);
+
     Dictionary<char, ShopMenuItem> menuItems = [];
     foreach (Item item in GS.Player.Inventory.Items().OrderBy(i => i.Slot))
     {
@@ -439,8 +443,12 @@ class SmithyInputer : ShopMenuInputer
         continue;
       if (item.HasTrait<RustedTrait>())
         continue;
+      if (!Alchemy.Compatible(item, reagent!))
+        continue;
 
-      menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, 0));
+      double markup = CalcMarkup();
+      int price = (int)(50 * markup);
+      menuItems.Add(item.Slot, new ShopMenuItem(item.Slot, item, 1, price));
     }
 
     return menuItems;
@@ -511,13 +519,13 @@ class SmithyInputer : ShopMenuInputer
     }
     else if (menuState == 3)
     {
-      dialogueText = MenuScreen("What shall we try to upgrade?");
+      dialogueText = MenuScreen("What reagent shall we use?");
     }
     else if (menuState == 4)
     {
-      var (item, _) = GS.Player.Inventory.ItemAt(_itemToEnchant);
-      string txt = $"Try to enchant your [ICEBLUE {item!.FullName}] with what?";
-      dialogueText = MenuScreen(txt);
+      var (item, _) = GS.Player.Inventory.ItemAt(_reagent);
+      string txt = $"I can use your [ICEBLUE {item!.FullName}] to enchant:";
+      dialogueText = MenuScreen(txt, "Hmm...you have no items I can upgrade with that.\n");
     }
     else
     {
@@ -531,15 +539,15 @@ class SmithyInputer : ShopMenuInputer
   {
     if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out var menuState) && menuState.Curr == 4)
     {
-      char reagent = MenuItems.Values.Where(i => i.SelectedCount > 0)
+      char item = MenuItems.Values.Where(i => i.SelectedCount > 0)
                               .Select(i => i.Slot)
                               .First();
-
+      
       return new UpgradeItemUIResult()
       {
         Zorkminds = TotalInvoice(),
-        ItemSlot = _itemToEnchant,
-        ReagentSlot = reagent
+        ItemSlot = item,
+        ReagentSlot = _reagent!
       };
     }
     else if (Shopkeeper.Stats.TryGetValue(Attribute.ShopMenu, out menuState) && menuState.Curr == 2)
