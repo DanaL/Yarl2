@@ -1141,6 +1141,11 @@ class FirstBossTrait : Trait
   public override string AsText() => "FirstBoss";
 }
 
+class MoldSporesTrait : Trait
+{
+  public override string AsText() => "MoldSpores";
+}
+
 class MolochAltarTrait : Trait
 {
   public override string AsText() => "MolochAltar";
@@ -3795,6 +3800,7 @@ class TraitFactory
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
     { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
+    { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
@@ -3877,8 +3883,8 @@ class TraitFactory
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
-    { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
-    { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
+    { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },    
+    { "MoldSpores", (pieces, gameObj) => new MoldSporesTrait() },
     { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
     { "Named", (pieces, gameObj) => new NamedTrait() },

@@ -484,3 +484,6 @@ A minor demon typically summoned by a wizard or diabolist to assassinate their e
 #
 wraith
 A malignant ghost whose mortal form is visible as a faint outline of pale luminescence. Its touch numbs limbs and mind.
+#
+patch of yellow mold
+A sickly, unwholesome looking patch of mold.

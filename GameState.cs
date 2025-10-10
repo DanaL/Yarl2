@@ -1490,6 +1490,41 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
+    foreach (Item item in ObjDb.EnvironmentsAt(loc))
+    {
+      if (item.HasActiveTrait<MoldSporesTrait>())
+      {
+        UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} explodes in a cloud of spores!", this, loc);
+
+        HashSet<Loc> affected = [.. Util.Adj8Locs(loc).Where(l => TileAt(l).PassableByFlight())];
+        affected.Add(loc);
+        ExplosionAnimation explosion = new(this)
+        {
+          MainColour = Colours.LIME_GREEN,
+          AltColour1 = Colours.YELLOW,
+          AltColour2 = Colours.YELLOW_ORANGE,
+          Highlight = Colours.DARK_GREEN,
+          Centre = loc,
+          Sqs = [.. affected],
+          Ch = '*'
+        };
+        UI.PlayAnimation(explosion, this);
+
+        foreach (Loc affectedLoc in affected)
+        {
+          if (ObjDb.Occupant(affectedLoc) is Actor actor && !actor.HasTrait<ConstructTrait>() && !actor.HasTrait<UndeadTrait>())
+          {
+            List<string> msgs = [$"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "cough")}!" ];            
+            DiseasedTrait disease = new() { SourceId = item.ID };
+            msgs.AddRange(disease.Apply(actor, this));
+            UI.AlertPlayer(string.Join(" ", msgs).Trim(), this, affectedLoc);
+          }
+        }
+
+        ObjDb.RemoveItemFromGame(loc, item);
+      }
+    }
+
     return messages.Count > 0 ? string.Join(" ", messages) : "";
   }
 

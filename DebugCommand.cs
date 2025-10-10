@@ -117,7 +117,7 @@ class DebugCommand(GameState gs)
     {"holy water", ItemNames.HOLY_WATER },
     {"bone", ItemNames.BONE },
     {"skull", ItemNames.SKULL },
-    {"axes book", ItemNames.GUIDE_AXES }
+    {"axes book", ItemNames.GUIDE_AXES }    
   };
 
   public string DoCommand(string txt)
@@ -200,7 +200,21 @@ class DebugCommand(GameState gs)
 
       return "";
     }
+    else if (txt == "mold")
+    {
+      List<Loc> opt = [.. Util.Adj8Locs(_gs.Player.Loc).Where(loc => _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable())];
 
+      if (opt.Count > 0)
+      {
+        Loc loc = opt[_gs.Rng.Next(opt.Count)];
+        Item mold = ItemFactory.YellowMold(_gs);
+        _gs.ObjDb.Add(mold);
+        _gs.ObjDb.SetToLoc(loc, mold);
+      }
+
+      return "";
+    }
+    
     var parts = txt.Split(' ', 2);
     if (parts.Length < 2)
       return "Debug commands are formated: add/give/drop <obj name>";

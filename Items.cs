@@ -371,11 +371,9 @@ class ItemFactory
 
   public static Item Mist(GameState gs)
   {
-    var mist = new Item()
+    Item mist = new()
     {
-      Name = "mist",
-      Type = ItemType.Fog,
-      Value = 0,
+      Name = "mist", Type = ItemType.Fog, Value = 0,
       Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
@@ -384,13 +382,25 @@ class ItemFactory
     return mist;
   }
 
+  public static Item YellowMold(GameState gs)
+  {
+    Item mold = new()
+    {
+      Name = "patch of yellow mold", Type = ItemType.Environment, Value = 0,
+      Glyph = new Glyph('%', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
+    };
+    mold.Traits.Add(new AffixedTrait());
+    mold.Traits.Add(new FlammableTrait());
+    mold.Traits.Add(new MoldSporesTrait());
+
+    return mold;
+  }
+
   public static Item Fog(GameState gs)
   {
-    var mist = new Item()
+    Item mist = new()
     {
-      Name = "fog",
-      Type = ItemType.Fog,
-      Value = 0,
+      Name = "fog", Type = ItemType.Fog, Value = 0,
       Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
@@ -410,9 +420,7 @@ class ItemFactory
   {
     Item light = new()
     {
-      Name = "light",
-      Type = ItemType.Environment,
-      Value = 0,
+      Name = "light", Type = ItemType.Environment, Value = 0,
       Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
     };
     light.SetZ(-100);
