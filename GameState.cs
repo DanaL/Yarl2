@@ -1275,6 +1275,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   {
     Dictionary<(int, int), int> extraCosts = [];
 
+    // Mold, fire, etc shouldn't incur extra costs for brainless monsters
+    // but I'd have to do individual pathfinding at that point
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
     {
       foreach (Trait t in obj.Traits)
@@ -1288,6 +1290,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
           extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 15;
         }
+        else if (t is MoldSporesTrait)
+        {
+          (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
+          extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 5;
+        }
       }
     }
 
@@ -1295,6 +1302,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
     }
+
     DMap = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
 
