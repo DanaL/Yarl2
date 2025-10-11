@@ -75,17 +75,20 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
 
       // Maybe add an illusion/trap
-      if (levelNum < numOfLevels - 1)
+      if (levelNum < numOfLevels - 1 && rng.Next(10) == 0)
       {
-        // We don't want to make these tooooooo common
-        if (rng.NextDouble() > 0.1)
-          continue;
-
         AddBaitIllusion(levels[levelNum], DungeonId, levelNum, objDb, rng);
       }
 
       if (rng.Next(4) == 0)
+      {
         TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, levels[levelNum], objDb, rng);
+      }
+
+      if (rng.Next(6) == 0)
+      {
+        AddMoldPatch(DungeonId, levelNum, levels[levelNum], objDb, rng);
+      }
     }
 
     PopulateDungeon(dungeon, rng, objDb);

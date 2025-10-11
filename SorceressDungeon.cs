@@ -66,6 +66,11 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
       Actor mimic = MonsterFactory.Mimic();
       objDb.AddNewActor(mimic, new Loc(DungeonId, lvl, mr, mc));
+
+      if (rng.Next(6) == 0)
+      {
+        AddMoldPatch(DungeonId, lvl, map, objDb, rng);
+      }
     }
     
     return (towerDungeon, entrance);

@@ -215,14 +215,14 @@ abstract class DungeonBuilder
         if (deck.Indexes.Count == 0)
           deck.Reshuffle(rng);
         string m = deck.Monsters[deck.Indexes.Dequeue()];
-        
+
         // Some monsters are a bit special and take a bit of extra work
         //Actor monster = MonsterFactory.Get(m, objDb, rng);
         Actor monster = MonsterFactory.Get(m, objDb, rng);
         monster.Loc = loc;
         if (rng.NextDouble() < 0.8)
           monster.Traits.Add(new SleepingTrait());
-        objDb.AddNewActor(monster, loc);        
+        objDb.AddNewActor(monster, loc);
       }
     }
   }
@@ -234,7 +234,7 @@ abstract class DungeonBuilder
     {
       if (PortalCandidate(map, sq.Item1, sq.Item2))
         candidates.Add(sq);
-    } 
+    }
 
     if (candidates.Count == 0)
       return;
@@ -374,7 +374,7 @@ abstract class DungeonBuilder
     }
   }
 
-  static  bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;
+  static bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;
 
   static bool IsNWCorner(Map map, int row, int col)
   {
@@ -394,7 +394,7 @@ abstract class DungeonBuilder
       return false;
     if (!IsWall(map.TileAt(row + 1, col + 1).Type))
       return false;
-      
+
     return true;
   }
 
@@ -405,7 +405,7 @@ abstract class DungeonBuilder
     if (!IsWall(map.TileAt(row - 1, col).Type))
       return false;
     if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;    
+      return false;
     if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
       return false;
     if (!IsWall(map.TileAt(row, col + 1).Type))
@@ -416,7 +416,7 @@ abstract class DungeonBuilder
       return false;
     if (!IsWall(map.TileAt(row + 1, col + 1).Type))
       return false;
-      
+
     return true;
   }
 
@@ -425,7 +425,7 @@ abstract class DungeonBuilder
     if (!IsWall(map.TileAt(row - 1, col - 1).Type))
       return false;
     if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
-      return false;    
+      return false;
     if (!IsWall(map.TileAt(row - 1, col - 1).Type))
       return false;
     if (!IsWall(map.TileAt(row, col - 1).Type))
@@ -438,7 +438,7 @@ abstract class DungeonBuilder
       return false;
     if (!IsWall(map.TileAt(row + 1, col + 1).Type))
       return false;
-      
+
     return true;
   }
 
@@ -449,7 +449,7 @@ abstract class DungeonBuilder
     if (map.TileAt(row - 1, col).Type != TileType.DungeonFloor)
       return false;
     if (!IsWall(map.TileAt(row - 1, col - 1).Type))
-      return false;    
+      return false;
     if (map.TileAt(row, col - 1).Type != TileType.DungeonFloor)
       return false;
     if (!IsWall(map.TileAt(row, col + 1).Type))
@@ -460,7 +460,7 @@ abstract class DungeonBuilder
       return false;
     if (!IsWall(map.TileAt(row + 1, col + 1).Type))
       return false;
-      
+
     return true;
   }
 
@@ -495,15 +495,15 @@ abstract class DungeonBuilder
   {
     int[] trapOpts;
     if (level == 0)
-      trapOpts = [3, 6, 7];      
+      trapOpts = [3, 6, 7];
     else if (level == dungeonDepth - 1)
       trapOpts = [0, 1, 2, 3, 4, 6, 7]; // no trap doors on bottom level
     else
       trapOpts = [0, 1, 2, 3, 4, 5, 6, 7];
-   
+
     (int, int) sq;
     int numOfTraps = rng.Next(1, 6);
-    for (int j = 0 ; j < numOfTraps; j++)
+    for (int j = 0; j < numOfTraps; j++)
     {
       int trap = trapOpts[rng.Next(trapOpts.Length)];
       switch (trap)
@@ -538,7 +538,7 @@ abstract class DungeonBuilder
           map.SetTile(sq, TileFactory.Get(TileType.HiddenMagicMouth));
           break;
         case 7:
-          sq = map.RandomTile(TileType.DungeonFloor, rng);       
+          sq = map.RandomTile(TileType.DungeonFloor, rng);
           map.SetTile(sq, TileFactory.Get(TileType.HiddenSummonsTrap));
           break;
       }
@@ -607,27 +607,27 @@ abstract class DungeonBuilder
         // horizontal
         jetDir = horizontalDir;
         jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
-        triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+        triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4) };
       }
       else
       {
         // vertical
         jetDir = verticalDir;
         jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
-        triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+        triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4) };
       }
     }
     else if (horizontalValid)
     {
       jetDir = horizontalDir;
       jetLoc = cornerLoc with { Col = cornerLoc.Col - deltaH.Item2 };
-      triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4)};
+      triggerLoc = cornerLoc with { Col = cornerLoc.Col + deltaH.Item2 * rng.Next(1, 4) };
     }
     else
     {
       jetDir = verticalDir;
       jetLoc = cornerLoc with { Row = cornerLoc.Row - deltaV.Item1 };
-      triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4)};
+      triggerLoc = cornerLoc with { Row = cornerLoc.Row + deltaV.Item1 * rng.Next(1, 4) };
     }
 
     Tile fireJet = new FireJetTrap(false, jetDir);
@@ -664,7 +664,7 @@ abstract class DungeonBuilder
     Item bait = ItemFactory.Illusion(itemName, objDb);
     objDb.SetToLoc(loc, bait);
   }
-  
+
   protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
   {
     DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, dungeonId, levelNum, objDb, rng);
@@ -691,6 +691,30 @@ abstract class DungeonBuilder
       TileType.Chasm or TileType.Bridge or TileType.WoodBridge => true,
       _ => false,
     };
+  }
+
+  protected static void AddMoldPatch(int dungeonId, int levelNum, Map map, GameObjectDB objDb, Rng rng)
+  {
+    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
+    List<Loc> openFloors = [.. sqs.Where(l => !objDb.AreBlockersAtLoc(l))];
+    if (openFloors.Count == 0)
+      return;
+
+    Loc loc = openFloors[rng.Next(openFloors.Count)];
+    Item mold = ItemFactory.YellowMold();
+    objDb.Add(mold);
+    objDb.SetToLoc(loc, mold);
+
+    List<Loc> moldySpots = [loc];
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      if (map.TileAt(adj.Row, adj.Col).Passable() && rng.Next(5) == 0)
+      {
+        mold = ItemFactory.YellowMold();
+        objDb.Add(mold);
+        objDb.SetToLoc(adj, mold);
+      }
+    }
   }
 }
 

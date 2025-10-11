@@ -2798,8 +2798,15 @@ class StatDebuffTrait : TemporaryTrait
     if (target.Stats[Attr].Curr < -4)
       return [];
 
-    if (target.AbilityCheck(Attribute.Constitution, DC, gs.Rng))
+    if (target.Stats.ContainsKey(Attribute.Constitution))
+    {
+      if (target.AbilityCheck(Attribute.Constitution, DC, gs.Rng))
+        return [];
+    }
+    else if (gs.Rng.Next(20) >= DC)
+    {
       return [];
+    }
 
     target.Stats[Attr].Change(Amt);
     target.Traits.Add(this);

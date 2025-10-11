@@ -207,7 +207,7 @@ class DebugCommand(GameState gs)
       if (opt.Count > 0)
       {
         Loc loc = opt[_gs.Rng.Next(opt.Count)];
-        Item mold = ItemFactory.YellowMold(_gs);
+        Item mold = ItemFactory.YellowMold();
         _gs.ObjDb.Add(mold);
         _gs.ObjDb.SetToLoc(loc, mold);
       }

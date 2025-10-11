@@ -382,7 +382,7 @@ class ItemFactory
     return mist;
   }
 
-  public static Item YellowMold(GameState gs)
+  public static Item YellowMold()
   {
     Item mold = new()
     {

@@ -57,7 +57,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     if (Actor!.IsDisguised())
     {
       var disguise = Actor.Traits.OfType<DisguiseTrait>().First();
-      GameState!.UIRef().AlertPlayer($"Wait! That {disguise.DisguiseForm} is actually {actor.Name.IndefArticle()}!", GameState, Actor.Loc);
+      GameState!.UIRef().AlertPlayer($"Wait! That {disguise.DisguiseForm} is actually {Actor.Name.IndefArticle()}!", GameState, Actor.Loc);
       disguise.Disguised = false;
       Actor.Glyph = disguise.TrueForm;
     }
@@ -1522,7 +1522,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         }
       }
 
-      gs.ObjDb.RemoveItemFromLoc(item.Loc, item);
+      GameState.ObjDb.RemoveItemFromLoc(item.Loc, item);
 
       bool success = Cmd.AddItemToInventory(Actor, item, GameState);
       if (!success)
@@ -1534,7 +1534,7 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         foreach (Item stackedItem in GameState.ObjDb.ItemsAt(Actor.Loc).Where(i => i == item))
         {
           Cmd.AddItemToInventory(Actor, stackedItem, GameState);
-          gs.ObjDb.RemoveItemFromLoc(stackedItem.Loc, stackedItem);
+          GameState.ObjDb.RemoveItemFromLoc(stackedItem.Loc, stackedItem);
           ++count;
         }
       }
