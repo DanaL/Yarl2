@@ -50,7 +50,7 @@ abstract class Inputer(GameState gs)
   }
 }
 
-record LocDetails(string Title, string Desc, char Ch);
+record LocDetails(string Title, string Desc, char Ch, int HpCurr = -1, int HpMax = -1);
 
 class DummyInputer(GameState gs) : Inputer(gs)
 {

@@ -70,6 +70,7 @@ class Colours
   public static readonly Colour UNDERWATER = new(0, 118, 190, 50);
   public static readonly Colour EXAMINE = ICE_BLUE with { Alpha = 175 };
   public static readonly Colour CREAM = new(255, 253, 208, 0);
+  public static readonly Colour SHAMROCK = new(3, 172, 19, 255);
 
   public static string ColourToText(Colour colour)
   {
@@ -113,6 +114,7 @@ class Colours
     else if (colour == HOLY_AURA) return "holyaura";
     else if (colour == NULL) return "null";
     else if (colour == CREAM) return "cream";
+    else if (colour == SHAMROCK) return "shamrock";
     else throw new Exception($"Hmm I don't know that colour {colour}");
   }
 
@@ -158,6 +160,7 @@ class Colours
     "holyaura" => HOLY_AURA,
     "null" => NULL,
     "cream" => CREAM,
+    "shamrock" => SHAMROCK,
     _ => throw new Exception($"Hmm I don't know that colour {colour}")
   };
 

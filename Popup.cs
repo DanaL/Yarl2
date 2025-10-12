@@ -122,7 +122,13 @@ class Popup : IPopup
   readonly int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
-  
+
+  public string BarLabel { get; set; } = "";
+  public int Value1 { get; set; }
+  public int Value2 { get; set; }
+  public Colour Colour1 { get; set; }
+  public Colour Colour2 { get; set;  }
+
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
     int widthGuess = GuessWidth(message);
@@ -138,7 +144,7 @@ class Popup : IPopup
 
     LineScanner scanner = new(message);
     Words = scanner.Scan();
-        
+
     // preferredRow is the ideal row for the bottom of the box <-- this is dumb!
     // and the preferredCol is the ideal col for the centre of it
     PreferredRow = preferredRow;
@@ -215,6 +221,31 @@ class Popup : IPopup
     }
 
     WritePaddedLine();
+
+    if (BarLabel != "")
+    {
+      string blankLine = "| " + new string(' ', Width - 4) + " |";
+      ui.WriteText([(Colours.WHITE, blankLine)], row++, col);
+      int barWidth = Width - BarLabel.Length - 7;
+      List<(Colour, string)> barLine = [(Colours.WHITE, $"| {BarLabel} [")];
+
+      double ratio = Value1 / (double)Value2;
+      int bar1Len = (int)(barWidth * ratio);
+      int bar2Len = barWidth - bar1Len;
+      string bar1 = new('█', bar1Len);
+      barLine.Add((Colour1, bar1));
+
+      if (bar2Len > 0)
+      {
+        string bar2 = new('█', bar2Len);
+        barLine.Add((Colour2, bar2));
+      }
+
+      barLine.Add((Colours.WHITE, "] |"));
+
+      ui.WriteText(barLine, row++, col);
+      ui.WriteText([(Colours.WHITE, blankLine)], row++, col);
+    }
 
     string bottomBorder = Constants.BOTTOM_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.BOTTOM_RIGHT_CORNER.ToString();
     ui.WriteLine(bottomBorder, row, col, Width, DefaultTextColour);

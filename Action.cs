@@ -3857,8 +3857,18 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
     var (r, c) = GameState!.UIRef().LocToScrLoc(Loc.Row, Loc.Col, Actor!.Loc.Row, Actor.Loc.Col);
 
     LocDetails details = LocInfo(Loc);
+    Popup popup = new(details.Desc, details.Title, r - 2, c);
+    if (details.HpCurr != -1 && details.HpMax != -1)
+    {
+      popup.BarLabel = "HP";
+      popup.Colour1 = Colours.SHAMROCK;
+      popup.Colour2 = Colours.BRIGHT_RED;
+      popup.Value1 = details.HpCurr;
+      popup.Value2 = details.HpMax;
+    }
+
     GameState.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, details.Ch);
-    GameState.UIRef().SetPopup(new Popup(details.Desc, details.Title, r - 2, c));
+    GameState.UIRef().SetPopup(popup);
     GameState.LastPlayerFoV.Add(Loc);
     
     return 0.0;
@@ -3869,6 +3879,8 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
     string name;
     string desc = "I have no further info about this object. This is probably Dana's fault.";
 
+    int hpCurr = -1;
+    int hpMax = -1;
     if (GameState!.ObjDb.Occupant(loc) is Actor actor)
     {
       if (actor is Player)
@@ -3893,6 +3905,10 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
         name = actor.Name.IndefArticle().Capitalize();
         if (_cyclopedia.TryGetValue(actor.Name, out var v))
           desc = v.Text;
+
+        Stat hp = actor.Stats[Attribute.HP];
+        hpCurr = hp.Curr;
+        hpMax = hp.Max;
       }
 
       string extraInfo = "";
@@ -3924,7 +3940,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
         desc += "\n\n" + extraInfo;
       }
 
-      return new LocDetails(name, desc, actor.Glyph.Ch);
+      return new LocDetails(name, desc, actor.Glyph.Ch, hpCurr, hpMax);
     }
 
     List<Item> items = [.. GameState!.ObjDb.VisibleItemsAt(loc).OrderByDescending(i => i.HasTrait<BlockTrait>())];    
