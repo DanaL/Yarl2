@@ -372,7 +372,7 @@ class SmithyInputer : ShopMenuInputer
       return;
     }
 
-    if (!(ch == '\n' || opts.Contains(ch)))
+    if (!(ch == '\n' || ch == '\r' || opts.Contains(ch)))
     {
       WritePopup(Blurb);
       return;
