@@ -192,7 +192,7 @@ abstract class DungeonBuilder
     if (opts.Count > 0)
     {
       Loc loc = opts[rng.Next(opts.Count)];
-      Item item = Treasure.GetTalisam(rng, objDb);
+      Item item = Treasure.GetTalisman(rng, objDb);
       objDb.SetToLoc(loc, item);
     }
   }
