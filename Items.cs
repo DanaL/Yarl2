@@ -251,7 +251,7 @@ class ItemFactory
       Enum.TryParse(item.Name, out ItemNames name);
       Enum.TryParse(item.Type, out ItemType type);
       Glyph glyph = Glyph.TextToGlyph(item.Glyph);
-      ItemTemplate template = new ItemTemplate()
+      ItemTemplate template = new()
       {
         Name = item.DescriptiveName,
         Type = type,
