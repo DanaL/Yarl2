@@ -2431,7 +2431,7 @@ class EscapeDungeonAction(GameState gs) : Action(gs, gs.Player)
       return 1.0;
     }
 
-    ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(4, 9);
+    ulong happensOn = GameState.Turn + (ulong) GameState.Rng.Next(1, 6);
     var recall = new RecallTrait()
     {
       ExpiresOn = happensOn,
