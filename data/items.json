@@ -568,17 +568,6 @@
     ]
   },
   {
-    "Name": "RING_OF_AGGRESSION",
-    "DescriptiveName": "ring of aggression",
-    "Type": "Ring",
-    "Value": 75,
-    "Glyph": "o,white,grey,black,false",
-    "Traits": [
-      "Grants#ACMod&-3;Berzerk",
-      "CursedItem"
-    ]
-  },
-  {
     "Name": "POTION_OF_LEVITATION",
     "DescriptiveName": "potion of levitation",
     "Type": "Potion",
@@ -886,17 +875,6 @@
     "Glyph": "☥,green,darkgreen,black,false",
     "Traits": [
       "Grants#StatBuff&0&max&Dexterity&3&item"
-    ]
-  },
-  {
-    "Name": "RING_OF_FRAILITY",
-    "DescriptiveName": "ring of fraility",
-    "Type": "Ring",
-    "Value": 1,
-    "Glyph": "o,white,grey,black,false",
-    "Traits": [
-      "Grants#StatBuff&0&max&HP&-25&item",
-      "CursedItem"
     ]
   },
   {

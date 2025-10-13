@@ -1761,11 +1761,6 @@ class CurseTrait : TemporaryTrait
   public override string AsText() => $"Curse#{OwnerID}#{ExpiresOn}";
 }
 
-class CursedItemTrait : Trait 
-{
-  public override string AsText() => $"CursedItem";
-}
-
 class CutpurseTrait : Trait
 {
   public override string AsText() => $"Cutpurse#{SourceId}";
@@ -3744,7 +3739,6 @@ class TraitFactory
         ExpiresOn = ulong.Parse(pieces[2])
       }
     },
-    { "CursedItem", (pieces, gameObj) => new CursedItemTrait() },
     { "Cutpurse", (pieces, gameObj) =>
       {
         ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;

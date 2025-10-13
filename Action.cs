@@ -1626,7 +1626,7 @@ class CastCurse(Loc target, int dc) : Action
 
 class MinorSummonAction(GameState gs, Actor actor) : Action(gs, actor)
 {
-  string RandomMonster(Rng rng)
+  static string RandomMonster(Rng rng)
   {
     string[] opts = ["screech bat", "rust monster", "ghoul", "flame beetle", "dire goat", "skeleton"];
     return opts[rng.Next(opts.Length)];
@@ -3058,16 +3058,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         GameState.UIRef().AlertPlayer(s);
         energyCost = 1.0;
-        if (item.HasTrait<CursedItemTrait>())
-        {
-          if (item.Type == ItemType.Ring)
-            GameState.UIRef().AlertPlayer("The ring tightens around your finger!");          
-        }
-        break;
-      case EquipingResult.Cursed:
-        energyCost = 1.0;
-        GameState.UIRef().AlertPlayer("You cannot remove it! It seems to be cursed!");
-        break;
+        break;      
       case EquipingResult.Unequipped:
         s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "remove")} {item.FullName.DefArticle()}.";
         GameState.UIRef().AlertPlayer(s);

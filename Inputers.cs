@@ -1359,9 +1359,6 @@ class InventoryDetails : Inputer
       else if (Cyclopedia.TryGetValue(item.Name, out CyclopediaEntry? entry))
       {
         desc = entry.Text;
-
-        if (item.HasTrait<CursedItemTrait>())
-          desc += "\n\nIt is [brightred cursed]!";
       }
 
       int width = Math.Max(desc.Length, title.Length + 1);
