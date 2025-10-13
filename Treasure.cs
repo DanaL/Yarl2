@@ -90,7 +90,7 @@ class Treasure
 
   public static Item GoodMagicItem(Rng rng, GameObjectDB objDb)
   {
-    int roll = rng.Next(25);
+    int roll = rng.Next(26);
     return roll switch
     {
       0 => ItemFactory.Get(ItemNames.WAND_FIREBALLS, objDb),
@@ -117,6 +117,7 @@ class Treasure
       22 => ItemFactory.Get(ItemNames.GAUNTLETS_OF_POWER, objDb),
       23 => ItemFactory.Get(ItemNames.CLOAK_OF_PROTECTION, objDb),
       24 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
+      25 => ItemFactory.Get(ItemNames.CRIMSON_KING_WARD, objDb),
       _ => ItemFactory.Get(ItemNames.SILVER_LONGSWORD, objDb),
     };
   }

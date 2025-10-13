@@ -332,8 +332,7 @@ abstract class Actor : GameObj, IZLevel
     }
     gs.UIRef().RegisterAnimation(anim);
 
-    AuraOfProtectionTrait? aura = Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault();
-    if (aura is not null)
+    if (Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault() is AuraOfProtectionTrait aura)
     {
       aura.HP -= total;
       if (aura.HP > 0)
@@ -346,6 +345,35 @@ abstract class Actor : GameObj, IZLevel
         msg += "The shimmering aura shatters into glitter and sparks!";
         total = -1 * aura.HP;
         Traits.Remove(aura);
+      }
+    }
+
+    if (Traits.OfType<CrimsonWard>().FirstOrDefault() is CrimsonWard cw && currHP.Curr < currHP.Max)
+    {
+      bool s = false;
+      foreach (Loc adj in Util.Adj8Locs(Loc))
+      {
+        if (gs.ObjDb.Occupant(adj) is Actor adjActor)
+        {
+          int dmgDice = 1 + (currHP.Max - currHP.Curr) / 10;
+
+          if (!s)
+            gs.UIRef().AlertPlayer("The Ward lashes out!", gs, Loc);
+
+          int wardDmg = 0;
+          for (int j = 0; j < dmgDice; j++)
+            wardDmg += gs.Rng.Next(6) + 1;
+          List<(int, DamageType)> dmg = [(total, DamageType.Force)];
+          var (adjHpLeft, _, _) = adjActor.ReceiveDmg(dmg, 0, gs, null, 1.0);
+          if (adjHpLeft < 1)
+          {
+            gs.ActorKilled(adjActor, "a Crimson Ward", null);
+          }
+
+          gs.UIRef().RegisterAnimation(new SqAnimation(gs, adj, Colours.YELLOW_ORANGE, Colours.BRIGHT_RED, '*'));
+
+          s = true;
+        }
       }
     }
 

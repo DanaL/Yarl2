@@ -3169,6 +3169,11 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
   }
 }
 
+class CrimsonWard : Trait
+{
+  public override string AsText() => "CrimsonWard";
+}
+
 class CroesusTouchTrait : Trait
 {
   public override string AsText() => $"CroesusTouch#{SourceId}";
@@ -3729,6 +3734,7 @@ class TraitFactory
     { "Corrosive", (pieces, gameObj) => new CorrosiveTrait() },
     { "Corruption", (pieces, gameObj) => new CorruptionTrait() { Amt = int.Parse(pieces[1]) } },
     { "Countdown", (pieces, gameObj) => new CountdownTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
+    { "CrimsonWard", (pieces, gameObj) => new CrimsonWard() },
     { "CroesusTouch", (pieces, gameObj) => new CroesusTouchTrait { SourceId = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]) }},
     { "Cudgel", (pieces, gameObj) => new CudgelTrait() },
     { "Curse", (pieces, gameObj) =>

@@ -487,3 +487,6 @@ A malignant ghost whose mortal form is visible as a faint outline of pale lumine
 #
 patch of yellow mold
 A sickly, unwholesome looking patch of mold.
+#
+ward of the crimson king
+The Crimson King is a somewhat forgotten deity of war, vengeance, and strife. People pray to less often in these modern, civilized times. This ward lashes out at those who would dare harm one of His followers. The ward deals damage scaled by how far from max HP you are.

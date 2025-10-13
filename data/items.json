@@ -1291,5 +1291,15 @@
       "Block",
       "Opaque#0"
     ]
+  },
+  {
+    "Name": "CRIMSON_KING_WARD",
+    "DescriptiveName": "ward of the crimson king",
+    "Type": "Talisman",
+    "Value": 100,
+    "Glyph": "☥,brightred,dullred,black,false",
+    "Traits": [
+      "Grants#CrimsonWard"
+    ]
   }
 ]
