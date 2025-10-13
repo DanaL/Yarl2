@@ -1647,9 +1647,6 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait() 
                                   { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) })),
     "knock" => new UseResult(new KnockAction(gs, user)),
-    "identify" => new UseResult(new InventoryChoiceAction(gs, user, 
-          new InventoryOptions() { Title = "Identify which item?", Options = InvOption.UnidentifiedOnly }, 
-          new IdentifyItemAction(gs, user, item))),
     "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new ApplyPoisonAction(gs, user, item))),

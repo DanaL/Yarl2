@@ -428,20 +428,6 @@
     ]
   },
   {
-    "Name": "SCROLL_IDENTIFY",
-    "DescriptiveName": "scroll of identify",
-    "Type": "Scroll",
-    "Value": 10,
-    "Glyph": "?,white,grey,black,false",
-    "Traits": [
-      "Consumable",
-      "UseSimple#identify",
-      "Flammable",
-      "Scroll",
-      "Stackable"
-    ]
-  },
-  {
     "Name": "SCROLL_KNOCK",
     "DescriptiveName": "scroll of knock",
     "Type": "Scroll",

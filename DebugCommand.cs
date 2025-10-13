@@ -47,7 +47,6 @@ class DebugCommand(GameState gs)
     {"potion of cold resistance", ItemNames.POTION_COLD_RES},
     {"potion of levitation", ItemNames.POTION_OF_LEVITATION},
     {"antidote", ItemNames.ANTIDOTE},
-    {"scroll of identify", ItemNames.SCROLL_IDENTIFY},
     {"scroll of blink", ItemNames.SCROLL_BLINK},
     {"scroll of knock", ItemNames.SCROLL_KNOCK},
     {"scroll of magic mapping", ItemNames.SCROLL_MAGIC_MAP},

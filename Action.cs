@@ -2992,41 +2992,6 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
-class IdentifyItemAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
-{
-  public char Choice { get; set; }
-  Item? SourceItem { get; set; } = item;
-
-  public override double Execute()
-  {
-    base.Execute();
-
-
-    GameState!.ClearMenu();
-        
-    var (item, _) = Actor!.Inventory.ItemAt(Choice);
-    if (item is null)
-      return 0.0; // I think this should be impossible?
-
-    item.Identify();
-
-    string s = $"\n It's {item.FullName.IndefArticle()}! \n";
-    GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
-
-    string m = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "identify")} {item.FullName.DefArticle()}.";
-    GameState.UIRef().AlertPlayer(m);
-
-    if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
-    {
-      Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
-    }
-
-    return 1.0;
-  }
-
-  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
-}
-
 class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
