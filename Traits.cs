@@ -2974,6 +2974,12 @@ class RecallTrait : BasicTrait, IGameEventListener
     Player player = gs.Player;
     player.Traits.Remove(this);
 
+    if (player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    {
+      swallowed.Remove(gs);
+    }
+    player.ClearAnchors(gs);
+    
     // We can get the entrance to the main dungeon via the History
     // object in Campaign. (I'd like to eventually have side quest
     // dungeons, though, where Recall will also need to be handled

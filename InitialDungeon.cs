@@ -233,9 +233,6 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       }
       else if (rng.NextDouble() < 0.15)
       {
-        // If there's no prisoner on the level, give a small chance of there
-        // being a blood-stained altar. (Mainly because I don't want to bother
-        // checking against the possibility of two altars)
         List<(int, int)> floors = [];
         foreach (var (r, c) in levelMaps[level].SqsOfType(TileType.DungeonFloor))
         {
