@@ -1549,8 +1549,7 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
 
 class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
-  // We're done on any input 
-  public override void Input(char ch) {}
+  public override void Input(char ch) => Close();
 }
 
 class LongMessagerInputer : Inputer
