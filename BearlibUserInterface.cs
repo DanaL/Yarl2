@@ -132,9 +132,11 @@ internal class BLUserInterface : UserInterface, IDisposable
 
   public override void WriteLine(string message, int lineNum, int col, int width, Colour textColour, Colour bgColour)
   {
+    // Need to escape [ and ] for BearLib
+    string s = message.Replace("[", "[[").Replace("]", "]]");
     Terminal.BkColor(ToBearLibColour(bgColour));
     Terminal.Color(ToBearLibColour(textColour));
-    Terminal.Print(col, lineNum, message.PadRight(width));
+    Terminal.Print(col, lineNum, s.PadRight(width));
   }
 
   public override void ClearScreen() => Terminal.Clear();
