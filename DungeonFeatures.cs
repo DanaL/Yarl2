@@ -373,8 +373,11 @@ class IdolAltarMaker
       int lvlLo = int.Max(level - 3, 0);
       int lvlHi = int.Max(level, level + 2) - 1;
       int idolLevel = rng.Next(lvlLo, lvlHi);
-      var (idolR, idolC) = levels[idolLevel].RandomTile(TileType.DungeonFloor, rng);
-      Loc idolLoc = new(dungeonID, idolLevel, idolR, idolC);
+
+      List<Loc> floors = [.. levels[idolLevel].SqsOfType(TileType.DungeonFloor)
+                                  .Select(sq => new Loc(dungeonID, idolLevel, sq.Item1, sq.Item2))
+                                  .Where(l => !objDb.HazardsAtLoc(l))];
+      Loc idolLoc = floors[rng.Next(floors.Count)];
       objDb.Add(idol);
       objDb.SetToLoc(idolLoc, idol);
 
