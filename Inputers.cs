@@ -1547,6 +1547,40 @@ class Inventorier(GameState gs, HashSet<char> options) : Inputer(gs)
   }
 }
 
+class LongPopUp : Inputer
+{
+  string Text { get; set; }
+  Popup Popup { get; set; }
+
+  public LongPopUp(GameState gs, string text) : base(gs)
+  {
+    Text = text;
+    Popup = new Popup(Text, "", 2, -1);
+    WritePopup();
+  }
+
+  public override void Input(char ch)
+  {
+    if (ch == Constants.ESC)
+    {
+      Close();
+      return;
+    }
+    else if (ch == ' ')
+    {
+      Popup.NextPage();
+      Popup.SetText(Text);
+    }
+
+    WritePopup();
+  }
+
+  void WritePopup()
+  {
+    GS.UIRef().SetPopup(Popup);
+  }
+}
+
 class PauseForMoreInputer(GameState gs) : Inputer(gs)
 {
   public override void Input(char ch) => Close();

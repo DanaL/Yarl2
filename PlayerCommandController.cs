@@ -496,6 +496,18 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       ui.SetInputController(new MapView(GS));
     }
+    else if (ch == 'm')
+    {
+      string s = @"What is this?
+
+Delve is a roguelike fantasy CRPG in tradition of nethack, Angband, and others. You will create a character who explores a deep dungeon seeking to defeat a terrible evil lurking in the depths.
+
+Your first character will probably not succeed, and your second may not either. Delve, like many roguelikes, features permadeath: if your character is killed you will not be able to return to a previous save point and will have to begin a new game. But on the bright side, each time you create a character you will be presented with freshly generated world. The dungeon levels, the world above, and the village where you begin will all be a little bit different.
+
+Here is a bunch more text that will make this dialogue box long enough to need at least two pages so that I can test pagination.
+";
+      ui.SetInputController(new LongPopUp(GS, s));      
+    }
     else if (ch == 'o')
     {
       ProcessInteractCmd(ui);
@@ -537,7 +549,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     else if (ch == 'x')
     {
       ui.SetInputController(new Examiner(GS, GS.Player.Loc));
-    }   
+    }
     else if (ch == ',')
     {
       PickupCommand(GS, ui);
@@ -556,7 +568,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
         action = new UpstairsAction(GS);
       else
         action = new SwimAction(GS, GS.Player, true);
-      GS.Player.QueueAction(action);      
+      GS.Player.QueueAction(action);
     }
     else if (ch == '*')
     {
@@ -572,7 +584,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     {
       int x = (int)ui.CheatSheetMode + 1;
       ui.CheatSheetMode = (CheatSheetMode)(x % 4);
-    }    
+    }
     else if (ch == '?')
     {
       ui.SetInputController(new HelpScreen(GS, ui));

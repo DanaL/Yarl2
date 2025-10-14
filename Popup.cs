@@ -118,8 +118,8 @@ class Popup : IPopup
 {
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   readonly string Title;
-  readonly List<(Colour, string)> Words;
-  readonly int Width;
+  List<(Colour, string)> Words;
+  int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
 
@@ -129,21 +129,25 @@ class Popup : IPopup
   public Colour Colour1 { get; set; }
   public Colour Colour2 { get; set;  }
 
+  int Page { get; set; } = 0;
+
+  List<List<(Colour, string)>> CalculatedLines = [];
+
   public Popup(string message, string title, int preferredRow, int preferredCol, int width = -1)
   {
-    int widthGuess = GuessWidth(message);
+    Words = [];
     Title = title;
+    SetText(message);
+
+    int widthGuess = GuessWidth(message);
     if (width > 0)
       Width = width + 4;
-    else if (widthGuess == 0 || title.Length > widthGuess)
-      Width = title.Length + 6;
+    else if (widthGuess == 0 || Title.Length > widthGuess)
+      Width = Title.Length + 6;
     else if (widthGuess < UserInterface.ViewWidth - 4)
       Width = widthGuess + 4;
     else
       Width = UserInterface.ViewWidth - 4;
-
-    LineScanner scanner = new(message);
-    Words = scanner.Scan();
 
     // preferredRow is the ideal row for the bottom of the box <-- this is dumb!
     // and the preferredCol is the ideal col for the centre of it
@@ -153,39 +157,51 @@ class Popup : IPopup
 
   static int GuessWidth(string message) => message.Split('\n').Select(line => line.Length).Max();
 
+  public void SetText(string message)
+  {    
+    LineScanner scanner = new(message);
+    Words = scanner.Scan();
+  }
+
+  public void NextPage() => ++Page;
+
   public void Draw(UserInterface ui)
   {
-    int col, row;
+    CalculatedLines = [];
+
+    int col;
     if (PreferredCol != -1)
       col = PreferredCol - (Width / 2);
     else if (Width < UserInterface.ViewWidth)
       col = (UserInterface.ViewWidth - Width) / 2;
     else
       col = (UserInterface.ScreenWidth - Width) / 2;
-      
+
+    int row;
     if (PreferredRow == -1)
       row = 5;
     else
       row = PreferredRow + 3;
-    
     if (row < 0)
       row = PreferredRow + 3;
+
     if (col < 0)
       col = 0;
 
     string border = Constants.TOP_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.TOP_RIGHT_CORNER;
 
+    List<(Colour, string)> top;
     if (Title.Length > 0)
     {
       int left = int.Max(2, (Width - Title.Length) / 2 - 2);
       string title = Constants.TOP_LEFT_CORNER.ToString().PadRight(left, '─') + ' ';
       title += Title + ' ';
       title = title.PadRight(Width - 1, '─') + Constants.TOP_RIGHT_CORNER;
-      ui.WriteLine(title, row++, col, Width, DefaultTextColour);
+      top = [(DefaultTextColour, title)];
     }
     else
     {
-      ui.WriteLine(border, row++, col, Width, DefaultTextColour);
+      top = [(DefaultTextColour, border)];
     }
 
     int currWidth = 0;
@@ -201,7 +217,7 @@ class Popup : IPopup
 
       if (word == "\n")
       {
-        WritePaddedLine();
+        BuildPaddedLine();
       }
       else if (word == "\t")
       {
@@ -216,18 +232,19 @@ class Popup : IPopup
       else
       {
         --w;
-        WritePaddedLine();
+        BuildPaddedLine();
       }
     }
 
-    WritePaddedLine();
+    BuildPaddedLine();
+
+    string blankLine = "│ " + new string(' ', Width - 4) + " │";
 
     if (BarLabel != "")
-    {
-      string blankLine = "| " + new string(' ', Width - 4) + " |";
-      ui.WriteText([(Colours.WHITE, blankLine)], row++, col);
+    {      
+      CalculatedLines.Add([(Colours.WHITE, blankLine)]);
       int barWidth = Width - BarLabel.Length - 7;
-      List<(Colour, string)> barLine = [(Colours.WHITE, $"| {BarLabel} [")];
+      List<(Colour, string)> barLine = [(Colours.WHITE, $"│ {BarLabel} [")];
 
       double ratio = Value1 / (double)Value2;
       int bar1Len = (int)(barWidth * ratio);
@@ -241,16 +258,44 @@ class Popup : IPopup
         barLine.Add((Colour2, bar2));
       }
 
-      barLine.Add((Colours.WHITE, "] |"));
+      barLine.Add((Colours.WHITE, "] │"));
 
-      ui.WriteText(barLine, row++, col);
-      ui.WriteText([(Colours.WHITE, blankLine)], row++, col);
+      CalculatedLines.Add(barLine);
+      CalculatedLines.Add([(Colours.WHITE, blankLine)]);
+    }
+
+    int rowsAvailable = UserInterface.ScreenHeight - row - 2;
+    int rowsDisplayed = int.Min(rowsAvailable, CalculatedLines.Count);
+    bool pageinate = false;
+    if (CalculatedLines.Count >= rowsAvailable)
+    {
+      pageinate = true;
+      rowsDisplayed -= 2;
+    }
+
+    int page = Page * rowsDisplayed;
+    if (page >= CalculatedLines.Count)
+    {
+      Page = 0;
+      page = 0;
+    }
+
+    ui.WriteText(top, row++, col);
+    foreach (var l in CalculatedLines.Skip(Page * rowsDisplayed).Take(rowsDisplayed))
+    {
+      ui.WriteText(l, row++, col);
+    }
+
+    if (pageinate)
+    {
+      ui.WriteText([(DefaultTextColour, blankLine)], row++, col);
+      ui.WriteText([(DefaultTextColour, "│ "), (Colours.DARK_GREY, "next page >".PadLeft(Width - 4, ' ')), (DefaultTextColour, " │")], row++, col);
     }
 
     string bottomBorder = Constants.BOTTOM_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.BOTTOM_RIGHT_CORNER.ToString();
-    ui.WriteLine(bottomBorder, row, col, Width, DefaultTextColour);
-
-    void WritePaddedLine()
+    ui.WriteText([(DefaultTextColour, bottomBorder)], row++, col);
+    
+    void BuildPaddedLine()
     {
       // Calculate total width of all existing content
       int actualWidth = line.Sum(tuple => tuple.Item2.Length);
@@ -259,7 +304,7 @@ class Popup : IPopup
       int padding = Width - actualWidth;
       if (padding > 0)
         line.Add((DefaultTextColour, "│".PadLeft(padding, ' ')));
-      ui.WriteText(line, row++, col);
+      CalculatedLines.Add(line);      
       line = [(DefaultTextColour, "│ ")];
       currWidth = 0;
     }
