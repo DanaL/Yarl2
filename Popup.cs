@@ -119,7 +119,7 @@ class Popup : IPopup
   Colour DefaultTextColour { get; set; } = Colours.WHITE;
   readonly string Title;
   List<(Colour, string)> Words;
-  int Width;
+  readonly int Width;
   readonly int PreferredRow;
   readonly int PreferredCol;
 
@@ -128,6 +128,7 @@ class Popup : IPopup
   public int Value2 { get; set; }
   public Colour Colour1 { get; set; }
   public Colour Colour2 { get; set;  }
+  public int Pages { get; set; } = 1;
 
   int Page { get; set; } = 0;
 
@@ -267,6 +268,7 @@ class Popup : IPopup
     int rowsAvailable = UserInterface.ScreenHeight - row - 2;
     int rowsDisplayed = int.Min(rowsAvailable, CalculatedLines.Count);
     bool pageinate = false;
+    Pages = CalculatedLines.Count / rowsAvailable + 1;
     if (CalculatedLines.Count >= rowsAvailable)
     {
       pageinate = true;

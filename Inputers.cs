@@ -897,7 +897,7 @@ class Dialoguer : Inputer
       return;
     }
 
-    if (ch == ' ')
+    if (ch == ' ' && Popup.Pages > 1)
     {
       Popup.NextPage();
       WritePopup();
