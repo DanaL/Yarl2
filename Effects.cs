@@ -219,7 +219,7 @@ class EffectApplier
 
     gs.Player.Stats[Attribute.Piety].ChangeMax(1);
 
-    gs.UIRef().AlertPlayer("The altar glows with a holy light and is cleansed!", gs, loc);
+    gs.UIRef().AlertPlayer("The altar glows with a holy light and is cleansed! You feel properly pious.", gs, loc);
   }
 
   public static void CleanseLoc(GameState gs, Loc loc, Item? source)
