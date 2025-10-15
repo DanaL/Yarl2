@@ -891,9 +891,16 @@ class Dialoguer : Inputer
 
   public override void Input(char ch)
   {
-    if (ch == Constants.ESC || ch == _exitOpt || ch == ' ')
+    if (ch == Constants.ESC || ch == _exitOpt)
     {
       EndConversation("Farewell.");
+      return;
+    }
+
+    if (ch == ' ')
+    {
+      Popup.NextPage();
+      WritePopup();
       return;
     }
 
@@ -1013,9 +1020,6 @@ class Dialoguer : Inputer
       opts.Add(("swap", _swapPlaceOpt));
       sb.AppendLine($"{_swapPlaceOpt}) Pardon me. [GREY (Ask to swap places)]");
     }
-
-    _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
-    sb.AppendLine($"{_exitOpt}) Farewell.");
 
     sb.Append(footer);
 

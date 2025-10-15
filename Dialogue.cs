@@ -1434,7 +1434,7 @@ class DialogueInterpreter
       .First(t => t.Name == "ShopSelections");
 
     int bill = 0;
-    char[] slots = gs.Player.Inventory.UsedSlots();
+    char[] slots = [.. gs.Player.Inventory.UsedSlots().Order()];
     foreach (char slot in slots)
     {
       var (item, count) = gs.Player.Inventory.ItemAt(slot);
@@ -1475,7 +1475,11 @@ class DialogueInterpreter
     {
       Sb.Append("\n\nHmm you don't have anything I'm interested in at the moment.");
     }
-
+    else
+    {
+      Sb.Append("\n\nSelect items by slot. Confirm by hitting ENTER.");
+    }
+    
     mob.Stats[Attribute.ShopInvoice] = new Stat(bill);
     
     if (bill > 0)
