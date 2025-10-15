@@ -1520,6 +1520,10 @@ class InventoryDetails : Inputer
         items.Add("it is [DULLRED rusty], but can be repaired");
       if (trait is PoisonCoatedTrait)
         items.Add("it is coated in [DARKGREEN poison]");
+      if (trait is ReachTrait)
+        items.Add("it has [LIGHTBLUE reach]");
+      if (trait is ImpaleTrait)
+        items.Add("it can [LIGHTBLUE impale] foes");
     }
 
     if (items.Count == 0)
