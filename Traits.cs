@@ -255,6 +255,8 @@ class DragonCultBlessingTrait : BlessingTrait
 
 class ChampionBlessingTrait : BlessingTrait
 {
+  protected virtual string Title => "Champion";
+
   public override List<string> Apply(Actor granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
@@ -284,7 +286,7 @@ class ChampionBlessingTrait : BlessingTrait
 
   public override string Description(Actor owner)
   {
-    string s = "You have the [iceblue Champion Blessing]. It grants";
+    string s = $"You have the [iceblue {Title} Blessing]. It grants";
 
     AuraOfProtectionTrait? prot = owner.Traits.OfType<AuraOfProtectionTrait>()
                               .Where(t => t.SourceId == SourceId)
@@ -2364,6 +2366,36 @@ class OwnedTrait : Trait
   public override string AsText() => $"Owned#{string.Join(',', OwnerIDs)}";
 }
 
+class PaladinBlessingTrait : ChampionBlessingTrait
+{
+  protected override string Title => "Paladin";
+
+  public override List<string> Apply(Actor granter, GameState gs)
+  {
+    base.Apply(granter, gs);
+
+    int numOfDie = 1 + gs.Player.Stats[Attribute.Piety].Curr - 3;
+    DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = numOfDie };
+    gs.Player.Traits.Add(dt);
+
+    return [];
+  }
+
+  public override string Description(Actor owner)
+  {
+    string s = base.Description(owner);
+
+    DamageTrait dt = owner.Traits.OfType<DamageTrait>()
+                              .Where(t => t.SourceId == SourceId)
+                              .First();
+    s += $" You deal {dt.NumOfDie}d{dt.DamageDie} extra [lightblue holy damage].";
+
+    return s;
+  }
+
+  public override string AsText() => $"PaladinBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
+}
+
 class ParalyzedTrait : TemporaryTrait
 {
   public int DC { get; set; }
@@ -3936,6 +3968,7 @@ class TraitFactory
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
     { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
+    { "PaladinBlessing", (pieces, gameObj) => new PaladinBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
     { "Passive", (pieces, gameObj) => new PassiveTrait() },

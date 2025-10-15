@@ -22,7 +22,7 @@ enum TokenType
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
   OPTION, SPEND, END, 
-  BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_REAVER_BLESSING,
+  BLESSINGS, GRANT_CHAMP_BLESSING, GRANT_PALADIN_BLESSING, GRANT_REAVER_BLESSING,
   GRANT_EMBER_BLESSING, GRANT_TRICKSTER_BLESSSING, GRANT_WINTER_BLESSING,
   SHOP_MENU, SHOP_SELECTION, DRAGON_CULT_QUEST, SELL_MENU,
   EOF
@@ -235,6 +235,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.OPTION => OptionExpr(),
       TokenType.BLESSINGS => BlessingsExpr(),
       TokenType.GRANT_CHAMP_BLESSING => GrantChampionBlessingExpr(),
+      TokenType.GRANT_PALADIN_BLESSING => GrantPaladinBlessingExpr(),
       TokenType.GRANT_REAVER_BLESSING => GrantReaverBlessingExpr(),
       TokenType.GRANT_EMBER_BLESSING => GrantEmberBlessingExpr(),
       TokenType.GRANT_TRICKSTER_BLESSSING => GrantTricksterBlessingExpr(),
@@ -342,6 +343,13 @@ class ScriptParser(List<ScriptToken> tokens)
     Consume(TokenType.RIGHT_PAREN);
 
     return new ScriptChampionBlessing();
+  }
+
+  ScriptPaladinBlessing GrantPaladinBlessingExpr()
+  {
+    Consume(TokenType.GRANT_PALADIN_BLESSING);
+    Consume(TokenType.RIGHT_PAREN);
+    return new ScriptPaladinBlessing();
   }
 
   ScriptReaverBlessing GrantReaverBlessingExpr()
@@ -714,6 +722,7 @@ class ScriptSpend(int amount) : ScriptExpr
 }
 
 class ScriptChampionBlessing : ScriptExpr {}
+class ScriptPaladinBlessing : ScriptExpr { }
 class ScriptReaverBlessing : ScriptExpr {}
 class ScriptEmberBlessing : ScriptExpr {}
 class ScriptTricksterBlessing : ScriptExpr {}
@@ -1027,6 +1036,10 @@ class DialogueInterpreter
     else if (Expr is ScriptChampionBlessing)
     {
       EvalChampionBlessing(mob, gs);
+    }
+    else if (Expr is ScriptPaladinBlessing)
+    {
+      EvalPaladinBlessing(mob, gs);
     }
     else if (Expr is ScriptReaverBlessing)
     {
@@ -1567,11 +1580,16 @@ class DialogueInterpreter
 
     if (!blessed)
     {
+      int piety = gs.Player.Stats[Attribute.Piety].Max;
       Sb.Append("\n\nIf you would seek to drive back the darkness, I can offer you a blessing!");
       Sb.Append("\n\n(Blessings are buffs that will eventually wear off, and you'll need to return if you want another)");
       
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
-      Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
+      if (piety < 3)
+        Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Champion]: Huntokar's grace shall protect you and lead your blade to strike true!", opt++, new ScriptChampionBlessing()));
+      else
+        Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Paladin]: You will bring Huntokar's wrath to your foes!", opt++, new ScriptPaladinBlessing()));
+      
+      //Options.Add(new DialogueOption("The [ICEBLUE Blessing of the Reaver]: Bring Huntokar's wrath to your foes, turning you into a frightening presence!", opt++, new ScriptReaverBlessing()));
 
       if (gs.Player.Stats[Attribute.Piety].Max >= 2)
         Options.Add(new DialogueOption("The [ICEBLUE Winter's Blessing]: Use the power of arctic storms to aid your quest!", opt++, new ScriptWinterBlessing()));
@@ -1600,6 +1618,15 @@ class DialogueInterpreter
   static void EvalChampionBlessing(Actor mob, GameState gs)
   {
     ChampionBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
+    blessing.Apply(mob, gs);
+    gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
+    
+    throw new ConversationEnded("You are bathed in holy light!");
+  }
+
+  static void EvalPaladinBlessing(Actor mob, GameState gs)
+  {
+    PaladinBlessingTrait blessing = new() { SourceId = mob.ID, ExpiresOn = gs.Turn + 2000, OwnerID = gs.Player.ID };
     blessing.Apply(mob, gs);
     gs.Player.Stats[Attribute.LastBlessing].SetMax(1);
     
