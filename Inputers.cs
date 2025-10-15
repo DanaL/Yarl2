@@ -10,6 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 using static Yarl2.Util;
 
 namespace Yarl2;
@@ -867,6 +868,7 @@ class Dialoguer : Inputer
   char _exitOpt = '\0';
   char _swapPlaceOpt = '\0';
   readonly int _popupWidth = 60;
+  Popup Popup { get; set; }
 
   public Dialoguer(Mob interlocutor, GameState gs) : base(gs)
   {
@@ -879,6 +881,8 @@ class Dialoguer : Inputer
     }
     _dialogue = dialogue;
     _dialogue.InitDialogue(interlocutor, gs);
+
+    Popup = new Popup("", _interlocutor.FullName, -2, -1, _popupWidth);
 
     WritePopup();
   }
@@ -903,7 +907,10 @@ class Dialoguer : Inputer
     {
       if (!npc.ConfirmChoices(_interlocutor, GS))
         return;
+
       EndConversation("Farewell!");
+
+      return;
     }
 
     if (!_currOptions.Contains(ch))
@@ -945,79 +952,89 @@ class Dialoguer : Inputer
     QueueDeferredAction();    
   }
 
-  void WritePopup()
-  {
-    var sb = new StringBuilder(_interlocutor.Appearance.Capitalize());
+  string CalcDialogueText()
+  {    
+    var (blurb, footer, opts) = _dialogue.CurrentText(_interlocutor, GS);
+
+    if (string.IsNullOrEmpty(blurb))
+      return "";
+
+    StringBuilder sb = new(_interlocutor.Appearance.Capitalize());
     sb.Append("\n\n");
 
+    sb.Append('"');
+    sb.Append(blurb)
+      .Append("\"\n\n");
+
+    _currOptions = [];
+    foreach (var (text, key) in opts)
+    {
+      _currOptions.Add(key);
+
+      string optionPrefix = $"{key}) ";
+      sb.Append(optionPrefix);
+
+      // This is kind of dumb because the text being sent to the popup will
+      // be parsed again, but I want if an option is more than one line, that
+      // it will be tabbed over like:
+      //
+      // a) This option extends across two lines
+      //    and the rest of the text is here.
+      //
+      // But to avoid duplicating the scanning and wrapping, I'd need to 
+      // create something like an Options List and then I'm going down the
+      // the road of inventing a mini markup language...
+      LineScanner ls = new(text);
+      List<(Colour, string)> words = ls.Scan();
+
+      int availableWidth = _popupWidth - optionPrefix.Length;
+      foreach ((Colour c, string w) in words)
+      {
+        if (w.Length < availableWidth)
+        {
+          sb.Append($"[{Colours.ColourToText(c)} {w}]");
+          availableWidth -= w.Length;
+        }
+        else
+        {
+          sb.AppendLine();
+          sb.Append($"\t[{Colours.ColourToText(c)} {w}]");
+          availableWidth = _popupWidth - optionPrefix.Length;
+        }
+      }
+      sb.AppendLine();
+    }
+
+    if (!GS.InWilderness)
+    {
+      // If we're in a dungeon, provide option to ask to swap places, 
+      // otherwise the NPC might leave you blocked
+      _swapPlaceOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
+      opts.Add(("swap", _swapPlaceOpt));
+      sb.AppendLine($"{_swapPlaceOpt}) Pardon me. [GREY (Ask to swap places)]");
+    }
+
+    _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
+    sb.AppendLine($"{_exitOpt}) Farewell.");
+
+    sb.Append(footer);
+
+    return sb.ToString();
+  }
+
+  void WritePopup()
+  {    
     try
     {
-      var (blurb, footer, opts) = _dialogue.CurrentText(_interlocutor, GS);
-
-      if (string.IsNullOrEmpty(blurb))
+      string txt = CalcDialogueText();
+      if (string.IsNullOrEmpty(txt))
       {
         EndConversation($"{_interlocutor.FullName.Capitalize()} turns away from you.");
         return;
       }
-
-      sb.Append('"');
-      sb.Append(blurb)
-        .Append("\"\n\n");
-
-      _currOptions = [];
-      foreach (var (text, key) in opts)
-      {
-        _currOptions.Add(key);
-
-        string optionPrefix = $"{key}) ";
-        sb.Append(optionPrefix);
-
-        // This is kind of dumb because the text being sent to the popup will
-        // be parsed again, but I want if an option is more than one line, that
-        // it will be tabbed over like:
-        //
-        // a) This option extends across two lines
-        //    and the rest of the text is here.
-        //
-        // But to avoid duplicating the scanning and wrapping, I'd need to 
-        // create something like an Options List and then I'm going down the
-        // the road of inventing a mini markup language...
-        LineScanner ls = new(text);
-        List<(Colour, string)> words = ls.Scan();
-
-        int availableWidth = _popupWidth - optionPrefix.Length;
-        foreach ((Colour c, string w) in words)
-        {
-          if (w.Length < availableWidth)
-          {
-            sb.Append($"[{Colours.ColourToText(c)} {w}]");
-            availableWidth -= w.Length;
-          }
-          else
-          {
-            sb.AppendLine();
-            sb.Append($"\t[{Colours.ColourToText(c)} {w}]");
-            availableWidth = _popupWidth - optionPrefix.Length;
-          }
-        }
-        sb.AppendLine();
-      }
-
-      if (!GS.InWilderness)
-      {
-        // If we're in a dungeon, provide option to ask to swap places, 
-        // otherwise the NPC might leave you blocked
-        _swapPlaceOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
-        opts.Add(("swap", _swapPlaceOpt));
-        sb.AppendLine($"{_swapPlaceOpt}) Pardon me. [GREY (Ask to swap places)]");
-      }
-
-      _exitOpt = (char)(opts.Count > 0 ? opts[^1].Item2 + 1 : 'a');
-      sb.AppendLine($"{_exitOpt}) Farewell.");
-
-      sb.Append(footer);
-
-      GS.UIRef().SetPopup(new Popup(sb.ToString(), _interlocutor.FullName, -2, -1, _popupWidth));
+      
+      Popup.SetText(txt);
+      GS.UIRef().SetPopup(Popup);
     }
     catch (ConversationEnded ce)
     {

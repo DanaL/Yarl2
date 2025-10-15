@@ -703,6 +703,11 @@ class ScriptShopSelection(char opt) : ScriptExpr
   public char Choice { get; set; } = opt;
 }
 
+class ScriptSellSelection(char opt) : ScriptExpr 
+{
+  public char Choice { get; set; } = opt;
+}
+
 class ScriptSpend(int amount) : ScriptExpr
 {
   public int Amount { get; set; } = amount;
@@ -1014,6 +1019,10 @@ class DialogueInterpreter
     else if (Expr is ScriptShopSelection selection)
     {
       EvalShopSelection(selection.Choice, mob, gs);
+    }
+    else if (Expr is ScriptSellSelection sellSelection)
+    {
+      EvalSellSelection(sellSelection.Choice, mob, gs);
     }
     else if (Expr is ScriptChampionBlessing)
     {
@@ -1425,22 +1434,41 @@ class DialogueInterpreter
       .First(t => t.Name == "ShopSelections");
 
     int bill = 0;
-    char opt = 'a';
-    foreach (Item item in gs.Player.Inventory.Items())
+    char[] slots = gs.Player.Inventory.UsedSlots();
+    foreach (char slot in slots)
     {
-      if (item.Equipped)
+      var (item, count) = gs.Player.Inventory.ItemAt(slot);
+      if (item is null || item.Equipped)
         continue;
+
       if (item.Name == "torch" || item.Name == "skull" || item.Name == "bone")
         continue;
 
-      string s = $"{item.FullName.IndefArticle()} - [YELLOW $]{item.Value / 2}";
-      if (selections.Items.Contains(item.Slot - 'a')) 
+      string s;
+      if (count > 1)
+        s = $"{count} {item.FullName.Pluralize()} ";
+      else
+        s = $"{item.FullName.IndefArticle()} ";
+      s += $"- [YELLOW $]{ item.Value / 2}";
+      if (count > 1)
+        s += " each";
+
+      int selectionNum = slot - 'a';
+      if (selections.Items[selectionNum] > 0)
       {
-        s += " [GREEN *]";
-        bill += item.Value / 2;
+        s += " [GREEN ";
+
+        if (count == 1)
+          s += "*";
+        else
+          s += $"{selections.Items[selectionNum]}";
+
+        s += " ]";
+
+        bill += (item.Value / 2) * selections.Items[selectionNum];
       }
-      Options.Add(new DialogueOption(s, opt, new ScriptShopSelection(item.Slot)));
-      ++opt;
+
+      Options.Add(new DialogueOption(s, slot, new ScriptSellSelection(item.Slot)));
     }
 
     if (Options.Count == 0)
@@ -1496,6 +1524,26 @@ class DialogueInterpreter
       else
         Footer.Append("\n\n[BRIGHTRED You don't have enough money for all that!]");
     }
+  }
+
+  static void EvalSellSelection(char choice, Actor mob, GameState gs)
+  {
+    var (item, count) = gs.Player.Inventory.ItemAt(choice);
+
+    // I don't think at this point item can be null, but we want to keep the
+    // compiler happy
+    if (item is null)
+      return;
+
+    int selectionNum = choice - 'a';
+    NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
+                                           .Where(t => t.Name == "ShopSelections")
+                                           .First();
+
+    if (selections.Items[selectionNum] == count)
+      selections.Items[selectionNum] = 0;
+    else
+      selections.Items[selectionNum] += 1;
   }
 
   static void EvalShopSelection(char choice, Actor mob, GameState gs)

@@ -1025,7 +1025,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public void ShowMenu(UserInterface ui, InventoryOptions options)
   {
-    var slots = UsedSlots().Order().ToArray();
+    char[] slots = [.. UsedSlots().Order()];
 
     List<string> lines = [slots.Length == 0 ? "You are empty handed." : options.Title];
     foreach (var s in slots)

@@ -163,7 +163,7 @@ class PeddlerBehaviour : NPCBehaviour
   {
     NumberListTrait selections = mob.Traits.OfType<NumberListTrait>()
       .First(t => t.Name == "ShopSelections");
-    selections.Items = [];
+    selections.Items = [.. Enumerable.Repeat(0, 26)];
     mob.Stats[Attribute.ShopInvoice] = new Stat(0);
     mob.Stats[Attribute.DialogueState] = new Stat(0);
   }
@@ -172,25 +172,26 @@ class PeddlerBehaviour : NPCBehaviour
   {
     NumberListTrait nlt = npc.Traits.OfType<NumberListTrait>()
       .First(t => t.Name == "ShopSelections");
-    HashSet<int> selections = [..nlt.Items.Select(i => i + 'a')];
-    nlt.Items = [];
+
+    List<(char Slot, int Count)> selections = [];
+    for (int j = 0; j < nlt.Items.Count; j++)
+    {
+      if (nlt.Items[j] != 0)
+        selections.Add(((char) (j + 'a'), nlt.Items[j]));
+    }
 
     if (selections.Count == 0 || npc.Stats[Attribute.ShopInvoice].Curr > npc.Inventory.Zorkmids)
     {
       return false;
     }
 
-    List<ulong> purchases = [];
-    foreach (Item item in gs.Player.Inventory.Items())
+    foreach ((char slot, int count) in selections)
     {
-      if (selections.Contains(item.Slot))
-        purchases.Add(item.ID);
-    }
-    
-    foreach (ulong id in purchases)
-    {
-      Item item = gs.Player.Inventory.RemoveByID(id)!;
-      gs.ObjDb.RemoveItemFromGame(gs.Player.Loc, item);
+      List<Item> items = gs.Player.Inventory.Remove(slot, count);
+      foreach (Item item in items)
+      {
+        gs.ObjDb.RemoveItemFromGame(gs.Player.Loc, item);
+      }
     }
 
     npc.Inventory.Zorkmids -= npc.Stats[Attribute.ShopInvoice].Curr;
