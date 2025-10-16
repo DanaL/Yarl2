@@ -469,7 +469,8 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
       GameState.ApplyDamageEffectToLoc(pt, DamageType.Fire);
       if (GameState.ObjDb.Occupant(pt) is Actor victim)
       {
-        ui.AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
+        string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!";
+        ui.AlertPlayer(s, GameState, victim.Loc, victim);
 
         var (hpLeft, dmgMsg, _) = victim.ReceiveDmg(dmg, 0, GameState, null, 1.0);
         if (dmgMsg != "")
