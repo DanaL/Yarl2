@@ -2328,6 +2328,14 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
 
   public override List<string> Apply(Actor target, GameState gs)
   {
+    if (target.HasTrait<NumbedTrait>())
+    {
+      ExpiresOn += (ulong)gs.Rng.Next(25, 51);
+      return [];
+    }
+
+    ExpiresOn = (ulong)gs.Rng.Next(25, 51);
+
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);    
     OwnerID = target.ID;
