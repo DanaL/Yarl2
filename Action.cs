@@ -69,7 +69,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     }
     else
     {
-      GameState.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swing")} wildly!");      
+      GameState.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "swing")} wildly!", GameState, Actor.Loc, Actor);      
       result = 1.0;
     }
 
