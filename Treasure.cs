@@ -49,7 +49,8 @@ class Treasure
       ItemNames.SCROLL_DISARM, ItemNames.GUIDE_BOWS, ItemNames.TROLL_BROOCH, ItemNames.SMOULDERING_CHARM,
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY,
-      ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY, ItemNames.POTION_HARDINESS
+      ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY, ItemNames.POTION_HARDINESS,
+      ItemNames.TINCTURE_CELERITY
   ];
   
   static readonly List<ItemNames> Consumables = [
@@ -69,7 +70,8 @@ class Treasure
     ItemNames.SCROLL_TRAP_DETECTION,
     ItemNames.SCROLL_TREASURE_DETECTION,
     ItemNames.VIAL_OF_POISON,
-    ItemNames.WIND_FAN
+    ItemNames.WIND_FAN,
+    ItemNames.TINCTURE_CELERITY
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)
@@ -168,7 +170,7 @@ class Treasure
     return GenerateItem(name, objDb, rng);
   }
 
-  public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(8) switch
+  public static Item MinorGift(GameObjectDB objDb, Rng rng) => rng.Next(9) switch
   {
     0 => ItemFactory.Get(ItemNames.POTION_HEALING, objDb),
     1 => ItemFactory.Get(ItemNames.SCROLL_BLINK, objDb),
@@ -177,6 +179,7 @@ class Treasure
     4 => ItemFactory.Get(ItemNames.SCROLL_PROTECTION, objDb),
     5 => ItemFactory.Get(ItemNames.SCROLL_DISARM, objDb),
     6 => ItemFactory.Get(ItemNames.POTION_OBSCURITY, objDb),
+    7 => ItemFactory.Get(ItemNames.TINCTURE_CELERITY, objDb),
     _ => ItemFactory.Get(ItemNames.POTION_MIND_READING, objDb)
   };
 

@@ -122,6 +122,9 @@ A blade for warriors who prefer versatility, or perhaps are indecisive. You may 
 greatsword
 An imposing, heavy sword for a fighter all-in on offense.
 #
+rapier
+Very long, very thin sword. Very stabby.
+#
 spear
 A pokey stick: a true classic.
 #
@@ -493,3 +496,6 @@ A sickly, unwholesome looking patch of mold.
 #
 ward of the crimson king
 The Crimson King is a somewhat forgotten deity of war, vengeance, and strife. People pray to less often in these modern, civilized times. This ward lashes out at those who would dare harm one of His followers. The ward deals damage scaled by how far from max HP you are.
+#
+tincture of celerity
+A serum that speeds you up allowing you to act more often.

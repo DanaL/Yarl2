@@ -115,7 +115,8 @@ class DebugCommand(GameState gs)
     {"bone", ItemNames.BONE },
     {"skull", ItemNames.SKULL },
     {"axes book", ItemNames.GUIDE_AXES },
-    {"crimson king ward", ItemNames.CRIMSON_KING_WARD }
+    {"crimson king ward", ItemNames.CRIMSON_KING_WARD },
+    {"tincture of celerity", ItemNames.TINCTURE_CELERITY }
   };
 
   public string DoCommand(string txt)

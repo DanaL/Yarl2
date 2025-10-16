@@ -3177,6 +3177,10 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
     var anim = new BeamAnimation(GameState!, pts, Colours.FADED_PURPLE, Colours.BLACK);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
+    // The AlacrityTrait never expires, I don't think. Hmm... Did I create this
+    // before I created TemporaryTrait. It's not really a problem right now now
+    // because the player should never be hit by a ray of slowness, but 
+    // eventually monsters might be able to use wands.
     foreach (Loc loc in pts)
     {
       if (GameState.ObjDb.Occupant(loc) is Actor victim)
@@ -3194,12 +3198,8 @@ class RayOfSlownessAction(GameState gs, Actor actor, Trait src, ulong sourceId) 
 
         if (!alreadyAffected)
         {
-          if (GameState.LastPlayerFoV.Contains(loc))
-          {
-            string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "begin")} to move slower.";
-            GameState.UIRef().AlertPlayer(s);
-          }
-            
+          string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "begin")} to move slower.";
+          GameState.UIRef().AlertPlayer(s, GameState, loc, victim);            
           victim.Traits.Add(new AlacrityTrait() { Amt = -0.5, SourceId = SourceId });
         }
       }

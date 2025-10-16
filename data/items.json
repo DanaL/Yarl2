@@ -1192,6 +1192,18 @@
     ]
   },
   {
+    "Name": "TINCTURE_CELERITY",
+    "DescriptiveName": "tincture of celerity",
+    "Type": "Potion",
+    "Value": 50,
+    "Glyph": "!,green,darkgreen,black,false",
+    "Traits": [
+      "UseSimple#celerity",
+      "Consumable",
+      "Stackable"
+    ]
+  },
+  {
     "Name": "WIND_FAN",
     "DescriptiveName": "wind fan",
     "Type": "Tool",

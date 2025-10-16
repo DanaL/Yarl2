@@ -560,17 +560,19 @@ class AlchemistBehaviour : NPCBehaviour
     int newStock = gs.Rng.Next(1, 5);
     for (int j = 0; j < newStock; j++)
     {      
-      ItemNames itemName = gs.Rng.Next(8) switch
+      ItemNames itemName = gs.Rng.Next(10) switch
       {
-        0 => ItemNames.POTION_HEALING,
-        1 => ItemNames.POTION_HEROISM,
-        2 => ItemNames.POTION_OF_LEVITATION,
-        3 => ItemNames.POTION_MIND_READING,
-        4 => ItemNames.ANTIDOTE,
-        5 => ItemNames.POTION_OBSCURITY,
-        6 => ItemNames.HEARTY_SOUP,
+        0 or 1 => ItemNames.POTION_HEALING,
+        2 => ItemNames.POTION_HEROISM,
+        3 => ItemNames.POTION_OF_LEVITATION,
+        4 => ItemNames.POTION_MIND_READING,
+        5 => ItemNames.ANTIDOTE,
+        6 => ItemNames.POTION_OBSCURITY,
+        7 => ItemNames.TINCTURE_CELERITY,
+        8 => ItemNames.HEARTY_SOUP,
         _ => ItemNames.MUSHROOM_STEW
       };
+
       Item item = ItemFactory.Get(itemName, gs.ObjDb);
       item.Traits.Add(new SideEffectTrait() { Odds = 10, Effect = "Confused#0#13#0" });
       npc.Inventory.Add(item, npc.ID);

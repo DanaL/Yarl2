@@ -597,7 +597,7 @@ abstract class UserInterface
     {
       if (!statuses.Contains("POISONED") && trait is PoisonedTrait)
       {
-        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREEN, "POISONED")];
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.LIME_GREEN, "POISONED")];
         row = WriteSideBarLine(statusLine, statusLineNum--);
         statuses.Add("POISONED");
       }
@@ -740,6 +740,12 @@ abstract class UserInterface
       List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREY, "OBSCURED")];
       WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("OBSCURED");
+    }
+    if (!statuses.Contains("FAST") && gs.Player.HasTrait<CelerityTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.GREEN, "FAST")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("FAST");
     }
     if (!statuses.Contains("BLESSED") && gs.Player.HasTrait<BlessingTrait>())
     {

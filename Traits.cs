@@ -193,6 +193,39 @@ class CastTrait : Trait, IUSeable
   public void Used(){ }
 }
 
+class CelerityTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => "You slow down.";
+  public override string AsText() => $"Celerity#{SourceId}#{OwnerID}#{ExpiresOn}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    if (target.HasTrait<CelerityTrait>())
+    {
+      ExpiresOn += (ulong)gs.Rng.Next(25, 41);
+      return [];
+    }
+
+    target.Traits.Add(this);
+    OwnerID = target.ID;
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 101);
+
+    target.Recovery += 0.5;
+
+    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "speed")} up!"];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn > ExpiresOn && gs.ObjDb.GetObj(OwnerID) is Actor victim)
+    {
+      Remove(gs);
+      victim.Recovery -= 0.5;
+    }
+  }
+}
+
 class DragonCultBlessingTrait : BlessingTrait
 {
   const int MP_COST = 3;
@@ -1630,6 +1663,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
     "blink" => new UseResult(new BlinkAction(gs, user)),
     "booze" => new UseResult(new DrinkBoozeAction(gs, user)),
+    "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait())),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
     "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),    
@@ -1664,7 +1698,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                    new ApplyTraitAction(gs, user, 
                      new HeroismTrait() { 
                        OwnerID = user.ID, ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 75), SourceId = item!.ID})),
-    "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait() { ExpiresOn = gs.Turn + 50 })),
+    "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -3755,6 +3789,9 @@ class TraitFactory
     { "Brainless", (pieces, gameObj) => new BrainlessTrait() },
     { "CanApply", (pieces, gameObj) => new CanApplyTrait() },
     { "Cast", (pieces, gameObj) => new CastTrait() { Spell = pieces[1] }},
+    {
+      "Celerity", (pieces, gameObj) => new CelerityTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
+    },
     { "ChampionBlessing", (pieces, gameObj) => new ChampionBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Cleansing", (pieces, gamObj) => new CleansingTrait() },
     { "Cleave", (pieces, gameObj) => new CleaveTrait() },
@@ -3939,12 +3976,7 @@ class TraitFactory
     },
     { "Nondescript", (pieces, gameObj) => new NondescriptTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
     {
-      "Numbed", (pieces, gameObj) => new NumbedTrait()
-      {
-        SourceId = ulong.Parse(pieces[1]),
-        OwnerID = ulong.Parse(pieces[2]),
-        ExpiresOn = ulong.Parse(pieces[3])
-      }
+      "Numbed", (pieces, gameObj) => new NumbedTrait() { SourceId = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
     },
     { "NumberList", (pieces, gameObj) =>
       new NumberListTrait()

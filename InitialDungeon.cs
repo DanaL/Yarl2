@@ -102,7 +102,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     if (factDb.FactCheck("EarlyDenizen") is SimpleFact earlyOcc)
     {
-      //SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
+      SetBoss(dungeon, objDb, factDb, earlyOcc.Value, rng);
     }
 
     // The idol 'puzzle' gives a guaranteed Potion of Hardiness, but I think 
@@ -428,7 +428,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       ks.Name = "the Kobold Regional Manager";
       ks.Traits.Add(new NamedTrait());
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
+      Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);
       factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Kobold Regional Manager" });
 
@@ -457,7 +457,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     {
       Actor gg = MonsterFactory.Get("the Great Goblin", objDb, rng);
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
-      var loc = new Loc(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
+      Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(gg, loc);
       factDb.Add(new SimpleFact() { Name = "First Boss", Value = "the Great Goblin" });
     }
