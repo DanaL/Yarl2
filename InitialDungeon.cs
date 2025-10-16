@@ -112,7 +112,8 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     SetPuzzle(dungeon, objDb, factDb, rng);
 
-    GnomeMerchant(levels, DungeonId, rng, objDb);
+    if (rng.Next(3) == 0)
+      GnomeMerchant(levels, DungeonId, rng, objDb);
 
     // Update the main quest state when the player steps on the up stairs of 
     // the 3rd level. (This will mess up if the player somehow never actually 

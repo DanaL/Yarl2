@@ -1500,7 +1500,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (Item item in ObjDb.EnvironmentsAt(loc))
     {
-      if (item.HasActiveTrait<MoldSporesTrait>())
+      if (item.HasTrait<MoldSporesTrait>())
       {
         UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} explodes in a cloud of spores!", this, loc);
 
