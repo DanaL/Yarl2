@@ -3918,7 +3918,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
       return new LocDetails(title, details, item.Glyph.Ch);
     }
 
-    List<Item> env = GameState!.ObjDb.EnvironmentsAt(loc);
+    List<Item> env = [.. GameState!.ObjDb.EnvironmentsAt(loc).Where(e => e.Name != "photon")];
     if (env.Count > 0)
     {
       Item item = env[0];
