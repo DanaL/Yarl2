@@ -499,3 +499,6 @@ The Crimson King is a somewhat forgotten deity of war, vengeance, and strife. Pe
 #
 tincture of celerity
 A serum that speeds you up allowing you to act more often.
+#
+shadow
+Sometimes when a being dies, their shadow remains behind as an undead creature hungering for the vitality of the living.
