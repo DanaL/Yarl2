@@ -835,7 +835,7 @@ abstract class UserInterface
     if (!gs.LastPlayerFoV.Contains(loc))
       return;
 
-    if (other is null || !other.VisibleTo(gs.Player))
+    if (other is not null && !other.VisibleTo(gs.Player))
       return;
 
     AlertPlayer(alert);
