@@ -358,7 +358,7 @@ class AoEAction(GameState gs, Actor actor, Loc target, string effectTemplate, in
         List<string> msgs = effect.Apply(occ, GameState);
         string s = string.Join(' ', msgs).Trim();
 
-        GameState.UIRef().AlertPlayer(s, GameState, loc);
+        GameState.UIRef().AlertPlayer(s, GameState, loc, occ);
       }
     }
 

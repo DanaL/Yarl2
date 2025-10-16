@@ -823,10 +823,13 @@ abstract class UserInterface
 
     Messages.Enqueue(alert);
   }
-
-  public void AlertPlayer(string alert, GameState gs, Loc loc)
+  
+  public void AlertPlayer(string alert, GameState gs, Loc loc, Actor? other = null)
   {
     if (!gs.LastPlayerFoV.Contains(loc))
+      return;
+
+    if (other is null || !other.VisibleTo(gs.Player))
       return;
 
     AlertPlayer(alert);
