@@ -74,6 +74,15 @@ class ArrowAnimation : Animation
     var (loc, ch) = _frames[_frame];
     var sq = new Sqr(_ammoColour, Colours.BLACK, ch);
     var (scrR, scrC) = ui.LocToScrLoc(loc.Row, loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
+
+    // An animation can be reigstered and then the player moves off current
+    // level, which might lead to a wrong placement or out-of-bounds
+    if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
+    {
+      Expiry = DateTime.MinValue;
+      return;
+    }
+
     ui.SqsOnScreen[scrR, scrC] = sq;
 
     if ((DateTime.UtcNow - _lastFrame).TotalMicroseconds > 150)
