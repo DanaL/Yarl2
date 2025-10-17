@@ -71,7 +71,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
-      Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], DungeonId, levelNum, rng);
+      AddTreasure(objDb, levels[levelNum], DungeonId, levelNum, rng);
       SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
 
       // Maybe add an illusion/trap
@@ -287,6 +287,94 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     }
 
     return walls;
+  }
+
+  // This is probably overly complicated...
+  static void AddTreasure(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
+  {
+    if (levelNum == 0)
+    {
+      int numItems = rng.Next(1, 4);
+      for (int j = 0; j < numItems; j++)
+      {
+        Item item = Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng);
+        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(10, 21);
+      Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+    }
+    else if (levelNum == 1)
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        double roll = rng.NextDouble();
+        TreasureQuality quality = roll <= 0.9 ? TreasureQuality.Common : TreasureQuality.Uncommon;
+        Item item = Treasure.ItemByQuality(quality, objDb, rng);
+        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+
+      Item goodItem = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+      Treasure.AddObjectToLevel(goodItem, objDb, level, dungeonID, levelNum, rng);
+
+      for (int j = 0; j < rng.Next(1, 3); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(10, 21);
+        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+      }
+    }
+    else if (levelNum == 2 || levelNum == 3)
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        TreasureQuality quality;
+        double roll = rng.NextDouble();
+        if (roll <= 0.4)
+          quality = TreasureQuality.Common;
+        else if (roll <= 0.9)
+          quality = TreasureQuality.Uncommon;
+        else
+          quality = TreasureQuality.Good;
+        Item item = Treasure.ItemByQuality(quality, objDb, rng);
+        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+
+      for (int j = 0; j < rng.Next(1, 4); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(15, 36);
+        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+      }
+    }
+    else if (levelNum == 4)
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        TreasureQuality quality;
+        double roll = rng.NextDouble();
+        if (roll <= 0.2)
+          quality = TreasureQuality.Common;
+        else if (roll <= 0.7)
+          quality = TreasureQuality.Uncommon;
+        else
+          quality = TreasureQuality.Good;
+        Item item = Treasure.ItemByQuality(quality, objDb, rng);
+        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+      }
+
+      for (int j = 0; j < rng.Next(1, 4); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(15, 36);
+        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+      }
+    }
+
+    Treasure.AddConsumables(objDb, level, dungeonID, levelNum, rng);
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)

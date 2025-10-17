@@ -67,12 +67,39 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       Actor mimic = MonsterFactory.Mimic();
       objDb.AddNewActor(mimic, new Loc(DungeonId, lvl, mr, mc));
 
-      if (rng.Next(6) == 0)
+      if (rng.Next(5) == 0)
       {
         AddMoldPatch(DungeonId, lvl, map, objDb, rng);
       }
+
+      AddTreasure(objDb, map, DungeonId, lvl, rng);
     }
     
     return (towerDungeon, entrance);
+  }
+
+  static void AddTreasure(GameObjectDB objDb, Map map, int dungeonId, int level, Rng rng)
+  {
+    int numItems = rng.Next(2, 6);
+    for (int j = 0; j < numItems; j++)
+    {
+      TreasureQuality quality;
+      double roll = rng.NextDouble();
+      if (roll <= 0.1)
+        quality = TreasureQuality.Common;
+      else if (roll <= 0.5)
+        quality = TreasureQuality.Uncommon;
+      else
+        quality = TreasureQuality.Good;
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      Treasure.AddObjectToLevel(item, objDb, map, dungeonId, level, rng);
+    }
+
+    for (int j = 0; j < rng.Next(1, 4); j++)
+    {
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(15, 36);
+      Treasure.AddObjectToLevel(zorkmids, objDb, map, dungeonId, level, rng);
+    }
   }
 }
