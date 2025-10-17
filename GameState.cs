@@ -793,10 +793,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.VictoryScreen(victim.FullName, this);
       throw new VictoryException();
     }
-    else if (victim.HasTrait<FirstBossTrait>())
-    {
-      Player.Stats[Attribute.MainQuestState] = new Stat(Constants.MQ_FIRST_BOSS_BEAT);
-    }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {
       UI.AlertPlayer(dmt.Message);

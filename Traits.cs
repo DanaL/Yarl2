@@ -1171,11 +1171,6 @@ class GrantsTrait : Trait
   }
 }
 
-class FirstBossTrait : Trait
-{
-  public override string AsText() => "FirstBoss";
-}
-
 class MoldSporesTrait : Trait
 {
   public override string AsText() => "MoldSpores";
@@ -3886,8 +3881,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
-    { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },    
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
