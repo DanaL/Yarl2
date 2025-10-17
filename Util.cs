@@ -198,7 +198,7 @@ enum Rust { Rusted, Corroded }
 // Miscellaneous constants used in a few places
 class Constants
 {
-  public const ulong PLAYER_ID = 2;
+  public const ulong PLAYER_ID = 1;
   
   public const int BACKSPACE = 8;
   public const int TAB = 9;
