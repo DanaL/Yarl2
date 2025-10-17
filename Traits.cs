@@ -2854,9 +2854,13 @@ class StatDebuffTrait : TemporaryTrait
 
   public override List<string> Apply(Actor target, GameState gs)
   {
+    // Can't debuff stat if target doesn't have it!
+    if (!target.Stats.TryGetValue(Attr, out var stat))
+      return [];
+
     // We won't let a debuff lower a stat below -5. Let's not get out
     // of hand
-    if (target.Stats[Attr].Curr < -4)
+    if (stat.Curr < -4)
       return [];
 
     if (target.Stats.ContainsKey(Attribute.Constitution))
@@ -2869,7 +2873,7 @@ class StatDebuffTrait : TemporaryTrait
       return [];
     }
 
-    target.Stats[Attr].Change(Amt);
+    stat.Change(Amt);
     target.Traits.Add(this);
 
     if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
