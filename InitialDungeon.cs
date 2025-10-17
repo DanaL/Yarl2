@@ -296,12 +296,12 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       {
         PlaceMistyPortal(levelMaps[level], rng);
       }
-
-      AddDecorations(DungeonId, levelMaps, objDb, factDb, rng);
     }
+
+    AddDecorations(levelMaps, objDb, factDb, rng);
   }
 
-  void AddDecorations(int dungeonId, Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
+  void AddDecorations(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<Decoration> decorations = Decorations.GenDecorations(factDb, rng);
 
