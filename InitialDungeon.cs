@@ -429,7 +429,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     Item doc = new()
     {
       Name = desc, Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
+      Glyph = new Glyph('?', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false)
     };
     doc.Traits.Add(new FlammableTrait());
     doc.Traits.Add(new ScrollTrait());
