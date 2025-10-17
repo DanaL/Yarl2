@@ -53,7 +53,7 @@ class Treasure
       ItemNames.TINCTURE_CELERITY
   ];
   
-  static readonly List<ItemNames> Consumables = [
+  public static readonly List<ItemNames> Consumables = [
     ItemNames.POTION_COLD_RES,
     ItemNames.POTION_FIRE_RES,
     ItemNames.POTION_HEALING,
@@ -269,17 +269,5 @@ class Treasure
       items.Add(ItemFactory.Get(ItemNames.SKULL, objDb));
 
     return items;
-  }
-
-  public static void AddConsumables(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
-  {
-    int n = rng.Next(2, 5);
-    while (n > 0)
-    {
-      ItemNames name = Consumables[rng.Next(Consumables.Count)];
-      Item item = ItemFactory.Get(name, objDb);
-      AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
-      --n;
-    }
   }  
 }

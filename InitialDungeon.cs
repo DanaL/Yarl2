@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -71,23 +73,47 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
-      AddTreasure(objDb, levels[levelNum], DungeonId, levelNum, rng);
-      SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
+      Map map = levels[levelNum];
 
+      SetTraps(map, DungeonId, levelNum, numOfLevels, rng);
+
+      List<Loc> floors = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+            case TileType.HiddenTrapDoor:
+            case TileType.TrapDoor:
+            case TileType.TeleportTrap:
+            case TileType.HiddenTeleportTrap:
+            case TileType.WoodBridge:
+              Loc floor = new(dungeonID, levelNum, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floors.Add(floor);
+              break;
+          }
+        }
+      }
+      
+      AddTreasure(objDb, floors, levelNum, rng);
+      
       // Maybe add an illusion/trap
       if (levelNum < numOfLevels - 1 && rng.Next(10) == 0)
       {
-        AddBaitIllusion(levels[levelNum], DungeonId, levelNum, objDb, rng);
+        AddBaitIllusion(map, DungeonId, levelNum, objDb, rng);
       }
 
       if (rng.Next(4) == 0)
       {
-        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, levels[levelNum], objDb, rng);
+        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, map, objDb, rng);
       }
 
       if (rng.Next(6) == 0)
       {
-        AddMoldPatch(DungeonId, levelNum, levels[levelNum], objDb, rng);
+        AddMoldPatch(DungeonId, levelNum, map, objDb, rng);
       }
     }
 
@@ -290,19 +316,17 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   }
 
   // This is probably overly complicated...
-  static void AddTreasure(GameObjectDB objDb, Map level, int dungeonID, int levelNum, Rng rng)
+  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int levelNum, Rng rng)
   {
+    int zorkmidPiles = 3;
+
     if (levelNum == 0)
     {
       int numItems = rng.Next(1, 4);
       for (int j = 0; j < numItems; j++)
       {
-        Item item = Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng);
-        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
-      }
-      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-      zorkmids.Value = rng.Next(10, 21);
-      Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+        PlaceItem(Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng));        
+      }      
     }
     else if (levelNum == 1)
     {
@@ -311,19 +335,12 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       {
         double roll = rng.NextDouble();
         TreasureQuality quality = roll <= 0.9 ? TreasureQuality.Common : TreasureQuality.Uncommon;
-        Item item = Treasure.ItemByQuality(quality, objDb, rng);
-        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
       }
 
-      Item goodItem = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
-      Treasure.AddObjectToLevel(goodItem, objDb, level, dungeonID, levelNum, rng);
+      PlaceItem(Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng));
 
-      for (int j = 0; j < rng.Next(1, 3); j++)
-      {
-        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(10, 21);
-        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
-      }
+      zorkmidPiles = 2;
     }
     else if (levelNum == 2 || levelNum == 3)
     {
@@ -338,18 +355,10 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
           quality = TreasureQuality.Uncommon;
         else
           quality = TreasureQuality.Good;
-        Item item = Treasure.ItemByQuality(quality, objDb, rng);
-        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
-      }
-
-      for (int j = 0; j < rng.Next(1, 4); j++)
-      {
-        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(15, 36);
-        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
       }
     }
-    else if (levelNum == 4)
+    else
     {
       int numItems = rng.Next(3, 8);
       for (int j = 0; j < numItems; j++)
@@ -362,19 +371,33 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
           quality = TreasureQuality.Uncommon;
         else
           quality = TreasureQuality.Good;
-        Item item = Treasure.ItemByQuality(quality, objDb, rng);
-        Treasure.AddObjectToLevel(item, objDb, level, dungeonID, levelNum, rng);
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
       }
+    }
+    
+    for (int j = 0; j < rng.Next(1, zorkmidPiles + 1); j++)
+    {
+      int minZ = levelNum > 0 ? 10 : 1;
+      int maxZ = levelNum > 0 ? 36 : 15;
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(minZ, maxZ);
+      PlaceItem(zorkmids);
+    }
 
-      for (int j = 0; j < rng.Next(1, 4); j++)
+    if (levelNum > 0)
+    {
+      for (int i = 0; i < rng.Next(2, 5); i++)
       {
-        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
-        zorkmids.Value = rng.Next(15, 36);
-        Treasure.AddObjectToLevel(zorkmids, objDb, level, dungeonID, levelNum, rng);
+        ItemNames name = Treasure.Consumables[rng.Next(Treasure.Consumables.Count)];
+        PlaceItem(ItemFactory.Get(name, objDb));
       }
     }
 
-    Treasure.AddConsumables(objDb, level, dungeonID, levelNum, rng);
+    void PlaceItem(Item item)
+    {
+      Loc loc = floors[rng.Next(floors.Count)];
+      objDb.SetToLoc(loc, item);
+    }
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
