@@ -157,7 +157,6 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     bool captive = false;
-    string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
     double chanceOfDesecratedAltar = 0.25;
 
     // Can we create any rooms-within-rooms?

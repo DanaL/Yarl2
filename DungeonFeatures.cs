@@ -439,6 +439,10 @@ class CaptiveFeature
         if (Util.Distance(r, c, gateR, gateC) == 1)
           continue;
 
+        // Prevent lever from being generated inside the cell :P
+        if (Util.Distance(r, c, cellR, cellC) == 1)
+          continue;
+
         int floors = 0;
         foreach (var (adjR, adjC) in Util.Adj4Sqs(r, c))
         {
