@@ -777,7 +777,17 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
   {
-    bool locVisible = LastPlayerFoV.Contains(victim.Loc);
+    bool locVisible = false;
+    if (LastPlayerFoV.Contains(victim.Loc))
+    {
+      locVisible = true;
+    }
+    else if (attacker is not null && attacker.HasTrait<SwallowedTrait>() && victim.Traits.OfType<FullBellyTrait>().FirstOrDefault() is FullBellyTrait fbt)
+    {
+      if (fbt.VictimID == attacker.ID)
+        locVisible = true;
+    }
+
     if (victim is Player)
     {
       // Play any queued explosions in case it was one of the explosions
