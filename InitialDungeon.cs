@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -298,7 +296,149 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       {
         PlaceMistyPortal(levelMaps[level], rng);
       }
+
+      AddDecorations(DungeonId, levelMaps, objDb, factDb, rng);
     }
+  }
+
+  void AddDecorations(int dungeonId, Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    List<Decoration> decorations = Decorations.GenDecorations(factDb, rng);
+
+    foreach (var decoration in decorations)
+    {
+      // We won't use every last generated decoration
+      if (rng.NextDouble() < 0.1)
+        continue;
+
+      int level = rng.Next(levelMaps.Length);      
+      Map map = levelMaps[level];
+
+      List<Loc> floors = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+            case TileType.HiddenTrapDoor:
+            case TileType.TrapDoor:
+            case TileType.TeleportTrap:
+            case TileType.HiddenTeleportTrap:
+            case TileType.WoodBridge:
+            case TileType.Grass:
+            case TileType.Dirt:
+            case TileType.GreenTree:
+              Loc floor = new(dungeonID, level, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floors.Add(floor);
+              break;
+          }
+        }
+      }
+
+      if (floors.Count == 0)
+        continue; // unlikely...
+
+      if (decoration.Type == DecorationType.Statue)
+      {
+        List<Loc> candidates = [.. floors.Where(l => ValidStatueSq(map, l.Row, l.Col))];
+
+        // Prevent a statue from blocking a hallway
+        if (candidates.Count == 0)
+          continue;
+
+        Loc loc = candidates[rng.Next(candidates.Count)];
+        Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+        statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
+        objDb.SetToLoc(loc, statue);
+      }
+      else if (decoration.Type == DecorationType.Mosaic)
+      {
+        if (floors.Count == 0)
+          continue;
+
+        Loc loc = floors[rng.Next(floors.Count)];
+        Landmark mosaic = new(decoration.Desc.Capitalize());
+        map.SetTile(loc.Row, loc.Col, mosaic);
+      }
+      else if (decoration.Type == DecorationType.Fresco)
+      {
+        PlaceFresco(map, floors, decoration.Desc, rng);
+      }
+      else if (decoration.Type == DecorationType.ScholarJournal)
+      {
+        PlaceDocument(floors, decoration.Desc, objDb, rng);
+      }
+    }
+
+    static bool ValidStatueSq(Map map, int r, int c)
+    {
+      int adjFloorCount = 0;
+      foreach (var t in Util.Adj8Sqs(r, c))
+      {
+        if (map.TileAt(t).Type == TileType.DungeonFloor)
+          adjFloorCount++;
+      }
+
+      return adjFloorCount > 3;
+    }
+  }
+
+  static void PlaceFresco(Map map, List<Loc> floors, string frescoText, Rng rng)
+  {
+    // We want a floor tile that's next to a wall
+    List<Loc> candidates = [.. floors.Where(l => WallAdj(l))];
+
+    if (candidates.Count == 0)
+      return;
+
+    Loc loc = candidates[rng.Next(candidates.Count)];
+    Landmark tile = new(frescoText.Capitalize());
+    map.SetTile(loc.Row, loc.Col, tile);
+
+    bool WallAdj(Loc loc)
+    {
+      foreach (Loc adj in Util.Adj4Locs(loc))
+      {
+        if (map.TileAt(adj.Row, adj.Col).Type == TileType.DungeonWall)
+          return true;
+      }
+
+      return false;
+    }
+  }
+
+  static void PlaceDocument(List<Loc> floors, string documentText, GameObjectDB objDb, Rng rng)
+  {    
+    string adjective;
+    string desc;
+    var roll = rng.NextDouble();
+    if (roll < 0.5)
+    {
+      desc = "scroll";
+      adjective = "tattered";
+    }
+    else
+    {
+      desc = "page";
+      adjective = "torn";
+    }
+
+    Item doc = new()
+    {
+      Name = desc, Type = ItemType.Document,
+      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
+    };
+    doc.Traits.Add(new FlammableTrait());
+    doc.Traits.Add(new ScrollTrait());
+    doc.Traits.Add(new AdjectiveTrait(adjective));
+    doc.Traits.Add(new ReadableTrait(documentText) { OwnerID = doc.ID });
+
+    Loc loc = floors[rng.Next(floors.Count)];
+    objDb.Add(doc);
+    objDb.SetToLoc(loc, doc);
   }
 
   static int AdjWalls(Map map, int r, int c)
