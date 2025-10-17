@@ -693,10 +693,9 @@ abstract class DungeonBuilder
     };
   }
 
-  protected static void AddMoldPatch(int dungeonId, int levelNum, Map map, GameObjectDB objDb, Rng rng)
+  protected static void AddMoldPatch(Map map, List<Loc> floors, GameObjectDB objDb, Rng rng)
   {
-    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
-    List<Loc> openFloors = [.. sqs.Where(l => !objDb.AreBlockersAtLoc(l))];
+    List<Loc> openFloors = [.. floors.Where(l => !objDb.AreBlockersAtLoc(l))];
     if (openFloors.Count == 0)
       return;
 

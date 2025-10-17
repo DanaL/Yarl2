@@ -113,7 +113,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
       if (rng.Next(6) == 0)
       {
-        AddMoldPatch(DungeonId, levelNum, map, objDb, rng);
+        AddMoldPatch(map, floors, objDb, rng);
       }
     }
 

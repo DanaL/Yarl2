@@ -49,36 +49,53 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
     PopulateDungeon(towerDungeon, rng, objDb);
 
-    // Sometimes replace a door with a mimic. Just the sort of thing a wizard
-    // would do
     for (int lvl = 0; lvl < towerDungeon.LevelMaps.Count; lvl++)
     {
-      if (rng.Next(10) > 0)
-        continue;
-
       Map map = towerDungeon.LevelMaps[lvl];
-      List<(int, int)> doors = [.. map.SqsOfType(TileType.ClosedDoor).Concat(map.SqsOfType(TileType.OpenDoor))];
-      if (doors.Count == 0)
-        continue;
 
-      (int mr, int mc) = doors[rng.Next(doors.Count)];
-      map.SetTile(mr, mc, TileFactory.Get(TileType.DungeonFloor));
+      List<Loc> doors = [];
+      List<Loc> floorSqs = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+              Loc floor = new(dungeonId, lvl, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floorSqs.Add(floor);
+              break;
+            case TileType.ClosedDoor:
+            case TileType.OpenDoor:
+              doors.Add(new(dungeonId, lvl, r, c));
+              break;
+          }
+        }
+      }
 
-      Actor mimic = MonsterFactory.Mimic();
-      objDb.AddNewActor(mimic, new Loc(DungeonId, lvl, mr, mc));
+      // Sometimes replace a door with a mimic! Just the sort of thing a 
+      // wizard would do!
+      if (rng.Next(10) == 0 && doors.Count > 0)
+      {
+        Loc loc = doors[rng.Next(doors.Count)];
+        map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+        Actor mimic = MonsterFactory.Mimic();
+        objDb.AddNewActor(mimic, loc);
+      }
 
       if (rng.Next(5) == 0)
       {
-        AddMoldPatch(DungeonId, lvl, map, objDb, rng);
+        AddMoldPatch(map, floorSqs, objDb, rng);
       }
 
-      AddTreasure(objDb, map, DungeonId, lvl, rng);
+      AddTreasure(objDb, floorSqs, DungeonId, lvl, rng);
     }
     
     return (towerDungeon, entrance);
   }
 
-  static void AddTreasure(GameObjectDB objDb, Map map, int dungeonId, int level, Rng rng)
+  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int dungeonId, int level, Rng rng)
   {
     int numItems = rng.Next(2, 6);
     for (int j = 0; j < numItems; j++)
@@ -91,15 +108,20 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         quality = TreasureQuality.Uncommon;
       else
         quality = TreasureQuality.Good;
-      Item item = Treasure.ItemByQuality(quality, objDb, rng);
-      Treasure.AddObjectToLevel(item, objDb, map, dungeonId, level, rng);
+      PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
     }
 
     for (int j = 0; j < rng.Next(1, 4); j++)
     {
       Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
       zorkmids.Value = rng.Next(15, 36);
-      Treasure.AddObjectToLevel(zorkmids, objDb, map, dungeonId, level, rng);
+      PlaceItem(zorkmids);
+    }
+
+    void PlaceItem(Item item)
+    {
+      Loc loc = floors[rng.Next(floors.Count)];
+      objDb.SetToLoc(loc, item);
     }
   }
 }
