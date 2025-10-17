@@ -1288,7 +1288,12 @@ abstract class UserInterface
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
     text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
 
-    string dn = $"in {gameState.CurrentDungeon.Name}";
+    string dn;
+    if (gameState.Player.HasTrait<SwallowedTrait>())
+        dn = " in something's belly";
+    else
+      dn = $"in {gameState.CurrentDungeon.Name}";
+
     int x = (26 - dn.Length) / 2;
     dn = dn.PadLeft(26 - x, ' ');
     dn = dn.PadRight(26, ' ');
