@@ -1,18 +1,18 @@
 skeleton          |z|white        |darkgrey    |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Immunity#Poison,ResistPiercing,Undead,Brainless|
 zombie            |z|limegreen    |darkgreen   | 8|10|2|0.75|12| 8|MeleeBlunt#1#1#6#1#0#0#Attack|Undead,Brainless,Immunity#Poison|
-wolf              |d|lightgrey    |grey        |12| 8|2| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack||
+wolf              |d|lightgrey    |grey        |12| 8|3| 1.0|12|10|MeleePiercing#1#1#6#1#0#0#Attack||
 giant rat         |r|lightgrey    |grey        |11| 5|2| 1.0|10|10|MeleePiercing#1#1#4#1#0#0#Attack||
-dire bat          |v|lightbrown   |brown       |12| 5|2| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying|
+dire bat          |v|lightbrown   |brown       |12| 5|3| 1.0|10|12|MeleePiercing#1#1#5#1#0#0#Attack|Flying|
 goblin            |g|lightbrown   |brown       |12| 8|2| 1.0|12|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|PoorLoot
-goblin outcast    |g|limegreen    |darkgreen   |12|25|2| 1.0|12|10|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Infectious#13|PoorLoot
-goblin archer     |g|blue         |darkblue    |12|15|2| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
-penny pincher     |g|yellow       |yelloworange|16|15|2| 1.2|10|15|MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,Thief,BehaviourTree#Greedy|
+goblin outcast    |g|limegreen    |darkgreen   |12|25|4| 1.0|12|10|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Infectious#13|PoorLoot
+goblin archer     |g|blue         |darkblue    |12|15|3| 1.0|12|14|MissilePiercing#2#7#6#1#0#0#Attack,MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent|PoorLoot
+penny pincher     |g|yellow       |yelloworange|16|15|5| 1.2|10|15|MeleeSlashing#1#1#4#1#0#0#Attack|Intelligent,Thief,BehaviourTree#Greedy|
 hobgoblin         |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot
 kobold            |k|brightred    |dullred     |12| 8|2| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|PoorLoot
-kobold bully      |k|brown        |dullred     |12|25|2| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot
-kobold knight     |k|grey         |darkgrey    |12|25|3| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot,RINGMAIL#1#50#true
-nilbog            |g|lightblue    |blue        |14|20|3| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#7#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|
-kobold foreman    |k|yelloworange |dullred     |13|30|3| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Attack#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent|Coins#10#20
+kobold bully      |k|brown        |dullred     |12|25|4| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot
+kobold knight     |k|grey         |darkgrey    |12|25|4| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot,RINGMAIL#1#50#true
+nilbog            |g|lightblue    |blue        |14|20|4| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#7#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|
+kobold foreman    |k|yelloworange |dullred     |13|30|4| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Attack#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent|Coins#10#20
 vines             |:|green        |darkgreen   |12|25|0| 1.0|10|10||Plant,Plural,Immunity#Confusion,Brainless,Immobile|
 giant spider      |M|lightgrey    |grey        |13|25|3| 1.0|12|14|Web#2#7#0#0#0#7#Attack,MeleePiercing#1#1#9#1#0#0#Attack|Teflon,Poisoner#13#2#20|
 goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#0#0#0#2#AttackMelee,Slashing#1#1#5#1#0#0#Attack|Intelligent|

@@ -427,6 +427,9 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
       ks.Name = "the Kobold Regional Manager";
       ks.Traits.Add(new NamedTrait());
+      ks.Stats[Attribute.AttackBonus] = new Stat(6);
+      ks.Stats[Attribute.HP] = new Stat(35);
+
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
       Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);
