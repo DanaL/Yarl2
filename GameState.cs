@@ -1519,7 +1519,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           AltColour2 = Colours.YELLOW_ORANGE,
           Highlight = Colours.DARK_GREEN,
           Centre = loc,
-          Sqs = [.. affected],
+          Sqs = [.. affected.Where(l => LastPlayerFoV.Contains(l))],
           Ch = '*'
         };
         UI.PlayAnimation(explosion, this);
