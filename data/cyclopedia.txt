@@ -499,3 +499,9 @@ The Crimson King is a somewhat forgotten deity of war, vengeance, and strife. Pe
 #
 tincture of celerity
 A serum that speeds you up allowing you to act more often.
+#
+page
+A stained page torn from someone's notebook.
+#
+scroll
+An old scroll perhaps taken from some dusty library. It has seen better days.
