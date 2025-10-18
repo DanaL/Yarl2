@@ -11,11 +11,11 @@
 
 namespace Yarl2;
 
-class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccupant) : DungeonBuilder
+class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
 {
   const int HEIGHT = 30;
   const int WIDTH = 70;
-  int DungeonId { get; set; } = dungeonID;
+  int DungeonId { get; set; } = dungeonId;
   (int, int) Entrance { get; set; } = entrance;
   string MainOccupant { get; set; } = mainOccupant;
 
@@ -88,7 +88,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
             case TileType.TeleportTrap:
             case TileType.HiddenTeleportTrap:
             case TileType.WoodBridge:
-              Loc floor = new(dungeonID, levelNum, r, c);
+              Loc floor = new(DungeonId, levelNum, r, c);
               if (Util.GoodFloorSpace(objDb, floor))
                 floors.Add(floor);
               break;
@@ -330,7 +330,7 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
             case TileType.Grass:
             case TileType.Dirt:
             case TileType.GreenTree:
-              Loc floor = new(dungeonID, level, r, c);
+              Loc floor = new(DungeonId, level, r, c);
               if (Util.GoodFloorSpace(objDb, floor))
                 floors.Add(floor);
               break;

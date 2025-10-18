@@ -62,13 +62,13 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
           switch (map.TileAt(r, c).Type)
           {
             case TileType.DungeonFloor:
-              Loc floor = new(dungeonId, lvl, r, c);
+              Loc floor = new(DungeonId, lvl, r, c);
               if (Util.GoodFloorSpace(objDb, floor))
                 floorSqs.Add(floor);
               break;
             case TileType.ClosedDoor:
             case TileType.OpenDoor:
-              doors.Add(new(dungeonId, lvl, r, c));
+              doors.Add(new(DungeonId, lvl, r, c));
               break;
           }
         }
