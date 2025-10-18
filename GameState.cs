@@ -777,7 +777,17 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
   {
-    bool locVisible = LastPlayerFoV.Contains(victim.Loc);
+    bool locVisible = false;
+    if (LastPlayerFoV.Contains(victim.Loc))
+    {
+      locVisible = true;
+    }
+    else if (attacker is not null && attacker.HasTrait<SwallowedTrait>() && victim.Traits.OfType<FullBellyTrait>().FirstOrDefault() is FullBellyTrait fbt)
+    {
+      if (fbt.VictimID == attacker.ID)
+        locVisible = true;
+    }
+
     if (victim is Player)
     {
       // Play any queued explosions in case it was one of the explosions
@@ -792,10 +802,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       UI.VictoryScreen(victim.FullName, this);
       throw new VictoryException();
-    }
-    else if (victim.HasTrait<FirstBossTrait>())
-    {
-      Player.Stats[Attribute.MainQuestState] = new Stat(Constants.MQ_FIRST_BOSS_BEAT);
     }
     else if (locVisible && victim.Traits.OfType<DeathMessageTrait>().FirstOrDefault() is DeathMessageTrait dmt)
     {
@@ -1513,7 +1519,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           AltColour2 = Colours.YELLOW_ORANGE,
           Highlight = Colours.DARK_GREEN,
           Centre = loc,
-          Sqs = [.. affected],
+          Sqs = [.. affected.Where(l => LastPlayerFoV.Contains(l))],
           Ch = '*'
         };
         UI.PlayAnimation(explosion, this);

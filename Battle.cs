@@ -390,14 +390,14 @@ class Battle
     return "";
   }
 
-  static void ResolveGrapple(Actor actor, Actor target, GameState gs, GrapplerTrait grapple)
+  static string ResolveGrapple(Actor actor, Actor target, GameState gs, GrapplerTrait grapple)
   {
     // You can only be grappled by one thing at a time
     if (target.HasTrait<GrappledTrait>())
-      return;
+      return "";
 
     if (target.AbilityCheck(Attribute.Strength, grapple.DC, gs.Rng))
-      return;
+      return "";
 
     GrappledTrait grappled = new()
     {
@@ -412,8 +412,9 @@ class Battle
     actor.Traits.Add(grappling);
 
     string msg = $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} grappled by "; 
-    msg += actor.FullName + "!";
-    gs.UIRef().AlertPlayer(msg, gs, actor.Loc);
+    msg += MsgFactory.CalcName(actor, gs.Player) + "!";
+
+    return msg;
   }
 
   static int CalcAttackMod(Actor attacker, Item? weapon)
@@ -616,7 +617,7 @@ class Battle
       }
 
       if (grappler is not null)
-        ResolveGrapple(attacker, target, gs, grappler);
+        messages.Add(ResolveGrapple(attacker, target, gs, grappler));
 
       string verb = "hit";
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)

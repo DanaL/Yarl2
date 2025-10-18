@@ -71,23 +71,47 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
 
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
-      Treasure.AddTreasureToDungeonLevel(objDb, levels[levelNum], DungeonId, levelNum, rng);
-      SetTraps(levels[levelNum], DungeonId, levelNum, numOfLevels, rng);
+      Map map = levels[levelNum];
 
+      SetTraps(map, DungeonId, levelNum, numOfLevels, rng);
+
+      List<Loc> floors = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+            case TileType.HiddenTrapDoor:
+            case TileType.TrapDoor:
+            case TileType.TeleportTrap:
+            case TileType.HiddenTeleportTrap:
+            case TileType.WoodBridge:
+              Loc floor = new(dungeonID, levelNum, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floors.Add(floor);
+              break;
+          }
+        }
+      }
+      
+      AddTreasure(objDb, floors, levelNum, rng);
+      
       // Maybe add an illusion/trap
       if (levelNum < numOfLevels - 1 && rng.Next(10) == 0)
       {
-        AddBaitIllusion(levels[levelNum], DungeonId, levelNum, objDb, rng);
+        AddBaitIllusion(map, DungeonId, levelNum, objDb, rng);
       }
 
       if (rng.Next(4) == 0)
       {
-        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, levels[levelNum], objDb, rng);
+        TunnelCarver.MakeCollapsedTunnel(DungeonId, levelNum, map, objDb, rng);
       }
 
       if (rng.Next(6) == 0)
       {
-        AddMoldPatch(DungeonId, levelNum, levels[levelNum], objDb, rng);
+        AddMoldPatch(map, floors, objDb, rng);
       }
     }
 
@@ -131,7 +155,6 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     bool captive = false;
-    string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
     double chanceOfDesecratedAltar = 0.25;
 
     // Can we create any rooms-within-rooms?
@@ -274,6 +297,148 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
         PlaceMistyPortal(levelMaps[level], rng);
       }
     }
+
+    AddDecorations(levelMaps, objDb, factDb, rng);
+  }
+
+  void AddDecorations(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    List<Decoration> decorations = Decorations.GenDecorations(factDb, rng);
+
+    foreach (var decoration in decorations)
+    {
+      // We won't use every last generated decoration
+      if (rng.NextDouble() < 0.1)
+        continue;
+
+      int level = rng.Next(levelMaps.Length);      
+      Map map = levelMaps[level];
+
+      List<Loc> floors = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          switch (map.TileAt(r, c).Type)
+          {
+            case TileType.DungeonFloor:
+            case TileType.HiddenTrapDoor:
+            case TileType.TrapDoor:
+            case TileType.TeleportTrap:
+            case TileType.HiddenTeleportTrap:
+            case TileType.WoodBridge:
+            case TileType.Grass:
+            case TileType.Dirt:
+            case TileType.GreenTree:
+              Loc floor = new(dungeonID, level, r, c);
+              if (Util.GoodFloorSpace(objDb, floor))
+                floors.Add(floor);
+              break;
+          }
+        }
+      }
+
+      if (floors.Count == 0)
+        continue; // unlikely...
+
+      if (decoration.Type == DecorationType.Statue)
+      {
+        List<Loc> candidates = [.. floors.Where(l => ValidStatueSq(map, l.Row, l.Col))];
+
+        // Prevent a statue from blocking a hallway
+        if (candidates.Count == 0)
+          continue;
+
+        Loc loc = candidates[rng.Next(candidates.Count)];
+        Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
+        statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
+        objDb.SetToLoc(loc, statue);
+      }
+      else if (decoration.Type == DecorationType.Mosaic)
+      {
+        if (floors.Count == 0)
+          continue;
+
+        Loc loc = floors[rng.Next(floors.Count)];
+        Landmark mosaic = new(decoration.Desc.Capitalize());
+        map.SetTile(loc.Row, loc.Col, mosaic);
+      }
+      else if (decoration.Type == DecorationType.Fresco)
+      {
+        PlaceFresco(map, floors, decoration.Desc, rng);
+      }
+      else if (decoration.Type == DecorationType.ScholarJournal)
+      {
+        PlaceDocument(floors, decoration.Desc, objDb, rng);
+      }
+    }
+
+    static bool ValidStatueSq(Map map, int r, int c)
+    {
+      int adjFloorCount = 0;
+      foreach (var t in Util.Adj8Sqs(r, c))
+      {
+        if (map.TileAt(t).Type == TileType.DungeonFloor)
+          adjFloorCount++;
+      }
+
+      return adjFloorCount > 3;
+    }
+  }
+
+  static void PlaceFresco(Map map, List<Loc> floors, string frescoText, Rng rng)
+  {
+    // We want a floor tile that's next to a wall
+    List<Loc> candidates = [.. floors.Where(l => WallAdj(l))];
+
+    if (candidates.Count == 0)
+      return;
+
+    Loc loc = candidates[rng.Next(candidates.Count)];
+    Landmark tile = new(frescoText.Capitalize());
+    map.SetTile(loc.Row, loc.Col, tile);
+
+    bool WallAdj(Loc loc)
+    {
+      foreach (Loc adj in Util.Adj4Locs(loc))
+      {
+        if (map.TileAt(adj.Row, adj.Col).Type == TileType.DungeonWall)
+          return true;
+      }
+
+      return false;
+    }
+  }
+
+  static void PlaceDocument(List<Loc> floors, string documentText, GameObjectDB objDb, Rng rng)
+  {    
+    string adjective;
+    string desc;
+    var roll = rng.NextDouble();
+    if (roll < 0.5)
+    {
+      desc = "scroll";
+      adjective = "tattered";
+    }
+    else
+    {
+      desc = "page";
+      adjective = "torn";
+    }
+
+    Item doc = new()
+    {
+      Name = desc, Type = ItemType.Document,
+      Glyph = new Glyph('?', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false)
+    };
+    doc.Traits.Add(new FlammableTrait());
+    doc.Traits.Add(new ScrollTrait());
+    doc.Traits.Add(new AdjectiveTrait(adjective));
+    doc.Traits.Add(new ReadableTrait(documentText) { OwnerID = doc.ID });
+
+    Loc loc = floors[rng.Next(floors.Count)];
+    objDb.Add(doc);
+    objDb.SetToLoc(loc, doc);
   }
 
   static int AdjWalls(Map map, int r, int c)
@@ -287,6 +452,91 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
     }
 
     return walls;
+  }
+
+  // This is probably overly complicated...
+  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int levelNum, Rng rng)
+  {
+    int zorkmidPiles = 3;
+
+    if (levelNum == 0)
+    {
+      int numItems = rng.Next(1, 4);
+      for (int j = 0; j < numItems; j++)
+      {
+        PlaceItem(Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng));        
+      }      
+    }
+    else if (levelNum == 1)
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        double roll = rng.NextDouble();
+        TreasureQuality quality = roll <= 0.9 ? TreasureQuality.Common : TreasureQuality.Uncommon;
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+      }
+
+      PlaceItem(Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng));
+
+      zorkmidPiles = 2;
+    }
+    else if (levelNum == 2 || levelNum == 3)
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        TreasureQuality quality;
+        double roll = rng.NextDouble();
+        if (roll <= 0.4)
+          quality = TreasureQuality.Common;
+        else if (roll <= 0.9)
+          quality = TreasureQuality.Uncommon;
+        else
+          quality = TreasureQuality.Good;
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+      }
+    }
+    else
+    {
+      int numItems = rng.Next(3, 8);
+      for (int j = 0; j < numItems; j++)
+      {
+        TreasureQuality quality;
+        double roll = rng.NextDouble();
+        if (roll <= 0.2)
+          quality = TreasureQuality.Common;
+        else if (roll <= 0.7)
+          quality = TreasureQuality.Uncommon;
+        else
+          quality = TreasureQuality.Good;
+        PlaceItem(Treasure.ItemByQuality(quality, objDb, rng));
+      }
+    }
+    
+    for (int j = 0; j < rng.Next(1, zorkmidPiles + 1); j++)
+    {
+      int minZ = levelNum > 0 ? 10 : 1;
+      int maxZ = levelNum > 0 ? 36 : 15;
+      Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+      zorkmids.Value = rng.Next(minZ, maxZ);
+      PlaceItem(zorkmids);
+    }
+
+    if (levelNum > 0)
+    {
+      for (int i = 0; i < rng.Next(2, 5); i++)
+      {
+        ItemNames name = Treasure.Consumables[rng.Next(Treasure.Consumables.Count)];
+        PlaceItem(ItemFactory.Get(name, objDb));
+      }
+    }
+
+    void PlaceItem(Item item)
+    {
+      Loc loc = floors[rng.Next(floors.Count)];
+      objDb.SetToLoc(loc, item);
+    }
   }
 
   static void SetPuzzle(Dungeon dungeon, GameObjectDB objDb, FactDb factDb, Rng rng)
@@ -427,6 +677,9 @@ class InitialDungeonBuilder(int dungeonID, (int, int) entrance, string mainOccup
       Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
       ks.Name = "the Kobold Regional Manager";
       ks.Traits.Add(new NamedTrait());
+      ks.Stats[Attribute.AttackBonus] = new Stat(6);
+      ks.Stats[Attribute.HP] = new Stat(35);
+
       var sq = bossLevel.RandomTile(TileType.DungeonFloor, rng);
       Loc loc = new(dungeon.ID, bossLevelNum, sq.Item1, sq.Item2);
       objDb.AddNewActor(ks, loc);

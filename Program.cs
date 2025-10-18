@@ -130,7 +130,6 @@ namespace Yarl2
     public bool BumpToChat { get; set; }
     public bool BumpForLockedDoors { get; set; }
     public bool HighlightPlayer { get; set; }
-    public bool TorchLightAnimation { get; set; }
     public bool ShowHints { get; set; }
     public bool ShowTurns { get; set; }
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
@@ -161,7 +160,6 @@ namespace Yarl2
         BumpToChat = true,
         BumpForLockedDoors = true,
         HighlightPlayer = false,
-        TorchLightAnimation = true,
         ShowHints = true,
         ShowTurns = false
       };

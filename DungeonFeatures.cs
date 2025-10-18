@@ -24,17 +24,11 @@ enum DecorationType
   Statue, Fresco, Mosaic, ScholarJournal
 }
 
-class Decoration
+class Decoration(DecorationType type, string desc)
 {
   public static readonly Decoration Null = new NullDecoration();
-  public virtual DecorationType Type { get; }
-  public virtual string Desc { get; }
-
-  public Decoration(DecorationType type, string desc)
-  {
-    Type = type;
-    Desc = desc;
-  }
+  public virtual DecorationType Type { get; } = type;
+  public virtual string Desc { get; } = desc;
 }
 
 class NullDecoration : Decoration
@@ -437,6 +431,10 @@ class CaptiveFeature
         if (!map.InBounds(r, c) || map.TileAt(r, c).Type != TileType.DungeonWall)
           continue;
         if (Util.Distance(r, c, gateR, gateC) == 1)
+          continue;
+
+        // Prevent lever from being generated inside the cell :P
+        if (Util.Distance(r, c, cellR, cellC) == 1)
           continue;
 
         int floors = 0;

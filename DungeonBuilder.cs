@@ -693,10 +693,9 @@ abstract class DungeonBuilder
     };
   }
 
-  protected static void AddMoldPatch(int dungeonId, int levelNum, Map map, GameObjectDB objDb, Rng rng)
+  protected static void AddMoldPatch(Map map, List<Loc> floors, GameObjectDB objDb, Rng rng)
   {
-    var sqs = map.SqsOfType(TileType.DungeonFloor).Select(sq => new Loc(dungeonId, levelNum, sq.Item1, sq.Item2));
-    List<Loc> openFloors = [.. sqs.Where(l => !objDb.AreBlockersAtLoc(l))];
+    List<Loc> openFloors = [.. floors.Where(l => !objDb.AreBlockersAtLoc(l))];
     if (openFloors.Count == 0)
       return;
 
@@ -721,163 +720,6 @@ abstract class DungeonBuilder
 class MainDungeonBuilder : DungeonBuilder
 {
   int _dungeonID;
-
-  static void PlaceFresco(Map map, int height, int width, string frescoText, Rng rng)
-  {
-    List<(int, int)> candidateSqs = [];
-    // We're looking for any floor square that's adjacent to wall
-    for (int r = 1; r < height - 1; r++)
-    {
-      for (int c = 1; c < width - 1; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
-        {
-          bool viable = false;
-          foreach (var t in Util.Adj4Sqs(r, c))
-          {
-            if (map.TileAt(t).Type == TileType.DungeonWall)
-            {
-              viable = true;
-              break;
-            }
-          }
-
-          if (viable)
-            candidateSqs.Add((r, c));
-        }
-      }
-    }
-
-    if (candidateSqs.Count > 0)
-    {
-      var sq = candidateSqs[rng.Next(candidateSqs.Count)];
-      var tile = new Landmark(frescoText.Capitalize());
-      map.SetTile(sq, tile);
-    }
-  }
-
-  void PlaceDocument(Map map, int level, int height, int width, string documentText, GameObjectDB objDb, Rng rng)
-  {
-    // Any floor will do...
-    List<(int, int)> candidateSqs = [];
-    for (int r = 1; r < height - 1; r++)
-    {
-      for (int c = 1; c < width - 1; c++)
-      {
-        if (map.TileAt(r, c).Type == TileType.DungeonFloor)
-          candidateSqs.Add((r, c));
-      }
-    }
-
-    string adjective;
-    string desc;
-    var roll = rng.NextDouble();
-    if (roll < 0.5)
-    {
-      desc = "scroll";
-      adjective = "tattered";
-    }
-    else
-    {
-      desc = "page";
-      adjective = "torn";
-    }
-
-    var doc = new Item()
-    {
-      Name = desc,
-      Type = ItemType.Document,
-      Glyph = new Glyph('?', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, false)
-    };
-    doc.Traits.Add(new FlammableTrait());
-    doc.Traits.Add(new ScrollTrait());
-    doc.Traits.Add(new AdjectiveTrait(adjective));
-
-    var rt = new ReadableTrait(documentText)
-    {
-      OwnerID = doc.ID
-    };
-    doc.Traits.Add(rt);
-    var (row, col) = candidateSqs[rng.Next(candidateSqs.Count)];
-    var loc = new Loc(_dungeonID, level, row, col);
-    objDb.Add(doc);
-    objDb.SetToLoc(loc, doc);
-  }
-
-  void DecorateDungeon(Map[] levels, int dungeonId, int height, int width, int numOfLevels, FactDb factDb, GameObjectDB objDb, Rng rng)
-  {
-    bool ValidStatueSq(Map map, int r, int c)
-    {
-      int adjFloorCount = 0;
-      foreach (var t in Util.Adj8Sqs(r, c))
-      {
-        if (map.TileAt(t).Type == TileType.DungeonFloor)
-          adjFloorCount++;
-      }
-
-      return adjFloorCount> 3;
-    }
-
-    bool GoodFloorSpot(Loc loc)
-    {
-      foreach (Item item in objDb.ItemsAt(loc))
-      {
-        if (item.HasTrait<OnFireTrait>())
-          return false;
-      }
-
-      return true;
-    }
-
-    var decorations = Decorations.GenDecorations(factDb, rng);
-    
-    // I eventually probably won't include every decoration from every fact
-    foreach (var decoration in decorations)
-    {
-      if (rng.NextDouble() < 0.1)
-        continue;
-        
-      int level = rng.Next(numOfLevels);
-      List<(int, int)> floorTiles = [ ..levels[level].SqsOfType(TileType.DungeonFloor)
-                                                     .Where(sq => GoodFloorSpot(new Loc(dungeonId, level, sq.Item1, sq.Item2)))];
-
-      if (decoration.Type == DecorationType.Statue)
-      {
-        // Prevent a statue from blocking a hallway
-        List<int> candidates = [.. Enumerable.Range(0, floorTiles.Count)
-                          .Where(i => ValidStatueSq(levels[level], floorTiles[i].Item1, floorTiles[i].Item2))];                         
-        if (candidates.Count == 0)
-          continue;
-
-        int i = candidates[rng.Next(candidates.Count)];
-        var (r, c) = floorTiles[i];
-        Loc statueLoc = new(dungeonId, level, r, c);
-        Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-        statue.Traits.Add(new DescriptionTrait(decoration.Desc.Capitalize()));
-        objDb.SetToLoc(statueLoc, statue);
-        floorTiles.RemoveAt(i);
-      }
-      else if (decoration.Type == DecorationType.Mosaic)
-      {
-        if (floorTiles.Count == 0)
-          continue;
-
-        int i = rng.Next(floorTiles.Count);
-        var (r, c) = floorTiles[i];
-        var mosaic = new Landmark(decoration.Desc.Capitalize());
-        levels[level].SetTile(r, c, mosaic);
-        floorTiles.RemoveAt(i);
-      }
-      else if (decoration.Type == DecorationType.Fresco)
-      {
-        PlaceFresco(levels[level], height, width, decoration.Desc, rng);
-      }
-      else if (decoration.Type == DecorationType.ScholarJournal)
-      {
-        PlaceDocument(levels[level], level, height, width, decoration.Desc, objDb, rng);
-      }
-    }
-  }
 
   static List<(int, int)> FloorsNearSq(Map map, int row, int col, int d)
   {
@@ -1266,22 +1108,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
 
     AddRooms(_dungeonID, levels, objDb, factDb, rng);
-    
-    DecorateDungeon(levels, _dungeonID, h, w, numOfLevels, factDb, objDb, rng);
-
-    // Kind of assuming one of levels 7, 8, or 9 will have a valid placement
-    List<int> puzzleLevels = [7, 8, 9];
-    puzzleLevels.Shuffle(rng);
-    foreach (int level in puzzleLevels)
-    {
-      List<PathInfo> paths = LightPuzzleSetup.FindPotential(levels[level]);
-      if (paths.Count != 0)
-      {
-        LightPuzzleSetup.Create(levels[level], paths, objDb, _dungeonID, level, rng);
-        factDb.Add(new SimpleFact() { Name = "QuestPuzzle1", Value = level.ToString() });
-        break;
-      }
-    }
 
     MoonDaughterCleric(levels, id, rng, objDb);
 

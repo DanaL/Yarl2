@@ -789,6 +789,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         _items.RemoveAt(j);
         if (!PlayerInventory())
           item!.Slot = '\0';
+        item!.ContainedBy = 0;
+
         return item;
       }
     }
@@ -818,6 +820,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         if (!playerInventory)
           item.Slot = '\0';
+        item.ContainedBy = 0;
         removed.Add(item);
         _items.RemoveAt(index);
       }

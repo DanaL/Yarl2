@@ -10,7 +10,7 @@
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
+
 using static Yarl2.Util;
 
 namespace Yarl2;
@@ -772,10 +772,8 @@ class OptionsScreen : Inputer
       else if (row == 3)
         GS.Options.HighlightPlayer = !GS.Options.HighlightPlayer;
       else if (row == 4)
-        GS.Options.TorchLightAnimation = !GS.Options.TorchLightAnimation;
-      else if (row == 5)
         GS.Options.ShowHints = !GS.Options.ShowHints;
-      else if (row == 6)
+      else if (row == 5)
         GS.Options.ShowTurns = !GS.Options.ShowTurns;
 
       GS.UIRef().SetOptions(GS.Options, GS);
@@ -790,7 +788,6 @@ class OptionsScreen : Inputer
     string bumpDoorMenu = GS.Options.BumpForLockedDoors ? "On" : "Off";
     string bumpToChat = GS.Options.BumpToChat ? "On" : "Off";
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
-    string torchAnim = GS.Options.TorchLightAnimation ? "On" : "Off";
     string hints = GS.Options.ShowHints ? "On" : "Off";
     string turns = GS.Options.ShowTurns ? "On" : "Off";
     List<string> menuItems = [
@@ -798,7 +795,6 @@ class OptionsScreen : Inputer
       $"Bump for locked door menu: {bumpDoorMenu}",
       $"Bump to chat: {bumpToChat}",
       $"Highlight player: {hilitePlayer}",
-      $"Torchlight animation: {torchAnim}",
       $"Show command hints: {hints}",
       $"Show turns: {turns}"
     ];

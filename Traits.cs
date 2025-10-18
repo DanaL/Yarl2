@@ -1171,11 +1171,6 @@ class GrantsTrait : Trait
   }
 }
 
-class FirstBossTrait : Trait
-{
-  public override string AsText() => "FirstBoss";
-}
-
 class MoldSporesTrait : Trait
 {
   public override string AsText() => "MoldSpores";
@@ -2859,9 +2854,13 @@ class StatDebuffTrait : TemporaryTrait
 
   public override List<string> Apply(Actor target, GameState gs)
   {
+    // Can't debuff stat if target doesn't have it!
+    if (!target.Stats.TryGetValue(Attr, out var stat))
+      return [];
+
     // We won't let a debuff lower a stat below -5. Let's not get out
     // of hand
-    if (target.Stats[Attr].Curr < -4)
+    if (stat.Curr < -4)
       return [];
 
     if (target.Stats.ContainsKey(Attribute.Constitution))
@@ -2874,7 +2873,7 @@ class StatDebuffTrait : TemporaryTrait
       return [];
     }
 
-    target.Stats[Attr].Change(Amt);
+    stat.Change(Amt);
     target.Traits.Add(this);
 
     if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
@@ -3512,7 +3511,8 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 
     item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait)];
 
-    return $"{item!.FullName.DefArticle().Capitalize()} is extinguished.";
+    string s = item!.ContainedBy == Constants.PLAYER_ID ? "Your" : item!.FullName.DefArticle().Capitalize();
+    return $"{s} is extinguished.";
   }
 
   public UseResult Use(Actor _, GameState gs, int row, int col, Item? iitem)
@@ -3886,8 +3886,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
-    { "FirstBoss", (pieces, gameObj) => new FirstBossTrait() },
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },    
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
