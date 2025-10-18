@@ -17,18 +17,18 @@ class Treasure
 {  
   static readonly List<ItemNames> CommonItems = 
     [ ItemNames.TORCH, ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
-      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
+      ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.SCROLL_BLINK,
       ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.DAGGER, ItemNames.FLASK_OF_BOOZE ];
 
   static readonly List<ItemNames> UncommonItems = [
       ItemNames.TORCH, ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE,
       ItemNames.ZORKMIDS_PITTANCE, ItemNames.ZORKMIDS_PITTANCE, ItemNames.POTION_HEALING,
       ItemNames.POTION_HEALING, ItemNames.ANTIDOTE, ItemNames.ANTIDOTE, ItemNames.DAGGER,
-      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, ItemNames.HAND_AXE,
-      ItemNames.SCROLL_MAGIC_MAP, ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES,
-      ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER,
-      ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
-      ItemNames.LOCK_PICK, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
+      ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK,
+      ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_MAGIC_MAP, ItemNames.HAND_AXE,
+      ItemNames.POTION_COLD_RES, ItemNames.POTION_FIRE_RES, ItemNames.POTION_MIND_READING, ItemNames.WAND_MAGIC_MISSILES,
+      ItemNames.WAND_HEAL_MONSTER, ItemNames.HELMET, ItemNames.SHIELD, ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.SCROLL_KNOCK,
+      ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES,
       ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY,
       ItemNames.POTION_HARDINESS
@@ -37,9 +37,9 @@ class Treasure
   static readonly List<ItemNames> GoodItems = [ 
       ItemNames.ZORKMIDS_MEDIOCRE, ItemNames.ZORKMIDS_GOOD, ItemNames.ZORKMIDS_GOOD,
       ItemNames.POTION_HEALING, ItemNames.POTION_MIND_READING, ItemNames.POTION_COLD_RES,
-      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_ESCAPE, 
-      ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD, ItemNames.SHIELD, ItemNames.HELMET, 
-      ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
+      ItemNames.POTION_FIRE_RES, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_BLINK, ItemNames.SCROLL_MAGIC_MAP,
+      ItemNames.SCROLL_MAGIC_MAP, ItemNames.SCROLL_ESCAPE, ItemNames.GUISARME, ItemNames.LONGSWORD, ItemNames.SHORTSHORD,
+      ItemNames.SHIELD, ItemNames.HELMET, ItemNames.STUDDED_LEATHER_ARMOUR, ItemNames.CHAINMAIL, ItemNames.TALISMAN_OF_CIRCUMSPECTION,
       ItemNames.SPEAR, ItemNames.WAND_MAGIC_MISSILES, ItemNames.WAND_HEAL_MONSTER, ItemNames.LEATHER_GLOVES,
       ItemNames.WAND_FROST, ItemNames.WAND_SWAP, ItemNames.RING_OF_PROTECTION, ItemNames.WAND_SLOW_MONSTER,
       ItemNames.POTION_OF_LEVITATION, ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.WAND_FIREBALLS,
