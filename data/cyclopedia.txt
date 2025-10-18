@@ -74,7 +74,7 @@ A pink blob of jelly. Is it sentient? It seems to be moving toward you.
 acrid blob
 A blob of acidic jelly oozing across the floor toward you. Why does this thing even exist?
 #
-chillled jelly
+chilled jelly
 A frost-covered blob chills the nearby air. Probably the result of some mad wizard's experiments.
 #
 screech bat
@@ -507,4 +507,4 @@ page
 A stained page torn from someone's notebook.
 #
 scroll
-An old scroll perhaps taken from some dusty library. It has seen better days. 
+An old scroll perhaps taken from some dusty library. It has seen better days.
