@@ -304,14 +304,15 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   void AddDecorations(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<Decoration> decorations = Decorations.GenDecorations(factDb, rng);
-
+    HashSet<int> lvlsWithDocs = [];
+    
     foreach (var decoration in decorations)
     {
       // We won't use every last generated decoration
       if (rng.NextDouble() < 0.1)
         continue;
 
-      int level = rng.Next(levelMaps.Length);      
+      int level = rng.Next(levelMaps.Length);
       Map map = levelMaps[level];
 
       List<Loc> floors = [];
@@ -367,9 +368,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       {
         PlaceFresco(map, floors, decoration.Desc, rng);
       }
-      else if (decoration.Type == DecorationType.ScholarJournal)
+      else if (decoration.Type == DecorationType.ScholarJournal && !lvlsWithDocs.Contains(level))
       {
         PlaceDocument(floors, decoration.Desc, objDb, rng);
+        lvlsWithDocs.Add(level);
       }
     }
 

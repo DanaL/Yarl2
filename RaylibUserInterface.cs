@@ -57,7 +57,7 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent(bool pause = true)
   {
-    const int THRESHOLD = 150;
+    const int THRESHOLD = 140;
 
     if (pause)
       Thread.Sleep(2);
