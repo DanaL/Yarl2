@@ -132,6 +132,8 @@ namespace Yarl2
     public bool HighlightPlayer { get; set; }
     public bool ShowHints { get; set; }
     public bool ShowTurns { get; set; }
+    public bool DefaultMoveHints { get; set; }
+
     public Dictionary<char, string> KeyRemaps { get; set; } = [];
 
     public Options() { }
@@ -161,7 +163,8 @@ namespace Yarl2
         BumpForLockedDoors = true,
         HighlightPlayer = false,
         ShowHints = true,
-        ShowTurns = false
+        ShowTurns = false,
+        DefaultMoveHints = true
       };
 
       var userDir = Util.UserDir;

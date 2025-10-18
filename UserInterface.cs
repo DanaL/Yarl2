@@ -1337,6 +1337,9 @@ abstract class UserInterface
   {
     Options opts = gameState.Options;
 
+    if (opts.DefaultMoveHints)
+      CheatSheetMode = CheatSheetMode.MvMixed;
+      
     _animations.Add(new CloudAnimation(this, gameState));
     //_animations.Add(new RainAnimation(this, gameState));
 

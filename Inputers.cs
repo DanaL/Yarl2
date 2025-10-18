@@ -775,6 +775,8 @@ class OptionsScreen : Inputer
         GS.Options.ShowHints = !GS.Options.ShowHints;
       else if (row == 5)
         GS.Options.ShowTurns = !GS.Options.ShowTurns;
+      else if (row == 6)
+        GS.Options.DefaultMoveHints = !GS.Options.DefaultMoveHints;
 
       GS.UIRef().SetOptions(GS.Options, GS);
     }
@@ -790,13 +792,16 @@ class OptionsScreen : Inputer
     string hilitePlayer = GS.Options.HighlightPlayer ? "On" : "Off";
     string hints = GS.Options.ShowHints ? "On" : "Off";
     string turns = GS.Options.ShowTurns ? "On" : "Off";
+    string moveHints = GS.Options.DefaultMoveHints ? "On" : "Off";
+
     List<string> menuItems = [
       $"Bump to open doors: {bumpToOpen}",
       $"Bump for locked door menu: {bumpDoorMenu}",
       $"Bump to chat: {bumpToChat}",
       $"Highlight player: {hilitePlayer}",
       $"Show command hints: {hints}",
-      $"Show turns: {turns}"
+      $"Show turns: {turns}",
+      $"Show move keys by default: {moveHints}",
     ];
 
     GS.UIRef().SetPopup(new PopupMenu("Options", menuItems) { SelectedRow = row });
