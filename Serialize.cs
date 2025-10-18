@@ -142,6 +142,15 @@ internal class Serialize
     return files;
   }
 
+  public static void WriteOptions(Options options)
+  {
+    string s = JsonSerializer.Serialize(options);
+
+    DirectoryInfo userDir = Util.UserDir;
+    string fullpath = Path.Combine(userDir.FullName, "ddoptions.json");
+    File.WriteAllText(fullpath, s);
+  }
+
   static List<SqrSave> GenPreview(UserInterface ui)
   {
     List<SqrSave> sqs = [];
@@ -159,7 +168,7 @@ internal class Serialize
           sqr.Ch);
         sqs.Add(s);
       }
-    } 
+    }
 
     return sqs;
   }

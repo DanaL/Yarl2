@@ -1382,6 +1382,8 @@ abstract class UserInterface
         try
         {
           Serialize.WriteSaveGame(gameState, this);
+          Serialize.WriteOptions(gameState.Options);
+          
           success = true;
 
           SetLongMessage([" Be seeing you..."]);

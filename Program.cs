@@ -167,7 +167,7 @@ namespace Yarl2
         DefaultMoveHints = true
       };
 
-      var userDir = Util.UserDir;
+      DirectoryInfo userDir = Util.UserDir;
       if (userDir.Exists)
       {
         string optionsPath = "ddoptions.json";
@@ -184,7 +184,7 @@ namespace Yarl2
         if (File.Exists(optionsPath))
         {
           string json = File.ReadAllText(optionsPath);
-          var opts = JsonSerializer.Deserialize<Options>(json);
+          Options? opts = JsonSerializer.Deserialize<Options>(json);
           if (opts is not null)
             options = opts;
         }
