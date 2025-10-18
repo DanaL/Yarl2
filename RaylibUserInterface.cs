@@ -22,16 +22,17 @@ class RaylibUserInterface : UserInterface
   int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
   DateTime _lastKeyTime = DateTime.MinValue;
-
+  int _lastCh = '\0';
+  
   public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
   {
     int width = ScreenWidth * (opt.FontSize / 2) + 2;
     int height = ScreenHeight * opt.FontSize + 2;
 
     SetConfigFlags(ConfigFlags.VSyncHint);
-    SetTraceLogLevel(TraceLogLevel.None); 
+    SetTraceLogLevel(TraceLogLevel.None);
     InitWindow(width, height, windowTitle);
-    
+
     SetExitKey(KeyboardKey.Null);
     SetTargetFPS(60);
 
@@ -67,12 +68,13 @@ class RaylibUserInterface : UserInterface
 
     // Handle the initial key press
     int ch = GetCharPressed();
-    if (ch > 0)
+    if (ch > 0 && _lastCh != ch)
     {
+      _lastCh = (char)ch;
       _lastKeyTime = DateTime.UtcNow;
       return new GameEvent(GameEventType.KeyInput, (char)ch);
     }
-
+    
     ch = GetKeyPressed();
     if (ch == (int)KeyboardKey.Escape && IsKeyPressed(KeyboardKey.Escape))
     {
@@ -97,9 +99,8 @@ class RaylibUserInterface : UserInterface
 
     TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
     double ms = delta.TotalMilliseconds;
-
-    if (ms < 125)
-      return new GameEvent(GameEventType.NoEvent, '\0');;
+    if (ms < 150)
+      return new GameEvent(GameEventType.NoEvent, '\0');
 
     if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))
     {
@@ -140,6 +141,11 @@ class RaylibUserInterface : UserInterface
     {
       _lastKeyTime = DateTime.UtcNow;
       return new GameEvent(GameEventType.KeyInput, 'n');
+    }
+    else if (IsKeyDown(KeyboardKey.S))
+    {
+      _lastKeyTime = DateTime.UtcNow;
+      return new GameEvent(GameEventType.KeyInput, 's');
     }
     else if (IsKeyDown(KeyboardKey.Backspace))
     {

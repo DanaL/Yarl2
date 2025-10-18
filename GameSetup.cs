@@ -591,6 +591,7 @@ class CampaignCreator(UserInterface ui)
 
       Rng rng = new(seed);
       // seed = -1338258933;
+      // seed = 1489223156;
       GameObjectDB objDb = new();
       SetItemIDInfo(rng);
 
