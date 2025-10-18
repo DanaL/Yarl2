@@ -57,6 +57,8 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent(bool pause = true)
   {
+    const int THRESHOLD = 150;
+
     if (pause)
       Thread.Sleep(2);
 
@@ -66,9 +68,12 @@ class RaylibUserInterface : UserInterface
       return new GameEvent(GameEventType.Quiting, '\0');
     }
 
+    TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
+    double ms = delta.TotalMilliseconds;
+
     // Handle the initial key press
     int ch = GetCharPressed();
-    if (ch > 0 && _lastCh != ch)
+    if (ch > 0 && (_lastCh != ch || ms > THRESHOLD))
     {
       _lastCh = (char)ch;
       _lastKeyTime = DateTime.UtcNow;
@@ -97,9 +102,7 @@ class RaylibUserInterface : UserInterface
       return new GameEvent(GameEventType.KeyInput, (char)Constants.TAB);
     }
 
-    TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
-    double ms = delta.TotalMilliseconds;
-    if (ms < 150)
+    if (ms < THRESHOLD)
       return new GameEvent(GameEventType.NoEvent, '\0');
 
     if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))
