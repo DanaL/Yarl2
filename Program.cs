@@ -157,7 +157,7 @@ namespace Yarl2
       Options options = new()
       {
         Display = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Bearlib" : "Raylib",
-        FontSize = 14,
+        FontSize = 18,
         BumpToOpen = true,
         BumpToChat = true,
         BumpForLockedDoors = true,
