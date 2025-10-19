@@ -999,7 +999,7 @@ class Rooms
     List<Loc> itemSpots = [];
     foreach (var sq in room)
     {
-      Loc loc = new Loc(dungeonId, level, sq.Item1, sq.Item2);
+      Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
       if (map.TileAt(sq).Passable())
         itemSpots.Add(loc);
     }
@@ -1026,7 +1026,7 @@ class Rooms
       objDb.SetToLoc(loc, mithril);
     }
 
-    if (level > 4 && rng.NextDouble() <= 0.2)
+    if (level >= 4 && rng.NextDouble() <= 0.2)
     {
       Loc loc = itemSpots[rng.Next(itemSpots.Count)];
       Item mithril = ItemFactory.Get(ItemNames.MITHRIL_ORE, objDb);

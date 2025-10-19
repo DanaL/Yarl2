@@ -983,14 +983,7 @@ class MainDungeonBuilder : DungeonBuilder
         Rooms.KoboldWorshipRoom(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
         koboldEffigy = true;
-      }
-
-      if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)      
-      {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.MakeMinedChamber(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
-      }      
+      }   
     }
   }
 

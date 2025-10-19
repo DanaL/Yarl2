@@ -257,6 +257,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         graveyard = true;
       }
       
+      if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)      
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.MakeMinedChamber(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(roomId);
+      }   
+
       // Not technically a room but...
       if (level > 0 && rng.NextDouble() < 0.2 && !captive)
       {
