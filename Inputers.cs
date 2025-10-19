@@ -435,7 +435,6 @@ record HelpEntry(string Title, string Entry);
 
 class HelpScreen : Inputer
 {
-  static readonly int PageSize = UserInterface.ScreenHeight - 6;
   readonly UserInterface _ui;
   Dictionary<char, HelpEntry> Entries { get; set; } = [];
   char _selected;
@@ -484,8 +483,7 @@ class HelpScreen : Inputer
   {
     if (ch == Constants.ESC)
     {
-      _ui.ClearLongMessage();
-      _ui.SetInputController(new PlayerCommandController(GS));
+      Close();
       return;
     }
     else if (Entries.ContainsKey(ch))
