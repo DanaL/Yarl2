@@ -1061,30 +1061,24 @@ class Rooms
     }
   }
 
-  public static void MarkGraves(Map map, string epitaph, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
+  public static void MarkGraves(Map map, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb, FactDb factDb)
   {
     NameGenerator ng = new(rng, Util.NamesFile);
 
+    List<string> epitaphs = [.. factDb.HistoricalEvents
+              .Where(he => he is Disaster)
+              .Select(d => ((Disaster) d).Desc)];
+    
     int numOfGraves = room.Count / 4;
     for (int j = 0; j < numOfGraves; j++)
     {
       var (r, c) = room[rng.Next(room.Count)];
       int roll = rng.Next(10);
       string message;
-      string name;
+      string name = ng.GenerateName(rng.Next(6, 11)).Capitalize();
 
-      if (factDb.FactCheck("KylieGrave") is not SimpleFact && rng.Next(20) == 0)
-      {
-        name = "Kylie";
-        factDb.Add(new SimpleFact() { Name = "KylieGrave", Value = "KylieGrave" });
-      }
-      else
-      {
-        name = ng.GenerateName(rng.Next(6, 11)).Capitalize();
-      }
-
-      if (roll == 0)
-        message = $"{name}, claimed by {epitaph}.";
+      if (roll == 0 && epitaphs.Count > 0)
+        message = $"{name}, claimed by {epitaphs[rng.Next(epitaphs.Count)]}.";
       else if (roll == 1)
         message = $"Here lies {name}, missed except not by that troll.";
       else if (roll == 2)

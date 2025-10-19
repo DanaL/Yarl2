@@ -155,9 +155,9 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     bool captive = false;
+    bool graveyard = false;
     double chanceOfDesecratedAltar = 0.25;
 
-    // Can we create any rooms-within-rooms?
     for (int level = 0; level < levelMaps.Length; level++)
     {
       Map map = levelMaps[level];
@@ -249,6 +249,14 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         rooms.RemoveAt(roomId);
       }
 
+      if (!graveyard && level > 0 && rng.Next(10) == 0)
+      {
+        int roomId = rng.Next(rooms.Count);
+        Rooms.MarkGraves(levelMaps[level], rng, DungeonId, level, rooms[roomId], objDb, factDb);
+        rooms.RemoveAt(roomId);
+        graveyard = true;
+      }
+      
       // Not technically a room but...
       if (level > 0 && rng.NextDouble() < 0.2 && !captive)
       {

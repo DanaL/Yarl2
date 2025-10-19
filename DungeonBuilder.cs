@@ -921,19 +921,7 @@ class MainDungeonBuilder : DungeonBuilder
   }
 
   static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng)
-  {    
-    int graveyardOnLevel = -1;
-    string plagueDesc = "";
-    foreach (var fact in factDb.HistoricalEvents)
-    {      
-      if (fact is Disaster disaster && disaster.Type == DisasterType.Plague)
-      {
-        int level = rng.Next(1, levels.Length);
-        graveyardOnLevel = rng.Next(1, levels.Length);
-        plagueDesc = disaster.Desc.CapitalizeWords();
-      }
-    }
-
+  {
     string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
     bool koboldEffigy = false;
     for (int level = 0; level < levels.Length; level++)
@@ -995,14 +983,6 @@ class MainDungeonBuilder : DungeonBuilder
         Rooms.KoboldWorshipRoom(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
         koboldEffigy = true;
-      }
-
-      if (level == graveyardOnLevel)
-      {
-        int roomId = rng.Next(rooms.Count);
-        var map = levels[level];
-        Rooms.MarkGraves(map, plagueDesc, rng, dungeonId, level, rooms[roomId], objDb, factDb);
-        rooms.RemoveAt(roomId);
       }
 
       if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)      
