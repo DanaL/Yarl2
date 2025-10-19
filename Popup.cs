@@ -396,7 +396,7 @@ class Hint(List<string> text, int row) : IPopup
 class FullScreenPopup(Sqr[,] sqrs) : IPopup
 {
   Sqr[,] Sqrs { get; set; } = sqrs;
-  
+
   public void Draw(UserInterface ui)
   {
     int height = int.Min(UserInterface.ScreenHeight, Sqrs.GetLength(0));
@@ -410,6 +410,132 @@ class FullScreenPopup(Sqr[,] sqrs) : IPopup
       {
         ui.WriteSq(r, c, Sqrs[r, c]);
       }
+    }
+  }
+
+  public void SetDefaultTextColour(Colour colour) { }
+}
+
+class TwoPanelPopup(string title, List<string> left, string right, char separator) : IPopup
+{
+  // My intention is to use this for things wlike the help menu where you have
+  // options on the right and then text on the left, so receive the options
+  // as a list so I can calc how wide to make the left panel
+  public int Selected { get; set; } = 0;
+  List<string> LeftPanel { get; set; } = left;
+  string RightPanel { get; set; } = right;
+  char Separator { get; set; } = separator;
+  string Title { get; set; } = title;
+
+  List<List<(Colour, string)>> CalculatedRightPanel = [];
+
+  public void Draw(UserInterface ui)
+  {
+    LineScanner ls;
+    int row = 1;
+    int col = 1;
+    int rows = UserInterface.ScreenHeight - 2;
+
+    List<List<(Colour, string)>> options = [];
+    int optionsWidth = 0;
+    foreach (string opt in LeftPanel)
+    {
+      ls = new LineScanner(opt);
+      var scanned = ls.Scan();
+      int width = scanned.Sum(w => w.Item2.Length);
+      if (width > optionsWidth)
+        optionsWidth = width;
+      options.Add(scanned);
+    }
+
+    string blank = " ".PadLeft(UserInterface.ScreenWidth - 2);
+    ui.WriteText([(Colours.WHITE, blank)], row++, col);
+    string title = Title.PadRight(UserInterface.ScreenWidth - 2);
+    ui.WriteText([(Colours.WHITE, title)], row++, col);
+    ui.WriteText([(Colours.WHITE, blank)], row++, col);
+
+    int o = 0;
+    foreach (var option in options)
+    {
+      if (o++ == Selected)
+        ui.WriteText(option, row, col);
+      else
+        ui.WriteText([.. option.Select(opt => (Colours.GREY, opt.Item2))], row, col);
+
+      int width = option.Sum(w => w.Item2.Length);
+      if (width < optionsWidth)
+        ui.WriteText([(Colours.WHITE, " ".PadRight(optionsWidth - width))], row, width + 1);
+      ui.WriteText([(Colours.WHITE, $" {Separator} ")], row, optionsWidth + 1);
+
+      ++row;
+    }
+
+    string spacer = $"{Separator}".PadLeft(optionsWidth + 2) + " ";
+    while (row <= rows)
+    {
+      ui.WriteText([(Colours.WHITE, spacer)], row++, col);
+    }
+
+    CalculatedRightPanel = [];
+    ls = new LineScanner(RightPanel);
+    List<(Colour, string)> panel2 = ls.Scan();
+    int w = 0;
+    int rightPanelWidth = UserInterface.ScreenWidth - spacer.Length;
+    int currWidth = 0;
+    List<(Colour, string)> line = [];
+    while (w < panel2.Count)
+    {
+      var (colour, word) = panel2[w++];
+
+      if (word == "\r")
+        continue;
+
+      if (word == "\n")
+      {
+        BuildPaddedLine();
+      }
+      else if (word == "\t")
+      {
+        line.Add((Colours.BLACK, "   "));
+        currWidth += 3;
+      }
+      else if (word.Length < rightPanelWidth - currWidth - 2)
+      {
+        line.Add((colour, word));
+        currWidth += word.Length;
+      }
+      else
+      {
+        --w;
+        BuildPaddedLine();
+      }
+    }
+    BuildPaddedLine();
+
+    row = 3;
+    col = spacer.Length + 1;
+    for (int i = 0; i < int.Min(CalculatedRightPanel.Count, rows); i++)
+    {
+      ui.WriteText(CalculatedRightPanel[i], row++, col);
+    }
+
+    while (row < rows)
+    {
+      ui.WriteText([(Colours.WHITE, "".PadLeft(rightPanelWidth))], row++, col);
+    }
+    
+    void BuildPaddedLine()
+    {
+      // Calculate total width of all existing content
+      int actualWidth = line.Sum(tuple => tuple.Item2.Length);
+
+      // Pad out so that the right border lines up
+      int padding = rightPanelWidth - actualWidth;
+      if (padding > 0)
+        line.Add((Colours.WHITE, "".PadLeft(padding, ' ')));
+      CalculatedRightPanel.Add(line);
+      line = [];
+      currWidth = 0;
     }
   }
 

@@ -431,47 +431,42 @@ class NumericInputer : Inputer
   }
 }
 
-record HelpEntry(string Title, List<string> Entry);
+record HelpEntry(string Title, string Entry);
 
 class HelpScreen : Inputer
 {
   static readonly int PageSize = UserInterface.ScreenHeight - 6;
   readonly UserInterface _ui;
-  Dictionary<char, HelpEntry> _entries;
+  Dictionary<char, HelpEntry> Entries { get; set; } = [];
   char _selected;
-  readonly int _textAreaWidth;
   int _page = 0;
 
   public HelpScreen(GameState gs, UserInterface ui) : base(gs)
   {
     _ui = ui;
-    _entries = [];
-
-    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
-                    .Select(line => line.TrimEnd()).ToArray();
+    
+    string[] lines = [.. File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
+                              .Select(line => line.TrimEnd())];
     int l = 0;
     char ch = 'a';
     string title;
     do
     {
       title = lines[l++].Trim();
-      List<string> entry = [];
+      string entry = "";
       while (lines[l].Trim() != "#")
       {
-        entry.Add(lines[l++]);
+        if (lines[l].Trim() == "")
+          entry += '\n';
+        else
+          entry += lines[l];
+        ++l;
       }
-      _entries.Add(ch, new HelpEntry(title, entry));
+      Entries.Add(ch, new HelpEntry(title, entry));
       ch = (char)(ch + 1);
       ++l;
     }
     while (l < lines.Length);
-
-    // Figure out how wide the menu column is
-    int menuWidth = _entries.Values.Select(v => v.Title.Length).Max() + 6;
-    _textAreaWidth = UserInterface.ScreenWidth - menuWidth;
-
-    // Make the lines of text fit the screen width.
-    ResizeEntries();
 
     _page = 0;
     _selected = 'a';
@@ -486,123 +481,29 @@ class HelpScreen : Inputer
       _ui.SetInputController(new PlayerCommandController(GS));
       return;
     }
-    else if (_entries.ContainsKey(ch))
+    else if (Entries.ContainsKey(ch))
     {
       _selected = ch;
       _page = 0;
     }
     else if (ch == ' ')
     {
-      _page = (_page + 1) % CurrPageCount;
+      //_page = (_page + 1) % CurrPageCount;
     }
 
     WriteHelpScreen();
   }
 
-  int CurrPageCount
-  {
-    get
-    {
-      int lineCount = _entries[_selected].Entry.Count;
-      int pageCount = lineCount / PageSize;
-      if (lineCount - pageCount * PageSize > 0)
-        ++pageCount;
-
-      return pageCount;
-    }
-  }
-
   void WriteHelpScreen()
   {
-    List<string> help = [];
-    help.Add("");
-    help.Add(" Help for the Harried Adventurer!");
-    help.Add("");
+    List<string> options = [];
+    foreach (char key in Entries.Keys)
+      options.Add($"({key}) {Entries[key].Title}");
 
-    int menuWidth = UserInterface.ScreenWidth - _textAreaWidth;
-    foreach (char k in _entries.Keys)
-    {
-      var entry = _entries[k];
-      string line = $" ({k}) {entry.Title}";
-      line = line.PadRight(menuWidth);
-      line += '|';
-      help.Add(line);
-    }
+    var helpText = Entries[_selected].Entry;
+    TwoPanelPopup popup = new("Help for the Harried Adventurer", options, helpText, '│');
 
-    for (int l = 2 + _entries.Count; l < UserInterface.ScreenHeight; l++)
-      help.Add("|".PadLeft(menuWidth + 1));
-
-    WriteHelpEntry(help);
-    _ui.SetLongMessage(help);
-  }
-
-  List<string> SplitLine(string line)
-  {
-    List<string> pieces = [];
-
-    while (line.Length >= _textAreaWidth - 2)
-    {
-      int c = _textAreaWidth - 3;
-      while (c >= 0 && line[c] != ' ')
-        --c;
-      string slice = line[..c].TrimEnd();
-      if (slice[0] == ' ' && slice[1] != ' ')
-        slice = slice.Trim();
-      pieces.Add(slice);
-      line = line[c..];
-    }
-    if (line.Trim().Length > 0)
-    {
-      if (line.Length > 1 && line[0] == ' ' && line[1] != ' ')
-        pieces.Add(line.Trim());
-      else
-        pieces.Add(line.TrimEnd());
-    }
-
-    return pieces;
-  }
-
-  void ResizeEntries()
-  {
-    foreach (var k in _entries.Keys)
-    {
-      List<string> reformated = [];
-      var entry = _entries[k];
-      foreach (var line in entry.Entry)
-      {
-        if (line.Length < _textAreaWidth - 2)
-          reformated.Add(line);
-        else
-          reformated.AddRange(SplitLine(line));
-      }
-
-      _entries[k] = entry with { Entry = reformated };
-    }
-  }
-
-  void WriteHelpEntry(List<string> help)
-  {
-    var entry = _entries[_selected];
-    int l = 3;
-
-    help[l++] += $" ** {entry.Title} **";
-
-    List<string> lines;
-    if (entry.Entry.Count > PageSize)
-    {
-      lines = [.. entry.Entry.Skip(_page * PageSize).Take(PageSize)];
-      lines.Add("");
-      lines.Add($"- SPACE for next page ({_page + 1} of {CurrPageCount}) -".PadLeft(_textAreaWidth / 2 + 4));
-    }
-    else
-    {
-      lines = entry.Entry;
-    }
-
-    foreach (var line in lines)
-    {
-      help[l++] += " " + line;
-    }
+    GS.UIRef().SetPopup(popup);
   }
 }
 

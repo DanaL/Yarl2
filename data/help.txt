@@ -2,6 +2,7 @@ What is this?
 
 Delve is a roguelike fantasy CRPG in tradition of nethack, Angband, and others. You will create a character who explores a deep dungeon seeking to defeat a terrible evil lurking in the depths.
 
+
 Your first character will probably not succeed, and your second may not either. Delve, like many roguelikes, features permadeath: if your character is killed you will not be able to return to a previous save point and will have to begin a new game. But on the bright side, each time you create a character you will be presented with freshly generated world. The dungeon levels, the world above, and the village where you begin will all be a little bit different.
 #
 Commands
@@ -58,11 +59,11 @@ S   Save and exit.
 Q   Quit without saving. Please remember this will 
     abandon your current character.
 # 
-License
+Licence
 
-Dana's Delve is released under the Creative Commons CC0 v1.0 license. To greatest extentb I legally can, I'd like Delve's code to be in the Public Domain.
+Dana's Delve is released under the Creative Commons CC0 v1.0 licence. To greatest extentb I legally can, I'd like Delve's code to be in the Public Domain.
 
-You should have received a copy of the license along with the game (a file called COPYING), but if not you may read the CC0 license here: http://creativecommons.org/publicdomain/zero/1.0/.
+You should have received a copy of the licence along with the game (a file called COPYING), but if not you may read the CC0 licence here: http://creativecommons.org/publicdomain/zero/1.0/.
 
 Delve's source code is hosted at GitHub: https://github.com/DanaL/Yarl2.
 
