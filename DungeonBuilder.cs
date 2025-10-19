@@ -947,28 +947,6 @@ class MainDungeonBuilder : DungeonBuilder
       if (rooms.Count == 0)
         continue;
 
-      List<int> potentialVaults = [];
-      for (var i = 0; i < rooms.Count; i++)
-      {
-        if (Rooms.PotentialVault(levels[level], rooms[i]))
-          potentialVaults.Add(i);
-      }
-      
-      if (potentialVaults.Count > 0 && rng.NextDouble() < 1.2)
-      {
-        int roomId = potentialVaults[rng.Next(potentialVaults.Count)];
-        HashSet<(int, int)> vault = [.. rooms[roomId]];
-        var (doorR, doorC) = Vaults.FindExit(levels[level], vault);
-        rooms.RemoveAt(roomId);
-
-        // We could have found a false vault. Likely a spot separate from
-        // the rest of the dungoen by a river or chasm
-        if (doorR < 0 || doorC < 0)
-          continue;
-
-        Vaults.CreateVault(levels[level], dungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
-      }
-
       if (level < levels.Length - 1 && rng.NextDouble() < 0.2)
       {
         int roomId = rng.Next(rooms.Count);

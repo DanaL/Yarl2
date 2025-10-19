@@ -42,7 +42,7 @@ class Vaults
     return (-1, -1);
   }
 
-  public static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
+  public static void CreateVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, bool artifact, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
     if (level == 0)
     {
@@ -52,13 +52,13 @@ class Vaults
       return;
     }
 
-    if (level == 1 )
+    if (!artifact && level == 1)
     {
       if (rng.Next(3) == 0)
         HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
       else
         HiddenVault(map, dungeonID, level, doorRow, doorCol, vault, rng, objDb, factDb);
-       
+
       return;
     }
 
@@ -80,6 +80,16 @@ class Vaults
       case VaultDoorType.SecretDoor:
         map.SetTile(doorRow, doorCol, TileFactory.Get(TileType.SecretDoor));
         break;
+    }
+
+    if (artifact)
+    {
+      Item artifactWeapon = Artifacts.GenAncientWeapon(objDb, factDb, rng);
+      List<(int, int)> floors = [.. vault.Where(sq => map.TileAt(sq.Item1, sq.Item2).Type == TileType.DungeonFloor)];
+      var sq = floors[rng.Next(floors.Count)];
+      Loc loc = new(dungeonID, level, sq.Item1, sq.Item2);
+      objDb.Add(artifactWeapon);
+      objDb.SetToLoc(loc, artifactWeapon);
     }
   }
 
@@ -247,7 +257,7 @@ class Vaults
     factDb.Add(hf);
     
     return new Landmark(sb.ToString());
-  } 
+  }
 
   static void HiddenVault(Map map, int dungeonID, int level, int doorRow, int doorCol, HashSet<(int, int)> vault, Rng rng, GameObjectDB objDb, FactDb factDb)
   {
@@ -426,7 +436,7 @@ class Rooms
 
   public static bool PotentialVault(Map map, List<(int, int)> room)
   {
-    if (room.Count > 75)
+    if (room.Count > 85)
       return false;
 
     // Vaults only have one exit

@@ -1391,8 +1391,22 @@ class InventoryDetails : Inputer
   static string ExtraDetails(Item item)
   {
     List<string> items = [];
+
+    string weaponType = "";
+
+    List<DamageTrait> damage = [];
     foreach (var trait in item.Traits)
     {
+      if (trait is SwordTrait)
+        weaponType = "sword";
+      else if (trait is AxeTrait)
+        weaponType = "axe";
+      else if (trait is PolearmTrait)
+        weaponType = "polearm";
+
+      if (trait is DamageTrait dt)
+        damage.Add(dt);
+        
       if (trait is WeaponSpeedTrait spd)
       {
         if (spd.Cost < 1.0)
@@ -1430,7 +1444,20 @@ class InventoryDetails : Inputer
     if (items.Count == 0)
       return "";
 
-    return string.Join("; ", items).Capitalize() + ".";
+    string s = "";
+    if (weaponType != "")
+      s = $"This is {weaponType.IndefArticle()}.\n\n";
+
+    if (damage.Count > 0)
+    {
+      s += "It deals";
+      s += string.Join(',', damage.Select(d => $" {d.NumOfDie}d{d.DamageDie} {d.DamageType.ToString().ToLower()}"));
+      s += " damage.\n\n";
+    }
+
+    s += string.Join("; ", items).Capitalize() + ".";
+    
+    return s;
   }
 }
 

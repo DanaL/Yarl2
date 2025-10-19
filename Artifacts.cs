@@ -13,7 +13,7 @@ using System.Text;
 
 using Yarl2;
 
-class Artifacts 
+class Artifacts
 {
   static Item BaseItem(GameObjectDB objDb)
   {
@@ -22,7 +22,7 @@ class Artifacts
 
   static string History(FactDb factDb, Rng rng)
   {
-    List<string> deities = [ "the Moon Daughters", "Huntokar", "the Crimson King" ];
+    List<string> deities = ["the Moon Daughters", "Huntokar", "the Crimson King"];
 
     RulerInfo rulerInfo = factDb.Ruler;
 
@@ -40,7 +40,7 @@ class Artifacts
     sb.Append(" and sacred to ");
     sb.Append(deities[rng.Next(deities.Count)]);
     sb.Append('.');
-    
+
     return sb.ToString();
   }
 
@@ -56,8 +56,8 @@ class Artifacts
         {
           opts.Add(0);
           opts.Add(1);
-        }          
-      } 
+        }
+      }
       if (!sword.HasTrait<ViciousTrait>())
         opts.Add(3);
 
@@ -96,7 +96,71 @@ class Artifacts
 
     if (item.HasTrait<SwordTrait>())
       item = ArtifactSword(item, factDb, rng);
-      
+
     return item;
+  }
+
+  public static Item GenAncientWeapon(GameObjectDB objDb, FactDb factDb, Rng rng)
+  {
+    ItemNames type = rng.Next(3) switch
+    {
+      0 => ItemNames.SPEAR,
+      1 => ItemNames.BATTLE_AXE,
+      _ => ItemNames.LONGSWORD
+    };
+
+    Item artifact = ItemFactory.Get(type, objDb);
+    artifact.Traits.Add(new  WeaponBonusTrait() { Bonus = 2, SourceId = artifact.ID });
+
+    DamageType dmgType = factDb.Villain == VillainType.FieryDemon ? DamageType.Holy : DamageType.Fire;
+    artifact.Traits.Add(new DamageTrait() { DamageDie = 8, NumOfDie = 1, DamageType = dmgType });
+
+    bool beloved = factDb.Ruler.Beloved;
+    bool successful = false;
+    string invader = "";
+    
+    foreach (Fact fact in factDb.HistoricalEvents)
+    {
+      if (fact is Invasion invasion)
+      {
+        invader = invasion.Invader;
+        break;
+      }
+    }
+
+    List<string> names;
+    if (beloved)
+      names = ["Defender", "Dragontooth", "Lightbringer", "Foehammer"];
+    else
+      names = ["Reaver", "Dark Tidings", "Reaper", "the Storm"];
+
+    artifact.Name = names[rng.Next(names.Count)];
+
+    StringBuilder sb = new();
+    sb.Append(artifact.Name.Capitalize());
+    sb.Append(": forged long ago to battle ");
+    sb.Append(invader);
+    sb.Append(" when they assailed these lands. Personally wielded in battle by ");
+    sb.Append(factDb.Ruler.Name);
+    sb.Append(' ');
+    sb.Append(factDb.Ruler.Epithet.CapitalizeWords());
+    sb.Append("\n\n");
+    if (successful && beloved)
+      sb.Append("Ever after, this weapon was said to be a beacon of hope for the people.");
+    else if (successful && !beloved)
+      sb.Append("Later, the people would learn to fear the site of this wepaon.");
+    else if (!successful && beloved)
+    {
+      sb.Append("This weapon was burried after ");
+      sb.Append(invader);
+      sb.Append(" overran these lands.");
+    }
+    else
+    {
+      sb.Append("There are many who say this weapon is of ill omen and brings with it a curse.");
+    }
+    artifact.Traits.Add(new DescriptionTrait(sb.ToString()));
+
+    return artifact;
   }
 }

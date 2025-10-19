@@ -157,7 +157,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     bool captive = false;
     bool graveyard = false;
     double chanceOfDesecratedAltar = 0.25;
-
+    bool artifactVault = false;
+    
     for (int level = 0; level < levelMaps.Length; level++)
     {
       Map map = levelMaps[level];
@@ -165,7 +166,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       List<int> roomIds = [.. Enumerable.Range(0, rooms.Count)];
       roomIds.Shuffle(rng);
       List<int> potentialVaults = [];
-      
+
       foreach (int id in roomIds)
       {
         RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
@@ -186,26 +187,33 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
           break;
         }
-
-        for (var i = 0; i < rooms.Count; i++)
-        {
-          if (Rooms.PotentialVault(map, rooms[i]))
-            potentialVaults.Add(i);
-        }
       }
 
-      if (potentialVaults.Count > 0 && rng.NextDouble() < 0.2)
+      for (var i = 0; i < rooms.Count; i++)
+      {
+        if (Rooms.PotentialVault(map, rooms[i]))
+          potentialVaults.Add(i);
+      }
+
+      if (potentialVaults.Count > 0 && rng.NextDouble() < 0.33)
       {
         int vaultId = potentialVaults[rng.Next(potentialVaults.Count)];
         HashSet<(int, int)> vault = [.. rooms[vaultId]];
-        var (doorR, doorC) = Vaults.FindExit(map, vault);        
+        var (doorR, doorC) = Vaults.FindExit(map, vault);
         roomIds.Remove(vaultId);
-        
+
         // We could have found a false vault. Likely a spot separate from
         // the rest of the dungoen by a river or chasm
         if (doorR >= 0 && doorC >= 0)
         {
-          Vaults.CreateVault(map, DungeonId, level, doorR, doorC, vault, rng, objDb, factDb);
+          bool artifact = false;
+          if (level >= 3 && !artifactVault && rng.NextDouble() < 0.5)
+          {
+            artifact = true;
+            artifactVault = true;
+          }
+
+          Vaults.CreateVault(map, DungeonId, level, doorR, doorC, vault, artifact, rng, objDb, factDb);
         }
       }
 
@@ -256,13 +264,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         rooms.RemoveAt(roomId);
         graveyard = true;
       }
-      
-      if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)      
+
+      if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)
       {
         int roomId = rng.Next(rooms.Count);
         Rooms.MakeMinedChamber(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
-      }   
+      }
 
       // Not technically a room but...
       if (level > 0 && rng.NextDouble() < 0.2 && !captive)
@@ -287,7 +295,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         altar.Traits.Add(new MolochAltarTrait());
         objDb.SetToLoc(altarLoc, altar);
       }
-            
+
       if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
         int roomId = rng.Next(rooms.Count);
