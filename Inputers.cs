@@ -439,12 +439,12 @@ class HelpScreen : Inputer
   readonly UserInterface _ui;
   Dictionary<char, HelpEntry> Entries { get; set; } = [];
   char _selected;
-  int _page = 0;
-
+  TwoPanelPopup Popup { get; set; }
+  
   public HelpScreen(GameState gs, UserInterface ui) : base(gs)
   {
     _ui = ui;
-    
+
     string[] lines = [.. File.ReadAllLines(ResourcePath.GetDataFilePath("help.txt"))
                               .Select(line => line.TrimEnd())];
     int l = 0;
@@ -468,8 +468,15 @@ class HelpScreen : Inputer
     }
     while (l < lines.Length);
 
-    _page = 0;
+    List<string> options = [];
+    foreach (char key in Entries.Keys)
+      options.Add($"({key}) {Entries[key].Title}");
+
     _selected = 'a';
+
+    var helpText = Entries[_selected].Entry;
+    Popup = new TwoPanelPopup("Help for the Harried Adventurer", options, helpText, '│');
+
     WriteHelpScreen();
   }
 
@@ -484,7 +491,8 @@ class HelpScreen : Inputer
     else if (Entries.ContainsKey(ch))
     {
       _selected = ch;
-      _page = 0;
+      Popup.SetRightPanel(Entries[_selected].Entry);
+      Popup.Selected = _selected - 'a';
     }
     else if (ch == ' ')
     {
@@ -495,15 +503,8 @@ class HelpScreen : Inputer
   }
 
   void WriteHelpScreen()
-  {
-    List<string> options = [];
-    foreach (char key in Entries.Keys)
-      options.Add($"({key}) {Entries[key].Title}");
-
-    var helpText = Entries[_selected].Entry;
-    TwoPanelPopup popup = new("Help for the Harried Adventurer", options, helpText, '│');
-
-    GS.UIRef().SetPopup(popup);
+  {    
+    GS.UIRef().SetPopup(Popup);
   }
 }
 

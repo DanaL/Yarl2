@@ -61,11 +61,14 @@ Q   Quit without saving. Please remember this will
 # 
 Licence
 
-Dana's Delve is released under the Creative Commons CC0 v1.0 licence. To greatest extentb I legally can, I'd like Delve's code to be in the Public Domain.
+Dana's Delve is released under the Creative Commons CC0 v1.0 licence. To greatest extentt I legally can, I'd like Delve's code to be in the Public Domain.
+
 
 You should have received a copy of the licence along with the game (a file called COPYING), but if not you may read the CC0 licence here: http://creativecommons.org/publicdomain/zero/1.0/.
 
+
 Delve's source code is hosted at GitHub: https://github.com/DanaL/Yarl2.
 
-Delve also uses some additional resources created by others. I have included the DejaVu Sans Mono font (see https://dejavu-fonts.github.io for licensing details) and depending on the build of Delve, the game uses BearLibTerminal (https://github.com/tommyettinger/BearLibTerminal) via the DaceKonn.BearLibNET package on NuGet (licensed under the MIT license) (https://github.com/DaceKonn/BearLibNET) or the SDL 2.0 library. (https://www.libsdl.org). I've been using Ethan Lee's C# SDL wrapper, which are included in the /SDL folder. (I can't remember why I'm doing it this way instead of using NuGet -- it was workaround to some problem I was having)
+
+Delve also uses some additional resources created by others. I have included the DejaVu Sans Mono font (see https://dejavu-fonts.github.io for licensing details) and depending on the build of Delve, the game uses BearLibTerminal (https://github.com/tommyettinger/BearLibTerminal) via the DaceKonn.BearLibNET package on NuGet (licensed under the MIT license) (https://github.com/DaceKonn/BearLibNET) or the Raylib (https://www.raylib.com/). I've been using a C# raylib wrapper found on nuget (https://www.nuget.org/packages/Raylib-cs)
 #

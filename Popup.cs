@@ -514,7 +514,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
 
     row = 3;
     col = spacer.Length + 1;
-    for (int i = 0; i < int.Min(CalculatedRightPanel.Count, rows); i++)
+    for (int i = 0; i < int.Min(CalculatedRightPanel.Count, rows - 3); i++)
     {
       ui.WriteText(CalculatedRightPanel[i], row++, col);
     }
@@ -538,6 +538,8 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
       currWidth = 0;
     }
   }
+
+  public void SetRightPanel(string txt) => RightPanel = txt;
 
   public void SetDefaultTextColour(Colour colour) { }
 }
