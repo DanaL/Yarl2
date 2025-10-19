@@ -31,7 +31,7 @@ Other commands you'll need to know:
 
 [LIGHTBLUE c]   Close a door.
 
-[LIGHTBLUE C]   Chat with an NPC.
+[LIGHTBLUE C]   Chat with an NPC. Sometimes your character may need to say passwords or magic phrases out load. For this, use the chat command and target your own square (by tapping '.')
 
 [LIGHTBLUE d]   Drop an item in your inventory.
 
@@ -52,8 +52,7 @@ Other commands you'll need to know:
 
 [LIGHTBLUE i]   Iventory: view what you are currently carrying
 
-[LIGHTBLUE o]   Open a door. You will also automatically open doors by 
-    bumping into them.
+[LIGHTBLUE o]   Interact with things in the dungeon: doors, levers, etc.
 
 [LIGHTBLUE t]   Throw an item at a location. Your range will depend on 
     your character's strength. After selecting the item 
