@@ -1,12 +1,10 @@
 What is this?
-
 Delve is a roguelike fantasy CRPG in tradition of nethack, Angband, and others. You will create a character who explores a deep dungeon seeking to defeat a terrible evil lurking in the depths.
 
 
 Your first character will probably not succeed, and your second may not either. Delve, like many roguelikes, features permadeath: if your character is killed you will not be able to return to a previous save point and will have to begin a new game. But on the bright side, each time you create a character you will be presented with freshly generated world. The dungeon levels, the world above, and the village where you begin will all be a little bit different.
 #
-Commands
-
+Movement
 Delve is largely keyboard-driven and has many commands to control what your character is doing. You'll need to learn the movement keys. You may move around around using the clssic rogue/VIM-style keys, the arrow keys, or the number pad.
      
           North      Northwest Northeast
@@ -19,48 +17,68 @@ You can 'run' by pressing shift and any of the movement keys and your character 
 
 If you attempt to move into a closed door, you will automatically open it, and bumping into a monster makes a melee attack against them.
 
+#
+Other Commands
 Other commands you'll need to know:
 
 
-a   Apply/Use/Activate an item in your inventory. Ie., a 
-    potion, scroll, torch. 
-c   Close a door.
-C   Chat with an NPC.
-d   Drop an item in your inventory.
-e   Equip/Ready a weapon or piece of armour. Hit e again 
+[LIGHTBLUE a]   Apply/Use/Activate an item in your inventory. Ie., a 
+    potion, scroll, torch.
+
+[LIGHTBLUE c]   Close a door.
+
+[LIGHTBLUE C]   Chat with an NPC.
+
+[LIGHTBLUE d]   Drop an item in your inventory.
+
+[LIGHTBLUE e]   Equip/Ready a weapon or piece of armour. Hit e again 
     to un-equip the item.
-E   Enter a dungeon, which are indicated on the world map 
+
+[LIGHTBLUE E]   Enter a dungeon, which are indicated on the world map 
     by a Ո symbol
-f   Fire a bow. You can select a target via the movement
+
+[LIGHTBLUE f]   Fire a bow. You can select a target via the movement
     keys or by tabbing through visible targets. The game  
     will remember the last monster you targetted. If you 
     have a bow equipped, it will be automatically selected. 
     Note that you have unlimited ammunition but may also 
     find magical or special consumable arrows.
-F   Bash open a locked or closed door.
-i   Iventory: view what you are currently carrying
-o   Open a door. You will also automatically open doors by 
+
+[LIGHTBLUE F]   Bash open a locked or closed door.
+
+[LIGHTBLUE i]   Iventory: view what you are currently carrying
+
+[LIGHTBLUE o]   Open a door. You will also automatically open doors by 
     bumping into them.
-t   Throw an item at a location. Your range will depend on 
+
+[LIGHTBLUE t]   Throw an item at a location. Your range will depend on 
     your character's strength. After selecting the item 
     you wish to throw, you'll select a target via the 
     movement keys, or hit TAB to cycle through the 
     monsters on screen. The game will also remember the 
     last monster you targetted.
-,   Pick up items from the ground.
->   Use a downward staircase.
-<   Use an updward staircase.
-@   View your character's details.
-M   View the full map of the dungeon level you are on.
-x   Examine interesting features on screen. Hit TAB to 
+
+[LIGHTBLUE ,]   Pick up items from the ground.
+
+[LIGHTBLUE >]   Use a downward staircase.
+
+[LIGHTBLUE <]   Use an updward staircase.
+
+[LIGHTBLUE @]   View your character's details.
+
+[LIGHTBLUE M]   View the full map of the dungeon level you are on.
+
+[LIGHTBLUE x]   Examine interesting features on screen. Hit TAB to 
     cycle through monsters and items that you can see to 
     learn some information about them.
-S   Save and exit. 
-Q   Quit without saving. Please remember this will 
+
+[LIGHTBLUE S]   Save and exit. 
+
+[LIGHTBLUE Q]   Quit without saving. Please remember this will 
     abandon your current character.
+
 # 
 Licence
-
 Dana's Delve is released under the Creative Commons CC0 v1.0 licence. To greatest extentt I legally can, I'd like Delve's code to be in the Public Domain.
 
 

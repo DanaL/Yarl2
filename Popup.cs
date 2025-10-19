@@ -418,15 +418,16 @@ class FullScreenPopup(Sqr[,] sqrs) : IPopup
 
 class TwoPanelPopup(string title, List<string> left, string right, char separator) : IPopup
 {
+  public int Selected { get; set; } = 0;
+  
   // My intention is to use this for things wlike the help menu where you have
   // options on the right and then text on the left, so receive the options
-  // as a list so I can calc how wide to make the left panel
-  public int Selected { get; set; } = 0;
+  // as a list so I can calc how wide to make the left panel  
   List<string> LeftPanel { get; set; } = left;
   string RightPanel { get; set; } = right;
   char Separator { get; set; } = separator;
   string Title { get; set; } = title;
-
+  int Page { get; set; } = 0;
   List<List<(Colour, string)>> CalculatedRightPanel = [];
 
   public void Draw(UserInterface ui)
@@ -512,11 +513,39 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
     }
     BuildPaddedLine();
 
-    row = 3;
+    int rightPanelRows = rows - 3;
+    row = 4;
     col = spacer.Length + 1;
-    for (int i = 0; i < int.Min(CalculatedRightPanel.Count, rows - 3); i++)
+
+    bool pageinate = false;
+    int pages = CalculatedRightPanel.Count / rightPanelRows + 1;
+    if (CalculatedRightPanel.Count >= rightPanelRows)
     {
-      ui.WriteText(CalculatedRightPanel[i], row++, col);
+      pageinate = true;
+    }
+
+    int page = Page * rightPanelRows;
+    if (page >= CalculatedRightPanel.Count)
+    {
+      Page = 0;
+      page = 0;
+    }
+
+    IEnumerable<List<(Colour, string)>> rightPanelLines = [];
+    if (!pageinate)
+      rightPanelLines = CalculatedRightPanel;
+    else
+      rightPanelLines = CalculatedRightPanel.Skip(Page * (rightPanelRows - 2)).Take(rightPanelRows - 2);
+    
+    foreach (var rightLine in rightPanelLines)
+    {
+      ui.WriteText(rightLine, row++, col);
+    }
+
+    if (pageinate)
+    {
+      ui.WriteText([(Colours.BLACK, "".PadRight(rightPanelWidth))], row++, col);
+      ui.WriteText([(Colours.GREY, "next page >".PadLeft(rightPanelWidth - 2))], row++, col);
     }
 
     while (row < rows)
@@ -539,7 +568,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
     }
   }
 
+  public void NextPage() => ++Page;
   public void SetRightPanel(string txt) => RightPanel = txt;
-
   public void SetDefaultTextColour(Colour colour) { }
 }

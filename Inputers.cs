@@ -496,7 +496,7 @@ class HelpScreen : Inputer
     }
     else if (ch == ' ')
     {
-      //_page = (_page + 1) % CurrPageCount;
+      Popup.NextPage();
     }
 
     WriteHelpScreen();
