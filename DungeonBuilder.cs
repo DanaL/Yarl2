@@ -161,20 +161,37 @@ abstract class DungeonBuilder
   {
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
+      Map map = levels[levelNum];
+
       for (int r = 0; r < levels[levelNum].Height; r++)
       {
         for (int c = 0; c < levels[levelNum].Width; c++)
         {
-          Map map = levels[levelNum];
-          if (map.TileAt(r, c).Type == TileType.ClosedDoor)
+          TileType ttype = map.TileAt(r, c).Type;
+          if ((ttype == TileType.ClosedDoor || ttype == TileType.LockedDoor) && !GoodDoor(map, r, c))
           {
-            int adjFloors = Util.Adj4Sqs(r, c).Where(sq => map.TileAt(sq).Type == TileType.DungeonFloor).Count();
-            if (adjFloors >= 4)
-              map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+            map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
           }
         }
       }
     }
+
+    static bool GoodDoor(Map map, int row, int col)
+    {
+      TileType n = map.TileAt(row - 1, col).Type;
+      TileType s = map.TileAt(row + 1, col).Type;
+      TileType e = map.TileAt(row, col + 1).Type;
+      TileType w = map.TileAt(row, col - 1).Type;
+      return DoorNeighbour(n) && DoorNeighbour(s) || DoorNeighbour(e) && DoorNeighbour(w);
+    }
+
+    static bool DoorNeighbour(TileType tt) => tt switch
+    {
+      TileType.DungeonWall => true,
+      TileType.ClosedDoor => true,
+      TileType.LockedDoor => true,
+      _ => false
+    };
   }
 
   protected static void AddGoodItemToLevel(Map map, int dungeonId, int level, Rng rng, GameObjectDB objDb)
