@@ -60,6 +60,9 @@ class LineScanner(string line)
       case ']':
         CurrentColour = Colours.WHITE;
         break;
+      case '_':
+        Words.Add((CurrentColour, " "));
+        break;
       default:
         ScanWord();
         break;      

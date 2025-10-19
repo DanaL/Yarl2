@@ -7,16 +7,20 @@ Your first character will probably not succeed, and your second may not either. 
 Movement
 Delve is largely keyboard-driven and has many commands to control what your character is doing. You'll need to learn the movement keys. You may move around around using the clssic rogue/VIM-style keys, the arrow keys, or the number pad.
      
-          North      Northwest Northeast
-           |                 \  /
-    West-hjkl-East           y u          b n
-          |                              /   \
-         South                   Southwest    Southeast
+__________ [LIGHTBLUE y] _ [LIGHTBLUE k] _ [LIGHTBLUE u]
+
+___________ \ _ | /
+
+_________ [LIGHTBLUE h] - @ - [LIGHTBLUE l]
+
+___________ /  | \
+
+__________ [LIGHTBLUE b] _ [LIGHTBLUE j] _ [LIGHTBLUE n]
 
 You can 'run' by pressing shift and any of the movement keys and your character will move automatically as far as they are able, stopping if they reach something interesting like items on the dungeon floor, or if a monster comes into view.
 
-If you attempt to move into a closed door, you will automatically open it, and bumping into a monster makes a melee attack against them.
 
+If you attempt to move into a closed door, you will automatically open it, and bumping into a monster makes a melee attack against them.
 #
 Other Commands
 Other commands you'll need to know:
