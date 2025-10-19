@@ -296,7 +296,7 @@ class ChampionBlessingTrait : BlessingTrait
 
     ACModTrait ac = new() { ArmourMod = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
-    AuraOfProtectionTrait prot = new() { HP = 10 + piety * 5, SourceId = granter.ID };
+    AuraOfProtectionTrait prot = new() { HP = 25 + int.Max(1, piety) * 5, SourceId = granter.ID };
     prot.Apply(gs.Player, gs);
     AttackModTrait amt = new() { Amt = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(amt);
