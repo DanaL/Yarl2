@@ -117,7 +117,7 @@ class GameLoader(UserInterface ui)
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
 
-      //File.Delete(path);
+      File.Delete(path);
 
       return gameState;
     }
@@ -587,7 +587,6 @@ class CampaignCreator(UserInterface ui)
       }
       
       int seed = DateTime.UtcNow.GetHashCode();
-      seed = -1459466936;
       Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);
