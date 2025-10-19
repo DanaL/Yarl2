@@ -972,7 +972,7 @@ class Dialoguer : Inputer
 
     sb.Append('"');
     sb.Append(blurb)
-      .Append("\"\n\n");
+      .Append("\"\n");
 
     _currOptions = [];
     foreach (var (text, key) in opts)
