@@ -290,13 +290,10 @@ abstract class DungeonBuilder
         {
           map.SetTile(r, c, TileFactory.Get(TileType.SecretDoor));
         }
-        else if (tt == TileType.DungeonFloor)
-        {
-          int adjFloors = Util.Adj8Sqs(r, c)
-                              .Select(map.TileAt)
-                              .Where(t => t.Type == TileType.DungeonFloor).Count();
-          if (adjFloors == 2)
-            candidates.Add((r, c));
+        else if (tt == TileType.DungeonFloor && SecretDoorSpot(r, c))
+        {          
+          
+          candidates.Add((r, c));
         }
       }
     }
@@ -310,6 +307,26 @@ abstract class DungeonBuilder
         map.SetTile(sq, TileFactory.Get(TileType.SecretDoor));
       }
     }
+
+    bool SecretDoorSpot(int row, int col)
+    {
+      int adjWalls = Util.Adj8Sqs(row, col)
+                          .Select(map.TileAt)
+                          .Where(t => t.Type == TileType.DungeonWall).Count();
+      if (adjWalls != 6)
+        return false;
+
+      TileType floor = TileType.DungeonFloor;
+
+      if (map.TileAt(row - 1, col).Type == floor && map.TileAt(row + 1, col).Type == floor)
+        return true;
+
+      if (map.TileAt(row, col - 1).Type == floor && map.TileAt(row, col + 1).Type == floor)
+        return true;
+
+      return false;
+    }
+
   }
 
   protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, Rng rng)
