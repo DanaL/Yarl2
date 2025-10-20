@@ -3309,7 +3309,7 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     // when it hits an occupant.
     List<Loc> pts = Trajectory(Actor!.Loc, true);
 
-    var anim = new BeamAnimation(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
+    BeamAnimation anim = new(GameState!, pts, Colours.LIGHT_BLUE, Colours.WHITE);
     GameState!.UIRef().PlayAnimation(anim, GameState);
 
     foreach (var pt in pts)
@@ -3318,8 +3318,8 @@ class FrostRayAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
 
       if (GameState.ObjDb.Occupant(pt) is Actor occ && occ != Actor)
       {
-        int attackMod = 3;
-        var attackResult = Battle.MagicAttack(Actor!, occ, GameState, ray, attackMod, null);
+        int attackMod = 6;
+        Battle.MagicAttack(Actor!, occ, GameState, ray, attackMod, null);
       }
     }
 
