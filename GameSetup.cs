@@ -424,12 +424,12 @@ class CampaignCreator(UserInterface ui)
           if (!wildernessMap.InBounds(loc.Row, loc.Col))
             continue;
           Tile tile = wildernessMap.TileAt(loc.Row, loc.Col);
-          if (tile.Type == TileType.Grass) 
+          if (tile.Type == TileType.Grass)
           {
             Tile replacement = TileFactory.Get(rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.CharredGrass);
             wildernessMap.SetTile(loc.Row, loc.Col, replacement);
           }
-          else if (tile.IsTree()) 
+          else if (tile.IsTree())
           {
             Tile replacement = TileFactory.Get(rng.NextDouble() < 0.3 ? TileType.Dirt : TileType.CharredStump);
             wildernessMap.SetTile(loc.Row, loc.Col, replacement);
@@ -440,12 +440,12 @@ class CampaignCreator(UserInterface ui)
           if (!wildernessMap.InBounds(r, c))
             continue;
           Tile tile = wildernessMap.TileAt(r, c);
-          if (tile.Type == TileType.Grass) 
+          if (tile.Type == TileType.Grass)
           {
             Tile replacement = TileFactory.Get(rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.CharredGrass);
             wildernessMap.SetTile(r, c, replacement);
           }
-          else if (tile.IsTree()) 
+          else if (tile.IsTree())
           {
             Tile replacement = TileFactory.Get(rng.NextDouble() < 0.3 ? TileType.Dirt : TileType.CharredStump);
             wildernessMap.SetTile(r, c, replacement);
@@ -458,19 +458,19 @@ class CampaignCreator(UserInterface ui)
 
         string earlyMainOccupant = rng.NextDouble() < 0.5 ? "kobold" : "goblin";
         factDb.Add(new SimpleFact() { Name = "EarlyDenizen", Value = earlyMainOccupant });
-        
+
         Loc entranceLoc = new(0, 0, entrance.Item1, entrance.Item2);
 
         InitialDungeonBuilder db = new(1, entrance, earlyMainOccupant);
         Dungeon firstDungeon = db.Generate("Musty smells. A distant clang. Danger.", factDb, objDb, rng);
         firstDungeon.ExitLoc = entranceLoc;
         campaign.AddDungeon(firstDungeon);
-       
+
         Portal portal = new("You stand before a looming portal.")
         {
           Destination = new Loc(1, 0, db.ExitLoc.Item1, db.ExitLoc.Item2)
         };
-        
+
         wildernessMap.SetTile(entrance, portal);
         factDb.Add(new LocationFact()
         {
@@ -485,7 +485,7 @@ class CampaignCreator(UserInterface ui)
         campaign.Town = town;
 
         SorceressQuest.Setup(wildernessMap, town, objDb, factDb, campaign, rng);
-        
+
         HashSet<(int, int)>[] smallRegions = [.. regions.Values.Where(r => r.Count <= 30)];
         Wilderness.CarveBurriedValley(wildernessMap, smallRegions, town, objDb, factDb, rng);
         if (factDb.FactCheck("RLEntrance") is LocationFact rle)
@@ -496,7 +496,7 @@ class CampaignCreator(UserInterface ui)
           wildernessMap.SetTile(rle.Loc.Row, rle.Loc.Col, rlEntrance);
           rld.ExitLoc = rle.Loc;
           campaign.AddDungeon(rld);
-          
+
           // It would be a redo-the-wilderness if we couldn't make the valley/
           // find a place for the entrance
         }
@@ -529,6 +529,10 @@ class CampaignCreator(UserInterface ui)
       catch (CouldNotPlaceDungeonEntranceException)
       {
         Console.WriteLine("Failed to find spot for Main Dungeon");
+      }
+      catch (PlacingWitchesCottageException)
+      {
+        Console.WriteLine("Could not find place for witches' cottage");
       }
     }
     while (true);
@@ -574,7 +578,6 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = -321315824;
     Console.WriteLine($"Seed: {seed}");
 
     try

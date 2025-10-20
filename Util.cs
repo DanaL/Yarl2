@@ -1150,6 +1150,7 @@ class PlayerKilledException : Exception
 class VictoryException : Exception { }
 class InvalidTownException : Exception { }
 class PlacingBuldingException : Exception { }
+class PlacingWitchesCottageException : Exception { }
 class InvalidRoomException : Exception { }
 class CouldNotPlaceDungeonEntranceException : Exception { }
 class AbnormalMovement(Loc dest) : Exception

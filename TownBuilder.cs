@@ -928,7 +928,7 @@ class TownBuilder
       }
     }
 
-    throw new Exception("Unable to find a valid placement for witches' cottage");
+    throw new PlacingWitchesCottageException();
   }
 
   void CalcRoofs(Map map)
