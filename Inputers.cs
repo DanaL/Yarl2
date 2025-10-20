@@ -875,6 +875,9 @@ class Dialoguer : Inputer
       .Append("\"\n");
 
     _currOptions = [];
+    if (opts.Count > 0)
+      sb.Append('\n');
+
     foreach (var (text, key) in opts)
     {
       _currOptions.Add(key);
