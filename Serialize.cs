@@ -182,18 +182,20 @@ class GameStateSave
   public int CurrDungeonID { get; set; }
   public ulong Turn { get; set; }
   public ulong[] Seed { get; set; } = [];
+  public int InitialSeed { get; set; }
 
   public static GameStateSave Shrink(GameState gs) => new()
   {
     CurrDungeonID = gs.CurrDungeonID,
     CurrLevel = gs.CurrLevel,
     Turn = gs.Turn,
-    Seed = gs.Rng.State
+    Seed = gs.Rng.State,
+    InitialSeed = gs.Rng.InitialSeed
   };
 
   public static GameState Inflate(Campaign camp, GameStateSave gss, Options opt, UserInterface ui)
   {
-    Rng rng = Rng.FromState(gss.Seed);
+    Rng rng = Rng.FromState(gss.Seed, gss.InitialSeed);
     GameState gs = new(camp, opt, ui, rng)
     {
       CurrDungeonID = gss.CurrDungeonID,

@@ -20,17 +20,21 @@ namespace Yarl2;
 
 public class Rng
 {
+  public int InitialSeed { get; init; }
   readonly ulong[] s = new ulong[4];
 
-  public static Rng FromState(ulong[] state) => new()
+  public static Rng FromState(ulong[] state, int initialSeed) => new()
   {
-    State = state
+    State = state,
+    InitialSeed = initialSeed
   };
 
   protected Rng() { }
 
   public Rng(int seed)
   {
+    InitialSeed = seed;
+
     ulong ulSeed = (ulong)(uint)seed;
     s[0] = ulSeed;
     s[1] = ulSeed << 16;

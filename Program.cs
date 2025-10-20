@@ -42,6 +42,7 @@ try
         try
         {
           gameState = new CampaignCreator(display).Create(options);
+          
           display.InTutorial = false;
           if (gameState is null)
             state = RunningState.Quitting;
@@ -60,6 +61,7 @@ try
         {
           display.InTutorial = false;
           gameState = new GameLoader(display).Load(options);
+          
           if (gameState is null)
             state = RunningState.Quitting;
         }
@@ -91,16 +93,17 @@ catch (Exception ex)
   lines.Add(" Uhoh, Delve seems to have crashed, likely due to Dana's incompetence :'( ");
   lines.Add(" The execption thrown was: ");
   lines.Add(" " + ex.Message);
+  lines.Add(" " + ex.InnerException!.Message);
   lines.Add("");
   lines.Add(" Delve will now need to exit.");
-
+  
   var userDir = Util.UserDir;
   if (!userDir.Exists)
     userDir.Create();
 
   string logPath = Path.Combine(userDir.FullName, "crash.txt");
   File.WriteAllLines(logPath, lines);
-  File.AppendAllText(logPath, ex.StackTrace);
+  File.AppendAllText(logPath, ex.InnerException.StackTrace);
 
   display.ClosePopup();
   display.SetLongMessage(lines);

@@ -573,6 +573,10 @@ class CampaignCreator(UserInterface ui)
 
   public GameState? Create(Options options)
   {
+    int seed = DateTime.UtcNow.GetHashCode();
+    seed = -321315824;
+    Console.WriteLine($"Seed: {seed}");
+
     try
     {
       string playerName = QueryPlayerName();
@@ -585,9 +589,6 @@ class CampaignCreator(UserInterface ui)
           break;
         }
       }
-      
-      int seed = DateTime.UtcNow.GetHashCode();
-      Console.WriteLine($"Seed: {seed}");
 
       Rng rng = new(seed);
       GameObjectDB objDb = new();
@@ -595,7 +596,7 @@ class CampaignCreator(UserInterface ui)
 
       Campaign campaign;
       int startRow, startCol;
-      (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);      
+      (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);
       GameState gameState = new(campaign, options, UI, rng)
       {
         ObjDb = objDb,
@@ -617,7 +618,7 @@ class CampaignCreator(UserInterface ui)
       welcomeText += "\n\n";
       welcomeText += "Press [ICEBLUE /] to toggle between recent messages and command/movement key cheat sheets.";
       UI.SetPopup(new Popup(welcomeText, "", -2, -1));
-    
+
       gameState.ObjDb.SetActorToLoc(player.Loc, player.ID);
       gameState.PrepareFieldOfView();
       gameState.RecentlySeenMonsters.Add(gameState.Player.ID);
@@ -627,6 +628,11 @@ class CampaignCreator(UserInterface ui)
     catch (QuitGameException)
     {
       return null;
+    }
+    catch (Exception ex)
+    {
+      string s = $"Exception creating new game. Initial seed: {seed}";
+      throw new Exception(s, ex);
     }
   }
 }
