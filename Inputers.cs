@@ -1396,6 +1396,7 @@ class InventoryDetails : Inputer
     List<string> items = [];
 
     string weaponType = "";
+    string versatileText = "";
 
     List<DamageTrait> damage = [];
     foreach (var trait in item.Traits)
@@ -1409,7 +1410,7 @@ class InventoryDetails : Inputer
 
       if (trait is DamageTrait dt)
         damage.Add(dt);
-        
+
       if (trait is WeaponSpeedTrait spd)
       {
         if (spd.Cost < 1.0)
@@ -1430,8 +1431,11 @@ class InventoryDetails : Inputer
         items.Add("it can [BRIGHTRED cleave] enemies");
       if (trait is TwoHandedTrait)
         items.Add("it must be wielded with two hands");
-      if (trait is VersatileTrait)
+      if (trait is VersatileTrait vt)
+      {
         items.Add("it may be wielded in both hands or with a shield");
+        versatileText = $"{vt.OneHanded.NumOfDie}d{vt.OneHanded.DamageDie} (1H) or {vt.TwoHanded.NumOfDie}d{vt.TwoHanded.DamageDie} (2H) of {vt.TwoHanded.DamageType}";
+      }
       if (trait is ViciousTrait)
         items.Add($"this vicious weapon deals [BRIGHTRED extra damage]");
       if (trait is RustedTrait)
@@ -1451,9 +1455,11 @@ class InventoryDetails : Inputer
     if (weaponType != "")
       s = $"This is {weaponType.IndefArticle()}.\n\n";
 
-    if (damage.Count > 0)
+    if (damage.Count > 0 || versatileText != "")
     {
       s += "It deals";
+      if (versatileText != "")
+        s += $" {versatileText}";
       s += string.Join(',', damage.Select(d => $" {d.NumOfDie}d{d.DamageDie} {d.DamageType.ToString().ToLower()}"));
       s += " damage.\n\n";
     }
