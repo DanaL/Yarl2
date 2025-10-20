@@ -511,7 +511,7 @@ class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         ui.AlertPlayer("You fumble at the lock.");
       }
 
-      if (Tool.HasTrait<FragileTrait>() && GameState.Rng.Next(5) == 0)
+      if (Tool.HasTrait<FragileTrait>() && GameState.Rng.Next(10) == 0)
       {        
         Actor.Inventory.ConsumeItem(Tool, Actor, GameState);
         GameState.UIRef().AlertPlayer($"{Tool.Name.DefArticle().Capitalize()} breaks!");
