@@ -560,20 +560,6 @@ class Battle
 
       bool swallowed = attacker.HasTrait<SwallowedTrait>();
 
-      if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
-      {
-        // A versatile weapon only cleaves if it is being wielded with two hands
-        // (ie., the attacker doesn't have a shield equipped)
-        bool versatile = weapon.HasTrait<VersatileTrait>();
-        if (!(versatile && attacker.Inventory.ShieldEquipped()))
-        {
-          ResolveCleave(attacker, target, roll, gs, weaponBonus);
-        }        
-      }
-     
-      if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
-        ResolveImpale(attacker, target, roll, gs, weaponBonus);
-
       List<string> messages = [];
       GrapplerTrait? grappler = null;
       bool thief = false;
@@ -629,11 +615,25 @@ class Battle
           gs.UIRef().AlertPlayer(string.Join(' ', messages).Trim(), gs, target.Loc);      
       }
 
-      // Handling this here just so messages resulting from it happen after messages from ResolveMeleeHIt()
       if (thief)
       {
         HandleThief(attacker, target, gs);
       }
+
+      if (weapon is not null && weapon.HasTrait<CleaveTrait>() && !swallowed)
+      {
+        // A versatile weapon only cleaves if it is being wielded with two hands
+        // (ie., the attacker doesn't have a shield equipped)
+        bool versatile = weapon.HasTrait<VersatileTrait>();
+        if (!(versatile && attacker.Inventory.ShieldEquipped()))
+        {
+          ResolveCleave(attacker, target, roll, gs, weaponBonus);
+        }
+      }
+
+      if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
+        ResolveImpale(attacker, target, roll, gs, weaponBonus);
+
     }
     else
     {
