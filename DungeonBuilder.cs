@@ -335,18 +335,11 @@ abstract class DungeonBuilder
 
     for (int lvl = 0; lvl < numOfLevels; lvl++)
     {
-      floors.Add([]);
-      for (int r = 0; r < height; r++)
-      {
-        for (int c = 0; c < width; c++)
-        {
-          if (levels[lvl].TileAt(r, c).Type == TileType.DungeonFloor)
-            floors[lvl].Add((r, c));
-        }
-      }
+      floors.Add(levels[lvl].SqsOfType(TileType.DungeonFloor));
     }
 
-    // so first set the exit stairs
+    // so first set the exit stairs on the first floor
+    // (Exit is outwards, ie., stairs that lead oout of the dungeon)
     ExitLoc = floors[0][rng.Next(floors[0].Count)];
     Tile exitStairs;
     if (desc)
