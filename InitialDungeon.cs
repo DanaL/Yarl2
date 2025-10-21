@@ -115,6 +115,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
     }
 
+    AddDecorations(levels, objDb, factDb, rng);
+
     PopulateDungeon(dungeon, rng, objDb);
 
     // Add a couple of guaranteed good items to dungeon
@@ -314,9 +316,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       {
         PlaceMistyPortal(levelMaps[level], rng);
       }
-    }
-
-    AddDecorations(levelMaps, objDb, factDb, rng);
+    }    
   }
 
   void AddDecorations(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
@@ -388,7 +388,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
       else if (decoration.Type == DecorationType.ScholarJournal && !lvlsWithDocs.Contains(level))
       {
-        PlaceDocument(floors, decoration.Desc, objDb, rng);
+        PlaceDocument(floors, decoration.Desc, objDb, rng);        
         lvlsWithDocs.Add(level);
       }
     }
