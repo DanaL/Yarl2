@@ -158,7 +158,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     bool graveyard = false;
     double chanceOfDesecratedAltar = 0.25;
     bool artifactVault = false;
-    
+    HashSet<TileType> vaultExists = [ TileType.ClosedDoor, TileType.LockedDoor ];
     for (int level = 0; level < levelMaps.Length; level++)
     {
       Map map = levelMaps[level];
@@ -191,7 +191,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
       for (var i = 0; i < rooms.Count; i++)
       {
-        if (Rooms.PotentialVault(map, rooms[i]))
+        if (Rooms.PotentialVault(map, rooms[i], vaultExists))
           potentialVaults.Add(i);
       }
 

@@ -434,31 +434,43 @@ class Rooms
     map.SetTile(doorSq, TileFactory.Get(TileType.LockedDoor));
   }
 
-  public static bool PotentialVault(Map map, List<(int, int)> room)
+  // This is different from PotentialVault because we want to confirm it's an
+  // actual vault that is locked. I am currently using it in the SetStairs() 
+  // method to avoid placing the level's arrival stairs in a locked vault.
+  public static bool IsLockedVault(Map map, List<(int, int)> room)
+  {
+    HashSet<TileType> exits = [];
+    foreach (var (r, c) in room)
+    {
+      foreach (var adj in Util.Adj8Sqs(r, c))
+      {
+        Tile adjTile = map.TileAt(adj);
+       
+        if (!room.Contains(adj) && !(adjTile.Type == TileType.DungeonWall || adjTile.Type == TileType.PermWall))
+          exits.Add(adjTile.Type);
+      }
+    }
+    
+    return exits.Count == 1 && exits.Where(t => t == TileType.VaultDoor || t== TileType.Portcullis).Any();
+  }
+
+  public static bool PotentialVault(Map map, List<(int, int)> room, HashSet<TileType> validExits)
   {
     if (room.Count > 85)
       return false;
 
-    // Vaults only have one exit
     HashSet<(int, int)> exits = [];
     foreach (var (r, c) in room)
     {
-      // Don't allow a room with the upstairs to be a vault because it's
-      // likely the key will be on the other side of its door, preventing
-      // the player from progress. (Maybe when the dungeon is deeper and the
-      // PC presumably more powerful this will be okay)
-      if (map.TileAt(r, c).Type == TileType.Upstairs)
-        return false;
-
       foreach (var adj in Util.Adj8Sqs(r, c))
       {
         Tile adjTile = map.TileAt(adj);
-        TileType adjType = adjTile.Type;
-        if (!room.Contains(adj) && (adjTile.Passable() || adjType == TileType.ClosedDoor || adjType == TileType.LockedDoor))
+        if (!room.Contains(adj) && (adjTile.Passable() || validExits.Contains(adjTile.Type)))
           exits.Add(adj);
       }
     }
 
+    // Vaults only have one exit
     return exits.Count == 1;
   }
 

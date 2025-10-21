@@ -381,24 +381,61 @@ abstract class DungeonBuilder
       }
     }
 
-    (int, int) pick = shared[rng.Next(shared.Count)];
-    Downstairs down = new("");
-    Upstairs up = new("");
+    HashSet<(int, int)> lockedVaultSqs = [];
+    foreach (var room in currentLevel.FindRooms(9))
+    {
+      if (Rooms.IsLockedVault(currentLevel, room))
+      {
+        currentLevel.Dump();
+        lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
+      }
+    }
 
-    if (desc)
+    while (shared.Count > 0)
     {
-      down.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
-      up.Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-      currentLevel.SetTile(pick.Item1, pick.Item2, down);
-      nextLevel.SetTile(pick.Item1, pick.Item2, up);
+      (int, int) pick = shared[rng.Next(shared.Count)];
+      Downstairs down = new("");
+      Upstairs up = new("");
+
+      if (desc)
+      {
+        // The up stairs are the arrival stairs (for normal arrivals)
+        Loc arrivalLoc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+        if (lockedVaultSqs.Contains((arrivalLoc.Row, arrivalLoc.Col)))
+        {
+          currentLevel.Dump();
+          shared.Remove(pick);
+          continue;
+        }
+
+        up.Destination = arrivalLoc;        
+        down.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
+        currentLevel.SetTile(pick.Item1, pick.Item2, down);
+        nextLevel.SetTile(pick.Item1, pick.Item2, up);
+
+        return;
+      }
+      else
+      {
+        // Down stairs at the arrival stairs
+        Loc arrivalLoc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+        if (lockedVaultSqs.Contains((arrivalLoc.Row, arrivalLoc.Col)))
+        {
+          shared.Remove(pick);
+          continue;
+        }
+
+        down.Destination = arrivalLoc;
+        up.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
+        currentLevel.SetTile(pick.Item1, pick.Item2, up);
+        nextLevel.SetTile(pick.Item1, pick.Item2, down);
+
+        return;
+      }
     }
-    else
-    {
-      down.Destination = new Loc(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-      up.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
-      currentLevel.SetTile(pick.Item1, pick.Item2, up);
-      nextLevel.SetTile(pick.Item1, pick.Item2, down);
-    }
+
+    // I think this should be impossible??
+    throw new Exception("Could not place stairs!");
   }
 
   static bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;
