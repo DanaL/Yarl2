@@ -73,6 +73,8 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
    return turns;
   }
 
+
+  // Tiles that will cause the player to stop running
   static bool InterestingTiles( GameState gs, Loc loc)
   {
     foreach (Loc adj in Util.Adj4Locs(loc))
@@ -96,6 +98,17 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
       if (gs.ObjDb.ItemsAt(adj).Count > 0)
       {
         return true;
+      }
+
+      foreach (Item obj in gs.ObjDb.EnvironmentsAt(adj))
+      {
+        foreach (Trait t in obj.Traits)
+        {
+          if (t is MoldSporesTrait)
+            return true;
+          if (t is OnFireTrait)
+            return true;
+        }
       }
     }
 
