@@ -371,11 +371,10 @@ abstract class DungeonBuilder
     }
 
     HashSet<(int, int)> lockedVaultSqs = [];
-    foreach (var room in currentLevel.FindRooms(9))
+    foreach (var room in nextLevel.FindRooms(9))
     {
-      if (Rooms.IsLockedVault(currentLevel, room))
+      if (Rooms.IsLockedVault(nextLevel, room))
       {
-        currentLevel.Dump();
         lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
       }
     }
@@ -389,15 +388,14 @@ abstract class DungeonBuilder
       if (desc)
       {
         // The up stairs are the arrival stairs (for normal arrivals)
-        Loc arrivalLoc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-        if (lockedVaultSqs.Contains((arrivalLoc.Row, arrivalLoc.Col)))
+        Loc loc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+        if (lockedVaultSqs.Contains((loc.Row, loc.Col)))
         {
-          currentLevel.Dump();
           shared.Remove(pick);
           continue;
         }
 
-        up.Destination = arrivalLoc;        
+        up.Destination = loc;        
         down.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
         currentLevel.SetTile(pick.Item1, pick.Item2, down);
         nextLevel.SetTile(pick.Item1, pick.Item2, up);
@@ -407,14 +405,14 @@ abstract class DungeonBuilder
       else
       {
         // Down stairs at the arrival stairs
-        Loc arrivalLoc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-        if (lockedVaultSqs.Contains((arrivalLoc.Row, arrivalLoc.Col)))
+        Loc loc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
+        if (lockedVaultSqs.Contains((loc.Row, loc.Col)))
         {
           shared.Remove(pick);
           continue;
         }
 
-        down.Destination = arrivalLoc;
+        down.Destination = loc;
         up.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
         currentLevel.SetTile(pick.Item1, pick.Item2, up);
         nextLevel.SetTile(pick.Item1, pick.Item2, down);
