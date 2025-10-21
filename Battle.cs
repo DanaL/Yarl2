@@ -123,7 +123,7 @@ class Battle
     var (hpLeft, dmgMsg, _) = target.ReceiveDmg(dmg, bonusDamage, gs, ammo, 1.0);
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);    
-    ResolveHit(attacker, target, hpLeft, gs);
+    ResolveHit(attacker, target, hpLeft, ammo, gs);
     
     bool poisoner = false;
     foreach (var trait in ammo.Traits)
@@ -296,8 +296,7 @@ class Battle
     if (dmgMsg != "")
       gs.UIRef().AlertPlayer(dmgMsg);
     
-    ResolveHit(attacker, target, hpLeft, gs);
-
+    ResolveHit(attacker, target, hpLeft, weapon, gs);
     CheckAttackTraits(target, gs, attacker, dmgDone);
 
     if (weapon is not null) 
@@ -306,7 +305,7 @@ class Battle
     }      
   }
 
-  static void ResolveHit(GameObj attacker, Actor target, int hpLeft, GameState gs)
+  static void ResolveHit(GameObj attacker, Actor target, int hpLeft, Item? weapon, GameState gs)
   {
     if (hpLeft < 1)
     {
@@ -331,16 +330,12 @@ class Battle
 
     Actor? actor = attacker as Actor ?? null;
 
-    if (actor is not null && target.HasTrait<CorrosiveTrait>())
+    if (target.HasTrait<CorrosiveTrait>() && weapon is not null)
     {
-      Item? weapon = actor.Inventory.ReadiedWeapon();
-      if (weapon is not null)
+      var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
+      if (attacker is Player)
       {
-        var (s, _) = EffectApplier.Apply(DamageType.Rust, gs, weapon, actor);
-        if (attacker is Player)
-        {
-          gs.UIRef().AlertPlayer(s);          
-        }        
+        gs.UIRef().AlertPlayer(s);          
       }
     }
 
