@@ -500,6 +500,7 @@ class Rooms
               case TileType.LockedDoor:
               case TileType.DungeonFloor:
               case TileType.Bridge:
+              case TileType.SecretDoor:
                 exits.Add(adj);
                 break;
               default:

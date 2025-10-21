@@ -221,11 +221,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       {
         int roomId = rng.Next(rooms.Count);
 
-        if (level == 0 && IsEntranceHall(levelMaps[level], rooms[roomId]))
-        {
-          continue;
-        }
-
         switch (rng.Next(4))
         {
           case 0:

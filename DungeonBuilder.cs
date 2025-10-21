@@ -108,17 +108,6 @@ abstract class DungeonBuilder
     }
   }
 
-  protected static bool IsEntranceHall(Map map, List<(int, int)> sqs)
-  {
-    foreach (var sq in sqs)
-    {
-      if (map.TileAt(sq).Type == TileType.Upstairs)
-        return true;
-    }
-
-    return false;
-  }
-
   // At the moment, I am just adding a potion of levitation on the stairs up side,
   // but I can imagine other solutions to the level being split by a river (adding
   // another set of stairs, etc)
@@ -984,51 +973,6 @@ class MainDungeonBuilder : DungeonBuilder
     }
   }
 
-  static void AddRooms(int dungeonId, Map[] levels, GameObjectDB objDb, FactDb factDb, Rng rng)
-  {
-    string denizen = factDb.FactCheck("EarlyDenizen") is SimpleFact denizenFact ? denizenFact.Value : "";
-    bool koboldEffigy = false;
-    for (int level = 0; level < levels.Length; level++)
-    {
-      List<List<(int, int)>> rooms = levels[level].FindRooms(9);
-      if (rooms.Count == 0)
-        continue;
-
-      if (level < levels.Length - 1 && rng.NextDouble() < 0.2)
-      {
-        int roomId = rng.Next(rooms.Count);
-
-        if (level == 0 && IsEntranceHall(levels[level], rooms[roomId]))
-        {
-          continue;
-        }
-        
-        switch (rng.Next(4))
-        {
-          case 0:
-            Rooms.ChasmTrapRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
-            break;
-          case 1:
-            Rooms.TriggerChasmRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
-            break;
-          default:
-            Rooms.BasicChasmRoom(levels, rng, dungeonId, level, rooms[roomId], objDb);
-            break;
-        }
-        
-        rooms.RemoveAt(roomId);
-      }
-      
-      if (level > 0 && level < 5 && !koboldEffigy && denizen == "kobold" && rng.NextDouble() < 0.2)
-      {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.KoboldWorshipRoom(levels[level], rooms[roomId], dungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
-        koboldEffigy = true;
-      }   
-    }
-  }
-
   void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
   {
     if (level > 0)
@@ -1121,8 +1065,6 @@ class MainDungeonBuilder : DungeonBuilder
       levels[levelNum] = mapper.DrawLevel(w, h);
       dungeon.AddMap(levels[levelNum]);      
     }
-
-    AddRooms(_dungeonID, levels, objDb, factDb, rng);
 
     MoonDaughterCleric(levels, id, rng, objDb);
 
