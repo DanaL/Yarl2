@@ -841,7 +841,7 @@
     "Value": 100,
     "Glyph": "☥,brightred,dullred,black,false",
     "Traits": [
-      "Grants#StatBuff&0&max&Strength&3&item"
+      "Grants#StatBuff&0&max&Strength&1&item"
     ]
   },
   {
@@ -851,7 +851,7 @@
     "Value": 100,
     "Glyph": "☥,lightblue,blue,black,false",
     "Traits": [
-      "Grants#StatBuff&0&max&Constitution&3&item"
+      "Grants#StatBuff&0&max&Constitution&1&item"
     ]
   },
   {
@@ -861,7 +861,7 @@
     "Value": 100,
     "Glyph": "☥,green,darkgreen,black,false",
     "Traits": [
-      "Grants#StatBuff&0&max&Dexterity&3&item"
+      "Grants#StatBuff&0&max&Dexterity&1&item"
     ]
   },
   {

@@ -1312,7 +1312,7 @@ class DialogueInterpreter
     else if (gift.Gift == "BOON_STR")
     {
       Stat str = gs.Player.Stats[Attribute.Strength];
-      str.SetMax(str.Curr + 3);
+      str.SetMax(str.Curr + 1);
       gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
       gs.UIRef().AlertPlayer("You feel stronger!");
       return;
@@ -1320,7 +1320,7 @@ class DialogueInterpreter
     else if (gift.Gift == "BOON_DEX")
     {
       Stat dex = gs.Player.Stats[Attribute.Dexterity];
-      dex.SetMax(dex.Curr + 3);
+      dex.SetMax(dex.Curr + 1);
       gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
       gs.UIRef().AlertPlayer("You feel more agile!");
       return;
@@ -1328,9 +1328,9 @@ class DialogueInterpreter
     else if (gift.Gift == "BOON_CON")
     {
       Stat con = gs.Player.Stats[Attribute.Constitution];
-      con.SetMax(con.Curr + 3);
-      gs.Player.Stats[Attribute.HP].ChangeMax(15);
-      gs.Player.Stats[Attribute.HP].Change(15);
+      con.SetMax(con.Curr + 1);
+      gs.Player.Stats[Attribute.HP].ChangeMax(5);
+      gs.Player.Stats[Attribute.HP].Change(5);
       gs.UIRef().AlertPlayer($"\"{gift.Blurb}\"");
       gs.UIRef().AlertPlayer("You feel healthier!");
       return;      
