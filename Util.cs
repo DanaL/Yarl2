@@ -1359,22 +1359,36 @@ public static class ResourcePath
 
   static string FindResourcePath(string folder, string filename)
   {
-    string path = Path.Combine(folder, filename);
+    string path = string.IsNullOrEmpty(folder) 
+        ? filename 
+        : Path.Combine(folder, filename);
+    
     if (File.Exists(path))
     {
       return path;
     }
 
-    // If that doesn't exist and we're on macOS, try the bundle Resources path
+    // If we are executing as a macOS app bundle, we need to look in the
+    // Resources folder
     if (OperatingSystem.IsMacOS())
     {
-      string? bundlePath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-      if (bundlePath != null)
+      string exePath = AppDomain.CurrentDomain.BaseDirectory;
+
+      if (exePath.Contains(".app/Contents/MacOS"))
       {
-        string resourcePath = Path.Combine(bundlePath, folder, filename);
-        if (File.Exists(resourcePath))
+        string baseDir = exePath.TrimEnd(Path.DirectorySeparatorChar);
+        string? contentsDir = Path.GetDirectoryName(baseDir);
+        
+        if (contentsDir != null)
         {
-          return resourcePath;
+          string resourcePath = string.IsNullOrEmpty(folder)
+              ? Path.Combine(contentsDir, "Resources", filename)
+              : Path.Combine(contentsDir, "Resources", folder, filename);
+          
+          if (File.Exists(resourcePath))
+          {
+            return resourcePath;
+          }
         }
       }
     }
@@ -1382,7 +1396,8 @@ public static class ResourcePath
     throw new FileNotFoundException(
         $"Could not find {filename} in {folder} directory. " +
         $"Tried: {path} and bundle resources path. " +
-        $"Current directory: {Directory.GetCurrentDirectory()}"
+        $"Current directory: {Directory.GetCurrentDirectory()}, " +
+        $"Base directory: {AppDomain.CurrentDomain.BaseDirectory}"
     );
   }
 }
