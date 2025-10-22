@@ -1288,18 +1288,28 @@ abstract class UserInterface
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
     text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
 
+    int finalLevel = gameState.CurrLevel + 1;
+
     string dn;
-    if (gameState.Player.HasTrait<SwallowedTrait>())
-        dn = " in something's belly";
+
+    if (gameState.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swt)
+    {
+      dn = " in something's belly";
+
+      if (gameState.ObjDb.GetObj(swt.SwallowerID) is Actor swallower)
+        finalLevel = swallower.Loc.Level + 1;      
+    }
     else
+    {
       dn = $"in {gameState.CurrentDungeon.Name}";
+    }
 
     int x = (26 - dn.Length) / 2;
     dn = dn.PadLeft(26 - x, ' ');
     dn = dn.PadRight(26, ' ');
     text[8] = $@"    |{dn}|          |____|";
     
-    string lvlTxt = $"on level {gameState.CurrLevel + 1}";
+    string lvlTxt = $"on level {finalLevel}";
     lvlTxt =  $@"    |{lvlTxt.PadLeft((22 + lvlTxt.Length) / 2),-26}|                ";
     text.Insert(9, lvlTxt);
 
