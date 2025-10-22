@@ -489,7 +489,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     else if (levelNum == 1)
     {
-      int numItems = rng.Next(3, 8);
+      int numItems = rng.Next(2, 5);
       for (int j = 0; j < numItems; j++)
       {
         double roll = rng.NextDouble();
@@ -503,7 +503,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     else if (levelNum == 2 || levelNum == 3)
     {
-      int numItems = rng.Next(3, 8);
+      int numItems = rng.Next(3, 6);
       for (int j = 0; j < numItems; j++)
       {
         TreasureQuality quality;
@@ -519,7 +519,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     else
     {
-      int numItems = rng.Next(3, 8);
+      int numItems = rng.Next(3, 5);
       for (int j = 0; j < numItems; j++)
       {
         TreasureQuality quality;
@@ -545,7 +545,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     if (levelNum > 0)
     {
-      for (int i = 0; i < rng.Next(2, 5); i++)
+      for (int i = 0; i < rng.Next(1, 4); i++)
       {
         ItemNames name = Treasure.Consumables[rng.Next(Treasure.Consumables.Count)];
         PlaceItem(ItemFactory.Get(name, objDb));
