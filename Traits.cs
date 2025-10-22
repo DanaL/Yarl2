@@ -3511,7 +3511,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 
     item.Traits = [..item.Traits.Where(t => t is not LightSourceTrait)];
 
-    string s = item!.ContainedBy == Constants.PLAYER_ID ? "Your" : item!.FullName.DefArticle().Capitalize();
+    string s = item!.ContainedBy == Constants.PLAYER_ID ? $"Your {item.Name}" : item!.FullName.DefArticle().Capitalize();
     return $"{s} is extinguished.";
   }
 
