@@ -208,7 +208,7 @@ class Constants
   public const char SEPARATOR = '\u001F';
   public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
   public const int TELEPATHY_RANGE = 40; // I don't really have a better spot for this right now
-  public static readonly string VERSION = "0.4.1";
+  public static readonly string VERSION = "0.4.2";
   public const char TOP_LEFT_CORNER = '┍';
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
@@ -685,7 +685,7 @@ class Util
     TileType.SecretDoor => new Glyph('#', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.HiddenTeleportTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.TeleportTrap => new Glyph('^', Colours.LIGHT_PURPLE, Colours.PURPLE, Colours.BLACK, false),
-    TileType.BrokenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
+    TileType.BrokenPortcullis => new Glyph('/', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.HiddenDartTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.DartTrap => new Glyph('^', Colours.WHITE, Colours.LIGHT_GREY, Colours.BLACK, true),
     TileType.HiddenWaterTrap => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
