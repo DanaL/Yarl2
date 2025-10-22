@@ -834,10 +834,11 @@ class PrisonerBehaviour : NPCBehaviour
           1 => "Adventuring is for suckers.",
           _ => "I'm hanging up my sword."
         },        
-      _ => gs.Rng.Next(3) switch
+      _ => gs.Rng.Next(4) switch
             {
               0 => $"I was captured by {capturedBy}!",
               1 => "Help me!",
+              2 => "There should be a lever to open my cell around somewhere!",
               _ => "Can you free me?"
             }
     };
