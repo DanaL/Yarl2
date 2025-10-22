@@ -24,10 +24,12 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       MonsterDecks = DeckBuilder.ReadDeck("tower", rng)
     };
 
-    Tower towerBuilder = new(Height, Width, 5);
-    Map[] floors = [..towerBuilder.BuildLevels(5, rng)];
+    int numOfLevels = 4;
 
-    SetStairs(DungeonId, floors, Height, Width, 5, (entranceRow, entranceCol), false, rng);
+    Tower towerBuilder = new(Height, Width, 5);
+    Map[] floors = [..towerBuilder.BuildLevels(numOfLevels, rng)];
+
+    SetStairs(DungeonId, floors, Height, Width, numOfLevels, (entranceRow, entranceCol), false, rng);
 
     foreach (Map floor in floors)
     {
