@@ -9,6 +9,9 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Reflection.Emit;
+using System.Text.RegularExpressions;
+
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -115,6 +118,13 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
     }
 
+    // 1 in 3 dungeons have a captive
+    if (rng.Next(3) == 0)
+    {
+      int captiveLevel = rng.Next(1, numOfLevels);
+      CaptiveFeature.Create(DungeonId, captiveLevel, levels[captiveLevel], objDb, factDb, rng);
+    }
+
     AddDecorations(levels, objDb, factDb, rng);
 
     PopulateDungeon(dungeon, rng, objDb);
@@ -156,7 +166,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
   void AddRooms(Map[] levelMaps, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
-    bool captive = false;
     bool graveyard = false;
     double chanceOfDesecratedAltar = 0.25;
     bool artifactVault = false;
@@ -267,30 +276,6 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         int roomId = rng.Next(rooms.Count);
         Rooms.MakeMinedChamber(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
         rooms.RemoveAt(roomId);
-      }
-
-      // Not technically a room but...
-      if (level > 0 && rng.NextDouble() < 0.2 && !captive)
-      {
-        captive = true;
-        CaptiveFeature.Create(DungeonId, level, levelMaps[level], objDb, factDb, rng);
-      }
-      else if (rng.NextDouble() < 0.15)
-      {
-        List<(int, int)> floors = [];
-        foreach (var (r, c) in levelMaps[level].SqsOfType(TileType.DungeonFloor))
-        {
-          if (AdjWalls(levelMaps[level], r, c) >= 3)
-            continue;
-          floors.Add((r, c));
-        }
-
-        (int, int) altarSq = floors[rng.Next(floors.Count)];
-        Loc altarLoc = new(DungeonId, level, altarSq.Item1, altarSq.Item2);
-        Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);
-        altar.Glyph = new Glyph('∆', Colours.DULL_RED, Colours.BROWN, Colours.BLACK, false);
-        altar.Traits.Add(new MolochAltarTrait());
-        objDb.SetToLoc(altarLoc, altar);
       }
 
       if (rng.NextDouble() < chanceOfDesecratedAltar)
