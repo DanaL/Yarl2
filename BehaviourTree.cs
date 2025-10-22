@@ -1479,6 +1479,24 @@ class SeekPlayerAStar : BehaviourNode
   }
 }
 
+// This is for monsters like floating eyes and gas spores that will just 
+// want to approach their target and remain adjacent to them
+class LurkNearTarget : BehaviourNode
+{
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    Actor target = mob.PickTarget(gs);
+
+    if (target is not NoOne && Util.Distance(mob.Loc, target.Loc) <= 1)
+    {
+      mob.ExecuteAction(new PassAction(gs, mob));
+      return PlanStatus.Success;      
+    }
+
+    return PlanStatus.Failure;
+  }
+}
+
 class ChaseTarget : BehaviourNode
 {
   static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
@@ -1524,7 +1542,7 @@ class ChaseTarget : BehaviourNode
 
     return PlanStatus.Failure;
   }
-
+  
   static PlanStatus ChasePlayer(Mob mob, GameState gs)
   {
     DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
@@ -1630,12 +1648,6 @@ class WalkPath(Stack<Loc> path) : BehaviourNode
 
 class Planner
 {
-  static BehaviourNode GoToArea(Actor actor, GameState gs, Map map, HashSet<Loc> area)
-  {
-    FindPathToArea pathBuilder = new(area, gs);
-    return new WalkPath(pathBuilder.BuildPath(actor.Loc));
-  }
-
   static Sequence GoToBuilding(Actor actor, GameState gs, Map map, HashSet<Loc> area)
   {
     HashSet<Loc> floors = OnlyFloorsInArea(map, area);
@@ -1863,6 +1875,11 @@ class Planner
         passive.Add(up);
     }
 
+    // This will make the monster move to toward the player/target until they 
+    // are adjacent and then just hang out
+    if (actions.Count == 0 && passive.Count == 0)
+      actions.Add(new LurkNearTarget());
+
     // Not yet handling confused monsters, etc
 
     List<BehaviourNode> plan = [];
@@ -1949,14 +1966,7 @@ class Planner
 
     return new Selector(plan);
   }
-
-  static BehaviourNode CreateSimpleVillagerPlan(Mob mob)
-  {
-    HashSet<Loc> home = [];
-
-    return new WanderInArea(home);
-  }
-
+  
   static BehaviourNode WanderInHome(HashSet<Loc> home, GameState gs)
   {
     HashSet<Loc> sqs = [];
