@@ -3061,7 +3061,7 @@ class RecallTrait : BasicTrait, IGameEventListener
     {
       if (item.Traits.OfType<MetalTrait>().FirstOrDefault() is MetalTrait mt && mt.Type == Metals.Gold)
       {
-        player.Inventory.RemoveByID(item.ID);
+        player.Inventory.RemoveByID(item.ID, gs);
         itemsDropped.Add(item);
 
         if (item.Equipped)
@@ -3210,7 +3210,7 @@ class CountdownTrait : BasicTrait, IGameEventListener, IOwner
         {
           // I don't think owner should ever be null, barring a bug
           // but this placates the warning in VS/VS Code
-          ((Actor)owner).Inventory.Remove(item.Slot, 1);
+          ((Actor)owner).Inventory.Remove(item.Slot, 1, gs);
         }
       }
 
@@ -3544,7 +3544,7 @@ class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
         {
           // I don't think owner should ever be null, barring a bug
           // but this placates the warning in VS/VS Code
-          owner.Inventory.Remove(item.Slot, 1);
+          owner.Inventory.Remove(item.Slot, 1, gs);
           torchLoc = owner.Loc;
           msg = $"{item.Name.Possessive(owner).Capitalize()} burns out.";
         }

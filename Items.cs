@@ -66,7 +66,7 @@ class Item : GameObj, IEquatable<Item>
       else if (t is DoorKeyTrait)
         return true;
       else if (t is CleansingTrait)
-        return true;      
+        return true;
     }
 
     return false;
@@ -76,7 +76,7 @@ class Item : GameObj, IEquatable<Item>
   {
     if (IDInfo.TryGetValue(Name, out var idInfo))
       IDInfo[Name] = idInfo with { Known = true };
-    
+
     foreach (Trait t in Traits)
     {
       if (t is WandTrait wt)
@@ -124,9 +124,9 @@ class Item : GameObj, IEquatable<Item>
       fullname += " copy of";
 
     fullname += " " + name;
-    
+
     var traitDescs = Traits.Where(t => t is IDesc id)
-                           .Select(t => ((IDesc) t).Desc());
+                           .Select(t => ((IDesc)t).Desc());
     if (traitDescs.Any())
       fullname += " " + string.Join(' ', traitDescs);
 
@@ -138,9 +138,9 @@ class Item : GameObj, IEquatable<Item>
   public Metals MetalType()
   {
     var t = Traits.OfType<MetalTrait>().FirstOrDefault();
- 
+
     return t is not null ? t.Type : Metals.NotMetal;
-   }
+  }
 
   public bool CanCorrode()
   {
@@ -154,25 +154,25 @@ class Item : GameObj, IEquatable<Item>
 
   public override int GetHashCode() => $"{Type}+{Name}+{HasTrait<StackableTrait>()}".GetHashCode();
   public override bool Equals(object? obj) => Equals(obj as Item);
-  
+
   public bool Equals(Item? i)
   {
     if (i is null)
       return false;
 
-    if (ReferenceEquals(this, i)) 
+    if (ReferenceEquals(this, i))
       return true;
 
-    if (GetType() != i.GetType()) 
+    if (GetType() != i.GetType())
       return false;
 
-    if (HasTrait<StackableTrait>() != i.HasTrait<StackableTrait>()) 
+    if (HasTrait<StackableTrait>() != i.HasTrait<StackableTrait>())
       return false;
 
     return i.FullName == FullName && i.Type == Type;
   }
 
-  public static bool operator==(Item? a, Item? b)
+  public static bool operator ==(Item? a, Item? b)
   {
     if (a is null)
     {
@@ -180,29 +180,29 @@ class Item : GameObj, IEquatable<Item>
         return true;
       return false;
     }
-    
+
     return a.Equals(b);
   }
 
-  public static bool operator!=(Item? a, Item? b) => !(a == b);
+  public static bool operator !=(Item? a, Item? b) => !(a == b);
 }
 
 // I did this to prevent myself from typo-ing item names in code, but I didn't 
 // really think about how many items there would eventually be...
 enum ItemNames
 {
-  ANTIDOTE, ANTISNAIL_SANDALS, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, BONE, BOOTS_OF_WATER_WALKING, CAMPFIRE, 
+  ANTIDOTE, ANTISNAIL_SANDALS, APPLE, ARROW, BATTLE_AXE, BEETLE_CARAPACE, BLINDFOLD, BONE, BOOTS_OF_WATER_WALKING, CAMPFIRE,
   CHAINMAIL, CLAYMORE, CLOAK_OF_PROTECTION, COLUMN, CRIMSON_KING_WARD, CROESUS_CHARM, CUTPURSE_CREST, DAGGER, DART,
   FEATHERFALL_BOOTS, FIRE_GIANT_ESSENCE, FIREBOLT, FLASK_OF_BOOZE, FROST_GIANT_ESSENCE, GASTON_BADGE, GAUNTLETS_OF_POWER,
   GENERIC_WAND, GHOSTCAP_MUSHROOM, GOLDEN_APPLE, GREATSWORD, GUIDE_STABBY, GUIDE_AXES, GUIDE_BOWS, GUIDE_SWORDS, GUISARME,
-  HAND_AXE, HEARTY_SOUP, HEAVY_BOOTS, HELMET, HILL_GIANT_ESSENCE, HOLY_WATER, LEATHER_ARMOUR, LEATHER_GLOVES, LESSER_BURLY_CHARM, 
-  LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM, LOCK_PICK, LONGBOW, LONGSWORD, MACE, MEDITATION_CRYSTAL, MITHRIL_ORE, MUSHROOM_STEW, 
-  OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, POTION_FIRE_RES, POTION_HARDINESS, POTION_HEALING, POTION_HEROISM, 
+  HAND_AXE, HEARTY_SOUP, HEAVY_BOOTS, HELMET, HILL_GIANT_ESSENCE, HOLY_WATER, LEATHER_ARMOUR, LEATHER_GLOVES, LESSER_BURLY_CHARM,
+  LESSER_GRACE_CHARM, LESSER_HEALTH_CHARM, LOCK_PICK, LONGBOW, LONGSWORD, MACE, MEDITATION_CRYSTAL, MITHRIL_ORE, MUSHROOM_STEW,
+  OGRE_LIVER, PICKAXE, POTION_BLINDNESS, POTION_COLD_RES, POTION_FIRE_RES, POTION_HARDINESS, POTION_HEALING, POTION_HEROISM,
   POTION_MIND_READING, POTION_OF_LEVITATION, POTION_OBSCURITY, QUARTERSTAFF, RAPIER, RING_OF_ADORNMENT, RING_OF_PROTECTION,
   RINGMAIL, RUBBLE, SCROLL_BLINK, SCROLL_DISARM, SCROLL_KNOCK, SCROLL_MAGIC_MAP, SCROLL_PROTECTION, SCROLL_ESCAPE,
   SCROLL_SCATTERING, SCROLL_TRAP_DETECTION, SCROLL_TREASURE_DETECTION, SEEWEED, SHIELD, SHORTSHORD, SILVER_DAGGER, SILVER_LONGSWORD,
-  SKELETON_KEY, SKULL, SMOULDERING_CHARM, SPEAR, STATUE, STONE_ALTAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION, 
-  TINCTURE_CELERITY, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_DIGGING, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER, 
+  SKELETON_KEY, SKULL, SMOULDERING_CHARM, SPEAR, STATUE, STONE_ALTAR, STUDDED_LEATHER_ARMOUR, TALISMAN_OF_CIRCUMSPECTION,
+  TINCTURE_CELERITY, TORCH, TROLL_BROOCH, VIAL_OF_POISON, WAND_DIGGING, WAND_FIREBALLS, WAND_FROST, WAND_HEAL_MONSTER,
   WAND_MAGIC_MISSILES, WAND_SLOW_MONSTER, WAND_SUMMONING, WAND_SWAP, WIND_FAN, ZORKMIDS, ZORKMIDS_GOOD, ZORKMIDS_MEDIOCRE, ZORKMIDS_PITTANCE,
 
   RED_CRYSTAL, BLUE_CRYSTAL
@@ -224,7 +224,7 @@ class ItemTemplate
   public ItemType Type { get; set; }
   public int Value { get; set; }
   public Glyph Glyph { get; set; }
-  public List<string> TraitTemplates { get; set; } = [];  
+  public List<string> TraitTemplates { get; set; } = [];
 }
 
 class ItemFactory
@@ -377,7 +377,9 @@ class ItemFactory
   {
     Item mist = new()
     {
-      Name = "mist", Type = ItemType.Fog, Value = 0,
+      Name = "mist",
+      Type = ItemType.Fog,
+      Value = 0,
       Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
@@ -390,7 +392,9 @@ class ItemFactory
   {
     Item mold = new()
     {
-      Name = "patch of yellow mold", Type = ItemType.Environment, Value = 0,
+      Name = "patch of yellow mold",
+      Type = ItemType.Environment,
+      Value = 0,
       Glyph = new Glyph('%', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false)
     };
     mold.Traits.Add(new AffixedTrait());
@@ -404,7 +408,9 @@ class ItemFactory
   {
     Item mist = new()
     {
-      Name = "fog", Type = ItemType.Fog, Value = 0,
+      Name = "fog",
+      Type = ItemType.Fog,
+      Value = 0,
       Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
     };
     mist.SetZ(10);
@@ -424,7 +430,9 @@ class ItemFactory
   {
     Item light = new()
     {
-      Name = "light", Type = ItemType.Environment, Value = 0,
+      Name = "light",
+      Type = ItemType.Environment,
+      Value = 0,
       Glyph = new(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
     };
     light.SetZ(-100);
@@ -608,12 +616,14 @@ class ItemFactory
 
     return mud;
   }
-  
+
   public static Item PuddleOfGrease()
   {
     Item grease = new()
     {
-      Name = "grease", Type = ItemType.Environment, Value = 0,
+      Name = "grease",
+      Type = ItemType.Environment,
+      Value = 0,
       Glyph = new Glyph('.', Colours.DARK_GREY, Colours.BLACK, Colours.CREAM, false)
     };
     grease.SetZ(1);
@@ -647,10 +657,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   readonly List<(char, ulong)> _items = [];
   public char LastSlot { get; set; } = '\0';
   readonly GameObjectDB _objDb = objDb;
-  
+
   public bool Contains(ulong itemID)
   {
-    foreach (var  item in _items)
+    foreach (var item in _items)
     {
       if (item.Item2 == itemID)
         return true;
@@ -674,13 +684,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   bool PlayerInventory() => _objDb.GetObj(OwnerID) is Player;
 
-  public char[] UsedSlots() =>[..  _items.Select(i => i.Item1).Distinct()];
+  public char[] UsedSlots() => [.. _items.Select(i => i.Item1).Distinct()];
 
   char[] AvailableSlots()
   {
     var allSlots = Enumerable.Range('a', 26).Select(i => (char)i);
     char[] usedSlots = UsedSlots();
-    
+
     return [.. allSlots.Where(c => !usedSlots.Contains(c))];
   }
 
@@ -716,7 +726,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return null;
   }
 
-  public Item? ReadiedBow() 
+  public Item? ReadiedBow()
   {
     foreach (var bow in Items().Where(i => i.Type == ItemType.Bow && i.Equipped))
       return bow;
@@ -731,7 +741,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       Zorkmids += item.Value;
       return '\0';
     }
-    
+
     char slotToUse = '\0';
 
     // If the item is stackable and there are others of the same item, use
@@ -756,7 +766,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     // then the inventory is full, so return a null character
     char[] availableSlots = AvailableSlots();
     if (slotToUse == '\0' && availableSlots.Length == 0)
-    {      
+    {
       return '\0';
     }
 
@@ -782,7 +792,18 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return slotToUse;
   }
 
-  public Item? RemoveByID(ulong id)
+  void CheckForGrantsToRemove(Item item, GameState gs)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
+      return;
+
+    foreach (GrantsTrait trait in item.Traits.OfType<GrantsTrait>())
+    {
+      trait.Remove(owner, gs, item);
+    }
+  }
+
+  public Item? RemoveByID(ulong id, GameState gs)
   {
     for (int j = 0; j < _items.Count; j++)
     {
@@ -794,6 +815,12 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           item!.Slot = '\0';
         item!.ContainedBy = 0;
 
+        if (item.Equipped)
+        {
+          item.Equipped = false;
+          CheckForGrantsToRemove(item, gs);
+        }
+
         return item;
       }
     }
@@ -801,7 +828,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     return null;
   }
 
-  public List<Item> Remove(char slot, int count)
+  public List<Item> Remove(char slot, int count, GameState gs)
   {
     List<int> indexes = [];
     for (int j = _items.Count - 1; j >= 0; j--)
@@ -809,7 +836,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (_objDb.GetObj(_items[j].Item2) is Item item && item.Slot == slot)
       {
         indexes.Add(j);
-      }        
+      }
     }
 
     List<Item> removed = [];
@@ -825,10 +852,17 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           item.Slot = '\0';
         item.ContainedBy = 0;
         removed.Add(item);
+
+        if (item.Equipped)
+        {
+          item.Equipped = false;
+          CheckForGrantsToRemove(item, gs);
+        }
+
         _items.RemoveAt(index);
       }
     }
-        
+
     return removed;
   }
 
@@ -844,13 +878,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     {
       return UnequipItem(wand);
     }
-   
+
     if (freeHands > 0)
     {
       wand.Equipped = true;
       return (EquipingResult.Equipped, ArmourParts.None);
     }
-    
+
     return (EquipingResult.NoFreeHand, ArmourParts.None);
   }
 
@@ -891,18 +925,18 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (FocusEquipped())
           --freeHands;
       }
- 
+
       if (item.Type == ItemType.Wand)
         return ToggleWand(item, freeHands);
 
       if (item.Equipped)
-       return UnequipItem(item);
-      
+        return UnequipItem(item);
+
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
         if (freeHands == 0 && shield)
           return (EquipingResult.NoFreeHand, ArmourParts.None);
-        
+
         // If there is a weapon already equipped, unequip it
         foreach (Item other in Items())
         {
@@ -911,7 +945,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         }
 
         item.Equipped = true;
-        
+
         return (EquipingResult.Equipped, ArmourParts.None);
       }
       else if (item.Type == ItemType.Bow)
@@ -932,9 +966,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       {
         ArmourParts part = ArmourParts.None;
         foreach (ArmourTrait t in item.Traits.OfType<ArmourTrait>())
-        {          
+        {
           part = t.Part;
-          break;          
+          break;
         }
 
         // check to see if there's another piece in that slot
@@ -949,10 +983,10 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
         if (part is ArmourParts.Shield && freeHands == 0)
           return (EquipingResult.NoFreeHand, part);
-        
-        if (part is ArmourParts.Shield && (twoHandedWeapon|| bowEquiped))
+
+        if (part is ArmourParts.Shield && (twoHandedWeapon || bowEquiped))
           return (EquipingResult.TwoHandedConflict, part);
-        
+
         item.Equipped = !item.Equipped;
 
         return (EquipingResult.Equipped, ArmourParts.Shirt);
@@ -968,9 +1002,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           int ringCount = Items().Where(i => i.Type == ItemType.Ring && i.Equipped).Count();
           if (ringCount == 2)
             return (EquipingResult.TooManyRings, ArmourParts.None);
-          
+
           item.Equipped = true;
-          
+
           return (EquipingResult.Equipped, ArmourParts.None);
         }
       }
@@ -985,9 +1019,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           int talismanCount = Items().Where(i => i.Type == ItemType.Talisman && i.Equipped).Count();
           if (talismanCount == 2)
             return (EquipingResult.TooManyTalismans, ArmourParts.None);
-          
+
           item.Equipped = true;
-          
+
           return (EquipingResult.Equipped, ArmourParts.None);
         }
       }
@@ -1006,7 +1040,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
   public string ApplyEffectToInv(DamageType damageType, GameState gs, Loc loc)
   {
-    Actor? owner = (Actor?) gs.ObjDb.GetObj(OwnerID);
+    Actor? owner = (Actor?)gs.ObjDb.GetObj(OwnerID);
     List<string> msgs = [];
 
     foreach (var item in Items())
@@ -1016,7 +1050,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         msgs.Add(s);
       if (destroyed)
       {
-        RemoveByID(item.ID);
+        RemoveByID(item.ID, gs);
         gs.ItemDestroyed(item, loc);
       }
     }
@@ -1034,8 +1068,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       if (actor is Player player && player.Background == PlayerBackground.Scholar && roll < 0.2)
         return;
     }
-    
-    RemoveByID(item.ID);
+
+    RemoveByID(item.ID, gs);
     gs.ObjDb.RemoveItemFromGame(actor.Loc, item);
   }
 
@@ -1045,7 +1079,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     List<string> lines = [slots.Length == 0 ? "You are empty handed." : options.Title];
     foreach (var s in slots)
-    {      
+    {
       var (item, count) = ItemAt(s);
 
       if (item is null)
@@ -1059,13 +1093,13 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           if (t is WandTrait wt && !wt.IDed)
             known = false;
         }
-        
+
         if (known)
           continue;
       }
-      
+
       string desc = "";
-      try 
+      try
       {
         if (item.HasTrait<PluralTrait>())
           desc = $"some {item.FullName}";
@@ -1101,7 +1135,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         else if (item.Type == ItemType.Bow)
           desc += " (equipped)";
         else if (item.Type == ItemType.Ring)
-          desc += " (wearing)";        
+          desc += " (wearing)";
         else if (item.Type == ItemType.Wand)
           desc += " (focus)";
         else
@@ -1136,7 +1170,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     if (txt == "")
       return;
-      
+
     foreach (var i in txt.Split(','))
     {
       char slot = i[0];
@@ -1161,7 +1195,7 @@ class InventoryOptions
   public InvOption Options { get; set; } = InvOption.None;
 
   public InventoryOptions() { }
-  public InventoryOptions(string title) => Title = title;  
+  public InventoryOptions(string title) => Title = title;
 }
 
 enum EquipingResult
@@ -1176,11 +1210,11 @@ enum EquipingResult
   NoFreeHand
 }
 
-class EmptyInventory : Inventory 
+class EmptyInventory : Inventory
 {
-    public EmptyInventory() : base(0, null!) { }
+  public EmptyInventory() : base(0, null!) { }
 
-    public override List<Item> Items() => [];
-    public override string ToText() => "";
-    public override void RestoreFromText(string txt) { }
+  public override List<Item> Items() => [];
+  public override string ToText() => "";
+  public override void RestoreFromText(string txt) { }
 }

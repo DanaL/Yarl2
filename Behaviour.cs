@@ -187,7 +187,7 @@ class PeddlerBehaviour : NPCBehaviour
 
     foreach ((char slot, int count) in selections)
     {
-      List<Item> items = gs.Player.Inventory.Remove(slot, count);
+      List<Item> items = gs.Player.Inventory.Remove(slot, count, gs);
       foreach (Item item in items)
       {
         gs.ObjDb.RemoveItemFromGame(gs.Player.Loc, item);
@@ -257,7 +257,7 @@ class GnomeMerchantBehaviour : NPCBehaviour
 
     foreach (ulong id in purchases)
     {
-      Item item = npc.Inventory.RemoveByID(id)!;
+      Item item = npc.Inventory.RemoveByID(id, gs)!;
       gs.Player.AddToInventory(item, gs);
     }
 
@@ -464,7 +464,7 @@ class SmithBehaviour : NPCBehaviour
     {
       if (gs.Rng.NextDouble() < 0.2)
       {
-        npc.Inventory.RemoveByID(item.ID);
+        npc.Inventory.RemoveByID(item.ID, gs);
         gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
       }
     }
@@ -552,7 +552,7 @@ class AlchemistBehaviour : NPCBehaviour
     {
       if (gs.Rng.NextDouble() < 0.2)
       {
-        npc.Inventory.RemoveByID(item.ID);
+        npc.Inventory.RemoveByID(item.ID, gs);
         gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
       }
     }
@@ -631,7 +631,7 @@ class GrocerBehaviour : NPCBehaviour
     {
       if (gs.Rng.NextDouble() < 0.2)
       {
-        npc.Inventory.RemoveByID(item.ID);
+        npc.Inventory.RemoveByID(item.ID, gs);
         gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, item);
       }
     }

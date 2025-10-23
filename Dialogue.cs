@@ -1391,7 +1391,7 @@ class DialogueInterpreter
     if (itemId == ulong.MaxValue)
       throw new Exception($"Unknown item in dialogue: {offer.Identifier.Name}.");
     
-    Item? item = gs.Player.Inventory.RemoveByID(itemId);
+    Item? item = gs.Player.Inventory.RemoveByID(itemId, gs);
 
     // I think for now the item is just gone? If I actually implement NPC/monster 
     // inventories we could put it there.
@@ -1706,7 +1706,7 @@ class DialogueInterpreter
     if (skulls.Count > 0)
     {
       Item skull = skulls[0];
-      gs.Player.Inventory.RemoveByID(skull.ID);
+      gs.Player.Inventory.RemoveByID(skull.ID, gs);
       gs.ObjDb.RemoveItemFromGame(Loc.Nowhere, skull);
       gs.Player.Stats[Attribute.Piety].ChangeMax(1);
     }

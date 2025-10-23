@@ -792,7 +792,7 @@ class UpgradeItemAction : Action
 
       var (_, msg) = Alchemy.UpgradeItem(item, reagent);
 
-      GameState.Player.Inventory.RemoveByID(reagent.ID);
+      GameState.Player.Inventory.RemoveByID(reagent.ID, GameState);
 
       GameState.UIRef().SetPopup(new Popup(msg, "", -1, -1));
       foreach (string s in msg.Split('\n'))
@@ -848,7 +848,7 @@ class RepairItemAction : Action
         // Ie., you have a stack of rusted daggers but only reapir one.
         if (item.HasTrait<StackableTrait>())
         {
-          GameState.Player.Inventory.RemoveByID(item.ID);
+          GameState.Player.Inventory.RemoveByID(item.ID, GameState);
           GameState.Player.Inventory.Add(item, GameState.Player.ID);
         }        
       }
@@ -1001,7 +1001,7 @@ class WitchServiceAction(GameState gs, Mob witch) : Action(gs, witch)
 
       if (crystal is not null)
       {
-        GameState.Player.Inventory.RemoveByID(crystal.ID);
+        GameState.Player.Inventory.RemoveByID(crystal.ID, GameState);
         GameState.ObjDb.RemoveItemFromGame(Loc.Nowhere, crystal);
       }
       
@@ -1063,7 +1063,7 @@ class ShoppingCompletedAction : Action
     bool overflow = false;
     foreach (var (slot, count) in _selections)
     {
-      List<Item> bought = _shopkeeper.Inventory.Remove(slot, count);      
+      List<Item> bought = _shopkeeper.Inventory.Remove(slot, count, GameState);      
       foreach (Item item in bought)
       {
         char inventorySlot = GameState.Player.AddToInventory(item, GameState);
@@ -2283,18 +2283,14 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
           return 1.0;
 
         Item item = clothes[GameState.Rng.Next(clothes.Count)];
-        victim.Inventory.RemoveByID(item.ID);
-        item.Equipped = false;
-        GameState.ItemDropped(item, victim.Loc);
         s = $"{item.FullName.Possessive(victim).Capitalize()} falls off!";
-
-        foreach (GrantsTrait trait in item.Traits.OfType<GrantsTrait>())
-        {
-          trait.Remove(victim, GameState, item);
-        }
-
         if (GameState.LastPlayerFoV.Contains(victim.Loc))
           ui.AlertPlayer(s);
+
+        victim.Inventory.RemoveByID(item.ID, GameState);
+        
+        GameState.ItemDropped(item, victim.Loc);
+        
         if (victim is Player)
           GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
       }
@@ -2738,7 +2734,7 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
     if (_amount == 0 || _amount > itemCount)
       _amount = itemCount;
 
-    var droppedItems = Actor.Inventory.Remove(_slot, _amount);
+    var droppedItems = Actor.Inventory.Remove(_slot, _amount, GameState!);
     foreach (var droppedItem in droppedItems)
     {
       GameState.ItemDropped(droppedItem, Actor.Loc);
@@ -2762,7 +2758,7 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 
   public override double Execute()
   {
-    var ammo = Actor!.Inventory.Remove(_slot, 1).First();
+    var ammo = Actor!.Inventory.Remove(_slot, 1, GameState!).First();
     if (ammo != null)
     {
       // Calculate where the projectile will actually stop
@@ -2944,7 +2940,7 @@ class DropItemAction(GameState gs, Actor actor) : Action(gs, actor)
       s += MsgFactory.CalcName(item, GameState.Player) + ".";
       ui.AlertPlayer(s);
 
-      Actor.Inventory.Remove(Choice, 1);
+      Actor.Inventory.Remove(Choice, 1, GameState);
       GameState.ItemDropped(item, Actor.Loc);
       item.Equipped = false;
 

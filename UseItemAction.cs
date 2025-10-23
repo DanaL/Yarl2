@@ -436,7 +436,7 @@ class CleansingAction(GameState gs, Actor actor, Item source) : Action(gs, actor
 
     if (Source.HasTrait<ConsumableTrait>())
     {
-      Actor!.Inventory.RemoveByID(Source.ID);
+      Actor!.Inventory.RemoveByID(Source.ID, gs);
       GameState!.ObjDb.RemoveItemFromGame(loc, Source);
     }
 
@@ -561,7 +561,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       door.Open = true;
 
       // Just remove the key from the game since it's now useless
-      Actor.Inventory.RemoveByID(key.ID);
+      Actor.Inventory.RemoveByID(key.ID, gs);
       GameState.ObjDb.RemoveItemFromGame(Actor.Loc, key);
 
       return 1.0;
@@ -643,7 +643,7 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       // other torches
       if (torch)
       {
-        Actor.Inventory.RemoveByID(item.ID);        
+        Actor.Inventory.RemoveByID(item.ID, gs);        
         item.Traits = [.. item.Traits.Where(t => t is not StackableTrait)];
         Cmd.AddItemToInventory(Actor, item, GameState);
       }
