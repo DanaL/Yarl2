@@ -134,7 +134,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     AddGoodItemToLevel(levels[3], DungeonId, 3, rng, objDb);
 
     int fallenAdventurer = rng.Next(1, numOfLevels);
-    AddFallenAdventurer(objDb, levels[fallenAdventurer], fallenAdventurer, rng);
+    AddWidowerBeau(objDb, levels[fallenAdventurer], fallenAdventurer, factDb, rng);
 
     if (factDb.FactCheck("EarlyDenizen") is SimpleFact earlyOcc)
     {
@@ -721,7 +721,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
   }
 
-  void AddFallenAdventurer(GameObjectDB objDb, Map level, int levelNum, Rng rng)
+  void AddWidowerBeau(GameObjectDB objDb, Map level, int levelNum, FactDb factDb, Rng rng)
   {
     (int, int) sq = level.RandomTile(TileType.DungeonFloor, rng);
     Loc loc = new(DungeonId, levelNum, sq.Item1, sq.Item2);
@@ -764,13 +764,9 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // name and such in the objDb. Maybe sometimes they'll be an actual
     // ghost?
     NameGenerator ng = new(rng, Util.NamesFile);
-    Mob adventurer = new()
-    {
-      Name = ng.GenerateName(rng.Next(5, 12))
-    };
-    adventurer.Traits.Add(new FallenAdventurerTrait());
-    adventurer.Traits.Add(new OwnsItemTrait() { ItemID = trinket.ID });
-    objDb.Add(adventurer);
+    string adventurerName = ng.GenerateName(rng.Next(5, 12)).Capitalize();
+    factDb.Add(new SimpleFact() { Name = "WidowerBeau", Value = adventurerName });
+    factDb.Add(new SimpleFact() { Name = "TrinketId", Value = trinket.ID.ToString() });
   }
 
   static void GnomeMerchant(Map[] levels, int dungeonId, Rng rng, GameObjectDB objDb)

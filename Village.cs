@@ -578,25 +578,8 @@ class Village
 
     GenerateWitches(map, town, objDb, factDb, rng);
 
-    ulong fallenAdventurerID = ulong.MaxValue;
-    foreach (GameObj obj in objDb.Objs.Values)
-    {
-      if (obj.HasTrait<FallenAdventurerTrait>())
-      {
-        fallenAdventurerID = obj.ID;
-        break;
-      }
-    }
+    Mob widower = GenerateWidower(map, town, ng, rng);
+    objDb.AddNewActor(widower, widower.Loc);
 
-    if (fallenAdventurerID != ulong.MaxValue)
-    {
-      // Add a villager who knew the fallen adventurer. (Eventually this will
-      // be a random chance of happening since we'll have several fallen 
-      // adventurers over many levels and not ALL of them will have had 
-      // relationships with villagers)
-      Mob widower = GenerateWidower(map, town, ng, rng);
-      objDb.AddNewActor(widower, widower.Loc);
-      widower.Traits.Add(new RelationshipTrait() { Person1ID = widower.ID, Person2ID = fallenAdventurerID, Label = "romantic" });
-    }    
   }
 }

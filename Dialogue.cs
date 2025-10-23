@@ -790,30 +790,16 @@ class DialogueInterpreter
     return Sb.ToString();
   }
 
-  static ulong TrinketID(Actor partner, GameState gs)
+  static ulong TrinketID(GameState gs)
   {
-    foreach (Trait trait in partner.Traits)
-    {
-      if (trait is OwnsItemTrait owns)
-        return owns.ItemID;
+    if (gs.FactDb.FactCheck("TrinketId") is SimpleFact fact && ulong.TryParse(fact.Value, out ulong trinketId))
+    {      
+      return trinketId;
     }
 
     return 0;
   }
 
-  static Actor? MobPartner(Actor mob, GameState gs)
-  {
-    foreach (Trait trait  in mob.Traits)
-    {
-      if (trait is RelationshipTrait relationship)
-      {
-        return (Actor?)gs.ObjDb.GetObj(relationship.Person2ID);
-      }
-    }
-    
-    return null;
-  }
-  
   static object CheckVal(string name, Actor mob, GameState gs)
   {
     Actor? partner;
@@ -833,30 +819,17 @@ class DialogueInterpreter
       case "PLAYER_WALLET":
         return gs.Player.Inventory.Zorkmids;
       case "PARTNER_NAME":
-        partner = MobPartner(mob, gs);
-        string partnerName;
-        if (partner is null)
-          partnerName = "";
-        else
-          partnerName = partner.Name.Capitalize();        
-        return partnerName;
+        if (gs.FactDb.FactCheck("WidowerBeau") is SimpleFact sf)
+          return sf.Value;
+        return "";
       case "HAS_TRINKET":
-        trinketId = ulong.MaxValue;
-        partner = MobPartner(mob, gs);
-        if (partner is not null)
-         trinketId = TrinketID(partner, gs);
+        trinketId = TrinketID(gs);        
         return gs.Player.Inventory.Contains(trinketId);
       case "TRINKET":
-        trinketId = ulong.MaxValue;
-        partner = MobPartner(mob, gs);
-        if (partner is not null)
-          trinketId = TrinketID(partner, gs);
+        trinketId = TrinketID(gs);
         return trinketId;
       case "TRINKET_NAME":
-        trinketId = ulong.MaxValue;
-        partner = MobPartner(mob, gs);
-        if (partner is not null)
-          trinketId = TrinketID(partner, gs);
+        trinketId = TrinketID(gs);        
         if (gs.ObjDb.GetObj(trinketId) is Item item)        
           return item.Name;        
         return "";

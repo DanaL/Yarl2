@@ -1073,11 +1073,6 @@ class DividerTrait : Trait
   public override string AsText() => "Divider";
 }
 
-class FallenAdventurerTrait : Trait
-{
-  public override string AsText() => "FallenAdventurer";
-}
-
 class FeatherFallTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "You no longer feel feathery.";
@@ -1179,13 +1174,6 @@ class MoldSporesTrait : Trait
 class MolochAltarTrait : Trait
 {
   public override string AsText() => "MolochAltar";
-}
-
-class OwnsItemTrait : Trait
-{
-  public ulong ItemID { get; set; }
-
-  public override string AsText() => $"OwnsItem#{ItemID}";
 }
 
 class PlantTrait : Trait
@@ -2644,15 +2632,6 @@ class OnPickupTrait : Trait
   public override string AsText() => $"OnPickup#{Clear}#{Event}";
 }
 
-class RelationshipTrait : Trait
-{
-  public ulong Person1ID { get; set; }
-  public ulong Person2ID { get; set; }
-  public string Label { get; set; } = "";
-
-  public override string AsText() => $"Relationship#{Person1ID}#{Person2ID}#{Label}";
-}
-
 class RepugnantTrait : Trait
 {
   public override string AsText() => $"Repugnant#{SourceId}";
@@ -3878,7 +3857,6 @@ class TraitFactory
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
-    { "FallenAdventurer", (pieces, gameObj) => new FallenAdventurerTrait() },
     { "FeatherFall", (pieces, gameObj) => {
       ulong id = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]);
       ulong expiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);
@@ -4006,7 +3984,6 @@ class TraitFactory
     },
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
-    { "OwnsItem", (pieces, gameObj) => new OwnsItemTrait() { ItemID = ulong.Parse(pieces[1]) } },
     { "PaladinBlessing", (pieces, gameObj) => new PaladinBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
@@ -4043,7 +4020,6 @@ class TraitFactory
           SourceId = sourceId
         };
     } },
-    { "Relationship", (pieces, gameObj) => new RelationshipTrait() { Person1ID = ulong.Parse(pieces[1]), Person2ID = ulong.Parse(pieces[2]), Label = pieces[3] } },
     { "Repugnant", (pieces, gameObj) =>
       {
         ulong sourceId = pieces.Length > 1 ? ulong.Parse(pieces[1]) : 0;
