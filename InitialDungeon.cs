@@ -750,10 +750,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     // add trinket
     Item trinket = new()
     {
-      Name = "tin locket",
-      Type = ItemType.Trinket,
-      Value = 1,
-      Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
+      Name = "tin locket", Type = ItemType.Trinket,
+      Value = 1, Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
     objDb.Add(trinket);
     objDb.SetToLoc(loc, trinket);

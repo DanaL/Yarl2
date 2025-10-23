@@ -2,7 +2,7 @@
 	((= HAS_TRINKET true)
 		(
 			(say "That #TRINKET_NAME belonged to my love! Oh, where did you find it? Will you return it to me?")
-			(option "Give the #TRINKET_NAME to #NPC_NAME." ((set DIALOGUE_STATE 4) (offer TRINKET)))
+			(option "Give the #TRINKET_NAME to #NPC_NAME." ((set DIALOGUE_STATE 4) (offer TRINKET) (bump PIETY 1)))
 			(option "Keep the #TRINKET_NAME." ((set DIALOGUE_STATE 3) (end "#NPC_NAME turns away from you.")))
 		)
 	)

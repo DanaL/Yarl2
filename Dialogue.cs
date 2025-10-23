@@ -17,7 +17,7 @@ enum TokenType
 {
   LEFT_PAREN, RIGHT_PAREN, 
   IDENTIFIER, STRING, NUMBER,
-  COND, GIVE, OFFER, SAY, PICK, SET,
+  COND, GIVE, OFFER, SAY, PICK, SET, BUMP,
   AND, OR,
   EQ, NEQ, LT, LTE, GT, GTE, ELSE,
   TRUE, FALSE,
@@ -127,6 +127,7 @@ class ScriptScanner(string src)
       "spend" => TokenType.SPEND,
       "end" => TokenType.END,
       "offer" => TokenType.OFFER,
+      "bump" => TokenType.BUMP,
       "blessings-options" => TokenType.BLESSINGS,
       "grant-champion-blessing" => TokenType.GRANT_CHAMP_BLESSING,
       "grant-reaver-blessing" => TokenType.GRANT_REAVER_BLESSING,
@@ -245,6 +246,7 @@ class ScriptParser(List<ScriptToken> tokens)
       TokenType.SPEND => SpendExpr(),
       TokenType.END => EndExpr(),
       TokenType.OFFER => OfferExpr(),
+      TokenType.BUMP => BumpExpr(),
       TokenType.DRAGON_CULT_QUEST => StartDragonCultQuest(),
       _ => ListExpr(),
     };
@@ -508,6 +510,21 @@ class ScriptParser(List<ScriptToken> tokens)
 
     return new ScriptEnd(text);
   }
+  
+  ScriptBump BumpExpr()
+  {
+    Consume(TokenType.BUMP);
+    if (!Check(TokenType.IDENTIFIER))
+      throw new Exception("Expected identifier in Bump expression.");
+    string name = Peek().Lexeme;
+    Advance();
+
+    ScriptExpr val = Expr();
+
+    Consume(TokenType.RIGHT_PAREN);
+
+    return new ScriptBump(name, val);
+  }
 
   ScriptOffer OfferExpr()
   {
@@ -731,6 +748,12 @@ class ScriptBuyHolyWater : ScriptExpr {}
 class ScriptStartDragonCultQuest : ScriptExpr {}
 class ScriptTurnInSkull : ScriptExpr {}
 
+class ScriptBump(string stat, ScriptExpr val) : ScriptExpr
+{
+  public string Stat { get; set; } = stat;
+  public ScriptExpr Value { get; set; } = val;
+}
+
 class ScriptOffer(ScriptLiteral identifier) : ScriptExpr
 {
   public ScriptLiteral Identifier { get; set; } = identifier;
@@ -750,9 +773,9 @@ class DialogueInterpreter
   {
     string path = ResourcePath.GetDialogueFilePath(filename);
     var txt = File.ReadAllText(path);
-    var scanner = new ScriptScanner(txt);
-    var tokens = scanner.ScanTokens();
-    var parser = new ScriptParser(tokens);
+    ScriptScanner scanner = new(txt);
+    List<ScriptToken> tokens = scanner.ScanTokens();
+    ScriptParser parser = new(tokens);
 
     ScriptExpr expr = parser.Parse();
     Eval(expr, mob, gs);
@@ -1004,6 +1027,10 @@ class DialogueInterpreter
     {
       EvalSet(set, mob, gs);
     }
+    else if (Expr is ScriptBump bump)
+    {
+      EvalBump(bump, mob, gs);
+    }
     else if (Expr is ScriptList list)
     {
       foreach (var item in list.Items)
@@ -1147,6 +1174,38 @@ class DialogueInterpreter
       return new ScriptBool(CompareStr(expr.Op, strVal, expr.Value));
     
     throw new Exception("Variables must be int, bool, or string");
+  }
+
+  void EvalBump(ScriptBump set, Actor mob, GameState gs)
+  {
+    int val;
+    if (set.Value is ScriptNumber number)
+      val = number.Value;
+    else
+      throw new Exception("Expected number value in bump statement");
+
+    string s = set.Stat.ToLower().Capitalize();
+    if (Enum.TryParse(s, out Attribute attr))
+    {
+      if (gs.Player.Stats.TryGetValue(attr, out var stat))
+        stat.SetMax(stat.Curr + 1);
+      else
+        gs.Player.Stats[attr] = new Stat(val);
+      
+      string msg = attr switch
+      {
+        Attribute.Strength => "You feel stronger!",
+        Attribute.Dexterity => "You feel more agile!",
+        Attribute.Constitution => "You feel hardier!",
+        Attribute.Piety => "You feel appropriately pious!",
+        _ => "You feel a little different!"
+      };
+      gs.UIRef().AlertPlayer(msg);
+    }
+    else
+    {
+      throw new Exception($"Unknown Attribute in bump statement: {set.Stat}");
+    }
   }
 
   // At the moment, I only have on/off variables 
