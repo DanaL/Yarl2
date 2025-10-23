@@ -382,7 +382,7 @@ class Village
     return villager;
   }
 
-  static Mob GenerateWidower(Map map, Town town, NameGenerator ng, Rng rng)
+  static Mob GenerateWidower(Map map, Town town, GameObjectDB objDb, FactDb factDb, NameGenerator ng, Rng rng)
   {
     Mob widower = BaseVillager(ng, rng);
     widower.Traits.Add(new DialogueScriptTrait() { ScriptFile = "widower.txt" });
@@ -393,6 +393,36 @@ class Village
     
     widower.Stats.Add(Attribute.HomeID, new Stat(homeID));
     widower.SetBehaviour(new WidowerBehaviour());
+
+    if (factDb.FactCheck("TrinketId") is SimpleFact sf)
+    {
+      ulong trinketId = ulong.Parse(sf.Value);
+      if (objDb.GetObj(trinketId) is Item trinket)
+      {
+        string[] possibleSpecies = ["human", "elf", "half-elf", "gnome", "dwarf", "orc", "half-orc"];
+        string beau = possibleSpecies[rng.Next(possibleSpecies.Length)];
+
+        // I don't actually store the species picked for the villagers so dumb kludge time
+        string species = widower.Appearance.Replace("short ", "").Replace("tall ", "").Split(' ')[0];
+
+        string desc = "Inside the locket is a tiny painting portraying ";
+        if (beau == species)
+          desc += $"two {beau.Pluralize()}";
+        else 
+          desc += $"{species.IndefArticle()} and {beau}";
+
+        int roll = rng.Next(4);
+        desc += roll switch
+        {
+          0 => " arm-in-arm.",
+          1 => " embracing.",
+          2 => " gazing into each others' eyes.",
+          _ => " holding hands."
+        };
+
+        trinket.Traits.Add(new DescriptionTrait(desc));
+      }
+    }
 
     return widower;
   }
@@ -578,8 +608,7 @@ class Village
 
     GenerateWitches(map, town, objDb, factDb, rng);
 
-    Mob widower = GenerateWidower(map, town, ng, rng);
+    Mob widower = GenerateWidower(map, town, objDb, factDb, ng, rng);
     objDb.AddNewActor(widower, widower.Loc);
-
   }
 }

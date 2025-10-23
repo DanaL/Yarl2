@@ -875,14 +875,14 @@ static class StringUtils
 
       return s;
     }
+    else if (s == "elf")
+      return "elves";
+    else if (s == "half-elf")
+      return "half-elves";
     else if (s.EndsWith('s') || s.EndsWith('x') || s.EndsWith("ch"))
-    {
       return s + "es";
-    }
-    else
-    {
-      return s + "s";
-    }
+    else    
+      return s + "s";    
   }
 
   public static string Capitalize(this string s)
