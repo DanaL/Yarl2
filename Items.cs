@@ -55,17 +55,7 @@ class Item : GameObj, IEquatable<Item>
   public void SetZ(int z) => _z = z;
   public override int Z() => _z;
 
-  public bool Equipable() => Type switch
-  {
-    ItemType.Armour => true,
-    ItemType.Weapon => true,
-    ItemType.Tool => true,
-    ItemType.Bow => true,
-    ItemType.Ring => true,
-    ItemType.Talisman => true,
-    ItemType.Wand => true,
-    _ => false
-  };
+  public bool Equipable() => HasTrait<EquipableTrait>();
 
   public bool IsUseableTool()
   {
@@ -315,6 +305,19 @@ class ItemFactory
         {
           objDB.EndOfRoundListeners.Add(listener);
         }
+      }
+
+      switch (item.Type)
+      {
+        case ItemType.Armour:
+        case ItemType.Weapon:
+        case ItemType.Tool:
+        case ItemType.Bow:
+        case ItemType.Ring:
+        case ItemType.Talisman:
+        case ItemType.Wand:
+          item.Traits.Add(new EquipableTrait());
+          break;
       }
 
       return item;
@@ -988,6 +991,14 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
           return (EquipingResult.Equipped, ArmourParts.None);
         }
       }
+      // I think by this point it would be error for an item to not have the 
+      // equipable trait, but check for it here because and item that does not
+      // with get flagged with a conflict
+      else if (item.HasTrait<EquipableTrait>())
+      {
+        item.Equipped = !item.Equipped;
+        return (EquipingResult.Equipped, ArmourParts.None);
+      }
     }
 
     return (EquipingResult.Conflict, ArmourParts.None);
@@ -1090,11 +1101,11 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         else if (item.Type == ItemType.Bow)
           desc += " (equipped)";
         else if (item.Type == ItemType.Ring)
-          desc += " (wearing)";
-        else if (item.Type == ItemType.Talisman)
-          desc += " (equipped)";
+          desc += " (wearing)";        
         else if (item.Type == ItemType.Wand)
           desc += " (focus)";
+        else
+          desc += " (equipped)";
       }
       lines.Add($"{s}) {desc}");
     }

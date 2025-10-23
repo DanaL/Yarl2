@@ -802,7 +802,6 @@ class DialogueInterpreter
 
   static object CheckVal(string name, Actor mob, GameState gs)
   {
-    Actor? partner;
     ulong trinketId;
 
     switch (name)

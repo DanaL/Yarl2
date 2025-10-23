@@ -753,6 +753,16 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       Name = "tin locket", Type = ItemType.Trinket,
       Value = 1, Glyph = new Glyph('"', Colours.GREY, Colours.LIGHT_GREY, Colours.BLACK, false)
     };
+    trinket.Traits.Add(new EquipableTrait());
+
+    GrantsTrait buff = rng.Next(3) switch
+    {
+      0 => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Strength&1&item"] },
+      1 => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Dexterity&1&item"] },
+      _ => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Constitution&1&item"] },
+    };
+    trinket.Traits.Add(buff);
+
     objDb.Add(trinket);
     objDb.SetToLoc(loc, trinket);
 

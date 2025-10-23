@@ -807,6 +807,11 @@ class EdibleTrait : Trait
   public override string AsText() => "Edible";
 }
 
+class EquipableTrait : Trait
+{
+  public override string AsText() => "Equipable";
+}
+
 class EmberBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
@@ -3856,6 +3861,7 @@ class TraitFactory
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
+    { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "FeatherFall", (pieces, gameObj) => {
       ulong id = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]);
