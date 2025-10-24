@@ -517,3 +517,6 @@ An old scroll perhaps taken from some dusty library. It has seen better days.
 #
 rust monster
 A famous bane of adventurers, these monsters feast on metal and prepare their meals by corroding them first. They look like gigantic beetles with long, feathery antennae.
+#
+key
+A large, ornate key. But what does it unlock?
