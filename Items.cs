@@ -1172,24 +1172,24 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
         {
           if (item.HasTrait<TwoHandedTrait>())
-            desc += " (in hands)";
+            desc += " [GREY (in hands)]";
           else if (!item.HasTrait<VersatileTrait>())
-            desc += " (in hand)";
+            desc += " [GREY (in hand)]";
           else if (ShieldEquipped())
-            desc += " (in hand)";
+            desc += " [GREY (in hand)]";
           else
-            desc += " (in hands)";
+            desc += " [GREY (in hands)]";
         }
         else if (item.Type == ItemType.Armour)
-          desc += " (worn)";
+          desc += " [GREY (worn)]";
         else if (item.Type == ItemType.Bow)
-          desc += " (equipped)";
+          desc += " [GREY (equipped)]";
         else if (item.Type == ItemType.Ring)
-          desc += " (wearing)";
+          desc += " [GREY (wearing)]";
         else if (item.Type == ItemType.Wand)
-          desc += " (focus)";
+          desc += " [LIGHTBLUE (focus)]";
         else
-          desc += " (equipped)";
+          desc += " [GREY (equipped)]";
       }
 
       desc = desc.Replace(" poison", " [GREEN poison]");
