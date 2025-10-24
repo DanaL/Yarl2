@@ -293,6 +293,9 @@ A dog-sized beetle whose carapace glows with fiery heat.
 potion of heroism
 Hero-brand™  fantasy energy drink. Gives adventurers a temporary boost in both vitality and chutzpah.
 #
+potion of mind reading
+Allows you to sense the minds of nearby creatures.
+#
 generic wand
 Cheap, mass-produced wand that's at least good enough to use as a spellcasting focus.
 #
