@@ -432,11 +432,6 @@ class HeroismTrait : TemporaryTrait
     OwnerID = target.ID;
     target.Traits.Add(this);
 
-    // Note for if you ever implement monsters using items: this will fail
-    // to grant monsters bonus HP
-    if (target is Player p)
-      p.CalcHP();
-
     gs.RegisterForEvent(GameEventType.EndOfRound, this);   
 
     return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} heroic!" ];
@@ -1646,6 +1641,17 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     };
   }
 
+  static UseResult BuildHeroism(Actor user, GameState gs, Item item)
+  {
+    ulong expires = gs.Turn + (ulong)gs.Rng.Next(75, 101);
+
+    return new UseResult(
+      new ApplyTraitAction(gs, user,
+        [ new HeroismTrait() { OwnerID = user.ID, ExpiresOn = expires, SourceId = item.ID},
+          new StatBuffTrait() { Attr = Attribute.HP, Amt = 25, OwnerID = user.ID, ExpiresOn = expires, SourceId = item.ID, MaxHP = true } ]
+    ));
+  }
+
   public UseResult Use(Actor user, GameState gs, int row, int col, Item? item) => Spell switch
   {
     "antidote" => new UseResult(new AntidoteAction(gs, user)),
@@ -1682,10 +1688,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
                           OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID })),
-    "heroism" => new UseResult( 
-                   new ApplyTraitAction(gs, user, 
-                     new HeroismTrait() { 
-                       OwnerID = user.ID, ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(50, 75), SourceId = item!.ID})),
+    "heroism" => BuildHeroism(user, gs, item!),
     "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
@@ -2682,7 +2685,9 @@ class StatBuffTrait : TemporaryTrait
 {
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
-
+  public bool MaxHP { get; set; } = false; // kludge: sometimes I want to also raise current HP
+                                           // and sometimes I don't (ie., potion of heroism vs
+                                           // lesser health charm)
   public override string AsText() => $"StatBuff#{OwnerID}#{ExpiresOn}#{Attr}#{Amt}#{SourceId}";
 
   string CalcMessage(Actor target)
@@ -2736,7 +2741,7 @@ class StatBuffTrait : TemporaryTrait
     
     OwnerID = target.ID;
     target.Stats[Attr].ChangeMax(Amt);
-    if (Attr != Attribute.HP)
+    if (Attr != Attribute.HP || MaxHP)
     {
       target.Stats[Attr].Change(Amt);
     }
