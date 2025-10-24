@@ -810,16 +810,39 @@ abstract class UserInterface
 
   protected void WriteDropDown()
   {
-    int width = MenuRows!.Select(r => r.Length).Max() + 2;
-    int col = ViewWidth - width;
+    int width = 0;
     int row = 0;
 
-    Colour colour = _popup is null ? Colours.WHITE : Colours.GREY;
+    List<List<(Colour, string)>> lines = [];
     foreach (var line in MenuRows!)
     {
-      WriteLine(" " + line, row++, col, width, colour);
+      LineScanner ls = new(line);
+      List<(Colour, string)> words = [(Colours.BLACK, " ")];
+      words.AddRange(ls.Scan());
+
+      if (_popup is not null)
+        words = [.. words.Select(w => (w.Item1 with { Alpha = w.Item1.Alpha / 2 }, w.Item2))];
+
+      lines.Add(words);
+      
+      int chs = CountCh(words);
+      if (chs > width)
+        width = chs;
     }
-    WriteLine("", row, col, width, colour);
+    width += 1;
+
+    int col = ViewWidth - width;
+    
+    foreach (var line in lines!)
+    {
+      int chs = CountCh(line);
+      line.Add((Colours.BLACK, "".PadLeft(width - chs)));
+
+      WriteText(line, row++, col);
+    }
+    WriteLine("", row, col, width, Colours.BLACK);
+
+    static int CountCh(List<(Colour, string)> words) => words.Select(w => w.Item2.Length).Sum();
   }
 
   public void AlertPlayer(string alert)

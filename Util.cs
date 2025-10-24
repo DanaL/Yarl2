@@ -36,8 +36,8 @@ class Colours
   public static readonly Colour YELLOW = new(255, 255, 53, 255);
   public static readonly Colour YELLOW_ORANGE = new(255, 159, 0, 255);
   public static readonly Colour LIGHT_BROWN = new(160, 82, 45, 255);
-  public static readonly Colour ROOF_TILE = LIGHT_BROWN with { Alpha = 200 };
   public static readonly Colour BROWN = new(150, 75, 0, 255);
+  public static readonly Colour ROOF_TILE = LIGHT_BROWN with { Alpha = 200 };
   public static readonly Colour GREEN = new(144, 238, 144, 255);
   public static readonly Colour DARK_GREEN = new(0, 71, 49, 255);
   public static readonly Colour LIME_GREEN = new(191, 255, 0, 255);
@@ -69,7 +69,7 @@ class Colours
   public static readonly Colour HOLY_AURA = WHITE with { Alpha = 100 };
   public static readonly Colour UNDERWATER = new(0, 118, 190, 50);
   public static readonly Colour EXAMINE = ICE_BLUE with { Alpha = 175 };
-  public static readonly Colour CREAM = new(255, 253, 208, 0);
+  public static readonly Colour CREAM = new(255, 253, 208, 255);
   public static readonly Colour SHAMROCK = new(3, 172, 19, 255);
 
   public static string ColourToText(Colour colour)

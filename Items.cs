@@ -1191,7 +1191,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         else
           desc += " (equipped)";
       }
-      lines.Add($"{s}) {desc}");
+      lines.Add($"{s}) [{PickColour(item)} {desc}]");
     }
 
     if ((options.Options & InvOption.MentionMoney) == InvOption.MentionMoney)
@@ -1202,7 +1202,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       else if (Zorkmids == 1)
         lines.Add("You have a single zorkmid.");
       else
-        lines.Add($"Your wallet contains {Zorkmids} zorkmids.");
+        lines.Add($"Your wallet contains [YELLOW {Zorkmids}] zorkmids.");
     }
 
     if (!string.IsNullOrEmpty(options.Instructions))
@@ -1212,6 +1212,18 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     ui.ShowDropDown(lines);
+
+    static string PickColour(Item item) => item.Type switch
+    {
+      ItemType.Weapon => "LIGHTGREY",
+      ItemType.Armour => "SOFTRED",
+      ItemType.Scroll => "CREAM",
+      ItemType.Potion => "LIGHTBLUE",
+      ItemType.Wand => "GREEN",
+      ItemType.Talisman => "LIGHTPURPLE",
+      ItemType.Tool => "BROWN",
+      _ => "WHITE"
+    };
   }
 
   public virtual string ToText() => string.Join(',', _items.Select(i => $"{i.Item1}#{i.Item2}"));
