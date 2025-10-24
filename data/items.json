@@ -597,7 +597,7 @@
   {
     "Name": "VIAL_OF_POISON",
     "DescriptiveName": "vial of poison",
-    "Type": "Potion",
+    "Type": "Tool",
     "Value": 40,
     "Glyph": "!,limegreen,darkgreen,black,false",
     "Traits": [
@@ -1249,7 +1249,7 @@
   {
     "Name": "HOLY_WATER",
     "DescriptiveName": "vial of holy water",
-    "Type": "Potion",
+    "Type": "Tool",
     "Value": 25,
     "Glyph": "!,white,white,black,false",
     "Traits": [
