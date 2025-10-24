@@ -1195,6 +1195,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       desc = desc.Replace(" poison", " [GREEN poison]");
       desc = desc.Replace(" holy water", " [LIGHTBLUE holy water]");
       desc = desc.Replace(" (lit)", " ([YELLOWORANGE lit][BROWN )]");
+      
       lines.Add($"{s}) [{PickColour(item)} {desc}]");
     }
 

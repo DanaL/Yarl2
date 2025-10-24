@@ -394,7 +394,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
     Loc actualTarget = Target with { Row = fullR, Col = fullC };
     List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb, []);
     affected.Insert(0, Actor.Loc);
-    var explosion = new ExplosionAnimation(GameState!)
+    ExplosionAnimation explosion = new(GameState!)
     {
       MainColour = Colours.LIGHT_BROWN,
       AltColour1 = Colours.BROWN,

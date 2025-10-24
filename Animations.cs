@@ -207,8 +207,10 @@ class ExplosionAnimation(GameState gs) : Animation
 
     foreach (var pt in _toDraw.Keys)
     {
-      double roll = _gs.Rng.NextDouble();
+      if (!_gs.LastPlayerFoV.Contains(pt))
+        continue;
       
+      double roll = _gs.Rng.NextDouble();
       var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);      
       if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
         continue;
