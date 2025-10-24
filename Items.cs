@@ -41,7 +41,7 @@ enum ItemType
 }
 
 record ItemIDInfo(bool Known, string Desc);
-class Item : GameObj, IEquatable<Item>
+sealed class Item : GameObj, IEquatable<Item>
 {
   public static Dictionary<string, ItemIDInfo> IDInfo { get; set; } = [];
   public static readonly int DEFAULT_Z = 2;
@@ -643,11 +643,6 @@ enum ArmourParts
   Shield,
   Mask,
   Gloves
-}
-
-class Armour : Item
-{
-  public ArmourParts Piece { get; set; }
 }
 
 class Inventory(ulong ownerID, GameObjectDB objDb)

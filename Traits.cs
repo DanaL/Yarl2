@@ -69,14 +69,14 @@ abstract class BasicTrait : Trait
   public override string AsText() => $"{ExpiresOn}";
 }
 
-class AdjectiveTrait(string adj) : Trait
+sealed class AdjectiveTrait(string adj) : Trait
 {
   public string Adj { get; set; } = adj;
 
   public override string AsText() => $"Adjective#{Adj}";
 }
 
-class ACModTrait : BasicTrait
+sealed class ACModTrait : BasicTrait
 {
   public int ArmourMod { get; set; }
   public override string AsText() => $"ACMod#{ArmourMod}#{SourceId}";
@@ -92,7 +92,7 @@ class ArtifactTrait : Trait
   public override string AsText() => $"Artifact";
 }
 
-class AttackModTrait : Trait
+sealed class AttackModTrait : Trait
 {
   public int Amt { get; set; }
   public override string AsText() => $"AttackMod#{Amt}#{SourceId}";
@@ -556,7 +556,7 @@ class AlliesTrait : Trait
   public override string AsText() => $"Allies#{string.Join(',', IDs)}";
 }
 
-class AxeTrait : Trait
+sealed class AxeTrait : Trait
 {
   public override string AsText() => "Axe";
 }
@@ -564,7 +564,7 @@ class AxeTrait : Trait
 // Temproary (god, I hope!) trait to designate which Mobs use behaviour trees to
 // determine their behaviour instead of my OG hard-coded AI. Once I've converted
 // everyone to use BTs I can ditch this
-class BehaviourTreeTrait : Trait
+sealed class BehaviourTreeTrait : Trait
 {
   public string Plan { get; set; } = "";
 
@@ -581,7 +581,7 @@ class ConstructTrait : Trait
   public override string AsText() => "Construct";
 }
 
-class ConsumableTrait : Trait
+sealed class ConsumableTrait : Trait
 {
   public override string AsText() => "Consumable";
 }
@@ -598,7 +598,7 @@ class CorruptionTrait : Trait
   public override string AsText() => $"Corruption#{Amt}";
 }
 
-class DescriptionTrait(string text) : Trait
+sealed class DescriptionTrait(string text) : Trait
 {
   public string Text { get; set; } = text;
 
@@ -775,7 +775,7 @@ class MeleeDamageModTrait : Trait
   public override string AsText() => $"MeleeDamageMod#{Amt}#{SourceId}";
 }
 
-class MetalTrait : Trait
+sealed class MetalTrait : Trait
 {
   public Metals Type {  get; set; }
 
@@ -1029,7 +1029,7 @@ class StoneTabletTrait(string text) : BasicTrait, IUSeable, IOwner
   public void Used() {}
 }
 
-class StressTrait : Trait 
+sealed class StressTrait : Trait 
 {
   public StressLevel Stress { get; set; }
   public ulong OwnerID { get; set; }
@@ -3391,7 +3391,7 @@ class LightBeamTrait : Trait, IGameEventListener
 }
 
 // A light source that doesn't have fuel/burn out on its own.
-class LightSourceTrait : BasicTrait, IOwner
+sealed class LightSourceTrait : BasicTrait, IOwner
 {
   public ulong OwnerID { get; set; }
   public int Radius { get; set; }
@@ -3451,7 +3451,7 @@ class LightSpellTrait : TemporaryTrait
 }
 
 // Who knew torches would be so complicated...
-class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
+sealed class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDesc
 {
   public ulong OwnerID { get; set; }
   public ulong ObjId => OwnerID;
@@ -3606,7 +3606,7 @@ class TricksterBlessingTrait : BlessingTrait
   public override string Description(Actor owner) => "Trickster blessing";
 }
 
-class UndeadTrait : Trait
+sealed class UndeadTrait : Trait
 {
   public override string AsText() => $"Undead";
 }

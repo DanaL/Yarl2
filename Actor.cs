@@ -635,7 +635,7 @@ abstract class Actor : GameObj, IZLevel
   }
 }
 
-class Mob : Actor
+sealed class Mob : Actor
 {
   public List<Power> Powers { get; set; } = []; // this will supersede the Actions list
   public Dictionary<string, ulong> LastPowerUse = []; // I'll probably want to eventually serialize these
