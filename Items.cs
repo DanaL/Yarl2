@@ -1073,11 +1073,68 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     gs.ObjDb.RemoveItemFromGame(actor.Loc, item);
   }
 
+  List<char> SortedSlots()
+  {
+    List<char> weapons = [];
+    List<char> armour = [];
+    List<char> scrolls = [];
+    List<char> potions = [];
+    List<char> wands = [];
+    List<char> tools = [];
+    List<char> talisman = [];
+    List<char> other = [];
+
+    foreach (char s in UsedSlots().Order())
+    {
+      var (item, _) = ItemAt(s);
+      switch (item!.Type)
+      {
+        case ItemType.Weapon:
+        case ItemType.Bow:
+          weapons.Add(s);
+          break;
+        case ItemType.Armour:
+          armour.Add(s);
+          break;
+        case ItemType.Scroll:
+          scrolls.Add(s);
+          break;
+        case ItemType.Potion:
+          potions.Add(s);
+          break;
+        case ItemType.Wand:
+          wands.Add(s);
+          break;
+        case ItemType.Tool:
+          tools.Add(s);
+          break;
+        case ItemType.Talisman:
+          talisman.Add(s);
+          break;
+        default:
+          other.Add(s);
+          break;
+      }
+    }
+
+    List<char> slots = [];
+    slots.AddRange(weapons);
+    slots.AddRange(armour);
+    slots.AddRange(scrolls);
+    slots.AddRange(potions);
+    slots.AddRange(wands);
+    slots.AddRange(talisman);
+    slots.AddRange(tools);
+    slots.AddRange(other);
+
+    return slots;
+  }
+  
   public void ShowMenu(UserInterface ui, InventoryOptions options)
   {
-    char[] slots = [.. UsedSlots().Order()];
+    List<char> slots = SortedSlots();
 
-    List<string> lines = [slots.Length == 0 ? "You are empty handed." : options.Title];
+    List<string> lines = [slots.Count == 0 ? "You are empty handed." : options.Title];
     foreach (var s in slots)
     {
       var (item, count) = ItemAt(s);
@@ -1099,23 +1156,16 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       }
 
       string desc = "";
-      try
-      {
-        if (item.HasTrait<PluralTrait>())
-          desc = $"some {item.FullName}";
-        else if (item.HasTrait<ArtifactTrait>())
-          desc = item.FullName.DefArticle();
-        else if (count > 1)
-          desc = $"{count} {item.FullName.Pluralize()}";
-        else if (item.HasTrait<NamedTrait>())
-          desc = item.FullName;
-        else
-          desc = item.FullName.IndefArticle();
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine(ex.Message);
-      }
+      if (item.HasTrait<PluralTrait>())
+        desc = $"some {item.FullName}";
+      else if (item.HasTrait<ArtifactTrait>())
+        desc = item.FullName.DefArticle();
+      else if (count > 1)
+        desc = $"{count} {item.FullName.Pluralize()}";
+      else if (item.HasTrait<NamedTrait>())
+        desc = item.FullName;
+      else
+        desc = item.FullName.IndefArticle();
 
       if (item.Equipped)
       {
