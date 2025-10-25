@@ -18,12 +18,11 @@ namespace Yarl2;
 class RaylibUserInterface : UserInterface
 {
   Font _font;
-  int _fontWidth;
-  int _fontHeight;
+  readonly int _fontWidth;
+  readonly int _fontHeight;
   Dictionary<Colour, Color> _colours = [];
-  DateTime _lastKeyTime = DateTime.MinValue;
-  int _lastCh = '\0';
-  
+  Queue<GameEvent> EventQ { get; set; } = [];
+
   public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
   {
     int width = ScreenWidth * (opt.FontSize / 2) + 2;
@@ -57,115 +56,51 @@ class RaylibUserInterface : UserInterface
 
   protected override GameEvent PollForEvent(bool pause = true)
   {
-    const int THRESHOLD = 140;
-
     if (pause)
-      Thread.Sleep(2);
+      Delay(2);
 
     if (WindowShouldClose())
     {
-      _lastKeyTime = DateTime.UtcNow;
       return new GameEvent(GameEventType.Quiting, '\0');
     }
 
-    TimeSpan delta = DateTime.UtcNow - _lastKeyTime;
-    double ms = delta.TotalMilliseconds;
-
-    // Handle the initial key press
     int ch = GetCharPressed();
-    if (ch > 0 && (_lastCh != ch || ms > THRESHOLD))
+    while (ch > 0)
     {
-      _lastCh = (char)ch;
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)ch);
-    }
-    
-    ch = GetKeyPressed();
-    if (ch == (int)KeyboardKey.Escape && IsKeyPressed(KeyboardKey.Escape))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.ESC);
-    }
-    else if (ch == (int)KeyboardKey.Enter && IsKeyPressed(KeyboardKey.Enter))
-    {        
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)13);
-    }
-    else if (ch == (int)KeyboardKey.Backspace && IsKeyPressed(KeyboardKey.Backspace))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.BACKSPACE);
-    }
-    else if (ch == (int)KeyboardKey.Tab && IsKeyPressed(KeyboardKey.Tab))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.TAB);
+      if (ch >= 32 && ch <= 126)
+      {
+        EventQ.Enqueue(new(GameEventType.KeyInput, (char)ch));
+      }
+
+      ch = GetCharPressed();
     }
 
-    if (ms < THRESHOLD)
-      return new GameEvent(GameEventType.NoEvent, '\0');
+    if (IsKeyPressed(KeyboardKey.Escape))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.ESC));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Enter))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, (char)13));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Backspace))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.BACKSPACE));
+      Delay(50);
+    }
+    else if (IsKeyPressed(KeyboardKey.Tab))
+    {
+      EventQ.Enqueue(new(GameEventType.KeyInput, (char)Constants.TAB));
+      Delay(50);
+    }
 
-    if (IsKeyDown(KeyboardKey.Left) || IsKeyDown(KeyboardKey.H))
+    if (EventQ.Count > 0)
     {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'h');
+      return EventQ.Dequeue();
     }
-    else if (IsKeyDown(KeyboardKey.Right) || IsKeyDown(KeyboardKey.L))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'l');
-    }
-    else if (IsKeyDown(KeyboardKey.Up) || IsKeyDown(KeyboardKey.K))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'k');
-    }
-    else if (IsKeyDown(KeyboardKey.Down) || IsKeyDown(KeyboardKey.J))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'j');
-    }
-    else if (IsKeyDown(KeyboardKey.Y))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'y');
-    }
-    else if (IsKeyDown(KeyboardKey.U))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'u');
-    }
-    else if (IsKeyDown(KeyboardKey.B))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'b');
-    }
-    else if (IsKeyDown(KeyboardKey.N))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 'n');
-    }
-    else if (IsKeyDown(KeyboardKey.S))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, 's');
-    }
-    else if (IsKeyDown(KeyboardKey.Backspace))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.BACKSPACE);
-    }
-    else if (IsKeyDown(KeyboardKey.Tab))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.TAB);
-    }
-    else if (IsKeyDown(KeyboardKey.Escape))
-    {
-      _lastKeyTime = DateTime.UtcNow;
-      return new GameEvent(GameEventType.KeyInput, (char)Constants.ESC);
-    }
-    
+
     return new GameEvent(GameEventType.NoEvent, '\0');
   }
 

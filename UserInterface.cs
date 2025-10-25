@@ -824,7 +824,7 @@ abstract class UserInterface
         words = [.. words.Select(w => (w.Item1 with { Alpha = w.Item1.Alpha / 2 }, w.Item2))];
 
       lines.Add(words);
-      
+
       int chs = CountCh(words);
       if (chs > width)
         width = chs;
@@ -893,7 +893,7 @@ abstract class UserInterface
   public void ShowDropDown(List<string> lines) => MenuRows = lines;
   public void CloseMenu() => MenuRows = [];
 
-  static void Delay(int ms = 10) => Thread.Sleep(ms);
+  protected static void Delay(int ms = 10) => Thread.Sleep(ms);
 
   // I am using this in input menus outside of the main game. Primarily
   // the start menu
