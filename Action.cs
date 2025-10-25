@@ -282,18 +282,25 @@ class AssumeDisguiseAction(GameState gs, Actor actor) : Action(gs, actor)
   }
 }
 
-class ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : Action(gs, actor)
+class ApplyTraitAction : Action
 {
-  readonly TemporaryTrait _trait = trait;
+  List<TemporaryTrait> Traits { get; set; }
+
+  public ApplyTraitAction(GameState gs, Actor actor, List<TemporaryTrait> traits) : base(gs, actor) => Traits = traits;
+  public ApplyTraitAction(GameState gs, Actor actor, TemporaryTrait trait) : base(gs, actor) => Traits = [trait];
 
   public override double Execute()
-  {    
+  {
+    UserInterface ui = GameState!.UIRef();
+
     if (Actor is not null)
     {
-      List<string> msgs = _trait.Apply(Actor, GameState!);
-      UserInterface ui = GameState!.UIRef();
-      foreach (string s in msgs)
-        ui.AlertPlayer(s);
+      foreach (var t in Traits)
+      {
+        List<string> msgs = t.Apply(Actor, GameState!);
+        foreach (string s in msgs)
+          ui.AlertPlayer(s);
+      }
     }
     
     return 1.0;
@@ -387,7 +394,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
     Loc actualTarget = Target with { Row = fullR, Col = fullC };
     List<Loc> affected = ConeCalculator.Affected(Range, Actor.Loc, actualTarget, GameState.CurrentMap, GameState.ObjDb, []);
     affected.Insert(0, Actor.Loc);
-    var explosion = new ExplosionAnimation(GameState!)
+    ExplosionAnimation explosion = new(GameState!)
     {
       MainColour = Colours.LIGHT_BROWN,
       AltColour1 = Colours.BROWN,

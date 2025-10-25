@@ -41,7 +41,7 @@ enum ItemType
 }
 
 record ItemIDInfo(bool Known, string Desc);
-class Item : GameObj, IEquatable<Item>
+sealed class Item : GameObj, IEquatable<Item>
 {
   public static Dictionary<string, ItemIDInfo> IDInfo { get; set; } = [];
   public static readonly int DEFAULT_Z = 2;
@@ -645,11 +645,6 @@ enum ArmourParts
   Gloves
 }
 
-class Armour : Item
-{
-  public ArmourParts Piece { get; set; }
-}
-
 class Inventory(ulong ownerID, GameObjectDB objDb)
 {
   public ulong OwnerID { get; init; } = ownerID;
@@ -1172,25 +1167,30 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
         {
           if (item.HasTrait<TwoHandedTrait>())
-            desc += " (in hands)";
+            desc += " [GREY (in hands)]";
           else if (!item.HasTrait<VersatileTrait>())
-            desc += " (in hand)";
+            desc += " [GREY (in hand)]";
           else if (ShieldEquipped())
-            desc += " (in hand)";
+            desc += " [GREY (in hand)]";
           else
-            desc += " (in hands)";
+            desc += " [GREY (in hands)]";
         }
         else if (item.Type == ItemType.Armour)
-          desc += " (worn)";
+          desc += " [GREY (worn)]";
         else if (item.Type == ItemType.Bow)
-          desc += " (equipped)";
+          desc += " [GREY (equipped)]";
         else if (item.Type == ItemType.Ring)
-          desc += " (wearing)";
+          desc += " [GREY (wearing)]";
         else if (item.Type == ItemType.Wand)
-          desc += " (focus)";
+          desc += " [LIGHTBLUE (focus)]";
         else
-          desc += " (equipped)";
+          desc += " [GREY (equipped)]";
       }
+
+      desc = desc.Replace(" poison", " [GREEN poison]");
+      desc = desc.Replace(" holy water", " [LIGHTBLUE holy water]");
+      desc = desc.Replace(" (lit)", " ([YELLOWORANGE lit][BROWN )]");
+      
       lines.Add($"{s}) [{PickColour(item)} {desc}]");
     }
 

@@ -37,7 +37,7 @@ enum StressLevel
   Hystrical
 }
 
-class Player : Actor
+sealed class Player : Actor
 {
   public const int MAX_VISION_RADIUS = 25;
   public PlayerLineage Lineage { get; set; }
@@ -140,9 +140,7 @@ class Player : Actor
       if (t is StatBuffTrait sbt && sbt.Attr == Attribute.HP)
         baseHP += sbt.Amt;
       if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)        
-        baseHP += sdt.Amt;  
-      if (t is HeroismTrait)
-        baseHP += 25;            
+        baseHP += sdt.Amt;        
     }
 
     // We won't allow an HP buffs and debuffs to kill a character, just make

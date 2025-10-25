@@ -624,7 +624,7 @@ class Util
     char ch = door.Open ? '\\' : 'ǁ';
     var (fg, bg) = MetallicColour(door.Material);
 
-    return new Glyph(ch, fg, bg, Colours.BLACK, true);
+    return new Glyph(ch, fg, bg, Colours.BLACK, false);
   }
 
   public static Glyph TileToGlyph(Tile tile) => tile.Type switch
@@ -677,8 +677,8 @@ class Util
     TileType.FrozenDeepWater => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.FrozenWater => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.Portcullis => new Glyph('ǁ', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
-    TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, true),
-    TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, true),
+    TileType.OpenPortcullis => new Glyph('.', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+    TileType.GateTrigger => new Glyph(((GateTrigger)tile).Found ? '•' : '.', Colours.LIGHT_GREY, Colours.GREY, Colours.BLACK, false),
     TileType.VaultDoor => VaultDoorGlyph((VaultDoor)tile),
     TileType.HiddenTrapDoor or TileType.HiddenPit => new Glyph('.', Colours.GREY, Colours.GREY, Colours.BLACK, true),
     TileType.TrapDoor or TileType.Pit => new Glyph('^', Colours.GREY, Colours.GREY, Colours.BLACK, true),
