@@ -432,11 +432,6 @@ class HeroismTrait : TemporaryTrait
     OwnerID = target.ID;
     target.Traits.Add(this);
 
-    // Note for if you ever implement monsters using items: this will fail
-    // to grant monsters bonus HP
-    if (target is Player p)
-      p.CalcHP();
-
     gs.RegisterForEvent(GameEventType.EndOfRound, this);   
 
     return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} heroic!" ];
