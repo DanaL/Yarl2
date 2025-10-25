@@ -609,7 +609,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     }
     
     Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-    statue.Traits.Add(new DescriptionTrait("A statue of a greater demon covered in cracks, from which red light streams."));
+    statue.Traits.Add(new DescriptionTrait("a statue of a greater demon covered in cracks, from which red light streams."));
     statue.Traits.Add(new LightSourceTrait() { FgColour = Colours.BRIGHT_RED, BgColour = Colours.RED_AURA, Radius = 1, OwnerID = statue.ID });
     statue.Traits.Add(new DemonVisageTrait());
 
@@ -665,7 +665,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     void SetStatue(int row, int col)
     {
       Item statue = ItemFactory.Get(ItemNames.STATUE, objDb);
-      statue.Traits.Add(new DescriptionTrait("A statue depicting a demonic form."));
+      statue.Traits.Add(new DescriptionTrait("a statue depicting a demonic form."));
       int levelNum = stairsLoc.Level + 1;
       Loc loc = new(dungeon.ID, levelNum, row, col);
       objDb.SetToLoc(loc, statue);
