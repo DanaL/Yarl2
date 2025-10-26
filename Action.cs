@@ -1976,7 +1976,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
       }      
     }
 
-    var anim = new MagicMapAnimation(gs, gs.CurrentDungeon, sqsToSearch, false)
+    MagicMapAnimation anim = new(gs, gs.CurrentDungeon, sqsToSearch, false)
     {
       Colour = Colours.SEARCH_HIGHLIGHT,
       AltColour = Colours.SEARCH_HIGHLIGHT

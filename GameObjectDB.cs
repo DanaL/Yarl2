@@ -270,6 +270,16 @@ class GameObjectDB
       return ItemGlyphAt(loc);
   }
 
+  public Glyph VisibleGlyphAt(Loc loc, GameState gs)
+  {
+    if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor actor && actor.VisibleTo(gs.Player))
+    {
+      return Objs[id].Glyph;
+    }
+    
+    return ItemGlyphAt(loc);
+  }
+
   public Glyph ItemGlyphAt(Loc loc)
   {
     if (_itemLocs.TryGetValue(loc, out var items))
@@ -284,7 +294,7 @@ class GameObjectDB
         }
 
         return items[0].Glyph;
-      }      
+      }
     }
 
     return EMPTY;

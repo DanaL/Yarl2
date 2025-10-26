@@ -474,7 +474,7 @@ class MagicMapAnimation : Animation
       char ch = glyph.Ch;
       if (!TilesOnly)
       {
-        Glyph g = _gs.ObjDb.GlyphAt(loc);
+        Glyph g = _gs.ObjDb.VisibleGlyphAt(loc, _gs);
         if (g != GameObjectDB.EMPTY)
           ch = g.Ch;
       }
