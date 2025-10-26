@@ -3309,7 +3309,8 @@ class LightBeamTrait : Trait, IGameEventListener
     
     gs.UIRef().AlertPlayer(msg);
     gs.UIRef().SetPopup(new Popup(msg, "", -1, -1));
-    
+    gs.UIRef().RegisterAnimation(new SqAnimation(gs, block.Loc, Colours.DARK_GREY, Colours.WHITE, '*'));
+
     gs.ObjDb.RemoveItemFromGame(block.Loc, block);
 
     Loc dest = block.Loc with { Level = block.Loc.Level + 1 };
