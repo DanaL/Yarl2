@@ -929,7 +929,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
       if (item.Type == ItemType.Weapon || item.Type == ItemType.Tool)
       {
-        if (freeHands == 0 && shield)
+        if (freeHands == 0 && shield && item.HasTrait<TwoHandedTrait>())
           return (EquipingResult.NoFreeHand, ArmourParts.None);
 
         // If there is a weapon already equipped, unequip it
