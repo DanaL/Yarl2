@@ -3036,9 +3036,13 @@ class RecallTrait : BasicTrait, IGameEventListener
     Player player = gs.Player;
     player.Traits.Remove(this);
 
-    if (player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallowed)
+    Actor? swallower = null;
+    if (player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swallow)
     {
-      swallowed.Remove(gs);
+      swallow.Remove(gs);
+
+      if (gs.ObjDb.GetObj(swallow.SwallowerID) is Actor sw)
+        swallower = sw;
     }
     player.ClearAnchors(gs);
     
@@ -3059,8 +3063,11 @@ class RecallTrait : BasicTrait, IGameEventListener
     player.Inventory.Zorkmids = 0;
     Item coins = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
     coins.Value = zorkmids;
-    gs.ItemDropped(coins, player.Loc);
-
+    if (swallower is not null)
+      swallower.Inventory.Add(coins, swallower.ID);
+    else
+      gs.ItemDropped(coins, player.Loc);
+    
     List<Item> itemsDropped = [];
     foreach (Item item in player.Inventory.Items())
     {
