@@ -1129,11 +1129,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
 
     return slots;
 
-    List<char> SortSlots(List<char> slots)
-    {
-      var sorted = slots.OrderByDescending(s => ItemAt(s).Item1!.Equipped);
-      return [.. sorted];
-    }
+    List<char> SortSlots(List<char> slots) => [.. slots.OrderByDescending(s => ItemAt(s).Item1!.Equipped)];
   }
   
   public void ShowMenu(UserInterface ui, InventoryOptions options)

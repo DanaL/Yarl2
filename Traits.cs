@@ -2407,7 +2407,7 @@ class PaladinBlessingTrait : ChampionBlessingTrait
   {
     base.Apply(granter, gs);
 
-    int numOfDie = 1 + gs.Player.Stats[Attribute.Piety].Curr - 3;
+    int numOfDie = 1 + gs.Player.Stats[Attribute.Piety].Max - 3;
     DamageTrait dt = new() { SourceId = granter.ID, DamageType = DamageType.Holy, DamageDie = 6, NumOfDie = numOfDie };
     gs.Player.Traits.Add(dt);
 
