@@ -484,6 +484,11 @@ internal class MapSaver
             digits = Util.ToNums(pieces[2]);
             ((Portal)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
             break;
+          case TileType.MysteriousMirror:
+            tile = new MysteriousMirror(pieces[3]);
+            digits = Util.ToNums(pieces[2]);
+            ((MysteriousMirror)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
+            break;
           case TileType.Upstairs:
             tile = new Upstairs(pieces[3]);
             digits = Util.ToNums(pieces[2]);
@@ -493,16 +498,6 @@ internal class MapSaver
             tile = new Downstairs(pieces[3]);
             digits = Util.ToNums(pieces[2]);
             ((Downstairs)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-            break;
-          case TileType.Shortcut:
-            tile = new Shortcut();
-            digits = Util.ToNums(pieces[2]);
-            ((Shortcut)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
-            break;
-          case TileType.ShortcutDown:
-            tile = new ShortcutDown();
-            digits = Util.ToNums(pieces[2]);
-            ((ShortcutDown)tile).Destination = new Loc(digits[0], digits[1], digits[2], digits[3]);
             break;
           case TileType.OpenDoor:
           case TileType.ClosedDoor:

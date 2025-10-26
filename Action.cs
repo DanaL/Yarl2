@@ -701,7 +701,6 @@ abstract class PortalAction : Action
       }
     }
 
-    //GameState.RefreshPerformers();
     GameState.FlushPerformers();
     GameState.PrepareFieldOfView();
 
@@ -717,7 +716,7 @@ class DownstairsAction(GameState gameState) : PortalAction(gameState)
     var p = GameState!.Player!;
     var t = GameState.CurrentMap.TileAt(p.Loc.Row, p.Loc.Col);
 
-    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal || t.Type == TileType.ShortcutDown)
+    if (t.Type == TileType.Downstairs || t.Type == TileType.Portal)
     {
       UsePortal((Portal)t);
     }
@@ -743,21 +742,6 @@ class UpstairsAction(GameState gameState) : PortalAction(gameState)
     if (t.Type == TileType.Upstairs)
     {
       UsePortal((Portal)t);
-    }
-    else if (t is Shortcut shortcut)
-    {
-      // We want to turn the square on the surface into a portal back down.
-      // (The idea is that by using the shortcut the player opens the
-      // portcullis on the surface)
-      ShortcutDown portal = new()
-      {
-        Destination = p.Loc
-      };
-      GameState.Campaign.Dungeons[0].LevelMaps[0].SetTile(shortcut.Destination.Row, shortcut.Destination.Col, portal);
-
-      UsePortal((Portal)t);
-      GameState.UIRef().AlertPlayer("You climb a long stairway out of the dungeon.");
-      GameState.UIRef().SetPopup(new Popup("You climb a long stairway out of the dungeon.", "", -1, -1));
     }
     else
     {
@@ -2162,7 +2146,7 @@ class MirrorImageAction : Action
 
   static Mob MakeDuplciate(GameState gs, Actor src)
   { 
-    var glyph = new Glyph(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit, src.Glyph.BG, src.Glyph.Illuminate);
+    Glyph glyph = new(src.Glyph.Ch, src.Glyph.Lit, src.Glyph.Unlit, src.Glyph.BG, src.Glyph.Illuminate);
     
     // I originally implemented MirrorImage for cloakers, who can fly but I
     // think it makes sense for all mirror images since they're illusions that

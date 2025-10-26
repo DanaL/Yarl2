@@ -655,10 +655,8 @@ class Util
     TileType.Mountain => new Glyph('\u039B', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     TileType.SnowPeak => new Glyph('\u039B', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Portal => new Glyph('Ո', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
-    TileType.Shortcut => new Glyph('<', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Upstairs => new Glyph('<', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Downstairs => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
-    TileType.ShortcutDown => new Glyph('>', Colours.WHITE, Colours.GREY, Colours.BLACK, false),
     TileType.Cloud => new Glyph('#', Colours.WHITE, Colours.WHITE, Colours.BLACK, false),
     TileType.Dirt => new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
     TileType.WoodFloor => new Glyph('.', Colours.LIGHT_BROWN, Colours.BROWN, Colours.BLACK, false),
@@ -719,7 +717,7 @@ class Util
     TileType.FrozenLake => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.Underwater => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false),
     TileType.MistyPortal => new Glyph('Ո', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
-    // Ω
+    TileType.MysteriousMirror => new Glyph('Ω', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
@@ -801,6 +799,35 @@ class Util
     return false;
   }
 
+  // Sort of yet another implementation of floodfill...
+  public static Loc NearestUnoccupiedLoc(GameState gs, Loc loc)
+  {
+    HashSet<Loc> visited = [ loc ];
+    Queue<Loc> q = [];
+
+    List<Loc> initial = [.. Adj8Locs(loc)];
+    initial.Shuffle(gs.Rng);
+    foreach (Loc adj in initial)
+      q.Enqueue(adj);
+
+    while (q.Count > 0)
+    {
+      Loc curr = q.Dequeue();
+
+      if (gs.TileAt(curr).Passable() && !gs.ObjDb.Occupied(curr) && !gs.ObjDb.HazardsAtLoc(curr))
+        return curr;
+
+      visited.Add(curr);
+      foreach (Loc adj in Adj8Locs(curr))
+      {
+        if (gs.TileAt(adj).Passable() && !visited.Contains(adj))
+          q.Enqueue(adj);
+      }
+    }
+    
+    return Loc.Nowhere;
+  }
+  
   public static string NumToWord(int a) => a switch
   {
     0 => "zero",

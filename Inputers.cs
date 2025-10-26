@@ -164,6 +164,7 @@ class Examiner : Inputer
             case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
             case TileType.MistyPortal:
+            case TileType.MysteriousMirror:
               pq.Enqueue(loc, distance);
               break;
           }

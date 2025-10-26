@@ -318,7 +318,7 @@ abstract class DungeonBuilder
 
   }
 
-  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, Rng rng)
+  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, bool secondStairs, Rng rng)
   {
     List<List<(int, int)>> floors = [];
 
@@ -346,7 +346,7 @@ abstract class DungeonBuilder
     {
       CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
 
-      if (rng.NextDouble() < 0.1)
+      if (secondStairs && rng.NextDouble() < 0.1)
         CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
     }
   }

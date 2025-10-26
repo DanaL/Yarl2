@@ -29,7 +29,20 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     Tower towerBuilder = new(Height, Width, 5);
     Map[] floors = [..towerBuilder.BuildLevels(numOfLevels, rng)];
 
-    SetStairs(DungeonId, floors, Height, Width, numOfLevels, (entranceRow, entranceCol), false, rng);
+    SetStairs(DungeonId, floors, Height, Width, numOfLevels, (entranceRow, entranceCol), false, false, rng);
+
+    // Because it's a sorcerous tower, replace the final stairs with a 
+    // Mysterious Mirror
+    Map penultimate = floors[numOfLevels - 2];
+    var upStairsSq = penultimate.SqsOfType(TileType.Upstairs).First();
+    Upstairs upstairs = (Upstairs)penultimate.TileAt(upStairsSq);
+    MysteriousMirror mm1 = new("") { Destination = upstairs.Destination };
+    penultimate.SetTile(upStairsSq, mm1);
+    Map ultimate = floors[numOfLevels - 1];
+    Loc downLoc = upstairs.Destination;
+    Downstairs downstairs = (Downstairs)ultimate.TileAt(downLoc.Row, downLoc.Col);
+    MysteriousMirror mm2 = new("") { Destination = downstairs.Destination };
+    ultimate.SetTile(downLoc.Row, downLoc.Col, mm2);
 
     foreach (Map floor in floors)
     {

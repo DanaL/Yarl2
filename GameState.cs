@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -1456,6 +1457,20 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       UI.SetPopup(new Popup("You step into the misty portal and become momentarily disoeriented.", "", -1, -1));
     }
 
+    if (actor is Player && tile.Type == TileType.MysteriousMirror)
+    {
+      MysteriousMirror mm = (MysteriousMirror)TileAt(dest);
+      Loc mirrorDest = mm.Destination;
+      Loc actualDest = Util.NearestUnoccupiedLoc(this, mirrorDest);
+      ResolveActorMove(Player, Player.Loc, actualDest);
+      ActorEntersLevel(Player, actualDest.DungeonID, actualDest.Level);
+      FlushPerformers();
+      PrepareFieldOfView();
+
+      UI.AlertPlayer("The strange mirror draws you inside it!");
+      UI.SetPopup(new Popup("The strange mirror draws you inside it!", "", -1, -1));
+    }
+    
     if (tile.IsTrap())
     {
       Traps.TriggerTrap(this, actor, dest, tile, flying);

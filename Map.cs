@@ -24,10 +24,10 @@ enum TileType
   SecretDoor, HiddenTeleportTrap, TeleportTrap, HiddenDartTrap, DartTrap,
   FireJetTrap, JetTrigger, HiddenPit, Pit, WaterTrap, HiddenWaterTrap,
   MagicMouth, HiddenMagicMouth, IdolAltar, Gravestone, DisturbedGrave,
-  BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, Shortcut, 
-  ShortcutDown, BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
+  BridgeTrigger, HiddenBridgeCollapseTrap, RevealedBridgeCollapseTrap, 
+  BusinessSign, FakeStairs, HiddenSummonsTrap, RevealedSummonsTrap,
   HFence, VFence, CornerFence, MonsterWall, Lever, Crops, IllusoryWall,
-  Underwater, Kelp, MistyPortal
+  Underwater, Kelp, MistyPortal, MysteriousMirror
 }
 
 interface ITriggerable
@@ -158,9 +158,7 @@ abstract class Tile(TileType type) : IZLevel
     TileType.Chasm => "a chasm",
     TileType.Landmark => "a landmark",
     TileType.Forge => "a forge",
-    TileType.Shortcut => "some stairs up",
     TileType.Upstairs => "some stairs up",
-    TileType.ShortcutDown => "some stairs down",
     TileType.Downstairs => "some stairs down",
     TileType.Portal => "a dungeon entrance",
     TileType.CharredGrass => "charred grass",
@@ -377,20 +375,6 @@ class Portal(string stepMessage) : Tile(TileType.Portal)
   }
 }
 
-class Shortcut : Portal
-{
-  public Shortcut()  : base("A long stairway extending upwards.") => Type = TileType.Shortcut;
-
-  public override string ToString() => base.ToString();
-}
-
-class ShortcutDown : Portal
-{
-  public ShortcutDown()  : base("A long stairway extending into darkness.") => Type = TileType.ShortcutDown;
-
-  public override string ToString() => base.ToString();
-}
-
 class Upstairs : Portal
 {
   public Upstairs(string stepMessage) : base(stepMessage) => Type = TileType.Upstairs;
@@ -401,6 +385,13 @@ class Upstairs : Portal
 class Downstairs : Portal
 {
   public Downstairs(string stepMessage) : base(stepMessage) => Type = TileType.Downstairs;
+
+  public override string ToString() => base.ToString();
+}
+
+class MysteriousMirror : Portal
+{
+  public MysteriousMirror(string stepMessage) : base(stepMessage) => Type = TileType.MysteriousMirror;
 
   public override string ToString() => base.ToString();
 }

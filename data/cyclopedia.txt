@@ -446,6 +446,9 @@ It's probably just a floating fungi that only looks like a beholder. Definitely.
 mistyportal|Misty Portal
 A stone archway filled with swirling, sparkling mists.
 #
+mysteriousmirror|Mysterious Mirror
+The scene in the mirror's glass is hazy and indistinct, and does not seem to be a reflection of this room.
+#
 skull
 Likely the remains of some unfortunate adventurer.
 #
