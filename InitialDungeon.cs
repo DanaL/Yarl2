@@ -671,6 +671,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       Actor ks = MonsterFactory.Get("kobold supervisor", objDb, rng);
       ks.Name = "the Kobold Regional Manager";
       ks.Traits.Add(new NamedTrait());
+      ks.Traits.Add(new ImmunityTrait() { ExpiresOn = ulong.MaxValue, SourceId = ks.ID, Type = DamageType.Fire });
       ks.Stats[Attribute.AttackBonus] = new Stat(6);
       ks.Stats[Attribute.HP] = new Stat(35);
 

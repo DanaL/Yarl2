@@ -44,7 +44,7 @@ giant beetle      |a|lightgrey    |grey        |15|25|3| 1.0|12|12|MeleePiercing
 swarm of bees     |I|yellow       |yelloworange|17| 4|3| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying|
 displacer beast   |f|grey         |darkgrey    |14|25|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Displacement|
 the Great Goblin  |g|lightpurple  |purple      |16|50|6| 1.0|14|14|FearsomeBellow#0#2#0#0#15#12#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|KnockBack,Intelligent,Named|GoodMagic
-wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#5#4#15#5#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Heavy|
+wyrmling          |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#5#4#15#5#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Heavy,Immunity#Fire|
 kobold supervisor |k|lightpurple  |purple      |15|20|4| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent,Named|GoodMagic
 test dragon       |D|green        |darkgreen   |15|30|5| 1.0|16|14|FireBreath#0#5#1#1#15#5#Attack|Immobile|
 evil villain      |h|lightblue    |blue        |10|10|3| 1.0|10|10|MeleeSlashing#1#1#4#1#0#0#Attack|Immobile|
