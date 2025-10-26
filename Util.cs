@@ -208,7 +208,7 @@ class Constants
   public const char SEPARATOR = '\u001F';
   public static int PRACTICE_RATIO = 100; // how skill use count translates into a bonus
   public const int TELEPATHY_RANGE = 40; // I don't really have a better spot for this right now
-  public static readonly string VERSION = "0.4.2";
+  public static readonly string VERSION = "0.5.0";
   public const char TOP_LEFT_CORNER = '┍';
   public const char TOP_RIGHT_CORNER = '┑';
   public const char BOTTOM_LEFT_CORNER = '┕';
@@ -761,6 +761,13 @@ class Util
 
     return cyclopedia.ContainsKey(title);
   }
+
+  public static Glyph FlameGlyph(Rng rng) => rng.Next(3) switch
+  {
+    0 => new Glyph(Constants.FIRE_CHAR, Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, false),
+    1 => new Glyph(Constants.FIRE_CHAR, Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_RED, false),
+    _ => new Glyph(Constants.FIRE_CHAR, Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, false)
+  };
 
   public static (Colour, Colour) MetallicColour(Metals metal) => metal switch
   {

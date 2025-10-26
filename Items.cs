@@ -542,21 +542,12 @@ class ItemFactory
 
   public static Item Fire(GameState gs)
   {
-    Glyph glyph;
-    var roll = gs.Rng.NextDouble();
-    if (roll < 0.333)
-      glyph = new Glyph(Constants.FIRE_CHAR, Colours.BRIGHT_RED, Colours.DULL_RED, Colours.TORCH_ORANGE, false);
-    else if (roll < 0.666)
-      glyph = new Glyph(Constants.FIRE_CHAR, Colours.YELLOW, Colours.DULL_RED, Colours.TORCH_RED, false);
-    else
-      glyph = new Glyph(Constants.FIRE_CHAR, Colours.YELLOW_ORANGE, Colours.DULL_RED, Colours.TORCH_YELLOW, false);
-
     Item fire = new()
     {
       Name = "fire",
       Type = ItemType.Environment,
       Value = 0,
-      Glyph = glyph,
+      Glyph = Util.FlameGlyph(gs.Rng),
     };
     fire.SetZ(7);
     gs.ObjDb.Add(fire);

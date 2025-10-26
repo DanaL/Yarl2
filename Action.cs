@@ -2254,8 +2254,60 @@ class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
+class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageType dmgType) : Action(gs, actor)
+{
+  int DmgDie { get; set; } = dmgDie;
+  int NumOfDice { get; set; } = numOfDice;
+  DamageType DamageType { get; set; } = dmgType;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    UserInterface ui = GameState!.UIRef();
+    if (DamageType == DamageType.Fire)
+      ui.AlertPlayer($"Flames flare out from {Actor!.FullName}!", GameState, Actor.Loc, Actor);
+    else
+      ui.AlertPlayer($"Energy emits from {Actor!.FullName}!", GameState, Actor.Loc, Actor);
+
+    foreach (Loc adj in Util.Adj8Locs(Actor.Loc))
+    {
+      GameState.ApplyDamageEffectToLoc(adj, DamageType);
+
+      if (gs.ObjDb.Occupant(adj) is Actor adjActor)
+      {
+        int dmg = 0;
+        for (int j = 0; j < NumOfDice; j++)
+          dmg += gs.Rng.Next(DmgDie) + 1;
+        List<(int, DamageType)> dmgs = [(dmg, DamageType)];
+        var (adjHpLeft, _, _) = adjActor.ReceiveDmg(dmgs, 0, GameState, null, 1.0);
+
+        if (DamageType == DamageType.Fire)
+          ui.AlertPlayer($"{adjActor.FullName.Capitalize()} {Grammar.Conjugate(adjActor, "is")} burnt!");
+        
+        if (adjHpLeft < 1)
+        {
+          gs.ActorKilled(adjActor, Actor.FullName, null);
+        }
+      }
+
+      if (DamageType == DamageType.Fire)
+      {
+        Glyph g = Util.FlameGlyph(GameState.Rng);
+        ui.RegisterAnimation(new SqAnimation(GameState, adj, g.Lit, g.BG, Constants.FIRE_CHAR));
+      }
+      else
+      {
+        ui.RegisterAnimation(new SqAnimation(GameState, adj, Colours.LIGHT_PURPLE, Colours.FADED_PURPLE, '*'));
+      }
+    }
+        
+    return 1.0;
+  }
+}
+
 class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
-{    
+{
   public override double Execute()
   {
     base.Execute();
@@ -2279,9 +2331,9 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
           ui.AlertPlayer(s);
 
         victim.Inventory.RemoveByID(item.ID, GameState);
-        
+
         GameState.ItemDropped(item, victim.Loc);
-        
+
         if (victim is Player)
           GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
       }

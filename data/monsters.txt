@@ -72,3 +72,4 @@ hellhound         |d|brightred    |dullred     |15|50|8| 1.0|10|10|FireBreath#0#
 killer bee        |I|yelloworange |brown       |17|12|6| 1.0|10|10|MeleePiercing#1#1#2#1#0#0#Attack|Flying,Poisoner#13#2#20|
 invisible stalker |i|grey         |darkgrey    |15|40|5| 1.0|10|14|MeleeBlunt#1#1#4#3#0#0#Attack|Invisible#owner#false#max,Flying|
 wraith            |W|blue         |darkgrey    |14|40|5| 1.0|10|10|MeleeNecrotic#1#1#10#1#0#0#Attack|Immunity#Poison,ResistPiercing,ResistBlunt,ResistSlashing,Undead,SilverAllergy,Numbs|
+flame spirit      |ώ|brightred    |dullred     |15|40|3| 1.0|10|10|FlareFire#1#1#6#4#0#2#Attack|LightSource#owner#2#brightred#torchred,Flying,Immunity#Fire|

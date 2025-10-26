@@ -286,6 +286,8 @@ abstract class Actor : GameObj, IZLevel
     total += bonusDamage;
     total = (int)(total * scale);
 
+    Console.WriteLine($"{FullName.Capitalize()} took {total} damage.");
+    
     if (total > 0 && fireDamage && Name == "mud golem" && this is not Player)
     {
       gs.ObjDb.RemoveActor(this);
@@ -1121,6 +1123,8 @@ class Power
         return new ShriekAction(gs, mob, MaxRange);
       case "Gulp":
         return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);
+      case "FlareFire":
+        return new FlareAction(gs, mob, DmgDie, NumOfDice, DamageType.Fire);
       default:
         return new PassAction();
     }
