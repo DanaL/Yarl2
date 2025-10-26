@@ -9,9 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Reflection.Emit;
-using System.Text.RegularExpressions;
-
 namespace Yarl2;
 
 class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccupant) : DungeonBuilder
@@ -183,19 +180,8 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         RoomCorners corners = Rooms.IsRectangle(map, rooms[id]);
         if (corners.LowerRow - corners.UpperRow >= 5 && corners.RightCol - corners.LeftCol >= 5)
         {
-          Rooms.RoomInRoom(map, corners, rng);
-
-          List<(int, int)> nonFloors = [];
-          foreach (var sq in rooms[id])
-          {
-            if (map.TileAt(sq).Type != TileType.DungeonFloor)
-              nonFloors.Add(sq);
-          }
-          foreach (var sq in nonFloors)
-          {
-            rooms[id].Remove(sq);
-          }
-
+          var innerSqs = Rooms.RoomInRoom(map, corners, rng);
+          rooms[id] = [.. innerSqs];
           break;
         }
       }
@@ -240,8 +226,11 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           case 1:
             Rooms.TriggerChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
             break;
-          default:
+          case 2:
             Rooms.BasicChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            break;
+          default:
+            Rooms.ChasmIslandRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
             break;
         }
 

@@ -406,8 +406,10 @@ class Rooms
     return new(upperRow, leftCol, lowerRow, rightCol);
   }
 
-  public static void RoomInRoom(Map map, RoomCorners corners, Rng rng)
-  {    
+  public static HashSet<(int, int)> RoomInRoom(Map map, RoomCorners corners, Rng rng)
+  {
+    HashSet<(int, int)> innerSqs = [];
+
     HashSet<(int, int)> innerWalls = [];
     for (int c = corners.LeftCol + 1; c < corners.RightCol; c++)
     {
@@ -432,6 +434,16 @@ class Rooms
 
     var doorSq = innerWalls.ToList()[rng.Next(innerWalls.Count)];
     map.SetTile(doorSq, TileFactory.Get(TileType.LockedDoor));
+
+    for (int r = corners.UpperRow + 2; r < corners.LowerRow - 1; r++)
+    {
+      for (int c = corners.LeftCol + 2; c < corners.RightCol - 1; c++)
+      {
+        innerSqs.Add((r, c));
+      }
+    }
+
+    return innerSqs;
   }
 
   // This is different from PotentialVault because we want to confirm it's an
@@ -614,6 +626,59 @@ class Rooms
     }
   }
 
+  public static void ChasmIslandRoom(Map[] levels, Rng rng, int dungeonId, int level, List<(int, int)> room, GameObjectDB objDb)
+  {
+    Map map = levels[level];
+    Map mapBelow = levels[level + 1];
+
+    MakeChasm(map, mapBelow, room);
+
+    HashSet<Loc> doors = [];
+    foreach (var sq in room)
+    {
+      foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
+      {
+        TileType tt = map.TileAt(adj).Type;
+        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor)
+        {
+          doors.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
+        }
+      }
+    }
+    
+    List<(int, int)> islandSqs = [];    
+    var floors = room.Where(sq => map.TileAt(sq).Type == TileType.Chasm);    
+    foreach (var sq in floors)
+    {
+      bool adjToDoor = false;
+      foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
+      {
+        TileType tt = map.TileAt(adj).Type;
+        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor)
+        {
+          adjToDoor = true;
+          break;
+        }
+      }
+
+      if (adjToDoor)
+        continue;
+
+      islandSqs.Add(sq);
+    }
+
+    Loc door = doors.First();
+    List<(int, int)> candidates = [.. islandSqs.Where(s => Util.Distance(door, new Loc(dungeonId, level, s.Item1, s.Item2)) < 3)];
+    candidates.Shuffle(rng);
+    for (int j = 0; j < int.Min(candidates.Count, rng.Next(1, 4)); j++)
+    {
+      map.SetTile(candidates[j], TileFactory.Get(TileType.DungeonFloor));
+      Item item = Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng);
+      Loc loc = new(dungeonId, level, candidates[j].Item1, candidates[j].Item2);
+      objDb.SetToLoc(loc, item);
+    }
+  }
+  
   public static void TriggerChasmRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
@@ -654,7 +719,7 @@ class Rooms
         objDb.LocListeners.Add(new Loc(dungeonID, level, triggerSq.Item1, triggerSq.Item2));
         triggerSet = true;
         break;
-      }      
+      }
     }
 
     if (!triggerSet)
