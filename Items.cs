@@ -1117,17 +1117,23 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     }
 
     List<char> slots = [];
-    slots.AddRange(weapons);
-    slots.AddRange(armour);
-    slots.AddRange(scrolls);
-    slots.AddRange(potions);
-    slots.AddRange(wands);
-    slots.AddRange(talisman);
-    slots.AddRange(rings);
-    slots.AddRange(tools);
-    slots.AddRange(other);
+    slots.AddRange(SortSlots(weapons));
+    slots.AddRange(SortSlots(armour));
+    slots.AddRange(SortSlots(scrolls)); // You can't equip scrolls or potions
+    slots.AddRange(SortSlots(potions)); // but who knows what the future holds
+    slots.AddRange(SortSlots(wands));
+    slots.AddRange(SortSlots(talisman));
+    slots.AddRange(SortSlots(rings));
+    slots.AddRange(SortSlots(tools));
+    slots.AddRange(SortSlots(other));
 
     return slots;
+
+    List<char> SortSlots(List<char> slots)
+    {
+      var sorted = slots.OrderByDescending(s => ItemAt(s).Item1!.Equipped);
+      return [.. sorted];
+    }
   }
   
   public void ShowMenu(UserInterface ui, InventoryOptions options)
