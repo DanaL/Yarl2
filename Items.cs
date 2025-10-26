@@ -1077,6 +1077,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     List<char> wands = [];
     List<char> tools = [];
     List<char> talisman = [];
+    List<char> rings = [];
     List<char> other = [];
 
     foreach (char s in UsedSlots().Order())
@@ -1106,6 +1107,9 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
         case ItemType.Talisman:
           talisman.Add(s);
           break;
+        case ItemType.Ring:
+          rings.Add(s);
+          break;
         default:
           other.Add(s);
           break;
@@ -1119,6 +1123,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     slots.AddRange(potions);
     slots.AddRange(wands);
     slots.AddRange(talisman);
+    slots.AddRange(rings);
     slots.AddRange(tools);
     slots.AddRange(other);
 
@@ -1222,6 +1227,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       ItemType.Wand => "GREEN",
       ItemType.Talisman => "LIGHTPURPLE",
       ItemType.Tool => "BROWN",
+      ItemType.Ring => "YELLOW",
       _ => "WHITE"
     };
   }

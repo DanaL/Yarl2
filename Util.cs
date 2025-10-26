@@ -719,6 +719,7 @@ class Util
     TileType.FrozenLake => new Glyph('.', Colours.BLUE, Colours.ICE_BLUE, Colours.WHITE, false),
     TileType.Underwater => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false),
     TileType.MistyPortal => new Glyph('Ո', Colours.GREY, Colours.DARK_GREY, Colours.BLACK, false),
+    // Ω
     _ => new Glyph(' ', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
   };
 
