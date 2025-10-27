@@ -103,11 +103,14 @@ class Examiner : Inputer
           case '=':
             continue;
         }
-        if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)
+        
+        if (!GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
+        //if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)// && !GS.LastPlayerFoV.Contains(loc))
           continue;
 
         int distance = Distance(GS.Player.Loc, loc);
         Actor? occupant = GS.ObjDb.Occupant(loc);
+
         if (occupant is not null && AwareOfActor(occupant, GS))
         {
           if (loc == GS.Player.Loc)
