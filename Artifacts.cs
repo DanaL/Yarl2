@@ -144,7 +144,7 @@ class Artifacts
     sb.Append(factDb.Ruler.Name);
     sb.Append(' ');
     sb.Append(factDb.Ruler.Epithet.CapitalizeWords());
-    sb.Append("\n\n");
+    sb.Append(".\n\n");
     if (successful && beloved)
       sb.Append("Ever after, this weapon was said to be a beacon of hope for the people.");
     else if (successful && !beloved)
