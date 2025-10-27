@@ -19,16 +19,16 @@ goblin firestarter|g|brightred    |dullred     |12|10|2| 1.0|10|14|FireBolt#2#5#
 jelly             |b|pink         |dullred     |12|40|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Divider,ResistBlunt,Immunity#Confusion,Brainless|
 acrid blob        |b|green        |darkgreen   |12|20|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|AcidSplash,ResistBlunt,Immunity#Confusion,Immunity#Acid,Brainless|
 chilled jelly     |b|lightblue    |blue        |12|20|3|0.75|10|10|MeleeCold#1#1#6#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Retribution#Cold#8#1#1,Brainless|
-sticky ooze       |b|yelloworange |torchorange |12|25|3| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Grappler#18,Brainless,Divider|
+sticky ooze       |b|yelloworange |torchorange |12|25|4| 1.0|10|10|MeleeAcid#1#1#1#1#0#0#Attack|ResistBlunt,Immunity#Confusion,Grappler#18,Brainless,Divider|
 ogre              |O|lightgrey    |grey        |13|30|6| 1.0|18|10|MeleeBlunt#1#1#6#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy|
-centipede         |c|green        |darkgreen   |13|12|3| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10|
+centipede         |c|green        |darkgreen   |13|12|4| 1.0|12|12|MeleePiercing#1#1#4#1#0#0#Attack|Poisoner#13#1#10|
 duergar soldier   |h|lightgrey    |grey        |16|25|5| 1.0|14|12|MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent|MITHRIL_ORE#1#25#false
 drow warrior      |h|grey         |darkgrey    |15|20|5| 1.0|12|16|MissilePiercing#2#5#6#1#0#0#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent|
-owlbear           |Y|dullred      |brown       |13|25|4| 1.0|14|12|MeleeSlashing#1#1#6#1#0#0#Attack|Grappler#14|
+owlbear           |Y|dullred      |brown       |13|25|5| 1.0|14|12|MeleeSlashing#1#1#6#1#0#0#Attack|Grappler#14|
 cloaker           |v|grey         |darkgrey    |13|20|4| 1.0|12|14|MirrorImage#1#3#0#0#0#7#Attack,MeleePiercing#1#1#8#1#0#0#Attack|Flying|
-shadow            | |black        |black       |13|20|3| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead,Immunity#Poison|
+shadow            | |black        |black       |13|20|4| 1.0|10|14|MeleeNecrotic#1#1#4#1#0#0#Attack|Weaken#13#1,SilverAllergy,Undead,Immunity#Poison|
 floating eye      |e|lightblue    |blue        |13|20|0|0.25|10|10||ParalyzingGaze#18,Floating,Brainless|
-screech bat       |v|green        |darkgreen   |13|15|2| 1.0|10|16|ConfusingScream#0#0#4#0#14#7#Attack,MeleePiercing#1#1#6#1#0#0#Attack|Flying,Immunity#Confusion|
+screech bat       |v|green        |darkgreen   |13|15|6| 1.0|10|16|ConfusingScream#0#0#4#0#14#7#Attack,MeleePiercing#1#1#6#2#0#0#Attack|Flying,Immunity#Confusion|
 deep one          |h|green        |darkgreen   |13|20|5| 1.0|12|12|MeleePiercing#1#1#8#1#0#0#Attack|Intelligent|
 deep one shaman   |h|limegreen    |green       |13|25|4| 1.0|12|12|HealAllies#0#0#0#0#0#05#Passive,MeleePiercing#1#1#8#1#0#0#Attack|Intelligent|
 rust monster      |R|dullred      |dullred     |14|25|3| 1.0|10|10|MeleeAcid#1#1#6#1#0#0#Attack|Corrosive|
