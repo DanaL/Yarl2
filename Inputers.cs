@@ -1447,24 +1447,33 @@ class InventoryDetails : Inputer
         items.Add("it can [LIGHTBLUE impale] foes");
     }
 
-    if (items.Count == 0)
+    if (items.Count == 0 && weaponType == "" && damage.Count == 0)
       return "";
 
     string s = "";
+
     if (weaponType != "")
-      s = $"This is {weaponType.IndefArticle()}.\n\n";
+      s = $"This is {weaponType.IndefArticle()}.";
 
     if (damage.Count > 0 || versatileText != "")
     {
+      if (s.Length > 0)
+        s += "\n\n";
+
       s += "It deals";
       if (versatileText != "")
         s += $" {versatileText}";
       s += string.Join(',', damage.Select(d => $" {d.NumOfDie}d{d.DamageDie} {d.DamageType.ToString().ToLower()}"));
-      s += " damage.\n\n";
+      s += " damage.";
     }
 
-    s += string.Join("; ", items).Capitalize() + ".";
-    
+    if (items.Count > 0)
+    {
+      if (s.Length >0)
+        s += "\n\n";
+      s += string.Join("; ", items).Capitalize() + ".";
+    }
+
     return s;
   }
 }
