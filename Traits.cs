@@ -2325,7 +2325,7 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
       return [];
     }
 
-    ExpiresOn = (ulong)gs.Rng.Next(25, 51);
+    ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(25, 51);
 
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);    
