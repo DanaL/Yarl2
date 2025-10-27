@@ -191,7 +191,7 @@ class GameObjectDB
     return null;
   }
 
-  public (Glyph, int) ItemGlyph(Loc loc, Loc playerLoc)
+  public (Glyph, int, ulong) ItemGlyph(Loc loc, Loc playerLoc)
   {
     static (bool, Glyph) Disguised(Actor mob)
     {
@@ -203,13 +203,14 @@ class GameObjectDB
       return (false, EMPTY);
     }
 
+    ulong objId = 0;
     int z = 0;
     Glyph glyph = EMPTY;
 
     // If there is a Mob disguised as an item, we'll return that glyph
     if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor mob)
     { 
-      var (disguised, trueGlyph) = Disguised(mob);
+      var (disguised, _) = Disguised(mob);
       if (disguised)
       {
         glyph = mob.Glyph;
@@ -229,7 +230,7 @@ class GameObjectDB
         foreach (Trait t in item.Traits)
         {
           if (t is BlockTrait)
-            return (item.Glyph, item.Z());
+            return (item.Glyph, item.Z(), item.ID);
 
           if (t is HiddenTrait)
           {
@@ -250,12 +251,13 @@ class GameObjectDB
         if (item.Z() > z)
         {
           glyph = item.Glyph;
-          z = item.Z();          
+          z = item.Z();
+          objId = item.ID;
         }
       }
     }
 
-    return (glyph, z);
+    return (glyph, z, objId);
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with a TopGlyph() method
@@ -611,10 +613,11 @@ class GameObjectDB
 }
 
 // A structure to store info about a dungeon
+record LocMemory(Glyph Glyph, ulong ObjId);
 class Dungeon(int ID, string name, string arrivalMessage, bool desc)
 {
   public int ID { get; init; } = ID;
-  public Dictionary<Loc, Glyph> RememberedLocs = [];
+  public Dictionary<Loc, LocMemory> RememberedLocs = [];
   public Dictionary<int, Map> LevelMaps = [];
   public string ArrivalMessage { get; } = arrivalMessage;
   public List<MonsterDeck> MonsterDecks { get; set; } = [];

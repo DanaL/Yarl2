@@ -503,7 +503,7 @@ class MagicMapAnimation : Animation
     {
       if (sq.Row >= 0 && sq.Col >= 0 && sq.Row < UserInterface.ViewHeight && sq.Col < UserInterface.ViewWidth)
         _ui.SqsOnScreen[sq.Row, sq.Col] = sq.Sqr;
-      _dungeon.RememberedLocs.TryAdd(sq.Loc, sq.Glyph);
+      _dungeon.RememberedLocs.TryAdd(sq.Loc, new(sq.Glyph, 0));
     }
 
     if (_index >= _locs.Count)

@@ -188,7 +188,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void RememberLoc(Loc loc, Tile tile)
   {
     Glyph glyph = Util.TileToGlyph(tile);
-    CurrentDungeon.RememberedLocs[loc] = glyph;
+    CurrentDungeon.RememberedLocs[loc] = new(glyph, 0);
   }
 
   // I made life difficult for myself by deciding that Turn 0 of the game is 
@@ -2055,11 +2055,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     foreach (Loc loc in LastPlayerFoV)
     {
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-      var (glyph, z) = ObjDb.ItemGlyph(loc, Player.Loc);
-
-      if (glyph.Ch == 'g')
-        Console.WriteLine();
-        
+      var (glyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
+      
       if (glyph == GameObjectDB.EMPTY || z < tile.Z())
       {
         // Remember the terrain tile if there's nothing visible on the square
@@ -2087,11 +2084,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
             Glyph belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
             ch = belowTile.Ch;
           }
+
           glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);
         }
       }
 
-      CurrentDungeon.RememberedLocs[loc] = glyph;
+      CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
     }
   }
 }

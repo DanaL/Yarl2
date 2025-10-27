@@ -1273,7 +1273,7 @@ class DialogueInterpreter
       {
         Tile tile = gs.TileAt(loc);
         Glyph glyph = Util.TileToGlyph(tile);
-        dungeon.RememberedLocs.TryAdd(loc, glyph);
+        dungeon.RememberedLocs.TryAdd(loc, new(glyph, 0));
       }
 
       return;
@@ -1289,7 +1289,7 @@ class DialogueInterpreter
           if (tile.IsTrap())
           {
             Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, true);
-            gs.CurrentDungeon.RememberedLocs[loc] = g;
+            gs.CurrentDungeon.RememberedLocs[loc] = new(g, 0);
             Traps.RevealTrap(tile, gs, loc);            
           }
         }

@@ -86,29 +86,12 @@ class Examiner : Inputer
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
         Loc loc = new(start.DungeonID, start.Level, startRow + r, startCol + c);
-
-        // This is a bad kludge because at the moment, a scroll of magic 
-        // mapping can reveal the floor's map, which I implement by adding 
-        // them to RememberedSqs dictionary for the Dungeon. So, the player
-        // now 'remembers' squares they haven't seen yet so they haven't seen
-        // items on the floor. But later on this function we're looking for 
-        // items at a location that's visible on screen, which was revealing
-        // items the player didn't know about. What I need to do is perhaps
-        // track actually squares seen separately from map tiles known. But for
-        // now this will prevent most of the unknown items from appearing.
-        switch (ui.SqsOnScreen[r, c].Ch)
-        {
-          case '.':
-          case '\\':
-          case '=':
-            continue;
-        }
         
-        if (!GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
-        //if (ui.SqsOnScreen[r, c] == Constants.BLANK_SQ)// && !GS.LastPlayerFoV.Contains(loc))
+        if (!GS.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem))
           continue;
-
+        
         int distance = Distance(GS.Player.Loc, loc);
+
         Actor? occupant = GS.ObjDb.Occupant(loc);
 
         if (occupant is not null && AwareOfActor(occupant, GS))
@@ -130,23 +113,36 @@ class Examiner : Inputer
           if (CyclopediaEntryExists(form))
             pq.Enqueue(loc, distance);
         }
-        else if (GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Any())
+        else if (mem.ObjId != 0 && GS.ObjDb.ItemsAt(loc).Where(p => p.Type == ItemType.Landscape).Any())
         {
           pq.Enqueue(loc, distance);
         }
-        else if (GS.ObjDb.VisibleItemsAt(loc).Count > 0)
+        else if (mem.ObjId != 0 && GS.ObjDb.VisibleItemsAt(loc).Count > 0)
         {
           pq.Enqueue(loc, distance);
         }
-        else if (GS.ObjDb.EnvironmentsAt(loc).Count > 0)
+        else if (mem.ObjId != 0 && GS.ObjDb.EnvironmentsAt(loc).Count > 0)
         {
           pq.Enqueue(loc, distance);
         }
         else
         {
           var tile = GS.TileAt(loc);
+
           switch (tile.Type)
           {
+            case TileType.FireJetTrap:
+              if (((FireJetTrap)tile).Seen)
+                pq.Enqueue(loc, distance);
+              break;
+            case TileType.JetTrigger:
+              if (((JetTrigger) tile).Visible)
+                  pq.Enqueue(loc, distance);
+              break;
+            case TileType.GateTrigger:
+              if (((GateTrigger)tile).Found)
+                pq.Enqueue(loc, distance);
+              break;
             case TileType.Upstairs:
             case TileType.Downstairs:
             case TileType.Portal:
@@ -154,18 +150,16 @@ class Examiner : Inputer
             case TileType.TrapDoor:
             case TileType.Portcullis:
             case TileType.OpenPortcullis:
+            case TileType.VaultDoor:
             case TileType.TeleportTrap:
-            case TileType.JetTrigger:
-            case TileType.FireJetTrap:
             case TileType.WaterTrap:
             case TileType.MagicMouth:
             case TileType.Pit:
             case TileType.DartTrap:
             case TileType.Well:
-            case TileType.GateTrigger:
-            case TileType.Lever:
-            case TileType.RevealedSummonsTrap:
             case TileType.BridgeTrigger:
+            case TileType.Lever:
+            case TileType.RevealedSummonsTrap:            
             case TileType.MistyPortal:
             case TileType.MysteriousMirror:
               pq.Enqueue(loc, distance);
@@ -564,7 +558,7 @@ class MapView : Inputer
   Sqr[,] CalcMap(GameState gs)
   {
     Dungeon dungeon = gs.Campaign.Dungeons[gs.CurrDungeonID];
-    Dictionary<Loc, Glyph> remembered = dungeon.RememberedLocs;
+    Dictionary<Loc, LocMemory> remembered = dungeon.RememberedLocs;
 
     if (gs.CurrentMap.Width < UserInterface.ScreenWidth)
       OffSetCol = 0;
@@ -609,8 +603,9 @@ class MapView : Inputer
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
 
         Sqr sq;
-        if (remembered.TryGetValue(loc, out var g))
+        if (remembered.TryGetValue(loc, out var memory))
         {
+          Glyph g = memory.Glyph;
           // Probably overthinking things but for the wilderness map I prefer
           // the lit tiles and for dungeons the unlit
           Colour fg = gs.InWilderness ? g.Lit : g.Unlit;

@@ -2183,10 +2183,10 @@ class GoldSnifferTrait : TemporaryTrait, IGameEventListener
             }
           }
 
-          if (zorkmidsAt && (!gs.CurrentDungeon.RememberedLocs.TryGetValue(sq, out var glyph) || glyph.Ch != '$'))
+          if (zorkmidsAt && (!gs.CurrentDungeon.RememberedLocs.TryGetValue(sq, out var mem) || mem.Glyph.Ch != '$'))
           {
             zorkmidsFound = true;
-            gs.CurrentDungeon.RememberedLocs[sq] = new('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false);
+            gs.CurrentDungeon.RememberedLocs[sq] = new(new('$', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false), 0);
           }
         }
       }

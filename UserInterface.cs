@@ -1083,7 +1083,7 @@ abstract class UserInterface
     return result.Trim();
   }
 
-  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, Glyph> remembered, Loc loc, Sqr zsqr, bool playerTelepathic, bool playerSeeInvisible)
+  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, LocMemory> remembered, Loc loc, Sqr zsqr, bool playerTelepathic, bool playerSeeInvisible)
   {
     Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
@@ -1103,8 +1103,8 @@ abstract class UserInterface
         }
         else if (gs.ObjDb.FogAtLoc(loc, gs.Player.Loc) is Glyph fog)
           glyph = fog;
-        else if (remembered.TryGetValue(loc, out Glyph rememberedGlyph))
-          glyph = rememberedGlyph;
+        else if (remembered.TryGetValue(loc, out var rememberedLoc))
+          glyph = rememberedLoc.Glyph;
         else
           glyph = GameObjectDB.EMPTY;
 
@@ -1140,7 +1140,7 @@ abstract class UserInterface
         sqr = new Sqr(fgColour, bgColour, glyph.Ch);
       }
     }
-    else if (remembered.TryGetValue(loc, out var glyph))
+    else if (remembered.TryGetValue(loc, out var memory))
     {
       if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
       {
@@ -1149,12 +1149,12 @@ abstract class UserInterface
       else if (gs.CurrentMap.Submerged)
       {
         Colour bg = Colours.UNDERWATER with { Alpha = Colours.UNDERWATER.Alpha - 10 };
-        Colour fg = glyph.Unlit with { Alpha = glyph.Unlit.Alpha / 2 };
-        sqr = new Sqr(fg, bg, glyph.Ch);
+        Colour fg = memory.Glyph.Unlit with { Alpha = memory.Glyph.Unlit.Alpha / 2 };
+        sqr = new Sqr(fg, bg, memory.Glyph.Ch);
       }
       else
       {
-        sqr = new Sqr(glyph.Unlit, glyph.BG, glyph.Ch);
+        sqr = new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
       }
     }
     else

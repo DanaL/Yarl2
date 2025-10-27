@@ -388,7 +388,7 @@ internal class DungeonSaver
 
     foreach (var kvp in dungeon.RememberedLocs)
     {
-      string s = $"{kvp.Key}{Constants.SEPARATOR}{kvp.Value}";
+      string s = $"{kvp.Key}{Constants.SEPARATOR}{kvp.Value.Glyph},{kvp.Value.ObjId}";
       sd.RememberedLocs.Add(s);      
     }
 
@@ -402,12 +402,14 @@ internal class DungeonSaver
       ExitLoc = Loc.FromStr(sd.ExitLoc)
     };
 
-    foreach (string s in sd.RememberedLocs)
+    foreach (var s in sd.RememberedLocs)
     {
       var pieces = s.Split(Constants.SEPARATOR);
       Loc loc = Loc.FromStr(pieces[0]);
-      Glyph g = Glyph.TextToGlyph(pieces[1]);
-      d.RememberedLocs[loc] = g;
+      int x = pieces[1].LastIndexOf(',');
+      Glyph g = Glyph.TextToGlyph(pieces[1][..x]);
+      ulong objId = ulong.Parse(pieces[1][(x+1)..]);
+      d.RememberedLocs[loc] = new LocMemory(g, objId);
     }
  
     foreach (var k in sd.LevelMaps.Keys)

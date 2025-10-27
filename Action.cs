@@ -1994,7 +1994,7 @@ class DetectTrapsAction(GameState gs, Actor caster) : Action(gs, caster)
           {
             ++trapsFound;
             Glyph g = new('^', Colours.WHITE, Colours.WHITE, Colours.BLACK, true);
-            GameState.CurrentDungeon.RememberedLocs[loc] = g;
+            GameState.CurrentDungeon.RememberedLocs[loc] = new(g, 0);
             Traps.RevealTrap(tile, GameState, loc);
 
             if (Util.PtInSqr(r, c, topScreenRow, topScreenCol, UserInterface.ViewHeight, UserInterface.ViewWidth))
@@ -2038,7 +2038,7 @@ class DetectTreasureAction(GameState gs, Actor caster) : Action(gs, caster)
           if (glyph != GameObjectDB.EMPTY)
           {
             ++itemsFound;
-            GameState.CurrentDungeon.RememberedLocs[loc] = glyph;
+            GameState.CurrentDungeon.RememberedLocs[loc] = new(glyph, 0);
 
             if (Util.PtInSqr(r, c, topScreenRow, topScreenCol, UserInterface.ViewHeight, UserInterface.ViewWidth))
             {
@@ -2274,11 +2274,11 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
     {
       GameState.ApplyDamageEffectToLoc(adj, DamageType);
 
-      if (gs.ObjDb.Occupant(adj) is Actor adjActor)
+      if (GameState.ObjDb.Occupant(adj) is Actor adjActor)
       {
         int dmg = 0;
         for (int j = 0; j < NumOfDice; j++)
-          dmg += gs.Rng.Next(DmgDie) + 1;
+          dmg += GameState.Rng.Next(DmgDie) + 1;
         List<(int, DamageType)> dmgs = [(dmg, DamageType)];
         var (adjHpLeft, _, _) = adjActor.ReceiveDmg(dmgs, 0, GameState, null, 1.0);
 
@@ -2287,7 +2287,7 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
         
         if (adjHpLeft < 1)
         {
-          gs.ActorKilled(adjActor, Actor.FullName, null);
+          GameState.ActorKilled(adjActor, Actor.FullName, null);
         }
       }
 
@@ -3939,10 +3939,8 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
       return new LocDetails(name, desc, actor.Glyph.Ch, hpCurr, hpMax);
     }
 
-    List<Item> items = [.. GameState!.ObjDb.VisibleItemsAt(loc).OrderByDescending(i => i.HasTrait<BlockTrait>())];    
-    if (items.Count > 0)
+    if (GameState.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var mem) && GameState.ObjDb.GetObj(mem.ObjId) is Item item)
     { 
-      Item item = items[0];
       string title = item.FullName;
       if (item.HasTrait<PluralTrait>())
         title = title.Capitalize();
@@ -3961,16 +3959,16 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
     List<Item> env = [.. GameState!.ObjDb.EnvironmentsAt(loc).Where(e => e.Name != "photon")];
     if (env.Count > 0)
     {
-      Item item = env[0];
-      string title = item.Name.Capitalize();
+      Item envItem = env[0];
+      string title = envItem.Name.Capitalize();
       string details = "";
-      if (_cyclopedia.TryGetValue(item.Name, out var v))
+      if (_cyclopedia.TryGetValue(envItem.Name, out var v))
       {
         title = v.Title;
         details = v.Text;
       }
 
-      return new LocDetails(title, details, item.Glyph.Ch);
+      return new LocDetails(title, details, envItem.Glyph.Ch);
     }
 
     Tile tile = GameState!.TileAt(loc);
