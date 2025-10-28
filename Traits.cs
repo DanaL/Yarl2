@@ -450,7 +450,7 @@ class HeroismTrait : TemporaryTrait
   }
 }
 
-class HiddenTrait : Trait
+sealed class HiddenTrait : Trait
 {
   public override string AsText() => $"Hidden";
 }
@@ -472,7 +472,7 @@ class HomebodyTrait : Trait
 
 // This is to mark monsters who have ranged abilities but will also choose
 // to approach and attack their target
-class HunterTrait : Trait
+sealed class HunterTrait : Trait
 {
   public override string AsText() => "Hunter";
 }
@@ -1010,7 +1010,7 @@ class SleepingTrait : Trait
   public override string AsText() => "Sleeping";
 }
 
-class StickyTrait : BasicTrait
+sealed class StickyTrait : BasicTrait
 {
   public int DC => 16;
 
@@ -2381,7 +2381,7 @@ class NumbedTrait : TemporaryTrait
   }
 }
 
-class NumberListTrait : Trait
+sealed class NumberListTrait : Trait
 {
   public string Name { get; set; } = "";
   public List<int> Items { get; set; } = [];
@@ -2484,7 +2484,7 @@ class PoisonCoatedTrait : Trait
   public override string AsText() => "PoisonCoated";
 }
 
-class PoisonedTrait : TemporaryTrait
+sealed class PoisonedTrait : TemporaryTrait
 {
   public int DC { get; set; }
   public int Strength { get; set; }
@@ -2552,7 +2552,7 @@ class PoisonedTrait : TemporaryTrait
   }
 }
 
-class PoisonerTrait : BasicTrait
+sealed class PoisonerTrait : BasicTrait
 {
   public int DC { get; set; }
   public int Strength { get; set; }
