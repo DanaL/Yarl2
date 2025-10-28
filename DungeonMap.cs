@@ -926,9 +926,10 @@ class DungeonMap(Rng rng)
   }
 
   // Okay, so we still have two separate regions after other tweaks so I'm just 
-  // going to draw a straight tunnel between the two regions
+  // going to draw a tunnel between the two closest points of the two regions
   static void BruteForceJoinRegions(Map map, HashSet<(int, int)> a, HashSet<(int, int)> b, Rng rng)
-  {    
+  {
+    map.Dump();
     List<(int, int)> smaller, larger;
     if (a.Count > b.Count)
     {
@@ -940,56 +941,36 @@ class DungeonMap(Rng rng)
       larger = [.. b.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
       smaller = [.. a.Where(s => map.TileAt(s).Type == TileType.DungeonFloor)];
     }
+    smaller.Shuffle(rng);
 
-    bool done = false;
-    while (!done)
+    int shortestD = int.MaxValue;
+    Loc tunnelStart = Loc.Nowhere;
+    Loc tunnelEnd = Loc.Nowhere;
+    foreach (var sq in smaller)
     {
-      int i = rng.Next(smaller.Count);
-      var (startR, startC) = smaller[i];
-      smaller.RemoveAt(i);
-
-      List<(int, int)> endSqs = [];
-      foreach (var sq in larger)
+      foreach (var endSq in larger)
       {
-        if (Util.Distance(sq.Item1, sq.Item2, startR, startC) < 6 && (sq.Item1 == startR || sq.Item2 == startC))
-          endSqs.Add(sq);
-      }
-
-      if (endSqs.Count > 0)
-      {
-        var (endR, endC) = endSqs[rng.Next(endSqs.Count)];
-        int deltaR;
-        if (startR == endR)
-          deltaR = 0;
-        else if (startR < endR)
-          deltaR = 1;
-        else
-          deltaR = -1;
-        int deltaC;
-        if (startC == endC)
-          deltaC = 0;
-        else if (startC < endC)
-          deltaC = 1;
-        else
-          deltaC = -1;
-
-        int row = startR, col = startC;
-        while (row != endR || col != endC)
+        int d = Util.Distance(sq.Item1, sq.Item2, endSq.Item1, endSq.Item2);
+        if (d < int.MaxValue)
         {
-          map.SetTile(row, col, TileFactory.Get(TileType.DungeonFloor));
-          row += deltaR;
-          col += deltaC;
+          shortestD = d;
+          tunnelStart = new(0, 0, sq.Item1, sq.Item2);
+          tunnelEnd = new(0, 0, endSq.Item1, endSq.Item2);
         }
-        
-        return;
-      }
-      else
-      {
-        done = false;
       }
     }
 
-    throw new InvalidRoomException();
+    Dictionary<TileType, int> costs = [];
+    costs.Add(TileType.DungeonWall, 0);
+    costs.Add(TileType.DungeonFloor, 0);
+    Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, tunnelStart, tunnelEnd, costs, false);
+    while (path.Count > 0)
+    {
+      Loc loc = path.Pop();
+      map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
+    }
+
+    map.Dump();
   }
 
   public Map DrawLevel(int width, int height)
