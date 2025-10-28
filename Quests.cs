@@ -116,10 +116,15 @@ class SorceressQuest
     campaign.AddDungeon(sorceressTower);
 
     // Set the decoy mirrors.
-    (Dungeon wumpus, Loc wumpusLoc) = SorceressDungeonBuilder.WumpusDungeon(sdb.DecoyMirror1, dungeonId + 1, objDb, rng);    
-    if (sorceressTower.LevelMaps[sdb.DecoyMirror1.Level].TileAt(sdb.DecoyMirror1.Row, sdb.DecoyMirror1.Col) is MysteriousMirror mirror)
+    (Dungeon wumpus, Loc wumpusLoc) = SorceressDungeonBuilder.WumpusDungeon(sdb.DecoyMirror1, dungeonId + 1, objDb, rng);
+    Map mirrorLevel = sorceressTower.LevelMaps[sdb.DecoyMirror1.Level];
+    if (mirrorLevel.TileAt(sdb.DecoyMirror1.Row, sdb.DecoyMirror1.Col) is MysteriousMirror mirror)
     {
       mirror.Destination = wumpusLoc;
+
+      List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror1)
+                                    .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
+      wumpus.ExitLoc = adjToMirror[rng.Next(adjToMirror.Count)];
     }
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
