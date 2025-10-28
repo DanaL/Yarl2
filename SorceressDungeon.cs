@@ -59,6 +59,17 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     var mirror = farSqs[rng.Next(farSqs.Count)];    
     MysteriousMirror mm = new("") { Destination = tower };
     map.SetTile(mirror.Item1, mirror.Item2, mm);
+    floorsInChambers.Remove(mirror);
+
+    i = rng.Next(floorsInChambers.Count);
+    var pit = floorsInChambers[i];
+    map.SetTile(pit, TileFactory.Get(TileType.HiddenPit));
+    floorsInChambers.RemoveAt(i);
+
+    i = rng.Next(floorsInChambers.Count);
+    pit = floorsInChambers[i];
+    map.SetTile(pit, TileFactory.Get(TileType.HiddenPit));
+    floorsInChambers.RemoveAt(i);
 
     dungeon.AddMap(map);
 
