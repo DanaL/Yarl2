@@ -1448,8 +1448,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     if (actor is Player && tile.Type == TileType.MistyPortal)
     {
       Loc exitPoint = CurrentDungeon.ExitLoc;
-      ResolveActorMove(Player, Player.Loc, exitPoint);
       ActorEntersLevel(Player, 0, 0);
+      ResolveActorMove(Player, Player.Loc, exitPoint);      
       FlushPerformers();
       PrepareFieldOfView();
 
@@ -1462,8 +1462,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       MysteriousMirror mm = (MysteriousMirror)TileAt(dest);
       Loc mirrorDest = mm.Destination;
       Loc actualDest = Util.NearestUnoccupiedLoc(this, mirrorDest);
-      ResolveActorMove(Player, Player.Loc, actualDest);
       ActorEntersLevel(Player, actualDest.DungeonID, actualDest.Level);
+      ResolveActorMove(Player, Player.Loc, actualDest);      
       FlushPerformers();
       PrepareFieldOfView();
 
