@@ -1467,8 +1467,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       FlushPerformers();
       PrepareFieldOfView();
 
-      UI.AlertPlayer("The strange mirror draws you inside it!");
-      UI.SetPopup(new Popup("The strange mirror draws you inside it!", "", -1, -1));
+      string s = "The strange mirror draws you inside it!";
+      UI.AlertPlayer(s);
+      if (start.DungeonID != mirrorDest.DungeonID && CurrentDungeon.ArrivalMessage != "")
+      {
+        s += $"\n\n{CurrentDungeon.ArrivalMessage}";
+        UI.AlertPlayer(CurrentDungeon.ArrivalMessage);
+      }
+      
+      UI.SetPopup(new Popup(s, "", -1, -1));
     }
     
     if (tile.IsTrap())

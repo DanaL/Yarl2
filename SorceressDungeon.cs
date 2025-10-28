@@ -17,6 +17,42 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   int Width { get; set; } = width;
   int DungeonId { get; set; } = dungeonId;
 
+  public Loc DecoyMirror1 { get; set; } = Loc.Nowhere;
+  public Loc DecoyMirror2 { get; set; } = Loc.Nowhere;
+
+  public static (Dungeon, Loc) WumpusDungeon(Loc tower, int DungeonId, GameObjectDB objDb, Rng rng)
+  {
+    Dungeon dungeon = new(DungeonId, "a Noisome Cavern", "You are in Room 1.", false);
+
+    List<(int, int)> floors = [];
+    var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("wumpus.txt"));
+    Map map = new(lines[0].Length, lines.Length, TileType.PermWall);
+    for (int r = 0; r < lines.Length; r++)
+    {
+      for (int c = 0; c < lines[r].Length; c++)
+      {
+        if (lines[r][c] == '.')
+        {
+          map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
+          floors.Add((r, c));
+        }
+      }
+    }
+    
+    int i = rng.Next(floors.Count);
+    Loc arrival = new(DungeonId, 0, floors[i].Item1, floors[i].Item2);
+    floors.RemoveAt(i);
+
+    List<(int, int)> farSqs = [.. floors.Where(s => Util.Distance(s.Item1, s.Item2, arrival.Row, arrival.Col) > 20)];
+    var mirror = farSqs[rng.Next(farSqs.Count)];    
+    MysteriousMirror mm = new("") { Destination = tower };
+    map.SetTile(mirror.Item1, mirror.Item2, mm);
+
+    dungeon.AddMap(map);
+
+    return (dungeon, arrival);
+  }
+
   public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
     Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false)
@@ -61,9 +97,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         }
       }
     }
-
-    PopulateDungeon(towerDungeon, rng, objDb);
-
+    
     for (int lvl = 0; lvl < towerDungeon.LevelMaps.Count; lvl++)
     {
       Map map = towerDungeon.LevelMaps[lvl];
@@ -89,6 +123,21 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         }
       }
 
+      if (lvl == towerDungeon.LevelMaps.Count - 2)
+      {
+        int i = rng.Next(floorSqs.Count);
+        DecoyMirror1 = floorSqs[i];
+        MysteriousMirror mm = new("") { Destination = Loc.Nowhere };
+        towerDungeon.LevelMaps[lvl].SetTile(DecoyMirror1.Row, DecoyMirror1.Col, mm);
+        floorSqs.RemoveAt(i);
+
+        //i = rng.Next(floorSqs.Count);
+        //DecoyMirror2 = floorSqs[i];
+        //mm = new("") { Destination = upstairs.Destination };
+        //towerDungeon.LevelMaps[lvl].SetTile(DecoyMirror2.Row, DecoyMirror2.Col, mm);
+        //floorSqs.RemoveAt(i);
+      }
+
       // Sometimes replace a door with a mimic! Just the sort of thing a 
       // wizard would do!
       if (rng.Next(10) == 0 && doors.Count > 0)
@@ -103,6 +152,8 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       {
         AddMoldPatch(map, floorSqs, objDb, rng);
       }
+
+      PopulateDungeon(towerDungeon, rng, objDb);
 
       AddTreasure(objDb, floorSqs, DungeonId, lvl, rng);
     }
