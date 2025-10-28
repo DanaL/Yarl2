@@ -349,7 +349,7 @@ class CampaignCreator(UserInterface ui)
     options = [.. options.OrderBy(sq => sq.Item3)];
 
     if (options.Count == 0)
-      throw new CouldNotPlaceDungeonEntranceException();
+      throw new WildernessCreationException("Could not find a place for Initial Dungeon entrance");
 
     // The dividing by 4 thing is to try to bias the selection toward locations
     // further from town.
@@ -515,24 +515,10 @@ class CampaignCreator(UserInterface ui)
         //(startR, startC) = entrance;
 
         break;
-      }
-      catch (InvalidTownException)
+      }                  
+      catch (WildernessCreationException wce)
       {
-        Console.WriteLine("Oh no not enough cottages");
-        // Should I just bail out after too many tries? I can't imagine it 
-        // will take more than 1 or 2 more tries
-      }
-      catch (PlacingBuldingException)
-      {
-        Console.WriteLine("Failed to place a building");
-      }
-      catch (CouldNotPlaceDungeonEntranceException)
-      {
-        Console.WriteLine("Failed to find spot for Main Dungeon");
-      }
-      catch (PlacingWitchesCottageException)
-      {
-        Console.WriteLine("Could not find place for witches' cottage");
+        Console.WriteLine(wce.Message);
       }
     }
     while (true);
@@ -578,7 +564,7 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 1565045892;
+    //seed = 2013019477;
     Console.WriteLine($"Seed: {seed}");
 
     try

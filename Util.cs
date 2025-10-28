@@ -1183,11 +1183,9 @@ class PlayerKilledException : Exception
   public List<string> Messages { get; set; } = [];
 }
 class VictoryException : Exception { }
-class InvalidTownException : Exception { }
-class PlacingBuldingException : Exception { }
-class PlacingWitchesCottageException : Exception { }
 class InvalidRoomException : Exception { }
-class CouldNotPlaceDungeonEntranceException : Exception { }
+class WildernessCreationException(string msg) : Exception(msg) { }
+
 class AbnormalMovement(Loc dest) : Exception
 {
   public Loc Dest { get; set; } = dest;

@@ -629,12 +629,10 @@ class Rooms
   public static void ChasmIslandRoom(Map[] levels, Rng rng, int dungeonId, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
-    map.Dump();
     Map mapBelow = levels[level + 1];
 
     MakeChasm(map, mapBelow, room);
-    map.Dump();
-
+    
     HashSet<Loc> exists = [];
     foreach (var sq in room)
     {

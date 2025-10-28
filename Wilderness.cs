@@ -379,36 +379,6 @@ internal class Wilderness(Rng rng, int length)
     return map;
   }
 
-  static void Dump(Map map, int length, string filename)
-  {
-    using TextWriter tw = new StreamWriter(filename);
-    for (int r = 0; r < length; r++)
-    {
-      for (int c = 0; c < length; c++)
-      {
-        var t = map.TileAt(r, c);
-        char ch = t.Type switch
-        {
-          TileType.PermWall => '#',
-          TileType.DungeonWall => '#',
-          TileType.DungeonFloor or TileType.Sand => '.',
-          TileType.ClosedDoor => '+',
-          TileType.Mountain or TileType.SnowPeak => '^',
-          TileType.Grass => ',',
-          TileType.OrangeTree => 'T',
-          TileType.GreenTree => 'T',
-          TileType.RedTree => 'T',
-          TileType.YellowTree => 'T',
-          TileType.DeepWater or TileType.Water => '~',
-          _ => '!'
-        };
-
-        tw.Write(ch);
-      }
-      tw.WriteLine();
-    }
-  }
-
   static void SetBorderingWater(Map map, int length)
   {
     int center = length / 2;
@@ -611,7 +581,7 @@ internal class Wilderness(Rng rng, int length)
     }
 
     map.Dump();
-    throw new Exception("No valleys at all!");
+    throw new WildernessCreationException("No valleys at all!");
   }
 
   public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
