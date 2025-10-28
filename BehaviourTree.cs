@@ -1108,7 +1108,10 @@ class KeepDistance : BehaviourNode
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     int maxRange = 1;
-    if (mob.Powers.Count > 0)
+
+    // Monsters with hunter will approach their target even though they might
+    // have ranged abilities
+    if (!mob.HasTrait<HunterTrait>() && mob.Powers.Count > 0)
       maxRange = mob.Powers.Where(p => p.Type == PowerType.Attack).Max(p => p.MaxRange);
 
     if (!gs.Player.VisibleTo(mob) || !ClearShot(gs, mob.Loc, gs.Player.Loc))
@@ -1753,7 +1756,7 @@ class Planner
 
     // Insert the seek gold node after inactive. The greedy monster will hunt
     // gold unless it is immediately adjacent to the player.
-    Selector plan = (Selector)CreateMonsterPlan(mob);
+    Selector plan = CreateMonsterPlan(mob);
     int i = 0;
     foreach (BehaviourNode node in plan.Children)
     {
@@ -1798,7 +1801,7 @@ class Planner
       new SetMonsterAttitude(Mob.AGGRESSIVE, s)
     ]);
 
-    Selector plan = (Selector)CreateMonsterPlan(mob);
+    Selector plan = CreateMonsterPlan(mob);
 
     int i = 0;
     for (; i < plan.Children.Count; i++)
@@ -1850,7 +1853,7 @@ class Planner
     return new Selector(plan);
   }
 
-  static BehaviourNode CreateMonsterPlan(Mob mob)
+  static Selector CreateMonsterPlan(Mob mob)
   {
     bool immobile = mob.HasTrait<ImmobileTrait>();
 

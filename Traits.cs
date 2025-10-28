@@ -470,6 +470,13 @@ class HomebodyTrait : Trait
   public override string AsText() => $"Homebody#{Loc}#{Range}";
 }
 
+// This is to mark monsters who have ranged abilities but will also choose
+// to approach and attack their target
+class HunterTrait : Trait
+{
+  public override string AsText() => "Hunter";
+}
+
 class MosquitoTrait : Trait
 {
   public override string AsText() => "Mosquito";
@@ -1005,7 +1012,7 @@ class SleepingTrait : Trait
 
 class StickyTrait : BasicTrait
 {
-  public int DC => 13;
+  public int DC => 16;
 
   public override string AsText() => "Sticky";
 }
@@ -3883,7 +3890,7 @@ class TraitFactory
     }},
     { "FinalBoss", (pieces, gameObj) => new FinalBossTrait() },
     { "Finesse", (pieces, gameObj) => new FinesseTrait() },
-    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },    
+    { "FireRebuke", (pieces, gameObj) => new FireRebukeTrait() { SourceId = ulong.Parse(pieces[1])} },
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
@@ -3922,6 +3929,7 @@ class TraitFactory
     { "Hidden", (pieces, gameObj) => new HiddenTrait() },
     { "Holy", (pieces, gameObj) => new HolyTrait() },
     { "Homebody", (pieces, gameObj) => new HomebodyTrait() { Loc = Loc.FromStr(pieces[1]), Range = int.Parse(pieces[2]) }},
+    { "Hunter", (pieces, gameObj) => new HunterTrait() },
     { "Illusion", (pieces, gameObj) => new IllusionTrait() { SourceId = ulong.Parse(pieces[1]), ObjId = ulong.Parse(pieces[2]) } },
     { "Immobile", (pieces, gameObj) => new ImmobileTrait() },
     { "Immunity", (pieces, gameObj) => {
@@ -3966,7 +3974,7 @@ class TraitFactory
       new MageArmourTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) }
     },
     { "MeleeDamageMod", (pieces, gameObj) => new MeleeDamageModTrait() { Amt = int.Parse(pieces[1]), SourceId = ulong.Parse(pieces[2]) }},
-    { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },    
+    { "Metal", (pieces, gameObj) => new MetalTrait() { Type = (Metals)int.Parse(pieces[1]) } },
     { "MoldSpores", (pieces, gameObj) => new MoldSporesTrait() },
     { "MolochAltar", (pieces, gameObj) => new MolochAltarTrait() },
     { "Mosquito", (pieces, gameObj) => new MosquitoTrait() },
