@@ -359,8 +359,9 @@ class CampaignCreator(UserInterface ui)
     return (entrance.Item1, entrance.Item2);
   }
 
-  static (Campaign, int, int) BeginNewCampaign(Rng rng, GameObjectDB objDb)
+  static (Campaign, int, int, GameObjectDB) BeginNewCampaign(Rng rng)
   {
+    GameObjectDB objDb;
     Campaign campaign;
     Dungeon wilderness;
     Map wildernessMap;
@@ -372,6 +373,7 @@ class CampaignCreator(UserInterface ui)
     {
       try
       {
+        objDb = new GameObjectDB();
         campaign = new Campaign();
         wilderness = new Dungeon(0, "the Wilderness", "You draw a deep breath of fresh air.", true);
         Wilderness wildernessGenerator = new(rng, wildernessWidth);
@@ -523,7 +525,7 @@ class CampaignCreator(UserInterface ui)
     }
     while (true);
 
-    return (campaign, startR, startC);
+    return (campaign, startR, startC, objDb);
   }
 
   public void SavedGameExists(string playerName, string existingSavePath)
@@ -564,7 +566,7 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    //seed = 2013019477;
+    seed = 2013019477;
     Console.WriteLine($"Seed: {seed}");
 
     try
@@ -581,12 +583,13 @@ class CampaignCreator(UserInterface ui)
       }
 
       Rng rng = new(seed);
-      GameObjectDB objDb = new();
+      
       SetItemIDInfo(rng);
 
       Campaign campaign;
+      GameObjectDB objDb;
       int startRow, startCol;
-      (campaign, startRow, startCol) = BeginNewCampaign(rng, objDb);
+      (campaign, startRow, startCol, objDb) = BeginNewCampaign(rng);
       GameState gameState = new(campaign, options, UI, rng)
       {
         ObjDb = objDb,
