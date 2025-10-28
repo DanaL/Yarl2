@@ -73,3 +73,5 @@ killer bee        |I|yelloworange |brown       |17|12|6| 1.0|10|10|MeleePiercing
 invisible stalker |i|grey         |darkgrey    |15|40|5| 1.0|10|14|MeleeBlunt#1#1#4#3#0#0#Attack|Invisible#owner#false#max,Flying|
 wraith            |W|blue         |darkgrey    |14|40|5| 1.0|10|10|MeleeNecrotic#1#1#10#1#0#0#Attack|Immunity#Poison,ResistPiercing,ResistBlunt,ResistSlashing,Undead,SilverAllergy,Numbs|
 flame spirit      |ώ|brightred    |dullred     |15|40|3| 1.0|10|10|FlareFire#1#1#6#4#0#2#Attack|LightSource#owner#2#brightred#torchred,Flying,Immunity#Fire|
+super bat         |v|brightred    |dullred     |14|40|3|1.25|10|14|MeleePiercing#1#1#8#2#0#0#Attack|Flying|
+wumpus            |O|lightpurple  |purple      |15|65|6| 1.0|18|10|MeleeBlunt#1#1#5#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy|

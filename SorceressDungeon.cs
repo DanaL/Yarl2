@@ -43,7 +43,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     {
       for (int c = 0; c < map.Width; c++)
       {
-        if (map.TileAt(r,c).Type == TileType.DungeonFloor && CountAdjFloors(map, r, c) > 2)
+        if (map.TileAt(r,c).Type == TileType.DungeonFloor && CountAdjFloors(map, r, c) > 3)
         {
           floorSqs.Add((r, c));
         }
@@ -72,6 +72,28 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     floorsInChambers.RemoveAt(i);
 
     dungeon.AddMap(map);
+
+    i = rng.Next(floorsInChambers.Count);
+    var batSq = floorsInChambers[i];
+    floorsInChambers.RemoveAt(i);
+    Loc batLoc = new(DungeonId, 0, batSq.Item1, batSq.Item2);
+    Actor bat = MonsterFactory.Get("super bat", objDb, rng);    
+    objDb.AddNewActor(bat, batLoc);
+
+    i = rng.Next(floorsInChambers.Count);
+    batSq = floorsInChambers[i];
+    floorsInChambers.RemoveAt(i);
+    batLoc = new(DungeonId, 0, batSq.Item1, batSq.Item2);
+    bat = MonsterFactory.Get("super bat", objDb, rng);
+    objDb.AddNewActor(bat, batLoc);
+
+    List<Loc> adjToMirror = [.. Util.Adj8Sqs(mirror.Item1, mirror.Item2)
+                                  .Where(s => map.TileAt(s).Type == TileType.DungeonFloor)
+                                  .Select(s => new Loc(DungeonId, 0, s.Item1, s.Item2))];
+    adjToMirror.Shuffle(rng);
+    Loc wumpusLoc = adjToMirror[0];
+    Actor wumpus = MonsterFactory.Get("wumpus", objDb, rng);
+    objDb.AddNewActor(wumpus, wumpusLoc);
 
     return (dungeon, arrival);
 
