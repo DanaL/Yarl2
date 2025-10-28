@@ -24,7 +24,6 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   {
     Dungeon dungeon = new(DungeonId, "a Noisome Cavern", "You are in Room 1.", false);
 
-    List<(int, int)> floors = [];
     var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("wumpus.txt"));
     Map map = new(lines[0].Length, lines.Length, TileType.PermWall);
     for (int r = 0; r < lines.Length; r++)
@@ -33,17 +32,30 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       {
         if (lines[r][c] == '.')
         {
-          map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));
-          floors.Add((r, c));
+          map.SetTile(r, c, TileFactory.Get(TileType.DungeonFloor));          
         }
       }
     }
-    
-    int i = rng.Next(floors.Count);
-    Loc arrival = new(DungeonId, 0, floors[i].Item1, floors[i].Item2);
-    floors.RemoveAt(i);
 
-    List<(int, int)> farSqs = [.. floors.Where(s => Util.Distance(s.Item1, s.Item2, arrival.Row, arrival.Col) > 20)];
+    // Identify the floor squares that are in chambers
+    HashSet<(int, int)> floorSqs = [];    
+    for (int r = 0; r < map.Height; r++)
+    {
+      for (int c = 0; c < map.Width; c++)
+      {
+        if (map.TileAt(r,c).Type == TileType.DungeonFloor && CountAdjFloors(map, r, c) > 2)
+        {
+          floorSqs.Add((r, c));
+        }
+      }
+    }
+    List<(int, int)> floorsInChambers = [.. floorSqs];
+
+    int i = rng.Next(floorsInChambers.Count);
+    Loc arrival = new(DungeonId, 0, floorsInChambers[i].Item1, floorsInChambers[i].Item2);
+    floorsInChambers.RemoveAt(i);
+
+    List<(int, int)> farSqs = [.. floorsInChambers.Where(s => Util.Distance(s.Item1, s.Item2, arrival.Row, arrival.Col) > 20)];
     var mirror = farSqs[rng.Next(farSqs.Count)];    
     MysteriousMirror mm = new("") { Destination = tower };
     map.SetTile(mirror.Item1, mirror.Item2, mm);
@@ -51,6 +63,13 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     dungeon.AddMap(map);
 
     return (dungeon, arrival);
+
+    int CountAdjFloors(Map map, int row, int col)
+    {
+      return Util.Adj8Sqs(row, col)
+                 .Where(adj => map.TileAt(adj.Item1, adj.Item2).Type == TileType.DungeonFloor)
+                 .Count();
+    }
   }
 
   public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
