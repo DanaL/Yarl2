@@ -929,7 +929,6 @@ class DungeonMap(Rng rng)
   // going to draw a tunnel between the two closest points of the two regions
   static void BruteForceJoinRegions(Map map, HashSet<(int, int)> a, HashSet<(int, int)> b, Rng rng)
   {
-    map.Dump();
     List<(int, int)> smaller, larger;
     if (a.Count > b.Count)
     {
@@ -969,8 +968,6 @@ class DungeonMap(Rng rng)
       Loc loc = path.Pop();
       map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
     }
-
-    map.Dump();
   }
 
   public Map DrawLevel(int width, int height)

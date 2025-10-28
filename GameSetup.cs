@@ -578,7 +578,7 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    // seed = 2145130182;
+    seed = 1565045892;
     Console.WriteLine($"Seed: {seed}");
 
     try
@@ -633,10 +633,10 @@ class CampaignCreator(UserInterface ui)
     {
       return null;
     }
-    catch (Exception ex)
-    {
-      string s = $"Exception creating new game. Initial seed: {seed}";
-      throw new Exception(s, ex);
-    }
+    //catch (Exception ex)
+    //{
+    //  string s = $"Exception creating new game. Initial seed: {seed}";
+    //  throw new Exception(s, ex);
+    //}
   }
 }

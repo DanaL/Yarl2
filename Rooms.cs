@@ -629,19 +629,21 @@ class Rooms
   public static void ChasmIslandRoom(Map[] levels, Rng rng, int dungeonId, int level, List<(int, int)> room, GameObjectDB objDb)
   {
     Map map = levels[level];
+    map.Dump();
     Map mapBelow = levels[level + 1];
 
     MakeChasm(map, mapBelow, room);
+    map.Dump();
 
-    HashSet<Loc> doors = [];
+    HashSet<Loc> exists = [];
     foreach (var sq in room)
     {
       foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
       {
         TileType tt = map.TileAt(adj).Type;
-        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor)
+        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor || (!room.Contains(adj) && map.TileAt(adj).Passable()))
         {
-          doors.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
+          exists.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
         }
       }
     }
@@ -667,7 +669,7 @@ class Rooms
       islandSqs.Add(sq);
     }
 
-    Loc door = doors.First();
+    Loc door = exists.First();
     List<(int, int)> candidates = [.. islandSqs.Where(s => Util.Distance(door, new Loc(dungeonId, level, s.Item1, s.Item2)) < 3)];
     candidates.Shuffle(rng);
     for (int j = 0; j < int.Min(candidates.Count, rng.Next(1, 4)); j++)
