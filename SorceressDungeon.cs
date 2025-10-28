@@ -95,6 +95,25 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     Actor wumpus = MonsterFactory.Get("wumpus", objDb, rng);
     objDb.AddNewActor(wumpus, wumpusLoc);
 
+    for (int j = 0; j < 4; j++)
+    {
+      var quality = rng.Next(4) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
+      Item item = Treasure.ItemByQuality(quality, objDb, rng);
+      var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
+      Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
+      objDb.Add(item);
+      objDb.SetToLoc(loc, item);
+    }
+
+    for (int j = 0; j < 3; j++)
+    {
+      Item item = ItemFactory.Get(ItemNames.BONE, objDb);
+      var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
+      Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
+      objDb.Add(item);
+      objDb.SetToLoc(loc, item);
+    }
+
     return (dungeon, arrival);
 
     int CountAdjFloors(Map map, int row, int col)
