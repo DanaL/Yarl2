@@ -296,11 +296,14 @@ class ChampionBlessingTrait : BlessingTrait
 
     ACModTrait ac = new() { ArmourMod = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(ac);
-    AuraOfProtectionTrait prot = new() { HP = 25 + int.Max(1, piety) * 5, SourceId = granter.ID };
-    prot.Apply(gs.Player, gs);
+
+    int hpAmt = int.Max(1, piety) * 5;
+    StatBuffTrait sbt = new() { Attr = Attribute.HP, Amt = hpAmt, ExpiresOn = ulong.MaxValue, SourceId = granter.ID, MaxHP = true };
+    sbt.Apply(gs.Player, gs);
+
     AttackModTrait amt = new() { Amt = 1 + piety, SourceId = granter.ID };
     gs.Player.Traits.Add(amt);
-
+    
     gs.Player.Traits.Add(this);
 
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -312,7 +315,12 @@ class ChampionBlessingTrait : BlessingTrait
   {
     base.Remove(gs);
 
+    StatBuffTrait hpBuff = (StatBuffTrait) gs.Player.Traits.Where(t => t is StatBuffTrait sbt && sbt.SourceId == SourceId && sbt.Attr == Attribute.HP)
+                                                           .First();
+    hpBuff.Remove(gs);
+
     gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
+    gs.Player.CalcHP();
   }
 
   public override string AsText() => $"ChampionBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
@@ -321,7 +329,7 @@ class ChampionBlessingTrait : BlessingTrait
   {
     string s = $"You have the [iceblue {Title} Blessing]. It grants";
 
-    AuraOfProtectionTrait? prot = owner.Traits.OfType<AuraOfProtectionTrait>()
+    StatBuffTrait? sbt = owner.Traits.OfType<StatBuffTrait>()
                               .Where(t => t.SourceId == SourceId)
                               .FirstOrDefault();
 
@@ -338,13 +346,13 @@ class ChampionBlessingTrait : BlessingTrait
                               .FirstOrDefault();
     if (am is not null)
     {
-      s += prot is null ? " and " : ", ";
+      s += sbt is null ? " and " : ", ";
       s += $"a [lightblue +{am.Amt}] attack bonus";
     }
 
-    if (prot is not null)
+    if (sbt is not null)
     {
-      s += ", and a [lightblue ward] against damage";
+      s += $", and [lightblue +{sbt.Amt}] bonus HP";
     }
 
     s += ".";
@@ -1123,10 +1131,12 @@ class GrantsTrait : Trait
         obj.Traits.Add(trait);
       }
      
-      if (trait is IGameEventListener listener)
-      {       
-        gs.RegisterForEvent(GameEventType.EndOfRound, listener);
-      }
+      // I don't think this is necessary. The traits themselves should be
+      // registering inside their Apply methods
+      //if (trait is IGameEventListener listener)
+      //{       
+      //  gs.RegisterForEvent(GameEventType.EndOfRound, listener);
+      //}
     }
 
     // I can't remember why I am calling this hear D: Perhaps because of
@@ -2756,7 +2766,8 @@ class StatBuffTrait : TemporaryTrait
       SetPlayerHP(player);
     } 
 
-    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    if (ExpiresOn < ulong.MaxValue)
+      gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
     return [ CalcMessage(target) ];
   }
