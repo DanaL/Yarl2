@@ -160,7 +160,7 @@ class Popup : IPopup
   }
 
   static int GuessWidth(string message) => message.Split('\n').Select(line => line.Length).Max();
-
+  
   public void SetText(string message)
   {    
     LineScanner scanner = new(message);
