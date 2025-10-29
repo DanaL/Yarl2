@@ -958,6 +958,7 @@ class DungeonPassable : IPassable
     TileType.DungeonFloor => true,
     TileType.BrokenDoor => true,
     TileType.OpenDoor => true,
+    TileType.SecretDoor => true,
     TileType.ClosedDoor => true,
     TileType.LockedDoor => true,
     TileType.WoodBridge => true,

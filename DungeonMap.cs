@@ -950,7 +950,7 @@ class DungeonMap(Rng rng)
       foreach (var endSq in larger)
       {
         int d = Util.Distance(sq.Item1, sq.Item2, endSq.Item1, endSq.Item2);
-        if (d < int.MaxValue)
+        if (d < shortestD)
         {
           shortestD = d;
           tunnelStart = new(0, 0, sq.Item1, sq.Item2);
