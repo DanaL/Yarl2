@@ -1000,7 +1000,7 @@
     "Value": 100,
     "Glyph": "☥,dullred,brown,black,false",
     "Traits": [
-      "Grants#Regeneration&1&owner&false&max;Repugnant"
+      "Grants#Regeneration&1&owner&false&max;Repugnant;Vulnerable&Fire"
     ]
   },
   {

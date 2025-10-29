@@ -285,7 +285,7 @@ abstract class Actor : GameObj, IZLevel
       else if (vulnerabilities.Contains(dmg.Item2))
       {
         d *= 2;
-        msg = $"{FullName.Capitalize()} is in agony!";
+        msg = $"{FullName.Capitalize()} {Grammar.Conjugate(this, "is")} in agony!";
       }
 
       if (d > 0)

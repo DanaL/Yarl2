@@ -644,7 +644,7 @@ abstract class UserInterface
         switch (resist.Type)
         {
           case DamageType.Fire:
-            statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, "RESIST FIRE")];
+            statusLine = [(Colours.WHITE, "│ "), (Colours.LIGHT_BLUE, "RESIST FIRE")];
             row = WriteSideBarLine(statusLine, statusLineNum--);
             statuses.Add("RESIST FIRE");
             break;
@@ -768,7 +768,17 @@ abstract class UserInterface
         statuses.Add("WEAKENED");
       }
     }
-
+    foreach (VulnerableTrait vul in gs.Player.Traits.OfType<VulnerableTrait>())
+    {
+      string s = $"VULNERABLE: {vul.Type.ToString().ToUpper()}";
+      if (!statuses.Contains(s))
+      {
+        List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.BRIGHT_RED, s)];
+        row = WriteSideBarLine(statusLine, statusLineNum--);
+        statuses.Add(s);
+      }
+    }
+    
     var tile = gs.TileAt(gs.Player.Loc);
     var glyph = Util.TileToGlyph(tile);
     var tileSq = new Sqr(glyph.Lit, Colours.BLACK, glyph.Ch);
