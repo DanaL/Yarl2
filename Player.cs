@@ -350,6 +350,8 @@ sealed class Player : Actor
         fireRebuke = true;
       else if (trait is LikeableTrait)
         traitsToShow.Add("You are especially likeable");
+      else if (trait is RegenerationTrait)
+        traitsToShow.Add("You [green heal] especially quick");
     }
     
     if (alacrity < 0)
