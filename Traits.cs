@@ -928,22 +928,6 @@ class AppleProducerTrait : Trait, IGameEventListener, IOwner
   }
 }
 
-class ResistBluntTrait : Trait
-{
-  public override string AsText() => "ResistBlunt";
-}
-
-class ResistPiercingTrait : Trait
-{
-  public override string AsText() => "ResistPiercing";
-}
-
-class ResistSlashingTrait : Trait
-{
-  public override string AsText() => "ResistSlashing";
-}
-
-// I should replace the above 3 traits with this one
 class ResistanceTrait : TemporaryTrait
 {
   public DamageType Type { get; set; }
@@ -1485,6 +1469,13 @@ class StackableTrait() : Trait
 class VillagerTrait : Trait
 {
   public override string AsText() => "Villager";
+}
+
+class VulnerableTrait : Trait
+{
+  public DamageType Type { get; set; }
+
+  public override string AsText() => $"Vulnerable#{Type}";
 }
 
 class ScrollTrait : Trait
@@ -4070,9 +4061,6 @@ class TraitFactory
         return new RetributionTrait() { Type = dt, DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3]), Radius = int.Parse(pieces[4]) };
       }
     },
-    { "ResistBlunt", (pieces, gameObj) => new ResistBluntTrait() },
-    { "ResistPiercing", (pieces, gameObj) => new ResistPiercingTrait() },
-    { "ResistSlashing", (pieces, gameObj) => new ResistSlashingTrait() },
     { "Robbed", (pieces, gameObj) => new RobbedTrait() },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
@@ -4159,6 +4147,12 @@ class TraitFactory
     } },
     { "Vicious", (pieces, gameObj) => new ViciousTrait() { Scale = Util.ToDouble(pieces[1]) }},
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
+    { "Vulnerable", (pieces, gameObj) =>
+      {
+        Enum.TryParse(pieces[1], out DamageType type);
+        return new VulnerableTrait() { Type = type };
+      } 
+    },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "WaterWalking", (pieces, gameObj) =>
       pieces.Length > 1 ? new WaterWalkingTrait() { SourceId = ulong.Parse(pieces[1])} : new WaterWalkingTrait()

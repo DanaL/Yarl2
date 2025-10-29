@@ -246,7 +246,19 @@ abstract class Actor : GameObj, IZLevel
       }
     }
 
-    // If I pile up a bunch of resistances, I'll probably want something less brain-dead here
+    HashSet<DamageType> resistances = [];
+    HashSet<DamageType> immunities = [];
+    HashSet<DamageType> vulnerabilities = [];
+    foreach (Trait t in Traits)
+    {
+      if (t is ResistanceTrait res)
+        resistances.Add(res.Type);
+      else if (t is ImmunityTrait imm)
+        immunities.Add(imm.Type);
+      else if (t is VulnerableTrait vul)
+        vulnerabilities.Add(vul.Type);
+    }
+
     int total = 0;
     bool fireDamage = false;
     bool coldDamage = false;
@@ -258,26 +270,22 @@ abstract class Actor : GameObj, IZLevel
         coldDamage = true;
 
       int d = dmg.Item1;
-      if (dmg.Item2 == DamageType.Blunt && HasActiveTrait<ResistBluntTrait>())
-        d /= 2;
-      else if (dmg.Item2 == DamageType.Piercing && HasActiveTrait<ResistPiercingTrait>())
-        d /= 2;
-      else if (dmg.Item2 == DamageType.Slashing && HasActiveTrait<ResistSlashingTrait>())
-        d /= 2;
 
-      foreach (Trait trait in Traits)
+      if (immunities.Contains(dmg.Item2))
       {
-        if (trait is ImmunityTrait immunity && immunity.Type == dmg.Item2)
-        {
-          d = 0;
-          bonusDamage = 0;
-          msg = MsgFactory.CalcResistanceMessage(immunity.Type, true);
-        }
-        else if (trait is ResistanceTrait resist && resist.Type == dmg.Item2)
-        {
-          d /= 2;
-          msg = MsgFactory.CalcResistanceMessage(resist.Type, false);
-        }
+        d = 0;
+        bonusDamage = 0;
+        msg = MsgFactory.CalcResistanceMessage(dmg.Item2, true);
+      }
+      else if (resistances.Contains(dmg.Item2))
+      {
+        d /= 2;
+        msg = MsgFactory.CalcResistanceMessage(dmg.Item2, false);
+      }
+      else if (vulnerabilities.Contains(dmg.Item2))
+      {
+        d *= 2;
+        msg = $"{FullName.Capitalize()} is in agony!";
       }
 
       if (d > 0)
