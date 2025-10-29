@@ -128,6 +128,8 @@ Very long, very thin sword. Very stabby.
 spear
 A pokey stick: a true classic.
 #
+mace
+A stout cudgel with a flanged, iron head.
 guisarme
 An overly elaborate polearm featuring both an axe blade and an inexplicable hook.
 #
