@@ -2279,6 +2279,8 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
     if (gs.ObjDb.GetObj(OwnerID) is not Actor owner)
       return;
      
+     // Did do this calc intentionally?? I can't fathom why I would do it
+     // like this
     int duration = gs.Rng.Next(Strength - 20, Strength + 21);
     if (duration <= 0)
       return;
@@ -2296,7 +2298,7 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
         }
         else
         {
-          NauseaTrait nt = new NauseaTrait()
+          NauseaTrait nt = new()
           {
             OwnerID = victim.ID,
             ExpiresOn = gs.Turn + (ulong) duration
