@@ -532,3 +532,9 @@ A large, ornate key. But what does it unlock?
 #
 flame spirit
 A minor incarnation of Pure Fire.
+#
+super bat
+A rare species of bat, some say a throwback to ancient times. They are very fast.
+#
+wumpus
+A cave-dwelling ogre with a stench even worse than a regular ogre.
