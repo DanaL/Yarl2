@@ -1681,7 +1681,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "seeinvisible" => new UseResult(new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
             { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) })),
     "protection" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new AuraOfProtectionTrait() { HP = 25 })),
+                        new AuraOfProtectionTrait() { HP = 40 })),
     "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs))),
     "buffstrength" => new UseResult(new ApplyTraitAction(gs, user, 
                         new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
