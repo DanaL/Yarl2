@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Numerics;
+
 namespace Yarl2;
 
 class ActionResult
@@ -226,6 +228,64 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
   }
 
   public override void ReceiveUIResult(UIResult result) => _loc = ((LocUIResult)result).Loc;
+}
+
+class GetOverHereAction(GameState gs, Actor actor, Loc loc, int dmgDie, int numOfDie) : Action(gs, actor)
+{
+  Loc Loc { get; set; } = loc;
+  int DmgDie { get; set; } = dmgDie;
+  int NumOfDie { get; set; } = numOfDie;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    List<Loc> sqs = [.. Util.Bresenham(Actor!.Loc.Row, Actor.Loc.Col, Loc.Row, Loc.Col)                            
+                            .Select(l => new Loc(Loc.DungeonID, Loc.Level, l.Item1, l.Item2))];
+    sqs = [.. sqs.Skip(1)];
+    sqs = [.. sqs.Take(sqs.Count - 1)];
+
+    GameState!.UIRef().RegisterAnimation(new SqAnimation(GameState, sqs[0], Colours.GREY, Colours.BLACK, Util.ArrowChar(sqs[0], Loc)));
+    foreach (Loc seg in sqs.Skip(1))
+    {
+      char ch = '―';
+      if (int.Abs(Actor.Loc.Row - Loc.Row) > int.Abs(Actor.Loc.Col - Loc.Col))
+        ch = '|';
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState!, seg, Colours.GREY, Colours.BLACK, ch));
+    }
+    
+    if (GameState.ObjDb.Occupant(Loc) is Actor target)
+    {
+      Loc landingSpot = Loc;
+      for (int j = sqs.Count - 1; j >= 0; j--)
+      {
+        if (GameState.ObjDb.Occupied(sqs[j]))
+          break;
+        landingSpot = sqs[j];
+      }
+
+      GameState.UIRef().AlertPlayer($"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} speared by {Actor.FullName}!");
+
+      if (landingSpot != Loc)
+      {
+        GameState.UIRef().AlertPlayer($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "drag")} {target.FullName} toward them!");
+        GameState.ResolveActorMove(target, target.Loc, landingSpot);
+
+        int dmg = 0;
+        for (int j = 0; j < NumOfDie; j++)
+          dmg += GameState.Rng.Next(1, DmgDie) + 1;
+        List<(int, DamageType)> totalDmg = [(dmg, DamageType.Piercing)];
+        var (hpLeft, dmgMsg, _) = GameState.Player.ReceiveDmg(totalDmg, 0, GameState, null, 1.0);
+        GameState.UIRef().AlertPlayer(dmgMsg, GameState, landingSpot, Actor);
+        if (hpLeft < 1)
+        {
+          GameState.ActorKilled(target, "being speared", Actor);
+        }     
+      }
+    }
+
+    return 1.0;
+  }
 }
 
 class AssumeDisguiseAction(GameState gs, Actor actor) : Action(gs, actor)

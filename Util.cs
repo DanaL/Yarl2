@@ -608,7 +608,7 @@ class Util
   public static char ArrowChar(Loc a, Loc b)
   {
     if (a.Row == b.Row)
-      return '-';
+      return '―';
     else if (a.Col == b.Col)
       return '|';
     else if (a.Col < b.Col && a.Row < b.Row)

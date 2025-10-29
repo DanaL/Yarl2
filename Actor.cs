@@ -1133,6 +1133,8 @@ class Power
         return new GulpAction(gs, mob, DC, DmgDie, NumOfDice);
       case "FlareFire":
         return new FlareAction(gs, mob, DmgDie, NumOfDice, DamageType.Fire);
+      case "GetOverHere":
+        return new GetOverHereAction(gs, mob, loc, DmgDie, NumOfDice);
       default:
         return new PassAction();
     }

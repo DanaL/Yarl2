@@ -538,3 +538,9 @@ A rare species of bat, some say a throwback to ancient times. They are very fast
 #
 wumpus
 A cave-dwelling ogre with a stench even worse than a regular ogre.
+#
+duergar soldier
+A grey dwarf. Duergar are deep-dwelling, surly dwarves who have no love for others.
+#
+duergar spearfisher
+A grey dwarf who hunts with a jagged, barbed spear. Despite the name, they aren't picky about who their target is.
