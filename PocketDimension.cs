@@ -13,7 +13,7 @@ namespace Yarl2;
 
 class PocketDimension
 {
-  // I am flat out making the assumuption that I am going to create so many many
+  // I am flat out making the assumuption that I am not going to create so many
   // temporary levels that I underflow into the 'real' dungeon IDs.
   //
   // Real dungeonIds start at 0 (the wilderness) and work upwards. I think when
