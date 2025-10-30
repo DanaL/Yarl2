@@ -128,6 +128,8 @@ class SorceressQuest
     }
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
+    (Dungeon vampyArea, Loc vampyLoc) = SorceressDungeonBuilder.VampyDungeon(sdb.DecoyMirror2, dungeonId + 2, objDb, rng);
+
     Upstairs entrance = new("")
     {
       Destination = towerExit

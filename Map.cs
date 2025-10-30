@@ -893,6 +893,7 @@ class Map : ICloneable
           TileType.RedTree => 'T',
           TileType.OrangeTree => 'T',
           TileType.YellowTree => 'T',
+          TileType.Conifer => 'T',
           TileType.DeepWater => '~',
           TileType.Water => '~',
           TileType.Lake => '~',
@@ -903,6 +904,8 @@ class Map : ICloneable
           TileType.OpenPortcullis => '|',
           TileType.Portcullis => '|',          
           TileType.IllusoryWall => '?',
+          TileType.StoneWall => '#',
+          TileType.StoneFloor => '.',
           _ => ' '
         };
         Console.Write(ch);

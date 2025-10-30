@@ -20,9 +20,114 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   public Loc DecoyMirror1 { get; set; } = Loc.Nowhere;
   public Loc DecoyMirror2 { get; set; } = Loc.Nowhere;
 
-  public static (Dungeon, Loc) WumpusDungeon(Loc tower, int DungeonId, GameObjectDB objDb, Rng rng)
+  static void FindVampyCastleLoc(Map map, int h, int w, GameObjectDB objDb, Rng rng)
   {
-    Dungeon dungeon = new(DungeonId, "a Noisome Cavern", "You are in Room 1.", false);
+    List<(int, int)> opts = [];
+    int mostOpen = 0;
+    for (int r = 2; r < h - 9; r++)
+    {
+      for (int c = 2; c < w - 9; c += 2)
+      {
+        int x = CountOpenBorderSqs(r, c);
+        if (x > mostOpen)
+        {
+          opts.Clear();
+          opts.Add((r, c));
+          mostOpen = x;
+        }
+        else if (x == mostOpen)
+        {
+          opts.Add((r, c));
+        }
+      }
+    }
+
+    List<(int, int)> optsList = [.. opts];
+    var (sr, sc) = optsList[rng.Next(optsList.Count)];
+
+    for (int c = sc; c <= sc + 7; c++)
+    {
+      map.SetTile(sr, c, TileFactory.Get(TileType.StoneWall));
+      map.SetTile(sr + 7, c, TileFactory.Get(TileType.StoneWall));
+    }
+
+    for (int r = sr; r < sr + 7; r++)
+    {
+      map.SetTile(r, sc, TileFactory.Get(TileType.StoneWall));
+      map.SetTile(r, sc + 7, TileFactory.Get(TileType.StoneWall));
+    }
+
+    List<(int, int)> floors = [];
+    for (int r = sr + 1; r < sr + 6; r++)
+    {
+      for (int c = sc + 1; c < sc + 6; c++)
+      {
+        map.SetTile(r, c, TileFactory.Get(TileType.StoneFloor));
+        floors.Add((r, c));
+      }
+    }
+
+    int CountOpenBorderSqs(int r, int c)
+    {
+      int x = 0;
+      for (int dc = c - 1; dc <= c + 7; dc++)
+      {
+        if (map.TileAt(r - 1, dc).Type == TileType.Grass || map.TileAt(r - 1, dc).Type == TileType.Conifer)
+          ++x;
+        if (map.TileAt(r + 1, dc).Type == TileType.Grass || map.TileAt(r + 1, dc).Type == TileType.Conifer)
+          ++x;
+      }
+      
+      for (int dr = r; dr < r + 7; dr++)
+      {
+        if (map.TileAt(dr, c - 1).Type == TileType.Grass || map.TileAt(dr, c - 1).Type == TileType.Conifer)
+          ++x;
+        if (map.TileAt(dr, c + 7).Type == TileType.Grass || map.TileAt(dr, c + 7).Type == TileType.Conifer)
+          ++x;
+      }
+
+      return x;
+    }
+  }
+
+  public static (Dungeon, Loc) VampyDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
+  {
+    Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across the night sky.", false);
+
+    Map map = new(82, 42, TileType.WorldBorder);
+    bool[,] open = CACave.GetCave(40, 80, rng);
+    for (int r = 0; r < 40; r++)
+    {
+      for (int c = 0; c < 80; c++)
+      {
+        TileType tt = open[r, c] ? TileType.Grass : TileType.Mountain;
+        map.SetTile(r + 1 , c + 1, TileFactory.Get(tt));
+      }
+    }
+
+    ConfigurablePassable passable = new();
+    passable.Passable.Add(TileType.Grass);
+    CACave.JoinCaves(map, rng, objDb, passable, TileType.Grass, TileType.Mountain, TileType.Mountain);
+
+    for (int r = 1; r <= 40; r++)
+    {
+      for (int c = 1; c <= 80; c++)
+      {
+        if (map.TileAt(r, c).Type == TileType.Grass && rng.Next(4) < 3)
+          map.SetTile(r + 1, c + 1, TileFactory.Get(TileType.Conifer));
+      }
+    }
+
+    FindVampyCastleLoc(map, 42, 82, objDb, rng);
+
+    map.Dump();
+
+    return (dungeon, Loc.Nowhere);
+  }
+
+  public static (Dungeon, Loc) WumpusDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
+  {
+    Dungeon dungeon = new(dungeonId, "a Noisome Cavern", "You are in Room 1.", false);
 
     var lines = File.ReadAllLines(ResourcePath.GetDataFilePath("wumpus.txt"));
     Map map = new(lines[0].Length, lines.Length, TileType.PermWall);
@@ -52,7 +157,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     List<(int, int)> floorsInChambers = [.. floorSqs];
 
     int i = rng.Next(floorsInChambers.Count);
-    Loc arrival = new(DungeonId, 0, floorsInChambers[i].Item1, floorsInChambers[i].Item2);
+    Loc arrival = new(dungeonId, 0, floorsInChambers[i].Item1, floorsInChambers[i].Item2);
     floorsInChambers.RemoveAt(i);
 
     List<(int, int)> farSqs = [.. floorsInChambers.Where(s => Util.Distance(s.Item1, s.Item2, arrival.Row, arrival.Col) > 20)];
@@ -76,20 +181,20 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     i = rng.Next(floorsInChambers.Count);
     var batSq = floorsInChambers[i];
     floorsInChambers.RemoveAt(i);
-    Loc batLoc = new(DungeonId, 0, batSq.Item1, batSq.Item2);
+    Loc batLoc = new(dungeonId, 0, batSq.Item1, batSq.Item2);
     Actor bat = MonsterFactory.Get("super bat", objDb, rng);    
     objDb.AddNewActor(bat, batLoc);
 
     i = rng.Next(floorsInChambers.Count);
     batSq = floorsInChambers[i];
     floorsInChambers.RemoveAt(i);
-    batLoc = new(DungeonId, 0, batSq.Item1, batSq.Item2);
+    batLoc = new(dungeonId, 0, batSq.Item1, batSq.Item2);
     bat = MonsterFactory.Get("super bat", objDb, rng);
     objDb.AddNewActor(bat, batLoc);
 
     List<Loc> adjToMirror = [.. Util.Adj8Sqs(mirror.Item1, mirror.Item2)
                                   .Where(s => map.TileAt(s).Type == TileType.DungeonFloor)
-                                  .Select(s => new Loc(DungeonId, 0, s.Item1, s.Item2))];
+                                  .Select(s => new Loc(dungeonId, 0, s.Item1, s.Item2))];
     adjToMirror.Shuffle(rng);
     Loc wumpusLoc = adjToMirror[0];
     Actor wumpus = MonsterFactory.Get("wumpus", objDb, rng);
@@ -100,7 +205,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       var quality = rng.Next(4) > 0 ? TreasureQuality.Good : TreasureQuality.Uncommon;
       Item item = Treasure.ItemByQuality(quality, objDb, rng);
       var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
-      Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
+      Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
       objDb.Add(item);
       objDb.SetToLoc(loc, item);
     }
@@ -109,7 +214,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     {
       Item item = ItemFactory.Get(ItemNames.BONE, objDb);
       var sq = floorsInChambers[rng.Next(floorsInChambers.Count)];
-      Loc loc = new(DungeonId, 0, sq.Item1, sq.Item2);
+      Loc loc = new(dungeonId, 0, sq.Item1, sq.Item2);
       objDb.Add(item);
       objDb.SetToLoc(loc, item);
     }
