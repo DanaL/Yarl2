@@ -747,9 +747,9 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     GrantsTrait buff = rng.Next(3) switch
     {
-      0 => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Strength&1&item"] },
-      1 => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Dexterity&1&item"] },
-      _ => new GrantsTrait() { TraitsGranted = ["StatBuff&0&max&Constitution&1&item"] },
+      0 => new GrantsTrait() { TraitsGranted = ["StatBuff#0#max#Strength#1#item"] },
+      1 => new GrantsTrait() { TraitsGranted = ["StatBuff#0#max#Dexterity#1#item"] },
+      _ => new GrantsTrait() { TraitsGranted = ["StatBuff#0#max#Constitution#1#item"] },
     };
     trinket.Traits.Add(buff);
 
