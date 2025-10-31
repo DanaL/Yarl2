@@ -566,6 +566,7 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
+    //seed = 1653494808;
     Console.WriteLine($"Seed: {seed}");
 
     try

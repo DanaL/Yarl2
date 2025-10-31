@@ -20,7 +20,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   public Loc DecoyMirror1 { get; set; } = Loc.Nowhere;
   public Loc DecoyMirror2 { get; set; } = Loc.Nowhere;
 
-  static void MarkVampyCastleLoc(Map map, int h, int w, GameObjectDB objDb, Rng rng)
+  static Loc MarkVampyCastleLoc(Map map, int h, int w, Loc mirrorExit, int dungeonId, GameObjectDB objDb, Rng rng)
   {
     List<(int, int)> opts = [];
     int mostOpen = 0;
@@ -113,11 +113,18 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
       return x;
     }
+
+    MysteriousMirror mm = new("") { Destination = mirrorExit };
+    var (mr, mc) = floors[rng.Next(floors.Count)];
+    map.SetTile(mr, mc, mm);
+    Loc mirrorLoc = new(dungeonId, 0, mr, mc);
+
+    return mirrorLoc;
   }
 
   public static (Dungeon, Loc) VampyDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
   {
-    Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across the night sky.", false);
+    Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across a night sky.", false);
 
     Map map = new(82, 42, TileType.WorldBorder);
     bool[,] open = CACave.GetCave(40, 80, rng);
@@ -143,11 +150,25 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       }
     }
 
-    MarkVampyCastleLoc(map, 42, 82, objDb, rng);
+    Loc mirrorLoc = MarkVampyCastleLoc(map, 42, 82, tower, dungeonId, objDb, rng);
 
-    map.Dump();
+    List<(int, int)> arrivalSpots = [];
+    for (int r = 1; r < map.Height - 1; r++)
+    {
+      for (int c = 1; c < map.Width - 1; c++)
+      {
+        TileType tt = map.TileAt(r, c).Type;
+        if ((tt == TileType.Grass || tt == TileType.Conifer) && Util.Distance(mirrorLoc.Row, mirrorLoc.Col, r, c) > 25)
+          arrivalSpots.Add((r, c));
+      }
+    }
 
-    return (dungeon, Loc.Nowhere);
+    var spot = arrivalSpots[rng.Next(arrivalSpots.Count)];
+    Loc arrivalLoc = new(dungeonId, 0, spot.Item1, spot.Item2);
+
+    dungeon.AddMap(map);
+
+    return (dungeon, arrivalLoc);
   }
 
   public static (Dungeon, Loc) WumpusDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
@@ -332,11 +353,11 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         towerDungeon.LevelMaps[lvl].SetTile(DecoyMirror1.Row, DecoyMirror1.Col, mm);
         floorSqs.RemoveAt(i);
 
-        //i = rng.Next(floorSqs.Count);
-        //DecoyMirror2 = floorSqs[i];
-        //mm = new("") { Destination = upstairs.Destination };
-        //towerDungeon.LevelMaps[lvl].SetTile(DecoyMirror2.Row, DecoyMirror2.Col, mm);
-        //floorSqs.RemoveAt(i);
+        i = rng.Next(floorSqs.Count);
+        DecoyMirror2 = floorSqs[i];
+        mm = new("") { Destination = upstairs.Destination };
+        towerDungeon.LevelMaps[lvl].SetTile(DecoyMirror2.Row, DecoyMirror2.Col, mm);
+        floorSqs.RemoveAt(i);
       }
 
       // Sometimes replace a door with a mimic! Just the sort of thing a 

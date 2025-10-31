@@ -129,6 +129,16 @@ class SorceressQuest
     campaign.Dungeons.Add(wumpus.ID, wumpus);
 
     (Dungeon vampyArea, Loc vampyLoc) = SorceressDungeonBuilder.VampyDungeon(sdb.DecoyMirror2, dungeonId + 2, objDb, rng);
+    mirrorLevel = sorceressTower.LevelMaps[sdb.DecoyMirror2.Level];
+    if (mirrorLevel.TileAt(sdb.DecoyMirror2.Row, sdb.DecoyMirror2.Col) is MysteriousMirror mirror2)
+    {
+      mirror2.Destination = vampyLoc;
+
+      List<Loc> adjToMirror = [.. Util.Adj8Locs(sdb.DecoyMirror2)
+                                    .Where(l => mirrorLevel.TileAt(l.Row, l.Col).Type == TileType.DungeonFloor)];
+      vampyArea.ExitLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+    }
+    campaign.Dungeons.Add(vampyArea.ID, vampyArea);
 
     Upstairs entrance = new("")
     {

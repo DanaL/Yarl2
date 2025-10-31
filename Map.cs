@@ -903,7 +903,8 @@ class Map : ICloneable
           TileType.VaultDoor => '|',
           TileType.OpenPortcullis => '|',
           TileType.Portcullis => '|',          
-          TileType.IllusoryWall => '?',          
+          TileType.IllusoryWall => '?',
+          TileType.MysteriousMirror => 'M',
           _ => ' '
         };
         Console.Write(ch);
