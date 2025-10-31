@@ -112,9 +112,7 @@ class TitleScreen
         return SetupType.Quit;
       else if (c == 't')
         return SetupType.Tutorial;
-      else if (c == 'Z')
-        throw new Exception("Test exception!");
-        
+              
       if ((DateTime.UtcNow - lastRedraw).TotalMilliseconds >= 250)
       {
         UpdatePlayer();

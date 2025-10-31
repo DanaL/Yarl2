@@ -20,7 +20,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   public Loc DecoyMirror1 { get; set; } = Loc.Nowhere;
   public Loc DecoyMirror2 { get; set; } = Loc.Nowhere;
 
-  static void FindVampyCastleLoc(Map map, int h, int w, GameObjectDB objDb, Rng rng)
+  static void MarkVampyCastleLoc(Map map, int h, int w, GameObjectDB objDb, Rng rng)
   {
     List<(int, int)> opts = [];
     int mostOpen = 0;
@@ -45,27 +45,52 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     List<(int, int)> optsList = [.. opts];
     var (sr, sc) = optsList[rng.Next(optsList.Count)];
 
+    List<(int, int)> walls = [];
     for (int c = sc; c <= sc + 7; c++)
     {
       map.SetTile(sr, c, TileFactory.Get(TileType.StoneWall));
+      walls.Add((sr, c));
       map.SetTile(sr + 7, c, TileFactory.Get(TileType.StoneWall));
+      walls.Add((sr + 7, c));
+
+      // Make sure tiles around the building aren't mountains
+      TileType tt = rng.Next(3) == 0 ? TileType.Grass : TileType.Conifer;
+      map.SetTile(sr - 1, c, TileFactory.Get(tt));
+      tt = rng.Next(3) == 0 ? TileType.Grass : TileType.Conifer;
+      map.SetTile(sr + 8, c, TileFactory.Get(tt));
     }
 
     for (int r = sr; r < sr + 7; r++)
     {
       map.SetTile(r, sc, TileFactory.Get(TileType.StoneWall));
+      walls.Add((r, sc));
       map.SetTile(r, sc + 7, TileFactory.Get(TileType.StoneWall));
+      walls.Add((r, sc + 7));
+
+      // Make sure tiles around the building aren't mountains
+      TileType tt = rng.Next(3) == 0 ? TileType.Grass : TileType.Conifer;
+      map.SetTile(r, sc - 1, TileFactory.Get(tt));
+      tt = rng.Next(3) == 0 ? TileType.Grass : TileType.Conifer;
+      map.SetTile(r, sc + 8, TileFactory.Get(tt));
     }
 
     List<(int, int)> floors = [];
-    for (int r = sr + 1; r < sr + 6; r++)
+    for (int r = sr + 1; r < sr + 7; r++)
     {
-      for (int c = sc + 1; c < sc + 6; c++)
+      for (int c = sc + 1; c < sc + 7; c++)
       {
         map.SetTile(r, c, TileFactory.Get(TileType.StoneFloor));
         floors.Add((r, c));
       }
     }
+
+    walls.Remove((sr, sc));
+    walls.Remove((sr + 7, sc + 7));
+    walls.Remove((sr + 7, sc));
+    walls.Remove((sr, sc + 7));
+
+    var door = walls[rng.Next(walls.Count)];
+    map.SetTile(door, TileFactory.Get(TileType.LockedDoor));
 
     int CountOpenBorderSqs(int r, int c)
     {
@@ -118,7 +143,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       }
     }
 
-    FindVampyCastleLoc(map, 42, 82, objDb, rng);
+    MarkVampyCastleLoc(map, 42, 82, objDb, rng);
 
     map.Dump();
 

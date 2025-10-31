@@ -882,8 +882,8 @@ class Map : ICloneable
         {
           TileType.WorldBorder => ' ',
           TileType.PermWall => '#',
-          TileType.DungeonWall => '#',
-          TileType.DungeonFloor => '.',
+          TileType.DungeonWall or TileType.StoneWall => '#',
+          TileType.DungeonFloor or TileType.StoneFloor => '.',
           TileType.Sand => ' ',
           TileType.ClosedDoor or TileType.LockedDoor => '+',
           TileType.Mountain or TileType.SnowPeak => '^',
@@ -903,9 +903,7 @@ class Map : ICloneable
           TileType.VaultDoor => '|',
           TileType.OpenPortcullis => '|',
           TileType.Portcullis => '|',          
-          TileType.IllusoryWall => '?',
-          TileType.StoneWall => '#',
-          TileType.StoneFloor => '.',
+          TileType.IllusoryWall => '?',          
           _ => ' '
         };
         Console.Write(ch);
