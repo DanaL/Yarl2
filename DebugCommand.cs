@@ -125,12 +125,7 @@ class DebugCommand(GameState gs)
     {
       _gs.UIRef().AlertPlayer($"Loc: {_gs.Player.Loc}");
       return "";
-    }
-    else if (txt == "fog")
-    {
-      FogifyLevel();
-      return "";
-    }
+    }    
     else if (txt == "turn")
     {
       _gs.UIRef().AlertPlayer($"Turn {_gs.Turn}");
@@ -252,19 +247,6 @@ class DebugCommand(GameState gs)
           return "Need integer stress level";
       default:
         return "Unknown debug command";
-    }
-  }
-
-  void FogifyLevel()
-  {
-    for (int r = 0; r < _gs.CurrentMap.Height; r++)
-    {
-      for (int c = 0; c < _gs.CurrentMap.Width; c++)
-      {
-        Loc loc = new(_gs.CurrDungeonID, _gs.CurrLevel, r, c);
-        Item mist = ItemFactory.Mist(_gs);
-        _gs.ObjDb.SetToLoc(loc, mist);
-      }
     }
   }
 

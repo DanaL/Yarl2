@@ -373,21 +373,6 @@ class ItemFactory
     };
   }
 
-  public static Item Mist(GameState gs)
-  {
-    Item mist = new()
-    {
-      Name = "mist",
-      Type = ItemType.Fog,
-      Value = 0,
-      Glyph = new Glyph('≈', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
-    };
-    mist.SetZ(10);
-    mist.Traits.Add(new OpaqueTrait() { Visibility = 3 });
-
-    return mist;
-  }
-
   public static Item YellowMold()
   {
     Item mold = new()
