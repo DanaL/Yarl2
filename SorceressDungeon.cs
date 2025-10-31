@@ -150,7 +150,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
   public static (Dungeon, Loc) VampyDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
   {
-    Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across a night sky.", false);
+    Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across a night sky. You are surrounded by a thick fog.", false);
 
     Map map = new(82, 42, TileType.WorldBorder);
     bool[,] open = CACave.GetCave(40, 80, rng);

@@ -1384,7 +1384,7 @@ abstract class UserInterface
       CheatSheetMode = CheatSheetMode.MvMixed;
       
     _animations.Add(new CloudAnimation(this, gameState));
-    //_animations.Add(new RainAnimation(this, gameState));
+    _animations.Add(new FogAnimation(this, gameState, gameState.Wilderness.Height, gameState.Wilderness.Width));
 
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;

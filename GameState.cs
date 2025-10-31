@@ -9,7 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Net.Mail;
 using System.Text;
 
 namespace Yarl2;
@@ -1879,7 +1878,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           scale = 1.0;
           fgLightColour = Colours.BLACK;
           bgLightColour = Colours.BLACK;
-        }
+        }       
         else
         {
           int d = int.Max(0, Util.Distance(sq.Key, obj.Loc) - 1);
@@ -2000,6 +1999,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
+
     Dictionary<Loc, int> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
 
     // if the player is not blind, let them see adj sqs regardless of 

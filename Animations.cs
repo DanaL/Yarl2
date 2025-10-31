@@ -160,9 +160,9 @@ class ExplosionAnimation(GameState gs) : Animation
 {
   public Colour MainColour { get; set; }
   public Colour AltColour1 { get; set; }
-  public Colour AltColour2 {  get; set; }
+  public Colour AltColour2 { get; set; }
   public Colour Highlight { get; set; }
-  public Loc Centre {  get; set; }
+  public Loc Centre { get; set; }
   public char Ch { get; set; } = '*';
   public HashSet<Loc> Sqs { get; set; } = [];
   readonly Dictionary<Loc, Sqr> _toDraw = [];
@@ -201,7 +201,7 @@ class ExplosionAnimation(GameState gs) : Animation
           _toDraw.Add(loc, new Sqr(Highlight, colour, Ch));
         }
 
-        ++_radius;       
+        ++_radius;
       }
     }
 
@@ -209,9 +209,9 @@ class ExplosionAnimation(GameState gs) : Animation
     {
       if (!_gs.LastPlayerFoV.Contains(pt))
         continue;
-      
+
       double roll = _gs.Rng.NextDouble();
-      var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);      
+      var (scrR, scrC) = ui.LocToScrLoc(pt.Row, pt.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
       if (scrR < 0 || scrR >= UserInterface.ViewHeight || scrC < 0 || scrC >= UserInterface.ViewWidth)
         continue;
 
@@ -268,7 +268,7 @@ class BarkAnimation : Animation
   readonly Actor _actor;
   readonly string _bark;
   readonly UserInterface _ui;
- 
+
   public BarkAnimation(GameState gs, int duration, Actor actor, string bark)
   {
     _gs = gs;
@@ -309,7 +309,7 @@ class BarkAnimation : Animation
     SetSqr(row, pointerCol, new Sqr(Colours.WHITE, Colours.BLACK, pointer));
     foreach (char ch in message)
     {
-      SetSqr(row2, col++, new Sqr(Colours.WHITE, Colours.BLACK, ch));      
+      SetSqr(row2, col++, new Sqr(Colours.WHITE, Colours.BLACK, ch));
     }
 
     void SetSqr(int row, int col, Sqr sqr)
@@ -367,7 +367,7 @@ class HitAnimation : Animation
   Colour FgColour { get; set; }
   Colour BgColour { get; set; }
   Actor Actor { get; set; }
-  char Ch {  get; set; }
+  char Ch { get; set; }
 
   public HitAnimation(GameState gs, Actor actor, Colour fg, Colour bg, char ch)
   {
@@ -399,7 +399,7 @@ class HitAnimation : Animation
 class SqAnimation : Animation
 {
   public bool IgnoreFoV { get; set; } = false;
-  
+
   readonly GameState _gs;
   Loc _loc;
   Colour _fgColour;
@@ -528,8 +528,8 @@ class PolearmAnimation : Animation
   Loc _origin;
   Loc _target;
 
-  public PolearmAnimation(GameState gs, Colour colour, Loc origin, Loc target) 
-  { 
+  public PolearmAnimation(GameState gs, Colour colour, Loc origin, Loc target)
+  {
     _gs = gs;
     _colour = colour;
     _origin = origin;
@@ -548,44 +548,102 @@ class PolearmAnimation : Animation
   }
 }
 
-class RainAnimation(UserInterface ui, GameState gs) : Animation
+class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
 {
+  int Height { get; set; } = h;
+  int Width { get; set; } = w;
   readonly UserInterface UI = ui;
   readonly GameState GS = gs;
-  DateTime LastFrame { get; set;} = DateTime.UtcNow;
-  HashSet<(int, int)> Sqs = [];
-
-  void PickSqs()
-  {
-    Sqs = [];
-    for (int i = 0; i < UserInterface.ViewHeight * UserInterface.ViewWidth / 5; i++)
-    {
-      int row = GS.Rng.Next(UserInterface.ViewHeight);
-      int col = GS.Rng.Next(UserInterface.ViewWidth);
-
-      if (row == UI.PlayerScreenRow && col == UI.PlayerScreenCol)
-        continue;
-        
-      Sqs.Add((row, col));
-    }
-  }
+  int Seed { get; set; } = 1;// = DateTime.Now.GetHashCode();
+  DateTime LastUpdate {  get; set; } = DateTime.MinValue;
+  PerlinNoise Noise { get; set; } = new(gs.Rng);
+  double[,] FogDensity = new double[h, w];
 
   public override void Update()
   {
     if (!GS.InWilderness)
       return;
 
-    TimeSpan dd = DateTime.UtcNow - LastFrame;
-
-    if (Sqs.Count == 0 || dd.TotalMilliseconds > 400) 
+    // Update the foggy spots only occasionally
+    var dd = DateTime.UtcNow - LastUpdate;
+    if (dd.TotalMilliseconds > 1000)
     {
-      PickSqs();
-      LastFrame = DateTime.UtcNow;
+      float scale = 0.1f;
+      float time = 0.05f * Seed++;// GS.Turn;
+      for (int y = 0; y < Height; y++)
+      {
+        for (int x = 0; x < Width; x++)
+        {
+          FogDensity[y, x] = Noise.Noise(x * scale, y * scale, time); // Seed++);
+        }
+      }
+
+      LastUpdate = DateTime.UtcNow;
     }
-    
-    Sqr rain = new(Colours.DARK_BLUE, Colours.BLACK, '/');
-    foreach (var (r, c) in Sqs)
-      UI.SqsOnScreen[r, c] = rain; 
+
+    Colour baseColour = Colours.WHITE;
+    int rowOffset = GS.Player.Loc.Row - UI.PlayerScreenRow;
+    int colOffset = GS.Player.Loc.Col - UI.PlayerScreenCol;
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {        
+        Sqr sqr = UI.SqsOnScreen[r, c];
+        if (sqr == Constants.BLANK_SQ)
+          continue;
+
+        int mapRow = r + rowOffset;
+        int mapCol = c + colOffset;
+                
+        Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);        
+        Colour bgColour = sqr.Bg;        
+        if (GS.LastPlayerFoV.Contains(loc))
+        {          
+          double density = FogDensity[mapRow, mapCol];
+          if (NoFog(GS.TileAt(loc)) || (mapRow == GS.Player.Loc.Row && mapCol == GS.Player.Loc.Col) || density < 0.2)
+            bgColour = sqr.Bg;
+          else if (density < 0.3)
+            bgColour = baseColour with { Alpha = 60 };
+          else if (density < 0.4)
+            bgColour = baseColour with { Alpha = 80 };
+          else if (density < 0.45)
+            bgColour = baseColour with { Alpha = 95 };
+          else if (density < 0.5)
+            bgColour = baseColour with { Alpha = 110 };
+          else if (density < 0.55)
+            bgColour = baseColour with { Alpha = 120 };
+          else if (density < 0.6)
+            bgColour = baseColour with { Alpha = 130 };
+          else if (density < 0.7)
+            bgColour = baseColour with { Alpha = 145 };
+          else if (density < 0.8)
+            bgColour = baseColour with { Alpha = 160 };
+          else
+            bgColour = baseColour with { Alpha = 180 };
+        }
+
+        UI.SqsOnScreen[r, c] = sqr with { Bg = bgColour };
+      }
+    }
+  }
+
+  static bool NoFog(Tile tile)
+  {
+    if (tile.Type == TileType.Mountain || tile.Type == TileType.SnowPeak)
+      return false;
+
+    if (!tile.PassableByFlight())
+      return true;
+
+    switch (tile.Type)
+    {
+      case TileType.StoneFloor:
+      case TileType.WoodFloor:
+      case TileType.Forge:
+        return true;
+      default:
+        return false;
+    }
   }
 }
 
@@ -628,7 +686,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
     if (_gs.Rng.NextDouble() < 0.5)
     {
       _row = _gs.Rng.Next(screenRow - height - 1, screenRow + 3);
-      _col =  screenCol - width - 1;
+      _col = screenCol - width - 1;
     }
     else
     {
@@ -651,14 +709,14 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
 
         int cloudRow = _row + r;
         int cloudCol = _col + c;
-        
+
         if (!_gs.LastPlayerFoV.Contains(new Loc(0, 0, cloudRow, cloudCol)))
           continue;
 
         var (scrR, scrC) = _ui.LocToScrLoc(cloudRow, cloudCol, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
         if (scrR >= 0 && scrR < UserInterface.ViewHeight && scrC >= 0 && scrC < UserInterface.ViewWidth)
         {
-          _ui.SqsOnScreen[scrR, scrC] =_cloudSqr;
+          _ui.SqsOnScreen[scrR, scrC] = _cloudSqr;
         }
       }
     }
