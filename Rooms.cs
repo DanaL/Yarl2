@@ -632,16 +632,16 @@ class Rooms
     Map mapBelow = levels[level + 1];
 
     MakeChasm(map, mapBelow, room);
-    
-    HashSet<Loc> exists = [];
+
+    HashSet<Loc> exits = [];
     foreach (var sq in room)
     {
       foreach (var adj in Util.Adj8Sqs(sq.Item1, sq.Item2))
       {
         TileType tt = map.TileAt(adj).Type;
-        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor || (!room.Contains(adj) && map.TileAt(adj).Passable()))
+        if (tt == TileType.ClosedDoor || tt == TileType.LockedDoor || tt == TileType.SecretDoor || (!room.Contains(adj) && map.TileAt(adj).Passable()))
         {
-          exists.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
+          exits.Add(new Loc(dungeonId, level, adj.Item1, adj.Item2));
         }
       }
     }
@@ -667,7 +667,7 @@ class Rooms
       islandSqs.Add(sq);
     }
 
-    Loc door = exists.First();
+    Loc door = exits.First();
     List<(int, int)> candidates = [.. islandSqs.Where(s => Util.Distance(door, new Loc(dungeonId, level, s.Item1, s.Item2)) < 3)];
     candidates.Shuffle(rng);
     for (int j = 0; j < int.Min(candidates.Count, rng.Next(1, 4)); j++)

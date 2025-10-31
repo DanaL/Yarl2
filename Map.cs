@@ -904,6 +904,7 @@ class Map : ICloneable
           TileType.OpenPortcullis => '|',
           TileType.Portcullis => '|',          
           TileType.IllusoryWall => '?',
+          TileType.SecretDoor => 'S',
           TileType.MysteriousMirror => 'M',
           _ => ' '
         };
