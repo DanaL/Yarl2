@@ -2258,8 +2258,9 @@ class NauseaTrait : TemporaryTrait
 
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
-    
-    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} nauseous!" ];    
+
+    string s = target is Player ? "You feel nauseous!" : $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "look")} nauseous!";
+    return [ s ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -2269,7 +2270,8 @@ class NauseaTrait : TemporaryTrait
       victim.Traits.Remove(this);
       Expired = true;
       gs.StopListening(GameEventType.EndOfRound, this);
-      gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} better.");
+      if (victim is Player)
+        gs.UIRef().AlertPlayer($"You feel better.");
     }
   }
 }
@@ -2315,7 +2317,7 @@ class NauseousAuraTrait : Trait, IGameEventListener, IOwner
           };
           
           foreach (string s in nt.Apply(victim, gs))
-            gs.UIRef().AlertPlayer(s);
+            gs.UIRef().AlertPlayer(s, gs, victim.Loc);
         }
       }      
     }    
