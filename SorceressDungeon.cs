@@ -92,6 +92,39 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     var door = walls[rng.Next(walls.Count)];
     map.SetTile(door, TileFactory.Get(TileType.LockedDoor));
 
+    MysteriousMirror mm = new("") { Destination = mirrorExit };
+    var (mr, mc) = floors[rng.Next(floors.Count)];
+    map.SetTile(mr, mc, mm);
+    Loc mirrorLoc = new(dungeonId, 0, mr, mc);
+
+    List<(int, int)> graveSpots = [];
+    for (int r = sr - 2; r < sr + 9; r++)
+    {
+      for (int c = sc - 2; c < sc + 9; c++)
+      {
+        TileType tt = map.TileAt((r, c)).Type;
+        if (tt == TileType.Conifer || tt == TileType.Grass)
+          graveSpots.Add((r, c));
+      }
+    }
+    int graves = int.Min(graveSpots.Count, rng.Next(4, 7));
+    graveSpots.Shuffle(rng);
+    NameGenerator ng = new(rng, Util.NamesFile);
+    for (int j = 0; j < graves; j++)
+    {
+      string msg = rng.Next(10) switch
+      {
+        0 => $"{ng.GenerateName(rng.Next(5, 9)).Capitalize()}, exsanguinated and fondly remembered.",
+        1 => $"{ng.GenerateName(rng.Next(5, 9)).Capitalize()}, a snack in many ways.",
+        2 => $"{ng.GenerateName(rng.Next(5, 9)).Capitalize()}, a fine rival, a tall glass of blood.",
+        _ => "An unmarked grave."
+      };
+
+      map.SetTile(graveSpots[j], new Gravestone(msg));
+    }
+
+    return mirrorLoc;
+
     int CountOpenBorderSqs(int r, int c)
     {
       int x = 0;
@@ -113,13 +146,6 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
       return x;
     }
-
-    MysteriousMirror mm = new("") { Destination = mirrorExit };
-    var (mr, mc) = floors[rng.Next(floors.Count)];
-    map.SetTile(mr, mc, mm);
-    Loc mirrorLoc = new(dungeonId, 0, mr, mc);
-
-    return mirrorLoc;
   }
 
   public static (Dungeon, Loc) VampyDungeon(Loc tower, int dungeonId, GameObjectDB objDb, Rng rng)
