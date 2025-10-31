@@ -376,7 +376,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
           adjFloorCount++;
       }
 
-      return adjFloorCount > 3;
+      return adjFloorCount > 4;
     }
   }
 
