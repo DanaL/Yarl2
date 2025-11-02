@@ -76,3 +76,4 @@ flame spirit        |ώ|brightred    |dullred     |15|40|3| 1.0|10|10|FlareFire#
 super bat           |v|brightred    |dullred     |14|40|3|1.25|10|14|MeleePiercing#1#1#8#2#0#0#Attack|Flying|
 wumpus              |O|lightpurple  |purple      |15|65|6| 1.0|18|10|MeleeBlunt#1#1#5#2#0#0#Attack|KnockBack,Intelligent,Drop#ogre_liver#33,Heavy,Vulnerable#Piercing,NauseousAura#owner#10|
 duergar spearfisher |h|grey         |darkgrey    |16|25|5| 1.0|13|14|GetOverHere#2#3#6#1#0#2#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent|MITHRIL_ORE#1#30#false
+dire wolf           |d|grey         |darkgrey    |14|25|6| 1.0|12|10|MeleePiercing#1#1#6#2#0#0#Attack||

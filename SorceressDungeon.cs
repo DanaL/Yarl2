@@ -156,7 +156,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     {
       Features = MapFeatures.Foggy | MapFeatures.UndiggableFloor
     };
-    
+
     bool[,] open = CACave.GetCave(40, 80, rng);
     for (int r = 0; r < 40; r++)
     {
@@ -183,6 +183,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     Loc mirrorLoc = MarkVampyCastleLoc(map, 42, 82, tower, dungeonId, objDb, rng);
 
     List<(int, int)> arrivalSpots = [];
+    List<(int, int)> allOutside = [];
     for (int r = 1; r < map.Height - 1; r++)
     {
       for (int c = 1; c < map.Width - 1; c++)
@@ -190,6 +191,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         TileType tt = map.TileAt(r, c).Type;
         if ((tt == TileType.Grass || tt == TileType.Conifer) && Util.Distance(mirrorLoc.Row, mirrorLoc.Col, r, c) > 25)
           arrivalSpots.Add((r, c));
+        allOutside.Add((r, c));
       }
     }
 
@@ -198,6 +200,18 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
 
     dungeon.AddMap(map);
 
+    allOutside.Shuffle(rng);
+    for (int j = 0; j < 6; j += 2)
+    {
+      Actor bat = MonsterFactory.Get("dire bat", objDb, rng);
+      Loc batLoc = new(dungeonId, 0, allOutside[j].Item1, allOutside[j].Item2);
+      objDb.AddNewActor(bat, batLoc);
+
+      Actor wolf = MonsterFactory.Get("dire wolf", objDb, rng);
+      Loc wolfLoc = new(dungeonId, 0, allOutside[j + 1].Item1, allOutside[j + 1].Item2);
+      objDb.AddNewActor(wolf, wolfLoc);
+    }
+    
     return (dungeon, arrivalLoc);
   }
 
