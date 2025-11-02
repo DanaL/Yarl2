@@ -69,6 +69,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ActorEntersLevel(Actor actor, int dungeonId, int level)
   {
+    Map prevMap = CurrentMap;
+    if (actor is Player && (prevMap.Features & MapFeatures.Foggy) != MapFeatures.None)
+    {
+      UI.ClearFoggyAnimation();
+    }
+    
     CurrLevel = level;
     CurrDungeonID = dungeonId;
     int maxDepth = Player.Stats[Attribute.Depth].Max;
@@ -90,14 +96,19 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
-    if (CurrentDungeon.LevelMaps[CurrLevel].Alerts.Count > 0)
+    if (CurrentMap.Alerts.Count > 0)
     {
-      string alerts = string.Join(' ', CurrentDungeon.LevelMaps[CurrLevel].Alerts).Trim();
+      string alerts = string.Join(' ', CurrentMap.Alerts).Trim();
       UIRef().SetPopup(new Popup(alerts, "", 6, -1, alerts.Length));
       UIRef().AlertPlayer(alerts);
-      CurrentDungeon.LevelMaps[CurrLevel].Alerts = [];
+      CurrentMap.Alerts = [];
     }
 
+    if (actor is Player && (CurrentMap.Features & MapFeatures.Foggy) != MapFeatures.None)
+    {
+      UI.RegisterAnimation(new FogAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
+    }
+    
     // If the player is returning to the overworld, is there any maintenance we need to do?
     if (actor is Player && dungeonId == 0)
     {

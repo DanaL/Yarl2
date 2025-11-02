@@ -152,7 +152,11 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   {
     Dungeon dungeon = new(dungeonId, "a Gloomy Mountain Valley", "Dark clouds roil across a night sky. You are surrounded by a thick fog.", false);
 
-    Map map = new(82, 42, TileType.WorldBorder);
+    Map map = new(82, 42, TileType.WorldBorder)
+    {
+      Features = MapFeatures.Foggy | MapFeatures.UndiggableFloor
+    };
+    
     bool[,] open = CACave.GetCave(40, 80, rng);
     for (int r = 0; r < 40; r++)
     {

@@ -557,13 +557,10 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
   int Seed { get; set; } = 1;// = DateTime.Now.GetHashCode();
   DateTime LastUpdate {  get; set; } = DateTime.MinValue;
   PerlinNoise Noise { get; set; } = new(gs.Rng);
-  double[,] FogDensity = new double[h, w];
+  readonly double[,] FogDensity = new double[h, w];
 
   public override void Update()
   {
-    if (!GS.InWilderness)
-      return;
-
     // Update the foggy spots only occasionally
     var dd = DateTime.UtcNow - LastUpdate;
     if (dd.TotalMilliseconds > 1000)
@@ -640,6 +637,7 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
       case TileType.StoneFloor:
       case TileType.WoodFloor:
       case TileType.Forge:
+      case TileType.MysteriousMirror:
         return true;
       default:
         return false;

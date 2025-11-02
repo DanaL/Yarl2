@@ -324,11 +324,11 @@ abstract class UserInterface
       PlayAnimation(anim, gs);
   }
 
-  public void RegisterAnimation(Animation animation)
-  {
-    _animations.Add(animation);
-  }
-
+  public void ClearFoggyAnimation() =>
+    _animations = [.. _animations.Where(a => a is not FogAnimation)];
+  
+  public void RegisterAnimation(Animation anim) => _animations.Add(anim);
+  
   // This plays the full animation (as opposed to registering
   // it to be played as part of the game loop). This means the
   // UI will be blocked while it is playing
@@ -1384,8 +1384,7 @@ abstract class UserInterface
       CheatSheetMode = CheatSheetMode.MvMixed;
 
     _animations.Add(new CloudAnimation(this, gameState));
-    _animations.Add(new FogAnimation(this, gameState, gameState.Wilderness.Height, gameState.Wilderness.Width));
-
+    
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
 
