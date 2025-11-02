@@ -696,16 +696,22 @@ class TileFactory
   };
 }
 
+public enum MapFeatures
+{
+  None = 0b0000,
+  UndiggableFloor = 0b0001,
+  Submerged = 0b0010,
+  Foggy = 0b0100
+}
+
 class Map : ICloneable
 {
   public readonly int Width;
   public readonly int Height;
+  public MapFeatures Features { get; set; } = MapFeatures.None;
 
   public Tile[] Tiles;
   public List<string> Alerts = [];
-
-  public bool DiggableFloor { get; set; } = true;
-  public bool Submerged { get; set; } = false;
 
   public Map(int width, int height)
   {
@@ -747,11 +753,11 @@ class Map : ICloneable
   // List of floors that are good spots to place items or mobs. Should be
   // free of other occuptants, rubble/statues, or hazards like campfires
   public List<Loc> ClearFloors(int dungeonId, int level, GameObjectDB objDb)
-  {     
+  {
     List<Loc> floors = [];
     for (int r = 0; r < Height; r++)
     {
-      for (int c = 0; c <Width; c++)
+      for (int c = 0; c < Width; c++)
       {
         Tile tile = TileAt(r, c);
         if (tile.Type != TileType.DungeonFloor)
@@ -800,7 +806,7 @@ class Map : ICloneable
     for (int r = 1; r < Height - 1; r++)
     {
       for (int c = 1; c < Width - 1; c++)
-      {        
+      {
         if (!visited[r, c] && IsRoomFloorTile(TileAt(r, c).Type) && IsRoomSq(r, c))
         {
           // Found a new potential room tile (has 8 adjacent floors), flood fill from this point
@@ -830,28 +836,28 @@ class Map : ICloneable
 
   void RoomFloodFill(int r, int c, bool[,] visited, List<(int r, int c)> floors)
   {
-    if (!InBounds(r, c)) 
+    if (!InBounds(r, c))
       return;
-    if (visited[r, c]) 
+    if (visited[r, c])
       return;
     if (!IsRoomFloorTile(TileAt(r, c).Type))
       return;
     if (!IsRoomSq(r, c))
       return;
-    
+
     // Is the tile an an exit, which I'm defining as door or passable tile with 
     // walls to the left and right and open spaces up and down. So
     //
     //  .....       ..#..
     //  ##.##  or   .....
     //  .....       ..#..
-    if (TileAt(r-1, c).Type == TileType.DungeonWall && TileAt(r+1, c).Type == TileType.DungeonWall
-      && IsRoomFloorTile(TileAt(r, c-1).Type) && IsRoomFloorTile(TileAt(r, c+1).Type))
+    if (TileAt(r - 1, c).Type == TileType.DungeonWall && TileAt(r + 1, c).Type == TileType.DungeonWall
+      && IsRoomFloorTile(TileAt(r, c - 1).Type) && IsRoomFloorTile(TileAt(r, c + 1).Type))
     {
       return;
     }
-    if (TileAt(r, c-1).Type == TileType.DungeonWall && TileAt(r, c+1).Type == TileType.DungeonWall
-      && IsRoomFloorTile(TileAt(r-1, c).Type) && IsRoomFloorTile(TileAt(r+1, c).Type))
+    if (TileAt(r, c - 1).Type == TileType.DungeonWall && TileAt(r, c + 1).Type == TileType.DungeonWall
+      && IsRoomFloorTile(TileAt(r - 1, c).Type) && IsRoomFloorTile(TileAt(r + 1, c).Type))
     {
       return;
     }
@@ -902,7 +908,7 @@ class Map : ICloneable
           TileType.Downstairs => '>',
           TileType.VaultDoor => '|',
           TileType.OpenPortcullis => '|',
-          TileType.Portcullis => '|',          
+          TileType.Portcullis => '|',
           TileType.IllusoryWall => '?',
           TileType.SecretDoor => 'S',
           TileType.MysteriousMirror => 'M',
@@ -914,7 +920,7 @@ class Map : ICloneable
     }
   }
 
-  public void DumpMarkRooms(List<List<(int,int)>> rooms)
+  public void DumpMarkRooms(List<List<(int, int)>> rooms)
   {
     HashSet<(int, int)> floors = [];
     foreach (List<(int, int)> room in rooms)
@@ -969,8 +975,7 @@ class Map : ICloneable
     if (Tiles is not null)
       temp.Tiles = (Tile[])Tiles.Clone();
 
-    temp.DiggableFloor = DiggableFloor;
-    temp.Submerged = Submerged;
+    temp.Features = Features;
 
     return temp;
   }

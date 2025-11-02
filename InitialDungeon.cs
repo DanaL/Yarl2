@@ -39,7 +39,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
     AddRooms(levels, objDb, factDb, rng);
       
-    dungeon.LevelMaps[numOfLevels - 1].DiggableFloor = false;
+    dungeon.LevelMaps[numOfLevels - 1].Features |= MapFeatures.UndiggableFloor;
 
     List<int> riverLevels = [];
     for (int levelNum = 0; levelNum < numOfLevels; levelNum++)
@@ -557,10 +557,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     int levelNum = stairsLoc.Level + 1;
 
     // Generate the cellar level
-    Map cellar = new(cellarWidth, cellarHeight)
-    {
-      DiggableFloor = false
-    };
+    Map cellar = new(cellarWidth, cellarHeight) { Features = MapFeatures.UndiggableFloor };
 
     for (int r = 0; r < cellarHeight; r++)
     {

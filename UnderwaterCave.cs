@@ -75,7 +75,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
   Map MidLevel(GameObjectDB objDb, Rng rng)
   {
-    Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
+    Map map = new(Width, Height, TileType.PermWall) { Features = MapFeatures.Submerged };
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
     for (int r = 0; r < Height - 2; r++)
     {
@@ -95,7 +95,7 @@ class UnderwaterCaveDungeon(int dungeonId, int height, int width) : DungeonBuild
 
   Map BottomLevel(GameObjectDB objDb, Rng rng)
   {
-    Map map = new(Width, Height, TileType.PermWall) { Submerged = true };
+    Map map = new(Width, Height, TileType.PermWall) { Features = MapFeatures.Submerged };
     bool[,] floors = CACave.GetCave(Height - 2, Width - 2, rng);
     for (int r = 0; r < Height - 2; r++)
     {

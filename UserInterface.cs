@@ -1156,7 +1156,7 @@ abstract class UserInterface
       {
         sqr = Constants.ROOF;
       }
-      else if (gs.CurrentMap.Submerged)
+      else if ((gs.CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
       {
         Colour bg = Colours.UNDERWATER with { Alpha = Colours.UNDERWATER.Alpha - 10 };
         Colour fg = memory.Glyph.Unlit with { Alpha = memory.Glyph.Unlit.Alpha / 2 };
@@ -1382,7 +1382,7 @@ abstract class UserInterface
 
     if (opts.DefaultMoveHints)
       CheatSheetMode = CheatSheetMode.MvMixed;
-      
+
     _animations.Add(new CloudAnimation(this, gameState));
     _animations.Add(new FogAnimation(this, gameState, gameState.Wilderness.Height, gameState.Wilderness.Width));
 

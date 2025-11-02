@@ -1490,7 +1490,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       ActorFallsIntoWater(actor, dest);
     }
-    else if (map.Submerged)
+    else if ((map.Features & MapFeatures.Submerged) != MapFeatures.None)
     {
       string msg = actor.Inventory.ApplyEffectToInv(DamageType.Wet, this, actor.Loc);
       UI.AlertPlayer(msg);
@@ -1952,7 +1952,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
         lightRadius = int.Max(lightRadius, daylight);
       }
-      else if (CurrentMap.Submerged)
+      else if ((CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
       {
         lightRadius = 3;
         fgLightColour = Colours.UNDERWATER;

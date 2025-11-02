@@ -378,7 +378,8 @@ class CampaignCreator(UserInterface ui)
         wilderness = new Dungeon(0, "the Wilderness", "You draw a deep breath of fresh air.", true);
         Wilderness wildernessGenerator = new(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
-
+        wildernessMap.Features = MapFeatures.Foggy;
+        
         // Redraw map if there aren't enough mountains
         int mountains = 0;
         for (int r = 0; r < wildernessMap.Height; r++)
@@ -566,7 +567,6 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 856814898;
     Console.WriteLine($"Seed: {seed}");
 
     try
