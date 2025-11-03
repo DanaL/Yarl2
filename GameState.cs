@@ -1085,10 +1085,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return next;
   }
 
-  // Not sure if this is the right spot for this.  Maybe the player should have a feature/trait
-  // that's countdown timer for healing. Then its period can be tweaked by effects and items.
-  // I don't what to have every single effect have its own turn like light sources do, but 
-  // maybe Actors can have a list of effects I check for each turn?
   void EndOfTurn()
   {
     bool IsActiveListener(GameObj obj)

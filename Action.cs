@@ -50,8 +50,10 @@ abstract class Action
 
 class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
 {
-  Loc Target { get; set; } = target;
+  public Trait? AttackEffect { get; set; } = null;
 
+  Loc Target { get; set; } = target;
+  
   public override double Execute()
   {
     base.Execute();
@@ -67,7 +69,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     double result;
     if (GameState!.ObjDb.Occupant(Target) is Actor target)
     {
-      result = Battle.MeleeAttack(Actor!, target, GameState).EnergyCost;
+      result = Battle.MeleeAttack(Actor!, target, GameState, AttackEffect).EnergyCost;
     }
     else
     {

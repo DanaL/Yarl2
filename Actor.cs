@@ -1135,6 +1135,9 @@ class Power
         return new FlareAction(gs, mob, DmgDie, NumOfDice, DamageType.Fire);
       case "GetOverHere":
         return new GetOverHereAction(gs, mob, loc, DmgDie, NumOfDice);
+      case "BloodDrain":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Piercing);
+        return new MeleeAttackAction(gs, mob, loc) { AttackEffect = new BloodDrainTrait() };
       default:
         return new PassAction();
     }

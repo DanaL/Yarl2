@@ -557,7 +557,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == '>')
     {
-      Action action = (GS.CurrentMap.Features & MapFeatures.Submerged) == MapFeatures.None || GS.TileAt(GS.Player.Loc).Type == TileType.Lake
+      Action action = (GS.CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None || GS.TileAt(GS.Player.Loc).Type == TileType.Lake
         ? new SwimAction(GS, GS.Player, false)
         : new DownstairsAction(GS);
       GS.Player.QueueAction(action);

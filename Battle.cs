@@ -70,7 +70,7 @@ class Battle
     Actor? occ = gs.ObjDb.Occupant(checkLoc);
     if (occ is not null && attackRoll >= occ.AC)
     {
-      ResolveMeleeHit(attacker, occ, gs, "impale", weaponBonus);
+      ResolveMeleeHit(attacker, occ, gs, "impale", weaponBonus, null);
       success = true;
     }
 
@@ -90,7 +90,7 @@ class Battle
       {
         if (attackRoll >= occ.AC)
         {
-          ResolveMeleeHit(attacker, occ, gs, "cleave", weaponBonus);
+          ResolveMeleeHit(attacker, occ, gs, "cleave", weaponBonus, null);
           success = true;
         }
       }
@@ -237,7 +237,7 @@ class Battle
     }
   }
 
-  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, string attackVerb, int weaponBonus)
+  static void ResolveMeleeHit(Actor attacker, Actor target, GameState gs, string attackVerb, int weaponBonus, Trait? attackEffect)
   {    
     // Need to handle the case where the player isn't currently wielding a weapon...
     List<(int, DamageType)> dmg = [];
@@ -298,6 +298,18 @@ class Battle
     
     ResolveHit(attacker, target, hpLeft, weapon, gs);
     CheckAttackTraits(target, gs, attacker, dmgDone);
+
+    // This is getting messy with CheckAttackTraits() as a whole other thing
+    if (attackEffect is BloodDrainTrait && attacker.Stats.TryGetValue(Attribute.HP, out var hp) && hp.Curr < hp.Max)
+    {
+      hp.Change(dmgDone);
+      string s = $"{attacker.FullName.Capitalize()} {Grammar.Conjugate(attacker, "drain")}";
+      if (target is Player)
+        s += " your life essence and looks stronger!";
+      else
+        s += $" {target.FullName} and looks stronerg!";
+      gs.UIRef().AlertPlayer(s, gs, target.Loc, target);
+    }
 
     if (weapon is not null) 
     { 
@@ -501,7 +513,7 @@ class Battle
     return totalMod;
   }
 
-  public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs)
+  public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs, Trait? attackEffect = null)
   {    
     var result = new ActionResult() { EnergyCost = 1.0 };
     Item? weapon = attacker.Inventory.ReadiedWeapon();
@@ -603,7 +615,7 @@ class Battle
       string verb = "hit";
       if (attacker.Traits.OfType<AttackVerbTrait>().FirstOrDefault() is AttackVerbTrait avt)
         verb = avt.Verb;
-      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus);
+      ResolveMeleeHit(attacker, target, gs, verb, weaponBonus, attackEffect);
 
       if (messages.Count > 0)
       {        
@@ -628,7 +640,6 @@ class Battle
 
       if (weapon is not null && weapon.HasTrait<ImpaleTrait>() && !swallowed)
         ResolveImpale(attacker, target, roll, gs, weaponBonus);
-
     }
     else
     {

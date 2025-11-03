@@ -591,6 +591,11 @@ class BlockTrait : Trait
   public override string AsText() => "Block";
 }
 
+class BloodDrainTrait : Trait
+{
+  public override string AsText() => "BloodDrain";
+}
+
 class ConstructTrait : Trait
 {
   public override string AsText() => "Construct";

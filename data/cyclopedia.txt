@@ -544,3 +544,6 @@ A grey dwarf. Duergar are deep-dwelling, surly dwarves who have no love for othe
 #
 duergar spearfisher
 A grey dwarf who hunts with a jagged, barbed spear. Despite the name, they aren't picky about who their target is.
+#
+vampire
+Snappy dresser, sharp biter. Likes blood, dislikes holy things.
