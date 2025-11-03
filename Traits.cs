@@ -3587,6 +3587,86 @@ sealed class TorchTrait : BasicTrait, IGameEventListener, IUSeable, IOwner, IDes
   }
 }
 
+class TransformedTrait : TemporaryTrait
+{
+  public ulong OriginalId { get; set; }
+  public List<ulong> TransformedIds { get; set; } = [];
+
+  public override string AsText() => $"Transformed#{ExpiresOn}#{OwnerID}#{OriginalId}#{string.Join(',', TransformedIds)}";
+
+  public override List<string> Apply(Actor target, GameState gs)
+  {
+    target.Traits.Add(this);
+
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    gs.RegisterForEvent(GameEventType.Death, this, target.ID);
+
+    return [];
+  }
+
+  void RemoveTransformedIdFromActor(GameState gs, ulong id)
+  {
+    if (gs.ObjDb.GetObj(id) is Actor actor)
+    {
+      foreach (Trait t in actor.Traits)
+      {
+        if (t is TransformedTrait tt)
+          tt.TransformedIds.Remove(OwnerID);
+      }
+    }      
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    switch (eventType)
+    {
+      case GameEventType.Death:
+        RemoveTransformedIdFromActor(gs, OwnerID);
+        List<ulong> ids = [.. TransformedIds];
+        foreach (ulong id in ids)
+          RemoveTransformedIdFromActor(gs, id);
+
+        Remove(gs);
+
+        if (TransformedIds.Count == 0)
+          Untransform(gs, loc);
+
+        break;
+      case GameEventType.EndOfRound:
+        if (OwnerID == OriginalId && gs.Turn > ExpiresOn)
+        {
+          List<Loc> locs = [];
+          foreach (ulong id in TransformedIds)
+          {
+            if (gs.ObjDb.GetObj(id) is Actor transformed)
+              locs.Add(transformed.Loc);
+          }
+          locs.Shuffle(gs.Rng);
+          Untransform(gs, locs[0]);
+        }
+        break;
+    }
+  }
+
+  void Untransform(GameState gs, Loc loc)
+  {
+    foreach (ulong id in TransformedIds)
+    {
+      if (gs.ObjDb.GetObj(id) is Actor transformed)
+      {
+        gs.RemovePerformerFromGame(transformed);
+      }
+    }
+
+    if (gs.ObjDb.GetObj(OriginalId) is Actor original)
+    {
+      gs.UIRef().AlertPlayer($"{original.FullName.Capitalize()} {Grammar.Conjugate(original, "return")} to its normal form.", gs, loc);
+      gs.ResolveActorMove(original, loc, loc);
+      Remove(gs);
+    }
+  }
+}
+
 class TricksterBlessingTrait : BlessingTrait
 {
   public override List<string> Apply(Actor granter, GameState gs)
@@ -4150,6 +4230,15 @@ class TraitFactory
         OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Lit = bool.Parse(pieces[2]),
         Fuel = int.Parse(pieces[3])
+      }
+    },
+    {
+      "Transformed", (pieces, gameObj) => new TransformedTrait()
+      {
+        ExpiresOn = ulong.Parse(pieces[1]),
+        OwnerID = ulong.Parse(pieces[2]),
+        OriginalId = ulong.Parse(pieces[3]), 
+        TransformedIds = pieces[4] == "" ? [] : [..pieces[3].Split(',').Select(ulong.Parse)]
       }
     },
     { "TricksterBlessing", (pieces, gameObj) => new TricksterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },

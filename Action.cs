@@ -140,6 +140,59 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
   }
 }
 
+class TransFormIntoBats(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    List<Loc> batLocs = [];
+    for (int r = Actor!.Loc.Row - 2; r <= Actor.Loc.Row + 2; r++)
+    {
+      for (int c = Actor.Loc.Col - 2; c <= Actor.Loc.Col + 2; c++)
+      {
+        if (!GameState!.CurrentMap.InBounds(r, c))
+          continue;
+        Loc loc = Actor.Loc with { Row = r, Col = c };
+        if (GameState.CurrentMap.TileAt(r, c).PassableByFlight() && !GameState.ObjDb.Occupied(loc))
+          batLocs.Add(loc);
+      }
+    }
+    batLocs.Shuffle(GameState!.Rng);
+
+    List<Actor> bats = [];
+    int numOfBats = GameState.Rng.Next(4, 5);
+    for (int j = 0; j < int.Min(numOfBats, batLocs.Count); j++)
+    {
+      Actor bat = MonsterFactory.Get("dire bat", GameState.ObjDb, GameState.Rng);
+      GameState.ObjDb.AddNewActor(bat, batLocs[j]);
+      bats.Add(bat);
+      GameState.UIRef().RegisterAnimation(new SqAnimation(GameState, batLocs[j], Colours.DARK_GREY, Colours.BLACK, '*'));
+    }
+
+    string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "transform")} into a swarm of bats!";
+    GameState!.UIRef().AlertPlayer(s, GameState, Actor.Loc, Actor);
+
+    GameState.ObjDb.StashActor(Actor);
+
+    ulong expiry = GameState.Turn + (ulong)GameState.Rng.Next(5, 8);
+    TransformedTrait transformed = new() 
+    { 
+      OriginalId = Actor.ID, OwnerID = Actor.ID, ExpiresOn = expiry,
+      TransformedIds = [ ..bats.Select(b => b.ID)]
+    };
+    transformed.Apply(Actor, GameState);
+    
+    foreach (Actor bat in bats)
+    {
+      transformed = new() { OriginalId = Actor.ID, OwnerID = bat.ID, TransformedIds = [.. bats.Select(b => b.ID)], ExpiresOn = expiry };
+      transformed.Apply(bat, GameState);
+    }
+
+    return 1.0;
+  }
+}
+
 // This is a different class from MissileAttackAction because it will take the result the 
 // aim selection. It also handles the animation and following the path of the arrow
 class ArrowShotAction(GameState gs, Actor actor, Item? bow, Item ammo, int attackBonus) : TargetedAction(gs, actor)

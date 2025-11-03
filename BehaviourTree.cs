@@ -335,7 +335,7 @@ class UsePower(Power power) : BehaviourNode
     }
 
     return PlanStatus.Failure;
-  }
+  }  
 }
 
 class CrushPower(Power power) : UsePower(power)
@@ -451,6 +451,34 @@ class HealAlliesPower(Power power) : UsePower(power)
     }
 
     return PlanStatus.Failure;
+  }
+}
+
+class UseTurnIntoBatsPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
+    {
+      if (gs.Turn <= lastUse + Power.Cooldown)
+        return false;
+    }
+    
+    if (mob.Stats[Attribute.HP].Curr < mob.Stats[Attribute.HP].Max * 0.75)
+      return true;
+
+    return gs.Rng.Next(5) == 0;
+  }
+
+  public override PlanStatus Execute(Mob mob, GameState gs)
+  {
+    if (!Available(mob, gs))
+      return PlanStatus.Failure;
+
+    mob.ExecuteAction(new TransFormIntoBats(gs, mob));
+    mob.LastPowerUse[Power.Name] = gs.Turn;
+
+    return PlanStatus.Success;
   }
 }
 
@@ -1831,6 +1859,7 @@ class Planner
         "Gulp" => new GulpPower(p),
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
+        "TurnIntoBats" => new UseTurnIntoBatsPower(p),
         _ => new UsePower(p)
       };
 
@@ -1870,6 +1899,7 @@ class Planner
         "Gulp" => new GulpPower(p),
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
+        "TurnIntoBats" => new UseTurnIntoBatsPower(p),
         _ => new UsePower(p)
       };
 

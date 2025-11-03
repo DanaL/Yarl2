@@ -345,7 +345,8 @@ class GameObjectDB
   public void RemoveActor(Actor actor)
   {
     Objs.Remove(actor.ID);
-    _actorLocs.Remove(actor.Loc);
+    if (_actorLocs.TryGetValue(actor.Loc, out ulong id) && id == actor.ID)
+      _actorLocs.Remove(actor.Loc);
 
     foreach (Trait t in actor.Traits.Where(t => t is IGameEventListener))
     {
@@ -574,6 +575,12 @@ class GameObjectDB
     List<(ulong, IGameEventListener)> toRemove = [.. DeathWatchListeners.Where(dw => dw.Item1 == item.ID)];
     foreach (var dwl in toRemove)
       DeathWatchListeners.Remove(dwl);
+  }
+
+  public void StashActor(Actor a)
+  {
+    _actorLocs.Remove(a.Loc);
+    a.Loc = Loc.Nowhere;
   }
 
   public void ActorMoved(Actor a, Loc from, Loc to)

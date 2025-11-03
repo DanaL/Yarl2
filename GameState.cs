@@ -831,7 +831,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (targetID == victim.ID)
       {
-        listener.EventAlert(GameEventType.Death, this, Loc.Nowhere);
+        listener.EventAlert(GameEventType.Death, this, victim.Loc);
         ObjDb.DeathWatchListeners = [.. ObjDb.DeathWatchListeners.Where(w => w.Item1 != victim.ID)];
       }
     }
