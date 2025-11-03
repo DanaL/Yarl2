@@ -20,7 +20,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   public Loc DecoyMirror1 { get; set; } = Loc.Nowhere;
   public Loc DecoyMirror2 { get; set; } = Loc.Nowhere;
 
-  static Loc MarkVampyCastleLoc(Map map, int h, int w, Loc mirrorExit, int dungeonId, GameObjectDB objDb, Rng rng)
+  static Loc MarkVampyCastleLoc(Map map, int h, int w, Loc mirrorExit, int dungeonId, Rng rng)
   {
     List<(int, int)> opts = [];
     int mostOpen = 0;
@@ -180,7 +180,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       }
     }
 
-    Loc mirrorLoc = MarkVampyCastleLoc(map, 42, 82, tower, dungeonId, objDb, rng);
+    Loc mirrorLoc = MarkVampyCastleLoc(map, 42, 82, tower, dungeonId, rng);
 
     List<(int, int)> arrivalSpots = [];
     List<(int, int)> allOutside = [];
@@ -212,6 +212,13 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       objDb.AddNewActor(wolf, wolfLoc);
     }
     
+    List<Loc> adjToMirror = [.. Util.Adj8Sqs(mirrorLoc.Row, mirrorLoc.Col)
+                                  .Where(sq => map.TileAt(sq).Passable())
+                                  .Select(sq => new Loc(dungeonId, 0, sq.Item1, sq.Item2))];
+    Loc vampLoc = adjToMirror[rng.Next(adjToMirror.Count)];
+    Actor vampire = MonsterFactory.Get("vampire", objDb, rng);
+    objDb.AddNewActor(vampire, vampLoc);
+
     return (dungeon, arrivalLoc);
   }
 
