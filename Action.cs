@@ -2630,6 +2630,29 @@ class KnockAction(GameState gs, Actor caster) : Action(gs, caster)
   }
 }
 
+class DescentAction(GameState gs, Actor actor) : Action(gs, actor)
+{
+  public override double Execute()
+  {
+    Loc loc = Actor!.Loc;
+    Map map = GameState!.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+
+    if (GameState!.InWilderness || (map.Features & MapFeatures.UndiggableFloor) != MapFeatures.None)
+    {
+      GameState.UIRef().AlertPlayer("A tiny, nearly imperceptible divot forms.", GameState, loc);
+    }
+    else
+    {
+      GameState.UIRef().AlertPlayer("A chasm forms!", GameState, loc);
+      Item chasm = ItemFactory.Chasm(GameState);
+      GameState.ObjDb.SetToLoc(loc, chasm);
+      GameState.ChasmCreated(loc);
+    }
+
+    return 1.0;
+  }
+}
+
 class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 {
   public override double Execute()

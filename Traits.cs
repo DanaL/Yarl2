@@ -146,7 +146,7 @@ class AuraOfProtectionTrait : TemporaryTrait
 {
   public int HP { get; set; }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     List<string> messages = [];
     if (target.Traits.OfType<AuraOfProtectionTrait>().FirstOrDefault() is AuraOfProtectionTrait aura)
@@ -198,8 +198,11 @@ class CelerityTrait : TemporaryTrait
   protected override string ExpiryMsg => "You slow down.";
   public override string AsText() => $"Celerity#{SourceId}#{OwnerID}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     if (target.HasTrait<CelerityTrait>())
     {
       ExpiresOn += (ulong)gs.Rng.Next(25, 41);
@@ -232,7 +235,7 @@ class DragonCultBlessingTrait : BlessingTrait
 
   public override string Description(Actor owner) => "Dragon cult clessing";
 
-  public override List<string> Apply(Actor _, GameState gs)
+  public override List<string> Apply(GameObj _, GameState gs)
   {
     ACModTrait ac = new() { ArmourMod = 3, SourceId = Constants.DRAGON_GOD_ID };
     gs.Player.Traits.Add(ac);
@@ -290,7 +293,7 @@ class ChampionBlessingTrait : BlessingTrait
 {
   protected virtual string Title => "Champion";
 
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
 
@@ -419,8 +422,11 @@ class HeroismTrait : TemporaryTrait
   public override string AsText() => $"Heroism#{OwnerID}#{ExpiresOn}#{SourceId}";
   protected override string ExpiryMsg => "You feel less heroic.";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     if (target.Stats.TryGetValue(Attribute.Nerve, out var nerve))
     {
       nerve.Change(125);
@@ -769,7 +775,7 @@ class MageArmourTrait : TemporaryTrait
   protected override string ExpiryMsg => $"You feel less protected.";
   public override string AsText() => $"MageArmour#{ExpiresOn}#{OwnerID}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     foreach (Trait t in target.Traits)
     {
@@ -829,7 +835,7 @@ class EquipableTrait : Trait
 
 class EmberBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     ResistanceTrait resist = new()
     {
@@ -894,7 +900,7 @@ class PrisonerTrait : TemporaryTrait
   }
 
   public override string AsText() => $"Prisoner#{SourceId}#{Cell}";
-  public override List<string> Apply(Actor target, GameState gs) => [];
+  public override List<string> Apply(GameObj target, GameState gs) => [];
 }
 
 class QuietTrait : Trait
@@ -948,7 +954,7 @@ class ResistanceTrait : TemporaryTrait
   protected override string ExpiryMsg => $"You no longer feel resistant to {Type}.";
   public override string AsText() => $"Resistance#{Type}#{base.AsText()}#{SourceId}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     if (target.Traits.OfType<ResistanceTrait>().FirstOrDefault(t => t.Type == Type) is ResistanceTrait existing)
     {
@@ -986,7 +992,7 @@ class RestingTrait : TemporaryTrait
     }
   }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -1081,7 +1087,7 @@ class FeatherFallTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "You no longer feel feathery.";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -1135,13 +1141,6 @@ class GrantsTrait : Trait
       {
         obj.Traits.Add(trait);
       }
-     
-      // I don't think this is necessary. The traits themselves should be
-      // registering inside their Apply methods
-      //if (trait is IGameEventListener listener)
-      //{       
-      //  gs.RegisterForEvent(GameEventType.EndOfRound, listener);
-      //}
     }
 
     // I can't remember why I am calling this hear D: Perhaps because of
@@ -1279,7 +1278,7 @@ abstract class TemporaryTrait : BasicTrait, IGameEventListener, IOwner
     }
   }
 
-  public abstract List<string> Apply(Actor target, GameState gs);
+  public abstract List<string> Apply(GameObj target, GameState gs);
 
   public override string AsText() => $"{ExpiresOn}#{OwnerID}";
 }
@@ -1289,13 +1288,36 @@ class TelepathyTrait : TemporaryTrait
   protected override string ExpiryMsg => "You can no longer sense others' minds!";
   public override string AsText() => $"Telepathy#{base.AsText()}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);    
     OwnerID = target.ID;
 
     return [ $"{target.FullName.Capitalize()} can sense others' minds!" ];
+  }
+}
+
+class TemporaryChasmTrait : TemporaryTrait
+{
+  protected override string ExpiryMsg => "The chasm fills in.";
+  public override string AsText() => $"TemporaryChasm#{OwnerID}#{ExpiresOn}";
+
+  public override void Remove(GameState gs)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is Item item)
+    {
+      gs.ObjDb.RemoveItemFromGame(item.Loc, item);
+    }
+  }
+
+  public override List<string> Apply(GameObj obj, GameState gs)
+  {
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+    OwnerID = obj.ID;
+    ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(3, 8);
+
+    return [];
   }
 }
 
@@ -1309,7 +1331,7 @@ class TipsyTrait : TemporaryTrait
   protected override string ExpiryMsg => "A fog lifts.";
   public override string AsText() => $"Tipsy#{OwnerID}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     throw new NotImplementedException();
   }
@@ -1364,7 +1386,7 @@ class LevitationTrait : TemporaryTrait
     }
   }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
     target.Traits.Add(new FloatingTrait());
@@ -1532,8 +1554,11 @@ class FrightenedTrait : TemporaryTrait
   
   public override string AsText() => $"Frightened#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     foreach (Trait trait in target.Traits)
     {
       if (trait is TipsyTrait)
@@ -1703,6 +1728,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
                           OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID })),
     "heroism" => BuildHeroism(user, gs, item!),
     "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
+    "descent" => new UseResult(new DescentAction(gs, user)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -1776,7 +1802,7 @@ class ArmourTrait : Trait
 
 class CurseTrait : TemporaryTrait
 {
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     foreach (Trait t in target.Traits)
     {
@@ -1828,7 +1854,7 @@ class DiseasedTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "You feel healthy again.";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     foreach (Trait t in target.Traits)
     {
@@ -1981,8 +2007,11 @@ class BoostMaxStatTrait : TemporaryTrait
   public Attribute Stat { get; set; }
   public int Amount { get; set; }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     if (!target.Stats.TryGetValue(Stat, out Stat? statValue))
     {
       statValue = new Stat(0);
@@ -2023,8 +2052,11 @@ class ConfusedTrait : TemporaryTrait
   
   public override string AsText() => $"Confused#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     foreach (Trait trait in target.Traits)
     {
       if (trait is ConfusedTrait)
@@ -2076,8 +2108,11 @@ class LameTrait : TemporaryTrait
 {  
   public override string AsText() => $"Lame#{OwnerID}#{ExpiresOn}";
   
-  public override List<string> Apply(Actor target, GameState gs)
-  {    
+  public override List<string> Apply(GameObj obj, GameState gs)
+  {
+    if (obj is not Actor target)
+      return [];
+
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
     foreach (var t in target.Traits)
@@ -2155,7 +2190,7 @@ class GoldSnifferTrait : TemporaryTrait, IGameEventListener
 {
   const int RANGE = 10;
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     OwnerID = target.ID;
 
@@ -2218,8 +2253,11 @@ class ExhaustedTrait : TemporaryTrait
 {  
   public override string AsText() => $"Exhausted#{OwnerID}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
-  {    
+  public override List<string> Apply(GameObj obj, GameState gs)
+  {
+    if (obj is not Actor target)
+      return [];
+
     // if the actor already has the exhausted trait, just set the EndsOn
     // of the existing trait to the higher value
     foreach (var t in target.Traits)
@@ -2256,9 +2294,9 @@ class NauseaTrait : TemporaryTrait
 {
   public override string AsText() => $"Nausea#{OwnerID}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
-    if (target.HasTrait<NauseaTrait>())
+    if (obj.HasTrait<NauseaTrait>() || obj is not Actor target)
       return [];
 
     target.Traits.Add(this);
@@ -2334,7 +2372,7 @@ class NondescriptTrait : TemporaryTrait, IGameEventListener
   protected override string ExpiryMsg => "You feel the attention of others turn toward you.";
   public override string AsText() => $"Nondescript#{base.AsText()}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     if (target.HasTrait<NumbedTrait>())
     {
@@ -2357,8 +2395,11 @@ class NumbedTrait : TemporaryTrait
   protected override string ExpiryMsg => "Your numbness fades.";
   public override string AsText() => $"Numbed#{SourceId}#{OwnerID}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     if (target.HasTrait<NumbedTrait>())
     {
       ExpiresOn += (ulong)gs.Rng.Next(10, 21);
@@ -2420,7 +2461,7 @@ class PaladinBlessingTrait : ChampionBlessingTrait
 {
   protected override string Title => "Paladin";
 
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     base.Apply(granter, gs);
 
@@ -2453,9 +2494,9 @@ class ParalyzedTrait : TemporaryTrait
   
   public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
-    if (target.HasTrait<ParalyzedTrait>())
+    if (obj is not Actor target || target.HasTrait<ParalyzedTrait>())
       return [];
 
     if (target.AbilityCheck(Attribute.Will, DC, gs.Rng))
@@ -2501,9 +2542,9 @@ sealed class PoisonedTrait : TemporaryTrait
   public int Duration { get; set; }
   public override string AsText() => $"Poisoned#{DC}#{Strength}#{OwnerID}#{ExpiresOn}#{Duration}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
-    foreach (Trait t in target.Traits)
+    foreach (Trait t in obj.Traits)
     {
       // We won't apply multiple poison statuses to one victim. Although maybe I
       // should replace the weaker poison with the stronger one?
@@ -2514,6 +2555,9 @@ sealed class PoisonedTrait : TemporaryTrait
         return [];
     }
 
+    if (obj is not Actor target)
+      return [];
+    
     bool conCheck = target.AbilityCheck(Attribute.Constitution, DC, gs.Rng);
     if (!conCheck)
     {
@@ -2745,8 +2789,11 @@ class StatBuffTrait : TemporaryTrait
     player.Stats[Attribute.HP].SetCurr(maxHp);
   }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     // If the buffs share the same source, just increase the expires on rather
     // than letting the player spam stat buffs
     StatBuffTrait? other = target.Traits.OfType<StatBuffTrait>().Where(t => t.SourceId == SourceId).FirstOrDefault();
@@ -2859,8 +2906,11 @@ class StatDebuffTrait : TemporaryTrait
     return player ? "You feel different!" : "";
   }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj obj, GameState gs)
   {
+    if (obj is not Actor target)
+      return [];
+
     // Can't debuff stat if target doesn't have it!
     if (!target.Stats.TryGetValue(Attr, out var stat))
       return [];
@@ -2930,7 +2980,7 @@ class BlindTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "You can see again!";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     // I imagine there will eventually be an immunity to blindess trait?
     List<string> msgs = [];
@@ -2985,7 +3035,7 @@ class ReadableTrait(string text) : BasicTrait, IUSeable, IOwner
 
 class ReaverBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     int piety = gs.Player.Stats[Attribute.Piety].Max;
 
@@ -3161,7 +3211,7 @@ class SeeInvisibleTrait : TemporaryTrait
 {
   protected override string ExpiryMsg => "Your vision returns to normal.";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
@@ -3456,7 +3506,7 @@ class LightSpellTrait : TemporaryTrait
       obj.Traits.RemoveAt(i);
   }
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     LightSourceTrait lst = new()
     {
@@ -3594,7 +3644,7 @@ class TransformedTrait : TemporaryTrait
 
   public override string AsText() => $"Transformed#{ExpiresOn}#{OwnerID}#{OriginalId}#{string.Join(',', TransformedIds)}";
 
-  public override List<string> Apply(Actor target, GameState gs)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
     target.Traits.Add(this);
 
@@ -3669,7 +3719,7 @@ class TransformedTrait : TemporaryTrait
 
 class TricksterBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     QuietTrait quiet = new() { SourceId = granter.ID };
     gs.Player.Traits.Add(quiet);
@@ -3765,7 +3815,7 @@ class WeaponBonusTrait : Trait
 
 class WinterBlessingTrait : BlessingTrait
 {
-  public override List<string> Apply(Actor granter, GameState gs)
+  public override List<string> Apply(GameObj granter, GameState gs)
   {
     ResistanceTrait resist = new()
     {
@@ -4223,6 +4273,7 @@ class TraitFactory
     { "Sword", (pieces, gameObj) => new SwordTrait() },
     { "Teflon", (pieces, gameObj) => new TeflonTrait() },
     { "Telepathy", (pieces, gameObj) => new TelepathyTrait() { ExpiresOn = ulong.Parse(pieces[1]), OwnerID = ulong.Parse(pieces[2]) } },
+    { "TemporaryChasm", (pieces, gameObj) => new TemporaryChasmTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Thief", (pieces, gameObj) => new ThiefTrait() },
     { "Tipsy", (pieces, gameObj) => new TipsyTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "Torch", (pieces, gameObj) => new TorchTrait()
