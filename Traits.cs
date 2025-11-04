@@ -1316,6 +1316,7 @@ class TemporaryChasmTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
     OwnerID = obj.ID;
     ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(3, 8);
+    obj.Traits.Add(this);
 
     return [];
   }

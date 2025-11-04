@@ -282,6 +282,55 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
   }
 
+  void MakeTemporaryChasm(Loc loc)
+  {
+    Map map = Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    if (loc.DungeonID == 0 || (map.Features & MapFeatures.UndiggableFloor) != MapFeatures.None)
+    {
+      UI.AlertPlayer("A small ripple seems to pass over the terrain.", this, loc);
+      return;
+    }
+
+    HashSet<Loc> tiles = [loc];
+    foreach (Loc adj in Util.Adj8Locs(loc))
+    {
+      if (Rng.Next(5) < 4)
+      {
+        tiles.Add(adj);
+        foreach (Loc aadj in Util.Adj8Locs(adj))
+        {
+          if (Rng.Next(6) <= 1)
+            tiles.Add(aadj);
+        }
+      }
+    }
+
+
+    foreach (Loc puddleLoc in tiles)
+    {
+      Tile tile = TileAt(puddleLoc);
+      
+      switch (tile.Type)
+      {
+        case TileType.DungeonFloor:
+        case TileType.Grass:
+        case TileType.StoneFloor:
+        case TileType.OpenDoor:
+        case TileType.WoodBridge:
+        case TileType.Bridge:
+        case TileType.Dirt:
+        case TileType.DeepWater:
+        case TileType.FrozenDeepWater:
+          Item chasm = ItemFactory.Chasm(this);
+          ObjDb.SetToLoc(puddleLoc, chasm);
+          ChasmCreated(puddleLoc);
+          break;
+        default:
+          continue;
+      }      
+    }
+  }
+
   void MakePuddleOfBooze(Loc loc)
   {
     HashSet<Loc> tiles = [loc];
@@ -320,7 +369,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       loc = Util.NearestOpen(this, loc);
     }
 
-    if (tile.Type == TileType.Chasm)
+    if (tile.Type == TileType.Chasm || ObjDb.EnvironmentsAt(loc).Where(e => e.HasTrait<TemporaryChasmTrait>()).Any())
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", this, loc);
       int delta = CurrentDungeon.Descending ? 1 : -1;
@@ -339,6 +388,14 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         SacrificeGoldToHuntokar(item.Value, loc);
         return;
       }
+    }
+
+    if (thrown && item.Name == "potion of descent")
+    {
+      ObjDb.RemoveItemFromGame(item.Loc, item);
+      UI.AlertPlayer("The bottle shatters!", this, loc);
+      MakeTemporaryChasm(loc);
+      return;
     }
 
     if (thrown && item.Name == "flask of booze")
