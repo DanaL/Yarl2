@@ -31,7 +31,7 @@ class Treasure
       ItemNames.SCROLL_KNOCK, ItemNames.LOCK_PICK, ItemNames.VIAL_OF_POISON, ItemNames.SCROLL_PROTECTION,
       ItemNames.SCROLL_DISARM, ItemNames.BEETLE_CARAPACE, ItemNames.LEATHER_GLOVES,
       ItemNames.SCROLL_TREASURE_DETECTION, ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SKELETON_KEY,
-      ItemNames.POTION_HARDINESS, ItemNames.POTION_HEROISM
+      ItemNames.POTION_HARDINESS, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT
   ]; 
 
   static readonly List<ItemNames> GoodItems = [ 
@@ -50,7 +50,7 @@ class Treasure
       ItemNames.CLOAK_OF_PROTECTION, ItemNames.GAUNTLETS_OF_POWER, ItemNames.SCROLL_TREASURE_DETECTION,
       ItemNames.SCROLL_TRAP_DETECTION, ItemNames.SCROLL_SCATTERING, ItemNames.POTION_OBSCURITY,
       ItemNames.FEATHERFALL_BOOTS, ItemNames.WIND_FAN, ItemNames.SKELETON_KEY, ItemNames.POTION_HARDINESS,
-      ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM
+      ItemNames.TINCTURE_CELERITY, ItemNames.POTION_HEROISM, ItemNames.POTION_DESCENT
   ];
   
   public static readonly List<ItemNames> Consumables = [
@@ -72,7 +72,8 @@ class Treasure
     ItemNames.SCROLL_TREASURE_DETECTION,
     ItemNames.VIAL_OF_POISON,
     ItemNames.WIND_FAN,
-    ItemNames.TINCTURE_CELERITY
+    ItemNames.TINCTURE_CELERITY,
+    ItemNames.POTION_DESCENT
   ];
 
   public static Item GetTalisman(Rng rng, GameObjectDB objDb)
