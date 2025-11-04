@@ -96,6 +96,11 @@ sealed class Item : GameObj, IEquatable<Item>
       name = Name;
     }
 
+    if (Type == ItemType.Zorkmid)
+    {
+      return Value > 1 ? $"{Value} zorkmids" : "1 zorkmid";
+    }
+
     List<string> adjs = [];
     int bonus = 0;
     bool isBook = false;
