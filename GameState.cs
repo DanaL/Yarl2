@@ -371,9 +371,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (tile.Type == TileType.Chasm || ObjDb.EnvironmentsAt(loc).Where(e => e.HasTrait<TemporaryChasmTrait>()).Any())
     {
-      string s = $"{item.FullName.DefArticle().Capitalize()}";
+      string s = item.FullName.DefArticle().Capitalize();
+      string v = item.Type == ItemType.Zorkmid && item.Value > 1 ? "tumble" : "tumbles";
+      UI.AlertPlayer($"{s} {v} into darkness!", this, loc);
 
-      UI.AlertPlayer($"{s} tumbles into darkness!", this, loc);
       int delta = CurrentDungeon.Descending ? 1 : -1;
       ItemDropped(item, loc with { Level = loc.Level + delta });
       return;
