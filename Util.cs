@@ -806,6 +806,36 @@ class Util
     return false;
   }
 
+  // The nearest location that is passable by flight. Not worrying if it is
+  // occupied or if there are hazards.
+  public static Loc NearestOpen(GameState gs, Loc loc)
+  {
+    Map map = gs.Campaign.Dungeons[loc.DungeonID].LevelMaps[loc.Level];
+    HashSet<Loc> visited = [];
+    Queue<Loc> q = [];
+    q.Enqueue(loc);
+    visited.Add(loc);
+
+    while (q.Count > 0)
+    {
+      Loc curr = q.Dequeue();
+
+      if (gs.TileAt(curr).PassableByFlight())
+        return curr;
+
+      List<Loc> adjLocs = [.. Adj8Locs(curr).Where(l => !visited.Contains(l) && map.InBounds(l.Row, l.Col))];
+      adjLocs.Shuffle(gs.Rng);
+
+      foreach (Loc adj in adjLocs)
+      {
+        visited.Add(adj);
+        q.Enqueue(adj);
+      }
+    }
+
+    return Loc.Nowhere;
+  }
+
   // Sort of yet another implementation of floodfill...
   public static Loc NearestUnoccupiedLoc(GameState gs, Loc loc)
   {

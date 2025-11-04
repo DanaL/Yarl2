@@ -315,6 +315,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     Tile tile = TileAt(loc);
 
+    if (!tile.PassableByFlight())
+    {
+      loc = Util.NearestOpen(this, loc);
+    }
+
     if (tile.Type == TileType.Chasm)
     {
       UI.AlertPlayer($"{item.Name.DefArticle().Capitalize()} tumbles into darkness!", this, loc);
@@ -604,6 +609,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     foreach (var item in itemsToFall)
     {
       ObjDb.RemoveItemFromLoc(loc, item);
+      // Actually 'touching' the chasm and falling to the next level are
+      // handled in ItemDropped()
       ItemDropped(item, loc);
     }
   }
@@ -730,6 +737,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       while (true)
       {
         Map map = dungeon.LevelMaps[landingSpot.Level];
+        landingSpot = Util.NearestOpen(this, landingSpot);
+
         if (map.TileAt(landingSpot.Row, landingSpot.Col).Type != TileType.Chasm)
           return landingSpot;
         landingSpot = landingSpot with { Level = landingSpot.Level + delta };
