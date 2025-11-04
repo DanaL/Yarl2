@@ -418,7 +418,7 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     Loc entranceStairs = Loc.Nowhere;
     Loc prevLoc = new(0, 0, entranceRow, entranceCol);
     Portal? prevDownstairs = null;
-    int maxLevels = rng.Next(5, 8);
+    int maxLevels = rng.Next(3, 6);
     for (int lvl = 0; lvl < maxLevels; lvl++)
     {
       (Map map, List<(int, int)> roomSqs) = RLLevelMaker.MakeLevel(rng);

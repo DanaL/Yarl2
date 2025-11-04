@@ -584,7 +584,7 @@ internal class Wilderness(Rng rng, int length)
     throw new WildernessCreationException("No valleys at all!");
   }
 
-  public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
+  public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, HashSet<(int, int)> mainRegion, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<HashSet<(int, int)>> valleys = [.. regions.Where(r => IsValley(r))];
 
@@ -605,7 +605,7 @@ internal class Wilderness(Rng rng, int length)
     Dictionary<TileType, int> costs = [];
     costs.Add(TileType.Grass, 2);
     costs.Add(TileType.Sand, 2);
-    costs.Add(TileType.Water, 4);
+    costs.Add(TileType.Water, 6);
     costs.Add(TileType.GreenTree, 2);
     costs.Add(TileType.YellowTree, 2);
     costs.Add(TileType.RedTree, 2);
@@ -614,8 +614,8 @@ internal class Wilderness(Rng rng, int length)
     costs.Add(TileType.Dirt, 2);
     costs.Add(TileType.ClosedDoor, 3);
     costs.Add(TileType.Bridge, 3);
-    costs.Add(TileType.Mountain, 3);
-    costs.Add(TileType.SnowPeak, 3);
+    costs.Add(TileType.Mountain, 5);
+    costs.Add(TileType.SnowPeak, 5);
 
     Loc start = new(0, 0, sr, sc);
     // Pick a target loc in town
@@ -651,24 +651,32 @@ internal class Wilderness(Rng rng, int length)
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.Dirt));
         carved.Add(loc);
       }
-      else
+      else if (mainRegion.Contains((loc.Row, loc.Col)))
       {
         break;
       }
     }
 
-    int numOfRubble = int.Min(3, carved.Count);
-    if (carved.Count > numOfRubble)
-      numOfRubble = rng.Next(numOfRubble, carved.Count);
-    List<int> indexes = [.. Enumerable.Range(0, carved.Count)];
-    indexes.Shuffle(rng);
-    for (int j = 0; j < numOfRubble; j++)
+    for (int j = 0; j < int.Min(3, carved.Count); j++)
     {
-      Loc loc = carved[indexes[j]];
       Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
-      objDb.SetToLoc(loc, rubble);
+      objDb.SetToLoc(carved[j], rubble);
     }
 
+    if (carved.Count > 6)
+    {
+      List<int> indexes = [.. Enumerable.Range(3, carved.Count - 3)];
+      indexes.Shuffle(rng);
+
+      int numOfRubble = int.Min(rng.Next(indexes.Count), 6);
+      for (int j = 0; j < numOfRubble; j++)
+      {
+        Loc loc = carved[indexes[j]];
+        Item rubble = ItemFactory.Get(ItemNames.RUBBLE, objDb);
+        objDb.SetToLoc(loc, rubble);
+      }
+    }
+    
     // Valleys can be bordered by deep water, but we need to have at least
     // one mountain
     bool IsValley(HashSet<(int, int)> potential)
