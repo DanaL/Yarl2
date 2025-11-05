@@ -1462,7 +1462,12 @@ class InventoryDetails : Inputer
 
       s += "It deals";
       if (versatileText != "")
+      {
         s += $" {versatileText}";
+
+        if (damage.Count > 0)
+          s += ", and ";
+      }
       s += string.Join(',', damage.Select(d => $" {d.NumOfDie}d{d.DamageDie} {d.DamageType.ToString().ToLower()}"));
       s += " damage.";
     }
