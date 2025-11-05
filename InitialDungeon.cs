@@ -556,8 +556,10 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
     int cellarWidth = WIDTH + 2;
     int levelNum = stairsLoc.Level + 1;
 
-    // Generate the cellar level
-    Map cellar = new(cellarWidth, cellarHeight) { Features = MapFeatures.UndiggableFloor };
+    Map cellar = new(cellarWidth, cellarHeight) 
+    { 
+      Features = MapFeatures.UndiggableFloor | MapFeatures.NoRandomEncounters 
+    };
 
     for (int r = 0; r < cellarHeight; r++)
     {

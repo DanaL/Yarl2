@@ -701,7 +701,8 @@ public enum MapFeatures
   None = 0b0000,
   UndiggableFloor = 0b0001,
   Submerged = 0b0010,
-  Foggy = 0b0100
+  Foggy = 0b0100,
+  NoRandomEncounters = 0b1000
 }
 
 class Map : ICloneable

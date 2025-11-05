@@ -1168,7 +1168,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     ++Turn;
 
-    // I'm still not sure if I'm going to HP regeneration inside the dungeon
+    /* Start of me waffling about HP regeneration */
+    
+    // I've been flip-flopping between whether I want the player to regenerate
+    // HP inside dungeons or not
     if (Turn % 11 == 0)
     {
       Player.Stats[Attribute.HP].Change(1);
@@ -1181,6 +1184,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     //  Player.Stats[Attribute.HP].Change(1);
     //}
 
+    /* End of me waffling about HP regeneration */
+
     if (Turn % 17 == 0 && Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
     {
       magicPoints.Change(1);
@@ -1188,7 +1193,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
-    if (Rng.Next(60) == 0)
+    if ((CurrentMap.Features & MapFeatures.NoRandomEncounters) != MapFeatures.None && Rng.Next(60) == 0)
     {
       SpawnMonster();
     }
