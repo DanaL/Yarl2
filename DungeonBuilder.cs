@@ -207,7 +207,7 @@ abstract class DungeonBuilder
   {
     for (int lvl = 0; lvl < dungeon.LevelMaps.Count; lvl++)
     {
-      for (int j = 0; j < rng.Next(8, 13); j++)
+      for (int j = 0; j < rng.Next(dungeon.PopulationLow, dungeon.PopulationHigh + 1); j++)
       {
         int monsterLvl = lvl;
         if (lvl > 0 && rng.NextDouble() > 0.8)

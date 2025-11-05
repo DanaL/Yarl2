@@ -406,7 +406,11 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 
   public (Dungeon, Loc) Generate(int entranceRow, int entranceCol, GameObjectDB objDb, Rng rng)
   {
-    Dungeon dungeon = new(DungeonId, "a Forgotten Dungeon", "", true);
+    Dungeon dungeon = new(DungeonId, "a Forgotten Dungeon", "", true)
+    {
+      PopulationLow = 6,
+      PopulationHigh = 10
+    };
 
     dungeon.MonsterDecks = DeckBuilder.ReadDeck("lost_dungeon", rng);
 

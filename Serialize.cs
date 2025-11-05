@@ -360,6 +360,8 @@ internal class DungeonSaver
   public bool Descending { get; set; }
   public string ExitLoc { get; set; } = "";
   public string Name { get; set; } = "";
+  public int PopulationLow { get; set; }
+  public int PopulationHigh { get; set; }
 
   [JsonInclude]
   public List<string> RememberedLocs = [];
@@ -379,6 +381,8 @@ internal class DungeonSaver
       MonsterDecks = [.. dungeon.MonsterDecks.Select(deck => deck.ToString())],
       ExitLoc = dungeon.ExitLoc.ToString(),
       Name = dungeon.Name,
+      PopulationLow = dungeon.PopulationLow,
+      PopulationHigh = dungeon.PopulationHigh
     };
 
     foreach (var k in dungeon.LevelMaps.Keys)
@@ -399,7 +403,9 @@ internal class DungeonSaver
   {
     Dungeon d = new(sd.ID, sd.Name, sd.ArrivalMessage ?? "", sd.Descending)
     {
-      ExitLoc = Loc.FromStr(sd.ExitLoc)
+      ExitLoc = Loc.FromStr(sd.ExitLoc),
+      PopulationLow = sd.PopulationLow,
+      PopulationHigh = sd.PopulationHigh
     };
 
     foreach (var s in sd.RememberedLocs)

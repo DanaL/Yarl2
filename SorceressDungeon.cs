@@ -330,7 +330,9 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
   {
     Dungeon towerDungeon = new(DungeonId, "a Musty Tower", "Ancient halls that smell of dust and magic.", false)
     {
-      MonsterDecks = DeckBuilder.ReadDeck("tower", rng)
+      MonsterDecks = DeckBuilder.ReadDeck("tower", rng),
+      PopulationLow = 5,
+      PopulationHigh = 10
     };
 
     int numOfLevels = 4;

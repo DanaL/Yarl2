@@ -378,7 +378,7 @@ class CampaignCreator(UserInterface ui)
         wilderness = new Dungeon(0, "the Wilderness", "You draw a deep breath of fresh air.", true);
         Wilderness wildernessGenerator = new(rng, wildernessWidth);
         wildernessMap = wildernessGenerator.DrawLevel();
-        wildernessMap.Features = MapFeatures.Foggy;
+        wildernessMap.Features = MapFeatures.NoRandomEncounters;
         
         // Redraw map if there aren't enough mountains
         int mountains = 0;
