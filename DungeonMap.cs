@@ -705,7 +705,7 @@ class DungeonMap(Rng rng)
         row = 1;
         done = true;
       }
-      if (row >= height - 1)
+      if (row >= height - 2)
       {
         row = height - 2;
         done = true;
@@ -715,7 +715,7 @@ class DungeonMap(Rng rng)
         col = 1;
         done = true;
       }
-      if (col >= width - 1)
+      if (col >= width - 2)
       {
         col = width - 2;
         done = true;
@@ -725,7 +725,6 @@ class DungeonMap(Rng rng)
     }
 
     DrawRiver(map, pts, riverTile, dungeonId, level, objDb, rng);
-
     AddBridges(map, height, width, riverTile, rng);
   }
 
@@ -809,39 +808,40 @@ class DungeonMap(Rng rng)
 
     if (!map.IsTile(above, riverTile) && !map.IsTile(below, riverTile))
     {
-      if (map.InBounds(above))
+      if (NotEdge(above))
       {
         map.SetTile(above, TileFactory.Get(riverTile));
         above = (above.Row - 1, above.Col);
-        if (map.InBounds(above) && rng.NextDouble() < 0.33 && NoItems(above.Row, above.Col))
+        if (NotEdge(above) && rng.Next(3) == 0 && NoItems(above.Row, above.Col))
           map.SetTile(above, TileFactory.Get(riverTile));
       }
-      if (map.InBounds(below))
+      if (NotEdge(below))
       {
         map.SetTile(below, TileFactory.Get(riverTile));
         below = (below.Row + 1, below.Col);
-        if (map.InBounds(below) && rng.NextDouble() < 0.33 && NoItems(below.Row, below.Col))
+        if (NotEdge(below) && rng.Next(3) == 0 && NoItems(below.Row, below.Col))
           map.SetTile(below, TileFactory.Get(riverTile));
       }
     }
     if (!map.IsTile(left, riverTile) && !map.IsTile(right, riverTile))
     {
-      if (map.InBounds(left))
+      if (NotEdge(left))
       {
         map.SetTile(left, TileFactory.Get(riverTile));
         left = (left.Row, left.Col - 1);
-        if (map.InBounds(left) && rng.NextDouble() < 0.33 && NoItems(left.Row, left.Col))
+        if (NotEdge(left) && rng.Next(3) == 0 && NoItems(left.Row, left.Col))
           map.SetTile(left, TileFactory.Get(riverTile));
       }
-      if (map.InBounds(right))
+      if (NotEdge(right))
       {
         map.SetTile(right, TileFactory.Get(riverTile));
         right = (right.Row, right.Col + 1);
-        if (map.InBounds(right) && rng.NextDouble() < 0.33 && NoItems(right.Row, right.Col))
+        if (NotEdge(right) && rng.Next(3) == 0 && NoItems(right.Row, right.Col))
           map.SetTile(right, TileFactory.Get(riverTile));
       }
     }
 
+    bool NotEdge((int R, int C) sq) => sq.R > 0 && sq.C > 0 && sq.R < map.Height - 1 && sq.C < map.Width - 1;
     bool NoItems(int r, int c) => !objDb.AnyItemsAt(new Loc(dungeonId, level, r, c));
   }
 
