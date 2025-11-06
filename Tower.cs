@@ -62,6 +62,9 @@ class Tower(int height, int width, int minLength)
       else
         row = rng.Next(int.Min(a, b), int.Max(a, b));
 
+      //if (row % 2 == 0)
+      //  row += rng.Next(2) == 0 ? 1 : -1;
+
       for (int c = lc; c <= rc; c++)
       {
         map[row, c] = true;
@@ -201,6 +204,12 @@ class Tower(int height, int width, int minLength)
 
   static void SetDoors(Map map, int level, Rng rng)
   {
+    if (level == 2)
+    {
+      map.Dump();
+      Console.WriteLine();
+    }
+
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
     // the inefficiency will be even noticable.
@@ -218,7 +227,10 @@ class Tower(int height, int width, int minLength)
     {
       int j = roomIds[0];
       Room room = rooms[j];
-
+      if (level == 2 && room.Sqs.Count == 15)
+      {
+        Console.WriteLine($"Processing room {j} with size {room.Sqs.Count}");
+      }
       // Find the adjacent rooms
       List<int> adjRooms = [];
       foreach (int otherId in roomIds)
@@ -226,6 +238,10 @@ class Tower(int height, int width, int minLength)
         if (otherId == j)
           continue;
 
+        if (level == 2 && rooms[otherId].Sqs.Count == 15)
+        {
+          Console.WriteLine($"  Checking adjacency with room {otherId} size {rooms[otherId].Sqs.Count}");
+        }
         foreach ((int r, int c) in room.Perimeter.Intersect(rooms[otherId].Perimeter))
         {
           if (DoorCandidate(map, r, c))
@@ -264,6 +280,10 @@ class Tower(int height, int width, int minLength)
         int otherId = adjRooms[k];
         Room other = rooms[otherId];
 
+        if (level == 2 && (room.Sqs.Count == 15 || other.Sqs.Count == 15))
+        {
+          Console.WriteLine($"Merging rooms {j} and {otherId}");
+        }
         // place the door
         List<(int r, int c)> doorable = [];
         List<(int r, int c)> shared = [.. room.Perimeter.Intersect(other.Perimeter)];
@@ -497,6 +517,9 @@ class Tower(int height, int width, int minLength)
       DrawWallFromCorner(map, row, col, rng);
     }
 
+    if (level == 2)
+      map.Dump();
+
     RegionFinder rf = new(new DungeonPassable());
     Dictionary<int, HashSet<(int, int)>> rooms =  rf.Find(map, false, 0, TileType.DungeonFloor);
 
@@ -544,9 +567,8 @@ class Tower(int height, int width, int minLength)
       }
     }
 
-    List<Room> rms = FindRooms(map);
-    TweakInterior(map, rms, level, rng);
-
+    TweakInterior(map, FindRooms(map), level, rng);
+    
     return map;
 
     bool IsCorner(int row, int col)
