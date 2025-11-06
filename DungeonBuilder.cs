@@ -407,7 +407,7 @@ abstract class DungeonBuilder
 
     static int StairsPathsCosts(Tile tile)
     {
-      if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
+      if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
         return 1;
 
       if (!tile.Passable())
