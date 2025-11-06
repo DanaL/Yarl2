@@ -14,6 +14,45 @@ namespace Yarl2;
 
 class PlayerCreator
 {
+  public static Player NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
+  {
+    PlayerLineage lineage = PickLineage(ui);
+    PlayerBackground background = PickBackground(ui);
+
+    Player player = new(playerName)
+    {
+      Loc = new Loc(0, 0, startRow, startCol),
+      Lineage = lineage,
+      Background = background,
+      Energy = 1.0,
+      ID = Constants.PLAYER_ID
+    };
+    player.Stats = RollStats(player.Lineage, player.Background, rng);
+    player.Stats[Attribute.MainQuestState] = new Stat(0);
+    player.Traits.Add(new SwimmerTrait());
+    player.Inventory = new Inventory(player.ID, gs.ObjDb);
+
+    gs.ObjDb.Add(player);
+
+    SetInitialAbilities(player);
+    SetStartingGear(player, gs, rng);
+
+    // Humans start with a little more money than the others
+    if (lineage == PlayerLineage.Human)
+    {
+      Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
+      money.Value = 20;
+      player.Inventory.Add(money, player.ID);
+    }
+
+    player.CalcHP();
+
+    PlayerRegenTrait prt = new();
+    prt.Apply(player, gs);
+
+    return player;
+  }
+
   static PlayerLineage PickLineage(UserInterface ui)
   {
     List<string> menu = [
@@ -281,38 +320,5 @@ class PlayerCreator
         }
       }
     }
-  }
-
-  public static Player NewPlayer(string playerName, GameState gs, int startRow, int startCol, UserInterface ui, Rng rng)
-  {
-    PlayerLineage lineage = PickLineage(ui);
-    PlayerBackground background = PickBackground(ui);
-
-    Player player = new(playerName)
-    {
-      Loc = new Loc(0, 0, startRow, startCol), Lineage = lineage,
-      Background = background, Energy = 1.0, ID = Constants.PLAYER_ID
-    };
-    player.Stats = RollStats(player.Lineage, player.Background, rng);
-    player.Stats[Attribute.MainQuestState] = new Stat(0);
-    player.Traits.Add(new SwimmerTrait());
-    player.Inventory = new Inventory(player.ID, gs.ObjDb);
-
-    gs.ObjDb.Add(player);
-
-    SetInitialAbilities(player);
-    SetStartingGear(player, gs, rng);
-
-    // Humans start with a little more money than the others
-    if (lineage == PlayerLineage.Human)
-    {
-      Item money = ItemFactory.Get(ItemNames.ZORKMIDS, gs.ObjDb);
-      money.Value = 20;
-      player.Inventory.Add(money, player.ID);
-    }
-
-    player.CalcHP();
-
-    return player;
   }
 }

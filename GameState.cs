@@ -1168,29 +1168,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     ++Turn;
 
-    /* Start of me waffling about HP regeneration */
-    
-    // I've been flip-flopping between whether I want the player to regenerate
-    // HP inside dungeons or not
-    if (Turn % 11 == 0)
-    {
-      Player.Stats[Attribute.HP].Change(1);
-    }
-
-    //// During the day, in the wilderness, the player regenerates HP
-    //var (hour, _) = CurrTime();
-    //if (InWilderness && Turn % 7 == 0 && hour >= 6 && hour <= 21)
-    //{
-    //  Player.Stats[Attribute.HP].Change(1);
-    //}
-
-    /* End of me waffling about HP regeneration */
-
-    if (Turn % 17 == 0 && Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
-    {
-      magicPoints.Change(1);
-    }
-
     // I'm not sure yet what a good monster gen rate is, and what in-game
     // conditions should affect it
     if ((CurrentMap.Features & MapFeatures.NoRandomEncounters) != MapFeatures.None && Rng.Next(60) == 0)

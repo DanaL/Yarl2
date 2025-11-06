@@ -1186,6 +1186,39 @@ class PlantTrait : Trait
   public override string AsText() => "Plant";
 }
 
+// This handles the player's recovery of HP and MP over time.
+// I waffle between whether or not the player will heal inside dungeons.
+// Guess I'll wait until the game is more done since it will be a big
+// balancing factor ¯\_ (ツ)_/¯
+sealed class PlayerRegenTrait : TemporaryTrait
+{
+  public override string AsText() => "PlayerRegen";
+
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    ExpiresOn = ulong.MaxValue;
+    OwnerID = target.ID;
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.Turn % 11 == 0)
+    {
+      gs.Player.Stats[Attribute.HP].Change(1);
+    }
+
+    if (gs.Turn % 17 == 0 && gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints))
+    {
+      magicPoints.Change(1);
+    }
+  }
+}
+
 class PluralTrait : Trait
 {
   public override string AsText() => "Plural";
@@ -4158,6 +4191,7 @@ class TraitFactory
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
     { "Passive", (pieces, gameObj) => new PassiveTrait() },
     { "Plant", (pieces, gameObj) => new PlantTrait() },
+    { "PlayerRegen", (pieces, gameObj) => new PlayerRegenTrait() },
     { "Plural", (pieces, gameObj) => new PluralTrait() },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
     { "Poisoned", (pieces, gameObj) => new PoisonedTrait()
