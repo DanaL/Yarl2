@@ -320,109 +320,101 @@ abstract class DungeonBuilder
 
   protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, bool secondStairs, Rng rng)
   {
-    List<List<(int, int)>> floors = [];
-
-    for (int lvl = 0; lvl < numOfLevels; lvl++)
-    {
-      floors.Add(levels[lvl].SqsOfType(TileType.DungeonFloor));
-    }
+    List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
 
     // so first set the exit stairs on the first floor
     // (Exit is outwards, ie., stairs that lead oout of the dungeon)
-    ExitLoc = floors[0][rng.Next(floors[0].Count)];
-    Tile exitStairs;
-    if (desc)
-    {
-      exitStairs = new Upstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
-    }
-    else
-    {
-      exitStairs = new Downstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
-    }
+    ExitLoc = floors[rng.Next(floors.Count)];
+    Tile exitStairs = desc ? new Upstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) }
+                           : new Downstairs("") { Destination = new Loc(0, 0, entrance.Item1, entrance.Item2) };
 
     levels[0].SetTile(ExitLoc, exitStairs);
 
-    for (int lvl = 0; lvl < numOfLevels - 1; lvl++)
-    {
-      CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
-
-      if (secondStairs && rng.NextDouble() < 0.1)
-        CreateStairway(dungeonId, levels[lvl], levels[lvl + 1], lvl, height, width, desc, rng);
-    }
+    CreateStairway(dungeonId, levels, 0, ExitLoc, desc, rng);
   }
 
-  // I want the dungeon levels to be, geographically, neatly stacked so
-  // the stairs between floors will be at the same location. (Ie., if 
-  // the down stairs on level 3 is at 34,60 then the stairs up from 
-  // level 4 should be at 34,60 too)
-  static void CreateStairway(int dungeonId, Map currentLevel, Map nextLevel, int currentLevelNum, int height, int width, bool desc, Rng rng)
+  static void CreateStairway(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
   {
-    // find the pairs of floor squares shared between the two levels
-    List<(int, int)> shared = [];
-    for (int r = 1; r < height - 1; r++)
-    {
-      for (int c = 1; c < width - 1; c++)
-      {
-        if (currentLevel.TileAt(r, c).Type == TileType.DungeonFloor && nextLevel.TileAt(r, c).Type == TileType.DungeonFloor)
-        {
-          shared.Add((r, c));
-        }
-      }
-    }
+    Map currLvl = levelMaps[levelNum];
+    Map nextLvl = levelMaps[levelNum + 1];
+    DijkstraMap dijkstra = new(currLvl, [], currLvl.Height, currLvl.Width, false);
+    dijkstra.Generate(StairsPathsCosts, arrivalStairs, int.MaxValue);
 
+    // We want to avoid placing stairs in a vault the player has potentially
+    // no way to open. I can probably skip this check if I'm adding a second
+    // staircase to a level?
     HashSet<(int, int)> lockedVaultSqs = [];
-    foreach (var room in nextLevel.FindRooms(9))
+    foreach (var room in nextLvl.FindRooms(9))
     {
-      if (Rooms.IsLockedVault(nextLevel, room))
+      if (Rooms.IsLockedVault(nextLvl, room))
       {
         lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
       }
     }
 
-    while (shared.Count > 0)
+    List<(int, int, int)> floors = [];
+    int sumOfCosts = 0;
+    for (int r = 1; r < currLvl.Height - 1; r++)
     {
-      (int, int) pick = shared[rng.Next(shared.Count)];
-      Downstairs down = new("");
-      Upstairs up = new("");
-
-      if (desc)
+      for (int c = 1; c < currLvl.Width - 1; c++)
       {
-        // The up stairs are the arrival stairs (for normal arrivals)
-        Loc loc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-        if (lockedVaultSqs.Contains((loc.Row, loc.Col)))
+        Tile tile = currLvl.TileAt(r, c);
+        Tile tileBelow = nextLvl.TileAt(r, c);
+
+        if (tile.Type == TileType.DungeonFloor && tileBelow.Type == TileType.DungeonFloor && !lockedVaultSqs.Contains((r, c)))
         {
-          shared.Remove(pick);
-          continue;
+          int cost = dijkstra.Sqrs[r, c] * 2;
+          if (cost < int.MaxValue)
+          {
+            floors.Add((r, c, cost));
+            sumOfCosts += cost;
+          }
         }
-
-        up.Destination = loc;        
-        down.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
-        currentLevel.SetTile(pick.Item1, pick.Item2, down);
-        nextLevel.SetTile(pick.Item1, pick.Item2, up);
-
-        return;
-      }
-      else
-      {
-        // Down stairs at the arrival stairs
-        Loc loc = new(dungeonId, currentLevelNum, pick.Item1, pick.Item2);
-        if (lockedVaultSqs.Contains((loc.Row, loc.Col)))
-        {
-          shared.Remove(pick);
-          continue;
-        }
-
-        down.Destination = loc;
-        up.Destination = new Loc(dungeonId, currentLevelNum + 1, pick.Item1, pick.Item2);
-        currentLevel.SetTile(pick.Item1, pick.Item2, up);
-        nextLevel.SetTile(pick.Item1, pick.Item2, down);
-
-        return;
       }
     }
 
-    // I think this should be impossible??
-    throw new Exception("Could not place stairs!");
+    floors = [.. floors.OrderByDescending(i => i.Item3)];
+    int n = rng.Next(sumOfCosts);
+    int j = floors[0].Item3, i = 0;
+    while (j < n)
+    {
+      j += floors[i++].Item3;
+    }
+
+    (int stairsR, int stairsC) = (floors[i].Item1, floors[i].Item2);
+    Loc exitDest = new(dungeonId, levelNum + 1, stairsR, stairsC);
+    Loc nextArrivalDest = new(dungeonId, levelNum, stairsR, stairsC);
+
+    if (desc)
+    {
+      Downstairs exitStairs = new("") { Destination = exitDest };
+      Upstairs nextArrivalStairs = new("") {  Destination = nextArrivalDest };
+      currLvl.SetTile(stairsR, stairsC, exitStairs);
+      nextLvl.SetTile(stairsR, stairsC, nextArrivalStairs);
+    }
+    else
+    {
+      Upstairs exitStairs = new("") { Destination = exitDest };
+      Downstairs nextArrivalStairs = new("") { Destination = nextArrivalDest };
+      currLvl.SetTile(stairsR, stairsC, exitStairs);
+      nextLvl.SetTile(stairsR, stairsC, nextArrivalStairs);
+    }
+
+    if (levelNum < levelMaps.Length - 2)
+    {
+      CreateStairway(dungeonId, levelMaps, levelNum + 1, (stairsR, stairsC) , desc, rng);
+    }
+
+    static int StairsPathsCosts(Tile tile)
+    {
+      if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor)
+        return 1;
+
+      if (!tile.Passable())
+        return int.MaxValue;
+
+      return 1;
+    }
   }
 
   static bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;

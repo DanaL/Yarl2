@@ -22,7 +22,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   Map Map { get; set; } = map;
   int Height { get; set; } = height;
   int Width { get; set; } = width;
-  int[,]? _dijkstraMap { get; set; }
+  public readonly int[,] Sqrs = new int[height, width];
   Dictionary<(int, int), int> ExtraCosts { get; set; } = extraCosts;
 
   public GameState? GS { get; set; }
@@ -106,18 +106,17 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   // single goal.
   public void Generate(TravelCostFunction calcCost, (int Row, int Col) goal, int maxRange)
   {
-    _dijkstraMap = new int[Height, Width];
     AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
 
     for (int r = 0; r < Height; r++)
     {
       for (int c = 0; c < Width; c++)
       {
-        _dijkstraMap[r, c] = int.MaxValue;
+        Sqrs[r, c] = int.MaxValue;
       }
     }
 
-    _dijkstraMap[goal.Row, goal.Col] = 0;
+    Sqrs[goal.Row, goal.Col] = 0;
 
     var q = new Queue<(int, int)>();
     foreach (var sq in calcAdjSqs(goal.Row, goal.Col))
@@ -151,19 +150,19 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
       {
         if (n.Item1 < 0 || n.Item2 < 0 || n.Item1 >= Height || n.Item2 >= Width)
           continue;
-        if (_dijkstraMap[n.Item1, n.Item2] < cheapestNeighbour)
-          cheapestNeighbour = _dijkstraMap[n.Item1, n.Item2];
+        if (Sqrs[n.Item1, n.Item2] < cheapestNeighbour)
+          cheapestNeighbour = Sqrs[n.Item1, n.Item2];
         if (!visited.Contains(n))
           q.Enqueue(n);
       }
-      _dijkstraMap[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
+      Sqrs[sq.Item1, sq.Item2] = cheapestNeighbour + cost;
       visited.Add(sq);
     }
   }
 
   public List<(int, int)> ShortestPath(int row, int col)
   {
-    if (_dijkstraMap is null)
+    if (Sqrs is null)
       throw new Exception("No dijkstra map found");
 
     AdjSqs calcAdjSqs = CardinalMovesOnly ? Util.Adj4Sqs : Util.Adj8Sqs;
@@ -177,7 +176,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
       return [];
     }
 
-    int score = _dijkstraMap[currRow, currCol];
+    int score = Sqrs[currRow, currCol];
 
     while (score != 0)
     {
@@ -187,10 +186,10 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
       {
         if (adj.Item1 < 0 || adj.Item2 < 0 || adj.Item1 >= Height || adj.Item2 >= Width)
           continue;
-        if (_dijkstraMap[adj.Item1, adj.Item2] < cost)
+        if (Sqrs[adj.Item1, adj.Item2] < cost)
         {
           next = (adj.Item1, adj.Item2);
-          cost = _dijkstraMap[adj.Item1, adj.Item2];
+          cost = Sqrs[adj.Item1, adj.Item2];
         }
       }
 
@@ -207,15 +206,15 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 
   public List<(int, int, int)> Neighbours(int row, int col)
   {
-    if (_dijkstraMap is null)
+    if (Sqrs is null)
       throw new Exception("No dijkstra map found");
 
     List<(int, int, int)> adj = [];
 
     foreach (var (nr, nc) in Util.Adj8Sqs(row, col))
     {
-      if (_dijkstraMap[nr, nc] < int.MaxValue)
-        adj.Add((nr, nc, _dijkstraMap[nr, nc]));
+      if (Sqrs[nr, nc] < int.MaxValue)
+        adj.Add((nr, nc, Sqrs[nr, nc]));
     }
 
     return [.. adj.OrderBy(v => v.Item3)];
@@ -245,7 +244,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 
     void FindPath(int row, int col, int currentScore, HashSet<(int, int)> visited)
     {
-      if (_dijkstraMap is null)
+      if (Sqrs is null)
         throw new Exception("Map should never be null");
 
       if (currentScore > bestScore && currentPath.Count > 1)
@@ -265,7 +264,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
           continue;
 
         var adj = (adjRow, adjCol);
-        int cost = _dijkstraMap[adjRow, adjCol];
+        int cost = Sqrs[adjRow, adjCol];
         // The goal square is marked 0 in the map, which is the player's
         // location and thus impassable
         if (visited.Contains(adj) || cost == int.MaxValue || cost == 0)
@@ -274,7 +273,7 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
         visited.Add(adj);
         currentPath.Add(adj);
 
-        FindPath(adjRow, adjCol, currentScore + _dijkstraMap[adjRow, adjCol], visited);
+        FindPath(adjRow, adjCol, currentScore + Sqrs[adjRow, adjCol], visited);
 
         visited.Remove(adj);
         currentPath.RemoveAt(currentPath.Count - 1);
