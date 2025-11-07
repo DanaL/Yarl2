@@ -550,3 +550,6 @@ Snappy dresser, sharp biter. Likes blood, dislikes holy things.
 #
 dancing sword
 Your standard animated, floating sword. It slices threateningly through the air around it.
+#
+dancing greatsword
+Some call it a dancing bastard sword, for many reasons.
