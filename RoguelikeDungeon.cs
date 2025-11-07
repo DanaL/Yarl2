@@ -409,49 +409,16 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     Dungeon dungeon = new(DungeonId, "a Forgotten Dungeon", "", true)
     {
       PopulationLow = 6,
-      PopulationHigh = 10
+      PopulationHigh = 10,
+      MonsterDecks = DeckBuilder.ReadDeck("lost_dungeon", rng)
     };
 
-    dungeon.MonsterDecks = DeckBuilder.ReadDeck("lost_dungeon", rng);
-
-    // FOr rogue-esque levels, the stairs can go anywhere. Ie., the dungeon
-    // levels don't stack neatly like in my other dungeon types. So I'm not
-    // using the DungeonBuilder class's SetStairs method()
-    Loc entranceStairs = Loc.Nowhere;
-    Loc prevLoc = new(0, 0, entranceRow, entranceCol);
-    Portal? prevDownstairs = null;
     int maxLevels = 3; // for 0.5.0, I'm going to just do 3 levels, at least until I have enough content
     for (int lvl = 0; lvl < maxLevels; lvl++)
     {
       (Map map, List<(int, int)> roomSqs) = RLLevelMaker.MakeLevel(rng);
 
-      Upstairs upstairs = new("") { Destination = prevLoc };
-      int i = rng.Next(roomSqs.Count);
-      (int ur, int uc) = roomSqs[i];
-      map.SetTile(ur, uc, upstairs);
-      roomSqs.RemoveAt(i);
-
-      if (prevDownstairs is not null)
-      {
-        prevDownstairs.Destination = new(DungeonId, lvl, ur, uc);
-      }
-
-      if (lvl == 0)
-      {
-        entranceStairs = new(DungeonId, 0, ur, uc);
-      }
-
-      if (lvl < maxLevels - 1)
-      {
-        Downstairs downstairs = new("");
-        i = rng.Next(roomSqs.Count);
-        (int dr, int dc) = roomSqs[i];
-        roomSqs.RemoveAt(i);
-        map.SetTile(dr, dc, downstairs);
-        prevLoc = new(DungeonId, lvl, dr, dc);
-        prevDownstairs = downstairs;
-      }
-      else
+      if (lvl == maxLevels - 1)
       {
         SetBell(roomSqs, lvl, objDb, rng);
       }
@@ -459,8 +426,11 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
       dungeon.AddMap(map);
     }
 
+    Map[] levels = [.. dungeon.LevelMaps.Values];
+    SetRoguelikeStairs(DungeonId, levels, new Loc(0, 0, entranceRow, entranceCol), rng);
+
     PopulateDungeon(dungeon, rng, objDb);
 
-    return (dungeon, entranceStairs);
+    return (dungeon, new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2));
   }
 }

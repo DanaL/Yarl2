@@ -318,7 +318,7 @@ abstract class DungeonBuilder
 
   }
 
-  protected void SetStairs(int dungeonId, Map[] levels, int height, int width, int numOfLevels, (int, int) entrance, bool desc, bool secondStairs, Rng rng)
+  protected void SetStairs(int dungeonId, Map[] levels, (int, int) entrance, bool desc, Rng rng)
   {
     List<(int, int)> floors = levels[0].SqsOfType(TileType.DungeonFloor);
 
@@ -330,10 +330,80 @@ abstract class DungeonBuilder
 
     levels[0].SetTile(ExitLoc, exitStairs);
 
-    CreateStairway(dungeonId, levels, 0, ExitLoc, desc, rng);
+    CreateStairwayStacked(dungeonId, levels, 0, ExitLoc, desc, rng);
   }
 
-  static void CreateStairway(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
+  public void SetRoguelikeStairs(int dungeonId, Map[] levelMaps, Loc prevDest, Rng rng)
+  {
+    Downstairs? exitStairs = null;
+    
+    for (int lvl = 0; lvl < levelMaps.Length; lvl++)
+    {
+      
+
+      List<(int, int)> currFloorSqs = [];
+      foreach (var room in levelMaps[lvl].FindRooms(5))
+      {
+        currFloorSqs.AddRange(room.Where(sq => levelMaps[lvl].TileAt(sq).Type == TileType.DungeonFloor));
+      }
+      
+      Upstairs arrivalStairs = new("") { Destination = prevDest };
+      (int upstairsR, int upstairsC) = currFloorSqs[rng.Next(currFloorSqs.Count)];
+      levelMaps[lvl].SetTile(upstairsR, upstairsC, arrivalStairs);
+
+      if (exitStairs is not null)
+        exitStairs.Destination = new(dungeonId, lvl, upstairsR, upstairsC);
+
+      if (lvl == 0)
+        ExitLoc = (upstairsR, upstairsC);
+
+      if (lvl == levelMaps.Length - 1)
+        break;
+
+      DijkstraMap dijkstra = new(levelMaps[lvl], [], levelMaps[lvl].Height, levelMaps[lvl].Width, false);
+      dijkstra.Generate(StairsPathsCosts, (upstairsR, upstairsC), int.MaxValue);
+
+      HashSet<(int, int)> floorsSet = [.. currFloorSqs];
+      List<(int, int, int)> exitSqs = [];
+      int sumOfCosts = 0;
+      for (int r = 1; r < levelMaps[lvl].Height - 1; r++)
+      {
+        for (int c = 1; c < levelMaps[lvl].Width - 1; c++)
+        {
+          Tile tile = levelMaps[lvl].TileAt(r, c);
+          if (tile.Type == TileType.DungeonFloor && floorsSet.Contains((r, c)))
+          {
+            int cost = dijkstra.Sqrs[r, c] * 2;
+            if (cost < int.MaxValue)
+            {
+              exitSqs.Add((r, c, cost));
+              sumOfCosts += cost;
+            }
+          }
+        }        
+      }
+
+      exitSqs = [.. exitSqs.OrderByDescending(i => i.Item3)];
+      int n = rng.Next(sumOfCosts);
+      int j = exitSqs[0].Item3, i = 0;
+      while (j < n)
+      {
+        j += exitSqs[i++].Item3;
+      }
+
+      (int exitR, int exitC) = (exitSqs[i].Item1, exitSqs[i].Item2);
+      exitStairs = new Downstairs("");
+      levelMaps[lvl].SetTile(exitR, exitC, exitStairs);
+
+      prevDest = new Loc(dungeonId, lvl, exitR, exitC);
+    }   
+  }
+
+  // Create stairways where dungeon levels are nearly stacked on top of one
+  // another. Ie., if you go down stairs at (13, 20) on one level, you'll 
+  // arrive at (13, 20) on the next level. Contrasted with classic rogue 
+  // dungeons.
+  static void CreateStairwayStacked(int dungeonId, Map[] levelMaps, int levelNum, (int, int) arrivalStairs, bool desc, Rng rng)
   {
     Map currLvl = levelMaps[levelNum];
     Map nextLvl = levelMaps[levelNum + 1];
@@ -343,7 +413,7 @@ abstract class DungeonBuilder
     // We want to avoid placing stairs in a vault the player has potentially
     // no way to open. I can probably skip this check if I'm adding a second
     // staircase to a level?
-    HashSet<(int, int)> lockedVaultSqs = [];
+    HashSet<(int, int)> lockedVaultSqs = [];    
     foreach (var room in nextLvl.FindRooms(9))
     {
       if (Rooms.IsLockedVault(nextLvl, room))
@@ -351,16 +421,15 @@ abstract class DungeonBuilder
         lockedVaultSqs = [.. lockedVaultSqs.Union(room)];
       }
     }
-
+    
     List<(int, int, int)> floors = [];
     int sumOfCosts = 0;
     for (int r = 1; r < currLvl.Height - 1; r++)
     {
       for (int c = 1; c < currLvl.Width - 1; c++)
       {
-        Tile tile = currLvl.TileAt(r, c);
         Tile tileBelow = nextLvl.TileAt(r, c);
-
+        Tile tile = currLvl.TileAt(r, c);
         if (tile.Type == TileType.DungeonFloor && tileBelow.Type == TileType.DungeonFloor && !lockedVaultSqs.Contains((r, c)))
         {
           int cost = dijkstra.Sqrs[r, c] * 2;
@@ -402,19 +471,19 @@ abstract class DungeonBuilder
 
     if (levelNum < levelMaps.Length - 2)
     {
-      CreateStairway(dungeonId, levelMaps, levelNum + 1, (stairsR, stairsC) , desc, rng);
+      CreateStairwayStacked(dungeonId, levelMaps, levelNum + 1, (stairsR, stairsC) , desc, rng);
     }
+  }
 
-    static int StairsPathsCosts(Tile tile)
-    {
-      if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
-        return 1;
-
-      if (!tile.Passable())
-        return int.MaxValue;
-
+  static int StairsPathsCosts(Tile tile)
+  {
+    if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
       return 1;
-    }
+
+    if (!tile.Passable())
+      return int.MaxValue;
+
+    return 1;
   }
 
   static bool IsWall(TileType type) => type == TileType.DungeonWall || type == TileType.PermWall;

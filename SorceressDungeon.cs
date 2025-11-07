@@ -340,7 +340,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
     Tower towerBuilder = new(Height, Width, 5);
     Map[] floors = [..towerBuilder.BuildLevels(numOfLevels, rng)];
 
-    SetStairs(DungeonId, floors, Height, Width, numOfLevels, (entranceRow, entranceCol), false, false, rng);
+    SetStairs(DungeonId, floors, (entranceRow, entranceCol), false, rng);
 
     // Because it's a sorcerous tower, replace the final stairs with a 
     // Mysterious Mirror
