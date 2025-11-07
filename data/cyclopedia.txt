@@ -547,3 +547,6 @@ A grey dwarf who hunts with a jagged, barbed spear. Despite the name, they aren'
 #
 vampire
 Snappy dresser, sharp biter. Likes blood, dislikes holy things.
+#
+dancing sword
+Your standard animated, floating sword. It slices threateningly through the air around it.
