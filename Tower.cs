@@ -50,8 +50,10 @@ class Tower(int height, int width, int minLength)
         map[r, col] = true;
       }
 
-      Partition(map, tr, lc, br, col, rng);
-      Partition(map, tr, col + 1, br, rc, rng);
+      if (col - lc >= 2)
+        Partition(map, tr, lc, br, col, rng);
+      if (rc - col - 1 >= 2)
+        Partition(map, tr, col + 1, br, rc, rng);
     }
     else
     {
@@ -62,16 +64,15 @@ class Tower(int height, int width, int minLength)
       else
         row = rng.Next(int.Min(a, b), int.Max(a, b));
 
-      //if (row % 2 == 0)
-      //  row += rng.Next(2) == 0 ? 1 : -1;
-
       for (int c = lc; c <= rc; c++)
       {
         map[row, c] = true;
       }
 
-      Partition(map, tr, lc, row, rc, rng);
-      Partition(map, row + 1, lc, br, rc, rng);
+      if (row - tr >= 2)
+        Partition(map, tr, lc, row, rc, rng);
+      if (br - row - 1 >= 2)
+        Partition(map, row + 1, lc, br, rc, rng);
     }
   }
 
@@ -203,13 +204,7 @@ class Tower(int height, int width, int minLength)
   }
 
   static void SetDoors(Map map, int level, Rng rng)
-  {
-    if (level == 2)
-    {
-      map.Dump();
-      Console.WriteLine();
-    }
-
+  {    
     // Just rebuilding the set of rooms here. It seemed simpler than trying to
     // merge Room objects when we are merged interior rooms and I can't imagine
     // the inefficiency will be even noticable.
@@ -227,10 +222,7 @@ class Tower(int height, int width, int minLength)
     {
       int j = roomIds[0];
       Room room = rooms[j];
-      if (level == 2 && room.Sqs.Count == 15)
-      {
-        Console.WriteLine($"Processing room {j} with size {room.Sqs.Count}");
-      }
+      
       // Find the adjacent rooms
       List<int> adjRooms = [];
       foreach (int otherId in roomIds)
@@ -238,10 +230,6 @@ class Tower(int height, int width, int minLength)
         if (otherId == j)
           continue;
 
-        if (level == 2 && rooms[otherId].Sqs.Count == 15)
-        {
-          Console.WriteLine($"  Checking adjacency with room {otherId} size {rooms[otherId].Sqs.Count}");
-        }
         foreach ((int r, int c) in room.Perimeter.Intersect(rooms[otherId].Perimeter))
         {
           if (DoorCandidate(map, r, c))
@@ -280,10 +268,6 @@ class Tower(int height, int width, int minLength)
         int otherId = adjRooms[k];
         Room other = rooms[otherId];
 
-        if (level == 2 && (room.Sqs.Count == 15 || other.Sqs.Count == 15))
-        {
-          Console.WriteLine($"Merging rooms {j} and {otherId}");
-        }
         // place the door
         List<(int r, int c)> doorable = [];
         List<(int r, int c)> shared = [.. room.Perimeter.Intersect(other.Perimeter)];
@@ -517,9 +501,6 @@ class Tower(int height, int width, int minLength)
       DrawWallFromCorner(map, row, col, rng);
     }
 
-    if (level == 2)
-      map.Dump();
-
     RegionFinder rf = new(new DungeonPassable());
     Dictionary<int, HashSet<(int, int)>> rooms =  rf.Find(map, false, 0, TileType.DungeonFloor);
 
@@ -543,18 +524,8 @@ class Tower(int height, int width, int minLength)
       int height = br - tr + 1;
       int width = rc - lc + 1;
       bool[,] roomMap = new bool[height + 2, width + 2];
-      for (int r = 0; r < height + 2; r++)
-      {
-        roomMap[r, 0] = true;
-        roomMap[r, width + 1] = true;
-      }
-      for (int c = 0; c < width + 2; c++)
-      {
-        roomMap[0, c] = true;
-        roomMap[height + 1, c] = true;
-      }
-
-      Partition(roomMap, 0, 0, height, width, rng);
+      
+      Partition(roomMap, 1, 1, height, width, rng);
 
       // Copy the partitioned room back into the map
       for (int r = 0; r < height + 2; r++)
@@ -568,7 +539,7 @@ class Tower(int height, int width, int minLength)
     }
 
     TweakInterior(map, FindRooms(map), level, rng);
-    
+
     return map;
 
     bool IsCorner(int row, int col)
@@ -677,7 +648,9 @@ class Tower(int height, int width, int minLength)
 
       var regions = rf.Find(map, false, 0, TileType.PermWall);
       Console.WriteLine($"regions: {regions.Count}");
-      
+
+      map.Dump();
+
       floors.Add(map);
     }
 
