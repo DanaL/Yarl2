@@ -667,10 +667,17 @@ class Tower(int height, int width, int minLength)
     firstFloor.Features = MapFeatures.UndiggableFloor;
     floors.Add(firstFloor);
 
+
+    RegionFinder rf = new(new DungeonPassable());
+
     Map outline = GenerateOutline(firstFloor);
     for (int j = 0; j < numOfFloors - 1; j++)
     {
       Map map = RedrawInterior(outline, j + 1, rng);
+
+      var regions = rf.Find(map, false, 0, TileType.PermWall);
+      Console.WriteLine($"regions: {regions.Count}");
+      
       floors.Add(map);
     }
 
