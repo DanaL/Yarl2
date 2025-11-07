@@ -2124,7 +2124,7 @@ class ConfusedTrait : TemporaryTrait
       victim.Traits.Remove(this);
       Expired = true;
       string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "regain")} {Grammar.Possessive(victim)} senses!";
-      gs.UIRef().AlertPlayer(msg);
+      gs.UIRef().AlertPlayer(msg, gs, victim.Loc, victim);
       gs.StopListening(GameEventType.EndOfRound, this);
     }    
   }
