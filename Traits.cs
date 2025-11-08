@@ -1192,7 +1192,7 @@ class PlantTrait : Trait
 // balancing factor ¯\_ (ツ)_/¯
 sealed class PlayerRegenTrait : TemporaryTrait
 {
-  public override string AsText() => "PlayerRegen";
+  public override string AsText() => $"PlayerRegen#{OwnerID}";
 
   public override List<string> Apply(GameObj target, GameState gs)
   {
@@ -4191,7 +4191,7 @@ class TraitFactory
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
     { "Passive", (pieces, gameObj) => new PassiveTrait() },
     { "Plant", (pieces, gameObj) => new PlantTrait() },
-    { "PlayerRegen", (pieces, gameObj) => new PlayerRegenTrait() },
+    { "PlayerRegen", (pieces, gameObj) => new PlayerRegenTrait() { OwnerID = ulong.Parse(pieces[1]) }},
     { "Plural", (pieces, gameObj) => new PluralTrait() },
     { "PoisonCoated", (pieces, gameObj) => new PoisonCoatedTrait() },
     { "Poisoned", (pieces, gameObj) => new PoisonedTrait()
