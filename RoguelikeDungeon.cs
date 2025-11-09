@@ -385,7 +385,39 @@ class RLLevelMaker
 internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
 {
   int DungeonId { get; set; } = dungeonId;
+  
+  static void AddTreasure(int dungeonId, Map[] levels, GameObjectDB objDb, Rng rng)
+  {
+    for (int lvl = 0; lvl < levels.Length; lvl++)
+    {
+      List<Loc> floors = [.. levels[lvl].SqsOfType(TileType.DungeonFloor)
+                              .Select(sq => new Loc(dungeonId, lvl, sq.Item1, sq.Item2))
+                              .Where(l => !objDb.HazardsAtLoc(l))];
 
+      for (int j = 0; j < rng.Next(3, 6); j++)
+      {
+        Item item = rng.Next(10) switch
+        {
+          0 or 1 => Treasure.ItemByQuality(TreasureQuality.Common, objDb, rng),
+          2 or 3 or 4 => Treasure.ItemByQuality(TreasureQuality.Uncommon, objDb, rng),
+          _ => Treasure.ItemByQuality(TreasureQuality.Good, objDb, rng)
+        };
+
+        Loc loc = floors[rng.Next(floors.Count)];
+        objDb.SetToLoc(loc, item);
+      }
+
+      for (int j = 0; j < rng.Next(2, 5); j++)
+      {
+        Item zorkmids = ItemFactory.Get(ItemNames.ZORKMIDS, objDb);
+        zorkmids.Value = rng.Next(10, 36);
+
+        Loc loc = floors[rng.Next(floors.Count)];
+        objDb.SetToLoc(loc, zorkmids);
+      }
+    }
+  }
+  
   void SetBell(List<(int, int)> floorSqs, int levelNum, GameObjectDB objDb, Rng rng)
   {
     Item bell = new()
@@ -430,6 +462,8 @@ internal class RoguelikeDungeonBuilder(int dungeonId) : DungeonBuilder
     SetRoguelikeStairs(DungeonId, levels, new Loc(0, 0, entranceRow, entranceCol), rng);
 
     PopulateDungeon(dungeon, rng, objDb);
+
+    AddTreasure(DungeonId, levels, objDb, rng);
 
     return (dungeon, new Loc(DungeonId, 0, ExitLoc.Item1, ExitLoc.Item2));
   }
