@@ -1430,6 +1430,8 @@ class InventoryDetails : Inputer
         items.Add("it can [BRIGHTRED cleave] enemies");
       if (trait is TwoHandedTrait)
         items.Add("it must be wielded with two hands");
+      if (trait is RustProofTrait)
+        items.Add("it is [ICEBLUE rustproof]");
       if (trait is VersatileTrait vt)
       {
         items.Add("it may be wielded in both hands or with a shield");

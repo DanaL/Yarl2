@@ -553,3 +553,6 @@ Your standard animated, floating sword. It slices threateningly through the air 
 #
 dancing greatsword
 Some call it a dancing bastard sword, for many reasons.
+#
+scroll of stainlessness
+Obviously a spell wizards created so they needn't worry about keeping their cutlery polished, but adventurers sometimes also use it to protect their gear from the ravages of water, acid, and rust monsters.

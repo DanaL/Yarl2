@@ -1269,9 +1269,14 @@ class RustedTrait : Trait
   public override string AsText() => $"Rusted#{(int)Amount}";
 }
 
+class RustProofTrait : Trait
+{
+  public override string AsText() => "RustProof";
+}
+
 class SwimmerTrait : Trait
 {
-  public override string AsText() => "Swimmer";  
+  public override string AsText() => "Swimmer";
 }
 
 class SwordTrait : Trait
@@ -1732,7 +1737,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "celerity" => new UseResult(new ApplyTraitAction(gs, user, new CelerityTrait())),
     "curedisease" => new UseResult(new CureDisease(gs, user)),
     "disarm" => new UseResult(new DisarmAction(gs, user, user.Loc)),
-    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),    
+    "minorheal" => new UseResult(new HealAction(gs, user, 4, 4)),
     "maxheal" => new UseResult(new HealAction(gs, user, int.MaxValue, -1)),
     "trivialheal" => new UseResult(new HealAction(gs, user, 1, 1)),
     "soothe" => new UseResult(new SootheAction(gs, user, 21)),
@@ -1741,28 +1746,37 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "detecttreasure" => new UseResult(new DetectTreasureAction(gs, user)),
     "detecttraps" => new UseResult(new DetectTrapsAction(gs, user)),
     "scatter" => new UseResult(new ScatterAction(gs, user)),
-    "resistfire" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200})),
-    "resistcold" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200})),
+    "resistfire" => new UseResult(new ApplyTraitAction(gs, user,
+                        new ResistanceTrait() { Type = DamageType.Fire, ExpiresOn = gs.Turn + 200 })),
+    "resistcold" => new UseResult(new ApplyTraitAction(gs, user,
+                        new ResistanceTrait() { Type = DamageType.Cold, ExpiresOn = gs.Turn + 200 })),
     "recall" => new UseResult(new EscapeDungeonAction(gs)),
-    "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait() 
-                                  { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) })),
+    "levitation" => new UseResult(new ApplyTraitAction(gs, user, new LevitationTrait()
+    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
     "knock" => new UseResult(new KnockAction(gs, user)),
     "applypoison" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Apply it to which item?" },
           new ApplyPoisonAction(gs, user, item))),
     "seeinvisible" => new UseResult(new ApplyTraitAction(gs, user, new SeeInvisibleTrait()
-            { ExpiresOn = gs.Turn + (ulong) gs.Rng.Next(30, 75) })),
-    "protection" => new UseResult(new ApplyTraitAction(gs, user, 
+    { ExpiresOn = gs.Turn + (ulong)gs.Rng.Next(30, 75) })),
+    "protection" => new UseResult(new ApplyTraitAction(gs, user,
                         new AuraOfProtectionTrait() { HP = 40 })),
     "blindness" => new UseResult(new ApplyTraitAction(gs, user, BuildBlindTrait(user, gs))),
-    "buffstrength" => new UseResult(new ApplyTraitAction(gs, user, 
-                        new StatBuffTrait() { Attr = Attribute.Strength, Amt = 2, 
-                          OwnerID = user.ID, ExpiresOn = gs.Turn + 50, SourceId = item!.ID })),
+    "buffstrength" => new UseResult(new ApplyTraitAction(gs, user,
+                        new StatBuffTrait()
+                        {
+                          Attr = Attribute.Strength,
+                          Amt = 2,
+                          OwnerID = user.ID,
+                          ExpiresOn = gs.Turn + 50,
+                          SourceId = item!.ID
+                        })),
     "heroism" => BuildHeroism(user, gs, item!),
     "nondescript" => new UseResult(new ApplyTraitAction(gs, user, new NondescriptTrait())),
     "descent" => new UseResult(new DescentAction(gs, user)),
+    "stainless" => new UseResult(new InventoryChoiceAction(gs, user,
+          new InventoryOptions() { Title = "Cast on which item?" },
+          new ApplyStainlessnessAction(gs, user, item))),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 
@@ -4248,6 +4262,7 @@ class TraitFactory
     },
     { "Robbed", (pieces, gameObj) => new RobbedTrait() },
     { "Rusted", (pieces, gameObj) => new RustedTrait() { Amount = (Rust)int.Parse(pieces[1]) } },
+    { "RustProof", (pieces, gameObj) => new RustProofTrait() },
     { "Scroll", (pieces, gameObj) => new ScrollTrait() },
     { "SeeInvisible", (pieces, gameObj) => new SeeInvisibleTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) } },
     { "SetAttributeTrigger", (pieces, gameObj) =>
@@ -4323,7 +4338,7 @@ class TraitFactory
       {
         ExpiresOn = ulong.Parse(pieces[1]),
         OwnerID = ulong.Parse(pieces[2]),
-        OriginalId = ulong.Parse(pieces[3]), 
+        OriginalId = ulong.Parse(pieces[3]),
         TransformedIds = pieces[4] == "" ? [] : [..pieces[3].Split(',').Select(ulong.Parse)]
       }
     },
@@ -4346,7 +4361,7 @@ class TraitFactory
       {
         Enum.TryParse(pieces[1], out DamageType type);
         return new VulnerableTrait() { Type = type };
-      } 
+      }
     },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
     { "WaterWalking", (pieces, gameObj) =>

@@ -3170,10 +3170,59 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
+class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
+{
+  public char Choice { get; set; }
+  Item? SourceItem { get; set; } = item;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState!.ClearMenu();
+
+    var (item, _) = Actor!.Inventory.ItemAt(Choice);
+
+    if (item != null)
+    {
+      string objName = item.FullName.DefArticle();
+      string name = Actor.FullName.Capitalize();
+      string verb = Grammar.Conjugate(Actor, "cast");
+      string s = $"{name} {verb} a spell on {objName}.";
+      GameState.UIRef().AlertPlayer(s);
+
+      s = $"A glow envelops {objName}";
+      if (!item.HasTrait<MetalTrait>() || item.HasTrait<RustProofTrait>())
+        s += " but it seems to have little effect.";
+      else
+        s += " and it seems protected!";
+      GameState.UIRef().AlertPlayer(s);
+
+      item.Traits.Add(new RustProofTrait());
+
+      // Still need to remove rust from currently rusted items
+      if (item.HasTrait<RustedTrait>())
+      {
+        EffectApplier.RemoveRust(item);
+        GameState.UIRef().AlertPlayer($"{objName.Capitalize()} looks as good as new!");
+      }
+      
+      if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
+      {
+        Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
+      }
+    }
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
+}
+
 class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public char Choice { get; set; }
-  
+
   public override double Execute()
   {
     var (item, _) = Actor!.Inventory.ItemAt(Choice);
@@ -3201,7 +3250,7 @@ class ToggleEquippedAction(GameState gs, Actor actor) : Action(gs, actor)
         s += item.Type == ItemType.Wand ? " as a casting focus." : ".";
         GameState.UIRef().AlertPlayer(s);
         energyCost = 1.0;
-        break;      
+        break;
       case EquipingResult.Unequipped:
         s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "remove")} {item.FullName.DefArticle()}.";
         GameState.UIRef().AlertPlayer(s);

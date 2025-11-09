@@ -994,6 +994,20 @@
     ]
   },
   {
+    "Name": "SCROLL_STAINLESS",
+    "DescriptiveName": "scroll of stainlessness",
+    "Type": "Scroll",
+    "Value": 10,
+    "Glyph": "?,white,grey,black,false",
+    "Traits": [
+      "Consumable",
+      "UseSimple#stainless",
+      "Flammable",
+      "Scroll",
+      "Stackable"
+    ]
+  },
+  {
     "Name": "FLASK_OF_BOOZE",
     "DescriptiveName": "flask of booze",
     "Type": "Potion",
