@@ -459,6 +459,12 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
       PlaceItem(zorkmids);
     }
 
+    if (rng.NextDouble() < 0.4)
+    {
+      Item compound = ItemFactory.Get(ItemNames.ALCHEMICAL_COMPOUND, objDb);
+      PlaceItem(compound);
+    }
+    
     void PlaceItem(Item item)
     {
       Loc loc = floors[rng.Next(floors.Count)];
