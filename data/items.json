@@ -1020,6 +1020,18 @@
     ]
   },
   {
+    "Name": "ALCHEMICAL_COMPOUND",
+    "DescriptiveName": "alchemical compound",
+    "Type": "Potion",
+    "Value": 25,
+    "Glyph": "!,limegreen,green,black,false",
+    "Traits": [
+      "Consumable",
+      "Stackable",
+      "UseSimple#alchemicalcompound"
+    ]
+  },
+  {
     "Name": "TROLL_BROOCH",
     "DescriptiveName": "troll's brooch",
     "Type": "Talisman",

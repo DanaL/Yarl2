@@ -1777,6 +1777,7 @@ class UseSimpleTrait(string spell) : Trait, IUSeable
     "stainless" => new UseResult(new InventoryChoiceAction(gs, user,
           new InventoryOptions() { Title = "Cast on which item?" },
           new ApplyStainlessnessAction(gs, user, item))),
+    "alchemicalcompound" => new UseResult(new ConsumeAlchemicalCompound(gs, user, item!)),
     _ => throw new NotImplementedException($"{Spell.Capitalize()} is not defined!")
   };
 

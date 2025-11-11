@@ -9,8 +9,6 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-using System.Numerics;
-
 namespace Yarl2;
 
 class ActionResult
@@ -3170,6 +3168,64 @@ class ApplyPoisonAction(GameState gs, Actor actor, Item? item) : Action(gs, acto
   public override void ReceiveUIResult(UIResult result) => Choice = ((MenuUIResult)result).Choice;
 }
 
+class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(gs, actor)
+{
+  Item SourceItem { get; set; } = item;
+
+  public override double Execute()
+  {
+    base.Execute();
+
+    List<string> messages = ["You hold your nose and consume the noisome substance."];
+    Actor!.Inventory.ConsumeItem(SourceItem, Actor, GameState!);
+
+    Attribute boosted = GameState!.Rng.Next(3) switch
+    {
+      0 => Attribute.Strength,
+      1 => Attribute.Dexterity,
+      _ => Attribute.Constitution
+    };
+    BoostMaxStatTrait b = new() { Stat = boosted, Amount = 2 };
+    messages.AddRange(b.Apply(Actor, GameState));
+
+    int roll = GameState.Rng.Next(10);
+    switch (roll)
+    {
+      case 0:
+        PoisonedTrait poison = new()
+        {
+          DC = 15,
+          Strength = 2,
+          Duration = GameState.Rng.Next(10, 21)
+        };
+        messages.AddRange(poison.Apply(Actor, GameState));
+        break;
+      case 1:
+        messages.Add("Oof -- this burns!");
+        int acidDmg = GameState.Rng.Next(10, 21);
+        var (hpLeft, _, _) = Actor.ReceiveDmg([(acidDmg, DamageType.Acid)], 0, GameState, SourceItem, 1.0);
+        if (hpLeft < 1)
+        {
+          foreach (string s in messages)
+            GameState.UIRef().AlertPlayer(s);
+          GameState.ActorKilled(Actor, "an alchemical experiment", null);
+        }    
+        break;
+      default:
+        messages.Add("You feel dizzy!");
+        GameState.UIRef().AlertPlayer("You feel dizzy!");
+        ConfusedTrait confused = new() { DC = 15 };
+        messages.AddRange(confused.Apply(Actor, GameState));
+        break;
+    }
+    
+    foreach (string s in messages)
+      GameState.UIRef().AlertPlayer(s);
+
+    return 1.0;
+  }
+}
+
 class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(gs, actor)
 {
   public char Choice { get; set; }
@@ -3206,7 +3262,7 @@ class ApplyStainlessnessAction(GameState gs, Actor actor, Item? item) : Action(g
         EffectApplier.RemoveRust(item);
         GameState.UIRef().AlertPlayer($"{objName.Capitalize()} looks as good as new!");
       }
-      
+
       if (SourceItem is not null && SourceItem.HasTrait<ConsumableTrait>())
       {
         Actor.Inventory.ConsumeItem(SourceItem, Actor, GameState);
@@ -3365,7 +3421,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
         if (hpLeft < 1)
         {
           GameState.ActorKilled(victim, "a fireball", null);
-        }        
+        }
       }
     }
 
@@ -3686,7 +3742,7 @@ class SwapWithMobAction(GameState gs, Actor actor, Trait src) : Action(gs, actor
         var txt = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "feel")} a sense of vertigo followed by existential dread.";
         GameState.UIRef().AlertPlayer(txt);
 
-        var confused = new ConfusedTrait() { DC = 15 };
+        ConfusedTrait confused = new() { DC = 15 };
         confused.Apply(Actor, GameState);
       }
       else

@@ -556,3 +556,6 @@ Some call it a dancing bastard sword, for many reasons.
 #
 scroll of stainlessness
 Obviously a spell wizards created so they needn't worry about keeping their cutlery polished, but adventurers sometimes also use it to protect their gear from the ravages of water, acid, and rust monsters.
+#
+alchemical compound
+A bubbling flask of...something. It is a medley of odours and not quite a solid, not fully a liquid. You could probably consume it though...

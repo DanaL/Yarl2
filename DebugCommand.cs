@@ -118,7 +118,8 @@ class DebugCommand(GameState gs)
     {"crimson king ward", ItemNames.CRIMSON_KING_WARD },
     {"tincture of celerity", ItemNames.TINCTURE_CELERITY },
     {"potion of descent", ItemNames.POTION_DESCENT },
-    {"scroll of stainlessness", ItemNames.SCROLL_STAINLESS}
+    {"scroll of stainlessness", ItemNames.SCROLL_STAINLESS },
+    {"alchemical compound", ItemNames.ALCHEMICAL_COMPOUND }
   };
 
   public string DoCommand(string txt)

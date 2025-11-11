@@ -790,7 +790,7 @@ sealed class Mob : Actor
   }
 
   // At the moment, monsters will pick the player, but I'm working toward
-  // changing thawt
+  // changing that
   public override Actor PickTarget(GameState gs)
   {
     if (gs.Player.HasTrait<NondescriptTrait>())
