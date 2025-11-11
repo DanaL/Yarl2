@@ -372,7 +372,7 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         }
       }
     }
-    
+
     for (int lvl = 0; lvl < towerDungeon.LevelMaps.Count; lvl++)
     {
       Map map = towerDungeon.LevelMaps[lvl];
@@ -428,15 +428,15 @@ class SorceressDungeonBuilder(int dungeonId, int height, int width) : DungeonBui
         AddMoldPatch(map, floorSqs, objDb, rng);
       }
 
-      PopulateDungeon(towerDungeon, rng, objDb);
-
-      AddTreasure(objDb, floorSqs, DungeonId, lvl, rng);
+      AddTreasure(objDb, floorSqs, rng);
     }
+
+    PopulateDungeon(towerDungeon, rng, objDb);
     
     return (towerDungeon, entrance);
   }
 
-  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, int dungeonId, int level, Rng rng)
+  static void AddTreasure(GameObjectDB objDb, List<Loc> floors, Rng rng)
   {
     int numItems = rng.Next(2, 6);
     for (int j = 0; j < numItems; j++)
