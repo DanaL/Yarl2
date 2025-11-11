@@ -2322,7 +2322,7 @@ class ExhaustedTrait : TemporaryTrait
     target.Recovery -= 0.5;
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "become")} exhausted!" ];
+    return [ $"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "feel")} exhausted!" ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)

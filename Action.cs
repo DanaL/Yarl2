@@ -3189,6 +3189,7 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
     messages.AddRange(b.Apply(Actor, GameState));
 
     int roll = GameState.Rng.Next(10);
+    roll = 2;
     switch (roll)
     {
       case 0:
@@ -3209,7 +3210,16 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
           foreach (string s in messages)
             GameState.UIRef().AlertPlayer(s);
           GameState.ActorKilled(Actor, "an alchemical experiment", null);
-        }    
+        }
+        break;
+      case 2:
+        messages.Add("Mmm tastes like molasses.");
+        ExhaustedTrait exhausted = new()
+        {
+          OwnerID = actor.ID,
+          ExpiresOn = GameState.Turn + (ulong)GameState.Rng.Next(50, 100)
+        };
+        messages.AddRange(exhausted.Apply(Actor, GameState));
         break;
       default:
         messages.Add("You feel dizzy!");
