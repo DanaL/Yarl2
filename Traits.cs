@@ -3307,7 +3307,7 @@ class InvisibleTrait : TemporaryTrait
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
-  {    
+  {
     if (gs.ObjDb.GetObj(OwnerID) is not Actor actor)
     {
       gs.RemoveListener(this);

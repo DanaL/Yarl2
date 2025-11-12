@@ -857,14 +857,6 @@ class InDanger : BehaviourNode
   }
 }
 
-class ValidTarget(Actor actor) : BehaviourNode
-{
-  Actor Actor { get; set; } = actor;
-
-  public override PlanStatus Execute(Mob mob, GameState gs) =>
-    Actor is NoOne ? PlanStatus.Failure : PlanStatus.Success;
-}
-
 class IsFrightened : BehaviourNode
 {
   public override PlanStatus Execute(Mob mob, GameState gs) =>
@@ -1530,17 +1522,38 @@ class LurkNearTarget : BehaviourNode
 
 class ChaseTarget : BehaviourNode
 {
-  static PlanStatus ChasePlayerDoors(Mob mob, GameState gs)
+  static PlanStatus ChaseToLoc(Mob mob, Loc target, GameState gs)
   {
     if (mob.HasTrait<ImmobileTrait>())
       return PlanStatus.Failure;
 
-    DijkstraMap map = gs.GetDMap("doors") ?? throw new Exception("Dijkstra map should never be null");
-    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
+    TravelCostFunction costFunc = DijkstraMap.Cost;
+    foreach (Trait t in mob.Traits)
     {
-      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
+      if (t is IntelligentTrait) 
+      {
+        costFunc = DijkstraMap.CostWithDoors;
+        break;
+      }
+      else if (t is FloatingTrait || t is FlyingTrait)
+      {
+        costFunc = DijkstraMap.CostByFlight;
+        break;
+      }
+      else if (t is SwimmerTrait)
+      {
+        costFunc = DijkstraMap.CostForSwimming;
+        break;
+      }
+    }
+    
+    Stack<Loc> path = AStar.FindPath2(gs.ObjDb, gs.CurrentMap, mob.Loc, target, costFunc, true);
 
+    if (path.Count > 0)    
+    {
+      Loc loc = path.Pop();
       Tile tile = gs.TileAt(loc);
+
       if (tile is Door door && !door.Open)
       {
         mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
@@ -1554,78 +1567,15 @@ class ChaseTarget : BehaviourNode
     }
 
     return PlanStatus.Failure;
-
-  }
-
-  static PlanStatus ChasePlayerFlying(Mob mob, GameState gs)
-  {
-    DijkstraMap map = gs.GetDMap("flying") ?? throw new Exception("Dijkstra map should never be null");
-    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
-    {
-      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
-
-      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).PassableByFlight())
-      {
-        mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return PlanStatus.Success;
-      }
-    }
-
-    return PlanStatus.Failure;
-  }
-  
-  static PlanStatus ChasePlayer(Mob mob, GameState gs)
-  {
-    DijkstraMap map = gs.GetDMap() ?? throw new Exception("Dijkstra map should never be null");
-
-    foreach (var sq in map.Neighbours(mob.Loc.Row, mob.Loc.Col))
-    {
-      Loc loc = new(mob.Loc.DungeonID, mob.Loc.Level, sq.Item1, sq.Item2);
-
-      // We still check if the tile is passable because, say, a door might be
-      // closed after the current dijkstra map is calculated and before it is
-      // refreshed      
-      if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
-      {
-        mob.ExecuteAction(new MoveAction(gs, mob, loc));
-        return PlanStatus.Success;
-      }
-    }
-
-    return PlanStatus.Failure;
   }
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    Actor target = mob.PickTarget(gs);
-
-    ValidTarget valid = new(target);
-    if (valid.Execute(mob, gs) == PlanStatus.Failure)
+    Loc targetLoc = mob.PickTargetLoc(gs);
+    if (targetLoc == Loc.Nowhere)
       return PlanStatus.Failure;
 
-    if (target is Player)
-    {
-      // if we are chasing the player (the most likely scenario, we can use
-      // the dijkstra maps available from  GameState
-      foreach (Trait t in mob.Traits)
-      {
-        if (t is IntelligentTrait)
-          return ChasePlayerDoors(mob, gs);
-        if (t is FloatingTrait)
-          return ChasePlayerFlying(mob, gs);
-        if (t is FlyingTrait)
-          return ChasePlayerFlying(mob, gs);
-      }
-
-      return ChasePlayer(mob, gs);
-    }
-    else
-    {
-      // How to handle chasing someone other than the Player? I don't want to 
-      // calc A* on every turn...although maybe it won't be a problem??
-    }
-
-    return PlanStatus.Failure;
+    return ChaseToLoc(mob, targetLoc, gs);
   }
 }
 

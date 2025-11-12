@@ -290,6 +290,56 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 class AStar
 {
+  static public Stack<Loc> FindPath2(GameObjectDB objDb, Map map, Loc start, Loc goal, TravelCostFunction calcCost, bool allowDiagonal = true)
+  {
+    PriorityQueue<Loc, int> q = new();
+    q.Enqueue(start, 0);
+    Dictionary<Loc, Loc> cameFrom = [];
+    cameFrom[start] = start;
+    Dictionary<Loc, int> costs = [];
+    costs[start] = 0;
+
+    while (q.Count > 0)
+    {
+      Loc curr = q.Dequeue();
+
+      if (curr == goal)
+        break;
+
+      var adjSqs = allowDiagonal ? Util.Adj8Locs(curr) : Util.Adj4Locs(curr);
+      foreach (Loc adj in adjSqs)
+      {
+        int travel = calcCost(map.TileAt(adj.Row, adj.Col));
+        if (travel == int.MaxValue)
+          continue;
+        else if (objDb.AreBlockersAtLoc(adj))
+          continue;
+
+        int newCost = costs[curr] + travel;
+        if (!costs.TryGetValue(adj, out int value) || newCost < value)
+        {
+          costs[adj] = newCost;
+          int priority = newCost + Util.Manhattan(goal, adj);
+          q.Enqueue(adj, priority);
+          cameFrom[adj] = curr;
+        }
+      }
+    }
+
+    if (!cameFrom.ContainsKey(goal))
+      return [];
+
+    Stack<Loc> path = [];
+    Loc loc = goal;
+    while (loc != start)
+    {
+      path.Push(loc);
+      loc = cameFrom[loc];
+    }
+
+    return path;
+  }
+
   static public Stack<Loc> FindPath(GameObjectDB objDb, Map map, Loc start, Loc goal, Dictionary<TileType, int> travelCost, bool allowDiagonal = true)
   {
     PriorityQueue<Loc, int> q = new();

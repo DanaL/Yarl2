@@ -338,9 +338,7 @@ abstract class DungeonBuilder
     Downstairs? exitStairs = null;
     
     for (int lvl = 0; lvl < levelMaps.Length; lvl++)
-    {
-      
-
+    {      
       List<(int, int)> currFloorSqs = [];
       foreach (var room in levelMaps[lvl].FindRooms(5))
       {

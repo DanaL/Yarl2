@@ -617,6 +617,7 @@ abstract class Actor : GameObj, IZLevel
         break;
       }
     }
+
     if (HasTrait<InvisibleTrait>() && !seeInvisible)
       return false;
 
@@ -789,6 +790,18 @@ sealed class Mob : Actor
     gs.PrepareFieldOfView();
   }
 
+  static Loc PickInvisibleTarget(Loc loc, GameState gs)
+  {
+    List<Loc> randomLoc = [loc];
+    foreach (Loc adj in Util.Adj4Locs(gs.Player.Loc))
+    {
+      if (!gs.ObjDb.Occupied(adj) && gs.TileAt(adj).PassableByFlight())
+        randomLoc.Add(adj);
+    }
+
+    return randomLoc.Count > 0 ? randomLoc[gs.Rng.Next(randomLoc.Count)] : Loc.Nowhere;
+  }
+
   // At the moment, monsters will pick the player, but I'm working toward
   // changing that
   public override Actor PickTarget(GameState gs)
@@ -796,15 +809,24 @@ sealed class Mob : Actor
     if (gs.Player.HasTrait<NondescriptTrait>())
       return NoOne.Instance();
 
-    return gs.Player;
+    if (gs.Player.VisibleTo(this))
+      return gs.Player;
+
+    return NoOne.Instance();
   }
 
-  public override Loc PickTargetLoc(GameState gameState)
+  public override Loc PickTargetLoc(GameState gs)
   {
-    if (gameState.Player.HasTrait<NondescriptTrait>())
+    if (gs.Player.HasTrait<NondescriptTrait>())
       return Loc.Nowhere;
 
-    return HasTrait<ConfusedTrait>() ? Util.RandomAdjLoc(Loc, gameState) : gameState.Player.Loc;
+    if (HasTrait<ConfusedTrait>())
+      Util.RandomAdjLoc(Loc, gs);
+
+    if (!gs.Player.VisibleTo(this))
+      return PickInvisibleTarget(gs.Player.Loc, gs);
+
+    return gs.Player.Loc;
   }
 
   // I suspect eventually these will diverge
