@@ -74,7 +74,7 @@ abstract class UserInterface
 
   List<Animation> _animations = [];
 
-  Glyph PlayerGlyph { get; set; }
+  public Glyph PlayerGlyph { get; set; }
 
   public bool InTutorial { get; set; } = false;
   public bool PauseForResponse { get; set; } = false;
@@ -96,10 +96,13 @@ abstract class UserInterface
   public void SetOptions(Options opts, GameState? gs)
   {
     _options = opts;
-    if (opts.HighlightPlayer)
-      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.HILITE, false);
-    else
+    
+    if (gs is null)
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
+    else if (opts.HighlightPlayer)
+      PlayerGlyph = PlayerGlyph with { BG = Colours.HILITE };
+    else
+      PlayerGlyph = PlayerGlyph with { BG = Colours.BLACK };
   }
 
   public void ClearLongMessage()
@@ -756,8 +759,14 @@ abstract class UserInterface
     if (!statuses.Contains("DISEASED") && gs.Player.HasTrait<DiseasedTrait>())
     {
       List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.LIME_GREEN, "DISEASED")];
-      row = WriteSideBarLine(statusLine, statusLineNum--);
+      WriteSideBarLine(statusLine, statusLineNum--);
       statuses.Add("DISEASED");
+    }
+    if (!statuses.Contains("INVISIBLE") && gs.Player.HasTrait<InvisibleTrait>())
+    {
+      List<(Colour, string)> statusLine = [(Colours.WHITE, "│ "), (Colours.WHITE, "INVISIBLE")];
+      WriteSideBarLine(statusLine, statusLineNum--);
+      statuses.Add("INVISIBLE");
     }
     foreach (StatDebuffTrait statBuff in gs.Player.Traits.OfType<StatDebuffTrait>())
     {

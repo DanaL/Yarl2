@@ -133,12 +133,7 @@ class DebugCommand(GameState gs)
     {
       _gs.UIRef().AlertPlayer($"Turn {_gs.Turn}");
       return "";
-    }
-    else if (txt == "heal")
-    {
-      _gs.Player.Stats[Attribute.HP].Reset();
-      return "";
-    }
+    }    
     else if (txt == "genocide")
     {
       List<Actor> toRremove = [.. _gs.ObjDb.AllActors().Where(a => a is not Player && a.Loc.DungeonID == _gs.CurrDungeonID && a.Loc.Level == _gs.CurrLevel)];
@@ -147,6 +142,18 @@ class DebugCommand(GameState gs)
         _gs.ObjDb.RemoveActor(a);
       }
       _gs.FlushPerformers();
+
+      return "";
+    }
+    else if (txt == "heal")
+    {
+      _gs.Player.Stats[Attribute.HP].Reset();
+      return "";
+    }
+    else if (txt == "invisible")
+    {
+      InvisibleTrait invis = new() { ExpiresOn = _gs.Turn + 25 };
+      invis.Apply(_gs.Player, _gs);
 
       return "";
     }

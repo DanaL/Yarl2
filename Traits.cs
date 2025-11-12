@@ -3291,6 +3291,7 @@ class SetAttributeTriggerTrait : Trait, IGameEventListener
 class InvisibleTrait : TemporaryTrait
 {
   public override string AsText() => $"Invisible#{OwnerID}#{Expired}#{ExpiresOn}";
+  protected override string ExpiryMsg => "You are no longer translucent.";
 
   public override List<string> Apply(GameObj target, GameState gs)
   {
@@ -3299,12 +3300,15 @@ class InvisibleTrait : TemporaryTrait
     target.Traits.Add(this);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
+    if (target is Player)
+      gs.UIRef().PlayerGlyph = gs.UIRef().PlayerGlyph with { Lit = Colours.DARK_GREY };
+
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "vanish")}!" ];
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {    
-    if (gs.ObjDb.GetObj(OwnerID) is not Actor)
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor actor)
     {
       gs.RemoveListener(this);
       return;
@@ -3314,6 +3318,9 @@ class InvisibleTrait : TemporaryTrait
     {
       Remove(gs);      
       Expired = true;
+
+      if (actor is Player)
+        gs.UIRef().PlayerGlyph = gs.UIRef().PlayerGlyph with { Lit = Colours.WHITE };
     }    
   }
 }
