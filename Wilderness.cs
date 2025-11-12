@@ -584,6 +584,24 @@ internal class Wilderness(Rng rng, int length)
     throw new WildernessCreationException("No valleys at all!");
   }
 
+  static int CostsToCarveValley(Tile tile) => tile.Type switch
+  {
+    TileType.Grass => 2,
+    TileType.Sand => 2,
+    TileType.Water => 6,
+    TileType.GreenTree => 2,
+    TileType.YellowTree => 2,
+    TileType.RedTree => 2,
+    TileType.OrangeTree => 2,
+    TileType.Conifer => 2,
+    TileType.Dirt => 2,
+    TileType.ClosedDoor => 3,
+    TileType.Bridge => 3,
+    TileType.Mountain => 5,
+    TileType.SnowPeak => 5,
+    _ => int.MaxValue
+  };
+
   public static void CarveBurriedValley(Map map, HashSet<(int, int)>[] regions, HashSet<(int, int)> mainRegion, Town town, GameObjectDB objDb, FactDb factDb, Rng rng)
   {
     List<HashSet<(int, int)>> valleys = [.. regions.Where(r => IsValley(r))];
@@ -602,21 +620,6 @@ internal class Wilderness(Rng rng, int length)
     (int sr, int sc) = valley[rng.Next(valley.Count)];
     factDb.Add(new LocationFact() { Desc = "RLEntrance", Loc = new(0, 0, sr, sc) });
 
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.Grass, 2);
-    costs.Add(TileType.Sand, 2);
-    costs.Add(TileType.Water, 6);
-    costs.Add(TileType.GreenTree, 2);
-    costs.Add(TileType.YellowTree, 2);
-    costs.Add(TileType.RedTree, 2);
-    costs.Add(TileType.OrangeTree, 2);
-    costs.Add(TileType.Conifer, 2);
-    costs.Add(TileType.Dirt, 2);
-    costs.Add(TileType.ClosedDoor, 3);
-    costs.Add(TileType.Bridge, 3);
-    costs.Add(TileType.Mountain, 5);
-    costs.Add(TileType.SnowPeak, 5);
-
     Loc start = new(0, 0, sr, sc);
     // Pick a target loc in town
     List<Loc> townSqs = [];
@@ -634,7 +637,7 @@ internal class Wilderness(Rng rng, int length)
     Loc goal = townSqs[rng.Next(townSqs.Count)];
 
     List<Loc> carved = [];
-    Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, costs, false);
+    Stack<Loc> path = AStar.FindPath2(objDb, map, start, goal, CostsToCarveValley, false);
     while (path.Count > 0)
     {
       Loc loc = path.Pop();

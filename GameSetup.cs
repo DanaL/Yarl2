@@ -225,27 +225,13 @@ class CampaignCreator(UserInterface ui)
       }
     }
 
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.Grass, 1);
-    costs.Add(TileType.Sand, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.GreenTree, 1);
-    costs.Add(TileType.RedTree, 1);
-    costs.Add(TileType.OrangeTree, 1);
-    costs.Add(TileType.YellowTree, 1);
-    costs.Add(TileType.Conifer, 1);
-    costs.Add(TileType.StoneFloor, 1);
-    costs.Add(TileType.WoodFloor, 1);
-    costs.Add(TileType.Well, 1);
-    
     while (opts.Count > 0)
     {
       int i = rng.Next(opts.Count);
       var (r, c) = opts[i];
 
       Loc loc = new(0, 0, r, c);
-      var path = AStar.FindPath(objDb, map, loc, goal, costs);
+      var path = AStar.FindPath2(objDb, map, loc, goal, DijkstraMap.Cost);
       if (path.Count > 0)
         return (r, c);
 
