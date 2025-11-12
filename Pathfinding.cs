@@ -314,6 +314,8 @@ class AStar
           continue;
         else if (objDb.AreBlockersAtLoc(adj))
           continue;
+        else if (objDb.Occupied(adj))
+          travel *= 2;
 
         int newCost = costs[curr] + travel;
         if (!costs.TryGetValue(adj, out int value) || newCost < value)
