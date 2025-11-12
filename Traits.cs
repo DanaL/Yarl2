@@ -3288,24 +3288,31 @@ class SetAttributeTriggerTrait : Trait, IGameEventListener
     gs.Player.Stats[Attribute] = new Stat(Value);
 }
 
-class InvisibleTrait : BasicTrait, IGameEventListener
+class InvisibleTrait : TemporaryTrait
 {
-  public ulong ActorID { get; set; }
-  public ulong ObjId => ActorID;
-  public bool Expired { get; set; }
-  public bool Listening => true;
-  public GameEventType EventType => GameEventType.EndOfRound;
+  public override string AsText() => $"Invisible#{OwnerID}#{Expired}#{ExpiresOn}";
 
-  public override string AsText() => $"Invisible#{ActorID}#{Expired}#{ExpiresOn}";
-
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  public override List<string> Apply(GameObj target, GameState gs)
   {
-    if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
+    OwnerID = target.ID;
+
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "vanish")}!" ];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {    
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor)
+    {
+      gs.RemoveListener(this);
       return;
+    }
 
     if (gs.Turn > ExpiresOn)
     {
-      actor.Traits.Remove(this);
+      Remove(gs);      
       Expired = true;
     }    
   }
@@ -4134,7 +4141,7 @@ class TraitFactory
     { "Invisible", (pieces, gameObj) =>
       new InvisibleTrait()
       {
-        ActorID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
+        OwnerID = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]),
         Expired = bool.Parse(pieces[2]),
         ExpiresOn = pieces[3] == "max" ? ulong.MaxValue : ulong.Parse(pieces[3])
       }

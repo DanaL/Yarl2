@@ -140,14 +140,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       if (!witch.HasTrait<InvisibleTrait>() && Rng.NextDouble() < 0.2)
       {
-        InvisibleTrait it = new()
-        {
-          ActorID = witchId,
-          Expired = false,
-          ExpiresOn = Turn + (ulong)Rng.Next(500, 1000)
-        };
-        witch.Traits.Add(it);
-        RegisterForEvent(GameEventType.EndOfRound, it);
+        InvisibleTrait it = new() { ExpiresOn = Turn + (ulong)Rng.Next(500, 1000) };
+        it.Apply(witch, this);
 
         witch.ClearPlan();
       }

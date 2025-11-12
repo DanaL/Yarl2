@@ -3216,7 +3216,7 @@ class ConsumeAlchemicalCompound(GameState gs, Actor actor, Item item) : Action(g
         messages.Add("Mmm tastes like molasses.");
         ExhaustedTrait exhausted = new()
         {
-          OwnerID = actor.ID,
+          OwnerID = Actor.ID,
           ExpiresOn = GameState.Turn + (ulong)GameState.Rng.Next(50, 100)
         };
         messages.AddRange(exhausted.Apply(Actor, GameState));
