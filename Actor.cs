@@ -530,8 +530,8 @@ abstract class Actor : GameObj, IZLevel
   public virtual void SetBehaviour(IBehaviour behaviour) => _behaviour = behaviour;
 
   public abstract Actor PickTarget(GameState gs);
-  public abstract Loc PickTargetLoc(GameState gamestate);
-  public abstract Loc PickRangedTargetLoc(GameState gamestate);
+  public abstract Loc PickTargetLoc(GameState gamestate, int range);
+  public abstract Loc PickRangedTargetLoc(GameState gamestate, int range);
   public abstract void TakeTurn(GameState gs);
   public abstract void CalcHP();
 
@@ -790,11 +790,13 @@ sealed class Mob : Actor
     gs.PrepareFieldOfView();
   }
 
-  static Loc PickInvisibleTarget(Loc loc, GameState gs)
+  static Loc PickInvisibleTarget(Loc loc, GameState gs, int range)
   {
     List<Loc> randomLoc = [loc];
     foreach (Loc adj in Util.Adj4Locs(gs.Player.Loc))
     {
+      if (Util.Distance(adj, loc) > range)
+        continue;
       if (!gs.ObjDb.Occupied(adj) && gs.TileAt(adj).PassableByFlight())
         randomLoc.Add(adj);
     }
@@ -815,7 +817,7 @@ sealed class Mob : Actor
     return NoOne.Instance();
   }
 
-  public override Loc PickTargetLoc(GameState gs)
+  public override Loc PickTargetLoc(GameState gs, int range)
   {
     if (gs.Player.HasTrait<NondescriptTrait>())
       return Loc.Nowhere;
@@ -824,13 +826,13 @@ sealed class Mob : Actor
       Util.RandomAdjLoc(Loc, gs);
 
     if (!gs.Player.VisibleTo(this))
-      return PickInvisibleTarget(gs.Player.Loc, gs);
+      return PickInvisibleTarget(gs.Player.Loc, gs, range);
 
     return gs.Player.Loc;
   }
 
   // I suspect eventually these will diverge
-  public override Loc PickRangedTargetLoc(GameState gameState) => PickTargetLoc(gameState);
+  public override Loc PickRangedTargetLoc(GameState gameState, int range) => PickTargetLoc(gameState, range);
 }
 
 class MonsterFactory
@@ -1075,9 +1077,9 @@ class Power
       case "RumBreath":
         return new RumBreathAction(gs, mob, loc, MaxRange);
       case "Nudity":
-        return new InduceNudityAction(gs, mob);
+        return new InduceNudityAction(gs, mob,MaxRange);
       case "FogCloud":
-        return new FogCloudAction(gs, mob);
+        return new FogCloudAction(gs, mob, MaxRange);
       case "Blink":
         return new BlinkAction(gs, mob);
       case "SummonKobold":
@@ -1143,7 +1145,7 @@ class Power
       case "DrainTorch":
         return new DrainTorchAction(gs, mob, loc);
       case "Entangle":
-        return new EntangleAction(gs, mob);
+        return new EntangleAction(gs, mob, MaxRange);
       case "FireBreath":
         return new FireBreathAction(gs, mob, loc, MaxRange, DmgDie, NumOfDice);
       case "FearsomeBellow":
@@ -1178,8 +1180,8 @@ class NoOne : Actor
   }
 
   public override Actor PickTarget(GameState gs) => this;
-  public override Loc PickTargetLoc(GameState gamestate) => Loc;
-  public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
+  public override Loc PickTargetLoc(GameState gamestate, int range) => Loc;
+  public override Loc PickRangedTargetLoc(GameState gamestate, int range) => Loc;
   public override void TakeTurn(GameState gs) { }
   public override void CalcHP() { }
 }

@@ -95,8 +95,8 @@ sealed class Player : Actor
   {
     throw new NotImplementedException();
   }
-  public override Loc PickTargetLoc(GameState gamestate) => Loc;
-  public override Loc PickRangedTargetLoc(GameState gamestate) => Loc;
+  public override Loc PickTargetLoc(GameState gamestate, int range) => Loc;
+  public override Loc PickRangedTargetLoc(GameState gamestate, int range) => Loc;
  
   public override int SpellDC
   {

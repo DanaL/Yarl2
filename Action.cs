@@ -90,7 +90,7 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
     base.Execute();
 
     UserInterface ui = GameState!.UIRef();
-    Loc targetLoc = Actor!.PickTargetLoc(GameState!);
+    Loc targetLoc = Actor!.PickTargetLoc(GameState!, 1);
     if (GameState.ObjDb.Occupant(targetLoc) is not Actor victim)
       return 1.0;
 
@@ -2334,15 +2334,17 @@ class MirrorImageAction : Action
   }
 }
 
-class FogCloudAction(GameState gs, Actor caster) : Action(gs, caster)
-{    
+class FogCloudAction(GameState gs, Actor caster, int range) : Action(gs, caster)
+{
+  public int Range { get; set; } = range;
+
   public override double Execute()
   {
     base.Execute();
 
     GameState gs = GameState!;
 
-    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!);
+    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!, Range);
     if (gs.LastPlayerFoV.Contains(targetLoc))
       gs.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!");
     
@@ -2415,8 +2417,10 @@ class FlareAction(GameState gs, Actor actor, int dmgDie, int numOfDice, DamageTy
   }
 }
 
-class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
+class InduceNudityAction(GameState gs, Actor caster, int range) : Action(gs, caster)
 {
+  int Range { get; set; } = range;
+
   public override double Execute()
   {
     base.Execute();
@@ -2427,7 +2431,7 @@ class InduceNudityAction(GameState gs, Actor caster) : Action(gs, caster)
       string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "dance")} a peculiar jig.";
       ui.AlertPlayer(s);
 
-      Loc targetLoc = Actor.PickRangedTargetLoc(GameState);
+      Loc targetLoc = Actor.PickRangedTargetLoc(GameState, Range);
       if (GameState.ObjDb.Occupant(targetLoc) is Actor victim)
       {
         List<Item> clothes = [.. victim.Inventory.Items().Where(i => i.Type == ItemType.Armour && i.Equipped)];
@@ -2489,12 +2493,13 @@ class DrainTorchAction(GameState gs, Actor caster, Loc target) : Action(gs, cast
   }
 }
 
-class EntangleAction(GameState gs, Actor caster) : Action(gs, caster)
+class EntangleAction(GameState gs, Actor caster, int range) : Action(gs, caster)
 {
-  
+  int Range { get; set; } = range;
+
   public override double Execute()
   {
-    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!);
+    Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!, Range);
     foreach (var (r, c) in Util.Adj8Sqs(targetLoc.Row, targetLoc.Col))
     {
       var loc = targetLoc with { Row = r, Col = c };

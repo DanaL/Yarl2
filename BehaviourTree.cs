@@ -253,7 +253,7 @@ class UsePower(Power power) : BehaviourNode
 
     if (Power.Type == PowerType.Attack)
     {
-      Loc targetLoc = mob.PickTargetLoc(gs);
+      Loc targetLoc = mob.PickTargetLoc(gs, int.MaxValue);
       if (targetLoc == Loc.Nowhere)
         return false;
 
@@ -276,7 +276,7 @@ class UsePower(Power power) : BehaviourNode
     if (Available(mob, gs))
     {
       mob.LastPowerUse[Power.Name] = gs.Turn;
-      mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs)));
+      mob.ExecuteAction(Power.Action(mob, gs, mob.PickTargetLoc(gs, int.MaxValue)));
 
       return PlanStatus.Success;
     }
@@ -1416,7 +1416,7 @@ class ChaseTarget : BehaviourNode
 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
-    Loc targetLoc = mob.PickTargetLoc(gs);
+    Loc targetLoc = mob.PickTargetLoc(gs, int.MaxValue);
     if (targetLoc == Loc.Nowhere)
       return PlanStatus.Failure;
 
