@@ -241,22 +241,6 @@ class WitchQuest
       }
     }
 
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.Grass, 1);
-    costs.Add(TileType.Sand, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.GreenTree, 1);
-    costs.Add(TileType.RedTree, 1);
-    costs.Add(TileType.OrangeTree, 1);
-    costs.Add(TileType.YellowTree, 1);
-    costs.Add(TileType.Conifer, 1);
-    costs.Add(TileType.Water, 1);
-    costs.Add(TileType.Well, 1);
-    costs.Add(TileType.WoodWall, 1);
-    costs.Add(TileType.StoneWall, 1);
-    costs.Add(TileType.WoodFloor, 1);
-
     while (mountains.Count > 0)
     {
       int i = gs.Rng.Next(mountains.Count);
@@ -265,7 +249,7 @@ class WitchQuest
 
       // Start from the proposed entrance, otherwise pathfinding will fail
       // because mountains aren't open
-      var path = AStar.FindPath(gs.ObjDb, wilderness, loc, witches, costs, true);
+      var path = AStar.FindPath2(gs.ObjDb, wilderness, loc, witches, Costs, true);
       if (path.Count > 0)
         return loc;
     }
@@ -274,6 +258,16 @@ class WitchQuest
     {
       return others[gs.Rng.Next(others.Count)];
     }
+
+    static int Costs(Tile tile) => tile.Type switch
+    {
+      TileType.Grass or TileType.Sand or TileType.Dirt
+        or TileType.Bridge or TileType.GreenTree or TileType.RedTree
+        or TileType.OrangeTree or TileType.YellowTree or TileType.Conifer
+        or TileType.Water or TileType.Well or TileType.WoodWall 
+        or TileType.StoneWall or TileType.WoodFloor => 1,
+      _ => int.MaxValue
+    };
 
     // I'm not sure what to do if there are no valid locations? Is it
     // even possible?
