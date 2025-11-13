@@ -83,22 +83,13 @@ abstract class DungeonBuilder
       }
     }
 
-    Dictionary<TileType, int> passable = [];
-    passable.Add(TileType.DungeonFloor, 1);
-    passable.Add(TileType.ClosedDoor, 1);
-    passable.Add(TileType.LockedDoor, 1);
-    passable.Add(TileType.Upstairs, 1);
-    passable.Add(TileType.Downstairs, 1);
-    passable.Add(TileType.WoodBridge, 1);
-    passable.Add(TileType.SecretDoor, 1);
-
     foreach (var (ur, uc) in upStairs)
     {
       Loc start = new(0, 0, ur, uc);
       foreach (var (dr, dc) in downStairs)
       {
         Loc goal = new(0, 0, dr, dc);
-        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, passable);
+        Stack<Loc> path = AStar.FindPath2(objDb, map, start, goal, Costs);
         if (path.Count == 0)
         {
           AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);
@@ -106,6 +97,18 @@ abstract class DungeonBuilder
         }
       }
     }
+
+    static int Costs(Tile tile) => tile.Type switch
+    { 
+      TileType.DungeonFloor => 1,
+      TileType.ClosedDoor => 1,
+      TileType.LockedDoor => 1,
+      TileType.Upstairs => 1,
+      TileType.Downstairs => 1,
+      TileType.WoodBridge => 1,
+      TileType.SecretDoor => 1,
+      _ => int.MaxValue
+    };
   }
 
   // At the moment, I am just adding a potion of levitation on the stairs up side,
