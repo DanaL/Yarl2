@@ -382,6 +382,18 @@ class Util
     return Math.Atan2(dY, dX);
   }
 
+  public static char DirPointer(string dir) => dir switch
+  {
+    "north" => '↑',
+    "northeast" => '↗',
+    "east" => '→',
+    "southeast" => '↘',
+    "south" => '↓',
+    "southwest" => '↙',
+    "west" => '←',
+    _ => '↖'    
+  };
+
   public static string RelativeDir(Loc a, Loc b)
   {
     double angle = AngleBetweenLocs(a, b);

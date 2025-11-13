@@ -828,6 +828,21 @@ class TownBuilder
     // there to join up with another road in town
     CompleteWitchRoad(lastRoadSq, map, Town, objDb);
 
+    // Let's add a road sign where the road reaches town
+    List<(int, int)> roadSignOpts = [];
+    foreach (var adj in Util.Adj8Sqs(lastRoadSq.Item1, lastRoadSq.Item2))
+    {
+      Tile tile = map.TileAt(adj.Item1, adj.Item2);
+      if (tile.Passable() && tile.Type != TileType.Dirt)
+        roadSignOpts.Add((adj.Item1, adj.Item2));
+    }
+    if (roadSignOpts.Count > 0)
+    {
+      var signSq = roadSignOpts[rng.Next(roadSignOpts.Count)];
+      char witchesDir = Util.DirPointer(Util.RelativeDir(new(0, 0, signSq.Item1, signSq.Item2), frontDoorLoc));
+      map.SetTile(signSq.Item1, signSq.Item2, new BusinessSign($"{witchesDir} K&S Magical Services"));
+    }
+
     if (opts.Count > 0)
     {
       var wellSq = opts[rng.Next(opts.Count)];
