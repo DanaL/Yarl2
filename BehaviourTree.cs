@@ -1639,7 +1639,7 @@ class Planner
     return plan;
   }
 
-  static BehaviourNode CreateMimicPlan(Mob mimic)
+  static Selector CreateMimicPlan(Mob mimic)
   {    
     List<BehaviourNode> actions = [];
     List<BehaviourNode> passive = [];
