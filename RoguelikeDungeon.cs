@@ -118,7 +118,7 @@ class RLLevelMaker
     int startR = start.Row + start.Height / 2, startC = start.Col + start.Width / 2;
     int endR = end.Row + end.Height / 2, endC = end.Col + end.Width / 2;
 
-    Stack<Loc> path = AStar.FindPath2(new GameObjectDB(), map, new(0, 0, startR, startC),
+    Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, new(0, 0, startR, startC),
         new(0, 0, endR, endC), CostByFlight, false);
 
     TileType prev = TileType.DungeonFloor;

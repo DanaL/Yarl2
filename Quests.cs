@@ -249,7 +249,7 @@ class WitchQuest
 
       // Start from the proposed entrance, otherwise pathfinding will fail
       // because mountains aren't open
-      var path = AStar.FindPath2(gs.ObjDb, wilderness, loc, witches, Costs, true);
+      var path = AStar.FindPath(gs.ObjDb, wilderness, loc, witches, Costs, true);
       if (path.Count > 0)
         return loc;
     }

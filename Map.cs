@@ -1077,7 +1077,7 @@ class CACave
       (int, int) endSqr = mainSqs[rng.Next(mainSqs.Count)];
       Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
 
-      Stack<Loc> path = AStar.FindPath2(objDb, map, start, end, TravelCost, false);
+      Stack<Loc> path = AStar.FindPath(objDb, map, start, end, TravelCost, false);
       while (path.Count > 0)
       {
         Loc sq = path.Pop();

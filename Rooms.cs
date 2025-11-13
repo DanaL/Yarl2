@@ -564,7 +564,7 @@ class Rooms
     {
       Loc startLoc = new(dungeonID, level, r, c);
       Loc goalLoc = new(dungeonID, level, goalSq.Item1, goalSq.Item2);
-      Stack<Loc> path = AStar.FindPath2(objDb, map, startLoc, goalLoc, PassableCosts, false);
+      Stack<Loc> path = AStar.FindPath(objDb, map, startLoc, goalLoc, PassableCosts, false);
       if (path.Count > 0)
       {
         while (path.Count > 0)

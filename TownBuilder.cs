@@ -817,7 +817,7 @@ class TownBuilder
     // path from the front door to the garden. (Sometimes the garden was 
     // created in the middle of mountains, eetc)
     Loc frontDoorLoc = new(0, 0, frontDoor.Item1, frontDoor.Item2);
-    var gardenPath = AStar.FindPath2(objDb, map, frontDoorLoc, gardenSq, DijkstraMap.CostWithDoors, false);
+    var gardenPath = AStar.FindPath(objDb, map, frontDoorLoc, gardenSq, DijkstraMap.CostWithDoors, false);
     if (gardenPath.Count == 0)
       return false;
 

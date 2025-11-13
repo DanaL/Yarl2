@@ -89,7 +89,7 @@ abstract class DungeonBuilder
       foreach (var (dr, dc) in downStairs)
       {
         Loc goal = new(0, 0, dr, dc);
-        Stack<Loc> path = AStar.FindPath2(objDb, map, start, goal, Costs);
+        Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, Costs);
         if (path.Count == 0)
         {
           AddRiverCrossing(map, ur, uc, dungeonId, level, objDb, rng);

@@ -959,7 +959,7 @@ class DungeonMap(Rng rng)
       }
     }
 
-    Stack<Loc> path = AStar.FindPath2(new GameObjectDB(), map, tunnelStart, tunnelEnd, Costs, false);
+    Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, tunnelStart, tunnelEnd, Costs, false);
     while (path.Count > 0)
     {
       Loc loc = path.Pop();

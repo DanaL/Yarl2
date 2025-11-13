@@ -231,7 +231,7 @@ class CampaignCreator(UserInterface ui)
       var (r, c) = opts[i];
 
       Loc loc = new(0, 0, r, c);
-      var path = AStar.FindPath2(objDb, map, loc, goal, DijkstraMap.Cost);
+      var path = AStar.FindPath(objDb, map, loc, goal, DijkstraMap.Cost);
       if (path.Count > 0)
         return (r, c);
 

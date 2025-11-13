@@ -46,49 +46,19 @@ class FindNearbyItem(Mob mob, GameState gs, string name) : IPathBuilder
     while (itemLocs.Count > 0)
     {
       Loc loc = itemLocs.Dequeue();
-      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, TravelCosts(Mob), true);
+
+      TravelCostFunction costFunc = DijkstraMap.Cost;
+      if (Mob.HasTrait<IntelligentTrait>())
+        costFunc = DijkstraMap.CostWithDoors;
+      else if (Mob.HasTrait<FloatingTrait>() || Mob.HasTrait<FlyingTrait>())
+        costFunc = DijkstraMap.CostByFlight;
+
+      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, costFunc, true);
       if (path.Count > 0)
         return path;
     }
 
     return [];
-  }
-
-  static Dictionary<TileType, int> TravelCosts(Mob mob)
-  {
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.DungeonFloor, 1);
-    costs.Add(TileType.Gravestone, 1);
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.WoodBridge, 1);
-    costs.Add(TileType.MagicMouth, 1);
-    costs.Add(TileType.HiddenMagicMouth, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.GreenTree, 1);
-    costs.Add(TileType.RedTree, 1);
-    costs.Add(TileType.YellowTree, 1);
-    costs.Add(TileType.OrangeTree, 1);
-    costs.Add(TileType.Conifer, 1);
-    costs.Add(TileType.Sand, 1);
-    costs.Add(TileType.Grass, 1);
-    costs.Add(TileType.OpenDoor, 1);
-    costs.Add(TileType.BrokenDoor, 1);
-    costs.Add(TileType.OpenPortcullis, 1);
-    costs.Add(TileType.FrozenDeepWater, 2);
-    costs.Add(TileType.FrozenWater, 2);
-    costs.Add(TileType.Well, 1);
-    costs.Add(TileType.Upstairs, 1);
-    costs.Add(TileType.Downstairs, 1);
-
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is IntelligentTrait)
-        costs.Add(TileType.ClosedDoor, 2);
-      if (t is FloatingTrait || t is FlyingTrait)
-        costs.Add(TileType.DeepWater, 1);
-    }
-
-    return costs;
   }
 
   public bool AtGoal(Loc loc, GameState _) => loc == Goal;
@@ -106,7 +76,9 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
 
     foreach (Loc loc in locs)
     {
-      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, TravelCosts, false);
+      // I'm using this node to build routes for villagers, so I can assume the cost function
+      // that includes doors.
+      Stack<Loc> path = AStar.FindPath(GS.ObjDb, GS.MapForLoc(start), start, loc, DijkstraMap.CostWithDoors, false);
       if (path.Count > 0)
         return path;
     }
@@ -115,31 +87,6 @@ class FindPathToArea(HashSet<Loc> area, GameState gs) : IPathBuilder
   }
 
   public bool AtGoal(Loc loc, GameState gs) => Area.Contains(loc);
-
-  static Dictionary<TileType, int> TravelCosts
-  {
-    get
-    {
-      Dictionary<TileType, int> costs = [];
-      costs.Add(TileType.Grass, 1);
-      costs.Add(TileType.Sand, 1);
-      costs.Add(TileType.Dirt, 0);
-      costs.Add(TileType.Bridge, 1);
-      costs.Add(TileType.GreenTree, 1);
-      costs.Add(TileType.RedTree, 1);
-      costs.Add(TileType.OrangeTree, 1);
-      costs.Add(TileType.YellowTree, 1);
-      costs.Add(TileType.Conifer, 1);
-      costs.Add(TileType.StoneFloor, 1);
-      costs.Add(TileType.WoodFloor, 1);
-      costs.Add(TileType.OpenDoor, 1);
-      costs.Add(TileType.Well, 1);
-      costs.Add(TileType.ClosedDoor, 2);
-      costs.Add(TileType.Water, 3);
-
-      return costs;
-    }
-  }
 }
 
 abstract class BehaviourNode
@@ -1021,53 +968,14 @@ class FindWayToArea(HashSet<Loc> area) : BehaviourNode
   {
     Loc goal = Area[gs.Rng.Next(Area.Count)];
 
-    var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, goal, TravelCosts(mob), true);
+    TravelCostFunction costFunc = DijkstraMap.Cost;
+    if (mob.HasTrait<IntelligentTrait>())
+      costFunc = DijkstraMap.CostWithDoors;
+    else if (mob.HasTrait<FloatingTrait>() || mob.HasTrait<FlyingTrait>())
+      costFunc = DijkstraMap.CostByFlight;
+    var path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, goal, costFunc, true);
     return path;
   }
-
-  static Dictionary<TileType, int> TravelCosts(Mob mob)
-  {
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.DungeonFloor, 1);
-    costs.Add(TileType.DisturbedGrave, 2);
-    costs.Add(TileType.Gravestone, 2);
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.MagicMouth, 1);
-    costs.Add(TileType.HiddenMagicMouth, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.GreenTree, 2);
-    costs.Add(TileType.OpenDoor, 1);
-    costs.Add(TileType.BrokenDoor, 1);
-    costs.Add(TileType.OpenPortcullis, 1);
-    costs.Add(TileType.Pool, 1);
-    costs.Add(TileType.FrozenDeepWater, 2);
-    costs.Add(TileType.FrozenWater, 2);
-    costs.Add(TileType.Well, 2);
-    costs.Add(TileType.Upstairs, 1);
-    costs.Add(TileType.Downstairs, 1);
-    costs.Add(TileType.Grass, 1);
-    costs.Add(TileType.YellowTree, 2);
-    costs.Add(TileType.OrangeTree, 2);
-    costs.Add(TileType.RedTree, 2);
-    costs.Add(TileType.Conifer, 2);
-    costs.Add(TileType.WoodFloor, 1);
-    costs.Add(TileType.StoneFloor, 1);
-    costs.Add(TileType.WoodBridge, 1);
-    costs.Add(TileType.Water, 3);
-    costs.Add(TileType.Sand, 1);
-    costs.Add(TileType.Crops, 1);
-
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is IntelligentTrait || t is VillagerTrait)
-        costs.Add(TileType.ClosedDoor, 2);
-      if (t is FloatingTrait || t is FlyingTrait)
-        costs.Add(TileType.DeepWater, 1);
-    }
-
-    return costs;
-  }
-
 }
 
 // A behaviour where the monster will keep its distance, but which I mean
@@ -1412,77 +1320,26 @@ class FindUpStairs : BehaviourNode
 
     Loc stairsLoc = mob.Loc with { Row = stairs[0].Item1, Col = stairs[0].Item2 };
     Goal = stairsLoc;
-    return AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, Goal, TravelCosts(mob), true);
-  }
 
-  static Dictionary<TileType, int> TravelCosts(Mob mob)
-  {
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.DungeonFloor, 1);
-    costs.Add(TileType.DisturbedGrave, 1);
-    costs.Add(TileType.Gravestone, 1);
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.WoodBridge, 1);
-    costs.Add(TileType.MagicMouth, 1);
-    costs.Add(TileType.HiddenMagicMouth, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.GreenTree, 1);
-    costs.Add(TileType.OpenDoor, 1);
-    costs.Add(TileType.BrokenDoor, 1);
-    costs.Add(TileType.OpenPortcullis, 1);
-    costs.Add(TileType.Pool, 1);
-    costs.Add(TileType.FrozenDeepWater, 2);
-    costs.Add(TileType.FrozenWater, 2);
-    costs.Add(TileType.Well, 1);
-    costs.Add(TileType.Upstairs, 1);
-    costs.Add(TileType.Downstairs, 1);
-
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is IntelligentTrait)
-        costs.Add(TileType.ClosedDoor, 2);
-      if (t is FloatingTrait || t is FlyingTrait)
-        costs.Add(TileType.DeepWater, 1);
-    }
-
-    return costs;
+    TravelCostFunction costFunc = DijkstraMap.Cost;
+    if (mob.HasTrait<IntelligentTrait>())
+      costFunc = DijkstraMap.CostWithDoors;
+    else if (mob.HasTrait<FloatingTrait>() || mob.HasTrait<FlyingTrait>())
+      costFunc = DijkstraMap.CostByFlight;
+    return AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, Goal, costFunc, true);
   }
 }
 
+// This predates me switching ChaseTarget to use A* and I can probably 
+// ditch it for that BN subclass
 class SeekPlayerAStar : BehaviourNode
-{
-  static Dictionary<TileType, int> TravelCosts(Mob mob)
-  {
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.Bridge, 1);
-    costs.Add(TileType.WoodBridge, 1);
-    costs.Add(TileType.Dirt, 1);
-    costs.Add(TileType.GreenTree, 1);
-    costs.Add(TileType.OrangeTree, 1);
-    costs.Add(TileType.RedTree, 1);
-    costs.Add(TileType.YellowTree, 1);
-    costs.Add(TileType.Well, 1);
-    costs.Add(TileType.Water, 2);
-    costs.Add(TileType.Grass, 1);
-    costs.Add(TileType.Sand, 1);
-
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is IntelligentTrait)
-        costs.Add(TileType.ClosedDoor, 2);
-      if (t is FloatingTrait || t is FlyingTrait)
-        costs.Add(TileType.DeepWater, 1);
-    }
-
-    return costs;
-  }
-
+{ 
   public override PlanStatus Execute(Mob mob, GameState gs)
   {    
     if (Util.Distance(mob.Loc, gs.Player.Loc) <= 1)
       return PlanStatus.Success;
 
-    Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, gs.Player.Loc, TravelCosts(mob), true);
+    Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, gs.Player.Loc, DijkstraMap.Cost, true);
 
     if (path.Count == 0)
       return PlanStatus.Failure;
@@ -1528,26 +1385,14 @@ class ChaseTarget : BehaviourNode
       return PlanStatus.Failure;
 
     TravelCostFunction costFunc = DijkstraMap.Cost;
-    foreach (Trait t in mob.Traits)
-    {
-      if (t is IntelligentTrait) 
-      {
-        costFunc = DijkstraMap.CostWithDoors;
-        break;
-      }
-      else if (t is FloatingTrait || t is FlyingTrait)
-      {
-        costFunc = DijkstraMap.CostByFlight;
-        break;
-      }
-      else if (t is SwimmerTrait)
-      {
-        costFunc = DijkstraMap.CostForSwimming;
-        break;
-      }
-    }
-    
-    Stack<Loc> path = AStar.FindPath2(gs.ObjDb, gs.CurrentMap, mob.Loc, target, costFunc, true);
+    if (mob.HasTrait<IntelligentTrait>())
+      costFunc = DijkstraMap.CostWithDoors;
+    else if (mob.HasTrait<FloatingTrait>() || mob.HasTrait<FlyingTrait>())
+      costFunc = DijkstraMap.CostByFlight;
+    else if (mob.HasTrait<SwimmerTrait>())
+      costFunc = DijkstraMap.CostForSwimming;
+
+    Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, target, costFunc, true);
 
     if (path.Count > 0)    
     {

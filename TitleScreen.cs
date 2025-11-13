@@ -230,7 +230,7 @@ class TitleScreen(UserInterface ui)
       var (startR, startC) = startingSpots[j];
       startingSpots.RemoveAt(j);
       Loc start = new(0, 0, startR, startC);
-      Stack<Loc> path = AStar.FindPath2(ObjDb, Map, start, dungeon, DijkstraMap.Cost);
+      Stack<Loc> path = AStar.FindPath(ObjDb, Map, start, dungeon, DijkstraMap.Cost);
 
       if (path.Count > 0)
       {
@@ -392,7 +392,7 @@ class TitleScreen(UserInterface ui)
     if (monster is null)
       return;
     
-    Stack<Loc> path = AStar.FindPath2(ObjDb, Map, Player, monster.Loc, DijkstraMap.CostWithDoors, false);
+    Stack<Loc> path = AStar.FindPath(ObjDb, Map, Player, monster.Loc, DijkstraMap.CostWithDoors, false);
     if (path.Count > 0)
     {
       path.Pop();

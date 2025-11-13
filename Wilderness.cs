@@ -637,7 +637,7 @@ internal class Wilderness(Rng rng, int length)
     Loc goal = townSqs[rng.Next(townSqs.Count)];
 
     List<Loc> carved = [];
-    Stack<Loc> path = AStar.FindPath2(objDb, map, start, goal, CostsToCarveValley, false);
+    Stack<Loc> path = AStar.FindPath(objDb, map, start, goal, CostsToCarveValley, false);
     while (path.Count > 0)
     {
       Loc loc = path.Pop();
