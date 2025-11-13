@@ -560,17 +560,11 @@ class Rooms
 
     (int, int) goalSq = info.IslandSqs[rng.Next(info.IslandSqs.Count)];
 
-    Dictionary<TileType, int> passable = new()
-    {
-      [TileType.DungeonFloor] = 1,
-      [TileType.Chasm] = 1
-    };
-
     foreach (var (r, c) in info.Exits)
     {
       Loc startLoc = new(dungeonID, level, r, c);
       Loc goalLoc = new(dungeonID, level, goalSq.Item1, goalSq.Item2);
-      Stack<Loc> path = AStar.FindPath(objDb, map, startLoc, goalLoc, passable, false);
+      Stack<Loc> path = AStar.FindPath2(objDb, map, startLoc, goalLoc, PassableCosts, false);
       if (path.Count > 0)
       {
         while (path.Count > 0)
@@ -583,6 +577,13 @@ class Rooms
     }
 
     return bridges;
+
+    static int PassableCosts(Tile tile) => tile.Type switch
+    {
+      TileType.Chasm => 1,
+      TileType.DungeonFloor => 1,
+      _ => int.MaxValue
+    };
   }
 
   public static void ChasmTrapRoom(Map[] levels, Rng rng, int dungeonID, int level, List<(int, int)> room, GameObjectDB objDb)
