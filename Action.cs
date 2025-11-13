@@ -1444,7 +1444,7 @@ class OpenDoorAction : DirectionalAction
       {
         result = 1.0;
 
-        ui.AlertPlayer("The door is locked!");
+        ui.AlertPlayer("The door is locked!", GameState, Loc);
       }
       else if (!d.Open)
       {
@@ -1454,13 +1454,13 @@ class OpenDoorAction : DirectionalAction
       }
       else if (Actor is Player)
       {
-        ui.AlertPlayer("The door is already open.");
+        ui.AlertPlayer("The door is already open.", GameState, Loc);
       }
     }
     else if (door is VaultDoor vd)
     {
       string msg = vd.Open ? "The doors stand open." : "You'll need a key!";
-      ui.AlertPlayer(msg);
+      ui.AlertPlayer(msg, GameState, Loc);
     }
     else if (Actor is Player)
     {
