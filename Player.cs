@@ -12,20 +12,8 @@
 
 namespace Yarl2;
 
-enum PlayerLineage
-{
-  Human,
-  Elf,
-  Orc,
-  Dwarf
-}
-
-enum PlayerBackground
-{
-  Warrior,
-  Scholar,
-  Skullduggery
-}
+enum PlayerLineage { Human, Elf, Orc, Dwarf }
+enum PlayerBackground { Warrior, Scholar, Skullduggery }
 
 enum StressLevel
 {
@@ -355,7 +343,7 @@ sealed class Player : Actor
     }
     
     if (alacrity < 0)
-      traitsToShow.Add("You are quicker than normal");
+      traitsToShow.Add("You are [green quicker] than normal");
     else if (alacrity > 0)
       traitsToShow.Add("You are somewhat slowed");
 
