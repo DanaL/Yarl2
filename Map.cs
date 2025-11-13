@@ -1052,13 +1052,23 @@ class CACave
         sqs = regions[k].Count;
       }
     }
-
-    Dictionary<TileType, int> travelCost = new() { { open, 1 }, { closed, 2} };
     
     List<int> caves = [.. regions.Keys];
     caves.Remove(largest);
     HashSet<(int, int)> mainCave = regions[largest];
     List<(int, int)> mainSqs = [.. mainCave];
+
+    // woah I made a closure!
+    int TravelCost(Tile tile)
+    {
+      if (tile.Type == open)
+        return 1;
+      else if (tile.Type == closed)
+        return 2;
+      else
+        return int.MaxValue;
+    }
+
     foreach (int i in caves)
     {
       List<(int, int)> cave = [.. regions[i]];
@@ -1067,7 +1077,7 @@ class CACave
       (int, int) endSqr = mainSqs[rng.Next(mainSqs.Count)];
       Loc end = new(0, 0, endSqr.Item1, endSqr.Item2);
 
-      Stack<Loc> path = AStar.FindPath(objDb, map, start, end, travelCost, false);
+      Stack<Loc> path = AStar.FindPath2(objDb, map, start, end, TravelCost, false);
       while (path.Count > 0)
       {
         Loc sq = path.Pop();
