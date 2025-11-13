@@ -247,7 +247,7 @@ class UsePower(Power power) : BehaviourNode
   {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
-      if (gs.Turn <= lastUse + Power.Cooldown)
+      if (gs.Turn < lastUse + Power.Cooldown)
         return false;
     }
 
@@ -342,7 +342,7 @@ class HealAlliesPower(Power power) : UsePower(power)
   {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
-      if (gs.Turn <= lastUse + Power.Cooldown)
+      if (gs.Turn < lastUse + Power.Cooldown)
         return false;
     }
 
@@ -407,7 +407,7 @@ class UseTurnIntoBatsPower(Power power) : UsePower(power)
   {
     if (mob.LastPowerUse.TryGetValue(Power.Name, out ulong lastUse))
     {
-      if (gs.Turn <= lastUse + Power.Cooldown)
+      if (gs.Turn < lastUse + Power.Cooldown)
         return false;
     }
     
