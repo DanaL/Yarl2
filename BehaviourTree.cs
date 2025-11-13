@@ -1088,7 +1088,7 @@ class RandomMove : BehaviourNode
       {
         opts.Add((adj, false));
       }
-      else if (tile is Door door && !door.Open)
+      else if (tile is Door door && !door.Open && door.Type != TileType.LockedDoor)
       {
         opts.Add((adj, true));
       }
