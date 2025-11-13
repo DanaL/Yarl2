@@ -126,13 +126,11 @@ class MsgFactory
 
   public static string KillerName(GameObj murderer, Player player)
   {
-    string name = CalcName(murderer, player, 0, Article.Def);
+    string name = CalcName(murderer, player, 0, Article.InDef);
     if (name == "something")
       return "???";
-    else if (murderer.HasTrait<NamedTrait>())
-      return name;
     else
-      return name.IndefArticle();
+      return name;    
   }
 
   public static string SlipOnIceMessage(Actor actor, Loc loc, GameState gs)
