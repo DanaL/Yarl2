@@ -11,11 +11,10 @@
 
 using Yarl2;
 
-class TitleScreen
+class TitleScreen(UserInterface ui)
 {
-  UserInterface UI { get; set; }
+  UserInterface UI { get; set; } = ui;
   Map? Map { get; set; }
-  Dictionary<TileType, int> TravelCost { get; set; } = [];
   Loc Player { get; set; }
   Loc Stairs { get; set; }
   Stack<Loc> PlayerPath { get; set; } = [];
@@ -23,26 +22,7 @@ class TitleScreen
   HashSet<Loc> SeenBefore = [];
   GameObjectDB ObjDb { get; set; } = new();
   int FightRound = 0;
-  Dictionary<Loc, (Sqr, DateTime)> SpecialSqs = [];
-
-  public TitleScreen(UserInterface ui)
-  {
-    UI = ui;
-    TravelCost.Add(TileType.Bridge, 1);
-    TravelCost.Add(TileType.Grass, 1);
-    TravelCost.Add(TileType.Dirt, 1);
-    TravelCost.Add(TileType.Sand, 1);
-    TravelCost.Add(TileType.Water, 1);
-    TravelCost.Add(TileType.GreenTree, 1);
-    TravelCost.Add(TileType.RedTree, 1);
-    TravelCost.Add(TileType.OrangeTree, 1);
-    TravelCost.Add(TileType.YellowTree, 1);
-    TravelCost.Add(TileType.Conifer, 1);
-    TravelCost.Add(TileType.DungeonFloor, 1);
-    TravelCost.Add(TileType.ClosedDoor, 1);
-    TravelCost.Add(TileType.OpenDoor, 1);
-    TravelCost.Add(TileType.Upstairs, 1);
-  }
+  readonly Dictionary<Loc, (Sqr, DateTime)> SpecialSqs = [];
 
   public SetupType Display()
   {
@@ -250,7 +230,7 @@ class TitleScreen
       var (startR, startC) = startingSpots[j];
       startingSpots.RemoveAt(j);
       Loc start = new(0, 0, startR, startC);
-      Stack<Loc> path = AStar.FindPath(ObjDb, Map, start, dungeon, TravelCost);
+      Stack<Loc> path = AStar.FindPath2(ObjDb, Map, start, dungeon, DijkstraMap.Cost);
 
       if (path.Count > 0)
       {
@@ -412,7 +392,7 @@ class TitleScreen
     if (monster is null)
       return;
     
-    Stack<Loc> path = AStar.FindPath(ObjDb, Map, Player, monster.Loc, TravelCost);
+    Stack<Loc> path = AStar.FindPath2(ObjDb, Map, Player, monster.Loc, DijkstraMap.CostWithDoors, false);
     if (path.Count > 0)
     {
       path.Pop();
