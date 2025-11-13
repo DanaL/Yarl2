@@ -959,15 +959,19 @@ class DungeonMap(Rng rng)
       }
     }
 
-    Dictionary<TileType, int> costs = [];
-    costs.Add(TileType.DungeonWall, 0);
-    costs.Add(TileType.DungeonFloor, 0);
-    Stack<Loc> path = AStar.FindPath(new GameObjectDB(), map, tunnelStart, tunnelEnd, costs, false);
+    Stack<Loc> path = AStar.FindPath2(new GameObjectDB(), map, tunnelStart, tunnelEnd, Costs, false);
     while (path.Count > 0)
     {
       Loc loc = path.Pop();
       map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
     }
+
+    static int Costs(Tile tile) => tile.Type switch
+    {
+      TileType.DungeonFloor => 0,
+      TileType.DungeonWall => 0,
+      _ => int.MaxValue
+    };
   }
 
   public Map DrawLevel(int width, int height)
