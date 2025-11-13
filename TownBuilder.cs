@@ -822,7 +822,11 @@ class TownBuilder
       return false;
 
     // Draw a road from the front step to the town
-    CampaignCreator.DrawRoad(map, map.Height, frontDoor, Town, TileType.Dirt, true, rng);
+    var lastRoadSq = CampaignCreator.DrawRoad(map, map.Height, frontDoor, Town, TileType.Dirt, true, rng);
+    
+    // DrawRoad() draws until the outskirts of town; let's draw the road from
+    // there to join up with another road in town
+    CompleteWitchRoad(lastRoadSq, map, Town, objDb);
 
     if (opts.Count > 0)
     {
@@ -833,6 +837,52 @@ class TownBuilder
     return true;
 
     TileType Plot() => rng.NextDouble() < 0.5 ? TileType.Dirt : TileType.Crops;
+  }
+
+  static void CompleteWitchRoad((int, int) startSq, Map map, Town town, GameObjectDB objDb)
+  {
+    // I'll just draw the road to the nearest (as crow flies) dirt tile in town
+    // and hopefully it doesn't look too silly
+    int maxD = int.MaxValue;
+    (int, int) goalSq = (0, 0);
+    for (int r = town.Row; r < town.Row + town.Height; r++)
+    {
+      for (int c = town.Col; c < town.Col + town.Width; c++)
+      {
+        int dist = Util.Distance(startSq.Item1, startSq.Item2, r, c);
+        if (map.TileAt(r, c).Type != TileType.Dirt || dist >= maxD)
+          continue;
+
+        maxD = dist;
+        goalSq = (r, c);
+      }
+    }
+
+    if (goalSq == (0, 0))
+      return;
+
+    var path = AStar.FindPath(objDb, map, new Loc(0, 0, startSq.Item1, startSq.Item2),
+                              new Loc(0, 0, goalSq.Item1, goalSq.Item2), CostForRoad, false);
+    while (path.Count > 0)
+    {
+      var sq = path.Pop();
+      Tile tile = map.TileAt(sq.Row, sq.Col);
+      if (tile.Type == TileType.Bridge)
+        continue;
+      else if (tile.Type == TileType.Water)
+        map.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.Bridge));
+      else
+        map.SetTile(sq.Row, sq.Col, TileFactory.Get(TileType.Dirt));
+    }
+
+    static int CostForRoad(Tile tile)
+    {
+      if (tile.Type == TileType.Grass || tile.IsTree() || tile.Type == TileType.Dirt || tile.Type == TileType.Bridge)
+        return 1;
+      else if (tile.Type == TileType.Water)
+        return 3;
+      else return int.MaxValue;
+    }
   }
 
   void AddWitchesCottage(Map map, int townCentreRow, int townCentreCol, Template template, GameObjectDB objDb, Rng rng)

@@ -270,10 +270,10 @@ class CampaignCreator(UserInterface ui)
     return opts[rng.Next(opts.Count)];
   }
 
-  static public void DrawRoad(Map map, int overWorldWidth, (int, int) entrance, Town town, TileType roadTile, bool drawComplete, Rng rng)
+  static public (int, int) DrawRoad(Map map, int overWorldWidth, (int, int) entrance, Town town, TileType roadTile, bool drawComplete, Rng rng)
   {
     DijkstraMap dmap = new(map, [], overWorldWidth, overWorldWidth, true);
-    (int, int) townSq = RandomSqInTown(map, town, rng);
+    (int, int) townSq = RandomSqInTown(map, town, rng);    
     Tile tt = map.TileAt(townSq);
 
     dmap.Generate(CostForRoadBuilding, (townSq.Item1, townSq.Item2), 257);
@@ -281,6 +281,8 @@ class CampaignCreator(UserInterface ui)
 
     double draw = 1.0;
     double delta = 2.0 / road.Count;
+    
+    (int, int) prevSq = road[0];
 
     foreach (var sq in road.Skip(1))
     {
@@ -291,6 +293,8 @@ class CampaignCreator(UserInterface ui)
         map.SetTile(sq, TileFactory.Get(TileType.Bridge));
       else if (rng.NextDouble() < draw)
         map.SetTile(sq, TileFactory.Get(roadTile));
+
+      prevSq = sq;
       if (drawComplete) 
         continue;
 
@@ -298,6 +302,8 @@ class CampaignCreator(UserInterface ui)
       if (draw < 0.03)
         draw = 0.03;
     }
+
+    return prevSq;
   }
 
   // I want to pick a square that nestled into the mountains, so we'll pick
@@ -553,7 +559,6 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = 876519093;
     Console.WriteLine($"Seed: {seed}");
 
     try
