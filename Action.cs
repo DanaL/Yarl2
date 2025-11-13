@@ -1914,13 +1914,14 @@ class SummonAction(Loc target, string summons, int count) : Action()
       return 1.0;
     }
 
+    Actor? summoned = null;
     int summonCount = 0;
     for (int j = 0; j < _count; j++)
     {
       var loc = SpawnPt();
       if (loc != Loc.Nowhere)
       {
-        Actor summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
+        summoned = MonsterFactory.Get(_summons, GameState!.ObjDb, GameState.Rng);
         summoned.Stats[Attribute.MobAttitude].SetMax(Mob.AGGRESSIVE);
         GameState.ObjDb.AddNewActor(summoned, loc);
         ++summonCount;
@@ -1930,21 +1931,16 @@ class SummonAction(Loc target, string summons, int count) : Action()
     List<string> msgs = [];
     if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
     {
-      string txt;
       if (summonCount == 0)
       {
-        txt = "A spell fizzles.";
+        msgs.Add("A spell fizzles.");
       }
-      else
+      else if (summoned is not null)
       {
-        txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} ";
-        if (_count == 1)
-          txt += _summons.IndefArticle() + "!";
-        else
-          txt += $"some {_summons.Pluralize()}!";
+        string txt = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "summon")} ";
+        txt += MsgFactory.CalcName(summoned, GameState.Player, summonCount, Article.InDef) + ".";
+        msgs.Add(txt);
       }
-
-      msgs.Add(txt);
     }
 
     foreach (string s in msgs)

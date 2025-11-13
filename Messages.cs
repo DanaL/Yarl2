@@ -57,9 +57,10 @@ class Grammar
   }
 }
 
+enum Article { None, InDef, Def }
 class MsgFactory
 {
-  public static string CalcName(GameObj gobj, Player player, int amount = 0, bool noArticle = false)
+  public static string CalcName(GameObj gobj, Player player, int amount = 0, Article article = Article.Def)
   {
     StringBuilder sb = new();
     if (gobj is Item item)
@@ -73,10 +74,16 @@ class MsgFactory
       else if (item.HasTrait<NamedTrait>())
       {
         sb.Append(item.FullName);
-      }
+      }      
       else
       {
-        sb.Append(noArticle ? item.FullName : item.FullName.DefArticle());
+        sb.Append(
+          article switch
+          {
+            Article.InDef => item.FullName.IndefArticle(),
+            Article.Def => item.FullName.DefArticle(),
+            _ => item.FullName
+          });
       }
     }
     else if (gobj is Actor actor)
@@ -84,11 +91,24 @@ class MsgFactory
       if (actor.IsDisguised())
       {
         DisguiseTrait dt = actor.Traits.OfType<DisguiseTrait>().First();
-        sb.Append(noArticle ? dt.DisguiseForm : dt.DisguiseForm.DefArticle());
+
+        sb.Append(
+          article switch
+          {
+            Article.InDef => dt.DisguiseForm.IndefArticle(),
+            Article.Def => dt.DisguiseForm.DefArticle(),
+            _ => dt.DisguiseForm
+          });
       }
       else if (actor.VisibleTo(player))
       {
-        sb.Append(noArticle ? gobj.Name : gobj.FullName);
+        sb.Append(
+          article switch
+          { 
+            Article.None => actor.Name,
+            Article.InDef => actor.Name.IndefArticle(),
+            _ => actor.FullName
+          });
       }
       else
       {
@@ -106,7 +126,7 @@ class MsgFactory
 
   public static string KillerName(GameObj murderer, Player player)
   {
-    string name = CalcName(murderer, player, 0, true);
+    string name = CalcName(murderer, player, 0, Article.Def);
     if (name == "something")
       return "???";
     else if (murderer.HasTrait<NamedTrait>())
