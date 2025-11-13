@@ -92,7 +92,10 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
     UserInterface ui = GameState!.UIRef();
     Loc targetLoc = Actor!.PickTargetLoc(GameState!, 1);
     if (GameState.ObjDb.Occupant(targetLoc) is not Actor victim)
+    {
+      GameState.UIRef().AlertPlayer($"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "lunges")} at empty air!", GameState, Actor.Loc, Actor);
       return 1.0;
+    }
 
     string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "bite")} {victim.FullName}!";
     ui.AlertPlayer(s);
