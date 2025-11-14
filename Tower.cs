@@ -645,13 +645,10 @@ class Tower(int height, int width, int minLength)
     for (int j = 0; j < numOfFloors - 1; j++)
     {
       Map map = RedrawInterior(outline, j + 1, rng);
-
-      var regions = rf.Find(map, false, 0, TileType.PermWall);
-      Console.WriteLine($"regions: {regions.Count}");
-
-      map.Dump();
-
       floors.Add(map);
+
+      //var regions = rf.Find(map, false, 0, TileType.PermWall);
+      //Console.WriteLine($"regions: {regions.Count}");
     }
 
     return floors;
