@@ -513,9 +513,9 @@ class Battle
     return totalMod;
   }
 
-  public static ActionResult MeleeAttack(Actor attacker, Actor target, GameState gs, Trait? attackEffect = null)
-  {    
-    var result = new ActionResult() { EnergyCost = 1.0 };
+  public static double MeleeAttack(Actor attacker, Actor target, GameState gs, Trait? attackEffect = null)
+  {
+    double result = 1.0;
     Item? weapon = attacker.Inventory.ReadiedWeapon();
     int weaponBonus = 0;
     if (weapon is not null)
@@ -525,7 +525,7 @@ class Battle
         if (trait is WeaponBonusTrait wb)
           weaponBonus += wb.Bonus;
         if (trait is WeaponSpeedTrait qw)
-          result.EnergyCost = qw.Cost;
+          result = qw.Cost;
       }
     }
     

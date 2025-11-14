@@ -11,13 +11,6 @@
 
 namespace Yarl2;
 
-class ActionResult
-{
-  public double EnergyCost { get; set; } = 0.0;
-  
-  public ActionResult() { }
-}
-
 abstract class Action
 {
   public Actor? Actor { get; set; }
@@ -67,7 +60,7 @@ class MeleeAttackAction(GameState gs, Actor actor, Loc target) : Action(gs, acto
     double result;
     if (GameState!.ObjDb.Occupant(Target) is Actor target)
     {
-      result = Battle.MeleeAttack(Actor!, target, GameState, AttackEffect).EnergyCost;
+      result = Battle.MeleeAttack(Actor!, target, GameState, AttackEffect);
     }
     else
     {
