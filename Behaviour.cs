@@ -847,8 +847,8 @@ class PrisonerBehaviour : NPCBehaviour
             {
               0 => $"I was captured by {capturedBy}!",
               1 => "Help me!",
-              2 => "There should be a lever to open my cell around somewhere!",
-              _ => "Can you free me?"
+              2 => "Can you free me?",
+              _ => "There should be a lever to open my cell around somewhere!"              
             }
     };
   }

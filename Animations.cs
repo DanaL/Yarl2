@@ -250,14 +250,6 @@ class ThrownMissileAnimation(GameState gs, Glyph glyph, List<Loc> pts, Item ammo
     {
       Expiry = DateTime.MinValue;
       _ammo.SetZ(Item.DEFAULT_Z);
-
-      // This happens inside the animation class because I don't want the
-      // message to be displayed until the animation has finished.
-      var tile = _gs.TileAt(_pts.Last());
-      if (tile.Type == TileType.DeepWater)
-      {
-        var item = _ammo.FullName.DefArticle().Capitalize();
-      }
     }
   }
 }
@@ -278,14 +270,13 @@ class BarkAnimation : Animation
     _ui = gs.UIRef();
   }
 
-  // Need to actually calculate where to place the bark if the
-  // speaker is near an edge of the screen/
-  // screenRow and screenCol are the speaker's row/col
   void RenderLine(int screenRow, int screenCol, string message)
   {
     int pointerCol = screenCol + 1;
     int row = screenRow + (screenRow < 3 ? 1 : -1);
     int row2 = screenRow + (screenRow < 3 ? 2 : -2);
+    int row3 = screenRow + (screenRow < 3 ? 3 : -3);
+    string msg2 = "";
 
     int col = screenCol - message.Length / 3;
     char pointer = row > 3 ? '/' : '\\';
@@ -301,9 +292,24 @@ class BarkAnimation : Animation
     }
     else if (col + message.Length >= UserInterface.ViewWidth)
     {
-      col = UserInterface.ViewWidth - message.Length - 1;
+      int mid = CalcBreak(message);
+      string s = message[..mid];
+      msg2 = s.Trim();
+      message = message[mid..].Trim();
+
       pointer = row > 3 ? '\\' : '/';
       pointerCol = screenCol - 1;
+
+      col = screenCol - int.Max(message.Length, msg2.Length) / 3;
+    }
+
+    if (msg2.Length > 0)
+    {
+      int col2 = col;
+      foreach (char ch in msg2)
+      {
+        SetSqr(row3, col2++, new Sqr(Colours.WHITE, Colours.BLACK, ch));
+      }
     }
 
     SetSqr(row, pointerCol, new Sqr(Colours.WHITE, Colours.BLACK, pointer));
@@ -324,6 +330,27 @@ class BarkAnimation : Animation
 
       if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.Contains(mapLoc))
         _ui.SqsOnScreen[row, col] = sqr;
+    }
+    
+    int CalcBreak(string m)
+    {
+      int j = m.Length / 2;
+
+      if (m[j] == ' ')
+        return j;
+
+      int k = j;
+      while (j >= 0 && k < m.Length)
+      {
+        if (m[j] == ' ')
+          return j;
+        if (m[k] == ' ')
+          return k;
+        ++j;
+        ++k;
+      }
+
+      return -1;
     }
   }
 
