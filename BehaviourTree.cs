@@ -285,6 +285,20 @@ class UsePower(Power power) : BehaviourNode
   }  
 }
 
+// This is for Powers where the mob must be able to see its target as a
+// condition of using it. Ie., spells like InduceNudity
+class SeeToTargetPower(Power power) : UsePower(power)
+{
+  protected override bool Available(Mob mob, GameState gs)
+  {
+    bool available = base.Available(mob, gs);
+    if (!available)
+      return false;
+
+    return mob.PickTarget(gs) is not NoOne;
+  }
+}
+
 class CrushPower(Power power) : UsePower(power)
 {
   static ulong Victim(Mob mob, GameState gs)
@@ -1655,6 +1669,7 @@ class Planner
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
         "TurnIntoBats" => new UseTurnIntoBatsPower(p),
+        "Nudity" or "FogCloud" => new SeeToTargetPower(p),
         _ => new UsePower(p)
       };
 
@@ -1695,6 +1710,7 @@ class Planner
         "Crush" => new CrushPower(p),
         "HealAllies" => new HealAlliesPower(p),
         "TurnIntoBats" => new UseTurnIntoBatsPower(p),
+        "Nudity" or "FogCloud" => new SeeToTargetPower(p),
         _ => new UsePower(p)
       };
 
