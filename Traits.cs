@@ -323,7 +323,6 @@ class ChampionBlessingTrait : BlessingTrait
     hpBuff.Remove(gs);
 
     gs.Player.Traits = [.. gs.Player.Traits.Where(t => t.SourceId != SourceId)];
-    gs.Player.CalcHP();
   }
 
   public override string AsText() => $"ChampionBlessing#{SourceId}#{ExpiresOn}#{OwnerID}";
@@ -2890,7 +2889,7 @@ class StatBuffTrait : TemporaryTrait
 
     base.Remove(gs);
   }
-
+  
   string RemoveBuff(Actor target, Trait trait)
   {
     target.Stats[Attr].ChangeMax(-Amt);
@@ -2898,13 +2897,17 @@ class StatBuffTrait : TemporaryTrait
     {
       target.Stats[Attr].Change(-Amt);
     }
-    
+
     target.Traits.Remove(trait);
     
     if (target is Player player)
     {
       if (Attr == Attribute.HP || Attr == Attribute.Constitution)
-        SetPlayerHP(player);
+      {
+        int curr = player.Stats[Attribute.HP].Curr;
+        int maxHP = player.CalcMaxHP();
+        player.Stats[Attribute.HP].SetCurr(int.Min(curr, maxHP));
+      }
 
       if (Attr == Attribute.HP && Amt < 0)
         return "Some of your vitality returns.";

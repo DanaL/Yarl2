@@ -118,7 +118,7 @@ sealed class Player : Actor
     }
   }
 
-  public override void CalcHP()
+  public int CalcMaxHP()
   {
     int baseHP = Stats[Attribute.BaseHP].Curr;
     if (Lineage == PlayerLineage.Orc)
@@ -135,8 +135,8 @@ sealed class Player : Actor
     {
       if (t is StatBuffTrait sbt && sbt.Attr == Attribute.HP)
         baseHP += sbt.Amt;
-      if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)        
-        baseHP += sdt.Amt;        
+      if (t is StatDebuffTrait sdt && sdt.Attr == Attribute.HP)
+        baseHP += sdt.Amt;
     }
 
     // We won't allow an HP buffs and debuffs to kill a character, just make
@@ -144,8 +144,10 @@ sealed class Player : Actor
     if (baseHP < 1)
       baseHP = 1;
 
-    Stats[Attribute.HP].SetMax(baseHP);
+    return baseHP;
   }
+  
+  public override void CalcHP() => Stats[Attribute.HP].SetMax(CalcMaxHP());
 
   public void CalcStress()
   {
