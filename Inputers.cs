@@ -676,8 +676,6 @@ class OptionsScreen : Inputer
         GS.Options.ShowTurns = !GS.Options.ShowTurns;
       else if (row == 6)
         GS.Options.DefaultMoveHints = !GS.Options.DefaultMoveHints;
-
-      GS.UIRef().SetOptions(GS.Options, GS);
     }
 
     WritePopup();

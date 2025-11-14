@@ -73,34 +73,19 @@ abstract class UserInterface
 
   List<Animation> _animations = [];
 
-  public Glyph PlayerGlyph { get; set; }
-
   public bool InTutorial { get; set; } = false;
   public bool PauseForResponse { get; set; } = false;
 
   Inputer? InputController { get; set; } = null;
   public void SetInputController(Inputer inputer) => InputController = inputer;
 
-  public UserInterface(Options opts)
+  public UserInterface()
   {
-    SetOptions(opts, null);
     PlayerScreenRow = ViewHeight / 2;
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
     SqsOnScreen = new Sqr[ViewHeight, ViewWidth];
     ZLayer = new Sqr[ViewHeight, ViewWidth];
     ClearZLayer();
-  }
-
-  // At the moment this is the only UI bit that is affected by options I 
-  // imagine that will eventually change
-  public void SetOptions(Options opts, GameState? gs)
-  {    
-    if (gs is null)
-      PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
-    else if (opts.HighlightPlayer)
-      PlayerGlyph = PlayerGlyph with { BG = Colours.HILITE };
-    else
-      PlayerGlyph = PlayerGlyph with { BG = Colours.BLACK };
   }
 
   public void ClearLongMessage()
@@ -213,6 +198,7 @@ abstract class UserInterface
       }
     }
 
+    Glyph playerGlyph = new('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
     Animation? bark = null;
     GameEvent e;
     do
@@ -229,7 +215,7 @@ abstract class UserInterface
           Glyph glyph;
           if (r == playerRow && c == playerCol)
           {
-            glyph = PlayerGlyph;
+            glyph = playerGlyph;
             PlayerScreenRow = screenR;
             PlayerScreenCol = screenC;
           }
@@ -1269,10 +1255,11 @@ abstract class UserInterface
         }
       }
     }
-
+    
     if (ZLayer[PlayerScreenRow, PlayerScreenCol] == Constants.BLANK_SQ)
     {
-      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(PlayerGlyph.Lit, PlayerGlyph.BG, PlayerGlyph.Ch);
+      Colour bg = gs.Options.HighlightPlayer ? Colours.HILITE : gs.Player.Glyph.BG;
+      SqsOnScreen[PlayerScreenRow, PlayerScreenCol] = new Sqr(gs.Player.Glyph.Lit, bg, gs.Player.Glyph.Ch);
     }
   }
 
@@ -1386,8 +1373,7 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
-    SetOptions(opts, gameState);
-
+    
     if (opts.DefaultMoveHints)
       CheatSheetMode = CheatSheetMode.MvMixed;
 
@@ -1431,7 +1417,6 @@ abstract class UserInterface
         bool success;
         try
         {
-          gameState.Player.Glyph = PlayerGlyph;
           Serialize.WriteSaveGame(gameState, this);
           Serialize.WriteOptions(gameState.Options);
           

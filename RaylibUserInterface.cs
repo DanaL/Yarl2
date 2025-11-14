@@ -23,7 +23,7 @@ class RaylibUserInterface : UserInterface
   Dictionary<Colour, Color> _colours = [];
   Queue<GameEvent> EventQ { get; set; } = [];
 
-  public RaylibUserInterface(string windowTitle, Options opt) : base(opt)
+  public RaylibUserInterface(string windowTitle, Options opt) : base()
   {
     int width = ScreenWidth * (opt.FontSize / 2) + 2;
     int height = ScreenHeight * opt.FontSize + 2;

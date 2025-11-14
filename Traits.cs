@@ -3301,7 +3301,7 @@ class InvisibleTrait : TemporaryTrait
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
     if (target is Player)
-      gs.UIRef().PlayerGlyph = gs.UIRef().PlayerGlyph with { Lit = Colours.DARK_GREY };
+      target.Glyph = target.Glyph with { Lit = Colours.DARK_GREY };
 
     return [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "vanish")}!" ];
   }
@@ -3320,7 +3320,8 @@ class InvisibleTrait : TemporaryTrait
       Expired = true;
 
       if (actor is Player)
-        gs.UIRef().PlayerGlyph = gs.UIRef().PlayerGlyph with { Lit = Colours.WHITE };
+        gs.Player.Glyph = gs.Player.Glyph with { Lit = Colours.WHITE };
+      
     }    
   }
 }

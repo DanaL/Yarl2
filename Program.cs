@@ -64,8 +64,6 @@ try
           
           if (gameState is null)
             state = RunningState.Quitting;
-          else
-            display.PlayerGlyph = gameState.Player.Glyph;
         }
         catch (GameNotLoadedException)
         {
