@@ -150,10 +150,13 @@ class DebugCommand(GameState gs)
       _gs.Player.Stats[Attribute.HP].Reset();
       return "";
     }
-    else if (txt == "invisible")
+    else if (txt == "nobless")
     {
-      InvisibleTrait invis = new() { ExpiresOn = _gs.Turn + 25 };
-      invis.Apply(_gs.Player, _gs);
+      List<Trait> traits = [.. _gs.Player.Traits.Where(t => t is BlessingTrait)];
+      foreach (BlessingTrait t in traits.Cast<BlessingTrait>())
+      {
+        t.ExpiresOn = 1;
+      }
 
       return "";
     }

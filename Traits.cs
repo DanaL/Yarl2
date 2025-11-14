@@ -2893,8 +2893,6 @@ class StatBuffTrait : TemporaryTrait
 
   string RemoveBuff(Actor target, Trait trait)
   {
-    int currAmt = target.Stats[Attr].Curr;
-
     target.Stats[Attr].ChangeMax(-Amt);
     if (Attr != Attribute.HP)
     {
