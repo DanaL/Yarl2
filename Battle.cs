@@ -534,6 +534,9 @@ class Battle
     var (stressPenalty, _) = attacker.StressPenalty();
     roll -= stressPenalty;
 
+    if (!target.VisibleTo(attacker))
+      roll -= 5;
+
     ClearObscured(attacker, gs);
 
     if (roll >= target.AC)
@@ -790,7 +793,9 @@ class Battle
     int roll = AttackRoll(gs.Rng) + attacker.TotalMissileAttackModifier(ammo) + attackBonus;
     if (attacker.HasTrait<TipsyTrait>())
       roll -= gs.Rng.Next(1, 6);
-  
+    if (!target.VisibleTo(attacker))
+      roll -= 5;
+      
     var (stressPenalty, _) = attacker.StressPenalty();
     roll -= stressPenalty;
 
@@ -825,6 +830,9 @@ class Battle
   {
     bool success = false;
     int roll = AttackRoll(gs.Rng) + attacker.TotalSpellAttackModifier() + attackBonus;
+    if (!target.VisibleTo(attacker))
+      roll -= 5;
+
     if (roll >= target.AC)
     {
       if (anim is not null)
