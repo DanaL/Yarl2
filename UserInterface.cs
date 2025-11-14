@@ -53,8 +53,7 @@ abstract class UserInterface
   public int PlayerScreenRow { get; protected set; }
   public int PlayerScreenCol { get; protected set; }
   protected List<string>? _longMessage;
-  protected Options _options;
-
+  
   readonly Queue<string> Messages = [];
 
   public Sqr[,] SqsOnScreen;
@@ -84,7 +83,6 @@ abstract class UserInterface
 
   public UserInterface(Options opts)
   {
-    _options = opts;
     SetOptions(opts, null);
     PlayerScreenRow = ViewHeight / 2;
     PlayerScreenCol = (ScreenWidth - SideBarWidth - 1) / 2;
@@ -93,10 +91,10 @@ abstract class UserInterface
     ClearZLayer();
   }
 
+  // At the moment this is the only UI bit that is affected by options I 
+  // imagine that will eventually change
   public void SetOptions(Options opts, GameState? gs)
-  {
-    _options = opts;
-    
+  {    
     if (gs is null)
       PlayerGlyph = new Glyph('@', Colours.WHITE, Colours.WHITE, Colours.BLACK, false);
     else if (opts.HighlightPlayer)
@@ -555,7 +553,7 @@ abstract class UserInterface
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
     WriteLine($"│ HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
 
-    int bottomOffset = _options.ShowTurns ? 2 : 1;
+    int bottomOffset = gs.Options.ShowTurns ? 2 : 1;
 
     if (gs.Player.Stats.TryGetValue(Attribute.MagicPoints, out var magicPoints) && magicPoints.Max > 0)
     {
@@ -1388,6 +1386,7 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
+    SetOptions(opts, gameState);
 
     if (opts.DefaultMoveHints)
       CheatSheetMode = CheatSheetMode.MvMixed;
@@ -1432,6 +1431,7 @@ abstract class UserInterface
         bool success;
         try
         {
+          gameState.Player.Glyph = PlayerGlyph;
           Serialize.WriteSaveGame(gameState, this);
           Serialize.WriteOptions(gameState.Options);
           

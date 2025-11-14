@@ -35,7 +35,7 @@ internal class Serialize
 {
   public static void WriteSaveGame(GameState gameState, UserInterface ui)
   {
-    var objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
+    GameObjDBSave objDbSave = GameObjDBSave.Shrink(gameState.ObjDb);
 
     var preview = GenPreview(ui);
     var sgi = new SaveGameInfo(CampaignSaver.Shrink(gameState.Campaign), GameStateSave.Shrink(gameState), objDbSave, Item.IDInfo, preview);
@@ -681,7 +681,7 @@ class GameObjDBSave
   static Player InflatePlayer(string txt, GameObjectDB objDb)
   {
     var fields = txt.Split(Constants.SEPARATOR);
-    var p = new Player(fields[2]);
+    Player p = new(fields[2], Glyph.TextToGlyph(fields[4]));
 
     Enum.TryParse(fields[0], out PlayerLineage charClass);
     p.Lineage = charClass;
@@ -825,10 +825,8 @@ class GameObjDBSave
 
   public static GameObjDBSave Shrink(GameObjectDB objDb)
   {
-    GameObjDBSave sidb = new();
+    GameObjDBSave sidb = new() { LocListeners = objDb.LocListeners };
 
-    sidb.LocListeners = objDb.LocListeners;
-    
     foreach (var kvp in objDb.Objs)
     {
       var obj = kvp.Value;
