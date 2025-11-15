@@ -186,12 +186,12 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
         }
       }
 
-      for (var i = 0; i < rooms.Count; i++)
+      foreach (int id in roomIds)
       {
-        if (Rooms.PotentialVault(map, rooms[i], vaultExists))
-          potentialVaults.Add(i);
+        if (Rooms.PotentialVault(map, rooms[id], vaultExists))
+          potentialVaults.Add(id);
       }
-
+      
       if (potentialVaults.Count > 0 && rng.NextDouble() < 0.33)
       {
         int vaultId = potentialVaults[rng.Next(potentialVaults.Count)];
@@ -216,61 +216,55 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
 
       if (level < levelMaps.Length - 1 && rng.NextDouble() < 0.2)
       {
-        int roomId = rng.Next(rooms.Count);
-
         switch (rng.Next(4))
         {
           case 0:
-            Rooms.ChasmTrapRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            Rooms.ChasmTrapRoom(levelMaps, rng, DungeonId, level, rooms[roomIds[0]], objDb);
             break;
           case 1:
-            Rooms.TriggerChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            Rooms.TriggerChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomIds[0]], objDb);
             break;
           case 2:
-            Rooms.BasicChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            Rooms.BasicChasmRoom(levelMaps, rng, DungeonId, level, rooms[roomIds[0]], objDb);
             break;
           default:
-            Rooms.ChasmIslandRoom(levelMaps, rng, DungeonId, level, rooms[roomId], objDb);
+            Rooms.ChasmIslandRoom(levelMaps, rng, DungeonId, level, rooms[roomIds[0]], objDb);
             break;
         }
 
-        roomIds.Remove(roomId);
+        roomIds.RemoveAt(0);
       }
 
-      // These aren't rooms but decorations/features
+      // These aren't rooms really, but decorations/features
       if (level > 0 && rng.NextDouble() < 0.25)
       {
-        int roomId = rng.Next(roomIds.Count);
-        Rooms.CampRoom(rooms[roomId], DungeonId, level, factDb, objDb, rng);
-        roomIds.Remove(roomId);
+        Rooms.CampRoom(rooms[roomIds[0]], DungeonId, level, factDb, objDb, rng);
+        roomIds.RemoveAt(0);
       }
 
       if (factDb.Ruler.Type == OGRulerType.ElfLord && rng.NextDouble() < 0.15)
       {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.Orchard(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
+        Rooms.Orchard(levelMaps[level], rooms[roomIds[0]], DungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(0);
       }
 
       if (!graveyard && level > 0 && rng.Next(10) == 0)
       {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.MarkGraves(levelMaps[level], rng, DungeonId, level, rooms[roomId], objDb, factDb);
-        rooms.RemoveAt(roomId);
+        Rooms.MarkGraves(levelMaps[level], rng, DungeonId, level, rooms[roomIds[0]], objDb, factDb);
+        rooms.RemoveAt(0);
         graveyard = true;
       }
 
       if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)
       {
-        int roomId = rng.Next(rooms.Count);
-        Rooms.MakeMinedChamber(levelMaps[level], rooms[roomId], DungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(roomId);
+        Rooms.MakeMinedChamber(levelMaps[level], rooms[roomIds[0]], DungeonId, level, factDb, objDb, rng);
+        rooms.RemoveAt(0);
       }
 
       if (rng.NextDouble() < chanceOfDesecratedAltar)
       {
-        int roomId = rng.Next(rooms.Count);
-        List<(int, int)> room = rooms[roomId];
+        List<(int, int)> room = rooms[roomIds[0]];
+        roomIds.RemoveAt(0);
         (int, int) altarSq = room[rng.Next(room.Count)];
         Loc altarLoc = new(DungeonId, level, altarSq.Item1, altarSq.Item2);
         Item altar = ItemFactory.Get(ItemNames.STONE_ALTAR, objDb);

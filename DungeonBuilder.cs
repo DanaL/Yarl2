@@ -444,6 +444,11 @@ abstract class DungeonBuilder
     }
 
     floors = [.. floors.OrderByDescending(i => i.Item3)];
+
+    if (sumOfCosts < 0)
+    {
+      currLvl.Dump();
+    }
     int n = rng.Next(sumOfCosts);
     int j = floors[0].Item3, i = 0;
     while (j < n)

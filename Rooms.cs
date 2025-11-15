@@ -457,7 +457,7 @@ class Rooms
       foreach (var adj in Util.Adj8Sqs(r, c))
       {
         Tile adjTile = map.TileAt(adj);
-       
+
         if (!room.Contains(adj) && !(adjTile.Type == TileType.DungeonWall || adjTile.Type == TileType.PermWall))
           exits.Add(adjTile.Type);
       }
