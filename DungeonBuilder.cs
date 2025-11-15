@@ -486,6 +486,12 @@ abstract class DungeonBuilder
     if (tile.Type == TileType.ClosedDoor || tile.Type == TileType.LockedDoor || tile.Type == TileType.SecretDoor)
       return 1;
 
+    // This will allow instances where the arrival stairs are in a chasm room,
+    // which I think I am going to allow for now. I'll revisit this later if
+    // it seems annoying
+    if (tile.Type == TileType.Chasm)
+      return 2;
+
     if (!tile.Passable())
       return int.MaxValue;
 
