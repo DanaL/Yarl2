@@ -202,42 +202,42 @@ class TownBuilder
       if (map.TileAt(r, c).Type != TileType.ClosedDoor)
         continue;
 
-        string sign = building switch
-        {
-          BuildingType.Smithy => "Ye Olde Smithy",
-          BuildingType.Market => "Dry Goods, Salves, & More",
-          BuildingType.Tavern => "Tavern & Common House",
-          _ => ""
-        };
-        
-        List<(int, int)> options = [];
-        TileType type = map.TileAt(r-1, c-1).Type;
-        if ((type == TileType.Grass || type == TileType.Dirt || map.TileAt(r-1, c-1).IsTree())
-                && !Util.Adj4Sqs(r-1, c-1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor))
-          options.Add((r-1, c-1));
-        type = map.TileAt(r-1, c+1).Type;
-        if ((type == TileType.Grass || type == TileType.Dirt || map.TileAt(r-1, c+1).IsTree())
-                && !Util.Adj4Sqs(r-1, c+1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor))
-          options.Add((r-1, c+1));
-        type = map.TileAt(r+1, c-1).Type;
-        if ((type == TileType.Grass || type == TileType.Dirt || map.TileAt(r+1, c-1).IsTree())
-                && !Util.Adj4Sqs(r+1, c-1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor))
-          options.Add((r+1, c-1));
-        type = map.TileAt(r+1, c+1).Type;
-        if ((type == TileType.Grass || type == TileType.Dirt || map.TileAt(r+1, c+1).IsTree())
-                && !Util.Adj4Sqs(r+1, c+1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor))
-          options.Add((r+1, c+1));
+      string sign = building switch
+      {
+        BuildingType.Smithy => "Ye Olde Smithy",
+        BuildingType.Market => "Dry Goods, Salves, & More",
+        BuildingType.Tavern => "Tavern & Common House",
+        _ => ""
+      };
 
-        if (options.Count > 0)
-        {
-          var (signR, signC) = options[rng.Next(options.Count)];
-          map.SetTile(signR, signC, new BusinessSign(sign));
-          break;
-        }
+      List<(int, int)> options = [];
+      if (SpotForSign(r - 1, c- 1))
+        options.Add((r - 1, c - 1));
+      if (SpotForSign(r - 1, c + 1))
+        options.Add((r - 1, c + 1));
+      if (SpotForSign(r + 1, c - 1))
+        options.Add((r + 1, c - 1));
+      if (SpotForSign(r + 1, c + 1))
+        options.Add((r + 1, c + 1));
+
+      if (options.Count > 0)
+      {
+        var (signR, signC) = options[rng.Next(options.Count)];
+        map.SetTile(signR, signC, new BusinessSign(sign));
+        break;
       }
+    }
+    
+    bool SpotForSign(int r, int c)
+    {
+      TileType type = map.TileAt(r - 1, c - 1).Type;
+
+      return (type == TileType.Grass || type == TileType.Dirt || type == TileType.Sand || map.TileAt(r + 1, c + 1).IsTree())
+              && !Util.Adj4Sqs(r + 1, c + 1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor);
+    }
   }
 
-  bool BuildingFits(Map map, int nwRow, int nwCol, Template t)
+  static bool BuildingFits(Map map, int nwRow, int nwCol, Template t)
   {
     for (int r = 0; r < t.Height; r++)
     {
@@ -630,7 +630,7 @@ class TownBuilder
           foreach (var adj in Util.Adj4Sqs(r, c))
           {
             var tile = map.TileAt(adj.Item1, adj.Item2);
-            if (tile.Type == TileType.Grass || tile.IsTree())
+            if (tile.Type == TileType.Grass || tile.Type == TileType.Sand || tile.IsTree())
             {
               map.SetTile(adj.Item1, adj.Item2, TileFactory.Get(TileType.Dirt));
               doors.Add((adj.Item1, adj.Item2));
@@ -658,7 +658,7 @@ class TownBuilder
       foreach (var sq in path)
       {
         var tile = map.TileAt(sq);
-        if (tile.Type == TileType.Grass || tile.IsTree())
+        if (tile.Type == TileType.Grass || tile.Type == TileType.Sand || tile.IsTree())
           map.SetTile(sq, TileFactory.Get(TileType.Dirt));
         else if (tile.Type == TileType.Water)
         {
