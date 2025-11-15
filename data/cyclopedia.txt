@@ -559,3 +559,6 @@ Obviously a spell wizards created so they needn't worry about keeping their cutl
 #
 alchemical compound
 A bubbling flask of...something. It is a medley of odours and not quite a solid, not fully a liquid. You could probably consume it though...
+#
+giant toad
+A very, very large toad. Certainly large enough to fit you inside.
