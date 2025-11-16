@@ -100,40 +100,20 @@ class RaylibUserInterface : UserInterface
       EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
       Delay(50);
     }
-    else if (IsKeyDown(KeyboardKey.Left))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'h'));
-      Delay(5);
-    }
     else if (IsKeyPressed(KeyboardKey.Right))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
       Delay(50);
-    }
-    else if (IsKeyDown(KeyboardKey.Right))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'l'));
-      Delay(5);
     }
     else if (IsKeyPressed(KeyboardKey.Down))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
       Delay(50);
     }
-    else if (IsKeyDown(KeyboardKey.Down))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'j'));
-      Delay(5);
-    }
     else if (IsKeyPressed(KeyboardKey.Up))
     {
       EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
       Delay(50);
-    }
-    else if (IsKeyDown(KeyboardKey.Up))
-    {
-      EventQ.Enqueue(new(GameEventType.KeyInput, 'k'));
-      Delay(5);
     }
     
     if (EventQ.Count > 0)
