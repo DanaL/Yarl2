@@ -1574,11 +1574,6 @@ class FlyingTrait : BasicTrait
   public override string AsText() => $"Flying#{ExpiresOn}";
 }
 
-class FragileTrait : Trait
-{
-  public override string AsText() => "Fragile";
-}
-
 class FriendlyMonsterTrait : Trait
 {
   public override string AsText() => "FriendlyMonster";
@@ -2790,7 +2785,14 @@ class WeaponSpeedTrait : Trait
   public override string AsText() => $"WeaponSpeed#{Cost}";
 }
 
-class StatBuffTrait : TemporaryTrait 
+class WearAndTearTrait : Trait
+{
+  public int Wear { get; set; }
+
+  public override string AsText() => $"WearAndTear#{Wear}";
+}
+
+class StatBuffTrait : TemporaryTrait
 {
   public Attribute Attr { get; set; }
   public int Amt { get; set; }
@@ -2850,14 +2852,14 @@ class StatBuffTrait : TemporaryTrait
       other.ExpiresOn = ulong.Max(other.ExpiresOn, ExpiresOn);
       return [];
     }
-    
+
     OwnerID = target.ID;
     target.Stats[Attr].ChangeMax(Amt);
     if (Attr != Attribute.HP || MaxHP)
     {
       target.Stats[Attr].Change(Amt);
     }
-    
+
     target.Traits.Add(this);
 
     // If a buff affects HP or Con, recalculate HP. But we don't want to allow
@@ -2866,16 +2868,16 @@ class StatBuffTrait : TemporaryTrait
     if (target is Player player && (Attr == Attribute.HP || Attr == Attribute.Constitution))
     {
       SetPlayerHP(player);
-    } 
+    }
 
     if (ExpiresOn < ulong.MaxValue)
       gs.RegisterForEvent(GameEventType.EndOfRound, this);
 
-    return [ CalcMessage(target) ];
+    return [CalcMessage(target)];
   }
 
   public override void Remove(GameState gs)
-  {  
+  {
     if (gs.ObjDb.GetObj(OwnerID) is Actor actor)
     {
       List<StatBuffTrait> statBuffs = [.. actor.Traits.OfType<StatBuffTrait>().Where(t => t.SourceId == SourceId)];
@@ -2889,7 +2891,7 @@ class StatBuffTrait : TemporaryTrait
 
     base.Remove(gs);
   }
-  
+
   string RemoveBuff(Actor target, Trait trait)
   {
     target.Stats[Attr].ChangeMax(-Amt);
@@ -2899,7 +2901,7 @@ class StatBuffTrait : TemporaryTrait
     }
 
     target.Traits.Remove(trait);
-    
+
     if (target is Player player)
     {
       if (Attr == Attribute.HP || Attr == Attribute.Constitution)
@@ -2915,9 +2917,9 @@ class StatBuffTrait : TemporaryTrait
         return "You feel less sturdy.";
       else
         return $"Your {Attr} returns to normal.";
-      }
+    }
 
-    return "";    
+    return "";
   }
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
@@ -4100,7 +4102,6 @@ class TraitFactory
     { "Flammable", (pieces, gameObj) => new FlammableTrait() },
     { "Floating", (pieces, gameObj) => new FloatingTrait() },
     { "Flying", (pieces, gameObj) => new FlyingTrait() },
-    { "Fragile", (pieces, gameObj) => new FragileTrait() },
     { "FriendlyMonster", (pieces, gameObj) => new FriendlyMonsterTrait() },
     { "Frightened", (pieces, gameObj) => new FrightenedTrait()
       { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) }
@@ -4387,6 +4388,7 @@ class TraitFactory
     { "Weaken", (pieces, gameObj) =>  new WeakenTrait() { DC = int.Parse(pieces[1]), Amt = int.Parse(pieces[2]) } },
     { "WeaponBonus", (pieces, gameObj) => new WeaponBonusTrait() { Bonus = int.Parse(pieces[1]) } },
     { "WeaponSpeed", (pieces, gameObj) => new WeaponSpeedTrait() { Cost = Util.ToDouble(pieces[1]) } },
+    { "WearAndTear", (pieces, gameObj) => new WearAndTearTrait() { Wear = int.Parse(pieces[1])} },
     { "WinterBlessing", (pieces, gameObj) => new WinterBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Worshiper", (pieces, gameObj) => new WorshiperTrait() { AltarLoc = Loc.FromStr(pieces[1]), AltarId = ulong.Parse(pieces[2]), Chant = pieces[3] } }
   };

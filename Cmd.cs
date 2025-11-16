@@ -27,7 +27,7 @@ class Cmd
       gs.ObjDb.RemoveItemFromGame(item.Loc, item);
       return true;
     }
-    
+
     char slot = inv.Add(item, actor.ID);
     if (slot == '\0')
     {
@@ -40,5 +40,23 @@ class Cmd
     }
 
     return true;
+  }
+  
+  public static void CheckWear(Item tool, Actor actor, GameState gs)
+  {
+    if (tool.Traits.OfType<WearAndTearTrait>().FirstOrDefault() is WearAndTearTrait wear)
+    {
+      ++wear.Wear;
+
+      if (gs.Rng.Next(30) < wear.Wear)
+      {
+        actor.Inventory.ConsumeItem(tool, actor, gs);
+        string t = $"{Grammar.Possessive(actor).Capitalize()} {tool.Name} breaks!";
+        gs.UIRef().AlertPlayer(t, gs, actor.Loc);
+
+        if (actor is Player)
+          gs.UIRef().SetPopup(new Popup(t, "", -1, -1));
+      }
+    }
   }
 }

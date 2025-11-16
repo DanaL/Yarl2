@@ -79,15 +79,18 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     else if (tile.Type == TileType.DungeonWall)
     {
       DigDungeonWall(targetLoc);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (tile.Type == TileType.PermWall)
     {
       GameState!.UIRef().AlertPlayer("Your pickaxe bounces off the wall without leaving the merest scratch.");
       GameState.UIRef().SetPopup(new Popup("Your pickaxe bounces off the wall without leaving the merest scratch.", "", -1, -1));
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.DungeonFloor)
     {
       DigDungeonFloor(targetLoc, GameState, Actor);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.WoodBridge)
     {
@@ -104,10 +107,12 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Downstairs)
     {
       DigStairs(targetLoc, tile.Type, GameState, Actor);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Upstairs)
     {
       DigStairs(targetLoc, tile.Type, GameState, Actor);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
     else if (targetLoc == Actor.Loc && tile.Type == TileType.Pit)
     {
@@ -117,6 +122,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     else if (GameState.ObjDb.ItemsAt(targetLoc).Any(i => i.HasTrait<BlockTrait>()))
     {
       DigBlock(targetLoc, GameState, Actor);
+      Cmd.CheckWear(Tool, Actor, GameState);
     }    
     else
     {
@@ -511,11 +517,7 @@ class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
         ui.AlertPlayer("You fumble at the lock.");
       }
 
-      if (Tool.HasTrait<FragileTrait>() && GameState.Rng.Next(10) == 0)
-      {        
-        Actor.Inventory.ConsumeItem(Tool, Actor, GameState);
-        GameState.UIRef().AlertPlayer($"{Tool.Name.DefArticle().Capitalize()} breaks!");
-      }
+      Cmd.CheckWear(Tool, Actor, GameState);
     }
 
     return energyCost;

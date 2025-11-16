@@ -88,7 +88,8 @@
       "Damage#6#1#Piercing",
       "Axe",
       "Metal#1",
-      "DiggingTool"
+      "DiggingTool",
+      "WearAndTear#0"
     ]
   },
   {
@@ -327,7 +328,7 @@
     "Value": 20,
     "Glyph": ";,white,grey,black,false",
     "Traits": [
-      "Fragile",
+      "WearAndTear#15",
       "DoorKey#-2"
     ]
   },
