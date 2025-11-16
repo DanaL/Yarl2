@@ -48,7 +48,7 @@ class Cmd
     {
       ++wear.Wear;
 
-      if (gs.Rng.Next(30) < wear.Wear)
+      if (gs.Rng.Next(40) < wear.Wear)
       {
         actor.Inventory.ConsumeItem(tool, actor, gs);
         string t = $"{Grammar.Possessive(actor).Capitalize()} {tool.Name} breaks!";

@@ -1015,7 +1015,8 @@ abstract class UserInterface
 
     do
     {
-      _confirm = new Popup(txt, "", ViewHeight / 2 - 2, ScreenWidth / 2);
+      if (txt != "")
+        _confirm = new Popup(txt, "", ViewHeight / 2 - 2, ScreenWidth / 2);
       _popup?.SetDefaultTextColour(Colours.DARK_GREY);
 
       UpdateDisplay(gs);
@@ -1311,7 +1312,6 @@ abstract class UserInterface
           @"____)/\_____(\__/____\(/_______\)/_|(/____"
         ];
 
-    string depth = gameState.Player.Stats[Attribute.Depth].Curr.ToString()!.PadRight(2);
     text[5] = $@"     /{gameState.Player.Name.PadLeft((21 + gameState.Player.Name.Length) / 2).PadRight(24)}\    |        __";
     text[7] = $@"    |{messages[0].PadLeft((22 + messages[0].Length) / 2),-26}|          |    |";
 
@@ -1324,7 +1324,7 @@ abstract class UserInterface
       dn = " in something's belly";
 
       if (gameState.ObjDb.GetObj(swt.SwallowerID) is Actor swallower)
-        finalLevel = swallower.Loc.Level + 1;      
+        finalLevel = swallower.Loc.Level + 1;
     }
     else
     {
@@ -1335,9 +1335,9 @@ abstract class UserInterface
     dn = dn.PadLeft(26 - x, ' ');
     dn = dn.PadRight(26, ' ');
     text[8] = $@"    |{dn}|          |____|";
-    
+
     string lvlTxt = $"on level {finalLevel}";
-    lvlTxt =  $@"    |{lvlTxt.PadLeft((22 + lvlTxt.Length) / 2),-26}|                ";
+    lvlTxt = $@"    |{lvlTxt.PadLeft((22 + lvlTxt.Length) / 2),-26}|                ";
     text.Insert(9, lvlTxt);
 
     if (messages.Count > 1)
@@ -1345,6 +1345,9 @@ abstract class UserInterface
       string s = $@"    |{messages[1].PadLeft((22 + messages[1].Length) / 2),-26}|          |    |";
       text.Insert(8, s);
     }
+
+    text.Add("");
+    text.Add(" See your inventory? (y/n)");
 
     ClosePopup();
     CheatSheetMode = CheatSheetMode.Messages;
@@ -1360,7 +1363,15 @@ abstract class UserInterface
       }
     }
 
-    BlockForInput(gameState);
+    if (Confirmation("", gameState))
+    {
+      ClosePopup();
+      ClearSqsOnScreen();
+      gameState.Player.Inventory.ShowMenu(gameState.UIRef(), new InventoryOptions() { Title = "You were carrying", Options = InvOption.MentionMoney });
+      BlockForInput(gameState);
+      CloseMenu();
+    }
+    //BlockForInput(gameState);
   }
 
   // Clear out anything that should shouldn't persist between games
@@ -1450,6 +1461,7 @@ abstract class UserInterface
 
         DrawGravestone(gameState, pke.Messages);
         Reset();
+
         return RunningState.GameOver;
       }
       catch (VictoryException)
