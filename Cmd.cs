@@ -66,6 +66,7 @@ class Cmd
     {
       gs.RemoveListener(explosion);
       bomb.Traits = [.. bomb.Traits.Where(t => t is not ExplosionCountdownTrait)];
+      bomb.Traits.Add(new StackableTrait());
       gs.UIRef().AlertPlayer($"The bomb's fuse is extinguished.", gs, loc);
     }
   }
@@ -76,6 +77,7 @@ class Cmd
     {
       ExplosionCountdownTrait ect = new() { Fuse = explosive.Fuse, DmgDie = explosive.DmgDie, NumOfDice = explosive.NumOfDice };
       ect.Apply(bomb, gs);
+      bomb.Traits = [.. bomb.Traits.Where(t => t is not StackableTrait)];
     }
   }
 }
