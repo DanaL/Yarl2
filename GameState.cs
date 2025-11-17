@@ -406,7 +406,14 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     if (thrown && item.HasTrait<ExplosiveTrait>())
     {
-      Cmd.SetExplosive(item, this);
+      if (tile.Type == TileType.Water || tile.Type == TileType.DeepWater || tile.Type == TileType.Underwater)
+      {
+        Cmd.DefuseBomb(item, loc, this);
+      }
+      else 
+      {
+        Cmd.SetExplosive(item, this); 
+      }
     }
 
     ObjDb.SetToLoc(loc, item);

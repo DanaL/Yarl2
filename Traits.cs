@@ -9,6 +9,7 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Collections.Generic;
 using System.Text;
 
 namespace Yarl2;
@@ -2333,12 +2334,14 @@ class ExhaustedTrait : TemporaryTrait
   }
 }
 
-class ExplosionCountdownTrait : TemporaryTrait
+class ExplosionCountdownTrait : TemporaryTrait, IDesc
 {
   public int Fuse { get; set; }
   public int DmgDie { get; set; }
   public int NumOfDice { get; set; }
-  
+
+  public string Desc() => "(lit)";
+
   public override string AsText() => $"ExplosionCountdown#{OwnerID}#{ExpiresOn}#{Fuse}#{DmgDie}#{NumOfDice}";
 
   // Assuming DmgDie and NumOfDice set in constructor
@@ -2353,6 +2356,8 @@ class ExplosionCountdownTrait : TemporaryTrait
 
     gs.UIRef().AlertPlayer("The fuse begins to hiss.", gs, target.Loc);
     gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    target.Traits.Add(this);
 
     return [];
   }

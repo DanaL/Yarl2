@@ -60,6 +60,16 @@ class Cmd
     }
   }
 
+  public static void DefuseBomb(Item bomb, Loc loc, GameState gs)
+  {
+    if (bomb.Traits.OfType<ExplosionCountdownTrait>().FirstOrDefault() is ExplosionCountdownTrait explosion)
+    {
+      gs.RemoveListener(explosion);
+      bomb.Traits = [.. bomb.Traits.Where(t => t is not ExplosionCountdownTrait)];
+      gs.UIRef().AlertPlayer($"The bomb's fuse is extinguished.", gs, loc);
+    }
+  }
+
   public static void SetExplosive(Item bomb, GameState gs)
   {    
     if (bomb.Traits.OfType<ExplosiveTrait>().FirstOrDefault() is ExplosiveTrait explosive)
