@@ -2364,8 +2364,19 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
 
   void Explosion(Item bomb, GameState gs)
   {
-    HashSet<Loc> sqs = [bomb.Loc];
-    foreach (Loc adj in Util.Adj8Locs(bomb.Loc))
+    Loc loc;
+
+    // This will probably fail if I ever implement, say, boxes and the bomb
+    // is inside a box that is being carried in someone's invetory. But not
+    // gonna handle that yet because I haven't thought exactly about how I'll
+    // implement containers like that
+    if (bomb.ContainedBy > 0 && gs.ObjDb.GetObj(bomb.ContainedBy) is GameObj obj)
+      loc = obj.Loc;
+    else
+      loc = bomb.Loc;
+
+    HashSet<Loc> sqs = [loc];
+    foreach (Loc adj in Util.Adj8Locs(loc))
       sqs.Add(adj);
 
     // A bunch of explosion stuff is pretty same-y (see Fireballs, etc) but
@@ -2375,7 +2386,7 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
     {
       MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW,
       AltColour2 = Colours.YELLOW_ORANGE,  Highlight = Colours.WHITE,
-      Centre = bomb.Loc, Sqs = sqs
+      Centre = loc, Sqs = sqs
     };
     gs.UIRef().PlayAnimation(explosion, gs);
 
@@ -2411,7 +2422,7 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
         gs.UIRef().AlertPlayer("The rubble is destroyed!", gs, pt);
         foreach (Item r in rubble)
         {
-          gs.ObjDb.RemoveItemFromLoc(pt, r);
+          gs.ItemDestroyed(r, pt);
         }
       }
     }
@@ -2428,7 +2439,7 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
     if (gs.Turn > ExpiresOn)
     {
       Explosion(bomb, gs);
-      gs.ObjDb.RemoveItemFromGame(loc, bomb);
+      gs.ItemDestroyed(bomb, loc);
     }
     else if (ExpiresOn - gs.Turn == 0)
     {

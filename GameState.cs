@@ -465,12 +465,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void ItemDestroyed(Item item, Loc loc)
   {
-    ObjDb.RemoveItemFromGame(loc, item);
-
-    foreach (IGameEventListener listener in item.Traits.OfType<IGameEventListener>())
+    if (item.ContainedBy > 0 && ObjDb.GetObj(item.ContainedBy) is Actor owner)
     {
-      RemoveListener(listener);
+      owner.Inventory.RemoveByID(item.ID, this);
     }
+
+    ObjDb.RemoveItemFromGame(loc, item);
 
     if (item.Name == "dragon effigy")
     {

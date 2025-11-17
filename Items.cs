@@ -808,9 +808,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
   {
     for (int j = 0; j < _items.Count; j++)
     {
-      if (_items[j].Item2 == id)
+      if (_items[j].Item2 == id && _objDb.GetObj(_items[j].Item2) is Item item)
       {
-        var item = _objDb.GetObj(_items[j].Item2) as Item;
         _items.RemoveAt(j);
         if (!PlayerInventory())
           item!.Slot = '\0';
@@ -1049,11 +1048,8 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
       var (s, destroyed) = EffectApplier.Apply(damageType, gs, item, owner);
       if (s != "")
         msgs.Add(s);
-      if (destroyed)
-      {
-        RemoveByID(item.ID, gs);
+      if (destroyed)      
         gs.ItemDestroyed(item, loc);
-      }
     }
 
     return string.Join(' ', msgs).Trim();
@@ -1086,6 +1082,7 @@ class Inventory(ulong ownerID, GameObjectDB objDb)
     List<char> rings = [];
     List<char> other = [];
 
+    var ussss = UsedSlots();
     foreach (char s in UsedSlots().Order())
     {
       var (item, _) = ItemAt(s);
