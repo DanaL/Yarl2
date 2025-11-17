@@ -1325,7 +1325,8 @@
     "Value": 10,
     "Glyph": "),darkgrey,darkgrey,black,false",
     "Traits": [
-      "Explosive#3#6#3"
+      "Explosive#3#6#3",
+      "Stackable"
     ]
   }
 ]

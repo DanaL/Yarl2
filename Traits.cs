@@ -2363,6 +2363,9 @@ class ExplosionCountdownTrait : TemporaryTrait
     foreach (Loc adj in Util.Adj8Locs(bomb.Loc))
       sqs.Add(adj);
 
+    // A bunch of explosion stuff is pretty same-y (see Fireballs, etc) but
+    // not exactly the same so I'm not sure if I want to pull it up into shared
+    // functions. But there's also differences between them so ¯\_(ツ)_/¯
     ExplosionAnimation explosion = new(gs)
     {
       MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW,
@@ -2380,7 +2383,8 @@ class ExplosionCountdownTrait : TemporaryTrait
       gs.ApplyDamageEffectToLoc(pt, DamageType.Force);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
-        gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the explosion!");
+        string name = MsgFactory.CalcName(victim, gs.Player, 0, Article.Def).Capitalize();
+        gs.UIRef().AlertPlayer($"{name} {Grammar.Conjugate(victim, "is")} caught in the explosion!", gs, pt);
 
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
         if (hpLeft < 1)
@@ -2389,6 +2393,21 @@ class ExplosionCountdownTrait : TemporaryTrait
         }
 
         // Also want to destroy doors and remove rubble
+      }
+      else if (gs.TileAt(pt) is Door)
+      {
+        gs.UIRef().AlertPlayer("The door is destroyed!", gs, pt);
+        gs.CurrentMap.SetTile(pt.Row, pt.Col, TileFactory.Get(TileType.BrokenDoor));
+      }
+      
+      List<Item> rubble = [.. gs.ObjDb.ItemsAt(pt).Where(i => i.Name == "rubble")];
+      if (rubble.Count > 0)
+      {
+        gs.UIRef().AlertPlayer("The rubble is destroyed!", gs, pt);
+        foreach (Item r in rubble)
+        {
+          gs.ObjDb.RemoveItemFromLoc(pt, r);
+        }
       }
     }
   }

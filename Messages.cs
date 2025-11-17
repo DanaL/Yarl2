@@ -60,10 +60,10 @@ class Grammar
 enum Article { None, InDef, Def }
 class MsgFactory
 {
-  public static string CalcName(GameObj gobj, Player player, int amount = 0, Article article = Article.Def)
+  public static string CalcName(GameObj obj, Player player, int amount = 0, Article article = Article.Def)
   {
     StringBuilder sb = new();
-    if (gobj is Item item)
+    if (obj is Item item)
     {
       if (amount > 1)
       {
@@ -86,7 +86,7 @@ class MsgFactory
           });
       }
     }
-    else if (gobj is Actor actor)
+    else if (obj is Actor actor)
     {
       if (actor.IsDisguised())
       {
@@ -118,7 +118,7 @@ class MsgFactory
     else
     {
       // I suppose there might eventually be other types of GameObjects and Items and Actors?
-      sb.Append(gobj.FullName);
+      sb.Append(obj.FullName);
     }
 
     return sb.ToString();
