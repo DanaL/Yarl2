@@ -2957,6 +2957,10 @@ class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
             break;
           }
         }
+        else if (GameState.ObjDb.AreBlockersAtLoc(pt))
+        {
+          break;
+        }
         else if (tile.Passable() || tile.PassableByFlight())
         {
           pts.Add(pt);
