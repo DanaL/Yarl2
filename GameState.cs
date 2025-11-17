@@ -403,6 +403,12 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
     }
 
+
+    if (thrown && item.HasTrait<ExplosiveTrait>())
+    {
+      Cmd.SetExplosive(item, this);
+    }
+
     ObjDb.SetToLoc(loc, item);
     string msg = ThingTouchesFloor(loc);
     UI.AlertPlayer(msg);

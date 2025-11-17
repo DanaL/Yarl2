@@ -119,7 +119,8 @@ class DebugCommand(GameState gs)
     {"tincture of celerity", ItemNames.TINCTURE_CELERITY },
     {"potion of descent", ItemNames.POTION_DESCENT },
     {"scroll of stainlessness", ItemNames.SCROLL_STAINLESS },
-    {"alchemical compound", ItemNames.ALCHEMICAL_COMPOUND }
+    {"alchemical compound", ItemNames.ALCHEMICAL_COMPOUND },
+    {"bomb", ItemNames.BOMB }
   };
 
   public string DoCommand(string txt)

@@ -59,4 +59,13 @@ class Cmd
       }
     }
   }
+
+  public static void SetExplosive(Item bomb, GameState gs)
+  {    
+    if (bomb.Traits.OfType<ExplosiveTrait>().FirstOrDefault() is ExplosiveTrait explosive)
+    {
+      ExplosionCountdownTrait ect = new() { Fuse = explosive.Fuse, DmgDie = explosive.DmgDie, NumOfDice = explosive.NumOfDice };
+      ect.Apply(bomb, gs);
+    }
+  }
 }

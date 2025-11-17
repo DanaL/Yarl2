@@ -562,3 +562,6 @@ A bubbling flask of...something. It is a medley of odours and not quite a solid,
 #
 giant toad
 A very, very large toad. Certainly large enough to fit you inside.
+#
+bomb
+A classic iron ball with a fuse sticking out of it.

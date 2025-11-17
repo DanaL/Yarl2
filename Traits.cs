@@ -2329,8 +2329,97 @@ class ExhaustedTrait : TemporaryTrait
       string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "feel")} less exhausted!";
       gs.UIRef().AlertPlayer(msg);
       gs.StopListening(GameEventType.EndOfRound, this);
-    }      
+    }    
   }
+}
+
+class ExplosionCountdownTrait : TemporaryTrait
+{
+  public int Fuse { get; set; }
+  public int DmgDie { get; set; }
+  public int NumOfDice { get; set; }
+  
+  public override string AsText() => $"ExplosionCountdown#{OwnerID}#{ExpiresOn}#{Fuse}#{DmgDie}#{NumOfDice}";
+
+  // Assuming DmgDie and NumOfDice set in constructor
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    // If a ticking bomb is picked up and thrown again, don't reset the timer
+    if (target.HasTrait<ExplosionCountdownTrait>())
+      return [];
+    
+    OwnerID = target.ID;
+    ExpiresOn = gs.Turn + (ulong)Fuse;
+
+    gs.UIRef().AlertPlayer("The fuse begins to hiss.", gs, target.Loc);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  void Explosion(Item bomb, GameState gs)
+  {
+    HashSet<Loc> sqs = [bomb.Loc];
+    foreach (Loc adj in Util.Adj8Locs(bomb.Loc))
+      sqs.Add(adj);
+
+    ExplosionAnimation explosion = new(gs)
+    {
+      MainColour = Colours.BRIGHT_RED, AltColour1 = Colours.YELLOW,
+      AltColour2 = Colours.YELLOW_ORANGE,  Highlight = Colours.WHITE,
+      Centre = bomb.Loc, Sqs = sqs
+    };
+    gs.UIRef().PlayAnimation(explosion, gs);
+
+    int total = 0;
+    for (int j = 0; j < NumOfDice; j++)
+      total += gs.Rng.Next(DmgDie) + 1;
+    List<(int, DamageType)> dmg = [(total, DamageType.Force)];
+    foreach (Loc pt in sqs)
+    {
+      gs.ApplyDamageEffectToLoc(pt, DamageType.Force);
+      if (gs.ObjDb.Occupant(pt) is Actor victim)
+      {
+        gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the explosion!");
+
+        var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);
+        if (hpLeft < 1)
+        {
+          gs.ActorKilled(victim, "an explosion", null);
+        }
+
+        // Also want to destroy doors and remove rubble
+      }
+    }
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  {
+    if (gs.ObjDb.GetObj(OwnerID) is not Item bomb) 
+    {
+      gs.RemoveListener(this);
+      return;
+    }
+
+    if (gs.Turn > ExpiresOn)
+    {
+      Explosion(bomb, gs);
+      gs.ObjDb.RemoveItemFromGame(loc, bomb);
+    }
+    else if (ExpiresOn - gs.Turn == 0)
+    {
+      bomb.Glyph = bomb.Glyph with { Lit = Colours.BRIGHT_RED, Unlit = Colours.DULL_RED };
+    }
+  }
+}
+
+class ExplosiveTrait : Trait
+{
+  public int Fuse { get; set; }
+  public int DmgDie {  get; set; }
+  public int NumOfDice { get; set; }
+
+  public override string AsText() => $"Explosive#{Fuse}#{DmgDie}#{NumOfDice}";
 }
 
 class NauseaTrait : TemporaryTrait
@@ -4091,6 +4180,12 @@ class TraitFactory
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
+    { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])} },
+    { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait() 
+      { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), 
+        Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])
+      } 
+    },
     { "FeatherFall", (pieces, gameObj) => {
       ulong id = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]);
       ulong expiresOn = pieces[2] == "max" ? ulong.MaxValue : ulong.Parse(pieces[2]);

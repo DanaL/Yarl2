@@ -3406,7 +3406,7 @@ class FireballAction(GameState gs, Actor actor, Trait src) : TargetedAction(gs, 
     var affected = GameState!.Flood(actualLoc, 3);
     affected.Add(actualLoc);
 
-    var explosion = new ExplosionAnimation(GameState!)
+    ExplosionAnimation explosion = new(GameState!)
     {
       MainColour = Colours.BRIGHT_RED,
       AltColour1 = Colours.YELLOW,

@@ -1317,5 +1317,15 @@
     "Traits": [
       "Grants#CrimsonWard"
     ]
+  },
+  {
+    "Name": "BOMB",
+    "DescriptiveName": "bomb",
+    "Type": "Tool",
+    "Value": 10,
+    "Glyph": "),darkgrey,darkgrey,black,false",
+    "Traits": [
+      "Explosive#3#6#3"
+    ]
   }
 ]
