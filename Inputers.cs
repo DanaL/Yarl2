@@ -1676,11 +1676,13 @@ class DirectionalInputer : Inputer
 {
   (int, int) _result;
   bool TargetSelf { get; set; }
+  bool OnlyOpenLocs { get; set; }
+  HashSet<(int, int)> ValidLocs { get; set; }
 
-  public DirectionalInputer(GameState gs, bool targetSelf = false) : base(gs)
+  public DirectionalInputer(GameState gs, bool targetSelf, bool onlyOpen = false) : base(gs)
   {
     TargetSelf = targetSelf;
-    
+    OnlyOpenLocs = onlyOpen;
     string prompt = "Which direction?";
     int width = prompt.Length + 2;
     if (targetSelf)
@@ -1689,6 +1691,21 @@ class DirectionalInputer : Inputer
       width = 35;
     }
     gs.UIRef().SetPopup(new Popup(prompt, "", gs.UIRef().PlayerScreenRow - 8, -1, width));
+
+    if (OnlyOpenLocs)
+    {
+      ValidLocs = [];
+      foreach (var adj in Adj8)
+      {
+        Loc loc = gs.Player.Loc with {  Row = gs.Player.Loc.Row + adj.Item1, Col = gs.Player.Loc.Col + adj.Item2 };
+        if (gs.TileAt(loc).PassableByFlight() && !gs.ObjDb.AreBlockersAtLoc(loc))
+          ValidLocs.Add(adj);
+      }
+    }
+    else
+    {
+      ValidLocs = [.. Adj8];
+    }
   }
 
   public override void Input(char ch)
@@ -1700,17 +1717,22 @@ class DirectionalInputer : Inputer
     else
     {
       var dir = KeyToDir(ch);
-      if (dir != (0, 0))
+      bool valid = ValidLocs.Contains(dir);
+      if (dir != (0, 0) && valid)
       {
         _result = dir;
         
         Close();
         QueueDeferredAction();
       }
+      else if (dir != (0, 0) && !valid)
+      {
+        GS.UIRef().AlertPlayer("There's no room there.");
+      }
       else if (TargetSelf && ch == '.')
       {
         _result = (0, 0);
-        
+
         Close();
         QueueDeferredAction();
       }

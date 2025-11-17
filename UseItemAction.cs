@@ -457,6 +457,36 @@ class CleansingAction(GameState gs, Actor actor, Item source) : Action(gs, actor
   }
 }
 
+class SetExplosiveAction(GameState gs, Actor actor, Item bomb) : Action(gs, actor)
+{
+  int Row;
+  int Col;
+  Item Bomb { get; set; } = bomb;
+
+  public override double Execute()
+  {
+    Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
+
+    string name = MsgFactory.CalcName(Actor!, GameState!.Player, 0, Article.Def).Capitalize();
+    string s = $"{name} {Grammar.Conjugate(Actor, "light")} the fuse.";
+    GameState.UIRef().AlertPlayer(s, GameState, loc);
+
+    // passing true for the 'thrown' parameter causes the explosive to be 
+    // enabled in ItemDropped() (piggybacking off code for throwing a bomb)
+    Actor.Inventory.RemoveByID(Bomb.ID, GameState);
+    GameState.ItemDropped(Bomb, loc, true);
+
+    return 1.0;
+  }
+
+  public override void ReceiveUIResult(UIResult result)
+  {
+    var dir = (DirectionUIResult)result;
+    Row = dir.Row;
+    Col = dir.Col;
+  }
+}
+
 class PickLockAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 {
   int Row;
@@ -598,6 +628,10 @@ class UseItemAction(GameState gs, Actor actor) : Action(gs, actor)
       else if (item.HasTrait<CleansingTrait>())
       {
         dir.DeferredAction = new CleansingAction(GameState, Actor, item);
+      }
+      else if (item.HasTrait<ExplosiveTrait>())
+      {
+        dir = new(GameState, true, true) { DeferredAction = new SetExplosiveAction(GameState, Actor, item) };
       }
       else
       {

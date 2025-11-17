@@ -67,6 +67,8 @@ sealed class Item : GameObj, IEquatable<Item>
         return true;
       else if (t is CleansingTrait)
         return true;
+      else if (t is ExplosiveTrait)
+        return true;
     }
 
     return false;

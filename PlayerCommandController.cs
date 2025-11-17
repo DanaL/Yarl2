@@ -495,7 +495,7 @@ class PlayerCommandController(GameState gs) : Inputer(gs)
     }
     else if (ch == 'F')
     {
-      ui.SetInputController(new DirectionalInputer(GS) { DeferredAction = new BashAction(GS, GS.Player) });      
+      ui.SetInputController(new DirectionalInputer(GS, false) { DeferredAction = new BashAction(GS, GS.Player) });      
     }
     else if (ch == 'i')
     {
