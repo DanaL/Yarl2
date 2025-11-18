@@ -467,14 +467,21 @@ class SetExplosiveAction(GameState gs, Actor actor, Item bomb) : Action(gs, acto
   {
     Loc loc = Actor!.Loc with { Row = Actor.Loc.Row + Row, Col = Actor.Loc.Col + Col };
 
-    string name = MsgFactory.CalcName(Actor!, GameState!.Player, 0, Article.Def).Capitalize();
-    string s = $"{name} {Grammar.Conjugate(Actor, "light")} the fuse.";
-    GameState.UIRef().AlertPlayer(s, GameState, loc);
+    if (Bomb.HasTrait<ExplosionCountdownTrait>())
+    {
+      GameState!.UIRef().AlertPlayer("The fuse is already lit.", GameState, loc);
+    }
+    else
+    {
+      string name = MsgFactory.CalcName(Actor!, GameState!.Player, 0, Article.Def).Capitalize();
+      string s = $"{name} {Grammar.Conjugate(Actor, "light")} the fuse.";
+      GameState.UIRef().AlertPlayer(s, GameState, loc);
 
-    // passing true for the 'thrown' parameter causes the explosive to be 
-    // enabled in ItemDropped() (piggybacking off code for throwing a bomb)
-    Actor.Inventory.RemoveByID(Bomb.ID, GameState);
-    GameState.ItemDropped(Bomb, loc, true);
+      // passing true for the 'thrown' parameter causes the explosive to be 
+      // enabled in ItemDropped() (piggybacking off code for throwing a bomb)
+      Actor.Inventory.RemoveByID(Bomb.ID, GameState);
+      GameState.ItemDropped(Bomb, loc, true);
+    }
 
     return 1.0;
   }
