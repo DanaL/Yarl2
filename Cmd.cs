@@ -44,11 +44,13 @@ class Cmd
   
   public static void CheckWear(Item tool, Actor actor, GameState gs)
   {
+    bool rusty = tool.HasTrait<RustedTrait>();
     if (tool.Traits.OfType<WearAndTearTrait>().FirstOrDefault() is WearAndTearTrait wear)
     {
       ++wear.Wear;
 
-      if (gs.Rng.Next(40) < wear.Wear)
+      int rustRoll = rusty ? 20 : 40;
+      if (gs.Rng.Next(rustRoll) < wear.Wear)
       {
         actor.Inventory.ConsumeItem(tool, actor, gs);
         string t = $"{Grammar.Possessive(actor).Capitalize()} {tool.Name} breaks!";
