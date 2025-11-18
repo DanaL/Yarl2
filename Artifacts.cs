@@ -132,7 +132,7 @@ class Artifacts
     if (beloved)
       names = ["Defender", "Dragontooth", "Lightbringer", "Foehammer"];
     else
-      names = ["Reaver", "Dark Tidings", "Reaper", "the Storm"];
+      names = ["Reaver", "Dark Tidings", "Reaper", "Tempest"];
 
     artifact.Name = names[rng.Next(names.Count)];
 
