@@ -477,6 +477,13 @@ class SetExplosiveAction(GameState gs, Actor actor, Item bomb) : Action(gs, acto
       string s = $"{name} {Grammar.Conjugate(Actor, "light")} the fuse.";
       GameState.UIRef().AlertPlayer(s, GameState, loc);
 
+      // A bit of a kludge to give the Fuse more time to make it useful as 
+      // a tool
+      if (Bomb.Traits.OfType<ExplosiveTrait>().FirstOrDefault() is ExplosiveTrait explosive)
+      {
+        explosive.Fuse = 3;
+      }
+
       // passing true for the 'thrown' parameter causes the explosive to be 
       // enabled in ItemDropped() (piggybacking off code for throwing a bomb)
       Actor.Inventory.RemoveByID(Bomb.ID, GameState);
