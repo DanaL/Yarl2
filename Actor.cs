@@ -943,7 +943,8 @@ class MonsterFactory
 
           if (rng.Next(100) < odds)
           {
-            for (int j = 0; j < itemCount; j++)
+            int total = rng.Next(itemCount) + 1;
+            for (int j = 0; j < total; j++)
             {
               Item item = ItemFactory.Get(itemName, objDb);
               char slot = m.AddToInventory(item, null);
@@ -1083,7 +1084,18 @@ class Power
       case "Blink":
         return new BlinkAction(gs, mob);
       case "SummonKobold":
-        return new SummonAction(mob.Loc, "kobold", 1)
+        List<string> kobolds = ["kobold", "kobold", "kobold"];
+
+        if (mob.Loc.Level > 2)
+        {
+          kobolds.Add("kobold bully");
+          kobolds.Add("kobold knight");
+        }
+
+        if (mob.Loc.Level > 4)
+          kobolds.Add("kobold artillerist");
+
+        return new SummonAction(mob.Loc, kobolds[gs.Rng.Next(kobolds.Count)], 1)
         {
           GameState = gs,
           Actor = mob,
@@ -1162,6 +1174,8 @@ class Power
       case "BloodDrain":
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Piercing);
         return new MeleeAttackAction(gs, mob, loc) { AttackEffect = new BloodDrainTrait() };
+      case "ThrowBomb":
+        return new ThrowBombAction(gs, mob, loc);
       default:
         return new PassAction();
     }

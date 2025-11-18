@@ -565,3 +565,6 @@ A very, very large toad. Certainly large enough to fit you inside.
 #
 bomb
 A classic iron ball with a fuse sticking out of it.
+#
+kobold artillerist
+A soot-covered kobold with a bunch of bombs strapped to its bandolier.

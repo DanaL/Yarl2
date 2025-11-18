@@ -11,6 +11,7 @@ hobgoblin           |g|grey         |darkgrey    |14|15|3| 1.0|14|10|MeleeSlashi
 kobold              |k|brightred    |dullred     |12| 8|2| 1.0|10|10|MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|PoorLoot
 kobold bully        |k|brown        |dullred     |12|25|4| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot
 kobold knight       |k|grey         |darkgrey    |12|25|4| 1.0|10|10|MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot,RINGMAIL#1#50#true
+kobold artillerist  |k|dullred      |dullred     |12|25|4| 1.0|10|10|ThrowBomb#2#8#0#0#0#5#Attack,MeleeSlashing#1#1#8#1#0#0#Attack|Intelligent|PoorLoot,BOMB#3#75#false
 nilbog              |g|lightblue    |blue        |14|20|4| 1.0|10|14|Nudity#2#7#0#0#0#15#Attack,FogCloud#2#9#0#0#0#25#Attack,Blink#0#0#0#0#0#7#Movement,MeleeSlashing#1#1#6#1#0#0#Attack|Intelligent|
 kobold foreman      |k|yelloworange |dullred     |13|30|4| 1.0|12|10|SummonKobold#0#0#0#0#0#5#Attack#Break's over!,MeleeSlashing#1#1#5#2#0#0#Attack|DeathMessage#The foreman says: clocking out!,Intelligent|Coins#10#20
 vines               |:|green        |darkgreen   |12|25|0| 1.0|10|10||Plant,Plural,Immunity#Confusion,Brainless,Immobile|

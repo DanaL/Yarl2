@@ -2927,62 +2927,36 @@ class DropStackAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
   public override void ReceiveUIResult(UIResult result) => _amount = ((NumericUIResult)result).Amount;
 }
 
+class ThrowBombAction(GameState gs, Actor actor, Loc target) : Action(gs, actor)
+{
+  Loc Target { get; set; } = target;
+
+  public override double Execute()
+  {
+    Item bomb = ItemFactory.Get(ItemNames.BOMB, GameState!.ObjDb);
+    Cmd.ThrowItem(Actor!, bomb, Target, GameState!);
+   
+    return 1.0;
+  }
+}
+
 class ThrowAction(GameState gs, Actor actor, char slot) : Action(gs, actor)
 {
   readonly char _slot = slot;
-  Loc _target { get; set; }
+  Loc Target { get; set; }
 
   public override double Execute()
   {
     var ammo = Actor!.Inventory.Remove(_slot, 1, GameState!).First();
     if (ammo != null)
     {
-      // Calculate where the projectile will actually stop
-      var trajectory = Util.Trajectory(Actor.Loc, _target);
-      List<Loc> pts = [];
-      for (int j = 0; j < trajectory.Count; j++)
-      {
-        var pt = trajectory[j];
-        var tile = GameState!.TileAt(pt);
-        var occ = GameState.ObjDb.Occupant(pt);
-        if (j > 0 && occ != null)
-        {
-          pts.Add(pt);
-
-          // I'm not handling what happens if a projectile hits a friendly or 
-          // neutral NPCs
-          bool attackSuccessful = Battle.MissileAttack(Actor, occ, GameState, ammo, 0, null);
-          if (attackSuccessful)
-          {
-            break;
-          }
-        }
-        else if (GameState.ObjDb.AreBlockersAtLoc(pt))
-        {
-          break;
-        }
-        else if (tile.Passable() || tile.PassableByFlight())
-        {
-          pts.Add(pt);
-        }
-        else
-        {
-          break;
-        }
-      }
-
-      ThrownMissileAnimation anim = new(GameState!, ammo.Glyph, pts, ammo);
-      GameState!.UIRef().PlayAnimation(anim, GameState);
-
-      Loc landingPt = pts.Last();
-      GameState.ItemDropped(ammo, landingPt, true);
-      ammo.Equipped = false;
+      Cmd.ThrowItem(Actor, ammo, Target, GameState!);
     }
 
     return 1.0;
   }
 
-  public override void ReceiveUIResult(UIResult result) => _target = ((LocUIResult)result).Loc;
+  public override void ReceiveUIResult(UIResult result) => Target = ((LocUIResult)result).Loc;
 }
 
 class FireSelectedBowAction(GameState gs, Player player) : Action(gs, player)

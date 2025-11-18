@@ -80,4 +80,47 @@ class Cmd
       bomb.Traits = [.. bomb.Traits.Where(t => t is not StackableTrait)];
     }
   }
+
+  public static void ThrowItem(Actor chucker, Item item, Loc target, GameState gs)
+  {
+    List<Loc> trajectory = Util.Trajectory(chucker.Loc, target);
+    List<Loc> pts = [];
+    for (int j = 0; j < trajectory.Count; j++)
+    {
+      var pt = trajectory[j];
+      var tile = gs.TileAt(pt);
+      var occ = gs.ObjDb.Occupant(pt);
+      if (j > 0 && occ != null)
+      {
+        pts.Add(pt);
+
+        // I'm not handling what happens if a projectile hits a friendly or 
+        // neutral NPCs
+        bool attackSuccessful = Battle.MissileAttack(chucker, occ, gs, item, 0, null);
+        if (attackSuccessful)
+        {
+          break;
+        }
+      }
+      else if (gs.ObjDb.AreBlockersAtLoc(pt))
+      {
+        break;
+      }
+      else if (tile.Passable() || tile.PassableByFlight())
+      {
+        pts.Add(pt);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    ThrownMissileAnimation anim = new(gs, item.Glyph, pts, item);
+    gs.UIRef().PlayAnimation(anim, gs);
+
+    Loc landingPt = pts.Last();
+    gs.ItemDropped(item, landingPt, true);
+    item.Equipped = false;
+  }
 }
