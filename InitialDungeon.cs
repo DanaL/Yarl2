@@ -49,7 +49,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       {
         Map? nextLevel = null;
         TileType riverType = TileType.DeepWater;
-        if (levelNum < numOfLevels - 1 && rng.Next(3) == 0)
+        if (levelNum < numOfLevels - 1 && rng.Next(3) >= 0)
         {
           riverType = TileType.Chasm;
           nextLevel = levels[levelNum + 1];
@@ -245,20 +245,20 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       if (factDb.Ruler.Type == OGRulerType.ElfLord && rng.NextDouble() < 0.15)
       {
         Rooms.Orchard(levelMaps[level], rooms[roomIds[0]], DungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(0);
+        roomIds.RemoveAt(0);
       }
 
       if (!graveyard && level > 0 && rng.Next(10) == 0)
       {
         Rooms.MarkGraves(levelMaps[level], rng, DungeonId, level, rooms[roomIds[0]], objDb, factDb);
-        rooms.RemoveAt(0);
+        roomIds.RemoveAt(0);
         graveyard = true;
       }
 
       if (level >= 2 && factDb.Ruler.Type == OGRulerType.DwarfLord && rng.NextDouble() < 0.15)
       {
         Rooms.MakeMinedChamber(levelMaps[level], rooms[roomIds[0]], DungeonId, level, factDb, objDb, rng);
-        rooms.RemoveAt(0);
+        roomIds.RemoveAt(0);
       }
 
       if (rng.NextDouble() < chanceOfDesecratedAltar)
