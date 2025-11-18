@@ -172,25 +172,25 @@ class TownBuilder
     switch (building)
     {
       case BuildingType.Shrine:
-        Town.Shrine = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();        
+        Town.Shrine = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
         break;
       case BuildingType.Tavern:
-        Town.Tavern = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
+        Town.Tavern = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
         InstallSign(map, building, sqs, rng);
         break;
       case BuildingType.Market:
-        Town.Market = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
+        Town.Market = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
         InstallSign(map, building, sqs, rng);
         break;
       case BuildingType.Smithy:
-        Town.Smithy = sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet();
+        Town.Smithy = [.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
         InstallSign(map, building, sqs, rng);
         break;
       case BuildingType.WitchesCottage:
         // Witches' cottage is set up outside the main town building functions
         break;
       default:
-        Town.Homes.Add(sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2)).ToHashSet());
+        Town.Homes.Add([.. sqs.Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))]);
         break;
     }
   }
@@ -230,10 +230,10 @@ class TownBuilder
     
     bool SpotForSign(int r, int c)
     {
-      TileType type = map.TileAt(r - 1, c - 1).Type;
+      TileType type = map.TileAt(r, c).Type;
 
-      return (type == TileType.Grass || type == TileType.Dirt || type == TileType.Sand || map.TileAt(r + 1, c + 1).IsTree())
-              && !Util.Adj4Sqs(r + 1, c + 1).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor);
+      return (type == TileType.Grass || type == TileType.Dirt || type == TileType.Sand || map.TileAt(r, c).IsTree())
+              && !Util.Adj4Sqs(r, c).Any(sq => map.TileAt(sq).Type == TileType.ClosedDoor);
     }
   }
 
