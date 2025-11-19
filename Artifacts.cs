@@ -135,10 +135,18 @@ class Artifacts
       names = ["Reaver", "Dark Tidings", "Reaper", "Tempest"];
 
     artifact.Name = names[rng.Next(names.Count)];
+    artifact.Traits.Add(new NamedTrait());
+
+    string weaponType = type switch
+    {
+      ItemNames.SPEAR => "spear",
+      ItemNames.BATTLE_AXE => "battle axe",
+      _ => "longsword"
+    };
 
     StringBuilder sb = new();
     sb.Append(artifact.Name.Capitalize());
-    sb.Append(": forged long ago to battle ");
+    sb.Append($": {weaponType.IndefArticle()} forged long ago to battle ");
     sb.Append(invader);
     sb.Append(" when they assailed these lands. Personally wielded in battle by ");
     sb.Append(factDb.Ruler.Name);

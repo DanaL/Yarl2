@@ -63,7 +63,7 @@ class MsgFactory
   public static string CalcName(GameObj obj, Player player)
     => CalcName(obj, player, 0, Article.Def);
 
-  public static string CalcName(GameObj obj, Player player,Article article = Article.Def)
+  public static string CalcName(GameObj obj, Player player, Article article = Article.Def)
     => CalcName(obj, player, 0, article);
 
   public static string CalcName(GameObj obj, Player player, int amount, Article article = Article.Def)
@@ -77,10 +77,14 @@ class MsgFactory
         sb.Append(' ');
         sb.Append(item.FullName.Pluralize());
       }
+      else if (item.HasTrait<NamedTrait>() && obj is Item)
+      {
+        sb.Append(item.FullName.DefArticle());
+      }
       else if (item.HasTrait<NamedTrait>())
       {
         sb.Append(item.FullName);
-      }      
+      }
       else
       {
         sb.Append(

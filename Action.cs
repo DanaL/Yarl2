@@ -1645,13 +1645,9 @@ class PickupItemAction(GameState gs, Actor actor) : Action(gs, actor)
         pickupMsg += "a zorkmid.";
       else if (item.Type == ItemType.Zorkmid)
         pickupMsg += $"{item.Value} zorkmids.";
-      else if (count > 1)
-        pickupMsg += $"{count} {item.FullName.Pluralize()}.";
-      else if (item.HasTrait<NamedTrait>())
-        pickupMsg += item.FullName;
       else
-        pickupMsg += item.FullName.DefArticle() + ".";
-
+        pickupMsg += MsgFactory.CalcName(item, GameState.Player, count, Article.Def) + ".";
+      
       if (item.Traits.OfType<OwnedTrait>().FirstOrDefault() is OwnedTrait ownedTrait)
       {
         List<string> msgs = GameState.OwnedItemPickedUp(ownedTrait.OwnerIDs, Actor, item.ID);

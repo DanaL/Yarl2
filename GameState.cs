@@ -1740,7 +1740,8 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else if (count == 1)
       {
-        sb.Append($" There is {item.FullName.IndefArticle()} here.");
+        string s = MsgFactory.CalcName(item, Player, Article.InDef);
+        sb.Append($" There is {s} here.");
       }
       else
       {
