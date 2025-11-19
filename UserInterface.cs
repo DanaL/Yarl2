@@ -547,7 +547,8 @@ abstract class UserInterface
   protected void WriteSideBar(GameState gs)
   {
     int row = 0;
-    WriteLine($"│ {gs.Player.Name}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine("│ ", row, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine(gs.Player.Name, row++, ViewWidth + 2, SideBarWidth, Colours.WHITE);
     int currHP = gs.Player.Stats[Attribute.HP].Curr;
     int maxHP = gs.Player.Stats[Attribute.HP].Max;
     WriteLine($"│ HP: {currHP} ({maxHP})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
@@ -559,7 +560,8 @@ abstract class UserInterface
       WriteLine($"│ MP: {magicPoints.Curr} ({magicPoints.Max})", row++, ViewWidth, SideBarWidth, Colours.WHITE);
     }
 
-    WriteLine($"│ AC: {gs.Player.AC}", row++, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine("│ AC:", row, ViewWidth, SideBarWidth, Colours.WHITE);
+    WriteLine(gs.Player.AC.ToString(), row++, ViewWidth + 6, SideBarWidth, Colours.WHITE);
 
     (Colour, string)[] zorkmidLine = [_sbSpacer, (Colours.YELLOW, "$"), (Colours.WHITE, $": {gs.Player.Inventory.Zorkmids}")];
     row = WriteSideBarLine(zorkmidLine, row);
