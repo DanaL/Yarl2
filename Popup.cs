@@ -285,10 +285,10 @@ class Popup : IPopup
       page = 0;
     }
 
-    ui.WriteText(top, row++, col);
+    ui.WriteText(top.ToArray(), row++, col);
     foreach (var l in CalculatedLines.Skip(Page * rowsDisplayed).Take(rowsDisplayed))
     {
-      ui.WriteText(l, row++, col);
+      ui.WriteText(l.ToArray(), row++, col);
     }
 
     if (pageinate)
@@ -431,7 +431,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
   char Separator { get; set; } = separator;
   string Title { get; set; } = title;
   int Page { get; set; } = 0;
-  List<List<(Colour, string)>> CalculatedRightPanel = [];
+  List<(Colour, string)[]> CalculatedRightPanel = [];
 
   public void Draw(UserInterface ui)
   {
@@ -462,7 +462,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
     foreach (var option in options)
     {
       if (o++ == Selected)
-        ui.WriteText(option, row, col);
+        ui.WriteText(option.ToArray(), row, col);
       else
         ui.WriteText([.. option.Select(opt => (Colours.GREY, opt.Item2))], row, col);
 
@@ -534,7 +534,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
       page = 0;
     }
 
-    IEnumerable<List<(Colour, string)>> rightPanelLines = [];
+    IEnumerable<(Colour, string)[]> rightPanelLines = [];
     if (!pageinate)
       rightPanelLines = CalculatedRightPanel;
     else
@@ -565,7 +565,7 @@ class TwoPanelPopup(string title, List<string> left, string right, char separato
       int padding = rightPanelWidth - actualWidth;
       if (padding > 0)
         line.Add((Colours.WHITE, "".PadLeft(padding, ' ')));
-      CalculatedRightPanel.Add(line);
+      CalculatedRightPanel.Add(line.ToArray());
       line = [];
       currWidth = 0;
     }
