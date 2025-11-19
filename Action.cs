@@ -134,7 +134,7 @@ class GulpAction(GameState gs, Actor actor, int dc, int dmgDie, int numOfDice) :
   }
 }
 
-class TransFormIntoBats(GameState gs, Actor actor) : Action(gs, actor)
+class TransFormIntoBatsAction(GameState gs, Actor actor) : Action(gs, actor)
 {
   public override double Execute()
   {

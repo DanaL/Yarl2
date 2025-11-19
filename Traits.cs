@@ -3903,7 +3903,11 @@ class TransformedTrait : TemporaryTrait
     {
       gs.UIRef().AlertPlayer($"{original.FullName.Capitalize()} {Grammar.Conjugate(original, "return")} to its normal form.", gs, loc);
       gs.ResolveActorMove(original, loc, loc);
-      Remove(gs);
+
+      if (original.Traits.OfType<TransformedTrait>().FirstOrDefault() is TransformedTrait tt)
+      {
+        tt.Remove(gs);
+      }
     }
   }
 }

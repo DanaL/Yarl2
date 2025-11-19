@@ -436,7 +436,7 @@ class UseTurnIntoBatsPower(Power power) : UsePower(power)
     if (!Available(mob, gs))
       return PlanStatus.Failure;
 
-    mob.ExecuteAction(new TransFormIntoBats(gs, mob));
+    mob.ExecuteAction(new TransFormIntoBatsAction(gs, mob));
     mob.LastPowerUse[Power.Name] = gs.Turn;
 
     return PlanStatus.Success;
