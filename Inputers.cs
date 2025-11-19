@@ -964,7 +964,8 @@ class PickupMenu : Inputer
   {
     if (ch == Constants.ESC || ch == ' ')
     {
-      GS.UIRef().SetInputController(new PlayerCommandController(GS));
+      Close();
+      return;
     }
     else if (MenuOptions.ContainsKey(ch) && !Choices.Contains(ch))
     {
