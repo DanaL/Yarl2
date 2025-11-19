@@ -4218,7 +4218,7 @@ class TraitFactory
     { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])} },
     { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait() 
       { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), 
-        Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])
+        Fuse = int.Parse(pieces[3]), DmgDie = int.Parse(pieces[4]), NumOfDice = int.Parse(pieces[5])
       } 
     },
     { "FeatherFall", (pieces, gameObj) => {
