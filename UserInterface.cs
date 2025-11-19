@@ -557,7 +557,7 @@ abstract class UserInterface
     var weapon = gs.Player.Inventory.ReadiedWeapon();
     if (weapon is not null)
     {
-      string weaponName = MsgFactory.CalcName(weapon, gs.Player);
+      string weaponName = MsgFactory.CalcName(weapon, gs.Player, Article.InDef);
       List<(Colour, string)> weaponLine = [(Colours.WHITE, "│ "), (weapon.Glyph.Lit, weapon.Glyph.Ch.ToString())];
       if (weapon.HasTrait<TwoHandedTrait>() || (weapon.HasTrait<VersatileTrait>() && !gs.Player.Inventory.ShieldEquipped()))
         weaponLine.Add((Colours.WHITE, $" {weaponName} (in hands)"));

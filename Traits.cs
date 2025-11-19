@@ -2399,7 +2399,7 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
       gs.ApplyDamageEffectToLoc(pt, DamageType.Force);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
-        string name = MsgFactory.CalcName(victim, gs.Player, 0, Article.Def).Capitalize();
+        string name = MsgFactory.CalcName(victim, gs.Player, Article.Def).Capitalize();
         gs.UIRef().AlertPlayer($"{name} {Grammar.Conjugate(victim, "is")} caught in the explosion!", gs, pt);
 
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);

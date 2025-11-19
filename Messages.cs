@@ -60,7 +60,13 @@ class Grammar
 enum Article { None, InDef, Def }
 class MsgFactory
 {
-  public static string CalcName(GameObj obj, Player player, int amount = 0, Article article = Article.Def)
+  public static string CalcName(GameObj obj, Player player)
+    => CalcName(obj, player, 0, Article.Def);
+
+  public static string CalcName(GameObj obj, Player player,Article article = Article.Def)
+    => CalcName(obj, player, 0, article);
+
+  public static string CalcName(GameObj obj, Player player, int amount, Article article = Article.Def)
   {
     StringBuilder sb = new();
     if (obj is Item item)

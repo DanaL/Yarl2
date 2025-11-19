@@ -473,7 +473,7 @@ class SetExplosiveAction(GameState gs, Actor actor, Item bomb) : Action(gs, acto
     }
     else
     {
-      string name = MsgFactory.CalcName(Actor!, GameState!.Player, 0, Article.Def).Capitalize();
+      string name = MsgFactory.CalcName(Actor!, GameState!.Player, Article.Def).Capitalize();
       string s = $"{name} {Grammar.Conjugate(Actor, "light")} the fuse.";
       GameState.UIRef().AlertPlayer(s, GameState, loc);
 
