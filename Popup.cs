@@ -194,7 +194,7 @@ class Popup : IPopup
 
     string border = Constants.TOP_LEFT_CORNER.ToString().PadRight(Width - 1, '─') + Constants.TOP_RIGHT_CORNER;
 
-    List<(Colour, string)> top;
+    (Colour, string)[] top;
     if (Title.Length > 0)
     {
       int left = int.Max(2, (Width - Title.Length) / 2 - 2);
@@ -285,7 +285,7 @@ class Popup : IPopup
       page = 0;
     }
 
-    ui.WriteText(top.ToArray(), row++, col);
+    ui.WriteText(top, row++, col);
     foreach (var l in CalculatedLines.Skip(Page * rowsDisplayed).Take(rowsDisplayed))
     {
       ui.WriteText(l.ToArray(), row++, col);
