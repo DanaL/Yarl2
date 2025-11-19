@@ -598,7 +598,7 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
       {
         for (int x = 0; x < Width; x++)
         {
-          FogDensity[y, x] = Noise.Noise(x * scale, y * scale, time); // Seed++);
+          FogDensity[y, x] = Noise.Noise(x * scale, y * scale, time);
         }
       }
 
@@ -620,7 +620,8 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
         int mapCol = c + colOffset;
                 
         Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);        
-        Colour bgColour = sqr.Bg;        
+        Colour bgColour = sqr.Bg;
+        Colour fgColour = sqr.Fg;
         if (GS.LastPlayerFoV.Contains(loc))
         {          
           double density = FogDensity[mapRow, mapCol];
@@ -644,9 +645,12 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
             bgColour = baseColour with { Alpha = 160 };
           else
             bgColour = baseColour with { Alpha = 180 };
+
+          if (fgColour == Colours.LIGHT_GREY || fgColour == Colours.GREY || fgColour == Colours.DARK_GREY)
+            fgColour = Colours.WHITE;          
         }
 
-        UI.SqsOnScreen[r, c] = sqr with { Bg = bgColour };
+        UI.SqsOnScreen[r, c] = sqr with { Fg = fgColour, Bg = bgColour };
       }
     }
   }
