@@ -1341,10 +1341,9 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     return deck.Monsters[Rng.Next(deck.Monsters.Count)];
   }
 
+  Dictionary<(int, int), int> _extraCosts = [];
   public void SetDMaps(Loc loc)
-  {
-    Dictionary<(int, int), int> extraCosts = [];
-
+  {    
     // Mold, fire, etc shouldn't incur extra costs for brainless monsters
     // but I'd have to do individual pathfinding at that point
     foreach (GameObj obj in ObjDb.ObjectsOnLevel(loc.DungeonID, loc.Level))
@@ -1353,37 +1352,37 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       {
         if (t is BlockTrait)
         {
-          extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
+          _extraCosts[(obj.Loc.Row, obj.Loc.Col)] = DijkstraMap.IMPASSABLE;
         }
         else if (t is OnFireTrait)
         {
           (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
-          extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 15;
+          _extraCosts[sq] = _extraCosts.GetValueOrDefault(sq, 0) + 15;
         }
         else if (t is MoldSporesTrait)
         {
           (int, int) sq = (obj.Loc.Row, obj.Loc.Col);
-          extraCosts[sq] = extraCosts.GetValueOrDefault(sq, 0) + 5;
+          _extraCosts[sq] = _extraCosts.GetValueOrDefault(sq, 0) + 5;
         }
       }
     }
 
     foreach (Loc occ in ObjDb.OccupantsOnLevel(loc.DungeonID, loc.Level))
     {
-      extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
+      _extraCosts[(occ.Row, occ.Col)] = DijkstraMap.IMPASSABLE;
     }
 
-    DMap = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
+    DMap = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMap.Generate(DijkstraMap.Cost, (loc.Row, loc.Col), 25);
 
     // I wonder how complicated it would be to generate the maps in parallel...
-    DMapDoors = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
+    DMapDoors = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapDoors.Generate(DijkstraMap.CostWithDoors, (loc.Row, loc.Col), 25);
 
-    DMapFlight = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
+    DMapFlight = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapFlight.Generate(DijkstraMap.CostByFlight, (loc.Row, loc.Col), 25);
 
-    DMapSwimming = new(CurrentMap, extraCosts, CurrentMap.Height, CurrentMap.Width, false);
+    DMapSwimming = new(CurrentMap, _extraCosts, CurrentMap.Height, CurrentMap.Width, false);
     DMapSwimming.Generate(DijkstraMap.CostForSwimming, (loc.Row, loc.Col), 25);
   }
 

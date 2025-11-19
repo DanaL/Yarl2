@@ -79,5 +79,5 @@ wumpus              |O|lightpurple  |purple      |15|65|6| 1.0|18|10|MeleeBlunt#
 duergar spearfisher |h|grey         |darkgrey    |16|25|5| 1.0|13|14|GetOverHere#2#3#6#1#0#2#Attack,MeleeBlunt#1#1#10#1#0#0#Attack|Intelligent|MITHRIL_ORE#1#30#false
 dire wolf           |d|grey         |darkgrey    |14|25|6| 1.0|12|10|MeleePiercing#1#1#6#2#0#0#Attack||
 vampire             |V|blue         |darkblue    |15|50|8| 1.0|14|14|TurnIntoBats#0#0#0#0#0#10#Attack,BloodDrain#1#1#8#1#0#1#Attack,MeleeSlashing#1#1#5#2#0#0#Attack|Flying,Undead,SilverAllergy,Intelligent,Vulnerable#Holy|
-dancing sword       |)|white        |lightgrey   |16|30|7| 1.0|10|10|MeleeSlashing#1#1#5#2#0#0#Attack|Drop#SILVER_LONGSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
-dancing greatsword  |)|white        |lightgrey   |16|40|7| 1.0|10|10|MeleeSlashing#1#1#5#3#0#0#Attack|Drop#GREATSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
+dancing sword       |)|white        |lightgrey   |16|30|7| 1.0|10|10|MeleeSlashing#1#1#5#2#0#0#Attack|Construct,Drop#SILVER_LONGSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
+dancing greatsword  |)|white        |lightgrey   |16|40|7| 1.0|10|10|MeleeSlashing#1#1#5#3#0#0#Attack|Construct,Drop#GREATSWORD#50,Resistance#Piercing,Resistance#Slashing,Resistance#Blunt,LightSource#owner#1#iceblue#mysticaura,Flying|
