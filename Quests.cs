@@ -158,7 +158,7 @@ class SorceressQuest
     };
     string magicWord = History.MagicWord(rng);
     factDb.Add(new SimpleFact() { Name = "MDTemplePassword", Value = magicWord });
-    string txt = $"...and so I borrowed -- well, borrowed without permission -- the Candle from the Moon Daughter's hidden temple. I did return it when I was finished! It wasn't even that hard to find. You just stand in the centre of Moonstone Ring on a clear night and speak: {magicWord}.";
+    string txt = $"...and so I borrowed -- well, borrowed without permission -- the Candle from the Moon Daughter's hidden temple. I did return it when I was finished! It wasn't even that hard to find. You just stand in the centre of the Moonstone Ring on a clear night and speak: {magicWord}.";
     diary1.Traits.Add(new ReadableTrait(txt) { OwnerID = diary1.ID });
     diary1.Traits.Add(new DescriptionTrait("A hastily scrawled document with many passages crossed out and rewritten."));
     List<(int, int)> floorSqs = sorceressTower.LevelMaps[tl - 1].SqsOfType(TileType.DungeonFloor);
