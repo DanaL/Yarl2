@@ -401,7 +401,7 @@ class HealAlliesPower(Power power) : UsePower(power)
     {
       int i = gs.Rng.Next(candidates.Count);
 
-      if (Util.AwareOfActor(mob, gs))
+      if (Util.PlayerAwareOfActor(mob, gs))
       {
         string castText = $"{MsgFactory.CalcName(mob, gs.Player).Capitalize()} {Grammar.Conjugate(mob, "cast")} a healing spell!";
         gs.UIRef().AlertPlayer(castText);

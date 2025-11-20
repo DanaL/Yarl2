@@ -156,7 +156,7 @@ class MsgFactory
 
   public static string DoorMessage(Actor actor, Loc loc, string verb, GameState gs)
   {
-    if (Util.AwareOfActor(actor, gs))    
+    if (Util.PlayerAwareOfActor(actor, gs))    
       return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, verb)} the door.";    
     else if (actor is Player)
       return $"You fumble with a door handle and {verb} a door.";
@@ -168,7 +168,7 @@ class MsgFactory
 
   public static string HitMessage(GameObj attacker, Actor target, string verb, GameState gs)
   {
-    bool canSeeTarget = Util.AwareOfActor(target, gs);
+    bool canSeeTarget = Util.PlayerAwareOfActor(target, gs);
     
     if (attacker is Player)
     {
@@ -186,8 +186,8 @@ class MsgFactory
 
   public static string MissMessage(Actor attacker, Actor target, GameState gs)
   {
-    bool canSeeTarget = Util.AwareOfActor(target, gs);
-    bool canSeeAttacker = Util.AwareOfActor(attacker, gs);
+    bool canSeeTarget = Util.PlayerAwareOfActor(target, gs);
+    bool canSeeAttacker = Util.PlayerAwareOfActor(attacker, gs);
 
     if (target is Player)
       return canSeeAttacker ? $"{CalcName(attacker, gs.Player).Capitalize()} {Grammar.Conjugate(attacker, "miss")} you!" : "You are missed by an attack!";
@@ -210,7 +210,7 @@ class MsgFactory
     }
  
     string etre = plural ? "are" : "is";
-    if (Util.AwareOfActor(victim, gs))
+    if (Util.PlayerAwareOfActor(victim, gs))
       return $"{CalcName(victim, gs.Player).Capitalize()} {etre} {verb}.";
     else if (attacker is Player)
       return "You kill something!";

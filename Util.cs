@@ -801,7 +801,7 @@ class Util
     return true;
   }
 
-  public static bool AwareOfActor(Actor actor, GameState gs)
+  public static bool PlayerAwareOfActor(Actor actor, GameState gs)
   {
     bool telepathic = gs.Player.HasActiveTrait<TelepathyTrait>();
     int distance = Distance(gs.Player.Loc, actor.Loc);
@@ -809,6 +809,8 @@ class Util
     if (telepathic && distance <= Constants.TELEPATHY_RANGE)
       return true;
     else if (actor.IsDisguised())
+      return false;
+    else if (!actor.VisibleTo(gs.Player))
       return false;
     else if (gs.LastPlayerFoV.Contains(actor.Loc))
       return true;

@@ -94,7 +94,7 @@ class Examiner : Inputer
 
         Actor? occupant = GS.ObjDb.Occupant(loc);
 
-        if (occupant is not null && AwareOfActor(occupant, GS))
+        if (occupant is not null && PlayerAwareOfActor(occupant, GS))
         {
           if (loc == GS.Player.Loc)
           {
