@@ -292,15 +292,7 @@ class BarkAnimation : Animation
     }
     else if (col + message.Length >= UserInterface.ViewWidth)
     {
-      int mid = CalcBreak(message);
-      string s = message[..mid];
-      msg2 = s.Trim();
-      message = message[mid..].Trim();
-
-      pointer = row > 3 ? '\\' : '/';
-      pointerCol = screenCol - 1;
-
-      col = screenCol - int.Max(message.Length, msg2.Length) / 3;
+      col = UserInterface.ViewWidth - message.Length - 1;
     }
 
     if (msg2.Length > 0)
@@ -330,27 +322,6 @@ class BarkAnimation : Animation
 
       if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.Contains(mapLoc))
         _ui.SqsOnScreen[row, col] = sqr;
-    }
-    
-    int CalcBreak(string m)
-    {
-      int j = m.Length / 2;
-
-      if (m[j] == ' ')
-        return j;
-
-      int k = j;
-      while (j >= 0 && k < m.Length)
-      {
-        if (m[j] == ' ')
-          return j;
-        if (m[k] == ' ')
-          return k;
-        ++j;
-        ++k;
-      }
-
-      return -1;
     }
   }
 
@@ -647,7 +618,7 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
             bgColour = baseColour with { Alpha = 180 };
 
           if (fgColour == Colours.LIGHT_GREY || fgColour == Colours.GREY || fgColour == Colours.DARK_GREY)
-            fgColour = Colours.WHITE;          
+            fgColour = Colours.WHITE;
         }
 
         UI.SqsOnScreen[r, c] = sqr with { Fg = fgColour, Bg = bgColour };

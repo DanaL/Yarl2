@@ -764,7 +764,7 @@ class MayorBehaviour : NPCBehaviour
       var (hour, _) = gs.CurrTime();
       if (hour >= 7 && hour < 19)
       {
-        bark = "Today at least seems peaceful";
+        bark = "Today at least seems peaceful!";
       }
       else if (gs.Town.Tavern.Contains(actor.Loc))
       {
