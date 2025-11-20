@@ -3357,26 +3357,30 @@ class RecallTrait : BasicTrait, IGameEventListener
   }
 }
 
-class RegenerationTrait : BasicTrait, IGameEventListener
+class RegenerationTrait : TemporaryTrait
 {
   public int Rate { get; set; }
   public ulong ActorID { get; set; }
-  public ulong ObjId => ActorID;
-  public bool Expired { get; set; } = false;
-  public bool Listening => true;
-  public GameEventType EventType => GameEventType.EndOfRound;
 
   public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}#{SourceId}";
 
-  public void EventAlert(GameEventType eventType, GameState gs, Loc loc)
+  public override List<string> Apply(GameObj target, GameState gs)
+  {
+    OwnerID = target.ID;
+    target.Traits.Add(this);
+    gs.RegisterForEvent(GameEventType.EndOfRound, this);
+
+    return [];
+  }
+
+  public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
     if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
       return;
 
     if (gs.Turn > ExpiresOn)
     {
-      actor.Traits.Remove(this);
-      Expired = true;
+      Remove(gs);
     }
     else
     {
