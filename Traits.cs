@@ -2379,6 +2379,8 @@ class ExplosionCountdownTrait : TemporaryTrait, IDesc
     foreach (Loc adj in Util.Adj8Locs(loc))
       sqs.Add(adj);
 
+    gs.Noise(loc.Row, loc.Col, 7);
+    
     // A bunch of explosion stuff is pretty same-y (see Fireballs, etc) but
     // not exactly the same so I'm not sure if I want to pull it up into shared
     // functions. But there's also differences between them so ¯\_(ツ)_/¯

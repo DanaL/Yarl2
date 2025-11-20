@@ -160,6 +160,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       if (digger == gs.Player)
         gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
+
+    gs.Noise(loc.Row, loc.Col, 5);
   }
 
   static void DigInPit(Loc loc, GameState gs, Actor digger)
@@ -180,6 +182,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       digger.Traits = [..digger.Traits.Where(t => t is not InPitTrait)];
 
       digger.QueueAction(new MoveAction(gs, digger, loc));
+
+      gs.Noise(loc.Row, loc.Col, 3);
     }
   }
 
@@ -218,6 +222,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     }
 
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+    
+    gs.Noise(loc.Row, loc.Col, 3);
   }
 
   static void DigStairs(Loc loc, TileType tile, GameState gs, Actor digger)
@@ -255,6 +261,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
     gs.UIRef().AlertPlayer("You destroy some stairs.");
     gs.UIRef().SetPopup(new Popup(s, "", -1, -1));
+
+    gs.Noise(loc.Row, loc.Col, 5);
   }
 
   static void DigFrozenWater(Loc loc, GameState gs, Actor digger)
@@ -330,6 +338,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
     bool flying = digger.HasActiveTrait<FlyingTrait>() || digger.HasActiveTrait<FloatingTrait>();
     if (!flying)
       digger.Traits.Add(new InPitTrait());
+
+      gs.Noise(loc.Row, loc.Col, 5);
   }
 
   void DigDungeonWall(Loc loc)
@@ -352,6 +362,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().AlertPlayer(s);
       GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
+
+    gs.Noise(loc.Row, loc.Col, 5);
   }
 
   void ChopDoor(Loc loc)
@@ -362,7 +374,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
 
     if (Actor!.AbilityCheck(Attribute.Strength, dc, GameState.Rng))
     {
-      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";      
+      string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "chop")} the door to pieces!";
       GameState.UIRef().AlertPlayer(s);
       if (Actor == GameState.Player)
         GameState.UIRef().SetPopup(new Popup(s, "", -1, -1, s.Length));
@@ -373,6 +385,8 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().AlertPlayer("Splinters fly but the door remains intact.");
       GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
     }
+    
+    gs.Noise(loc.Row, loc.Col, 5);
   }
 
   void ChopTree(Loc loc, Tile tile)
