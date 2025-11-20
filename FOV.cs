@@ -14,7 +14,7 @@
 
 namespace Yarl2;
 
-class Illumination
+static class Illumination
 {
   public const int None = 0;
   public const int NE = 0b0001;
@@ -242,13 +242,13 @@ class FieldOfView
 
   public static Dictionary<Loc, int> CalcVisible(int radius, Loc loc, Map map, GameObjectDB objDb)
   {
-    Dictionary<Loc, bool> opqueLocs = [];
+    Dictionary<Loc, bool> opaqueLocs = [];
     Dictionary<Loc, int> visible = [];
     visible.Add(loc, Illumination.Full);
 
     for (int j = 0; j < 8; j++)
     {
-      Dictionary<Loc, int> octant = CalcOctant(radius, loc, map, j, objDb, opqueLocs);
+      Dictionary<Loc, int> octant = CalcOctant(radius, loc, map, j, objDb, opaqueLocs);
       foreach (var sq in octant)
       {
         if (!visible.TryAdd(sq.Key, sq.Value))

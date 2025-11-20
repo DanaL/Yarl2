@@ -25,7 +25,7 @@ enum Dir { North, South, East, West, None }
 // inconvenient for me
 record struct Colour(int R, int G, int B, int Alpha);
 
-class Colours
+static class Colours
 {
   public static readonly Colour NULL = new(0, 0, 0, 0);
   public static readonly Colour BLACK = new(0, 0, 0, 255);
@@ -196,7 +196,7 @@ static class MetalsExtensions
 enum Rust { Rusted, Corroded }
 
 // Miscellaneous constants used in a few places
-class Constants
+static class Constants
 {
   public const ulong PLAYER_ID = 1;
   
@@ -228,7 +228,7 @@ class Constants
   public const ulong DRAGON_GOD_ID = ulong.MaxValue - 1;
 }
 
-class Util
+static class Util
 {
   public static double ToDouble(string s) => double.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
 
@@ -1136,7 +1136,7 @@ class MapUtils
 {
   public static void Dump(Map map, Dictionary<(int, int), int> areas)
   {
-    char RegionNum(int num)
+    static char RegionNum(int num)
     {
       if (num < 10)
         return (char)('0' + num);
