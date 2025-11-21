@@ -60,7 +60,7 @@ class InitialDungeonBuilder(int dungeonId, (int, int) entrance, string mainOccup
       }
     }
 
-    TidyOrphanedDoors(DungeonId, levels, objDb, rng);
+    TidyOrphanedDoors(levels);
 
     SetStairs(DungeonId, levels, Entrance, dungeon.Descending, rng);
 

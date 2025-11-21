@@ -178,7 +178,7 @@ abstract class DungeonBuilder
   //  #....
   //  #..+.
   //  ###..
-  protected static void TidyOrphanedDoors(int dungeonId, Map[] levels, GameObjectDB objDb, Rng rng)
+  protected static void TidyOrphanedDoors(Map[] levels)
   {
     for (int levelNum = 0; levelNum < levels.Length; levelNum++)
     {
@@ -819,8 +819,12 @@ abstract class DungeonBuilder
   }
 
   protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
-  {
+  {    
     DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, dungeonId, levelNum, objDb, rng);
+    if (levelNum == 2)
+    {
+      map.Dump();
+    }
 
     // When making a chasm, we want to turn any walls below chasms on the 
     // floor below into floors. 

@@ -733,7 +733,10 @@ class DungeonMap(Rng rng)
     // Look at me using a ~closure~!!
     int Passable(Tile tile)
     {
-      return tile.Type == riverTile ? 1 : DijkstraMap.CostWithDoors(tile);
+      if (tile.Type == riverTile || tile.Type == TileType.LockedDoor)
+        return 1;
+      else
+        return DijkstraMap.CostWithDoors(tile);
     }
 
     var regionFinder = new RegionFinder(new DungeonPassable());
@@ -749,8 +752,8 @@ class DungeonMap(Rng rng)
       }
     }
 
-    var djmap = new DijkstraMap(map, [], height, width, true);
-    foreach (var k in regions.Keys)
+    DijkstraMap djmap = new(map, [], height, width, true);
+    foreach (int k in regions.Keys)
     {
       if (k != largest && regions[k].Count >= 5)
       {
