@@ -342,7 +342,7 @@ class WitchBehaviour : NPCBehaviour
       {
         0 => "Sophie, did you see that sparrow?",
         1 => $"{grocerName} is charging HOW MUCH for mandrake root?",
-        2 => "Do not tarry!",
+        2 => "Sometimes you'll find seeweed growing near underground rivers.",
         _ => "Dark augeries..."
       };
     }    
