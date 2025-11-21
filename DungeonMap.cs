@@ -752,23 +752,26 @@ class DungeonMap(Rng rng)
       }
     }
 
+    GameObjectDB dummy = new();
     DijkstraMap djmap = new(map, [], height, width, true);
+    HashSet<Loc> mainRegion = [.. regions[largest].Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
     foreach (int k in regions.Keys)
     {
       if (k != largest && regions[k].Count >= 5)
       {
-        // find the closest points between this region and the main/largest region
-        var nearby = ClosestPts(regions[largest], regions[k]);
-        var pair = nearby[rng.Next(nearby.Count)];
-        djmap.Generate(Passable, pair.Item2, 70);
-
-        var start = pair.Item1;
-        var path = djmap.ShortestPath(start.Item1, start.Item2);
-        foreach (var pt in path)
+        List<Loc> r = [.. regions[k].Select(sq => new Loc(0, 0, sq.Item1, sq.Item2))];
+        var start = r[rng.Next(r.Count)];
+        var path = AStar.FindPathToArea(dummy, map, start, mainRegion, Passable, false);
+        while (path.Count > 0)
         {
-          if (map.IsTile(pt, riverTile))
-            map.SetTile(pt, TileFactory.Get(TileType.WoodBridge));
+          Loc pt = path.Pop();
+          if (map.IsTile((pt.Row, pt.Col), riverTile))
+          {
+            map.SetTile(pt.Row, pt.Col, TileFactory.Get(TileType.WoodBridge));
+            mainRegion.Add(pt);
+          }
         }
+        mainRegion = [.. mainRegion.Union(r)];
       }
     }
   }

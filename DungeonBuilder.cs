@@ -347,7 +347,6 @@ abstract class DungeonBuilder
 
       return false;
     }
-
   }
 
   protected void SetStairs(int dungeonId, Map[] levels, (int, int) entrance, bool desc, Rng rng)
@@ -821,10 +820,6 @@ abstract class DungeonBuilder
   protected static void AddRiverToLevel(TileType riverTile, Map map, Map? mapBelow, int levelNum, int height, int width, int dungeonId, GameObjectDB objDb, Rng rng)
   {    
     DungeonMap.CreateRiver(map, width + 1, height + 1, riverTile, dungeonId, levelNum, objDb, rng);
-    if (levelNum == 2)
-    {
-      map.Dump();
-    }
 
     // When making a chasm, we want to turn any walls below chasms on the 
     // floor below into floors. 

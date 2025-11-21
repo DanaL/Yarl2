@@ -286,11 +286,15 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
   }
 }
 
+delegate bool AtGoalFunc(Loc loc);
+delegate int HeuristicFunc(Loc a);
+delegate IEnumerable<Loc> AdjancencyFunc(Loc a);
+
 // Redblob is SUCH a treasure of a website
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 class AStar
 {
-  static public Stack<Loc> FindPath(GameObjectDB objDb, Map map, Loc start, Loc goal, TravelCostFunction calcCost, bool allowDiagonal = true)
+  static public Stack<Loc> AStarSearch(GameObjectDB objDb, Map map, Loc start, AtGoalFunc goalFunc, HeuristicFunc heuristic, TravelCostFunction calcCost, AdjancencyFunc adjLocs)
   {
     PriorityQueue<Loc, int> q = new();
     q.Enqueue(start, 0);
@@ -298,16 +302,19 @@ class AStar
     cameFrom[start] = start;
     Dictionary<Loc, int> costs = [];
     costs[start] = 0;
+    Loc goal = Loc.Nowhere;
 
     while (q.Count > 0)
     {
       Loc curr = q.Dequeue();
 
-      if (curr == goal)
+      if (goalFunc(curr))
+      {
+        goal = curr;
         break;
+      }
 
-      var adjSqs = allowDiagonal ? Util.Adj8Locs(curr) : Util.Adj4Locs(curr);
-      foreach (Loc adj in adjSqs)
+      foreach (Loc adj in adjLocs(curr))
       {
         int travel = calcCost(map.TileAt(adj.Row, adj.Col));
         if (travel == int.MaxValue)
@@ -321,7 +328,7 @@ class AStar
         if (!costs.TryGetValue(adj, out int value) || newCost < value)
         {
           costs[adj] = newCost;
-          int priority = newCost + Util.Manhattan(goal, adj);
+          int priority = newCost + heuristic(adj);
           q.Enqueue(adj, priority);
           cameFrom[adj] = curr;
         }
@@ -340,5 +347,23 @@ class AStar
     }
 
     return path;
+  }
+
+  public static Stack<Loc> FindPath(GameObjectDB objDb, Map map, Loc start, Loc goal, TravelCostFunction calcCost, bool allowDiagonal = true)
+  {
+    bool AtSingleGoal(Loc loc) => loc == goal;
+    int Heuristic(Loc loc) => Util.Manhattan(loc, goal);
+    AdjancencyFunc af = allowDiagonal ? Util.Adj8Locs : Util.Adj4Locs;
+
+    return AStarSearch(objDb, map, start, AtSingleGoal, Heuristic, calcCost, af);
+  }
+
+  public static Stack<Loc> FindPathToArea(GameObjectDB objDb, Map map, Loc start, HashSet<Loc> goal, TravelCostFunction calcCost, bool allowDiagonal = true)
+  {
+    bool InGoalArea(Loc loc) => goal.Contains(loc);
+    int Heuristic(Loc loc) => Util.Manhattan(start, loc);
+    AdjancencyFunc af = allowDiagonal ? Util.Adj8Locs : Util.Adj4Locs;
+
+    return AStarSearch(objDb, map, start, InGoalArea, Heuristic, calcCost, af);
   }
 }
