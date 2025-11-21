@@ -559,7 +559,6 @@ class CampaignCreator(UserInterface ui)
   public GameState? Create(Options options)
   {
     int seed = DateTime.UtcNow.GetHashCode();
-    seed = -1916051484;
     Console.WriteLine($"Seed: {seed}");
 
     try

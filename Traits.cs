@@ -908,6 +908,11 @@ class QuietTrait : Trait
   public override string AsText() => $"Quiet#{SourceId}";  
 }
 
+sealed class AmphibiousTrait : Trait
+{
+  public override string AsText() => "Amphibious";
+}
+
 class AppleProducerTrait : Trait, IGameEventListener, IOwner
 {
   public ulong OwnerID { get; set; }
@@ -4111,6 +4116,7 @@ class TraitFactory
         return new AmmoTrait() { DamageDie = int.Parse(pieces[1]), NumOfDie = int.Parse(pieces[2]), DamageType = ammoDt, Range = int.Parse(pieces[4]) };
       }
     },
+    { "Amphibious", (pieces, gameObj) => new AmphibiousTrait() },
     { "AppleProducer", (pieces, gameObj) => new AppleProducerTrait() { OwnerID = ulong.Parse(pieces[1]) } },
     { "Armour", (pieces, gameObj) => { Enum.TryParse(pieces[1], out ArmourParts part);
       return new ArmourTrait() { Part = part, ArmourMod = int.Parse(pieces[2]), Bonus = int.Parse(pieces[3]) }; }

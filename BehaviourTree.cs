@@ -1405,6 +1405,8 @@ class ChaseTarget : BehaviourNode
       costFunc = DijkstraMap.CostByFlight;
     else if (mob.HasTrait<SwimmerTrait>())
       costFunc = DijkstraMap.CostForSwimming;
+    else if (mob.HasTrait<AmphibiousTrait>())
+      costFunc = DijkstraMap.CostForAmphibians;
 
     Stack<Loc> path = AStar.FindPath(gs.ObjDb, gs.CurrentMap, mob.Loc, target, costFunc, true);
 
@@ -1418,7 +1420,7 @@ class ChaseTarget : BehaviourNode
         mob.ExecuteAction(new OpenDoorAction(gs, mob, loc));
         return PlanStatus.Success;
       }
-      else if (!gs.ObjDb.Occupied(loc) && gs.TileAt(loc).Passable())
+      else if (!gs.ObjDb.Occupied(loc))
       {
         mob.ExecuteAction(new MoveAction(gs, mob, loc));
         return PlanStatus.Success;

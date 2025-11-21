@@ -99,6 +99,16 @@ class DijkstraMap(Map map, Dictionary<(int, int), int> extraCosts, int height, i
     _ => int.MaxValue,
   };
 
+  public static int CostForAmphibians(Tile tile)
+  {
+    if (tile.Passable())    
+      return 1;
+    else if (tile.Type == TileType.Lake || tile.Type == TileType.Water || tile.Type == TileType.DeepWater)
+      return 1;
+    else
+      return int.MaxValue;
+  }
+
   // Passable defines the squares to be used in the pathfinding and their weight
   // (Ie., a floor might be passable with score 1 but a door is 2 because it's 
   // slightly more expensive)

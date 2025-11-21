@@ -34,6 +34,8 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
         canFly = true;
       else if (t is SwimmerTrait)
         canSwim = true;
+      else if (t is AmphibiousTrait)
+        canSwim = true;
       else if (t is WaterWalkingTrait)
         waterWalking = true;
       else if (t is TipsyTrait)
