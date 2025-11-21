@@ -773,6 +773,29 @@ class Map : ICloneable
     return floors;
   }
 
+  public List<(int, int)> TilesNearSq(TileType lookFor, int row, int col, int d)
+  {
+    List<(int, int)> sqs = [];
+
+    int loR = int.Max(0, row - d);
+    int hiR = int.Min(Height - 1, row + d);
+    for (int r = loR; r < hiR; r++)
+    {
+      if (TileAt(r, col).Type == lookFor)
+        sqs.Add((r, col));
+    }
+
+    int loC = int.Max(0, col - d);
+    int hiC = int.Min(Width - 1, col + d);
+    for (int c = loC; c < hiC; c++)
+    {
+      if (TileAt(row, c).Type == lookFor)
+        sqs.Add((row, c));
+    }
+
+    return sqs;
+  }
+
   static bool IsRoomFloorTile(TileType type) => type switch
   {
     TileType.DungeonFloor => true,

@@ -65,6 +65,35 @@ abstract class DungeonBuilder
     return closets;
   }
 
+  protected static void DecorateRiver(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
+  {
+    // if there's a river, sometimes add seeweed nearby
+    if (rng.Next(3) == 0)
+    {
+      HashSet<(int, int)> candidates = [];
+      for (int r = 0; r < map.Height; r++)
+      {
+        for (int c = 0; c < map.Width; c++)
+        {
+          if (map.TileAt(r, c).Type == TileType.DeepWater)
+          {
+            foreach (var sq in map.TilesNearSq(TileType.DungeonFloor, r, c, 2))
+              candidates.Add(sq);
+          }
+        }
+      }
+
+      List<(int, int)> sqs = [.. candidates];
+      sqs.Shuffle(rng);
+      int numOfWeeds = rng.Next(1, 4);
+      foreach (var sq in sqs.Take(numOfWeeds))
+      {
+        Item weed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
+        objDb.SetToLoc(new(dungeonId, level, sq.Item1, sq.Item2), weed);
+      }
+    }
+  }
+
   // If a river/chasm cuts the up stairs off from the down stairs, drop
   // a potion of levitation on the level so the player isn't trapped.
   protected static void RiverQoLCheck(Map map, int dungeonId, int level, GameObjectDB objDb, Rng rng)
@@ -845,29 +874,6 @@ class MainDungeonBuilder : DungeonBuilder
 {
   int _dungeonID;
 
-  static List<(int, int)> FloorsNearSq(Map map, int row, int col, int d)
-  {
-    List<(int, int)> sqs = [];
-
-    int loR = int.Max(0, row - d);
-    int hiR = int.Min(map.Height - 1, row + d);
-    for (int r = loR; r < hiR; r++)
-    {
-      if (map.TileAt(r, col).Type == TileType.DungeonFloor)
-        sqs.Add((r, col));
-    }
-
-    int loC = int.Max(0, col - d);
-    int hiC = int.Min(map.Width - 1, col + d);
-    for (int c = loC; c < hiC; c++)
-    {
-      if (map.TileAt(row, c).Type == TileType.DungeonFloor)
-        sqs.Add((row, c));
-    }
-    
-    return sqs;
-  }
-
   string DeepOneShrineDesc(Rng rng)
   {
     var sb = new StringBuilder();
@@ -946,17 +952,6 @@ class MainDungeonBuilder : DungeonBuilder
 
     HashSet<(int, int)> candidates = [];
 
-    for (int r = 0; r < map.Height; r++) 
-    { 
-      for (int c = 0; c < map.Width; c++) 
-      { 
-        if (map.TileAt(r, c).Type == TileType.DeepWater)
-        {
-          foreach (var sq in FloorsNearSq(map, r, c, 3))
-            candidates.Add(sq);
-        }
-      }
-    }
 
     if (candidates.Count == 0)
       // can't place the shrine
@@ -1041,48 +1036,6 @@ class MainDungeonBuilder : DungeonBuilder
         Loc itemLoc = nearbyLocs[rng.Next(nearbyLocs.Count)];
         objDb.SetToLoc(itemLoc, loot);
       }
-    }
-  }
-
-  void DecorateRiver(Map map, List<MonsterDeck> monsterDecks, int dungeonId, int level, GameObjectDB objDb, Rng rng)
-  {
-    if (level > 0)
-    {
-      monsterDecks[level].Monsters.Add("deep one");
-      monsterDecks[level].Monsters.Add("deep one");
-      monsterDecks[level].Monsters.Add("deep one");
-      monsterDecks[level].Reshuffle(rng);
-
-      DeepOneShrine(map, dungeonId, level, objDb, rng);
-
-      // if there's a river, sometimes add seeweed nearby
-      if (rng.NextDouble() < 0.2)
-      {
-        HashSet<(int, int)> candidates = [];
-        for (int r = 0; r < map.Height; r++) 
-        { 
-          for (int c = 0; c < map.Width; c++) 
-          { 
-            if (map.TileAt(r, c).Type == TileType.DeepWater)
-            {
-              foreach (var sq in FloorsNearSq(map, r, c, 2))
-                candidates.Add(sq);
-            }
-          }
-        }
-
-        List<(int, int)> sqs = [..candidates];
-        int numOfWeeds = rng.Next(1, 4);
-        for (int j = 0; j < numOfWeeds; j++)
-        {
-          int i = rng.Next(sqs.Count);
-          (int, int) sq = sqs[i];
-          sqs.RemoveAt(i);
-          Loc loc = new(dungeonId, level, sq.Item1, sq.Item2);
-          Item weed = ItemFactory.Get(ItemNames.SEEWEED, objDb);
-          objDb.SetToLoc(loc, weed);
-        }
-      }    
     }
   }
 
