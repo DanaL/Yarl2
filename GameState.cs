@@ -71,10 +71,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   {
     Map prevMap = CurrentMap;
     if (actor is Player && (prevMap.Features & MapFeatures.Foggy) != MapFeatures.None)
-    {
       UI.ClearFoggyAnimation();
-    }
-    
+    else if (actor is Player && (prevMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+      UI.ClearUnderwaterAnimation();
+
     CurrLevel = level;
     CurrDungeonID = dungeonId;
     int maxDepth = Player.Stats[Attribute.Depth].Max;
@@ -107,6 +107,10 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     if (actor is Player && (CurrentMap.Features & MapFeatures.Foggy) != MapFeatures.None)
     {
       UI.RegisterAnimation(new FogAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
+    }
+    else if (actor is Player && (CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+    {
+      UI.RegisterAnimation(new UnderwaterAnimation(UI, this, CurrentMap.Height, CurrentMap.Width));
     }
     
     // If the player is returning to the overworld, is there any maintenance we need to do?
@@ -2019,8 +2023,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       else if ((CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
       {
         lightRadius = 3;
-        fgLightColour = Colours.UNDERWATER;
-        bgLightColour = Colours.UNDERWATER;
       }
 
       if (lightRadius == -1)

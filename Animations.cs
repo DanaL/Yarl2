@@ -546,6 +546,89 @@ class PolearmAnimation : Animation
   }
 }
 
+class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
+{
+  int Height { get; set; } = h;
+  int Width { get; set; } = w;
+  readonly UserInterface UI = ui;
+  readonly GameState GS = gs;
+  int Seed { get; set; } = gs.Rng.Next(100_000);
+  DateTime LastUpdate { get; set; } = DateTime.MinValue;
+  PerlinNoise Noise { get; set; } = new(gs.Rng);
+  readonly double[,] Density = new double[h, w];
+
+  public override void Update()
+  {
+    Console.WriteLine(Seed);
+    // Update the foggy spots only occasionally
+    var dd = DateTime.UtcNow - LastUpdate;
+    if (dd.TotalMilliseconds > 500)
+    {
+      float scale = 0.1f;
+      float time = 0.05f * Seed++;
+      for (int y = 0; y < Height; y++)
+      {
+        for (int x = 0; x < Width; x++)
+        {
+          Density[y, x] = Noise.Noise(x * scale, y * scale, time);
+        }
+      }
+
+      LastUpdate = DateTime.UtcNow;
+    }
+
+    Colour baseColour = Colours.UNDERWATER;
+    int rowOffset = GS.Player.Loc.Row - UI.PlayerScreenRow;
+    int colOffset = GS.Player.Loc.Col - UI.PlayerScreenCol;
+    for (int r = 0; r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {
+        int mapRow = r + rowOffset;
+        int mapCol = c + colOffset;
+        Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
+
+        if (!GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
+          continue;
+
+        Sqr sqr = UI.SqsOnScreen[r, c];
+        Colour fgColour = sqr.Fg;
+
+        double density = Density[mapRow, mapCol];
+        int alpha;
+        if (density < 0.2)
+          alpha = 15;
+        else if (density < 0.3)
+          alpha = 30;
+        else if (density < 0.4)
+          alpha = 70;
+        else if (density < 0.45)
+          alpha = 80;
+        else if (density < 0.5)
+          alpha = 90;
+        else if (density < 0.55)
+          alpha = 110;
+        else if (density < 0.6)
+          alpha = 120;
+        else if (density < 0.7)
+          alpha = 130;
+        else if (density < 0.8)
+          alpha = 140;
+        else
+          alpha = 150;
+
+        if (loc == GS.Player.Loc)
+          alpha = sqr.Bg.Alpha;
+        else if (!GS.LastPlayerFoV.Contains(loc))
+          alpha /= 2;
+
+        Colour bgColour = baseColour with { Alpha = alpha };         
+        UI.SqsOnScreen[r, c] = sqr with { Fg = fgColour, Bg = bgColour };
+      }
+    }
+  }
+}
+
 class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
 {
   int Height { get; set; } = h;
@@ -553,7 +636,7 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
   readonly UserInterface UI = ui;
   readonly GameState GS = gs;
   int Seed { get; set; } = 1;// = DateTime.Now.GetHashCode();
-  DateTime LastUpdate {  get; set; } = DateTime.MinValue;
+  DateTime LastUpdate { get; set; } = DateTime.MinValue;
   PerlinNoise Noise { get; set; } = new(gs.Rng);
   readonly double[,] FogDensity = new double[h, w];
 
@@ -582,19 +665,19 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
-      {        
+      {
         Sqr sqr = UI.SqsOnScreen[r, c];
         if (sqr == Constants.BLANK_SQ)
           continue;
 
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
-                
-        Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);        
+
+        Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
         Colour bgColour = sqr.Bg;
         Colour fgColour = sqr.Fg;
         if (GS.LastPlayerFoV.Contains(loc))
-        {          
+        {
           double density = FogDensity[mapRow, mapCol];
           if (NoFog(GS.TileAt(loc)) || (mapRow == GS.Player.Loc.Row && mapCol == GS.Player.Loc.Col) || density < 0.2)
             bgColour = sqr.Bg;

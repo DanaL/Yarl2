@@ -67,7 +67,7 @@ static class Colours
   public static readonly Colour RED_AURA = new(208, 28, 31, 75);
   public static readonly Colour BLUE_AURA = new(0, 0, 200, 75);
   public static readonly Colour HOLY_AURA = WHITE with { Alpha = 100 };
-  public static readonly Colour UNDERWATER = new(0, 118, 190, 50);
+  public static readonly Colour UNDERWATER = new(0, 118, 190, 255);
   public static readonly Colour EXAMINE = ICE_BLUE with { Alpha = 175 };
   public static readonly Colour CREAM = new(255, 253, 208, 255);
   public static readonly Colour SHAMROCK = new(3, 172, 19, 255);
@@ -658,7 +658,7 @@ static class Util
     TileType.Sand => new Glyph('.', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
     TileType.Grass => new Glyph('.', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
     TileType.Crops => new Glyph('γ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
-    TileType.Kelp => new Glyph('γ', Colours.DARK_GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
+    TileType.Kelp => new Glyph('γ', Colours.GREEN, Colours.SOPHIE_GREEN, Colours.BLACK, false),
     TileType.GreenTree => new Glyph('ϙ', Colours.GREEN, Colours.DARK_GREEN, Colours.BLACK, false),
     TileType.YellowTree => new Glyph('ϙ', Colours.YELLOW, Colours.YELLOW_ORANGE, Colours.BLACK, false),
     TileType.RedTree => new Glyph('ϙ', Colours.BRIGHT_RED, Colours.DULL_RED, Colours.BLACK, false),

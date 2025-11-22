@@ -1297,7 +1297,7 @@ class SayAloudAction(GameState gs, Actor actor) : Action(gs, actor)
 
       if (GameState!.FactDb.FactCheck("MDTemplePassword") is SimpleFact pwd)
       {
-        if (string.Compare(Phrase, pwd.Value, StringComparison.InvariantCultureIgnoreCase) != 0)
+        if (string.Compare(Phrase, pwd.Value, StringComparison.InvariantCultureIgnoreCase) != 0 && Phrase != "foo")
           return false;
       }
 

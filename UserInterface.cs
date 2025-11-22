@@ -313,7 +313,10 @@ abstract class UserInterface
 
   public void ClearFoggyAnimation() =>
     _animations = [.. _animations.Where(a => a is not FogAnimation)];
-  
+
+  public void ClearUnderwaterAnimation() =>
+    _animations = [.. _animations.Where(a => a is not UnderwaterAnimation)];
+    
   public void RegisterAnimation(Animation anim) => _animations.Add(anim);
   
   // This plays the full animation (as opposed to registering
@@ -1134,12 +1137,6 @@ abstract class UserInterface
       if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
       {
         sqr = Constants.ROOF;
-      }
-      else if ((gs.CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
-      {
-        Colour bg = Colours.UNDERWATER with { Alpha = Colours.UNDERWATER.Alpha - 10 };
-        Colour fg = memory.Glyph.Unlit with { Alpha = memory.Glyph.Unlit.Alpha / 2 };
-        sqr = new Sqr(fg, bg, memory.Glyph.Ch);
       }
       else
       {

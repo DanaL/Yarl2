@@ -119,6 +119,15 @@ class GameLoader(UserInterface ui)
 
       //File.Delete(path);
 
+      if ((gameState.CurrentMap.Features & MapFeatures.Foggy) != MapFeatures.None)
+      {
+        UI.RegisterAnimation(new FogAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
+      }
+      else if ((gameState.CurrentMap.Features & MapFeatures.Submerged) != MapFeatures.None)
+      {
+        UI.RegisterAnimation(new UnderwaterAnimation(UI, gameState, gameState.CurrentMap.Height, gameState.CurrentMap.Width));
+      }
+      
       return gameState;
     }
     catch (QuitGameException)
