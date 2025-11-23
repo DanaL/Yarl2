@@ -830,3 +830,34 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
     }
   }
 }
+
+class RoofAnimation(GameState gs) : Animation
+{
+  readonly GameState GS = gs;
+  
+  public override void Update()
+  {
+    if (!GS.InWilderness)
+      return;
+
+    var ui = GS.UIRef();
+    (_, _, int pr, int pc) = GS.Player.Loc;
+    int maxR = int.Min(pr + UserInterface.ViewHeight / 2 + 1, GS.CurrentMap.Height);
+    int maxC = int.Min(pc + UserInterface.ViewWidth / 2 + 1, GS.CurrentMap.Width);
+    for (int r = 0;  r < UserInterface.ViewHeight; r++)
+    {
+      for (int c = 0; c < UserInterface.ViewWidth; c++)
+      {
+        var (gr, gc) = ui.ScrLocToGameLoc(r, c, pr, pc);
+        Loc loc = new(0, 0, gr, gc);
+        if (GS.Town.Roofs.Contains(loc) && GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
+        {
+          if (!GS.LastPlayerFoV.Contains(loc))
+          {
+            ui.SqsOnScreen[r, c] = Constants.ROOF;
+          }
+        }
+      }
+    }
+  }
+}

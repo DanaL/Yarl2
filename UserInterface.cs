@@ -1134,14 +1134,7 @@ abstract class UserInterface
     }
     else if (remembered.TryGetValue(loc, out var memory))
     {
-      if (gs.InWilderness && remembered.ContainsKey(loc) && gs.Town.Roofs.Contains(loc))
-      {
-        sqr = Constants.ROOF;
-      }
-      else
-      {
-        sqr = new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
-      }
+      sqr = new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
     }
     else
     {
@@ -1371,7 +1364,8 @@ abstract class UserInterface
       CheatSheetMode = CheatSheetMode.MvMixed;
 
     _animations.Add(new CloudAnimation(this, gameState));
-    
+    _animations.Add(new RoofAnimation(gameState));
+
     InputController = new PlayerCommandController(gameState);
     DateTime refresh = DateTime.UtcNow;
 
