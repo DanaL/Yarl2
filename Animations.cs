@@ -745,9 +745,10 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
   void MakeCloud()
   {
     int count = 0;
-    List<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    locs.Shuffle(_gs.Rng);
-
+    //int[] locs = stackalloc { 0, 1, 2, 3, 4, 5, 6, 8, 8 };
+    //locs.Shuffle(_gs.Rng);
+    Span<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    
     foreach (var k in locs)
     {
       if (count < 7 && _gs.Rng.NextDouble() < 0.7)
