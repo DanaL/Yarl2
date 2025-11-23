@@ -350,36 +350,44 @@ class DebugCommand(GameState gs)
     return [..Util.Adj8Locs(loc)
         .Where(loc => !_gs.ObjDb.Occupied(loc) 
                           && _gs.CurrentMap.TileAt(loc.Row, loc.Col).Passable()
-                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()) .Any())];
+                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()).Any())];
   }
 
+  List<Loc> AdjWater(Loc loc)
+  {
+    static bool IsWater(TileType t) => t switch
+    {
+      TileType.DeepWater or TileType.Underwater or TileType.Lake => true,
+      _ => false
+    };
+
+    return [..Util.Adj8Locs(loc)
+        .Where(loc => !_gs.ObjDb.Occupied(loc) 
+                          && IsWater(_gs.CurrentMap.TileAt(loc.Row, loc.Col).Type)
+                          && !_gs.ObjDb.ItemsAt(loc).Where(item => item.HasTrait<BlockTrait>()).Any())];
+  }
+  
   string AddMonster(string monsterName)
   {
-    var adjSpots = AdjSpots(_gs.Player.Loc);
-
-    if (adjSpots.Count == 0)
-      return "No open spot to add monster";
-
     try
-    {
-      var spawnLoc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
-
+    {      
       Actor monster;
 
-      if (monsterName == "Bob")
-      {
-        monster = MonsterFactory.Get("ogre", _gs.ObjDb, _gs.Rng);
-        monster.Name = "Bob";
-        monster.Traits.Add(new NamedTrait());
-      }
-      else if (monsterName == "mimic")
-      {
+      if (monsterName == "mimic")
         monster = MonsterFactory.Mimic();
-      }
       else
-      {
         monster = MonsterFactory.Get(monsterName, _gs.ObjDb, _gs.Rng);
-      }
+      
+      List<Loc> adjSpots = AdjSpots(_gs.Player.Loc);
+      if (monster.HasTrait<AmphibiousTrait>())
+        adjSpots.AddRange(AdjWater(_gs.Player.Loc));
+      else if (monster.HasTrait<SwimmerTrait>())
+        adjSpots = AdjWater(_gs.Player.Loc);
+        
+      if (adjSpots.Count == 0)
+        return "No open spot to add monster";
+
+      var spawnLoc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
 
       _gs.ObjDb.AddNewActor(monster, spawnLoc);
 
