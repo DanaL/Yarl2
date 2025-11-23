@@ -1062,6 +1062,9 @@ class Power
       case "MeleeFire":
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Fire);
         return new MeleeAttackAction(gs, mob, loc);
+      case "MeleeElectric":
+        mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Electricity);
+        return new MeleeAttackAction(gs, mob, loc);
       case "MeleeNecrotic":
         mob.Dmg = new Damage(DmgDie, NumOfDice, DamageType.Necrotic);
         return new MeleeAttackAction(gs, mob, loc);

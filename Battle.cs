@@ -9,6 +9,8 @@
 // with this software. If not, 
 // see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+using System.Xml.Serialization;
+
 namespace Yarl2;
 
 enum DamageType
@@ -139,8 +141,19 @@ class Battle
       CheckCoatedPoison(ammo, gs.Rng);
   }
 
+  static void CheckForElectrocution(int DC, int duration, Actor victim, GameState gs)
+  {
+    if (victim.AbilityCheck(Attribute.Constitution, DC, gs.Rng))
+      return;
+
+    gs.UIRef().AlertPlayer("Shocking!", gs, victim.Loc);
+    ParalyzedTrait pt = new() { DC = DC, Duration = gs.Rng.Next(duration) + 1 };
+    foreach (string s in pt.Apply(victim, gs))
+      gs.UIRef().AlertPlayer(s, gs, victim.Loc);
+  }
+  
   static void CheckForInfection(int infectionDC, ulong sourceId, Actor victim, GameState gs)
-  {    
+  {
     if (victim.AbilityCheck(Attribute.Constitution, infectionDC, gs.Rng))
       return;
 
@@ -182,6 +195,11 @@ class Battle
         CheckForInfection(infect.DC, obj.ID, target, gs);
       }
 
+      if (trait is ElectrocutesTrait elect)
+      {
+        CheckForElectrocution(elect.DC, elect.Duration, target, gs);
+      }
+      
       if (trait is WeakenTrait weaken)
       {
         var debuff = new StatDebuffTrait()

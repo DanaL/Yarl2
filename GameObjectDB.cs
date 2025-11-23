@@ -601,7 +601,7 @@ class GameObjectDB
         performers.Add(actor);
       }
     }
-
+    
     return performers;
   }
 

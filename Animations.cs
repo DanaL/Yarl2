@@ -557,7 +557,6 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
 
   public override void Update()
   {
-    Console.WriteLine(Seed);
     // Update the foggy spots only occasionally
     var dd = DateTime.UtcNow - LastUpdate;
     if (dd.TotalMilliseconds > 500)

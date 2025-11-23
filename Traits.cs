@@ -828,6 +828,14 @@ class EdibleTrait : Trait
   public override string AsText() => "Edible";
 }
 
+class ElectrocutesTrait : Trait
+{
+  public int DC { get; set; }
+  public int Duration { get; set; }
+
+  public override string AsText() => $"Electrocutes#{DC}#{Duration}";
+}
+
 class EquipableTrait : Trait
 {
   public override string AsText() => "Equipable";
@@ -2665,8 +2673,8 @@ class ParalyzedTrait : TemporaryTrait
 {
   public int DC { get; set; }
   public int TurnsParalyzed { get; set; } = 0;
-  
-  public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}";
+  public int Duration { get; set; } = 75;
+  public override string AsText() => $"Paralyzed#{OwnerID}#{DC}#{ExpiresOn}#{Duration}";
 
   public override List<string> Apply(GameObj obj, GameState gs)
   {
@@ -2692,7 +2700,7 @@ class ParalyzedTrait : TemporaryTrait
 
       // If you have a low enough Will score you might never pass the saving 
       // throw, so put a ceiling on how long someone can be paralyzed.
-      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng) ||  TurnsParalyzed > 75)
+      if (victim.AbilityCheck(Attribute.Will, DC, gs.Rng) ||  TurnsParalyzed > Duration)
       {
         victim.Traits.Remove(this);
         Expired = true;
@@ -4227,14 +4235,15 @@ class TraitFactory
     },
     { "Drop", (pieces, gameObj) => new DropTrait() { ItemName = pieces[1], Chance = int.Parse(pieces[2]) }},
     { "Edible", (pieces, gameObj) => new EdibleTrait() },
+    { "Electrocutes", (pieces, gameObj) => new ElectrocutesTrait() { DC = int.Parse(pieces[1]), Duration = int.Parse(pieces[2]) } },
     { "EmberBlessing", (pieces, gameObj) => new EmberBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
     { "Equipable", (pieces, gameObj) => new EquipableTrait() },
     { "Exhausted", (pieces, gameObj) =>  new ExhaustedTrait() { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]) }},
     { "Explosive", (pieces, GameObj) => new ExplosiveTrait() { Fuse = int.Parse(pieces[1]), DmgDie = int.Parse(pieces[2]), NumOfDice = int.Parse(pieces[3])} },
-    { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait() 
-      { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), 
+    { "ExplosionCountdown", (pieces, GameObj) => new ExplosionCountdownTrait()
+      { OwnerID = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]),
         Fuse = int.Parse(pieces[3]), DmgDie = int.Parse(pieces[4]), NumOfDice = int.Parse(pieces[5])
-      } 
+      }
     },
     { "FeatherFall", (pieces, gameObj) => {
       ulong id = pieces[1] == "owner" ? gameObj!.ID : ulong.Parse(pieces[1]);
@@ -4364,7 +4373,12 @@ class TraitFactory
     { "Owned", (pieces, gameObj) => new OwnedTrait() { OwnerIDs = [..pieces[1].Split(',').Select(ulong.Parse)] } },
     { "Opaque", (pieces, gameObj) => new OpaqueTrait() { Visibility = int.Parse(pieces[1]) } },
     { "PaladinBlessing", (pieces, gameObj) => new PaladinBlessingTrait() { SourceId = ulong.Parse(pieces[1]), ExpiresOn = ulong.Parse(pieces[2]), OwnerID = ulong.Parse(pieces[3]) } },
-    { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait() { OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]), ExpiresOn = ulong.Parse(pieces[3]) } },
+    { "Paralyzed", (pieces, gameObj) => new ParalyzedTrait()
+    {
+        OwnerID = ulong.Parse(pieces[1]), DC = int.Parse(pieces[2]),
+        ExpiresOn = ulong.Parse(pieces[3]), Duration = int.Parse(pieces[4])
+      }
+    },
     { "ParalyzingGaze", (pieces, gameObj) => new ParalyzingGazeTrait() { DC = int.Parse(pieces[1]) } },
     { "Passive", (pieces, gameObj) => new PassiveTrait() },
     { "Plant", (pieces, gameObj) => new PlantTrait() },
