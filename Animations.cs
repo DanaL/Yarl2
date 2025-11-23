@@ -36,8 +36,7 @@ class AimAnimation(UserInterface ui, GameState gs, Loc origin, Loc initialTarget
       var (scrR, scrC) = _ui.LocToScrLoc(pt.Item1, pt.Item2, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
       if (scrR > 0 && scrR < _scrH && scrC > 0 && scrC < _scrW)
       {
-        Sqr sq = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = Colours.HILITE };
-        _ui.SqsOnScreen[scrR, scrC] = sq;
+        _ui.SqsOnScreen[scrR, scrC] = _ui.SqsOnScreen[scrR, scrC] with { Fg = Colours.WHITE, Bg = Colours.HILITE };
       }
     }
   }
@@ -387,8 +386,7 @@ class HitAnimation : Animation
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
     {
-      Sqr sq = new(FgColour, BgColour, Ch);
-      ui.SqsOnScreen[scrR, scrC] = sq;
+      ui.SqsOnScreen[scrR, scrC] = new(FgColour, BgColour, Ch);
     }
   }
 }
@@ -745,8 +743,6 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
   void MakeCloud()
   {
     int count = 0;
-    //int[] locs = stackalloc { 0, 1, 2, 3, 4, 5, 6, 8, 8 };
-    //locs.Shuffle(_gs.Rng);
     Span<int> locs = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     
     foreach (var k in locs)
@@ -843,21 +839,19 @@ class RoofAnimation(GameState gs) : Animation
 
     var ui = GS.UIRef();
     (_, _, int pr, int pc) = GS.Player.Loc;
-    int maxR = int.Min(pr + UserInterface.ViewHeight / 2 + 1, GS.CurrentMap.Height);
-    int maxC = int.Min(pc + UserInterface.ViewWidth / 2 + 1, GS.CurrentMap.Width);
     for (int r = 0;  r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
       {
         var (gr, gc) = ui.ScrLocToGameLoc(r, c, pr, pc);
         Loc loc = new(0, 0, gr, gc);
-        if (GS.Town.Roofs.Contains(loc) && GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
+        if (!GS.Town.Roofs.Contains(loc) || !GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
+          continue;
+
+        if (!GS.LastPlayerFoV.Contains(loc))
         {
-          if (!GS.LastPlayerFoV.Contains(loc))
-          {
-            ui.SqsOnScreen[r, c] = Constants.ROOF;
-          }
-        }
+          ui.SqsOnScreen[r, c] = Constants.ROOF;
+        } 
       }
     }
   }
