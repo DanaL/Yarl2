@@ -259,7 +259,7 @@ class UsePower(Power power) : BehaviourNode
 
       int d = Util.Distance(mob.Loc, targetLoc);
 
-      if (!ClearShot(gs, mob.Loc, targetLoc))
+      if (d > 1 && !ClearShot(gs, mob.Loc, targetLoc))
         return false;
 
       if (Power.MinRange == 0 && Power.MaxRange == 0)
