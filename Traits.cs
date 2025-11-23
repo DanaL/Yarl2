@@ -3365,9 +3365,8 @@ class RecallTrait : BasicTrait, IGameEventListener
 class RegenerationTrait : TemporaryTrait
 {
   public int Rate { get; set; }
-  public ulong ActorID { get; set; }
-
-  public override string AsText() => $"Regeneration#{Rate}#{ActorID}#{Expired}#{ExpiresOn}#{SourceId}";
+  
+  public override string AsText() => $"Regeneration#{Rate}#{OwnerID}#{Expired}#{ExpiresOn}#{SourceId}";
 
   public override List<string> Apply(GameObj target, GameState gs)
   {
@@ -3380,7 +3379,7 @@ class RegenerationTrait : TemporaryTrait
 
   public override void EventAlert(GameEventType eventType, GameState gs, Loc loc)
   {
-    if (gs.ObjDb.GetObj(ActorID) is not Actor actor)
+    if (gs.ObjDb.GetObj(OwnerID) is not Actor actor)
       return;
 
     if (gs.Turn > ExpiresOn)
@@ -4395,7 +4394,7 @@ class TraitFactory
       return new RegenerationTrait()
         {
           Rate = int.Parse(pieces[1]),
-          ActorID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
+          OwnerID = pieces[2] == "owner" ? gameObj!.ID : ulong.Parse(pieces[2]),
           Expired = bool.Parse(pieces[3]),
           ExpiresOn = pieces[4] == "max" ? ulong.MaxValue : ulong.Parse(pieces[4]),
           SourceId = sourceId
