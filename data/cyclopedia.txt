@@ -586,3 +586,6 @@ Technically they are a shell-less snail, but you should be more concerned about 
 #
 giant squid
 Bet you're regretting all the calamari you ate, huh?
+#
+death turtle
+An adorable (but enormous) turtle twisted into an undead abomination. Sickly, unhealthy energy radiates from it.
