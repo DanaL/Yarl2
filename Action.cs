@@ -2326,6 +2326,39 @@ class MirrorImageAction : Action
   }
 }
 
+class InkCloudAction(GameState gs, Actor caster) : Action(gs, caster)
+{
+  public override double Execute()
+  {
+    base.Execute();
+
+    GameState gs = GameState!;
+    Loc targetLoc = Actor!.Loc;
+
+    if (gs.LastPlayerFoV.Contains(targetLoc))
+      gs.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "spray")} a cloud of ink!");
+
+    foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
+    {
+      TileType tile = gs.TileAt(loc).Type;
+      if (!(tile == TileType.Lake || tile == TileType.Underwater || tile == TileType.DeepWater))
+        continue;
+
+      Item ink = ItemFactory.Ink(gs);
+      var timer = ink.Traits.OfType<CountdownTrait>().First();
+      gs.RegisterForEvent(GameEventType.EndOfRound, timer);
+      gs.ObjDb.Add(ink);
+      gs.ObjDb.SetToLoc(loc, ink);
+    }
+
+    // We need to do this here because it changes the player's FOV and we want
+    // to update the display appropriately
+    gs.PrepareFieldOfView();
+
+    return 1.0;
+  }
+}
+
 class FogCloudAction(GameState gs, Actor caster, int range) : Action(gs, caster)
 {
   public int Range { get; set; } = range;
@@ -2342,7 +2375,7 @@ class FogCloudAction(GameState gs, Actor caster, int range) : Action(gs, caster)
     
     foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
     {
-      var mist = ItemFactory.Fog(gs);
+      Item mist = ItemFactory.Fog(gs);
       var timer = mist.Traits.OfType<CountdownTrait>().First();
       gs.RegisterForEvent(GameEventType.EndOfRound, timer);
       gs.ObjDb.Add(mist);

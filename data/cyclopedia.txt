@@ -583,3 +583,6 @@ A slithery fish that seems to spark and crackle in the dark waters.
 #
 giant sea slug
 Technically they are a shell-less snail, but you should be more concerned about how poisonous they are than their taxonomy.
+#
+giant squid
+Bet you're regretting all the calamari you ate, huh?

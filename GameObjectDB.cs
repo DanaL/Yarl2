@@ -223,7 +223,7 @@ class GameObjectDB
       int d = Util.Distance(loc, playerLoc);
       foreach (var item in items)
       {
-        if (item.Type == ItemType.Fog)
+        if (item.Type == ItemType.Fog || item.Type == ItemType.Ink)
           continue;
 
         bool hidden = false;
@@ -486,7 +486,7 @@ class GameObjectDB
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
 
-    return [.. stack.Where(i => i.Type != ItemType.Environment && i.Type != ItemType.Fog)];
+    return [.. stack.Where(i => i.Type != ItemType.Environment && i.Type != ItemType.Fog && i.Type != ItemType.Ink)];
   }
 
   public List<Item> VisibleItemsAt(Loc loc)
@@ -501,24 +501,17 @@ class GameObjectDB
   {
     if (!_itemLocs.TryGetValue(loc, out var stack))
       return [];
-    return [..stack.Where(i => i.Type == ItemType.Environment || i.Type == ItemType.Fog)];
+    return [..stack.Where(i => i.Type == ItemType.Environment || i.Type == ItemType.Fog || i.Type == ItemType.Ink)];
   }
 
-  public Glyph? FogAtLoc(Loc loc, Loc playerLoc)
+  public Glyph? ItemGlyphForType(Loc loc, ItemType type)
   {
-    int d = Util.Distance(loc, playerLoc);
     if (_itemLocs.TryGetValue(loc, out var stack))
     {
       foreach (Item item in stack)
       {
-        if (item.Type != ItemType.Fog)
-          continue;
-
-        foreach (Trait t in item.Traits)
-        {
-          if (t is OpaqueTrait opaque && d >= opaque.Visibility)
-            return item.Glyph;
-        }
+        if (item.Type == type)
+          return item.Glyph;
       }
     }
 

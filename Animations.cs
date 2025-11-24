@@ -589,6 +589,10 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
           continue;
 
         Sqr sqr = UI.SqsOnScreen[r, c];
+
+        if (sqr == Constants.INK)
+          continue;
+
         Colour fgColour = sqr.Fg;
 
         double density = Density[mapRow, mapCol];

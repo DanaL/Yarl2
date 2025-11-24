@@ -37,7 +37,8 @@ enum ItemType
   Illusion,
   Device,
   Altar,
-  Column
+  Column,
+  Ink
 }
 
 record ItemIDInfo(bool Known, string Desc);
@@ -398,6 +399,20 @@ class ItemFactory
     mold.Traits.Add(new MoldSporesTrait());
 
     return mold;
+  }
+
+  public static Item Ink(GameState gs)
+  {
+    Item ink = new()
+    {
+      Name = "ink", Type = ItemType.Ink, Value = 0,
+      Glyph = new Glyph('░', Colours.BLACK, Colours.BLACK, Colours.BLACK, false)
+    };
+    ink.SetZ(15);
+    ink.Traits.Add(new OpaqueTrait() { Visibility = 0 });
+    ink.Traits.Add(new CountdownTrait() { OwnerID = ink.ID, ExpiresOn = gs.Turn + 5 });
+
+    return ink;
   }
 
   public static Item Fog(GameState gs)

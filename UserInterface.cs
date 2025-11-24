@@ -46,14 +46,14 @@ abstract class UserInterface
   public abstract void WriteSq(int row, int col, Sqr sq);
   public abstract void ClearScreen();
 
-  protected abstract GameEvent PollForEvent(bool pause = true);  
+  protected abstract GameEvent PollForEvent(bool pause = true);
   protected abstract void Blit(); // Is blit the right term for this? 'Presenting the screen'
 
   protected int FontSize;
   public int PlayerScreenRow { get; protected set; }
   public int PlayerScreenCol { get; protected set; }
   protected List<string>? _longMessage;
-  
+
   readonly Queue<string> Messages = [];
 
   public Sqr[,] SqsOnScreen;
@@ -316,9 +316,9 @@ abstract class UserInterface
 
   public void ClearUnderwaterAnimation() =>
     _animations = [.. _animations.Where(a => a is not UnderwaterAnimation)];
-    
+
   public void RegisterAnimation(Animation anim) => _animations.Add(anim);
-  
+
   // This plays the full animation (as opposed to registering
   // it to be played as part of the game loop). This means the
   // UI will be blocked while it is playing
@@ -496,10 +496,10 @@ abstract class UserInterface
 
   readonly (Colour, string) _sbSpacer = (Colours.WHITE, "│ ");
   int WriteSideBarLine(Colour colour, string text, int row)
-  {    
+  {
     WriteLine(_sbSpacer.Item2, row, ViewWidth, SideBarWidth, _sbSpacer.Item1);
     WriteLine(text, row, ViewWidth + _sbSpacer.Item2.Length, SideBarWidth, colour);
-    
+
     return row + 1;
   }
 
@@ -545,7 +545,7 @@ abstract class UserInterface
     return row;
   }
 
-  readonly HashSet<string> _statuses = [];    
+  readonly HashSet<string> _statuses = [];
   readonly string _sbBlank = "│".PadRight(ViewWidth);
   protected void WriteSideBar(GameState gs)
   {
@@ -760,7 +760,7 @@ abstract class UserInterface
         _statuses.Add(s);
       }
     }
-    
+
     Tile tile = gs.TileAt(gs.Player.Loc);
     Glyph glyph = Util.TileToGlyph(tile);
     Sqr tileSq = new(glyph.Lit, Colours.BLACK, glyph.Ch);
@@ -823,7 +823,7 @@ abstract class UserInterface
     width += 1;
 
     int col = ViewWidth - width;
-    
+
     foreach (var line in lines!)
     {
       int chs = CountCh(line);
@@ -843,7 +843,7 @@ abstract class UserInterface
 
     Messages.Enqueue(alert);
   }
-  
+
   public void AlertPlayer(string alert, GameState gs, Loc loc, Actor? other = null)
   {
     if (!gs.LastPlayerFoV.Contains(loc))
@@ -1077,71 +1077,95 @@ abstract class UserInterface
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, LocMemory> remembered, Loc loc, Sqr zsqr, bool playerTelepathic, bool playerSeeInvisible)
   {
-    Sqr sqr;
     if (gs.LastPlayerFoV.Contains(loc))
     {
       if (zsqr != Constants.BLANK_SQ)
+        return zsqr;
+
+      // It's really dumb (and redundant) to calculate FOV in GS.PrepareFieldOfView()
+      // and then select an actor glyph here and handle teleparhy, etc in the
+      // UI code, but I don't have the wherewithal to sort it out right now. 
+      // But I don't like having the logic split across two places.
+      //
+      // It stems from me not wanting to store Actors in RememberedLocs, because
+      // we show remembered items but not remembered monsters
+      //
+      // This is compounded because now I want to have ink that does hide 
+      // occupants (whereas fog doesn't)
+      Glyph glyph;
+      bool isMob = false;
+
+      Actor? actor = gs.ObjDb.Occupant(loc);
+      Glyph? ink = gs.ObjDb.ItemGlyphForType(loc, ItemType.Ink);
+
+      if (ink is not null)
       {
-        sqr = zsqr;
-      }
-      else
-      {
-        Glyph glyph;
-        bool isMob = false;
-        if (gs.ObjDb.Occupant(loc) is Actor actor && gs.Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
+        if (playerTelepathic && actor is not null && gs.Player.GlyphSeen(actor, true, playerSeeInvisible) is Glyph vg)
         {
           glyph = vg;
           isMob = true;
         }
-        else if (gs.ObjDb.FogAtLoc(loc, gs.Player.Loc) is Glyph fog)
-          glyph = fog;
-        else if (remembered.TryGetValue(loc, out var rememberedLoc))
-          glyph = rememberedLoc.Glyph;
         else
-          glyph = GameObjectDB.EMPTY;
+        {
+          glyph = (Glyph)ink;
+        }
+      }
+      else if (actor is not null && gs.Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph g)
+      {
+        glyph = g;
+        isMob = true;
+      }
+      else
+      if (gs.ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
+      {
+        glyph = fog;
+      }
+      else if (remembered.TryGetValue(loc, out var rememberedLoc))
+      {
+        glyph = rememberedLoc.Glyph;
+      }
+      else
+      {
+        glyph = GameObjectDB.EMPTY;
+      }
 
-        Colour fgColour, bgColour;
-        if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
-        {          
-          //double scale = isMob ? double.Min(1.0, lightInfo.Scale + 0.15) : lightInfo.Scale;
-          fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
-          fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
+      Colour fgColour, bgColour;
+      if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
+      {
+        fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
+        fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
 
-          if (isMob)
-          {
-            bgColour = glyph.BG;
-          }
-          else if (glyph.BG == Colours.BLACK)
-          {
-            bgColour = lightInfo.BgColour;
-            bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
-          }
-          else
-          {
-            // The background actually has a colour, use the Foreground alpha
-            // to make sure it stands out.
-            bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
-          }
+        if (isMob)
+        {
+          bgColour = glyph.BG;
+        }
+        else if (glyph.BG == Colours.BLACK)
+        {
+          bgColour = lightInfo.BgColour;
+          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
         }
         else
         {
-          fgColour = glyph.Lit;
-          bgColour = glyph.BG;
+          // The background actually has a colour, use the Foreground alpha
+          // to make sure it stands out.
+          bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
         }
-
-        sqr = new Sqr(fgColour, bgColour, glyph.Ch);
       }
-    }
-    else if (remembered.TryGetValue(loc, out var memory))
-    {
-      sqr = new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
-    }
-    else
-    {
-      sqr = Constants.BLANK_SQ;
-    }
+      else
+      {
+        fgColour = glyph.Lit;
+        bgColour = glyph.BG;
+      }
 
-    return sqr;
+      return new Sqr(fgColour, bgColour, glyph.Ch);
+    }
+    
+    if (remembered.TryGetValue(loc, out var memory))
+    {
+      return new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
+    }
+    
+    return Constants.BLANK_SQ;
   }
 
   void SetSqsOnScreen(GameState gs)
@@ -1160,9 +1184,9 @@ abstract class UserInterface
       if (t is TelepathyTrait)
         playerTelepathic = true;
       if (t is SeeInvisibleTrait)
-        playerSeeInvisible = true; 
+        playerSeeInvisible = true;
     }
-    
+
     for (int r = 0; r < ViewHeight; r++)
     {
       for (int c = 0; c < ViewWidth; c++)
@@ -1231,7 +1255,7 @@ abstract class UserInterface
         }
       }
     }
-    
+
     if (ZLayer[PlayerScreenRow, PlayerScreenCol] == Constants.BLANK_SQ)
     {
       Colour bg = gs.Options.HighlightPlayer ? Colours.HILITE : gs.Player.Glyph.BG;
@@ -1359,7 +1383,7 @@ abstract class UserInterface
   public RunningState GameLoop(GameState gameState)
   {
     Options opts = gameState.Options;
-    
+
     if (opts.DefaultMoveHints)
       CheatSheetMode = CheatSheetMode.MvMixed;
 
@@ -1406,7 +1430,7 @@ abstract class UserInterface
         {
           Serialize.WriteSaveGame(gameState, this);
           Serialize.WriteOptions(gameState.Options);
-          
+
           success = true;
 
           SetLongMessage([" Be seeing you..."]);

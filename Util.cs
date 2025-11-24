@@ -215,6 +215,7 @@ static class Constants
   public const char BOTTOM_RIGHT_CORNER = '┙';
   public const char FIRE_CHAR = '\u22CF';
   public static Sqr ROOF = new(Colours.ROOF_TILE, Colours.BLACK, '░');
+  public static Sqr INK = new(Colours.BLACK, Colours.BLACK, '░');
   public static Colour NO_COLOUR = new(0, 0, 0, 0);
 
   public const int WILDERNESS_WIDTH = 129;

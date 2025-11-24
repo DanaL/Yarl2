@@ -609,18 +609,20 @@ abstract class Actor : GameObj, IZLevel
       return true;
 
     bool seeInvisible = false;
+    bool telepathy = false;
     foreach (Trait t in other.Traits)
     {
       if (t is SeeInvisibleTrait || t is TelepathyTrait)
       {
         seeInvisible = true;
+        telepathy = true;
         break;
       }
     }
 
-    if (HasTrait<InvisibleTrait>() && !seeInvisible)
+    if (HasTrait<InvisibleTrait>() && !(seeInvisible || telepathy))
       return false;
-
+        
     return true;
   }
 
@@ -1084,6 +1086,8 @@ class Power
         return new InduceNudityAction(gs, mob,MaxRange);
       case "FogCloud":
         return new FogCloudAction(gs, mob, MaxRange);
+      case "InkCloud":
+        return new InkCloudAction(gs, mob);
       case "Blink":
         return new BlinkAction(gs, mob);
       case "SummonKobold":
