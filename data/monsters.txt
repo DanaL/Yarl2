@@ -84,3 +84,4 @@ dancing greatsword  |)|white        |lightgrey   |16|40|7| 1.0|10|10|MeleeSlashi
 snapping turtle     |ǒ|green        |darkgreen   |15|20|7| 1.0|12|10|MeleePiercing#1#1#6#2#0#0#Attack|Amphibious|
 piranha             |»|brightred    |dullred     |13|30|7| 1.0|10|14|MeleePiercing#1#1#6#2#0#0#Attack|Swimmer|
 electric eel        |»|yellow       |yelloworange|14|35|7| 1.0|10|14|MeleeElectric#1#1#8#1#0#0#Attack|Swimmer,Electrocutes#15#3|
+cave shark          |»|grey         |darkgrey    |14|45|7| 1.0|10|14|MeleePiercing#1#1#8#2#0#0#Attack|Swimmer|

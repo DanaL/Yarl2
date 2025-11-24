@@ -473,7 +473,7 @@ class TryToEscape : BehaviourNode
 
     bool smart = false;
     bool airborne = false;
-    bool immobile = false;
+    bool immobile = false;    
     foreach (Trait t in mob.Traits)
     {
       if (t is IntelligentTrait)
