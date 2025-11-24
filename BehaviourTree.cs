@@ -473,7 +473,8 @@ class TryToEscape : BehaviourNode
 
     bool smart = false;
     bool airborne = false;
-    bool immobile = false;    
+    bool immobile = false;
+    bool swimmer = false;
     foreach (Trait t in mob.Traits)
     {
       if (t is IntelligentTrait)
@@ -482,6 +483,8 @@ class TryToEscape : BehaviourNode
         airborne = true;
       else if (t is ImmobileTrait)
         immobile = true;
+      else if (t is SwimmerTrait)
+        swimmer = true;
     }
 
     // A smart monster will jump on a teleport trap to escape
@@ -517,6 +520,8 @@ class TryToEscape : BehaviourNode
         map = gs.GetDMap("flying");
       else if (smart)
         map = gs.GetDMap("doors");
+      else if (swimmer)
+        map = gs.GetDMap("swim");
       else
         map = gs.GetDMap();
       if (map is null)
