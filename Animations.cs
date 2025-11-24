@@ -590,7 +590,7 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
 
         Sqr sqr = UI.SqsOnScreen[r, c];
 
-        if (sqr == Constants.INK)
+        if (sqr == Constants.INK || sqr.Bg == Colours.EXAMINE)
           continue;
 
         Colour fgColour = sqr.Fg;
