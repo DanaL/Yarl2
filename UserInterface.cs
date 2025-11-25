@@ -1075,57 +1075,8 @@ abstract class UserInterface
     return result.Trim();
   }
 
-  static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, LocMemory> remembered, Loc loc, Sqr zsqr)
-  {
-    if (gs.LastPlayerFoV.TryGetValue(loc, out FoVItem fovInfo))
-    {
-      if (zsqr != Constants.BLANK_SQ)
-        return zsqr;
-
-      var (glyph, isMob) = fovInfo;
-      
-      Colour fgColour, bgColour;
-      if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
-      {
-        fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
-        fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
-
-        if (isMob)
-        {
-          bgColour = glyph.BG;
-        }
-        else if (glyph.BG == Colours.BLACK)
-        {
-          bgColour = lightInfo.BgColour;
-          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
-        }
-        else
-        {
-          // The background actually has a colour, use the Foreground alpha
-          // to make sure it stands out.
-          bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
-        }
-      }
-      else
-      {
-        fgColour = glyph.Lit;
-        bgColour = glyph.BG;
-      }
-
-      return new Sqr(fgColour, bgColour, glyph.Ch);
-    }
-    
-    if (remembered.TryGetValue(loc, out var memory))
-    {
-      return new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
-    }
-    
-    return Constants.BLANK_SQ;
-  }
-
   void SetSqsOnScreen(GameState gs)
   {
-    Dungeon dungeon = gs.CurrentDungeon;
     int playerRow = gs.Player.Loc.Row;
     int playerCol = gs.Player.Loc.Col;
 
@@ -1140,8 +1091,14 @@ abstract class UserInterface
         int mapCol = c + colOffset;
 
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-        Sqr sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
-
+        Sqr sqr;
+        if (gs.LastPlayerFoV.TryGetValue(loc, out Glyph glyph))
+          sqr = ZLayer[r, c] != Constants.BLANK_SQ ? ZLayer[r, c] : new Sqr(glyph.Lit, glyph.BG, glyph.Ch);
+        else if (gs.CurrentDungeon.RememberedLocs.TryGetValue(loc, out var memory))
+          sqr = new Sqr(memory.Glyph.Unlit, memory.Glyph.BG, memory.Glyph.Ch);
+        else
+          sqr = Constants.BLANK_SQ;
+        
         SqsOnScreen[r, c] = sqr;
       }
     }

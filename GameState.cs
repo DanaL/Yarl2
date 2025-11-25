@@ -13,8 +13,6 @@ using System.Text;
 
 namespace Yarl2;
 
-record struct FoVItem(Glyph Glyph, bool IsMob);
-
 // The queue of actors to act will likely need to go here.
 class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 {
@@ -39,7 +37,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
-  public Dictionary<Loc, FoVItem> LastPlayerFoV = [];
+  public Dictionary<Loc, Glyph> LastPlayerFoV = [];
   DijkstraMap? DMap { get; set; }
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
@@ -2140,21 +2138,23 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {      
       if (hallucinations.Contains(loc))
       {
-        LastPlayerFoV[loc] = new(Hallucination(), true);        
+        LastPlayerFoV[loc] = Hallucination();
         continue;
       }
 
       Glyph glyph;
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (objGlyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
+      bool illuminate = false;
 
       if (ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
       {
-        glyph = fog;
+        glyph = fog;        
       }
       else if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
       {
         glyph = objGlyph;
+        illuminate = true;
       }            
       else if (tile.Type == TileType.Chasm)
       {
@@ -2175,23 +2175,44 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else
       {
-        glyph = Util.TileToGlyph(tile);        
+        glyph = Util.TileToGlyph(tile);     
+        illuminate = true;
       }
 
       CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
       
+      if (illuminate && LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
+      {
+        Colour bgColour, fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
+        fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
+
+       if (glyph.BG == Colours.BLACK)
+        {
+          bgColour = lightInfo.BgColour;
+          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
+        }
+        else
+        {
+          // The background actually has a colour, use the Foreground alpha
+          // to make sure it stands out.
+          bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
+        }
+
+        glyph = glyph with { Lit = fgColour, BG = bgColour };
+      }
+
       bool occupied = ObjDb.Occupied(loc);
       if (ObjDb.ItemGlyphForType(loc, ItemType.Ink) is Glyph ink && !(occupied && playerTelepathic))
       {
-        LastPlayerFoV[loc] = new((Glyph)  ink, false);
+        LastPlayerFoV[loc] = (Glyph)ink;
       }
       else if (ObjDb.Occupant(loc) is Actor actor && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
       {
-        LastPlayerFoV[loc] = new(vg, true);
+        LastPlayerFoV[loc] = vg;
       }
       else
       {
-        LastPlayerFoV[loc] = new(glyph, false);
+        LastPlayerFoV[loc] = glyph;
       }
     }
 
@@ -2239,7 +2260,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         if (g == GameObjectDB.EMPTY)
           g = Util.TileToGlyph(TileAt(loc));
 
-        LastPlayerFoV[loc] = new(new(g.Ch, Colours.LIGHT_GREY, Colours.LIGHT_GREY, Colours.FADED_PURPLE, false), true);
+        LastPlayerFoV[loc] = new(g.Ch, Colours.LIGHT_GREY, Colours.LIGHT_GREY, Colours.FADED_PURPLE, false);
       }
     }
   }
