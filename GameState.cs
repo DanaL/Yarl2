@@ -2137,55 +2137,62 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
 
     foreach (Loc loc in fov)
-    {
-      Glyph glyph;
-      bool isMob = false;
-
+    {      
       if (hallucinations.Contains(loc))
       {
-        glyph = Hallucination();
-        isMob = true;
+        LastPlayerFoV[loc] = new(Hallucination(), true);        
+        continue;
       }
-      else if (ObjDb.Occupant(loc) is Actor actor && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
-      {
-        glyph = vg;
-        isMob = true;
-      }
-      else
-      {
-        Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-        var (objGlyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
 
-        if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
+      Glyph glyph;
+      Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
+      var (objGlyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
+
+      if (ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
+      {
+        glyph = fog;
+      }
+      else if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
+      {
+        glyph = objGlyph;
+      }            
+      else if (tile.Type == TileType.Chasm)
+      {
+        Loc below = loc with { Level = CurrLevel + 1 };
+        Glyph glyphBelow = ObjDb.GlyphAt(below);
+        char ch;
+        if (glyphBelow != GameObjectDB.EMPTY)
         {
-          glyph = objGlyph;
-        }
-        else if (tile.Type != TileType.Chasm)
-        {
-          glyph = Util.TileToGlyph(tile);
+          ch = glyphBelow.Ch;
         }
         else
         {
-          Loc below = loc with { Level = CurrLevel + 1 };
-          Glyph glyphBelow = ObjDb.GlyphAt(below);
-          char ch;
-          if (glyphBelow != GameObjectDB.EMPTY)
-          {
-            ch = glyphBelow.Ch;
-          }
-          else
-          {
-            Glyph belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
-            ch = belowTile.Ch;
-          }
-
-          glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);
+          Glyph belowTile = Util.TileToGlyph(CurrentDungeon.LevelMaps[CurrLevel + 1].TileAt(loc.Row, loc.Col));
+          ch = belowTile.Ch;
         }
 
-        CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
+        glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);
+      }
+      else
+      {
+        glyph = Util.TileToGlyph(tile);        
       }
 
-      LastPlayerFoV[loc] = new(glyph, isMob);
+      CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
+      
+      bool occupied = ObjDb.Occupied(loc);
+      if (ObjDb.ItemGlyphForType(loc, ItemType.Ink) is Glyph ink && !(occupied && playerTelepathic))
+      {
+        LastPlayerFoV[loc] = new((Glyph)  ink, false);
+      }
+      else if (ObjDb.Occupant(loc) is Actor actor && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
+      {
+        LastPlayerFoV[loc] = new(vg, true);
+      }
+      else
+      {
+        LastPlayerFoV[loc] = new(glyph, false);
+      }
     }
 
     if (playerTelepathic)

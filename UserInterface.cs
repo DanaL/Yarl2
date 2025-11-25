@@ -1084,37 +1084,6 @@ abstract class UserInterface
 
       var (glyph, isMob) = fovInfo;
       
-      //if (ink is not null)
-      //{
-      //  if (playerTelepathic && actor is not null && gs.Player.GlyphSeen(actor, true, playerSeeInvisible) is Glyph vg)
-      //  {
-      //    glyph = vg;
-      //    isMob = true;
-      //  }
-      //  else
-      //  {
-      //    glyph = (Glyph)ink;
-      //  }
-      //}
-      //else if (actor is not null && gs.Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph g)
-      //{
-      //  glyph = g;
-      //  isMob = true;
-      //}
-      //else
-      //if (gs.ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
-      //{
-      //  glyph = fog;
-      //}
-      //else if (remembered.TryGetValue(loc, out var rememberedLoc))
-      //{
-      //  glyph = rememberedLoc.Glyph;
-      //}
-      //else
-      //{
-      //  glyph = GameObjectDB.EMPTY;
-      //}
-
       Colour fgColour, bgColour;
       if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
       {
@@ -1171,7 +1140,7 @@ abstract class UserInterface
         int mapCol = c + colOffset;
 
         Loc loc = new(gs.CurrDungeonID, gs.CurrLevel, mapRow, mapCol);
-        Sqr sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c], playerTelepathic, playerSeeInvisible);
+        Sqr sqr = SqrToDisplay(gs, dungeon.RememberedLocs, loc, ZLayer[r, c]);
 
         SqsOnScreen[r, c] = sqr;
       }
