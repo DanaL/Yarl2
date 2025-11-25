@@ -2187,6 +2187,54 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
       LastPlayerFoV[loc] = new(glyph, isMob);
     }
+
+    if (playerTelepathic)
+    {
+      CheckTelepathy(playerSeeInvisible);
+    }
+  }
+
+  void CheckTelepathy(bool playerSeeInvisible)
+  {
+    // If the player has telepathy, find any nearby monsters and display them
+    // plus the squares adjacent to them
+    int range = int.Max(UserInterface.ViewHeight / 2, UserInterface.ViewWidth / 2);
+
+    // We need to track which mobs we've already drawn otherwise we could
+    // display a mimic/disguised monster via telepathy and then overwrite
+    // them as an item if they are adj to another monster seen by teleapthy
+    HashSet<Loc> mobsSeen = [];
+    foreach (Actor mob in ObjDb.ActorsWithin(Player.Loc, range))
+    {
+      if (mob == Player || mob.HasTrait<BrainlessTrait>())
+        continue;
+
+      List<Loc> viewed = [.. Util.Adj8Locs(mob.Loc).Where(adj => !LastPlayerFoV.ContainsKey(adj))];
+      if (!LastPlayerFoV.ContainsKey(mob.Loc))
+        viewed.Add(mob.Loc);
+
+      foreach (Loc loc in viewed)
+      {
+        if (mobsSeen.Contains(loc))
+          continue;
+
+        Glyph g;
+        if (ObjDb.Occupant(loc) is Actor actor)
+        {
+          g = Player.GlyphSeen(actor, true, playerSeeInvisible) ?? GameObjectDB.EMPTY;
+          mobsSeen.Add(loc);
+        }
+        else
+        {
+          g = ObjDb.ItemGlyphAt(loc);
+        }
+
+        if (g == GameObjectDB.EMPTY)
+          g = Util.TileToGlyph(TileAt(loc));
+
+        LastPlayerFoV[loc] = new(new(g.Ch, Colours.LIGHT_GREY, Colours.LIGHT_GREY, Colours.FADED_PURPLE, false), true);
+      }
+    }
   }
 }
 
