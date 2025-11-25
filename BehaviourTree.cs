@@ -192,7 +192,7 @@ class MoveLevel : BehaviourNode
   public override PlanStatus Execute(Mob mob, GameState gs)
   {
     // They won't move levels if the player can see them
-    if (gs.LastPlayerFoV.Contains(mob.Loc))
+    if (gs.LastPlayerFoV.ContainsKey(mob.Loc))
       return PlanStatus.Failure;
 
     Dungeon dungeon = gs.Campaign.Dungeons[mob.Loc.DungeonID];
@@ -494,7 +494,7 @@ class TryToEscape : BehaviourNode
       {
         if (gs.TileAt(adj).Type == TileType.TeleportTrap && !gs.ObjDb.Occupied(adj))
         {
-          if (gs.LastPlayerFoV.Contains(adj))
+          if (gs.LastPlayerFoV.ContainsKey(adj))
             gs.UIRef().AlertPlayer($"{mob.FullName.Capitalize()} jumps into the teleport trap!");
           mob.ExecuteAction(new MoveAction(gs, mob, adj));
           return PlanStatus.Running;

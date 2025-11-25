@@ -206,7 +206,7 @@ class ExplosionAnimation(GameState gs) : Animation
 
     foreach (var pt in _toDraw.Keys)
     {
-      if (!_gs.LastPlayerFoV.Contains(pt))
+      if (!_gs.LastPlayerFoV.ContainsKey(pt))
         continue;
 
       double roll = _gs.Rng.NextDouble();
@@ -319,7 +319,7 @@ class BarkAnimation : Animation
       var (mapRow, mapCol) = _ui.ScrLocToGameLoc(row, col, playerLoc.Row, playerLoc.Col);
       Loc mapLoc = playerLoc with { Row = mapRow, Col = mapCol };
 
-      if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.Contains(mapLoc))
+      if (!_gs.ObjDb.Occupied(mapLoc) || !_gs.LastPlayerFoV.ContainsKey(mapLoc))
         _ui.SqsOnScreen[row, col] = sqr;
     }
   }
@@ -338,7 +338,7 @@ class BarkAnimation : Animation
     // I thought about having part of the message appear on screen even if the
     // speaker is off screen, but didn't want to deal with the extra 
     // complication
-    if (!_gs.LastPlayerFoV.Contains(loc))
+    if (!_gs.LastPlayerFoV.ContainsKey(loc))
       return;
 
     if (loc.DungeonID == _gs.CurrDungeonID && loc.Level == _gs.CurrLevel)
@@ -381,7 +381,7 @@ class HitAnimation : Animation
     UserInterface ui = GS.UIRef();
     var (scrR, scrC) = ui.LocToScrLoc(Actor.Loc.Row, Actor.Loc.Col, GS.Player.Loc.Row, GS.Player.Loc.Col);
 
-    if (!GS.LastPlayerFoV.Contains(Actor.Loc))
+    if (!GS.LastPlayerFoV.ContainsKey(Actor.Loc))
       return;
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
@@ -417,7 +417,7 @@ class SqAnimation : Animation
     var ui = _gs.UIRef();
     var (scrR, scrC) = ui.LocToScrLoc(_loc.Row, _loc.Col, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
 
-    if (!_gs.LastPlayerFoV.Contains(_loc))
+    if (!_gs.LastPlayerFoV.ContainsKey(_loc))
       return;
 
     if (scrR > 0 && scrR < ui.SqsOnScreen.GetLength(0) && scrC > 0 && scrC < ui.SqsOnScreen.GetLength(1))
@@ -620,7 +620,7 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
 
         if (loc == GS.Player.Loc)
           alpha = sqr.Bg.Alpha;
-        else if (!GS.LastPlayerFoV.Contains(loc))
+        else if (!GS.LastPlayerFoV.ContainsKey(loc))
           alpha /= 2;
 
         Colour bgColour = baseColour with { Alpha = alpha };         
@@ -677,7 +677,7 @@ class FogAnimation(UserInterface ui, GameState gs, int h, int w) : Animation
         Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
         Colour bgColour = sqr.Bg;
         Colour fgColour = sqr.Fg;
-        if (GS.LastPlayerFoV.Contains(loc))
+        if (GS.LastPlayerFoV.ContainsKey(loc))
         {
           double density = FogDensity[mapRow, mapCol];
           if (NoFog(GS.TileAt(loc)) || (mapRow == GS.Player.Loc.Row && mapCol == GS.Player.Loc.Col) || density < 0.2)
@@ -793,7 +793,7 @@ class CloudAnimation(UserInterface ui, GameState gs) : Animation
         int cloudRow = _row + r;
         int cloudCol = _col + c;
 
-        if (!_gs.LastPlayerFoV.Contains(new Loc(0, 0, cloudRow, cloudCol)))
+        if (!_gs.LastPlayerFoV.ContainsKey(new Loc(0, 0, cloudRow, cloudCol)))
           continue;
 
         var (scrR, scrC) = _ui.LocToScrLoc(cloudRow, cloudCol, _gs.Player.Loc.Row, _gs.Player.Loc.Col);
@@ -851,7 +851,7 @@ class RoofAnimation(GameState gs) : Animation
         if (!GS.Town.Roofs.Contains(loc) || !GS.CurrentDungeon.RememberedLocs.ContainsKey(loc))
           continue;
 
-        if (!GS.LastPlayerFoV.Contains(loc))
+        if (!GS.LastPlayerFoV.ContainsKey(loc))
         {
           ui.SqsOnScreen[r, c] = Constants.ROOF;
         } 

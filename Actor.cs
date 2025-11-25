@@ -705,7 +705,7 @@ sealed class Mob : Actor
 
     if (heard && HasTrait<SleepingTrait>())
     {
-      if (gs.LastPlayerFoV.Contains(Loc))
+      if (gs.LastPlayerFoV.ContainsKey(Loc))
         gs.UIRef().AlertPlayer($"{FullName.Capitalize()} wakes up.");
       Traits.RemoveAll(t => t is SleepingTrait);
     }

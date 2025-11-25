@@ -42,7 +42,7 @@ class CanSeeLoc(Loc loc, string msg) : ConditionalEvent
   Loc Loc { get; set; } = loc;
   string Msg { get; set; } = msg;
 
-  public override bool CondtionMet(GameState gs) => gs.LastPlayerFoV.Contains(Loc);
+  public override bool CondtionMet(GameState gs) => gs.LastPlayerFoV.ContainsKey(Loc);
 
   public override void Fire(GameState gs)
   {

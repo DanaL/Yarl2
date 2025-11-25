@@ -16,7 +16,7 @@ class Traps
   public static void TriggerTrap(GameState gs, Actor actor, Loc loc, Tile tile, bool flying)
   {
     UserInterface ui = gs.UIRef();
-    bool trapSqVisible = gs.LastPlayerFoV.Contains(actor.Loc);
+    bool trapSqVisible = gs.LastPlayerFoV.ContainsKey(actor.Loc);
     
     if (actor.HasTrait<IllusionTrait>())
       return;
@@ -170,14 +170,14 @@ class Traps
         s = $"{actor.FullName.Capitalize()} is soaked by a blast of water";
       }
 
-      if (gs.LastPlayerFoV.Contains(actor.Loc))
+      if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
       {
         gs.UIRef().AlertPlayer(s);
         RevealTrap(tile, gs, loc);
       }
 
       s = actor.Inventory.ApplyEffectToInv(DamageType.Wet, gs, loc);      
-      if (gs.LastPlayerFoV.Contains(actor.Loc))
+      if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
         gs.UIRef().AlertPlayer(s);
     }
     else if (tile.Type == TileType.HiddenMagicMouth || tile.Type == TileType.MagicMouth)
@@ -209,7 +209,7 @@ class Traps
             if (sleeping is not null)
             {
               monster.Traits.Remove(sleeping);
-              if (gs.LastPlayerFoV.Contains(checkLoc))
+              if (gs.LastPlayerFoV.ContainsKey(checkLoc))
                 msgs.Add($"{monster.FullName.Capitalize()} wakes up!");
             }
           }          
@@ -282,12 +282,12 @@ class Traps
     else
       quote = $"Well well well, if it isn't {actor.Name.IndefArticle()}!";
 
-    bool visible = gs.LastPlayerFoV.Contains(actor.Loc);
+    bool visible = gs.LastPlayerFoV.ContainsKey(actor.Loc);
 
     if (rng.Next(3) == 0)
       return visible ? "A magic mouth shrieks!" : "You hear a shriek!";
 
-    string msg = gs.LastPlayerFoV.Contains(actor.Loc) ? "A magic mouth shouts, " : "Something shouts, ";    
+    string msg = gs.LastPlayerFoV.ContainsKey(actor.Loc) ? "A magic mouth shouts, " : "Something shouts, ";    
     msg += '"' + quote + '"';
 
     return msg;
@@ -342,7 +342,7 @@ class Traps
 
   static void TriggerJetTrap(JetTrigger trigger, GameState gs, Actor actor)
   {
-    if (gs.LastPlayerFoV.Contains(actor.Loc))
+    if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
     {
       trigger.Visible = true;
     }
@@ -377,7 +377,7 @@ class Traps
       if (!gs.TileAt(loc).PassableByFlight())
         break;
       affected.Add(loc);
-      if (gs.LastPlayerFoV.Contains(loc))
+      if (gs.LastPlayerFoV.ContainsKey(loc))
         seen.Add(loc);
     }
     
@@ -407,7 +407,7 @@ class Traps
       gs.ApplyDamageEffectToLoc(pt, DamageType.Fire);
       if (gs.ObjDb.Occupant(pt) is Actor victim)
       {
-        if (gs.LastPlayerFoV.Contains(loc))
+        if (gs.LastPlayerFoV.ContainsKey(loc))
           gs.UIRef().AlertPlayer($"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} caught in the flames!");
         
         var (hpLeft, _, _) = victim.ReceiveDmg(dmg, 0, gs, null, 1.0);

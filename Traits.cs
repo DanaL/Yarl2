@@ -383,7 +383,7 @@ class SwallowedTrait : Trait, IGameEventListener
     {
       victim.Traits.Remove(this);
       gs.RemoveListener(this);
-      if (gs.LastPlayerFoV.Contains(victim.Loc))
+      if (gs.LastPlayerFoV.ContainsKey(victim.Loc))
       {
         string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "is")} expelled!";
         gs.UIRef().AlertPlayer(s);
@@ -1640,7 +1640,7 @@ class FrightenedTrait : TemporaryTrait
     victim.Traits.Remove(this);
     Expired = true;
     string msg = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "shake")} off {Grammar.Possessive(victim)} fear!";
-    if (victim.VisibleTo(gs.Player) && gs.LastPlayerFoV.Contains(victim.Loc))
+    if (victim.VisibleTo(gs.Player) && gs.LastPlayerFoV.ContainsKey(victim.Loc))
       gs.UIRef().AlertPlayer(msg);
     gs.StopListening(GameEventType.EndOfRound, this);
 
@@ -2135,7 +2135,7 @@ class ConfusedTrait : TemporaryTrait
 
     gs.UIRef().RegisterAnimation(new HitAnimation(gs, target, Colours.WHITE, Colours.FAINT_PINK, '?'));
 
-    return gs.LastPlayerFoV.Contains(target.Loc) 
+    return gs.LastPlayerFoV.ContainsKey(target.Loc) 
        ? [$"{target.FullName.Capitalize()} {Grammar.Conjugate(target, "is")} confused!"] : [];
   }
 
@@ -2231,7 +2231,7 @@ class LeaveDungeonTrait : Trait, IGameEventListener
       {
         gs.RemovePerformerFromGame(actor);
 
-        if (gs.LastPlayerFoV.Contains(actor.Loc))
+        if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
         {
           string s = $"{actor.FullName.Capitalize()} disappears in a puff of smoke!";
           gs.UIRef().AlertPlayer(s);
@@ -3585,7 +3585,7 @@ class LightBeamTrait : Trait, IGameEventListener
   static void DestroyBlock(GameState gs, Item block)
   {
     string msg;
-    if (gs.LastPlayerFoV.Contains(block.Loc))
+    if (gs.LastPlayerFoV.ContainsKey(block.Loc))
       msg = "Exposed to the light, the stone block crumbles to dust!";
     else
       msg = "You hear a loud crack and the clattering of stones.";

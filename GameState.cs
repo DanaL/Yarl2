@@ -37,7 +37,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
-  public HashSet<Loc> LastPlayerFoV = [];
+  public Dictionary<Loc, Glyph> LastPlayerFoV = [];
   DijkstraMap? DMap { get; set; }
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
@@ -448,7 +448,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       if (CurrentMap.TileAt(wallLoc.Row, wallLoc.Col).Type == TileType.DungeonWall)
       {
         CurrentMap.SetTile(wallLoc.Row, wallLoc.Col, TileFactory.Get(TileType.DungeonFloor));
-        if (LastPlayerFoV.Contains(wallLoc))
+        if (LastPlayerFoV.ContainsKey(wallLoc))
           UI.AlertPlayer("As the idol touches the altar, a wall slides aside with a rumble.");
         else
           UI.AlertPlayer("You hear grinding stone.");
@@ -622,7 +622,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else if (tile.Type == TileType.WoodBridge)
       {
-        if (LastPlayerFoV.Contains(Player.Loc))
+        if (LastPlayerFoV.ContainsKey(Player.Loc))
           UI.AlertPlayer("The bridge burns up and collapses!");
 
         BridgeDestroyed(loc);
@@ -765,7 +765,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         messages.Add(msg);
       }
 
-      if (LastPlayerFoV.Contains(destination))
+      if (LastPlayerFoV.ContainsKey(destination))
         messages.Add($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "wash")} ashore, gasping for breath!");
     }
     else
@@ -869,7 +869,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void ActorKilled(Actor victim, string killedBy, GameObj? attacker)
   {
     bool locVisible = false;
-    if (LastPlayerFoV.Contains(victim.Loc))
+    if (LastPlayerFoV.ContainsKey(victim.Loc))
     {
       locVisible = true;
     }
@@ -966,7 +966,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         ObjDb.ActorMoved(originalForm, originalForm.Loc, victim.Loc);
         RefreshPerformers();
 
-        if (LastPlayerFoV.Contains(victim.Loc))
+        if (LastPlayerFoV.ContainsKey(victim.Loc))
         {
           string s = $"{victim.FullName.Capitalize()} {Grammar.Conjugate(victim, "turn")} back into {originalForm.Name.IndefArticle()}!";
           UI.AlertPlayer(s);
@@ -985,7 +985,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       zorkmids.Value = Rng.Next(10, 21);
       ItemDropped(zorkmids, victim.Loc);
 
-      if (LastPlayerFoV.Contains(victim.Loc))
+      if (LastPlayerFoV.ContainsKey(victim.Loc))
       {
         UI.AlertPlayer("Coins tumble to the ground.");
       }
@@ -1294,7 +1294,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       return;
 
     // prefer spawning the monster where the player can't see it
-    List<Loc> outOfSight = [.. openLoc.Where(l => !LastPlayerFoV.Contains(l))];
+    List<Loc> outOfSight = [.. openLoc.Where(l => !LastPlayerFoV.ContainsKey(l))];
     if (outOfSight.Count > 0)
       openLoc = outOfSight;
 
@@ -1478,7 +1478,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       ActorKilled(actor, "a fall", null);
     }
 
-    if (LastPlayerFoV.Contains(actor.Loc) || actor is Player)
+    if (LastPlayerFoV.ContainsKey(actor.Loc) || actor is Player)
     {
       string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "is")} injured by the fall!";
       UI.AlertPlayer(s);
@@ -1578,7 +1578,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       trigger.EventAlert(GameEventType.LocChanged, this, loc);
     }
 
-    if (LastPlayerFoV.Contains(loc))
+    if (LastPlayerFoV.ContainsKey(loc))
     {
       // If there are illusory objects and the player can see the square, the
       // illusion will fade. I'm assuming the player can see the 'interaction' 
@@ -1607,7 +1607,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
           AltColour2 = Colours.YELLOW_ORANGE,
           Highlight = Colours.DARK_GREEN,
           Centre = loc,
-          Sqs = [.. affected.Where(l => LastPlayerFoV.Contains(l))],
+          Sqs = [.. affected.Where(l => LastPlayerFoV.ContainsKey(l))],
           Ch = '*'
         };
         UI.PlayAnimation(explosion, this);
@@ -2061,21 +2061,23 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
   public void PrepareFieldOfView()
   {
+    LastPlayerFoV.Clear();
+
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
     bool blind = Player.HasTrait<BlindTrait>();
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
 
     Dictionary<Loc, int> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
-
+    List<Loc> fov = [];
     // if the player is not blind, let them see adj sqs regardless of 
     // illumination status. (If the player is surrounded by a fog cloud or such
     // they could come back as not illumination)
-    LastPlayerFoV.Clear();
+    
     if (!blind)
     {
       foreach (Loc loc in Util.Adj8Locs(Player.Loc))
-        LastPlayerFoV.Add(loc);
+        fov.Add(loc);
     }
 
     Dictionary<Loc, int> lit = CalcLitLocations(playerFoV, CurrDungeonID, CurrLevel);
@@ -2083,7 +2085,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     {
       int playerIllum = sq.Value;
       if (lit.TryGetValue(sq.Key, out var illum) && (illum & playerIllum) != Illumination.None)
-        LastPlayerFoV.Add(sq.Key);
+        fov.Add(sq.Key);
     }
 
     // Calculate which squares are newly viewed and check if there are
@@ -2091,7 +2093,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     // halt running when a monster comes into view)
     HashSet<ulong> prevSeenMonsters = RecentlySeenMonsters.Select(id => id).ToHashSet();
     RecentlySeenMonsters = [Player.ID];
-    foreach (Loc loc in LastPlayerFoV)
+    foreach (Loc loc in fov)
     {
       if (ObjDb.Occupant(loc) is Actor occ && occ.VisibleTo(Player))
         RecentlySeenMonsters.Add(occ.ID);
@@ -2115,18 +2117,18 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
       if (hallucinationCount > 0)
       {
-        List<Loc> fovLocs = [.. LastPlayerFoV];
         for (int j = 0; j < hallucinationCount && LastPlayerFoV.Count > 0; j++)
         {
-          int i = Rng.Next(fovLocs.Count);
-          hallucinations.Add(fovLocs[i]);
-          fovLocs.RemoveAt(i);
+          int i = Rng.Next(fov.Count);
+          hallucinations.Add(fov[i]);
         }
       }
     }
 
-    foreach (Loc loc in LastPlayerFoV)
+    foreach (Loc loc in fov)
     {
+      LastPlayerFoV[loc] = new('?', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, false);
+
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (glyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
       

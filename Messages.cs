@@ -145,7 +145,7 @@ class MsgFactory
 
   public static string SlipOnIceMessage(Actor actor, Loc loc, GameState gs)
   {
-    bool canSeeLoc = gs.LastPlayerFoV.Contains(loc);
+    bool canSeeLoc = gs.LastPlayerFoV.ContainsKey(loc);
     if (canSeeLoc)
       return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "slip")} on the ice!";
     else if (actor is Player)
@@ -160,7 +160,7 @@ class MsgFactory
       return $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, verb)} the door.";    
     else if (actor is Player)
       return $"You fumble with a door handle and {verb} a door.";
-    else if (gs.LastPlayerFoV.Contains(loc))
+    else if (gs.LastPlayerFoV.ContainsKey(loc))
       return $"You see a door {verb}.";
     else
       return $"You hear a door {verb}.";

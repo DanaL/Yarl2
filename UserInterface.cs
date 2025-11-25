@@ -846,7 +846,7 @@ abstract class UserInterface
 
   public void AlertPlayer(string alert, GameState gs, Loc loc, Actor? other = null)
   {
-    if (!gs.LastPlayerFoV.Contains(loc))
+    if (!gs.LastPlayerFoV.ContainsKey(loc))
       return;
 
     if (other is not null && !other.VisibleTo(gs.Player))
@@ -1077,7 +1077,7 @@ abstract class UserInterface
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, LocMemory> remembered, Loc loc, Sqr zsqr, bool playerTelepathic, bool playerSeeInvisible)
   {
-    if (gs.LastPlayerFoV.Contains(loc))
+    if (gs.LastPlayerFoV.ContainsKey(loc))
     {
       if (zsqr != Constants.BLANK_SQ)
         return zsqr;
@@ -1216,8 +1216,8 @@ abstract class UserInterface
         if (mob == gs.Player || mob.HasTrait<BrainlessTrait>())
           continue;
 
-        List<Loc> viewed = [.. Util.Adj8Locs(mob.Loc).Where(adj => !gs.LastPlayerFoV.Contains(adj))];
-        if (!gs.LastPlayerFoV.Contains(mob.Loc))
+        List<Loc> viewed = [.. Util.Adj8Locs(mob.Loc).Where(adj => !gs.LastPlayerFoV.ContainsKey(adj))];
+        if (!gs.LastPlayerFoV.ContainsKey(mob.Loc))
           viewed.Add(mob.Loc);
 
         foreach (Loc loc in viewed)

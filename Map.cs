@@ -337,7 +337,7 @@ class GateTrigger(Loc gate) : Tile(TileType.GateTrigger), IGameEventListener
     if (gs.TileAt(Gate) is Portcullis portcullis)
     {
       portcullis.Trigger();  
-      if (gs.LastPlayerFoV.Contains(loc))
+      if (gs.LastPlayerFoV.ContainsKey(loc))
         Found = true;
       if (loc == gs.Player.Loc)
         gs.Player.HaltTravel();
@@ -450,7 +450,7 @@ class BridgeCollapseTrap() : Tile(TileType.HiddenBridgeCollapseTrap), IGameEvent
         gs.BridgeDestroyed(bridgeLoc);
       }
 
-      if (gs.LastPlayerFoV.Contains(loc))
+      if (gs.LastPlayerFoV.ContainsKey(loc))
       {        
         string s = "The bridge collapses into the chasm!";
         gs.UIRef().AlertPlayer(s);
@@ -492,7 +492,7 @@ class BridgeTrigger() : Tile(TileType.BridgeTrigger), IGameEventListener
       }
       Triggered = true;
 
-      if (gs.LastPlayerFoV.Contains(loc))
+      if (gs.LastPlayerFoV.ContainsKey(loc))
       {
         string s = "You hear the sound of machinery as a bridge rises!";
         gs.UIRef().AlertPlayer(s);

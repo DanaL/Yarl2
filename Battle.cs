@@ -248,7 +248,7 @@ class Battle
       spawnling.Stats[Attribute.HP].SetCurr(actor.Stats[Attribute.HP].Curr);
       gs.ObjDb.AddNewActor(spawnling, loc);
       
-      if (gs.LastPlayerFoV.Contains(loc))
+      if (gs.LastPlayerFoV.ContainsKey(loc))
         gs.UIRef().AlertPlayer($"{actor.FullName.Capitalize()} spawns!");
     }
   }
@@ -920,7 +920,7 @@ class Battle
     if (tipsy is not null)
     {
       tipsy.ExpiresOn += (ulong) gs.Rng.Next(50, 76);
-      if (gs!.LastPlayerFoV.Contains(imbiber!.Loc))
+      if (gs!.LastPlayerFoV.ContainsKey(imbiber!.Loc))
         messages.Add($"{imbiber.FullName.Capitalize()} {Grammar.Conjugate(imbiber, "get")} tipsier.");
     }
     else

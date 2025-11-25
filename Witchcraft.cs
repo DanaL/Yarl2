@@ -448,14 +448,14 @@ class CastFrogify(GameState gs, Actor actor) : CastSpellAction(gs, actor)
           form = "zombie frog";
         Actor frog = pt.Morph(victim, GameState, form);
         
-        if (GameState.LastPlayerFoV.Contains(frog.Loc))
+        if (GameState.LastPlayerFoV.ContainsKey(frog.Loc))
         {
           string s = $"{victim.FullName.Capitalize()} turns into {frog.Name.IndefArticle()}.";
           GameState.UIRef().AlertPlayer(s);
           GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
         }
       }
-      else if (GameState.LastPlayerFoV.Contains(victim.Loc))
+      else if (GameState.LastPlayerFoV.ContainsKey(victim.Loc))
       {
         GameState.UIRef().AlertPlayer("The spell fizzles as a giant toad is more or less already a frog.");
         GameState.UIRef().SetPopup(new Popup("The spell fizzles as a giant toad is more or less already a frog.", "", -1, -1));
@@ -502,7 +502,7 @@ class CastConeOfCold(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(1, 0))
       return 0.0;
 
-    HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
+    HashSet<Loc> animLocs = [..Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
     ExplosionAnimation blast = new(GameState!)
     {
       MainColour = Colours.ICE_BLUE,
@@ -563,7 +563,7 @@ class CastGustOfWindAction(GameState gs, Actor actor, Item? item) : CastSpellAct
 
     GameState!.UIRef().AlertPlayer("Whoooosh!!");
 
-    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState!.LastPlayerFoV.Contains(l))];
+    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState!.LastPlayerFoV.ContainsKey(l))];
     ExplosionAnimation blast = new(GameState!)
     {
       MainColour = Colours.LIGHT_BLUE,
@@ -848,7 +848,7 @@ class CastFireBreath(GameState gs, Actor actor) : CastSpellAction(gs, actor)
     if (!CheckCost(3, 0))
       return 0.0;
 
-    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.Contains(l))];
+    HashSet<Loc> animLocs = [.. Affected.Where(l => GameState.LastPlayerFoV.ContainsKey(l))];
     ExplosionAnimation blast = new(GameState!)
     {
       MainColour = Colours.BRIGHT_RED,

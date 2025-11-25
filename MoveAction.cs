@@ -157,7 +157,7 @@ class MoveAction(GameState gameState, Actor actor, Loc loc) : Action(gameState, 
       if (actor.AbilityCheck(Attribute.Strength, 13, gs.Rng))
       {
         string s = $"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "crawl")} to the edge of the pit.";
-        if (gs.LastPlayerFoV.Contains(actor.Loc))
+        if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
           ui.AlertPlayer(s);
         actor.Traits = [.. actor.Traits.Where(t => t is not InPitTrait)];
       }
@@ -301,7 +301,7 @@ class BumpAction(GameState gameState, Actor actor, Loc loc) : MoveAction(gameSta
       {
         ui.AlertPlayer("You are too frightened to attack!");
       }
-      else if (occ is not null && occ.IsDisguised() && GameState.LastPlayerFoV.Contains(occ.Loc))
+      else if (occ is not null && occ.IsDisguised() && GameState.LastPlayerFoV.ContainsKey(occ.Loc))
       {
         DisguiseTrait dt = occ.Traits.OfType<DisguiseTrait>().First();
         ui.AlertPlayer($"Wait! That {dt.DisguiseForm} is actually {occ.Name.IndefArticle()}!");

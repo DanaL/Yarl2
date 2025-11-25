@@ -257,7 +257,7 @@ class MissileAttackAction(GameState gs, Actor actor, Loc loc, Item ammo) : Actio
     {
       if (Actor is not Player)
       {
-        if (GameState.LastPlayerFoV.Contains(Actor.Loc)) 
+        if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc)) 
         {
           string s = $"{MsgFactory.CalcName(Actor, GameState.Player).Capitalize()} shoots at ";
           s+= $"{MsgFactory.CalcName(target, GameState.Player)}!";
@@ -425,7 +425,7 @@ class ShriekAction(GameState gs, Actor actor, int radius) : Action(gs, actor)
     base.Execute();
 
     string msg;
-    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
       msg = $"{Actor.FullName.Capitalize()} lets out a piercing shriek!";
     else
       msg = "You hear a piercing shriek!";
@@ -491,7 +491,7 @@ class RumBreathAction(GameState gs, Actor actor, Loc target, int range) : Action
   {
     base.Execute();
 
-    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "spew")} a gout of alcohol!";
       GameState!.UIRef().AlertPlayer(s);
@@ -545,7 +545,7 @@ class FireBreathAction(GameState gs, Actor actor, Loc target, int range, int dmg
     UserInterface ui = GameState!.UIRef();
     base.Execute();
 
-    if (GameState.LastPlayerFoV.Contains(Actor!.Loc))
+    if (GameState.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "breath")} a gout of flame!";
       ui.AlertPlayer(s);
@@ -707,7 +707,7 @@ class DisarmAction(GameState gs, Actor actor, Loc loc) : Action(gs, actor)
       {
         map.SetTile(loc.Row, loc.Col, TileFactory.Get(TileType.DungeonFloor));
         ++trapCount;
-        if (GameState.LastPlayerFoV.Contains(loc))
+        if (GameState.LastPlayerFoV.ContainsKey(loc))
         {
           SqAnimation anim = new(GameState, loc, Colours.WHITE, Colours.FADED_PURPLE, '^');
           ui.RegisterAnimation(anim);
@@ -740,7 +740,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
       ui.AlertPlayer("You plunge into the water!");
     else if (actor is Player)
       ui.AlertPlayer("You stumble and fall into some water!");
-    else if (gs.LastPlayerFoV.Contains(Loc))
+    else if (gs.LastPlayerFoV.ContainsKey(Loc))
       ui.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "plunge")} into the water!");
     else
       ui.AlertPlayer("You hear a splash!");
@@ -755,7 +755,7 @@ class DiveAction(GameState gs, Actor actor, Loc loc, bool voluntary) : Action(gs
       ui.AlertPlayer("You leap into the darkness!");
     else if (actor is Player)
       ui.AlertPlayer("There's no floor beneath your feet!");
-    else if (gs.LastPlayerFoV.Contains(Loc))
+    else if (gs.LastPlayerFoV.ContainsKey(Loc))
       ui.AlertPlayer($"{actor.FullName.Capitalize()} {Grammar.Conjugate(actor, "fall")} into the darkness!");
     
     var landingSpot = new Loc(Loc.DungeonID, Loc.Level + 1, Loc.Row, Loc.Col);
@@ -1549,7 +1549,7 @@ class CrushAction(GameState gs, Actor actor, ulong victimId, int dmgDie, int dmg
 
     if (GameState!.ObjDb.GetObj(VictimId) is Actor victim)
     {
-      if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+      if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
       {
         string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "crush")} {victim.FullName}.";
         GameState.UIRef().AlertPlayer(s);
@@ -1900,7 +1900,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
     int levelPop = GameState!.ObjDb.LevelCensus(Actor!.Loc.DungeonID, Actor.Loc.Level);
     if (levelPop > 100)
     {
-      if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+      if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc))
         GameState.UIRef().AlertPlayer("A spell fizzles");
 
       return 1.0;
@@ -1921,7 +1921,7 @@ class SummonAction(Loc target, string summons, int count) : Action()
     }
 
     List<string> msgs = [];
-    if (GameState!.LastPlayerFoV.Contains(Actor!.Loc))
+    if (GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc))
     {
       if (summonCount == 0)
       {
@@ -1951,7 +1951,7 @@ class SearchAction(GameState gs, Actor player) : Action(gs, player)
     GameState gs = GameState!;
     UserInterface ui = gs.UIRef();
     Loc playerLoc = Actor!.Loc;
-    List<Loc> sqsToSearch = [..gs.LastPlayerFoV
+    List<Loc> sqsToSearch = [..gs.LastPlayerFoV.Keys
                                  .Where(loc => Util.Distance(playerLoc, loc) <= 3)];
 
     bool rogue = gs.Player.Background == PlayerBackground.Skullduggery;
@@ -2335,7 +2335,7 @@ class InkCloudAction(GameState gs, Actor caster) : Action(gs, caster)
     GameState gs = GameState!;
     Loc targetLoc = Actor!.Loc;
 
-    if (gs.LastPlayerFoV.Contains(targetLoc))
+    if (gs.LastPlayerFoV.ContainsKey(targetLoc))
       gs.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "spray")} a cloud of ink!");
 
     foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
@@ -2370,7 +2370,7 @@ class FogCloudAction(GameState gs, Actor caster, int range) : Action(gs, caster)
     GameState gs = GameState!;
 
     Loc targetLoc = Actor!.PickRangedTargetLoc(GameState!, Range);
-    if (gs.LastPlayerFoV.Contains(targetLoc))
+    if (gs.LastPlayerFoV.ContainsKey(targetLoc))
       gs.UIRef().AlertPlayer($"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "cast")} Fog Cloud!");
     
     foreach (Loc loc in Util.LocsInRadius(targetLoc, 2, gs.CurrentMap.Height, gs.CurrentMap.Width))
@@ -2451,7 +2451,7 @@ class InduceNudityAction(GameState gs, Actor caster, int range) : Action(gs, cas
     base.Execute();
     UserInterface ui = GameState!.UIRef();
 
-    if (GameState!.LastPlayerFoV.Contains(GameState!.Player.Loc))
+    if (GameState!.LastPlayerFoV.ContainsKey(GameState!.Player.Loc))
     {
       string s = $"{Actor!.FullName.Capitalize()} {Grammar.Conjugate(Actor, "dance")} a peculiar jig.";
       ui.AlertPlayer(s);
@@ -2465,7 +2465,7 @@ class InduceNudityAction(GameState gs, Actor caster, int range) : Action(gs, cas
 
         Item item = clothes[GameState.Rng.Next(clothes.Count)];
         s = $"{item.FullName.Possessive(victim).Capitalize()} falls off!";
-        if (GameState.LastPlayerFoV.Contains(victim.Loc))
+        if (GameState.LastPlayerFoV.ContainsKey(victim.Loc))
           ui.AlertPlayer(s);
 
         victim.Inventory.RemoveByID(item.ID, GameState);
@@ -2722,7 +2722,7 @@ class BlinkAction(GameState gs, Actor caster) : Action(gs, caster)
 
       base.Execute();
       Actor.QueueAction(new MoveAction(GameState, Actor, landingSpot));
-      if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+      if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc))
         GameState.UIRef().AlertPlayer($"Bamf! {Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "blink")} away!");
       
       return 0.0;
@@ -2782,7 +2782,7 @@ class DrinkBoozeAction(GameState gs, Actor target) : Action(gs, target)
     base.Execute();
     UserInterface ui = GameState!.UIRef();
 
-    bool canSeeLoc = GameState!.LastPlayerFoV.Contains(Actor!.Loc);
+    bool canSeeLoc = GameState!.LastPlayerFoV.ContainsKey(Actor!.Loc);
 
     if (Actor is Player)
       ui.AlertPlayer("Glug! Glug! Glug!");
@@ -3953,7 +3953,7 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     {
       GameState.UIRef().AlertPlayer("\"Aroint thee!\"");
     }
-    else if (GameState.LastPlayerFoV.Contains(Actor.Loc))
+    else if (GameState.LastPlayerFoV.ContainsKey(Actor.Loc))
     {
       string s = $"{Actor.FullName.Capitalize()} {Grammar.Conjugate(Actor, "read")} a scroll! Poof!";
       GameState.UIRef().AlertPlayer(s);
@@ -4131,7 +4131,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
 
     GameState.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, details.Ch);
     GameState.UIRef().SetPopup(popup);
-    GameState.LastPlayerFoV.Add(Loc);
+    //GameState.LastPlayerFoV.Add(Loc);
     
     return 0.0;
   }

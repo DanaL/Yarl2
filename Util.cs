@@ -813,7 +813,7 @@ static class Util
       return false;
     else if (!actor.VisibleTo(gs.Player))
       return false;
-    else if (gs.LastPlayerFoV.Contains(actor.Loc))
+    else if (gs.LastPlayerFoV.ContainsKey(actor.Loc))
       return true;
     else if (gs.Player.Traits.OfType<SwallowedTrait>().FirstOrDefault() is SwallowedTrait swalloewd)
       return swalloewd.SwallowerID == actor.ID;
