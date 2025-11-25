@@ -13,6 +13,8 @@ using System.Text;
 
 namespace Yarl2;
 
+record struct FoVItem(Glyph Glyph, bool IsMob);
+
 // The queue of actors to act will likely need to go here.
 class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 {
@@ -37,7 +39,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   PerformersStack Performers { get; set; } = new();
 
   public HashSet<ulong> RecentlySeenMonsters { get; set; } = [];
-  public Dictionary<Loc, Glyph> LastPlayerFoV = [];
+  public Dictionary<Loc, FoVItem> LastPlayerFoV = [];
   DijkstraMap? DMap { get; set; }
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
@@ -2062,6 +2064,15 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void PrepareFieldOfView()
   {
     LastPlayerFoV.Clear();
+    bool playerTelepathic = false;
+    bool playerSeeInvisible = false;
+    foreach (Trait t in Player.Traits)
+    {
+      if (t is TelepathyTrait)
+        playerTelepathic = true;
+      else if (t is SeeInvisibleTrait)
+        playerSeeInvisible = true;
+    }
 
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
@@ -2127,19 +2138,27 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
     foreach (Loc loc in fov)
     {
-      LastPlayerFoV[loc] = new('?', Colours.ICE_BLUE, Colours.BLUE, Colours.BLACK, false);
+      Glyph glyph;
+      bool isMob = false;
 
-      Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-      var (glyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
-      
-      if (glyph == GameObjectDB.EMPTY || z < tile.Z())
+      if (hallucinations.Contains(loc))
       {
-        // Remember the terrain tile if there's nothing visible on the square
+        glyph = Hallucination();
+        isMob = true;
+      }
+      else if (ObjDb.Occupant(loc) is Actor actor && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
+      {
+        glyph = vg;
+        isMob = true;
+      }
+      else
+      {
+        Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
+        var (objGlyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
 
-        // If it's a chasm, we display the tile from the level below
-        if (hallucinations.Contains(loc))
+        if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
         {
-          glyph = Hallucination();
+          glyph = objGlyph;
         }
         else if (tile.Type != TileType.Chasm)
         {
@@ -2162,9 +2181,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
           glyph = new Glyph(ch, Colours.FAR_BELOW, Colours.FAR_BELOW, Colours.BLACK, false);
         }
+
+        CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
       }
 
-      CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
+      LastPlayerFoV[loc] = new(glyph, isMob);
     }
   }
 }

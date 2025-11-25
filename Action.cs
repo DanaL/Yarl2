@@ -4131,8 +4131,7 @@ class HighlightLocAction(GameState gs, Actor actor) : Action(gs, actor)
 
     GameState.UIRef().ZLayer[r, c] = new Sqr(Colours.WHITE, Colours.EXAMINE, details.Ch);
     GameState.UIRef().SetPopup(popup);
-    //GameState.LastPlayerFoV.Add(Loc);
-    
+
     return 0.0;
   }
 

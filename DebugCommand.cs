@@ -390,6 +390,7 @@ class DebugCommand(GameState gs)
       var spawnLoc = adjSpots[_gs.Rng.Next(adjSpots.Count)];
 
       _gs.ObjDb.AddNewActor(monster, spawnLoc);
+      _gs.PrepareFieldOfView();
 
       return "";
     }

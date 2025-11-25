@@ -1077,57 +1077,43 @@ abstract class UserInterface
 
   static Sqr SqrToDisplay(GameState gs, Dictionary<Loc, LocMemory> remembered, Loc loc, Sqr zsqr, bool playerTelepathic, bool playerSeeInvisible)
   {
-    if (gs.LastPlayerFoV.ContainsKey(loc))
+    if (gs.LastPlayerFoV.TryGetValue(loc, out FoVItem fovInfo))
     {
       if (zsqr != Constants.BLANK_SQ)
         return zsqr;
 
-      // It's really dumb (and redundant) to calculate FOV in GS.PrepareFieldOfView()
-      // and then select an actor glyph here and handle teleparhy, etc in the
-      // UI code, but I don't have the wherewithal to sort it out right now. 
-      // But I don't like having the logic split across two places.
-      //
-      // It stems from me not wanting to store Actors in RememberedLocs, because
-      // we show remembered items but not remembered monsters
-      //
-      // This is compounded because now I want to have ink that does hide 
-      // occupants (whereas fog doesn't)
-      Glyph glyph;
-      bool isMob = false;
-
-      Actor? actor = gs.ObjDb.Occupant(loc);
-      Glyph? ink = gs.ObjDb.ItemGlyphForType(loc, ItemType.Ink);
-
-      if (ink is not null)
-      {
-        if (playerTelepathic && actor is not null && gs.Player.GlyphSeen(actor, true, playerSeeInvisible) is Glyph vg)
-        {
-          glyph = vg;
-          isMob = true;
-        }
-        else
-        {
-          glyph = (Glyph)ink;
-        }
-      }
-      else if (actor is not null && gs.Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph g)
-      {
-        glyph = g;
-        isMob = true;
-      }
-      else
-      if (gs.ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
-      {
-        glyph = fog;
-      }
-      else if (remembered.TryGetValue(loc, out var rememberedLoc))
-      {
-        glyph = rememberedLoc.Glyph;
-      }
-      else
-      {
-        glyph = GameObjectDB.EMPTY;
-      }
+      var (glyph, isMob) = fovInfo;
+      
+      //if (ink is not null)
+      //{
+      //  if (playerTelepathic && actor is not null && gs.Player.GlyphSeen(actor, true, playerSeeInvisible) is Glyph vg)
+      //  {
+      //    glyph = vg;
+      //    isMob = true;
+      //  }
+      //  else
+      //  {
+      //    glyph = (Glyph)ink;
+      //  }
+      //}
+      //else if (actor is not null && gs.Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph g)
+      //{
+      //  glyph = g;
+      //  isMob = true;
+      //}
+      //else
+      //if (gs.ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
+      //{
+      //  glyph = fog;
+      //}
+      //else if (remembered.TryGetValue(loc, out var rememberedLoc))
+      //{
+      //  glyph = rememberedLoc.Glyph;
+      //}
+      //else
+      //{
+      //  glyph = GameObjectDB.EMPTY;
+      //}
 
       Colour fgColour, bgColour;
       if (glyph.Lit != Colours.FAR_BELOW && gs.LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
