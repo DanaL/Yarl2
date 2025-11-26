@@ -30,8 +30,6 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public ulong Turn { get; set; }
   public bool Tutorial { get; set; }
   public bool PlayerAFK { get; set; } = false; // Player is resting at inn, or paralyzed
-  
-  public Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
   public List<(Loc, Colour, Colour, int)> Lights { get; set; } = [];
 
   PerformersStack Performers { get; set; } = new();
@@ -42,6 +40,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   DijkstraMap? DMapDoors { get; set; }
   DijkstraMap? DMapFlight { get; set; }
   DijkstraMap? DMapSwimming { get; set; }
+  readonly Dictionary<Loc, (Colour, Colour, int, int)> LitSqs = [];
 
   public DijkstraMap? GetDMap(string map = "")
   {
@@ -2062,27 +2061,33 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
   public void PrepareFieldOfView()
   {
     LastPlayerFoV.Clear();
+
     bool playerTelepathic = false;
     bool playerSeeInvisible = false;
+    bool blind = false;
+    StressLevel stress = StressLevel.None;
     foreach (Trait t in Player.Traits)
     {
       if (t is TelepathyTrait)
         playerTelepathic = true;
       else if (t is SeeInvisibleTrait)
         playerSeeInvisible = true;
+      else if (t is BlindTrait)
+        blind = true;
+      else if (t is StressTrait s)
+        stress = s.Stress;
     }
 
     //var stackTrace = new System.Diagnostics.StackTrace();
     //var callingMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name;
-    bool blind = Player.HasTrait<BlindTrait>();
+    
     int radius = blind ? 0 : Player.MAX_VISION_RADIUS;
-
     Dictionary<Loc, int> playerFoV = FieldOfView.CalcVisible(radius, Player.Loc, CurrentMap, ObjDb);
     List<Loc> fov = [];
-    // if the player is not blind, let them see adj sqs regardless of 
-    // illumination status. (If the player is surrounded by a fog cloud or such
-    // they could come back as not illumination)
-    
+
+    // If the player is not blind, we'll always show them the adj 8 tiles.
+    // I think this looks better and is nicer when the player is surrounded
+    // by fog, etc
     if (!blind)
     {
       foreach (Loc loc in Util.Adj8Locs(Player.Loc))
@@ -2114,43 +2119,17 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
     }
     RecentlySeenMonsters = prevSeenMonsters;
 
-    // an extremely stressed character may see hallucinations
-    HashSet<Loc> hallucinations = [];
-    if (!InWilderness && Player.Traits.OfType<StressTrait>().FirstOrDefault() is StressTrait stress)
-    {
-      int hallucinationCount = 0;
-      if (stress.Stress == StressLevel.Paranoid)
-        hallucinationCount = Rng.Next(1, 4);
-      else if (stress.Stress == StressLevel.Hystrical)
-        hallucinationCount = Rng.Next(2, 6);
-
-      if (hallucinationCount > 0)
-      {
-        for (int j = 0; j < hallucinationCount && LastPlayerFoV.Count > 0; j++)
-        {
-          int i = Rng.Next(fov.Count);
-          hallucinations.Add(fov[i]);
-        }
-      }
-    }
-
     foreach (Loc loc in fov)
-    {      
-      if (hallucinations.Contains(loc))
-      {
-        LastPlayerFoV[loc] = Hallucination();
-        continue;
-      }
-
+    {
       Glyph glyph;
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
       var (objGlyph, z, objId, itemType) = ObjDb.ItemGlyph(loc, Player.Loc);
-      bool illuminate = false;
-
+      
       if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
       {
         glyph = objGlyph;
-        illuminate = itemType != ItemType.Ink;
+        if (itemType != ItemType.Ink)
+          glyph = LightUpGlyph(glyph, loc);
       }            
       else if (tile.Type == TileType.Chasm)
       {
@@ -2171,32 +2150,11 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
       else
       {
-        glyph = Util.TileToGlyph(tile);     
-        illuminate = true;
+        glyph = LightUpGlyph(Util.TileToGlyph(tile), loc);
       }
 
       CurrentDungeon.RememberedLocs[loc] = new(glyph, objId);
       
-      if (illuminate && LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
-      {
-        Colour bgColour, fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
-        fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
-
-       if (glyph.BG == Colours.BLACK)
-        {
-          bgColour = lightInfo.BgColour;
-          bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
-        }
-        else
-        {
-          // The background actually has a colour, use the Foreground alpha
-          // to make sure it stands out.
-          bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
-        }
-
-        glyph = glyph with { Lit = fgColour, BG = bgColour };
-      }
-
       if (ObjDb.Occupant(loc) is Actor actor && (actor.Z() > z || playerTelepathic) && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
       {
         LastPlayerFoV[loc] = vg;
@@ -2207,10 +2165,50 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
       }
     }
 
+    // an extremely stressed character may see hallucinations
+    if (!InWilderness && (stress == StressLevel.Paranoid || stress == StressLevel.Hystrical))
+    {
+      int hallucinationCount = stress switch 
+      {
+        StressLevel.Paranoid => Rng.Next(1, 4),
+        _ => Rng.Next(2, 6)
+      };
+
+      for (int j = 0; j < hallucinationCount && LastPlayerFoV.Count > 0; j++)
+      {
+        LastPlayerFoV[fov[Rng.Next(fov.Count)]] = Hallucination();
+      }
+    }
+
     if (playerTelepathic)
     {
       CheckTelepathy(playerSeeInvisible);
     }
+  }
+
+  Glyph LightUpGlyph(Glyph glyph, Loc loc)
+  {
+    if (LitSqs.TryGetValue(loc, out (Colour FgColour, Colour BgColour, int FgAlpha, int BgAlpha) lightInfo))
+    {
+      Colour bgColour, fgColour = glyph.Illuminate ? lightInfo.FgColour : glyph.Lit;
+      fgColour = fgColour with { Alpha = lightInfo.FgAlpha };
+
+      if (glyph.BG == Colours.BLACK)
+      {
+        bgColour = lightInfo.BgColour;
+        bgColour = bgColour with { Alpha = lightInfo.BgAlpha };
+      }
+      else
+      {
+        // If the background isn't black, use the Foreground alpha
+        // to make sure it stands out.
+        bgColour = glyph.BG with { Alpha = lightInfo.FgAlpha };
+      }
+
+      glyph = glyph with { Lit = fgColour, BG = bgColour };
+    }
+
+    return glyph;
   }
 
   void CheckTelepathy(bool playerSeeInvisible)
