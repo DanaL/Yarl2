@@ -1777,7 +1777,7 @@ class Planner
     }
     else
     {
-      plan.Add(new RandomMove() { Label = "default" });
+      plan.Add(new Sequence([new Selector(actions), new RandomMove() { Label = "default" }]));
     }
 
     return new Selector(plan);
