@@ -3928,7 +3928,10 @@ class ScatterAction(GameState gs, Actor actor) : Action(gs, actor)
     }
 
     List<Loc> affected = [];
-    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState!.CurrentMap, GameState.ObjDb))
+    // I'm passing a new objdb because I am using CalcVisible() as a way to 
+    // calculate a circular area of effect and I want to ignore objects like
+    // fog and ink that reduce visibility.
+    foreach (var kvp in FieldOfView.CalcVisible(4, Actor!.Loc, GameState!.CurrentMap, new GameObjectDB()))
     {
       if (kvp.Value != Illumination.Full)
         continue;
