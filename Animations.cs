@@ -574,13 +574,12 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
       LastUpdate = DateTime.UtcNow;
     }
 
-    Colour baseColour = Colours.UNDERWATER;
     int rowOffset = GS.Player.Loc.Row - UI.PlayerScreenRow;
     int colOffset = GS.Player.Loc.Col - UI.PlayerScreenCol;
     for (int r = 0; r < UserInterface.ViewHeight; r++)
     {
       for (int c = 0; c < UserInterface.ViewWidth; c++)
-      {
+      {        
         int mapRow = r + rowOffset;
         int mapCol = c + colOffset;
         Loc loc = new(GS.CurrDungeonID, GS.CurrLevel, mapRow, mapCol);
@@ -593,6 +592,16 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
         if (sqr == Constants.INK || sqr.Bg == Colours.EXAMINE)
           continue;
 
+        Colour baseColour;
+        if (GS.LitSqs.TryGetValue(loc, out (Colour Fg, Colour Bg, int FgAlpha, int BgAlpha) lightInfo) && lightInfo.Bg != Colours.BLACK)
+        {
+          baseColour = lightInfo.Bg;
+        }
+        else
+        {
+          baseColour = Colours.UNDERWATER;
+        }
+        
         Colour fgColour = sqr.Fg;
 
         double density = Density[mapRow, mapCol];
@@ -617,6 +626,8 @@ class UnderwaterAnimation(UserInterface ui, GameState gs, int h, int w) : Animat
           alpha = 140;
         else
           alpha = 150;
+
+        alpha = int.Min(alpha, baseColour.Alpha);
 
         if (loc == GS.Player.Loc)
           alpha = sqr.Bg.Alpha;

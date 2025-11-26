@@ -166,6 +166,11 @@ static class Colours
 
   public static Colour Blend(Colour a, Colour b)
   {
+    if (a == BLACK)
+      return b;
+    else if (b == BLACK)
+      return a;
+
     float totalAlpha = a.Alpha + b.Alpha;
     double scaleA = a.Alpha / totalAlpha;
     double scaleB = b.Alpha / totalAlpha;

@@ -589,3 +589,6 @@ Bet you're regretting all the calamari you ate, huh?
 #
 death turtle
 An adorable (but enormous) turtle twisted into an undead abomination. Sickly, unhealthy energy radiates from it.
+#
+angler fish
+A deep-dwelling fish noted for its bioluminescence to attract prey and its horrific collection of teeth for biting prey.
