@@ -1605,7 +1605,7 @@ class VulnerableTrait : Trait
 {
   public DamageType Type { get; set; }
 
-  public override string AsText() => $"Vulnerable#{Type}";
+  public override string AsText() => $"Vulnerable#{Type}#{SourceId}";
 }
 
 class ScrollTrait : Trait
@@ -4585,8 +4585,9 @@ class TraitFactory
     { "Villager", (pieces, gameObj) => new VillagerTrait() },
     { "Vulnerable", (pieces, gameObj) =>
       {
+        ulong sourceId = pieces.Length > 2 ? ulong.Parse(pieces[2]) : 0;
         Enum.TryParse(pieces[1], out DamageType type);
-        return new VulnerableTrait() { Type = type };
+        return new VulnerableTrait() { Type = type, SourceId = sourceId };
       }
     },
     { "Wand", (pieces, gameObj) => new WandTrait() { Charges = int.Parse(pieces[1]), IDed = bool.Parse(pieces[2]), Effect = pieces[3] } },
