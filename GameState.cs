@@ -2144,17 +2144,13 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
 
       Glyph glyph;
       Tile tile = CurrentMap.TileAt(loc.Row, loc.Col);
-      var (objGlyph, z, objId) = ObjDb.ItemGlyph(loc, Player.Loc);
+      var (objGlyph, z, objId, itemType) = ObjDb.ItemGlyph(loc, Player.Loc);
       bool illuminate = false;
 
-      if (ObjDb.ItemGlyphForType(loc, ItemType.Fog) is Glyph fog)
-      {
-        glyph = fog;        
-      }
-      else if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
+      if (objGlyph != GameObjectDB.EMPTY && z >= tile.Z())
       {
         glyph = objGlyph;
-        illuminate = true;
+        illuminate = itemType != ItemType.Ink;
       }            
       else if (tile.Type == TileType.Chasm)
       {
@@ -2201,12 +2197,7 @@ class GameState(Campaign c, Options opts, UserInterface ui, Rng rng)
         glyph = glyph with { Lit = fgColour, BG = bgColour };
       }
 
-      bool occupied = ObjDb.Occupied(loc);
-      if (ObjDb.ItemGlyphForType(loc, ItemType.Ink) is Glyph ink && !(occupied && playerTelepathic))
-      {
-        LastPlayerFoV[loc] = (Glyph)ink;
-      }
-      else if (ObjDb.Occupant(loc) is Actor actor && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
+      if (ObjDb.Occupant(loc) is Actor actor && (actor.Z() > z || playerTelepathic) && Player.GlyphSeen(actor, playerTelepathic, playerSeeInvisible) is Glyph vg)
       {
         LastPlayerFoV[loc] = vg;
       }

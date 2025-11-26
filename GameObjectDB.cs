@@ -191,7 +191,7 @@ class GameObjectDB
     return null;
   }
 
-  public (Glyph, int, ulong) ItemGlyph(Loc loc, Loc playerLoc)
+  public (Glyph, int, ulong, ItemType) ItemGlyph(Loc loc, Loc playerLoc)
   {
     static (bool, Glyph) Disguised(Actor mob)
     {
@@ -206,6 +206,7 @@ class GameObjectDB
     ulong objId = 0;
     int z = 0;
     Glyph glyph = EMPTY;
+    ItemType itemType = ItemType.Tool;
 
     // If there is a Mob disguised as an item, we'll return that glyph
     if (_actorLocs.TryGetValue(loc, out ulong id) && Objs[id] is Actor mob)
@@ -223,14 +224,12 @@ class GameObjectDB
       int d = Util.Distance(loc, playerLoc);
       foreach (var item in items)
       {
-        if (item.Type == ItemType.Fog || item.Type == ItemType.Ink)
-          continue;
-
+        itemType = item.Type;
         bool hidden = false;
         foreach (Trait t in item.Traits)
         {
           if (t is BlockTrait)
-            return (item.Glyph, item.Z(), item.ID);
+            return (item.Glyph, item.Z(), item.ID, item.Type);
 
           if (t is HiddenTrait)
           {
@@ -257,7 +256,7 @@ class GameObjectDB
       }
     }
 
-    return (glyph, z, objId);
+    return (glyph, z, objId,itemType);
   }
 
   // TODO: I think I can replace GlyphAt() and ItemGlyphAt() with a TopGlyph() method

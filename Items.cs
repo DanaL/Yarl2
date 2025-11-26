@@ -422,9 +422,9 @@ class ItemFactory
       Name = "fog",
       Type = ItemType.Fog,
       Value = 0,
-      Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, true)
+      Glyph = new Glyph('*', Colours.GREY, Colours.GREY, Colours.DARK_GREY, false)
     };
-    mist.SetZ(10);
+    mist.SetZ(3);
     mist.Traits.Add(new OpaqueTrait() { Visibility = 0 });
     mist.Traits.Add(new CountdownTrait()
     {

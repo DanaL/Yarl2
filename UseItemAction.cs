@@ -363,7 +363,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().SetPopup(new Popup(s, "", -1, -1));
     }
 
-    gs.Noise(loc.Row, loc.Col, 5);
+    GameState.Noise(loc.Row, loc.Col, 5);
   }
 
   void ChopDoor(Loc loc)
@@ -386,7 +386,7 @@ class DigAction(GameState gs, Actor actor, Item tool) : Action(gs, actor)
       GameState.UIRef().SetPopup(new Popup("Splinters fly but the door remains intact.", "", -1, -1));
     }
     
-    gs.Noise(loc.Row, loc.Col, 5);
+    GameState.Noise(loc.Row, loc.Col, 5);
   }
 
   void ChopTree(Loc loc, Tile tile)
