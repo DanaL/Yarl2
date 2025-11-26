@@ -1133,7 +1133,7 @@ class RandomMove : BehaviourNode
     return PlanStatus.Success;
   }
 
-  static PlanStatus Move(Mob mob, GameState gs, bool flying)
+  static PlanStatus Move(Mob mob, GameState gs, bool flying, bool swimmer)
   {
     List<Loc> opts = [];
     foreach (Loc adj in Util.Adj8Locs(mob.Loc))
@@ -1144,6 +1144,12 @@ class RandomMove : BehaviourNode
       Tile tile = gs.TileAt(adj);
       if (gs.ObjDb.Occupied(adj))
         continue;
+
+      if (swimmer && tile.IsWater())
+        opts.Add(adj);
+      else if (swimmer)
+        continue;
+
       if (tile.Passable())
         opts.Add(adj);
       else if (flying && tile.PassableByFlight())
@@ -1183,10 +1189,12 @@ class RandomMove : BehaviourNode
       if (t is IntelligentTrait)
         return MoveOrDoor(mob, gs);
       if (t is FloatingTrait || t is FlyingTrait)
-        return Move(mob, gs, true);
+        return Move(mob, gs, true, false);
+      if (t is SwimmerTrait)
+        return Move(mob, gs, false, true);
     }
 
-    return Move(mob, gs, false);
+    return Move(mob, gs, false, false);
   }
 }
 

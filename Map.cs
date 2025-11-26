@@ -51,6 +51,15 @@ abstract class Tile(TileType type) : IZLevel
   public abstract bool PassableByFlight();
   public abstract bool Opaque();
 
+  public bool IsWater() => Type switch
+  {
+    TileType.Water => true,
+    TileType.DeepWater => true,
+    TileType.Lake => true,
+    TileType.Underwater => true,
+    _ => false
+  };
+
   public bool IsTree() => Type switch
   {
     TileType.GreenTree => true,
